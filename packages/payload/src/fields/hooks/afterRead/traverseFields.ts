@@ -8,9 +8,9 @@ import type {
   SelectMode,
   SelectType,
 } from '../../../types/index.js'
-import type { Field } from '../../config/types.js'
+import type { Field, TabAsField } from '../../config/types.js'
 
-import { getFieldPaths } from '../../getFieldPaths.js'
+import { getFieldPathsModified } from '../../getFieldPaths.js'
 import { promise } from './promise.js'
 
 type Args = {
@@ -25,7 +25,7 @@ type Args = {
    * fieldPromises are used for things like field hooks. They should be awaited before awaiting populationPromises
    */
   fieldPromises: Promise<void>[]
-  fields: Field[]
+  fields: (Field | TabAsField)[]
   findMany: boolean
   flattenLocales: boolean
   global: null | SanitizedGlobalConfig
@@ -74,12 +74,12 @@ export const traverseFields = ({
   triggerHooks = true,
 }: Args): void => {
   fields.forEach((field, fieldIndex) => {
-    const { indexPath, path, schemaPath } = getFieldPaths({
+    const { indexPath, path, schemaPath } = getFieldPathsModified({
       field,
       index: fieldIndex,
-      parentIndexPath: 'name' in field ? '' : parentIndexPath,
+      parentIndexPath,
       parentPath,
-      parentSchemaPath: !('name' in field) && field.type === 'tabs' ? '' : parentSchemaPath,
+      parentSchemaPath,
     })
 
     fieldPromises.push(
@@ -92,7 +92,6 @@ export const traverseFields = ({
         draft,
         fallbackLocale,
         field,
-        fieldIndex,
         fieldPromises,
         findMany,
         flattenLocales,
@@ -102,7 +101,6 @@ export const traverseFields = ({
         overrideAccess,
         parentIndexPath,
         parentPath,
-        parentSchemaPath,
         path,
         populate,
         populationPromises,

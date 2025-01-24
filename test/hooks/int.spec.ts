@@ -561,6 +561,7 @@ describe('Hooks', () => {
           namedTab: {
             fieldWithinNamedTab: '',
           },
+          fieldWithinNestedUnnamedTab: '',
         },
       })
 

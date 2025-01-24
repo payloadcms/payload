@@ -1,10 +1,9 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
-import type { Field, FieldHookArgs } from '../../config/types.js'
+import type { Field, FieldHookArgs, TabAsField } from '../../config/types.js'
 
-import { fieldAffectsData, tabHasName } from '../../config/types.js'
-import { getFieldPaths } from '../../getFieldPaths.js'
+import { fieldAffectsData } from '../../config/types.js'
 import { runBeforeDuplicateHooks } from './runHook.js'
 import { traverseFields } from './traverseFields.js'
 
@@ -12,13 +11,12 @@ type Args<T> = {
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   doc: T
-  field: Field
+  field: Field | TabAsField
   id?: number | string
   indexPath: string
   overrideAccess: boolean
   parentIndexPath: string
   parentPath: string
-  parentSchemaPath: string
   path: string
   req: PayloadRequest
   schemaPath: string
@@ -34,7 +32,6 @@ export const promise = async <T>({
   indexPath,
   overrideAccess,
   parentPath,
-  parentSchemaPath,
   path,
   req,
   schemaPath,
@@ -189,7 +186,8 @@ export const promise = async <T>({
               break
             }
 
-            case 'group': {
+            case 'group':
+            case 'tab': {
               promises.push(
                 traverseFields({
                   id,
@@ -290,7 +288,7 @@ export const promise = async <T>({
             siblingDoc[field.name] = {}
           }
 
-          const groupDoc = siblingDoc[field.name] as Record<string, unknown>
+          const groupDoc = siblingDoc[field.name] as JsonObject
 
           await traverseFields({
             id,
@@ -303,7 +301,31 @@ export const promise = async <T>({
             parentPath: path,
             parentSchemaPath: schemaPath,
             req,
-            siblingDoc: groupDoc as JsonObject,
+            siblingDoc: groupDoc,
+          })
+
+          break
+        }
+
+        case 'tab': {
+          if (typeof siblingDoc[field.name] !== 'object') {
+            siblingDoc[field.name] = {}
+          }
+
+          const tabDoc = siblingDoc[field.name] as JsonObject
+
+          await traverseFields({
+            id,
+            collection,
+            context,
+            doc,
+            fields: field.fields,
+            overrideAccess,
+            parentIndexPath: '',
+            parentPath: path,
+            parentSchemaPath: schemaPath,
+            req,
+            siblingDoc: tabDoc,
           })
 
           break
@@ -333,34 +355,18 @@ export const promise = async <T>({
       }
 
       case 'tabs': {
-        field.tabs.forEach(async (tab, tabIndex) => {
-          const isNamedTab = tabHasName(tab)
-
-          const {
-            indexPath: tabIndexPath,
-            path: tabPath,
-            schemaPath: tabSchemaPath,
-          } = getFieldPaths({
-            field: tab,
-            index: tabIndex,
-            parentIndexPath: indexPath,
-            parentPath: isNamedTab ? '' : parentPath,
-            parentSchemaPath: isNamedTab ? schemaPath : '',
-          })
-
-          await traverseFields({
-            id,
-            collection,
-            context,
-            doc,
-            fields: tab.fields,
-            overrideAccess,
-            parentIndexPath: isNamedTab ? '' : tabIndexPath,
-            parentPath: isNamedTab ? tabPath : parentPath,
-            parentSchemaPath: tabSchemaPath,
-            req,
-            siblingDoc,
-          })
+        await traverseFields({
+          id,
+          collection,
+          context,
+          doc,
+          fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+          overrideAccess,
+          parentIndexPath: indexPath,
+          parentPath: path,
+          parentSchemaPath: schemaPath,
+          req,
+          siblingDoc,
         })
 
         break

@@ -48,3 +48,25 @@ export function getFieldPaths({
     schemaPath: `${parentSchemaPath ? parentSchemaPath + '.' : ''}${indexSuffix}`,
   }
 }
+
+export function getFieldPathsModified({
+  field,
+  index,
+  parentIndexPath,
+  parentPath,
+  parentSchemaPath,
+}: Args): FieldPaths {
+  if ('name' in field) {
+    return {
+      indexPath: '',
+      path: `${parentPath ? parentPath + '.' : ''}${field.name}`,
+      schemaPath: `${parentSchemaPath ? parentSchemaPath + '.' : ''}${field.name}`,
+    }
+  }
+
+  return {
+    indexPath: `${parentIndexPath ? parentIndexPath + '-' : ''}${index}`,
+    path: parentPath,
+    schemaPath: `_index-${`${parentIndexPath ? parentIndexPath + '-' : ''}${index}`}`,
+  }
+}

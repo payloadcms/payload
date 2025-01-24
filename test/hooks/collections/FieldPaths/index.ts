@@ -63,6 +63,7 @@ export const FieldPaths: CollectionConfig = {
     {
       // schemaPath: 'topLevelNamedField'
       // path: 'topLevelNamedField'
+      // indexPath: ''
       name: 'topLevelNamedField',
       type: 'text',
       hooks: attachHooks('topLevelNamedField'),
@@ -70,12 +71,14 @@ export const FieldPaths: CollectionConfig = {
     {
       // schemaPath: 'array'
       // path: 'array'
+      // indexPath: ''
       name: 'array',
       type: 'array',
       fields: [
         {
           // schemaPath: 'array.fieldWithinArray'
           // path: 'array.[n].fieldWithinArray'
+          // indexPath: ''
           name: 'fieldWithinArray',
           type: 'text',
           hooks: attachHooks('fieldWithinArray'),
@@ -84,12 +87,14 @@ export const FieldPaths: CollectionConfig = {
     },
     {
       // schemaPath: '_index-2'
-      // path: '_index-2'
+      // path: ''
+      // indexPath: '2'
       type: 'row',
       fields: [
         {
           // schemaPath: '_index-2.fieldWithinRow'
           // path: 'fieldWithinRow'
+          // indexPath: ''
           name: 'fieldWithinRow',
           type: 'text',
           hooks: attachHooks('fieldWithinRow'),
@@ -98,34 +103,40 @@ export const FieldPaths: CollectionConfig = {
     },
     {
       // schemaPath: '_index-3'
-      // path: '_index-3'
+      // path: ''
+      // indexPath: '3'
       type: 'tabs',
       tabs: [
         {
           // schemaPath: '_index-3-0'
-          // path: '_index-3-0'
+          // path: ''
+          // indexPath: '3-0'
           label: 'Unnamed Tab',
           fields: [
             {
               // schemaPath: '_index-3-0.fieldWithinUnnamedTab'
               // path: 'fieldWithinUnnamedTab'
+              // indexPath: ''
               name: 'fieldWithinUnnamedTab',
               type: 'text',
               hooks: attachHooks('fieldWithinUnnamedTab'),
             },
             {
               // schemaPath: '_index-3-0-1'
-              // path: '_index-3-0-1'
+              // path: ''
+              // indexPath: '3-0-1'
               type: 'tabs',
               tabs: [
                 {
                   // schemaPath: '_index-3-0-1-0'
-                  // path: '_index-3-0-1-0'
+                  // path: ''
+                  // indexPath: '3-0-1-0'
                   label: 'Nested Unnamed Tab',
                   fields: [
                     {
                       // schemaPath: '_index-3-0-1-0.fieldWithinNestedUnnamedTab'
                       // path: 'fieldWithinNestedUnnamedTab'
+                      // indexPath: ''
                       name: 'fieldWithinNestedUnnamedTab',
                       type: 'text',
                       hooks: attachHooks('fieldWithinNestedUnnamedTab'),
@@ -139,12 +150,14 @@ export const FieldPaths: CollectionConfig = {
         {
           // schemaPath: '_index-3.namedTab'
           // path: 'namedTab'
+          // indexPath: ''
           label: 'Named Tab',
           name: 'namedTab',
           fields: [
             {
               // schemaPath: '_index-3.namedTab.fieldWithinNamedTab'
               // path: 'namedTab.fieldWithinNamedTab'
+              // indexPath: ''
               name: 'fieldWithinNamedTab',
               type: 'text',
               hooks: attachHooks('fieldWithinNamedTab'),

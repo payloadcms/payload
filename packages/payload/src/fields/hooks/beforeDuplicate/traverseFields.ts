@@ -1,16 +1,16 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
-import type { Field } from '../../config/types.js'
+import type { Field, TabAsField } from '../../config/types.js'
 
-import { getFieldPaths } from '../../getFieldPaths.js'
+import { getFieldPathsModified } from '../../getFieldPaths.js'
 import { promise } from './promise.js'
 
 type Args<T> = {
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   doc: T
-  fields: Field[]
+  fields: (Field | TabAsField)[]
   id?: number | string
   overrideAccess: boolean
   parentIndexPath: string
@@ -36,12 +36,12 @@ export const traverseFields = async <T>({
   const promises = []
 
   fields.forEach((field, fieldIndex) => {
-    const { indexPath, path, schemaPath } = getFieldPaths({
+    const { indexPath, path, schemaPath } = getFieldPathsModified({
       field,
       index: fieldIndex,
-      parentIndexPath: 'name' in field ? '' : parentIndexPath,
+      parentIndexPath,
       parentPath,
-      parentSchemaPath: !('name' in field) && field.type === 'tabs' ? '' : parentSchemaPath,
+      parentSchemaPath,
     })
 
     promises.push(
@@ -55,7 +55,6 @@ export const traverseFields = async <T>({
         overrideAccess,
         parentIndexPath,
         parentPath,
-        parentSchemaPath,
         path,
         req,
         schemaPath,

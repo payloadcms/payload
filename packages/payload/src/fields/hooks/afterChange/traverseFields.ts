@@ -2,9 +2,9 @@ import type { SanitizedCollectionConfig } from '../../../collections/config/type
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
-import type { Field } from '../../config/types.js'
+import type { Field, TabAsField } from '../../config/types.js'
 
-import { getFieldPaths } from '../../getFieldPaths.js'
+import { getFieldPathsModified } from '../../getFieldPaths.js'
 import { promise } from './promise.js'
 
 type Args = {
@@ -12,7 +12,7 @@ type Args = {
   context: RequestContext
   data: JsonObject
   doc: JsonObject
-  fields: Field[]
+  fields: (Field | TabAsField)[]
   global: null | SanitizedGlobalConfig
   operation: 'create' | 'update'
   parentIndexPath: string
@@ -45,12 +45,12 @@ export const traverseFields = async ({
   const promises = []
 
   fields.forEach((field, fieldIndex) => {
-    const { indexPath, path, schemaPath } = getFieldPaths({
+    const { indexPath, path, schemaPath } = getFieldPathsModified({
       field,
       index: fieldIndex,
-      parentIndexPath: 'name' in field ? '' : parentIndexPath,
+      parentIndexPath,
       parentPath,
-      parentSchemaPath: !('name' in field) && field.type === 'tabs' ? '' : parentSchemaPath,
+      parentSchemaPath,
     })
 
     promises.push(
@@ -65,7 +65,6 @@ export const traverseFields = async ({
         operation,
         parentIndexPath,
         parentPath,
-        parentSchemaPath,
         path,
         previousDoc,
         previousSiblingDoc,
