@@ -7,14 +7,17 @@ import type {
   SanitizedGlobalPermission,
 } from 'payload'
 
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { notFound } from 'next/navigation.js'
 import React from 'react'
+
+import type { DiffComponentProps } from './RenderFieldsToDiff/fields/types.js'
 
 import { getLatestVersion } from '../Versions/getLatestVersion.js'
 import { DefaultVersionView } from './Default/index.js'
 
 export const VersionView: PayloadServerReactComponent<EditViewComponent> = async (props) => {
-  const { initPageResult, routeSegments } = props
+  const { initPageResult, routeSegments, searchParams } = props
 
   const {
     collectionConfig,
@@ -24,6 +27,8 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
     req,
     req: { payload, payload: { config } = {}, user } = {},
   } = initPageResult
+
+  console.log('searchParams', searchParams)
 
   const versionID = routeSegments[routeSegments.length - 1]
 
@@ -134,6 +139,21 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
 
   if (!doc) {
     return notFound()
+  }
+
+  const customDiffComponents = (collectionConfig ?? globalConfig)?.admin?.components?.views?.edit
+    ?.version?.diffComponents
+
+  const customRenderedDiffComponents = {}
+  if (customDiffComponents) {
+    for (const [key, component] of Object.entries(customDiffComponents)) {
+      customRenderedDiffComponents[key] = RenderServerComponent({
+        clientProps: {} as DiffComponentProps,
+        Component: component,
+        importMap: payload.importMap,
+        serverProps: {},
+      })
+    }
   }
 
   return (

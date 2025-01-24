@@ -3,7 +3,8 @@ import type { OptionObject } from 'payload'
 
 import { Gutter, useConfig, useDocumentInfo, usePayloadAPI, useTranslation } from '@payloadcms/ui'
 import { formatDate } from '@payloadcms/ui/shared'
-import React, { useState } from 'react'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation.js'
+import React, { useEffect, useState } from 'react'
 
 import type { CompareOption, DefaultVersionsViewProps } from './types.js'
 
@@ -11,8 +12,8 @@ import { diffComponents } from '../RenderFieldsToDiff/fields/index.js'
 import RenderFieldsToDiff from '../RenderFieldsToDiff/index.js'
 import Restore from '../Restore/index.js'
 import { SelectComparison } from '../SelectComparison/index.js'
-import { SelectLocales } from '../SelectLocales/index.js'
 import './index.scss'
+import { SelectLocales } from '../SelectLocales/index.js'
 import { SetStepNav } from './SetStepNav.js'
 
 const baseClass = 'view-version'
@@ -38,6 +39,27 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   const [locales, setLocales] = useState<OptionObject[]>(localeOptions)
 
   const [compareValue, setCompareValue] = useState<CompareOption>()
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    // If compareValue changes, update url params
+    const current = new URLSearchParams(Array.from(searchParams.entries())) // -> has to use this form
+
+    if (!compareValue) {
+      current.delete('compareValue')
+    } else {
+      current.set('compareValue', compareValue?.value)
+    }
+
+    // cast to string
+    const search = current.toString()
+    // or const query = `${'?'.repeat(search.length && 1)}${search}`;
+    const query = search ? `?${search}` : ''
+
+    router.push(`${pathname}${query}`)
+  }, [compareValue])
 
   const {
     admin: { dateFormat },

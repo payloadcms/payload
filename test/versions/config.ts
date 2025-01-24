@@ -10,6 +10,7 @@ import DraftPosts from './collections/Drafts.js'
 import DraftWithMax from './collections/DraftsWithMax.js'
 import LocalizedPosts from './collections/Localized.js'
 import Posts from './collections/Posts.js'
+import { RichText } from './collections/RichText.js'
 import VersionPosts from './collections/Versions.js'
 import AutosaveGlobal from './globals/Autosave.js'
 import DisablePublishGlobal from './globals/DisablePublish.js'
@@ -35,6 +36,7 @@ export default buildConfigWithDefaults({
     LocalizedPosts,
     VersionPosts,
     CustomIDs,
+    RichText,
   ],
   globals: [AutosaveGlobal, DraftGlobal, DraftWithMaxGlobal, DisablePublishGlobal, LocalizedGlobal],
   indexSortableFields: true,
