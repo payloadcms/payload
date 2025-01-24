@@ -39,15 +39,19 @@ export const tenantField = ({
   hooks: {
     beforeChange: [
       ({ req, value }) => {
+        const idType =
+          req.payload.collections[tenantsCollectionSlug]?.customIDType ??
+          req.payload.db.defaultIDType
+
         if (!value) {
-          const tenantFromCookie = getTenantFromCookie(req.headers, req.payload.db.defaultIDType)
+          const tenantFromCookie = getTenantFromCookie(req.headers, idType)
           if (tenantFromCookie) {
             return tenantFromCookie
           }
           throw new APIError('You must select a tenant', 400, null, true)
         }
 
-        return req.payload.db.defaultIDType === 'number' ? parseInt(value) : value
+        return idType === 'number' ? parseFloat(value) : value
       },
     ],
   },
