@@ -12,9 +12,10 @@ import { MenuItems } from './collections/MenuItems.js'
 import { Tenants } from './collections/Tenants.js'
 import { Users } from './collections/Users/index.js'
 import { seed } from './seed/index.js'
+import { menuItemsSlug, menuSlug } from './shared.js'
 
 export default buildConfigWithDefaults({
-  collections: [Tenants, Users, Menu, MenuItems],
+  collections: [Tenants, Users, MenuItems, Menu],
   admin: {
     autoLogin: false,
     importMap: {
@@ -35,8 +36,8 @@ export default buildConfigWithDefaults({
         access: {},
       },
       collections: {
-        'menu-items': {},
-        menu: {
+        [menuItemsSlug]: {},
+        [menuSlug]: {
           isGlobal: true,
         },
       },
