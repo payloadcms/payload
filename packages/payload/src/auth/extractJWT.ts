@@ -18,6 +18,7 @@ const extractionMethods: Record<string, ExtractionMethod> = {
     return null
   },
   cookie: ({ headers, payload }) => {
+    const origin = headers.get('Origin')
     const cookies = parseCookies(headers)
     const tokenCookieName = `${payload.config.cookiePrefix}-token`
     const cookieToken = cookies.get(tokenCookieName)
