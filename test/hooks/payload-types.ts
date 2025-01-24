@@ -254,6 +254,7 @@ export interface FieldPath {
               id?: string | null;
             }[]
           | null;
+        fieldWithinRowWithinArray?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -363,6 +364,42 @@ export interface FieldPath {
     | boolean
     | null;
   fieldWithinNestedArray_beforeDuplicate_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinRowWithinArray_beforeValidate_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinRowWithinArray_beforeChange_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinRowWithinArray_afterRead_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinRowWithinArray_beforeDuplicate_FieldPaths?:
     | {
         [k: string]: unknown;
       }
@@ -772,6 +809,7 @@ export interface FieldPathsSelect<T extends boolean = true> {
               fieldWithinNestedArray?: T;
               id?: T;
             };
+        fieldWithinRowWithinArray?: T;
         id?: T;
       };
   fieldWithinRow?: T;
@@ -794,6 +832,10 @@ export interface FieldPathsSelect<T extends boolean = true> {
   fieldWithinNestedArray_beforeChange_FieldPaths?: T;
   fieldWithinNestedArray_afterRead_FieldPaths?: T;
   fieldWithinNestedArray_beforeDuplicate_FieldPaths?: T;
+  fieldWithinRowWithinArray_beforeValidate_FieldPaths?: T;
+  fieldWithinRowWithinArray_beforeChange_FieldPaths?: T;
+  fieldWithinRowWithinArray_afterRead_FieldPaths?: T;
+  fieldWithinRowWithinArray_beforeDuplicate_FieldPaths?: T;
   fieldWithinRow_beforeValidate_FieldPaths?: T;
   fieldWithinRow_beforeChange_FieldPaths?: T;
   fieldWithinRow_afterRead_FieldPaths?: T;

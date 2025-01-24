@@ -12,7 +12,8 @@ import { withTenantListFilter } from './utilities/withTenantListFilter.js'
 const defaults = {
   tenantCollectionSlug: 'tenants',
   tenantFieldName: 'tenant',
-  userTenantsArrayFieldName: 'tenants',
+  tenantsArrayFieldName: 'tenants',
+  tenantsArrayTenantFieldName: 'tenant',
 }
 
 export const multiTenantPlugin =
@@ -34,6 +35,10 @@ export const multiTenantPlugin =
     const tenantsCollectionSlug = (pluginConfig.tenantsSlug =
       pluginConfig.tenantsSlug || defaults.tenantCollectionSlug)
     const tenantFieldName = pluginConfig?.tenantField?.name || defaults.tenantFieldName
+    const tenantsArrayFieldName =
+      pluginConfig?.tenantsArrayField?.arrayFieldName || defaults.tenantsArrayFieldName
+    const tenantsArrayTenantFieldName =
+      pluginConfig?.tenantsArrayField?.arrayTenantFieldName || defaults.tenantsArrayTenantFieldName
 
     /**
      * Add defaults for admin properties
@@ -83,6 +88,8 @@ export const multiTenantPlugin =
       adminUsersCollection.fields.push(
         tenantsArrayField({
           ...(pluginConfig?.tenantsArrayField || {}),
+          tenantsArrayFieldName,
+          tenantsArrayTenantFieldName,
           tenantsCollectionSlug,
         }),
       )
@@ -90,7 +97,7 @@ export const multiTenantPlugin =
 
     addCollectionAccess({
       collection: adminUsersCollection,
-      fieldName: 'tenants.tenant',
+      fieldName: `${tenantsArrayFieldName}.${tenantsArrayTenantFieldName}`,
       userHasAccessToAllTenants,
     })
 
@@ -143,6 +150,8 @@ export const multiTenantPlugin =
             tenantFieldName,
             tenantsCollectionSlug,
             usersSlug: adminUsersCollection.slug,
+            usersTenantsArrayFieldName: tenantsArrayFieldName,
+            usersTenantsArrayTenantFieldName: tenantsArrayTenantFieldName,
           })
         }
       } else if (pluginConfig.collections?.[collection.slug]) {
