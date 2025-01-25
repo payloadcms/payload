@@ -1,29 +1,18 @@
 'use client'
+import { ProductVariant } from '@/collections/Products/ui/types'
 import { RowLabelProps, useRowLabel } from '@payloadcms/ui'
 import React, { useEffect, useState } from 'react'
 
-import type { InfoType } from '../types'
-
-type RowData = {
-  id: string
-  info: InfoType
-  options: string[]
-  stock: number
-  stripeProductID: string
-}
-
 export const VariantLabel: React.FC<RowLabelProps> = () => {
-  const { data, rowNumber } = useRowLabel<RowData>()
+  const { data, rowNumber } = useRowLabel<ProductVariant>()
   const [label, setLabel] = useState(`Variant ${rowNumber}`)
 
   useEffect(() => {
-    if (data?.info && data?.info?.options?.length) {
-      const info = data.info
-
+    if (data?.options?.length) {
       const labels: string[] = []
 
-      info.options.forEach((option) => {
-        if (option.label) labels.push(option.label)
+      data?.options.forEach((option) => {
+        if (option) labels.push(option.label)
       })
 
       setLabel(labels.join(' '))
@@ -34,7 +23,7 @@ export const VariantLabel: React.FC<RowLabelProps> = () => {
 
   return (
     <div>
-      <span>{label}</span>
+      <span style={{ textTransform: 'capitalize' }}>{label}</span>
     </div>
   )
 }

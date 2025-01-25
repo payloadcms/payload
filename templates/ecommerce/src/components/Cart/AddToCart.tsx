@@ -1,31 +1,19 @@
 'use client'
 
-import type { InfoType } from '@/collections/Products/ui/types'
 import type { Product } from '@/payload-types'
 
 import { useCart } from '@/providers/Cart'
 import clsx from 'clsx'
 import { PlusIcon } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
-import React, { useMemo } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
-type ProductVariant = any // Product['variants']['variants'][number]
+type ProductVariant = NonNullable<NonNullable<Product['variants']>['variants']>[number]
 
-type BaseProps = {
+type Props = {
   product: Product
+  variants?: ProductVariant[]
 }
-
-type PropsWithVariants = {
-  info?: never
-  variants: ProductVariant[]
-}
-
-type PropsWithInfo = {
-  info: any //Product['variants']['variants'][0]['info']
-  variants?: never
-}
-
-type Props = BaseProps & (PropsWithInfo | PropsWithVariants)
 
 export function AddToCart({ product, variants }: Props) {
   const { addItemToCart, cart } = useCart()
@@ -42,8 +30,12 @@ export function AddToCart({ product, variants }: Props) {
 
     if (selectedVariantId) {
       const variant = variants?.find((variant) => variant.id === selectedVariantId)
-      const info = variant?.info as InfoType
-      const variantOptions = info.options.map((option) => `${option.key.slug}=${option.slug}`)
+
+      if (!variant) {
+        return base
+      }
+
+      const variantOptions = variant.options.map((option) => `${option.slug}=${option.slug}`)
       return `${base}?variant=${selectedVariantId}&${variantOptions.join('&')}`
     } else {
       return base
@@ -58,23 +50,47 @@ export function AddToCart({ product, variants }: Props) {
     )
   }
 
+  const addToCart = useCallback(
+    (e: React.FormEvent<HTMLButtonElement>) => {
+      e.preventDefault()
+
+      let unitPrice = product.price || 0
+
+      if (selectedVariantId && product.enableVariants && product.variants?.variants?.length) {
+        const variant = product.variants?.variants?.find(
+          (variant) => variant.id === selectedVariantId,
+        )
+        unitPrice = variant?.price || 0
+      }
+
+      console.log({
+        id: selectedVariantId ?? product.id,
+        product,
+        quantity: 1,
+        url: productUrl,
+        unitPrice,
+        variant: selectedVariantId ?? undefined,
+      })
+
+      addItemToCart({
+        id: selectedVariantId ?? product.id,
+        product,
+        quantity: 1,
+        url: productUrl,
+        unitPrice,
+        variant: selectedVariantId ?? undefined,
+      })
+    },
+    [addItemToCart, product, productUrl, selectedVariantId],
+  )
+
   return (
     <button
       aria-label="Add to cart"
       className={clsx(buttonClasses, {
         'hover:opacity-90': true,
       })}
-      onClick={(e: React.FormEvent<HTMLButtonElement>) => {
-        e.preventDefault()
-
-        addItemToCart({
-          id: selectedVariantId ?? product.id,
-          product,
-          quantity: 1,
-          url: productUrl,
-          variant: selectedVariantId ?? undefined,
-        })
-      }}
+      onClick={addToCart}
       type="submit"
     >
       <div className="absolute left-0 ml-4">

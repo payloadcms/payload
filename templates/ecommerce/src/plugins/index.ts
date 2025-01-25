@@ -13,7 +13,6 @@ import { beforeSyncWithSearch } from '@/search/beforeSync'
 import { stripePlugin } from '@payloadcms/plugin-stripe'
 
 import { paymentSucceeded } from '@/stripe/webhooks/paymentSucceeded'
-import { productUpdated } from '@/stripe/webhooks/productUpdated'
 
 import { Page, Product } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
@@ -102,7 +101,6 @@ export const plugins: Plugin[] = [
     stripeWebhooksEndpointSecret: process.env.STRIPE_WEBHOOKS_SIGNING_SECRET,
     webhooks: {
       'payment_intent.succeeded': paymentSucceeded,
-      'product.updated': productUpdated,
     },
   }),
 

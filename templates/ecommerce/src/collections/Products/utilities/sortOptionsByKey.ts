@@ -1,10 +1,10 @@
-import type { OptionKey } from '../ui/types'
+import type { OptionKey, Option } from '../ui/types'
 
-export function sortOptionsByKey(options: string[], keys: OptionKey[]): string[] {
+export function sortOptionsByKey(options: OptionKey[], keys: Option[]): OptionKey[] {
   return options.sort((a, b) => {
-    const aIndex = keys.findIndex((group) => group.values.some((option) => option.slug === a))
+    const aIndex = keys.findIndex((group) => group.values!.some((option) => option.slug === a.slug))
 
-    const bIndex = keys.findIndex((group) => group.values.some((option) => option.slug === b))
+    const bIndex = keys.findIndex((group) => group.values!.some((option) => option.slug === b.slug))
 
     return aIndex - bIndex
   })

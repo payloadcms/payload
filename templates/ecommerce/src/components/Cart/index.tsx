@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { CartModal } from './modal'
+import { CartModal } from './CartModal'
 
 export function Cart() {
   return <CartModal />

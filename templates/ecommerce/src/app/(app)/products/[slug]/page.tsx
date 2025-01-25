@@ -68,6 +68,17 @@ export default async function ProductPage({ params }: Args) {
     ? variants?.some((variant) => variant?.stock > 0)
     : product.stock! > 0
 
+  let price = product.price
+
+  if (product.enableVariants && product.variants?.variants?.length) {
+    price = product.variants?.variants?.reduce((acc, variant) => {
+      if (variant?.price > acc) {
+        return variant.price
+      }
+      return acc
+    }, product.price || 0)
+  }
+
   const productJsonLd = {
     name: product.title,
     '@context': 'https://schema.org',
@@ -77,8 +88,8 @@ export default async function ProductPage({ params }: Args) {
     offers: {
       '@type': 'AggregateOffer',
       availability: hasStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-      price: product.price,
-      priceCurrency: product.currency,
+      price: price,
+      priceCurrency: 'usd',
     },
   }
 
@@ -127,10 +138,12 @@ export default async function ProductPage({ params }: Args) {
 
       {product.layout && <RenderBlocks blocks={product.layout} />}
 
-      {relatedProducts.length && (
+      {relatedProducts.length ? (
         <div className="container">
           <RelatedProducts products={relatedProducts as Product[]} />
         </div>
+      ) : (
+        <></>
       )}
     </React.Fragment>
   )
@@ -152,7 +165,7 @@ function RelatedProducts({ products }: { products: Product[] }) {
               <GridTileImage
                 label={{
                   amount: product.price!,
-                  currencyCode: product.currency!,
+                  currencyCode: 'usd',
                   title: product.title,
                 }}
                 media={product.meta?.image as Media}

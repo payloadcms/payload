@@ -20,49 +20,15 @@ export const productHat: Partial<Product> = {
     ],
     variants: [
       {
-        options: ['black'],
-        stripeProductID: 'prod_Rd14YYv1Jlvy7w',
+        options: [{ slug: 'black', label: 'Black' }],
         stock: 52,
-        info: {
-          price: {
-            amount: 1900,
-            currency: 'usd',
-          },
-          productName: 'Payload Hat - Black',
-          options: [
-            {
-              slug: 'black',
-              key: {
-                slug: 'colour',
-                label: 'Colour',
-              },
-              label: 'Black',
-            },
-          ],
-        },
+        price: 1900,
         images: ['{{IMAGE_1}}'],
       },
       {
-        options: ['white'],
-        stripeProductID: 'prod_Rd18itaLMglNRH',
+        options: [{ slug: 'white', label: 'White' }],
         stock: 52,
-        info: {
-          price: {
-            amount: 1900,
-            currency: 'usd',
-          },
-          productName: 'Payload Cup Whites',
-          options: [
-            {
-              slug: 'white',
-              key: {
-                slug: 'colour',
-                label: 'Colour',
-              },
-              label: 'White',
-            },
-          ],
-        },
+        price: 1900,
         images: ['{{IMAGE_2}}'],
       },
     ],
@@ -78,7 +44,6 @@ export const productHat: Partial<Product> = {
   _status: 'published',
   layout: [],
   categories: ['{{CATEGORY_1}}'],
-  currency: 'usd',
   description: {
     root: {
       children: [

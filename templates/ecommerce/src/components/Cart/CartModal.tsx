@@ -18,9 +18,9 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React, { useEffect, useRef, useState } from 'react'
 
-import { DeleteItemButton } from './delete-item-button'
-import { EditItemQuantityButton } from './edit-item-quantity-button'
-import { OpenCart } from './open-cart'
+import { DeleteItemButton } from './DeleteItemButton'
+import { EditItemQuantityButton } from './EditItemQuantityButton'
+import { OpenCart } from './OpenCart'
 
 export function CartModal() {
   const { cart, cartQuantity, cartTotal } = useCart()
@@ -87,15 +87,16 @@ export function CartModal() {
                     typeof product.gallery?.[0] !== 'string' ? product.gallery?.[0] : undefined
 
                   let image = firstGalleryImage || metaImage
+                  let price = product.price
 
                   const isVariant = Boolean(item.variant)
                   const variant = product?.variants?.variants?.length
                     ? product.variants.variants.find((v) => v.id === item.variant)
                     : undefined
 
-                  const info = isVariant ? (variant?.info as InfoType) : (product?.info as InfoType)
-
                   if (isVariant) {
+                    price = variant?.price
+
                     if (variant?.images?.[0] && typeof variant.images?.[0] !== 'string') {
                       image = variant.images[0]
                     }
@@ -125,9 +126,9 @@ export function CartModal() {
 
                           <div className="flex flex-1 flex-col text-base">
                             <span className="leading-tight">{product?.title}</span>
-                            {isVariant && info.options?.length ? (
-                              <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                                {info.options
+                            {isVariant && variant ? (
+                              <p className="text-sm text-neutral-500 dark:text-neutral-400 capitalize">
+                                {variant.options
                                   ?.map((option) => {
                                     return option.label
                                   })
@@ -137,11 +138,11 @@ export function CartModal() {
                           </div>
                         </Link>
                         <div className="flex h-16 flex-col justify-between">
-                          {info?.price && (
+                          {price && (
                             <Price
-                              amount={info.price?.amount}
+                              amount={price}
                               className="flex justify-end space-y-2 text-right text-sm"
-                              currencyCode={info.price?.currency}
+                              currencyCode={'usd'}
                             />
                           )}
                           <div className="ml-auto flex h-9 flex-row items-center rounded-full border border-neutral-200 dark:border-neutral-700">

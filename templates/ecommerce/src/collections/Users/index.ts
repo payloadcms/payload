@@ -131,6 +131,10 @@ export const Users: CollectionConfig = {
                   relationTo: 'products',
                 },
                 {
+                  name: 'variantID',
+                  type: 'text',
+                },
+                {
                   name: 'variant',
                   type: 'text',
                 },
@@ -140,9 +144,9 @@ export const Users: CollectionConfig = {
               type: 'row',
               fields: [
                 {
-                  name: 'stripeProductID',
-                  type: 'text',
-                  label: 'Stripe Product ID',
+                  name: 'unitPrice',
+                  type: 'number',
+                  required: true,
                 },
                 {
                   name: 'quantity',
@@ -150,6 +154,7 @@ export const Users: CollectionConfig = {
                   admin: {
                     step: 1,
                   },
+                  required: true,
                   min: 0,
                 },
               ],

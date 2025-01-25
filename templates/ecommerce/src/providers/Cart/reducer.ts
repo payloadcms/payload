@@ -100,7 +100,7 @@ export const cartReducer = (cart: CartType, action: CartAction): CartType => {
           quantity:
             (incomingItem.quantity || 0) > 0
               ? (withAddedItem[indexInCart].quantity || 0) + (incomingItem.quantity || 0)
-              : undefined,
+              : 0,
         }
       }
 

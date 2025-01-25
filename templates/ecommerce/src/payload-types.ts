@@ -13,9 +13,10 @@
 export type CartItems =
   | {
       product?: (string | null) | Product;
+      variantID?: string | null;
       variant?: string | null;
-      stripeProductID?: string | null;
-      quantity?: number | null;
+      unitPrice: number;
+      quantity: number;
       url?: string | null;
       id?: string | null;
     }[]
@@ -174,58 +175,40 @@ export interface Product {
   layout?: (CallToActionBlock | ContentBlock | MediaBlock)[] | null;
   enableVariants?: boolean | null;
   variants?: {
-    options?:
-      | {
-          label: string;
-          slug: string;
-          values?:
-            | {
-                label: string;
-                slug: string;
-                id?: string | null;
-              }[]
-            | null;
-          id?: string | null;
-        }[]
-      | null;
+    options: {
+      label: string;
+      slug: string;
+      values?:
+        | {
+            label: string;
+            slug: string;
+            id?: string | null;
+          }[]
+        | null;
+      id?: string | null;
+    }[];
     variants?:
       | {
-          options: string[];
-          stripeProductID?: string | null;
+          options: {
+            label: string;
+            slug: string;
+            id?: string | null;
+          }[];
+          price: number;
           /**
            * Define stock for this variant. A stock of 0 disables checkout for this variant.
            */
           stock: number;
-          info?:
-            | {
-                [k: string]: unknown;
-              }
-            | unknown[]
-            | string
-            | number
-            | boolean
-            | null;
           images?: (string | Media)[] | null;
           id?: string | null;
         }[]
       | null;
   };
-  stripeProductID?: string | null;
-  info?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
   /**
    * Define stock for this product. A stock of 0 disables checkout for this product.
    */
   stock?: number | null;
   price?: number | null;
-  currency?: string | null;
   relatedProducts?: (string | Product)[] | null;
   meta?: {
     title?: string | null;
@@ -956,8 +939,9 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface CartItemsSelect<T extends boolean = true> {
   product?: T;
+  variantID?: T;
   variant?: T;
-  stripeProductID?: T;
+  unitPrice?: T;
   quantity?: T;
   url?: T;
   id?: T;
@@ -999,19 +983,21 @@ export interface ProductsSelect<T extends boolean = true> {
         variants?:
           | T
           | {
-              options?: T;
-              stripeProductID?: T;
+              options?:
+                | T
+                | {
+                    label?: T;
+                    slug?: T;
+                    id?: T;
+                  };
+              price?: T;
               stock?: T;
-              info?: T;
               images?: T;
               id?: T;
             };
       };
-  stripeProductID?: T;
-  info?: T;
   stock?: T;
   price?: T;
-  currency?: T;
   relatedProducts?: T;
   meta?:
     | T

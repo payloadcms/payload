@@ -18,11 +18,8 @@ import { MediaBlock } from '@/blocks/MediaBlock/config'
 import { slugField } from '@/fields/slug'
 import { adminsOrPublished } from '@/access/adminsOrPublished'
 
-import { beforeProductChange } from './hooks/beforeChange'
 import { deleteProductFromCarts } from './hooks/deleteProductFromCarts'
 import { revalidateProduct } from './hooks/revalidateProduct'
-
-import type { Product as ProductType } from '@/payload-types'
 
 import {
   MetaDescriptionField,
@@ -41,8 +38,7 @@ export const Products: CollectionConfig = {
     update: admins,
   },
   admin: {
-    defaultColumns: ['title', 'stripeProductID', '_status'],
-
+    defaultColumns: ['title', 'enableVariants', '_status', 'variants.variants'],
     livePreview: {
       url: ({ data }) => {
         const path = generatePreviewPath({
@@ -185,6 +181,7 @@ export const Products: CollectionConfig = {
                     },
                   ],
                   label: 'Variant options',
+                  required: true,
                   minRows: 1,
                 },
                 {
@@ -202,29 +199,39 @@ export const Products: CollectionConfig = {
                   fields: [
                     {
                       name: 'options',
-                      type: 'text',
+                      type: 'array',
                       admin: {
                         components: {
                           Field: '@/collections/Products/ui/VariantSelect#VariantSelect',
                         },
                       },
-                      hasMany: true,
-                      required: true,
-                    },
-                    {
-                      name: 'stripeProductID',
-                      type: 'text',
-                      admin: {
-                        components: {
-                          Field:
-                            '@/collections/Products/ui/StripeProductSelect#StripeProductSelect',
+                      fields: [
+                        {
+                          type: 'row',
+                          fields: [
+                            {
+                              name: 'label',
+                              type: 'text',
+                              required: true,
+                            },
+                            {
+                              name: 'slug',
+                              type: 'text',
+                              required: true,
+                            },
+                          ],
                         },
-                      },
-                      label: 'Stripe Product ID',
+                      ],
+                      required: true,
                     },
                     {
                       type: 'row',
                       fields: [
+                        {
+                          name: 'price',
+                          type: 'number',
+                          required: true,
+                        },
                         {
                           name: 'stock',
                           type: 'number',
@@ -239,14 +246,6 @@ export const Products: CollectionConfig = {
                       ],
                     },
                     {
-                      name: 'info',
-                      type: 'json',
-                      admin: {
-                        hidden: true,
-                        readOnly: true,
-                      },
-                    },
-                    {
                       name: 'images',
                       type: 'upload',
                       relationTo: 'media',
@@ -257,6 +256,7 @@ export const Products: CollectionConfig = {
                     plural: 'Variants',
                     singular: 'Variant',
                   },
+                  required: true,
                   minRows: 1,
                   validate: (value, { siblingData }) => {
                     if (siblingData.variants.length) {
@@ -269,8 +269,12 @@ export const Products: CollectionConfig = {
 
                           // Join the arrays then compare the strings, note that we sort the array before it's saved in the custom component
                           const test = dedupedArray.find((otherOption: ProductVariant) => {
-                            const firstOption = otherOption?.options?.join('')
-                            const secondOption = variant?.options?.join('')
+                            const firstOption = otherOption?.options
+                              ?.map((option) => option.slug)
+                              .join('')
+                            const secondOption = variant?.options
+                              ?.map((option) => option.slug)
+                              .join('')
 
                             return firstOption === secondOption
                           })
@@ -291,27 +295,7 @@ export const Products: CollectionConfig = {
               label: false,
             },
             {
-              name: 'stripeProductID',
-              type: 'text',
-              admin: {
-                components: {
-                  Field: '@/collections/Products/ui/StripeProductSelect#StripeProductSelect',
-                },
-                condition: (data) => !data.enableVariants,
-              },
-              label: 'Stripe Product',
-            },
-            {
-              name: 'info',
-              type: 'json',
-              admin: {
-                condition: (data) => !data.enableVariants,
-                hidden: true,
-              },
-            },
-            {
               name: 'stock',
-
               type: 'number',
               admin: {
                 condition: (data) => !data.enableVariants,
@@ -324,15 +308,9 @@ export const Products: CollectionConfig = {
             {
               name: 'price',
               type: 'number',
+              required: true,
               admin: {
-                hidden: true,
-              },
-            },
-            {
-              name: 'currency',
-              type: 'text',
-              admin: {
-                hidden: true,
+                condition: (data) => !data.enableVariants,
               },
             },
             {
@@ -405,7 +383,6 @@ export const Products: CollectionConfig = {
   hooks: {
     afterChange: [revalidateProduct],
     afterDelete: [deleteProductFromCarts],
-    beforeChange: [beforeProductChange],
   },
   versions: {
     drafts: {

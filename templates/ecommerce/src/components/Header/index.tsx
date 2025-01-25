@@ -1,6 +1,6 @@
 import { CMSLink } from '@/components/Link'
-import { Cart } from '@/components/cart'
-import { OpenCart } from '@/components/cart/open-cart'
+import { Cart } from '@/components/Cart'
+import { OpenCart } from '@/components/Cart/OpenCart'
 import { LogoSquare } from '@/components/LogoSquare'
 import Link from 'next/link'
 import React, { Suspense } from 'react'

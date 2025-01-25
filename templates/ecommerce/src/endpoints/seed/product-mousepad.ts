@@ -15,7 +15,6 @@ export const productMousepad: Partial<Product> = {
   skipSync: false,
   _status: 'published',
   layout: [],
-  currency: 'usd',
   description: {
     root: {
       children: [
@@ -48,15 +47,7 @@ export const productMousepad: Partial<Product> = {
     },
   },
   gallery: ['{{IMAGE_1}}', '{{IMAGE_2}}', '{{IMAGE_3}}'],
-  info: {
-    price: {
-      amount: 2999,
-      currency: 'usd',
-    },
-    productName: 'Payload Cup Whites',
-  },
   categories: ['{{CATEGORY_1}}'],
   price: 2999,
-  stripeProductID: 'prod_Rd19g69yRRN50q',
   title: 'Mouse pad',
 }

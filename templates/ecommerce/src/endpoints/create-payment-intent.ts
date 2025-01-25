@@ -1,8 +1,7 @@
-import type { InfoType } from '@/collections/Products/ui/types'
-import type { User } from '@/payload-types'
+import type { Product, User } from '@/payload-types'
 import type { PayloadHandler } from 'payload'
 
-import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
+import { addDataAndFileToRequest } from 'payload'
 import Stripe from 'stripe'
 
 import type { CartItems } from '@/payload-types'
@@ -120,26 +119,32 @@ export const createPaymentIntent: PayloadHandler = async (req) => {
           return null
         }
 
-        if (typeof product === 'string') {
+        if (!product || typeof product === 'string') {
           return null
         }
 
         let price = 0
+        let variant: NonNullable<NonNullable<Product['variants']>['variants']>[number] | null = null
 
         if (isVariant) {
-          const variant = product?.variants?.variants?.find((item) => item.id === variantFromItem)
+          const matchingVariant = product?.variants?.variants?.find(
+            (item) => item.id === variantFromItem,
+          )
 
-          if (variant) {
-            price = (variant.info as InfoType).price.amount
+          if (matchingVariant) {
+            variant = matchingVariant
+            price = matchingVariant.price || 0
           }
         } else {
-          price = (product?.info as InfoType).price.amount
+          price = product.price || 0
         }
 
         metadata.push({
-          product: product?.id,
+          product: product.title,
+          productId: product?.id,
           quantity: quantity,
-          variant: variantFromItem,
+          variantId: variant?.id,
+          variant: variant?.options.map((option) => option).join(', '),
         })
 
         total += price * quantity
@@ -151,6 +156,8 @@ export const createPaymentIntent: PayloadHandler = async (req) => {
     if (total === 0) {
       throw new Error('There is nothing to pay for, add some items to your cart and try again.')
     }
+
+    console.log({ metadata })
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount: total,

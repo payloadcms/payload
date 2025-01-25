@@ -1,18 +1,11 @@
 'use client'
 
 import type { Product } from '@/payload-types'
-import type { InfoType } from '@/collections/Products/ui/types'
 
 import { createUrl } from '@/utilities/createUrl'
 import clsx from 'clsx'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import React from 'react'
-
-type Combination = {
-  [key: string]: boolean | string // ie. { color: 'Red', size: 'Large', ... }
-  availableForSale: boolean
-  id: string
-}
 
 export function VariantSelector({ product }: { product: Product }) {
   const router = useRouter()
@@ -26,21 +19,12 @@ export function VariantSelector({ product }: { product: Product }) {
     return null
   }
 
-  const combinations: Combination[] = variants?.map((variant) => {
-    const info = variant.info as InfoType
-    return {
-      id: variant.id,
-      availableForSale: variant.stock > 0 && Boolean(variant.stripeProductID),
-      // Adds key / value pairs for each variant (ie. "color": "Black" and "size": 'M").
-      ...info.options.reduce(
-        (accumulator, option) => ({
-          ...accumulator,
-          [option.key.slug]: option.slug,
-        }),
-        {},
-      ),
-    }
-  }) as Combination[]
+  /**
+   * Flattened array of all possible variant combinations.
+   */
+  const combinations = variants!.map((variant) => {
+    return variant.options
+  })
 
   return variantOptions?.map((key) => {
     const options = key.values
@@ -51,7 +35,8 @@ export function VariantSelector({ product }: { product: Product }) {
         <dd className="flex flex-wrap gap-3">
           <React.Fragment>
             {options?.map((option) => {
-              const optionNameLowerCase = key.slug.toLowerCase()
+              const optionSlug = option.slug
+              const optionKeyLowerCase = key.slug.toLowerCase()
 
               // Base option params on current params so we can preserve any other param state in the url.
               const optionSearchParams = new URLSearchParams(searchParams.toString())
@@ -62,7 +47,7 @@ export function VariantSelector({ product }: { product: Product }) {
 
               // Update the option params using the current option to reflect how the url *would* change,
               // if the option was clicked.
-              optionSearchParams.set(optionNameLowerCase, option.slug)
+              optionSearchParams.set(optionKeyLowerCase, option.slug)
 
               const optionUrl = createUrl(pathname, optionSearchParams)
 
@@ -75,24 +60,35 @@ export function VariantSelector({ product }: { product: Product }) {
               // This is the "magic" that will cross check possible variant combinations and preemptively
               // disable combinations that are not available. For example, if the color gray is only available in size medium,
               // then all other sizes should be disabled.
-              const filtered = Array.from(optionSearchParams.entries()).filter(([key, value]) =>
-                variants?.find((variant) => {
-                  const variantInfo = variant.info as InfoType
-                  const option = variantInfo.options.find((option) => option.key.slug === key)
+              const filtered = Array.from(optionSearchParams.entries()).filter(([key, value]) => {
+                return combinations?.find((combination) => {
+                  const option = variants?.find((option) => {
+                    return option.options.find((option) => {
+                      return option.slug === key && option.label === value
+                    })
+                  })
 
                   return option?.slug === value
-                }),
-              )
+                })
+              })
 
-              const isAvailableForSale = combinations.find((combination) =>
-                filtered.every(
-                  ([key, value]) => combination[key] === value && combination.availableForSale,
-                ),
-              )
+              console.log({ filtered })
+
+              const existingVariant = variants?.find((variant) => {
+                const hasOption = variant.options.find((variantOption) => {
+                  return variantOption.slug === optionSlug
+                })
+
+                return hasOption
+              })
+
+              console.log({ existingVariant })
+
+              const isAvailableForSale = Boolean(existingVariant?.id && existingVariant?.stock > 0)
 
               // The option is active if it's in the url params.
               const isActive =
-                Boolean(isAvailableForSale) && searchParams.get(optionNameLowerCase) === option.slug
+                Boolean(isAvailableForSale) && searchParams.get(optionKeyLowerCase) === option.slug
 
               return (
                 <button
@@ -110,7 +106,7 @@ export function VariantSelector({ product }: { product: Product }) {
                   disabled={!isAvailableForSale}
                   key={option.slug}
                   onClick={() => {
-                    router.replace(`${optionUrl}&variant=${isAvailableForSale?.id}`, {
+                    router.replace(`${optionUrl}&variant=${existingVariant?.id}`, {
                       scroll: false,
                     })
                   }}

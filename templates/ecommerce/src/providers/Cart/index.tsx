@@ -1,9 +1,7 @@
 'use client'
 
-import type { InfoType } from '@/collections/Products/ui/types'
 import type { Product, User } from '@/payload-types'
 
-import { parse } from 'path'
 import React, {
   createContext,
   useCallback,
@@ -54,22 +52,12 @@ const flattenCart = (cart: User['cart']): User['cart'] => ({
         return null
       }
 
-      let stripeProductID
-
-      if (typeof item.product !== 'string') {
-        if (item.variant) {
-          const variant = item.product?.variants?.variants?.find((v) => v.id === item.variant)
-          if (variant?.stripeProductID) stripeProductID = variant.stripeProductID
-        }
-        if (item.product.stripeProductID) stripeProductID = item.product.stripeProductID
-      }
-
       return {
         ...item,
         // flatten relationship to product
         product: typeof item.product === 'string' ? item.product : item.product.id,
+        variantID: item?.variant,
         quantity: typeof item?.quantity === 'number' ? item?.quantity : 0,
-        stripeProductID,
         variant: item?.variant,
       }
     })
@@ -194,7 +182,7 @@ export const CartProvider = (props) => {
 
         void syncCartToPayload()
       } catch (e) {
-        console.error('Error while syncing cart to Payload.') // eslint-disable-line no-console
+        console.error('Error while syncing cart to Payload.')
       }
     } else {
       localStorage.setItem('cart', JSON.stringify(cart))
@@ -218,7 +206,7 @@ export const CartProvider = (props) => {
                 ? product === incomingProduct.id
                 : product?.id === incomingProduct.id
             }
-          }), // eslint-disable-line function-paren-newline
+          }),
         )
       }
       return isInCart
@@ -267,13 +255,13 @@ export const CartProvider = (props) => {
 
     const newTotal =
       cart?.items?.reduce((acc, item) => {
-        if (typeof item.product === 'string') return acc
-        const itemInfo = item.variant
-          ? (item.product?.variants?.variants?.find((v) => v.id === item.variant)?.info as InfoType)
-          : (item.product?.info as InfoType)
+        if (typeof item.product === 'string' || !item.product) return acc
 
-        const itemCost = itemInfo.price.amount * item.quantity!
-        return acc + (itemCost || 0)
+        let itemCost = 0
+
+        itemCost = item.unitPrice * item.quantity
+
+        return acc + itemCost
       }, 0) || 0
 
     const newQuantity =

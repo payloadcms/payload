@@ -11,7 +11,6 @@ import { LinkFeatureClient as LinkFeatureClient_e70f5e05f09f93e00b997edb1ef0c864
 import { OptionLabel as OptionLabel_2a854a70840417c0380b8c55437dba4b } from '@/collections/Products/ui/RowLabels/OptionLabel'
 import { KeyLabel as KeyLabel_5cfa349e0a6907ae2ad53190ba896137 } from '@/collections/Products/ui/RowLabels/KeyLabel'
 import { VariantSelect as VariantSelect_69de406736b5647ab0dda949697d5591 } from '@/collections/Products/ui/VariantSelect'
-import { StripeProductSelect as StripeProductSelect_849f1f31c120e1c36d4dfe109861c211 } from '@/collections/Products/ui/StripeProductSelect'
 import { VariantLabel as VariantLabel_4328c5fb4d789fba8b97b71b57a7d333 } from '@/collections/Products/ui/RowLabels/VariantLabel'
 import { OverviewComponent as OverviewComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { MetaTitleComponent as MetaTitleComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
@@ -50,8 +49,6 @@ export const importMap = {
     KeyLabel_5cfa349e0a6907ae2ad53190ba896137,
   '@/collections/Products/ui/VariantSelect#VariantSelect':
     VariantSelect_69de406736b5647ab0dda949697d5591,
-  '@/collections/Products/ui/StripeProductSelect#StripeProductSelect':
-    StripeProductSelect_849f1f31c120e1c36d4dfe109861c211,
   '@/collections/Products/ui/RowLabels/VariantLabel#VariantLabel':
     VariantLabel_4328c5fb4d789fba8b97b71b57a7d333,
   '@payloadcms/plugin-seo/client#OverviewComponent':
