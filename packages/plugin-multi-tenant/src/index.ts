@@ -126,6 +126,7 @@ export const multiTenantPlugin =
             collection,
             enabledSlugs: [...collectionSlugs, ...globalCollectionSlugs],
             tenantFieldName,
+            tenantsCollectionSlug,
             usersSlug: adminUsersCollection.slug,
           })
         }
@@ -143,6 +144,8 @@ export const multiTenantPlugin =
           fields: collection.fields,
           tenantEnabledCollectionSlugs: collectionSlugs,
           tenantEnabledGlobalSlugs: globalCollectionSlugs,
+          tenantFieldName,
+          tenantsCollectionSlug,
         })
 
         /**
@@ -170,6 +173,7 @@ export const multiTenantPlugin =
           collection.admin.baseListFilter = withTenantListFilter({
             baseListFilter: collection.admin?.baseListFilter,
             tenantFieldName,
+            tenantsCollectionSlug,
           })
         }
 
@@ -210,6 +214,7 @@ export const multiTenantPlugin =
         serverProps: {
           globalSlugs: globalCollectionSlugs,
           tenantFieldName,
+          tenantsCollectionSlug,
         },
       })
     }

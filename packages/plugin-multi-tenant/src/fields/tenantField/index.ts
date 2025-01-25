@@ -1,6 +1,7 @@
 import { type RelationshipField } from 'payload'
 import { APIError } from 'payload'
 
+import { getCollectionIDType } from '../../utilities/getCollectionIDType.js'
 import { getTenantFromCookie } from '../../utilities/getTenantFromCookie.js'
 
 type Args = {
@@ -39,10 +40,10 @@ export const tenantField = ({
   hooks: {
     beforeChange: [
       ({ req, value }) => {
-        const idType =
-          req.payload.collections[tenantsCollectionSlug]?.customIDType ??
-          req.payload.db.defaultIDType
-
+        const idType = getCollectionIDType({
+          collectionSlug: tenantsCollectionSlug,
+          payload: req.payload,
+        })
         if (!value) {
           const tenantFromCookie = getTenantFromCookie(req.headers, idType)
           if (tenantFromCookie) {

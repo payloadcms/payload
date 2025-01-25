@@ -10,6 +10,7 @@ type Args = {
   docID?: number | string
   globalSlugs: string[]
   tenantFieldName: string
+  tenantsCollectionSlug: CollectionSlug
   viewType: ViewTypes
 } & ServerProps
 
@@ -24,6 +25,7 @@ export const GlobalViewRedirect = async (args: Args) => {
       headers,
       payload: args.payload,
       tenantFieldName: args.tenantFieldName,
+      tenantsCollectionSlug: args.tenantsCollectionSlug,
       view: args.viewType,
     })
 

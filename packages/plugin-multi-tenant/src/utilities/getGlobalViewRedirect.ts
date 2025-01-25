@@ -1,6 +1,7 @@
 import type { Payload, ViewTypes } from 'payload'
 
 import { SELECT_ALL } from '../constants.js'
+import { getCollectionIDType } from './getCollectionIDType.js'
 import { getTenantFromCookie } from './getTenantFromCookie.js'
 
 type Args = {
@@ -9,6 +10,7 @@ type Args = {
   payload: Payload
   slug: string
   tenantFieldName: string
+  tenantsCollectionSlug: string
   view: ViewTypes
 }
 export async function getGlobalViewRedirect({
@@ -17,9 +19,14 @@ export async function getGlobalViewRedirect({
   headers,
   payload,
   tenantFieldName,
+  tenantsCollectionSlug,
   view,
 }: Args): Promise<string | void> {
-  const tenant = getTenantFromCookie(headers, payload.db.defaultIDType)
+  const idType = getCollectionIDType({
+    collectionSlug: tenantsCollectionSlug,
+    payload,
+  })
+  const tenant = getTenantFromCookie(headers, idType)
   let redirectRoute
 
   if (tenant) {
