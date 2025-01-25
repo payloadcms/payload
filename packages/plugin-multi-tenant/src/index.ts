@@ -80,7 +80,12 @@ export const multiTenantPlugin =
      * Add tenants array field to users collection
      */
     if (pluginConfig?.tenantsArrayField?.includeDefaultField !== false) {
-      adminUsersCollection.fields.push(tenantsArrayField(pluginConfig?.tenantsArrayField || {}))
+      adminUsersCollection.fields.push(
+        tenantsArrayField({
+          ...(pluginConfig?.tenantsArrayField || {}),
+          tenantsCollectionSlug,
+        }),
+      )
     }
 
     addCollectionAccess({
