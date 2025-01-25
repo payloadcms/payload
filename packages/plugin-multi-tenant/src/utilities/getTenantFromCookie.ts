@@ -13,5 +13,5 @@ export function getTenantFromCookie(
 ): null | number | string {
   const cookies = parseCookies(headers)
   const selectedTenant = cookies.get('payload-tenant') || null
-  return selectedTenant ? (idType === 'number' ? parseInt(selectedTenant) : selectedTenant) : null
+  return selectedTenant ? (idType === 'number' ? parseFloat(selectedTenant) : selectedTenant) : null
 }

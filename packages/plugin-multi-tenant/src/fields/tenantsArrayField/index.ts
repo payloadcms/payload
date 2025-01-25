@@ -4,6 +4,7 @@ export const tenantsArrayField = (args: {
   arrayFieldAccess?: ArrayField['access']
   rowFields?: ArrayField['fields']
   tenantFieldAccess?: RelationshipField['access']
+  tenantsCollectionSlug: string
 }): ArrayField => ({
   name: 'tenants',
   type: 'array',
@@ -14,7 +15,7 @@ export const tenantsArrayField = (args: {
       type: 'relationship',
       access: args.tenantFieldAccess,
       index: true,
-      relationTo: 'tenants',
+      relationTo: args.tenantsCollectionSlug,
       required: true,
       saveToJWT: true,
     },
