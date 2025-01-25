@@ -131,6 +131,7 @@ export const Form: React.FC<FormProps> = (props) => {
               id,
               collectionSlug,
               data,
+              event: 'submit',
               operation,
               preferences: {} as any,
               req: {

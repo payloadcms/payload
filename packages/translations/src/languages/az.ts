@@ -444,6 +444,8 @@ export const azTranslations: DefaultTranslationsObject = {
     autosavedSuccessfully: 'Uğurla avtomatik olaraq yadda saxlandı.',
     autosavedVersion: 'Avtomatik yadda saxlanmış versiya',
     changed: 'Dəyişdirildi',
+    changedFieldsCount_one: '{{count}} sahə dəyişdi',
+    changedFieldsCount_other: '{{count}} dəyişdirilmiş sahələr',
     compareVersion: 'Versiyanı müqayisə et:',
     confirmPublish: 'Dərci təsdiq edin',
     confirmRevertToSaved: 'Yadda saxlanana qayıtmağı təsdiq edin',

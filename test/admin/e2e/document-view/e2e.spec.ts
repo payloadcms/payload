@@ -190,6 +190,13 @@ describe('Document View', () => {
       await saveDocAndAssert(page)
       await expect(page.locator('#field-title')).toBeEnabled()
     })
+
+    test('should thread proper event argument to validation functions', async () => {
+      await page.goto(postsUrl.create)
+      await page.locator('#field-title').fill(title)
+      await page.locator('#field-validateUsingEvent').fill('Not allowed')
+      await saveDocAndAssert(page, '#action-save', 'error')
+    })
   })
 
   describe('document titles', () => {

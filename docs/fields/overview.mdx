@@ -289,13 +289,14 @@ export const MyField: Field = {
 
 The following additional properties are provided in the `ctx` object:
 
-| Property      | Description                                                                                                              |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `data`        | An object containing the full collection or global document currently being edited.                                       |
-| `siblingData` | An object containing document data that is scoped to only fields within the same parent of this field.                    |
-| `operation`   | Will be `create` or `update` depending on the UI action or API call.                                                      |
-| `id`          | The `id` of the current document being edited. `id` is `undefined` during the `create` operation.                         |
-| `req`        | The current HTTP request object. Contains `payload`, `user`, etc. |
+| Property      | Description                                                                                                                           |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `data`        | An object containing the full collection or global document currently being edited.                                                   |
+| `siblingData` | An object containing document data that is scoped to only fields within the same parent of this field.                                |
+| `operation`   | Will be `create` or `update` depending on the UI action or API call.                                                                  |
+| `id`          | The `id` of the current document being edited. `id` is `undefined` during the `create` operation.                                     |
+| `req`         | The current HTTP request object. Contains `payload`, `user`, etc.                                                                     |
+| `event`       | Either `onChange` or `submit` depending on the current action. Used as a performance opt-in. [More details](#async-field-validations). |
 
 #### Reusing Default Field Validations
 
@@ -316,9 +317,36 @@ const field: Field = {
 }
 ```
 
+Here is a list of all default field validation functions:
+
+```ts
+import {
+  array,
+  blocks,
+  checkbox,
+  code,
+  date,
+  email,
+  group,
+  json,
+  number,
+  point,
+  radio,
+  relationship,
+  richText,
+  select,
+  tabs,
+  text,
+  textarea,
+  upload,
+} from 'payload/shared'
+```
+
 #### Async Field Validations
 
 Custom validation functions can also be asynchronous depending on your needs. This makes it possible to make requests to external services or perform other miscellaneous asynchronous logic.
+
+When writing async validation functions, it is important to consider the performance implications. Validations are executed on every change to the field, so they should be as lightweight as possible. If you need to perform expensive validations, such as querying the database, consider using the `event` property in the `ctx` object to only run the validation on form submission.
 
 To write asynchronous validation functions, use the `async` keyword to define your function:
 
@@ -332,10 +360,18 @@ export const Orders: CollectionConfig = {
       name: 'customerNumber',
       type: 'text',
       // highlight-start
-      validate: async (val, { operation }) => {
-        if (operation !== 'create') return true
+      validate: async (val, { event }) => {
+        if (event === 'onChange') {
+          return true
+        }
+
+        // only perform expensive validation when the form is submitted
         const response = await fetch(`https://your-api.com/customers/${val}`)
-        if (response.ok) return true
+
+        if (response.ok) {
+          return true
+        }
+
         return 'The customer number provided does not match any customers within our records.'
       },
       // highlight-end
