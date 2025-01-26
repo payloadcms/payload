@@ -8,12 +8,14 @@ import type {
   PayloadComponent,
   SanitizedFieldPermissions,
   Tab,
+  TabAsField,
+  TabAsFieldClient,
   TypedLocale,
 } from 'payload'
 import type { DiffMethod } from 'react-diff-viewer-continued'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { fieldAffectsData, fieldIsID, getFieldPaths, tabHasName } from 'payload/shared'
+import { fieldAffectsData, fieldIsID, tabHasName } from 'payload/shared'
 
 import type { FieldDiffProps, FieldDiffPropsServer } from './RenderFieldsToDiff/types.js'
 
@@ -57,6 +59,62 @@ type Args = {
   version: any
 }
 
+type Args2 = {
+  field: ClientField | Field | TabAsField | TabAsFieldClient
+  index: number
+  parentIndexPath: string
+  parentPath: string
+  parentSchemaPath: string
+}
+
+type Result = {
+  /**
+   * A string of '-' separated indexes representing where
+   * to find this field in a given field schema array.
+   * It will always be complete and accurate.
+   */
+  indexPath: string
+  /**
+   * Path for this field specifically.
+   */
+  path: string
+  /**
+   * Schema path for this field specifically.
+   */
+  schemaPath: string
+  schemaPathWithIndex: string
+}
+
+export function getFieldPaths2({
+  field,
+  index,
+  parentIndexPath,
+  parentPath,
+  parentSchemaPath,
+}: Args2): Result {
+  if ('name' in field) {
+    return {
+      indexPath: `${parentIndexPath ? parentIndexPath + '-' : ''}${index}`,
+      path: `${parentPath ? parentPath + (parentPath.endsWith('.') ? '' : '.') : ''}${field.name}`,
+      schemaPath: `${parentSchemaPath ? parentSchemaPath + (parentSchemaPath.endsWith('.') ? '' : '.') : ''}${field.name}`,
+      schemaPathWithIndex: `${parentSchemaPath ? parentSchemaPath + (parentSchemaPath.endsWith('.') ? '' : '.') : ''}${field.name}`,
+    }
+  }
+
+  const indexSuffix = `_index-${`${parentIndexPath ? parentIndexPath + '-' : ''}${index}`}`
+
+  return {
+    indexPath: `${parentIndexPath ? parentIndexPath + '-' : ''}${index}`,
+    path: `${parentPath ? parentPath + (parentPath.endsWith('.') ? '' : '.') : ''}${indexSuffix}`,
+    schemaPath: `${
+      parentSchemaPath ? parentSchemaPath + (parentSchemaPath.endsWith('.') ? '' : '.') : ''
+    }`,
+    schemaPathWithIndex: `${
+      parentSchemaPath ? parentSchemaPath + (parentSchemaPath.endsWith('.') ? '' : '.') : ''
+    }${indexSuffix}`,
+  }
+}
+
 export const buildVersionState = ({
   clientSchemaMap,
   comparisonDoc,
@@ -82,7 +140,7 @@ export const buildVersionState = ({
       continue
     }
 
-    const { indexPath, path, schemaPath } = getFieldPaths({
+    const { indexPath, path, schemaPath, schemaPathWithIndex } = getFieldPaths2({
       field,
       index: fieldIndex,
       parentIndexPath: 'name' in field ? '' : parentIndexPath,
@@ -90,7 +148,7 @@ export const buildVersionState = ({
       parentSchemaPath,
     })
 
-    const clientField = clientSchemaMap.get(entitySlug + '.' + schemaPath)
+    const clientField = clientSchemaMap.get(entitySlug + '.' + schemaPathWithIndex)
 
     const CustomComponent = customDiffComponents?.[field.type]
     const DefaultComponent = diffComponents?.[field.type]
@@ -114,7 +172,7 @@ export const buildVersionState = ({
           indexPath: tabIndexPath,
           path: tabPath,
           schemaPath: tabSchemaPath,
-        } = getFieldPaths({
+        } = getFieldPaths2({
           field: {
             ...tab,
             type: 'tab',
