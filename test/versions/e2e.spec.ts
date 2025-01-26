@@ -786,6 +786,12 @@ describe('Versions', () => {
     let postID: string
     let versionID: string
 
+    const openVersionsDiffView = async (postID: string, versionID: string) => {
+      const versionURL = `${serverURL}/admin/collections/${draftCollectionSlug}/${postID}/versions/${versionID}`
+      await page.goto(versionURL)
+      await page.waitForURL(versionURL)
+    }
+
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, draftCollectionSlug)
     })
@@ -829,16 +835,12 @@ describe('Versions', () => {
     })
 
     test('should render diff', async () => {
-      const versionURL = `${serverURL}/admin/collections/${draftCollectionSlug}/${postID}/versions/${versionID}`
-      await page.goto(versionURL)
-      await page.waitForURL(versionURL)
+      await openVersionsDiffView(postID, versionID)
       await expect(page.locator('.render-field-diffs').first()).toBeVisible()
     })
 
     test('should render diff for nested fields', async () => {
-      const versionURL = `${serverURL}/admin/collections/${draftCollectionSlug}/${postID}/versions/${versionID}`
-      await page.goto(versionURL)
-      await page.waitForURL(versionURL)
+      await openVersionsDiffView(postID, versionID)
       await expect(page.locator('.render-field-diffs').first()).toBeVisible()
 
       const blocksDiffLabel = page.getByText('Blocks Field', { exact: true })
@@ -907,6 +909,41 @@ describe('Versions', () => {
 
       // Expect collapser content to be visible
       await expect(diffCollapserContent).toBeVisible()
+    })
+
+    describe('hidden and disabled fields', () => {
+      test('should render fields with admin.hidden: true ', async () => {
+        await openVersionsDiffView(postID, versionID)
+        await expect(page.locator('.render-field-diffs').first()).toBeVisible()
+
+        // Fields with admin.hidden should only be hidden in the edit view, and
+        // visible in the version view
+        const adminHiddenField = page.getByText('Admin Hidden Field', {
+          exact: true,
+        })
+        await expect(adminHiddenField).toBeVisible()
+      })
+      test('should not render fields with hidden: true ', async () => {
+        await openVersionsDiffView(postID, versionID)
+        await expect(page.locator('.render-field-diffs').first()).toBeVisible()
+
+        // Fields with hidden should be hidden everywhere
+        const hiddenField = page.getByText('Hidden Field', {
+          exact: true,
+        })
+        await expect(hiddenField).toBeHidden()
+      })
+
+      test('should not render fields with admin.disabled: true ', async () => {
+        await openVersionsDiffView(postID, versionID)
+        await expect(page.locator('.render-field-diffs').first()).toBeVisible()
+
+        // Fields with admin.disable should be hidden everywhere in the Admin UI
+        const adminDisabledField = page.getByText('Admin Disabled Field', {
+          exact: true,
+        })
+        await expect(adminDisabledField).toBeHidden()
+      })
     })
   })
 })
