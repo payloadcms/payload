@@ -3,14 +3,15 @@ import type { I18nClient } from '@payloadcms/translations'
 import type { OptionObject, SelectField, SelectFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
 import type { DiffComponentProps } from '../types.js'
 
 import Label from '../../Label/index.js'
 import { diffStyles } from '../styles.js'
-import { DiffViewer } from './DiffViewer/index.js'
 import './index.scss'
+import { DiffViewer } from './DiffViewer/index.js'
 
 const baseClass = 'select-diff'
 
@@ -49,10 +50,11 @@ const Select: React.FC<DiffComponentProps<SelectFieldClient>> = ({
   comparison,
   diffMethod,
   field,
-  i18n,
   locale,
   version,
 }) => {
+  const { i18n } = useTranslation()
+
   let placeholder = ''
 
   if (version === comparison) {

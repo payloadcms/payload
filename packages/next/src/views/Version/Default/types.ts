@@ -5,6 +5,8 @@ import type {
   SanitizedGlobalPermission,
 } from 'payload'
 
+import type { VersionState } from '../buildVersionState.js'
+
 export type CompareOption = {
   label: React.ReactNode | string
   options?: CompareOption[]
@@ -20,4 +22,5 @@ export type DefaultVersionsViewProps = {
   readonly latestPublishedVersion?: string
   readonly localeOptions: OptionObject[]
   readonly versionID?: string
+  readonly versionState: VersionState
 }

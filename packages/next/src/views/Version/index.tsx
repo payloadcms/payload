@@ -8,16 +8,20 @@ import type {
 } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { notFound } from 'next/navigation.js'
 import React from 'react'
 
 import type { DiffComponentProps } from './RenderFieldsToDiff/fields/types.js'
 
+import { getClientSchemaMap } from '../../../../ui/src/utilities/getClientSchemaMap.js'
+import { getSchemaMap } from '../../../../ui/src/utilities/getSchemaMap.js'
 import { getLatestVersion } from '../Versions/getLatestVersion.js'
+import { buildVersionState } from './buildVersionState.js'
 import { DefaultVersionView } from './Default/index.js'
 
 export const VersionView: PayloadServerReactComponent<EditViewComponent> = async (props) => {
-  const { initPageResult, routeSegments, searchParams } = props
+  const { i18n, initPageResult, routeSegments, searchParams } = props
 
   const {
     collectionConfig,
@@ -28,12 +32,15 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
     req: { payload, payload: { config } = {}, user } = {},
   } = initPageResult
 
-  console.log('searchParams', searchParams)
-
   const versionID = routeSegments[routeSegments.length - 1]
 
   const collectionSlug = collectionConfig?.slug
   const globalSlug = globalConfig?.slug
+
+  const localeCodesFromParams = searchParams.localeCodes
+    ? JSON.parse(searchParams.localeCodes as string)
+    : null
+  const comparisonVersionIDFromParams: string = searchParams.compareValue as string
 
   const { localization } = config
 
@@ -125,12 +132,27 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
     }
   }
 
-  const localeOptions: OptionObject[] =
-    localization &&
-    localization.locales.map(({ code, label }) => ({
-      label,
-      value: code,
-    }))
+  const localeOptions: OptionObject[] = []
+  if (localization) {
+    if (localeCodesFromParams) {
+      for (const code of localeCodesFromParams) {
+        const locale = localization.locales.find((locale) => locale.code === code)
+        if (locale) {
+          localeOptions.push({
+            label: locale.label,
+            value: locale.code,
+          })
+        }
+      }
+    } else {
+      for (const { code, label } of localization.locales) {
+        localeOptions.push({
+          label,
+          value: code,
+        })
+      }
+    }
+  }
 
   const latestVersion =
     latestPublishedVersion?.updatedAt > latestDraftVersion?.updatedAt
@@ -141,6 +163,32 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
     return notFound()
   }
 
+  /**
+   * The doc to compare this version to is either the latest version, or a specific version if specified in the URL.
+   * This specific version is added to the URL when a user selects a version to compare to.
+   */
+  let comparisonDoc = null
+  if (comparisonVersionIDFromParams) {
+    if (collectionSlug) {
+      comparisonDoc = await payload.findVersionByID({
+        id: comparisonVersionIDFromParams,
+        collection: collectionSlug,
+        depth: 0,
+      })
+    } else {
+      comparisonDoc = await payload.findGlobalVersionByID({
+        id: comparisonVersionIDFromParams,
+        slug: globalSlug,
+        depth: 0,
+      })
+    }
+  } else {
+    comparisonDoc = latestVersion
+  }
+
+  /**
+   * Handle custom diff field components
+   */
   const customDiffComponents = (collectionConfig ?? globalConfig)?.admin?.components?.views?.edit
     ?.version?.diffComponents
 
@@ -156,15 +204,54 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
     }
   }
 
+  const schemaMap = getSchemaMap({
+    collectionSlug,
+    config,
+    globalSlug,
+    i18n,
+  })
+
+  const clientSchemaMap = getClientSchemaMap({
+    collectionSlug,
+    config: getClientConfig({ config: payload.config, i18n, importMap: payload.importMap }),
+    globalSlug,
+    i18n,
+    payload,
+    schemaMap,
+  })
+
+  const versionState = buildVersionState({
+    clientSchemaMap,
+    comparisonDoc: comparisonDoc?.version,
+    customDiffComponents,
+    entitySlug: collectionSlug || globalSlug,
+    fieldPermissions: docPermissions?.fields,
+    fields: (collectionConfig || globalConfig)?.fields,
+    i18n,
+    locales: localeOptions && localeOptions.map((locale) => locale.value),
+    parentIndexPath: '',
+    parentPath: '',
+    parentSchemaPath: '',
+    payload,
+    version: globalConfig
+      ? {
+          ...doc?.version,
+          createdAt: doc?.version?.createdAt || doc.createdAt,
+          updatedAt: doc?.version?.updatedAt || doc.updatedAt,
+        }
+      : doc?.version,
+  })
+
   return (
     <DefaultVersionView
       doc={doc}
       docPermissions={docPermissions}
-      initialComparisonDoc={latestVersion}
+      initialComparisonDoc={comparisonDoc}
       latestDraftVersion={latestDraftVersion?.id}
       latestPublishedVersion={latestPublishedVersion?.id}
       localeOptions={localeOptions}
       versionID={versionID}
+      versionState={versionState}
     />
   )
 }

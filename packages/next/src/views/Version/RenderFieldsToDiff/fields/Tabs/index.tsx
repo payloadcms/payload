@@ -1,6 +1,7 @@
 'use client'
 import type { TabsFieldClient } from 'payload'
 
+import { useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
 import type { DiffComponentProps } from '../types.js'
@@ -15,44 +16,20 @@ const Tabs: React.FC<DiffComponentProps<TabsFieldClient>> = ({
   diffComponents,
   field,
   fieldPermissions,
-  i18n,
   locale,
   locales,
   version,
+  versionField,
 }) => {
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__wrap`}>
-        {field.tabs.map((tab, i) => {
+        {versionField.tabs.map((tab, i) => {
           if ('name' in tab) {
-            return (
-              <Nested
-                comparison={comparison?.[tab.name]}
-                diffComponents={diffComponents}
-                field={field}
-                fieldPermissions={fieldPermissions}
-                fields={tab.fields}
-                i18n={i18n}
-                key={i}
-                locale={locale}
-                locales={locales}
-                version={version?.[tab.name]}
-              />
-            )
+            return <Nested field={field} key={i} locale={locale} versionFields={tab.fields} />
           }
 
-          return (
-            <RenderFieldsToDiff
-              comparison={comparison}
-              diffComponents={diffComponents}
-              fieldPermissions={fieldPermissions}
-              fields={tab.fields}
-              i18n={i18n}
-              key={i}
-              locales={locales}
-              version={version}
-            />
-          )
+          return <RenderFieldsToDiff fields={versionField.fields} key={i} />
         })}
       </div>
     </div>

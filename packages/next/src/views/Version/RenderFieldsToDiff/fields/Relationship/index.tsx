@@ -2,7 +2,7 @@
 import type { ClientCollectionConfig, ClientField, RelationshipFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useConfig } from '@payloadcms/ui'
+import { useConfig, useTranslation } from '@payloadcms/ui'
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
 import React from 'react'
 import ReactDiffViewerImport from 'react-diff-viewer-continued'
@@ -102,10 +102,11 @@ const generateLabelFromValue = (
 const Relationship: React.FC<DiffComponentProps<RelationshipFieldClient>> = ({
   comparison,
   field,
-  i18n,
   locale,
   version,
 }) => {
+  const { i18n } = useTranslation()
+
   const placeholder = `[${i18n.t('general:noValue')}]`
 
   const {

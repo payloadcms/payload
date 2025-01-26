@@ -1,27 +1,24 @@
 'use client'
 import { getTranslation } from '@payloadcms/translations'
+import { useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
+import type { VersionField } from '../../../buildVersionState.js'
 import type { DiffComponentProps } from '../types.js'
 
+import './index.scss'
 import RenderFieldsToDiff from '../../index.js'
 import Label from '../../Label/index.js'
-import './index.scss'
 
 const baseClass = 'nested-diff'
 
-const Nested: React.FC<DiffComponentProps> = ({
-  comparison,
-  diffComponents,
-  disableGutter = false,
-  field,
-  fieldPermissions,
-  fields,
-  i18n,
-  locale,
-  locales,
-  version,
-}) => {
+const Nested: React.FC<
+  {
+    versionFields: VersionField[]
+  } & Pick<DiffComponentProps, 'disableGutter' | 'field' | 'locale'>
+> = ({ disableGutter = false, field, locale, versionFields }) => {
+  const { i18n } = useTranslation()
+
   return (
     <div className={baseClass}>
       {'label' in field && field.label && typeof field.label !== 'function' && (
@@ -35,15 +32,7 @@ const Nested: React.FC<DiffComponentProps> = ({
           .filter(Boolean)
           .join(' ')}
       >
-        <RenderFieldsToDiff
-          comparison={comparison}
-          diffComponents={diffComponents}
-          fieldPermissions={fieldPermissions}
-          fields={fields}
-          i18n={i18n}
-          locales={locales}
-          version={version}
-        />
+        <RenderFieldsToDiff fields={versionFields} />
       </div>
     </div>
   )

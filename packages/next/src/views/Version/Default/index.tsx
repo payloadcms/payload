@@ -1,14 +1,13 @@
 'use client'
 import type { OptionObject } from 'payload'
 
-import { Gutter, useConfig, useDocumentInfo, usePayloadAPI, useTranslation } from '@payloadcms/ui'
+import { Gutter, useConfig, useDocumentInfo, useTranslation } from '@payloadcms/ui'
 import { formatDate } from '@payloadcms/ui/shared'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation.js'
 import React, { useEffect, useState } from 'react'
 
 import type { CompareOption, DefaultVersionsViewProps } from './types.js'
 
-import { diffComponents } from '../RenderFieldsToDiff/fields/index.js'
 import RenderFieldsToDiff from '../RenderFieldsToDiff/index.js'
 import Restore from '../Restore/index.js'
 import { SelectComparison } from '../SelectComparison/index.js'
@@ -26,6 +25,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   latestPublishedVersion,
   localeOptions,
   versionID,
+  versionState,
 }) => {
   const { config, getEntityConfig } = useConfig()
 
@@ -52,6 +52,11 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
     } else {
       current.set('compareValue', compareValue?.value)
     }
+    if (!locales) {
+      current.delete('localeCodes')
+    } else {
+      current.set('localeCodes', JSON.stringify(locales.map((locale) => locale.value)))
+    }
 
     // cast to string
     const search = current.toString()
@@ -59,7 +64,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
     const query = search ? `?${search}` : ''
 
     router.push(`${pathname}${query}`)
-  }, [compareValue])
+  }, [compareValue, pathname, router, searchParams, locales])
 
   const {
     admin: { dateFormat },
@@ -76,18 +81,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
     collectionSlug || globalSlug
   }/versions`
 
-  const compareFetchURL = compareValue?.value && `${compareBaseURL}/${compareValue.value}`
-
-  const [{ data: currentComparisonDoc }] = usePayloadAPI(compareFetchURL, {
-    initialData: initialComparisonDoc,
-    initialParams: { depth: 1, draft: 'true', locale: 'all' },
-  })
-
-  const comparison = compareValue?.value && currentComparisonDoc?.version // the `version` key is only present on `versions` documents
-
   const canUpdate = docPermissions?.update
-
-  const localeValues = locales && locales.map((locale) => locale.value)
 
   const draftsEnabled = Boolean((collectionConfig || globalConfig)?.versions.drafts)
 
@@ -140,25 +134,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
             <SelectLocales onChange={setLocales} options={localeOptions} value={locales} />
           )}
         </div>
-        {doc?.version && (
-          <RenderFieldsToDiff
-            comparison={comparison}
-            diffComponents={diffComponents}
-            fieldPermissions={docPermissions?.fields}
-            fields={(collectionConfig || globalConfig)?.fields}
-            i18n={i18n}
-            locales={localeValues}
-            version={
-              globalConfig
-                ? {
-                    ...doc?.version,
-                    createdAt: doc?.version?.createdAt || doc.createdAt,
-                    updatedAt: doc?.version?.updatedAt || doc.updatedAt,
-                  }
-                : doc?.version
-            }
-          />
-        )}
+        {doc?.version && <RenderFieldsToDiff fields={versionState.versionFields} />}
       </Gutter>
     </main>
   )

@@ -2,14 +2,15 @@
 import type { ClientField } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { useTranslation } from '@payloadcms/ui'
 import { getUniqueListBy } from 'payload/shared'
 import React from 'react'
 
 import type { DiffComponentProps } from '../types.js'
 
 import RenderFieldsToDiff from '../../index.js'
-import Label from '../../Label/index.js'
 import './index.scss'
+import Label from '../../Label/index.js'
 
 const baseClass = 'iterable-diff'
 
@@ -18,11 +19,12 @@ const Iterable: React.FC<DiffComponentProps> = ({
   diffComponents,
   field,
   fieldPermissions,
-  i18n,
   locale,
   locales,
   version,
 }) => {
+  const { i18n } = useTranslation()
+
   const versionRowCount = Array.isArray(version) ? version.length : 0
   const comparisonRowCount = Array.isArray(comparison) ? comparison.length : 0
   const maxRows = Math.max(versionRowCount, comparisonRowCount)
@@ -83,15 +85,7 @@ const Iterable: React.FC<DiffComponentProps> = ({
 
             return (
               <div className={`${baseClass}__wrap`} key={i}>
-                <RenderFieldsToDiff
-                  comparison={comparisonRow}
-                  diffComponents={diffComponents}
-                  fieldPermissions={fieldPermissions}
-                  fields={fields}
-                  i18n={i18n}
-                  locales={locales}
-                  version={versionRow}
-                />
+                <RenderFieldsToDiff fields={fields} />
               </div>
             )
           })}

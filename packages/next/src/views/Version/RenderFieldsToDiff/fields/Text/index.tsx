@@ -2,26 +2,23 @@
 import type { TextFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
 import type { DiffComponentProps } from '../types.js'
 
 import Label from '../../Label/index.js'
 import { diffStyles } from '../styles.js'
-import { DiffViewer } from './DiffViewer/index.js'
 import './index.scss'
+import { DiffViewer } from './DiffViewer/index.js'
 
 const baseClass = 'text-diff'
 
-const Text: React.FC<DiffComponentProps<TextFieldClient>> = ({
-  comparison,
-  diffMethod,
-  field,
-  i18n,
-  isRichText = false,
-  locale,
-  version,
-}) => {
+const Text: React.FC<DiffComponentProps<TextFieldClient>> = (props) => {
+  const { comparison, diffMethod, field, isRichText = false, locale, version } = props
+
+  const { i18n } = useTranslation()
+
   let placeholder = ''
 
   if (version === comparison) {
