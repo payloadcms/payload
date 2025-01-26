@@ -42,6 +42,11 @@ export const RenderFieldsToDiff: React.FC<Props> = ({
           return null
         }
 
+        // Don't render fields with admin.hiddenInVersionView
+        if (field.admin.hiddenInVersionView) {
+          return null
+        }
+
         const Component = diffComponents[field.type]
 
         const isRichText = field.type === 'richText'

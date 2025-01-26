@@ -944,6 +944,17 @@ describe('Versions', () => {
         })
         await expect(adminDisabledField).toBeHidden()
       })
+
+      test('should not render fields with admin.hiddenInVersionView: true ', async () => {
+        await openVersionsDiffView(postID, versionID)
+        await expect(page.locator('.render-field-diffs').first()).toBeVisible()
+
+        // Fields with admin.hiddenInVersionView should be hidden in the version view
+        const adminHiddenInVersionViewView = page.getByText('Admin Disable List View Field', {
+          exact: true,
+        })
+        await expect(adminHiddenInVersionViewView).toBeHidden()
+      })
     })
   })
 })
