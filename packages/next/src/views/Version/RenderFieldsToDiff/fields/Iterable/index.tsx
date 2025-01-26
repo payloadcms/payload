@@ -22,7 +22,6 @@ const Iterable: React.FC<DiffComponentProps> = ({
   locale,
   locales,
   modifiedOnly,
-  permissions,
   version,
 }) => {
   const versionRowCount = Array.isArray(version) ? version.length : 0
