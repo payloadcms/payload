@@ -874,7 +874,7 @@ describe('Versions', () => {
 
       // Expect iterable change count to be visible
       const iterableChangeCount = blocksDiff.locator('.diff-collapser__field-change-count').first()
-      await expect(iterableChangeCount).toHaveText('2 changed fields')
+      await expect(iterableChangeCount).toHaveText('1 changed field')
 
       // Expect iterable rows to be visible
       const blocksDiffRows = blocksDiff.locator('.iterable-diff__rows')
@@ -888,7 +888,7 @@ describe('Versions', () => {
       const firstBlocksDiffRowChangeCount = firstBlocksDiffRow
         .locator('.diff-collapser__field-change-count')
         .first()
-      await expect(firstBlocksDiffRowChangeCount).toHaveText('2 changed fields')
+      await expect(firstBlocksDiffRowChangeCount).toHaveText('1 changed field')
 
       // Expect collapser content to be visible
       const diffCollapserContent = blocksDiffRows.locator('.diff-collapser__content')

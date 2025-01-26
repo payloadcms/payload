@@ -1,5 +1,18 @@
 import { countChangedFields, countChangedFieldsInRows } from './countChangedFields.js'
+import { isFieldHiddenInVersionView } from './isFieldHiddenInVersionView.js'
+
 import type { ClientField } from 'payload'
+
+// Mock isFieldHiddenInVersionView with it's original implementation so we can
+// replace it later in the hidden fields tests.
+// (Couldn't use jest.spyOn directly due to "TypeError: Cannot redefine property")
+jest.mock('./isFieldHiddenInVersionView', () => {
+  const actual = jest.requireActual('./isFieldHiddenInVersionView')
+  return {
+    ...actual,
+    isFieldHiddenInVersionView: jest.fn(actual.isFieldHiddenInVersionView),
+  }
+})
 
 describe('countChangedFields', () => {
   // locales can be undefined when not configured in payload.config.js
@@ -40,16 +53,20 @@ describe('countChangedFields', () => {
     expect(result).toBe(2)
   })
 
-  it('should not count the id field because it is not displayed in the version view', () => {
+  it('should not count changed fields when isFieldHiddenInVersionView() returns true', async () => {
+    // Make isFieldHiddenInVersionView return true for one of the fields
+    // jest.mocked() is used to correct the type of isFieldHiddenInVersionView
+    jest.mocked(isFieldHiddenInVersionView).mockImplementationOnce(() => true)
+
     const fields: ClientField[] = [
-      { name: 'id', type: 'text' },
       { name: 'a', type: 'text' },
+      { name: 'b', type: 'text' },
     ]
-    const comparison = { id: 'original', a: 'original' }
-    const version = { id: 'changed', a: 'original' }
+    const comparison = { a: 'original', b: 'original' }
+    const version = { a: 'changed', b: 'changed' }
 
     const result = countChangedFields({ comparison, fields, version, locales })
-    expect(result).toBe(0)
+    expect(result).toBe(1)
   })
 
   it('should count changed fields inside collapsible fields', () => {

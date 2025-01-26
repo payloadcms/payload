@@ -8,6 +8,7 @@ import type { diffComponents as _diffComponents } from './fields/index.js'
 import type { FieldDiffProps, Props } from './types.js'
 
 import { diffMethods } from './fields/diffMethods.js'
+import { isFieldHiddenInVersionView } from './utilities/isFieldHiddenInVersionView.js'
 import './index.scss'
 
 const baseClass = 'render-field-diffs'
@@ -28,22 +29,7 @@ export const RenderFieldsToDiff: React.FC<Props> = ({
   return (
     <div className={baseClass}>
       {fields?.map((field, i) => {
-        if (fieldIsID(field)) {
-          return null
-        }
-
-        // Don't render hidden fields
-        if (field.hidden) {
-          return null
-        }
-
-        // Don't render fields with admin.disabled
-        if (field.admin.disabled) {
-          return null
-        }
-
-        // Don't render fields with admin.hiddenInVersionView
-        if (field.admin.hiddenInVersionView) {
+        if (isFieldHiddenInVersionView(field)) {
           return null
         }
 

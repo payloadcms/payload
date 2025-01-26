@@ -2,6 +2,7 @@ import type { ArrayFieldClient, BlocksFieldClient, ClientField } from 'payload'
 
 import { fieldHasChanges } from './fieldHasChanges.js'
 import { getFieldsForRowComparison } from './getFieldsForRowComparison.js'
+import { isFieldHiddenInVersionView } from './isFieldHiddenInVersionView.js'
 
 type Args = {
   comparison: unknown
@@ -18,10 +19,11 @@ export function countChangedFields({ comparison, fields, locales, version }: Arg
   let count = 0
 
   fields.forEach((field) => {
-    // Don't count the id field since it is not displayed in the UI
-    if ('name' in field && field.name === 'id') {
+    // Don't count fields that are hidden in the version view
+    if (isFieldHiddenInVersionView(field)) {
       return
     }
+
     const fieldType = field.type
     switch (fieldType) {
       // Iterable fields are arrays and blocks fields. We iterate over each row and
