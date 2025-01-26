@@ -15,7 +15,7 @@ import type {
 import type { DiffMethod } from 'react-diff-viewer-continued'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { fieldAffectsData, fieldIsID, tabHasName } from 'payload/shared'
+import { fieldIsID, tabHasName } from 'payload/shared'
 
 import type { FieldDiffProps, FieldDiffPropsServer } from './RenderFieldsToDiff/types.js'
 
@@ -41,7 +41,7 @@ export type VersionState = {
 
 type Args = {
   clientSchemaMap: ClientFieldSchemaMap
-  comparisonDoc
+  comparisonSiblingData: object
   customDiffComponents: Record<FieldTypes, PayloadComponent<null, null>>
   entitySlug: string
   fieldPermissions:
@@ -56,7 +56,7 @@ type Args = {
   parentPath: string
   parentSchemaPath: string
   payload: Payload
-  version: any
+  versionSiblingData: object
 }
 
 type Args2 = {
@@ -117,7 +117,7 @@ export function getFieldPaths2({
 
 export const buildVersionState = ({
   clientSchemaMap,
-  comparisonDoc,
+  comparisonSiblingData,
   customDiffComponents,
   entitySlug,
   fieldPermissions,
@@ -128,7 +128,7 @@ export const buildVersionState = ({
   parentPath,
   parentSchemaPath,
   payload,
-  version,
+  versionSiblingData,
 }: Args): VersionState => {
   const versionState: VersionState = {
     versionFields: [],
@@ -186,7 +186,8 @@ export const buildVersionState = ({
           name: 'name' in tab ? tab.name : null,
           fields: buildVersionState({
             clientSchemaMap,
-            comparisonDoc,
+            comparisonSiblingData:
+              'name' in tab ? comparisonSiblingData?.[tab.name] : comparisonSiblingData,
             customDiffComponents,
             entitySlug,
             fieldPermissions,
@@ -197,7 +198,7 @@ export const buildVersionState = ({
             parentPath: tabPath,
             parentSchemaPath: tabSchemaPath,
             payload,
-            version,
+            versionSiblingData: 'name' in tab ? versionSiblingData?.[tab.name] : versionSiblingData,
           }).versionFields,
           label: tab.label,
         })
@@ -208,7 +209,8 @@ export const buildVersionState = ({
     if ('fields' in field) {
       versionField.fields = buildVersionState({
         clientSchemaMap,
-        comparisonDoc,
+        comparisonSiblingData:
+          'name' in field ? comparisonSiblingData?.[field.name] : comparisonSiblingData,
         customDiffComponents,
         entitySlug,
         fieldPermissions,
@@ -219,91 +221,95 @@ export const buildVersionState = ({
         parentPath: path,
         parentSchemaPath: schemaPath,
         payload,
-        version,
+        versionSiblingData: 'name' in field ? versionSiblingData?.[field.name] : versionSiblingData,
       }).versionFields
     }
 
-    if (fieldAffectsData(field)) {
-      const fieldName = field.name
-      const valueIsObject = field.type === 'code' || field.type === 'json'
+    const fieldName: null | string = 'name' in field ? field.name : null
+    const valueIsObject = field.type === 'code' || field.type === 'json'
 
-      const versionValue = valueIsObject
-        ? JSON.stringify(version?.[fieldName])
-        : version?.[fieldName]
+    const versionValue = fieldName
+      ? valueIsObject
+        ? JSON.stringify(versionSiblingData?.[fieldName])
+        : versionSiblingData?.[fieldName]
+      : versionSiblingData
 
-      const comparisonValue = valueIsObject
-        ? JSON.stringify(comparisonDoc?.[fieldName])
-        : comparisonDoc?.[fieldName]
+    const comparisonValue = fieldName
+      ? valueIsObject
+        ? JSON.stringify(comparisonSiblingData?.[fieldName])
+        : comparisonSiblingData?.[fieldName]
+      : comparisonSiblingData
 
-      const hasPermission =
-        fieldPermissions === true ||
-        fieldPermissions?.[fieldName] === true ||
-        fieldPermissions?.[fieldName]?.read
+    const hasPermission =
+      fieldPermissions === true ||
+      !fieldName ||
+      fieldPermissions?.[fieldName] === true ||
+      fieldPermissions?.[fieldName]?.read
 
-      const subFieldPermissions =
-        fieldPermissions === true ||
-        fieldPermissions?.[fieldName] === true ||
-        fieldPermissions?.[fieldName]?.fields
+    const subFieldPermissions =
+      fieldPermissions === true ||
+      !fieldName ||
+      fieldPermissions?.[fieldName] === true ||
+      fieldPermissions?.[fieldName]?.fields
 
-      if (!hasPermission) {
-        continue
-      }
+    if (!hasPermission) {
+      continue
+    }
 
-      const clientCellProps: FieldDiffProps = {
-        comparison: comparisonValue,
-        diffMethod,
-        field: clientField as ClientField,
-        fieldPermissions: subFieldPermissions,
-        fields: 'fields' in clientField ? clientField?.fields : [],
-        isRichText,
-        locales,
-        version: versionValue,
-        versionField,
-      }
+    const clientCellProps: FieldDiffProps = {
+      comparison: comparisonValue,
+      diffMethod,
+      field: clientField as ClientField,
+      fieldPermissions: subFieldPermissions,
+      fields: 'fields' in clientField ? clientField?.fields : [],
+      isRichText,
+      locales,
+      version: versionValue,
+      versionField,
+    }
 
-      const serverCellProps: FieldDiffPropsServer = {
-        ...clientCellProps,
-        clientField: clientField as ClientField,
-        field,
-        i18n,
-      }
+    const serverCellProps: FieldDiffPropsServer = {
+      ...clientCellProps,
+      clientField: clientField as ClientField,
+      field,
+      i18n,
+    }
 
-      if (field.localized) {
-        versionField.CustomComponentByLocale = {}
+    if ('localized' in field && field.localized) {
+      versionField.CustomComponentByLocale = {}
 
-        for (const locale of locales) {
-          const versionLocaleValue = versionValue?.[locale]
-          const comparisonLocaleValue = comparisonValue?.[locale]
+      for (const locale of locales) {
+        const versionLocaleValue = versionValue?.[locale]
+        const comparisonLocaleValue = comparisonValue?.[locale]
 
-          versionField.CustomComponentByLocale[locale] = RenderServerComponent({
-            clientProps: {
-              ...clientCellProps,
-              comparison: comparisonLocaleValue,
-              locale,
-              version: versionLocaleValue,
-            },
-            Component: CustomComponent,
-            Fallback: DefaultComponent,
-            importMap: payload.importMap,
-            key: 'diff component with locale',
-            serverProps: {
-              ...serverCellProps,
-              comparison: comparisonLocaleValue,
-              locale,
-              version: versionLocaleValue,
-            },
-          })
-        }
-      } else {
-        versionField.CustomComponent = RenderServerComponent({
-          clientProps: clientCellProps,
+        versionField.CustomComponentByLocale[locale] = RenderServerComponent({
+          clientProps: {
+            ...clientCellProps,
+            comparison: comparisonLocaleValue,
+            locale,
+            version: versionLocaleValue,
+          },
           Component: CustomComponent,
           Fallback: DefaultComponent,
           importMap: payload.importMap,
-          key: 'diff component',
-          serverProps: serverCellProps,
+          key: 'diff component with locale',
+          serverProps: {
+            ...serverCellProps,
+            comparison: comparisonLocaleValue,
+            locale,
+            version: versionLocaleValue,
+          },
         })
       }
+    } else {
+      versionField.CustomComponent = RenderServerComponent({
+        clientProps: clientCellProps,
+        Component: CustomComponent,
+        Fallback: DefaultComponent,
+        importMap: payload.importMap,
+        key: 'diff component',
+        serverProps: serverCellProps,
+      })
     }
 
     versionState.versionFields.push(versionField)

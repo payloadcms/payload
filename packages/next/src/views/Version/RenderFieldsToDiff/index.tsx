@@ -31,7 +31,7 @@ const RenderFieldsToDiff: React.FC<{
           )
         } else if (field.CustomComponent) {
           return (
-            <div className={`${baseClass}__field`} key={fieldIndex}>
+            <div className={`${baseClass}__field field__${field.type}`} key={fieldIndex}>
               {field.CustomComponent}
             </div>
           )

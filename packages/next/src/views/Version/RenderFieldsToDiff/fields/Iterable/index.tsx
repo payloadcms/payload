@@ -22,6 +22,7 @@ const Iterable: React.FC<DiffComponentProps> = ({
   locale,
   locales,
   version,
+  versionField,
 }) => {
   const { i18n } = useTranslation()
 
