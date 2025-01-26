@@ -8,6 +8,7 @@ import type {
   ClientField,
   Field,
   FieldBase,
+  JoinFieldClient,
   LabelsClient,
   RadioFieldClient,
   RowFieldClient,
@@ -32,6 +33,7 @@ export type ServerOnlyFieldProperties =
   | 'editor' // This is a `richText` only property
   | 'enumName' // can be a function
   | 'filterOptions' // This is a `relationship` and `upload` only property
+  | 'graphQL'
   | 'label'
   | 'typescriptSchema'
   | 'validate'
@@ -53,6 +55,7 @@ const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
   'typescriptSchema',
   'dbName', // can be a function
   'enumName', // can be a function
+  'graphQL', // client does not need graphQL
   // the following props are handled separately (see below):
   // `label`
   // `fields`
@@ -227,6 +230,16 @@ export const createClientField = ({
       break
     }
 
+    case 'join': {
+      const field = clientField as JoinFieldClient
+
+      field.targetField = {
+        relationTo: field.targetField.relationTo,
+      }
+
+      break
+    }
+
     case 'radio':
     // falls through
     case 'select': {
@@ -279,6 +292,8 @@ export const createClientField = ({
               continue
             }
 
+            const tabProp = tab[key]
+
             if (key === 'fields') {
               clientTab.fields = createClientFields({
                 defaultIDType,
@@ -287,8 +302,37 @@ export const createClientField = ({
                 i18n,
                 importMap,
               })
+            } else if (
+              (key === 'label' || key === 'description') &&
+              typeof tabProp === 'function'
+            ) {
+              clientTab[key] = tabProp({ t: i18n.t })
+            } else if (key === 'admin') {
+              clientTab.admin = {} as AdminClient
+
+              for (const adminKey in tab.admin) {
+                if (serverOnlyFieldAdminProperties.includes(adminKey as any)) {
+                  continue
+                }
+
+                switch (adminKey) {
+                  case 'description':
+                    if ('description' in tab.admin) {
+                      if (typeof tab.admin?.description === 'function') {
+                        clientTab.admin.description = tab.admin.description({ t: i18n.t })
+                      } else {
+                        clientTab.admin.description = tab.admin.description
+                      }
+                    }
+
+                    break
+
+                  default:
+                    clientField.admin[adminKey] = tab.admin[adminKey]
+                }
+              }
             } else {
-              clientTab[key] = tab[key]
+              clientTab[key] = tabProp
             }
           }
           field.tabs[i] = clientTab

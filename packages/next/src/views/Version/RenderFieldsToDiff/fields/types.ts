@@ -9,7 +9,6 @@ export type DiffComponentProps<TField extends ClientField = ClientField> = {
   readonly comparison: any
   readonly diffComponents: DiffComponents
   readonly diffMethod?: DiffMethod
-  readonly disableGutter?: boolean
   readonly field: TField
   readonly fieldPermissions?:
     | {

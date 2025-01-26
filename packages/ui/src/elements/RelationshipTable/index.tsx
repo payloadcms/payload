@@ -61,7 +61,6 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     relationTo,
   } = props
   const [Table, setTable] = useState<React.ReactNode>(null)
-
   const { getEntityConfig } = useConfig()
 
   const { permissions } = useAuth()
@@ -92,9 +91,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   const [query, setQuery] = useState<ListQuery>()
   const [openColumnSelector, setOpenColumnSelector] = useState(false)
 
-  const [collectionConfig] = useState(
-    () => getEntityConfig({ collectionSlug: relationTo }) as ClientCollectionConfig,
-  )
+  const [collectionConfig] = useState(() => getEntityConfig({ collectionSlug: relationTo }))
 
   const [isLoadingTable, setIsLoadingTable] = useState(!disableTable)
   const [data, setData] = useState<PaginatedDocs>(initialData)
@@ -115,12 +112,21 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         newQuery.where = hoistQueryParamsToAnd(newQuery.where, filterOptions)
       }
 
+      // map columns from string[] to ListPreferences['columns']
+      const defaultColumns = field.admin.defaultColumns
+        ? field.admin.defaultColumns.map((accessor) => ({
+            accessor,
+            active: true,
+          }))
+        : undefined
+
       const {
         data: newData,
         state: newColumnState,
         Table: NewTable,
       } = await getTableState({
         collectionSlug: relationTo,
+        columns: defaultColumns,
         docs,
         enableRowSelections: false,
         query: newQuery,
@@ -134,11 +140,12 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       setIsLoadingTable(false)
     },
     [
-      query,
       field.defaultLimit,
       field.defaultSort,
+      field.admin.defaultColumns,
       collectionConfig.admin.pagination.defaultLimit,
       collectionConfig.defaultSort,
+      query,
       filterOptions,
       getTableState,
       relationTo,
@@ -183,6 +190,14 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       void onDrawerSave(args)
     },
     [closeDrawer, onDrawerSave],
+  )
+
+  const onDrawerDelete = useCallback<DocumentDrawerProps['onDelete']>(
+    (args) => {
+      const newDocs = data.docs.filter((doc) => doc.id !== args.id)
+      void renderTable(newDocs)
+    },
+    [data.docs, renderTable],
   )
 
   const preferenceKey = `${relationTo}-list`
@@ -237,20 +252,20 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           {data.docs && data.docs.length > 0 && (
             <RelationshipProvider>
               <ListQueryProvider
-                collectionSlug={relationTo}
                 data={data}
                 defaultLimit={
                   field.defaultLimit ?? collectionConfig?.admin?.pagination?.defaultLimit
                 }
                 modifySearchParams={false}
                 onQueryChange={setQuery}
-                preferenceKey={preferenceKey}
               >
                 <TableColumnsProvider
                   collectionSlug={relationTo}
                   columnState={columnState}
                   docs={data.docs}
-                  LinkedCellOverride={<DrawerLink onDrawerSave={onDrawerSave} />}
+                  LinkedCellOverride={
+                    <DrawerLink onDrawerDelete={onDrawerDelete} onDrawerSave={onDrawerSave} />
+                  }
                   preferenceKey={preferenceKey}
                   renderRowTypes
                   setTable={setTable}

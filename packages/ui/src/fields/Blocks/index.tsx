@@ -95,7 +95,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   )
 
   const {
-    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label, RowLabels } = {},
     errorPaths,
     rows = [],
     showError,
@@ -259,7 +259,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
           onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
         >
           {rows.map((row, i) => {
-            const { blockType } = row
+            const { blockType, isLoading } = row
             const blockConfig = blocks.find((block) => block.slug === blockType)
 
             if (blockConfig) {
@@ -281,8 +281,9 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                       errorCount={rowErrorCount}
                       fields={blockConfig.fields}
                       hasMaxRows={hasMaxRows}
+                      isLoading={isLoading}
                       isSortable={isSortable}
-                      Label={Label}
+                      Label={RowLabels?.[i]}
                       labels={labels}
                       moveRow={moveRow}
                       parentPath={path}

@@ -5,6 +5,7 @@ import { contact as contactPageData } from './contact-page'
 import { home } from './home'
 import { image1 } from './image-1'
 import { image2 } from './image-2'
+import { imageHero1 } from './image-hero-1'
 import { post1 } from './post-1'
 import { post2 } from './post-2'
 import { post3 } from './post-3'
@@ -72,7 +73,7 @@ export const seed = async ({
     depth: 0,
     where: {
       email: {
-        equals: 'demo-author@payloadcms.com',
+        equals: 'demo-author@example.com',
       },
     },
   })
@@ -103,15 +104,12 @@ export const seed = async ({
     technologyCategory,
     newsCategory,
     financeCategory,
-    designCategory,
-    softwareCategory,
-    engineeringCategory,
   ] = await Promise.all([
     payload.create({
       collection: 'users',
       data: {
         name: 'Demo Author',
-        email: 'demo-author@payloadcms.com',
+        email: 'demo-author@example.com',
         password: 'password',
       },
     }),
@@ -132,7 +130,7 @@ export const seed = async ({
     }),
     payload.create({
       collection: 'media',
-      data: image2,
+      data: imageHero1,
       file: hero1Buffer,
     }),
 
@@ -140,6 +138,12 @@ export const seed = async ({
       collection: 'categories',
       data: {
         title: 'Technology',
+        breadcrumbs: [
+          {
+            label: 'Technology',
+            url: '/technology',
+          },
+        ],
       },
     }),
 
@@ -147,6 +151,12 @@ export const seed = async ({
       collection: 'categories',
       data: {
         title: 'News',
+        breadcrumbs: [
+          {
+            label: 'News',
+            url: '/news',
+          },
+        ],
       },
     }),
 
@@ -154,12 +164,24 @@ export const seed = async ({
       collection: 'categories',
       data: {
         title: 'Finance',
+        breadcrumbs: [
+          {
+            label: 'Finance',
+            url: '/finance',
+          },
+        ],
       },
     }),
     payload.create({
       collection: 'categories',
       data: {
         title: 'Design',
+        breadcrumbs: [
+          {
+            label: 'Design',
+            url: '/design',
+          },
+        ],
       },
     }),
 
@@ -167,6 +189,12 @@ export const seed = async ({
       collection: 'categories',
       data: {
         title: 'Software',
+        breadcrumbs: [
+          {
+            label: 'Software',
+            url: '/software',
+          },
+        ],
       },
     }),
 
@@ -174,6 +202,12 @@ export const seed = async ({
       collection: 'categories',
       data: {
         title: 'Engineering',
+        breadcrumbs: [
+          {
+            label: 'Engineering',
+            url: '/engineering',
+          },
+        ],
       },
     }),
   ])

@@ -34,11 +34,12 @@ const generateLabelFromValue = (
   }
 
   let relatedDoc: RelationshipValue
-  let valueToReturn = '' as any
+  let valueToReturn: RelationshipValue | string = ''
 
   const relationTo = 'relationTo' in field ? field.relationTo : undefined
 
   if (value === null || typeof value === 'undefined') {
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string -- We want to return a string specifilly for null and undefined
     return String(value)
   }
 
@@ -76,26 +77,29 @@ const generateLabelFromValue = (
       valueToReturn = relatedDoc
     }
 
-    if (typeof valueToReturn === 'object' && titleFieldIsLocalized) {
+    if (typeof valueToReturn === 'object' && titleFieldIsLocalized && valueToReturn?.[locale]) {
       valueToReturn = valueToReturn[locale]
     }
   } else if (relatedDoc) {
     // Handle non-polymorphic `hasMany` relationships or fallback
     if (typeof relatedDoc?.id !== 'undefined') {
-      valueToReturn = relatedDoc.id
+      valueToReturn = String(relatedDoc.id)
     } else {
       valueToReturn = relatedDoc
     }
   }
 
-  if (typeof valueToReturn === 'object' && valueToReturn !== null) {
+  if (
+    (valueToReturn && typeof valueToReturn === 'object' && valueToReturn !== null) ||
+    typeof valueToReturn !== 'string'
+  ) {
     valueToReturn = JSON.stringify(valueToReturn)
   }
 
   return valueToReturn
 }
 
-const Relationship: React.FC<DiffComponentProps<RelationshipFieldClient>> = ({
+export const Relationship: React.FC<DiffComponentProps<RelationshipFieldClient>> = ({
   comparison,
   field,
   i18n,
@@ -155,5 +159,3 @@ const Relationship: React.FC<DiffComponentProps<RelationshipFieldClient>> = ({
     </div>
   )
 }
-
-export default Relationship

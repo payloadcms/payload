@@ -3,7 +3,13 @@ import type React from 'react'
 
 import { TextField } from '@payloadcms/ui'
 
-export const CustomTextFieldServer: TextFieldServerComponent = (props) => {
-  const path = (props?.path || props?.field?.name || '') as string
-  return <TextField field={props?.clientField} path={path} />
+export const CustomTextFieldServer: TextFieldServerComponent = ({
+  clientField,
+  path,
+  schemaPath,
+  permissions,
+}) => {
+  return (
+    <TextField field={clientField} path={path} schemaPath={schemaPath} permissions={permissions} />
+  )
 }

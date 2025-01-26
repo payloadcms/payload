@@ -5,6 +5,7 @@ import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerCompo
 import { formatAdminURL, isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { notFound, redirect } from 'next/navigation.js'
+import { logError } from 'payload'
 import React from 'react'
 
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
@@ -28,6 +29,7 @@ export const generateMetadata: GenerateEditViewMetadata = async (args) => getMet
 // called on-demand from document drawers
 export const renderDocument = async ({
   disableActions,
+  documentSubViewType,
   drawerSlug,
   importMap,
   initialData,
@@ -37,6 +39,7 @@ export const renderDocument = async ({
   redirectAfterDelete,
   redirectAfterDuplicate,
   searchParams,
+  viewType,
 }: {
   overrideEntityVisibility?: boolean
 } & AdminViewProps): Promise<{
@@ -86,6 +89,7 @@ export const renderDocument = async ({
       globalSlug,
       locale,
       payload,
+      req,
       user,
     }))
 
@@ -314,7 +318,7 @@ export const renderDocument = async ({
     req,
   })
 
-  const clientProps = { formState, ...documentSlots }
+  const clientProps = { formState, ...documentSlots, documentSubViewType, viewType }
 
   return {
     data: doc,
@@ -384,7 +388,8 @@ export const Document: React.FC<AdminViewProps> = async (args) => {
     if (error?.message === 'NEXT_REDIRECT') {
       throw error
     }
-    args.initPageResult.req.payload.logger.error(error)
+
+    logError({ err: error, payload: args.initPageResult.req.payload })
 
     if (error.message === 'not-found') {
       notFound()

@@ -17,7 +17,7 @@ import { baseIDField } from '../baseFields/baseIDField.js'
 import { setDefaultBeforeDuplicate } from '../setDefaultBeforeDuplicate.js'
 import { validations } from '../validations.js'
 import { sanitizeJoinField } from './sanitizeJoinField.js'
-import { fieldAffectsData, tabHasName } from './types.js'
+import { fieldAffectsData, fieldIsLocalized, tabHasName } from './types.js'
 
 type Args = {
   collectionConfig?: CollectionConfig
@@ -120,14 +120,14 @@ export const sanitizeFields = async ({
         console.warn(
           `(payload): The "min" property is deprecated for the Relationship field "${field.name}" and will be removed in a future version. Please use "minRows" instead.`,
         )
+        field.minRows = field.min
       }
       if (field.max && !field.maxRows) {
         console.warn(
           `(payload): The "max" property is deprecated for the Relationship field "${field.name}" and will be removed in a future version. Please use "maxRows" instead.`,
         )
+        field.maxRows = field.max
       }
-      field.minRows = field.minRows || field.min
-      field.maxRows = field.maxRows || field.max
     }
 
     if (field.type === 'upload') {
@@ -249,7 +249,7 @@ export const sanitizeFields = async ({
           ? `${joinPath ? joinPath + '.' : ''}${field.name}`
           : joinPath,
         joins,
-        parentIsLocalized: parentIsLocalized || field.localized,
+        parentIsLocalized: parentIsLocalized || fieldIsLocalized(field),
         requireFieldLevelRichTextEditor,
         richTextSanitizationPromises,
         validRelationships,

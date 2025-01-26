@@ -1,16 +1,17 @@
-import type { Payload } from 'payload'
+import type { Payload, TypeWithID } from 'payload'
 
 import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-import type { Category, Config, Post, Singular } from './payload-types.js'
+import type { Category, Config, DepthJoins1, DepthJoins3, Post, Singular } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { idToString } from '../helpers/idToString.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import {
+  categoriesJoinRestrictedSlug,
   categoriesSlug,
   postsSlug,
   restrictedCategoriesSlug,
@@ -89,10 +90,33 @@ describe('Joins Field', () => {
         upload: uploadedImage,
         categories,
         categoriesLocalized: categories,
+        polymorphic: {
+          relationTo: 'categories',
+          value: category.id,
+        },
+        polymorphics: [
+          {
+            relationTo: 'categories',
+            value: category.id,
+          },
+        ],
+        localizedPolymorphic: {
+          relationTo: 'categories',
+          value: category.id,
+        },
+        localizedPolymorphics: [
+          {
+            relationTo: 'categories',
+            value: category.id,
+          },
+        ],
         group: {
           category: category.id,
           camelCaseCategory: category.id,
         },
+        array: [{ category: category.id }],
+        localizedArray: [{ category: category.id }],
+        blocks: [{ blockType: 'block', category: category.id }],
       })
     }
   })
@@ -182,6 +206,34 @@ describe('Joins Field', () => {
     expect(docs[0].group.camelCaseCategory.group.camelCasePosts.docs).toHaveLength(10)
   })
 
+  it('should populate joins with array relationships', async () => {
+    const categoryWithPosts = await payload.findByID({
+      id: category.id,
+      collection: categoriesSlug,
+    })
+
+    expect(categoryWithPosts.arrayPosts.docs).toBeDefined()
+  })
+
+  it('should populate joins with localized array relationships', async () => {
+    const categoryWithPosts = await payload.findByID({
+      id: category.id,
+      collection: categoriesSlug,
+    })
+
+    expect(categoryWithPosts.localizedArrayPosts.docs).toBeDefined()
+    expect(categoryWithPosts.localizedArrayPosts.docs).toHaveLength(10)
+  })
+
+  it('should populate joins with blocks relationships', async () => {
+    const categoryWithPosts = await payload.findByID({
+      id: category.id,
+      collection: categoriesSlug,
+    })
+
+    expect(categoryWithPosts.blocksPosts.docs).toBeDefined()
+  })
+
   it('should populate uploads in joins', async () => {
     const { docs } = await payload.find({
       limit: 1,
@@ -190,6 +242,17 @@ describe('Joins Field', () => {
 
     expect(docs[0].upload.id).toBeDefined()
     expect(docs[0].upload.relatedPosts.docs).toHaveLength(10)
+  })
+
+  it('should join on polymorphic relationships', async () => {
+    const categoryWithPosts = await payload.findByID({
+      collection: categoriesSlug,
+      id: category.id,
+    })
+    expect(categoryWithPosts.polymorphic.docs[0]).toHaveProperty('id')
+    expect(categoryWithPosts.polymorphics.docs[0]).toHaveProperty('id')
+    expect(categoryWithPosts.localizedPolymorphic.docs[0]).toHaveProperty('id')
+    expect(categoryWithPosts.localizedPolymorphics.docs[0]).toHaveProperty('id')
   })
 
   it('should filter joins using where query', async () => {
@@ -554,6 +617,22 @@ describe('Joins Field', () => {
       expect(unlimited.docs[0].relatedPosts.hasNextPage).toStrictEqual(false)
     })
 
+    it('should respect access control for join collections', async () => {
+      const { docs } = await payload.find({
+        collection: categoriesJoinRestrictedSlug,
+        where: {
+          name: { equals: 'categoryJoinRestricted' },
+        },
+        overrideAccess: false,
+        user,
+      })
+      const [categoryWithRestrictedPosts] = docs
+      expect(categoryWithRestrictedPosts.collectionRestrictedJoin.docs).toHaveLength(1)
+      expect(categoryWithRestrictedPosts.collectionRestrictedJoin.docs[0].title).toStrictEqual(
+        'should allow read',
+      )
+    })
+
     it('should respect access control for join request `where` queries', async () => {
       await expect(async () => {
         await payload.findByID({
@@ -579,7 +658,7 @@ describe('Joins Field', () => {
           name: 'restricted category',
         },
       })
-      const post = await createPost({
+      await createPost({
         collection: restrictedPostsSlug,
         data: {
           title: 'restricted post',
@@ -776,6 +855,31 @@ describe('Joins Field', () => {
         .then((res) => res.json())
       expect(response.data.Category.relatedPosts.docs[0].title).toStrictEqual('test 3')
     })
+
+    it('should respect access control for join collections', async () => {
+      const query = `query {
+        CategoriesJoinRestricteds {
+          docs {
+            name
+            collectionRestrictedJoin {
+              docs {
+                title
+                canRead
+              }
+            }
+          }
+        }
+      }`
+
+      const response = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+      const [categoryWithRestrictedPosts] = response.data.CategoriesJoinRestricteds.docs
+      expect(categoryWithRestrictedPosts.collectionRestrictedJoin.docs).toHaveLength(1)
+      expect(categoryWithRestrictedPosts.collectionRestrictedJoin.docs[0].title).toStrictEqual(
+        'should allow read',
+      )
+    })
   })
 
   it('should work id.in command delimited querying with joins', async () => {
@@ -881,6 +985,44 @@ describe('Joins Field', () => {
     expect(find.docs).toHaveLength(5)
 
     await payload.delete({ collection: categoriesSlug, where: { name: { equals: 'totalDocs' } } })
+  })
+
+  it('should self join', async () => {
+    const doc_1 = await payload.create({ collection: 'self-joins', data: {} })
+    const doc_2 = await payload.create({ collection: 'self-joins', data: { rel: doc_1 }, depth: 0 })
+
+    const data = await payload.findByID({ collection: 'self-joins', id: doc_1.id, depth: 1 })
+
+    expect((data.joins.docs[0] as TypeWithID).id).toBe(doc_2.id)
+  })
+
+  it('should populate joins on depth 2', async () => {
+    const depthJoin_2 = await payload.create({ collection: 'depth-joins-2', data: {}, depth: 0 })
+    const depthJoin_1 = await payload.create({
+      collection: 'depth-joins-1',
+      data: { rel: depthJoin_2 },
+      depth: 0,
+    })
+
+    const depthJoin_3 = await payload.create({
+      collection: 'depth-joins-3',
+      data: { rel: depthJoin_1 },
+      depth: 0,
+    })
+
+    const data = await payload.findByID({
+      collection: 'depth-joins-2',
+      id: depthJoin_2.id,
+      depth: 2,
+    })
+
+    const joinedDoc = data.joins.docs[0] as DepthJoins1
+
+    expect(joinedDoc.id).toBe(depthJoin_1.id)
+
+    const joinedDoc2 = joinedDoc.joins.docs[0] as DepthJoins3
+
+    expect(joinedDoc2.id).toBe(depthJoin_3.id)
   })
 })
 

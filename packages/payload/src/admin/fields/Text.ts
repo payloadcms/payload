@@ -7,6 +7,7 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
+  FieldPaths,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
@@ -26,12 +27,19 @@ type TextFieldBaseClientProps = {
   readonly validate?: TextFieldValidation
 }
 
+type TextFieldBaseServerProps = Pick<FieldPaths, 'path'>
+
 export type TextFieldClientProps = ClientFieldBase<TextFieldClientWithoutType> &
   TextFieldBaseClientProps
 
-export type TextFieldServerProps = ServerFieldBase<TextField, TextFieldClientWithoutType>
+export type TextFieldServerProps = ServerFieldBase<TextField, TextFieldClientWithoutType> &
+  TextFieldBaseServerProps
 
-export type TextFieldServerComponent = FieldServerComponent<TextField, TextFieldClientWithoutType>
+export type TextFieldServerComponent = FieldServerComponent<
+  TextField,
+  TextFieldClientWithoutType,
+  TextFieldBaseServerProps
+>
 
 export type TextFieldClientComponent = FieldClientComponent<
   TextFieldClientWithoutType,

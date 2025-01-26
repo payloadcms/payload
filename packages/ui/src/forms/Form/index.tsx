@@ -30,7 +30,7 @@ import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { abortAndIgnore } from '../../utilities/abortAndIgnore.js'
+import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 import { requests } from '../../utilities/api.js'
 import {
   FormContext,
@@ -93,7 +93,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const [submitted, setSubmitted] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   const contextRef = useRef({} as FormContextType)
-  const resetFormStateAbortControllerRef = useRef<AbortController>(null)
+  const abortResetFormRef = useRef<AbortController>(null)
 
   const fieldsReducer = useReducer(fieldReducer, {}, () => initialState)
 
@@ -131,6 +131,7 @@ export const Form: React.FC<FormProps> = (props) => {
               id,
               collectionSlug,
               data,
+              event: 'submit',
               operation,
               preferences: {} as any,
               req: {
@@ -228,6 +229,7 @@ export const Form: React.FC<FormProps> = (props) => {
       // Execute server side validations
       if (Array.isArray(beforeSubmit)) {
         let revalidatedFormState: FormState
+
         const serializableFields = deepCopyObjectSimpleWithoutReactComponents(
           contextRef.current.fields,
         )
@@ -242,7 +244,9 @@ export const Form: React.FC<FormProps> = (props) => {
           revalidatedFormState = result
         }, Promise.resolve())
 
-        const isValid = Object.entries(revalidatedFormState).every(([, field]) => field.valid)
+        const isValid = Object.entries(revalidatedFormState).every(
+          ([, field]) => field.valid !== false,
+        )
 
         if (!isValid) {
           setProcessing(false)
@@ -277,6 +281,7 @@ export const Form: React.FC<FormProps> = (props) => {
         const serializableFields = deepCopyObjectSimpleWithoutReactComponents(
           contextRef.current.fields,
         )
+
         const data = reduceFieldsToValues(serializableFields, true)
 
         for (const [key, value] of Object.entries(overrides)) {
@@ -334,10 +339,11 @@ export const Form: React.FC<FormProps> = (props) => {
           if (typeof onSuccess === 'function') {
             const newFormState = await onSuccess(json)
             if (newFormState) {
-              const { newState: mergedFormState } = mergeServerFormState(
-                contextRef.current.fields || {},
-                newFormState,
-              )
+              const { newState: mergedFormState } = mergeServerFormState({
+                acceptValues: true,
+                existingState: contextRef.current.fields || {},
+                incomingState: newFormState,
+              })
 
               dispatchFields({
                 type: 'REPLACE_STATE',
@@ -483,10 +489,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const reset = useCallback(
     async (data: unknown) => {
-      abortAndIgnore(resetFormStateAbortControllerRef.current)
-
-      const controller = new AbortController()
-      resetFormStateAbortControllerRef.current = controller
+      const controller = handleAbortRef(abortResetFormRef)
 
       const docPreferences = await getDocPreferences()
 
@@ -507,6 +510,8 @@ export const Form: React.FC<FormProps> = (props) => {
       contextRef.current = { ...initContextState } as FormContextType
       setModified(false)
       dispatchFields({ type: 'REPLACE_STATE', state: newState })
+
+      abortResetFormRef.current = null
     },
     [
       collectionSlug,
@@ -576,8 +581,10 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 
   useEffect(() => {
+    const abortOnChange = abortResetFormRef.current
+
     return () => {
-      abortAndIgnore(resetFormStateAbortControllerRef.current)
+      abortAndIgnore(abortOnChange)
     }
   }, [])
 
@@ -665,10 +672,10 @@ export const Form: React.FC<FormProps> = (props) => {
             return
           }
 
-          const { changed, newState } = mergeServerFormState(
-            contextRef.current.fields || {},
-            revalidatedFormState,
-          )
+          const { changed, newState } = mergeServerFormState({
+            existingState: contextRef.current.fields || {},
+            incomingState: revalidatedFormState,
+          })
 
           if (changed) {
             dispatchFields({

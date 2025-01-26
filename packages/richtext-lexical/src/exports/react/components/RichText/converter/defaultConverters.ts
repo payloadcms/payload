@@ -8,6 +8,7 @@ import { LinebreakJSXConverter } from './converters/linebreak.js'
 import { LinkJSXConverter } from './converters/link.js'
 import { ListJSXConverter } from './converters/list.js'
 import { ParagraphJSXConverter } from './converters/paragraph.js'
+import { TabJSXConverter } from './converters/tab.js'
 import { TableJSXConverter } from './converters/table.js'
 import { TextJSXConverter } from './converters/text.js'
 import { UploadJSXConverter } from './converters/upload.js'
@@ -23,4 +24,5 @@ export const defaultJSXConverters: JSXConverters<DefaultNodeTypes> = {
   ...ListJSXConverter,
   ...LinkJSXConverter({}),
   ...UploadJSXConverter,
+  ...TabJSXConverter,
 }

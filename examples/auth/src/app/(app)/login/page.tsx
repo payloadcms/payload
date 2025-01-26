@@ -10,7 +10,7 @@ import classes from './index.module.scss'
 import { LoginForm } from './LoginForm'
 
 export default async function Login() {
-  const headers = getHeaders()
+  const headers = await getHeaders()
   const payload = await getPayload({ config })
   const { user } = await payload.auth({ headers })
 

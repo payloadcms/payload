@@ -13,18 +13,86 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
   const workflowSlugs: Set<string> = new Set()
   const taskSlugs: Set<string> = new Set(['inline'])
 
-  config.jobs?.workflows.forEach((workflow) => {
-    workflowSlugs.add(workflow.slug)
-  })
+  if (config.jobs?.workflows.length) {
+    config.jobs?.workflows.forEach((workflow) => {
+      workflowSlugs.add(workflow.slug)
+    })
+  }
 
-  config.jobs.tasks.forEach((task) => {
-    if (workflowSlugs.has(task.slug)) {
-      throw new Error(
-        `Task slug "${task.slug}" is already used by a workflow. No tasks are allowed to have the same slug as a workflow.`,
-      )
-    }
-    taskSlugs.add(task.slug)
-  })
+  if (config.jobs?.tasks.length) {
+    config.jobs.tasks.forEach((task) => {
+      if (workflowSlugs.has(task.slug)) {
+        throw new Error(
+          `Task slug "${task.slug}" is already used by a workflow. No tasks are allowed to have the same slug as a workflow.`,
+        )
+      }
+      taskSlugs.add(task.slug)
+    })
+  }
+
+  const logFields: Field[] = [
+    {
+      name: 'executedAt',
+      type: 'date',
+      required: true,
+    },
+    {
+      name: 'completedAt',
+      type: 'date',
+      required: true,
+    },
+    {
+      name: 'taskSlug',
+      type: 'select',
+      options: [...taskSlugs],
+      required: true,
+    },
+    {
+      name: 'taskID',
+      type: 'text',
+      required: true,
+    },
+    {
+      name: 'input',
+      type: 'json',
+    },
+    {
+      name: 'output',
+      type: 'json',
+    },
+    {
+      name: 'state',
+      type: 'radio',
+      options: ['failed', 'succeeded'],
+      required: true,
+    },
+    {
+      name: 'error',
+      type: 'json',
+      admin: {
+        condition: (_, data) => data.state === 'failed',
+      },
+      required: true,
+    },
+  ]
+
+  if (config?.jobs?.addParentToTaskLog) {
+    logFields.push({
+      name: 'parent',
+      type: 'group',
+      fields: [
+        {
+          name: 'taskSlug',
+          type: 'select',
+          options: [...taskSlugs],
+        },
+        {
+          name: 'taskID',
+          type: 'text',
+        },
+      ],
+    })
+  }
 
   const jobsCollection: CollectionConfig = {
     slug: 'payload-jobs',
@@ -85,51 +153,7 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
                 admin: {
                   description: 'Task execution log',
                 },
-                fields: [
-                  {
-                    name: 'executedAt',
-                    type: 'date',
-                    required: true,
-                  },
-                  {
-                    name: 'completedAt',
-                    type: 'date',
-                    required: true,
-                  },
-                  {
-                    name: 'taskSlug',
-                    type: 'select',
-                    options: [...taskSlugs],
-                    required: true,
-                  },
-                  {
-                    name: 'taskID',
-                    type: 'text',
-                    required: true,
-                  },
-                  {
-                    name: 'input',
-                    type: 'json',
-                  },
-                  {
-                    name: 'output',
-                    type: 'json',
-                  },
-                  {
-                    name: 'state',
-                    type: 'radio',
-                    options: ['failed', 'succeeded'],
-                    required: true,
-                  },
-                  {
-                    name: 'error',
-                    type: 'json',
-                    admin: {
-                      condition: (_, data) => data.state === 'failed',
-                    },
-                    required: true,
-                  },
-                ],
+                fields: logFields,
               },
             ],
             label: 'Status',
@@ -200,5 +224,6 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
     },
     lockDocuments: false,
   }
+
   return jobsCollection
 }
