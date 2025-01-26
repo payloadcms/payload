@@ -437,6 +437,8 @@ export const etTranslations: DefaultTranslationsObject = {
     autosavedSuccessfully: 'Automaatselt salvestatud.',
     autosavedVersion: 'Automaatselt salvestatud versioon',
     changed: 'Muudetud',
+    changedFieldsCount_one: '{{count}} muudetud väli',
+    changedFieldsCount_other: '{{count}} muudetud välja',
     compareVersion: 'Võrdle versiooni:',
     confirmPublish: 'Kinnita avaldamine',
     confirmRevertToSaved: 'Kinnita taastamine salvestatud seisundisse',

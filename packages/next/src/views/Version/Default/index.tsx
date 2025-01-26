@@ -8,7 +8,7 @@ import React, { useEffect, useState } from 'react'
 
 import type { CompareOption, DefaultVersionsViewProps } from './types.js'
 
-import RenderFieldsToDiff from '../RenderFieldsToDiff/index.js'
+import { RenderFieldsToDiff } from '../RenderFieldsToDiff/index.js'
 import Restore from '../Restore/index.js'
 import { SelectComparison } from '../SelectComparison/index.js'
 import './index.scss'

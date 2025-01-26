@@ -443,6 +443,8 @@ export const bgTranslations: DefaultTranslationsObject = {
     autosavedSuccessfully: 'Успешно автоматично запазване.',
     autosavedVersion: 'Автоматично запазена версия',
     changed: 'Променен',
+    changedFieldsCount_one: '{{count}} променено поле',
+    changedFieldsCount_other: '{{count}} променени полета',
     compareVersion: 'Сравни версия с:',
     confirmPublish: 'Потвърди публикуване',
     confirmRevertToSaved: 'Потвърди възстановяване до запазен',

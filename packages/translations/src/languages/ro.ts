@@ -451,6 +451,8 @@ export const roTranslations: DefaultTranslationsObject = {
     autosavedSuccessfully: 'Autosalvare cu succes.',
     autosavedVersion: 'Versiunea salvată automat.',
     changed: 'Schimbat',
+    changedFieldsCount_one: '{{count}} a modificat câmpul',
+    changedFieldsCount_other: '{{count}} câmpuri modificate',
     compareVersion: 'Comparați versiunea cu:',
     confirmPublish: 'Confirmați publicarea',
     confirmRevertToSaved: 'Confirmați revenirea la starea salvată',

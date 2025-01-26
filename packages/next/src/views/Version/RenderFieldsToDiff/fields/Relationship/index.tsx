@@ -99,7 +99,7 @@ const generateLabelFromValue = (
   return valueToReturn
 }
 
-const Relationship: React.FC<DiffComponentProps<RelationshipFieldClient>> = ({
+export const Relationship: React.FC<DiffComponentProps<RelationshipFieldClient>> = ({
   comparison,
   field,
   locale,
@@ -160,5 +160,3 @@ const Relationship: React.FC<DiffComponentProps<RelationshipFieldClient>> = ({
     </div>
   )
 }
-
-export default Relationship

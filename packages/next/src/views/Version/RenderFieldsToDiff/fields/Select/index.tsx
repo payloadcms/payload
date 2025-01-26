@@ -46,7 +46,7 @@ const getTranslatedOptions = (
   return typeof options === 'string' ? options : getTranslation(options.label, i18n)
 }
 
-const Select: React.FC<DiffComponentProps<SelectFieldClient>> = ({
+export const Select: React.FC<DiffComponentProps<SelectFieldClient>> = ({
   comparison,
   diffMethod,
   field,
@@ -89,5 +89,3 @@ const Select: React.FC<DiffComponentProps<SelectFieldClient>> = ({
     </div>
   )
 }
-
-export default Select

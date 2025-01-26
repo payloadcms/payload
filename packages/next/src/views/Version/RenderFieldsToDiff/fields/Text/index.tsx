@@ -14,9 +14,14 @@ import { DiffViewer } from './DiffViewer/index.js'
 
 const baseClass = 'text-diff'
 
-const Text: React.FC<DiffComponentProps<TextFieldClient>> = (props) => {
-  const { comparison, diffMethod, field, isRichText = false, locale, version } = props
-
+export const Text: React.FC<DiffComponentProps<TextFieldClient>> = ({
+  comparison,
+  diffMethod,
+  field,
+  isRichText = false,
+  locale,
+  version,
+}) => {
   const { i18n } = useTranslation()
 
   let placeholder = ''
@@ -55,5 +60,3 @@ const Text: React.FC<DiffComponentProps<TextFieldClient>> = (props) => {
     </div>
   )
 }
-
-export default Text

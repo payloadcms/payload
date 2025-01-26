@@ -22,16 +22,18 @@ import type { FieldDiffProps, FieldDiffPropsServer } from './RenderFieldsToDiff/
 import { diffMethods } from './RenderFieldsToDiff/fields/diffMethods.js'
 import { diffComponents } from './RenderFieldsToDiff/fields/index.js'
 
+export type VersionTab = {
+  fields: VersionField[]
+  name?: string
+} & Pick<Tab, 'label'>
+
 export type VersionField = {
   CustomComponent?: React.ReactNode
   CustomComponentByLocale?: {
     [locale: TypedLocale]: React.ReactNode
   }
   fields: VersionField[]
-  tabs?: ({
-    fields: VersionField[]
-    name?: string
-  } & Pick<Tab, 'label'>)[]
+  tabs?: VersionTab[]
   type: FieldTypes
 }
 

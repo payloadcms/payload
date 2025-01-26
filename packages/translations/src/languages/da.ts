@@ -442,6 +442,8 @@ export const daTranslations: DefaultTranslationsObject = {
     autosavedSuccessfully: 'Autosaved gennemført.',
     autosavedVersion: 'Autosaved version',
     changed: 'Ændret',
+    changedFieldsCount_one: '{{count}} ændret felt',
+    changedFieldsCount_other: '{{count}} ændrede felter',
     compareVersion: 'Sammenlign version med:',
     confirmPublish: 'Bekræft offentliggørelse',
     confirmRevertToSaved: 'Bekræft tilbagerulning til gemt',

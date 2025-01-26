@@ -1,4 +1,3 @@
-import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import type {
   Block,
   CollectionBeforeChangeHook,
@@ -167,7 +166,7 @@ export interface CheckboxField {
 export interface MessageField {
   blockName?: string
   blockType: 'message'
-  message: SerializedEditorState
+  message: object
 }
 
 export type FormFieldBlock =

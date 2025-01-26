@@ -9,7 +9,7 @@ import './index.scss'
 
 const baseClass = 'render-field-diffs'
 
-const RenderFieldsToDiff: React.FC<{
+export const RenderFieldsToDiff: React.FC<{
   fields: VersionField[]
 }> = ({ fields }) => {
   return (
@@ -42,5 +42,3 @@ const RenderFieldsToDiff: React.FC<{
     </div>
   )
 }
-
-export default RenderFieldsToDiff

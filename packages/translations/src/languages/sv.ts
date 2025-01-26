@@ -443,6 +443,8 @@ export const svTranslations: DefaultTranslationsObject = {
     autosavedSuccessfully: 'Autosparades framgångsrikt.',
     autosavedVersion: 'Autosparad version',
     changed: 'Ändrad',
+    changedFieldsCount_one: '{{count}} ändrat fält',
+    changedFieldsCount_other: '{{count}} ändrade fält',
     compareVersion: 'Jämför version med:',
     confirmPublish: 'Bekräfta publicering',
     confirmRevertToSaved: 'Bekräfta återgång till sparad',
