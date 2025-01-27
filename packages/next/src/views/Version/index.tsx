@@ -61,7 +61,7 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
         id: versionID,
         collection: slug,
         depth: 1,
-        locale: '*',
+        locale: 'all',
         overrideAccess: false,
         req,
         user,
@@ -71,6 +71,7 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
         latestDraftVersion = await getLatestVersion({
           slug,
           type: 'collection',
+          locale: 'all',
           parentID: id,
           payload,
           status: 'draft',
@@ -78,6 +79,7 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
         latestPublishedVersion = await getLatestVersion({
           slug,
           type: 'collection',
+          locale: 'all',
           parentID: id,
           payload,
           status: 'published',
@@ -98,7 +100,7 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
         id: versionID,
         slug,
         depth: 1,
-        locale: '*',
+        locale: 'all',
         overrideAccess: false,
         req,
         user,
@@ -108,12 +110,14 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
         latestDraftVersion = await getLatestVersion({
           slug,
           type: 'global',
+          locale: 'all',
           payload,
           status: 'draft',
         })
         latestPublishedVersion = await getLatestVersion({
           slug,
           type: 'global',
+          locale: 'all',
           payload,
           status: 'published',
         })
@@ -174,12 +178,14 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
         id: comparisonVersionIDFromParams,
         collection: collectionSlug,
         depth: 0,
+        locale: 'all',
       })
     } else {
       comparisonDoc = await payload.findGlobalVersionByID({
         id: comparisonVersionIDFromParams,
         slug: globalSlug,
         depth: 0,
+        locale: 'all',
       })
     }
   } else {

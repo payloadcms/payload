@@ -333,11 +333,6 @@ const buildVersionFieldState = ({
       if (!Array.isArray(versionValue)) {
         throw new Error('Expected versionValue to be an array')
       }
-
-      if (field.name === 'localized') {
-        console.log('arraySiblingData', versionValue)
-      }
-
       baseVersionField.rows = []
 
       for (let i = 0; i < versionValue.length; i++) {

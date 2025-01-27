@@ -8,6 +8,7 @@ type ReturnType = {
 } | null
 
 type Args = {
+  locale?: string
   parentID?: number | string
   payload: Payload
   slug: string
@@ -15,7 +16,7 @@ type Args = {
   type: 'collection' | 'global'
 }
 export async function getLatestVersion(args: Args): Promise<ReturnType> {
-  const { slug, type = 'collection', parentID, payload, status } = args
+  const { slug, type = 'collection', locale, parentID, payload, status } = args
 
   const and: Where[] = [
     {
@@ -37,6 +38,7 @@ export async function getLatestVersion(args: Args): Promise<ReturnType> {
     const sharedOptions = {
       depth: 0,
       limit: 1,
+      locale,
       sort: '-updatedAt',
       where: {
         and,
