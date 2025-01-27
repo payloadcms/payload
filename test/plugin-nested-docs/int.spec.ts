@@ -72,6 +72,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
             title: `Child ${i + 1}`,
             slug: `child-${i + 1}`,
             parent: parentDoc.id,
+            _status: 'published',
           },
         })
       }
@@ -83,6 +84,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
         data: {
           title: '11 children updated',
           slug: '11-children-updated',
+          _status: 'published',
         },
       })
 
@@ -90,7 +92,6 @@ describe('@payloadcms/plugin-nested-docs', () => {
       const { docs } = await payload.find({
         collection: 'pages',
         limit: 0,
-        draft: true,
         where: {
           parent: {
             equals: parentDoc.id,
