@@ -13,6 +13,7 @@ import Restore from '../Restore/index.js'
 import { SelectComparison } from '../SelectComparison/index.js'
 import './index.scss'
 import { SelectLocales } from '../SelectLocales/index.js'
+import { SelectedLocalesContext } from './SelectedLocalesContext.js'
 import { SetStepNav } from './SetStepNav.js'
 
 const baseClass = 'view-version'
@@ -144,7 +145,11 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
             />
           )}
         </div>
-        {doc?.version && <RenderFieldsToDiff fields={versionState.versionFields} />}
+        <SelectedLocalesContext.Provider
+          value={{ selectedLocales: selectedLocales.map((locale) => locale.value) }}
+        >
+          {doc?.version && <RenderFieldsToDiff fields={versionState.versionFields} />}
+        </SelectedLocalesContext.Provider>
       </Gutter>
     </main>
   )

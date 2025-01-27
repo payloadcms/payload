@@ -11,13 +11,16 @@ import './index.scss'
 
 import type { DiffComponentProps } from '../../types.js'
 
+import { useSelectedLocales } from '../../../Default/SelectedLocalesContext.js'
 import { DiffCollapser } from '../../DiffCollapser/index.js'
 import { RenderFieldsToDiff } from '../../index.js'
 
 const baseClass = 'tabs-diff'
 
 export const Tabs: React.FC<DiffComponentProps<TabsFieldClient>> = (props) => {
-  const { baseVersionField, comparisonValue, field, locales, versionValue } = props
+  const { baseVersionField, comparisonValue, field, versionValue } = props
+  const { selectedLocales } = useSelectedLocales()
+
   return (
     <div className={baseClass}>
       {baseVersionField.tabs.map((tab, i) => {
@@ -25,9 +28,9 @@ export const Tabs: React.FC<DiffComponentProps<TabsFieldClient>> = (props) => {
         return (
           <div className={`${baseClass}__tab`} key={i}>
             {(() => {
-              if ('name' in fieldTab && locales && fieldTab.localized) {
+              if ('name' in fieldTab && selectedLocales && fieldTab.localized) {
                 // Named localized tab
-                return locales.map((locale, index) => {
+                return selectedLocales.map((locale, index) => {
                   const localizedTabProps = {
                     ...props,
                     comparison: comparisonValue?.[tab.name]?.[locale],
@@ -72,15 +75,9 @@ type TabProps = {
   tab: VersionTab
 } & DiffComponentProps<TabsFieldClient>
 
-const Tab: React.FC<TabProps> = ({
-  comparisonValue,
-  fieldTab,
-  locale,
-  locales,
-  tab,
-  versionValue,
-}) => {
+const Tab: React.FC<TabProps> = ({ comparisonValue, fieldTab, locale, tab, versionValue }) => {
   const { i18n } = useTranslation()
+  const { selectedLocales } = useSelectedLocales()
 
   return (
     <DiffCollapser
@@ -96,7 +93,7 @@ const Tab: React.FC<TabProps> = ({
           </span>
         )
       }
-      locales={locales}
+      locales={selectedLocales}
       version={versionValue}
     >
       <RenderFieldsToDiff fields={tab.fields} />

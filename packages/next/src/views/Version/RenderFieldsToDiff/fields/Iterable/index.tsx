@@ -9,6 +9,7 @@ import './index.scss'
 
 import type { DiffComponentProps } from '../../types.js'
 
+import { useSelectedLocales } from '../../../Default/SelectedLocalesContext.js'
 import { DiffCollapser } from '../../DiffCollapser/index.js'
 import { RenderFieldsToDiff } from '../../index.js'
 import { getFieldsForRowComparison } from '../../utilities/getFieldsForRowComparison.js'
@@ -20,10 +21,10 @@ export const Iterable: React.FC<DiffComponentProps> = ({
   comparisonValue,
   field,
   locale,
-  locales,
   versionValue,
 }) => {
   const { i18n } = useTranslation()
+  const { selectedLocales } = useSelectedLocales()
 
   const versionRowCount = Array.isArray(versionValue) ? versionValue.length : 0
   const comparisonRowCount = Array.isArray(comparisonValue) ? comparisonValue.length : 0
@@ -49,7 +50,7 @@ export const Iterable: React.FC<DiffComponentProps> = ({
             </span>
           )
         }
-        locales={locales}
+        locales={selectedLocales}
         version={versionValue}
       >
         {maxRows > 0 && (
@@ -75,7 +76,7 @@ export const Iterable: React.FC<DiffComponentProps> = ({
                     comparison={comparisonRow}
                     fields={fields}
                     label={rowLabel}
-                    locales={locales}
+                    locales={selectedLocales}
                     version={versionRow}
                   >
                     <RenderFieldsToDiff fields={versionFields} />

@@ -19,10 +19,10 @@ export type DiffComponentProps<TClientField extends ClientField = ClientField> =
         [key: string]: SanitizedFieldPermissions
       }
     | true
-  fields: ClientField[]
-  isRichText: boolean
+  /**
+   * If this field is localized, this will be the locale of the field
+   */
   locale?: string
-  locales: string[]
   /**
    * Field value from the current version
    */
@@ -37,4 +37,5 @@ export type DiffComponentServerProps<
   field: TField
   i18n: I18nClient
   req: PayloadRequest
+  selectedLocales: string[]
 } & Omit<DiffComponentProps, 'field'>

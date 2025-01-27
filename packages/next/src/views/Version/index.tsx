@@ -234,11 +234,11 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
     fieldPermissions: docPermissions?.fields,
     fields: (collectionConfig || globalConfig)?.fields,
     i18n,
-    locales: selectedLocales && selectedLocales.map((locale) => locale.value),
     parentIndexPath: '',
     parentPath: '',
     parentSchemaPath: '',
     req,
+    selectedLocales: selectedLocales && selectedLocales.map((locale) => locale.value),
     versionSiblingData: globalConfig
       ? {
           ...doc?.version,

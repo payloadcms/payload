@@ -56,11 +56,11 @@ type Args = {
     | true
   fields: Field[]
   i18n: I18nClient
-  locales: string[]
   parentIndexPath: string
   parentPath: string
   parentSchemaPath: string
   req: PayloadRequest
+  selectedLocales: string[]
   versionSiblingData: object
 }
 
@@ -139,11 +139,11 @@ export const buildVersionState = ({
   fieldPermissions,
   fields,
   i18n,
-  locales,
   parentIndexPath,
   parentPath,
   parentSchemaPath,
   req,
+  selectedLocales,
   versionSiblingData,
 }: Args): VersionState => {
   const versionState: VersionState = {
@@ -179,7 +179,7 @@ export const buildVersionState = ({
     if (isLocalized) {
       versionField.fieldByLocale = {}
 
-      for (const locale of locales) {
+      for (const locale of selectedLocales) {
         versionField.fieldByLocale[locale] = buildVersionFieldState({
           clientField: clientField as ClientField,
           clientSchemaMap,
@@ -191,12 +191,12 @@ export const buildVersionState = ({
           i18n,
           indexPath,
           locale,
-          locales,
           parentPath,
           parentSchemaPath,
           path,
           req,
           schemaPath,
+          selectedLocales,
           versionValue: versionValue?.[locale],
         })
       }
@@ -211,12 +211,12 @@ export const buildVersionState = ({
         fieldPermissions,
         i18n,
         indexPath,
-        locales,
         parentPath,
         parentSchemaPath,
         path,
         req,
         schemaPath,
+        selectedLocales,
         versionValue,
       })
     }
@@ -238,12 +238,12 @@ const buildVersionFieldState = ({
   i18n,
   indexPath,
   locale,
-  locales,
   parentPath,
   parentSchemaPath,
   path,
   req,
   schemaPath,
+  selectedLocales,
   versionValue,
 }: {
   clientField: ClientField
@@ -260,7 +260,6 @@ const buildVersionFieldState = ({
 >): BaseVersionField | null => {
   const fieldName: null | string = 'name' in field ? field.name : null
 
-  const isRichText = field.type === 'richText'
   const diffMethod: DiffMethod = diffMethods[field.type] || 'CHARS'
 
   const hasPermission =
@@ -317,11 +316,11 @@ const buildVersionFieldState = ({
           fieldPermissions,
           fields: tab.fields,
           i18n,
-          locales,
           parentIndexPath: isNamedTab ? '' : tabIndexPath,
           parentPath: tabPath,
           parentSchemaPath: tabSchemaPath,
           req,
+          selectedLocales,
           versionSiblingData: 'name' in tab ? versionValue?.[tab.name] : versionValue,
         }).versionFields,
         label: tab.label,
@@ -346,11 +345,11 @@ const buildVersionFieldState = ({
           fieldPermissions,
           fields: field.fields,
           i18n,
-          locales,
           parentIndexPath: 'name' in field ? '' : indexPath,
           parentPath: path + '.' + i,
           parentSchemaPath: schemaPath,
           req,
+          selectedLocales,
           versionSiblingData: versionRow,
         }).versionFields
       }
@@ -363,11 +362,11 @@ const buildVersionFieldState = ({
         fieldPermissions,
         fields: field.fields,
         i18n,
-        locales,
         parentIndexPath: 'name' in field ? '' : indexPath,
         parentPath: path,
         parentSchemaPath: schemaPath,
         req,
+        selectedLocales,
         versionSiblingData: versionValue as object,
       }).versionFields
     }
@@ -401,11 +400,11 @@ const buildVersionFieldState = ({
         fieldPermissions,
         fields,
         i18n,
-        locales,
         parentIndexPath: 'name' in field ? '' : indexPath,
         parentPath: path + '.' + i,
         parentSchemaPath: schemaPath + '.' + versionBlock.slug,
         req,
+        selectedLocales,
         versionSiblingData: versionRow,
       }).versionFields
     }
@@ -420,9 +419,6 @@ const buildVersionFieldState = ({
     diffMethod,
     field: clientField,
     fieldPermissions: subFieldPermissions,
-    fields: 'fields' in clientField ? clientField?.fields : [],
-    isRichText,
-    locales,
     versionValue,
   }
 
@@ -432,6 +428,7 @@ const buildVersionFieldState = ({
     field,
     i18n,
     req,
+    selectedLocales,
   }
 
   baseVersionField.CustomComponent = RenderServerComponent({
