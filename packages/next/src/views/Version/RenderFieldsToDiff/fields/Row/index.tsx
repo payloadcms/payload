@@ -9,10 +9,10 @@ import { RenderFieldsToDiff } from '../../index.js'
 
 const baseClass = 'row-diff'
 
-export const Row: React.FC<DiffComponentProps<RowFieldClient>> = ({ versionField }) => {
+export const Row: React.FC<DiffComponentProps<RowFieldClient>> = ({ baseVersionField }) => {
   return (
     <div className={baseClass}>
-      <RenderFieldsToDiff fields={versionField.fields} />
+      <RenderFieldsToDiff fields={baseVersionField.fields} />
     </div>
   )
 }

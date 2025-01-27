@@ -2,11 +2,12 @@ import type { I18nClient } from '@payloadcms/translations'
 import type { ClientField, Field, SanitizedFieldPermissions } from 'payload'
 import type { DiffMethod } from 'react-diff-viewer-continued'
 
-import type { VersionField } from '../buildVersionState.js'
+import type { BaseVersionField, VersionField } from '../buildVersionState.js'
 
 export type DiffComponents = Record<string, React.FC<DiffComponentProps>>
 
 export type DiffComponentProps<TClientField extends ClientField = ClientField> = {
+  baseVersionField: BaseVersionField
   /**
    * Field value from the version being compared
    */
@@ -22,7 +23,6 @@ export type DiffComponentProps<TClientField extends ClientField = ClientField> =
   isRichText: boolean
   locale?: string
   locales: string[]
-  versionField: VersionField
   /**
    * Field value from the current version
    */

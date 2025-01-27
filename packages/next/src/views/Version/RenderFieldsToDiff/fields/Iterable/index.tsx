@@ -16,11 +16,11 @@ import { getFieldsForRowComparison } from '../../utilities/getFieldsForRowCompar
 const baseClass = 'iterable-diff'
 
 export const Iterable: React.FC<DiffComponentProps> = ({
+  baseVersionField,
   comparisonValue,
   field,
   locale,
   locales,
-  versionField,
   versionValue,
 }) => {
   const { i18n } = useTranslation()
@@ -59,10 +59,10 @@ export const Iterable: React.FC<DiffComponentProps> = ({
               const comparisonRow = comparisonValue?.[i] || {}
 
               const { fields, versionFields } = getFieldsForRowComparison({
+                baseVersionField,
                 comparisonRow,
                 field,
                 row: i,
-                versionField,
                 versionRow,
               })
 

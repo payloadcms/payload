@@ -16,12 +16,12 @@ import { RenderFieldsToDiff } from '../../index.js'
 const baseClass = 'group-diff'
 
 export const Group: React.FC<DiffComponentProps<GroupFieldClient>> = ({
+  baseVersionField,
   comparisonValue,
   field,
   fields,
   locale,
   locales,
-  versionField,
   versionValue,
 }) => {
   const { i18n } = useTranslation()
@@ -44,7 +44,7 @@ export const Group: React.FC<DiffComponentProps<GroupFieldClient>> = ({
         locales={locales}
         version={versionValue}
       >
-        <RenderFieldsToDiff fields={versionField.fields} />
+        <RenderFieldsToDiff fields={baseVersionField.fields} />
       </DiffCollapser>
     </div>
   )

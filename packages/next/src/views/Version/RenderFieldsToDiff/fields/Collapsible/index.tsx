@@ -13,11 +13,11 @@ import { RenderFieldsToDiff } from '../../index.js'
 const baseClass = 'collapsible-diff'
 
 export const Collapsible: React.FC<DiffComponentProps<CollapsibleFieldClient>> = ({
+  baseVersionField,
   comparisonValue,
   field,
   fields,
   locales,
-  versionField,
   versionValue,
 }) => {
   const { i18n } = useTranslation()
@@ -35,7 +35,7 @@ export const Collapsible: React.FC<DiffComponentProps<CollapsibleFieldClient>> =
         locales={locales}
         version={versionValue}
       >
-        <RenderFieldsToDiff fields={versionField.fields} />
+        <RenderFieldsToDiff fields={baseVersionField.fields} />
       </DiffCollapser>
     </div>
   )

@@ -17,10 +17,10 @@ import { RenderFieldsToDiff } from '../../index.js'
 const baseClass = 'tabs-diff'
 
 export const Tabs: React.FC<DiffComponentProps<TabsFieldClient>> = (props) => {
-  const { comparisonValue, field, locales, versionField, versionValue } = props
+  const { baseVersionField, comparisonValue, field, locales, versionValue } = props
   return (
     <div className={baseClass}>
-      {versionField.tabs.map((tab, i) => {
+      {baseVersionField.tabs.map((tab, i) => {
         const fieldTab = field.tabs?.[i]
         return (
           <div className={`${baseClass}__tab`} key={i}>

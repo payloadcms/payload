@@ -15,12 +15,12 @@ export const RenderFieldsToDiff: React.FC<{
   return (
     <div className={baseClass}>
       {fields?.map((field, fieldIndex) => {
-        if (field.CustomComponentByLocale) {
+        if (field.fieldByLocale) {
           const LocaleComponents: React.ReactNode[] = []
-          for (const [locale, Component] of Object.entries(field.CustomComponentByLocale)) {
+          for (const [locale, baseField] of Object.entries(field.fieldByLocale)) {
             LocaleComponents.push(
               <div className={`${baseClass}__locale`} key={[locale, fieldIndex].join('-')}>
-                <div className={`${baseClass}__locale-value`}>{Component}</div>
+                <div className={`${baseClass}__locale-value`}>{baseField.CustomComponent}</div>
               </div>,
             )
           }
@@ -29,10 +29,10 @@ export const RenderFieldsToDiff: React.FC<{
               {LocaleComponents}
             </div>
           )
-        } else if (field.CustomComponent) {
+        } else if (field.field) {
           return (
             <div className={`${baseClass}__field field__${field.type}`} key={fieldIndex}>
-              {field.CustomComponent}
+              {field.field.CustomComponent}
             </div>
           )
         }

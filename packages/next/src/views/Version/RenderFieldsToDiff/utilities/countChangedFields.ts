@@ -179,10 +179,10 @@ export function countChangedFieldsInRows({
     const versionRow = versionRows?.[i] || {}
 
     const { fields: rowFields } = getFieldsForRowComparison({
+      baseVersionField: { fields: [] },
       comparisonRow,
       field,
       row: i,
-      versionField: { type: field.type, fields: [] },
       versionRow,
     })
 

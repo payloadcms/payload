@@ -2,7 +2,7 @@ import type { ArrayFieldClient, BlocksFieldClient, ClientField } from 'payload'
 
 import { getUniqueListBy } from 'payload/shared'
 
-import type { VersionField } from '../../buildVersionState.js'
+import type { BaseVersionField, VersionField } from '../../buildVersionState.js'
 
 /**
  * Get the fields for a row in an iterable field for comparison.
@@ -11,16 +11,16 @@ import type { VersionField } from '../../buildVersionState.js'
  *   because the fields from the version and comparison rows may differ.
  */
 export function getFieldsForRowComparison({
+  baseVersionField,
   comparisonRow,
   field,
   row,
-  versionField,
   versionRow,
 }: {
+  baseVersionField: BaseVersionField
   comparisonRow: any
   field: ArrayFieldClient | BlocksFieldClient
   row: number
-  versionField: VersionField
   versionRow: any
 }): { fields: ClientField[]; versionFields: VersionField[] } {
   let fields: ClientField[] = []
@@ -28,7 +28,9 @@ export function getFieldsForRowComparison({
 
   if (field.type === 'array' && 'fields' in field) {
     fields = field.fields
-    versionFields = versionField.rows?.length ? versionField.rows[row] : versionField.fields
+    versionFields = baseVersionField.rows?.length
+      ? baseVersionField.rows[row]
+      : baseVersionField.fields
   } else if (field.type === 'blocks') {
     if (versionRow?.blockType === comparisonRow?.blockType) {
       const matchedBlock = ('blocks' in field &&
@@ -37,7 +39,9 @@ export function getFieldsForRowComparison({
       }
 
       fields = matchedBlock.fields
-      versionFields = versionField.rows?.length ? versionField.rows[row] : versionField.fields
+      versionFields = baseVersionField.rows?.length
+        ? baseVersionField.rows[row]
+        : baseVersionField.fields
     } else {
       const matchedVersionBlock = ('blocks' in field &&
         field.blocks?.find((block) => block.slug === versionRow?.blockType)) || {
@@ -54,7 +58,9 @@ export function getFieldsForRowComparison({
       )
 
       // buildVersionState already merged the fields of the version and comparison rows together
-      versionFields = versionField.rows?.length ? versionField.rows[row] : versionField.fields
+      versionFields = baseVersionField.rows?.length
+        ? baseVersionField.rows[row]
+        : baseVersionField.fields
     }
   }
 
