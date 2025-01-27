@@ -15,7 +15,7 @@ describe('getFieldsForRowComparison', () => {
         fields: arrayFields,
       }
 
-      const result = getFieldsForRowComparison({
+      const { fields } = getFieldsForRowComparison({
         field,
         versionRow: {},
         comparisonRow: {},
@@ -23,7 +23,7 @@ describe('getFieldsForRowComparison', () => {
         baseVersionField: { fields: [] },
       })
 
-      expect(result).toEqual(arrayFields)
+      expect(fields).toEqual(arrayFields)
     })
   })
 
@@ -48,7 +48,7 @@ describe('getFieldsForRowComparison', () => {
       const versionRow = { blockType: 'blockA' }
       const comparisonRow = { blockType: 'blockA' }
 
-      const result = getFieldsForRowComparison({
+      const { fields } = getFieldsForRowComparison({
         field,
         versionRow,
         comparisonRow,
@@ -56,7 +56,7 @@ describe('getFieldsForRowComparison', () => {
         baseVersionField: { fields: [] },
       })
 
-      expect(result).toEqual(blockAFields)
+      expect(fields).toEqual(blockAFields)
     })
 
     it('should return unique combined fields when block types differ', () => {
@@ -84,7 +84,7 @@ describe('getFieldsForRowComparison', () => {
       const versionRow = { blockType: 'blockA' }
       const comparisonRow = { blockType: 'blockB' }
 
-      const result = getFieldsForRowComparison({
+      const { fields } = getFieldsForRowComparison({
         field,
         versionRow,
         comparisonRow,
@@ -93,7 +93,7 @@ describe('getFieldsForRowComparison', () => {
       })
 
       // Should contain all unique fields from both blocks
-      expect(result).toEqual([
+      expect(fields).toEqual([
         { name: 'a', type: 'text' },
         { name: 'b', type: 'text' },
         { name: 'c', type: 'text' },
