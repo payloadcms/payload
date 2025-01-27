@@ -108,10 +108,7 @@ export const RenderFields: React.FC<RenderFieldsProps> = (props) => {
               parentSchemaPath={parentSchemaPath}
               path={path}
               permissions={
-                permissions === undefined ||
-                permissions === null ||
-                permissions === true ||
-                permissions?.[parentName] === true
+                permissions === undefined || permissions === null || permissions === true
                   ? true
                   : 'name' in field
                     ? permissions?.[field.name]
