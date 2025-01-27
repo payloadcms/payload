@@ -100,14 +100,16 @@ const Restore: React.FC<Props> = ({
           className={[canRestoreAsDraft && `${baseClass}__button`].filter(Boolean).join(' ')}
           onClick={() => toggleModal(modalSlug)}
           size="small"
-          SubMenuPopupContent={() =>
-            canRestoreAsDraft && (
-              <PopupList.ButtonGroup>
-                <PopupList.Button onClick={() => [setDraft(true), toggleModal(modalSlug)]}>
-                  {t('version:restoreAsDraft')}
-                </PopupList.Button>
-              </PopupList.ButtonGroup>
-            )
+          SubMenuPopupContent={
+            canRestoreAsDraft
+              ? () => (
+                  <PopupList.ButtonGroup>
+                    <PopupList.Button onClick={() => [setDraft(true), toggleModal(modalSlug)]}>
+                      {t('version:restoreAsDraft')}
+                    </PopupList.Button>
+                  </PopupList.ButtonGroup>
+                )
+              : null
           }
         >
           {t('version:restoreThisVersion')}
