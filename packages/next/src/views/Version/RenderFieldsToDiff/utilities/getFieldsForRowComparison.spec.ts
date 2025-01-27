@@ -19,6 +19,8 @@ describe('getFieldsForRowComparison', () => {
         field,
         versionRow: {},
         comparisonRow: {},
+        row: 0,
+        versionField: { type: 'array', fields: [] },
       })
 
       expect(result).toEqual(arrayFields)
@@ -50,6 +52,8 @@ describe('getFieldsForRowComparison', () => {
         field,
         versionRow,
         comparisonRow,
+        row: 0,
+        versionField: { type: 'blocks', fields: [] },
       })
 
       expect(result).toEqual(blockAFields)
@@ -84,6 +88,8 @@ describe('getFieldsForRowComparison', () => {
         field,
         versionRow,
         comparisonRow,
+        row: 0,
+        versionField: { type: 'blocks', fields: [] },
       })
 
       // Should contain all unique fields from both blocks
