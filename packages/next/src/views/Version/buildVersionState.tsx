@@ -17,7 +17,7 @@ import type { DiffMethod } from 'react-diff-viewer-continued'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { fieldIsID, tabHasName } from 'payload/shared'
 
-import type { FieldDiffProps, FieldDiffPropsServer } from './RenderFieldsToDiff/types.js'
+import type { DiffComponentProps, DiffComponentServerProps } from './RenderFieldsToDiff/types.js'
 
 import { diffMethods } from './RenderFieldsToDiff/fields/diffMethods.js'
 import { diffComponents } from './RenderFieldsToDiff/fields/index.js'
@@ -312,7 +312,7 @@ export const buildVersionState = ({
       continue
     }
 
-    const clientCellProps: FieldDiffProps = {
+    const clientCellProps: DiffComponentProps = {
       comparison: comparisonValue,
       diffMethod,
       field: clientField as ClientField,
@@ -328,7 +328,7 @@ export const buildVersionState = ({
       },
     }
 
-    const serverCellProps: FieldDiffPropsServer = {
+    const serverCellProps: DiffComponentServerProps = {
       ...clientCellProps,
       clientField: clientField as ClientField,
       field,

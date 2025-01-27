@@ -1,9 +1,4 @@
-import type {
-  Document,
-  OptionObject,
-  SanitizedCollectionPermission,
-  SanitizedGlobalPermission,
-} from 'payload'
+import type { Document, OptionObject } from 'payload'
 
 import type { VersionState } from '../buildVersionState.js'
 
@@ -15,9 +10,8 @@ export type CompareOption = {
 }
 
 export type DefaultVersionsViewProps = {
+  readonly canUpdate: boolean
   readonly doc: Document
-  readonly docPermissions: SanitizedCollectionPermission | SanitizedGlobalPermission
-  readonly initialComparisonDoc: Document
   readonly latestDraftVersion?: string
   readonly latestPublishedVersion?: string
   readonly localeOptions: OptionObject[]

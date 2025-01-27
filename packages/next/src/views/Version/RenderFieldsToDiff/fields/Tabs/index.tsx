@@ -9,7 +9,7 @@ import type { VersionTab } from '../../../buildVersionState.js'
 
 import './index.scss'
 
-import type { DiffComponentProps } from '../types.js'
+import type { DiffComponentProps } from '../../types.js'
 
 import { DiffCollapser } from '../../DiffCollapser/index.js'
 import { RenderFieldsToDiff } from '../../index.js'
@@ -72,17 +72,7 @@ type TabProps = {
   tab: VersionTab
 } & DiffComponentProps<TabsFieldClient>
 
-const Tab: React.FC<TabProps> = ({
-  comparison,
-  diffComponents,
-  fieldPermissions,
-  fieldTab,
-  locale,
-  locales,
-  tab,
-  version,
-  versionField,
-}) => {
+const Tab: React.FC<TabProps> = ({ comparison, fieldTab, locale, locales, tab, version }) => {
   const { i18n } = useTranslation()
 
   return (

@@ -1,19 +1,21 @@
 'use client'
+import type { GroupFieldClient } from 'payload'
+
 import { getTranslation } from '@payloadcms/translations'
-import { useTranslation } from '@payloadcms/ui'
 
 import './index.scss'
 
+import { useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
-import type { DiffComponentProps } from '../types.js'
+import type { DiffComponentProps } from '../../types.js'
 
 import { DiffCollapser } from '../../DiffCollapser/index.js'
 import { RenderFieldsToDiff } from '../../index.js'
 
 const baseClass = 'group-diff'
 
-export const Group: React.FC<DiffComponentProps> = ({
+export const Group: React.FC<DiffComponentProps<GroupFieldClient>> = ({
   comparison,
   field,
   fields,

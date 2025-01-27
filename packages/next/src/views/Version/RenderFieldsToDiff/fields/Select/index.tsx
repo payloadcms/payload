@@ -6,11 +6,11 @@ import { getTranslation } from '@payloadcms/translations'
 import { useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
-import type { DiffComponentProps } from '../types.js'
+import type { DiffComponentProps } from '../../types.js'
 
 import Label from '../../Label/index.js'
-import { diffStyles } from '../styles.js'
 import './index.scss'
+import { diffStyles } from '../styles.js'
 import { DiffViewer } from './DiffViewer/index.js'
 
 const baseClass = 'select-diff'
@@ -65,12 +65,26 @@ export const Select: React.FC<DiffComponentProps<SelectFieldClient>> = ({
 
   const comparisonToRender =
     typeof comparison !== 'undefined'
-      ? getTranslatedOptions(getOptionsToRender(comparison, options, field.hasMany), i18n)
+      ? getTranslatedOptions(
+          getOptionsToRender(
+            typeof comparison === 'string' ? comparison : JSON.stringify(comparison),
+            options,
+            field.hasMany,
+          ),
+          i18n,
+        )
       : placeholder
 
   const versionToRender =
     typeof version !== 'undefined'
-      ? getTranslatedOptions(getOptionsToRender(version, options, field.hasMany), i18n)
+      ? getTranslatedOptions(
+          getOptionsToRender(
+            typeof version === 'string' ? version : JSON.stringify(version),
+            options,
+            field.hasMany,
+          ),
+          i18n,
+        )
       : placeholder
 
   return (

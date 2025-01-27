@@ -18,9 +18,8 @@ import { SetStepNav } from './SetStepNav.js'
 const baseClass = 'view-version'
 
 export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
+  canUpdate,
   doc,
-  docPermissions,
-  initialComparisonDoc,
   latestDraftVersion,
   latestPublishedVersion,
   localeOptions,
@@ -80,8 +79,6 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   const compareBaseURL = `${serverURL}${apiRoute}/${globalSlug ? 'globals/' : ''}${
     collectionSlug || globalSlug
   }/versions`
-
-  const canUpdate = docPermissions?.update
 
   const draftsEnabled = Boolean((collectionConfig || globalConfig)?.versions.drafts)
 

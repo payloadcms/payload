@@ -1,6 +1,6 @@
 import type { FieldTypes } from 'payload'
 
-import type { DiffComponentProps } from './types.js'
+import type { DiffComponentProps } from '../types.js'
 
 import { Collapsible } from './Collapsible/index.js'
 import { Group } from './Group/index.js'
@@ -11,7 +11,7 @@ import { Select } from './Select/index.js'
 import { Tabs } from './Tabs/index.js'
 import { Text } from './Text/index.js'
 
-export const diffComponents: Record<FieldTypes, React.FC<DiffComponentProps<any>>> = {
+export const diffComponents: Record<FieldTypes, React.FC<DiffComponentProps>> = {
   array: Iterable,
   blocks: Iterable,
   checkbox: Text,

@@ -9,13 +9,13 @@ import type {
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
+import { getClientSchemaMap } from '@payloadcms/ui/utilities/getClientSchemaMap'
+import { getSchemaMap } from '@payloadcms/ui/utilities/getSchemaMap'
 import { notFound } from 'next/navigation.js'
 import React from 'react'
 
-import type { DiffComponentProps } from './RenderFieldsToDiff/fields/types.js'
+import type { DiffComponentProps } from './RenderFieldsToDiff/types.js'
 
-import { getClientSchemaMap } from '../../../../ui/src/utilities/getClientSchemaMap.js'
-import { getSchemaMap } from '../../../../ui/src/utilities/getSchemaMap.js'
 import { getLatestVersion } from '../Versions/getLatestVersion.js'
 import { buildVersionState } from './buildVersionState.js'
 import { DefaultVersionView } from './Default/index.js'
@@ -244,9 +244,8 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
 
   return (
     <DefaultVersionView
+      canUpdate={docPermissions?.update}
       doc={doc}
-      docPermissions={docPermissions}
-      initialComparisonDoc={comparisonDoc}
       latestDraftVersion={latestDraftVersion?.id}
       latestPublishedVersion={latestPublishedVersion?.id}
       localeOptions={localeOptions}

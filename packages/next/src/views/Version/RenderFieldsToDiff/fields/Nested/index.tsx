@@ -4,9 +4,11 @@ import { useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
 import type { VersionField } from '../../../buildVersionState.js'
-import type { DiffComponentProps } from '../types.js'
 
 import './index.scss'
+
+import type { DiffComponentProps } from '../../types.js'
+
 import { RenderFieldsToDiff } from '../../index.js'
 import Label from '../../Label/index.js'
 

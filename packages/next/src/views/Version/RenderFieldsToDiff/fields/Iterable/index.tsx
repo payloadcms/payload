@@ -1,14 +1,14 @@
 'use client'
-import type { ClientField } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useTranslation } from '@payloadcms/ui'
 import { fieldIsArrayType, fieldIsBlockType } from 'payload/shared'
 import React from 'react'
 
-import type { DiffComponentProps } from '../types.js'
-
 import './index.scss'
+
+import type { DiffComponentProps } from '../../types.js'
+
 import { DiffCollapser } from '../../DiffCollapser/index.js'
 import { RenderFieldsToDiff } from '../../index.js'
 import { getFieldsForRowComparison } from '../../utilities/getFieldsForRowComparison.js'
@@ -17,7 +17,6 @@ const baseClass = 'iterable-diff'
 
 export const Iterable: React.FC<DiffComponentProps> = ({
   comparison,
-  diffComponents,
   field,
   fieldPermissions,
   locale,

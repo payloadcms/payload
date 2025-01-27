@@ -1,16 +1,18 @@
 'use client'
+import type { CollapsibleFieldClient } from 'payload'
+
 import { getTranslation } from '@payloadcms/translations'
 import { useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
-import type { DiffComponentProps } from '../types.js'
+import type { DiffComponentProps } from '../../types.js'
 
 import { DiffCollapser } from '../../DiffCollapser/index.js'
 import { RenderFieldsToDiff } from '../../index.js'
 
 const baseClass = 'collapsible-diff'
 
-export const Collapsible: React.FC<DiffComponentProps> = ({
+export const Collapsible: React.FC<DiffComponentProps<CollapsibleFieldClient>> = ({
   comparison,
   field,
   fields,
