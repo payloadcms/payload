@@ -446,6 +446,8 @@ export const caTranslations: DefaultTranslationsObject = {
     autosavedSuccessfully: 'Desat automàticament amb èxit.',
     autosavedVersion: 'Versió desada automàticament',
     changed: 'Canviat',
+    changedFieldsCount_one: '{{count}} camp canviat',
+    changedFieldsCount_other: '{{count}} camps modificats',
     compareVersion: 'Comparar versió amb:',
     confirmPublish: 'Confirmar publicació',
     confirmRevertToSaved: 'Confirmar revertir a desat',

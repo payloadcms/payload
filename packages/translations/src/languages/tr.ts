@@ -445,6 +445,8 @@ export const trTranslations: DefaultTranslationsObject = {
     autosavedSuccessfully: 'Otomatik kaydetme başarılı',
     autosavedVersion: 'Otomatik kayıtlı sürüm',
     changed: 'Değişiklik yapıldı',
+    changedFieldsCount_one: '{{count}} alanı değişti',
+    changedFieldsCount_other: '{{count}} değişen alan',
     compareVersion: 'Sürümü şununla karşılaştır:',
     confirmPublish: 'Yayınlamayı onayla',
     confirmRevertToSaved: 'Confirm revert to saved',

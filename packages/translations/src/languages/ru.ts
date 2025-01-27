@@ -446,6 +446,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     autosavedSuccessfully: 'Автосохранение успешно.',
     autosavedVersion: 'Автоматически сохраненная версия',
     changed: 'Изменено',
+    changedFieldsCount_one: '{{count}} изменил поле',
+    changedFieldsCount_other: '{{count}} измененных полей',
     compareVersion: 'Сравнить версию с:',
     confirmPublish: 'Подтвердить публикацию',
     confirmRevertToSaved: 'Подтвердить возврат к сохраненному',

@@ -81,7 +81,9 @@ describe('Block fields', () => {
     // ensure the block was appended to the rows
     const addedRow = page.locator('#field-blocks .blocks-field__row').last()
     await expect(addedRow).toBeVisible()
-    await expect(addedRow.locator('.blocks-field__block-pill-content')).toContainText('Content')
+    await expect(addedRow.locator('.blocks-field__block-header')).toHaveText(
+      'Custom Block Label: Content 04',
+    )
   })
 
   test('should open blocks drawer from block row and add below', async () => {
@@ -108,7 +110,9 @@ describe('Block fields', () => {
     // ensure the block was inserted beneath the first in the rows
     const addedRow = page.locator('#field-blocks #blocks-row-1')
     await expect(addedRow).toBeVisible()
-    await expect(addedRow.locator('.blocks-field__block-pill-content')).toContainText('Content') // went from `Number` to `Content`
+    await expect(addedRow.locator('.blocks-field__block-header')).toHaveText(
+      'Custom Block Label: Content 02',
+    ) // went from `Number` to `Content`
   })
 
   test('should duplicate block', async () => {
@@ -257,7 +261,7 @@ describe('Block fields', () => {
 
     await page.click('#action-save', { delay: 100 })
     await expect(page.locator('.payload-toast-container')).toContainText(
-      'The following field is invalid: blocksWithMinRows',
+      'The following field is invalid: Blocks With Min Rows',
     )
   })
 

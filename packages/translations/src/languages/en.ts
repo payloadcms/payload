@@ -443,6 +443,8 @@ export const enTranslations = {
     autosave: 'Autosave',
     autosavedSuccessfully: 'Autosaved successfully.',
     autosavedVersion: 'Autosaved version',
+    changedFieldsCount_one: '{{count}} changed field',
+    changedFieldsCount_other: '{{count}} changed fields',
     changed: 'Changed',
     compareVersion: 'Compare version against:',
     confirmPublish: 'Confirm publish',

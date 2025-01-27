@@ -440,6 +440,8 @@ export const hrTranslations: DefaultTranslationsObject = {
     autosavedSuccessfully: 'Automatsko spremanje uspješno.',
     autosavedVersion: 'Verzija automatski spremljenog dokumenta',
     changed: 'Promijenjeno',
+    changedFieldsCount_one: '{{count}} promijenjeno polje',
+    changedFieldsCount_other: '{{count}} promijenjena polja',
     compareVersion: 'Usporedi verziju sa:',
     confirmPublish: 'Potvrdi objavu',
     confirmRevertToSaved: 'Potvrdite vraćanje na spremljeno',

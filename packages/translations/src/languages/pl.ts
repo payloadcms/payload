@@ -443,6 +443,8 @@ export const plTranslations: DefaultTranslationsObject = {
     autosavedSuccessfully: 'Pomyślnie zapisano automatycznie.',
     autosavedVersion: 'Wersja zapisana automatycznie',
     changed: 'Zmieniono',
+    changedFieldsCount_one: '{{count}} zmienione pole',
+    changedFieldsCount_other: '{{count}} zmienione pola',
     compareVersion: 'Porównaj wersję z:',
     confirmPublish: 'Potwierdź publikację',
     confirmRevertToSaved: 'Potwierdź powrót do zapisanego',

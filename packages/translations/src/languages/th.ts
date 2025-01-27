@@ -434,6 +434,8 @@ export const thTranslations: DefaultTranslationsObject = {
     autosavedSuccessfully: 'บันทึกอัตโนมัติสำเร็จ',
     autosavedVersion: 'เวอร์ชันบันทึกอัตโนมัติ',
     changed: 'มีการแก้ไข',
+    changedFieldsCount_one: '{{count}} เปลี่ยนฟิลด์',
+    changedFieldsCount_other: '{{count}} ฟิลด์ที่มีการเปลี่ยนแปลง',
     compareVersion: 'เปรียบเทียบเวอร์ชันกับ:',
     confirmPublish: 'ยืนยันการเผยแพร่',
     confirmRevertToSaved: 'ยืนยันย้อนการแก้ไข',

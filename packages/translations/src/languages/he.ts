@@ -429,6 +429,8 @@ export const heTranslations: DefaultTranslationsObject = {
     autosavedSuccessfully: 'נשמר בהצלחה.',
     autosavedVersion: 'גרסת שמירה אוטומטית',
     changed: 'שונה',
+    changedFieldsCount_one: '{{count}} שינה שדה',
+    changedFieldsCount_other: '{{count}} שדות ששונו',
     compareVersion: 'השווה לגרסה:',
     confirmPublish: 'אישור פרסום',
     confirmRevertToSaved: 'אישור שחזור לגרסה שנשמרה',

@@ -448,6 +448,8 @@ export const esTranslations: DefaultTranslationsObject = {
     autosavedSuccessfully: 'Guardado automáticamente con éxito.',
     autosavedVersion: 'Versión Autoguardada',
     changed: 'Modificado',
+    changedFieldsCount_one: '{{count}} campo modificado',
+    changedFieldsCount_other: '{{count}} campos modificados',
     compareVersion: 'Comparar versión con:',
     confirmPublish: 'Confirmar publicación',
     confirmRevertToSaved: 'Confirmar revertir a guardado',

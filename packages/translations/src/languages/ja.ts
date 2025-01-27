@@ -441,6 +441,8 @@ export const jaTranslations: DefaultTranslationsObject = {
     autosavedSuccessfully: '自動保存に成功しました。',
     autosavedVersion: '自動保存されたバージョン',
     changed: '変更済み',
+    changedFieldsCount_one: '{{count}} 変更されたフィールド',
+    changedFieldsCount_other: '{{count}}つの変更されたフィールド',
     compareVersion: 'バージョンを比較:',
     confirmPublish: '公開を確認する',
     confirmRevertToSaved: '保存された状態に戻す確認',

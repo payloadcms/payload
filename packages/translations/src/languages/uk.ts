@@ -441,6 +441,8 @@ export const ukTranslations: DefaultTranslationsObject = {
     autosavedSuccessfully: 'Автозбереження успішно виконано.',
     autosavedVersion: 'Автозбереження',
     changed: 'Змінено',
+    changedFieldsCount_one: '{{count}} змінене поле',
+    changedFieldsCount_other: '{{count}} змінених полів',
     compareVersion: 'Порівняти версію з:',
     confirmPublish: 'Підтвердити публікацію',
     confirmRevertToSaved: 'Підтвердити повернення до збереженого стану',
