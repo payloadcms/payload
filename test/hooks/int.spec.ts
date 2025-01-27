@@ -21,7 +21,7 @@ import {
 import { relationsSlug } from './collections/Relations/index.js'
 import { transformSlug } from './collections/Transform/index.js'
 import { hooksUsersSlug } from './collections/Users/index.js'
-import { beforeValidateSlug } from './collectionSlugs.js'
+import { beforeValidateSlug, fieldPathsSlug } from './shared.js'
 import { HooksConfig } from './config.js'
 import { dataHooksGlobalSlug } from './globals/Data/index.js'
 
@@ -516,6 +516,101 @@ describe('Hooks', () => {
       const globalAndFieldString = globalString + fieldString
 
       expect(doc.field_globalAndField).toStrictEqual(globalAndFieldString + globalAndFieldString)
+    })
+
+    it('should pass correct field paths through field hooks', async () => {
+      const formatExpectedFieldPaths = (
+        fieldIdentifier: string,
+        {
+          path,
+          schemaPath,
+        }: {
+          path: string[]
+          schemaPath: string[]
+        },
+      ) => ({
+        [`${fieldIdentifier}_beforeValidate_FieldPaths`]: {
+          path,
+          schemaPath,
+        },
+        [`${fieldIdentifier}_beforeChange_FieldPaths`]: {
+          path,
+          schemaPath,
+        },
+        [`${fieldIdentifier}_afterRead_FieldPaths`]: {
+          path,
+          schemaPath,
+        },
+        [`${fieldIdentifier}_beforeDuplicate_FieldPaths`]: {
+          path,
+          schemaPath,
+        },
+      })
+
+      const originalDoc = await payload.create({
+        collection: fieldPathsSlug,
+        data: {
+          topLevelNamedField: 'Test',
+          array: [
+            {
+              fieldWithinArray: 'Test',
+              nestedArray: [
+                {
+                  fieldWithinNestedArray: 'Test',
+                  fieldWithinNestedRow: 'Test',
+                },
+              ],
+            },
+          ],
+          fieldWithinRow: 'Test',
+          fieldWithinUnnamedTab: 'Test',
+          namedTab: {
+            fieldWithinNamedTab: 'Test',
+          },
+          fieldWithinNestedUnnamedTab: 'Test',
+        },
+      })
+
+      // duplicate the doc to ensure that the beforeDuplicate hook is run
+      const doc = await payload.duplicate({
+        id: originalDoc.id,
+        collection: fieldPathsSlug,
+      })
+
+      expect(doc).toMatchObject({
+        ...formatExpectedFieldPaths('topLevelNamedField', {
+          path: ['topLevelNamedField'],
+          schemaPath: ['topLevelNamedField'],
+        }),
+        ...formatExpectedFieldPaths('fieldWithinArray', {
+          path: ['array', '0', 'fieldWithinArray'],
+          schemaPath: ['array', 'fieldWithinArray'],
+        }),
+        ...formatExpectedFieldPaths('fieldWithinNestedArray', {
+          path: ['array', '0', 'nestedArray', '0', 'fieldWithinNestedArray'],
+          schemaPath: ['array', 'nestedArray', 'fieldWithinNestedArray'],
+        }),
+        ...formatExpectedFieldPaths('fieldWithinRowWithinArray', {
+          path: ['array', '0', 'fieldWithinRowWithinArray'],
+          schemaPath: ['array', '_index-2', 'fieldWithinRowWithinArray'],
+        }),
+        ...formatExpectedFieldPaths('fieldWithinRow', {
+          path: ['fieldWithinRow'],
+          schemaPath: ['_index-2', 'fieldWithinRow'],
+        }),
+        ...formatExpectedFieldPaths('fieldWithinUnnamedTab', {
+          path: ['fieldWithinUnnamedTab'],
+          schemaPath: ['_index-3-0', 'fieldWithinUnnamedTab'],
+        }),
+        ...formatExpectedFieldPaths('fieldWithinNestedUnnamedTab', {
+          path: ['fieldWithinNestedUnnamedTab'],
+          schemaPath: ['_index-3-0-1-0', 'fieldWithinNestedUnnamedTab'],
+        }),
+        ...formatExpectedFieldPaths('fieldWithinNamedTab', {
+          path: ['namedTab', 'fieldWithinNamedTab'],
+          schemaPath: ['_index-3', 'namedTab', 'fieldWithinNamedTab'],
+        }),
+      })
     })
   })
 

@@ -5,6 +5,7 @@ import { getTenantListFilter } from './getTenantListFilter.js'
 type Args = {
   baseListFilter?: BaseListFilter
   tenantFieldName: string
+  tenantsCollectionSlug: string
 }
 /**
  * Combines a base list filter with a tenant list filter
@@ -12,7 +13,7 @@ type Args = {
  * Combines where constraints inside of an AND operator
  */
 export const withTenantListFilter =
-  ({ baseListFilter, tenantFieldName }: Args): BaseListFilter =>
+  ({ baseListFilter, tenantFieldName, tenantsCollectionSlug }: Args): BaseListFilter =>
   async (args) => {
     const filterConstraints = []
 
@@ -27,6 +28,7 @@ export const withTenantListFilter =
     const tenantListFilter = getTenantListFilter({
       req: args.req,
       tenantFieldName,
+      tenantsCollectionSlug,
     })
 
     if (tenantListFilter) {
