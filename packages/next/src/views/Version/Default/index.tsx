@@ -43,8 +43,9 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   const searchParams = useSearchParams()
 
   useEffect(() => {
-    // If compareValue changes, update url params
-    const current = new URLSearchParams(Array.from(searchParams.entries())) // -> has to use this form
+    // If the selected comparison doc or locales change, update URL params so that version page RSC
+    // can update the version comparison state
+    const current = new URLSearchParams(Array.from(searchParams.entries()))
 
     if (!compareValue) {
       current.delete('compareValue')
@@ -57,11 +58,8 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
       current.set('localeCodes', JSON.stringify(locales.map((locale) => locale.value)))
     }
 
-    // cast to string
     const search = current.toString()
-    // or const query = `${'?'.repeat(search.length && 1)}${search}`;
     const query = search ? `?${search}` : ''
-
     router.push(`${pathname}${query}`)
   }, [compareValue, pathname, router, searchParams, locales])
 
