@@ -54,10 +54,9 @@
       resize: none;
       outline: none;
       text-transform: inherit;
+      field-sizing: content;
+      overflow-y: scroll;
 
-      &::-webkit-scrollbar {
-        display: none;
-      }
       &[data-rtl='true'] {
         direction: rtl;
       }
