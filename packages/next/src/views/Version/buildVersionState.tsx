@@ -388,8 +388,14 @@ const buildVersionFieldState = ({
         fields = versionBlock.fields
       } else {
         const comparisonBlock = field.blocks.find((block) => block.slug === comparisonRow.blockType)
-
-        fields = getUniqueListBy<Field>([...versionBlock.fields, ...comparisonBlock.fields], 'name')
+        if (comparisonBlock) {
+          fields = getUniqueListBy<Field>(
+            [...versionBlock.fields, ...comparisonBlock.fields],
+            'name',
+          )
+        } else {
+          fields = versionBlock.fields
+        }
       }
 
       baseVersionField.rows[i] = buildVersionState({
