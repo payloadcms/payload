@@ -16,18 +16,17 @@ import { getFieldsForRowComparison } from '../../utilities/getFieldsForRowCompar
 const baseClass = 'iterable-diff'
 
 export const Iterable: React.FC<DiffComponentProps> = ({
-  comparison,
+  comparisonValue,
   field,
-  fieldPermissions,
   locale,
   locales,
-  version,
   versionField,
+  versionValue,
 }) => {
   const { i18n } = useTranslation()
 
-  const versionRowCount = Array.isArray(version) ? version.length : 0
-  const comparisonRowCount = Array.isArray(comparison) ? comparison.length : 0
+  const versionRowCount = Array.isArray(versionValue) ? versionValue.length : 0
+  const comparisonRowCount = Array.isArray(comparisonValue) ? comparisonValue.length : 0
   const maxRows = Math.max(versionRowCount, comparisonRowCount)
 
   if (!fieldIsArrayType(field) && !fieldIsBlockType(field)) {
@@ -37,7 +36,7 @@ export const Iterable: React.FC<DiffComponentProps> = ({
   return (
     <div className={baseClass}>
       <DiffCollapser
-        comparison={comparison}
+        comparison={comparisonValue}
         field={field}
         isIterable
         label={
@@ -51,13 +50,13 @@ export const Iterable: React.FC<DiffComponentProps> = ({
           )
         }
         locales={locales}
-        version={version}
+        version={versionValue}
       >
         {maxRows > 0 && (
           <div className={`${baseClass}__rows`}>
             {Array.from(Array(maxRows).keys()).map((row, i) => {
-              const versionRow = version?.[i] || {}
-              const comparisonRow = comparison?.[i] || {}
+              const versionRow = versionValue?.[i] || {}
+              const comparisonRow = comparisonValue?.[i] || {}
 
               const { fields, versionFields } = getFieldsForRowComparison({
                 comparisonRow,

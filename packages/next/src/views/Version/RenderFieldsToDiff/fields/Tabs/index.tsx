@@ -17,7 +17,7 @@ import { RenderFieldsToDiff } from '../../index.js'
 const baseClass = 'tabs-diff'
 
 export const Tabs: React.FC<DiffComponentProps<TabsFieldClient>> = (props) => {
-  const { comparison, field, locales, version, versionField } = props
+  const { comparisonValue, field, locales, versionField, versionValue } = props
   return (
     <div className={baseClass}>
       {versionField.tabs.map((tab, i) => {
@@ -30,8 +30,8 @@ export const Tabs: React.FC<DiffComponentProps<TabsFieldClient>> = (props) => {
                 return locales.map((locale, index) => {
                   const localizedTabProps = {
                     ...props,
-                    comparison: comparison?.[tab.name]?.[locale],
-                    version: version?.[tab.name]?.[locale],
+                    comparison: comparisonValue?.[tab.name]?.[locale],
+                    version: versionValue?.[tab.name]?.[locale],
                   }
                   return (
                     <div className={`${baseClass}__tab-locale`} key={[locale, index].join('-')}>
@@ -51,8 +51,8 @@ export const Tabs: React.FC<DiffComponentProps<TabsFieldClient>> = (props) => {
                 // Named tab
                 const namedTabProps = {
                   ...props,
-                  comparison: comparison?.[tab.name],
-                  version: version?.[tab.name],
+                  comparison: comparisonValue?.[tab.name],
+                  version: versionValue?.[tab.name],
                 }
                 return <Tab fieldTab={fieldTab} key={i} {...namedTabProps} tab={tab} />
               } else {
@@ -72,12 +72,19 @@ type TabProps = {
   tab: VersionTab
 } & DiffComponentProps<TabsFieldClient>
 
-const Tab: React.FC<TabProps> = ({ comparison, fieldTab, locale, locales, tab, version }) => {
+const Tab: React.FC<TabProps> = ({
+  comparisonValue,
+  fieldTab,
+  locale,
+  locales,
+  tab,
+  versionValue,
+}) => {
   const { i18n } = useTranslation()
 
   return (
     <DiffCollapser
-      comparison={comparison}
+      comparison={comparisonValue}
       fields={fieldTab.fields}
       label={
         'label' in tab &&
@@ -90,7 +97,7 @@ const Tab: React.FC<TabProps> = ({ comparison, fieldTab, locale, locales, tab, v
         )
       }
       locales={locales}
-      version={version}
+      version={versionValue}
     >
       <RenderFieldsToDiff fields={tab.fields} />
     </DiffCollapser>

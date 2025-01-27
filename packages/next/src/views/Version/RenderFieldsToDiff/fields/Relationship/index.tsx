@@ -100,10 +100,10 @@ const generateLabelFromValue = (
 }
 
 export const Relationship: React.FC<DiffComponentProps<RelationshipFieldClient>> = ({
-  comparison,
+  comparisonValue,
   field,
   locale,
-  version,
+  versionValue,
 }) => {
   const { i18n } = useTranslation()
 
@@ -116,25 +116,27 @@ export const Relationship: React.FC<DiffComponentProps<RelationshipFieldClient>>
   let versionToRender: string | undefined = placeholder
   let comparisonToRender: string | undefined = placeholder
 
-  if (version) {
-    if ('hasMany' in field && field.hasMany && Array.isArray(version)) {
+  if (versionValue) {
+    if ('hasMany' in field && field.hasMany && Array.isArray(versionValue)) {
       versionToRender =
-        version.map((val) => generateLabelFromValue(collections, field, locale, val)).join(', ') ||
-        placeholder
+        versionValue
+          .map((val) => generateLabelFromValue(collections, field, locale, val))
+          .join(', ') || placeholder
     } else {
-      versionToRender = generateLabelFromValue(collections, field, locale, version) || placeholder
+      versionToRender =
+        generateLabelFromValue(collections, field, locale, versionValue) || placeholder
     }
   }
 
-  if (comparison) {
-    if ('hasMany' in field && field.hasMany && Array.isArray(comparison)) {
+  if (comparisonValue) {
+    if ('hasMany' in field && field.hasMany && Array.isArray(comparisonValue)) {
       comparisonToRender =
-        comparison
+        comparisonValue
           .map((val) => generateLabelFromValue(collections, field, locale, val))
           .join(', ') || placeholder
     } else {
       comparisonToRender =
-        generateLabelFromValue(collections, field, locale, comparison) || placeholder
+        generateLabelFromValue(collections, field, locale, comparisonValue) || placeholder
     }
   }
 

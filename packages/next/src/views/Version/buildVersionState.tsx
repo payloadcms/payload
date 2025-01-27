@@ -122,6 +122,13 @@ export function getFieldPaths2({
   }
 }
 
+/**
+ * Build up an object that contains rendered diff components for each field.
+ * This is then sent to the client to be rendered.
+ *
+ * Here, the server is responsible for traversing through the document data and building up this
+ * version state object.
+ */
 export const buildVersionState = ({
   clientSchemaMap,
   comparisonSiblingData,
@@ -282,19 +289,10 @@ export const buildVersionState = ({
     }
 
     const fieldName: null | string = 'name' in field ? field.name : null
-    const valueIsObject = field.type === 'code' || field.type === 'json'
 
-    const versionValue = fieldName
-      ? valueIsObject
-        ? JSON.stringify(versionSiblingData?.[fieldName])
-        : versionSiblingData?.[fieldName]
-      : versionSiblingData
+    const versionValue = fieldName ? versionSiblingData?.[fieldName] : versionSiblingData
 
-    const comparisonValue = fieldName
-      ? valueIsObject
-        ? JSON.stringify(comparisonSiblingData?.[fieldName])
-        : comparisonSiblingData?.[fieldName]
-      : comparisonSiblingData
+    const comparisonValue = fieldName ? comparisonSiblingData?.[fieldName] : comparisonSiblingData
 
     const hasPermission =
       fieldPermissions === true ||
@@ -313,19 +311,19 @@ export const buildVersionState = ({
     }
 
     const clientCellProps: DiffComponentProps = {
-      comparison: comparisonValue,
+      comparisonValue,
       diffMethod,
       field: clientField as ClientField,
       fieldPermissions: subFieldPermissions,
       fields: 'fields' in clientField ? clientField?.fields : [],
       isRichText,
       locales,
-      version: versionValue,
       versionField: {
         ...versionField,
         CustomComponent: undefined,
         CustomComponentByLocale: undefined,
       },
+      versionValue,
     }
 
     const serverCellProps: DiffComponentServerProps = {
@@ -345,20 +343,20 @@ export const buildVersionState = ({
         versionField.CustomComponentByLocale[locale] = RenderServerComponent({
           clientProps: {
             ...clientCellProps,
-            comparison: comparisonLocaleValue,
+            comparisonValue: comparisonLocaleValue,
             locale,
-            version: versionLocaleValue,
-          },
+            versionValue: versionLocaleValue,
+          } as DiffComponentProps,
           Component: CustomComponent,
           Fallback: DefaultComponent,
           importMap: payload.importMap,
           key: 'diff component with locale',
           serverProps: {
             ...serverCellProps,
-            comparison: comparisonLocaleValue,
+            comparisonValue: comparisonLocaleValue,
             locale,
-            version: versionLocaleValue,
-          },
+            versionValue: versionLocaleValue,
+          } as DiffComponentServerProps,
         })
       }
     } else {

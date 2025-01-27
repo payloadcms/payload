@@ -7,7 +7,10 @@ import type { VersionField } from '../buildVersionState.js'
 export type DiffComponents = Record<string, React.FC<DiffComponentProps>>
 
 export type DiffComponentProps<TClientField extends ClientField = ClientField> = {
-  comparison: Record<string, any>
+  /**
+   * Field value from the version being compared
+   */
+  comparisonValue: unknown
   diffMethod: DiffMethod
   field: TClientField
   fieldPermissions:
@@ -19,8 +22,11 @@ export type DiffComponentProps<TClientField extends ClientField = ClientField> =
   isRichText: boolean
   locale?: string
   locales: string[]
-  version: Record<string, any>
   versionField: VersionField
+  /**
+   * Field value from the current version
+   */
+  versionValue: unknown
 }
 
 export type DiffComponentServerProps<

@@ -15,24 +15,24 @@ import { DiffViewer } from './DiffViewer/index.js'
 const baseClass = 'text-diff'
 
 export const Text: React.FC<DiffComponentProps<TextFieldClient>> = ({
-  comparison,
+  comparisonValue,
   diffMethod,
   field,
   locale,
-  version,
+  versionValue,
 }) => {
   const { i18n } = useTranslation()
 
   let placeholder = ''
 
-  if (version === comparison) {
+  if (versionValue == comparisonValue) {
     placeholder = `[${i18n.t('general:noValue')}]`
   }
 
   const versionToRender: string =
-    typeof version === 'string' ? version : JSON.stringify(version, null, 2)
+    typeof versionValue === 'string' ? versionValue : JSON.stringify(versionValue, null, 2)
   const comparisonToRender =
-    typeof comparison === 'string' ? comparison : JSON.stringify(comparison, null, 2)
+    typeof comparisonValue === 'string' ? comparisonValue : JSON.stringify(comparisonValue, null, 2)
 
   return (
     <div className={baseClass}>

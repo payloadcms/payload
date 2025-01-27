@@ -47,27 +47,27 @@ const getTranslatedOptions = (
 }
 
 export const Select: React.FC<DiffComponentProps<SelectFieldClient>> = ({
-  comparison,
+  comparisonValue,
   diffMethod,
   field,
   locale,
-  version,
+  versionValue,
 }) => {
   const { i18n } = useTranslation()
 
   let placeholder = ''
 
-  if (version === comparison) {
+  if (versionValue == comparisonValue) {
     placeholder = `[${i18n.t('general:noValue')}]`
   }
 
   const options = 'options' in field && field.options
 
   const comparisonToRender =
-    typeof comparison !== 'undefined'
+    typeof comparisonValue !== 'undefined'
       ? getTranslatedOptions(
           getOptionsToRender(
-            typeof comparison === 'string' ? comparison : JSON.stringify(comparison),
+            typeof comparisonValue === 'string' ? comparisonValue : JSON.stringify(comparisonValue),
             options,
             field.hasMany,
           ),
@@ -76,10 +76,10 @@ export const Select: React.FC<DiffComponentProps<SelectFieldClient>> = ({
       : placeholder
 
   const versionToRender =
-    typeof version !== 'undefined'
+    typeof versionValue !== 'undefined'
       ? getTranslatedOptions(
           getOptionsToRender(
-            typeof version === 'string' ? version : JSON.stringify(version),
+            typeof versionValue === 'string' ? versionValue : JSON.stringify(versionValue),
             options,
             field.hasMany,
           ),
