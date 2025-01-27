@@ -1166,7 +1166,7 @@ export type EditConfigWithRoot = {
 }
 
 export type EditConfigWithoutRoot = {
-  [key: string]: EditViewConfig
+  [key: string]: EditViewConfig & Record<string, unknown>
   /**
    * Replace or modify individual nested routes, or add new ones:
    * + `default` - `/admin/collections/:collection/:id`
@@ -1185,7 +1185,7 @@ export type EditConfigWithoutRoot = {
   livePreview?: Partial<EditViewConfig>
   root?: never
   version?: {
-    diffComponents?: Record<FieldTypes, PayloadComponent<null, null>>
+    diffComponents?: Partial<Record<FieldTypes, PayloadComponent<null, null>>>
   } & Partial<EditViewConfig>
   versions?: Partial<EditViewConfig>
 }

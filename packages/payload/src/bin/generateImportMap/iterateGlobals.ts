@@ -49,6 +49,12 @@ export function iterateGlobals({
           addToImportMap(editViewConfig?.tab?.Component)
           addToImportMap(editViewConfig?.tab?.Pill)
         }
+
+        if ('diffComponents' in editViewConfig) {
+          for (const diffComponent of Object.values(editViewConfig.diffComponents)) {
+            addToImportMap(diffComponent)
+          }
+        }
       }
     }
   }
