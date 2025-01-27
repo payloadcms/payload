@@ -238,7 +238,7 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
     parentIndexPath: '',
     parentPath: '',
     parentSchemaPath: '',
-    payload,
+    req,
     versionSiblingData: globalConfig
       ? {
           ...doc?.version,

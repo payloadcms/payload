@@ -4,8 +4,8 @@ import type {
   ClientFieldSchemaMap,
   Field,
   FieldTypes,
-  Payload,
   PayloadComponent,
+  PayloadRequest,
   SanitizedFieldPermissions,
   Tab,
   TabAsField,
@@ -60,7 +60,7 @@ type Args = {
   parentIndexPath: string
   parentPath: string
   parentSchemaPath: string
-  payload: Payload
+  req: PayloadRequest
   versionSiblingData: object
 }
 
@@ -143,7 +143,7 @@ export const buildVersionState = ({
   parentIndexPath,
   parentPath,
   parentSchemaPath,
-  payload,
+  req,
   versionSiblingData,
 }: Args): VersionState => {
   const versionState: VersionState = {
@@ -195,7 +195,7 @@ export const buildVersionState = ({
           parentPath,
           parentSchemaPath,
           path,
-          payload,
+          req,
           schemaPath,
           versionValue: versionValue?.[locale],
         })
@@ -215,7 +215,7 @@ export const buildVersionState = ({
         parentPath,
         parentSchemaPath,
         path,
-        payload,
+        req,
         schemaPath,
         versionValue,
       })
@@ -242,7 +242,7 @@ const buildVersionFieldState = ({
   parentPath,
   parentSchemaPath,
   path,
-  payload,
+  req,
   schemaPath,
   versionValue,
 }: {
@@ -321,7 +321,7 @@ const buildVersionFieldState = ({
           parentIndexPath: isNamedTab ? '' : tabIndexPath,
           parentPath: tabPath,
           parentSchemaPath: tabSchemaPath,
-          payload,
+          req,
           versionSiblingData: 'name' in tab ? versionValue?.[tab.name] : versionValue,
         }).versionFields,
         label: tab.label,
@@ -350,7 +350,7 @@ const buildVersionFieldState = ({
           parentIndexPath: 'name' in field ? '' : indexPath,
           parentPath: path + '.' + i,
           parentSchemaPath: schemaPath,
-          payload,
+          req,
           versionSiblingData: versionRow,
         }).versionFields
       }
@@ -367,7 +367,7 @@ const buildVersionFieldState = ({
         parentIndexPath: 'name' in field ? '' : indexPath,
         parentPath: path,
         parentSchemaPath: schemaPath,
-        payload,
+        req,
         versionSiblingData: versionValue as object,
       }).versionFields
     }
@@ -405,7 +405,7 @@ const buildVersionFieldState = ({
         parentIndexPath: 'name' in field ? '' : indexPath,
         parentPath: path + '.' + i,
         parentSchemaPath: schemaPath + '.' + versionBlock.slug,
-        payload,
+        req,
         versionSiblingData: versionRow,
       }).versionFields
     }
@@ -431,6 +431,7 @@ const buildVersionFieldState = ({
     clientField,
     field,
     i18n,
+    req,
   }
 
   baseVersionField.CustomComponent = RenderServerComponent({
@@ -442,7 +443,7 @@ const buildVersionFieldState = ({
       : clientCellProps,
     Component: CustomComponent,
     Fallback: DefaultComponent,
-    importMap: payload.importMap,
+    importMap: req.payload.importMap,
     key: 'diff component',
     serverProps: locale
       ? ({

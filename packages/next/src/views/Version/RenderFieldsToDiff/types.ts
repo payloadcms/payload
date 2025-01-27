@@ -1,8 +1,8 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { ClientField, Field, SanitizedFieldPermissions } from 'payload'
+import type { ClientField, Field, PayloadRequest, SanitizedFieldPermissions } from 'payload'
 import type { DiffMethod } from 'react-diff-viewer-continued'
 
-import type { BaseVersionField, VersionField } from '../buildVersionState.js'
+import type { BaseVersionField } from '../buildVersionState.js'
 
 export type DiffComponents = Record<string, React.FC<DiffComponentProps>>
 
@@ -36,4 +36,5 @@ export type DiffComponentServerProps<
   clientField: TClientField
   field: TField
   i18n: I18nClient
+  req: PayloadRequest
 } & Omit<DiffComponentProps, 'field'>
