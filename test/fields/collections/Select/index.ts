@@ -1,7 +1,9 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
+import { selectFieldsSlug } from '../../slugs'
+
 const SelectFields: CollectionConfig = {
-  slug: 'select-fields',
+  slug: selectFieldsSlug,
   fields: [
     {
       name: 'select',
@@ -81,6 +83,88 @@ const SelectFields: CollectionConfig = {
       ],
     },
     {
+      name: 'array',
+      type: 'array',
+      fields: [
+        {
+          name: 'selectHasMany',
+          hasMany: true,
+          type: 'select',
+          admin: {
+            isClearable: true,
+            isSortable: true,
+          },
+          options: [
+            {
+              label: 'Value One',
+              value: 'one',
+            },
+            {
+              label: 'Value Two',
+              value: 'two',
+            },
+            {
+              label: 'Value Three',
+              value: 'three',
+            },
+            {
+              label: 'Value Four',
+              value: 'four',
+            },
+            {
+              label: 'Value Five',
+              value: 'five',
+            },
+            {
+              label: 'Value Six',
+              value: 'six',
+            },
+          ],
+        },
+        {
+          name: 'group',
+          type: 'group',
+          fields: [
+            {
+              name: 'selectHasMany',
+              hasMany: true,
+              type: 'select',
+              admin: {
+                isClearable: true,
+                isSortable: true,
+              },
+              options: [
+                {
+                  label: 'Value One',
+                  value: 'one',
+                },
+                {
+                  label: 'Value Two',
+                  value: 'two',
+                },
+                {
+                  label: 'Value Three',
+                  value: 'three',
+                },
+                {
+                  label: 'Value Four',
+                  value: 'four',
+                },
+                {
+                  label: 'Value Five',
+                  value: 'five',
+                },
+                {
+                  label: 'Value Six',
+                  value: 'six',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
       name: 'selectHasManyLocalized',
       type: 'select',
       hasMany: true,
@@ -122,12 +206,22 @@ const SelectFields: CollectionConfig = {
       type: 'select',
       options: ['One', 'Two', 'Three'],
     },
+    {
+      type: 'group',
+      name: 'settings',
+      fields: [
+        {
+          name: 'category',
+          type: 'select',
+          hasMany: true,
+          options: [
+            { value: 'a', label: 'A' },
+            { value: 'b', label: 'B' },
+          ],
+        },
+      ],
+    },
   ],
-}
-
-export const selectsDoc = {
-  select: 'one',
-  selectHasMany: ['two', 'four'],
 }
 
 export default SelectFields

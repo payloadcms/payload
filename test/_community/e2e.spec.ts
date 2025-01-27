@@ -2,14 +2,15 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 
+import { initPageConsoleErrorCatch } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 
 const { beforeAll, describe } = test
-let url: AdminUrlUtil
 
 describe('Admin Panel', () => {
   let page: Page
+  let url: AdminUrlUtil
 
   beforeAll(async ({ browser }) => {
     const { serverURL } = await initPayloadE2E(__dirname)
@@ -17,6 +18,7 @@ describe('Admin Panel', () => {
 
     const context = await browser.newContext()
     page = await context.newPage()
+    initPageConsoleErrorCatch(page)
   })
 
   test('example test', async () => {

@@ -28,14 +28,11 @@
       margin-left: base(0.5);
     }
 
-    .btn {
-      background-color: var(--theme-elevation-100);
-      cursor: pointer;
-      padding: 0 base(0.25);
-      border-radius: $style-radius-s;
+    .pill {
+      background-color: var(--theme-elevation-200);
 
       &:hover {
-        background-color: var(--theme-elevation-200);
+        background-color: var(--theme-elevation-150);
       }
     }
   }

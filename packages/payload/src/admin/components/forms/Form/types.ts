@@ -2,7 +2,12 @@ import type React from 'react'
 import type { Dispatch } from 'react'
 
 import type { User } from '../../../../auth/types'
-import type { Condition, Field as FieldConfig, Validate } from '../../../../fields/config/types'
+import type {
+  Condition,
+  Field,
+  Field as FieldConfig,
+  Validate,
+} from '../../../../fields/config/types'
 
 export type Row = {
   blockType?: string
@@ -15,8 +20,10 @@ export type FormField = {
   condition?: Condition
   disableFormData?: boolean
   errorMessage?: string
+  fieldSchema?: FieldConfig
   initialValue: unknown
   passesCondition?: boolean
+  previousValue?: unknown
   rows?: Row[]
   valid: boolean
   validate?: Validate
@@ -41,6 +48,12 @@ export type Props = {
   className?: string
   disableSuccessStatus?: boolean
   disabled?: boolean
+  /**
+   * By default, the form will get the field schema (not data) from the current document. If you pass this in, you can override that behavior.
+   * This is very useful for sub-forms, where the form's field schema is not necessarily the field schema of the current document (e.g. for the Blocks
+   * feature of the Lexical Rich Text field)
+   */
+  fields?: Field[]
   handleResponse?: (res: Response) => void
   initialData?: Data
   initialState?: Fields
@@ -174,7 +187,10 @@ export type Context = {
   }: {
     data?: Data
     path: string
-    rowIndex: number
+    /*
+     * by default the new row will be added to the end of the list
+     */
+    rowIndex?: number
   }) => Promise<void>
   buildRowErrors: () => void
   createFormData: CreateFormData
@@ -190,7 +206,7 @@ export type Context = {
   getField: GetField
   getFields: GetFields
   getSiblingData: GetSiblingData
-  removeFieldRow: ({ path, rowIndex }: { path: string; rowIndex: number }) => Promise<void>
+  removeFieldRow: ({ path, rowIndex }: { path: string; rowIndex: number }) => void
   replaceFieldRow: ({
     data,
     path,

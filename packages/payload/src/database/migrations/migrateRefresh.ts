@@ -2,6 +2,9 @@
 import type { PayloadRequest } from '../../express/types'
 import type { BaseDatabaseAdapter } from '../types'
 
+import { commitTransaction } from '../../utilities/commitTransaction'
+import { initTransaction } from '../../utilities/initTransaction'
+import { killTransaction } from '../../utilities/killTransaction'
 import { getMigrations } from './getMigrations'
 import { readMigrationFiles } from './readMigrationFiles'
 
@@ -25,7 +28,7 @@ export async function migrateRefresh(this: BaseDatabaseAdapter) {
     msg: `Rolling back batch ${latestBatch} consisting of ${existingMigrations.length} migration(s).`,
   })
 
-  let transactionID
+  const req = { payload } as PayloadRequest
 
   // Reverse order of migrations to rollback
   existingMigrations.reverse()
@@ -39,16 +42,14 @@ export async function migrateRefresh(this: BaseDatabaseAdapter) {
 
       payload.logger.info({ msg: `Migrating down: ${migration.name}` })
       const start = Date.now()
-      transactionID = await this.beginTransaction()
-      await migrationFile.down({ payload })
+      await initTransaction(req)
+      await migrationFile.down({ payload, req })
       payload.logger.info({
         msg: `Migrated down:  ${migration.name} (${Date.now() - start}ms)`,
       })
       await payload.delete({
         collection: 'payload-migrations',
-        req: {
-          transactionID,
-        } as PayloadRequest,
+        req,
         where: {
           name: {
             equals: migration.name,
@@ -56,7 +57,7 @@ export async function migrateRefresh(this: BaseDatabaseAdapter) {
         },
       })
     } catch (err: unknown) {
-      await this.rollbackTransaction(transactionID)
+      await killTransaction(req)
       let msg = `Error running migration ${migration.name}. Rolling back.`
       if (err instanceof Error) {
         msg += ` ${err.message}`
@@ -74,23 +75,21 @@ export async function migrateRefresh(this: BaseDatabaseAdapter) {
     payload.logger.info({ msg: `Migrating: ${migration.name}` })
     try {
       const start = Date.now()
-      transactionID = await this.beginTransaction()
-      await migration.up({ payload })
+      await initTransaction(req)
+      await migration.up({ payload, req })
       await payload.create({
         collection: 'payload-migrations',
         data: {
           name: migration.name,
           executed: true,
         },
-        req: {
-          transactionID,
-        } as PayloadRequest,
+        req,
       })
-      await this.commitTransaction(transactionID)
+      await commitTransaction(req)
 
       payload.logger.info({ msg: `Migrated:  ${migration.name} (${Date.now() - start}ms)` })
     } catch (err: unknown) {
-      await this.rollbackTransaction(transactionID)
+      await killTransaction(req)
       let msg = `Error running migration ${migration.name}. Rolling back.`
       if (err instanceof Error) {
         msg += ` ${err.message}`

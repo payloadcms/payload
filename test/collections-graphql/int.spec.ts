@@ -1,11 +1,20 @@
 import { GraphQLClient } from 'graphql-request'
+import path from 'path'
 
 import type { Post } from './payload-types'
 
 import payload from '../../packages/payload/src'
+import getFileByPath from '../../packages/payload/src/uploads/getFileByPath'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import { initPayloadTest } from '../helpers/configHelpers'
-import configPromise, { pointSlug, slug } from './config'
+import { idToString } from '../helpers/idToString'
+import configPromise, {
+  errorOnHookSlug,
+  pointSlug,
+  relationSlug,
+  relationWithAccessControlSlug,
+  slug,
+} from './config'
 
 const title = 'title'
 
@@ -42,8 +51,7 @@ describe('collections-graphql', () => {
 
     beforeEach(async () => {
       existingDoc = await createPost()
-      existingDocGraphQLID =
-        payload.db.defaultIDType === 'number' ? existingDoc.id : `"${existingDoc.id}"`
+      existingDocGraphQLID = idToString(existingDoc.id, payload)
     })
 
     it('should create', async () => {
@@ -67,7 +75,7 @@ describe('collections-graphql', () => {
           title
         }
       }`
-      const response = await client.request(query, { title })
+      const response = (await client.request(query, { title })) as any
       const doc: Post = response.createPost
 
       expect(doc).toMatchObject({ title })
@@ -102,6 +110,109 @@ describe('collections-graphql', () => {
       expect(docs).toContainEqual(expect.objectContaining({ id: existingDoc.id }))
     })
 
+    it('should count', async () => {
+      const query = `query {
+        countPosts {
+          totalDocs
+        }
+      }`
+      const response = await client.request<{ countPosts: { totalDocs: number } }>(query)
+      const { totalDocs } = response.countPosts
+
+      expect(typeof totalDocs).toBe('number')
+    })
+
+    it('should read using multiple queries', async () => {
+      const query = `query {
+          postIDs: Posts {
+            docs {
+              id
+            }
+          }
+          posts: Posts {
+            docs {
+              id
+              title
+            }
+          }
+          singlePost: Post(id: ${existingDocGraphQLID}) {
+            id
+            title
+          }
+      }`
+      const response = await client.request(query)
+      const { postIDs, posts, singlePost } = response
+      expect(postIDs.docs).toBeDefined()
+      expect(posts.docs).toBeDefined()
+      expect(singlePost.id).toBeDefined()
+    })
+
+    it('should commit or rollback multiple mutations independently', async () => {
+      const firstTitle = 'first title'
+      const secondTitle = 'second title'
+      const first = await payload.create({
+        collection: errorOnHookSlug,
+        data: {
+          errorBeforeChange: true,
+          title: firstTitle,
+        },
+      })
+      const second = await payload.create({
+        collection: errorOnHookSlug,
+        data: {
+          errorBeforeChange: true,
+          title: secondTitle,
+        },
+      })
+
+      const updated = 'updated title'
+
+      const query = `mutation {
+          createPost(data: {title: "${title}"}) {
+              id
+              title
+            }
+          updateFirst: updateErrorOnHook(id: ${idToString(
+            first.id,
+            payload,
+          )}, data: {title: "${updated}"}) {
+            title
+          }
+          updateSecond: updateErrorOnHook(id: ${idToString(
+            second.id,
+            payload,
+          )}, data: {title: "${updated}"}) {
+            id
+            title
+          }
+      }`
+
+      client.requestConfig.errorPolicy = 'all'
+      const response = await client.request(query)
+      client.requestConfig.errorPolicy = 'none'
+
+      const createdResult = await payload.findByID({
+        id: response.createPost.id,
+        collection: slug,
+      })
+      const updateFirstResult = await payload.findByID({
+        id: first.id,
+        collection: errorOnHookSlug,
+      })
+      const updateSecondResult = await payload.findByID({
+        id: second.id,
+        collection: errorOnHookSlug,
+      })
+
+      expect(response?.createPost.id).toBeDefined()
+      expect(response?.updateFirst).toBeNull()
+      expect(response?.updateSecond).toBeNull()
+
+      expect(createdResult).toMatchObject(response.createPost)
+      expect(updateFirstResult).toMatchObject(first)
+      expect(updateSecondResult).toStrictEqual(second)
+    })
+
     it('should retain payload api', async () => {
       const query = `
         query {
@@ -120,6 +231,18 @@ describe('collections-graphql', () => {
       const res = response.PayloadApiTestTwos
 
       expect(res.docs[0].relation.payloadAPI).toStrictEqual('GraphQL')
+    })
+
+    it('should have access to headers in resolver', async () => {
+      const query = `query {
+        ContentTypes {
+          docs {
+            contentType
+          }
+        }
+      }`
+      const response = await client.request(query)
+      expect(response.ContentTypes?.docs[0]?.contentType).toEqual('application/json')
     })
 
     it('should update existing', async () => {
@@ -676,6 +799,295 @@ describe('collections-graphql', () => {
         expect(totalDocs).toStrictEqual(1)
         expect(docs[0].relationToCustomID.id).toStrictEqual(1)
       })
+
+      it('should query a document with a deleted relationship', async () => {
+        const relation = await payload.create({
+          collection: relationSlug,
+          data: {
+            name: 'test',
+          },
+        })
+
+        await payload.create({
+          collection: slug,
+          data: {
+            relationField: relation.id,
+            title: 'has deleted relation',
+          },
+        })
+
+        await payload.delete({
+          id: relation.id,
+          collection: relationSlug,
+        })
+
+        const query = `query {
+          Posts(where: { title: { equals: "has deleted relation" }}) {
+            docs {
+              id
+              title
+              relationField {
+                id
+              }
+            }
+            totalDocs
+          }
+        }`
+
+        const response = await client.request(query)
+        const { docs } = response.Posts
+
+        expect(docs[0].relationField).toBeFalsy()
+      })
+
+      it('should query a document with a deleted relationship hasMany', async () => {
+        const relation = await payload.create({
+          collection: relationSlug,
+          data: {
+            name: 'test',
+          },
+        })
+
+        await payload.create({
+          collection: slug,
+          data: {
+            relationHasManyField: [relation.id],
+            title: 'has deleted relation hasMany',
+          },
+        })
+
+        await payload.delete({
+          id: relation.id,
+          collection: relationSlug,
+        })
+
+        const query = `query {
+          Posts(where: { title: { equals: "has deleted relation hasMany" }}) {
+            docs {
+              id
+              title
+              relationHasManyField {
+                id
+              }
+            }
+            totalDocs
+          }
+        }`
+
+        const response = await client.request(query)
+        const { docs } = response.Posts
+
+        expect(docs[0].relationHasManyField).toHaveLength(0)
+      })
+
+      // fix: https://github.com/payloadcms/payload/issues/6518
+      it('should query a document with a filtered relationship', async () => {
+        const relWithAccessControl1 = await payload.create({
+          collection: relationWithAccessControlSlug,
+          data: {
+            name: 'rel1',
+            visible: false,
+          },
+        })
+        const relWithAccessControl2 = await payload.create({
+          collection: relationWithAccessControlSlug,
+          data: {
+            name: 'rel2',
+            visible: true,
+          },
+        })
+
+        await payload.create({
+          collection: slug,
+          data: {
+            relationHasManyFieldWithAccessControl: [
+              relWithAccessControl1.id,
+              relWithAccessControl2.id,
+            ],
+            title: 'with a filtered relationship',
+          },
+        })
+
+        // language=graphql
+        const query = `query {
+          Posts(where: {title: {equals: "with a filtered relationship"}}) {
+            docs {
+              relationHasManyFieldWithAccessControl {
+                name
+              }
+            }
+          }
+        }`
+        const response = (await client.request(query)) as any
+        expect(response).toStrictEqual({
+          Posts: {
+            docs: [{ relationHasManyFieldWithAccessControl: [{ name: 'rel2' }] }],
+          },
+        })
+      })
+
+      it('should query relationships with locale', async () => {
+        const newDoc = await payload.create({
+          collection: 'cyclical-relationship',
+          data: {
+            title: {
+              en: 'English title',
+              es: 'Spanish title',
+            },
+          },
+          locale: '*',
+        })
+
+        await payload.update({
+          collection: 'cyclical-relationship',
+          id: newDoc.id,
+          data: {
+            relationToSelf: newDoc.id,
+          },
+        })
+
+        const query = `query($locale: LocaleInputType) {
+          CyclicalRelationships(locale: $locale) {
+            docs {
+              title
+              relationToSelf {
+                title
+              }
+            }
+          }
+        }`
+        const response = (await client.request(query, { locale: 'es' })) as any
+
+        const queriedDoc = response.CyclicalRelationships.docs[0]
+        expect(queriedDoc.title).toEqual(queriedDoc.relationToSelf.title)
+      })
+
+      it('should query correctly with draft argument', async () => {
+        // publish doc
+        const newDoc = await payload.create({
+          collection: 'cyclical-relationship',
+          draft: false,
+          data: {
+            title: '1',
+          },
+        })
+
+        // save new version
+        await payload.update({
+          collection: 'cyclical-relationship',
+          id: newDoc.id,
+          draft: true,
+          data: {
+            title: '2',
+            relationToSelf: newDoc.id,
+          },
+        })
+
+        const query = `{
+          CyclicalRelationships(draft: true) {
+            docs {
+              title
+              relationToSelf(draft: false) {
+                title
+              }
+            }
+          }
+        }`
+        const response = (await client.request(query)) as any
+
+        const queriedDoc = response.CyclicalRelationships.docs[0]
+        expect(queriedDoc.title).toEqual('2')
+        expect(queriedDoc.relationToSelf.title).toEqual('1')
+      })
+
+      it('should query upload enabled docs', async () => {
+        const file = await getFileByPath(path.resolve(__dirname, '../uploads/test-image.jpg'))
+
+        const mediaDoc = await payload.create({
+          collection: 'media',
+          file,
+          data: {
+            title: 'example',
+          },
+        })
+
+        // doc with upload relation
+        const newDoc = await payload.create({
+          collection: 'cyclical-relationship',
+          data: {
+            media: mediaDoc.id,
+          },
+        })
+
+        const query = `{
+          CyclicalRelationship(id: ${
+            typeof newDoc.id === 'number' ? newDoc.id : `"${newDoc.id}"`
+          }) {
+            media {
+              id
+              title
+            }
+          }
+        }`
+        const response = (await client.request(query)) as any
+
+        const queriedDoc = response.CyclicalRelationship
+        expect(queriedDoc.media.id).toEqual(mediaDoc.id)
+        expect(queriedDoc.media.title).toEqual('example')
+      })
+    })
+
+    it('should cascade draft arg with globals', async () => {
+      // publish relationship doc
+      const newDoc = await payload.create({
+        collection: 'cyclical-relationship',
+        draft: false,
+        data: {
+          title: 'published relationship',
+        },
+      })
+
+      // save draft version relationship doc
+      await payload.update({
+        collection: 'cyclical-relationship',
+        id: newDoc.id,
+        draft: true,
+        data: {
+          title: 'draft relationship',
+        },
+      })
+
+      // update global (published data)
+      await payload.updateGlobal({
+        slug: 'global-1',
+        data: {
+          title: 'published title',
+          relationship: newDoc.id,
+        },
+      })
+
+      // update global (draft data)
+      await payload.updateGlobal({
+        slug: 'global-1',
+        draft: true,
+        data: {
+          title: 'draft title',
+        },
+      })
+
+      const query = `{
+        Global1(draft: true) {
+          title
+          relationship {
+            title
+          }
+        }
+      }`
+      const response = (await client.request(query)) as any
+
+      const queriedGlobal = response.Global1
+      expect(queriedGlobal.title).toEqual('draft title')
+      expect(queriedGlobal.relationship.title).toEqual('draft relationship')
     })
   })
 
@@ -685,11 +1097,11 @@ describe('collections-graphql', () => {
 
       // language=graphQL
       const query = `query {
-        Posts(where: { title: { exists: true }}) {
-          docs {
-            badFieldName
+          Posts(where: { title: { exists: true }}) {
+              docs {
+                  badFieldName
+              }
           }
-        }
       }`
       await client.request(query).catch((err) => {
         error = err
@@ -702,12 +1114,12 @@ describe('collections-graphql', () => {
       let error
       // language=graphQL
       const query = `mutation {
-        createPost(data: {min: 1}) {
-          id
-          min
-          createdAt
-          updatedAt
-        }
+          createPost(data: {min: 1}) {
+              id
+              min
+              createdAt
+              updatedAt
+          }
       }`
 
       await client.request(query).catch((err) => {
@@ -722,21 +1134,21 @@ describe('collections-graphql', () => {
       let error
       // language=graphQL
       const query = `mutation createTest {
-        test1:createUser(data: { email: "test@test.com", password: "test" }) {
-          email
-        }
+          test1:createUser(data: { email: "test@test.com", password: "test" }) {
+              email
+          }
 
-        test2:createUser(data: { email: "test2@test.com", password: "" }) {
-          email
-        }
+          test2:createUser(data: { email: "test2@test.com", password: "" }) {
+              email
+          }
 
-        test3:createUser(data: { email: "test@test.com", password: "test" }) {
-          email
-        }
+          test3:createUser(data: { email: "test@test.com", password: "test" }) {
+              email
+          }
 
-        test4:createUser(data: { email: "", password: "test" }) {
-          email
-        }
+          test4:createUser(data: { email: "", password: "test" }) {
+              email
+          }
       }`
 
       await client.request(query).catch((err) => {
@@ -757,7 +1169,7 @@ describe('collections-graphql', () => {
       expect(error.response.errors[1].path[0]).toEqual('test3')
       expect(error.response.errors[1].extensions.name).toEqual('ValidationError')
       expect(error.response.errors[1].extensions.data[0].message).toEqual(
-        'A user with the given email is already registered',
+        'A user with the given email is already registered.',
       )
       expect(error.response.errors[1].extensions.data[0].field).toEqual('email')
 
@@ -775,9 +1187,9 @@ describe('collections-graphql', () => {
       let error
       // language=graphQL
       const query = `query {
-        QueryWithInternalError {
-            text
-        }
+          QueryWithInternalError {
+              text
+          }
       }`
 
       await client.request(query).catch((err) => {

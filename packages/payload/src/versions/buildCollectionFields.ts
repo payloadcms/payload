@@ -5,49 +5,49 @@ export const buildVersionCollectionFields = (collection: SanitizedCollectionConf
   const fields: Field[] = [
     {
       name: 'parent',
+      type: 'relationship',
       index: true,
       relationTo: collection.slug,
-      type: 'relationship',
     },
     {
       name: 'version',
-      fields: collection.fields,
       type: 'group',
+      fields: collection.fields.filter((field) => !('name' in field) || field.name !== 'id'),
     },
     {
       name: 'createdAt',
+      type: 'date',
       admin: {
         disabled: true,
       },
       index: true,
-      type: 'date',
     },
     {
       name: 'updatedAt',
+      type: 'date',
       admin: {
         disabled: true,
       },
       index: true,
-      type: 'date',
     },
   ]
 
   if (collection?.versions?.drafts) {
     fields.push({
       name: 'latest',
+      type: 'checkbox',
       admin: {
         disabled: true,
       },
       index: true,
-      type: 'checkbox',
     })
   }
 
   if (collection?.versions?.drafts && collection?.versions?.drafts?.autosave) {
     fields.push({
       name: 'autosave',
-      index: true,
       type: 'checkbox',
+      index: true,
     })
   }
 

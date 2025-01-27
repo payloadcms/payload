@@ -4,10 +4,12 @@ export type Autosave = {
 
 export type IncomingDrafts = {
   autosave?: Autosave | boolean
+  validate?: boolean
 }
 
 export type SanitizedDrafts = {
   autosave: Autosave | false
+  validate: boolean
 }
 
 export type IncomingCollectionVersions = {

@@ -33,22 +33,24 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
   const {
     className,
     components,
+    customProps,
     disabled = false,
     filterOption = undefined,
     isClearable = true,
     isCreatable,
     isLoading,
     isSearchable = true,
-    noOptionsMessage,
+    noOptionsMessage = () => t('general:noOptions'),
     numberOnly = false,
     onChange,
     onMenuOpen,
     options,
     placeholder = t('general:selectValue'),
-    selectProps,
     showError,
     value,
   } = props
+
+  const loadingMessage = () => t('general:loading') + '...'
 
   const classes = [className, 'react-select', showError && 'react-select--error']
     .filter(Boolean)
@@ -58,7 +60,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     return (
       <Select
         captureMenuScroll
-        customProps={selectProps}
+        customProps={customProps}
         isLoading={isLoading}
         placeholder={getTranslation(placeholder, i18n)}
         {...props}
@@ -79,6 +81,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         isClearable={isClearable}
         isDisabled={disabled}
         isSearchable={isSearchable}
+        loadingMessage={loadingMessage}
         menuPlacement="auto"
         noOptionsMessage={noOptionsMessage}
         onChange={onChange}
@@ -148,6 +151,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       isClearable={isClearable}
       isDisabled={disabled}
       isSearchable={isSearchable}
+      loadingMessage={loadingMessage}
       menuPlacement="auto"
       noOptionsMessage={noOptionsMessage}
       onChange={onChange}

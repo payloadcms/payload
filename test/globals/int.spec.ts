@@ -6,6 +6,7 @@ import { RESTClient } from '../helpers/rest'
 import configPromise, {
   accessControlSlug,
   arraySlug,
+  defaultValueSlug,
   englishLocale,
   slug,
   spanishLocale,
@@ -21,14 +22,14 @@ describe('globals', () => {
     let client: RESTClient
     beforeAll(async () => {
       const config = await configPromise
-      client = new RESTClient(config, { serverURL, defaultSlug: slug })
+      client = new RESTClient(config, { defaultSlug: slug, serverURL })
     })
     it('should create', async () => {
       const title = 'update'
       const data = {
         title,
       }
-      const { status, doc } = await client.updateGlobal({ data })
+      const { doc, status } = await client.updateGlobal({ data })
 
       expect(status).toEqual(200)
       expect(doc).toMatchObject(data)
@@ -40,7 +41,7 @@ describe('globals', () => {
         title,
       }
       await client.updateGlobal({ data })
-      const { status, doc } = await client.findGlobal()
+      const { doc, status } = await client.findGlobal()
 
       expect(status).toEqual(200)
       expect(doc.globalType).toEqual(slug)
@@ -54,11 +55,11 @@ describe('globals', () => {
         },
       ]
 
-      const { status, doc } = await client.updateGlobal({
-        slug: arraySlug,
+      const { doc, status } = await client.updateGlobal({
         data: {
           array,
         },
+        slug: arraySlug,
       })
 
       expect(status).toBe(200)
@@ -71,12 +72,12 @@ describe('globals', () => {
   describe('local', () => {
     it('should save empty json objects', async () => {
       const createdJSON: any = await payload.updateGlobal({
-        slug,
         data: {
           json: {
             state: {},
           },
         },
+        slug,
       })
 
       expect(createdJSON.json.state).toEqual({})
@@ -87,8 +88,8 @@ describe('globals', () => {
         title: 'title',
       }
       const doc = await payload.updateGlobal({
-        slug,
         data,
+        slug,
       })
       expect(doc).toMatchObject(data)
     })
@@ -99,8 +100,8 @@ describe('globals', () => {
         title,
       }
       await payload.updateGlobal({
-        slug,
         data,
+        slug,
       })
       const doc = await payload.findGlobal({
         slug,
@@ -129,19 +130,19 @@ describe('globals', () => {
       }
 
       await payload.updateGlobal({
-        slug: arraySlug,
-        locale: englishLocale,
         data: {
           array: localized.en.array,
         },
+        locale: englishLocale,
+        slug: arraySlug,
       })
 
       await payload.updateGlobal({
-        slug: arraySlug,
-        locale: spanishLocale,
         data: {
           array: localized.es.array,
         },
+        locale: spanishLocale,
+        slug: arraySlug,
       })
 
       const en = await payload.findGlobal({
@@ -160,25 +161,35 @@ describe('globals', () => {
 
     it('should respect valid access query constraint', async () => {
       const emptyGlobal = await payload.findGlobal({
-        slug: accessControlSlug,
         overrideAccess: false,
+        slug: accessControlSlug,
       })
 
       expect(Object.keys(emptyGlobal)).toHaveLength(0)
 
       await payload.updateGlobal({
-        slug: accessControlSlug,
         data: {
           enabled: true,
         },
+        slug: accessControlSlug,
       })
 
       const hasAccess = await payload.findGlobal({
-        slug: accessControlSlug,
         overrideAccess: false,
+        slug: accessControlSlug,
       })
 
       expect(hasAccess.title).toBeDefined()
+    })
+
+    it('should get globals with defaultValues populated before first creation', async () => {
+      const defaultValueGlobal = await payload.findGlobal({
+        slug: defaultValueSlug,
+      })
+
+      expect(defaultValueGlobal.text).toStrictEqual('test')
+      // @ts-ignore
+      expect(defaultValueGlobal.group.text).toStrictEqual('test')
     })
   })
 
@@ -209,8 +220,8 @@ describe('globals', () => {
         title: 'updated graphql',
       }
       await payload.updateGlobal({
-        slug,
         data,
+        slug,
       })
 
       const query = `query {
@@ -223,6 +234,14 @@ describe('globals', () => {
       const doc = response.Global
 
       expect(doc).toMatchObject(data)
+    })
+
+    it('should not show globals with disabled graphql', async () => {
+      const query = `query {
+        WithoutGraphql { __typename }
+      }`
+
+      await expect(client.request(query)).rejects.toHaveProperty('message')
     })
   })
 })

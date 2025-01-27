@@ -1,6 +1,8 @@
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { EditViewProps } from '../types'
+
 import { Chevron } from '../..'
 import { requests } from '../../../api'
 import CopyToClipboard from '../../elements/CopyToClipboard'
@@ -8,9 +10,11 @@ import { Gutter } from '../../elements/Gutter'
 import { CheckboxInput } from '../../forms/field-types/Checkbox/Input'
 import SelectInput from '../../forms/field-types/Select/Input'
 import { MinimizeMaximize } from '../../icons/MinimizeMaximize'
+import { useActions } from '../../utilities/ActionsProvider'
 import { useConfig } from '../../utilities/Config'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
 import { useLocale } from '../../utilities/Locale'
+import { SetStepNav } from '../collections/Edit/SetStepNav'
 import './index.scss'
 
 const chars = {
@@ -23,9 +27,9 @@ const chars = {
 const baseClass = 'query-inspector'
 
 const Bracket = ({
+  type,
   comma = false,
   position,
-  type,
 }: {
   comma?: boolean
   position: 'end' | 'start'
@@ -60,9 +64,9 @@ const RecursivelyRenderObjectData = ({
   const objectKeys = Object.keys(object)
   const objectLength = objectKeys.length
   const [isOpen, setIsOpen] = React.useState<boolean>(true)
-
+  const isNestedAndEmpty = isEmpty && (parentType === 'object' || parentType === 'array')
   return (
-    <li>
+    <li className={isNestedAndEmpty ? `${baseClass}__row-line--nested` : ''}>
       <button
         aria-label="toggle"
         className={`${baseClass}__list-toggle ${isEmpty ? `${baseClass}__list-toggle--empty` : ''}`}
@@ -101,6 +105,8 @@ const RecursivelyRenderObjectData = ({
               type = 'object'
             } else if (typeof value === 'number') {
               type = 'number'
+            } else if (typeof value === 'boolean') {
+              type = 'boolean'
             } else {
               type = 'string'
             }
@@ -118,19 +124,28 @@ const RecursivelyRenderObjectData = ({
               )
             }
 
-            if (type === 'date' || type === 'string' || type === 'null' || type === 'number') {
-              return (
-                <li
-                  className={`${baseClass}__row-line ${baseClass}__value-type--${type}`}
-                  key={`${key}-${keyIndex}`}
-                >
-                  {parentType === 'object' ? <span>{`"${key}": `}</span> : null}
+            if (
+              type === 'date' ||
+              type === 'string' ||
+              type === 'null' ||
+              type === 'number' ||
+              type === 'boolean'
+            ) {
+              const parentHasKey = Boolean(parentType === 'object' && key)
 
-                  {type === 'string' ? (
-                    <span className={`${baseClass}__value`}>{`"${value}"`}</span>
-                  ) : (
-                    <span className={`${baseClass}__value`}>{value}</span>
-                  )}
+              const rowClasses = [
+                `${baseClass}__row-line`,
+                `${baseClass}__value-type--${type}`,
+                `${baseClass}__row-line--${objectKey ? 'nested' : 'top'}`,
+              ]
+                .filter(Boolean)
+                .join(' ')
+
+              return (
+                <li className={rowClasses} key={`${key}-${keyIndex}`}>
+                  {parentHasKey ? <span>{`"${key}": `}</span> : null}
+
+                  <span className={`${baseClass}__value`}>{JSON.stringify(value)}</span>
                   {isLastKey ? '' : ','}
                 </li>
               )
@@ -156,8 +171,9 @@ function createURL(url: string) {
   }
 }
 
-export const API = ({ apiURL }) => {
-  const { i18n } = useTranslation()
+export const API: React.FC<EditViewProps> = (props) => {
+  const { apiURL } = props
+  const { i18n, t } = useTranslation()
   const {
     localization,
     routes: { api },
@@ -166,6 +182,8 @@ export const API = ({ apiURL }) => {
   const { id, collection, global } = useDocumentInfo()
   const { code } = useLocale()
   const url = createURL(apiURL)
+
+  const { setViewActions } = useActions()
 
   const draftsEnabled = collection?.versions?.drafts || global?.versions?.drafts
   const docEndpoint = global ? `/globals/${global.slug}` : `/${collection.slug}/${id}`
@@ -195,14 +213,39 @@ export const API = ({ apiURL }) => {
     fetchData()
   }, [i18n.language, fetchURL, authenticated])
 
+  React.useEffect(() => {
+    const editConfig = (collection || global)?.admin?.components?.views?.Edit
+    const apiActions =
+      editConfig && 'API' in editConfig && 'actions' in editConfig.API ? editConfig.API.actions : []
+
+    setViewActions(apiActions)
+
+    return () => {
+      setViewActions([])
+    }
+  }, [collection, global, setViewActions])
+
   const localeOptions =
     localization &&
     localization.locales.map((locale) => ({ label: locale.label, value: locale.code }))
 
   const classes = [baseClass, fullscreen && `${baseClass}--fullscreen`].filter(Boolean).join(' ')
 
+  let isEditing: boolean
+
+  if ('collection' in props) {
+    isEditing = props?.isEditing
+  }
+
   return (
     <Gutter className={classes} right={false}>
+      <SetStepNav
+        collection={collection}
+        global={global}
+        id={id}
+        isEditing={isEditing}
+        view="API"
+      />
       <div className={`${baseClass}__configuration`}>
         <div className={`${baseClass}__api-url`}>
           <span className={`${baseClass}__label`}>
@@ -219,14 +262,14 @@ export const API = ({ apiURL }) => {
               <CheckboxInput
                 checked={draft}
                 id="draft-checkbox"
-                label="Draft"
+                label={t('version:draft')}
                 onToggle={() => setDraft(!draft)}
               />
             )}
             <CheckboxInput
               checked={authenticated}
               id="auth-checkbox"
-              label="Authenticated"
+              label={t('authentication:authenticated')}
               onToggle={() => setAuthenticated(!authenticated)}
             />
           </div>
@@ -237,7 +280,7 @@ export const API = ({ apiURL }) => {
                 label: locale,
                 value: locale,
               }}
-              label="Locale"
+              label={t('general:locale')}
               name="locale"
               onChange={(e) => setLocale(e.value as string)}
               options={localeOptions}
@@ -249,7 +292,7 @@ export const API = ({ apiURL }) => {
               label: depth,
               value: depth,
             }}
-            label="Depth"
+            label={t('general:depth')}
             name="depth"
             onChange={(e) => setDepth(e.value as string)}
             options={[

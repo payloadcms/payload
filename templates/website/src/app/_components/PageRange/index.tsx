@@ -3,46 +3,48 @@ import React from 'react'
 import classes from './index.module.scss'
 
 const defaultLabels = {
-  singular: 'Doc',
   plural: 'Docs',
+  singular: 'Doc',
 }
 
 const defaultCollectionLabels = {
   posts: {
-    singular: 'Post',
     plural: 'Posts',
+    singular: 'Post',
   },
   projects: {
-    singular: 'Project',
     plural: 'Projects',
+    singular: 'Project',
   },
 }
 
 export const PageRange: React.FC<{
   className?: string
-  totalDocs?: number
-  currentPage?: number
   collection?: string
-  limit?: number
   collectionLabels?: {
-    singular?: string
     plural?: string
+    singular?: string
   }
+  currentPage?: number
+  limit?: number
+  totalDocs?: number
 }> = props => {
   const {
     className,
-    totalDocs,
-    currentPage,
     collection,
-    limit,
     collectionLabels: collectionLabelsFromProps,
+    currentPage,
+    limit,
+    totalDocs,
   } = props
 
-  const indexStart = (currentPage ? currentPage - 1 : 1) * (limit || 1) + 1
+  let indexStart = (currentPage ? currentPage - 1 : 1) * (limit || 1) + 1
+  if (totalDocs && indexStart > totalDocs) indexStart = 0
+
   let indexEnd = (currentPage || 1) * (limit || 1)
   if (totalDocs && indexEnd > totalDocs) indexEnd = totalDocs
 
-  const { singular, plural } =
+  const { plural, singular } =
     collectionLabelsFromProps || defaultCollectionLabels[collection || ''] || defaultLabels || {}
 
   return (
@@ -50,7 +52,9 @@ export const PageRange: React.FC<{
       {(typeof totalDocs === 'undefined' || totalDocs === 0) && 'Search produced no results.'}
       {typeof totalDocs !== 'undefined' &&
         totalDocs > 0 &&
-        `Showing ${indexStart} - ${indexEnd} of ${totalDocs} ${totalDocs > 1 ? plural : singular}`}
+        `Showing ${indexStart}${indexStart > 0 ? ` - ${indexEnd}` : ''} of ${totalDocs} ${
+          totalDocs > 1 ? plural : singular
+        }`}
     </div>
   )
 }

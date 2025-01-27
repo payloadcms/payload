@@ -1,6 +1,4 @@
 /* eslint-disable no-underscore-dangle */
-import memoize from 'micro-memoize'
-
 import type { FindOneArgs } from '../../database/types'
 import type { PayloadRequest } from '../../express/types'
 import type { Collection, TypeWithID } from '../config/types'
@@ -9,6 +7,7 @@ import executeAccess from '../../auth/executeAccess'
 import { combineQueries } from '../../database/combineQueries'
 import { NotFound } from '../../errors'
 import { afterRead } from '../../fields/hooks/afterRead'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable'
@@ -29,37 +28,8 @@ export type Arguments = {
 async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<T> {
   let args = incomingArgs
 
-  // /////////////////////////////////////
-  // beforeOperation - Collection
-  // /////////////////////////////////////
-
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-    await priorHook
-
-    args =
-      (await hook({
-        args,
-        context: args.req.context,
-        operation: 'read',
-      })) || args
-  }, Promise.resolve())
-
-  const {
-    id,
-    collection: { config: collectionConfig },
-    currentDepth,
-    depth,
-    disableErrors,
-    draft: draftEnabled = false,
-    overrideAccess = false,
-    req: { locale, payload, t },
-    req,
-    showHiddenFields,
-  } = args
-
   try {
-    const shouldCommit = await initTransaction(req)
-    const { transactionID } = req
+    const shouldCommit = await initTransaction(args.req)
 
     // /////////////////////////////////////
     // beforeOperation - Collection
@@ -71,10 +41,25 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
       args =
         (await hook({
           args,
-          context: req.context,
+          collection: args.collection.config,
+          context: args.req.context,
           operation: 'read',
+          req: args.req,
         })) || args
     }, Promise.resolve())
+
+    const {
+      id,
+      collection: { config: collectionConfig },
+      currentDepth,
+      depth,
+      disableErrors,
+      draft: draftEnabled = false,
+      overrideAccess = false,
+      req: { fallbackLocale, locale, t },
+      req,
+      showHiddenFields,
+    } = args
 
     // /////////////////////////////////////
     // Access
@@ -102,21 +87,12 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
 
     if (!findOneArgs.where.and[0].id) throw new NotFound(t)
 
-    if (!req.findByID) req.findByID = { [transactionID]: {} }
-
-    if (!req.findByID[transactionID][collectionConfig.slug]) {
-      const nonMemoizedFindByID = async (query: FindOneArgs) => req.payload.db.findOne(query)
-
-      req.findByID[transactionID][collectionConfig.slug] = memoize(nonMemoizedFindByID, {
-        isPromise: true,
-        maxSize: 100,
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore This is straight from their docs, bad typings
-        transformKey: JSON.stringify,
-      })
+    let result: T
+    if (collectionConfig?.db?.findOne) {
+      result = await collectionConfig.db.findOne(findOneArgs)
+    } else {
+      result = await req.payload.db.findOne(findOneArgs)
     }
-
-    let result = (await req.findByID[transactionID][collectionConfig.slug](findOneArgs)) as T
 
     if (!result) {
       if (!disableErrors) {
@@ -125,9 +101,6 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
 
       return null
     }
-
-    // Clone the result - it may have come back memoized
-    result = JSON.parse(JSON.stringify(result))
 
     // /////////////////////////////////////
     // Replace document with draft if available
@@ -153,6 +126,7 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
 
       result =
         (await hook({
+          collection: collectionConfig,
           context: req.context,
           doc: result,
           query: findOneArgs.where,
@@ -165,11 +139,15 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
     // /////////////////////////////////////
 
     result = await afterRead({
+      collection: collectionConfig,
       context: req.context,
       currentDepth,
       depth,
       doc: result,
-      entityConfig: collectionConfig,
+      draft: draftEnabled,
+      fallbackLocale,
+      global: null,
+      locale,
       overrideAccess,
       req,
       showHiddenFields,
@@ -184,6 +162,7 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
 
       result =
         (await hook({
+          collection: collectionConfig,
           context: req.context,
           doc: result,
           query: findOneArgs.where,
@@ -197,6 +176,7 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
 
     result = await buildAfterOperation<T>({
       args,
+      collection: collectionConfig,
       operation: 'findByID',
       result: result as any,
     }) // TODO: fix this typing
@@ -205,11 +185,11 @@ async function findByID<T extends TypeWithID>(incomingArgs: Arguments): Promise<
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {
-    await killTransaction(req)
+    await killTransaction(args.req)
     throw error
   }
 }

@@ -15,12 +15,13 @@ import { useAuth } from '../../../utilities/Auth'
 import { useConfig } from '../../../utilities/Config'
 import { GetFilterOptions } from '../../../utilities/GetFilterOptions'
 import { useLocale } from '../../../utilities/Locale'
-import Error from '../../Error'
+import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
 import { useFormProcessing } from '../../Form/context'
-import Label from '../../Label'
+import DefaultLabel from '../../Label'
 import useField from '../../useField'
 import withCondition from '../../withCondition'
+import { fieldBaseClass } from '../shared'
 import { AddNewRelation } from './AddNew'
 import { createRelationMap } from './createRelationMap'
 import { findOptionsByValue } from './findOptionsByValue'
@@ -28,7 +29,6 @@ import './index.scss'
 import optionsReducer from './optionsReducer'
 import { MultiValueLabel } from './select-components/MultiValueLabel'
 import { SingleValue } from './select-components/SingleValue'
-import { fieldBaseClass } from '../shared'
 
 const maxResultsPerRequest = 10
 
@@ -40,10 +40,12 @@ const Relationship: React.FC<Props> = (props) => {
     admin: {
       allowCreate = true,
       className,
+      components: { Error, Label } = {},
       condition,
       description,
       isSortable = true,
       readOnly,
+      sortOptions,
       style,
       width,
     } = {},
@@ -56,6 +58,9 @@ const Relationship: React.FC<Props> = (props) => {
     validate = relationship,
   } = props
 
+  const ErrorComp = Error || DefaultError
+  const LabelComp = Label || DefaultLabel
+
   const config = useConfig()
 
   const {
@@ -64,14 +69,24 @@ const Relationship: React.FC<Props> = (props) => {
     serverURL,
   } = config
 
+  const hasMultipleRelations = Array.isArray(relationTo)
+  const initialLoadedPageState = hasMultipleRelations
+    ? relationTo.reduce((acc, relation) => {
+        return {
+          ...acc,
+          [relation]: 0,
+        }
+      }, {})
+    : {}
+
   const { i18n, t } = useTranslation('fields')
   const { permissions } = useAuth()
   const { code: locale } = useLocale()
   const formProcessing = useFormProcessing()
-  const hasMultipleRelations = Array.isArray(relationTo)
   const [options, dispatchOptions] = useReducer(optionsReducer, [])
   const [lastFullyLoadedRelation, setLastFullyLoadedRelation] = useState(-1)
-  const [lastLoadedPage, setLastLoadedPage] = useState<Record<string, number>>({})
+  const [lastLoadedPage, setLastLoadedPage] =
+    useState<Record<string, number>>(initialLoadedPageState)
   const [errorLoading, setErrorLoading] = useState('')
   const [filterOptionsResult, setFilterOptionsResult] = useState<FilterOptionsResult>()
   const [search, setSearch] = useState('')
@@ -124,7 +139,8 @@ const Relationship: React.FC<Props> = (props) => {
       })
 
       if (!errorLoading) {
-        relationsToFetch.reduce(async (priorRelation, relation) => {
+        await relationsToFetch.reduce(async (priorRelation, relation) => {
+          const relationFilterOption = filterOptionsResult?.[relation]
           let lastLoadedPageToUse
           if (search !== searchArg) {
             lastLoadedPageToUse = 1
@@ -133,19 +149,31 @@ const Relationship: React.FC<Props> = (props) => {
           }
           await priorRelation
 
+          if (relationFilterOption === false) {
+            setLastFullyLoadedRelation(relations.indexOf(relation))
+            return Promise.resolve()
+          }
+
           if (resultsFetched < 10) {
             const collection = collections.find((coll) => coll.slug === relation)
             const fieldToSearch = collection?.admin?.useAsTitle || 'id'
+            let fieldToSort = collection?.defaultSort || 'id'
+            if (typeof sortOptions === 'string') {
+              fieldToSort = sortOptions
+            } else if (sortOptions?.[relation]) {
+              fieldToSort = sortOptions[relation]
+            }
 
             const query: {
               [key: string]: unknown
               where: Where
             } = {
               depth: 0,
+              draft: true,
               limit: maxResultsPerRequest,
               locale,
               page: lastLoadedPageToUse,
-              sort: fieldToSearch,
+              sort: fieldToSort,
               where: {
                 and: [
                   {
@@ -165,16 +193,21 @@ const Relationship: React.FC<Props> = (props) => {
               })
             }
 
-            if (filterOptionsResult?.[relation]) {
-              query.where.and.push(filterOptionsResult[relation])
+            if (relationFilterOption && typeof relationFilterOption !== 'boolean') {
+              query.where.and.push(relationFilterOption)
             }
 
-            const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, {
-              credentials: 'include',
-              headers: {
-                'Accept-Language': i18n.language,
+            const response = await fetch(
+              `${serverURL}${api}/${relation}?${qs.stringify(query, {
+                strictNullHandling: true,
+              })}`,
+              {
+                credentials: 'include',
+                headers: {
+                  'Accept-Language': i18n.language,
+                },
               },
-            })
+            )
 
             if (response.ok) {
               const data: PaginatedDocs<unknown> = await response.json()
@@ -193,24 +226,24 @@ const Relationship: React.FC<Props> = (props) => {
                 resultsFetched += data.docs.length
 
                 dispatchOptions({
+                  type: 'ADD',
                   collection,
                   config,
                   docs: data.docs,
                   i18n,
                   sort,
-                  type: 'ADD',
                 })
               }
             } else if (response.status === 403) {
               setLastFullyLoadedRelation(relations.indexOf(relation))
               dispatchOptions({
+                type: 'ADD',
                 collection,
                 config,
                 docs: [],
                 i18n,
                 ids: relationMap[relation],
                 sort,
-                type: 'ADD',
               })
             } else {
               setErrorLoading(t('error:unspecific'))
@@ -232,6 +265,7 @@ const Relationship: React.FC<Props> = (props) => {
       locale,
       filterOptionsResult,
       serverURL,
+      sortOptions,
       api,
       i18n,
       config,
@@ -240,18 +274,18 @@ const Relationship: React.FC<Props> = (props) => {
   )
 
   const updateSearch = useDebouncedCallback((searchArg: string, valueArg: Value | Value[]) => {
-    getResults({ search: searchArg, sort: true, value: valueArg })
+    void getResults({ search: searchArg, sort: true, value: valueArg })
     setSearch(searchArg)
   }, 300)
 
   const handleInputChange = useCallback(
     (searchArg: string, valueArg: Value | Value[]) => {
       if (search !== searchArg) {
-        setLastLoadedPage({})
-        updateSearch(searchArg, valueArg)
+        setLastLoadedPage(initialLoadedPageState)
+        updateSearch(searchArg, valueArg, searchArg !== '')
       }
     },
-    [search, updateSearch],
+    [initialLoadedPageState, search, updateSearch],
   )
 
   // ///////////////////////////////////
@@ -265,21 +299,21 @@ const Relationship: React.FC<Props> = (props) => {
       value,
     })
 
-    Object.entries(relationMap).reduce(async (priorRelation, [relation, ids]) => {
+    void Object.entries(relationMap).reduce(async (priorRelation, [relation, ids]) => {
       await priorRelation
 
       const idsToLoad = ids.filter((id) => {
-        return !options.find(
-          (optionGroup) =>
-            optionGroup?.options?.find(
-              (option) => option.value === id && option.relationTo === relation,
-            ),
+        return !options.find((optionGroup) =>
+          optionGroup?.options?.find(
+            (option) => option.value === id && option.relationTo === relation,
+          ),
         )
       })
 
       if (idsToLoad.length > 0) {
         const query = {
           depth: 0,
+          draft: true,
           limit: idsToLoad.length,
           locale,
           where: {
@@ -290,12 +324,17 @@ const Relationship: React.FC<Props> = (props) => {
         }
 
         if (!errorLoading) {
-          const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(query)}`, {
-            credentials: 'include',
-            headers: {
-              'Accept-Language': i18n.language,
+          const response = await fetch(
+            `${serverURL}${api}/${relation}?${qs.stringify(query, {
+              strictNullHandling: true,
+            })}`,
+            {
+              credentials: 'include',
+              headers: {
+                'Accept-Language': i18n.language,
+              },
             },
-          })
+          )
 
           const collection = collections.find((coll) => coll.slug === relation)
           let docs = []
@@ -306,13 +345,13 @@ const Relationship: React.FC<Props> = (props) => {
           }
 
           dispatchOptions({
+            type: 'ADD',
             collection,
             config,
             docs,
             i18n,
             ids: idsToLoad,
             sort: true,
-            type: 'ADD',
           })
         }
       }
@@ -353,18 +392,18 @@ const Relationship: React.FC<Props> = (props) => {
 
     dispatchOptions({ type: 'CLEAR' })
     setLastFullyLoadedRelation(-1)
-    setLastLoadedPage({})
+    setLastLoadedPage(initialLoadedPageState)
     setHasLoadedFirstPage(false)
   }, [relationTo, filterOptionsResult, locale])
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
       dispatchOptions({
+        type: 'UPDATE',
         collection: args.collectionConfig,
         config,
         doc: args.doc,
         i18n,
-        type: 'UPDATE',
       })
     },
     [i18n, config],
@@ -391,6 +430,7 @@ const Relationship: React.FC<Props> = (props) => {
   }, [])
 
   const valueToRender = findOptionsByValue({ options, value })
+
   if (!Array.isArray(valueToRender) && valueToRender?.value === 'null') valueToRender.value = null
 
   return (
@@ -411,8 +451,8 @@ const Relationship: React.FC<Props> = (props) => {
         width,
       }}
     >
-      <Error message={errorMessage} showError={showError} />
-      <Label htmlFor={pathOrName} label={label} required={required} />
+      <ErrorComp message={errorMessage} showError={showError} />
+      <LabelComp htmlFor={pathOrName} label={label} required={required} />
       <GetFilterOptions
         {...{
           filterOptions,
@@ -476,7 +516,7 @@ const Relationship: React.FC<Props> = (props) => {
             onMenuOpen={() => {
               if (!hasLoadedFirstPage) {
                 setIsLoading(true)
-                getResults({
+                void getResults({
                   onSuccess: () => {
                     setHasLoadedFirstPage(true)
                     setIsLoading(false)
@@ -486,7 +526,7 @@ const Relationship: React.FC<Props> = (props) => {
               }
             }}
             onMenuScrollToBottom={() => {
-              getResults({
+              void getResults({
                 lastFullyLoadedRelation,
                 search,
                 sort: false,
@@ -513,7 +553,7 @@ const Relationship: React.FC<Props> = (props) => {
         </div>
       )}
       {errorLoading && <div className={`${baseClass}__error-loading`}>{errorLoading}</div>}
-      <FieldDescription description={description} value={value} />
+      <FieldDescription description={description} path={path} value={value} />
     </div>
   )
 }

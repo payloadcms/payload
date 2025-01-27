@@ -3,13 +3,15 @@ import { useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router-dom'
 
 import type { Fields } from '../../forms/Form/types'
-import type { GlobalEditViewProps } from '../types'
+import type { DefaultGlobalViewProps } from './Default'
 import type { IndexProps } from './types'
 
 import usePayloadAPI from '../../../hooks/usePayloadAPI'
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema'
+import { fieldTypes } from '../../forms/field-types'
 import { useAuth } from '../../utilities/Auth'
 import { useConfig } from '../../utilities/Config'
+import { useDocumentEvents } from '../../utilities/DocumentEvents'
 import { useDocumentInfo } from '../../utilities/DocumentInfo'
 import { EditDepthContext } from '../../utilities/EditDepth'
 import { useLocale } from '../../utilities/Locale'
@@ -25,8 +27,14 @@ const GlobalView: React.FC<IndexProps> = (props) => {
   const { permissions, user } = useAuth()
   const [initialState, setInitialState] = useState<Fields>()
   const [updatedAt, setUpdatedAt] = useState<string>()
-  const { docPermissions, getDocPermissions, getDocPreferences, getVersions, preferencesKey } =
-    useDocumentInfo()
+  const {
+    action,
+    docPermissions,
+    getDocPermissions,
+    getDocPreferences,
+    getVersions,
+    preferencesKey,
+  } = useDocumentInfo()
   const { getPreference } = usePreferences()
   const { t } = useTranslation()
   const config = useConfig()
@@ -36,12 +44,19 @@ const GlobalView: React.FC<IndexProps> = (props) => {
     serverURL,
   } = useConfig()
 
-  const { admin: { components: { views: { Edit: Edit } = {} } = {} } = {}, fields, slug } = global
+  const { reportUpdate } = useDocumentEvents()
+
+  const { slug, admin: { components: { views: { Edit: Edit } = {} } = {} } = {}, fields } = global
 
   const onSave = useCallback(
     async (json) => {
-      getVersions()
-      getDocPermissions()
+      reportUpdate({
+        entitySlug: global.slug,
+        updatedAt: json?.result?.updatedAt || new Date().toISOString(),
+      })
+
+      void getVersions()
+      void getDocPermissions()
       setUpdatedAt(json?.result?.updatedAt)
 
       const preferences = await getDocPreferences()
@@ -58,7 +73,18 @@ const GlobalView: React.FC<IndexProps> = (props) => {
       })
       setInitialState(state)
     },
-    [getVersions, fields, user, locale, t, getDocPermissions, getDocPreferences, config],
+    [
+      getVersions,
+      fields,
+      user,
+      locale,
+      t,
+      getDocPermissions,
+      getDocPreferences,
+      config,
+      global,
+      reportUpdate,
+    ],
   )
 
   const [{ data, isLoading: isLoadingData }] = usePayloadAPI(`${serverURL}${api}/globals/${slug}`, {
@@ -89,7 +115,7 @@ const GlobalView: React.FC<IndexProps> = (props) => {
       setInitialState(state)
     }
 
-    if (dataToRender) awaitInitialState()
+    if (dataToRender) void awaitInitialState()
   }, [
     dataToRender,
     fields,
@@ -104,13 +130,14 @@ const GlobalView: React.FC<IndexProps> = (props) => {
 
   const isLoading = !initialState || !docPermissions || isLoadingData
 
-  const componentProps: GlobalEditViewProps = {
-    action: `${serverURL}${api}/globals/${slug}?locale=${locale}&fallback-locale=null`,
+  const componentProps: DefaultGlobalViewProps = {
+    action,
     apiURL: `${serverURL}${api}/globals/${slug}?locale=${locale}${
       global.versions?.drafts ? '&draft=true' : ''
     }`,
     canAccessAdmin: permissions?.canAccessAdmin,
     data: dataToRender,
+    fieldTypes,
     global,
     initialState,
     isLoading,

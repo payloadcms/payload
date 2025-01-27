@@ -1,6 +1,5 @@
 import type { CollectionPermission, GlobalPermission } from '../auth/types'
-import type { SanitizedCollectionConfig } from '../collections/config/types'
-import type { TypeWithID } from '../collections/config/types'
+import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types'
 import type { Access } from '../config/types'
 import type { PayloadRequest } from '../express/types'
 import type { FieldAccess } from '../fields/config/types'
@@ -58,8 +57,11 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
         if (typeof where === 'object') {
           const paginatedRes = await req.payload.find({
             collection: entity.slug,
+            depth: 0,
             limit: 1,
             overrideAccess: true,
+            pagination: false,
+            req,
             where: {
               ...where,
               and: [
@@ -79,7 +81,9 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
         return req.payload.findByID({
           id,
           collection: entity.slug,
+          depth: 0,
           overrideAccess: true,
+          req,
         })
       }
     }
@@ -97,9 +101,17 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
     const mutablePolicies = policiesObj
 
     if (accessLevel === 'field' && docBeingAccessed === undefined) {
-      docBeingAccessed = await getEntityDoc()
+      // assign docBeingAccessed first as the promise to avoid multiple calls to getEntityDoc
+      docBeingAccessed = getEntityDoc().then((doc) => {
+        docBeingAccessed = doc
+      })
     }
-    const accessResult = await access({ id, doc: docBeingAccessed, req })
+    // awaiting the promise to ensure docBeingAccessed is assigned before it is used
+    await docBeingAccessed
+
+    const data = req?.body
+
+    const accessResult = await access({ id, data, doc: docBeingAccessed, req })
 
     if (typeof accessResult === 'object' && !disableWhere) {
       mutablePolicies[operation] = {
@@ -212,33 +224,33 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
     )
   }
 
-  await Promise.all(
-    operations.map(async (operation) => {
-      let entityAccessPromise: Promise<void>
+  await operations.reduce(async (priorOperation, operation) => {
+    await priorOperation
 
-      if (typeof entity.access[operation] === 'function') {
-        entityAccessPromise = createAccessPromise({
-          access: entity.access[operation],
-          accessLevel: 'entity',
-          operation,
-          policiesObj: policies,
-        })
-      } else {
-        policies[operation] = {
-          permission: isLoggedIn,
-        }
-      }
+    let entityAccessPromise: Promise<void>
 
-      await entityAccessPromise
-
-      await executeFieldPolicies({
-        entityPermission: policies[operation].permission,
-        fields: entity.fields,
+    if (typeof entity.access[operation] === 'function') {
+      entityAccessPromise = createAccessPromise({
+        access: entity.access[operation],
+        accessLevel: 'entity',
         operation,
         policiesObj: policies,
       })
-    }),
-  )
+    } else {
+      policies[operation] = {
+        permission: isLoggedIn,
+      }
+    }
+
+    await entityAccessPromise
+
+    await executeFieldPolicies({
+      entityPermission: policies[operation].permission,
+      fields: entity.fields,
+      operation,
+      policiesObj: policies,
+    })
+  }, Promise.resolve())
 
   return policies
 }

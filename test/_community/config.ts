@@ -1,27 +1,14 @@
-import type { Media, Menu, Post, User } from './payload-types'
-
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import { devUser } from '../credentials'
 import { MediaCollection } from './collections/Media'
 import { PostsCollection, postsSlug } from './collections/Posts'
+import { UsersCollection } from './collections/Users'
 import { MenuGlobal } from './globals/Menu'
-
-declare module '../../packages/payload/src/index' {
-  export interface GeneratedTypes {
-    collections: {
-      media: Media
-      posts: Post
-      users: User
-    }
-    globals: {
-      menu: Menu
-    }
-  }
-}
 
 export default buildConfigWithDefaults({
   // ...extend config here
   collections: [
+    UsersCollection,
     PostsCollection,
     MediaCollection,
     // ...add more collections here
@@ -47,6 +34,23 @@ export default buildConfigWithDefaults({
       collection: postsSlug,
       data: {
         text: 'example post',
+        title: 'title1',
+      },
+    })
+
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        text: 'example post',
+        title: 'title3',
+      },
+    })
+
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        text: 'example post',
+        title: 'title2',
       },
     })
   },

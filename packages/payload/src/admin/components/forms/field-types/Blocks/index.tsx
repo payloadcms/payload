@@ -34,9 +34,10 @@ const BlocksField: React.FC<Props> = (props) => {
 
   const {
     name,
-    admin: { className, condition, description, readOnly },
+    admin: { className, condition, description, isSortable = true, readOnly },
     blocks,
     fieldTypes,
+    forceRender = false,
     indexPath,
     label,
     labels: labelsFromProps,
@@ -90,7 +91,7 @@ const BlocksField: React.FC<Props> = (props) => {
     showError,
     valid,
     value,
-  } = useField<[]>({
+  } = useField<number>({
     condition,
     hasRows: true,
     path,
@@ -117,7 +118,7 @@ const BlocksField: React.FC<Props> = (props) => {
 
   const duplicateRow = useCallback(
     (rowIndex: number) => {
-      dispatchFields({ path, rowIndex, type: 'DUPLICATE_ROW' })
+      dispatchFields({ type: 'DUPLICATE_ROW', path, rowIndex })
       setModified(true)
 
       setTimeout(() => {
@@ -128,8 +129,8 @@ const BlocksField: React.FC<Props> = (props) => {
   )
 
   const removeRow = useCallback(
-    async (rowIndex: number) => {
-      await removeFieldRow({ path, rowIndex })
+    (rowIndex: number) => {
+      removeFieldRow({ path, rowIndex })
       setModified(true)
     },
     [path, removeFieldRow, setModified],
@@ -137,7 +138,7 @@ const BlocksField: React.FC<Props> = (props) => {
 
   const moveRow = useCallback(
     (moveFromIndex: number, moveToIndex: number) => {
-      dispatchFields({ moveFromIndex, moveToIndex, path, type: 'MOVE_ROW' })
+      dispatchFields({ type: 'MOVE_ROW', moveFromIndex, moveToIndex, path })
       setModified(true)
     },
     [dispatchFields, path, setModified],
@@ -145,14 +146,14 @@ const BlocksField: React.FC<Props> = (props) => {
 
   const toggleCollapseAll = useCallback(
     (collapsed: boolean) => {
-      dispatchFields({ collapsed, path, setDocFieldPreferences, type: 'SET_ALL_ROWS_COLLAPSED' })
+      dispatchFields({ type: 'SET_ALL_ROWS_COLLAPSED', collapsed, path, setDocFieldPreferences })
     },
     [dispatchFields, path, setDocFieldPreferences],
   )
 
   const setCollapse = useCallback(
     (rowID: string, collapsed: boolean) => {
-      dispatchFields({ collapsed, path, rowID, setDocFieldPreferences, type: 'SET_ROW_COLLAPSED' })
+      dispatchFields({ type: 'SET_ROW_COLLAPSED', collapsed, path, rowID, setDocFieldPreferences })
     },
     [dispatchFields, path, setDocFieldPreferences],
   )
@@ -214,7 +215,7 @@ const BlocksField: React.FC<Props> = (props) => {
             </ul>
           )}
         </div>
-        <FieldDescription description={description} value={value} />
+        <FieldDescription description={description} path={path} value={value} />
       </header>
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
       {(rows.length > 0 || (!valid && (showRequired || showMinRows))) && (
@@ -229,7 +230,7 @@ const BlocksField: React.FC<Props> = (props) => {
 
             if (blockToRender) {
               return (
-                <DraggableSortableItem disabled={readOnly} id={row.id} key={row.id}>
+                <DraggableSortableItem disabled={readOnly || !isSortable} id={row.id} key={row.id}>
                   {(draggableSortableItemProps) => (
                     <BlockRow
                       {...draggableSortableItemProps}
@@ -238,8 +239,10 @@ const BlocksField: React.FC<Props> = (props) => {
                       blocks={blocks}
                       duplicateRow={duplicateRow}
                       fieldTypes={fieldTypes}
+                      forceRender={forceRender}
                       hasMaxRows={hasMaxRows}
                       indexPath={indexPath}
+                      isSortable={isSortable}
                       labels={labels}
                       moveRow={moveRow}
                       path={path}
@@ -297,7 +300,7 @@ const BlocksField: React.FC<Props> = (props) => {
           </DrawerToggler>
           <BlocksDrawer
             addRow={addRow}
-            addRowIndex={value?.length || 0}
+            addRowIndex={rows?.length || 0}
             blocks={blocks}
             drawerSlug={drawerSlug}
             labels={labels}

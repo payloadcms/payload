@@ -25,6 +25,10 @@
 <a target="_blank" href="https://payloadcms.com/docs/getting-started/what-is-payload" rel="dofollow"><strong>Explore the Docs</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://payloadcms.com/community-help" rel="dofollow"><strong>Community Help</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://demo.payloadcms.com/" rel="dofollow"><strong>Try Live Demo</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://github.com/payloadcms/payload/discussions/1539" rel="dofollow"><strong>Roadmap</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://www.g2.com/products/payload-cms/reviews#reviews" rel="dofollow"><strong>View G2 Reviews</strong></a>
 </h4>
 <hr/>
+
+> [!IMPORTANT]
+> 🎉 <strong>Payload 2.0 is now available!</strong> Read more in the <a target="_blank" href="https://payloadcms.com/blog/payload-2-0" rel="dofollow"><strong>announcement post</strong></a>.
+
 <h3>Benefits over a regular CMS</h3>
 <ul>
   <li>Don’t hit some third-party SaaS API, hit your own API</li>
@@ -47,7 +51,7 @@ Create a cloud account, connect your GitHub, and [deploy in minutes](https://pay
 Before beginning to work with Payload, make sure you have all of the [required software](https://payloadcms.com/docs/getting-started/installation).
 
 ```text
-npx create-payload-app
+npx create-payload-app@latest
 ```
 
 Alternatively, it only takes about five minutes to [create an app from scratch](https://payloadcms.com/docs/getting-started/installation#from-scratch).
@@ -94,6 +98,8 @@ We're constantly adding more templates to our [Templates Directory](https://gith
 ## 🗒️ Documentation
 
 Check out the [Payload website](https://payloadcms.com/docs/getting-started/what-is-payload) to find in-depth documentation for everything that Payload offers.
+
+Migrating from v1 to v2? Check out the [2.0 Release Notes](https://github.com/payloadcms/payload/releases/tag/v2.0.0) on how to do it.
 
 ## 🙋 Contributing
 

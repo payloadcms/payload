@@ -17,8 +17,15 @@ const Component: React.FC<{
   onCancel: () => void
   onConfirm: () => void
 }> = ({ isActive, onCancel, onConfirm }) => {
-  const { closeModal, openModal } = useModal()
+  const { closeModal, openModal, modalState } = useModal()
   const { t } = useTranslation('general')
+
+  // Manually check for modal state as 'esc' key will not trigger the nav inactivity
+  useEffect(() => {
+    if (!modalState?.[modalSlug]?.isOpen && isActive) {
+      onCancel()
+    }
+  }, [modalState])
 
   useEffect(() => {
     if (isActive) openModal(modalSlug)

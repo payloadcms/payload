@@ -21,9 +21,11 @@ export type DocumentTabCondition = (args: {
   global: SanitizedGlobalConfig
 }) => boolean
 
+// Everything is optional because we merge in the defaults
+// i.e. the config may override the `Default` view with a `label` but not an `href`
 export type DocumentTabConfig = {
   condition?: DocumentTabCondition
-  href:
+  href?:
     | ((args: {
         apiURL: string
         collection: SanitizedCollectionConfig
@@ -40,7 +42,7 @@ export type DocumentTabConfig = {
         match: ReturnType<typeof useRouteMatch>
       }) => boolean)
     | boolean
-  label: ((args: { t: (key: string) => string }) => string) | string
+  label?: ((args: { t: (key: string) => string }) => string) | string
   newTab?: boolean
   pillLabel?:
     | ((args: { versions: ReturnType<typeof useDocumentInfo>['versions'] }) => string)

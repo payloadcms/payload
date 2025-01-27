@@ -29,7 +29,7 @@ const start = async (): Promise<void> => {
     app.listen(PORT, async () => {
       payload.logger.info(`Next.js is now building...`)
       // @ts-expect-error
-      await nextBuild(path.join(__dirname, '../'))
+      await nextBuild(path.join(__dirname, '..'))
       process.exit()
     })
 
@@ -38,6 +38,7 @@ const start = async (): Promise<void> => {
 
   const nextApp = next({
     dev: process.env.NODE_ENV !== 'production',
+    port: PORT,
   })
 
   const nextHandler = nextApp.getRequestHandler()

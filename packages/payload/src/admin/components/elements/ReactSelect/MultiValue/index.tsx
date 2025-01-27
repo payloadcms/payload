@@ -16,11 +16,12 @@ export const MultiValue: React.FC<MultiValueProps<Option>> = (props) => {
     innerProps,
     isDisabled,
     // @ts-expect-error // TODO Fix this - moduleResolution 16 breaks our declare module
-    selectProps: { customProps: { disableMouseDown } = {} } = {},
+    selectProps: { customProps: { disableMouseDown } = {}, isSortable } = {},
   } = props
 
   const { attributes, isDragging, listeners, setNodeRef, transform } = useDraggableSortable({
     id: value.toString(),
+    disabled: !isSortable,
   })
 
   const classes = [

@@ -6,7 +6,7 @@ export type PayloadLogger = pino.Logger
 const prettyOptions = {
   colorize: true,
   ignore: 'pid,hostname',
-  translateTime: 'HH:MM:ss',
+  translateTime: 'SYS:HH:MM:ss',
 }
 
 export const defaultLoggerOptions: pino.LoggerOptions = {

@@ -29,14 +29,14 @@
   &.active {
     background-color: var(--color-base-100);
 
-    .floating-select-toolbar-popup__dropdown--caret {
+    .floating-select-toolbar-popup__dropdown-caret {
       &:after {
         transform: rotate(0deg);
       }
     }
   }
 
-  &--caret {
+  &-caret {
     &:after {
       transform: rotate(180deg);
 
@@ -56,14 +56,14 @@
     }
   }
 
-  &--items {
+  &-items {
     position: absolute;
     background: var(--color-base-0);
     border-radius: 4px;
     width: 132.5px;
     z-index: 100;
 
-    .item {
+    .floating-select-toolbar-popup__dropdown-item {
       all: unset; // reset all default button styles
       cursor: pointer;
       color: var(--color-base-900);
@@ -92,7 +92,7 @@
 
 html[data-theme='light'] {
   .floating-select-toolbar-popup__dropdown {
-    &--items {
+    &-items {
       position: absolute;
       @include shadow-m;
     }

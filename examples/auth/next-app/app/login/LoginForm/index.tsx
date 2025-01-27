@@ -57,7 +57,7 @@ export const LoginForm: React.FC = () => {
         {' with the password '}
         <b>demo</b>
         {'. To manage your users, '}
-        <Link href={`${process.env.NEXT_PUBLIC_CMS_URL}/admin/collections/users`}>
+        <Link href={`${process.env.NEXT_PUBLIC_PAYLOAD_URL}/admin/collections/users`}>
           login to the admin dashboard
         </Link>
         .

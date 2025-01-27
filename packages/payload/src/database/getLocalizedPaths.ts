@@ -62,6 +62,17 @@ export async function getLocalizedPaths({
         return paths
       }
 
+      if (!matchedField && currentPath === 'id' && i === pathSegments.length - 1) {
+        lastIncompletePath.path = currentPath
+        const idField: Field = {
+          name: 'id',
+          type: payload.db.defaultIDType as 'text',
+        }
+        lastIncompletePath.field = idField
+        lastIncompletePath.complete = true
+        return paths
+      }
+
       if (matchedField) {
         if ('hidden' in matchedField && matchedField.hidden && !overrideAccess) {
           lastIncompletePath.invalid = true
@@ -96,9 +107,10 @@ export async function getLocalizedPaths({
             // If this is a polymorphic relation,
             // We only support querying directly (no nested querying)
             if (typeof matchedField.relationTo !== 'string') {
-              const lastSegmentIsValid = ['relationTo', 'value'].includes(
-                pathSegments[pathSegments.length - 1],
-              )
+              const lastSegmentIsValid =
+                ['relationTo', 'value'].includes(pathSegments[pathSegments.length - 1]) ||
+                pathSegments.length === 1 ||
+                (pathSegments.length === 2 && pathSegments[0] === 'version')
 
               if (lastSegmentIsValid) {
                 lastIncompletePath.complete = true

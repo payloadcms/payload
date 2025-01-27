@@ -1,8 +1,12 @@
 {
   "name": "@payloadcms/live-preview",
-  "version": "0.1.0",
+  "version": "0.2.2",
   "description": "The official live preview JavaScript SDK for Payload",
-  "repository": "https://github.com/payloadcms/payload",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/live-preview"
+  },
   "license": "MIT",
   "homepage": "https://payloadcms.com",
   "author": "Payload CMS, Inc.",
@@ -16,13 +20,8 @@
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "prepublishOnly": "pnpm clean && pnpm build"
   },
-  "dependencies": {
-    "react": "18.2.0"
-  },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/node": "20.5.7",
-    "@types/react": "18.2.15",
     "payload": "workspace:*"
   },
   "exports": {

@@ -36,7 +36,7 @@ export const WatchCondition: React.FC<Props> = ({
   data.id = id
 
   const hasCondition = Boolean(condition)
-  const isPassingCondition = hasCondition ? condition(data, siblingData, { user }) : true
+  const isPassingCondition = hasCondition ? Boolean(condition(data, siblingData, { user })) : true
   const field = fields[path]
 
   const wasPassingCondition = field?.passesCondition

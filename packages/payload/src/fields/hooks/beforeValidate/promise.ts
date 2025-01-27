@@ -1,5 +1,7 @@
 /* eslint-disable no-param-reassign */
+import type { SanitizedCollectionConfig } from '../../../collections/config/types'
 import type { PayloadRequest, RequestContext } from '../../../express/types'
+import type { SanitizedGlobalConfig } from '../../../globals/config/types'
 import type { Field, TabAsField } from '../../config/types'
 
 import { fieldAffectsData, tabHasName, valueIsValueWithRelation } from '../../config/types'
@@ -9,16 +11,19 @@ import { getExistingRowDoc } from '../beforeChange/getExistingRowDoc'
 import { traverseFields } from './traverseFields'
 
 type Args<T> = {
+  collection: SanitizedCollectionConfig | null
   context: RequestContext
   data: T
   doc: T
   field: Field | TabAsField
+  global: SanitizedGlobalConfig | null
   id?: number | string
   operation: 'create' | 'update'
   overrideAccess: boolean
   req: PayloadRequest
   siblingData: Record<string, unknown>
   siblingDoc: Record<string, unknown>
+  siblingDocKeys: Set<string>
 }
 
 // This function is responsible for the following actions, in order:
@@ -30,17 +35,29 @@ type Args<T> = {
 
 export const promise = async <T>({
   id,
+  collection,
   context,
   data,
   doc,
   field,
+  global,
   operation,
   overrideAccess,
   req,
   siblingData,
   siblingDoc,
+  siblingDocKeys,
 }: Args<T>): Promise<void> => {
   if (fieldAffectsData(field)) {
+    // Remove the key from siblingDocKeys
+    // the goal is to keep any existing data present
+    // before updating, for users that want to maintain
+    // external data in the same collections as Payload manages,
+    // without having fields defined for them
+    if (siblingDocKeys.has(field.name)) {
+      siblingDocKeys.delete(field.name)
+    }
+
     if (field.name === 'id') {
       if (field.type === 'number' && typeof siblingData[field.name] === 'string') {
         const value = siblingData[field.name] as string
@@ -209,8 +226,11 @@ export const promise = async <T>({
         await priorHook
 
         const hookedValue = await currentHook({
+          collection,
           context,
           data,
+          field,
+          global,
           operation,
           originalDoc: doc,
           req,
@@ -263,10 +283,12 @@ export const promise = async <T>({
 
       await traverseFields({
         id,
+        collection,
         context,
         data,
         doc,
         fields: field.fields,
+        global,
         operation,
         overrideAccess,
         req,
@@ -282,14 +304,16 @@ export const promise = async <T>({
 
       if (Array.isArray(rows)) {
         const promises = []
-        rows.forEach((row, i) => {
+        rows.forEach((row) => {
           promises.push(
             traverseFields({
               id,
+              collection,
               context,
               data,
               doc,
               fields: field.fields,
+              global,
               operation,
               overrideAccess,
               req,
@@ -308,7 +332,7 @@ export const promise = async <T>({
 
       if (Array.isArray(rows)) {
         const promises = []
-        rows.forEach((row, i) => {
+        rows.forEach((row) => {
           const rowSiblingDoc = getExistingRowDoc(row, siblingDoc[field.name])
           const blockTypeToMatch = row.blockType || rowSiblingDoc.blockType
           const block = field.blocks.find((blockType) => blockType.slug === blockTypeToMatch)
@@ -319,10 +343,12 @@ export const promise = async <T>({
             promises.push(
               traverseFields({
                 id,
+                collection,
                 context,
                 data,
                 doc,
                 fields: block.fields,
+                global,
                 operation,
                 overrideAccess,
                 req,
@@ -342,15 +368,18 @@ export const promise = async <T>({
     case 'collapsible': {
       await traverseFields({
         id,
+        collection,
         context,
         data,
         doc,
         fields: field.fields,
+        global,
         operation,
         overrideAccess,
         req,
         siblingData,
         siblingDoc,
+        siblingDocKeys,
       })
 
       break
@@ -359,7 +388,10 @@ export const promise = async <T>({
     case 'tab': {
       let tabSiblingData
       let tabSiblingDoc
-      if (tabHasName(field)) {
+
+      const isNamedTab = tabHasName(field)
+
+      if (isNamedTab) {
         if (typeof siblingData[field.name] !== 'object') siblingData[field.name] = {}
         if (typeof siblingDoc[field.name] !== 'object') siblingDoc[field.name] = {}
 
@@ -372,15 +404,18 @@ export const promise = async <T>({
 
       await traverseFields({
         id,
+        collection,
         context,
         data,
         doc,
         fields: field.fields,
+        global,
         operation,
         overrideAccess,
         req,
         siblingData: tabSiblingData,
         siblingDoc: tabSiblingDoc,
+        siblingDocKeys: isNamedTab ? undefined : siblingDocKeys,
       })
 
       break
@@ -389,15 +424,18 @@ export const promise = async <T>({
     case 'tabs': {
       await traverseFields({
         id,
+        collection,
         context,
         data,
         doc,
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+        global,
         operation,
         overrideAccess,
         req,
         siblingData,
         siblingDoc,
+        siblingDocKeys,
       })
 
       break

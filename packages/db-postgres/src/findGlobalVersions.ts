@@ -27,7 +27,10 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   )
   const sort = typeof sortArg === 'string' ? sortArg : '-createdAt'
 
-  const tableName = `_${toSnakeCase(global)}_v`
+  const tableName = this.tableNameMap.get(
+    `_${toSnakeCase(globalConfig.slug)}${this.versionsSuffix}`,
+  )
+
   const fields = buildVersionGlobalFields(globalConfig)
 
   return findMany({

@@ -15,6 +15,7 @@ export const resetLoginAttempts = async ({
   payload,
   req,
 }: Args): Promise<void> => {
+  if (!('lockUntil' in doc && typeof doc.lockUntil === 'string') || doc.loginAttempts === 0) return
   await payload.update({
     id: doc.id,
     collection: collection.slug,
@@ -22,6 +23,7 @@ export const resetLoginAttempts = async ({
       lockUntil: null,
       loginAttempts: 0,
     },
+    overrideAccess: true,
     req,
   })
 }

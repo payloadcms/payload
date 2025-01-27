@@ -1,6 +1,6 @@
 import type { RichTextAdapter } from 'payload/types'
 
-import { withMergedProps } from 'payload/components/utilities'
+import { withMergedProps, withNullableJSONSchemaType } from 'payload/utilities'
 
 import type { AdapterArguments } from './types'
 
@@ -9,7 +9,7 @@ import { richTextRelationshipPromise } from './data/richTextRelationshipPromise'
 import { richTextValidate } from './data/validation'
 import RichTextField from './field'
 
-export function slateEditor(args: AdapterArguments): RichTextAdapter<AdapterArguments> {
+export function slateEditor(args: AdapterArguments): RichTextAdapter<any[], AdapterArguments, any> {
   return {
     CellComponent: withMergedProps({
       Component: RichTextCell,
@@ -19,11 +19,24 @@ export function slateEditor(args: AdapterArguments): RichTextAdapter<AdapterArgu
       Component: RichTextField,
       toMergeIntoProps: args,
     }),
-    afterReadPromise({
+    outputSchema: ({ isRequired }) => {
+      return {
+        type: withNullableJSONSchemaType('array', isRequired),
+        items: {
+          type: 'object',
+        },
+      }
+    },
+    populationPromise({
+      context,
       currentDepth,
       depth,
+      draft,
       field,
+      findMany,
+      flattenLocales,
       overrideAccess,
+      populationPromises,
       req,
       showHiddenFields,
       siblingDoc,
@@ -35,10 +48,15 @@ export function slateEditor(args: AdapterArguments): RichTextAdapter<AdapterArgu
         !field?.admin?.elements
       ) {
         return richTextRelationshipPromise({
+          context,
           currentDepth,
           depth,
+          draft,
           field,
+          findMany,
+          flattenLocales,
           overrideAccess,
+          populationPromises,
           req,
           showHiddenFields,
           siblingDoc,
@@ -50,6 +68,10 @@ export function slateEditor(args: AdapterArguments): RichTextAdapter<AdapterArgu
   }
 }
 
+export { default as ElementButton } from './field/elements/Button'
+
+export { default as toggleElement } from './field/elements/toggle'
+export { default as LeafButton } from './field/leaves/Button'
 export type {
   AdapterArguments,
   ElementNode,

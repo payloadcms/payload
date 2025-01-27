@@ -5,6 +5,7 @@
     "outDir": "dist",
     "noEmit": false,
     "jsx": "react",
+    "sourceMap": true,
   },
   "include": [
     "src/server.ts",

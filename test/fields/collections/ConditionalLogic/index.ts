@@ -1,7 +1,9 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
+import { conditionalLogicSlug } from '../../slugs'
+
 const ConditionalLogic: CollectionConfig = {
-  slug: 'conditional-logic',
+  slug: conditionalLogicSlug,
   admin: {
     useAsTitle: 'text',
   },
@@ -91,12 +93,6 @@ const ConditionalLogic: CollectionConfig = {
       },
     },
   ],
-}
-
-export const conditionalLogicDoc = {
-  text: 'Seeded conditional logic document',
-  toggleField: true,
-  fieldToToggle: 'spiderman',
 }
 
 export default ConditionalLogic

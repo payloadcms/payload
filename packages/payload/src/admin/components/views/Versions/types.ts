@@ -17,5 +17,7 @@ export type Props = IndexProps & {
   id: string
   isLoading: boolean
   isLoadingVersions: boolean
+  latestDraftVersion?: string
+  latestPublishedVersion?: string
   versionsData: PaginatedDocs<Version>
 }

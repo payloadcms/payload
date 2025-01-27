@@ -42,18 +42,27 @@ const buildColumns = ({
       colIndex += 1
     }
     const props = cellProps?.[colIndex] || {}
+
+    const fieldAffectsDataSubFields =
+      field &&
+      field.type &&
+      (field.type === 'array' || field.type === 'group' || field.type === 'blocks')
+
+    const disableListFilter =
+      field.admin && 'disableListFilter' in field.admin ? field.admin.disableListFilter : false
+
     return {
       name: field.name,
       accessor: field.name,
       active: isActive,
+      admin: {
+        disableListColumn: field.admin?.disableListColumn,
+        disableListFilter,
+      },
       components: {
         Heading: (
           <SortColumn
-            disable={
-              ('disableSort' in field && Boolean(field.disableSort)) ||
-              fieldIsPresentationalOnly(field) ||
-              undefined
-            }
+            disable={fieldAffectsDataSubFields || fieldIsPresentationalOnly(field) || undefined}
             label={field.label || field.name}
             name={field.name}
           />

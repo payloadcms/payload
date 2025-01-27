@@ -12,11 +12,13 @@ import { useForm, useFormModified } from '../../forms/Form/context'
 import MinimalTemplate from '../../templates/Minimal'
 import { useConfig } from '../../utilities/Config'
 import Button from '../Button'
+import * as PopupList from '../Popup/PopupButtonList'
+import { baseBeforeDuplicate } from './baseBeforeDuplicate'
 import './index.scss'
 
 const baseClass = 'duplicate'
 
-const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
+const Duplicate: React.FC<Props> = ({ id, slug, collection }) => {
   const { push } = useHistory()
   const modified = useFormModified()
   const { toggleModal } = useModal()
@@ -30,12 +32,15 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
     routes: { admin },
   } = useConfig()
   const [hasClicked, setHasClicked] = useState<boolean>(false)
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const { i18n, t } = useTranslation('general')
 
   const modalSlug = `duplicate-${id}`
 
   const handleClick = useCallback(
     async (override = false) => {
+      if (isSubmitting) return
+      setIsSubmitting(true)
       setHasClicked(true)
 
       if (modified && !override) {
@@ -43,102 +48,92 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
         return
       }
 
-      const create = async (locale = ''): Promise<null | string> => {
+      const saveDocument = async ({
+        id,
+        duplicateID = '',
+        locale = '',
+      }): Promise<null | string> => {
         const response = await requests.get(`${serverURL}${api}/${slug}/${id}`, {
           headers: {
             'Accept-Language': i18n.language,
           },
           params: {
             depth: 0,
+            draft: true,
+            'fallback-locale': 'none',
             locale,
           },
         })
         let data = await response.json()
 
-        if ('createdAt' in data) delete data.createdAt
-        if ('updatedAt' in data) delete data.updatedAt
+        data = baseBeforeDuplicate({ collection, data, locale })
 
         if (typeof collection.admin.hooks?.beforeDuplicate === 'function') {
           data = await collection.admin.hooks.beforeDuplicate({
+            collection,
             data,
             locale,
           })
         }
 
-        const result = await requests.post(`${serverURL}${api}/${slug}`, {
-          body: JSON.stringify(data),
-          headers: {
-            'Accept-Language': i18n.language,
-            'Content-Type': 'application/json',
+        delete data['id']
+
+        if (!duplicateID) {
+          if ('createdAt' in data) delete data.createdAt
+          if ('updatedAt' in data) delete data.updatedAt
+        }
+
+        const result = await requests[duplicateID ? 'patch' : 'post'](
+          `${serverURL}${api}/${slug}/${duplicateID}?locale=${locale}&fallback-locale=none`,
+          {
+            body: JSON.stringify(data),
+            headers: {
+              'Accept-Language': i18n.language,
+              'Content-Type': 'application/json',
+            },
           },
-        })
+        )
         const json = await result.json()
 
-        if (result.status === 201) {
+        if (result.status === 201 || result.status === 200) {
           return json.doc.id
         }
-        json.errors.forEach((error) => toast.error(error.message))
+
+        // only show the error if this is the initial request failing
+        if (!duplicateID) {
+          json.errors.forEach((error) => toast.error(error.message))
+        }
         return null
       }
 
-      let duplicateID
+      let duplicateID: string
+      let abort = false
+      const localeErrors = []
 
       if (localization) {
-        duplicateID = await create(localization.defaultLocale)
-        let abort = false
-
-        await localization.localeCodes
-          .filter((locale) => locale !== localization.defaultLocale)
-          .reduce(async (priorLocalePatch, locale) => {
-            await priorLocalePatch
-
-            if (!abort) {
-              const res = await requests.get(`${serverURL}${api}/${slug}/${id}`, {
-                headers: {
-                  'Accept-Language': i18n.language,
-                },
-                params: {
-                  depth: 0,
-                  locale,
-                },
-              })
-              let localizedDoc = await res.json()
-
-              if (typeof collection.admin.hooks?.beforeDuplicate === 'function') {
-                localizedDoc = await collection.admin.hooks.beforeDuplicate({
-                  data: localizedDoc,
-                  locale,
-                })
-              }
-
-              const patchResult = await requests.patch(
-                `${serverURL}${api}/${slug}/${duplicateID}?locale=${locale}`,
-                {
-                  body: JSON.stringify(localizedDoc),
-                  headers: {
-                    'Accept-Language': i18n.language,
-                    'Content-Type': 'application/json',
-                  },
-                },
-              )
-              if (patchResult.status > 400) {
-                abort = true
-                const json = await patchResult.json()
-                json.errors.forEach((error) => toast.error(error.message))
-              }
-            }
-          }, Promise.resolve())
-
-        if (abort) {
-          // delete the duplicate doc to prevent incomplete
-          await requests.delete(`${serverURL}${api}/${slug}/${id}`, {
-            headers: {
-              'Accept-Language': i18n.language,
-            },
+        await localization.localeCodes.reduce(async (priorLocalePatch, locale) => {
+          await priorLocalePatch
+          if (abort) return
+          const localeResult = await saveDocument({
+            id,
+            duplicateID,
+            locale,
           })
-        }
+          duplicateID = localeResult || duplicateID
+          if (duplicateID && !localeResult) {
+            localeErrors.push(locale)
+          }
+          if (!duplicateID) {
+            abort = true
+          }
+        }, Promise.resolve())
       } else {
-        duplicateID = await create()
+        duplicateID = await saveDocument({ id })
+      }
+
+      if (!duplicateID) {
+        // document was not saved, error toast was displayed
+        return
       }
 
       toast.success(
@@ -146,7 +141,18 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
         { autoClose: 3000 },
       )
 
+      if (localeErrors.length > 0) {
+        toast.error(
+          `
+          ${t('error:localesNotSaved_other', { count: localeErrors.length })}
+          ${localeErrors.join(', ')}
+          `,
+          { autoClose: 5000 },
+        )
+      }
+
       setModified(false)
+      setIsSubmitting(false)
 
       setTimeout(() => {
         push({
@@ -173,20 +179,19 @@ const Duplicate: React.FC<Props> = ({ id, collection, slug }) => {
   )
 
   const confirm = useCallback(async () => {
-    setHasClicked(false)
     await handleClick(true)
+    setHasClicked(false)
   }, [handleClick])
 
   return (
     <React.Fragment>
-      <Button
-        buttonStyle="none"
-        className={baseClass}
+      <PopupList.Button
+        disabled={isSubmitting}
         id="action-duplicate"
         onClick={() => handleClick(false)}
       >
         {t('duplicate')}
-      </Button>
+      </PopupList.Button>
       {modified && hasClicked && (
         <Modal className={`${baseClass}__modal`} slug={modalSlug}>
           <MinimalTemplate className={`${baseClass}__modal-template`}>

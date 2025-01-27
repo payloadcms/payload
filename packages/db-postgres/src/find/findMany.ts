@@ -1,12 +1,13 @@
 import type { FindArgs } from 'payload/database'
 import type { Field, PayloadRequest, TypeWithID } from 'payload/types'
 
-import { inArray, sql } from 'drizzle-orm'
+import { inArray, count as sqlCount } from 'drizzle-orm'
 
 import type { PostgresAdapter } from '../types'
 import type { ChainedMethods } from './chainMethods'
 
 import buildQuery from '../queries/buildQuery'
+import { selectDistinct } from '../queries/selectDistinct'
 import { transform } from '../transform/read'
 import { buildFindManyArgs } from './buildFindManyArgs'
 import { chainMethods } from './chainMethods'
@@ -30,16 +31,15 @@ export const findMany = async function find({
   tableName,
   where: whereArg,
 }: Args) {
-  const db = adapter.sessions[req.transactionID]?.db || adapter.drizzle
+  const db = adapter.sessions[await req.transactionID]?.db || adapter.drizzle
   const table = adapter.tables[tableName]
 
-  let limit = limitArg
+  const limit = limitArg ?? 10
   let totalDocs: number
   let totalPages: number
   let hasPrevPage: boolean
   let hasNextPage: boolean
   let pagingCounter: number
-  let selectDistinctResult
 
   const { joinAliases, joins, orderBy, selectFields, where } = await buildQuery({
     adapter,
@@ -51,6 +51,7 @@ export const findMany = async function find({
   })
 
   const orderedIDMap: Record<number | string, number> = {}
+  let orderedIDs: (number | string)[]
 
   const selectDistinctMethods: ChainedMethods = []
 
@@ -68,36 +69,21 @@ export const findMany = async function find({
     tableName,
   })
 
-  // only fetch IDs when a sort or where query is used that needs to be done on join tables, otherwise these can be done directly on the table in findMany
-  if (Object.keys(joins).length > 0 || joinAliases.length > 0) {
-    if (where) {
-      selectDistinctMethods.push({ args: [where], method: 'where' })
-    }
+  selectDistinctMethods.push({ args: [skip || (page - 1) * limit], method: 'offset' })
+  selectDistinctMethods.push({ args: [limit === 0 ? undefined : limit], method: 'limit' })
 
-    joinAliases.forEach(({ condition, table }) => {
-      selectDistinctMethods.push({
-        args: [table, condition],
-        method: 'leftJoin',
-      })
-    })
+  const selectDistinctResult = await selectDistinct({
+    adapter,
+    chainedMethods: selectDistinctMethods,
+    db,
+    joinAliases,
+    joins,
+    selectFields,
+    tableName,
+    where,
+  })
 
-    Object.entries(joins).forEach(([joinTable, condition]) => {
-      if (joinTable) {
-        selectDistinctMethods.push({
-          args: [adapter.tables[joinTable], condition],
-          method: 'leftJoin',
-        })
-      }
-    })
-
-    selectDistinctMethods.push({ args: [skip || (page - 1) * limit], method: 'offset' })
-    selectDistinctMethods.push({ args: [limit === 0 ? undefined : limit], method: 'limit' })
-
-    selectDistinctResult = await chainMethods({
-      methods: selectDistinctMethods,
-      query: db.selectDistinct(selectFields).from(table),
-    })
-
+  if (selectDistinctResult) {
     if (selectDistinctResult.length === 0) {
       return {
         docs: [],
@@ -111,15 +97,21 @@ export const findMany = async function find({
         totalDocs: 0,
         totalPages: 0,
       }
+    } else {
+      // set the id in an object for sorting later
+      selectDistinctResult.forEach(({ id }, i) => {
+        orderedIDMap[id] = i
+      })
+      orderedIDs = Object.keys(orderedIDMap)
+      findManyArgs.where = inArray(adapter.tables[tableName].id, orderedIDs)
     }
-    // set the id in an object for sorting later
-    selectDistinctResult.forEach(({ id }, i) => {
-      orderedIDMap[id as number | string] = i
-    })
-    findManyArgs.where = inArray(adapter.tables[tableName].id, Object.keys(orderedIDMap))
   } else {
     findManyArgs.limit = limitArg === 0 ? undefined : limitArg
-    findManyArgs.offset = skip || (page - 1) * limitArg
+
+    const offset = skip || (page - 1) * limitArg
+
+    if (!Number.isNaN(offset)) findManyArgs.offset = offset
+
     if (where) {
       findManyArgs.where = where
     }
@@ -128,7 +120,7 @@ export const findMany = async function find({
 
   const findPromise = db.query[tableName].findMany(findManyArgs)
 
-  if (pagination !== false || selectDistinctResult?.length > limit) {
+  if (pagination !== false && (orderedIDs ? orderedIDs?.length <= limit : true)) {
     const selectCountMethods: ChainedMethods = []
 
     joinAliases.forEach(({ condition, table }) => {
@@ -150,12 +142,14 @@ export const findMany = async function find({
     const countResult = await chainMethods({
       methods: selectCountMethods,
       query: db
-        .select({ count: sql<number>`count(*)` })
+        .select({
+          count: sqlCount(),
+        })
         .from(table)
         .where(where),
     })
     totalDocs = Number(countResult[0].count)
-    totalPages = typeof limit === 'number' ? Math.ceil(totalDocs / limit) : 1
+    totalPages = typeof limit === 'number' && limit !== 0 ? Math.ceil(totalDocs / limit) : 1
     hasPrevPage = page > 1
     hasNextPage = totalPages > page
     pagingCounter = (page - 1) * limit + 1
@@ -167,9 +161,8 @@ export const findMany = async function find({
     rawDocs.sort((a, b) => orderedIDMap[a.id] - orderedIDMap[b.id])
   }
 
-  if (pagination === false) {
+  if (pagination === false || !totalDocs) {
     totalDocs = rawDocs.length
-    limit = totalDocs
     totalPages = 1
     pagingCounter = 1
     hasPrevPage = false

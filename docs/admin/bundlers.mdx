@@ -12,13 +12,13 @@ Payload has two official bundlers, the [Webpack Bundler](/docs/admin/webpack) an
 Webpack (recommended):
 
 ```text
-yarn add @payloadcms/webpack-bundler
+yarn add @payloadcms/bundler-webpack
 ```
 
 Vite (beta):
 
 ```text
-yarn add @payloadcms/vite-bundler
+yarn add @payloadcms/bundler-vite
 ```
 
 ##### Configure the bundler
@@ -46,8 +46,8 @@ At their core, a bundler's main goal is to take a bunch of files and turn them i
 Since the bundled file is sent to the browser, it can't include any server-only code. You will need to remove any server-only code from your admin UI before bundling it. You can learn more about [excluding server code](/docs/admin/excluding-server-code) section.
 
 <Banner type="warning">
-  <strong>Using environment variables in the admin UI</strong>
-  <br />
+  **Using environment variables in the admin UI**
+
   Bundles should not contain sensitive information. By default, Payload
   excludes env variables from the bundle. If you need to use env variables in your payload config,
   you need to prefix them with `PAYLOAD_PUBLIC_` to make them available to the client-side code.

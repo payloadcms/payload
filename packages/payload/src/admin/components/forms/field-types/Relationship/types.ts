@@ -61,5 +61,5 @@ export type GetResults = (args: {
 }) => Promise<void>
 
 export type FilterOptionsResult = {
-  [relation: string]: Where
+  [relation: string]: Where | boolean
 }

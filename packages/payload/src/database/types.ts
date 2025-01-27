@@ -22,6 +22,8 @@ export interface BaseDatabaseAdapter {
    */
   connect?: Connect
 
+  count: Count
+
   create: Create
 
   createGlobal: CreateGlobal
@@ -78,7 +80,7 @@ export interface BaseDatabaseAdapter {
   /**
    * Drop the current database and run all migrate up functions
    */
-  migrateFresh: () => Promise<void>
+  migrateFresh: (args: { forceAcceptWarning?: boolean }) => Promise<void>
   /**
    * Run all migration down functions before running up
    */
@@ -116,8 +118,8 @@ export interface BaseDatabaseAdapter {
   sessions?: {
     [id: string]: {
       db: unknown
-      reject: () => void
-      resolve: () => void
+      reject: () => Promise<void>
+      resolve: () => Promise<void>
     }
   }
 
@@ -138,6 +140,10 @@ export type Destroy = (payload: Payload) => Promise<void>
 
 export type CreateMigration = (args: {
   file?: string
+  /**
+   * Skips the prompt asking to create empty migrations
+   */
+  forceAcceptWarning?: boolean
   migrationName?: string
   payload: Payload
 }) => Promise<void>
@@ -151,9 +157,9 @@ export type BeginTransaction = (
   options?: Record<string, unknown>,
 ) => Promise<null | number | string>
 
-export type RollbackTransaction = (id: number | string) => Promise<void>
+export type RollbackTransaction = (id: number | string | Promise<number | string>) => Promise<void>
 
-export type CommitTransaction = (id: number | string) => Promise<void>
+export type CommitTransaction = (id: number | string | Promise<number | string>) => Promise<void>
 
 export type QueryDraftsArgs = {
   collection: string
@@ -192,6 +198,15 @@ export type FindArgs = {
 }
 
 export type Find = <T = TypeWithID>(args: FindArgs) => Promise<PaginatedDocs<T>>
+
+export type CountArgs = {
+  collection: string
+  locale?: string
+  req: PayloadRequest
+  where?: Where
+}
+
+export type Count = (args: CountArgs) => Promise<{ totalDocs: number }>
 
 type BaseVersionArgs = {
   limit?: number
@@ -377,8 +392,8 @@ export type DeleteManyArgs = {
 export type DeleteMany = (args: DeleteManyArgs) => Promise<void>
 
 export type Migration = MigrationData & {
-  down: ({ payload }: { payload }) => Promise<boolean>
-  up: ({ payload }: { payload }) => Promise<boolean>
+  down: ({ payload, req }: { payload: Payload; req: PayloadRequest }) => Promise<boolean>
+  up: ({ payload, req }: { payload: Payload; req: PayloadRequest }) => Promise<boolean>
 }
 
 export type MigrationData = {
@@ -399,3 +414,10 @@ export type PaginatedDocs<T = any> = {
   totalDocs: number
   totalPages: number
 }
+
+export type DBIdentifierName =
+  | ((Args: {
+      /** The name of the parent table when using relational DBs */
+      tableName?: string
+    }) => string)
+  | string

@@ -14,8 +14,8 @@ import RenderFields from '../../RenderFields'
 import { RowLabel } from '../../RowLabel'
 import { WatchChildErrors } from '../../WatchChildErrors'
 import withCondition from '../../withCondition'
-import './index.scss'
 import { fieldBaseClass } from '../shared'
+import './index.scss'
 
 const baseClass = 'collapsible-field'
 
@@ -24,6 +24,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
     admin: { className, description, initCollapsed, readOnly },
     fieldTypes,
     fields,
+    forceRender = false,
     indexPath,
     label,
     path,
@@ -41,46 +42,53 @@ const CollapsibleField: React.FC<Props> = (props) => {
     async (newCollapsedState: boolean) => {
       const existingPreferences: DocumentPreferences = await getPreference(preferencesKey)
 
-      setPreference(preferencesKey, {
-        ...existingPreferences,
-        ...(path
-          ? {
-              fields: {
-                ...(existingPreferences?.fields || {}),
-                [path]: {
-                  ...existingPreferences?.fields?.[path],
-                  collapsed: newCollapsedState,
+      if (preferencesKey) {
+        await setPreference(preferencesKey, {
+          ...existingPreferences,
+          ...(path
+            ? {
+                fields: {
+                  ...(existingPreferences?.fields || {}),
+                  [path]: {
+                    ...existingPreferences?.fields?.[path],
+                    collapsed: newCollapsedState,
+                  },
                 },
-              },
-            }
-          : {
-              fields: {
-                ...(existingPreferences?.fields || {}),
-                [fieldPreferencesKey]: {
-                  ...existingPreferences?.fields?.[fieldPreferencesKey],
-                  collapsed: newCollapsedState,
+              }
+            : {
+                fields: {
+                  ...(existingPreferences?.fields || {}),
+                  [fieldPreferencesKey]: {
+                    ...existingPreferences?.fields?.[fieldPreferencesKey],
+                    collapsed: newCollapsedState,
+                  },
                 },
-              },
-            }),
-      })
+              }),
+        })
+      }
     },
     [preferencesKey, fieldPreferencesKey, getPreference, setPreference, path],
   )
 
   useEffect(() => {
     const fetchInitialState = async () => {
-      const preferences = await getPreference(preferencesKey)
-      if (preferences) {
-        const initCollapsedFromPref = path
+      if (preferencesKey) {
+        const preferences = await getPreference(preferencesKey)
+        const specificPreference = path
           ? preferences?.fields?.[path]?.collapsed
           : preferences?.fields?.[fieldPreferencesKey]?.collapsed
-        setCollapsedOnMount(Boolean(initCollapsedFromPref))
+
+        if (specificPreference !== undefined) {
+          setCollapsedOnMount(Boolean(specificPreference))
+        } else {
+          setCollapsedOnMount(typeof initCollapsed === 'boolean' ? initCollapsed : false)
+        }
       } else {
         setCollapsedOnMount(typeof initCollapsed === 'boolean' ? initCollapsed : false)
       }
     }
 
-    fetchInitialState()
+    void fetchInitialState()
   }, [getPreference, preferencesKey, fieldPreferencesKey, initCollapsed, path])
 
   if (typeof collapsedOnMount !== 'boolean') return null
@@ -89,7 +97,6 @@ const CollapsibleField: React.FC<Props> = (props) => {
 
   return (
     <div
-      id={`field-${fieldPreferencesKey}${path ? `-${path.replace(/\./g, '__')}` : ''}`}
       className={[
         fieldBaseClass,
         baseClass,
@@ -98,6 +105,7 @@ const CollapsibleField: React.FC<Props> = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
+      id={`field-${fieldPreferencesKey}${path ? `-${path.replace(/\./g, '__')}` : ''}`}
     >
       <WatchChildErrors fieldSchema={fields} path={path} setErrorCount={setErrorCount} />
       <Collapsible
@@ -118,14 +126,14 @@ const CollapsibleField: React.FC<Props> = (props) => {
             path: createNestedFieldPath(path, field),
           }))}
           fieldTypes={fieldTypes}
-          forceRender
+          forceRender={forceRender}
           indexPath={indexPath}
           margins="small"
           permissions={permissions}
           readOnly={readOnly}
         />
       </Collapsible>
-      <FieldDescription description={description} />
+      <FieldDescription description={description} path={path} />
     </div>
   )
 }

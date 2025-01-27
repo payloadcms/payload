@@ -2,19 +2,22 @@ import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
 import type { FeatureProvider } from '../../types'
 
-import { UnderlineIcon } from '../../../lexical/ui/icons/Underline'
 import { SectionWithEntries } from '../common/floatingSelectToolbarSection'
 
 export const UnderlineTextFeature = (): FeatureProvider => {
   return {
-    feature: ({ resolvedFeatures, unsanitizedEditorConfig }) => {
+    feature: () => {
       return {
         floatingSelectToolbar: {
           sections: [
             SectionWithEntries([
               {
-                ChildComponent: UnderlineIcon,
-                isActive: ({ editor, selection }) => {
+                ChildComponent: () =>
+                  // @ts-expect-error
+                  import('../../../lexical/ui/icons/Underline').then(
+                    (module) => module.UnderlineIcon,
+                  ),
+                isActive: ({ selection }) => {
                   if ($isRangeSelection(selection)) {
                     return selection.hasFormat('underline')
                   }

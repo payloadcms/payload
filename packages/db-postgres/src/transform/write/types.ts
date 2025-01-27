@@ -30,6 +30,7 @@ export type RowToInsert = {
   blocks: {
     [blockType: string]: BlockRowToInsert[]
   }
+  blocksToDelete: Set<string>
   locales: {
     [locale: string]: Record<string, unknown>
   }
@@ -40,4 +41,5 @@ export type RowToInsert = {
   selects: {
     [tableName: string]: Record<string, unknown>[]
   }
+  texts: Record<string, unknown>[]
 }

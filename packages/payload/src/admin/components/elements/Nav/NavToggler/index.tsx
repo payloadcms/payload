@@ -12,8 +12,9 @@ export const NavToggler: React.FC<{
   children?: React.ReactNode
   className?: string
   id?: string
+  tabIndex?: number
 }> = (props) => {
-  const { id, children, className } = props
+  const { id, children, className, tabIndex = 0 } = props
 
   const { t } = useTranslation('general')
 
@@ -27,7 +28,7 @@ export const NavToggler: React.FC<{
 
   return (
     <button
-      aria-label={t('menu')}
+      aria-label={`${navOpen ? t('close') : t('open')} ${t('menu')}`}
       className={[baseClass, navOpen && `${baseClass}--is-open`, className]
         .filter(Boolean)
         .join(' ')}
@@ -43,6 +44,7 @@ export const NavToggler: React.FC<{
           })
         }
       }}
+      tabIndex={tabIndex}
       type="button"
     >
       {children}

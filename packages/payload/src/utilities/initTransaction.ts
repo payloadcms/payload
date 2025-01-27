@@ -6,11 +6,27 @@ import type { PayloadRequest } from '../express/types'
  */
 export async function initTransaction(req: PayloadRequest): Promise<boolean> {
   const { payload, transactionID } = req
-  if (!transactionID && typeof payload.db.beginTransaction === 'function') {
-    req.transactionID = await payload.db.beginTransaction()
-    if (req.transactionID) {
-      return true
-    }
+  if (transactionID instanceof Promise) {
+    // wait for whoever else is already creating the transaction
+    await transactionID
+    return false
+  }
+
+  if (transactionID) {
+    // we already have a transaction, we're not in charge of committing it
+    return false
+  }
+  if (typeof payload.db.beginTransaction === 'function') {
+    // create a new transaction
+    req.transactionID = payload.db.beginTransaction().then((transactionID) => {
+      if (transactionID) {
+        req.transactionID = transactionID
+      }
+
+      return transactionID
+    })
+    await req.transactionID
+    return !!req.transactionID
   }
   return false
 }

@@ -5,6 +5,7 @@ import type { IndexProps } from './types'
 
 import { getTranslation } from '../../../../utilities/getTranslation'
 import usePayloadAPI from '../../../hooks/usePayloadAPI'
+import { useActions } from '../../utilities/ActionsProvider'
 import { useAuth } from '../../utilities/Auth'
 import { useConfig } from '../../utilities/Config'
 import { EditDepthContext } from '../../utilities/EditDepth'
@@ -18,6 +19,8 @@ const VersionsView: React.FC<IndexProps> = (props) => {
   const { permissions, user } = useAuth()
 
   const [fetchURL, setFetchURL] = useState('')
+
+  const { setViewActions } = useActions()
 
   const {
     routes: { admin, api },
@@ -33,6 +36,8 @@ const VersionsView: React.FC<IndexProps> = (props) => {
   let entityLabel: string
   let slug: string
   let editURL: string
+  const [latestDraftVersion, setLatestDraftVersion] = useState(undefined)
+  const [latestPublishedVersion, setLatestPublishedVersion] = useState(undefined)
 
   if (collection) {
     ;({ slug } = collection)
@@ -45,15 +50,22 @@ const VersionsView: React.FC<IndexProps> = (props) => {
     // 1. "components.Edit"
     // 2. "components.Edit.Versions"
     // 3. "components.Edit.Versions.Component"
-    const Edit = collection?.admin?.components?.views?.Edit
-    CustomVersionsView =
-      typeof Edit === 'function'
-        ? Edit
-        : typeof Edit === 'object' && typeof Edit.Versions === 'function'
-        ? Edit.Versions
-        : typeof Edit?.Versions === 'object' && typeof Edit.Versions.Component === 'function'
-        ? Edit.Versions.Component
-        : undefined
+    const EditCollection = collection?.admin?.components?.views?.Edit
+
+    if (typeof EditCollection === 'function') {
+      CustomVersionsView = EditCollection
+    } else if (
+      typeof EditCollection === 'object' &&
+      typeof EditCollection.Versions === 'function'
+    ) {
+      CustomVersionsView = EditCollection.Versions
+    } else if (
+      typeof EditCollection?.Versions === 'object' &&
+      'Component' in EditCollection.Versions &&
+      typeof EditCollection.Versions.Component === 'function'
+    ) {
+      CustomVersionsView = EditCollection.Versions.Component
+    }
   }
 
   if (global) {
@@ -63,20 +75,60 @@ const VersionsView: React.FC<IndexProps> = (props) => {
     editURL = `${admin}/globals/${global.slug}`
 
     // See note above about cascading component definitions
-    const Edit = global?.admin?.components?.views?.Edit
-    CustomVersionsView =
-      typeof Edit === 'function'
-        ? Edit
-        : typeof Edit === 'object' && typeof Edit.Versions === 'function'
-        ? Edit.Versions
-        : typeof Edit?.Versions === 'object' && typeof Edit.Versions.Component === 'function'
-        ? Edit.Versions.Component
-        : undefined
+    const EditGlobal = global?.admin?.components?.views?.Edit
+
+    if (typeof EditGlobal === 'function') {
+      CustomVersionsView = EditGlobal
+    } else if (typeof EditGlobal === 'object' && typeof EditGlobal.Versions === 'function') {
+      CustomVersionsView = EditGlobal.Versions
+    } else if (
+      typeof EditGlobal?.Versions === 'object' &&
+      'Component' in EditGlobal.Versions &&
+      typeof EditGlobal.Versions.Component === 'function'
+    ) {
+      CustomVersionsView = EditGlobal.Versions.Component
+    }
   }
 
   const [{ data, isLoading }] = usePayloadAPI(docURL, { initialParams: { draft: 'true' } })
   const [{ data: versionsData, isLoading: isLoadingVersions }, { setParams }] =
     usePayloadAPI(fetchURL)
+
+  const hasDraftsEnabled = collection?.versions?.drafts || global?.versions?.drafts
+
+  const sharedParams = (status) => {
+    return {
+      depth: 0,
+      limit: 1,
+      sort: '-updatedAt',
+      where: {
+        'version._status': {
+          equals: status,
+        },
+      },
+    }
+  }
+
+  const [{ data: draft }] = usePayloadAPI(fetchURL, {
+    initialParams: hasDraftsEnabled ? { ...sharedParams('draft') } : {},
+  })
+
+  const [{ data: published }] = usePayloadAPI(fetchURL, {
+    initialParams: hasDraftsEnabled ? { ...sharedParams('published') } : {},
+  })
+
+  useEffect(() => {
+    if (hasDraftsEnabled) {
+      const formattedPublished = published?.docs?.length > 0 && published?.docs[0]
+      const formattedDraft = draft?.docs?.length > 0 && draft?.docs[0]
+
+      if (!formattedPublished || !formattedDraft) return
+
+      const publishedNewerThanDraft = formattedPublished?.updatedAt > formattedDraft?.updatedAt
+      setLatestDraftVersion(publishedNewerThanDraft ? undefined : formattedDraft?.id)
+      setLatestPublishedVersion(formattedPublished.latest ? formattedPublished?.id : undefined)
+    }
+  }, [hasDraftsEnabled, draft, published])
 
   useEffect(() => {
     const params = {
@@ -114,6 +166,20 @@ const VersionsView: React.FC<IndexProps> = (props) => {
     setParams(params)
   }, [setParams, page, sort, limit, serverURL, api, id, global, collection])
 
+  useEffect(() => {
+    const editConfig = (collection || global)?.admin?.components?.views?.Edit
+    const versionsActions =
+      editConfig && 'Versions' in editConfig && 'actions' in editConfig.Versions
+        ? editConfig.Versions.actions
+        : []
+
+    setViewActions(versionsActions)
+
+    return () => {
+      setViewActions([])
+    }
+  }, [collection, global, setViewActions])
+
   return (
     <EditDepthContext.Provider value={1}>
       <RenderCustomComponent
@@ -130,6 +196,8 @@ const VersionsView: React.FC<IndexProps> = (props) => {
           global,
           isLoading,
           isLoadingVersions,
+          latestDraftVersion,
+          latestPublishedVersion,
           user,
           versionsData,
         }}

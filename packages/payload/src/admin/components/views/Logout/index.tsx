@@ -25,7 +25,7 @@ const Logout: React.FC<{ inactivity?: boolean }> = (props) => {
   const redirect = query.get('redirect')
 
   useEffect(() => {
-    logOut()
+    void logOut()
   }, [logOut])
 
   return (

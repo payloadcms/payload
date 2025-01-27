@@ -9,7 +9,7 @@ const reduceToIDs = (options) =>
       return [...ids, ...reduceToIDs(option.options)]
     }
 
-    return [...ids, option.value]
+    return [...ids, { id: option.value, relationTo: option.relationTo }]
   }, [])
 
 const sortOptions = (options: Option[]): Option[] =>
@@ -63,10 +63,12 @@ const optionsReducer = (state: OptionGroup[], action: Action): OptionGroup[] => 
       const optionsToAddTo = newOptions.find(
         (optionGroup) => optionGroup.label === collection.labels.plural,
       )
-
       const newSubOptions = docs.reduce((docSubOptions, doc) => {
-        if (loadedIDs.indexOf(doc.id) === -1) {
-          loadedIDs.push(doc.id)
+        if (
+          loadedIDs.filter((item) => item.id === doc.id && item.relationTo === relation).length ===
+          0
+        ) {
+          loadedIDs.push({ id: doc.id, relationTo: relation })
 
           const docTitle = formatUseAsTitle({
             collection,
@@ -89,7 +91,10 @@ const optionsReducer = (state: OptionGroup[], action: Action): OptionGroup[] => 
       }, [])
 
       ids.forEach((id) => {
-        if (!loadedIDs.includes(id)) {
+        if (
+          loadedIDs.filter((item) => item.id === id && item.relationTo === relation).length === 0
+        ) {
+          loadedIDs.push({ id, relationTo: relation })
           newSubOptions.push({
             label: `${i18n.t('general:untitled')} - ID: ${id}`,
             relationTo: relation,

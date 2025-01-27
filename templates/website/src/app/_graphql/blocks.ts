@@ -51,11 +51,13 @@ export const ARCHIVE_BLOCK = `
         id
         slug
         title
+        ${META}
       }
       ...on Project {
         id
         slug
         title
+        ${META}
       }
     }
   }

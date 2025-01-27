@@ -15,7 +15,7 @@ query Header {
 `
 
 export const FOOTER = `
-  Header {
+  Footer {
     navItems {
       link ${LINK_FIELDS({ disableAppearance: true })}
 		}
@@ -23,7 +23,7 @@ export const FOOTER = `
 `
 
 export const FOOTER_QUERY = `
-query Header {
+query Footer {
   ${FOOTER}
 }
 `

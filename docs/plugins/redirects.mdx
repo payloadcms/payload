@@ -1,0 +1,75 @@
+---
+title: Redirects Plugin
+label: Redirects
+order: 20
+desc: Automatically create redirects for your Payload application
+keywords: plugins, redirects, redirect, plugin, payload, cms, seo, indexing, search, search engine
+---
+
+[![NPM](https://img.shields.io/npm/v/@payloadcms/plugin-redirects)](https://www.npmjs.com/package/@payloadcms/plugin-redirects)
+
+This plugin allows you to easily manage redirects for your application from within your admin panel. It does so by adding a `redirects` collection to your config that allows you specify a redirect from one URL to another. Your front-end application can use this data to automatically redirect users to the correct page using proper HTTP status codes. This is useful for SEO, indexing, and search engine ranking when re-platforming or when changing your URL structure.
+
+For example, if you have a page at `/about` and you want to change it to `/about-us`, you can create a redirect from the old page to the new one, then you can use this data to write HTTP redirects into your front-end application. This will ensure that users are redirected to the correct page without penalty because search engines are notified of the change at the request level. This is a very lightweight plugin that will allow you to integrate managed redirects for any front-end framework.
+
+<Banner type="info">
+  This plugin is completely open-source and the [source code can be found here](https://github.com/payloadcms/payload/tree/main/packages/plugin-redirects). If you need help, check out our [Community Help](https://payloadcms.com/community-help). If you think you've found a bug, please [open a new issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%25redirects&template=bug_report.md&title=plugin-redirects%3A) with as much detail as possible.
+</Banner>
+
+##### Core features
+
+- Adds a `redirects` collection to your config that:
+  - includes a `from` and `to` fields
+  - allows `to` to be a document reference
+
+## Installation
+
+Install the plugin using any JavaScript package manager like [Yarn](https://yarnpkg.com), [NPM](https://npmjs.com), or [PNPM](https://pnpm.io):
+
+```bash
+  yarn add @payloadcms/plugin-redirects
+```
+
+## Basic Usage
+
+In the `plugins` array of your [Payload config](https://payloadcms.com/docs/configuration/overview), call the plugin with [options](#options):
+
+```ts
+import { buildConfig } from "payload/config";
+import redirects from "@payloadcms/plugin-redirects";
+
+const config = buildConfig({
+  collections: [
+    {
+      slug: "pages",
+      fields: [],
+    },
+  ],
+  plugins: [
+    redirects({
+      collections: ["pages"],
+    }),
+  ],
+});
+
+export default config;
+```
+
+### Options
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `collections` | `string[]` | An array of collection slugs to populate in the `to` field of each redirect. |
+| `overrides` | `object` | A partial collection config that allows you to override anything on the `redirects` collection. |
+
+## TypeScript
+
+All types can be directly imported:
+
+```ts
+import { PluginConfig } from "@payloadcms/plugin-redirects/types";
+```
+
+## Examples
+
+The [Examples Directory](https://github.com/payloadcms/payload/tree/main/examples) contains an official [Redirects Plugin Example](https://github.com/payloadcms/payload/tree/main/examples/redirects) which demonstrates exactly how to configure this plugin in Payload and implement it on your front-end. The [Templates Directory](https://github.com/payloadcms/payload/tree/main/templates) also contains an official [Website Template](https://github.com/payloadcms/payload/tree/main/templates/website) and [E-commerce Template](https://github.com/payloadcms/payload/tree/main/templates/ecommere), both of which use this plugin.

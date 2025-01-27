@@ -1,4 +1,6 @@
-export const defaultRichTextValue = {
+import type { SerializedEditorState, SerializedParagraphNode, SerializedTextNode } from 'lexical'
+
+export const defaultRichTextValue: SerializedEditorState = {
   root: {
     children: [
       {
@@ -11,14 +13,14 @@ export const defaultRichTextValue = {
             text: '',
             type: 'text',
             version: 1,
-          },
+          } as SerializedTextNode,
         ],
         direction: null,
         format: '',
         indent: 0,
         type: 'paragraph',
         version: 1,
-      },
+      } as SerializedParagraphNode,
     ],
     direction: null,
     format: '',
@@ -28,7 +30,7 @@ export const defaultRichTextValue = {
   },
 }
 
-export const defaultRichTextValueV2 = {
+export const defaultRichTextValueV2: SerializedEditorState = {
   root: {
     children: [
       {
@@ -38,7 +40,7 @@ export const defaultRichTextValueV2 = {
         indent: 0,
         type: 'paragraph',
         version: 1,
-      },
+      } as SerializedParagraphNode,
     ],
     direction: null,
     format: '',

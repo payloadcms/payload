@@ -17,20 +17,37 @@ const intersectionObserverOptions = {
   rootMargin: '1000px',
 }
 
-// If you send `fields` through, it will render those fields explicitly
-// Otherwise, it will reduce your fields using the other provided props
-// This is so that we can conditionally render fields before reducing them, if desired
-// See the sidebar in '../collections/Edit/Default/index.tsx' for an example
+/**
+ * If you send `fields` through, it will render those fields explicitly
+ * Otherwise, it will reduce your fields using the other provided props
+ * This is so that we can conditionally render fields before reducing them, if desired
+ * See the sidebar in '../collections/Edit/Default/index.tsx' for an example
+ *
+ * The state/data for the fields it renders is not managed by this component. Instead, every component it renders has
+ * their own handling of their own value, usually through the useField hook. This hook will get the field's value
+ * from the Form the field is in, using the field's path.
+ *
+ * Thus, if you would like to set the value of a field you render here, you must do so in the Form that contains the field, or in the
+ * Field component itself.
+ *
+ * All this component does is render the field's Field Components, and pass them the props they need to function.
+ **/
 const RenderFields: React.FC<Props> = (props) => {
-  const { className, fieldTypes, forceRender, margins } = props
+  const {
+    className,
+    fieldTypes,
+    forceRender: forceRenderFromProps,
+    forceRenderAllFields,
+    margins,
+  } = props
 
   const { i18n, t } = useTranslation('general')
-  const [hasRendered, setHasRendered] = useState(Boolean(forceRender))
-  const [intersectionRef, entry] = useIntersect(intersectionObserverOptions)
+  const [hasRendered, setHasRendered] = useState(Boolean(forceRenderFromProps))
+  const [intersectionRef, entry] = useIntersect(intersectionObserverOptions, forceRenderFromProps)
 
   const isIntersecting = Boolean(entry?.isIntersecting)
   const isAboveViewport = entry?.boundingClientRect?.top < 0
-  const shouldRender = forceRender || isIntersecting || isAboveViewport
+  const shouldRender = forceRenderFromProps || isIntersecting || isAboveViewport
   const operation = useOperation()
 
   useEffect(() => {
@@ -94,6 +111,7 @@ const RenderFields: React.FC<Props> = (props) => {
                       readOnly,
                     },
                     fieldTypes,
+                    forceRender: forceRenderAllFields || forceRenderFromProps,
                     indexPath:
                       'indexPath' in props ? `${props?.indexPath}.${fieldIndex}` : `${fieldIndex}`,
                     path: field.path || (isFieldAffectingData && 'name' in field ? field.name : ''),

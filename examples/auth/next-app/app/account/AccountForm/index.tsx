@@ -39,15 +39,18 @@ export const AccountForm: React.FC = () => {
   const onSubmit = useCallback(
     async (data: FormData) => {
       if (user) {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/users/${user.id}`, {
-          // Make sure to include cookies with fetch
-          credentials: 'include',
-          method: 'PATCH',
-          body: JSON.stringify(data),
-          headers: {
-            'Content-Type': 'application/json',
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/users/${user.id}`,
+          {
+            // Make sure to include cookies with fetch
+            credentials: 'include',
+            method: 'PATCH',
+            body: JSON.stringify(data),
+            headers: {
+              'Content-Type': 'application/json',
+            },
           },
-        })
+        )
 
         if (response.ok) {
           const json = await response.json()

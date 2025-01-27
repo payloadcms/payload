@@ -2,6 +2,7 @@ import type { Collection } from '../../collections/config/types'
 import type { PayloadRequest } from '../../express/types'
 
 import { APIError } from '../../errors'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 import executeAccess from '../executeAccess'
@@ -72,7 +73,7 @@ async function unlock(args: Args): Promise<boolean> {
       result = null
     }
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {

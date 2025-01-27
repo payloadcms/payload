@@ -9,8 +9,8 @@ To spin up this example locally, follow these steps:
 1. First clone the repo
 1. Then `cd YOUR_PROJECT_REPO && cp .env.example .env`
 1. Next `yarn && yarn dev`
-1. Now `open http://localhost:3000/admin` to access the admin panel
-1. Login with email `dev@payloadcms.com` and password `test`
+1. Now Open [http://localhost:3000/admin](http://localhost:3000/admin)  to access the admin panel
+1. Login with email `demo@payloadcms.com` and password `demo`
 
 That's it! Changes made in `./src` will be reflected in your app. See the [Development](#development) section for more details on how to log in as a tenant.
 
@@ -69,7 +69,7 @@ For more details on this, see the [CORS](https://payloadcms.com/docs/production/
 
 ## Front-end
 
-If you're building a website or other front-end for your tenant, you will need specify the `tenant` in your requests. For example, if you wanted to fetch all pages for the tenant `ABC`, you would make a request to `/api/pages?where[tenant][slug][equals]=abc`.
+If you're building a website or other front-end for your tenant, you will need specify the `tenant` in your requests. For example, if you wanted to fetch all pages for the tenant `ABC`, you would make a request to `/api/pages?where[tenant.name][equals]=ABC`.
 
 For a head start on building a website for your tenant(s), check out the official [Website Template](https://github.com/payloadcms/template-website). It includes a page layout builder, preview, SEO, and much more. It is not multi-tenant, though, but you can easily take the concepts from that example and apply them here.
 
@@ -79,7 +79,7 @@ To spin up this example locally, follow the [Quick Start](#quick-start).
 
 ### Seed
 
-On boot, a seed script is included to scaffold a basic database for you to use as an example. This is done by setting the `PAYLOAD_DROP_DATABASE` and `PAYLOAD_SEED` environment variables which are included in the `.env.example` by default. You can remove these from your `.env` to prevent this behavior. You can also freshly seed your project at any time by running `yarn seed`. This seed creates a super-admin user with email `dev@payloadcms.com` and password `test` along with the following tenants:
+On boot, a seed script is included to scaffold a basic database for you to use as an example. This is done by setting the `PAYLOAD_DROP_DATABASE` and `PAYLOAD_SEED` environment variables which are included in the `.env.example` by default. You can remove these from your `.env` to prevent this behavior. You can also freshly seed your project at any time by running `yarn seed`. This seed creates a super-admin user with email `demo@payloadcms.com` and password `demo` along with the following tenants:
 
 - `ABC`
   - Domains:

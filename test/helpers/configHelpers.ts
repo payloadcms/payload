@@ -6,7 +6,6 @@ import shelljs from 'shelljs'
 import { v4 as uuid } from 'uuid'
 
 import type { Payload } from '../../packages/payload/src'
-import type { CollectionConfig } from '../../packages/payload/src/collections/config/types'
 import type { InitOptions } from '../../packages/payload/src/config/types'
 
 import payload from '../../packages/payload/src'
@@ -41,8 +40,6 @@ export async function initPayloadTest(options: Options): Promise<InitializedPayl
   process.env.NODE_ENV = 'test'
   process.env.PAYLOAD_CONFIG_PATH = path.resolve(options.__dirname, './config.ts')
 
-  const port = await getPort()
-
   if (!initOptions?.local) {
     initOptions.express = express()
   }
@@ -64,16 +61,10 @@ export async function initPayloadTest(options: Options): Promise<InitializedPayl
 
   await payload.init(initOptions)
 
+  const port = await getPort()
   if (initOptions.express) {
     initOptions.express.listen(port)
   }
 
   return { serverURL: `http://localhost:${port}`, payload }
-}
-
-export const openAccess: CollectionConfig['access'] = {
-  read: () => true,
-  create: () => true,
-  delete: () => true,
-  update: () => true,
 }

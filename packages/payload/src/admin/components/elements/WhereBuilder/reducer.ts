@@ -50,26 +50,32 @@ const reducer = (state: Where[], action: Action): Where[] => {
         )[0] || [undefined, undefined]
 
         if (operator) {
+          const existingOperator = Object.keys(existingCondition)[0]
+
+          const newValue =
+            existingOperator && existingOperator !== operator
+              ? undefined
+              : Object.values(existingCondition)[0]
           newState[orIndex].and[andIndex] = {
             [existingFieldName]: {
-              [operator]: Object.values(existingCondition)[0],
+              [operator]: newValue,
             },
           }
         }
 
         if (field) {
           newState[orIndex].and[andIndex] = {
-            [field]: {
-              [Object.keys(existingCondition)[0]]: Object.values(existingCondition)[0],
-            },
+            [field]: operator ? { [operator]: value } : {},
           }
         }
 
         if (value !== undefined) {
           newState[orIndex].and[andIndex] = {
-            [existingFieldName]: {
-              [Object.keys(existingCondition)[0]]: value,
-            },
+            [existingFieldName]: Object.keys(existingCondition)[0]
+              ? {
+                  [Object.keys(existingCondition)[0]]: value,
+                }
+              : {},
           }
         }
       }

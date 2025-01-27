@@ -57,7 +57,7 @@ const {
 There are times when a custom field component needs to have access to data from other fields, and you have a few options to do so. The `useFormFields` hook is a powerful and highly performant way to retrieve a form's field state, as well as to retrieve the `dispatchFields` method, which can be helpful for setting other fields' form states from anywhere within a form.
 
 <Banner type="success">
-  <strong>This hook is great for retrieving only certain fields from form state</strong> because it
+  **This hook is great for retrieving only certain fields from form state** because it
   ensures that it will only cause a rerender when the items that you ask for change.
 </Banner>
 
@@ -133,8 +133,8 @@ To see types for each action supported within the `dispatchFields` hook, check o
 The `useForm` hook can be used to interact with the form itself, and sends back many methods that can be used to reactively fetch form state without causing rerenders within your components each time a field is changed. This is useful if you have action-based callbacks that your components fire, and need to interact with form state _based on a user action_.
 
 <Banner type="warning">
-  <strong>Warning:</strong>
-  <br />
+  **Warning:**
+
   This hook is optimized to avoid causing rerenders when fields change, and as such, its `fields`
   property will be out of date. You should only leverage this hook if you need to perform actions
   against the form in response to your users' actions. Do not rely on its returned "fields" as being
@@ -152,7 +152,7 @@ The `useForm` hook returns an object with the following properties: |
   rows={[
     [
       {
-        value: <strong><code>fields</code></strong>,
+        value: "**`fields`**",
       },
       {
         value: "Deprecated. This property cannot be relied on as up-to-date.",
@@ -163,7 +163,7 @@ The `useForm` hook returns an object with the following properties: |
     ],
     [
       {
-        value: <strong><code>submit</code></strong>,
+        value: "**`submit`**",
       },
       {
         value: "Method to trigger the form to submit",
@@ -174,7 +174,7 @@ The `useForm` hook returns an object with the following properties: |
     ],
     [
       {
-        value: <strong><code>dispatchFields</code></strong>,
+        value: "**`dispatchFields`**",
       },
       {
         value: "Dispatch actions to the form field state",
@@ -185,7 +185,7 @@ The `useForm` hook returns an object with the following properties: |
     ],
     [
       {
-        value: <strong><code>validateForm</code></strong>,
+        value: "**`validateForm`**",
       },
       {
         value: "Trigger a validation of the form state",
@@ -196,10 +196,10 @@ The `useForm` hook returns an object with the following properties: |
     ],
     [
       {
-        value: <strong><code>createFormData</code></strong>,
+        value: "**`createFormData`**",
       },
       {
-        value: <>Create a <code>multipart/form-data</code> object from the current form's state</>,
+        value: "Create a `multipart/form-data` object from the current form's state",
       },
       {
         value: ''
@@ -207,7 +207,7 @@ The `useForm` hook returns an object with the following properties: |
     ],
     [
       {
-        value: <strong><code>disabled</code></strong>,
+        value: "**`disabled`**",
       },
       {
         value: "Boolean denoting whether or not the form is disabled",
@@ -218,7 +218,7 @@ The `useForm` hook returns an object with the following properties: |
     ],
     [
       {
-        value: <strong><code>getFields</code></strong>,
+        value: "**`getFields`**",
       },
       {
         value: 'Gets all fields from state',
@@ -229,7 +229,7 @@ The `useForm` hook returns an object with the following properties: |
     ],
     [
       {
-        value: <strong><code>getField</code></strong>,
+        value: "**`getField`**",
       },
       {
         value: 'Gets a single field from state by path',
@@ -240,7 +240,7 @@ The `useForm` hook returns an object with the following properties: |
     ],
     [
       {
-        value: <strong><code>getData</code></strong>,
+        value: "**`getData`**",
       },
       {
         value: 'Returns the data stored in the form',
@@ -251,7 +251,7 @@ The `useForm` hook returns an object with the following properties: |
     ],
     [
       {
-        value: <strong><code>getSiblingData</code></strong>,
+        value: "**`getSiblingData`**",
       },
       {
         value: 'Returns form sibling data for the given field path',
@@ -262,21 +262,10 @@ The `useForm` hook returns an object with the following properties: |
     ],
     [
       {
-        value: <strong><code>setModified</code></strong>,
+        value: "**`setModified`**",
       },
       {
-        value: <>Set the form\'s <code>modified</code> state</>,
-      },
-      {
-        value: '',
-      },
-    ],
-    [
-      {
-        value: <strong><code>setProcessing</code></strong>,
-      },
-      {
-        value: <>Set the form\'s <code>processing</code> state</>,
+        value: "Set the form\'s `modified` state",
       },
       {
         value: '',
@@ -284,10 +273,10 @@ The `useForm` hook returns an object with the following properties: |
     ],
     [
       {
-        value: <strong><code>setSubmitted</code></strong>,
+        value: "**`setProcessing`**",
       },
       {
-        value: <>Set the form\'s <code>submitted</code> state</>,
+        value: "Set the form\'s `processing` state",
       },
       {
         value: '',
@@ -295,7 +284,18 @@ The `useForm` hook returns an object with the following properties: |
     ],
     [
       {
-        value: <strong><code>formRef</code></strong>,
+        value: "**`setSubmitted`**",
+      },
+      {
+        value: "Set the form\'s `submitted` state",
+      },
+      {
+        value: '',
+      },
+    ],
+    [
+      {
+        value: "**`formRef`**",
       },
       {
         value: 'The ref from the form HTML element',
@@ -306,7 +306,7 @@ The `useForm` hook returns an object with the following properties: |
     ],
     [
       {
-        value: <strong><code>reset</code></strong>,
+        value: "**`reset`**",
       },
       {
         value: 'Method to reset the form to its initial state',
@@ -317,17 +317,16 @@ The `useForm` hook returns an object with the following properties: |
     ],
     [
       {
-        value: <strong><code>addFieldRow</code></strong>,
+        value: "**`addFieldRow`**",
       },
       {
         value: "Method to add a row on an array or block field",
       },
       {
         drawerTitle: 'addFieldRow',
-        drawerDescription: 'A useful method to programtically add a row to an array or block field.',
+        drawerDescription: 'A useful method to programmatically add a row to an array or block field.',
         drawerSlug: 'addFieldRow',
-        drawerContent: (
-<>
+        drawerContent: `
   <TableWithDrawers
     columns={[
       'Prop',
@@ -336,7 +335,7 @@ The `useForm` hook returns an object with the following properties: |
     rows={[
       [
         {
-          value: <strong><code>path</code></strong>,
+          value: "**\\\`path\\\`**",
         },
         {
           value: "The path to the array or block field",
@@ -344,15 +343,15 @@ The `useForm` hook returns an object with the following properties: |
       ],
       [
         {
-          value: <strong><code>rowIndex</code></strong>,
+          value: "**\\\`rowIndex\\\`**",
         },
         {
-          value: "The index of the row to add",
+          value: "The index of the row to add. If omitted, the row will be added to the end of the array.",
         },
       ],
       [
         {
-          value: <strong><code>data</code></strong>,
+          value: "**\\\`data\\\`**",
         },
         {
           value: "The data to add to the row",
@@ -361,14 +360,9 @@ The `useForm` hook returns an object with the following properties: |
     ]}
   />
 
-{' '}
 
-<br />
-
-{' '}
-
-<pre>
-  {`import { useForm } from "payload/components/forms";
+\`\`\`tsx
+import { useForm } from "payload/components/forms";
 
 export const CustomArrayManager = () => {
   const { addFieldRow } = useForm()
@@ -391,12 +385,13 @@ export const CustomArrayManager = () => {
       Add Row
     </button>
   )
-}`}
-</pre>
+}
+\`\`\`
 
-  <p>An example config to go along with the custom component</p>
-  <pre>
-{`const ExampleCollection = {
+An example config to go along with the Custom Component
+
+\`\`\`tsx
+const ExampleCollection = {
   slug: "example-collection",
   fields: [
     {
@@ -414,30 +409,28 @@ export const CustomArrayManager = () => {
       name: "customArrayManager",
       admin: {
         components: {
-          Field: CustomArrayManager,
+          Field: '/path/to/CustomArrayManagerField',
         },
       },
     },
   ],
-}`}
-  </pre>
-</>
-        )
+}
+\`\`\`
+`
       }
     ],
     [
       {
-        value: <strong><code>removeFieldRow</code></strong>,
+        value: "**`removeFieldRow`**",
       },
       {
         value: "Method to remove a row from an array or block field",
       },
       {
         drawerTitle: 'removeFieldRow',
-        drawerDescription: 'A useful method to programtically remove a row from an array or block field.',
+        drawerDescription: 'A useful method to programmatically remove a row from an array or block field.',
         drawerSlug: 'removeFieldRow',
-        drawerContent: (
-<>
+        drawerContent:  `
   <TableWithDrawers
     columns={[
       'Prop',
@@ -446,7 +439,7 @@ export const CustomArrayManager = () => {
     rows={[
       [
         {
-          value: <strong><code>path</code></strong>,
+          value: "**\\\`path\\\`**",
         },
         {
           value: "The path to the array or block field",
@@ -454,7 +447,7 @@ export const CustomArrayManager = () => {
       ],
       [
         {
-          value: <strong><code>rowIndex</code></strong>,
+          value: "**\\\`rowIndex\\\`**",
         },
         {
           value: "The index of the row to remove",
@@ -463,14 +456,10 @@ export const CustomArrayManager = () => {
     ]}
   />
 
-{' '}
 
-<br />
 
-{' '}
-
-<pre>
-  {`import { useForm } from "payload/components/forms";
+\`\`\`tsx
+import { useForm } from "payload/components/forms";
 
 export const CustomArrayManager = () => {
   const { removeFieldRow } = useForm()
@@ -488,12 +477,13 @@ export const CustomArrayManager = () => {
       Remove Row
     </button>
   )
-}`}
-</pre>
+}
+\`\`\`
 
-  <p>An example config to go along with the custom component</p>
-  <pre>
-{`const ExampleCollection = {
+An example config to go along with the Custom Component
+
+\`\`\`tsx
+const ExampleCollection = {
   slug: "example-collection",
   fields: [
     {
@@ -511,30 +501,28 @@ export const CustomArrayManager = () => {
       name: "customArrayManager",
       admin: {
         components: {
-          Field: CustomArrayManager,
+          Field: '/path/to/CustomArrayManagerField',
         },
       },
     },
   ],
-}`}
-  </pre>
-</>
-        )
+}
+\`\`\`
+`
       }
     ],
     [
       {
-        value: <strong><code>replaceFieldRow</code></strong>,
+        value: "**`replaceFieldRow`**",
       },
       {
         value: "Method to replace a row from an array or block field",
       },
       {
         drawerTitle: 'replaceFieldRow',
-        drawerDescription: 'A useful method to programtically replace a row from an array or block field.',
+        drawerDescription: 'A useful method to programmatically replace a row from an array or block field.',
         drawerSlug: 'replaceFieldRow',
-        drawerContent: (
-<>
+        drawerContent:  `
   <TableWithDrawers
     columns={[
       'Prop',
@@ -543,7 +531,7 @@ export const CustomArrayManager = () => {
     rows={[
       [
         {
-          value: <strong><code>path</code></strong>,
+          value: "**\\\`path\\\`**",
         },
         {
           value: "The path to the array or block field",
@@ -551,7 +539,7 @@ export const CustomArrayManager = () => {
       ],
       [
         {
-          value: <strong><code>rowIndex</code></strong>,
+          value: "**\\\`rowIndex\\\`**",
         },
         {
           value: "The index of the row to replace",
@@ -559,7 +547,7 @@ export const CustomArrayManager = () => {
       ],
       [
         {
-          value: <strong><code>data</code></strong>,
+         value: "**\\\`data\\\`**",
         },
         {
           value: "The data to replace within the row",
@@ -568,14 +556,11 @@ export const CustomArrayManager = () => {
     ]}
   />
 
-{' '}
 
-<br />
 
-{' '}
 
-<pre>
-  {`import { useForm } from "payload/components/forms";
+\`\`\`tsx
+import { useForm } from "payload/components/forms";
 
 export const CustomArrayManager = () => {
   const { replaceFieldRow } = useForm()
@@ -598,12 +583,13 @@ export const CustomArrayManager = () => {
       Replace Row
     </button>
   )
-}`}
-</pre>
+}
+\`\`\`
 
-  <p>An example config to go along with the custom component</p>
-  <pre>
-{`const ExampleCollection = {
+An example config to go along with the Custom Component
+
+\`\`\`tsx
+const ExampleCollection = {
   slug: "example-collection",
   fields: [
     {
@@ -621,19 +607,49 @@ export const CustomArrayManager = () => {
       name: "customArrayManager",
       admin: {
         components: {
-          Field: CustomArrayManager,
+          Field: '/path/to/CustomArrayManagerField',
         },
       },
     },
   ],
-}`}
-  </pre>
-</>
-        )
+}
+\`\`\`
+`
       }
     ],
   ]}
 />
+
+### useCollapsible
+
+The `useCollapsible` hook allows you to control parent collapsibles:
+
+| Property                  | Description                                                                                                        |
+|---------------------------|--------------------------------------------------------------------------------------------------------------------|
+| **`collapsed`**          | State of the collapsible. `true` if open, `false` if collapsed                                                 |
+| **`isVisible`**              | If nested, determine if the nearest collapsible is visible. `true` if no parent is closed, `false` otherwise                                                        |
+| **`toggle`**                  | Toggles the state of the nearest collapsible                                                                |
+| **`withinCollapsible`**      | Determine when you are within another collaspible                                 |                                               |
+
+**Example:**
+
+```tsx
+import React from 'react'
+
+import { useCollapsible } from 'payload/components/utilities'
+
+const CustomComponent: React.FC = () => {
+  const { collapsed, toggle } = useCollapsible()
+  return (
+    <div>
+      <p className="field-type">I am {collapsed ? 'closed' : 'open'}</p>
+      <button onClick={toggle} type="button">
+        Toggle
+      </button>
+    </div>
+  )
+}
+```
 
 ### useDocumentInfo
 
@@ -758,3 +774,85 @@ const MyComponent: React.FC = () => {
 ### usePreferences
 
 Returns methods to set and get user preferences. More info can be found [here](https://payloadcms.com/docs/admin/preferences).
+
+### useTheme
+
+Returns the currently selected theme (`light`, `dark` or `auto`), a set function to update it and a boolean `autoMode`, used to determine if the theme value should be set automatically based on the user's device preferences.
+
+```tsx
+import { useTheme } from 'payload/components/utilities'
+
+const MyComponent: React.FC = () => {
+  // highlight-start
+  const { autoMode, setTheme, theme } = useTheme()
+  // highlight-end
+
+  return (
+    <>
+      <span>The current theme is {theme} and autoMode is {autoMode}</span>
+      <button
+        type="button"
+        onClick={() => setTheme(prev => prev === "light" ? "dark" : "light")}
+      >
+        Toggle theme
+      </button>
+    </>
+    )
+}
+```
+
+### useTableColumns
+
+Returns methods to manipulate table columns
+
+```tsx
+import { useTableColumns } from 'payload/components/hooks'
+
+const MyComponent: React.FC = () => {
+  // highlight-start
+  const { setActiveColumns } = useTableColumns()
+
+  const resetColumns = () => {
+    setActiveColumns(['id', 'createdAt', 'updatedAt'])
+  }
+  // highlight-end
+
+  return (
+    <button
+      type="button"
+      onClick={resetColumns}
+    >
+      Reset columns
+    </button>
+  )
+}
+```
+
+### useDocumentEvents
+
+The `useDocumentEvents` hook provides a way of subscribing to cross-document events, such as updates made to nested documents within a drawer. This hook will report document events that are outside the scope of the document currently being edited. This hook provides the following:
+
+| Property                  | Description                                                                                                                               |
+|---------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|
+| **`mostRecentUpdate`**    | An object containing the most recently updated document. It contains the `entitySlug`, `id` (if collection), and `updatedAt` properties   |
+| **`reportUpdate`**        | A method used to report updates to documents. It accepts the same arguments as the `mostRecentUpdate` property.                           |
+
+**Example:**
+
+```tsx
+import { useDocumentEvents } from 'payload/components/hooks'
+
+const ListenForUpdates: React.FC = () => {
+  const { mostRecentUpdate } = useDocumentEvents()
+
+  return (
+    <span>
+      {JSON.stringify(mostRecentUpdate)}
+    </span>
+  )
+}
+```
+
+<Banner type="info">
+  Right now the `useDocumentEvents` hook only tracks recently updated documents, but in the future it will track more document-related events as needed, such as document creation, deletion, etc.
+</Banner>

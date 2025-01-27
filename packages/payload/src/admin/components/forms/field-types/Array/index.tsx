@@ -29,9 +29,10 @@ const baseClass = 'array-field'
 const ArrayFieldType: React.FC<Props> = (props) => {
   const {
     name,
-    admin: { className, components, condition, description, readOnly },
+    admin: { className, components, condition, description, isSortable = true, readOnly },
     fieldTypes,
     fields,
+    forceRender = false,
     indexPath,
     localized,
     maxRows,
@@ -91,7 +92,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
     showError,
     valid,
     value,
-  } = useField<[]>({
+  } = useField<number>({
     condition,
     hasRows: true,
     path,
@@ -112,7 +113,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
 
   const duplicateRow = useCallback(
     (rowIndex: number) => {
-      dispatchFields({ path, rowIndex, type: 'DUPLICATE_ROW' })
+      dispatchFields({ type: 'DUPLICATE_ROW', path, rowIndex })
       setModified(true)
 
       setTimeout(() => {
@@ -123,8 +124,8 @@ const ArrayFieldType: React.FC<Props> = (props) => {
   )
 
   const removeRow = useCallback(
-    async (rowIndex: number) => {
-      await removeFieldRow({ path, rowIndex })
+    (rowIndex: number) => {
+      removeFieldRow({ path, rowIndex })
       setModified(true)
     },
     [removeFieldRow, path, setModified],
@@ -132,7 +133,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
 
   const moveRow = useCallback(
     (moveFromIndex: number, moveToIndex: number) => {
-      dispatchFields({ moveFromIndex, moveToIndex, path, type: 'MOVE_ROW' })
+      dispatchFields({ type: 'MOVE_ROW', moveFromIndex, moveToIndex, path })
       setModified(true)
     },
     [dispatchFields, path, setModified],
@@ -140,14 +141,14 @@ const ArrayFieldType: React.FC<Props> = (props) => {
 
   const toggleCollapseAll = useCallback(
     (collapsed: boolean) => {
-      dispatchFields({ collapsed, path, setDocFieldPreferences, type: 'SET_ALL_ROWS_COLLAPSED' })
+      dispatchFields({ type: 'SET_ALL_ROWS_COLLAPSED', collapsed, path, setDocFieldPreferences })
     },
     [dispatchFields, path, setDocFieldPreferences],
   )
 
   const setCollapse = useCallback(
     (rowID: string, collapsed: boolean) => {
-      dispatchFields({ collapsed, path, rowID, setDocFieldPreferences, type: 'SET_ROW_COLLAPSED' })
+      dispatchFields({ type: 'SET_ROW_COLLAPSED', collapsed, path, rowID, setDocFieldPreferences })
     },
     [dispatchFields, path, setDocFieldPreferences],
   )
@@ -213,6 +214,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
         <FieldDescription
           className={`field-description-${path.replace(/\./g, '__')}`}
           description={description}
+          path={path}
           value={value}
         />
       </header>
@@ -225,7 +227,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
           onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
         >
           {rows.map((row, i) => (
-            <DraggableSortableItem disabled={readOnly} id={row.id} key={row.id}>
+            <DraggableSortableItem disabled={readOnly || !isSortable} id={row.id} key={row.id}>
               {(draggableSortableItemProps) => (
                 <ArrayRow
                   {...draggableSortableItemProps}
@@ -234,8 +236,10 @@ const ArrayFieldType: React.FC<Props> = (props) => {
                   duplicateRow={duplicateRow}
                   fieldTypes={fieldTypes}
                   fields={fields}
+                  forceRender={forceRender}
                   hasMaxRows={hasMaxRows}
                   indexPath={indexPath}
+                  isSortable={isSortable}
                   labels={labels}
                   moveRow={moveRow}
                   path={path}
@@ -262,8 +266,8 @@ const ArrayFieldType: React.FC<Props> = (props) => {
                   {t('validation:requiresAtLeast', {
                     count: minRows,
                     label:
-                      getTranslation(minRows ? labels.plural : labels.singular, i18n) ||
-                      t(minRows > 1 ? 'general:row' : 'general:rows'),
+                      getTranslation(minRows > 1 ? labels.plural : labels.singular, i18n) ||
+                      t(minRows > 1 ? 'general:rows' : 'general:row'),
                   })}
                 </Banner>
               )}
@@ -278,7 +282,7 @@ const ArrayFieldType: React.FC<Props> = (props) => {
           icon="plus"
           iconPosition="left"
           iconStyle="with-border"
-          onClick={() => addRow(value?.length || 0)}
+          onClick={() => addRow(value || 0)}
         >
           {t('addLabel', { label: getTranslation(labels.singular, i18n) })}
         </Button>

@@ -39,6 +39,7 @@ export const defaults: Omit<Config, 'db' | 'editor'> = {
     schemaOutputFile: `${typeof process?.cwd === 'function' ? process.cwd() : ''}/schema.graphql`,
   },
   hooks: {},
+  joiValidation: true,
   localization: false,
   maxDepth: 10,
   rateLimit: {

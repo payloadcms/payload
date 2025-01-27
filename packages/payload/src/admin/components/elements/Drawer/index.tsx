@@ -1,5 +1,4 @@
 import { Modal, useModal } from '@faceless-ui/modal'
-import { useWindowInfo } from '@faceless-ui/window-info'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -52,9 +51,6 @@ export const Drawer: React.FC<Props> = ({
 }) => {
   const { t } = useTranslation('general')
   const { closeModal, modalState } = useModal()
-  const {
-    breakpoints: { m: midBreak },
-  } = useWindowInfo()
   const drawerDepth = useEditDepth()
   const [isOpen, setIsOpen] = useState(false)
   const [animateIn, setAnimateIn] = useState(false)
@@ -72,7 +68,12 @@ export const Drawer: React.FC<Props> = ({
 
     return (
       <Modal
-        className={[className, baseClass, animateIn && `${baseClass}--is-open`]
+        className={[
+          className,
+          baseClass,
+          animateIn && `${baseClass}--is-open`,
+          drawerDepth > 1 && `${baseClass}--nested`,
+        ]
           .filter(Boolean)
           .join(' ')}
         slug={slug}
@@ -80,7 +81,7 @@ export const Drawer: React.FC<Props> = ({
           zIndex: zBase + drawerDepth,
         }}
       >
-        {drawerDepth === 1 && <div className={`${baseClass}__blur-bg`} />}
+        {(!drawerDepth || drawerDepth === 1) && <div className={`${baseClass}__blur-bg`} />}
         <button
           aria-label={t('close')}
           className={`${baseClass}__close`}
@@ -89,7 +90,7 @@ export const Drawer: React.FC<Props> = ({
           type="button"
         />
         <div className={`${baseClass}__content`}>
-          <div className={`${baseClass}__blur-bg`} />
+          <div className={`${baseClass}__blur-bg-content`} />
           <Gutter className={`${baseClass}__content-children`} left={gutter} right={gutter}>
             <EditDepthContext.Provider value={drawerDepth + 1}>
               {header && header}

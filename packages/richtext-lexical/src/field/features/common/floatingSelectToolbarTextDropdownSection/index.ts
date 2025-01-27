@@ -3,14 +3,13 @@ import type {
   FloatingToolbarSectionEntry,
 } from '../../../lexical/plugins/FloatingSelectToolbar/types'
 
-import { TextIcon } from '../../../lexical/ui/icons/Text'
-import './index.scss'
-
 export const TextDropdownSectionWithEntries = (
   entries: FloatingToolbarSectionEntry[],
 ): FloatingToolbarSection => {
   return {
-    ChildComponent: TextIcon,
+    ChildComponent: () =>
+      // @ts-expect-error
+      import('../../../lexical/ui/icons/Text').then((module) => module.TextIcon),
     entries,
     key: 'dropdown-text',
     order: 1,

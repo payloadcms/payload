@@ -2,7 +2,7 @@ import { Drawer } from 'payload/components/elements'
 import { Form } from 'payload/components/forms'
 import { RenderFields } from 'payload/components/forms'
 import { FormSubmit } from 'payload/components/forms'
-import { fieldTypes } from 'payload/config'
+import { fieldTypes } from 'payload/components/forms'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -18,9 +18,10 @@ export const LinkDrawer: React.FC<Props> = ({
   initialState,
 }) => {
   const { t } = useTranslation('fields')
+
   return (
     <Drawer className={baseClass} slug={drawerSlug} title={t('editLink') ?? ''}>
-      <Form initialState={initialState} onSubmit={handleModalSubmit}>
+      <Form fields={fieldSchema} initialState={initialState} onSubmit={handleModalSubmit}>
         <RenderFields
           fieldSchema={fieldSchema}
           fieldTypes={fieldTypes}

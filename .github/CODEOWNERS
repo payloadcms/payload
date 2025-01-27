@@ -1,0 +1,32 @@
+# Order matters. The last matching pattern takes precedence.
+
+### Core ###
+
+### Adapters ###
+/packages/richtext-*/ @AlessioGr
+
+### Plugins ###
+/packages/plugin-cloud*/ @denolfe
+
+### Templates ###
+/templates/ @jacobsfletch @denolfe
+
+### Misc ###
+/packages/create-payload-app/ @denolfe
+/packages/eslint-*/ @denolfe
+
+### Build Files ###
+/**/package.json @denolfe
+
+/tsconfig.json @denolfe
+/**/tsconfig*.json @denolfe
+
+/jest.config.js @denolfe
+/**/jest.config.js @denolfe
+
+### Root ###
+/package.json @denolfe
+/scripts/ @denolfe
+/.husky/ @denolfe
+/.vscode/ @denolfe
+/.github/ @denolfe

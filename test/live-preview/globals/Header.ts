@@ -6,6 +6,7 @@ export const Header: GlobalConfig = {
   slug: 'header',
   access: {
     read: () => true,
+    update: () => true,
   },
   fields: [
     {

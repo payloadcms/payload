@@ -1,11 +1,15 @@
 @import '../../../../scss/styles.scss';
 
 .popup-button-list {
+  --list-button-padding: calc(var(--base) * 0.5);
   display: flex;
   flex-direction: column;
   text-align: left;
-  --list-button-padding: calc(var(--base) * 0.5);
-
+  gap: 3px;
+  [dir='rtl']
+  &__text-align--left {
+    text-align: right;
+  }
   &__text-align--left {
     text-align: left;
   }
@@ -13,10 +17,14 @@
   &__text-align--center {
     text-align: center;
   }
-
+  [dir='rtl']
+  &__text-align--right {
+    text-align: left;
+  }
   &__text-align--right {
     text-align: right;
   }
+
 
   &__button {
     @extend %btn-reset;
@@ -43,5 +51,9 @@
     &:focus-within {
       background-color: var(--popup-button-highlight);
     }
+  }
+
+  &__button--selected {
+    background-color: var(--theme-elevation-150);
   }
 }

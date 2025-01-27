@@ -31,6 +31,35 @@ describe('dataloader', () => {
       if (loginResult.token) token = loginResult.token
     })
 
+    it('should allow multiple parallel queries', async () => {
+      for (let i = 0; i < 100; i++) {
+        const query = `
+          query {
+            Shops {
+              docs {
+                name
+                items {
+                  name
+                }
+              }
+            }
+            Items {
+              docs {
+                name
+                itemTags {
+                  name
+                }
+              }
+            }
+          }`
+        const response = await client.request(query)
+        expect(response).toStrictEqual({
+          Shops: { docs: [{ name: 'shop1', items: [{ name: 'item1' }] }] },
+          Items: { docs: [{ name: 'item1', itemTags: [{ name: 'tag1' }] }] },
+        })
+      }
+    })
+
     it('should allow querying via graphql', async () => {
       const query = `query {
         Posts {

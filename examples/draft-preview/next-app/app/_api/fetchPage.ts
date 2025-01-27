@@ -16,7 +16,7 @@ export const fetchPage = async (
   const pageRes: {
     docs: Page[]
   } = await fetch(
-    `${process.env.NEXT_PUBLIC_CMS_URL}/api/pages?where[slug][equals]=${slug}${
+    `${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/pages?where[slug][equals]=${slug}${
       draft && payloadToken ? '&draft=true' : ''
     }`,
     {

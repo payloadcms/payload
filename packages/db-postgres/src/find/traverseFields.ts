@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import type { Field } from 'payload/types'
 
-import { fieldAffectsData } from 'payload/types'
+import { fieldAffectsData, tabHasName } from 'payload/types'
 import toSnakeCase from 'to-snake-case'
 
 import type { PostgresAdapter } from '../types'
@@ -15,6 +15,7 @@ type TraverseFieldArgs = {
   depth?: number
   fields: Field[]
   path: string
+  tablePath: string
   topLevelArgs: Record<string, unknown>
   topLevelTableName: string
 }
@@ -27,10 +28,50 @@ export const traverseFields = ({
   depth,
   fields,
   path,
+  tablePath,
   topLevelArgs,
   topLevelTableName,
 }: TraverseFieldArgs) => {
   fields.forEach((field) => {
+    if (field.type === 'collapsible' || field.type === 'row') {
+      traverseFields({
+        _locales,
+        adapter,
+        currentArgs,
+        currentTableName,
+        depth,
+        tablePath,
+        fields: field.fields,
+        path,
+        topLevelArgs,
+        topLevelTableName,
+      })
+
+      return
+    }
+
+    if (field.type === 'tabs') {
+      field.tabs.forEach((tab) => {
+        const tabPath = tabHasName(tab) ? `${path}${tab.name}_` : path
+        const tabTablePath = tabHasName(tab) ? `${tablePath}${toSnakeCase(tab.name)}_` : tablePath
+
+        traverseFields({
+          _locales,
+          adapter,
+          currentArgs,
+          currentTableName,
+          depth,
+          fields: tab.fields,
+          path: tabPath,
+          tablePath: tabTablePath,
+          topLevelArgs,
+          topLevelTableName,
+        })
+      })
+
+      return
+    }
+
     if (fieldAffectsData(field)) {
       switch (field.type) {
         case 'array': {
@@ -42,9 +83,13 @@ export const traverseFields = ({
             with: {},
           }
 
-          const arrayTableName = `${currentTableName}_${toSnakeCase(field.name)}`
+          const arrayTableName = adapter.tableNameMap.get(
+            `${currentTableName}_${tablePath}${toSnakeCase(field.name)}`,
+          )
 
-          if (adapter.tables[`${arrayTableName}_locales`]) withArray.with._locales = _locales
+          const arrayTableNameWithLocales = `${arrayTableName}${adapter.localesSuffix}`
+
+          if (adapter.tables[arrayTableNameWithLocales]) withArray.with._locales = _locales
           currentArgs.with[`${path}${field.name}`] = withArray
 
           traverseFields({
@@ -55,6 +100,7 @@ export const traverseFields = ({
             depth,
             fields: field.fields,
             path: '',
+            tablePath: '',
             topLevelArgs,
             topLevelTableName,
           })
@@ -92,18 +138,24 @@ export const traverseFields = ({
                 with: {},
               }
 
-              if (adapter.tables[`${topLevelTableName}_${toSnakeCase(block.slug)}_locales`])
+              const tableName = adapter.tableNameMap.get(
+                `${topLevelTableName}_blocks_${toSnakeCase(block.slug)}`,
+              )
+
+              if (adapter.tables[`${tableName}${adapter.localesSuffix}`]) {
                 withBlock.with._locales = _locales
+              }
               topLevelArgs.with[blockKey] = withBlock
 
               traverseFields({
                 _locales,
                 adapter,
                 currentArgs: withBlock,
-                currentTableName,
+                currentTableName: tableName,
                 depth,
+                tablePath: '',
                 fields: block.fields,
-                path,
+                path: '',
                 topLevelArgs,
                 topLevelTableName,
               })
@@ -118,6 +170,7 @@ export const traverseFields = ({
             adapter,
             currentArgs,
             currentTableName,
+            tablePath: `${tablePath}${toSnakeCase(field.name)}_`,
             depth,
             fields: field.fields,
             path: `${path}${field.name}_`,

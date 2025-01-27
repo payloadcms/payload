@@ -11,7 +11,6 @@ export const Media: React.FC<Props> = props => {
   const Tag = (htmlElement as any) || Fragment
 
   return (
-    // ts-expect-error
     <Tag
       {...(htmlElement !== null
         ? {
@@ -19,11 +18,7 @@ export const Media: React.FC<Props> = props => {
           }
         : {})}
     >
-      {isVideo ? (
-        <Video {...props} />
-      ) : (
-        <Image {...props} /> // eslint-disable-line
-      )}
+      {isVideo ? <Video {...props} /> : <Image {...props} />}
     </Tag>
   )
 }

@@ -2,6 +2,9 @@
 import type { PayloadRequest } from '../../express/types'
 import type { BaseDatabaseAdapter } from '../types'
 
+import { commitTransaction } from '../../utilities/commitTransaction'
+import { initTransaction } from '../../utilities/initTransaction'
+import { killTransaction } from '../../utilities/killTransaction'
 import { getMigrations } from './getMigrations'
 import { readMigrationFiles } from './readMigrationFiles'
 
@@ -16,7 +19,7 @@ export async function migrateReset(this: BaseDatabaseAdapter): Promise<void> {
     return
   }
 
-  let transactionID
+  const req = { payload } as PayloadRequest
 
   // Rollback all migrations in order
   for (const migration of migrationFiles) {
@@ -28,21 +31,21 @@ export async function migrateReset(this: BaseDatabaseAdapter): Promise<void> {
       payload.logger.info({ msg: `Migrating down: ${migration.name}` })
       try {
         const start = Date.now()
-        transactionID = await this.beginTransaction()
-        await migration.down({ payload })
+        await initTransaction(req)
+        await migration.down({ payload, req })
         await payload.delete({
           collection: 'payload-migrations',
-          req: { transactionID } as PayloadRequest,
+          req,
           where: {
             id: {
               equals: existingMigration.id,
             },
           },
         })
-        await this.commitTransaction(transactionID)
+        await commitTransaction(req)
         payload.logger.info({ msg: `Migrated down:  ${migration.name} (${Date.now() - start}ms)` })
       } catch (err: unknown) {
-        await this.rollbackTransaction(transactionID)
+        await killTransaction(req)
         payload.logger.error({ err, msg: `Error running migration ${migration.name}` })
         throw err
       }

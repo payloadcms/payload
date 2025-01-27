@@ -1,24 +1,28 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { FieldTypes } from '../../forms/field-types'
 import type { GlobalEditViewProps } from '../types'
 
 import { getTranslation } from '../../../../utilities/getTranslation'
 import { DocumentHeader } from '../../elements/DocumentHeader'
 import { FormLoadingOverlayToggle } from '../../elements/Loading'
 import Form from '../../forms/Form'
+import { useActions } from '../../utilities/ActionsProvider'
 import { OperationContext } from '../../utilities/OperationProvider'
+import { SetStepNav } from '../collections/Edit/SetStepNav'
 import { GlobalRoutes } from './Routes'
 import { CustomGlobalComponent } from './Routes/CustomComponent'
 import './index.scss'
 
 const baseClass = 'global-edit'
 
-const DefaultGlobalView: React.FC<
-  GlobalEditViewProps & {
-    disableRoutes?: boolean
-  }
-> = (props) => {
+export type DefaultGlobalViewProps = GlobalEditViewProps & {
+  disableRoutes?: boolean
+  fieldTypes: FieldTypes
+}
+
+const DefaultGlobalView: React.FC<DefaultGlobalViewProps> = (props) => {
   const { i18n } = useTranslation('general')
 
   const {
@@ -26,6 +30,7 @@ const DefaultGlobalView: React.FC<
     apiURL,
     data,
     disableRoutes,
+    fieldTypes,
     global,
     initialState,
     isLoading,
@@ -33,13 +38,36 @@ const DefaultGlobalView: React.FC<
     permissions,
   } = props
 
+  const { setViewActions } = useActions()
+
   const { label } = global
 
   const hasSavePermission = permissions?.update?.permission
 
+  useEffect(() => {
+    const path = location.pathname
+
+    if (!path.endsWith(global.slug)) {
+      return
+    }
+
+    const editConfig = global?.admin?.components?.views?.Edit
+    const defaultActions =
+      editConfig && 'Default' in editConfig && 'actions' in editConfig.Default
+        ? editConfig.Default.actions
+        : []
+
+    setViewActions(defaultActions)
+
+    return () => {
+      setViewActions([])
+    }
+  }, [global.slug, location.pathname, global?.admin?.components?.views?.Edit, setViewActions])
+
   return (
-    <main className={baseClass}>
+    <main className={`${baseClass} ${baseClass}--${global.slug}`}>
       <OperationContext.Provider value="update">
+        <SetStepNav global={global} />
         <Form
           action={action}
           className={`${baseClass}__form`}
@@ -59,7 +87,7 @@ const DefaultGlobalView: React.FC<
               {disableRoutes ? (
                 <CustomGlobalComponent view="Default" {...props} />
               ) : (
-                <GlobalRoutes {...props} />
+                <GlobalRoutes {...props} fieldTypes={fieldTypes} />
               )}
             </React.Fragment>
           )}

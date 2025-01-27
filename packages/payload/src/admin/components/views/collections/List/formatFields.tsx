@@ -1,5 +1,3 @@
-import React from 'react'
-
 import type { SanitizedCollectionConfig } from '../../../../../collections/config/types'
 import type { Field } from '../../../../../fields/config/types'
 
@@ -8,29 +6,39 @@ import { fieldAffectsData, fieldIsPresentationalOnly } from '../../../../../fiel
 const formatFields = (config: SanitizedCollectionConfig): Field[] => {
   const hasID =
     config.fields.findIndex((field) => fieldAffectsData(field) && field.name === 'id') > -1
+
+  const defaultIDField: Field = {
+    name: 'id',
+    type: 'text',
+    admin: {
+      disableBulkEdit: true,
+    },
+    label: 'ID',
+  }
+
+  const shouldSkipField = (field: Field): boolean =>
+    !fieldIsPresentationalOnly(field) && (field.hidden === true || field.admin?.disabled === true)
+
   const fields: Field[] = config.fields.reduce(
     (formatted, field) => {
-      if (
-        !fieldIsPresentationalOnly(field) &&
-        (field.hidden === true || field?.admin?.disabled === true)
-      ) {
+      if (shouldSkipField(field)) {
         return formatted
       }
 
-      return [...formatted, field]
+      const formattedField =
+        field.type === 'tabs'
+          ? {
+              ...field,
+              tabs: field.tabs.map((tab) => ({
+                ...tab,
+                fields: tab.fields.filter((tabField) => !shouldSkipField(tabField)),
+              })),
+            }
+          : field
+
+      return [...formatted, formattedField]
     },
-    hasID
-      ? []
-      : [
-          {
-            name: 'id',
-            admin: {
-              disableBulkEdit: true,
-            },
-            label: 'ID',
-            type: 'text',
-          },
-        ],
+    hasID ? [] : [defaultIDField],
   )
 
   return fields

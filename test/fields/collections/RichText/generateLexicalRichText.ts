@@ -54,7 +54,7 @@ export function generateLexicalRichText() {
               format: '',
               indent: 0,
               type: 'link',
-              version: 1,
+              version: 2,
               fields: {
                 url: 'https://payloadcms.com',
                 newTab: true,
@@ -86,13 +86,11 @@ export function generateLexicalRichText() {
               format: '',
               indent: 0,
               type: 'link',
-              version: 1,
+              version: 2,
               fields: {
                 url: 'https://',
                 doc: {
-                  value: {
-                    id: '{{ARRAY_DOC_ID}}',
-                  },
+                  value: '{{ARRAY_DOC_ID}}',
                   relationTo: 'array-fields',
                 },
                 newTab: false,

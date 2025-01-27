@@ -1,0 +1,146 @@
+---
+title: Search Plugin
+label: Search
+order: 20
+desc: Generates records of your documents that are extremely fast to search on.
+keywords: plugins, search, search plugin, search engine, search index, search results, search bar, search box, search field, search form, search input
+---
+
+[![NPM](https://img.shields.io/npm/v/@payloadcms/plugin-search)](https://www.npmjs.com/package/@payloadcms/plugin-search)
+
+This plugin generates records of your documents that are extremely fast to search on. It does so by creating a new `search` collection that is indexed in the database then saving a static copy of each of your documents using only search-critical data. Search records are automatically created, synced, and deleted behind-the-scenes as you manage your application's documents.
+
+For example, if you have a posts collection that is extremely large and complex, this would allow you to sync just the title, excerpt, and slug of each post so you can query on _that_ instead of the original post directly. Search records are static, so querying them also has the significant advantage of bypassing any hooks that may present be on the original documents. You define exactly what data is synced, and you can even modify or fallback this data before it is saved on a per-document basis.
+
+To query search results, use all the existing Payload APIs that you are already familiar with. You can also prioritize search results by setting a custom priority for each collection. For example, you may want to list blog posts before pages. Or you may want one specific post to always take appear first. Search records are given a `priority` field that can be used as the `?sort=` parameter in your queries.
+
+This plugin is a great way to implement a fast, immersive search experience such as a search bar in a front-end application. Many applications may not need the power and complexity of a third-party service like Algolia or ElasticSearch. This plugin provides a first-party alternative that is easy to set up and runs entirely on your own database.
+
+<Banner type="info">
+  This plugin is completely open-source and the [source code can be found here](https://github.com/payloadcms/payload/tree/main/packages/plugin-search). If you need help, check out our [Community Help](https://payloadcms.com/community-help). If you think you've found a bug, please [open a new issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%20search&template=bug_report.md&title=plugin-search%3A) with as much detail as possible.
+</Banner>
+
+##### Core Features
+
+- Automatically adds an indexed `search` collection to your database
+- Automatically creates, syncs, and deletes search records as you manage your documents
+- Saves only search-critical data that you define (e.g. title, excerpt, etc.)
+- Allows you to query search results using first-party Payload APIs
+- Allows you to query documents without triggering any of their underlying hooks
+- Allows you to easily prioritize search results by collection or document
+
+## Installation
+
+Install the plugin using any JavaScript package manager like [Yarn](https://yarnpkg.com), [NPM](https://npmjs.com), or [PNPM](https://pnpm.io):
+
+```bash
+  yarn add @payloadcms/plugin-search
+```
+
+## Basic Usage
+
+In the `plugins` array of your [Payload config](https://payloadcms.com/docs/configuration/overview), call the plugin with [options](#options):
+
+```js
+import { buildConfig } from 'payload/config'
+import search from '@payloadcms/plugin-search'
+
+const config = buildConfig({
+  collections: [
+    {
+      slug: 'pages',
+      fields: [],
+    },
+    {
+      slug: 'posts',
+      fields: [],
+    },
+  ],
+  plugins: [
+    search({
+      collections: ['pages', 'posts'],
+      defaultPriorities: {
+        pages: 10,
+        posts: 20,
+      },
+    }),
+  ],
+})
+
+export default config
+```
+
+### Options
+
+#### `collections`
+
+The `collections` property is an array of collection slugs to enable syncing to search. Enabled collections receive a `beforeChange` and `afterDelete` hook that creates, updates, and deletes its respective search record as it changes over time.
+
+#### `defaultPriorities`
+
+This plugin automatically adds a `priority` field to the `search` collection that can be used as the `?sort=` parameter in your queries. For example, you may want to list blog posts before pages. Or you may want one specific post to always take appear first.
+
+The `defaultPriorities` property is used to set a fallback `priority` on search records during the `create` operation. It accepts an object with keys that are your collection slugs and values that can either be a number or a function that returns a number. The function receives the `doc` as an argument, which is the document being created.
+
+```ts
+// payload.config.ts
+{
+  // ...
+  searchPlugin({
+    defaultPriorities: {
+      pages: ({ doc }) => (doc.title.startsWith('Hello, world!') ? 1 : 10),
+      posts: 20,
+    },
+  }),
+}
+```
+
+#### `searchOverrides`
+
+This plugin automatically creates the `search` collection, but you can override anything on this collection via the `searchOverrides` property. It accepts anything from the [Payload Collection Config](https://payloadcms.com/docs/configuration/collections) and merges it in with the default `search` collection config provided by the plugin.
+
+```ts
+// payload.config.ts
+{
+  // ...
+  searchPlugin({
+    searchOverrides: {
+      slug: 'search-results',
+    },
+  }),
+}
+```
+
+#### `beforeSync`
+
+Before creating or updating a search record, the `beforeSync` function runs. This is an [afterChange](https://payloadcms.com/docs/hooks/globals#afterchange) hook that allows you to modify the data or provide fallbacks before its search record is created or updated.
+
+```ts
+// payload.config.ts
+{
+  // ...
+  searchPlugin({
+    beforeSync: ({ originalDoc, searchDoc }) => ({
+      ...searchDoc,
+      // Modify your docs in any way here, this can be async
+      excerpt: originalDoc?.excerpt || 'This is a fallback excerpt',
+    }),
+  }),
+}
+```
+
+#### `syncDrafts`
+
+When `syncDrafts` is true, draft documents will be synced to search. This is false by default. You must have [Payload Drafts](https://payloadcms.com/docs/versions/drafts) enabled for this to apply.
+
+#### `deleteDrafts`
+
+If true, will delete documents from search whose status changes to draft. This is true by default. You must have [Payload Drafts](https://payloadcms.com/docs/versions/drafts) enabled for this to apply.
+
+## TypeScript
+
+All types can be directly imported:
+
+```ts
+import type { SearchConfig, BeforeSync } from '@payloadcms/plugin-search/types'
+```

@@ -1,14 +1,19 @@
 import type { RollbackTransaction } from 'payload/database'
 
 export const rollbackTransaction: RollbackTransaction = async function rollbackTransaction(
-  id = '',
+  incomingID = '',
 ) {
-  if (!this.sessions[id]) {
-    this.payload.logger.warn('rollbackTransaction called when no transaction exists')
+  const transactionID = incomingID instanceof Promise ? await incomingID : incomingID
+
+  // if multiple operations are using the same transaction, the first will flow through and delete the session.
+  // subsequent calls should be ignored.
+  if (!this.sessions[transactionID]) {
     return
   }
 
-  await this.sessions[id].reject()
+  // end the session promise in failure by calling reject
+  await this.sessions[transactionID].reject()
 
-  delete this.sessions[id]
+  // delete the session causing any other operations with the same transaction to fail
+  delete this.sessions[transactionID]
 }

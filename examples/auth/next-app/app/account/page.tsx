@@ -22,7 +22,7 @@ export default async function Account() {
       <h1>Account</h1>
       <p>
         {`This is your account dashboard. Here you can update your account information and more. To manage all users, `}
-        <Link href={`${process.env.NEXT_PUBLIC_CMS_URL}/admin/collections/users`}>
+        <Link href={`${process.env.NEXT_PUBLIC_PAYLOAD_URL}/admin/collections/users`}>
           login to the admin dashboard
         </Link>
         {'.'}

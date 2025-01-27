@@ -6,8 +6,11 @@ import type { Payload } from '../../../../packages/payload/src/payload'
 
 import { AuthenticationError } from '../../../../packages/payload/src/errors'
 import { devUser, regularUser } from '../../../credentials'
+import { afterLoginHook } from './afterLoginHook'
+import { meHook } from './meHook'
+import { refreshHook } from './refreshHook'
 
-const beforeLoginHook: BeforeLoginHook = ({ user, req }) => {
+const beforeLoginHook: BeforeLoginHook = ({ req, user }) => {
   const isAdmin = user.roles.includes('admin') ? user : undefined
   if (!isAdmin) {
     throw new AuthenticationError(req.t)
@@ -33,16 +36,23 @@ const Users: CollectionConfig = {
   fields: [
     {
       name: 'roles',
-      label: 'Role',
       type: 'select',
+      defaultValue: ['user'],
+      hasMany: true,
+      label: 'Role',
       options: ['admin', 'user'],
-      defaultValue: 'user',
       required: true,
       saveToJWT: true,
-      hasMany: true,
+    },
+    {
+      name: 'afterLoginHook',
+      type: 'checkbox',
     },
   ],
   hooks: {
+    me: [meHook],
+    refresh: [refreshHook],
+    afterLogin: [afterLoginHook],
     beforeLogin: [beforeLoginHook],
   },
 }

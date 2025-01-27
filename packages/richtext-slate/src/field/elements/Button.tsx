@@ -1,3 +1,4 @@
+'use client'
 import type { ElementType } from 'react'
 
 import { Tooltip } from 'payload/components'

@@ -1,5 +1,7 @@
 import type { Collection } from '../../../collections/config/types'
+import type { PayloadRequest } from '../../../express/types'
 
+import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
 import login from '../../operations/login'
 
 function loginResolver(collection: Collection) {
@@ -11,7 +13,7 @@ function loginResolver(collection: Collection) {
         password: args.password,
       },
       depth: 0,
-      req: context.req,
+      req: isolateObjectProperty<PayloadRequest>(context.req, 'transactionID'),
       res: context.res,
     }
 

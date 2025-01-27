@@ -16,7 +16,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
 ) {
   const VersionModel = this.versions[collection]
   const collectionConfig = this.payload.collections[collection].config
-  const options = withSession(this, req.transactionID)
+  const options = await withSession(this, req)
 
   let hasNearConstraint
   let sort
@@ -44,6 +44,9 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     where: combinedWhere,
   })
 
+  // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
+  const useEstimatedCount =
+    hasNearConstraint || !versionQuery || Object.keys(versionQuery).length === 0
   const paginationOptions: PaginateOptions = {
     forceCountFn: hasNearConstraint,
     lean: true,
@@ -52,7 +55,33 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     page,
     pagination,
     sort,
-    useEstimatedCount: hasNearConstraint,
+    useEstimatedCount,
+  }
+
+  if (this.collation) {
+    const defaultLocale = 'en'
+    paginationOptions.collation = {
+      locale: locale && locale !== 'all' && locale !== '*' ? locale : defaultLocale,
+      ...this.collation,
+    }
+  }
+
+  if (
+    !useEstimatedCount &&
+    Object.keys(versionQuery).length === 0 &&
+    this.disableIndexHints !== true
+  ) {
+    // Improve the performance of the countDocuments query which is used if useEstimatedCount is set to false by adding
+    // a hint. By default, if no hint is provided, MongoDB does not use an indexed field to count the returned documents,
+    // which makes queries very slow. This only happens when no query (filter) is provided. If one is provided, it uses
+    // the correct indexed field
+    paginationOptions.useCustomCountFn = () => {
+      return Promise.resolve(
+        VersionModel.countDocuments(versionQuery, {
+          hint: { _id: 1 },
+        }),
+      )
+    }
   }
 
   if (limit > 0) {
@@ -62,12 +91,14 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   }
 
   const result = await VersionModel.paginate(versionQuery, paginationOptions)
-  const docs = JSON.parse(JSON.stringify(result.docs))
+
+  const docs = this.jsonParse ? JSON.parse(JSON.stringify(result.docs)) : result.docs
 
   return {
     ...result,
     docs: docs.map((doc) => {
       // eslint-disable-next-line no-param-reassign
+
       doc = {
         _id: doc.parent,
         id: doc.parent,

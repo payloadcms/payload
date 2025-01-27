@@ -1,14 +1,14 @@
 import React from 'react'
 import { StaticImageData } from 'next/image'
 
-import { Page } from '../../../payload/payload-types'
+import { Page } from '../../../payload-types'
 import { Gutter } from '../../_components/Gutter'
 import { Media } from '../../_components/Media'
 import RichText from '../../_components/RichText'
 
 import classes from './index.module.scss'
 
-type Props = Extract<Page['layout'][0], { blockType: 'mediaBlock' }> & {
+type Props = Extract<Exclude<Page['layout'], undefined>[0], { blockType: 'mediaBlock' }> & {
   staticImage?: StaticImageData
   id?: string
 }

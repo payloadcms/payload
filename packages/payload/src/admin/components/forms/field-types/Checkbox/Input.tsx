@@ -1,15 +1,21 @@
 import React from 'react'
 
+import type { Props as LabelProps } from '../../Label/types'
+
 import Check from '../../../icons/Check'
 import Line from '../../../icons/Line'
-import Label from '../../Label'
+import DefaultLabel from '../../Label'
 import './index.scss'
 
 const baseClass = 'checkbox-input'
 
 type CheckboxInputProps = {
+  Label?: React.ComponentType<LabelProps>
+  afterInput?: React.ComponentType<any>[]
   'aria-label'?: string
+  beforeInput?: React.ComponentType<any>[]
   checked?: boolean
+  className?: string
   id?: string
   inputRef?: React.MutableRefObject<HTMLInputElement>
   label?: string
@@ -18,23 +24,27 @@ type CheckboxInputProps = {
   partialChecked?: boolean
   readOnly?: boolean
   required?: boolean
-  className?: string
 }
 
 export const CheckboxInput: React.FC<CheckboxInputProps> = (props) => {
   const {
     id,
     name,
+    Label,
+    afterInput,
     'aria-label': ariaLabel,
+    beforeInput,
     checked,
+    className,
     inputRef,
     label,
     onToggle,
     partialChecked,
     readOnly,
     required,
-    className,
   } = props
+
+  const LabelComp = Label || DefaultLabel
 
   return (
     <div
@@ -48,6 +58,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = (props) => {
         .join(' ')}
     >
       <div className={`${baseClass}__input`}>
+        {Array.isArray(beforeInput) && beforeInput.map((Component, i) => <Component key={i} />)}
         <input
           aria-label={ariaLabel}
           defaultChecked={Boolean(checked)}
@@ -58,12 +69,13 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = (props) => {
           ref={inputRef}
           type="checkbox"
         />
+        {Array.isArray(afterInput) && afterInput.map((Component, i) => <Component key={i} />)}
         <span className={`${baseClass}__icon ${!partialChecked ? 'check' : 'partial'}`}>
           {!partialChecked && <Check />}
           {partialChecked && <Line />}
         </span>
       </div>
-      {label && <Label htmlFor={id} label={label} required={required} />}
+      {label && <LabelComp htmlFor={id} label={label} required={required} />}
     </div>
   )
 }

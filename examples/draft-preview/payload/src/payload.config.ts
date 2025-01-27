@@ -1,3 +1,6 @@
+import { webpackBundler } from '@payloadcms/bundler-webpack'
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
+import { slateEditor } from '@payloadcms/richtext-slate'
 import path from 'path'
 import { buildConfig } from 'payload/config'
 
@@ -9,10 +12,15 @@ import { MainMenu } from './globals/MainMenu'
 export default buildConfig({
   collections: [Pages, Users],
   admin: {
+    bundler: webpackBundler(),
     components: {
       beforeLogin: [BeforeLogin],
     },
   },
+  editor: slateEditor({}),
+  db: mongooseAdapter({
+    url: process.env.DATABASE_URI,
+  }),
   serverURL: process.env.PAYLOAD_PUBLIC_SERVER_URL,
   cors: [
     process.env.PAYLOAD_PUBLIC_SERVER_URL || '',

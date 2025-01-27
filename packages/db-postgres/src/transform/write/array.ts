@@ -1,17 +1,20 @@
 /* eslint-disable no-param-reassign */
 import type { ArrayField } from 'payload/types'
 
+import type { PostgresAdapter } from '../../types'
 import type { ArrayRowToInsert, BlockRowToInsert, RelationshipToDelete } from './types'
 
 import { isArrayOfRows } from '../../utilities/isArrayOfRows'
 import { traverseFields } from './traverseFields'
 
 type Args = {
+  adapter: PostgresAdapter
   arrayTableName: string
   baseTableName: string
   blocks: {
     [blockType: string]: BlockRowToInsert[]
   }
+  blocksToDelete: Set<string>
   data: unknown
   field: ArrayField
   locale?: string
@@ -22,12 +25,20 @@ type Args = {
   selects: {
     [tableName: string]: Record<string, unknown>[]
   }
+  texts: Record<string, unknown>[]
+  /**
+   * Set to a locale code if this set of fields is traversed within a
+   * localized array or block field
+   */
+  withinArrayOrBlockLocale?: string
 }
 
 export const transformArray = ({
+  adapter,
   arrayTableName,
   baseTableName,
   blocks,
+  blocksToDelete,
   data,
   field,
   locale,
@@ -36,8 +47,12 @@ export const transformArray = ({
   relationships,
   relationshipsToDelete,
   selects,
+  texts,
+  withinArrayOrBlockLocale,
 }: Args) => {
   const newRows: ArrayRowToInsert[] = []
+
+  const hasUUID = adapter.tables[arrayTableName]._uuid
 
   if (isArrayOfRows(data)) {
     data.forEach((arrayRow, i) => {
@@ -47,6 +62,16 @@ export const transformArray = ({
         row: {
           _order: i + 1,
         },
+      }
+
+      // If we have declared a _uuid field on arrays,
+      // that means the ID has to be unique,
+      // and our ids within arrays are not unique.
+      // So move the ID to a uuid field for storage
+      // and allow the database to generate a serial id automatically
+      if (hasUUID) {
+        newRow.row._uuid = arrayRow.id
+        delete arrayRow.id
       }
 
       if (locale) {
@@ -59,10 +84,16 @@ export const transformArray = ({
         newRow.row._locale = locale
       }
 
+      if (withinArrayOrBlockLocale) {
+        newRow.row._locale = withinArrayOrBlockLocale
+      }
+
       traverseFields({
+        adapter,
         arrays: newRow.arrays,
         baseTableName,
         blocks,
+        blocksToDelete,
         columnPrefix: '',
         data: arrayRow,
         fieldPrefix: '',
@@ -75,6 +106,8 @@ export const transformArray = ({
         relationshipsToDelete,
         row: newRow.row,
         selects,
+        texts,
+        withinArrayOrBlockLocale,
       })
 
       newRows.push(newRow)

@@ -5,7 +5,8 @@
   top: 0;
   bottom: auto;
   left: auto;
-  right: base(0.5);
+  max-width: 75%;
+  right: calc(var(--base) * 0.5);
   transform: none;
   background-color: var(--theme-error-500);
 

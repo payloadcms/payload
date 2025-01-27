@@ -1,3 +1,4 @@
+'use client'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection'
 import { $getNodeByKey, type ElementFormatType } from 'lexical'
@@ -12,8 +13,7 @@ import { useTranslation } from 'react-i18next'
 import type { RelationshipData } from '../RelationshipNode'
 
 import { useEditorConfigContext } from '../../../../lexical/config/EditorConfigProvider'
-import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from '../../drawer'
-import { EnabledRelationshipsCondition } from '../../utils/EnabledRelationshipsCondition'
+import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from '../../drawer/commands'
 import './index.scss'
 
 const baseClass = 'lexical-relationship'
@@ -101,34 +101,37 @@ const Component: React.FC<Props> = (props) => {
           </p>
         </DocumentDrawerToggler>
       </div>
-      <div className={`${baseClass}__actions`}>
-        <Button
-          buttonStyle="icon-label"
-          className={`${baseClass}__swapButton`}
-          disabled={field?.admin?.readOnly}
-          el="div"
-          icon="swap"
-          onClick={() => {
-            editor.dispatchCommand(INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND, {
-              replace: { nodeKey },
-            })
-          }}
-          round
-          tooltip={t('swapRelationship')}
-        />
-        <Button
-          buttonStyle="icon-label"
-          className={`${baseClass}__removeButton`}
-          disabled={field?.admin?.readOnly}
-          icon="x"
-          onClick={(e) => {
-            e.preventDefault()
-            removeRelationship()
-          }}
-          round
-          tooltip={t('fields:removeRelationship')}
-        />
-      </div>
+      {editor.isEditable() && (
+        <div className={`${baseClass}__actions`}>
+          <Button
+            buttonStyle="icon-label"
+            className={`${baseClass}__swapButton`}
+            disabled={field?.admin?.readOnly}
+            el="div"
+            icon="swap"
+            onClick={() => {
+              editor.dispatchCommand(INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND, {
+                replace: { nodeKey },
+              })
+            }}
+            round
+            tooltip={t('swapRelationship')}
+          />
+          <Button
+            buttonStyle="icon-label"
+            className={`${baseClass}__removeButton`}
+            disabled={field?.admin?.readOnly}
+            icon="x"
+            onClick={(e) => {
+              e.preventDefault()
+              removeRelationship()
+            }}
+            round
+            tooltip={t('fields:removeRelationship')}
+          />
+        </div>
+      )}
+
       {id && <DocumentDrawer onSave={updateRelationship} />}
       {children}
     </div>
@@ -136,9 +139,5 @@ const Component: React.FC<Props> = (props) => {
 }
 
 export const RelationshipComponent = (props: Props): React.ReactNode => {
-  return (
-    <EnabledRelationshipsCondition {...props}>
-      <Component {...props} />
-    </EnabledRelationshipsCondition>
-  )
+  return <Component {...props} />
 }

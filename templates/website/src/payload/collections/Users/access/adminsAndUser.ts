@@ -9,7 +9,9 @@ const adminsAndUser: Access = ({ req: { user } }) => {
     }
 
     return {
-      id: user.id,
+      id: {
+        equals: user.id,
+      },
     }
   }
 

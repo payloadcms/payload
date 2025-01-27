@@ -1,6 +1,10 @@
 @import 'payload/scss';
 
 .rich-text-lexical {
+  .editor {
+    position: relative;
+  }
+
   .editor-shell {
     position: relative;
 
@@ -33,4 +37,22 @@
     /* Make it behave more like a background element (no interaction) */
     pointer-events: none;
   }
+}
+
+.floating-select-toolbar-popup__section-dropdown-align {
+  display: flex;
+  gap: 2px;
+}
+.floating-select-toolbar-popup__section-features {
+  display: flex;
+  gap: 2px;
+}
+.floating-select-toolbar-popup__section-dropdown-text {
+  display: flex;
+  gap: 2px;
+}
+
+.floating-select-toolbar-popup__section-format {
+  display: flex;
+  gap: 2px;
 }

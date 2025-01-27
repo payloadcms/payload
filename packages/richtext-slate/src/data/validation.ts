@@ -7,8 +7,8 @@ import { defaultRichTextValue } from './defaultValue'
 export const richTextValidate: Validate<
   unknown,
   unknown,
-  RichTextField<AdapterArguments>,
-  RichTextField<AdapterArguments>
+  RichTextField<any[], AdapterArguments>,
+  RichTextField<any[], AdapterArguments>
 > = (value, { required, t }) => {
   if (required) {
     const stringifiedDefaultValue = JSON.stringify(defaultRichTextValue)

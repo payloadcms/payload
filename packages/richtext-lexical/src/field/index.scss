@@ -2,7 +2,12 @@
 
 .rich-text-lexical {
   display: flex;
-  isolation: isolate;
+
+  .errorBoundary {
+    pre {
+      text-wrap: unset;
+    }
+  }
 
   &__wrap {
     width: 100%;
@@ -11,9 +16,11 @@
 
   &--read-only {
     .editor-shell {
-      background: var(--theme-elevation-200);
-      color: var(--theme-elevation-450);
-      padding: base(0.5);
+      .editor {
+        background: var(--theme-elevation-200);
+        color: var(--theme-elevation-450);
+        padding: base(0.5);
+      }
     }
   }
 }

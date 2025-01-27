@@ -32,7 +32,7 @@ export const registerLocalStrategy = async ({
 
   if (existingUser.docs.length > 0) {
     throw new ValidationError([
-      { field: 'email', message: 'A user with the given email is already registered' },
+      { field: 'email', message: req.t('error:userEmailAlreadyRegistered') },
     ])
   }
 
@@ -41,7 +41,7 @@ export const registerLocalStrategy = async ({
   const sanitizedDoc = { ...doc }
   if (sanitizedDoc.password) delete sanitizedDoc.password
 
-  return payload.db.create({
+  const dbArgs = {
     collection: collection.slug,
     data: {
       ...sanitizedDoc,
@@ -49,5 +49,10 @@ export const registerLocalStrategy = async ({
       salt,
     },
     req,
-  })
+  }
+  if (collection?.db?.create) {
+    return collection.db.create(dbArgs)
+  } else {
+    return payload.db.create(dbArgs)
+  }
 }

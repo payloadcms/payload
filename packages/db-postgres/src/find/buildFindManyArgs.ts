@@ -33,6 +33,16 @@ export const buildFindManyArgs = ({
     },
   }
 
+  if (adapter.tables[`${tableName}_texts`]) {
+    result.with._texts = {
+      columns: {
+        id: false,
+        parent: false,
+      },
+      orderBy: ({ order }, { asc: ASC }) => [ASC(order)],
+    }
+  }
+
   if (adapter.tables[`${tableName}_numbers`]) {
     result.with._numbers = {
       columns: {
@@ -43,7 +53,7 @@ export const buildFindManyArgs = ({
     }
   }
 
-  if (adapter.tables[`${tableName}_rels`]) {
+  if (adapter.tables[`${tableName}${adapter.relationshipsSuffix}`]) {
     result.with._rels = {
       columns: {
         id: false,
@@ -53,7 +63,7 @@ export const buildFindManyArgs = ({
     }
   }
 
-  if (adapter.tables[`${tableName}_locales`]) {
+  if (adapter.tables[`${tableName}${adapter.localesSuffix}`]) {
     result.with._locales = _locales
   }
 
@@ -65,6 +75,7 @@ export const buildFindManyArgs = ({
     depth,
     fields,
     path: '',
+    tablePath: '',
     topLevelArgs: result,
     topLevelTableName: tableName,
   })

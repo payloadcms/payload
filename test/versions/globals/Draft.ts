@@ -1,12 +1,26 @@
 import type { GlobalConfig } from '../../../packages/payload/src/globals/config/types'
 
-import { draftGlobalSlug } from '../shared'
+import GlobalVersionButton from '../elements/GlobalVersionButton'
+import GlobalVersionsButton from '../elements/GlobalVersionsButton'
+import { draftGlobalSlug } from '../slugs'
 
 const DraftGlobal: GlobalConfig = {
   slug: draftGlobalSlug,
   label: 'Draft Global',
   admin: {
     preview: () => 'https://payloadcms.com',
+    components: {
+      views: {
+        Edit: {
+          Version: {
+            actions: [GlobalVersionButton],
+          },
+          Versions: {
+            actions: [GlobalVersionsButton],
+          },
+        },
+      },
+    },
   },
   versions: {
     max: 20,

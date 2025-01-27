@@ -1,5 +1,5 @@
 import type { SQL } from 'drizzle-orm'
-import type { Field } from 'payload/types'
+import type { Field, PayloadRequest } from 'payload/types'
 
 import type { DrizzleDB, GenericColumn, PostgresAdapter } from '../types'
 
@@ -9,6 +9,7 @@ type BaseArgs = {
   db: DrizzleDB
   fields: Field[]
   path?: string
+  req: PayloadRequest
   tableName: string
 }
 

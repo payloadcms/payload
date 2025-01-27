@@ -10,11 +10,11 @@ import { withSession } from './withSession'
 
 export const findGlobal: FindGlobal = async function findGlobal(
   this: MongooseAdapter,
-  { locale, req = {} as PayloadRequest, slug, where },
+  { slug, locale, req = {} as PayloadRequest, where },
 ) {
   const Model = this.globals
   const options = {
-    ...withSession(this, req.transactionID),
+    ...(await withSession(this, req)),
     lean: true,
   }
 
@@ -30,12 +30,16 @@ export const findGlobal: FindGlobal = async function findGlobal(
   if (!doc) {
     return null
   }
+
+  if (this.jsonParse) {
+    doc = JSON.parse(JSON.stringify(doc))
+  }
+
   if (doc._id) {
-    doc.id = doc._id
+    doc.id = JSON.parse(JSON.stringify(doc._id))
     delete doc._id
   }
 
-  doc = JSON.parse(JSON.stringify(doc))
   doc = sanitizeInternalFields(doc)
 
   return doc

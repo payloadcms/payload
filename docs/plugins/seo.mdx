@@ -1,0 +1,214 @@
+---
+title: SEO Plugin
+label: SEO
+order: 20
+desc: Manage SEO metadata from your Payload admin
+keywords: plugins, seo, meta, search, engine, ranking, google
+---
+
+[![NPM](https://img.shields.io/npm/v/@payloadcms/plugin-seo)](https://www.npmjs.com/package/@payloadcms/plugin-seo)
+
+This plugin allows you to easily manage SEO metadata for your application from within your admin panel. When enabled on your collections and globals, it adds a new `meta` field group containing `title`, `description`, and `image` by default. Your front-end application can then use this data to render meta tags however your application requires. For example, you would inject a `title` tag into the `<head>` of your page using `meta.title` as its content.
+
+As users are editing documents within the admin panel, they have the option to "auto-generate" these fields. When clicked, this plugin will execute your own custom functions that re-generate the title, description, and image. This way you can build your own SEO writing assistance directly into your application. For example, you could append your site name onto the page title, or use the document's excerpt field as the description, or even integrate with some third-party API to generate the image using AI.
+
+To help you visualize what your page might look like in a search engine, a preview is rendered on page just beneath the meta fields. This preview is updated in real-time as you edit your metadata. There are also visual indicators to help you write effective meta, such as a character counter for the title and description fields. You can even inject your own custom fields into the `meta` field group as your application requires, like `og:title` or `json-ld`. If you've ever used something like Yoast SEO, this plugin might feel very familiar.
+
+<Banner type="info">
+  This plugin is completely open-source and the [source code can be found here](https://github.com/payloadcms/payload/tree/main/packages/plugin-seo). If you need help, check out our [Community Help](https://payloadcms.com/community-help). If you think you've found a bug, please [open a new issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%20seo&template=bug_report.md&title=plugin-seo%3A) with as much detail as possible.
+</Banner>
+
+##### Core features
+
+- Adds a `meta` field group to every SEO-enabled collection or global
+- Allows you to define custom functions to auto-generate metadata
+- Displays hints and indicators to help content editor write effective meta
+- Renders a snippet of what a search engine might display
+- Extendable so you can define custom fields like `og:title` or `json-ld`
+- Soon will support dynamic variable injection
+
+## Installation
+
+Install the plugin using any JavaScript package manager like [Yarn](https://yarnpkg.com), [NPM](https://npmjs.com), or [PNPM](https://pnpm.io):
+
+```bash
+  yarn add @payloadcms/plugin-seo
+```
+
+## Basic Usage
+
+In the `plugins` array of your [Payload config](https://payloadcms.com/docs/configuration/overview), call the plugin with [options](#options):
+
+```ts
+import { buildConfig } from 'payload/config';
+import seoPlugin from '@payloadcms/plugin-seo';
+
+const config = buildConfig({
+  collections: [
+    {
+      slug: 'pages',
+      fields: []
+    },
+    {
+      slug: 'media',
+      upload: {
+        staticDir: // path to your static directory,
+      },
+      fields: []
+    }
+  ],
+  plugins: [
+    seoPlugin({
+      collections: [
+        'pages',
+      ],
+      uploadsCollection: 'media',
+      generateTitle: ({ doc }) => `Website.com — ${doc.title.value}`,
+      generateDescription: ({ doc }) => doc.excerpt
+    })
+  ]
+});
+
+export default config;
+```
+
+### Options
+
+##### `collections`
+
+An array of collections slugs to enable SEO. Enabled collections receive a `meta` field which is an object of title, description, and image subfields.
+
+##### `globals`
+
+An array of global slugs to enable SEO. Enabled globals receive a `meta` field which is an object of title, description, and image subfields.
+
+##### `fields`
+
+An array of fields that allows you to inject your own custom fields onto the `meta` field group. The following fields are provided by default:
+
+  - `title`: text
+  - `description`: textarea
+  - `image`: upload (if an `uploadsCollection` is provided)
+  - `preview`: ui
+
+##### `uploadsCollection`
+
+Set the `uploadsCollection` to your application's upload-enabled collection slug. This is used to provide an `image` field on the `meta` field group.
+
+##### `tabbedUI`
+
+When the `tabbedUI` property is `true`, it appends an `SEO` tab onto your config using Payload's [Tabs Field](https://payloadcms.com/docs/fields/tabs). If your collection is not already tab-enabled, meaning the first field in your config is not of type `tabs`, then one will be created for you called `Content`. Defaults to `false`.
+
+<Banner type="info">
+  If you wish to continue to use top-level or sidebar fields with `tabbedUI`, you must not let the default `Content` tab get created for you (see the note above). Instead, you must define the first field of your config with type `tabs` and place all other fields adjacent to this one.
+</Banner>
+
+##### `generateTitle`
+
+A function that allows you to return any meta title, including from document's content.
+
+```ts
+// payload.config.ts
+{
+  // ...
+  seoPlugin({
+    generateTitle: ({ ...docInfo, doc, locale }) => `Website.com — ${doc?.title?.value}`,
+  })
+}
+```
+
+##### `generateDescription`
+
+A function that allows you to return any meta description, including from document's content.
+
+```ts
+// payload.config.ts
+{
+  // ...
+  seoPlugin({
+    generateDescription: ({ ...docInfo, doc, locale }) => doc?.excerpt?.value
+  })
+}
+```
+
+##### `generateImage`
+
+A function that allows you to return any meta image, including from document's content.
+
+```ts
+// payload.config.ts
+{
+  // ...
+  seoPlugin({
+    generateImage: ({ ...docInfo, doc, locale }) => doc?.featuredImage?.value
+  })
+}
+```
+
+##### `generateURL`
+
+A function called by the search preview component to display the actual URL of your page.
+
+```ts
+// payload.config.ts
+{
+  // ...
+  seoPlugin({
+    generateURL: ({ ...docInfo, doc, locale }) => `https://yoursite.com/${collection?.slug}/${doc?.slug?.value}`
+  })
+}
+```
+
+#### `interfaceName`
+
+Rename the meta group interface name that is generated for TypeScript and GraphQL.
+
+```ts
+// payload.config.ts
+{
+  // ...
+  seoPlugin({
+    interfaceName: 'customInterfaceNameSEO'
+  })
+}
+```
+
+#### `fieldOverrides`
+
+Pass any valid field props to the base fields: Title, Description or Image.
+
+```ts
+// payload.config.ts
+seoPlugin({
+  // ...
+  fieldOverrides: {
+    title: {
+      required: true,
+    },
+    description: {
+      localized: true,
+    },
+  },
+})
+```
+
+## TypeScript
+
+All types can be directly imported:
+
+```ts
+import {
+  PluginConfig,
+  GenerateTitle,
+  GenerateDescription
+  GenerateURL
+} from '@payloadcms/plugin-seo/types';
+```
+
+## Examples
+
+The [Templates Directory](https://github.com/payloadcms/payload/tree/main/templates) contains an official [Website Template](https://github.com/payloadcms/payload/tree/main/templates/website) and [E-commerce Template](https://github.com/payloadcms/payload/tree/main/templates/ecommerce) which demonstrates exactly how to configure this plugin in Payload and implement it on your front-end.
+
+## Screenshots
+
+![image](https://user-images.githubusercontent.com/70709113/163850633-f3da5f8e-2527-4688-bc79-17233307a883.png)

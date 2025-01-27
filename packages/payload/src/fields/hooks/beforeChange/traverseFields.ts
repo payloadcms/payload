@@ -1,16 +1,20 @@
+import type { SanitizedCollectionConfig } from '../../../collections/config/types'
 import type { PayloadRequest, RequestContext } from '../../../express/types'
+import type { SanitizedGlobalConfig } from '../../../globals/config/types'
 import type { Operation } from '../../../types'
 import type { Field, TabAsField } from '../../config/types'
 
 import { promise } from './promise'
 
 type Args = {
+  collection: SanitizedCollectionConfig | null
   context: RequestContext
   data: Record<string, unknown>
   doc: Record<string, unknown>
   docWithLocales: Record<string, unknown>
   errors: { field: string; message: string }[]
   fields: (Field | TabAsField)[]
+  global: SanitizedGlobalConfig | null
   id?: number | string
   mergeLocaleActions: (() => void)[]
   operation: Operation
@@ -24,12 +28,14 @@ type Args = {
 
 export const traverseFields = async ({
   id,
+  collection,
   context,
   data,
   doc,
   docWithLocales,
   errors,
   fields,
+  global,
   mergeLocaleActions,
   operation,
   path,
@@ -45,12 +51,14 @@ export const traverseFields = async ({
     promises.push(
       promise({
         id,
+        collection,
         context,
         data,
         doc,
         docWithLocales,
         errors,
         field,
+        global,
         mergeLocaleActions,
         operation,
         path,

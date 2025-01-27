@@ -8,11 +8,12 @@ import { deepCopyObject } from '../../../utilities/deepCopyObject'
 import { traverseFields } from './traverseFields'
 
 type Args<T> = {
+  collection: SanitizedCollectionConfig | null
   context: RequestContext
   data: Record<string, unknown> | T
   doc: Record<string, unknown> | T
   docWithLocales: Record<string, unknown>
-  entityConfig: SanitizedCollectionConfig | SanitizedGlobalConfig
+  global: SanitizedGlobalConfig | null
   id?: number | string
   operation: Operation
   req: PayloadRequest
@@ -21,11 +22,12 @@ type Args<T> = {
 
 export const beforeChange = async <T extends Record<string, unknown>>({
   id,
+  collection,
   context,
   data: incomingData,
   doc,
   docWithLocales,
-  entityConfig,
+  global,
   operation,
   req,
   skipValidation,
@@ -36,12 +38,14 @@ export const beforeChange = async <T extends Record<string, unknown>>({
 
   await traverseFields({
     id,
+    collection,
     context,
     data,
     doc,
     docWithLocales,
     errors,
-    fields: entityConfig.fields,
+    fields: collection?.fields || global?.fields,
+    global,
     mergeLocaleActions,
     operation,
     path: '',

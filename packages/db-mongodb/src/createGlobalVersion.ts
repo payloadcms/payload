@@ -1,9 +1,9 @@
 import type { CreateGlobalVersion } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
-import type { Document } from 'payload/types'
 
 import type { MongooseAdapter } from '.'
 
+import sanitizeInternalFields from './utilities/sanitizeInternalFields'
 import { withSession } from './withSession'
 
 export const createGlobalVersion: CreateGlobalVersion = async function createGlobalVersion(
@@ -11,7 +11,7 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
   { autosave, createdAt, globalSlug, parent, req = {} as PayloadRequest, updatedAt, versionData },
 ) {
   const VersionModel = this.versions[globalSlug]
-  const options = withSession(this, req.transactionID)
+  const options = await withSession(this, req)
 
   const [doc] = await VersionModel.create(
     [
@@ -49,15 +49,15 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
       ],
     },
     { $unset: { latest: 1 } },
+    options,
   )
 
-  const result: Document = JSON.parse(JSON.stringify(doc))
+  const result = this.jsonParse ? JSON.parse(JSON.stringify(doc)) : doc.toObject()
+
   const verificationToken = doc._verificationToken
 
-  // custom id type reset
-  result.id = result._id
   if (verificationToken) {
     result._verificationToken = verificationToken
   }
-  return result
+  return sanitizeInternalFields(result)
 }

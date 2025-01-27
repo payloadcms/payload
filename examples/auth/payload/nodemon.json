@@ -1,4 +1,5 @@
 {
   "ext": "ts",
-  "exec": "ts-node src/server.ts"
+  "exec": "ts-node src/server.ts -- -I",
+  "stdin": false
 }

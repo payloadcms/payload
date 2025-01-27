@@ -2,20 +2,23 @@ import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
 import type { FeatureProvider } from '../../types'
 
-import { StrikethroughIcon } from '../../../lexical/ui/icons/Strikethrough'
 import { SectionWithEntries } from '../common/floatingSelectToolbarSection'
 import { STRIKETHROUGH } from './markdownTransformers'
 
 export const StrikethroughTextFeature = (): FeatureProvider => {
   return {
-    feature: ({ resolvedFeatures, unsanitizedEditorConfig }) => {
+    feature: () => {
       return {
         floatingSelectToolbar: {
           sections: [
             SectionWithEntries([
               {
-                ChildComponent: StrikethroughIcon,
-                isActive: ({ editor, selection }) => {
+                ChildComponent: () =>
+                  // @ts-expect-error
+                  import('../../../lexical/ui/icons/Strikethrough').then(
+                    (module) => module.StrikethroughIcon,
+                  ),
+                isActive: ({ selection }) => {
                   if ($isRangeSelection(selection)) {
                     return selection.hasFormat('strikethrough')
                   }

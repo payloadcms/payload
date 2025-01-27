@@ -43,11 +43,12 @@ export const PublicUser: CollectionConfig = {
 
 **Payload will automatically open up the following queries:**
 
-| Query Name         | Operation           |
-| ------------------ | ------------------- |
-| **`PublicUser`**   | `findByID`          |
-| **`PublicUsers`**  | `find`              |
-| **`mePublicUser`** | `me` auth operation |
+| Query Name              | Operation           |
+| ------------------      | ------------------- |
+| **`PublicUser`**        | `findByID`          |
+| **`PublicUsers`**       | `find`              |
+| **`countPublicUsers`**  | `count`             |
+| **`mePublicUser`**      | `me` auth operation |
 
 **And the following mutations:**
 
@@ -115,8 +116,8 @@ GraphQL Playground is enabled by default for development purposes, but disabled 
 You can even log in using the `login[collection-singular-label-here]` mutation to use the Playground as an authenticated user.
 
 <Banner type="success">
-  <strong>Tip:</strong>
-  <br />
+  **Tip:**
+
   To see more regarding how the above queries and mutations are used, visit your GraphQL playground
   (by default at
   [http://localhost:3000/api/graphql-playground](http://localhost:3000/api/graphql-playground))

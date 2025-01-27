@@ -1,4 +1,4 @@
-import type { Block } from '../../../../packages/payload/src/fields/config/types'
+import type { Block } from 'payload/types'
 
 import { lexicalEditor } from '../../../../packages/richtext-lexical/src'
 
@@ -28,6 +28,18 @@ export const UploadAndRichTextBlock: Block = {
     },
   ],
   slug: 'uploadAndRichText',
+}
+
+export const RelationshipBlock: Block = {
+  fields: [
+    {
+      name: 'rel',
+      type: 'relationship',
+      relationTo: 'uploads',
+      required: true,
+    },
+  ],
+  slug: 'relationshipBlock',
 }
 
 export const SelectFieldBlock: Block = {

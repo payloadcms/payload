@@ -58,6 +58,7 @@ export const PreviewFrameSizeInput: React.FC<{
     <input
       className={baseClass}
       min={0}
+      name={axis === 'x' ? 'live-preview-width' : 'live-preview-height'}
       onChange={handleChange}
       step={1}
       type="number"

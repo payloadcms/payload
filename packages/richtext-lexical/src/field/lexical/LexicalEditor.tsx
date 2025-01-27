@@ -1,3 +1,5 @@
+'use client'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary'
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin'
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin'
@@ -8,6 +10,7 @@ import { useEffect, useState } from 'react'
 
 import type { LexicalProviderProps } from './LexicalProvider'
 
+import { EditorPlugin } from './EditorPlugin'
 import './LexicalEditor.scss'
 import { FloatingSelectToolbarPlugin } from './plugins/FloatingSelectToolbar'
 import { MarkdownShortcutPlugin } from './plugins/MarkdownShortcut'
@@ -16,8 +19,11 @@ import { AddBlockHandlePlugin } from './plugins/handles/AddBlockHandlePlugin'
 import { DraggableBlockPlugin } from './plugins/handles/DraggableBlockPlugin'
 import { LexicalContentEditable } from './ui/ContentEditable'
 
-export const LexicalEditor: React.FC<LexicalProviderProps> = (props) => {
+export const LexicalEditor: React.FC<Pick<LexicalProviderProps, 'editorConfig' | 'onChange'>> = (
+  props,
+) => {
   const { editorConfig, onChange } = props
+  const [editor] = useLexicalComposerContext()
 
   const [floatingAnchorElem, setFloatingAnchorElem] = useState<HTMLDivElement | null>(null)
   const onRef = (_floatingAnchorElem: HTMLDivElement) => {
@@ -30,7 +36,7 @@ export const LexicalEditor: React.FC<LexicalProviderProps> = (props) => {
 
   useEffect(() => {
     const updateViewPortWidth = () => {
-      const isNextSmallWidthViewport = window.matchMedia('(max-width: 1025px)').matches
+      const isNextSmallWidthViewport = window.matchMedia('(max-width: 768px)').matches
 
       if (isNextSmallWidthViewport !== isSmallWidthViewport) {
         setIsSmallWidthViewport(isNextSmallWidthViewport)
@@ -46,6 +52,11 @@ export const LexicalEditor: React.FC<LexicalProviderProps> = (props) => {
 
   return (
     <React.Fragment>
+      {editorConfig.features.plugins.map((plugin) => {
+        if (plugin.position === 'top') {
+          return <EditorPlugin key={plugin.key} plugin={plugin} />
+        }
+      })}
       <RichTextPlugin
         ErrorBoundary={LexicalErrorBoundary}
         contentEditable={
@@ -55,10 +66,12 @@ export const LexicalEditor: React.FC<LexicalProviderProps> = (props) => {
             </div>
           </div>
         }
-        placeholder={<p className="editor-placeholder">Start typing...</p>}
+        placeholder={
+          <p className="editor-placeholder">Start typing, or press '/' for commands...</p>
+        }
       />
       <OnChangePlugin
-        // Selection changes can be ignore here, reducing the
+        // Selection changes can be ignored here, reducing the
         // frequency that the FieldComponent and Payload receive updates.
         // Selection changes are only needed if you are saving selection state
         ignoreSelectionChange
@@ -71,7 +84,7 @@ export const LexicalEditor: React.FC<LexicalProviderProps> = (props) => {
       />
       {floatingAnchorElem && (
         <React.Fragment>
-          {!isSmallWidthViewport && (
+          {!isSmallWidthViewport && editor.isEditable() && (
             <React.Fragment>
               <DraggableBlockPlugin anchorElem={floatingAnchorElem} />
               <AddBlockHandlePlugin anchorElem={floatingAnchorElem} />
@@ -82,21 +95,37 @@ export const LexicalEditor: React.FC<LexicalProviderProps> = (props) => {
               plugin.position === 'floatingAnchorElem' &&
               !(plugin.desktopOnly === true && isSmallWidthViewport)
             ) {
-              return <plugin.Component anchorElem={floatingAnchorElem} key={plugin.key} />
+              return (
+                <EditorPlugin anchorElem={floatingAnchorElem} key={plugin.key} plugin={plugin} />
+              )
             }
           })}
+          {editor.isEditable() && (
+            <React.Fragment>
+              <FloatingSelectToolbarPlugin anchorElem={floatingAnchorElem} />
+              <SlashMenuPlugin anchorElem={floatingAnchorElem} />
+            </React.Fragment>
+          )}
         </React.Fragment>
       )}
-      <HistoryPlugin />
-      <FloatingSelectToolbarPlugin />
-      <SlashMenuPlugin />
+      {editor.isEditable() && (
+        <React.Fragment>
+          <HistoryPlugin />
+          <MarkdownShortcutPlugin />
+        </React.Fragment>
+      )}
+
       <TabIndentationPlugin />
       {editorConfig.features.plugins.map((plugin) => {
         if (plugin.position === 'normal') {
-          return <plugin.Component key={plugin.key} />
+          return <EditorPlugin key={plugin.key} plugin={plugin} />
         }
       })}
-      <MarkdownShortcutPlugin />
+      {editorConfig.features.plugins.map((plugin) => {
+        if (plugin.position === 'bottom') {
+          return <EditorPlugin key={plugin.key} plugin={plugin} />
+        }
+      })}
     </React.Fragment>
   )
 }

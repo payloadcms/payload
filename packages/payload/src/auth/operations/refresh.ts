@@ -9,12 +9,16 @@ import type { Document } from '../../types'
 
 import { buildAfterOperation } from '../../collections/operations/utils'
 import { Forbidden } from '../../errors'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import getCookieExpiration from '../../utilities/getCookieExpiration'
+import { initTransaction } from '../../utilities/initTransaction'
+import { killTransaction } from '../../utilities/killTransaction'
 import { getFieldsToSign } from './getFieldsToSign'
 
 export type Result = {
   exp: number
   refreshedToken: string
+  strategy?: string
   user: Document
 }
 
@@ -22,123 +26,153 @@ export type Arguments = {
   collection: Collection
   req: PayloadRequest
   res?: Response
-  token: string
 }
 
 async function refresh(incomingArgs: Arguments): Promise<Result> {
   let args = incomingArgs
 
-  // /////////////////////////////////////
-  // beforeOperation - Collection
-  // /////////////////////////////////////
+  try {
+    const shouldCommit = await initTransaction(args.req)
 
-  await args.collection.config.hooks.beforeOperation.reduce(
-    async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
-      await priorHook
+    // /////////////////////////////////////
+    // beforeOperation - Collection
+    // /////////////////////////////////////
 
-      args =
-        (await hook({
-          args,
-          context: args.req.context,
-          operation: 'refresh',
-        })) || args
-    },
-    Promise.resolve(),
-  )
+    await args.collection.config.hooks.beforeOperation.reduce(
+      async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
+        await priorHook
 
-  // /////////////////////////////////////
-  // Refresh
-  // /////////////////////////////////////
+        args =
+          (await hook({
+            args,
+            collection: args.collection?.config,
+            context: args.req.context,
+            operation: 'refresh',
+            req: args.req,
+          })) || args
+      },
+      Promise.resolve(),
+    )
 
-  const {
-    collection: { config: collectionConfig },
-    req: {
-      payload: { config, secret },
-    },
-  } = args
+    // /////////////////////////////////////
+    // Refresh
+    // /////////////////////////////////////
 
-  if (typeof args.token !== 'string') throw new Forbidden(args.req.t)
+    const {
+      collection: { config: collectionConfig },
+      req: {
+        payload: { config, secret },
+      },
+    } = args
 
-  const parsedURL = url.parse(args.req.url)
-  const isGraphQL = parsedURL.pathname === config.routes.graphQL
+    if (!args.req.user) throw new Forbidden(args.req.t)
 
-  const user = await args.req.payload.findByID({
-    id: args.req.user.id,
-    collection: args.req.user.collection,
-    depth: isGraphQL ? 0 : args.collection.config.auth.depth,
-    req: args.req,
-  })
+    const parsedURL = url.parse(args.req.url)
+    const isGraphQL = parsedURL.pathname === config.routes.graphQL
 
-  const fieldsToSign = getFieldsToSign({
-    collectionConfig,
-    email: user?.email as string,
-    user: args?.req?.user,
-  })
+    const user = await args.req.payload.findByID({
+      id: args.req.user.id,
+      collection: args.req.user.collection,
+      depth: isGraphQL ? 0 : args.collection.config.auth.depth,
+      req: args.req,
+    })
 
-  const refreshedToken = jwt.sign(fieldsToSign, secret, {
-    expiresIn: collectionConfig.auth.tokenExpiration,
-  })
+    let result: Result
 
-  const exp = (jwt.decode(refreshedToken) as Record<string, unknown>).exp as number
+    // /////////////////////////////////////
+    // refresh hook - Collection
+    // /////////////////////////////////////
 
-  if (args.res) {
-    const cookieOptions = {
-      domain: undefined,
-      expires: getCookieExpiration(collectionConfig.auth.tokenExpiration),
-      httpOnly: true,
-      path: '/',
-      sameSite: collectionConfig.auth.cookies.sameSite,
-      secure: collectionConfig.auth.cookies.secure,
+    for (const refreshHook of args.collection.config.hooks.refresh) {
+      const hookResult = await refreshHook({ args, user })
+
+      if (hookResult) {
+        result = hookResult
+        break
+      }
     }
 
-    if (collectionConfig.auth.cookies.domain)
-      cookieOptions.domain = collectionConfig.auth.cookies.domain
+    if (!result) {
+      const fieldsToSign = getFieldsToSign({
+        collectionConfig,
+        email: user?.email as string,
+        user: args?.req?.user,
+      })
 
-    args.res.cookie(`${config.cookiePrefix}-token`, refreshedToken, cookieOptions)
-  }
+      const refreshedToken = jwt.sign(fieldsToSign, secret, {
+        expiresIn: collectionConfig.auth.tokenExpiration,
+      })
 
-  let result: Result = {
-    exp,
-    refreshedToken,
-    user,
-  }
+      const exp = (jwt.decode(refreshedToken) as Record<string, unknown>).exp as number
 
-  // /////////////////////////////////////
-  // After Refresh - Collection
-  // /////////////////////////////////////
+      if (args.res) {
+        const cookieOptions = {
+          domain: undefined,
+          expires: getCookieExpiration(collectionConfig.auth.tokenExpiration),
+          httpOnly: true,
+          path: '/',
+          sameSite: collectionConfig.auth.cookies.sameSite,
+          secure: collectionConfig.auth.cookies.secure,
+        }
 
-  await collectionConfig.hooks.afterRefresh.reduce(async (priorHook, hook) => {
-    await priorHook
+        if (collectionConfig.auth.cookies.domain)
+          cookieOptions.domain = collectionConfig.auth.cookies.domain
 
-    result =
-      (await hook({
-        context: args.req.context,
+        args.res.cookie(`${config.cookiePrefix}-token`, refreshedToken, cookieOptions)
+      }
+
+      result = {
         exp,
-        req: args.req,
-        res: args.res,
-        token: refreshedToken,
-      })) || result
-  }, Promise.resolve())
+        refreshedToken,
+        strategy: args.req.user._strategy,
+        user,
+      }
+    }
 
-  // /////////////////////////////////////
-  // afterOperation - Collection
-  // /////////////////////////////////////
+    // /////////////////////////////////////
+    // After Refresh - Collection
+    // /////////////////////////////////////
 
-  result = await buildAfterOperation({
-    args,
-    operation: 'refresh',
-    result,
-  })
+    await collectionConfig.hooks.afterRefresh.reduce(async (priorHook, hook) => {
+      await priorHook
 
-  // /////////////////////////////////////
-  // Return results
-  // /////////////////////////////////////
+      result =
+        (await hook({
+          collection: args.collection?.config,
+          context: args.req.context,
+          exp: result.exp,
+          req: args.req,
+          res: args.res,
+          token: result.refreshedToken,
+        })) || result
+    }, Promise.resolve())
 
-  if (collectionConfig.auth.removeTokenFromResponses) {
-    delete result.refreshedToken
+    // /////////////////////////////////////
+    // afterOperation - Collection
+    // /////////////////////////////////////
+
+    result = await buildAfterOperation({
+      args,
+      collection: args.collection?.config,
+      operation: 'refresh',
+      result,
+    })
+
+    // /////////////////////////////////////
+    // Return results
+    // /////////////////////////////////////
+
+    if (collectionConfig.auth.removeTokenFromResponses) {
+      delete result.refreshedToken
+    }
+
+    if (shouldCommit) await commitTransaction(args.req)
+
+    return result
+  } catch (error: unknown) {
+    await killTransaction(args.req)
+    throw error
   }
-
-  return result
 }
 
 export default refresh

@@ -39,6 +39,11 @@ const buildEndpoints = (global: SanitizedGlobalConfig): Endpoint[] => {
       path: '/access',
     },
     {
+      handler: async (req, res, next) => docAccessRequestHandler(req, res, next, global),
+      method: 'post',
+      path: '/access',
+    },
+    {
       handler: findOne(global),
       method: 'get',
       path: '/',

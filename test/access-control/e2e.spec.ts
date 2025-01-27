@@ -6,7 +6,7 @@ import type { ReadOnlyCollection, RestrictedVersion } from './payload-types'
 
 import payload from '../../packages/payload/src'
 import wait from '../../packages/payload/src/utilities/wait'
-import { exactText, openDocControls, openNav } from '../helpers'
+import { exactText, initPageConsoleErrorCatch, openDocControls, openNav } from '../helpers'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil'
 import { initPayloadE2E } from '../helpers/configHelpers'
 import {
@@ -47,6 +47,7 @@ describe('access control', () => {
 
     const context = await browser.newContext()
     page = await context.newPage()
+    initPageConsoleErrorCatch(page)
   })
 
   test('field without read access should not show', async () => {
@@ -125,6 +126,14 @@ describe('access control', () => {
     })
   })
 
+  describe('restricted fields', () => {
+    test('should not show field without permission', async () => {
+      await page.goto(url.account)
+      await wait(500)
+      await expect(page.locator('#field-roles')).toBeHidden()
+    })
+  })
+
   describe('read-only collection', () => {
     let existingDoc: ReadOnlyCollection
 
@@ -170,6 +179,12 @@ describe('access control', () => {
     test('fields should be read-only', async () => {
       await page.goto(readOnlyUrl.edit(existingDoc.id))
       await expect(page.locator('#field-name')).toBeDisabled()
+    })
+
+    test('should not render dot menu popup when `create` and `delete` access control is set to false', async () => {
+      await page.goto(readOnlyUrl.edit(existingDoc.id))
+      await wait(1000)
+      await expect(page.locator('.collection-edit .doc-controls .doc-controls__popup')).toBeHidden()
     })
   })
 

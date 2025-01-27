@@ -24,7 +24,9 @@ type BlockFieldProps = UseDraggableSortableReturn &
     addRow: (rowIndex: number, blockType: string) => void
     blockToRender: Block
     duplicateRow: (rowIndex: number) => void
+    forceRender?: boolean
     hasMaxRows?: boolean
+    isSortable?: boolean
     moveRow: (fromIndex: number, toIndex: number) => void
     readOnly: boolean
     removeRow: (rowIndex: number) => void
@@ -40,8 +42,10 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
   blocks,
   duplicateRow,
   fieldTypes,
+  forceRender,
   hasMaxRows,
   indexPath,
+  isSortable,
   labels,
   listeners,
   moveRow,
@@ -88,6 +92,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
               blocks={blocks}
               duplicateRow={duplicateRow}
               hasMaxRows={hasMaxRows}
+              isSortable={isSortable}
               labels={labels}
               moveRow={moveRow}
               removeRow={removeRow}
@@ -99,11 +104,15 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
         className={classNames}
         collapsed={row.collapsed}
         collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
-        dragHandleProps={{
-          id: row.id,
-          attributes,
-          listeners,
-        }}
+        dragHandleProps={
+          isSortable
+            ? {
+                id: row.id,
+                attributes,
+                listeners,
+              }
+            : undefined
+        }
         header={
           <div className={`${baseClass}__block-header`}>
             <span className={`${baseClass}__block-number`}>
@@ -130,6 +139,7 @@ export const BlockRow: React.FC<BlockFieldProps> = ({
             path: createNestedFieldPath(path, field),
           }))}
           fieldTypes={fieldTypes}
+          forceRender={forceRender}
           indexPath={indexPath}
           margins="small"
           permissions={permissions?.blocks?.[row.blockType]?.fields}

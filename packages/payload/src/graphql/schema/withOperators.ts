@@ -198,7 +198,7 @@ const defaults: DefaultsType = {
           new GraphQLEnumType({
             name: `${combineParentName(parentName, field.name)}_Input`,
             values: field.options.reduce((values, option) => {
-              if (typeof option === 'object' && option.value) {
+              if (optionIsObject(option)) {
                 return {
                   ...values,
                   [formatName(option.value)]: {
@@ -207,16 +207,12 @@ const defaults: DefaultsType = {
                 }
               }
 
-              if (typeof option === 'string') {
-                return {
-                  ...values,
-                  [option]: {
-                    value: option,
-                  },
-                }
+              return {
+                ...values,
+                [formatName(option)]: {
+                  value: option,
+                },
               }
-
-              return values
             }, {}),
           }),
       })),

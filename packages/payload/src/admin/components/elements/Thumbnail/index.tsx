@@ -25,11 +25,8 @@ const Thumbnail: React.FC<Props> = (props) => {
   const classes = [baseClass, `${baseClass}--size-${size || 'medium'}`, className].join(' ')
 
   useEffect(() => {
-    if (doc && collection && thumbnailSRC) {
+    if (thumbnailSRC) {
       setSrc(`${thumbnailSRC}${imageCacheTag ? `?${imageCacheTag}` : ''}`)
-    }
-    if (fileSrc) {
-      setSrc(fileSrc)
     }
   }, [doc, collection, thumbnailSRC, fileSrc, imageCacheTag])
 

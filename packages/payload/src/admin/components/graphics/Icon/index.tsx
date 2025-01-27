@@ -9,10 +9,10 @@ const css = `
     width: 18px;
     height: 18px;
   }
+
   .graphic-icon path {
     fill: var(--theme-elevation-1000);
   }
-
 
   @media (max-width: 768px) {
     .graphic-icon {

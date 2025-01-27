@@ -38,7 +38,7 @@ export const CreateAccountForm: React.FC = () => {
 
   const onSubmit = useCallback(
     async (data: FormData) => {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/users`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/users`, {
         method: 'POST',
         body: JSON.stringify(data),
         headers: {
@@ -75,7 +75,7 @@ export const CreateAccountForm: React.FC = () => {
     <form onSubmit={handleSubmit(onSubmit)} className={classes.form}>
       <p>
         {`This is where new customers can signup and create a new account. To manage all users, `}
-        <Link href={`${process.env.NEXT_PUBLIC_CMS_URL}/admin/collections/users`}>
+        <Link href={`${process.env.NEXT_PUBLIC_PAYLOAD_URL}/admin/collections/users`}>
           login to the admin dashboard
         </Link>
         {'.'}

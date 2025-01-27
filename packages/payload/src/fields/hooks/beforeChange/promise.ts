@@ -1,7 +1,9 @@
 /* eslint-disable no-param-reassign */
 import merge from 'deepmerge'
 
+import type { SanitizedCollectionConfig } from '../../../collections/config/types'
 import type { PayloadRequest, RequestContext } from '../../../express/types'
+import type { SanitizedGlobalConfig } from '../../../globals/config/types'
 import type { Operation } from '../../../types'
 import type { Field, TabAsField } from '../../config/types'
 
@@ -10,12 +12,14 @@ import { getExistingRowDoc } from './getExistingRowDoc'
 import { traverseFields } from './traverseFields'
 
 type Args = {
+  collection: SanitizedCollectionConfig | null
   context: RequestContext
   data: Record<string, unknown>
   doc: Record<string, unknown>
   docWithLocales: Record<string, unknown>
   errors: { field: string; message: string }[]
   field: Field | TabAsField
+  global: SanitizedGlobalConfig | null
   id?: number | string
   mergeLocaleActions: (() => void)[]
   operation: Operation
@@ -36,12 +40,14 @@ type Args = {
 
 export const promise = async ({
   id,
+  collection,
   context,
   data,
   doc,
   docWithLocales,
   errors,
   field,
+  global,
   mergeLocaleActions,
   operation,
   path,
@@ -52,7 +58,7 @@ export const promise = async ({
   skipValidation,
 }: Args): Promise<void> => {
   const passesCondition = field.admin?.condition
-    ? field.admin.condition(data, siblingData, { user: req.user })
+    ? Boolean(field.admin.condition(data, siblingData, { user: req.user }))
     : true
   let skipValidationFromHere = skipValidation || !passesCondition
 
@@ -75,10 +81,15 @@ export const promise = async ({
         await priorHook
 
         const hookedValue = await currentHook({
+          collection,
           context,
           data,
+          field,
+          global,
           operation,
           originalDoc: doc,
+          previousSiblingDoc: siblingDoc,
+          previousValue: siblingDoc[field.name],
           req,
           siblingData,
           value: siblingData[field.name],
@@ -111,6 +122,8 @@ export const promise = async ({
         jsonError,
         operation,
         payload: req.payload,
+        previousValue: siblingDoc[field.name],
+        req,
         siblingData: merge(siblingDoc, siblingData, { arrayMerge: (_, source) => source }),
         t: req.t,
         user: req.user,
@@ -183,12 +196,14 @@ export const promise = async ({
 
       await traverseFields({
         id,
+        collection,
         context,
         data,
         doc,
         docWithLocales,
         errors,
         fields: field.fields,
+        global,
         mergeLocaleActions,
         operation,
         path: `${path}${field.name}.`,
@@ -211,12 +226,14 @@ export const promise = async ({
           promises.push(
             traverseFields({
               id,
+              collection,
               context,
               data,
               doc,
               docWithLocales,
               errors,
               fields: field.fields,
+              global,
               mergeLocaleActions,
               operation,
               path: `${path}${field.name}.${i}.`,
@@ -251,12 +268,14 @@ export const promise = async ({
             promises.push(
               traverseFields({
                 id,
+                collection,
                 context,
                 data,
                 doc,
                 docWithLocales,
                 errors,
                 fields: block.fields,
+                global,
                 mergeLocaleActions,
                 operation,
                 path: `${path}${field.name}.${i}.`,
@@ -280,12 +299,14 @@ export const promise = async ({
     case 'collapsible': {
       await traverseFields({
         id,
+        collection,
         context,
         data,
         doc,
         docWithLocales,
         errors,
         fields: field.fields,
+        global,
         mergeLocaleActions,
         operation,
         path,
@@ -319,12 +340,14 @@ export const promise = async ({
 
       await traverseFields({
         id,
+        collection,
         context,
         data,
         doc,
         docWithLocales,
         errors,
         fields: field.fields,
+        global,
         mergeLocaleActions,
         operation,
         path: tabPath,
@@ -341,12 +364,14 @@ export const promise = async ({
     case 'tabs': {
       await traverseFields({
         id,
+        collection,
         context,
         data,
         doc,
         docWithLocales,
         errors,
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+        global,
         mergeLocaleActions,
         operation,
         path,

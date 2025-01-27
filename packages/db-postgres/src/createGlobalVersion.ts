@@ -14,10 +14,10 @@ export async function createGlobalVersion<T extends TypeWithID>(
   this: PostgresAdapter,
   { autosave, globalSlug, req = {} as PayloadRequest, versionData }: CreateGlobalVersionArgs,
 ) {
-  const db = this.sessions[req.transactionID]?.db || this.drizzle
+  const db = this.sessions[await req.transactionID]?.db || this.drizzle
   const global = this.payload.globals.config.find(({ slug }) => slug === globalSlug)
-  const globalTableName = toSnakeCase(globalSlug)
-  const tableName = `_${globalTableName}_v`
+
+  const tableName = this.tableNameMap.get(`_${toSnakeCase(global.slug)}${this.versionsSuffix}`)
 
   const result = await upsertRow<TypeWithVersion<T>>({
     adapter: this,
@@ -29,6 +29,7 @@ export async function createGlobalVersion<T extends TypeWithID>(
     db,
     fields: buildVersionGlobalFields(global),
     operation: 'create',
+    req,
     tableName,
   })
 

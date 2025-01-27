@@ -20,7 +20,8 @@
     ],
     "paths": {
       "@/*": ["./*"],
-      "@payloadcms/live-preview": ["../../../packages/live-preview"]
+      "@payloadcms/live-preview": ["../../../packages/live-preview"],
+      "@payloadcms/live-preview-react": ["../../../packages/live-preview-react"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
@@ -28,6 +29,9 @@
   "references": [
     {
       "path": "../../../packages/live-preview"
+    },
+    {
+      "path": "../../../packages/live-preview-react"
     }
   ]
 }

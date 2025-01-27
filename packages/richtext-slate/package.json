@@ -1,13 +1,17 @@
 {
   "name": "@payloadcms/richtext-slate",
-  "version": "1.0.0",
+  "version": "1.5.2",
   "description": "The officially supported Slate richtext adapter for Payload",
-  "repository": "https://github.com/payloadcms/payload",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/richtext-slate"
+  },
   "license": "MIT",
   "homepage": "https://payloadcms.com",
   "author": "Payload CMS, Inc.",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
@@ -17,10 +21,9 @@
     "prepublishOnly": "pnpm clean && pnpm build"
   },
   "dependencies": {
-    "@faceless-ui/modal": "2.0.1",
+    "@faceless-ui/modal": "2.0.2",
     "i18next": "22.5.1",
     "is-hotkey": "0.2.0",
-    "react": "18.2.0",
     "react-i18next": "11.18.6",
     "slate": "0.91.4",
     "slate-history": "0.86.0",
@@ -32,6 +35,10 @@
     "@types/node": "20.5.7",
     "@types/react": "18.2.15",
     "payload": "workspace:*"
+  },
+  "peerDependencies": {
+    "payload": "^2.3.0",
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
   },
   "exports": {
     ".": {

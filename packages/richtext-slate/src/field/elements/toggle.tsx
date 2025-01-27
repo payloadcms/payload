@@ -1,3 +1,4 @@
+'use client'
 import { Editor, Transforms } from 'slate'
 import { ReactEditor } from 'slate-react'
 

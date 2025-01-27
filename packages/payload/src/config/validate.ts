@@ -83,6 +83,10 @@ const validateSchema = async (
     abortEarly: false,
   })
 
+  if (!config?.joiValidation) {
+    return config
+  }
+
   const nestedErrors = [
     ...(await validateCollections(config.collections)),
     ...validateGlobals(config.globals),

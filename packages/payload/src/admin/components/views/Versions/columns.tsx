@@ -8,10 +8,10 @@ import type { SanitizedCollectionConfig } from '../../../../collections/config/t
 import type { SanitizedGlobalConfig } from '../../../../globals/config/types'
 import type { Column } from '../../elements/Table/types'
 
-import { Pill } from '../..'
 import { formatDate } from '../../../utilities/formatDate'
 import SortColumn from '../../elements/SortColumn'
 import { useConfig } from '../../utilities/Config'
+import { AutosaveCell } from './cells/AutosaveCell'
 
 type CreatedAtCellProps = {
   collection?: SanitizedCollectionConfig
@@ -45,53 +45,59 @@ export const buildVersionColumns = (
   collection: SanitizedCollectionConfig,
   global: SanitizedGlobalConfig,
   t: TFunction,
-): Column[] => [
-  {
-    name: '',
-    accessor: 'updatedAt',
-    active: true,
-    components: {
-      Heading: <SortColumn label={t('general:updatedAt')} name="updatedAt" />,
-      renderCell: (row, data) => (
-        <CreatedAtCell collection={collection} date={data} global={global} id={row?.id} />
-      ),
+  latestDraftVersion?: string,
+  latestPublishedVersion?: string,
+): Column[] => {
+  const entityConfig = collection || global
+
+  const columns: Column[] = [
+    {
+      name: '',
+      accessor: 'updatedAt',
+      active: true,
+      components: {
+        Heading: <SortColumn label={t('general:updatedAt')} name="updatedAt" />,
+        renderCell: (row, data) => (
+          <CreatedAtCell collection={collection} date={data} global={global} id={row?.id} />
+        ),
+      },
+      label: '',
     },
-    label: '',
-  },
-  {
-    name: '',
-    accessor: 'id',
-    active: true,
-    components: {
-      Heading: <SortColumn disable label={t('versionID')} name="id" />,
-      renderCell: (row, data) => <TextCell>{data}</TextCell>,
+    {
+      name: '',
+      accessor: 'id',
+      active: true,
+      components: {
+        Heading: <SortColumn disable label={t('versionID')} name="id" />,
+        renderCell: (row, data) => <TextCell>{data}</TextCell>,
+      },
+      label: '',
     },
-    label: '',
-  },
-  {
-    name: '',
-    accessor: 'autosave',
-    active: true,
-    components: {
-      Heading: <SortColumn disable label={t('type')} name="autosave" />,
-      renderCell: (row) => (
-        <TextCell>
-          {row?.autosave && (
-            <React.Fragment>
-              <Pill>{t('autosave')}</Pill>
-              &nbsp;&nbsp;
-            </React.Fragment>
-          )}
-          {row?.version._status === 'published' && (
-            <React.Fragment>
-              <Pill pillStyle="success">{t('published')}</Pill>
-              &nbsp;&nbsp;
-            </React.Fragment>
-          )}
-          {row?.version._status === 'draft' && <Pill>{t('draft')}</Pill>}
-        </TextCell>
-      ),
-    },
-    label: '',
-  },
-]
+  ]
+
+  if (
+    entityConfig?.versions?.drafts ||
+    (entityConfig?.versions?.drafts && entityConfig.versions.drafts?.autosave)
+  ) {
+    columns.push({
+      name: '',
+      accessor: 'autosave',
+      active: true,
+      components: {
+        Heading: <SortColumn disable label={t('status')} name="autosave" />,
+        renderCell: (row) => {
+          return (
+            <AutosaveCell
+              latestDraftVersion={latestDraftVersion}
+              latestPublishedVersion={latestPublishedVersion}
+              rowData={row}
+            />
+          )
+        },
+      },
+      label: '',
+    })
+  }
+
+  return columns
+}

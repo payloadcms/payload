@@ -3,7 +3,7 @@ import type { PathToQuery } from 'payload/database'
 import type { Field } from 'payload/types'
 import type { Operator } from 'payload/types'
 
-import objectID from 'bson-objectid'
+import ObjectIdImport from 'bson-objectid'
 import mongoose from 'mongoose'
 import { getLocalizedPaths } from 'payload/database'
 import { fieldAffectsData } from 'payload/types'
@@ -14,9 +14,12 @@ import type { MongooseAdapter } from '..'
 import { operatorMap } from './operatorMap'
 import { sanitizeQueryValue } from './sanitizeQueryValue'
 
+const ObjectId = ObjectIdImport
+
 type SearchParam = {
   path?: string
-  value: unknown
+  rawQuery?: unknown
+  value?: unknown
 }
 
 const subQueryOptions = {
@@ -92,13 +95,19 @@ export async function buildSearchParam({
   const [{ field, path }] = paths
 
   if (path) {
-    const formattedValue = sanitizeQueryValue({
+    const {
+      operator: formattedOperator,
+      rawQuery,
+      val: formattedValue,
+    } = sanitizeQueryValue({
       field,
       hasCustomID,
       operator,
       path,
       val,
     })
+
+    if (rawQuery) return { value: rawQuery }
 
     // If there are multiple collections to search through,
     // Recursively build up a list of query constraints
@@ -125,7 +134,7 @@ export async function buildSearchParam({
               payload,
               where: {
                 [subPath]: {
-                  [operator]: val,
+                  [formattedOperator]: val,
                 },
               },
             })
@@ -183,21 +192,25 @@ export async function buildSearchParam({
       return relationshipQuery
     }
 
-    if (operator && validOperators.includes(operator as Operator)) {
-      const operatorKey = operatorMap[operator]
+    if (formattedOperator && validOperators.includes(formattedOperator as Operator)) {
+      const operatorKey = operatorMap[formattedOperator]
 
       if (field.type === 'relationship' || field.type === 'upload') {
         let hasNumberIDRelation
+        let multiIDCondition = '$or'
+        if (operatorKey === '$ne') multiIDCondition = '$and'
 
         const result = {
           value: {
-            $or: [{ [path]: { [operatorKey]: formattedValue } }],
+            [multiIDCondition]: [{ [path]: { [operatorKey]: formattedValue } }],
           },
         }
 
         if (typeof formattedValue === 'string') {
           if (mongoose.Types.ObjectId.isValid(formattedValue)) {
-            result.value.$or.push({ [path]: { [operatorKey]: objectID(formattedValue) } })
+            result.value[multiIDCondition].push({
+              [path]: { [operatorKey]: ObjectId(formattedValue) },
+            })
           } else {
             ;(Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo]).forEach(
               (relationTo) => {
@@ -218,16 +231,18 @@ export async function buildSearchParam({
             )
 
             if (hasNumberIDRelation)
-              result.value.$or.push({ [path]: { [operatorKey]: parseFloat(formattedValue) } })
+              result.value[multiIDCondition].push({
+                [path]: { [operatorKey]: parseFloat(formattedValue) },
+              })
           }
         }
 
-        if (result.value.$or.length > 1) {
+        if (result.value[multiIDCondition].length > 1) {
           return result
         }
       }
 
-      if (operator === 'like' && typeof formattedValue === 'string') {
+      if (formattedOperator === 'like' && typeof formattedValue === 'string') {
         const words = formattedValue.split(' ')
 
         const result = {

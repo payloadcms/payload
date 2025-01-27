@@ -1,30 +1,58 @@
 import { INSERT_UNORDERED_LIST_COMMAND, ListItemNode, ListNode } from '@lexical/list'
-import { ListPlugin } from '@lexical/react/LexicalListPlugin'
 
 import type { FeatureProvider } from '../../types'
 
-import { SlashMenuOption } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/LexicalMenu'
-import { UnorderedListIcon } from '../../../lexical/ui/icons/UnorderedList'
+import { SlashMenuOption } from '../../../lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types'
+import { TextDropdownSectionWithEntries } from '../../common/floatingSelectToolbarTextDropdownSection'
+import { ListHTMLConverter, ListItemHTMLConverter } from '../htmlConverter'
 import { UNORDERED_LIST } from './markdownTransformer'
 
-export const UnoderedListFeature = (): FeatureProvider => {
+export const UnorderedListFeature = (): FeatureProvider => {
   return {
-    feature: ({ resolvedFeatures, unsanitizedEditorConfig }) => {
+    feature: () => {
       return {
+        floatingSelectToolbar: {
+          sections: [
+            TextDropdownSectionWithEntries([
+              {
+                ChildComponent: () =>
+                  // @ts-expect-error
+                  import('../../../lexical/ui/icons/UnorderedList').then(
+                    (module) => module.UnorderedListIcon,
+                  ),
+                isActive: () => false,
+                key: 'unorderedList',
+                label: `Unordered List`,
+                onClick: ({ editor }) => {
+                  editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined)
+                },
+                order: 11,
+              },
+            ]),
+          ],
+        },
         markdownTransformers: [UNORDERED_LIST],
         nodes: [
           {
+            converters: {
+              html: ListHTMLConverter,
+            },
             node: ListNode,
             type: ListNode.getType(),
           },
           {
+            converters: {
+              html: ListItemHTMLConverter,
+            },
             node: ListItemNode,
             type: ListItemNode.getType(),
           },
         ],
         plugins: [
           {
-            Component: ListPlugin,
+            Component: () =>
+              // @ts-expect-error
+              import('../plugin').then((module) => module.LexicalListPlugin),
             position: 'normal',
           },
         ],
@@ -32,16 +60,22 @@ export const UnoderedListFeature = (): FeatureProvider => {
         slashMenu: {
           options: [
             {
+              displayName: 'Lists',
+              key: 'lists',
               options: [
-                new SlashMenuOption('Unordered List', {
-                  Icon: UnorderedListIcon,
+                new SlashMenuOption('unorderedlist', {
+                  Icon: () =>
+                    // @ts-expect-error
+                    import('../../../lexical/ui/icons/UnorderedList').then(
+                      (module) => module.UnorderedListIcon,
+                    ),
+                  displayName: 'Unordered List',
                   keywords: ['unordered list', 'ul'],
                   onSelect: ({ editor }) => {
                     editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined)
                   },
                 }),
               ],
-              title: 'Lists',
             },
           ],
         },

@@ -14,19 +14,17 @@ export interface PopupMessage {
 
 export const usePopupWindow = (props: {
   eventType?: string
-  href: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onMessage?: (searchParams: PopupMessage['searchParams']) => Promise<void>
+  url: string
 }): {
   isPopupOpen: boolean
-  openPopupWindow: (e: React.MouseEvent<HTMLAnchorElement>) => void
-  popupHasLoaded: boolean
+  openPopupWindow: () => void
   popupRef?: React.MutableRefObject<Window | null>
 } => {
-  const { eventType, href, onMessage } = props
+  const { eventType, onMessage, url } = props
   const isReceivingMessage = useRef(false)
   const [isOpen, setIsOpen] = useState(false)
-  const [popupHasLoaded, setPopupHasLoaded] = useState(false)
   const { serverURL } = useConfig()
   const popupRef = useRef<Window | null>(null)
 
@@ -35,7 +33,7 @@ export const usePopupWindow = (props: {
     const receiveMessage = async (event: MessageEvent): Promise<void> => {
       if (
         event.origin !== window.location.origin ||
-        event.origin !== href ||
+        event.origin !== url ||
         event.origin !== serverURL
       ) {
         // console.warn(`Message received by ${event.origin}; IGNORED.`) // eslint-disable-line no-console
@@ -53,17 +51,21 @@ export const usePopupWindow = (props: {
       }
     }
 
-    window.addEventListener('message', receiveMessage, false)
+    if (isOpen && popupRef.current) {
+      window.addEventListener('message', receiveMessage, false)
+    }
 
     return () => {
       window.removeEventListener('message', receiveMessage)
     }
-  }, [onMessage, eventType, href, serverURL])
+  }, [onMessage, eventType, url, serverURL, isOpen])
 
   // Customize the size, position, and style of the popup window
   const openPopupWindow = useCallback(
-    (e) => {
-      e.preventDefault()
+    (e?: MouseEvent) => {
+      if (e) {
+        e.preventDefault()
+      }
 
       const features = {
         height: 700,
@@ -93,23 +95,15 @@ export const usePopupWindow = (props: {
           return strCopy
         }, '')
         .slice(0, -1) // remove last ',' (comma)
-      const newWindow = window.open(href, '_blank', popupOptions)
+
+      const newWindow = window.open(url, '_blank', popupOptions)
+
       popupRef.current = newWindow
+
       setIsOpen(true)
     },
-    [href],
+    [url],
   )
-
-  // the only cross-origin way of detecting when a popup window has loaded
-  // we catch a message event that the site rendered within the popup window fires
-  // there is no way in js to add an event listener to a popup window across domains
-  useEffect(() => {
-    window.addEventListener('message', (event) => {
-      if (event.origin === href && event.data === 'ready') {
-        setPopupHasLoaded(true)
-      }
-    })
-  }, [href])
 
   // this is the most stable and widely supported way to check if a popup window is no longer open
   // we poll its ref every x ms and use the popup window's `closed` property
@@ -121,7 +115,6 @@ export const usePopupWindow = (props: {
         if (popupRef.current.closed) {
           clearInterval(timer)
           setIsOpen(false)
-          setPopupHasLoaded(false)
         }
       }, 1000)
     } else {
@@ -138,7 +131,6 @@ export const usePopupWindow = (props: {
   return {
     isPopupOpen: isOpen,
     openPopupWindow,
-    popupHasLoaded,
     popupRef,
   }
 }

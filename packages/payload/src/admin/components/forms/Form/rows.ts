@@ -12,9 +12,9 @@ export const separateRows = (path: string, fields: Fields): Result => {
     const newRows = incomingRows
 
     if (fieldPath.indexOf(`${path}.`) === 0) {
-      const index = Number(fieldPath.replace(`${path}.`, '').split('.')[0])
-      if (!newRows[index]) newRows[index] = {}
-      newRows[index][fieldPath.replace(`${path}.${String(index)}.`, '')] = { ...field }
+      const [rowIndex] = fieldPath.replace(`${path}.`, '').split('.')
+      if (!newRows[rowIndex]) newRows[rowIndex] = {}
+      newRows[rowIndex][fieldPath.replace(`${path}.${String(rowIndex)}.`, '')] = { ...field }
     } else {
       remainingFields[fieldPath] = field
     }

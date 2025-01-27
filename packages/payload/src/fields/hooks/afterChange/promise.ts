@@ -1,15 +1,19 @@
 /* eslint-disable no-param-reassign */
+import type { SanitizedCollectionConfig } from '../../../collections/config/types'
 import type { PayloadRequest, RequestContext } from '../../../express/types'
+import type { SanitizedGlobalConfig } from '../../../globals/config/types'
 import type { Field, TabAsField } from '../../config/types'
 
 import { fieldAffectsData, tabHasName } from '../../config/types'
 import { traverseFields } from './traverseFields'
 
 type Args = {
+  collection: SanitizedCollectionConfig | null
   context: RequestContext
   data: Record<string, unknown>
   doc: Record<string, unknown>
   field: Field | TabAsField
+  global: SanitizedGlobalConfig | null
   operation: 'create' | 'update'
   previousDoc: Record<string, unknown>
   previousSiblingDoc: Record<string, unknown>
@@ -22,10 +26,12 @@ type Args = {
 // - Execute field hooks
 
 export const promise = async ({
+  collection,
   context,
   data,
   doc,
   field,
+  global,
   operation,
   previousDoc,
   previousSiblingDoc,
@@ -40,8 +46,11 @@ export const promise = async ({
         await priorHook
 
         const hookedValue = await currentHook({
+          collection,
           context,
           data,
+          field,
+          global,
           operation,
           originalDoc: doc,
           previousDoc,
@@ -63,10 +72,12 @@ export const promise = async ({
   switch (field.type) {
     case 'group': {
       await traverseFields({
+        collection,
         context,
         data,
         doc,
         fields: field.fields,
+        global,
         operation,
         previousDoc,
         previousSiblingDoc: previousDoc[field.name] as Record<string, unknown>,
@@ -86,10 +97,12 @@ export const promise = async ({
         rows.forEach((row, i) => {
           promises.push(
             traverseFields({
+              collection,
               context,
               data,
               doc,
               fields: field.fields,
+              global,
               operation,
               previousDoc,
               previousSiblingDoc: previousDoc?.[field.name]?.[i] || ({} as Record<string, unknown>),
@@ -115,10 +128,12 @@ export const promise = async ({
           if (block) {
             promises.push(
               traverseFields({
+                collection,
                 context,
                 data,
                 doc,
                 fields: block.fields,
+                global,
                 operation,
                 previousDoc,
                 previousSiblingDoc:
@@ -139,10 +154,12 @@ export const promise = async ({
     case 'row':
     case 'collapsible': {
       await traverseFields({
+        collection,
         context,
         data,
         doc,
         fields: field.fields,
+        global,
         operation,
         previousDoc,
         previousSiblingDoc: { ...previousSiblingDoc },
@@ -166,10 +183,12 @@ export const promise = async ({
       }
 
       await traverseFields({
+        collection,
         context,
         data,
         doc,
         fields: field.fields,
+        global,
         operation,
         previousDoc,
         previousSiblingDoc: tabPreviousSiblingDoc,
@@ -183,10 +202,12 @@ export const promise = async ({
 
     case 'tabs': {
       await traverseFields({
+        collection,
         context,
         data,
         doc,
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+        global,
         operation,
         previousDoc,
         previousSiblingDoc: { ...previousSiblingDoc },

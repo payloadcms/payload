@@ -24,7 +24,9 @@ type ArrayRowProps = UseDraggableSortableReturn &
     CustomRowLabel?: RowLabelType
     addRow: (rowIndex: number) => void
     duplicateRow: (rowIndex: number) => void
+    forceRender?: boolean
     hasMaxRows?: boolean
+    isSortable: boolean
     moveRow: (fromIndex: number, toIndex: number) => void
     readOnly?: boolean
     removeRow: (rowIndex: number) => void
@@ -40,8 +42,10 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   duplicateRow,
   fieldTypes,
   fields,
+  forceRender,
   hasMaxRows,
   indexPath,
+  isSortable,
   labels,
   listeners,
   moveRow,
@@ -92,6 +96,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
               duplicateRow={duplicateRow}
               hasMaxRows={hasMaxRows}
               index={rowIndex}
+              isSortable={isSortable}
               moveRow={moveRow}
               removeRow={removeRow}
               rowCount={rowCount}
@@ -101,11 +106,15 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
         className={classNames}
         collapsed={row.collapsed}
         collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
-        dragHandleProps={{
-          id: row.id,
-          attributes,
-          listeners,
-        }}
+        dragHandleProps={
+          isSortable
+            ? {
+                id: row.id,
+                attributes,
+                listeners,
+              }
+            : undefined
+        }
         header={
           <div className={`${baseClass}__row-header`}>
             <RowLabel
@@ -126,10 +135,11 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
             path: createNestedFieldPath(path, field),
           }))}
           fieldTypes={fieldTypes}
+          forceRender={forceRender}
           indexPath={indexPath}
+          margins="small"
           permissions={permissions?.fields}
           readOnly={readOnly}
-          margins="small"
         />
       </Collapsible>
     </div>

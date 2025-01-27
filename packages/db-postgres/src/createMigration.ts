@@ -1,8 +1,7 @@
 /* eslint-disable no-restricted-syntax, no-await-in-loop */
-import type { DrizzleSnapshotJSON } from 'drizzle-kit/utils'
+import type { DrizzleSnapshotJSON } from 'drizzle-kit/api'
 import type { CreateMigration } from 'payload/database'
 
-import { generateDrizzleJson, generateMigration } from 'drizzle-kit/utils'
 import fs from 'fs'
 import prompts from 'prompts'
 
@@ -44,22 +43,25 @@ const getDefaultDrizzleSnapshot = (): DrizzleSnapshotJSON => ({
     schemas: {},
     tables: {},
   },
-  dialect: 'pg',
+  dialect: 'postgresql',
   enums: {},
   prevId: '00000000-0000-0000-0000-00000000000',
   schemas: {},
+  sequences: {},
   tables: {},
-  version: '5',
+  version: '7',
 })
 
 export const createMigration: CreateMigration = async function createMigration(
   this: PostgresAdapter,
-  { migrationName, payload },
+  { forceAcceptWarning, migrationName, payload },
 ) {
   const dir = payload.db.migrationDir
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir)
   }
+
+  const { generateDrizzleJson, generateMigration, upPgSnapshot } = require('drizzle-kit/api')
 
   const [yyymmdd, hhmmss] = new Date().toISOString().split('T')
   const formattedDate = yyymmdd.replace(/\D/g, '')
@@ -74,6 +76,12 @@ export const createMigration: CreateMigration = async function createMigration(
   const filePath = `${dir}/${fileName}`
 
   let drizzleJsonBefore = getDefaultDrizzleSnapshot()
+
+  if (this.schemaName) {
+    drizzleJsonBefore.schemas = {
+      [this.schemaName]: this.schemaName,
+    }
+  }
 
   // Get latest migration snapshot
   const latestSnapshot = fs
@@ -91,16 +99,21 @@ export const createMigration: CreateMigration = async function createMigration(
   }
 
   const drizzleJsonAfter = generateDrizzleJson(this.schema)
+
+  if (drizzleJsonBefore.version < drizzleJsonAfter.version) {
+    drizzleJsonBefore = upPgSnapshot(drizzleJsonBefore)
+  }
+
   const sqlStatementsUp = await generateMigration(drizzleJsonBefore, drizzleJsonAfter)
   const sqlStatementsDown = await generateMigration(drizzleJsonAfter, drizzleJsonBefore)
 
-  if (!sqlStatementsUp.length && !sqlStatementsDown.length) {
+  if (!sqlStatementsUp.length && !sqlStatementsDown.length && !forceAcceptWarning) {
     const { confirm: shouldCreateBlankMigration } = await prompts(
       {
         name: 'confirm',
+        type: 'confirm',
         initial: false,
         message: 'No schema changes detected. Would you like to create a blank migration file?',
-        type: 'confirm',
       },
       {
         onCancel: () => {

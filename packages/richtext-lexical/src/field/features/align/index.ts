@@ -2,21 +2,20 @@ import { FORMAT_ELEMENT_COMMAND } from 'lexical'
 
 import type { FeatureProvider } from '../types'
 
-import { AlignCenterIcon } from '../../lexical/ui/icons/AlignCenter'
-import { AlignLeftIcon } from '../../lexical/ui/icons/AlignLeft'
 import { AlignDropdownSectionWithEntries } from './floatingSelectToolbarAlignDropdownSection'
-import './index.scss'
 
 export const AlignFeature = (): FeatureProvider => {
   return {
-    feature: ({ resolvedFeatures, unsanitizedEditorConfig }) => {
+    feature: () => {
       return {
         floatingSelectToolbar: {
           sections: [
             AlignDropdownSectionWithEntries([
               {
-                ChildComponent: AlignLeftIcon,
-                isActive: ({ editor, selection }) => false,
+                ChildComponent: () =>
+                  // @ts-expect-error
+                  import('../../lexical/ui/icons/AlignLeft').then((module) => module.AlignLeftIcon),
+                isActive: () => false,
                 key: 'align-left',
                 label: `Align Left`,
                 onClick: ({ editor }) => {
@@ -27,8 +26,12 @@ export const AlignFeature = (): FeatureProvider => {
             ]),
             AlignDropdownSectionWithEntries([
               {
-                ChildComponent: AlignCenterIcon,
-                isActive: ({ editor, selection }) => false,
+                ChildComponent: () =>
+                  // @ts-expect-error
+                  import('../../lexical/ui/icons/AlignCenter').then(
+                    (module) => module.AlignCenterIcon,
+                  ),
+                isActive: () => false,
                 key: 'align-center',
                 label: `Align Center`,
                 onClick: ({ editor }) => {
@@ -39,14 +42,34 @@ export const AlignFeature = (): FeatureProvider => {
             ]),
             AlignDropdownSectionWithEntries([
               {
-                ChildComponent: AlignLeftIcon,
-                isActive: ({ editor, selection }) => false,
+                ChildComponent: () =>
+                  // @ts-expect-error
+                  import('../../lexical/ui/icons/AlignRight').then(
+                    (module) => module.AlignRightIcon,
+                  ),
+                isActive: () => false,
                 key: 'align-right',
                 label: `Align Right`,
                 onClick: ({ editor }) => {
                   editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'right')
                 },
                 order: 3,
+              },
+            ]),
+            AlignDropdownSectionWithEntries([
+              {
+                ChildComponent: () =>
+                  // @ts-expect-error
+                  import('../../lexical/ui/icons/AlignJustify').then(
+                    (module) => module.AlignJustifyIcon,
+                  ),
+                isActive: () => false,
+                key: 'align-justify',
+                label: `Align Justify`,
+                onClick: ({ editor }) => {
+                  editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, 'justify')
+                },
+                order: 4,
               },
             ]),
           ],

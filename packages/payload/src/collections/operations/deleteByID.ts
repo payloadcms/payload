@@ -10,6 +10,7 @@ import { Forbidden, NotFound } from '../../errors'
 import { afterRead } from '../../fields/hooks/afterRead'
 import { deleteUserPreferences } from '../../preferences/deleteUserPreferences'
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions'
@@ -29,40 +30,8 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
 ): Promise<Document> {
   let args = incomingArgs
 
-  // /////////////////////////////////////
-  // beforeOperation - Collection
-  // /////////////////////////////////////
-
-  await args.collection.config.hooks.beforeOperation.reduce(
-    async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
-      await priorHook
-
-      args =
-        (await hook({
-          args,
-          context: args.req.context,
-          operation: 'delete',
-        })) || args
-    },
-    Promise.resolve(),
-  )
-
-  const {
-    id,
-    collection: { config: collectionConfig },
-    depth,
-    overrideAccess,
-    req: {
-      payload: { config },
-      payload,
-      t,
-    },
-    req,
-    showHiddenFields,
-  } = args
-
   try {
-    const shouldCommit = await initTransaction(req)
+    const shouldCommit = await initTransaction(args.req)
 
     // /////////////////////////////////////
     // beforeOperation - Collection
@@ -75,12 +44,30 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
         args =
           (await hook({
             args,
-            context: req.context,
+            collection: args.collection.config,
+            context: args.req.context,
             operation: 'delete',
+            req: args.req,
           })) || args
       },
       Promise.resolve(),
     )
+
+    const {
+      id,
+      collection: { config: collectionConfig },
+      depth,
+      overrideAccess,
+      req: {
+        fallbackLocale,
+        locale,
+        payload: { config },
+        payload,
+        t,
+      },
+      req,
+      showHiddenFields,
+    } = args
 
     // /////////////////////////////////////
     // Access
@@ -100,6 +87,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
 
       return hook({
         id,
+        collection: collectionConfig,
         context: req.context,
         req,
       })
@@ -108,13 +96,19 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
     // Retrieve document
     // /////////////////////////////////////
-
-    const docToDelete = await req.payload.db.findOne({
+    let docToDelete: Document
+    const dbArgs = {
       collection: collectionConfig.slug,
       locale: req.locale,
       req,
       where: combineQueries({ id: { equals: id } }, accessResults),
-    })
+    }
+
+    if (collectionConfig?.db?.findOne) {
+      docToDelete = await collectionConfig.db.findOne(dbArgs)
+    } else {
+      docToDelete = await req.payload.db.findOne(dbArgs)
+    }
 
     if (!docToDelete && !hasWhereAccess) throw new NotFound(t)
     if (!docToDelete && hasWhereAccess) throw new Forbidden(t)
@@ -128,14 +122,33 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
     })
 
     // /////////////////////////////////////
+    // Delete versions
+    // /////////////////////////////////////
+
+    if (collectionConfig.versions) {
+      await deleteCollectionVersions({
+        id,
+        slug: collectionConfig.slug,
+        payload,
+        req,
+      })
+    }
+
+    // /////////////////////////////////////
     // Delete document
     // /////////////////////////////////////
 
-    let result = await req.payload.db.deleteOne({
+    let result
+    const deleteOneArgs = {
       collection: collectionConfig.slug,
       req,
       where: { id: { equals: id } },
-    })
+    }
+    if (collectionConfig?.db?.deleteOne) {
+      result = await collectionConfig?.db.deleteOne(deleteOneArgs)
+    } else {
+      result = await payload.db.deleteOne(deleteOneArgs)
+    }
 
     // /////////////////////////////////////
     // Delete Preferences
@@ -149,27 +162,18 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
     })
 
     // /////////////////////////////////////
-    // Delete versions
-    // /////////////////////////////////////
-
-    if (collectionConfig.versions) {
-      await deleteCollectionVersions({
-        id,
-        payload,
-        req,
-        slug: collectionConfig.slug,
-      })
-    }
-
-    // /////////////////////////////////////
     // afterRead - Fields
     // /////////////////////////////////////
 
     result = await afterRead({
+      collection: collectionConfig,
       context: req.context,
       depth,
       doc: result,
-      entityConfig: collectionConfig,
+      draft: undefined,
+      fallbackLocale,
+      global: null,
+      locale,
       overrideAccess,
       req,
       showHiddenFields,
@@ -184,6 +188,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
 
       result =
         (await hook({
+          collection: collectionConfig,
           context: req.context,
           doc: result,
           req,
@@ -200,6 +205,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
       result =
         (await hook({
           id,
+          collection: collectionConfig,
           context: req.context,
           doc: result,
           req,
@@ -212,6 +218,7 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
 
     result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
       args,
+      collection: collectionConfig,
       operation: 'deleteByID',
       result,
     })
@@ -220,11 +227,11 @@ async function deleteByID<TSlug extends keyof GeneratedTypes['collections']>(
     // 8. Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {
-    await killTransaction(req)
+    await killTransaction(args.req)
     throw error
   }
 }

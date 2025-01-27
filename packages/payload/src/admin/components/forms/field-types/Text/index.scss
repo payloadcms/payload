@@ -3,8 +3,16 @@
 .field-type.text {
   position: relative;
 
-  input {
-    @include formInput;
+  &:not(.has-many) {
+    input {
+      @include formInput;
+    }
+  }
+}
+
+.has-many {
+  .rs__input-container {
+    overflow: hidden;
   }
 }
 

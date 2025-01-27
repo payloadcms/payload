@@ -5,6 +5,7 @@ import type { GeneratedTypes } from '../../../'
 import type { PayloadRequest } from '../../../express/types'
 import type { Collection } from '../../config/types'
 
+import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
 import deleteByID from '../../operations/deleteByID'
 
 export type Resolver<TSlug extends keyof GeneratedTypes['collections']> = (
@@ -23,14 +24,30 @@ export default function getDeleteResolver<TSlug extends keyof GeneratedTypes['co
   collection: Collection,
 ): Resolver<TSlug> {
   async function resolver(_, args, context) {
-    if (args.locale) context.req.locale = args.locale
-    if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale
+    let { req } = context
+    const locale = req.locale
+    const fallbackLocale = req.fallbackLocale
+    req = isolateObjectProperty(req, 'locale')
+    req = isolateObjectProperty(req, 'fallbackLocale')
+    req.locale = args.locale || locale
+    req.fallbackLocale = args.fallbackLocale || fallbackLocale
+    if (!req.query) req.query = {}
+
+    const draft: boolean =
+      args.draft ?? req.query?.draft === 'false'
+        ? false
+        : req.query?.draft === 'true'
+        ? true
+        : undefined
+    if (typeof draft === 'boolean') req.query.draft = String(draft)
+
+    context.req = req
 
     const options = {
       id: args.id,
       collection,
       depth: 0,
-      req: context.req,
+      req: isolateObjectProperty<PayloadRequest>(req, 'transactionID'),
     }
 
     const result = await deleteByID(options)

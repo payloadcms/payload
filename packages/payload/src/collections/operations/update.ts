@@ -21,6 +21,7 @@ import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles'
 import { generateFileData } from '../../uploads/generateFileData'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles'
 import { uploadFiles } from '../../uploads/uploadFiles'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields'
@@ -46,41 +47,8 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 ): Promise<BulkOperationResult<TSlug>> {
   let args = incomingArgs
 
-  // /////////////////////////////////////
-  // beforeOperation - Collection
-  // /////////////////////////////////////
-
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-    await priorHook
-
-    args =
-      (await hook({
-        args,
-        context: args.req.context,
-        operation: 'update',
-      })) || args
-  }, Promise.resolve())
-
-  const {
-    collection: { config: collectionConfig },
-    collection,
-    depth,
-    draft: draftArg = false,
-    overrideAccess,
-    overwriteExistingFiles = false,
-    req: {
-      locale,
-      payload: { config },
-      payload,
-      t,
-    },
-    req,
-    showHiddenFields,
-    where,
-  } = args
-
   try {
-    const shouldCommit = await initTransaction(req)
+    const shouldCommit = await initTransaction(args.req)
 
     // /////////////////////////////////////
     // beforeOperation - Collection
@@ -92,10 +60,31 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
       args =
         (await hook({
           args,
-          context: req.context,
+          collection: args.collection.config,
+          context: args.req.context,
           operation: 'update',
+          req: args.req,
         })) || args
     }, Promise.resolve())
+
+    const {
+      collection: { config: collectionConfig },
+      collection,
+      depth,
+      draft: draftArg = false,
+      overrideAccess,
+      overwriteExistingFiles = false,
+      req: {
+        fallbackLocale,
+        locale,
+        payload: { config },
+        payload,
+        t,
+      },
+      req,
+      showHiddenFields,
+      where,
+    } = args
 
     if (!where) {
       throw new APIError("Missing 'where' query of documents to update.", httpStatus.BAD_REQUEST)
@@ -141,6 +130,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
       const query = await payload.db.queryDrafts<GeneratedTypes['collections'][TSlug]>({
         collection: collectionConfig.slug,
+        limit: 0,
         locale,
         req,
         where: versionsWhere,
@@ -148,14 +138,21 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
       docs = query.docs
     } else {
-      const query = await payload.db.find({
+      const dbArgs = {
         collection: collectionConfig.slug,
         limit: 0,
         locale,
         pagination: false,
         req,
         where: fullWhere,
-      })
+      }
+
+      let query
+      if (collectionConfig?.db?.find) {
+        query = await collectionConfig.db.find(dbArgs)
+      } else {
+        query = await payload.db.find(dbArgs)
+      }
 
       docs = query.docs
     }
@@ -168,6 +165,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
       collection,
       config,
       data: bulkUpdateData,
+      operation: 'update',
       overwriteExistingFiles,
       req,
       throwOnMissingFile: false,
@@ -184,10 +182,14 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
       try {
         const originalDoc = await afterRead({
+          collection: collectionConfig,
           context: req.context,
           depth: 0,
           doc,
-          entityConfig: collectionConfig,
+          draft: draftArg,
+          fallbackLocale,
+          global: null,
+          locale,
           overrideAccess: true,
           req,
           showHiddenFields: true,
@@ -208,10 +210,11 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
         data = await beforeValidate<DeepPartial<GeneratedTypes['collections'][TSlug]>>({
           id,
+          collection: collectionConfig,
           context: req.context,
           data,
           doc: originalDoc,
-          entityConfig: collectionConfig,
+          global: null,
           operation: 'update',
           overrideAccess,
           req,
@@ -226,6 +229,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
           data =
             (await hook({
+              collection: collectionConfig,
               context: req.context,
               data,
               operation: 'update',
@@ -251,6 +255,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
           data =
             (await hook({
+              collection: collectionConfig,
               context: req.context,
               data,
               operation: 'update',
@@ -265,28 +270,38 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
         let result = await beforeChange<GeneratedTypes['collections'][TSlug]>({
           id,
+          collection: collectionConfig,
           context: req.context,
           data,
           doc: originalDoc,
           docWithLocales: doc,
-          entityConfig: collectionConfig,
+          global: null,
           operation: 'update',
           req,
-          skipValidation: shouldSaveDraft || data._status === 'draft',
+          skipValidation:
+            shouldSaveDraft &&
+            collectionConfig.versions.drafts &&
+            !collectionConfig.versions.drafts.validate &&
+            data._status !== 'published',
         })
 
         // /////////////////////////////////////
         // Update
         // /////////////////////////////////////
 
-        if (!shouldSaveDraft) {
-          result = await req.payload.db.updateOne({
+        if (!shouldSaveDraft || data._status === 'published') {
+          const dbArgs = {
             id,
             collection: collectionConfig.slug,
             data: result,
             locale,
             req,
-          })
+          }
+          if (collectionConfig?.db?.updateOne) {
+            result = await collectionConfig.db.updateOne(dbArgs)
+          } else {
+            result = await req.payload.db.updateOne(dbArgs)
+          }
         }
 
         // /////////////////////////////////////
@@ -301,7 +316,6 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
               ...result,
               createdAt: doc.createdAt,
             },
-            draft: shouldSaveDraft,
             payload,
             req,
           })
@@ -312,10 +326,14 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         // /////////////////////////////////////
 
         result = await afterRead({
+          collection: collectionConfig,
           context: req.context,
           depth,
           doc: result,
-          entityConfig: collectionConfig,
+          draft: draftArg,
+          fallbackLocale: null,
+          global: null,
+          locale,
           overrideAccess,
           req,
           showHiddenFields,
@@ -330,6 +348,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
           result =
             (await hook({
+              collection: collectionConfig,
               context: req.context,
               doc: result,
               req,
@@ -341,10 +360,11 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
         // /////////////////////////////////////
 
         result = await afterChange<GeneratedTypes['collections'][TSlug]>({
+          collection: collectionConfig,
           context: req.context,
           data,
           doc: result,
-          entityConfig: collectionConfig,
+          global: null,
           operation: 'update',
           previousDoc: originalDoc,
           req,
@@ -359,6 +379,7 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
           result =
             (await hook({
+              collection: collectionConfig,
               context: req.context,
               doc: result,
               operation: 'update',
@@ -400,15 +421,16 @@ async function update<TSlug extends keyof GeneratedTypes['collections']>(
 
     result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
       args,
+      collection: collectionConfig,
       operation: 'update',
       result,
     })
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {
-    await killTransaction(req)
+    await killTransaction(args.req)
     throw error
   }
 }

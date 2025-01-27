@@ -8,15 +8,14 @@
   height: 100vh;
   width: var(--nav-width);
   border-right: 1px solid var(--theme-elevation-100);
-  transform: translate3d(calc(var(--nav-width) * -1), 0, 0);
+  opacity: 0;
+  transition: opacity var(--nav-trans-time) ease-in-out;
 
   &--nav-open {
-    transform: translate3d(0, 0, 0);
-    transition: transform var(--nav-trans-time) linear;
+    opacity: 1;
   }
 
   &__header {
-    @include blur-bg;
     position: absolute;
     top: 0;
     width: 100%;
@@ -41,7 +40,7 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    padding: var(--app-header-height) base(1.5) base(2) base(1.25);
+    padding: var(--app-header-height) base(1) base(2) base(1);
     overflow-y: auto;
 
     // remove the scrollbar here to prevent layout shift as nav groups are toggled
@@ -128,12 +127,7 @@
 
   @include mid-break {
     &__scroll {
-      padding: var(--app-header-height) base(0.75) base(2) base(0.75);
-    }
-
-    nav a {
-      font-size: base(0.875);
-      line-height: base(1.5);
+      padding: var(--app-header-height) base(0.5) base(2);
     }
   }
 
@@ -141,11 +135,10 @@
     &__scroll {
       padding: var(--app-header-height) var(--gutter-h) base(2);
     }
-  }
 
-  @include extra-small-break {
-    &--nav-open {
-      transition: none;
+    nav a {
+      font-size: base(0.875);
+      line-height: base(1.5);
     }
 
     &__mobile-close {

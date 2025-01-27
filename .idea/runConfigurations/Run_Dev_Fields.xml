@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Run Dev Fields" type="NodeJSConfigurationType" application-parameters="fields" path-to-js-file="node_modules/.pnpm/nodemon@3.0.3/node_modules/nodemon/bin/nodemon.js" working-dir="$PROJECT_DIR$">
+    <method v="2" />
+  </configuration>
+</component>

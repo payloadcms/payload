@@ -1,16 +1,15 @@
 import type { FeatureProvider } from '../../types'
 
-import './index.scss'
-import { TreeViewPlugin } from './plugin'
-
-export const TreeviewFeature = (): FeatureProvider => {
+export const TreeViewFeature = (): FeatureProvider => {
   return {
-    feature: ({ resolvedFeatures, unsanitizedEditorConfig }) => {
+    feature: () => {
       return {
         plugins: [
           {
-            Component: TreeViewPlugin,
-            position: 'normal',
+            Component: () =>
+              // @ts-expect-error
+              import('./plugin').then((module) => module.TreeViewPlugin),
+            position: 'bottom',
           },
         ],
         props: null,

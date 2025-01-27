@@ -80,13 +80,18 @@
   ////////////////////////////////
   // HORIZONTAL ALIGNMENT
   ////////////////////////////////
-
+  [dir='rtl']
+  &--h-align-left {
+    .popup__caret {
+      right: var(--popup-padding);
+      left: unset
+    }
+  }
   &--h-align-left {
     .popup__caret {
       left: var(--popup-padding);
     }
   }
-
   &--h-align-center {
     .popup__content {
       left: 50%;
@@ -96,6 +101,19 @@
     .popup__caret {
       left: 50%;
       transform: translateX(-50%);
+    }
+  }
+
+  [dir='rtl']
+  &--h-align-right {
+    .popup__content {
+      right: unset;
+      left:0
+    }
+
+    .popup__caret {
+      right: unset;
+      left: var(--popup-padding)
     }
   }
 

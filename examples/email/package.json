@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "dotenv": "^8.2.0",
-    "express": "^4.17.1",
+    "express": "^4.19.2",
     "payload": "latest",
     "handlebars": "^4.7.7",
     "inline-css": "^4.0.2"

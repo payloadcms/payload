@@ -15,10 +15,11 @@ const RenderTitle: React.FC<Props> = (props) => {
     data,
     element = 'h1',
     fallback = '[untitled]',
+    global,
     title: titleFromProps,
   } = props
 
-  const titleFromForm = useTitle(collection)
+  const titleFromForm = useTitle({ collection, global })
 
   let title = titleFromForm
   if (!title) title = data?.id

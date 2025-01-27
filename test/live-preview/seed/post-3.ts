@@ -1,6 +1,6 @@
 import type { Post } from '../payload-types'
 
-export const post3: Partial<Post> = {
+export const post3: Omit<Post, 'createdAt' | 'id' | 'updatedAt'> = {
   title: 'Post 3',
   slug: 'post-3',
   meta: {
@@ -8,6 +8,7 @@ export const post3: Partial<Post> = {
     description: 'This is the third post.',
     image: '{{IMAGE}}',
   },
+  tenant: '{{TENANT_1_ID}}',
   hero: {
     type: 'lowImpact',
     richText: [

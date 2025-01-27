@@ -1,7 +1,7 @@
-import type { LocaleOption } from '../types'
+import type { Option } from '../../../elements/ReactSelect/types'
 
 export type Props = {
-  onChange: (options: LocaleOption[]) => void
-  options: LocaleOption[]
-  value: LocaleOption[]
+  onChange: (options: Option[]) => void
+  options: Option[]
+  value: Option[]
 }

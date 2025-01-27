@@ -72,6 +72,16 @@ export const seed = async (payload: Payload): Promise<void> => {
     }),
   ])
 
+  let image1ID = image1Doc.id
+  let image2ID = image2Doc.id
+  let image3ID = image3Doc.id
+
+  if (payload.db.defaultIDType === 'text') {
+    image1ID = `"${image1ID}"`
+    image2ID = `"${image2ID}"`
+    image3ID = `"${image3ID}"`
+  }
+
   payload.logger.info(`— Seeding categories...`)
 
   const [apparelCategory, ebooksCategory, coursesCategory] = await Promise.all([
@@ -103,8 +113,8 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: 'products',
     data: JSON.parse(
       JSON.stringify({ ...product1, categories: [apparelCategory.id] }).replace(
-        /{{PRODUCT_IMAGE}}/g,
-        image1Doc.id,
+        /"\{\{PRODUCT_IMAGE\}\}"/g,
+        image1ID,
       ),
     ),
   })
@@ -113,8 +123,8 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: 'products',
     data: JSON.parse(
       JSON.stringify({ ...product2, categories: [ebooksCategory.id] }).replace(
-        /{{PRODUCT_IMAGE}}/g,
-        image2Doc.id,
+        /"\{\{PRODUCT_IMAGE\}\}"/g,
+        image2ID,
       ),
     ),
   })
@@ -123,8 +133,8 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: 'products',
     data: JSON.parse(
       JSON.stringify({ ...product3, categories: [coursesCategory.id] }).replace(
-        /{{PRODUCT_IMAGE}}/g,
-        image3Doc.id,
+        /"\{\{PRODUCT_IMAGE\}\}"/g,
+        image3ID,
       ),
     ),
   })
@@ -157,10 +167,16 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   payload.logger.info(`— Seeding products page...`)
 
-  const { id: productsPageID } = await payload.create({
+  const productsPageDoc = await payload.create({
     collection: 'pages',
     data: productsPage,
   })
+
+  let productsPageID = productsPageDoc.id
+
+  if (payload.db.defaultIDType === 'text') {
+    productsPageID = `"${productsPageID}"`
+  }
 
   payload.logger.info(`— Seeding home page...`)
 
@@ -168,9 +184,9 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: 'pages',
     data: JSON.parse(
       JSON.stringify(home)
-        .replace(/{{PRODUCT1_IMAGE}}/g, image1Doc.id)
-        .replace(/{{PRODUCT2_IMAGE}}/g, image2Doc.id)
-        .replace(/{{PRODUCTS_PAGE_ID}}/g, productsPageID),
+        .replace(/"\{\{PRODUCT1_IMAGE\}\}"/g, image1ID)
+        .replace(/"\{\{PRODUCT2_IMAGE\}\}"/g, image2ID)
+        .replace(/"\{\{PRODUCTS_PAGE_ID\}\}"/g, productsPageID),
     ),
   })
 
@@ -178,7 +194,9 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   await payload.create({
     collection: 'pages',
-    data: JSON.parse(JSON.stringify(cartPage).replace(/{{PRODUCTS_PAGE_ID}}/g, productsPageID)),
+    data: JSON.parse(
+      JSON.stringify(cartPage).replace(/"\{\{PRODUCTS_PAGE_ID\}\}"/g, productsPageID),
+    ),
   })
 
   payload.logger.info(`— Seeding settings...`)
@@ -186,7 +204,7 @@ export const seed = async (payload: Payload): Promise<void> => {
   await payload.updateGlobal({
     slug: 'settings',
     data: {
-      productsPage: productsPageID,
+      productsPage: productsPageDoc.id,
     },
   })
 
@@ -201,7 +219,7 @@ export const seed = async (payload: Payload): Promise<void> => {
             type: 'reference',
             reference: {
               relationTo: 'pages',
-              value: productsPageID,
+              value: productsPageDoc.id,
             },
             label: 'Shop',
           },

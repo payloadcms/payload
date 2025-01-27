@@ -6,6 +6,7 @@ import type { Collection } from '../../collections/config/types'
 import type { PayloadRequest } from '../../express/types'
 
 import { APIError } from '../../errors'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import getCookieExpiration from '../../utilities/getCookieExpiration'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
@@ -122,7 +123,7 @@ async function resetPassword(args: Arguments): Promise<Result> {
       overrideAccess,
       req,
     })
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return {
       token: collectionConfig.auth.removeTokenFromResponses ? undefined : token,

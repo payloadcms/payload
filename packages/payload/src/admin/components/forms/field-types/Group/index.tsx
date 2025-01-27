@@ -14,9 +14,9 @@ import { WatchChildErrors } from '../../WatchChildErrors'
 import withCondition from '../../withCondition'
 import { useRow } from '../Row/provider'
 import { useTabs } from '../Tabs/provider'
+import { fieldBaseClass } from '../shared'
 import './index.scss'
 import { GroupProvider, useGroup } from './provider'
-import { fieldBaseClass } from '../shared'
 
 const baseClass = 'group-field'
 
@@ -26,13 +26,14 @@ const Group: React.FC<Props> = (props) => {
     admin: { className, description, hideGutter = false, readOnly, style, width },
     fieldTypes,
     fields,
+    forceRender = false,
     indexPath,
     label,
     path: pathFromProps,
     permissions,
   } = props
 
-  const isWithinCollapsible = useCollapsible()
+  const { withinCollapsible } = useCollapsible()
   const isWithinGroup = useGroup()
   const isWithinRow = useRow()
   const isWithinTab = useTabs()
@@ -42,7 +43,7 @@ const Group: React.FC<Props> = (props) => {
   const groupHasErrors = submitted && errorCount > 0
 
   const path = pathFromProps || name
-  const isTopLevel = !(isWithinCollapsible || isWithinGroup || isWithinRow)
+  const isTopLevel = !(withinCollapsible || isWithinGroup || isWithinRow)
 
   return (
     <div
@@ -50,7 +51,7 @@ const Group: React.FC<Props> = (props) => {
         fieldBaseClass,
         baseClass,
         isTopLevel && `${baseClass}--top-level`,
-        isWithinCollapsible && `${baseClass}--within-collapsible`,
+        withinCollapsible && `${baseClass}--within-collapsible`,
         isWithinGroup && `${baseClass}--within-group`,
         isWithinRow && `${baseClass}--within-row`,
         isWithinTab && `${baseClass}--within-tab`,
@@ -76,6 +77,7 @@ const Group: React.FC<Props> = (props) => {
                 <FieldDescription
                   className={`field-description-${path.replace(/\./g, '__')}`}
                   description={description}
+                  path={path}
                   value={null}
                 />
               </header>
@@ -88,6 +90,7 @@ const Group: React.FC<Props> = (props) => {
               path: createNestedFieldPath(path, subField),
             }))}
             fieldTypes={fieldTypes}
+            forceRender={forceRender}
             indexPath={indexPath}
             margins="small"
             permissions={permissions?.fields}

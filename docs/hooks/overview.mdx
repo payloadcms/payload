@@ -2,13 +2,13 @@
 title: Hooks Overview
 label: Overview
 order: 10
-desc: Hooks allow you to add your own logic to Payload, including integrating with third-party APIs, adding auto-generated data, or modifing Payload's base functionality.
+desc: Hooks allow you to add your own logic to Payload, including integrating with third-party APIs, adding auto-generated data, or modifying Payload's base functionality.
 keywords: hooks, overview, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, express
 ---
 
 <Banner type="info">
   Hooks are powerful ways to tie into existing Payload actions in order to add your own logic like
-  integrating with third-party APIs, adding auto-generated data, or modifing Payload's base
+  integrating with third-party APIs, adding auto-generated data, or modifying Payload's base
   functionality.
 </Banner>
 
@@ -36,7 +36,7 @@ If your Hook simply performs a side-effect, such as updating a CRM, it might be 
 
 #### Server-only execution
 
-Payload Hooks do not have any effect within the Payload Admin panel. You can safely [remove your hooks](/docs/admin/webpack#aliasing-server-only-modules) from your Admin panel's code by customizing the Webpack config, which not only keeps your Admin bundles' filesize small but also ensures that any server-side only code does not cause problems within browser environments.
+Payload Hooks are only triggered on the server. You can safely [remove your hooks](/docs/admin/excluding-server-code#aliasing-server-only-modules) from your Admin panel's client-side code by customizing the Webpack config, which not only keeps your Admin bundles' filesize small but also ensures that any server-side only code does not cause problems within browser environments.
 
 ## Hook Types
 

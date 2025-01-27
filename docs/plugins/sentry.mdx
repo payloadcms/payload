@@ -1,0 +1,133 @@
+---
+title: Sentry Plugin
+label: Sentry
+order: 20
+desc: Integrate Sentry error tracking into your Payload application
+keywords: plugins, sentry, error, tracking, monitoring, logging, bug, reporting, performance
+---
+
+[![NPM](https://img.shields.io/npm/v/@payloadcms/plugin-sentry)](https://www.npmjs.com/package/@payloadcms/plugin-sentry)
+
+This plugin allows you to integrate [Sentry](https://sentry.io/) seamlessly with your [Payload](https://github.com/payloadcms/payload) application.
+
+### What is Sentry?
+
+Sentry is a powerful error tracking and performance monitoring tool that helps developers identify, diagnose, and resolve issues in their applications.
+
+<Banner type="success">
+  Sentry does smart stuff with error data to make bugs easier to find and fix. - [sentry.io](https://sentry.io/)
+</Banner>
+
+This multi-faceted software offers a range of features that will help you manage errors with greater ease and ultimately ensure your application is running smoothly:
+
+#### Core Features
+
+- **Error Tracking**: Instantly captures and logs errors as they occur in your application
+- **Performance Monitoring**: Tracks application performance to identify slowdowns and bottlenecks
+- **Detailed Reports**: Provides comprehensive insights into errors, including stack traces and context
+- **Alerts and Notifications**: Send and customize event-triggered notifications
+- **Issue Grouping, Filtering and Search**: Automatically groups similar errors, and allows filtering and searching issues by custom criteria
+- **Breadcrumbs**: Records user actions and events leading up to an error
+- **Integrations**: Connects with various tools and services for enhanced workflow and issue management
+
+<Banner type="info">
+  This plugin is completely open-source and the [source code can be found here](https://github.com/payloadcms/payload/tree/main/packages/plugin-sentry). If you need help, check out our [Community Help](https://payloadcms.com/community-help). If you think you've found a bug, please [open a new issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%20seo&template=bug_report.md&title=plugin-seo%3A) with as much detail as possible.
+</Banner>
+
+## Installation
+
+Install the plugin using any JavaScript package manager like [Yarn](https://yarnpkg.com), [NPM](https://npmjs.com), or [PNPM](https://pnpm.io):
+
+```bash
+  yarn add @payloadcms/plugin-sentry
+```
+
+## Basic Usage
+
+In the `plugins` array of your [Payload config](https://payloadcms.com/docs/configuration/overview), call the plugin and pass in your Sentry DSN as an option.
+
+```ts
+import { buildConfig } from 'payload/config'
+import { sentry } from '@payloadcms/plugin-sentry'
+import { Pages, Media } from './collections'
+
+const config = buildConfig({
+  collections: [Pages, Media],
+  plugins: [
+    sentry({
+      dsn: 'https://61edebas776889984d323d777@o4505289711681536.ingest.sentry.io/4505357433352176',
+    }),
+  ],
+})
+
+export default config
+```
+
+## Options
+
+- `dsn` : string | **required**
+
+  Sentry automatically assigns a DSN when you create a project, the unique DSN informs Sentry where to send events so they are associated with the correct project.
+
+<Banner type="warning">
+  You can find your project DSN (Data Source Name) by visiting [sentry.io](sentry.io) and navigating to your [Project] > Settings > Client Keys (DSN).
+</Banner>
+
+- `enabled`: boolean | optional
+
+  Set to false to disable the plugin. Defaults to true.
+
+- `init` : ClientOptions | optional
+
+  Sentry allows a variety of options to be passed into the Sentry.init() function, see the full list of options [here](https://docs.sentry.io/platforms/node/guides/express/configuration/options).
+
+- `requestHandler` : RequestHandlerOptions | optional
+
+  Accepts options that let you decide what data should be included in the event sent to Sentry, checkout the options [here](https://docs.sentry.io/platforms/node/guides/express/configuration/options).
+
+- `captureErrors`: number[] | optional
+
+  By default, `Sentry.errorHandler` will capture only errors with a status code of 500 or higher. To capture additional error codes, pass the values as numbers in an array.
+
+To see all options available, visit the [Sentry Docs](https://docs.sentry.io/platforms/node/guides/express/configuration/options).
+
+### Example
+
+Configure any of these options by passing them to the plugin:
+
+```ts
+import { buildConfig } from 'payload/config'
+import { sentry } from '@payloadcms/plugin-sentry'
+import { Pages, Media } from './collections'
+
+const config = buildConfig({
+  collections: [Pages, Media],
+  plugins: [
+    sentry({
+      dsn: 'https://61edebas777689984d323d777@o4505289711681536.ingest.sentry.io/4505357433352176',
+      options: {
+        init: {
+          debug: true,
+          environment: 'development',
+          tracesSampleRate: 1.0,
+        },
+        requestHandler: {
+          serverName: false,
+          user: ['email'],
+        },
+        captureErrors: [400, 403, 404],
+      },
+    }),
+  ],
+})
+
+export default config
+```
+
+## TypeScript
+
+All types can be directly imported:
+
+```ts
+import { PluginOptions } from '@payloadcms/plugin-sentry/types'
+```

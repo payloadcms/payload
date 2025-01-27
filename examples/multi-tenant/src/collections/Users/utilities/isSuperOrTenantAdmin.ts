@@ -1,6 +1,6 @@
 import type { PayloadRequest } from 'payload/dist/types'
 
-import { isSuperAdmin } from '../../utilities/isSuperAdmin'
+import { isSuperAdmin } from '../../../utilities/isSuperAdmin'
 
 const logs = false
 
@@ -30,6 +30,7 @@ export const isSuperOrTenantAdmin = async (args: { req: PayloadRequest }): Promi
     },
     depth: 0,
     limit: 1,
+    req,
   })
 
   // if this tenant does not exist, deny access

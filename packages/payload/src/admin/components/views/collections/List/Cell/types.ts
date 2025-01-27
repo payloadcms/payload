@@ -11,6 +11,7 @@ export type Props = {
   onClick?: (Props) => void
   rowData: {
     [path: string]: unknown
+    id: number | string
   }
 }
 

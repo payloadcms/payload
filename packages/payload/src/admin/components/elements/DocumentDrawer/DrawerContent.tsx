@@ -11,6 +11,7 @@ import { baseClass } from '.'
 import { getTranslation } from '../../../../utilities/getTranslation'
 import usePayloadAPI from '../../../hooks/usePayloadAPI'
 import buildStateFromSchema from '../../forms/Form/buildStateFromSchema'
+import { fieldTypes } from '../../forms/field-types'
 import { useRelatedCollections } from '../../forms/field-types/Relationship/AddNew/useRelatedCollections'
 import X from '../../icons/X'
 import { useAuth } from '../../utilities/Auth'
@@ -45,21 +46,11 @@ const Content: React.FC<DocumentDrawerProps> = ({
 
   const { admin: { components: { views: { Edit } = {} } = {} } = {} } = collectionConfig
 
-  const { id, docPermissions, getDocPreferences } = useDocumentInfo()
+  const { id, action, docPermissions, getDocPreferences } = useDocumentInfo()
 
-  // The component definition could come from multiple places in the config
-  // we need to cascade into the proper component from the top-down
-  // 1. "components.Edit"
-  // 2. "components.Edit.Default"
-  // 3. "components.Edit.Default.Component"
-  const CustomEditView =
-    typeof Edit === 'function'
-      ? Edit
-      : typeof Edit === 'object' && typeof Edit.Default === 'function'
-      ? Edit.Default
-      : typeof Edit?.Default === 'object' && typeof Edit.Default.Component === 'function'
-      ? Edit.Default.Component
-      : undefined
+  // If they are replacing the entire edit view, use that.
+  // Else let the DefaultEdit determine what to render.
+  const CustomEditView = typeof Edit === 'function' ? Edit : undefined
 
   const [fields, setFields] = useState(() => formatFields(collectionConfig, true))
 
@@ -95,7 +86,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
       setInternalState(state)
     }
 
-    awaitInitialState()
+    void awaitInitialState()
     hasInitializedState.current = true
   }, [data, fields, id, user, locale, isLoadingDocument, t, getDocPreferences, config])
 
@@ -115,10 +106,6 @@ const Content: React.FC<DocumentDrawerProps> = ({
   const isEditing = Boolean(id)
 
   const apiURL = id ? `${serverURL}${api}/${collectionSlug}/${id}?locale=${locale}` : null
-
-  const action = `${serverURL}${api}/${collectionSlug}${
-    id ? `/${id}` : ''
-  }?locale=${locale}&fallback-locale=null`
 
   const hasSavePermission =
     (isEditing && docPermissions?.update?.permission) ||
@@ -161,6 +148,7 @@ const Content: React.FC<DocumentDrawerProps> = ({
         disableActions: true,
         disableLeaveWithoutSaving: true,
         disableRoutes: true,
+        fieldTypes,
         hasSavePermission,
         internalState,
         isEditing,

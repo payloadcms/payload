@@ -42,6 +42,7 @@ const sanitizeGlobals = (config: Config): SanitizedGlobalConfig[] => {
         if (sanitizedGlobal.versions.drafts === true) {
           sanitizedGlobal.versions.drafts = {
             autosave: false,
+            validate: false,
           }
         }
 
@@ -49,6 +50,10 @@ const sanitizeGlobals = (config: Config): SanitizedGlobalConfig[] => {
           sanitizedGlobal.versions.drafts.autosave = {
             interval: 2000,
           }
+        }
+
+        if (sanitizedGlobal.versions.drafts.validate === undefined) {
+          sanitizedGlobal.versions.drafts.validate = false
         }
 
         sanitizedGlobal.fields = mergeBaseFields(sanitizedGlobal.fields, baseVersionFields)
@@ -72,23 +77,23 @@ const sanitizeGlobals = (config: Config): SanitizedGlobalConfig[] => {
     if (!hasUpdatedAt) {
       sanitizedGlobal.fields.push({
         name: 'updatedAt',
+        type: 'date',
         admin: {
           disableBulkEdit: true,
           hidden: true,
         },
         label: translations['general:updatedAt'],
-        type: 'date',
       })
     }
     if (!hasCreatedAt) {
       sanitizedGlobal.fields.push({
         name: 'createdAt',
+        type: 'date',
         admin: {
           disableBulkEdit: true,
           hidden: true,
         },
         label: translations['general:createdAt'],
-        type: 'date',
       })
     }
 

@@ -1,3 +1,6 @@
+import type { Where } from 'payload/types'
+
+import qs from 'qs'
 import React, { useCallback, useEffect, useReducer, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -6,6 +9,7 @@ import type { Option } from '../../../ReactSelect/types'
 import type { GetResults, Props, ValueWithRelation } from './types'
 
 import useDebounce from '../../../../../hooks/useDebounce'
+import { useAuth } from '../../../../utilities/Auth'
 import { useConfig } from '../../../../utilities/Config'
 import ReactSelect from '../../../ReactSelect'
 import './index.scss'
@@ -16,7 +20,16 @@ const baseClass = 'condition-value-relationship'
 const maxResultsPerRequest = 10
 
 const RelationshipField: React.FC<Props> = (props) => {
-  const { admin: { isSortable } = {}, hasMany, onChange, relationTo, value } = props
+  const {
+    admin: { isSortable } = {},
+    disabled,
+    filterOptions,
+    hasMany,
+    onChange,
+    operator,
+    relationTo,
+    value,
+  } = props
 
   const {
     collections,
@@ -33,11 +46,14 @@ const RelationshipField: React.FC<Props> = (props) => {
   const [hasLoadedFirstOptions, setHasLoadedFirstOptions] = useState(false)
   const debouncedSearch = useDebounce(search, 300)
   const { i18n, t } = useTranslation('general')
+  const { user } = useAuth()
+
+  const isMulti = ['in', 'not_in'].includes(operator)
 
   const addOptions = useCallback(
     (data, relation) => {
       const collection = collections.find((coll) => coll.slug === relation)
-      dispatchOptions({ collection, data, hasMultipleRelations, i18n, relation, type: 'ADD' })
+      dispatchOptions({ type: 'ADD', collection, data, hasMultipleRelations, i18n, relation })
     },
     [collections, hasMultipleRelations, i18n],
   )
@@ -61,23 +77,66 @@ const RelationshipField: React.FC<Props> = (props) => {
       let resultsFetched = 0
 
       if (!errorLoading) {
-        relationsToFetch.reduce(async (priorRelation, relation) => {
+        void relationsToFetch.reduce(async (priorRelation, relation) => {
           await priorRelation
-
           if (resultsFetched < 10) {
+            const search: Record<string, unknown> & { where: Where } = {
+              depth: 0,
+              limit: maxResultsPerRequest,
+              page: lastLoadedPageToUse,
+              where: { and: [] },
+            }
             const collection = collections.find((coll) => coll.slug === relation)
             const fieldToSearch = collection?.admin?.useAsTitle || 'id'
-            const searchParam = searchArg ? `&where[${fieldToSearch}][like]=${searchArg}` : ''
-
-            const response = await fetch(
-              `${serverURL}${api}/${relation}?limit=${maxResultsPerRequest}&page=${lastLoadedPageToUse}&depth=0${searchParam}`,
-              {
-                credentials: 'include',
-                headers: {
-                  'Accept-Language': i18n.language,
+            // add search arg to where object
+            if (searchArg) {
+              search.where.and.push({
+                [fieldToSearch]: {
+                  like: searchArg,
                 },
+              })
+            }
+            // call the filterOptions function if it exists passing in the collection
+            if (filterOptions) {
+              const optionFilter =
+                typeof filterOptions === 'function'
+                  ? await filterOptions({
+                      // data and siblingData are empty since we cannot fetch with the values covering the
+                      // entire list this limitation means that filterOptions functions using a document's
+                      //  data are unsupported in the whereBuilder
+                      id: undefined,
+                      data: {},
+                      relationTo: collection.slug,
+                      siblingData: {},
+                      user,
+                    })
+                  : filterOptions
+              if (typeof optionFilter === 'object') {
+                search.where.and.push(optionFilter)
+              }
+              if (optionFilter === false) {
+                // no options will be returned
+                setLastFullyLoadedRelation(relations.indexOf(relation))
+
+                // If there are more relations to search, need to reset lastLoadedPage to 1
+                // both locally within function and state
+                if (relations.indexOf(relation) + 1 < relations.length) {
+                  lastLoadedPageToUse = 1
+                }
+                return
+              }
+            }
+
+            if (search.where.and.length === 0) {
+              delete search.where
+            }
+
+            const response = await fetch(`${serverURL}${api}/${relation}?${qs.stringify(search)}`, {
+              credentials: 'include',
+              headers: {
+                'Accept-Language': i18n.language,
               },
-            )
+            })
 
             if (response.ok) {
               const data: PaginatedDocs = await response.json()
@@ -97,18 +156,29 @@ const RelationshipField: React.FC<Props> = (props) => {
                 }
               }
             } else {
-              setErrorLoading(t('errors:unspecific'))
+              setErrorLoading(t('error:unspecific'))
             }
           }
         }, Promise.resolve())
       }
     },
-    [i18n, relationTo, errorLoading, collections, serverURL, api, addOptions, t],
+    [
+      relationTo,
+      errorLoading,
+      collections,
+      filterOptions,
+      serverURL,
+      api,
+      i18n.language,
+      user,
+      addOptions,
+      t,
+    ],
   )
 
   const findOptionsByValue = useCallback((): Option | Option[] => {
     if (value) {
-      if (hasMany) {
+      if (hasMany || isMulti) {
         if (Array.isArray(value)) {
           return value.map((val) => {
             if (hasMultipleRelations) {
@@ -117,7 +187,7 @@ const RelationshipField: React.FC<Props> = (props) => {
               options.forEach((opt) => {
                 if (opt.options) {
                   opt.options.some((subOpt) => {
-                    if (subOpt?.value === val.value) {
+                    if (subOpt?.value == val.value) {
                       matchedOption = subOpt
                       return true
                     }
@@ -130,7 +200,7 @@ const RelationshipField: React.FC<Props> = (props) => {
               return matchedOption
             }
 
-            return options.find((opt) => opt.value === val)
+            return options.find((opt) => opt.value == val)
           })
         }
 
@@ -145,7 +215,7 @@ const RelationshipField: React.FC<Props> = (props) => {
         options.forEach((opt) => {
           if (opt?.options) {
             opt.options.some((subOpt) => {
-              if (subOpt?.value === valueWithRelation.value) {
+              if (subOpt?.value == valueWithRelation.value) {
                 matchedOption = subOpt
                 return true
               }
@@ -157,11 +227,11 @@ const RelationshipField: React.FC<Props> = (props) => {
         return matchedOption
       }
 
-      return options.find((opt) => opt.value === value)
+      return options.find((opt) => opt.value == value)
     }
 
     return undefined
-  }, [hasMany, hasMultipleRelations, value, options])
+  }, [hasMany, hasMultipleRelations, isMulti, value, options])
 
   const handleInputChange = useCallback(
     (newSearch) => {
@@ -186,6 +256,7 @@ const RelationshipField: React.FC<Props> = (props) => {
           const data = await response.json()
           addOptions({ docs: [data] }, relation)
         } else {
+          // eslint-disable-next-line no-console
           console.error(t('error:loadingDocument', { id }))
         }
       }
@@ -199,15 +270,15 @@ const RelationshipField: React.FC<Props> = (props) => {
 
   useEffect(() => {
     dispatchOptions({
+      type: 'CLEAR',
       i18n,
       required: true,
-      type: 'CLEAR',
     })
 
     setHasLoadedFirstOptions(true)
     setLastLoadedPage(1)
     setLastFullyLoadedRelation(-1)
-    getResults({ search: debouncedSearch })
+    void getResults({ search: debouncedSearch })
   }, [getResults, debouncedSearch, relationTo, i18n])
 
   // ///////////////////////////
@@ -216,15 +287,15 @@ const RelationshipField: React.FC<Props> = (props) => {
 
   useEffect(() => {
     if (value && hasLoadedFirstOptions) {
-      if (hasMany) {
+      if (hasMany || isMulti) {
         const matchedOptions = findOptionsByValue()
 
         ;((matchedOptions as Option[]) || []).forEach((option, i) => {
           if (!option) {
             if (hasMultipleRelations) {
-              addOptionByID(value[i].value, value[i].relationTo)
+              void addOptionByID(value[i].value, value[i].relationTo)
             } else {
-              addOptionByID(value[i], relationTo)
+              void addOptionByID(value[i], relationTo)
             }
           }
         })
@@ -234,9 +305,9 @@ const RelationshipField: React.FC<Props> = (props) => {
         if (!matchedOption) {
           if (hasMultipleRelations) {
             const valueWithRelation = value as ValueWithRelation
-            addOptionByID(valueWithRelation.value, valueWithRelation.relationTo)
+            void addOptionByID(valueWithRelation.value, valueWithRelation.relationTo)
           } else {
-            addOptionByID(value, relationTo)
+            void addOptionByID(value, relationTo)
           }
         }
       }
@@ -246,6 +317,7 @@ const RelationshipField: React.FC<Props> = (props) => {
     findOptionsByValue,
     hasMany,
     hasMultipleRelations,
+    isMulti,
     relationTo,
     value,
     hasLoadedFirstOptions,
@@ -261,10 +333,11 @@ const RelationshipField: React.FC<Props> = (props) => {
     <div className={classes}>
       {!errorLoading && (
         <ReactSelect
-          isMulti={hasMany}
+          disabled={disabled}
+          isMulti={hasMany || isMulti}
           isSortable={isSortable}
           onChange={(selected) => {
-            if (hasMany) {
+            if (hasMany || isMulti) {
               onChange(
                 selected
                   ? selected.map((option) => {
@@ -290,7 +363,7 @@ const RelationshipField: React.FC<Props> = (props) => {
           }}
           onInputChange={handleInputChange}
           onMenuScrollToBottom={() => {
-            getResults({ lastFullyLoadedRelation, lastLoadedPage: lastLoadedPage + 1 })
+            void getResults({ lastFullyLoadedRelation, lastLoadedPage: lastLoadedPage + 1 })
           }}
           options={options}
           placeholder={t('selectValue')}

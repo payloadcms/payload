@@ -1,8 +1,12 @@
 {
   "name": "@payloadcms/db-mongodb",
-  "version": "1.0.1",
+  "version": "1.7.3",
   "description": "The officially supported MongoDB database adapter for Payload",
-  "repository": "https://github.com/payloadcms/payload",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/db-mongodb"
+  },
   "license": "MIT",
   "homepage": "https://payloadcms.com",
   "author": {
@@ -10,8 +14,8 @@
     "name": "Payload",
     "url": "https://payloadcms.com"
   },
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "build": "pnpm build:swc && pnpm build:types",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc",
@@ -23,7 +27,8 @@
     "bson-objectid": "2.0.4",
     "deepmerge": "4.3.1",
     "get-port": "5.1.1",
-    "mongoose": "6.11.4",
+    "http-status": "1.6.2",
+    "mongoose": "6.12.3",
     "mongoose-aggregate-paginate-v2": "1.0.6",
     "mongoose-paginate-v2": "1.7.22",
     "prompts": "2.4.2",
@@ -32,8 +37,12 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@types/mongoose-aggregate-paginate-v2": "1.0.9",
-    "mongodb-memory-server": "8.13.0",
+    "mongodb": "4.17.1",
+    "mongodb-memory-server": "^9",
     "payload": "workspace:*"
+  },
+  "peerDependencies": {
+    "payload": "^2.0.0"
   },
   "publishConfig": {
     "main": "./dist/index.js",

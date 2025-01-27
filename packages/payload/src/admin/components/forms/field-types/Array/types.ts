@@ -4,6 +4,7 @@ import type { ArrayField } from '../../../../../fields/config/types'
 
 export type Props = Omit<ArrayField, 'type'> & {
   fieldTypes: FieldTypes
+  forceRender?: boolean
   indexPath: string
   label: false | string
   path?: string

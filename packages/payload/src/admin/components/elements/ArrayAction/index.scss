@@ -18,14 +18,12 @@
   }
 
   &__action {
-    @extend %btn-reset;
     display: flex;
     gap: calc(var(--base) / 2);
     align-items: center;
 
     svg {
       position: relative;
-      top: -1px;
 
       .stroke {
         stroke-width: 1px;

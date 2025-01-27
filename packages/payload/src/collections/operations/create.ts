@@ -17,17 +17,17 @@ import type {
 import executeAccess from '../../auth/executeAccess'
 import sendVerificationEmail from '../../auth/sendVerificationEmail'
 import { registerLocalStrategy } from '../../auth/strategies/local/register'
-import { ValidationError } from '../../errors'
-import { fieldAffectsData } from '../../fields/config/types'
 import { afterChange } from '../../fields/hooks/afterChange'
 import { afterRead } from '../../fields/hooks/afterRead'
 import { beforeChange } from '../../fields/hooks/beforeChange'
 import { beforeValidate } from '../../fields/hooks/beforeValidate'
 import { generateFileData } from '../../uploads/generateFileData'
+import { unlinkTempFiles } from '../../uploads/unlinkTempFiles'
 import { uploadFiles } from '../../uploads/uploadFiles'
+import { commitTransaction } from '../../utilities/commitTransaction'
+import flattenFields from '../../utilities/flattenTopLevelFields'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
-import { mapAsync } from '../../utilities/mapAsync'
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields'
 import { saveVersion } from '../../versions/saveVersion'
 import { buildAfterOperation } from './utils'
@@ -54,43 +54,9 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 ): Promise<GeneratedTypes['collections'][TSlug]> {
   let args = incomingArgs
 
-  // /////////////////////////////////////
-  // beforeOperation - Collection
-  // /////////////////////////////////////
-
-  await args.collection.config.hooks.beforeOperation.reduce(
-    async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
-      await priorHook
-
-      args =
-        (await hook({
-          args,
-          context: args.req.context,
-          operation: 'create',
-        })) || args
-    },
-    Promise.resolve(),
-  )
-
-  const {
-    autosave = false,
-    collection: { config: collectionConfig },
-    collection,
-    depth,
-    disableVerificationEmail,
-    draft = false,
-    overrideAccess,
-    overwriteExistingFiles = false,
-    req: {
-      payload,
-      payload: { config, emailOptions },
-    },
-    req,
-    showHiddenFields,
-  } = args
-
   try {
-    const shouldCommit = await initTransaction(req)
+    const shouldCommit = await initTransaction(args.req)
+
     // /////////////////////////////////////
     // beforeOperation - Collection
     // /////////////////////////////////////
@@ -102,12 +68,33 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
         args =
           (await hook({
             args,
-            context: req.context,
+            collection: args.collection.config,
+            context: args.req.context,
             operation: 'create',
+            req: args.req,
           })) || args
       },
       Promise.resolve(),
     )
+
+    const {
+      autosave = false,
+      collection: { config: collectionConfig },
+      collection,
+      depth,
+      disableVerificationEmail,
+      draft = false,
+      overrideAccess,
+      overwriteExistingFiles = false,
+      req: {
+        fallbackLocale,
+        locale,
+        payload,
+        payload: { config, emailOptions },
+      },
+      req,
+      showHiddenFields,
+    } = args
 
     let { data } = args
 
@@ -124,10 +111,10 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
     // Custom id
     // /////////////////////////////////////
-
+    // @todo: Refactor code to store 'customId' on the collection configuration itself so we don't need to repeat flattenFields
     const hasIdField =
-      collectionConfig.fields.findIndex((field) => fieldAffectsData(field) && field.name === 'id') >
-      -1
+      flattenFields(collectionConfig.fields).findIndex((field) => field.name === 'id') > -1
+
     if (hasIdField) {
       data = {
         _id: data.id,
@@ -143,9 +130,11 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
       collection,
       config,
       data,
+      operation: 'create',
       overwriteExistingFiles,
       req,
-      throwOnMissingFile: !shouldSaveDraft,
+      throwOnMissingFile:
+        !shouldSaveDraft && collection.config.upload.filesRequiredOnCreate !== false,
     })
 
     data = newFileData
@@ -155,10 +144,11 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     data = await beforeValidate({
+      collection: collectionConfig,
       context: req.context,
       data,
       doc: {},
-      entityConfig: collectionConfig,
+      global: null,
       operation: 'create',
       overrideAccess,
       req,
@@ -174,6 +164,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 
         data =
           (await hook({
+            collection: collectionConfig,
             context: req.context,
             data,
             operation: 'create',
@@ -184,14 +175,6 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     )
 
     // /////////////////////////////////////
-    // Write files to local storage
-    // /////////////////////////////////////
-
-    if (!collectionConfig.upload.disableLocalStorage) {
-      await uploadFiles(payload, filesToUpload, req.t)
-    }
-
-    // /////////////////////////////////////
     // beforeChange - Collection
     // /////////////////////////////////////
 
@@ -200,6 +183,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 
       data =
         (await hook({
+          collection: collectionConfig,
           context: req.context,
           data,
           operation: 'create',
@@ -212,15 +196,27 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     const resultWithLocales = await beforeChange<Record<string, unknown>>({
+      collection: collectionConfig,
       context: req.context,
       data,
       doc: {},
       docWithLocales: {},
-      entityConfig: collectionConfig,
+      global: null,
       operation: 'create',
       req,
-      skipValidation: shouldSaveDraft,
+      skipValidation:
+        shouldSaveDraft &&
+        collectionConfig.versions.drafts &&
+        !collectionConfig.versions.drafts.validate,
     })
+
+    // /////////////////////////////////////
+    // Write files to local storage
+    // /////////////////////////////////////
+
+    if (!collectionConfig.upload.disableLocalStorage) {
+      await uploadFiles(payload, filesToUpload, req.t)
+    }
 
     // /////////////////////////////////////
     // Create
@@ -246,25 +242,15 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
         req,
       })
     } else {
-      try {
-        doc = await payload.db.create({
-          collection: collectionConfig.slug,
-          data: resultWithLocales,
-          req,
-        })
-      } catch (error) {
-        // Handle uniqueness error from MongoDB
-        throw error.code === 11000 && error.keyValue
-          ? new ValidationError(
-              [
-                {
-                  field: Object.keys(error.keyValue)[0],
-                  message: req.t('error:valueMustBeUnique'),
-                },
-              ],
-              req.t,
-            )
-          : error
+      const dbArgs = {
+        collection: collectionConfig.slug,
+        data: resultWithLocales,
+        req,
+      }
+      if (collectionConfig?.db?.create) {
+        doc = await collectionConfig.db.create(dbArgs)
+      } else {
+        doc = await payload.db.create(dbArgs)
       }
     }
 
@@ -309,10 +295,14 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     result = await afterRead({
+      collection: collectionConfig,
       context: req.context,
       depth,
       doc: result,
-      entityConfig: collectionConfig,
+      draft,
+      fallbackLocale,
+      global: null,
+      locale,
       overrideAccess,
       req,
       showHiddenFields,
@@ -327,6 +317,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 
       result =
         (await hook({
+          collection: collectionConfig,
           context: req.context,
           doc: result,
           req,
@@ -338,26 +329,15 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     result = await afterChange({
+      collection: collectionConfig,
       context: req.context,
       data,
       doc: result,
-      entityConfig: collectionConfig,
+      global: null,
       operation: 'create',
       previousDoc: {},
       req,
     })
-
-    // Remove temp files if enabled, as express-fileupload does not do this automatically
-    if (config.upload?.useTempFiles && collectionConfig.upload) {
-      const { files } = req
-      const fileArray = Array.isArray(files) ? files : [files]
-      await mapAsync(fileArray, async ({ file }) => {
-        // Still need this check because this will not be populated if using local API
-        if (file.tempFilePath) {
-          await unlinkFile(file.tempFilePath)
-        }
-      })
-    }
 
     // /////////////////////////////////////
     // afterChange - Collection
@@ -369,6 +349,7 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 
         result =
           (await hook({
+            collection: collectionConfig,
             context: req.context,
             doc: result,
             operation: 'create',
@@ -385,31 +366,22 @@ async function create<TSlug extends keyof GeneratedTypes['collections']>(
 
     result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
       args,
+      collection: collectionConfig,
       operation: 'create',
       result,
     })
 
-    // Remove temp files if enabled, as express-fileupload does not do this automatically
-    if (config.upload?.useTempFiles && collectionConfig.upload) {
-      const { files } = req
-      const fileArray = Array.isArray(files) ? files : [files]
-      await mapAsync(fileArray, async ({ file }) => {
-        // Still need this check because this will not be populated if using local API
-        if (file.tempFilePath) {
-          await unlinkFile(file.tempFilePath)
-        }
-      })
-    }
+    await unlinkTempFiles({ collectionConfig, config, req })
 
     // /////////////////////////////////////
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {
-    await killTransaction(req)
+    await killTransaction(args.req)
     throw error
   }
 }

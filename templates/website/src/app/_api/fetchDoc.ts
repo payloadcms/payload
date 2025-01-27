@@ -4,6 +4,7 @@ import type { Config } from '../../payload/payload-types'
 import { PAGE } from '../_graphql/pages'
 import { POST } from '../_graphql/posts'
 import { PROJECT } from '../_graphql/projects'
+import { GRAPHQL_API_URL } from './shared'
 import { payloadToken } from './token'
 
 const queryMap = {
@@ -38,7 +39,7 @@ export const fetchDoc = async <T>(args: {
     token = cookies().get(payloadToken)
   }
 
-  const doc: T = await fetch(`${process.env.PAYLOAD_PUBLIC_SERVER_URL}/api/graphql`, {
+  const doc: T = await fetch(`${GRAPHQL_API_URL}/api/graphql`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

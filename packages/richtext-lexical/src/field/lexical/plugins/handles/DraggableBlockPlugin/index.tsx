@@ -1,10 +1,4 @@
-/**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- */
+'use client'
 import type { LexicalEditor } from 'lexical'
 import type { DragEvent as ReactDragEvent } from 'react'
 
@@ -46,7 +40,6 @@ function setDragImage(dataTransfer: DataTransfer, draggableBlockElem: HTMLElemen
   const { transform } = draggableBlockElem.style
 
   // Remove dragImage borders
-  draggableBlockElem.style.transform = 'translateZ(0)'
   dataTransfer.setDragImage(draggableBlockElem, 0, 0)
 
   setTimeout(() => {
@@ -60,7 +53,6 @@ function hideTargetLine(
 ) {
   if (targetLineElem) {
     targetLineElem.style.opacity = '0'
-    targetLineElem.style.transform = 'translate(-10000px, -10000px)'
   }
   if (lastTargetBlockElem) {
     lastTargetBlockElem.style.opacity = '1'
@@ -164,7 +156,9 @@ function useDraggableBlockMenu(
         return
       }
 
-      setDraggableBlockElem(_draggableBlockElem)
+      if (draggableBlockElem !== _draggableBlockElem) {
+        setDraggableBlockElem(_draggableBlockElem)
+      }
     }
 
     // Since the draggableBlockElem is outside the actual editor, we need to listen to the document
@@ -175,7 +169,7 @@ function useDraggableBlockMenu(
     return () => {
       document?.removeEventListener('mousemove', onDocumentMouseMove)
     }
-  }, [scrollerElem, anchorElem, editor, calculateDistanceFromScrollerElem])
+  }, [scrollerElem, anchorElem, editor, calculateDistanceFromScrollerElem, draggableBlockElem])
 
   useEffect(() => {
     if (menuRef.current) {
@@ -329,7 +323,9 @@ function useDraggableBlockMenu(
         } else {
           targetNode.insertBefore(draggedNode)
         }*/
-        setDraggableBlockElem(null)
+        if (draggableBlockElem !== null) {
+          setDraggableBlockElem(null)
+        }
       })
 
       return true

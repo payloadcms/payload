@@ -8,6 +8,7 @@ import executeAccess from '../../auth/executeAccess'
 import { combineQueries } from '../../database/combineQueries'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths'
 import { afterRead } from '../../fields/hooks/afterRead'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields'
@@ -34,7 +35,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
     limit,
     overrideAccess,
     page,
-    req: { locale, payload },
+    req: { fallbackLocale, locale, payload },
     req,
     showHiddenFields,
     sort,
@@ -88,11 +89,19 @@ async function findVersions<T extends TypeWithVersion<T>>(
         paginatedDocs.docs.map(async (data) => ({
           ...data,
           version: await afterRead({
+            collection: null,
             context: req.context,
             depth,
-            doc: data.version,
-            entityConfig: globalConfig,
+            doc: {
+              ...data.version,
+              // Patch globalType onto version doc
+              globalType: globalConfig.slug,
+            },
+            draft: undefined,
+            fallbackLocale,
             findMany: true,
+            global: globalConfig,
+            locale,
             overrideAccess,
             req,
             showHiddenFields,
@@ -115,8 +124,14 @@ async function findVersions<T extends TypeWithVersion<T>>(
             await priorHook
 
             docRef.version =
-              (await hook({ doc: doc.version, findMany: true, query: fullWhere, req })) ||
-              doc.version
+              (await hook({
+                context: req.context,
+                doc: doc.version,
+                findMany: true,
+                global: globalConfig,
+                query: fullWhere,
+                req,
+              })) || doc.version
           }, Promise.resolve())
 
           return docRef
@@ -133,7 +148,7 @@ async function findVersions<T extends TypeWithVersion<T>>(
       docs: result.docs.map((doc) => sanitizeInternalFields<T>(doc)),
     }
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {

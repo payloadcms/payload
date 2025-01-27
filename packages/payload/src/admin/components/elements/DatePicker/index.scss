@@ -210,6 +210,10 @@ $cal-icon-width: 18px;
       background: none;
       outline: none;
       cursor: pointer;
+
+      option {
+        background-color: var(--theme-elevation-50);
+      }
     }
 
     &__day-names {

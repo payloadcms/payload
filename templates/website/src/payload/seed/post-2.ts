@@ -41,10 +41,7 @@ export const post2: Partial<Post> = {
             },
           ],
           link: {
-            reference: {
-              relationTo: 'pages',
-              value: '',
-            },
+            reference: null,
             url: '',
             label: '',
           },
@@ -73,10 +70,7 @@ export const post2: Partial<Post> = {
             },
           ],
           link: {
-            reference: {
-              relationTo: 'pages',
-              value: '',
-            },
+            reference: null,
             url: '',
             label: '',
           },

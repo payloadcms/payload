@@ -13,7 +13,7 @@ const LocaleContext = createContext({} as Locale)
 export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const { localization } = useConfig()
 
-  const { user } = useAuth()
+  const { refreshPermissions, user } = useAuth()
   const defaultLocale =
     localization && localization.defaultLocale ? localization.defaultLocale : 'en'
   const searchParams = useSearchParams()
@@ -26,6 +26,22 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
   const { getPreference, setPreference } = usePreferences()
   const localeFromParams = searchParams.locale
 
+  const handleLocaleChange = React.useCallback(
+    (newLocaleCode: string) => {
+      if (!localization) return
+
+      if (localization.localeCodes.indexOf(newLocaleCode) > -1) {
+        setLocaleCode(newLocaleCode)
+        setLocale(findLocaleFromCode(localization, newLocaleCode))
+        if (user) {
+          void setPreference('locale', newLocaleCode)
+          void refreshPermissions({ locale: newLocaleCode })
+        }
+      }
+    },
+    [localization, setPreference, user, refreshPermissions],
+  )
+
   useEffect(() => {
     if (!localization) {
       return
@@ -33,31 +49,23 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode }> = ({ child
 
     // set locale from search param
     if (localeFromParams && localization.localeCodes.indexOf(localeFromParams as string) > -1) {
-      setLocaleCode(localeFromParams as string)
-      setLocale(findLocaleFromCode(localization, localeFromParams as string))
-      if (user) setPreference('locale', localeFromParams)
+      handleLocaleChange(localeFromParams as string)
       return
     }
 
     // set locale from preferences or default
-    ;(async () => {
+    const initializeLocale = async () => {
       let preferenceLocale: string
-      let isPreferenceInConfig: boolean
       if (user) {
         preferenceLocale = await getPreference<string>('locale')
-        isPreferenceInConfig =
-          preferenceLocale && localization.localeCodes.indexOf(preferenceLocale) > -1
-        if (isPreferenceInConfig) {
-          setLocaleCode(preferenceLocale)
-          setLocale(findLocaleFromCode(localization, preferenceLocale))
-          return
-        }
-        setPreference('locale', defaultLocale)
+        handleLocaleChange(preferenceLocale)
+        return
       }
-      setLocaleCode(defaultLocale)
-      setLocale(findLocaleFromCode(localization, defaultLocale))
-    })()
-  }, [defaultLocale, getPreference, localeFromParams, setPreference, user, localization])
+      handleLocaleChange(defaultLocale)
+    }
+
+    void initializeLocale()
+  }, [defaultLocale, getPreference, handleLocaleChange, localeFromParams, localization, user])
 
   return <LocaleContext.Provider value={locale}>{children}</LocaleContext.Provider>
 }

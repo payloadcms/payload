@@ -1,6 +1,7 @@
 import React, { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { SanitizedCollectionConfig, SanitizedGlobalConfig } from '../../../../exports/types'
 import type { Props } from './types'
 
 import { Hamburger } from '../../elements/Hamburger'
@@ -15,7 +16,9 @@ import './index.scss'
 
 const baseClass = 'template-default'
 
-const Default: React.FC<Props> = ({ children, className }) => {
+const Default: React.FC<
+  Props & { collection?: SanitizedCollectionConfig; global?: SanitizedGlobalConfig }
+> = ({ children, className }) => {
   const {
     admin: {
       components: { Nav: CustomNav } = {
@@ -26,7 +29,7 @@ const Default: React.FC<Props> = ({ children, className }) => {
 
   const { t } = useTranslation('general')
 
-  const { navOpen, setNavOpen } = useNav()
+  const { navOpen } = useNav()
 
   return (
     <Fragment>
@@ -35,6 +38,11 @@ const Default: React.FC<Props> = ({ children, className }) => {
         keywords={`${t('dashboard')}, Payload`}
         title={t('dashboard')}
       />
+      <div className={`${baseClass}__nav-toggler-wrapper`} id="nav-toggler">
+        <NavToggler className={`${baseClass}__nav-toggler`}>
+          <Hamburger closeIcon="collapse" isActive={navOpen} />
+        </NavToggler>
+      </div>
       <div
         className={[baseClass, className, navOpen && `${baseClass}--nav-open`]
           .filter(Boolean)
@@ -44,17 +52,8 @@ const Default: React.FC<Props> = ({ children, className }) => {
         <div className={`${baseClass}__wrap`}>
           <AppHeader />
           {children}
-          <button
-            aria-label={t('close')}
-            className={`${baseClass}__nav-overlay`}
-            onClick={() => setNavOpen(!navOpen)}
-            type="button"
-          />
         </div>
       </div>
-      <NavToggler className={`${baseClass}__nav-toggler`} id="nav-toggler">
-        <Hamburger closeIcon="collapse" isActive={navOpen} />
-      </NavToggler>
     </Fragment>
   )
 }

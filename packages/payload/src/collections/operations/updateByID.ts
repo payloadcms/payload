@@ -20,6 +20,7 @@ import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles'
 import { generateFileData } from '../../uploads/generateFileData'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles'
 import { uploadFiles } from '../../uploads/uploadFiles'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion'
@@ -45,42 +46,8 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
 ): Promise<GeneratedTypes['collections'][TSlug]> {
   let args = incomingArgs
 
-  // /////////////////////////////////////
-  // beforeOperation - Collection
-  // /////////////////////////////////////
-
-  await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-    await priorHook
-
-    args =
-      (await hook({
-        args,
-        context: args.req.context,
-        operation: 'update',
-      })) || args
-  }, Promise.resolve())
-
-  const {
-    id,
-    autosave = false,
-    collection: { config: collectionConfig },
-    collection,
-    depth,
-    draft: draftArg = false,
-    overrideAccess,
-    overwriteExistingFiles = false,
-    req: {
-      locale,
-      payload: { config },
-      payload,
-      t,
-    },
-    req,
-    showHiddenFields,
-  } = args
-
   try {
-    const shouldCommit = await initTransaction(req)
+    const shouldCommit = await initTransaction(args.req)
 
     // /////////////////////////////////////
     // beforeOperation - Collection
@@ -92,19 +59,41 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       args =
         (await hook({
           args,
-          context: req.context,
+          collection: args.collection.config,
+          context: args.req.context,
           operation: 'update',
+          req: args.req,
         })) || args
     }, Promise.resolve())
+
+    const {
+      id,
+      autosave = false,
+      collection: { config: collectionConfig },
+      collection,
+      depth,
+      draft: draftArg = false,
+      overrideAccess,
+      overwriteExistingFiles = false,
+      req: {
+        fallbackLocale,
+        locale,
+        payload: { config },
+        payload,
+        t,
+      },
+      req,
+      showHiddenFields,
+    } = args
 
     if (!id) {
       throw new APIError('Missing ID of document to update.', httpStatus.BAD_REQUEST)
     }
 
     let { data } = args
-    const { password } = data
+    const dataHasPassword = 'password' in data && data.password
     const shouldSaveDraft = Boolean(draftArg && collectionConfig.versions.drafts)
-    const shouldSavePassword = Boolean(password && collectionConfig.auth && !shouldSaveDraft)
+    const shouldSavePassword = Boolean(dataHasPassword && collectionConfig.auth && !shouldSaveDraft)
 
     // /////////////////////////////////////
     // Access
@@ -138,10 +127,14 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     if (!docWithLocales && hasWherePolicy) throw new Forbidden(t)
 
     const originalDoc = await afterRead({
+      collection: collectionConfig,
       context: req.context,
       depth: 0,
       doc: docWithLocales,
-      entityConfig: collectionConfig,
+      draft: draftArg,
+      fallbackLocale: null,
+      global: null,
+      locale,
       overrideAccess: true,
       req,
       showHiddenFields: true,
@@ -155,6 +148,8 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
       collection,
       config,
       data,
+      operation: 'update',
+      originalDoc,
       overwriteExistingFiles,
       req,
       throwOnMissingFile: false,
@@ -181,10 +176,11 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
 
     data = await beforeValidate<DeepPartial<GeneratedTypes['collections'][TSlug]>>({
       id,
+      collection: collectionConfig,
       context: req.context,
       data,
       doc: originalDoc,
-      entityConfig: collectionConfig,
+      global: null,
       operation: 'update',
       overrideAccess,
       req,
@@ -199,6 +195,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
 
       data =
         (await hook({
+          collection: collectionConfig,
           context: req.context,
           data,
           operation: 'update',
@@ -224,6 +221,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
 
       data =
         (await hook({
+          collection: collectionConfig,
           context: req.context,
           data,
           operation: 'update',
@@ -238,14 +236,19 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
 
     let result = await beforeChange<GeneratedTypes['collections'][TSlug]>({
       id,
+      collection: collectionConfig,
       context: req.context,
       data,
       doc: originalDoc,
       docWithLocales,
-      entityConfig: collectionConfig,
+      global: null,
       operation: 'update',
       req,
-      skipValidation: shouldSaveDraft || data._status === 'draft',
+      skipValidation:
+        shouldSaveDraft &&
+        collectionConfig.versions.drafts &&
+        !collectionConfig.versions.drafts.validate &&
+        data._status !== 'published',
     })
 
     // /////////////////////////////////////
@@ -253,27 +256,32 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     const dataToUpdate: Record<string, unknown> = { ...result }
-
+    const { password } = dataToUpdate
     if (shouldSavePassword && typeof password === 'string') {
       const { hash, salt } = await generatePasswordSaltHash({ password })
       dataToUpdate.salt = salt
       dataToUpdate.hash = hash
+      delete dataToUpdate.password
       delete data.password
-      delete result.password
     }
 
     // /////////////////////////////////////
     // Update
     // /////////////////////////////////////
 
-    if (!shouldSaveDraft) {
-      result = await req.payload.db.updateOne({
+    if (!shouldSaveDraft || data._status === 'published') {
+      const dbArgs = {
         id,
         collection: collectionConfig.slug,
         data: dataToUpdate,
         locale,
         req,
-      })
+      }
+      if (collectionConfig?.db?.updateOne) {
+        result = await collectionConfig.db.updateOne(dbArgs)
+      } else {
+        result = await req.payload.db.updateOne(dbArgs)
+      }
     }
 
     // /////////////////////////////////////
@@ -300,10 +308,14 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     result = await afterRead({
+      collection: collectionConfig,
       context: req.context,
       depth,
       doc: result,
-      entityConfig: collectionConfig,
+      draft: draftArg,
+      fallbackLocale,
+      global: null,
+      locale,
       overrideAccess,
       req,
       showHiddenFields,
@@ -318,6 +330,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
 
       result =
         (await hook({
+          collection: collectionConfig,
           context: req.context,
           doc: result,
           req,
@@ -329,10 +342,11 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     // /////////////////////////////////////
 
     result = await afterChange<GeneratedTypes['collections'][TSlug]>({
+      collection: collectionConfig,
       context: req.context,
       data,
       doc: result,
-      entityConfig: collectionConfig,
+      global: null,
       operation: 'update',
       previousDoc: originalDoc,
       req,
@@ -347,6 +361,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
 
       result =
         (await hook({
+          collection: collectionConfig,
           context: req.context,
           doc: result,
           operation: 'update',
@@ -361,6 +376,7 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
 
     result = await buildAfterOperation<GeneratedTypes['collections'][TSlug]>({
       args,
+      collection: collectionConfig,
       operation: 'updateByID',
       result,
     })
@@ -375,11 +391,11 @@ async function updateByID<TSlug extends keyof GeneratedTypes['collections']>(
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {
-    await killTransaction(req)
+    await killTransaction(args.req)
     throw error
   }
 }

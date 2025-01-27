@@ -3,40 +3,145 @@ import React, { useReducer, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useHistory } from 'react-router-dom'
 
+import type { Field } from '../../../../exports/types'
 import type { Where } from '../../../../types'
 import type { Props } from './types'
 
+import { tabHasName } from '../../../../exports/types'
 import flattenTopLevelFields from '../../../../utilities/flattenTopLevelFields'
 import { getTranslation } from '../../../../utilities/getTranslation'
 import useThrottledEffect from '../../../hooks/useThrottledEffect'
+import { createNestedFieldPath } from '../../forms/Form/createNestedFieldPath'
 import { useSearchParams } from '../../utilities/SearchParams'
 import Button from '../Button'
+import { combineLabel } from '../FieldSelect'
 import Condition from './Condition'
 import fieldTypes from './field-types'
 import './index.scss'
 import reducer from './reducer'
 import { transformWhereQuery } from './transformWhereQuery'
 import validateWhereQuery from './validateWhereQuery'
-
 const baseClass = 'where-builder'
 
-const reduceFields = (fields, i18n) =>
+export type ReduceClientFieldsArgs = {
+  fields: Field[]
+  i18n: any
+  labelPrefix?: string
+  pathPrefix?: string
+}
+
+const reduceFields = (fields, i18n, labelPrefix, pathPrefix) =>
   flattenTopLevelFields(fields).reduce((reduced, field) => {
+    let operators = []
+
+    if (field.admin && 'disableListFilter' in field.admin && field.admin?.disableListFilter)
+      return reduced
+
+    if (field.type === 'group' && 'fields' in field) {
+      const translatedLabel = getTranslation(field.label || '', i18n)
+
+      const labelWithPrefix = labelPrefix
+        ? translatedLabel
+          ? labelPrefix + ' > ' + translatedLabel
+          : labelPrefix
+        : translatedLabel
+
+      const pathWithPrefix = field.name
+        ? pathPrefix
+          ? pathPrefix + '.' + field.name
+          : field.name
+        : pathPrefix
+
+      reduced.push(...reduceFields(field.fields, i18n, labelWithPrefix, pathWithPrefix))
+      return reduced
+    }
+
+    if (field.type === 'tab' && 'tabs' in field) {
+      const tabs = field.tabs as Array<any>
+
+      tabs.forEach((tab) => {
+        if (typeof tab.label !== 'boolean') {
+          const localizedTabLabel = getTranslation(tab.label, i18n)
+
+          const labelWithPrefix = labelPrefix
+            ? labelPrefix + ' > ' + localizedTabLabel
+            : localizedTabLabel
+
+          const tabPathPrefix =
+            tabHasName(tab) && tab.name
+              ? pathPrefix
+                ? pathPrefix + '.' + tab.name
+                : tab.name
+              : pathPrefix
+
+          if (typeof localizedTabLabel === 'string') {
+            reduced.push(...reduceFields(tab.fields, i18n, labelWithPrefix, tabPathPrefix))
+          }
+        }
+      })
+      return reduced
+    }
+
+    if ((field.type as string) === 'row' && 'fields' in field) {
+      reduced.push(...reduceFields(field.fields, i18n, labelPrefix, pathPrefix))
+      return reduced
+    }
+
+    if ((field.type as string) === 'collapsible' && 'fields' in field) {
+      const localizedTabLabel = getTranslation(field.label || '', i18n)
+
+      const labelWithPrefix = labelPrefix
+        ? labelPrefix + ' > ' + localizedTabLabel
+        : localizedTabLabel
+
+      reduced.push(...reduceFields(field.fields, i18n, labelWithPrefix, pathPrefix))
+      return reduced
+    }
+
     if (typeof fieldTypes[field.type] === 'object') {
+      if (typeof fieldTypes[field.type].operators === 'function') {
+        operators = fieldTypes[field.type].operators(
+          'hasMany' in field && field.hasMany ? true : false,
+        )
+      } else {
+        operators = fieldTypes[field.type].operators
+      }
+
+      const operatorKeys = new Set()
+      const reducedOperators = operators.reduce((acc, operator) => {
+        if (!operatorKeys.has(operator.value)) {
+          operatorKeys.add(operator.value)
+          return [
+            ...acc,
+            {
+              ...operator,
+              label: i18n.t(`operators:${operator.label}`),
+            },
+          ]
+        }
+        return acc
+      }, [])
+
+      const localizedLabel = getTranslation(field.label || field.name, i18n)
+
+      const formattedLabel = labelPrefix ? combineLabel(labelPrefix, field, i18n) : localizedLabel
+
+      const formattedValue = pathPrefix
+        ? createNestedFieldPath(pathPrefix, field as Field)
+        : field.name
+
       const formattedField = {
-        label: getTranslation(field.label || field.name, i18n),
-        value: field.name,
+        label: formattedLabel,
+        value: formattedValue,
         ...fieldTypes[field.type],
-        operators: fieldTypes[field.type].operators.map((operator) => ({
-          ...operator,
-          label: i18n.t(`operators:${operator.label}`),
-        })),
+        operators: reducedOperators,
         props: {
           ...field,
         },
       }
 
-      return [...reduced, formattedField]
+      reduced.push(formattedField)
+      return reduced
     }
 
     return reduced
@@ -79,7 +184,7 @@ const WhereBuilder: React.FC<Props> = (props) => {
     return []
   })
 
-  const [reducedFields] = useState(() => reduceFields(collection.fields, i18n))
+  const [reducedFields] = useState(() => reduceFields(collection.fields, i18n, null, null))
 
   // This handles updating the search query (URL) when the where conditions change
   useThrottledEffect(
@@ -110,6 +215,26 @@ const WhereBuilder: React.FC<Props> = (props) => {
         or: [...conditions, ...paramsToKeep],
       }
 
+      const reducedQuery = {
+        or: newWhereQuery.or.map((orCondition) => {
+          const andConditions = (orCondition.and || []).map((andCondition) => {
+            const reducedCondition = {}
+            Object.entries(andCondition).forEach(([fieldName, fieldValue]) => {
+              Object.entries(fieldValue).forEach(([operatorKey, operatorValue]) => {
+                reducedCondition[fieldName] = {}
+                reducedCondition[fieldName][operatorKey] = !operatorValue
+                  ? undefined
+                  : operatorValue
+              })
+            })
+            return reducedCondition
+          })
+          return {
+            and: andConditions,
+          }
+        }),
+      }
+
       if (handleChange) handleChange(newWhereQuery as Where)
 
       const hasExistingConditions =
@@ -124,7 +249,7 @@ const WhereBuilder: React.FC<Props> = (props) => {
             {
               ...currentParams,
               page: 1,
-              where: newWhereQuery,
+              where: reducedQuery,
             },
             { addQueryPrefix: true },
           ),
@@ -173,7 +298,7 @@ const WhereBuilder: React.FC<Props> = (props) => {
             iconStyle="with-border"
             onClick={() => {
               if (reducedFields.length > 0)
-                dispatchConditions({ field: reducedFields[0].value, type: 'add' })
+                dispatchConditions({ type: 'add', field: reducedFields[0].value })
             }}
           >
             {t('or')}
@@ -191,7 +316,7 @@ const WhereBuilder: React.FC<Props> = (props) => {
             iconStyle="with-border"
             onClick={() => {
               if (reducedFields.length > 0)
-                dispatchConditions({ field: reducedFields[0].value, type: 'add' })
+                dispatchConditions({ type: 'add', field: reducedFields[0].value })
             }}
           >
             {t('addFilter')}

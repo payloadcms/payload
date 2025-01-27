@@ -12,22 +12,24 @@ keywords: array, fields, config, configuration, documentation, Content Managemen
 </Banner>
 
 <LightDarkImage
-  srcLight="https://payloadcms.com/images/docs/fields/array.png"
-  srcDark="https://payloadcms.com/images/docs/fields/array-dark.png"
-  alt="Array field with two Rows in Payload admin panel"
-  caption="Admin panel screenshot of an Array field with two Rows"
+srcLight="https://payloadcms.com/images/docs/fields/array.png"
+srcDark="https://payloadcms.com/images/docs/fields/array-dark.png"
+alt="Array field with two Rows in Payload admin panel"
+caption="Admin panel screenshot of an Array field with two Rows"
 />
 
 **Example uses:**
 
 - A "slider" with an image ([upload field](/docs/fields/upload)) and a caption ([text field](/docs/fields/text))
-- Navigational structures where editors can specify nav items containing pages ([relationship field](/docs/fields/relationship)), an "open in new tab" [checkbox field](/docs/fields/checkbox)
-- Event agenda "timeslots" where you need to specify start & end time ([date field](/docs/fields/date)), label ([text field](/docs/fields/text)), and Learn More page [relationship](/docs/fields/relationship)
+- Navigational structures where editors can specify nav items containing
+  pages ([relationship field](/docs/fields/relationship)), an "open in new tab" [checkbox field](/docs/fields/checkbox)
+- Event agenda "timeslots" where you need to specify start & end time ([date field](/docs/fields/date)),
+  label ([text field](/docs/fields/text)), and Learn More page [relationship](/docs/fields/relationship)
 
 ### Config
 
 | Option              | Description                                                                                                                                                                                                                                                                        |
-| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|---------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **`name`** \*       | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                                                                                                             |
 | **`label`**         | Text used as the heading in the Admin panel or an object with keys for each language. Auto-generated from name if not defined.                                                                                                                                                     |
 | **`fields`** \*     | Array of field types to correspond to each row of the Array.                                                                                                                                                                                                                       |
@@ -45,16 +47,19 @@ keywords: array, fields, config, configuration, documentation, Content Managemen
 | **`admin`**         | Admin-specific configuration. See below for [more detail](#admin-config).                                                                                                                                                                                                          |
 | **`custom`**        | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                                          |
 | **`interfaceName`** | Create a top level, reusable [Typescript interface](/docs/typescript/generating-types#custom-field-interfaces) & [GraphQL type](/docs/graphql/graphql-schema#custom-field-schemas).                                                                                                |
+| **`dbName`**        | Custom table name for the field when using SQL database adapter ([Postgres](/docs/database/postgres)). Auto-generated from name if not defined.                                                                                                                                    |
 
 _\* An asterisk denotes that a property is required._
 
 ### Admin Config
 
-In addition to the default [field admin config](/docs/fields/overview#admin-config), you can adjust the following properties:
+In addition to the default [field admin config](/docs/fields/overview#admin-config), you can adjust the following
+properties:
 
 | Option                    | Description                                                                                                          |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+|---------------------------|----------------------------------------------------------------------------------------------------------------------|
 | **`initCollapsed`**       | Set the initial collapsed state                                                                                      |
+| **`isSortable`**          | Disable array order sorting by setting this value to `false`                                                               |
 | **`components.RowLabel`** | Function or React component to be rendered as the label on the array row. Receives `({ data, index, path })` as args |
 
 ### Example
@@ -63,6 +68,7 @@ In addition to the default [field admin config](/docs/fields/overview#admin-conf
 
 ```ts
 import { CollectionConfig } from 'payload/types'
+import { RowLabelArgs } from 'payload/dist/admin/components/forms/RowLabel/types'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
@@ -97,7 +103,7 @@ export const ExampleCollection: CollectionConfig = {
       ],
       admin: {
         components: {
-          RowLabel: ({ data, index }) => {
+          RowLabel: ({ data, index }: RowLabelArgs) => {
             return data?.title || `Slide ${String(index).padStart(2, '0')}`
           },
         },

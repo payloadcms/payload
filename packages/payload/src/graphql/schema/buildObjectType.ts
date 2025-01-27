@@ -92,14 +92,21 @@ function buildObjectType({
         field?.interfaceName || combineParentName(parentName, toWords(field.name, true))
 
       if (!payload.types.arrayTypes[interfaceName]) {
-        // eslint-disable-next-line no-param-reassign
-        payload.types.arrayTypes[interfaceName] = buildObjectType({
+        const objectType = buildObjectType({
           name: interfaceName,
           fields: field.fields,
           forceNullable: isFieldNullable(field, forceNullable),
           parentName: interfaceName,
           payload,
         })
+
+        if (Object.keys(objectType.getFields()).length) {
+          payload.types.arrayTypes[interfaceName] = objectType
+        }
+      }
+
+      if (!payload.types.arrayTypes[interfaceName]) {
+        return objectTypeConfig
       }
 
       const arrayType = new GraphQLList(new GraphQLNonNull(payload.types.arrayTypes[interfaceName]))
@@ -110,12 +117,12 @@ function buildObjectType({
       }
     },
     blocks: (objectTypeConfig: ObjectTypeConfig, field: BlockField) => {
-      const blockTypes = field.blocks.map((block) => {
+      const blockTypes: GraphQLObjectType<any, any>[] = field.blocks.reduce((acc, block) => {
         if (!payload.types.blockTypes[block.slug]) {
           const interfaceName =
             block?.interfaceName || block?.graphQL?.singularName || toWords(block.slug, true)
-          // eslint-disable-next-line no-param-reassign
-          payload.types.blockTypes[block.slug] = buildObjectType({
+
+          const objectType = buildObjectType({
             name: interfaceName,
             fields: [
               ...block.fields,
@@ -128,10 +135,22 @@ function buildObjectType({
             parentName: interfaceName,
             payload,
           })
+
+          if (Object.keys(objectType.getFields()).length) {
+            payload.types.blockTypes[block.slug] = objectType
+          }
         }
 
-        return payload.types.blockTypes[block.slug]
-      })
+        if (payload.types.blockTypes[block.slug]) {
+          acc.push(payload.types.blockTypes[block.slug])
+        }
+
+        return acc
+      }, [])
+
+      if (blockTypes.length === 0) {
+        return objectTypeConfig
+      }
 
       const fullName = combineParentName(parentName, toWords(field.name, true))
 
@@ -177,14 +196,21 @@ function buildObjectType({
         field?.interfaceName || combineParentName(parentName, toWords(field.name, true))
 
       if (!payload.types.groupTypes[interfaceName]) {
-        // eslint-disable-next-line no-param-reassign
-        payload.types.groupTypes[interfaceName] = buildObjectType({
+        const objectType = buildObjectType({
           name: interfaceName,
           fields: field.fields,
           forceNullable: isFieldNullable(field, forceNullable),
           parentName: interfaceName,
           payload,
         })
+
+        if (Object.keys(objectType.getFields()).length) {
+          payload.types.groupTypes[interfaceName] = objectType
+        }
+      }
+
+      if (!payload.types.groupTypes[interfaceName]) {
+        return objectTypeConfig
       }
 
       return {
@@ -286,12 +312,23 @@ function buildObjectType({
       type = type || newlyCreatedBlockType
 
       const relationshipArgs: {
+        draft?: unknown
         fallbackLocale?: unknown
         limit?: unknown
         locale?: unknown
         page?: unknown
         where?: unknown
       } = {}
+
+      const relationsUseDrafts = (Array.isArray(relationTo) ? relationTo : [relationTo]).some(
+        (relation) => payload.collections[relation].config.versions?.drafts,
+      )
+
+      if (relationsUseDrafts) {
+        relationshipArgs.draft = {
+          type: GraphQLBoolean,
+        }
+      }
 
       if (payload.config.localization) {
         relationshipArgs.locale = {
@@ -304,6 +341,11 @@ function buildObjectType({
       }
 
       const relationship = {
+        type: withNullableType(
+          field,
+          hasManyValues ? new GraphQLList(new GraphQLNonNull(type)) : type,
+          forceNullable,
+        ),
         args: relationshipArgs,
         extensions: { complexity: 10 },
         async resolve(parent, args, context) {
@@ -311,6 +353,7 @@ function buildObjectType({
           const locale = args.locale || context.req.locale
           const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale
           let relatedCollectionSlug = field.relationTo
+          const draft = args.draft ?? context.req.query?.draft
 
           if (hasManyValues) {
             const results = []
@@ -336,6 +379,7 @@ function buildObjectType({
                   fallbackLocale,
                   false,
                   false,
+                  draft,
                 ]),
               )
 
@@ -361,7 +405,7 @@ function buildObjectType({
             }
 
             await Promise.all(resultPromises)
-            return results
+            return results.filter((doc) => doc != null)
           }
 
           let id = value
@@ -382,6 +426,7 @@ function buildObjectType({
                 fallbackLocale,
                 false,
                 false,
+                draft,
               ]),
             )
 
@@ -404,11 +449,6 @@ function buildObjectType({
 
           return null
         },
-        type: withNullableType(
-          field,
-          hasManyValues ? new GraphQLList(new GraphQLNonNull(type)) : type,
-          forceNullable,
-        ),
       }
 
       return {
@@ -419,6 +459,7 @@ function buildObjectType({
     richText: (objectTypeConfig: ObjectTypeConfig, field: RichTextField) => ({
       ...objectTypeConfig,
       [field.name]: {
+        type: withNullableType(field, GraphQLJSON, forceNullable),
         args: {
           depth: {
             type: GraphQLInt,
@@ -429,10 +470,24 @@ function buildObjectType({
           if (typeof args.depth !== 'undefined') depth = args.depth
           const editor: RichTextAdapter = field?.editor
 
-          if (editor?.afterReadPromise) {
-            await editor?.afterReadPromise({
-              depth,
+          // RichText fields have their own depth argument in GraphQL.
+          // This is why the populationPromise (which populates richtext fields like uploads and relationships)
+          // is run here again, with the provided depth.
+          // In the graphql find.ts resolver, the depth is then hard-coded to 0.
+          // Effectively, this means that the populationPromise for GraphQL is only run here, and not in the find.ts resolver / normal population promise.
+          if (editor?.populationPromise) {
+            const populateDepth =
+              field?.maxDepth !== undefined && field?.maxDepth < depth ? field?.maxDepth : depth
+
+            await editor?.populationPromise({
+              context,
+              depth: populateDepth,
+              draft: args.draft,
               field,
+              findMany: false,
+              flattenLocales: false,
+              overrideAccess: false,
+              populationPromises: [],
               req: context.req,
               showHiddenFields: false,
               siblingDoc: parent,
@@ -441,7 +496,6 @@ function buildObjectType({
 
           return parent[field.name]
         },
-        type: withNullableType(field, GraphQLJSON, forceNullable),
       },
     }),
     row: (objectTypeConfig: ObjectTypeConfig, field: RowField) =>
@@ -472,20 +526,27 @@ function buildObjectType({
           const interfaceName =
             tab?.interfaceName || combineParentName(parentName, toWords(tab.name, true))
 
-          if (!payload.types.tabTypes[interfaceName]) {
-            // eslint-disable-next-line no-param-reassign
-            payload.types.tabTypes[interfaceName] = buildObjectType({
+          if (!payload.types.groupTypes[interfaceName]) {
+            const objectType = buildObjectType({
               name: interfaceName,
               fields: tab.fields,
               forceNullable,
               parentName: interfaceName,
               payload,
             })
+
+            if (Object.keys(objectType.getFields()).length) {
+              payload.types.groupTypes[interfaceName] = objectType
+            }
+          }
+
+          if (!payload.types.groupTypes[interfaceName]) {
+            return tabSchema
           }
 
           return {
             ...tabSchema,
-            [tab.name]: { type: payload.types.tabTypes[interfaceName] },
+            [tab.name]: { type: payload.types.groupTypes[interfaceName] },
           }
         }
 
@@ -500,7 +561,13 @@ function buildObjectType({
       }, objectTypeConfig),
     text: (objectTypeConfig: ObjectTypeConfig, field: TextField) => ({
       ...objectTypeConfig,
-      [field.name]: { type: withNullableType(field, GraphQLString, forceNullable) },
+      [field.name]: {
+        type: withNullableType(
+          field,
+          field.hasMany === true ? new GraphQLList(GraphQLString) : GraphQLString,
+          forceNullable,
+        ),
+      },
     }),
     textarea: (objectTypeConfig: ObjectTypeConfig, field: TextareaField) => ({
       ...objectTypeConfig,
@@ -537,6 +604,7 @@ function buildObjectType({
       const relatedCollectionSlug = field.relationTo
 
       const upload = {
+        type,
         args: uploadArgs,
         extensions: { complexity: 20 },
         async resolve(parent, args, context) {
@@ -544,6 +612,7 @@ function buildObjectType({
           const locale = args.locale || context.req.locale
           const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale
           const id = value
+          const draft = args.draft ?? context.req.query?.draft
 
           if (id) {
             const relatedDocument = await context.req.payloadDataLoader.load(
@@ -557,6 +626,7 @@ function buildObjectType({
                 fallbackLocale,
                 false,
                 false,
+                Boolean(draft),
               ]),
             )
 
@@ -565,7 +635,6 @@ function buildObjectType({
 
           return null
         },
-        type,
       }
 
       const whereFields = payload.collections[relationTo].config.fields

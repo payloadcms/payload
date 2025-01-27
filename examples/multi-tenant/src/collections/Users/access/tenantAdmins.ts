@@ -1,6 +1,6 @@
 import type { FieldAccess } from 'payload/types'
 
-import { checkUserRoles } from '../../utilities/checkUserRoles'
+import { checkUserRoles } from '../../../utilities/checkUserRoles'
 import { checkTenantRoles } from '../utilities/checkTenantRoles'
 
 export const tenantAdmins: FieldAccess = args => {

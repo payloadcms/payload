@@ -8,22 +8,21 @@ import { withSession } from './withSession'
 
 export const updateGlobal: UpdateGlobal = async function updateGlobal(
   this: MongooseAdapter,
-  { data, req = {} as PayloadRequest, slug },
+  { slug, data, req = {} as PayloadRequest },
 ) {
   const Model = this.globals
   const options = {
-    ...withSession(this, req.transactionID),
+    ...(await withSession(this, req)),
     lean: true,
     new: true,
   }
 
   let result
+
   result = await Model.findOneAndUpdate({ globalType: slug }, data, options)
 
-  result = JSON.parse(JSON.stringify(result))
+  result = this.jsonParse ? JSON.parse(JSON.stringify(result)) : result
 
-  // custom id type reset
-  result.id = result._id
   result = sanitizeInternalFields(result)
 
   return result

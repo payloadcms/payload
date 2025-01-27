@@ -1,37 +1,48 @@
 import path from 'path'
 
-import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
-import { slateEditor } from '../../packages/richtext-slate/src'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
-import { devUser } from '../credentials'
+import { CustomIdRow } from './collections/CustomIdRow'
+import { CustomIdTab } from './collections/CustomIdTab'
+import { CustomViews1 } from './collections/CustomViews1'
+import { CustomViews2 } from './collections/CustomViews2'
+import { CollectionForceRender } from './collections/ForceRender'
+import { Geo } from './collections/Geo'
+import { CollectionGroup1A } from './collections/Group1A'
+import { CollectionGroup1B } from './collections/Group1B'
+import { CollectionGroup2A } from './collections/Group2A'
+import { CollectionGroup2B } from './collections/Group2B'
+import { CollectionHidden } from './collections/Hidden'
+import { CollectionNoApiView } from './collections/NoApiView'
+import { CollectionNoForceRender } from './collections/NoForceRender'
+import { Posts } from './collections/Posts'
+import { Users } from './collections/Users'
+import AdminButton from './components/AdminButton'
 import AfterDashboard from './components/AfterDashboard'
 import AfterNavLinks from './components/AfterNavLinks'
 import BeforeLogin from './components/BeforeLogin'
-import CustomTabComponent from './components/CustomTabComponent'
-import DemoUIFieldCell from './components/DemoUIField/Cell'
-import DemoUIFieldField from './components/DemoUIField/Field'
 import Logout from './components/Logout'
 import CustomDefaultView from './components/views/CustomDefault'
-import CustomDefaultEditView from './components/views/CustomDefaultEdit'
-import CustomEditView from './components/views/CustomEdit'
 import CustomMinimalRoute from './components/views/CustomMinimal'
-import CustomVersionsView from './components/views/CustomVersions'
 import CustomView from './components/views/CustomView'
-import { globalSlug, postsSlug, slugPluralLabel, slugSingularLabel } from './shared'
-
-export interface Post {
-  createdAt: Date
-  description: string
-  id: string
-  title: string
-  updatedAt: Date
-}
+import CustomNestedView from './components/views/CustomViewNested'
+import { CustomGlobalViews1 } from './globals/CustomViews1'
+import { CustomGlobalViews2 } from './globals/CustomViews2'
+import { GlobalForceRender } from './globals/ForceRender'
+import { Global } from './globals/Global'
+import { GlobalGroup1A } from './globals/Group1A'
+import { GlobalGroup1B } from './globals/Group1B'
+import { GlobalHidden } from './globals/Hidden'
+import { GlobalNoApiView } from './globals/NoApiView'
+import { GlobalNoForceRender } from './globals/NoForceRender'
+import { clearAndSeedEverything } from './seed'
+import { customNestedViewPath, customViewPath } from './shared'
 
 export default buildConfigWithDefaults({
   admin: {
     css: path.resolve(__dirname, 'styles.scss'),
     components: {
       // providers: [CustomProvider, CustomProvider],
+      actions: [AdminButton],
       afterDashboard: [AfterDashboard],
       beforeLogin: [BeforeLogin],
       logout: {
@@ -41,16 +52,35 @@ export default buildConfigWithDefaults({
       views: {
         // Dashboard: CustomDashboardView,
         // Account: CustomAccountView,
-        CustomMinimalRoute: {
+        CustomMinimalView: {
           path: '/custom-minimal-view',
           Component: CustomMinimalRoute,
         },
-        CustomDefaultRoute: {
+        CustomDefaultView: {
           path: '/custom-default-view',
           Component: CustomDefaultView,
         },
+        CustomView: {
+          path: customViewPath,
+          exact: true,
+          Component: CustomView,
+        },
+        CustomNestedView: {
+          path: customNestedViewPath,
+          Component: CustomNestedView,
+        },
       },
     },
+    webpack: (config) => ({
+      ...config,
+      resolve: {
+        ...config.resolve,
+        alias: {
+          ...config?.resolve?.alias,
+          fs: path.resolve(__dirname, './mocks/emptyModule.js'),
+        },
+      },
+    }),
   },
   i18n: {
     resources: {
@@ -63,365 +93,52 @@ export default buildConfigWithDefaults({
   },
   localization: {
     defaultLocale: 'en',
-    locales: ['en', 'es'],
+    locales: [
+      {
+        label: {
+          es: 'Español',
+          en: 'Spanish',
+        },
+        code: 'es',
+      },
+      {
+        label: {
+          es: 'Inglés',
+          en: 'English',
+        },
+        code: 'en',
+      },
+    ],
   },
   collections: [
-    {
-      slug: 'users',
-      auth: true,
-      admin: {
-        useAsTitle: 'email',
-      },
-      fields: [],
-    },
-    {
-      slug: 'hidden-collection',
-      admin: {
-        hidden: () => true,
-      },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-      ],
-    },
-    {
-      slug: postsSlug,
-      labels: {
-        singular: slugSingularLabel,
-        plural: slugPluralLabel,
-      },
-      admin: {
-        description: 'Description',
-        listSearchableFields: ['title', 'description', 'number'],
-        group: 'One',
-        useAsTitle: 'title',
-        defaultColumns: ['id', 'number', 'title', 'description', 'demoUIField'],
-        preview: () => 'https://payloadcms.com',
-      },
-      versions: {
-        drafts: true,
-      },
-      fields: [
-        {
-          type: 'tabs',
-          tabs: [
-            {
-              label: 'Tab 1',
-              fields: [
-                {
-                  name: 'title',
-                  type: 'text',
-                },
-                {
-                  name: 'description',
-                  type: 'text',
-                },
-                {
-                  name: 'number',
-                  type: 'number',
-                },
-                {
-                  name: 'richText',
-                  type: 'richText',
-                  editor: slateEditor({
-                    admin: {
-                      elements: ['relationship'],
-                    },
-                  }),
-                },
-                {
-                  type: 'ui',
-                  name: 'demoUIField',
-                  label: 'Demo UI Field',
-                  admin: {
-                    components: {
-                      Field: DemoUIFieldField,
-                      Cell: DemoUIFieldCell,
-                    },
-                  },
-                },
-              ],
-            },
-          ],
-        },
-        {
-          name: 'sidebarField',
-          type: 'text',
-          admin: {
-            position: 'sidebar',
-          },
-        },
-      ],
-    },
-    {
-      slug: 'custom-views-one',
-      versions: true,
-      admin: {
-        components: {
-          views: {
-            // This will override the entire Edit view including all nested views, i.e. `/edit/:id/*`
-            // To override one specific nested view, use the nested view's slug as the key
-            Edit: CustomEditView,
-          },
-        },
-      },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-      ],
-    },
-    {
-      slug: 'custom-views-two',
-      versions: true,
-      admin: {
-        components: {
-          views: {
-            Edit: {
-              // This will override one specific nested view within the `/edit/:id` route, i.e. `/edit/:id/versions`
-              Default: CustomDefaultEditView,
-              Versions: CustomVersionsView,
-              MyCustomView: {
-                path: '/custom-tab-view',
-                Component: CustomView,
-                Tab: {
-                  label: 'Custom',
-                  href: '/custom-tab-view',
-                },
-              },
-              MyCustomViewWithCustomTab: {
-                path: '/custom-tab-component',
-                Component: CustomView,
-                Tab: CustomTabComponent,
-              },
-            },
-          },
-        },
-      },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-      ],
-    },
-    {
-      slug: 'group-one-collection-ones',
-      admin: {
-        group: 'One',
-      },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-      ],
-    },
-    {
-      slug: 'group-one-collection-twos',
-      admin: {
-        group: 'One',
-      },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-      ],
-    },
-    {
-      slug: 'group-two-collection-ones',
-      admin: {
-        group: 'Two',
-      },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-      ],
-    },
-    {
-      slug: 'group-two-collection-twos',
-      admin: {
-        group: 'Two',
-      },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-      ],
-    },
-    {
-      slug: 'geo',
-      fields: [
-        {
-          name: 'point',
-          type: 'point',
-        },
-      ],
-    },
+    Posts,
+    Users,
+    CollectionHidden,
+    CollectionNoApiView,
+    CustomViews1,
+    CustomViews2,
+    CollectionGroup1A,
+    CollectionGroup1B,
+    CollectionGroup2A,
+    CollectionGroup2B,
+    Geo,
+    CustomIdTab,
+    CustomIdRow,
+    CollectionForceRender,
+    CollectionNoForceRender,
   ],
   globals: [
-    {
-      slug: 'hidden-global',
-      admin: {
-        hidden: () => true,
-      },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-      ],
-    },
-    {
-      slug: globalSlug,
-      admin: {
-        group: 'Group',
-      },
-      versions: {
-        drafts: true,
-      },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-        {
-          name: 'sidebarField',
-          type: 'text',
-          admin: {
-            position: 'sidebar',
-          },
-        },
-      ],
-    },
-
-    {
-      slug: 'custom-global-views-one',
-      versions: true,
-      admin: {
-        components: {
-          views: {
-            Edit: CustomEditView,
-          },
-        },
-      },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-      ],
-    },
-    {
-      slug: 'custom-global-views-two',
-      versions: true,
-      admin: {
-        components: {
-          views: {
-            Edit: {
-              Default: CustomDefaultEditView,
-              Versions: CustomVersionsView,
-              MyCustomView: {
-                path: '/custom-tab-view',
-                Component: CustomView,
-                Tab: {
-                  label: 'Custom',
-                  href: '/custom-tab-view',
-                },
-              },
-              MyCustomViewWithCustomTab: {
-                path: '/custom-tab-component',
-                Component: CustomView,
-                Tab: CustomTabComponent,
-              },
-            },
-          },
-        },
-      },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-      ],
-    },
-    {
-      slug: 'group-globals-one',
-      admin: {
-        group: 'Group',
-      },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-      ],
-    },
-    {
-      slug: 'group-globals-two',
-      admin: {
-        group: 'Group',
-      },
-      fields: [
-        {
-          name: 'title',
-          type: 'text',
-        },
-      ],
-    },
+    GlobalHidden,
+    GlobalNoApiView,
+    Global,
+    CustomGlobalViews1,
+    CustomGlobalViews2,
+    GlobalGroup1A,
+    GlobalGroup1B,
+    GlobalForceRender,
+    GlobalNoForceRender,
   ],
   onInit: async (payload) => {
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: devUser.email,
-        password: devUser.password,
-      },
-    })
-
-    await mapAsync([...Array(11)], async () => {
-      await payload.create({
-        collection: postsSlug,
-        data: {
-          title: 'title',
-          description: 'description',
-        },
-      })
-    })
-
-    await payload.create({
-      collection: 'custom-views-one',
-      data: {
-        title: 'title',
-      },
-    })
-
-    await payload.create({
-      collection: 'custom-views-two',
-      data: {
-        title: 'title',
-      },
-    })
-
-    await payload.create({
-      collection: 'geo',
-      data: {
-        point: [7, -7],
-      },
-    })
-
-    await payload.create({
-      collection: 'geo',
-      data: {
-        point: [5, -5],
-      },
-    })
+    await clearAndSeedEverything(payload)
   },
 })

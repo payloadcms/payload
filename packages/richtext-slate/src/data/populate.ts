@@ -7,7 +7,8 @@ type Arguments = {
   currentDepth?: number
   data: unknown
   depth: number
-  field: RichTextField<AdapterArguments>
+  draft: boolean
+  field: RichTextField<any[], AdapterArguments, AdapterArguments>
   key: number | string
   overrideAccess?: boolean
   req: PayloadRequest
@@ -20,6 +21,7 @@ export const populate = async ({
   currentDepth,
   data,
   depth,
+  draft,
   key,
   overrideAccess,
   req,
@@ -42,6 +44,7 @@ export const populate = async ({
       req.fallbackLocale,
       typeof overrideAccess === 'undefined' ? false : overrideAccess,
       showHiddenFields,
+      draft,
     ]),
   )
 

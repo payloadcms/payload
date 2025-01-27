@@ -6,22 +6,37 @@
   cursor: pointer;
   background-color: transparent;
   outline: none;
-  position: absolute;
+  position: relative;
+  @include blur-bg;
 
-  --hamburger-padding: 5px;
+  --hamburger-padding: 8px;
   --hamburger-size: 9px;
   --hamburger-line-gap: 3px;
-  padding: var(--hamburger-padding);
-  border: 1px solid var(--theme-elevation-350);
-  color: var(--theme-text);
-  border-radius: 3px;
 
-  &:focus {
-    outline: none;
+  color: var(--theme-text);
+
+  &__wrapper {
+    border: 1px solid var(--theme-elevation-150);
+    padding: var(--hamburger-padding);
+    border-radius: 3px;
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    width: 100%;
+
+    &:hover {
+      border: 1px solid var(--theme-elevation-500);
+      background-color: var(--theme-elevation-100);
+    }
+
+    &:focus {
+      outline: none;
+    }
   }
 
   &__icon {
     position: relative;
+    z-index: 1;
     height: var(--hamburger-size);
     width: var(--hamburger-size);
     display: flex;

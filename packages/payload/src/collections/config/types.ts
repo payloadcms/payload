@@ -3,24 +3,30 @@ import type { Response } from 'express'
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired } from 'ts-essentials'
 
-import type { GeneratedTypes } from '../../'
+import type { DatabaseAdapter, GeneratedTypes } from '../../'
 import type {
   CustomPreviewButtonProps,
-  CustomPublishButtonProps,
+  CustomPublishButtonType,
   CustomSaveButtonProps,
   CustomSaveDraftButtonProps,
 } from '../../admin/components/elements/types'
 import type { Props as ListProps } from '../../admin/components/views/collections/List/types'
+import type { Arguments as MeArguments } from '../../auth/operations/me'
+import type {
+  Arguments as RefreshArguments,
+  Result as RefreshResult,
+} from '../../auth/operations/refresh'
 import type { Auth, IncomingAuthType, User } from '../../auth/types'
 import type {
   Access,
-  EditView,
-  EditViewComponent,
+  AdminViewComponent,
+  EditViewConfig,
   Endpoint,
   EntityDescription,
   GeneratePreviewURL,
   LivePreviewConfig,
 } from '../../config/types'
+import type { DBIdentifierName } from '../../database/types'
 import type { PayloadRequest, RequestContext } from '../../express/types'
 import type { Field } from '../../fields/config/types'
 import type { IncomingUploadType, Upload } from '../../uploads/types'
@@ -29,6 +35,7 @@ import type { AfterOperationArg, AfterOperationMap } from '../operations/utils'
 
 export type HookOperationType =
   | 'autosave'
+  | 'count'
   | 'create'
   | 'delete'
   | 'forgotPassword'
@@ -41,14 +48,19 @@ type CreateOrUpdateOperation = Extract<HookOperationType, 'create' | 'update'>
 
 export type BeforeOperationHook = (args: {
   args?: any
+  /** The collection which this hook is being run on */
+  collection: SanitizedCollectionConfig
   context: RequestContext
   /**
    * Hook operation being performed
    */
   operation: HookOperationType
+  req: PayloadRequest
 }) => any
 
 export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
+  /** The collection which this hook is being run on */
+  collection: SanitizedCollectionConfig
   context: RequestContext
   data?: Partial<T>
   /**
@@ -61,10 +73,12 @@ export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
    * `undefined` on 'create' operation
    */
   originalDoc?: T
-  req?: PayloadRequest
+  req: PayloadRequest
 }) => any
 
 export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
+  /** The collection which this hook is being run on */
+  collection: SanitizedCollectionConfig
   context: RequestContext
   data: Partial<T>
   /**
@@ -81,6 +95,8 @@ export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
 }) => any
 
 export type AfterChangeHook<T extends TypeWithID = any> = (args: {
+  /** The collection which this hook is being run on */
+  collection: SanitizedCollectionConfig
   context: RequestContext
   doc: T
   /**
@@ -92,27 +108,39 @@ export type AfterChangeHook<T extends TypeWithID = any> = (args: {
 }) => any
 
 export type BeforeReadHook<T extends TypeWithID = any> = (args: {
+  /** The collection which this hook is being run on */
+  collection: SanitizedCollectionConfig
   context: RequestContext
   doc: T
-  query: { [key: string]: any }
+  query: {
+    [key: string]: any
+  }
   req: PayloadRequest
 }) => any
 
 export type AfterReadHook<T extends TypeWithID = any> = (args: {
+  /** The collection which this hook is being run on */
+  collection: SanitizedCollectionConfig
   context: RequestContext
   doc: T
   findMany?: boolean
-  query?: { [key: string]: any }
+  query?: {
+    [key: string]: any
+  }
   req: PayloadRequest
 }) => any
 
 export type BeforeDeleteHook = (args: {
+  /** The collection which this hook is being run on */
+  collection: SanitizedCollectionConfig
   context: RequestContext
   id: number | string
   req: PayloadRequest
 }) => any
 
 export type AfterDeleteHook<T extends TypeWithID = any> = (args: {
+  /** The collection which this hook is being run on */
+  collection: SanitizedCollectionConfig
   context: RequestContext
   doc: T
   id: number | string
@@ -127,15 +155,24 @@ export type AfterErrorHook = (
   err: Error,
   res: unknown,
   context: RequestContext,
-) => { response: any; status: number } | void
+  /** The collection which this hook is being run on. This is null if the AfterError hook was be added to the payload-wide config */
+  collection: SanitizedCollectionConfig | null,
+) => {
+  response: any
+  status: number
+} | void
 
 export type BeforeLoginHook<T extends TypeWithID = any> = (args: {
+  /** The collection which this hook is being run on */
+  collection: SanitizedCollectionConfig
   context: RequestContext
   req: PayloadRequest
   user: T
 }) => any
 
 export type AfterLoginHook<T extends TypeWithID = any> = (args: {
+  /** The collection which this hook is being run on */
+  collection: SanitizedCollectionConfig
   context: RequestContext
   req: PayloadRequest
   token: string
@@ -143,18 +180,34 @@ export type AfterLoginHook<T extends TypeWithID = any> = (args: {
 }) => any
 
 export type AfterLogoutHook<T extends TypeWithID = any> = (args: {
+  /** The collection which this hook is being run on */
+  collection: SanitizedCollectionConfig
   context: RequestContext
   req: PayloadRequest
   res: Response
 }) => any
 
 export type AfterMeHook<T extends TypeWithID = any> = (args: {
+  /** The collection which this hook is being run on */
+  collection: SanitizedCollectionConfig
   context: RequestContext
   req: PayloadRequest
   response: unknown
 }) => any
 
+export type RefreshHook<T extends TypeWithID = any> = (args: {
+  args: RefreshArguments
+  user: T
+}) => Promise<RefreshResult | void> | (RefreshResult | void)
+
+export type MeHook<T extends TypeWithID = any> = (args: {
+  args: MeArguments
+  user: T
+}) => ({ exp: number; user: T } | void) | Promise<{ exp: number; user: T } | void>
+
 export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
+  /** The collection which this hook is being run on */
+  collection: SanitizedCollectionConfig
   context: RequestContext
   exp: number
   req: PayloadRequest
@@ -162,9 +215,16 @@ export type AfterRefreshHook<T extends TypeWithID = any> = (args: {
   token: string
 }) => any
 
-export type AfterForgotPasswordHook = (args: { args?: any; context: RequestContext }) => any
+export type AfterForgotPasswordHook = (args: {
+  args?: any
+  /** The collection which this hook is being run on */
+  collection: SanitizedCollectionConfig
+  context: RequestContext
+}) => any
 
 type BeforeDuplicateArgs<T> = {
+  /** The collection which this hook is being run on */
+  collection: SanitizedCollectionConfig
   data: T
   locale?: string
 }
@@ -192,7 +252,7 @@ export type CollectionAdminOptions = {
        * Replaces the "Publish" button
        * + drafts must be enabled
        */
-      PublishButton?: CustomPublishButtonProps
+      PublishButton?: CustomPublishButtonType
       /**
        * Replaces the "Save" button
        * + drafts must be disabled
@@ -211,30 +271,39 @@ export type CollectionAdminOptions = {
        * Set to an object to replace or modify individual nested routes, or to add new ones.
        */
       Edit?:
+        | (
+            | {
+                /**
+                 * Replace or modify individual nested routes, or add new ones:
+                 * + `Default` - `/admin/collections/:collection/:id`
+                 * + `API` - `/admin/collections/:collection/:id/api`
+                 * + `LivePreview` - `/admin/collections/:collection/:id/preview`
+                 * + `References` - `/admin/collections/:collection/:id/references`
+                 * + `Relationships` - `/admin/collections/:collection/:id/relationships`
+                 * + `Versions` - `/admin/collections/:collection/:id/versions`
+                 * + `Version` - `/admin/collections/:collection/:id/versions/:version`
+                 * + `CustomView` - `/admin/collections/:collection/:id/:path`
+                 */
+                API?: AdminViewComponent | Partial<EditViewConfig>
+                Default?: AdminViewComponent | Partial<EditViewConfig>
+                LivePreview?: AdminViewComponent | Partial<EditViewConfig>
+                Version?: AdminViewComponent | Partial<EditViewConfig>
+                Versions?: AdminViewComponent | Partial<EditViewConfig>
+                // TODO: uncomment these as they are built
+                // References?: EditView
+                // Relationships?: EditView
+              }
+            | {
+                [key: string]: EditViewConfig
+              }
+          )
+        | AdminViewComponent
+      List?:
         | {
-            [key: string]: EditView
-            API?: EditView
-            /**
-             * Replace or modify individual nested routes, or add new ones:
-             * + `Default` - `/admin/collections/:collection/:id`
-             * + `API` - `/admin/collections/:collection/:id/api`
-             * + `LivePreview` - `/admin/collections/:collection/:id/preview`
-             * + `References` - `/admin/collections/:collection/:id/references`
-             * + `Relationships` - `/admin/collections/:collection/:id/relationships`
-             * + `Versions` - `/admin/collections/:collection/:id/versions`
-             * + `Version` - `/admin/collections/:collection/:id/versions/:version`
-             * + `:path` - `/admin/collections/:collection/:id/:path`
-             */
-            Default?: EditView
-            LivePreview?: EditView
-            Version?: EditView
-            Versions?: EditView
-            // TODO: uncomment these as they are built
-            // References?: EditView
-            // Relationships?: EditView
+            Component?: React.ComponentType<ListProps>
+            actions?: React.ComponentType<any>[]
           }
-        | EditViewComponent
-      List?: React.ComponentType<ListProps>
+        | React.ComponentType<ListProps>
     }
   }
   /**
@@ -248,6 +317,11 @@ export type CollectionAdminOptions = {
   disableDuplicate?: boolean
   enableRichTextLink?: boolean
   enableRichTextRelationship?: boolean
+  /**
+   * Forces all fields in the Edit view to render immediately, regardless of scroll position
+   * @default false
+   */
+  forceRenderAllFields?: boolean
   /**
    * Place collections into a navigational group
    * */
@@ -314,6 +388,19 @@ export type CollectionConfig = {
   auth?: IncomingAuthType | boolean
   /** Extension point to add your custom data. */
   custom?: Record<string, any>
+
+  /**
+   * Add a custom database adapter to this collection.
+   */
+  db?: Pick<
+    DatabaseAdapter,
+    'create' | 'deleteMany' | 'deleteOne' | 'find' | 'findOne' | 'updateOne'
+  >
+  /**
+   * Used to override the default naming of the database table or collection with your using a function or string
+   * @WARNING: If you change this property with existing data, you will need to handle the renaming of the table in your database or by using migrations
+   */
+  dbName?: DBIdentifierName
   /**
    * Default field to sort by in collection list view
    */
@@ -352,6 +439,18 @@ export type CollectionConfig = {
     beforeOperation?: BeforeOperationHook[]
     beforeRead?: BeforeReadHook[]
     beforeValidate?: BeforeValidateHook[]
+    /**
+     * Use the `me` hook to control the `me` operation.
+     * Here, you can optionally instruct the me operation to return early,
+     * and skip its default logic.
+     */
+    me?: MeHook[]
+    /**
+     * Use the `refresh` hook to control the refresh operation.
+     * Here, you can optionally instruct the refresh operation to return early,
+     * and skip its default logic.
+     */
+    refresh?: RefreshHook[]
   }
   /**
    * Label configuration
@@ -382,6 +481,7 @@ export type CollectionConfig = {
    * @default false // disable uploads
    */
   upload?: IncomingUploadType | boolean
+
   /**
    * Customize the handling of incoming file uploads
    *
@@ -406,6 +506,7 @@ export type Collection = {
   config: SanitizedCollectionConfig
   graphQL?: {
     JWT: GraphQLObjectType
+    countType: GraphQLObjectType
     mutationInputType: GraphQLNonNull<any>
     paginatedType: GraphQLObjectType
     type: GraphQLObjectType

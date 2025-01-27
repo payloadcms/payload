@@ -76,7 +76,7 @@ const link: LinkType = ({ appearances, disableLabel = false, overrides = {} } = 
       name: 'reference',
       label: 'Document to link to',
       type: 'relationship',
-      relationTo: ['pages'],
+      relationTo: ['posts', 'pages'],
       required: true,
       maxDepth: 1,
       admin: {

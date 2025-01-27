@@ -1,17 +1,43 @@
+import type { FieldTypes } from '../exports/config'
 import type { Field } from '../fields/config/types'
 
-export const fieldSchemaToJSON = (fields: Field[]): Record<string, unknown>[] => {
+export type FieldSchemaJSON = {
+  blocks?: FieldSchemaJSON // TODO: conditionally add based on `type`
+  fields?: FieldSchemaJSON // TODO: conditionally add based on `type`
+  hasMany?: boolean // TODO: conditionally add based on `type`
+  name: string
+  relationTo?: string // TODO: conditionally add based on `type`
+  slug?: string // TODO: conditionally add based on `type`
+  type: keyof FieldTypes
+}[]
+
+export const fieldSchemaToJSON = (fields: Field[]): FieldSchemaJSON => {
   return fields.reduce((acc, field) => {
     let result = acc
 
     switch (field.type) {
       case 'group':
-      case 'array':
         acc.push({
           name: field.name,
           fields: fieldSchemaToJSON(field.fields),
           type: field.type,
         })
+
+        break
+
+      case 'array':
+        acc.push({
+          name: field.name,
+          fields: fieldSchemaToJSON([
+            ...field.fields,
+            {
+              name: 'id',
+              type: 'text',
+            },
+          ]),
+          type: field.type,
+        })
+
         break
 
       case 'blocks':
@@ -19,19 +45,25 @@ export const fieldSchemaToJSON = (fields: Field[]): Record<string, unknown>[] =>
           name: field.name,
           blocks: field.blocks.reduce((acc, block) => {
             acc[block.slug] = {
-              fields: fieldSchemaToJSON(block.fields),
+              fields: fieldSchemaToJSON([
+                ...block.fields,
+                {
+                  name: 'id',
+                  type: 'text',
+                },
+              ]),
             }
 
             return acc
           }, {}),
           type: field.type,
         })
+
         break
 
       case 'row':
       case 'collapsible':
         result = result.concat(fieldSchemaToJSON(field.fields))
-
         break
 
       case 'tabs': {
@@ -42,7 +74,7 @@ export const fieldSchemaToJSON = (fields: Field[]): Record<string, unknown>[] =>
             tabFields.push({
               name: tab.name,
               fields: fieldSchemaToJSON(tab.fields),
-              type: 'tab',
+              type: field.type,
             })
             return
           }

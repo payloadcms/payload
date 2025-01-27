@@ -2,7 +2,7 @@
 title: Postgres
 label: Postgres
 order: 50
-desc: Payload supports Postgres through an officially supported Drizzle database adapter. 
+desc: Payload supports Postgres through an officially supported Drizzle database adapter.
 keywords: Postgres, documentation, typescript, Content Management System, cms, headless, javascript, node, react, express
 ---
 
@@ -37,11 +37,18 @@ export default buildConfig({
 
 ### Options
 
-| Option            | Description                                                                                                                                                                      |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pool`            | [Pool connection options](https://orm.drizzle.team/docs/quick-postgresql/node-postgres) that will be passed to Drizzle and `node-postgres`.                                      |
-| `push`            | Disable Drizzle's [`db push`](https://orm.drizzle.team/kit-docs/overview#prototyping-with-db-push) in development mode. By default, `push` is enabled for development mode only. |
-| `migrationDir`    | Customize the directory that migrations are stored. |
+| Option                | Description                                                                                                                                                                                           |
+|-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `pool` \*             | [Pool connection options](https://orm.drizzle.team/docs/quick-postgresql/node-postgres) that will be passed to Drizzle and `node-postgres`.                                                           |
+| `push`                | Disable Drizzle's [`db push`](https://orm.drizzle.team/kit-docs/overview#prototyping-with-db-push) in development mode. By default, `push` is enabled for development mode only.                      |
+| `migrationDir`        | Customize the directory that migrations are stored.                                                                                                                                                   |
+| `logger`              | The instance of the logger to be passed to drizzle. By default Payload's will be used.                                                                                                                |
+| `schemaName`   | A string for the postgres schema to use, defaults to 'public'.                                                                                                                   |
+| `localesSuffix`       | A string appended to the end of table names for storing localized fields. Default is '_locales'.                                                                                                      |
+| `relationshipsSuffix` | A string appended to the end of table names for storing relationships. Default is '_rels'.                                                                                                            |
+| `versionsSuffix`      | A string appended to the end of table names for storing versions. Defaults to '_v'.                                                                                                                   |
+
+
 
 ### Access to Drizzle
 
@@ -65,7 +72,7 @@ In addition to exposing Drizzle directly, all of the tables, Drizzle relations, 
 
 Drizzle exposes two ways to work locally in development mode.
 
-The first is [`db push`](https://orm.drizzle.team/kit-docs/overview#prototyping-with-db-push), which automatically pushes changes you make to your Payload config (and therefore, Drizzle schema) to your database so you don't have to manually migrate every time you change your Payload config. This only works in development mode, and should not be mixed with manually running [`migrate`](/docs/database/migrations) commands. 
+The first is [`db push`](https://orm.drizzle.team/kit-docs/overview#prototyping-with-db-push), which automatically pushes changes you make to your Payload config (and therefore, Drizzle schema) to your database so you don't have to manually migrate every time you change your Payload config. This only works in development mode, and should not be mixed with manually running [`migrate`](/docs/database/migrations) commands.
 
 You will be warned if any changes that you make will entail data loss while in development mode. Push is enabled by default, but you can opt out if you'd like.
 
@@ -77,7 +84,7 @@ Migrations are extremely powerful thanks to the seamless way that Payload and Dr
 
 1. You are building your Payload config locally, with a local database used for testing.
 1. You have left the default setting of `push` enabled, so every time you change your Payload config (add or remove fields, collections, etc.), Drizzle will automatically push changes to your local DB.
-1. Once you're done with your changes, or have completed a feature, you can run `npm run payload migrate:create`. 
+1. Once you're done with your changes, or have completed a feature, you can run `npm run payload migrate:create`.
 1. Payload and Drizzle will look for any existing migrations, and automatically generate all SQL changes necessary to convert your schema from its prior state into the state of your current Payload config, and store the resulting DDL in a newly created migration.
 1. Once you're ready to go to production, you will be able to run `npm run payload migrate` against your production database, which will apply any new migrations that have not yet run.
 1. Now your production database is in sync with your Payload config!

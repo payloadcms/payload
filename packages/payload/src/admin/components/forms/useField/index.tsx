@@ -1,7 +1,6 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { UPDATE } from '../Form/types'
 import type { FieldType, Options } from './types'
 
 import useThrottledEffect from '../../../hooks/useThrottledEffect'
@@ -29,12 +28,16 @@ const useField = <T,>(options: Options): FieldType<T> => {
   const dispatchField = useFormFields(([_, dispatch]) => dispatch)
   const config = useConfig()
 
-  const { getData, getSiblingData, setModified } = useForm()
+  const { getData, getDataByPath, getSiblingData, setModified } = useForm()
 
   const value = field?.value as T
   const initialValue = field?.initialValue as T
   const valid = typeof field?.valid === 'boolean' ? field.valid : true
   const showError = valid === false && submitted
+
+  const prevValid = useRef(valid)
+  const prevErrorMessage = useRef(field?.errorMessage)
+  const prevValue = useRef(value)
 
   // Method to return from `useField`, used to
   // update field values from field component(s)
@@ -53,9 +56,9 @@ const useField = <T,>(options: Options): FieldType<T> => {
       }
 
       dispatchField({
+        type: 'UPDATE',
         disableFormData: disableFormData || (hasRows && val > 0),
         path,
-        type: 'UPDATE',
         value: val,
       })
     },
@@ -93,46 +96,62 @@ const useField = <T,>(options: Options): FieldType<T> => {
   useThrottledEffect(
     () => {
       const validateField = async () => {
-        const action: UPDATE = {
-          condition,
-          disableFormData:
-            disableFormData || (hasRows ? typeof value === 'number' && value > 0 : false),
-          errorMessage: undefined,
-          path,
-          rows: field?.rows,
-          type: 'UPDATE',
-          valid: false,
-          validate,
-          value,
+        let valueToValidate = value
+
+        if (field?.rows && Array.isArray(field.rows)) {
+          valueToValidate = getDataByPath(path)
         }
 
-        const validateOptions = {
-          id,
-          config,
-          data: getData(),
-          operation,
-          siblingData: getSiblingData(path),
-          t,
-          user,
-        }
+        let errorMessage: string | undefined
+        let valid: boolean | string = false
 
         const validationResult =
-          typeof validate === 'function' ? await validate(value, validateOptions) : true
+          typeof validate === 'function'
+            ? await validate(valueToValidate, {
+                id,
+                config,
+                data: getData(),
+                operation,
+                previousValue: prevValue.current,
+                siblingData: getSiblingData(path),
+                t,
+                user,
+              })
+            : true
 
         if (typeof validationResult === 'string') {
-          action.errorMessage = validationResult
-          action.valid = false
+          errorMessage = validationResult
+          valid = false
         } else {
-          action.valid = validationResult
-          action.errorMessage = undefined
+          valid = validationResult
+          errorMessage = undefined
         }
 
-        if (typeof dispatchField === 'function') {
-          dispatchField(action)
+        // Only dispatch if the validation result has changed
+        // This will prevent unnecessary rerenders
+        if (valid !== prevValid.current || errorMessage !== prevErrorMessage.current) {
+          prevValid.current = valid
+          prevErrorMessage.current = errorMessage
+
+          if (typeof dispatchField === 'function') {
+            dispatchField({
+              type: 'UPDATE',
+              condition,
+              disableFormData:
+                disableFormData || (hasRows ? typeof value === 'number' && value > 0 : false),
+              errorMessage,
+              path,
+              previousValue: prevValue.current,
+              rows: field?.rows,
+              valid,
+              validate,
+              value,
+            })
+          }
         }
       }
 
-      validateField()
+      void validateField()
     },
     150,
     [
@@ -142,6 +161,7 @@ const useField = <T,>(options: Options): FieldType<T> => {
       dispatchField,
       getData,
       getSiblingData,
+      getDataByPath,
       id,
       operation,
       path,

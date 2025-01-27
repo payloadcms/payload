@@ -7,13 +7,15 @@ import type { Description } from '../../FieldDescription/types'
 
 import { getTranslation } from '../../../../../utilities/getTranslation'
 import ReactSelect from '../../../elements/ReactSelect'
-import Error from '../../Error'
+import DefaultError from '../../Error'
 import FieldDescription from '../../FieldDescription'
-import Label from '../../Label'
+import DefaultLabel from '../../Label'
 import { fieldBaseClass } from '../shared'
 import './index.scss'
 
 export type SelectInputProps = Omit<SelectField, 'options' | 'type' | 'value'> & {
+  Error?: React.ComponentType<any>
+  Label?: React.ComponentType<any>
   className?: string
   description?: Description
   errorMessage?: string
@@ -33,6 +35,8 @@ export type SelectInputProps = Omit<SelectField, 'options' | 'type' | 'value'> &
 
 const SelectInput: React.FC<SelectInputProps> = (props) => {
   const {
+    Error,
+    Label,
     className,
     defaultValue,
     description,
@@ -53,6 +57,9 @@ const SelectInput: React.FC<SelectInputProps> = (props) => {
   } = props
 
   const { i18n } = useTranslation()
+
+  const ErrorComp = Error || DefaultError
+  const LabelComp = Label || DefaultLabel
 
   let valueToRender = defaultValue
 
@@ -89,8 +96,8 @@ const SelectInput: React.FC<SelectInputProps> = (props) => {
         width,
       }}
     >
-      <Error message={errorMessage} showError={showError} />
-      <Label htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
+      <ErrorComp message={errorMessage} showError={showError} />
+      <LabelComp htmlFor={`field-${path.replace(/\./g, '__')}`} label={label} required={required} />
       <ReactSelect
         disabled={readOnly}
         isClearable={isClearable}
@@ -104,7 +111,7 @@ const SelectInput: React.FC<SelectInputProps> = (props) => {
         showError={showError}
         value={valueToRender as Option}
       />
-      <FieldDescription description={description} value={value} />
+      <FieldDescription description={description} path={path} value={value} />
     </div>
   )
 }

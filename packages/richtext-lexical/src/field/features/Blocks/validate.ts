@@ -11,25 +11,34 @@ export const blockValidationHOC = (
 ): NodeValidation<SerializedBlockNode> => {
   const blockValidation: NodeValidation<SerializedBlockNode> = async ({
     node,
-    nodeValidations,
     payloadConfig,
     validation,
   }) => {
-    const blockFieldValues = node.fields.data
-
+    const blockFieldData = node.fields
     const blocks: Block[] = props.blocks
+
+    const {
+      options: { req },
+    } = validation
+
     // Sanitize block's fields here. This is done here and not in the feature, because the payload config is available here
+    const validRelationships = payloadConfig.collections.map((c) => c.slug) || []
     blocks.forEach((block) => {
-      const validRelationships = payloadConfig.collections.map((c) => c.slug) || []
-      block.fields = sanitizeFields({
-        config: payloadConfig,
-        fields: block.fields,
-        validRelationships,
-      })
+      // @ts-expect-error
+      if (!block._sanitized) {
+        block.fields = sanitizeFields({
+          config: payloadConfig,
+          fields: block.fields,
+          requireFieldLevelRichTextEditor: true,
+          validRelationships,
+        })
+        // @ts-expect-error
+        block._sanitized = true
+      }
     })
 
     // find block
-    const block = props.blocks.find((block) => block.slug === blockFieldValues.blockType)
+    const block = props.blocks.find((block) => block.slug === blockFieldData.blockType)
 
     // validate block
     if (!block) {
@@ -38,12 +47,26 @@ export const blockValidationHOC = (
 
     for (const field of block.fields) {
       if ('validate' in field && typeof field.validate === 'function' && field.validate) {
-        const fieldValue = 'name' in field ? node.fields.data[field.name] : null
+        const fieldValue = 'name' in field ? node.fields[field.name] : null
+
+        const passesCondition = field.admin?.condition
+          ? Boolean(
+              field.admin.condition(fieldValue, node.fields, {
+                user: req?.user,
+              }),
+            )
+          : true
+        if (!passesCondition) {
+          continue // Fixes https://github.com/payloadcms/payload/issues/4000
+        }
+
         const validationResult = await field.validate(fieldValue, {
+          ...field,
           id: validation.options.id,
           config: payloadConfig,
           data: fieldValue,
           operation: validation.options.operation,
+          payload: validation.options.payload,
           siblingData: validation.options.siblingData,
           t: validation.options.t,
           user: validation.options.user,

@@ -17,6 +17,24 @@
     padding: 0;
     overflow: auto;
 
+    // this container has a gradient overlay as visual indication of `overflow: scroll`
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    &::after {
+      content: '';
+      display: block;
+      position: sticky;
+      right: 0;
+      width: calc(var(--base) * 2);
+      height: calc(var(--base) * 2);
+      background: linear-gradient(to right, transparent, var(--theme-bg));
+      flex-shrink: 0;
+      z-index: 1111;
+      pointer-events: none;
+    }
+
     &__tabs {
       padding: 0;
       margin-left: var(--gutter-h);

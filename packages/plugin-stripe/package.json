@@ -1,0 +1,58 @@
+{
+  "name": "@payloadcms/plugin-stripe",
+  "version": "0.0.17",
+  "homepage:": "https://payloadcms.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/plugin-stripe"
+  },
+  "description": "Stripe plugin for Payload",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "_build": "pnpm build:swc && pnpm build:types",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "test": "echo 'No tests available.'",
+    "prepublishOnly": "yarn clean && yarn build"
+  },
+  "keywords": [
+    "payload",
+    "stripe",
+    "cms",
+    "plugin",
+    "typescript",
+    "payments",
+    "saas",
+    "subscriptions",
+    "licensing"
+  ],
+  "author": "dev@payloadcms.com",
+  "license": "MIT",
+  "peerDependencies": {
+    "payload": "^1.1.8 || ^2.0.0",
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
+  },
+  "dependencies": {
+    "lodash.get": "^4.4.2",
+    "stripe": "^10.2.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/lodash.get": "^4.4.7",
+    "@types/uuid": "^9.0.0",
+    "@payloadcms/eslint-config": "workspace:*",
+    "@types/express": "^4.17.9",
+    "@types/react": "18.0.21",
+    "payload": "workspace:*",
+    "prettier": "^2.7.1",
+    "webpack": "^5.78.0"
+  },
+  "files": [
+    "dist",
+    "types.js",
+    "types.d.ts"
+  ]
+}

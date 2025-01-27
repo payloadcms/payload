@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import type { SanitizedGlobalConfig } from '../../../../exports/types'
 
 import { useStepNav } from '../../elements/StepNav'
+import { useActions } from '../../utilities/ActionsProvider'
 import { useAuth } from '../../utilities/Auth'
 import { useConfig } from '../../utilities/Config'
 import RenderCustomComponent from '../../utilities/RenderCustomComponent'
@@ -19,6 +20,8 @@ const Dashboard: React.FC = () => {
     globals,
   } = useConfig()
 
+  const { setViewActions } = useActions()
+
   useEffect(() => {
     setFilteredGlobals(
       globals.filter((global) => permissions?.globals?.[global.slug]?.read?.permission),
@@ -28,6 +31,10 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     setStepNav([])
   }, [setStepNav])
+
+  useEffect(() => {
+    setViewActions([])
+  }, [setViewActions])
 
   return (
     <RenderCustomComponent

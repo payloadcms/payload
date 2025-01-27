@@ -2,7 +2,7 @@ import type { FieldAccess } from '../../packages/payload/src/fields/config/types
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults'
 import { devUser } from '../credentials'
-import { firstArrayText, secondArrayText } from './shared'
+import { firstArrayText, hiddenAccessCountSlug, secondArrayText } from './shared'
 import {
   docLevelAccessSlug,
   hiddenAccessSlug,
@@ -52,7 +52,22 @@ export default buildConfigWithDefaults({
             setTimeout(resolve, 50, true) // set to 'true' or 'false' here to simulate the response
           }),
       },
-      fields: [],
+      fields: [
+        {
+          name: 'roles',
+          type: 'select',
+          hasMany: true,
+          options: ['admin', 'user'],
+          defaultValue: ['user'],
+          access: {
+            create: ({ req }) => req.user?.roles?.includes('admin'),
+            read: () => false,
+            update: ({ req }) => {
+              return req.user?.roles?.includes('admin')
+            },
+          },
+        },
+      ],
     },
     {
       slug,
@@ -283,9 +298,6 @@ export default buildConfigWithDefaults({
           name: 'approvedForRemoval',
           type: 'checkbox',
           defaultValue: false,
-          admin: {
-            position: 'sidebar',
-          },
         },
         {
           name: 'approvedTitle',
@@ -354,6 +366,32 @@ export default buildConfigWithDefaults({
     },
     {
       slug: hiddenAccessSlug,
+      access: {
+        read: ({ req: { user } }) => {
+          if (user) return true
+
+          return {
+            hidden: {
+              not_equals: true,
+            },
+          }
+        },
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'hidden',
+          type: 'checkbox',
+          hidden: true,
+        },
+      ],
+    },
+    {
+      slug: hiddenAccessCountSlug,
       access: {
         read: ({ req: { user } }) => {
           if (user) return true

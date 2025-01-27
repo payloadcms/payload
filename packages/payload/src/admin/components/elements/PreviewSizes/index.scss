@@ -14,7 +14,7 @@
   }
 
   &__preview {
-    max-height: calc(100% - base(4));
+    max-height: calc(100% - base(6));
     padding: base(1.5) base(1.5) base(1.5) var(--gutter-h);
     object-fit: contain;
   }
@@ -77,7 +77,6 @@
   &__sizeOption {
     padding: base(0.5);
     display: flex;
-    flex-direction: row;
     gap: base(1);
     cursor: pointer;
     transition: background-color 0.2s ease-in-out;

@@ -3,12 +3,14 @@ import { useTranslation } from 'react-i18next'
 
 import Button from '../../elements/Button'
 import MinimalTemplate from '../../templates/Minimal'
+import { useAuth } from '../../utilities/Auth'
 import { useConfig } from '../../utilities/Config'
 import Meta from '../../utilities/Meta'
 
 const Unauthorized: React.FC = () => {
   const { t } = useTranslation('general')
   const config = useConfig()
+  const { user } = useAuth()
   const {
     admin: { logoutRoute },
     routes: { admin },
@@ -20,11 +22,11 @@ const Unauthorized: React.FC = () => {
         keywords={t('error:unauthorized')}
         title={t('error:unauthorized')}
       />
-      <h2>{t('error:unauthorized')}</h2>
+      <h2>{user ? t('general:unauthorized') : t('error:unauthorized')}</h2>
       <p>{t('error:notAllowedToAccessPage')}</p>
       <br />
-      <Button el="link" to={`${admin}${logoutRoute}`}>
-        {t('authentication:logOut')}
+      <Button el="link" to={`${admin}${user ? '' : logoutRoute}`}>
+        {user ? t('general:backToDashboard') : t('authentication:logOut')}
       </Button>
     </MinimalTemplate>
   )

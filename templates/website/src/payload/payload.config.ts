@@ -86,7 +86,6 @@ export default buildConfig({
     },
   ],
   plugins: [
-    // formBuilder({}),
     redirects({
       collections: ['pages', 'posts'],
     }),

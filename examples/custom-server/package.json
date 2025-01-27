@@ -20,10 +20,13 @@
     "lint:fix": "eslint --fix --ext .ts,.tsx src"
   },
   "dependencies": {
+    "@payloadcms/bundler-webpack": "latest",
+    "@payloadcms/db-mongodb": "latest",
+    "@payloadcms/richtext-slate": "latest",
     "dotenv": "^8.2.0",
     "escape-html": "^1.0.3",
-    "express": "^4.17.1",
-    "next": "^13.4.8",
+    "express": "^4.19.2",
+    "next": "^14.1.1",
     "payload": "latest",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
@@ -49,7 +52,7 @@
     "eslint-plugin-simple-import-sort": "^10.0.0",
     "nodemon": "^2.0.22",
     "prettier": "^2.7.1",
-    "ts-node": "^10.9.1",
+    "ts-node": "10.9.1",
     "typescript": "^4.8.4"
   }
 }

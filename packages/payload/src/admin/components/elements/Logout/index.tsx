@@ -8,20 +8,22 @@ import RenderCustomComponent from '../../utilities/RenderCustomComponent'
 
 const baseClass = 'nav'
 
-const DefaultLogout = () => {
+const DefaultLogout: React.FC<{
+  tabIndex?: number
+}> = ({ tabIndex }) => {
   const { t } = useTranslation('authentication')
   const config = useConfig()
+
   const {
-    admin: {
-      components: { logout },
-      logoutRoute,
-    },
+    admin: { logoutRoute },
     routes: { admin },
   } = config
+
   return (
     <Link
       aria-label={t('logOut')}
       className={`${baseClass}__log-out`}
+      tabIndex={tabIndex}
       to={`${admin}${logoutRoute}`}
     >
       <LogOut />
@@ -29,7 +31,9 @@ const DefaultLogout = () => {
   )
 }
 
-const Logout: React.FC = () => {
+const Logout: React.FC<{
+  tabIndex?: number
+}> = ({ tabIndex = 0 }) => {
   const {
     admin: {
       components: {
@@ -40,7 +44,15 @@ const Logout: React.FC = () => {
     } = {},
   } = useConfig()
 
-  return <RenderCustomComponent CustomComponent={CustomLogout} DefaultComponent={DefaultLogout} />
+  return (
+    <RenderCustomComponent
+      CustomComponent={CustomLogout}
+      DefaultComponent={DefaultLogout}
+      componentProps={{
+        tabIndex,
+      }}
+    />
+  )
 }
 
 export default Logout

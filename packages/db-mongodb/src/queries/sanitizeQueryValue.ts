@@ -11,14 +11,87 @@ type SanitizeQueryValueArgs = {
   val: any
 }
 
+const handleHasManyValues = (formattedValue) => {
+  return formattedValue.reduce((formattedValues, inVal) => {
+    const newValues = [inVal]
+    if (mongoose.Types.ObjectId.isValid(inVal)) {
+      newValues.push(new mongoose.Types.ObjectId(inVal))
+    }
+    const parsedNumber = parseFloat(inVal)
+    if (!Number.isNaN(parsedNumber)) {
+      newValues.push(parsedNumber)
+    }
+
+    return [...formattedValues, ...newValues]
+  }, [])
+}
+
+const handleNonHasManyValues = (formattedValue, operator, path) => {
+  const formattedQueries = formattedValue
+    .map((inVal) => {
+      if (inVal && typeof inVal === 'object' && 'relationTo' in inVal && 'value' in inVal) {
+        if (operator === 'in') {
+          return {
+            [`${path}.relationTo`]: { $eq: inVal.relationTo },
+            [`${path}.value`]: { $eq: inVal.value },
+          }
+        } else if (operator === 'not_in') {
+          return {
+            $and: [
+              { [`${path}.value`]: inVal.value },
+              { [`${path}.relationTo`]: inVal.relationTo },
+            ],
+          }
+        }
+      }
+      return null
+    })
+    .filter(Boolean)
+
+  if (formattedQueries.length > 0) {
+    return {
+      rawQuery: operator === 'in' ? { $or: formattedQueries } : { $nor: formattedQueries },
+    }
+  }
+}
+
+const buildExistsQuery = (formattedValue, path) => {
+  if (formattedValue) {
+    return {
+      rawQuery: {
+        $and: [
+          { [path]: { $exists: true } },
+          { [path]: { $ne: null } },
+          { [path]: { $ne: '' } }, // Exclude null and empty string
+        ],
+      },
+    }
+  } else {
+    return {
+      rawQuery: {
+        $or: [
+          { [path]: { $exists: false } },
+          { [path]: { $eq: null } },
+          { [path]: { $eq: '' } }, // Treat empty string as null / undefined
+        ],
+      },
+    }
+  }
+}
+
 export const sanitizeQueryValue = ({
   field,
   hasCustomID,
   operator,
   path,
   val,
-}: SanitizeQueryValueArgs): unknown => {
+}: SanitizeQueryValueArgs): {
+  operator?: string
+  rawQuery?: unknown
+  val?: unknown
+} => {
   let formattedValue = val
+  let formattedOperator = operator
 
   // Disregard invalid _ids
   if (path === '_id' && typeof val === 'string' && val.split(',').length === 1) {
@@ -26,7 +99,7 @@ export const sanitizeQueryValue = ({
       const isValid = mongoose.Types.ObjectId.isValid(val)
 
       if (!isValid) {
-        return undefined
+        return { operator: formattedOperator, val: undefined }
       }
     }
 
@@ -34,7 +107,7 @@ export const sanitizeQueryValue = ({
       const parsedNumber = parseFloat(val)
 
       if (Number.isNaN(parsedNumber)) {
-        return undefined
+        return { operator: formattedOperator, val: undefined }
       }
     }
   }
@@ -53,11 +126,19 @@ export const sanitizeQueryValue = ({
     }
   }
 
-  if (field.type === 'number' && typeof formattedValue === 'string') {
-    formattedValue = Number(val)
+  if (field.type === 'number') {
+    if (typeof formattedValue === 'string' && operator !== 'exists') {
+      formattedValue = Number(val)
+    }
+
+    if (operator === 'exists') {
+      formattedValue = val === 'true' ? true : val === 'false' ? false : Boolean(val)
+
+      return buildExistsQuery(formattedValue, path)
+    }
   }
 
-  if (field.type === 'date' && typeof val === 'string') {
+  if (field.type === 'date' && typeof val === 'string' && operator !== 'exists') {
     formattedValue = new Date(val)
     if (Number.isNaN(Date.parse(formattedValue))) {
       return undefined
@@ -69,17 +150,33 @@ export const sanitizeQueryValue = ({
       formattedValue = null
     }
 
-    if (operator === 'in' && Array.isArray(formattedValue)) {
-      formattedValue = formattedValue.reduce((formattedValues, inVal) => {
-        const newValues = [inVal]
-        if (mongoose.Types.ObjectId.isValid(inVal))
-          newValues.push(new mongoose.Types.ObjectId(inVal))
+    // Object equality requires the value to be the first key in the object that is being queried.
+    if (
+      operator === 'equals' &&
+      formattedValue &&
+      typeof formattedValue === 'object' &&
+      formattedValue.value &&
+      formattedValue.relationTo
+    ) {
+      return {
+        rawQuery: {
+          $and: [
+            { [`${path}.value`]: { $eq: formattedValue.value } },
+            { [`${path}.relationTo`]: { $eq: formattedValue.relationTo } },
+          ],
+        },
+      }
+    }
 
-        const parsedNumber = parseFloat(inVal)
-        if (!Number.isNaN(parsedNumber)) newValues.push(parsedNumber)
-
-        return [...formattedValues, ...newValues]
-      }, [])
+    if (['in', 'not_in'].includes(operator) && Array.isArray(formattedValue)) {
+      if ('hasMany' in field && field.hasMany) {
+        formattedValue = handleHasManyValues(formattedValue)
+      } else {
+        const result = handleNonHasManyValues(formattedValue, operator, path)
+        if (result) {
+          return result
+        }
+      }
     }
   }
 
@@ -103,7 +200,7 @@ export const sanitizeQueryValue = ({
       formattedValue = undefined
     } else {
       formattedValue = {
-        $geometry: { coordinates: [parseFloat(lng), parseFloat(lat)], type: 'Point' },
+        $geometry: { type: 'Point', coordinates: [parseFloat(lng), parseFloat(lat)] },
       }
 
       if (maxDistance) formattedValue.$maxDistance = parseFloat(maxDistance)
@@ -119,13 +216,48 @@ export const sanitizeQueryValue = ({
 
   if (path !== '_id' || (path === '_id' && hasCustomID && field.type === 'text')) {
     if (operator === 'contains') {
-      formattedValue = { $options: 'i', $regex: formattedValue }
+      formattedValue = {
+        $options: 'i',
+        $regex: formattedValue.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&'),
+      }
     }
+
+    if (operator === 'exists') {
+      formattedValue = formattedValue === 'true' || formattedValue === true
+
+      return buildExistsQuery(formattedValue, path)
+    }
+  }
+
+  if (
+    (path === '_id' || path === 'parent') &&
+    operator === 'like' &&
+    formattedValue.length === 24 &&
+    !hasCustomID
+  ) {
+    formattedOperator = 'equals'
   }
 
   if (operator === 'exists') {
     formattedValue = formattedValue === 'true' || formattedValue === true
+
+    // Clearable fields
+    if (['relationship', 'select', 'upload'].includes(field.type)) {
+      if (formattedValue) {
+        return {
+          rawQuery: {
+            $and: [{ [path]: { $exists: true } }, { [path]: { $ne: null } }],
+          },
+        }
+      } else {
+        return {
+          rawQuery: {
+            $or: [{ [path]: { $exists: false } }, { [path]: { $eq: null } }],
+          },
+        }
+      }
+    }
   }
 
-  return formattedValue
+  return { operator: formattedOperator, val: formattedValue }
 }

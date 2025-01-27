@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { RelationshipField } from '../../../../../../../../exports/types'
+import type { RelationshipField, UploadField } from '../../../../../../../../exports/types'
 import type { CellComponentProps } from '../../types'
 
 import { getTranslation } from '../../../../../../../../utilities/getTranslation'
@@ -9,13 +9,14 @@ import useIntersect from '../../../../../../../hooks/useIntersect'
 import { formatUseAsTitle } from '../../../../../../../hooks/useTitle'
 import { useConfig } from '../../../../../../utilities/Config'
 import { useListRelationships } from '../../../RelationshipProvider'
+import File from '../File'
 import './index.scss'
 
 type Value = { relationTo: string; value: number | string }
 const baseClass = 'relationship-cell'
 const totalToShow = 3
 
-const RelationshipCell: React.FC<CellComponentProps<RelationshipField>> = (props) => {
+const RelationshipCell: React.FC<CellComponentProps<RelationshipField | UploadField>> = (props) => {
   const { data: cellData, field } = props
   const config = useConfig()
   const { collections, routes } = config
@@ -47,6 +48,11 @@ const RelationshipCell: React.FC<CellComponentProps<RelationshipField>> = (props
               relationTo: field.relationTo,
               value: cell,
             })
+          } else if (typeof cell.id !== 'undefined' && typeof field.relationTo === 'string') {
+            formattedValues.push({
+              relationTo: field.relationTo,
+              value: cell.id,
+            })
           }
         })
       getRelationships(formattedValues)
@@ -68,11 +74,24 @@ const RelationshipCell: React.FC<CellComponentProps<RelationshipField>> = (props
           i18n,
         })
 
+        let fileField = null
+        if (field.type === 'upload') {
+          const relatedCollectionPreview = !!relatedCollection.upload.displayPreview
+          const fieldPreview = field.displayPreview
+          const previewAllowed =
+            fieldPreview || (relatedCollectionPreview && fieldPreview !== false)
+          if (previewAllowed && document) {
+            fileField = (
+              <File collection={relatedCollection} data={label} field={field} rowData={document} />
+            )
+          }
+        }
+
         return (
           <React.Fragment key={i}>
             {document === false && `${t('untitled')} - ID: ${value}`}
             {document === null && `${t('loading')}...`}
-            {document && (label || `${t('untitled')} - ID: ${value}`)}
+            {document && (fileField || label || `${t('untitled')} - ID: ${value}`)}
             {values.length > i + 1 && ', '}
           </React.Fragment>
         )

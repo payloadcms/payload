@@ -1,17 +1,22 @@
+'use client'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { $insertNodeToNearestRoot, mergeRegister } from '@lexical/utils'
-import { COMMAND_PRIORITY_EDITOR, type LexicalCommand, createCommand } from 'lexical'
+import {
+  $getPreviousSelection,
+  $getSelection,
+  $isParagraphNode,
+  $isRangeSelection,
+  COMMAND_PRIORITY_EDITOR,
+} from 'lexical'
 import React, { useEffect } from 'react'
 
 import type { BlockFields } from '../nodes/BlocksNode'
 
 import { BlocksDrawerComponent } from '../drawer'
 import { $createBlockNode, BlockNode } from '../nodes/BlocksNode'
+import { INSERT_BLOCK_COMMAND } from './commands'
 
-export type InsertBlockPayload = BlockFields
-
-export const INSERT_BLOCK_COMMAND: LexicalCommand<InsertBlockPayload> =
-  createCommand('INSERT_BLOCK_COMMAND')
+export type InsertBlockPayload = Exclude<BlockFields, 'id'>
 
 export function BlocksPlugin(): JSX.Element | null {
   const [editor] = useLexicalComposerContext()
@@ -26,9 +31,28 @@ export function BlocksPlugin(): JSX.Element | null {
         INSERT_BLOCK_COMMAND,
         (payload: InsertBlockPayload) => {
           editor.update(() => {
-            const blockNode = $createBlockNode(payload)
+            const selection = $getSelection() || $getPreviousSelection()
 
-            $insertNodeToNearestRoot(blockNode)
+            if ($isRangeSelection(selection)) {
+              const blockNode = $createBlockNode(payload)
+              $insertNodeToNearestRoot(blockNode)
+
+              const { focus } = selection
+              const focusNode = focus.getNode()
+
+              // First, delete currently selected node if it's an empty paragraph and if there are sufficient
+              // paragraph nodes (more than 1) left in the parent node, so that we don't "trap" the user
+              if (
+                $isParagraphNode(focusNode) &&
+                focusNode.getTextContentSize() === 0 &&
+                focusNode
+                  .getParent()
+                  .getChildren()
+                  .filter((node) => $isParagraphNode(node)).length > 1
+              ) {
+                focusNode.remove()
+              }
+            }
           })
 
           return true

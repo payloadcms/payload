@@ -7,7 +7,14 @@ import payload from '../../packages/payload/src'
 import { mapAsync } from '../../packages/payload/src/utilities/mapAsync'
 import { initPayloadTest } from '../helpers/configHelpers'
 import { RESTClient } from '../helpers/rest'
-import config, { customIdNumberSlug, customIdSlug, errorOnHookSlug, pointSlug, relationSlug, slug, } from './config'
+import config, {
+  customIdNumberSlug,
+  customIdSlug,
+  errorOnHookSlug,
+  pointSlug,
+  relationSlug,
+  slug,
+} from './config'
 
 let client: RESTClient
 
@@ -58,6 +65,15 @@ describe('collections-rest', () => {
       const expectedDocs = [post1, post2]
       expect(result.docs).toHaveLength(expectedDocs.length)
       expect(result.docs).toEqual(expect.arrayContaining(expectedDocs))
+    })
+
+    it('should count', async () => {
+      await createPost()
+      await createPost()
+      const { result, status } = await client.count()
+
+      expect(status).toEqual(200)
+      expect(result).toEqual({ totalDocs: 2 })
     })
 
     it('should find where id', async () => {
@@ -497,6 +513,26 @@ describe('collections-rest', () => {
           expect(result.docs).toEqual([post])
           expect(result.totalDocs).toEqual(1)
         })
+
+        it('should query LIKE by ID', async () => {
+          const post = await payload.create({
+            collection: slug,
+            data: {
+              title: 'find me buddy',
+            },
+          })
+
+          const { result, status } = await client.find<Post>({
+            query: {
+              id: {
+                like: post.id,
+              },
+            },
+          })
+
+          expect(status).toStrictEqual(200)
+          expect(result.totalDocs).toStrictEqual(1)
+        })
       })
 
       it('should query nested relationship - hasMany', async () => {
@@ -607,6 +643,14 @@ describe('collections-rest', () => {
         expect(status).toEqual(200)
         expect(result.docs).toHaveLength(1)
       })
+
+      it('should not error when attempting to sort on a field that does not exist', async () => {
+        const { status } = await client.find({
+          sort: 'fake',
+        })
+
+        expect(status).toStrictEqual(200)
+      })
     })
 
     describe('Operators', () => {
@@ -673,6 +717,72 @@ describe('collections-rest', () => {
 
         expect(status).toEqual(200)
         expect(result.docs).toEqual([post2])
+        expect(result.totalDocs).toEqual(1)
+      })
+
+      it('not_in (relationships)', async () => {
+        const relationship = await payload.create({
+          collection: relationSlug,
+          data: {},
+        })
+
+        await createPost({ relationField: relationship.id, title: 'not-me' })
+        // await createPost({ relationMultiRelationTo: relationship.id, title: 'not-me' })
+        const post2 = await createPost({ title: 'me' })
+        const { result, status } = await client.find<Post>({
+          query: {
+            relationField: {
+              not_in: [relationship.id],
+            },
+          },
+        })
+
+        // do not want to error for empty arrays
+        const { status: emptyNotInStatus } = await client.find<Post>({
+          query: {
+            relationField: {
+              not_in: [],
+            },
+          },
+        })
+
+        expect(emptyNotInStatus).toEqual(200)
+
+        expect(status).toEqual(200)
+        expect(result.docs).toEqual([post2])
+        expect(result.totalDocs).toEqual(1)
+      })
+
+      it('in (relationships)', async () => {
+        const relationship = await payload.create({
+          collection: relationSlug,
+          data: {},
+        })
+
+        const post1 = await createPost({ relationField: relationship.id, title: 'me' })
+        // await createPost({ relationMultiRelationTo: relationship.id, title: 'not-me' })
+        await createPost({ title: 'not-me' })
+        const { result, status } = await client.find<Post>({
+          query: {
+            relationField: {
+              in: [relationship.id],
+            },
+          },
+        })
+
+        // do not want to error for empty arrays
+        const { status: emptyNotInStatus } = await client.find<Post>({
+          query: {
+            relationField: {
+              in: [],
+            },
+          },
+        })
+
+        expect(emptyNotInStatus).toEqual(200)
+
+        expect(status).toEqual(200)
+        expect(result.docs).toEqual([post1])
         expect(result.totalDocs).toEqual(1)
       })
 
@@ -765,6 +875,20 @@ describe('collections-rest', () => {
         expect(status).toEqual(200)
         expect(result.docs).toEqual([post])
         expect(result.totalDocs).toEqual(1)
+      })
+
+      it('like - id should not crash', async () => {
+        await createPost({ title: 'post' })
+
+        const response = await client.find({
+          query: {
+            id: {
+              like: 'words partial',
+            },
+          },
+        })
+
+        expect(response.status).toEqual(200)
       })
 
       it('exists - true', async () => {
@@ -1110,39 +1234,182 @@ describe('collections-rest', () => {
         expect(result.docs).toEqual([post1])
       })
 
-      describe('limit', () => {
+      describe('pagination', () => {
+        let relatedDoc
+
         beforeEach(async () => {
-          await mapAsync([...Array(50)], async (_, i) =>
-            createPost({ number: i, title: 'limit-test' }),
-          )
+          relatedDoc = await payload.create({
+            collection: relationSlug,
+            data: {
+              name: 'test',
+            },
+          })
+          await mapAsync([...Array(10)], async (_, i) => {
+            await createPost({
+              number: i,
+              relationField: relatedDoc.id as string,
+              title: 'paginate-test',
+            })
+          })
         })
 
-        it('should query a limited set of docs', async () => {
-          const { result, status } = await client.find<Post>({
-            limit: 15,
+        it('should paginate with where query', async () => {
+          const { result: page1 } = await client.find({
+            limit: 4,
             query: {
               title: {
-                equals: 'limit-test',
+                equals: 'paginate-test',
               },
             },
           })
 
-          expect(status).toEqual(200)
-          expect(result.docs).toHaveLength(15)
-        })
-
-        it('should query all docs when limit=0', async () => {
-          const { result, status } = await client.find<Post>({
-            limit: 0,
+          const { result: page2 } = await client.find({
+            limit: 4,
+            page: 2,
             query: {
               title: {
-                equals: 'limit-test',
+                equals: 'paginate-test',
               },
             },
           })
 
-          expect(status).toEqual(200)
-          expect(result.totalDocs).toEqual(50)
+          const { result: page3 } = await client.find({
+            limit: 4,
+            page: 3,
+            query: {
+              title: {
+                equals: 'paginate-test',
+              },
+            },
+          })
+
+          expect(page1.hasNextPage).toStrictEqual(true)
+          expect(page1.hasPrevPage).toStrictEqual(false)
+          expect(page1.limit).toStrictEqual(4)
+          expect(page1.nextPage).toStrictEqual(2)
+          expect(page1.page).toStrictEqual(1)
+          expect(page1.pagingCounter).toStrictEqual(1)
+          expect(page1.prevPage).toStrictEqual(null)
+          expect(page1.totalDocs).toStrictEqual(10)
+          expect(page1.totalPages).toStrictEqual(3)
+
+          expect(page2.hasNextPage).toStrictEqual(true)
+          expect(page2.hasPrevPage).toStrictEqual(true)
+          expect(page2.limit).toStrictEqual(4)
+          expect(page2.nextPage).toStrictEqual(3)
+          expect(page2.page).toStrictEqual(2)
+          expect(page2.pagingCounter).toStrictEqual(5)
+          expect(page2.prevPage).toStrictEqual(1)
+          expect(page2.totalDocs).toStrictEqual(10)
+          expect(page2.totalPages).toStrictEqual(3)
+
+          expect(page3.hasNextPage).toStrictEqual(false)
+          expect(page3.hasPrevPage).toStrictEqual(true)
+          expect(page3.limit).toStrictEqual(4)
+          expect(page3.nextPage).toStrictEqual(null)
+          expect(page3.page).toStrictEqual(3)
+          expect(page3.pagingCounter).toStrictEqual(9)
+          expect(page3.prevPage).toStrictEqual(2)
+          expect(page3.totalDocs).toStrictEqual(10)
+          expect(page3.totalPages).toStrictEqual(3)
+        })
+
+        it('should paginate with where query on relationships', async () => {
+          const { result: page1 } = await client.find({
+            limit: 4,
+            query: {
+              relationField: {
+                equals: relatedDoc.id,
+              },
+            },
+          })
+
+          const { result: page2 } = await client.find({
+            limit: 4,
+            page: 2,
+            query: {
+              relationField: {
+                equals: relatedDoc.id,
+              },
+            },
+          })
+
+          const { result: page3 } = await client.find({
+            limit: 4,
+            page: 3,
+            query: {
+              relationField: {
+                equals: relatedDoc.id,
+              },
+            },
+          })
+
+          expect(page1.hasNextPage).toStrictEqual(true)
+          expect(page1.hasPrevPage).toStrictEqual(false)
+          expect(page1.limit).toStrictEqual(4)
+          expect(page1.nextPage).toStrictEqual(2)
+          expect(page1.page).toStrictEqual(1)
+          expect(page1.pagingCounter).toStrictEqual(1)
+          expect(page1.prevPage).toStrictEqual(null)
+          expect(page1.totalDocs).toStrictEqual(10)
+          expect(page1.totalPages).toStrictEqual(3)
+
+          expect(page2.hasNextPage).toStrictEqual(true)
+          expect(page2.hasPrevPage).toStrictEqual(true)
+          expect(page2.limit).toStrictEqual(4)
+          expect(page2.nextPage).toStrictEqual(3)
+          expect(page2.page).toStrictEqual(2)
+          expect(page2.pagingCounter).toStrictEqual(5)
+          expect(page2.prevPage).toStrictEqual(1)
+          expect(page2.totalDocs).toStrictEqual(10)
+          expect(page2.totalPages).toStrictEqual(3)
+
+          expect(page3.hasNextPage).toStrictEqual(false)
+          expect(page3.hasPrevPage).toStrictEqual(true)
+          expect(page3.limit).toStrictEqual(4)
+          expect(page3.nextPage).toStrictEqual(null)
+          expect(page3.page).toStrictEqual(3)
+          expect(page3.pagingCounter).toStrictEqual(9)
+          expect(page3.prevPage).toStrictEqual(2)
+          expect(page3.totalDocs).toStrictEqual(10)
+          expect(page3.totalPages).toStrictEqual(3)
+        })
+
+        describe('limit', () => {
+          beforeEach(async () => {
+            await mapAsync([...Array(50)], async (_, i) =>
+              createPost({ number: i, title: 'limit-test' }),
+            )
+          })
+
+          it('should query a limited set of docs', async () => {
+            const { result, status } = await client.find<Post>({
+              limit: 15,
+              query: {
+                title: {
+                  equals: 'limit-test',
+                },
+              },
+            })
+
+            expect(status).toStrictEqual(200)
+            expect(result.docs).toHaveLength(15)
+          })
+
+          it('should query all docs when limit=0', async () => {
+            const { result, status } = await client.find<Post>({
+              limit: 0,
+              query: {
+                title: {
+                  equals: 'limit-test',
+                },
+              },
+            })
+
+            expect(status).toStrictEqual(200)
+            expect(result.docs).toHaveLength(50)
+            expect(result.totalPages).toStrictEqual(1)
+          })
         })
       })
 
@@ -1175,21 +1442,20 @@ describe('collections-rest', () => {
   })
 })
 
-async function createPost (overrides?: Partial<Post>) {
+async function createPost(overrides?: Partial<Post>) {
   const { doc } = await client.create<Post>({ data: { title: 'title', ...overrides } })
   return doc
 }
 
-async function createPosts (count: number) {
+async function createPosts(count: number) {
   await mapAsync([...Array(count)], async () => {
     await createPost()
   })
 }
 
-async function clearDocs (): Promise<void> {
-  const allDocs = await payload.find({ collection: slug, limit: 100 })
-  const ids = allDocs.docs.map((doc) => doc.id)
-  await mapAsync(ids, async (id) => {
-    await payload.delete({ id, collection: slug })
+async function clearDocs(): Promise<void> {
+  await payload.delete({
+    collection: slug,
+    where: { id: { exists: true } },
   })
 }

@@ -1,16 +1,25 @@
 import { APIError } from 'payload/errors'
 import { type Field, type TabAsField, fieldAffectsData } from 'payload/types'
 import { createArrayFromCommaDelineated } from 'payload/utilities'
+import { validate as uuidValidate } from 'uuid'
+
+import type { PostgresAdapter } from '../types'
 
 type SanitizeQueryValueArgs = {
+  adapter: PostgresAdapter
   field: Field | TabAsField
+  isUUID: boolean
   operator: string
+  relationOrPath: string
   val: any
 }
 
 export const sanitizeQueryValue = ({
+  adapter,
   field,
+  isUUID,
   operator: operatorArg,
+  relationOrPath,
   val,
 }: SanitizeQueryValueArgs): { operator: string; value: unknown } => {
   let operator = operatorArg
@@ -18,25 +27,59 @@ export const sanitizeQueryValue = ({
 
   if (!fieldAffectsData(field)) return { operator, value: formattedValue }
 
+  if (
+    (field.type === 'relationship' || field.type === 'upload') &&
+    !relationOrPath.endsWith('relationTo') &&
+    Array.isArray(formattedValue)
+  ) {
+    const allPossibleIDTypes: (number | string)[] = []
+    formattedValue.forEach((val) => {
+      if (adapter.idType !== 'uuid' && typeof val === 'string') {
+        allPossibleIDTypes.push(val, parseInt(val))
+      } else if (typeof val === 'string') {
+        allPossibleIDTypes.push(val)
+      } else {
+        allPossibleIDTypes.push(val, String(val))
+      }
+    })
+    formattedValue = allPossibleIDTypes
+  }
+
   // Cast incoming values as proper searchable types
   if (field.type === 'checkbox' && typeof val === 'string') {
     if (val.toLowerCase() === 'true') formattedValue = true
     if (val.toLowerCase() === 'false') formattedValue = false
   }
 
-  if (['all', 'in', 'not_in'].includes(operator) && typeof formattedValue === 'string') {
-    formattedValue = createArrayFromCommaDelineated(formattedValue)
+  if (['all', 'in', 'not_in'].includes(operator)) {
+    if (typeof formattedValue === 'string') {
+      formattedValue = createArrayFromCommaDelineated(formattedValue)
 
-    if (field.type === 'number') {
-      formattedValue = formattedValue.map((arrayVal) => parseFloat(arrayVal))
+      if (field.type === 'number') {
+        formattedValue = formattedValue.map((arrayVal) => parseFloat(arrayVal))
+      }
+    }
+
+    if (!Array.isArray(formattedValue) || formattedValue.length === 0) {
+      return null
     }
   }
 
   if (field.type === 'number' && typeof formattedValue === 'string') {
     formattedValue = Number(val)
+
+    if (Number.isNaN(formattedValue)) {
+      formattedValue = null
+    }
   }
 
-  if (field.type === 'date') {
+  if (isUUID && typeof formattedValue === 'string') {
+    if (!uuidValidate(val)) {
+      formattedValue = null
+    }
+  }
+
+  if (field.type === 'date' && operator !== 'exists') {
     if (typeof val === 'string') {
       formattedValue = new Date(val)
       if (Number.isNaN(Date.parse(formattedValue))) {
@@ -53,6 +96,10 @@ export const sanitizeQueryValue = ({
     if (val === 'null') {
       formattedValue = null
     }
+  }
+
+  if ('hasMany' in field && field.hasMany && operator === 'contains') {
+    operator = 'equals'
   }
 
   if (operator === 'near' || operator === 'within' || operator === 'intersects') {

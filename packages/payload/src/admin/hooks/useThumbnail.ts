@@ -35,7 +35,7 @@ const useThumbnail = (
     return `${pathURL}/${thumbnailURL}`
   }
 
-  if (isImage(mimeType as string)) {
+  if (adminThumbnail || isImage(mimeType as string)) {
     if (typeof adminThumbnail === 'undefined' && url) {
       return url as string
     }
@@ -46,6 +46,10 @@ const useThumbnail = (
 
     if (sizes?.[adminThumbnail]?.filename) {
       return `${pathURL}/${sizes[adminThumbnail].filename}`
+    }
+
+    if (url) {
+      return url as string
     }
 
     return `${pathURL}/${filename}`

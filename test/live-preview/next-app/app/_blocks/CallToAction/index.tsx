@@ -8,7 +8,7 @@ import { VerticalPadding } from '../../_components/VerticalPadding'
 
 import classes from './index.module.scss'
 
-type Props = Extract<Page['layout'][0], { blockType: 'cta' }>
+type Props = Extract<Exclude<Page['layout'], undefined>[0], { blockType: 'cta' }>
 
 export const CallToActionBlock: React.FC<
   Props & {

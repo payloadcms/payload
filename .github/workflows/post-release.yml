@@ -1,0 +1,32 @@
+name: post-release
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+
+jobs:
+  post_release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # Only needed if debugging on a branch other than default
+          # ref: ${{ github.event.release.target_commitish || github.ref }}
+      - run: echo "npm_version=$(npm pkg get version | tr -d '"')" >> "$GITHUB_ENV"
+      - uses: ./.github/actions/release-commenter
+        continue-on-error: true
+        env:
+          ACTIONS_STEP_DEBUG: true
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag-filter: 'v\d'
+
+
+          # Change to blank to disable commenting
+          # comment-template: ''
+
+          comment-template: |
+            🚀 This is included in version {release_link}

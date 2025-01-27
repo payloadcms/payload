@@ -8,7 +8,7 @@ import {
   noEndpointsCollectionSlug,
   noEndpointsGlobalSlug,
   rootEndpoint,
-} from './config'
+} from './shared'
 
 require('isomorphic-fetch')
 

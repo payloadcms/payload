@@ -5,7 +5,7 @@ import type { PayloadRequest } from '../express/types'
  */
 export async function killTransaction(req: PayloadRequest): Promise<void> {
   const { payload, transactionID } = req
-  if (transactionID) {
+  if (transactionID && !(transactionID instanceof Promise)) {
     await payload.db.rollbackTransaction(req.transactionID)
     delete req.transactionID
   }

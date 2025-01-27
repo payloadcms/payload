@@ -1,6 +1,6 @@
 import type { Access } from 'payload/types'
 
-import { isSuperAdmin } from '../../utilities/isSuperAdmin'
+import { isSuperAdmin } from '../../../utilities/isSuperAdmin'
 
 export const tenants: Access = ({ req: { user }, data }) =>
   // individual documents

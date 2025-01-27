@@ -1,4 +1,4 @@
-import type { i18n } from 'i18next'
+'use client'
 import type { LexicalCommand, LexicalEditor, TextNode } from 'lexical'
 import type { MutableRefObject, ReactPortal } from 'react'
 
@@ -17,68 +17,16 @@ import {
 } from 'lexical'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
-export type MenuTextMatch = {
-  leadOffset: number
-  matchingString: string
-  replaceableString: string
-}
+import type { MenuTextMatch } from '../useMenuTriggerMatch'
+import type { SlashMenuOption } from './types'
+import type { SlashMenuGroup } from './types'
 
 export type MenuResolution = {
   getRect: () => DOMRect
   match?: MenuTextMatch
 }
 
-export const PUNCTUATION = '\\.,\\+\\*\\?\\$\\@\\|#{}\\(\\)\\^\\-\\[\\]\\\\/!%\'"~=<>_:;'
-
-export class SlashMenuGroup {
-  options: Array<SlashMenuOption>
-  title: string
-}
-
-export class SlashMenuOption {
-  Icon: React.FC
-
-  displayName?: ({ i18n }: { i18n: i18n }) => string
-  // Icon for display
-  key: string
-  // TBD
-  keyboardShortcut?: string
-  // For extra searching.
-  keywords: Array<string>
-  // What happens when you select this option?
-  onSelect: ({ editor, queryString }: { editor: LexicalEditor; queryString: string }) => void
-
-  ref?: MutableRefObject<HTMLElement | null>
-
-  // What shows up in the editor
-  title: string
-
-  constructor(
-    title: string,
-    options: {
-      Icon: React.FC
-      displayName?: ({ i18n }: { i18n: i18n }) => string
-      keyboardShortcut?: string
-      keywords?: Array<string>
-      onSelect: ({ editor, queryString }: { editor: LexicalEditor; queryString: string }) => void
-    },
-  ) {
-    this.key = title
-    this.ref = { current: null }
-    this.setRefElement = this.setRefElement.bind(this)
-
-    this.title = title
-    this.displayName = options.displayName
-    this.keywords = options.keywords || []
-    this.Icon = options.Icon
-    this.keyboardShortcut = options.keyboardShortcut
-    this.onSelect = options.onSelect.bind(this)
-  }
-
-  setRefElement(element: HTMLElement | null) {
-    this.ref = { current: element }
-  }
-}
+const baseClass = 'slash-menu-popup'
 
 export type MenuRenderFn = (
   anchorElementRef: MutableRefObject<HTMLElement | null>,
@@ -92,7 +40,7 @@ export type MenuRenderFn = (
 ) => JSX.Element | ReactPortal | null
 
 const scrollIntoViewIfNeeded = (target: HTMLElement) => {
-  const typeaheadContainerNode = document.getElementById('typeahead-menu')
+  const typeaheadContainerNode = document.getElementById('slash-menu')
   if (!typeaheadContainerNode) return
 
   const typeaheadRect = typeaheadContainerNode.getBoundingClientRect()
@@ -145,7 +93,9 @@ function $splitNodeContainingQuery(match: MenuTextMatch): TextNode | null {
   }
   const selectionOffset = anchor.offset
   const textContent = anchorNode.getTextContent().slice(0, selectionOffset)
+  // eslint-disable-next-line react/destructuring-assignment
   const characterOffset = match.replaceableString.length
+  // eslint-disable-next-line react/destructuring-assignment
   const queryOffset = getFullMatchOffset(textContent, match.matchingString, characterOffset)
   const startOffset = selectionOffset - queryOffset
   if (startOffset < 0) {
@@ -281,7 +231,7 @@ export function LexicalMenu({
     (option: SlashMenuOption) => {
       const rootElem = editor.getRootElement()
       if (rootElem !== null) {
-        rootElem.setAttribute('aria-activedescendant', 'typeahead-item-' + option.key)
+        rootElem.setAttribute('aria-activedescendant', `${baseClass}__item-${option.key}`)
         setSelectedOptionKey(option.key)
       }
     },
@@ -503,6 +453,7 @@ export function LexicalMenu({
 }
 
 export function useMenuAnchorRef(
+  anchorElem: HTMLElement,
   resolution: MenuResolution | null,
   setResolution: (r: MenuResolution | null) => void,
   className?: string,
@@ -517,8 +468,12 @@ export function useMenuAnchorRef(
 
     const menuEle = containerDiv.firstChild as Element
     if (rootElement !== null && resolution !== null) {
-      const { height, left, top, width } = resolution.getRect()
-      containerDiv.style.top = `${top + window.scrollY + VERTICAL_OFFSET}px`
+      const { height, width } = resolution.getRect()
+      let { left, top } = resolution.getRect()
+
+      const rawTop = top
+      top -= anchorElem.getBoundingClientRect().top + window.scrollY
+      left -= anchorElem.getBoundingClientRect().left + window.scrollX
       containerDiv.style.left = `${left + window.scrollX}px`
       containerDiv.style.height = `${height}px`
       containerDiv.style.width = `${width}px`
@@ -533,19 +488,18 @@ export function useMenuAnchorRef(
           containerDiv.style.left = `${rootElementRect.right - menuWidth + window.scrollX}px`
         }
 
-        const wouldGoOffTopOfScreen = top < menuHeight
-        const wouldGoOffBottomOfContainer = top + menuHeight > rootElementRect.bottom
+        const wouldGoOffBottomOfScreen = rawTop + menuHeight + VERTICAL_OFFSET > window.innerHeight
+        //const wouldGoOffBottomOfContainer = top + menuHeight > rootElementRect.bottom
+        const wouldGoOffTopOfScreen = rawTop < 0
 
         // Position slash menu above the cursor instead of below (default) if it would otherwise go off the bottom of the screen.
-        if (
-          (top + menuHeight > window.innerHeight ||
-            (wouldGoOffBottomOfContainer && !wouldGoOffTopOfScreen)) &&
-          top - rootElementRect.top > menuHeight
-        ) {
+        if (wouldGoOffBottomOfScreen && !wouldGoOffTopOfScreen) {
           const margin = 24
           containerDiv.style.top = `${
             top + VERTICAL_OFFSET - menuHeight + window.scrollY - (height + margin)
           }px`
+        } else {
+          containerDiv.style.top = `${top + window.scrollY + VERTICAL_OFFSET}px`
         }
       }
 
@@ -553,17 +507,17 @@ export function useMenuAnchorRef(
         if (className != null) {
           containerDiv.className = className
         }
-        containerDiv.setAttribute('aria-label', 'Typeahead menu')
-        containerDiv.setAttribute('id', 'typeahead-menu')
+        containerDiv.setAttribute('aria-label', 'Slash menu')
+        containerDiv.setAttribute('id', 'slash-menu')
         containerDiv.setAttribute('role', 'listbox')
         containerDiv.style.display = 'block'
         containerDiv.style.position = 'absolute'
-        document.body.append(containerDiv)
+        anchorElem.append(containerDiv)
       }
       anchorElementRef.current = containerDiv
-      rootElement.setAttribute('aria-controls', 'typeahead-menu')
+      rootElement.setAttribute('aria-controls', 'slash-menu')
     }
-  }, [editor, resolution, className])
+  }, [editor, resolution, className, anchorElem])
 
   useEffect(() => {
     const rootElement = editor.getRootElement()
@@ -597,5 +551,3 @@ export function useMenuAnchorRef(
 
   return anchorElementRef
 }
-
-export type TriggerFn = (text: string, editor: LexicalEditor) => MenuTextMatch | null

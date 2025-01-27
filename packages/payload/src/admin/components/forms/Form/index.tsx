@@ -50,12 +50,15 @@ import reduceFieldsToValues from './reduceFieldsToValues'
 const baseClass = 'form'
 
 const Form: React.FC<Props> = (props) => {
+  const { id, collection, getDocPreferences, global } = useDocumentInfo()
+
   const {
     action,
     children,
     className,
     disableSuccessStatus,
     disabled,
+    fields: fieldsFromProps = collection?.fields || global?.fields,
     handleResponse,
     initialData, // values only, paths are required as key - form should build initial state as convenience
     initialState, // fully formed initial field state
@@ -71,7 +74,6 @@ const Form: React.FC<Props> = (props) => {
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation('general')
   const { refreshCookie, user } = useAuth()
-  const { id, collection, getDocPreferences, global } = useDocumentInfo()
   const operation = useOperation()
 
   const config = useConfig()
@@ -90,6 +92,10 @@ const Form: React.FC<Props> = (props) => {
   if (initialState) initialFieldState = initialState
 
   const fieldsReducer = useReducer(fieldReducer, {}, () => initialFieldState)
+  /**
+   * `fields` is the current, up-to-date state/data of all fields in the form. It can be modified by using dispatchFields,
+   * which calls the fieldReducer, which then updates the state.
+   */
   const [fields, dispatchFields] = fieldsReducer
 
   contextRef.current.fields = fields
@@ -143,9 +149,9 @@ const Form: React.FC<Props> = (props) => {
 
       if (!stateMatches) {
         dispatchFields({
+          type: 'UPDATE',
           path,
           rows: newRows,
-          type: 'UPDATE',
         })
       }
     })
@@ -167,11 +173,18 @@ const Form: React.FC<Props> = (props) => {
           let validationResult: boolean | string = true
 
           if (typeof field.validate === 'function') {
-            validationResult = await field.validate(field.value, {
+            let valueToValidate = field.value
+
+            if (field?.rows && Array.isArray(field.rows)) {
+              valueToValidate = contextRef.current.getDataByPath(path)
+            }
+
+            validationResult = await field.validate(valueToValidate, {
               id,
               config,
               data,
               operation,
+              previousValue: field.previousValue,
               siblingData: contextRef.current.getSiblingData(path),
               t,
               user,
@@ -192,7 +205,7 @@ const Form: React.FC<Props> = (props) => {
     await Promise.all(validationPromises)
 
     if (!isDeepEqual(contextRef.current.fields, validatedFieldState)) {
-      dispatchFields({ state: validatedFieldState, type: 'REPLACE_STATE' })
+      dispatchFields({ type: 'REPLACE_STATE', state: validatedFieldState })
     }
 
     return isValid
@@ -287,8 +300,8 @@ const Form: React.FC<Props> = (props) => {
               destination.state = {
                 status: [
                   {
-                    message: json.message,
                     type: 'success',
+                    message: json.message,
                   },
                 ],
               }
@@ -431,10 +444,10 @@ const Form: React.FC<Props> = (props) => {
     [],
   )
 
-  const getRowConfigByPath = React.useCallback(
+  const getRowSchemaByPath = React.useCallback(
     ({ blockType, path }: { blockType?: string; path: string }) => {
       const rowConfig = traverseRowConfigs({
-        fieldConfig: collection?.fields || global?.fields,
+        fieldConfig: fieldsFromProps,
         path,
       })
       const rowFieldConfigs = buildFieldSchemaMap(rowConfig)
@@ -442,45 +455,47 @@ const Form: React.FC<Props> = (props) => {
       const fieldKey = pathSegments.at(-1)
       return rowFieldConfigs.get(blockType ? `${fieldKey}.${blockType}` : fieldKey)
     },
-    [traverseRowConfigs, collection?.fields, global?.fields],
+    [traverseRowConfigs, fieldsFromProps],
   )
 
-  // Array/Block row manipulation
+  // Array/Block row manipulation. This is called when, for example, you add a new block to a blocks field.
+  // The block data is saved in the rows property of the state, which is modified updated here.
   const addFieldRow: Context['addFieldRow'] = useCallback(
     async ({ data, path, rowIndex }) => {
       const preferences = await getDocPreferences()
-      const fieldConfig = getRowConfigByPath({
+      const rowSchema = getRowSchemaByPath({
         blockType: data?.blockType,
         path,
       })
 
-      if (fieldConfig) {
+      if (rowSchema) {
         const subFieldState = await buildStateFromSchema({
           id,
           config,
           data,
-          fieldSchema: fieldConfig,
+          fieldSchema: rowSchema,
           locale,
           operation,
           preferences,
           t,
           user,
         })
+
         dispatchFields({
+          type: 'ADD_ROW',
           blockType: data?.blockType,
           path,
           rowIndex,
           subFieldState,
-          type: 'ADD_ROW',
         })
       }
     },
-    [dispatchFields, getDocPreferences, id, user, operation, locale, t, getRowConfigByPath, config],
+    [dispatchFields, getDocPreferences, id, user, operation, locale, t, getRowSchemaByPath, config],
   )
 
   const removeFieldRow: Context['removeFieldRow'] = useCallback(
-    async ({ path, rowIndex }) => {
-      dispatchFields({ path, rowIndex, type: 'REMOVE_ROW' })
+    ({ path, rowIndex }) => {
+      dispatchFields({ type: 'REMOVE_ROW', path, rowIndex })
     },
     [dispatchFields],
   )
@@ -488,17 +503,17 @@ const Form: React.FC<Props> = (props) => {
   const replaceFieldRow: Context['replaceFieldRow'] = useCallback(
     async ({ data, path, rowIndex }) => {
       const preferences = await getDocPreferences()
-      const fieldConfig = getRowConfigByPath({
+      const rowSchema = getRowSchemaByPath({
         blockType: data?.blockType,
         path,
       })
 
-      if (fieldConfig) {
+      if (rowSchema) {
         const subFieldState = await buildStateFromSchema({
           id,
           config,
           data,
-          fieldSchema: fieldConfig,
+          fieldSchema: rowSchema,
           locale,
           operation,
           preferences,
@@ -506,15 +521,15 @@ const Form: React.FC<Props> = (props) => {
           user,
         })
         dispatchFields({
+          type: 'REPLACE_ROW',
           blockType: data?.blockType,
           path,
           rowIndex,
           subFieldState,
-          type: 'REPLACE_ROW',
         })
       }
     },
-    [dispatchFields, getDocPreferences, id, user, operation, locale, t, getRowConfigByPath, config],
+    [dispatchFields, getDocPreferences, id, user, operation, locale, t, getRowSchemaByPath, config],
   )
 
   const getFields = useCallback(() => contextRef.current.fields, [contextRef])
@@ -575,7 +590,7 @@ const Form: React.FC<Props> = (props) => {
       })
       contextRef.current = { ...initContextState } as FormContextType
       setModified(false)
-      dispatchFields({ state, type: 'REPLACE_STATE' })
+      dispatchFields({ type: 'REPLACE_STATE', state })
     },
     [id, user, operation, locale, t, dispatchFields, getDocPreferences, config],
   )
@@ -584,7 +599,7 @@ const Form: React.FC<Props> = (props) => {
     (state: Fields) => {
       contextRef.current = { ...initContextState } as FormContextType
       setModified(false)
-      dispatchFields({ state, type: 'REPLACE_STATE' })
+      dispatchFields({ type: 'REPLACE_STATE', state })
     },
     [dispatchFields],
   )
@@ -616,7 +631,7 @@ const Form: React.FC<Props> = (props) => {
   useEffect(() => {
     if (initialState) {
       contextRef.current = { ...initContextState } as FormContextType
-      dispatchFields({ state: initialState, type: 'REPLACE_STATE' })
+      dispatchFields({ type: 'REPLACE_STATE', state: initialState })
     }
   }, [initialState, dispatchFields])
 
@@ -625,7 +640,7 @@ const Form: React.FC<Props> = (props) => {
       contextRef.current = { ...initContextState } as FormContextType
       const builtState = buildInitialState(initialData)
       setFormattedInitialData(builtState)
-      dispatchFields({ state: builtState, type: 'REPLACE_STATE' })
+      dispatchFields({ type: 'REPLACE_STATE', state: builtState })
     }
   }, [initialData, dispatchFields])
 

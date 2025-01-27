@@ -1,7 +1,7 @@
 import { useDraggable } from '@dnd-kit/core'
 import React from 'react'
 
-import type { ToolbarProviderProps } from '../Context'
+import type { EditViewProps } from '../../types'
 
 import DragHandle from '../../../icons/Drag'
 import { useLivePreviewContext } from '../Context/context'
@@ -10,11 +10,7 @@ import './index.scss'
 
 const baseClass = 'live-preview-toolbar'
 
-export type LivePreviewToolbarProps = Omit<ToolbarProviderProps, 'children'> & {
-  iframeRef: React.RefObject<HTMLIFrameElement>
-}
-
-const DraggableToolbar: React.FC<LivePreviewToolbarProps> = (props) => {
+const DraggableToolbar: React.FC<EditViewProps> = (props) => {
   const { toolbarPosition } = useLivePreviewContext()
 
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
@@ -50,7 +46,7 @@ const DraggableToolbar: React.FC<LivePreviewToolbarProps> = (props) => {
   )
 }
 
-const StaticToolbar: React.FC<LivePreviewToolbarProps> = (props) => {
+const StaticToolbar: React.FC<EditViewProps> = (props) => {
   return (
     <div className={[baseClass, `${baseClass}--static`].join(' ')}>
       <ToolbarControls {...props} />
@@ -59,7 +55,7 @@ const StaticToolbar: React.FC<LivePreviewToolbarProps> = (props) => {
 }
 
 export const LivePreviewToolbar: React.FC<
-  LivePreviewToolbarProps & {
+  EditViewProps & {
     draggable?: boolean
   }
 > = (props) => {

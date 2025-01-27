@@ -43,11 +43,11 @@ const RenderFieldsToDiff: React.FC<Props> = ({
           if (field.localized) {
             return (
               <div className={`${baseClass}__field`} key={i}>
-                {locales.map((locale) => {
+                {locales.map((locale, index) => {
                   const versionLocaleValue = versionValue?.[locale]
                   const comparisonLocaleValue = comparisonValue?.[locale]
                   return (
-                    <div className={`${baseClass}__locale`} key={locale}>
+                    <div className={`${baseClass}__locale`} key={[locale, index].join('-')}>
                       <div className={`${baseClass}__locale-value`}>
                         <Component
                           comparison={comparisonLocaleValue}

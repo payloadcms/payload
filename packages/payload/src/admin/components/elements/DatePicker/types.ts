@@ -1,5 +1,8 @@
+import type { ReactDatePickerProps } from 'react-datepicker'
+
 type SharedProps = {
   displayFormat?: string
+  overrides?: ReactDatePickerProps
   pickerAppearance?: 'dayAndTime' | 'dayOnly' | 'default' | 'monthOnly' | 'timeOnly'
 }
 

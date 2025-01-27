@@ -1,24 +1,27 @@
-import React, { Fragment } from 'react'
+import React, { Fragment, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import type { FieldTypes } from '../../../../forms/field-types'
 import type { CollectionEditViewProps } from '../../../types'
 
 import { getTranslation } from '../../../../../../utilities/getTranslation'
 import { DocumentControls } from '../../../../elements/DocumentControls'
-import { Gutter } from '../../../../elements/Gutter'
-import RenderFields from '../../../../forms/RenderFields'
-import { filterFields } from '../../../../forms/RenderFields/filterFields'
-import { fieldTypes } from '../../../../forms/field-types'
+import { DocumentFields } from '../../../../elements/DocumentFields'
 import { LeaveWithoutSaving } from '../../../../modals/LeaveWithoutSaving'
 import Meta from '../../../../utilities/Meta'
 import Auth from '../Auth'
 import { SetStepNav } from '../SetStepNav'
 import { Upload } from '../Upload'
+import formatFields from '../formatFields'
 import './index.scss'
 
 const baseClass = 'collection-default-edit'
 
-export const DefaultCollectionEdit: React.FC<CollectionEditViewProps> = (props) => {
+export const DefaultCollectionEdit: React.FC<
+  CollectionEditViewProps & {
+    fieldTypes: FieldTypes
+  }
+> = (props) => {
   const { i18n, t } = useTranslation('general')
 
   const {
@@ -28,29 +31,35 @@ export const DefaultCollectionEdit: React.FC<CollectionEditViewProps> = (props) 
     data,
     disableActions,
     disableLeaveWithoutSaving,
+    fieldTypes,
     hasSavePermission,
     internalState,
     isEditing,
+    onSave,
     permissions,
-    updatedAt,
   } = props
 
-  const { auth, fields, upload } = collection
+  const { admin: { forceRenderAllFields } = {}, auth, upload } = collection
+
+  const [fields] = useState(() => formatFields(collection, isEditing))
 
   const operation = isEditing ? 'update' : 'create'
 
-  const sidebarFields = filterFields({
-    fieldSchema: fields,
-    fieldTypes,
-    filter: (field) => field?.admin?.position === 'sidebar',
-    permissions: permissions.fields,
-    readOnly: !hasSavePermission,
-  })
-
-  const hasSidebar = sidebarFields && sidebarFields.length > 0
-
   return (
     <Fragment>
+      <Meta
+        description={`${isEditing ? t('editing') : t('creating')} - ${getTranslation(
+          collection.labels.singular,
+          i18n,
+        )}`}
+        keywords={`${getTranslation(collection.labels.singular, i18n)}, Payload, CMS`}
+        title={`${isEditing ? t('editing') : t('creating')} - ${getTranslation(
+          collection.labels.singular,
+          i18n,
+        )}`}
+      />
+      {!(collection.versions?.drafts && collection.versions?.drafts?.autosave) &&
+        !disableLeaveWithoutSaving && <LeaveWithoutSaving />}
       <SetStepNav collection={collection} id={id} isEditing={isEditing} />
       <DocumentControls
         apiURL={apiURL}
@@ -60,31 +69,12 @@ export const DefaultCollectionEdit: React.FC<CollectionEditViewProps> = (props) 
         hasSavePermission={hasSavePermission}
         id={id}
         isEditing={isEditing}
+        onSave={onSave}
         permissions={permissions}
       />
-      <div
-        className={[
-          baseClass,
-          hasSidebar ? `${baseClass}--has-sidebar` : `${baseClass}--no-sidebar`,
-        ]
-          .filter(Boolean)
-          .join(' ')}
-      >
-        <div className={`${baseClass}__main`}>
-          <Meta
-            description={`${isEditing ? t('editing') : t('creating')} - ${getTranslation(
-              collection.labels.singular,
-              i18n,
-            )}`}
-            keywords={`${getTranslation(collection.labels.singular, i18n)}, Payload, CMS`}
-            title={`${isEditing ? t('editing') : t('creating')} - ${getTranslation(
-              collection.labels.singular,
-              i18n,
-            )}`}
-          />
-          {!(collection.versions?.drafts && collection.versions?.drafts?.autosave) &&
-            !disableLeaveWithoutSaving && <LeaveWithoutSaving />}
-          <Gutter className={`${baseClass}__edit`}>
+      <DocumentFields
+        BeforeFields={
+          <Fragment>
             {auth && (
               <Auth
                 className={`${baseClass}__auth`}
@@ -97,31 +87,15 @@ export const DefaultCollectionEdit: React.FC<CollectionEditViewProps> = (props) 
                 verify={auth.verify}
               />
             )}
-            {upload && (
-              <Upload collection={collection} internalState={internalState} updatedAt={updatedAt} />
-            )}
-            <RenderFields
-              className={`${baseClass}__fields`}
-              fieldSchema={fields}
-              fieldTypes={fieldTypes}
-              filter={(field) => !field?.admin?.position || field?.admin?.position !== 'sidebar'}
-              permissions={permissions.fields}
-              readOnly={!hasSavePermission}
-            />
-          </Gutter>
-        </div>
-        {hasSidebar && (
-          <div className={`${baseClass}__sidebar-wrap`}>
-            <div className={`${baseClass}__sidebar`}>
-              <div className={`${baseClass}__sidebar-sticky-wrap`}>
-                <div className={`${baseClass}__sidebar-fields`}>
-                  <RenderFields fieldTypes={fieldTypes} fields={sidebarFields} />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+            {upload && <Upload collection={collection} internalState={internalState} />}
+          </Fragment>
+        }
+        fieldTypes={fieldTypes}
+        fields={fields}
+        forceRenderAllFields={forceRenderAllFields}
+        hasSavePermission={hasSavePermission}
+        permissions={permissions}
+      />
     </Fragment>
   )
 }

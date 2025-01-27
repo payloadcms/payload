@@ -24,14 +24,26 @@ export const ButtonGroup: React.FC<{
 }
 
 type MenuButtonProps = {
+  active?: boolean
   children: React.ReactNode
   className?: string
+  disabled?: boolean
   id?: string
   onClick?: () => void
   to?: LinkProps['to']
 }
-export const Button: React.FC<MenuButtonProps> = ({ id, children, className, onClick, to }) => {
-  const classes = [`${baseClass}__button`, className].filter(Boolean).join(' ')
+export const Button: React.FC<MenuButtonProps> = ({
+  id,
+  active,
+  children,
+  className,
+  disabled,
+  onClick,
+  to,
+}) => {
+  const classes = [`${baseClass}__button`, active && `${baseClass}__button--selected`, className]
+    .filter(Boolean)
+    .join(' ')
 
   if (to) {
     return (
@@ -54,6 +66,7 @@ export const Button: React.FC<MenuButtonProps> = ({ id, children, className, onC
     return (
       <button
         className={classes}
+        disabled={disabled}
         id={id}
         onClick={() => {
           if (onClick) {

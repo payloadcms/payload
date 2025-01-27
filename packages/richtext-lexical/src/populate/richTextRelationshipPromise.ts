@@ -1,19 +1,21 @@
 import type { SerializedEditorState, SerializedLexicalNode } from 'lexical'
 import type { PayloadRequest, RichTextAdapter, RichTextField } from 'payload/types'
 
-import type { AfterReadPromise } from '../field/features/types'
+import type { PopulationPromise } from '../field/features/types'
 import type { AdapterProps } from '../types'
 
-export type Args = Parameters<RichTextAdapter<AdapterProps>['afterReadPromise']>[0] & {
-  afterReadPromises: Map<string, Array<AfterReadPromise>>
+export type Args = Parameters<
+  RichTextAdapter<SerializedEditorState, AdapterProps>['populationPromise']
+>[0] & {
+  editorPopulationPromises: Map<string, Array<PopulationPromise>>
 }
 
 type RecurseRichTextArgs = {
-  afterReadPromises: Map<string, Array<AfterReadPromise>>
   children: SerializedLexicalNode[]
   currentDepth: number
   depth: number
-  field: RichTextField<AdapterProps>
+  editorPopulationPromises: Map<string, Array<PopulationPromise>>
+  field: RichTextField<SerializedEditorState, AdapterProps>
   overrideAccess: boolean
   promises: Promise<void>[]
   req: PayloadRequest
@@ -22,33 +24,43 @@ type RecurseRichTextArgs = {
 }
 
 export const recurseRichText = ({
-  afterReadPromises,
   children,
+  context,
   currentDepth = 0,
   depth,
+  draft,
+  editorPopulationPromises,
   field,
+  findMany,
+  flattenLocales,
   overrideAccess = false,
+  populationPromises,
   promises,
   req,
   showHiddenFields,
   siblingDoc,
-}: RecurseRichTextArgs): void => {
+}: RecurseRichTextArgs & Args): void => {
   if (depth <= 0 || currentDepth > depth) {
     return
   }
 
   if (Array.isArray(children)) {
     children.forEach((node) => {
-      if (afterReadPromises?.has(node.type)) {
-        for (const promise of afterReadPromises.get(node.type)) {
+      if (editorPopulationPromises?.has(node.type)) {
+        for (const promise of editorPopulationPromises.get(node.type)) {
           promises.push(
             ...promise({
-              afterReadPromises,
+              context,
               currentDepth,
               depth,
+              draft,
+              editorPopulationPromises,
               field,
-              node: node,
+              findMany,
+              flattenLocales,
+              node,
               overrideAccess,
+              populationPromises,
               req,
               showHiddenFields,
               siblingDoc,
@@ -57,14 +69,19 @@ export const recurseRichText = ({
         }
       }
 
-      if ('children' in node && node?.children) {
+      if ('children' in node && Array.isArray(node?.children) && node?.children?.length) {
         recurseRichText({
-          afterReadPromises,
           children: node.children as SerializedLexicalNode[],
+          context,
           currentDepth,
           depth,
+          draft,
+          editorPopulationPromises,
           field,
+          findMany,
+          flattenLocales,
           overrideAccess,
+          populationPromises,
           promises,
           req,
           showHiddenFields,
@@ -76,11 +93,16 @@ export const recurseRichText = ({
 }
 
 export const richTextRelationshipPromise = async ({
-  afterReadPromises,
+  context,
   currentDepth,
   depth,
+  draft,
+  editorPopulationPromises,
   field,
+  findMany,
+  flattenLocales,
   overrideAccess,
+  populationPromises,
   req,
   showHiddenFields,
   siblingDoc,
@@ -88,12 +110,17 @@ export const richTextRelationshipPromise = async ({
   const promises = []
 
   recurseRichText({
-    afterReadPromises,
     children: (siblingDoc[field?.name] as SerializedEditorState)?.root?.children ?? [],
+    context,
     currentDepth,
     depth,
+    draft,
+    editorPopulationPromises,
     field,
+    findMany,
+    flattenLocales,
     overrideAccess,
+    populationPromises,
     promises,
     req,
     showHiddenFields,

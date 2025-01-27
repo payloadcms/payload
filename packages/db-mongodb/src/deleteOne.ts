@@ -1,6 +1,5 @@
 import type { DeleteOne } from 'payload/database'
 import type { PayloadRequest } from 'payload/types'
-import type { Document } from 'payload/types'
 
 import type { MongooseAdapter } from '.'
 
@@ -12,20 +11,16 @@ export const deleteOne: DeleteOne = async function deleteOne(
   { collection, req = {} as PayloadRequest, where },
 ) {
   const Model = this.collections[collection]
-  const options = withSession(this, req.transactionID)
+  const options = await withSession(this, req)
 
   const query = await Model.buildQuery({
     payload: this.payload,
     where,
   })
 
-  const doc = await Model.findOneAndDelete(query, options).lean()
+  let doc = await Model.findOneAndDelete(query, options).lean()
 
-  let result: Document = JSON.parse(JSON.stringify(doc))
+  doc = this.jsonParse ? JSON.parse(JSON.stringify(doc)) : doc
 
-  // custom id type reset
-  result.id = result._id
-  result = sanitizeInternalFields(result)
-
-  return result
+  return sanitizeInternalFields(doc)
 }

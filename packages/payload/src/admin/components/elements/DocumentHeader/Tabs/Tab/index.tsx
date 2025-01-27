@@ -54,7 +54,10 @@ export const DocumentTab: React.FC<DocumentTabProps & DocumentTabConfig> = (prop
       ? checkIsActive
       : location.pathname.startsWith(href)
 
-  if (!condition || (condition && condition({ collection, config, documentInfo, global }))) {
+  if (
+    !condition ||
+    (condition && Boolean(condition({ collection, config, documentInfo, global })))
+  ) {
     const labelToRender = typeof label === 'function' ? label({ t }) : label
     const pillToRender = typeof pillLabel === 'function' ? pillLabel({ versions }) : pillLabel
 
@@ -64,6 +67,7 @@ export const DocumentTab: React.FC<DocumentTabProps & DocumentTabConfig> = (prop
           className={`${baseClass}__link`}
           to={href}
           {...(newTab && { rel: 'noopener noreferrer', target: '_blank' })}
+          tabIndex={isActive ? -1 : 0}
         >
           <span className={`${baseClass}__label`}>
             {labelToRender}

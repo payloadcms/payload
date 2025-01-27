@@ -6,8 +6,10 @@ export const createBlockNode = (
 ): ElementTransformer['replace'] => {
   return (parentNode, children, match) => {
     const node = createNode(match)
-    node.append(...children)
-    parentNode.replace(node)
-    node.select(0, 0)
+    if (node) {
+      node.append(...children)
+      parentNode.replace(node)
+      node.select(0, 0)
+    }
   }
 }

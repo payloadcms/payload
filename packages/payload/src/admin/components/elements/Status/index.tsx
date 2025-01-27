@@ -168,6 +168,7 @@ const Status: React.FC = () => {
               <Button
                 buttonStyle="none"
                 className={`${baseClass}__action`}
+                id="action-revert-to-published"
                 onClick={() => toggleModal(revertModalSlug)}
               >
                 {t('revertToPublished')}
@@ -183,7 +184,10 @@ const Status: React.FC = () => {
                   >
                     {t('general:cancel')}
                   </Button>
-                  <Button onClick={processing ? undefined : () => performAction('revert')}>
+                  <Button
+                    id="action-revert-to-published-confirm"
+                    onClick={processing ? undefined : () => performAction('revert')}
+                  >
                     {t(processing ? 'reverting' : 'general:confirm')}
                   </Button>
                 </MinimalTemplate>

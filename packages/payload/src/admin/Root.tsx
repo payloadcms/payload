@@ -17,7 +17,9 @@ import { StepNavProvider } from './components/elements/StepNav'
 import { AuthProvider } from './components/utilities/Auth'
 import { ConfigProvider } from './components/utilities/Config'
 import { CustomProvider } from './components/utilities/CustomProvider'
+import { DocumentEventsProvider } from './components/utilities/DocumentEvents'
 import { I18n } from './components/utilities/I18n'
+import { LanguageWrap } from './components/utilities/LanguageWrap'
 import { LoadingOverlayProvider } from './components/utilities/LoadingOverlay'
 import { LocaleProvider } from './components/utilities/Locale'
 import { PreferencesProvider } from './components/utilities/Preferences'
@@ -45,19 +47,23 @@ const Root = ({ config: incomingConfig }: { config?: SanitizedConfig }) => {
                 <AuthProvider>
                   <PreferencesProvider>
                     <ThemeProvider>
-                      <SearchParamsProvider>
-                        <LocaleProvider>
-                          <StepNavProvider>
-                            <LoadingOverlayProvider>
-                              <NavProvider>
-                                <CustomProvider>
-                                  <Routes />
-                                </CustomProvider>
-                              </NavProvider>
-                            </LoadingOverlayProvider>
-                          </StepNavProvider>
-                        </LocaleProvider>
-                      </SearchParamsProvider>
+                      <LanguageWrap>
+                        <SearchParamsProvider>
+                          <LocaleProvider>
+                            <StepNavProvider>
+                              <LoadingOverlayProvider>
+                                <DocumentEventsProvider>
+                                  <NavProvider>
+                                    <CustomProvider>
+                                      <Routes />
+                                    </CustomProvider>
+                                  </NavProvider>
+                                </DocumentEventsProvider>
+                              </LoadingOverlayProvider>
+                            </StepNavProvider>
+                          </LocaleProvider>
+                        </SearchParamsProvider>
+                      </LanguageWrap>
                     </ThemeProvider>
                     <ModalContainer />
                   </PreferencesProvider>

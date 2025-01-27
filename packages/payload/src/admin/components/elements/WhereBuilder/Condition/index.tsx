@@ -26,31 +26,35 @@ const baseClass = 'condition'
 
 const Condition: React.FC<Props> = (props) => {
   const { andIndex, dispatch, fields, orIndex, value } = props
-  const fieldValue = Object.keys(value)[0]
-  const operatorAndValue = value?.[fieldValue] ? Object.entries(value[fieldValue])[0] : undefined
-
-  const operatorValue = operatorAndValue?.[0]
-  const queryValue = operatorAndValue?.[1]
-
+  const fieldName = Object.keys(value)[0]
   const [activeField, setActiveField] = useState<FieldCondition>(() =>
-    fields.find((field) => fieldValue === field.value),
+    fields.find((field) => fieldName === field.value),
   )
+
+  const operatorAndValue = value?.[fieldName] ? Object.entries(value[fieldName])[0] : undefined
+  const queryValue = operatorAndValue?.[1]
+  const operatorValue = operatorAndValue?.[0]
+
   const [internalValue, setInternalValue] = useState(queryValue)
+  const [internalOperatorField, setInternalOperatorField] = useState(operatorValue)
+
   const debouncedValue = useDebounce(internalValue, 300)
 
   useEffect(() => {
-    const newActiveField = fields.find((field) => fieldValue === field.value)
+    const newActiveField = fields.find(({ value: name }) => name === fieldName)
 
-    if (newActiveField) {
+    if (newActiveField && newActiveField !== activeField) {
       setActiveField(newActiveField)
+      setInternalOperatorField(null)
+      setInternalValue('')
     }
-  }, [fieldValue, fields])
+  }, [fieldName, fields, activeField])
 
   useEffect(() => {
     dispatch({
+      type: 'update',
       andIndex,
       orIndex,
-      type: 'update',
       value: debouncedValue || '',
     })
   }, [debouncedValue, dispatch, orIndex, andIndex])
@@ -73,31 +77,39 @@ const Condition: React.FC<Props> = (props) => {
         <div className={`${baseClass}__inputs`}>
           <div className={`${baseClass}__field`}>
             <ReactSelect
-              onChange={(field) =>
+              isClearable={false}
+              onChange={(field) => {
                 dispatch({
-                  andIndex,
-                  field: field.value,
-                  orIndex,
                   type: 'update',
+                  andIndex,
+                  field: field?.value,
+                  orIndex,
                 })
-              }
+              }}
               options={fields}
-              value={fields.find((field) => fieldValue === field.value)}
+              value={fields.find((field) => fieldName === field.value)}
             />
           </div>
           <div className={`${baseClass}__operator`}>
             <ReactSelect
-              disabled={!fieldValue}
+              disabled={!fieldName}
+              isClearable={false}
               onChange={(operator) => {
                 dispatch({
+                  type: 'update',
                   andIndex,
                   operator: operator.value,
                   orIndex,
-                  type: 'update',
                 })
+                setInternalOperatorField(operator.value)
+                setInternalValue('') // Reset value when operator changes
               }}
               options={activeField.operators}
-              value={activeField.operators.find((operator) => operatorValue === operator.value)}
+              value={
+                activeField.operators.find(
+                  (operator) => internalOperatorField === operator.value,
+                ) || null
+              }
             />
           </div>
           <div className={`${baseClass}__value`}>
@@ -106,6 +118,7 @@ const Condition: React.FC<Props> = (props) => {
               DefaultComponent={ValueComponent}
               componentProps={{
                 ...activeField?.props,
+                disabled: !operatorValue,
                 onChange: setInternalValue,
                 operator: operatorValue,
                 options: valueOptions,
@@ -122,9 +135,9 @@ const Condition: React.FC<Props> = (props) => {
             iconStyle="with-border"
             onClick={() =>
               dispatch({
+                type: 'remove',
                 andIndex,
                 orIndex,
-                type: 'remove',
               })
             }
             round
@@ -136,11 +149,11 @@ const Condition: React.FC<Props> = (props) => {
             iconStyle="with-border"
             onClick={() =>
               dispatch({
+                type: 'add',
                 andIndex: andIndex + 1,
                 field: fields[0].value,
                 orIndex,
                 relation: 'and',
-                type: 'add',
               })
             }
             round

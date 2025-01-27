@@ -3,6 +3,7 @@ export type Props = {
   duplicateRow: (current: number) => void
   hasMaxRows: boolean
   index: number
+  isSortable: boolean
   moveRow: (from: number, to: number) => void
   removeRow: (index: number) => void
   rowCount: number

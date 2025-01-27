@@ -9,6 +9,7 @@ import executeAccess from '../../auth/executeAccess'
 import { combineQueries } from '../../database/combineQueries'
 import { APIError, Forbidden, NotFound } from '../../errors'
 import { afterRead } from '../../fields/hooks/afterRead'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 
@@ -33,7 +34,7 @@ async function findVersionByID<T extends TypeWithID = any>(
     depth,
     disableErrors,
     overrideAccess,
-    req: { locale, payload, t },
+    req: { fallbackLocale, locale, payload, t },
     req,
     showHiddenFields,
   } = args
@@ -93,6 +94,7 @@ async function findVersionByID<T extends TypeWithID = any>(
 
       result.version =
         (await hook({
+          collection: collectionConfig,
           context: req.context,
           doc: result.version,
           query: fullWhere,
@@ -105,11 +107,15 @@ async function findVersionByID<T extends TypeWithID = any>(
     // /////////////////////////////////////
 
     result.version = await afterRead({
+      collection: collectionConfig,
       context: req.context,
       currentDepth,
       depth,
       doc: result.version,
-      entityConfig: collectionConfig,
+      draft: undefined,
+      fallbackLocale,
+      global: null,
+      locale,
       overrideAccess,
       req,
       showHiddenFields,
@@ -124,6 +130,7 @@ async function findVersionByID<T extends TypeWithID = any>(
 
       result.version =
         (await hook({
+          collection: collectionConfig,
           context: req.context,
           doc: result.version,
           query: fullWhere,
@@ -135,7 +142,7 @@ async function findVersionByID<T extends TypeWithID = any>(
     // Return results
     // /////////////////////////////////////
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {

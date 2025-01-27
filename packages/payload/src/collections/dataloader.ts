@@ -54,6 +54,7 @@ const batchAndLoadDocs =
         fallbackLocale,
         overrideAccess,
         showHiddenFields,
+        draft,
       ] = JSON.parse(key)
 
       const batchKeyArray = [
@@ -65,6 +66,7 @@ const batchAndLoadDocs =
         fallbackLocale,
         overrideAccess,
         showHiddenFields,
+        draft,
       ]
 
       const batchKey = JSON.stringify(batchKeyArray)
@@ -86,9 +88,11 @@ const batchAndLoadDocs =
       return batches
     }, {})
 
-    // Run find requests in parallel
+    // Run find requests one after another, so as to not hang transactions
 
-    const results = Object.entries(batchByFindArgs).map(async ([batchKey, ids]) => {
+    await Object.entries(batchByFindArgs).reduce(async (priorFind, [batchKey, ids]) => {
+      await priorFind
+
       const [
         transactionID,
         collection,
@@ -98,6 +102,7 @@ const batchAndLoadDocs =
         fallbackLocale,
         overrideAccess,
         showHiddenFields,
+        draft,
       ] = JSON.parse(batchKey)
 
       req.transactionID = transactionID
@@ -107,6 +112,7 @@ const batchAndLoadDocs =
         currentDepth,
         depth,
         disableErrors: true,
+        draft,
         fallbackLocale,
         locale,
         overrideAccess: Boolean(overrideAccess),
@@ -134,6 +140,7 @@ const batchAndLoadDocs =
           fallbackLocale,
           overrideAccess,
           showHiddenFields,
+          draft,
         ])
         const docsIndex = keys.findIndex((key) => key === docKey)
 
@@ -141,9 +148,7 @@ const batchAndLoadDocs =
           docs[docsIndex] = doc
         }
       })
-    })
-
-    await Promise.all(results)
+    }, Promise.resolve())
 
     // Return docs array,
     // which has now been injected with all fetched docs

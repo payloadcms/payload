@@ -4,6 +4,7 @@ import type { PayloadRequest } from '../../../express/types'
 import type { Where } from '../../../types'
 import type { Collection } from '../../config/types'
 
+import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
 import find from '../../operations/find'
 
 export type Resolver = (
@@ -27,8 +28,24 @@ export type Resolver = (
 
 export default function findResolver(collection: Collection): Resolver {
   return async function resolver(_, args, context) {
-    if (args.locale) context.req.locale = args.locale
-    if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale
+    let { req } = context
+    const locale = req.locale
+    const fallbackLocale = req.fallbackLocale
+
+    req = isolateObjectProperty(req, ['locale', 'fallbackLocale', 'transactionID'])
+    req.locale = args.locale || locale
+    req.fallbackLocale = args.fallbackLocale || fallbackLocale
+    if (!req.query) req.query = {}
+
+    const draft: boolean =
+      args.draft ?? req.query?.draft === 'false'
+        ? false
+        : req.query?.draft === 'true'
+          ? true
+          : undefined
+    if (typeof draft === 'boolean') req.query.draft = String(draft)
+
+    context.req = req
 
     const options = {
       collection,
@@ -36,7 +53,7 @@ export default function findResolver(collection: Collection): Resolver {
       draft: args.draft,
       limit: args.limit,
       page: args.page,
-      req: context.req,
+      req,
       sort: args.sort,
       where: args.where,
     }

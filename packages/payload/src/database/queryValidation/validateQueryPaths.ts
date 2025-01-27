@@ -33,7 +33,11 @@ type Args = {
 const flattenWhere = (query: Where): WhereField[] =>
   Object.entries(query).reduce((flattenedConstraints, [key, val]) => {
     if ((key === 'and' || key === 'or') && Array.isArray(val)) {
-      return [...flattenedConstraints, ...val.map((subVal) => flattenWhere(subVal))]
+      const subWhereConstraints: Where[] = val.reduce((acc, subVal) => {
+        const subWhere = flattenWhere(subVal)
+        return [...acc, ...subWhere]
+      }, [])
+      return [...flattenedConstraints, ...subWhereConstraints]
     }
 
     return [...flattenedConstraints, { [key]: val }]

@@ -38,7 +38,7 @@ const FileDetails: React.FC<Props> = (props) => {
             width={width as number}
           />
 
-          {isImage(mimeType as string) && (
+          {isImage(mimeType as string) && mimeType !== 'image/svg+xml' && (
             <UploadActions canEdit={canEdit} showSizePreviews={hasImageSizes && doc.filename} />
           )}
         </div>

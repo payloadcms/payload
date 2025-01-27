@@ -1,0 +1,40 @@
+{
+  "name": "@payloadcms/db-example",
+  "private": true,
+  "version": "0.0.1",
+  "description": "A sample implementation of a Payload database adapter",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "examples/db-example"
+  },
+  "license": "MIT",
+  "homepage": "https://payloadcms.com",
+  "author": {
+    "email": "info@payloadcms.com",
+    "name": "Payload",
+    "url": "https://payloadcms.com"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "pnpm build:swc && pnpm build:types",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "prepublishOnly": "pnpm clean && pnpm build"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "@payloadcms/eslint-config": "^1.1.1",
+    "payload": "^2.18.3",
+    "rimraf": "^4.1.2"
+  },
+  "peerDependencies": {
+    "payload": "^2.0.0"
+  },
+  "files": [
+    "dist"
+  ]
+}

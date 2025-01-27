@@ -1,9 +1,9 @@
 import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
 
-import { versionSlug } from '../shared'
+import { versionCollectionSlug } from '../slugs'
 
 const VersionPosts: CollectionConfig = {
-  slug: versionSlug,
+  slug: versionCollectionSlug,
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'description', 'createdAt'],

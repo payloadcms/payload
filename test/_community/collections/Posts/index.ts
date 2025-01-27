@@ -5,20 +5,25 @@ import { mediaSlug } from '../Media'
 export const postsSlug = 'posts'
 
 export const PostsCollection: CollectionConfig = {
-  slug: postsSlug,
+  defaultSort: 'title',
   fields: [
     {
       name: 'text',
       type: 'text',
     },
     {
+      name: 'title',
+      type: 'text',
+    },
+    {
       name: 'associatedMedia',
-      type: 'upload',
-      relationTo: mediaSlug,
       access: {
         create: () => true,
         update: () => false,
       },
+      relationTo: mediaSlug,
+      type: 'upload',
     },
   ],
+  slug: postsSlug,
 }

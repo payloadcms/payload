@@ -11,7 +11,7 @@ export const deleteVersions: DeleteVersions = async function deleteVersions(
 ) {
   const VersionsModel = this.versions[collection]
   const options = {
-    ...withSession(this, req.transactionID),
+    ...(await withSession(this, req)),
     lean: true,
   }
 

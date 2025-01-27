@@ -1,24 +1,12 @@
 import type { CollectionConfig } from '../../../packages/payload/src/collections/config/types'
 
+import CollectionVersionButton from '../elements/CollectionVersionButton'
+import CollectionVersionsButton from '../elements/CollectionVersionsButton'
 import { CustomPublishButton } from '../elements/CustomSaveButton'
-import { draftSlug } from '../shared'
+import { draftCollectionSlug } from '../slugs'
 
 const DraftPosts: CollectionConfig = {
-  slug: draftSlug,
-  admin: {
-    useAsTitle: 'title',
-    defaultColumns: ['title', 'description', 'createdAt', '_status'],
-    preview: () => 'https://payloadcms.com',
-    components: {
-      edit: {
-        PublishButton: CustomPublishButton,
-      },
-    },
-  },
-  versions: {
-    maxPerDoc: 35,
-    drafts: true,
-  },
+  slug: draftCollectionSlug,
   access: {
     read: ({ req: { user } }) => {
       if (user) {
@@ -42,19 +30,39 @@ const DraftPosts: CollectionConfig = {
     },
     readVersions: ({ req: { user } }) => Boolean(user),
   },
+  admin: {
+    components: {
+      edit: {
+        PublishButton: CustomPublishButton,
+      },
+      views: {
+        Edit: {
+          Version: {
+            actions: [CollectionVersionButton],
+          },
+          Versions: {
+            actions: [CollectionVersionsButton],
+          },
+        },
+      },
+    },
+    defaultColumns: ['title', 'description', 'createdAt', '_status'],
+    preview: () => 'https://payloadcms.com',
+    useAsTitle: 'title',
+  },
   fields: [
     {
       name: 'title',
-      label: 'Title',
       type: 'text',
+      label: 'Title',
+      localized: true,
       required: true,
       unique: true,
-      localized: true,
     },
     {
       name: 'description',
-      label: 'Description',
       type: 'textarea',
+      label: 'Description',
       required: true,
     },
     {
@@ -62,8 +70,8 @@ const DraftPosts: CollectionConfig = {
       type: 'radio',
       options: [
         {
-          value: 'test',
           label: { en: 'Test en', es: 'Test es' },
+          value: 'test',
         },
       ],
     },
@@ -73,16 +81,45 @@ const DraftPosts: CollectionConfig = {
       hasMany: true,
       options: [
         {
-          value: 'test1',
           label: { en: 'Test1 en', es: 'Test1 es' },
+          value: 'test1',
         },
         {
-          value: 'test2',
           label: { en: 'Test2 en', es: 'Test2 es' },
+          value: 'test2',
         },
       ],
     },
+    {
+      name: 'blocksField',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'block',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+            {
+              name: 'localized',
+              type: 'text',
+              localized: true,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'relation',
+      type: 'relationship',
+      relationTo: draftCollectionSlug,
+    },
   ],
+  versions: {
+    drafts: true,
+    maxPerDoc: 35,
+  },
 }
 
 export default DraftPosts

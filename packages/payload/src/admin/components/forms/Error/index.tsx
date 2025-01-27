@@ -8,11 +8,11 @@ import './index.scss'
 const baseClass = 'field-error'
 
 const Error: React.FC<Props> = (props) => {
-  const { message, showError = false } = props
+  const { alignCaret = 'right', message, showError = false } = props
 
   if (showError) {
     return (
-      <Tooltip className={baseClass} delay={0}>
+      <Tooltip alignCaret={alignCaret} className={baseClass} delay={0}>
         {message}
       </Tooltip>
     )

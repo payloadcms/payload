@@ -1,0 +1,17 @@
+@import '../../_css/common';
+
+.relationshipsBlock {
+}
+
+.array {
+  border: 1px solid var(--color-base-100);
+  padding: var(--base);
+
+  & > *:first-child {
+    margin-top: 0;
+  }
+
+  & > *:last-child {
+    margin-bottom: 0;
+  }
+}

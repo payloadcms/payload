@@ -8,19 +8,27 @@ import type { Props } from './types'
 
 import { formatDate } from '../../../../utilities/formatDate'
 import ReactSelect from '../../../elements/ReactSelect'
-import { useConfig } from '../../../utilities/Config'
-import { mostRecentVersionOption, publishedVersionOption } from '../shared'
-import './index.scss'
 import { fieldBaseClass } from '../../../forms/field-types/shared'
+import { useConfig } from '../../../utilities/Config'
+import { renderPill } from '../../Versions/cells/AutosaveCell'
+import './index.scss'
 
 const baseClass = 'compare-version'
 
-const maxResultsPerRequest = 10
+const maxResultsPerRequest = 100
 
-const baseOptions = [mostRecentVersionOption]
+const baseOptions = []
 
 const CompareVersion: React.FC<Props> = (props) => {
-  const { baseURL, onChange, parentID, publishedDoc, value, versionID } = props
+  const {
+    baseURL,
+    latestDraftVersion,
+    latestPublishedVersion,
+    onChange,
+    parentID,
+    value,
+    versionID,
+  } = props
 
   const {
     admin: { dateFormat },
@@ -70,30 +78,61 @@ const CompareVersion: React.FC<Props> = (props) => {
       if (response.ok) {
         const data: PaginatedDocs = await response.json()
         if (data.docs.length > 0) {
-          setOptions((existingOptions) => [
-            ...existingOptions,
-            ...data.docs.map((doc) => ({
-              label: formatDate(doc.updatedAt, dateFormat, i18n?.language),
+          const versionInfo = {
+            draft: {
+              currentLabel: t('version:currentDraft'),
+              latestVersion: latestDraftVersion,
+              pillStyle: undefined,
+              previousLabel: t('version:draft'),
+            },
+            published: {
+              currentLabel: t('version:currentPublishedVersion'),
+              latestVersion: latestPublishedVersion,
+              pillStyle: 'success',
+              previousLabel: t('version:previouslyPublished'),
+            },
+          }
+
+          const additionalOptions = data.docs.map((doc) => {
+            const status = doc.version._status
+            const { currentLabel, latestVersion, pillStyle, previousLabel } =
+              versionInfo[status] || {}
+
+            return {
+              label: (
+                <div>
+                  {formatDate(doc.updatedAt, dateFormat, i18n?.language)}
+                  &nbsp;&nbsp;
+                  {renderPill(doc, latestVersion, currentLabel, previousLabel, pillStyle)}
+                </div>
+              ),
               value: doc.id,
-            })),
-          ])
+            }
+          })
+
+          setOptions(additionalOptions)
           setLastLoadedPage(data.page)
         }
       } else {
         setErrorLoading(t('error:unspecific'))
       }
     },
-    [dateFormat, baseURL, parentID, versionID, t, i18n],
+    [dateFormat, baseURL, parentID, versionID, t, i18n, latestDraftVersion, latestPublishedVersion],
   )
 
   useEffect(() => {
-    getResults({ lastLoadedPage: 1 })
+    void getResults({ lastLoadedPage: 1 })
   }, [getResults])
 
+  const filteredOptions = options.filter(
+    (option, index, self) => self.findIndex((t) => t.value === option.value) === index,
+  )
+
   useEffect(() => {
-    if (publishedDoc?._status === 'published')
-      setOptions((currentOptions) => [publishedVersionOption, ...currentOptions])
-  }, [publishedDoc])
+    if (filteredOptions.length > 0 && !value) {
+      onChange(filteredOptions[0])
+    }
+  }, [filteredOptions, value, onChange])
 
   return (
     <div
@@ -104,12 +143,13 @@ const CompareVersion: React.FC<Props> = (props) => {
       <div className={`${baseClass}__label`}>{t('compareVersion')}</div>
       {!errorLoading && (
         <ReactSelect
+          isClearable={false}
           isSearchable={false}
           onChange={onChange}
           onMenuScrollToBottom={() => {
-            getResults({ lastLoadedPage: lastLoadedPage + 1 })
+            void getResults({ lastLoadedPage: lastLoadedPage + 1 })
           }}
-          options={options}
+          options={filteredOptions}
           placeholder={t('selectVersionToCompare')}
           value={value}
         />

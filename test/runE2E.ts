@@ -1,4 +1,5 @@
 import glob from 'glob'
+import minimist from 'minimist'
 import path from 'path'
 import shelljs from 'shelljs'
 import slash from 'slash'
@@ -8,14 +9,39 @@ shelljs.env.DISABLE_LOGGING = 'true'
 const playwrightBin = path.resolve(__dirname, '../node_modules/.bin/playwright')
 
 const testRunCodes: { code: number; suiteName: string }[] = []
-const args = process.argv.slice(2)
+const { _: args, bail, part } = minimist(process.argv.slice(2))
 const suiteName = args[0]
 
 // Run all
-if (!suiteName || args[0].startsWith('-')) {
-  const bail = args.includes('--bail')
-  const files = glob.sync(`${path.resolve(__dirname).replace(/\\/g, '/')}/**/*e2e.spec.ts`)
-  console.log(`\n\nExecuting all ${files.length} E2E tests...`)
+if (!suiteName) {
+  let files = glob.sync(`${path.resolve(__dirname).replace(/\\/g, '/')}/**/*e2e.spec.ts`)
+
+  const totalFiles = files.length
+
+  if (part) {
+    if (!part.includes('/')) {
+      throw new Error('part must be in the format of "1/2"')
+    }
+
+    const [partToRun, totalParts] = part.split('/').map((n) => parseInt(n))
+
+    if (partToRun > totalParts) {
+      throw new Error('part cannot be greater than totalParts')
+    }
+
+    const partSize = Math.ceil(files.length / totalParts)
+    const start = (partToRun - 1) * partSize
+    const end = start + partSize
+    files = files.slice(start, end)
+  }
+
+  if (files.length !== totalFiles) {
+    console.log(`\n\nExecuting part ${part}: ${files.length} of ${totalFiles} E2E tests...\n\n`)
+  } else {
+    console.log(`\n\nExecuting all ${files.length} E2E tests...\n\n`)
+  }
+  console.log(`${files.join('\n')}\n`)
+
   files.forEach((file) => {
     clearWebpackCache()
     executePlaywright(file, bail)

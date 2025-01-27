@@ -2,6 +2,7 @@
 
 .section-title {
   position: relative;
+  min-width: 0;
 
   &:after {
     display: block;

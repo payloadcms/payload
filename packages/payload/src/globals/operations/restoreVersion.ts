@@ -6,6 +6,7 @@ import executeAccess from '../../auth/executeAccess'
 import { NotFound } from '../../errors'
 import { afterChange } from '../../fields/hooks/afterChange'
 import { afterRead } from '../../fields/hooks/afterRead'
+import { commitTransaction } from '../../utilities/commitTransaction'
 import { initTransaction } from '../../utilities/initTransaction'
 import { killTransaction } from '../../utilities/killTransaction'
 
@@ -24,7 +25,7 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
     depth,
     globalConfig,
     overrideAccess,
-    req: { payload, t },
+    req: { fallbackLocale, locale, payload, t },
     req,
     showHiddenFields,
   } = args
@@ -57,14 +58,17 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
 
     const rawVersion = versionDocs[0]
 
+    // Patch globalType onto version doc
+    rawVersion.version.globalType = globalConfig.slug
+
     // /////////////////////////////////////
     // fetch previousDoc
     // /////////////////////////////////////
 
     const previousDoc = await payload.findGlobal({
+      slug: globalConfig.slug,
       depth,
       req,
-      slug: globalConfig.slug,
     })
 
     // /////////////////////////////////////
@@ -72,23 +76,23 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
     // /////////////////////////////////////
 
     const global = await payload.db.findGlobal({
-      req,
       slug: globalConfig.slug,
+      req,
     })
 
     let result = rawVersion.version
 
     if (global) {
       result = await payload.db.updateGlobal({
+        slug: globalConfig.slug,
         data: result,
         req,
-        slug: globalConfig.slug,
       })
     } else {
       result = await payload.db.createGlobal({
+        slug: globalConfig.slug,
         data: result,
         req,
-        slug: globalConfig.slug,
       })
     }
 
@@ -97,10 +101,14 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
     // /////////////////////////////////////
 
     result = await afterRead({
+      collection: null,
       context: req.context,
       depth,
       doc: result,
-      entityConfig: globalConfig,
+      draft: undefined,
+      fallbackLocale,
+      global: globalConfig,
+      locale,
       overrideAccess,
       req,
       showHiddenFields,
@@ -115,7 +123,9 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
 
       result =
         (await hook({
+          context: req.context,
           doc: result,
+          global: globalConfig,
           req,
         })) || result
     }, Promise.resolve())
@@ -125,10 +135,11 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
     // /////////////////////////////////////
 
     result = await afterChange({
+      collection: null,
       context: req.context,
       data: result,
       doc: result,
-      entityConfig: globalConfig,
+      global: globalConfig,
       operation: 'update',
       previousDoc,
       req,
@@ -143,13 +154,15 @@ async function restoreVersion<T extends TypeWithVersion<T> = any>(args: Argument
 
       result =
         (await hook({
+          context: req.context,
           doc: result,
+          global: globalConfig,
           previousDoc,
           req,
         })) || result
     }, Promise.resolve())
 
-    if (shouldCommit) await payload.db.commitTransaction(req.transactionID)
+    if (shouldCommit) await commitTransaction(req)
 
     return result
   } catch (error: unknown) {

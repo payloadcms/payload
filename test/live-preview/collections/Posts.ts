@@ -5,6 +5,7 @@ import { CallToAction } from '../blocks/CallToAction'
 import { Content } from '../blocks/Content'
 import { MediaBlock } from '../blocks/MediaBlock'
 import { hero } from '../fields/hero'
+import { tenantsSlug } from '../shared'
 
 export const postsSlug = 'posts'
 
@@ -30,6 +31,14 @@ export const Posts: CollectionConfig = {
       },
     },
     {
+      name: 'tenant',
+      type: 'relationship',
+      relationTo: tenantsSlug,
+      admin: {
+        position: 'sidebar',
+      },
+    },
+    {
       name: 'title',
       type: 'text',
       required: true,
@@ -47,7 +56,6 @@ export const Posts: CollectionConfig = {
             {
               name: 'layout',
               type: 'blocks',
-              required: true,
               blocks: [CallToAction, Content, MediaBlock, Archive],
             },
             {

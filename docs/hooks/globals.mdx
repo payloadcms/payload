@@ -79,7 +79,7 @@ import { GlobalAfterChangeHook } from 'payload/types'
 
 const afterChangeHook: GlobalAfterChangeHook = async ({
   doc, // full document data
-  previousDoc, // document data before updating the collection
+  previousDoc, // document data before updating the global
   req, // full express request
 }) => {
   return data

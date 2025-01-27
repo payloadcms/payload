@@ -7,7 +7,7 @@ import { Gutter } from '../components/Gutter'
 import RichText from '../components/RichText'
 import type { MainMenu, Page as PageType } from '../payload-types'
 
-import classes from './[slug].module.scss';
+import classes from './[slug].module.scss'
 
 const Page: React.FC<
   PageType & {
@@ -67,7 +67,7 @@ export const getStaticProps: GetStaticProps = async (context: GetStaticPropsCont
   )
 
   // when previewing, send the payload token to bypass draft access control
-  const pageReq = await fetch(`${process.env.NEXT_PUBLIC_CMS_URL}/api/pages${searchParams}`, {
+  const pageReq = await fetch(`${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/pages${searchParams}`, {
     headers: {
       ...(preview
         ? {
@@ -110,7 +110,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   let paths: Paths = []
 
   const pagesReq = await fetch(
-    `${process.env.NEXT_PUBLIC_CMS_URL}/api/pages?where[_status][equals]=published&depth=0&limit=300`,
+    `${process.env.NEXT_PUBLIC_PAYLOAD_URL}/api/pages?where[_status][equals]=published&depth=0&limit=300`,
   )
 
   const pagesData = await pagesReq.json()

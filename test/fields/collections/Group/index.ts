@@ -1,8 +1,9 @@
 import type { CollectionConfig } from '../../../../packages/payload/src/collections/config/types'
 
+import { groupFieldsSlug } from '../../slugs'
+
 export const groupDefaultValue = 'set from parent'
 export const groupDefaultChild = 'child takes priority'
-export const groupFieldsSlug = 'group-fields'
 
 const GroupFields: CollectionConfig = {
   slug: groupFieldsSlug,
@@ -54,6 +55,24 @@ const GroupFields: CollectionConfig = {
               ],
             },
           ],
+        },
+      ],
+    },
+    {
+      name: 'arrayOfGroups',
+      type: 'array',
+      defaultValue: [
+        {
+          groupItem: {
+            text: 'Hello world',
+          },
+        },
+      ],
+      fields: [
+        {
+          name: 'groupItem',
+          type: 'group',
+          fields: [{ name: 'text', type: 'text' }],
         },
       ],
     },
@@ -110,7 +129,6 @@ const GroupFields: CollectionConfig = {
         },
       ],
     },
-
     {
       type: 'tabs',
       tabs: [
@@ -165,21 +183,131 @@ const GroupFields: CollectionConfig = {
         },
       ],
     },
-  ],
-}
-
-export const groupDoc = {
-  group: {
-    text: 'some text within a group',
-    subGroup: {
-      textWithinGroup: 'please',
-      arrayWithinGroup: [
+    {
+      name: 'camelCaseGroup',
+      type: 'group',
+      fields: [
         {
-          textWithinArray: 'text in a group and array',
+          name: 'array',
+          type: 'array',
+          fields: [
+            {
+              type: 'text',
+              name: 'text',
+              localized: true,
+            },
+            {
+              type: 'array',
+              name: 'array',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'text',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: 'nesGroup',
+          type: 'group',
+          fields: [
+            {
+              type: 'array',
+              name: 'arr',
+              fields: [
+                {
+                  type: 'text',
+                  name: 'text',
+                  localized: true,
+                },
+              ],
+            },
+          ],
         },
       ],
     },
-  },
+    {
+      name: 'localizedGroupArr',
+      type: 'group',
+      localized: true,
+      fields: [
+        {
+          name: 'array',
+          type: 'array',
+          fields: [
+            {
+              type: 'text',
+              name: 'text',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'localizedGroupSelect',
+      type: 'group',
+      localized: true,
+      fields: [
+        {
+          type: 'select',
+          hasMany: true,
+          options: ['one', 'two'],
+          name: 'select',
+        },
+      ],
+    },
+    {
+      name: 'localizedGroupRel',
+      type: 'group',
+      localized: true,
+      fields: [
+        {
+          type: 'relationship',
+          relationTo: 'text-fields',
+          name: 'rel',
+        },
+      ],
+    },
+    {
+      name: 'localizedGroupManyRel',
+      type: 'group',
+      localized: true,
+      fields: [
+        {
+          type: 'relationship',
+          relationTo: 'text-fields',
+          name: 'email',
+          hasMany: true,
+        },
+      ],
+    },
+    {
+      name: 'localizedGroupPolyRel',
+      type: 'group',
+      localized: true,
+      fields: [
+        {
+          type: 'relationship',
+          relationTo: ['text-fields'],
+          name: 'email',
+        },
+      ],
+    },
+    {
+      name: 'localizedGroupPolyHasManyRel',
+      type: 'group',
+      localized: true,
+      fields: [
+        {
+          type: 'relationship',
+          relationTo: ['text-fields'],
+          name: 'email',
+          hasMany: true,
+        },
+      ],
+    },
+  ],
 }
 
 export default GroupFields

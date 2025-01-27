@@ -143,10 +143,7 @@ export const home: Partial<Page> = {
           ],
           enableLink: false,
           link: {
-            reference: {
-              value: '',
-              relationTo: 'pages',
-            },
+            reference: null,
             url: '',
             label: '',
           },
@@ -198,10 +195,7 @@ export const home: Partial<Page> = {
           ],
           enableLink: false,
           link: {
-            reference: {
-              value: '',
-              relationTo: 'pages',
-            },
+            reference: null,
             url: '',
             label: '',
           },
@@ -228,10 +222,7 @@ export const home: Partial<Page> = {
           ],
           enableLink: false,
           link: {
-            reference: {
-              value: '',
-              relationTo: 'pages',
-            },
+            reference: null,
             url: '',
             label: '',
           },
@@ -270,10 +261,7 @@ export const home: Partial<Page> = {
           ],
           enableLink: false,
           link: {
-            reference: {
-              value: '',
-              relationTo: 'pages',
-            },
+            reference: null,
             url: '',
             label: '',
           },
@@ -312,10 +300,7 @@ export const home: Partial<Page> = {
           ],
           enableLink: false,
           link: {
-            reference: {
-              value: '',
-              relationTo: 'pages',
-            },
+            reference: null,
             url: '',
             label: '',
           },
@@ -341,10 +326,7 @@ export const home: Partial<Page> = {
           ],
           enableLink: false,
           link: {
-            reference: {
-              value: '',
-              relationTo: 'pages',
-            },
+            reference: null,
             url: '',
             label: '',
           },
@@ -370,10 +352,7 @@ export const home: Partial<Page> = {
           ],
           enableLink: false,
           link: {
-            reference: {
-              value: '',
-              relationTo: 'pages',
-            },
+            reference: null,
             url: '',
             label: '',
           },
@@ -412,10 +391,7 @@ export const home: Partial<Page> = {
           ],
           enableLink: false,
           link: {
-            reference: {
-              value: '',
-              relationTo: 'pages',
-            },
+            reference: null,
             url: '',
             label: '',
           },
@@ -441,10 +417,7 @@ export const home: Partial<Page> = {
           ],
           enableLink: false,
           link: {
-            reference: {
-              value: '',
-              relationTo: 'pages',
-            },
+            reference: null,
             url: '',
             label: '',
           },

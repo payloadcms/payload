@@ -1,4 +1,5 @@
 import qs from 'qs'
+import QueryString from 'qs'
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
@@ -12,13 +13,15 @@ import type { ContextType, DocumentPermissions, Props, Version } from './types'
 
 import { useAuth } from '../Auth'
 import { useConfig } from '../Config'
+import { useLocale } from '../Locale'
 import { usePreferences } from '../Preferences'
+import { UploadEditsProvider, useUploadEdits } from '../UploadEdits'
 
 const Context = createContext({} as ContextType)
 
 export const useDocumentInfo = (): ContextType => useContext(Context)
 
-export const DocumentInfoProvider: React.FC<Props> = ({
+const DocumentInfo: React.FC<Props> = ({
   id: idFromProps,
   children,
   collection,
@@ -35,10 +38,11 @@ export const DocumentInfoProvider: React.FC<Props> = ({
   const { getPreference, setPreference } = usePreferences()
   const { i18n } = useTranslation()
   const { permissions } = useAuth()
+  const { code } = useLocale()
+  const { uploadEdits } = useUploadEdits()
   const [publishedDoc, setPublishedDoc] = useState<TypeWithID & TypeWithTimestamps>(null)
   const [versions, setVersions] = useState<PaginatedDocs<Version>>(null)
   const [unpublishedVersions, setUnpublishedVersions] = useState<PaginatedDocs<Version>>(null)
-  const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(null)
 
   const baseURL = `${serverURL}${api}`
   let slug: string
@@ -60,6 +64,10 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     }
   }
 
+  const [docPermissions, setDocPermissions] = useState<DocumentPermissions>(
+    permissions[pluralType][slug],
+  )
+
   const getVersions = useCallback(async () => {
     let versionFetchURL
     let publishedFetchURL
@@ -76,8 +84,9 @@ export const DocumentInfoProvider: React.FC<Props> = ({
       },
     }
 
-    const publishedVersionParams: { depth: number; where: Where } = {
+    const publishedVersionParams: { depth: number; locale: string; where: Where } = {
       depth: 0,
+      locale: code || undefined,
       where: {
         and: [
           {
@@ -192,10 +201,13 @@ export const DocumentInfoProvider: React.FC<Props> = ({
       setVersions(versionJSON)
       setUnpublishedVersions(unpublishedVersionJSON)
     }
-  }, [i18n, global, collection, id, baseURL])
+  }, [i18n, global, collection, id, baseURL, code])
 
   const getDocPermissions = React.useCallback(async () => {
     let docAccessURL: string
+    const params = {
+      locale: code || undefined,
+    }
     if (pluralType === 'globals') {
       docAccessURL = `/globals/${slug}/access`
     } else if (pluralType === 'collections' && id) {
@@ -203,20 +215,20 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     }
 
     if (docAccessURL) {
-      const res = await fetch(`${serverURL}${api}${docAccessURL}`, {
+      const res = await fetch(`${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`, {
         credentials: 'include',
         headers: {
           'Accept-Language': i18n.language,
         },
       })
-      const json = await res.json()
-      setDocPermissions(json)
-    } else {
-      // fallback to permissions from the entity type
-      // (i.e. create has no id)
-      setDocPermissions(permissions[pluralType][slug])
+      try {
+        const json = await res.json()
+        setDocPermissions(json)
+      } catch (e) {
+        console.error('Unable to fetch document permissions', e)
+      }
     }
-  }, [serverURL, api, pluralType, slug, id, permissions, i18n.language])
+  }, [serverURL, api, pluralType, slug, id, i18n.language, code])
 
   const getDocPreferences = useCallback(async () => {
     return getPreference<DocumentPreferences>(preferencesKey)
@@ -227,31 +239,51 @@ export const DocumentInfoProvider: React.FC<Props> = ({
       const allPreferences = await getDocPreferences()
 
       if (preferencesKey) {
-        setPreference(preferencesKey, {
-          ...allPreferences,
-          fields: {
-            ...(allPreferences?.fields || {}),
-            [path]: {
-              ...allPreferences?.fields?.[path],
-              ...fieldPreferences,
+        try {
+          await setPreference(preferencesKey, {
+            ...allPreferences,
+            fields: {
+              ...(allPreferences?.fields || {}),
+              [path]: {
+                ...allPreferences?.fields?.[path],
+                ...fieldPreferences,
+              },
             },
-          },
-        })
+          })
+        } catch (e) {
+          console.error(e)
+        }
       }
     },
     [setPreference, preferencesKey, getDocPreferences],
   )
 
   useEffect(() => {
-    getVersions()
+    void getVersions()
   }, [getVersions])
 
   useEffect(() => {
-    getDocPermissions()
+    void getDocPermissions()
   }, [getDocPermissions])
+
+  const action: string = React.useMemo(() => {
+    const docURL = `${baseURL}${pluralType === 'globals' ? `/globals` : ''}/${slug}${id ? `/${id}` : ''}`
+    const params = {
+      depth: 0,
+      'fallback-locale': 'null',
+      locale: code,
+      uploadEdits: uploadEdits || undefined,
+    }
+
+    return `${docURL}${QueryString.stringify(params, {
+      addQueryPrefix: true,
+    })}`
+  }, [baseURL, code, pluralType, id, slug, uploadEdits])
 
   const value: ContextType = {
     id,
+    slug,
+    action,
     collection,
     docPermissions,
     getDocPermissions,
@@ -261,10 +293,17 @@ export const DocumentInfoProvider: React.FC<Props> = ({
     preferencesKey,
     publishedDoc,
     setDocFieldPreferences,
-    slug,
     unpublishedVersions,
     versions,
   }
 
   return <Context.Provider value={value}>{children}</Context.Provider>
+}
+
+export const DocumentInfoProvider: React.FC<Props> = (props) => {
+  return (
+    <UploadEditsProvider>
+      <DocumentInfo {...props} />
+    </UploadEditsProvider>
+  )
 }

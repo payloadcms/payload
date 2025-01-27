@@ -1,4 +1,5 @@
 import type { SQL } from 'drizzle-orm'
+import type { PgTableWithColumns } from 'drizzle-orm/pg-core'
 import type { Field, Where } from 'payload/types'
 
 import { asc, desc } from 'drizzle-orm'
@@ -12,7 +13,7 @@ export type BuildQueryJoins = Record<string, SQL>
 
 export type BuildQueryJoinAliases = {
   condition: SQL
-  table: GenericTable
+  table: GenericTable | PgTableWithColumns<any>
 }[]
 
 type BuildQueryArgs = {
@@ -64,20 +65,26 @@ const buildQuery = async function buildQuery({
       orderBy.order = asc
     }
 
-    const { columnName: sortTableColumnName, table: sortTable } = getTableColumnFromPath({
-      adapter,
-      collectionPath: sortPath,
-      fields,
-      joinAliases,
-      joins,
-      locale,
-      pathSegments: sortPath.replace(/__/g, '.').split('.'),
-      selectFields,
-      tableName,
-    })
+    try {
+      const { columnName: sortTableColumnName, table: sortTable } = getTableColumnFromPath({
+        adapter,
+        collectionPath: sortPath,
+        fields,
+        joinAliases,
+        joins,
+        locale,
+        pathSegments: sortPath.replace(/__/g, '.').split('.'),
+        selectFields,
+        tableName,
+        value: sortPath,
+      })
+      orderBy.column = sortTable?.[sortTableColumnName]
+    } catch (err) {
+      // continue
+    }
+  }
 
-    orderBy.column = sortTable[sortTableColumnName]
-  } else {
+  if (!orderBy?.column) {
     orderBy.order = desc
     const createdAt = adapter.tables[tableName]?.createdAt
 

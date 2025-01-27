@@ -124,12 +124,12 @@ The built-in `relationship` element is a powerful way to reference other Documen
 Similar to the `relationship` element, the `upload` element is a user-friendly way to reference [Upload-enabled collections](/docs/upload/overview) with a UI specifically designed for media / image-based uploads.
 
 <Banner type="success">
-  <strong>Tip:</strong>
-  <br />
+  **Tip:**
+
   Collections are automatically allowed to be selected within the Rich Text relationship and upload
   elements by default. If you want to disable a collection from being able to be referenced in Rich
-  Text fields, set the collection admin options of <strong>enableRichTextLink</strong> and{' '}
-  <strong>enableRichTextRelationship</strong> to false.
+  Text fields, set the collection admin options of **enableRichTextLink** and
+  **enableRichTextRelationship** to false.
 </Banner>
 
 Relationship and Upload elements are populated dynamically into your Rich Text field' content. Within the REST and Local APIs, any present RichText `relationship` or `upload` elements will respect the `depth` option that you pass, and will be populated accordingly. In GraphQL, each `richText` field accepts an argument of `depth` for you to utilize.
@@ -168,7 +168,9 @@ Specifying custom `Type`s let you extend your custom elements by adding addition
 `collections/ExampleCollection.ts`
 
 ```ts
-import { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload/types'
+
+import { slateEditor } from '@payloadcms/richtext-slate'
 
 export const ExampleCollection: CollectionConfig = {
   slug: 'example-collection',
@@ -182,57 +184,59 @@ export const ExampleCollection: CollectionConfig = {
         },
       ],
       required: true,
-      admin: {
-        elements: [
-          'h2',
-          'h3',
-          'h4',
-          'link',
-          'blockquote',
-          {
-            name: 'cta',
-            Button: CustomCallToActionButton,
-            Element: CustomCallToActionElement,
-            plugins: [
-              // any plugins that are required by this element go here
-            ],
-          },
-        ],
-        leaves: [
-          'bold',
-          'italic',
-          {
-            name: 'highlight',
-            Button: CustomHighlightButton,
-            Leaf: CustomHighlightLeaf,
-            plugins: [
-              // any plugins that are required by this leaf go here
-            ],
-          },
-        ],
-        link: {
-          // Inject your own fields into the Link element
-          fields: [
+      editor: slateEditor({
+        admin: {
+          elements: [
+            'h2',
+            'h3',
+            'h4',
+            'link',
+            'blockquote',
             {
-              name: 'rel',
-              label: 'Rel Attribute',
-              type: 'select',
-              hasMany: true,
-              options: ['noopener', 'noreferrer', 'nofollow'],
-            },
-          ],
-        },
-        upload: {
-          collections: {
-            media: {
-              fields: [
-                // any fields that you would like to save
-                // on an upload element in the `media` collection
+              name: 'cta',
+              Button: CustomCallToActionButton,
+              Element: CustomCallToActionElement,
+              plugins: [
+                // any plugins that are required by this element go here
               ],
             },
+          ],
+          leaves: [
+            'bold',
+            'italic',
+            {
+              name: 'highlight',
+              Button: CustomHighlightButton,
+              Leaf: CustomHighlightLeaf,
+              plugins: [
+                // any plugins that are required by this leaf go here
+              ],
+            },
+          ],
+          link: {
+            // Inject your own fields into the Link element
+            fields: [
+              {
+                name: 'rel',
+                label: 'Rel Attribute',
+                type: 'select',
+                hasMany: true,
+                options: ['noopener', 'noreferrer', 'nofollow'],
+              },
+            ],
+          },
+          upload: {
+            collections: {
+              media: {
+                fields: [
+                  // any fields that you would like to save
+                  // on an upload element in the `media` collection
+                ],
+              },
+            },
           },
         },
-      },
+      }),
     },
   ],
 }
@@ -264,6 +268,10 @@ const serialize = (children) =>
 
       if (node.italic) {
         text = <em key={i}>{text}</em>;
+      }
+
+      if (node.text === '') {
+        text = ;
       }
 
       // Handle other leaf types here...
@@ -303,8 +311,8 @@ const serialize = (children) =>
 ```
 
 <Banner>
-  <strong>Note:</strong>
-  <br />
+  **Note:**
+
   The above example is for how to render to JSX, although for plain HTML the pattern is similar.
   Just remove the JSX and return HTML strings instead!
 </Banner>

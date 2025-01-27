@@ -1,7 +1,9 @@
 import type forgotPassword from '../../auth/operations/forgotPassword'
 import type login from '../../auth/operations/login'
 import type refresh from '../../auth/operations/refresh'
-import type { AfterOperationHook, TypeWithID } from '../config/types'
+import type { PayloadRequest } from '../../express/types'
+import type { AfterOperationHook, SanitizedCollectionConfig, TypeWithID } from '../config/types'
+import type countOperation from './count'
 import type create from './create'
 import type deleteOperation from './delete'
 import type deleteByID from './deleteByID'
@@ -11,6 +13,7 @@ import type update from './update'
 import type updateByID from './updateByID'
 
 export type AfterOperationMap<T extends TypeWithID> = {
+  count: typeof countOperation
   create: typeof create // todo: pass correct generic
   delete: typeof deleteOperation // todo: pass correct generic
   deleteByID: typeof deleteByID // todo: pass correct generic
@@ -22,7 +25,16 @@ export type AfterOperationMap<T extends TypeWithID> = {
   update: typeof update // todo: pass correct generic
   updateByID: typeof updateByID // todo: pass correct generic
 }
-export type AfterOperationArg<T extends TypeWithID> =
+export type AfterOperationArg<T extends TypeWithID> = {
+  /** The collection which this hook is being run on */
+  collection: SanitizedCollectionConfig
+  req: PayloadRequest
+} & (
+  | {
+      args: Parameters<AfterOperationMap<T>['count']>[0]
+      operation: 'count'
+      result: Awaited<ReturnType<AfterOperationMap<T>['count']>>
+    }
   | {
       args: Parameters<AfterOperationMap<T>['create']>[0]
       operation: 'create'
@@ -73,6 +85,7 @@ export type AfterOperationArg<T extends TypeWithID> =
       operation: 'updateByID'
       result: Awaited<ReturnType<AfterOperationMap<T>['updateByID']>>
     }
+)
 
 // export type AfterOperationHook = typeof buildAfterOperation;
 
@@ -80,9 +93,9 @@ export const buildAfterOperation = async <
   T extends TypeWithID = any,
   O extends keyof AfterOperationMap<T> = keyof AfterOperationMap<T>,
 >(
-  operationArgs: AfterOperationArg<T> & { operation: O },
+  operationArgs: Omit<AfterOperationArg<T>, 'req'> & { operation: O },
 ): Promise<Awaited<ReturnType<AfterOperationMap<T>[O]>>> => {
-  const { args, operation, result } = operationArgs
+  const { args, collection, operation, result } = operationArgs
 
   let newResult = result
 
@@ -92,7 +105,9 @@ export const buildAfterOperation = async <
 
       const hookResult = await hook({
         args,
+        collection,
         operation,
+        req: args.req,
         result: newResult,
       } as AfterOperationArg<T>)
 

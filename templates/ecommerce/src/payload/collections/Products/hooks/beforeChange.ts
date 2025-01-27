@@ -1,4 +1,4 @@
-import type { BeforeChangeHook } from 'payload/dist/globals/config/types'
+import type { BeforeChangeHook } from 'payload/dist/collections/config/types'
 import Stripe from 'stripe'
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY
@@ -8,7 +8,7 @@ const logs = false
 
 export const beforeProductChange: BeforeChangeHook = async ({ req, data }) => {
   const { payload } = req
-  const newDoc = {
+  const newDoc: Record<string, unknown> = {
     ...data,
     skipSync: false, // Set back to 'false' so that all changes continue to sync to Stripe
   }

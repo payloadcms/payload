@@ -1,0 +1,42 @@
+name: stale
+
+on:
+  workflow_dispatch:
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/stale@v9
+        id: stale
+        with:
+          debug-only: true
+          days-before-stale: 90
+          days-before-close: 7
+          ascending: true
+          operations-per-run: 300
+
+          # Ignore all assigned
+          exempt-all-assignees: false
+
+          # Issues
+          stale-issue-label: 'stale'
+          exempt-issue-labels: 'blocked,must,should,keep,created-by: Payload team,created-by: Contributor'
+          stale-issue-message: >
+            This issue has been marked as stale due to lack of activity. To keep the ticket open, please indicate that it is still relevant in a comment below.
+          close-issue-message: >
+            This issue was automatically closed due to lack of activity.
+
+          # Pull Requests
+          stale-pr-label: 'stale'
+          exempt-pr-labels: 'blocked,must,should,keep,created-by: Payload team,created-by: Contributor'
+          stale-pr-message: >
+            This PR is stale due to lack of activity. To keep the PR open, please indicate that it is still relevant in a comment below.
+          close-pr-message: >
+            This pull request was automatically closed due to lack of activity.
+
+      - name: Print outputs
+        run: echo ${{ format('{0},{1}', toJSON(steps.stale.outputs.staled-issues-prs), toJSON(steps.stale.outputs.closed-issues-prs)) }}

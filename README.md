@@ -1,30 +1,24 @@
-<a href="https://payloadcms.com">
-  <img width="100%" src="https://github.com/payloadcms/payload/blob/main/packages/payload/src/admin/assets/images/github-banner-alt.jpg?raw=true" alt="Payload headless CMS Admin panel built with React" />
-</a>
+<a href="https://payloadcms.com"><img width="100%" src="https://github.com/payloadcms/payload/blob/main/packages/payload/src/admin/assets/images/github-banner-alt.jpg?raw=true" alt="Payload headless CMS Admin panel built with React" /></a>
 <br />
 <br />
 <p align="left">
-  <a href="https://github.com/payloadcms/payload/actions">
-    <img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/payloadcms/payload/main.yml?style=flat-square">
-  </a>
+  <a href="https://github.com/payloadcms/payload/actions"><img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/payloadcms/payload/main.yml?style=flat-square"></a>
   &nbsp;
-  <a href="https://discord.gg/payload">
-    <img alt="Discord" src="https://img.shields.io/discord/967097582721572934?label=Discord&color=7289da&style=flat-square" />
-  </a>
+  <a href="https://discord.gg/payload"><img alt="Discord" src="https://img.shields.io/discord/967097582721572934?label=Discord&color=7289da&style=flat-square" /></a>
   &nbsp;
-  <a href="https://www.npmjs.com/package/payload">
-    <img alt="npm" src="https://img.shields.io/npm/v/payload?style=flat-square" />
-  </a>
+  <a href="https://www.npmjs.com/package/payload"><img alt="npm" src="https://img.shields.io/npm/v/payload?style=flat-square" /></a>
   &nbsp;
-  <a href="https://twitter.com/payloadcms">
-    <img src="https://img.shields.io/badge/follow-payloadcms-1DA1F2?logo=twitter&style=flat-square" alt="Payload Twitter" />
-  </a>
+  <a href="https://twitter.com/payloadcms"><img src="https://img.shields.io/badge/follow-payloadcms-1DA1F2?logo=twitter&style=flat-square" alt="Payload Twitter" /></a>
 </p>
 <hr/>
 <h4>
 <a target="_blank" href="https://payloadcms.com/docs/getting-started/what-is-payload" rel="dofollow"><strong>Explore the Docs</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://payloadcms.com/community-help" rel="dofollow"><strong>Community Help</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://demo.payloadcms.com/" rel="dofollow"><strong>Try Live Demo</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://github.com/payloadcms/payload/discussions/1539" rel="dofollow"><strong>Roadmap</strong></a>&nbsp;·&nbsp;<a target="_blank" href="https://www.g2.com/products/payload-cms/reviews#reviews" rel="dofollow"><strong>View G2 Reviews</strong></a>
 </h4>
 <hr/>
+
+> [!IMPORTANT]
+> 🎉 <strong>Payload 3.0 beta released!</strong> You can now deploy Payload fully in any Next.js app folder. Read more in the <a target="_blank" href="https://payloadcms.com/blog/30-beta-install-payload-into-any-nextjs-app-with-one-line" rel="dofollow"><strong>announcement post</strong></a>.
+
 <h3>Benefits over a regular CMS</h3>
 <ul>
   <li>Don’t hit some third-party SaaS API, hit your own API</li>
@@ -47,7 +41,7 @@ Create a cloud account, connect your GitHub, and [deploy in minutes](https://pay
 Before beginning to work with Payload, make sure you have all of the [required software](https://payloadcms.com/docs/getting-started/installation).
 
 ```text
-npx create-payload-app
+npx create-payload-app@latest
 ```
 
 Alternatively, it only takes about five minutes to [create an app from scratch](https://payloadcms.com/docs/getting-started/installation#from-scratch).
@@ -95,6 +89,8 @@ We're constantly adding more templates to our [Templates Directory](https://gith
 
 Check out the [Payload website](https://payloadcms.com/docs/getting-started/what-is-payload) to find in-depth documentation for everything that Payload offers.
 
+Migrating from v1 to v2? Check out the [2.0 Release Notes](https://github.com/payloadcms/payload/releases/tag/v2.0.0) on how to do it.
+
 ## 🙋 Contributing
 
 If you want to add contributions to this repository, please follow the instructions in [contributing.md](./CONTRIBUTING.md).
@@ -102,6 +98,10 @@ If you want to add contributions to this repository, please follow the instructi
 ## 📚 Examples
 
 The [Examples Directory](./examples) is a great resource for learning how to setup Payload in a variety of different ways, but you can also find great examples in our blog and throughout our social media.
+
+If you'd like to run the examples, you can either copy them to a folder outside this repo or run them directly by (1) navigating to the example's subfolder (`cd examples/your-example-folder`) and (2) using the `--ignore-workspace` flag to bypass workspace restrictions (e.g., `pnpm --ignore-workspace install` or `pnpm --ignore-workspace dev`).
+
+You can see more examples at:
 
 - [Examples Directory](./examples)
 - [Payload Blog](https://payloadcms.com/blog)

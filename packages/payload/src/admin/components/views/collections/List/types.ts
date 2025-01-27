@@ -1,5 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../../../../collections/config/types'
 import type { PaginatedDocs } from '../../../../../database/types'
+import type { FieldAffectingData } from '../../../../../exports/types'
 import type { Where } from '../../../../../types'
 import type { Props as ListControlsProps } from '../../../elements/ListControls/types'
 import type { Props as PaginatorProps } from '../../../elements/Paginator/types'
@@ -12,6 +13,7 @@ export type Props = {
   handleDelete?: () => void
   handlePageChange?: PaginatorProps['onChange']
   handlePerPageChange?: PerPageProps['handleChange']
+  handleSearchChange?: ListControlsProps['handleSearchChange']
   handleSortChange?: ListControlsProps['handleSortChange']
   handleWhereChange?: ListControlsProps['handleWhereChange']
   hasCreatePermission: boolean
@@ -19,10 +21,16 @@ export type Props = {
   modifySearchParams?: boolean
   newDocumentURL: string
   onCreateNewClick?: () => void
-  resetParams: (overrides?: { page?: number; sort?: string; where?: Where }) => void
+  resetParams: (overrides?: {
+    page?: number
+    search?: string
+    sort?: string
+    where?: Where
+  }) => void
   setLimit: (limit: number) => void
   setListControls: (controls: unknown) => void
   setSort: (sort: string) => void
+  titleField?: FieldAffectingData
   toggleColumn: (column: string) => void
 }
 

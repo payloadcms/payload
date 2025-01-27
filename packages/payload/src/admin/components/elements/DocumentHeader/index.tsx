@@ -27,16 +27,14 @@ export const DocumentHeader: React.FC<{
       {customHeader && customHeader}
       {!customHeader && (
         <Fragment>
-          {collection && (
-            <RenderTitle
-              className={`${baseClass}__title`}
-              collection={collection}
-              data={data}
-              fallback={`[${t('untitled')}]`}
-              useAsTitle={collection?.admin?.useAsTitle}
-            />
-          )}
-          {global && <h1 className={`${baseClass}__title`}>{global?.slug}</h1>}
+          <RenderTitle
+            className={`${baseClass}__title`}
+            collection={collection}
+            data={data}
+            fallback={`[${t('untitled')}]`}
+            global={global}
+            useAsTitle={collection?.admin?.useAsTitle}
+          />
           <DocumentTabs
             apiURL={apiURL}
             collection={collection}

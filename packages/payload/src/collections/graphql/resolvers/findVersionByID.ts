@@ -5,12 +5,12 @@ import type { PayloadRequest } from '../../../express/types'
 import type { TypeWithVersion } from '../../../versions/types'
 import type { Collection, TypeWithID } from '../../config/types'
 
+import isolateObjectProperty from '../../../utilities/isolateObjectProperty'
 import findVersionByID from '../../operations/findVersionByID'
 
 export type Resolver<T extends TypeWithID = any> = (
   _: unknown,
   args: {
-    draft: boolean
     fallbackLocale?: string
     id: number | string
     locale?: string
@@ -23,15 +23,21 @@ export type Resolver<T extends TypeWithID = any> = (
 
 export default function findVersionByIDResolver(collection: Collection): Resolver {
   return async function resolver(_, args, context) {
-    if (args.locale) context.req.locale = args.locale
-    if (args.fallbackLocale) context.req.fallbackLocale = args.fallbackLocale
+    let { req } = context
+    const locale = req.locale
+    const fallbackLocale = req.fallbackLocale
+    req = isolateObjectProperty(req, 'locale')
+    req = isolateObjectProperty(req, 'fallbackLocale')
+    req.locale = args.locale || locale
+    req.fallbackLocale = args.fallbackLocale || fallbackLocale
+
+    context.req = req
 
     const options = {
       id: args.id,
       collection,
       depth: 0,
-      draft: args.draft,
-      req: context.req,
+      req: isolateObjectProperty<PayloadRequest>(req, 'transactionID'),
     }
 
     const result = await findVersionByID(options)
