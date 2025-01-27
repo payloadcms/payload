@@ -47,7 +47,7 @@ export const CreateFirstUserClient: React.FC<{
   const collectionConfig = getEntityConfig({ collectionSlug: userSlug })
 
   const onChange: FormProps['onChange'][0] = React.useCallback(
-    async ({ formState: prevFormState }) => {
+    async ({ formState: prevFormState, submitted }) => {
       const controller = handleAbortRef(abortOnChangeRef)
 
       const response = await getFormState({
@@ -58,6 +58,7 @@ export const CreateFirstUserClient: React.FC<{
         operation: 'create',
         schemaPath: userSlug,
         signal: controller.signal,
+        skipValidation: !submitted,
       })
 
       abortOnChangeRef.current = null
