@@ -1,5 +1,5 @@
 'use client'
-import type { GroupFieldClient } from 'payload'
+import type { DiffComponentProps, GroupFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 
@@ -7,8 +7,6 @@ import './index.scss'
 
 import { useTranslation } from '@payloadcms/ui'
 import React from 'react'
-
-import type { DiffComponentProps } from '../../types.js'
 
 import { useSelectedLocales } from '../../../Default/SelectedLocalesContext.js'
 import { DiffCollapser } from '../../DiffCollapser/index.js'

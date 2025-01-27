@@ -19,6 +19,7 @@ export interface Config {
     'localized-posts': LocalizedPost;
     'version-posts': VersionPost;
     'custom-ids': CustomId;
+    richText: RichText;
     users: User;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -35,6 +36,7 @@ export interface Config {
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
     'version-posts': VersionPostsSelect<false> | VersionPostsSelect<true>;
     'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
+    richText: RichTextSelect<false> | RichTextSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -210,6 +212,30 @@ export interface CustomId {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "richText".
+ */
+export interface RichText {
+  id: string;
+  richtext?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -355,6 +381,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'custom-ids';
         value: string | CustomId;
+      } | null)
+    | ({
+        relationTo: 'richText';
+        value: string | RichText;
       } | null)
     | ({
         relationTo: 'users';
@@ -519,6 +549,15 @@ export interface VersionPostsSelect<T extends boolean = true> {
 export interface CustomIdsSelect<T extends boolean = true> {
   id?: T;
   title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "richText_select".
+ */
+export interface RichTextSelect<T extends boolean = true> {
+  richtext?: T;
   updatedAt?: T;
   createdAt?: T;
 }

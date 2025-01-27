@@ -1,8 +1,12 @@
-import type { ArrayFieldClient, BlocksFieldClient, ClientField } from 'payload'
+import type {
+  ArrayFieldClient,
+  BaseVersionField,
+  BlocksFieldClient,
+  ClientField,
+  VersionField,
+} from 'payload'
 
 import { getUniqueListBy } from 'payload/shared'
-
-import type { BaseVersionField, VersionField } from '../../buildVersionState.js'
 
 /**
  * Get the fields for a row in an iterable field for comparison.

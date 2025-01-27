@@ -1,4 +1,5 @@
 import type {
+  DiffComponentProps,
   Document,
   EditViewComponent,
   OptionObject,
@@ -13,8 +14,6 @@ import { getClientSchemaMap } from '@payloadcms/ui/utilities/getClientSchemaMap'
 import { getSchemaMap } from '@payloadcms/ui/utilities/getSchemaMap'
 import { notFound } from 'next/navigation.js'
 import React from 'react'
-
-import type { DiffComponentProps } from './RenderFieldsToDiff/types.js'
 
 import { getLatestVersion } from '../Versions/getLatestVersion.js'
 import { buildVersionState } from './buildVersionState.js'

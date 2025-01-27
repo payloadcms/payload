@@ -1,13 +1,14 @@
 'use client'
 
+import type { DiffComponentProps } from 'payload'
+
 import { getTranslation } from '@payloadcms/translations'
 import { useTranslation } from '@payloadcms/ui'
 import { fieldIsArrayType, fieldIsBlockType } from 'payload/shared'
-import React from 'react'
 
 import './index.scss'
 
-import type { DiffComponentProps } from '../../types.js'
+import React from 'react'
 
 import { useSelectedLocales } from '../../../Default/SelectedLocalesContext.js'
 import { DiffCollapser } from '../../DiffCollapser/index.js'

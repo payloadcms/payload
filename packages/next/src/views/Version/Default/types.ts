@@ -1,6 +1,4 @@
-import type { Document, OptionObject } from 'payload'
-
-import type { VersionState } from '../buildVersionState.js'
+import type { Document, OptionObject, VersionState } from 'payload'
 
 export type CompareOption = {
   label: React.ReactNode | string

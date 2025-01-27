@@ -1,7 +1,10 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
+  BaseVersionField,
   ClientField,
   ClientFieldSchemaMap,
+  DiffComponentProps,
+  DiffComponentServerProps,
   Field,
   FieldTypes,
   PayloadComponent,
@@ -11,38 +14,16 @@ import type {
   TabAsField,
   TabAsFieldClient,
   TypedLocale,
+  VersionField,
+  VersionState,
 } from 'payload'
 import type { DiffMethod } from 'react-diff-viewer-continued'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { fieldIsID, getUniqueListBy, tabHasName } from 'payload/shared'
 
-import type { DiffComponentProps, DiffComponentServerProps } from './RenderFieldsToDiff/types.js'
-
 import { diffMethods } from './RenderFieldsToDiff/fields/diffMethods.js'
 import { diffComponents } from './RenderFieldsToDiff/fields/index.js'
-
-export type VersionTab = {
-  fields: VersionField[]
-  name?: string
-} & Pick<Tab, 'label'>
-
-export type BaseVersionField = {
-  CustomComponent?: React.ReactNode
-  fields: VersionField[]
-  rows?: VersionField[][]
-  tabs?: VersionTab[]
-}
-
-export type VersionField = {
-  field?: BaseVersionField
-  fieldByLocale?: Record<TypedLocale, BaseVersionField>
-  type: FieldTypes
-}
-
-export type VersionState = {
-  versionFields: VersionField[]
-}
 
 type Args = {
   clientSchemaMap: ClientFieldSchemaMap

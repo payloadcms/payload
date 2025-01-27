@@ -1,11 +1,11 @@
 'use client'
 
+import type { VersionField } from 'payload'
+
 import React from 'react'
 
-import type { VersionField } from '../buildVersionState.js'
-
-import { diffComponents as _diffComponents } from './fields/index.js'
 import './index.scss'
+import { diffComponents as _diffComponents } from './fields/index.js'
 
 const baseClass = 'render-field-diffs'
 

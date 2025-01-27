@@ -1,11 +1,9 @@
 'use client'
-import type { TextFieldClient } from 'payload'
+import type { DiffComponentProps, TextFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useTranslation } from '@payloadcms/ui'
 import React from 'react'
-
-import type { DiffComponentProps } from '../../types.js'
 
 import Label from '../../Label/index.js'
 import './index.scss'

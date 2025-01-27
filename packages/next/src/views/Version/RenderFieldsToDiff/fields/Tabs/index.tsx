@@ -1,16 +1,11 @@
 'use client'
-import type { ClientTab, TabsFieldClient } from 'payload'
+import type { ClientTab, DiffComponentProps, TabsFieldClient, VersionTab } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
-import type { VersionTab } from '../../../buildVersionState.js'
-
 import './index.scss'
-
-import type { DiffComponentProps } from '../../types.js'
-
 import { useSelectedLocales } from '../../../Default/SelectedLocalesContext.js'
 import { DiffCollapser } from '../../DiffCollapser/index.js'
 import { RenderFieldsToDiff } from '../../index.js'

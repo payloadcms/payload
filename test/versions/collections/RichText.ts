@@ -8,7 +8,11 @@ export const RichText: CollectionConfig = {
     components: {
       views: {
         edit: {
-          version: {},
+          version: {
+            diffComponents: {
+              richText: './elements/RichTextDiffComponent/index.js#RichTextDiffComponent',
+            },
+          },
         },
       },
     },

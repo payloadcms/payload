@@ -1,6 +1,4 @@
-import type { FieldTypes } from 'payload'
-
-import type { DiffComponentProps } from '../types.js'
+import type { DiffComponentProps, FieldTypes } from 'payload'
 
 import { Collapsible } from './Collapsible/index.js'
 import { Group } from './Group/index.js'

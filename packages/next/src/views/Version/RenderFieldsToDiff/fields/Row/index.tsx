@@ -1,9 +1,7 @@
 'use client'
-import type { RowFieldClient } from 'payload'
+import type { DiffComponentProps, RowFieldClient } from 'payload'
 
 import React from 'react'
-
-import type { DiffComponentProps } from '../../types.js'
 
 import { RenderFieldsToDiff } from '../../index.js'
 

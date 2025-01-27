@@ -1,11 +1,9 @@
 'use client'
-import type { CollapsibleFieldClient } from 'payload'
+import type { CollapsibleFieldClient, DiffComponentProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useTranslation } from '@payloadcms/ui'
 import React from 'react'
-
-import type { DiffComponentProps } from '../../types.js'
 
 import { useSelectedLocales } from '../../../Default/SelectedLocalesContext.js'
 import { DiffCollapser } from '../../DiffCollapser/index.js'

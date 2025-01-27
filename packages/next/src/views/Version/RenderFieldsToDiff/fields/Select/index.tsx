@@ -1,12 +1,10 @@
 'use client'
 import type { I18nClient } from '@payloadcms/translations'
-import type { OptionObject, SelectField, SelectFieldClient } from 'payload'
+import type { DiffComponentProps, OptionObject, SelectField, SelectFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useTranslation } from '@payloadcms/ui'
 import React from 'react'
-
-import type { DiffComponentProps } from '../../types.js'
 
 import Label from '../../Label/index.js'
 import './index.scss'

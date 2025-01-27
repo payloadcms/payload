@@ -1,13 +1,16 @@
 'use client'
-import type { ClientCollectionConfig, ClientField, RelationshipFieldClient } from 'payload'
+import type {
+  ClientCollectionConfig,
+  ClientField,
+  DiffComponentProps,
+  RelationshipFieldClient,
+} from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useConfig, useTranslation } from '@payloadcms/ui'
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
 import React from 'react'
 import ReactDiffViewerImport from 'react-diff-viewer-continued'
-
-import type { DiffComponentProps } from '../../types.js'
 
 import Label from '../../Label/index.js'
 import './index.scss'
