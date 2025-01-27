@@ -52,6 +52,8 @@ export function getFieldsForRowComparison({
         [...matchedVersionBlock.fields, ...matchedComparisonBlock.fields],
         'name',
       )
+
+      // buildVersionState already merged the fields of the version and comparison rows together
       versionFields = versionField.rows?.length ? versionField.rows[row] : versionField.fields
     }
   }

@@ -15,7 +15,7 @@ import type {
 import type { DiffMethod } from 'react-diff-viewer-continued'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { fieldIsID, tabHasName } from 'payload/shared'
+import { fieldIsID, getUniqueListBy, tabHasName } from 'payload/shared'
 
 import type { DiffComponentProps, DiffComponentServerProps } from './RenderFieldsToDiff/types.js'
 
@@ -267,8 +267,22 @@ export const buildVersionState = ({
       for (let i = 0; i < blockSiblingData.length; i++) {
         const comparisonRow = comparisonSiblingData?.[field.name]?.[i] || {}
         const versionRow = blockSiblingData[i] || {}
+        const versionBlock = field.blocks.find((block) => block.slug === versionRow.blockType)
 
-        const block = field.blocks.find((block) => block.slug === versionRow.blockType)
+        let fields = []
+
+        if (versionRow.blockType === comparisonRow.blockType) {
+          fields = versionBlock.fields
+        } else {
+          const comparisonBlock = field.blocks.find(
+            (block) => block.slug === comparisonRow.blockType,
+          )
+
+          fields = getUniqueListBy<Field>(
+            [...versionBlock.fields, ...comparisonBlock.fields],
+            'name',
+          )
+        }
 
         versionField.rows[i] = buildVersionState({
           clientSchemaMap,
@@ -276,12 +290,12 @@ export const buildVersionState = ({
           customDiffComponents,
           entitySlug,
           fieldPermissions,
-          fields: block.fields,
+          fields,
           i18n,
           locales,
           parentIndexPath: 'name' in field ? '' : indexPath,
           parentPath: path + '.' + i,
-          parentSchemaPath: schemaPath + '.' + block.slug,
+          parentSchemaPath: schemaPath + '.' + versionBlock.slug,
           payload,
           versionSiblingData: versionRow,
         }).versionFields
