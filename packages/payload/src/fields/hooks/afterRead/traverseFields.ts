@@ -10,7 +10,6 @@ import type {
 } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
-import { getFieldPathsModified } from '../../getFieldPaths.js'
 import { promise } from './promise.js'
 
 type Args = {
@@ -74,14 +73,6 @@ export const traverseFields = ({
   triggerHooks = true,
 }: Args): void => {
   fields.forEach((field, fieldIndex) => {
-    const { indexPath, path, schemaPath } = getFieldPathsModified({
-      field,
-      index: fieldIndex,
-      parentIndexPath,
-      parentPath,
-      parentSchemaPath,
-    })
-
     fieldPromises.push(
       promise({
         collection,
@@ -92,20 +83,19 @@ export const traverseFields = ({
         draft,
         fallbackLocale,
         field,
+        fieldIndex,
         fieldPromises,
         findMany,
         flattenLocales,
         global,
-        indexPath,
         locale,
         overrideAccess,
         parentIndexPath,
         parentPath,
-        path,
+        parentSchemaPath,
         populate,
         populationPromises,
         req,
-        schemaPath,
         select,
         selectMode,
         showHiddenFields,

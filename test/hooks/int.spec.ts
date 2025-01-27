@@ -590,9 +590,9 @@ describe('Hooks', () => {
           path: ['array', '0', 'nestedArray', '0', 'fieldWithinNestedArray'],
           schemaPath: ['array', 'nestedArray', 'fieldWithinNestedArray'],
         }),
-        ...formatExpectedFieldPaths('fieldWithinNestedRow', {
-          path: ['array', '0', 'nestedArray', '0', 'fieldWithinNestedRow'],
-          schemaPath: ['array', '_index-2', 'fieldWithinNestedRow'],
+        ...formatExpectedFieldPaths('fieldWithinRowWithinArray', {
+          path: ['array', '0', 'fieldWithinRowWithinArray'],
+          schemaPath: ['array', '_index-2', 'fieldWithinRowWithinArray'],
         }),
         ...formatExpectedFieldPaths('fieldWithinRow', {
           path: ['fieldWithinRow'],

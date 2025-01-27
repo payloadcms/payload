@@ -11,7 +11,7 @@ import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
 import { getLabelFromPath } from '../../../utilities/getLabelFromPath.js'
 import { getTranslatedLabel } from '../../../utilities/getTranslatedLabel.js'
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
-import { getFieldPathsModified } from '../../getFieldPaths.js'
+import { getFieldPathsModified as getFieldPaths } from '../../getFieldPaths.js'
 import { getExistingRowDoc } from './getExistingRowDoc.js'
 import { traverseFields } from './traverseFields.js'
 
@@ -68,7 +68,7 @@ export const promise = async ({
   siblingDocWithLocales,
   skipValidation,
 }: Args): Promise<void> => {
-  const { indexPath, path, schemaPath } = getFieldPathsModified({
+  const { indexPath, path, schemaPath } = getFieldPaths({
     field,
     index: fieldIndex,
     parentIndexPath,
@@ -312,7 +312,7 @@ export const promise = async ({
         mergeLocaleActions,
         operation,
         parentIndexPath: indexPath,
-        parentPath: '',
+        parentPath,
         parentSchemaPath: schemaPath,
         req,
         siblingData,

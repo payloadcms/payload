@@ -91,8 +91,8 @@ export const FieldPaths: CollectionConfig = {
           type: 'array',
           fields: [
             {
-              // schemaPath: 'array.nestedArray.fieldWithinNestedArray'
               // path: 'array.[n].nestedArray.[n].fieldWithinNestedArray'
+              // schemaPath: 'array.nestedArray.fieldWithinNestedArray'
               // indexPath: ''
               name: 'fieldWithinNestedArray',
               type: 'text',
@@ -101,18 +101,18 @@ export const FieldPaths: CollectionConfig = {
           ],
         },
         {
-          // path: 'array._index-2'
+          // path: 'array.[n]._index-2'
           // schemaPath: 'array._index-2'
           // indexPath: ''
           type: 'row',
           fields: [
             {
-              // schemaPath: 'array._index-2.fieldWithinRow'
-              // path: 'array.[n].nestedArray.[n].fieldWithinNestedRow'
+              // path: 'array.[n].fieldWithinRowWithinArray'
+              // schemaPath: 'array._index-2.fieldWithinRowWithinArray'
               // indexPath: ''
-              name: 'fieldWithinNestedRow',
+              name: 'fieldWithinRowWithinArray',
               type: 'text',
-              hooks: attachHooks('fieldWithinNestedRow'),
+              hooks: attachHooks('fieldWithinRowWithinArray'),
             },
           ],
         },
@@ -204,7 +204,7 @@ export const FieldPaths: CollectionConfig = {
       'topLevelNamedField',
       'fieldWithinArray',
       'fieldWithinNestedArray',
-      'fieldWithinNestedRow',
+      'fieldWithinRowWithinArray',
       'fieldWithinRow',
       'fieldWithinUnnamedTab',
       'fieldWithinNestedUnnamedTab',

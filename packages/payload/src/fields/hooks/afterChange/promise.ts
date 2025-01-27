@@ -7,7 +7,7 @@ import type { Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
-import { getFieldPathsModified } from '../../getFieldPaths.js'
+import { getFieldPathsModified as getFieldPaths } from '../../getFieldPaths.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
@@ -50,7 +50,7 @@ export const promise = async ({
   siblingData,
   siblingDoc,
 }: Args): Promise<void> => {
-  const { indexPath, path, schemaPath } = getFieldPathsModified({
+  const { indexPath, path, schemaPath } = getFieldPaths({
     field,
     index: fieldIndex,
     parentIndexPath,

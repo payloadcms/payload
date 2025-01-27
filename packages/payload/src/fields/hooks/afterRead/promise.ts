@@ -14,6 +14,7 @@ import type { Field, TabAsField } from '../../config/types.js'
 import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
 import { getDefaultValue } from '../../getDefaultValue.js'
+import { getFieldPathsModified as getFieldPaths } from '../../getFieldPaths.js'
 import { relationshipPopulationPromise } from './relationshipPopulationPromise.js'
 import { traverseFields } from './traverseFields.js'
 
@@ -26,6 +27,7 @@ type Args = {
   draft: boolean
   fallbackLocale: null | string
   field: Field | TabAsField
+  fieldIndex: number
   /**
    * fieldPromises are used for things like field hooks. They should be awaited before awaiting populationPromises
    */
@@ -33,16 +35,14 @@ type Args = {
   findMany: boolean
   flattenLocales: boolean
   global: null | SanitizedGlobalConfig
-  indexPath: string
   locale: null | string
   overrideAccess: boolean
   parentIndexPath: string
   parentPath: string
-  path: string
+  parentSchemaPath: string
   populate?: PopulateType
   populationPromises: Promise<void>[]
   req: PayloadRequest
-  schemaPath: string
   select?: SelectType
   selectMode?: SelectMode
   showHiddenFields: boolean
@@ -68,19 +68,19 @@ export const promise = async ({
   draft,
   fallbackLocale,
   field,
+  fieldIndex,
   fieldPromises,
   findMany,
   flattenLocales,
   global,
-  indexPath,
   locale,
   overrideAccess,
+  parentIndexPath,
   parentPath,
-  path,
+  parentSchemaPath,
   populate,
   populationPromises,
   req,
-  schemaPath,
   select,
   selectMode,
   showHiddenFields,
@@ -88,6 +88,14 @@ export const promise = async ({
   triggerAccessControl = true,
   triggerHooks = true,
 }: Args): Promise<void> => {
+  const { indexPath, path, schemaPath } = getFieldPaths({
+    field,
+    index: fieldIndex,
+    parentIndexPath,
+    parentPath,
+    parentSchemaPath,
+  })
+
   const pathSegments = path ? path.split('.') : []
   const schemaPathSegments = schemaPath ? schemaPath.split('.') : []
   const indexPathSegments = indexPath ? indexPath.split('-').filter(Boolean)?.map(Number) : []
