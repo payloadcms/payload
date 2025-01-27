@@ -14,7 +14,7 @@ export type DefaultVersionsViewProps = {
   readonly doc: Document
   readonly latestDraftVersion?: string
   readonly latestPublishedVersion?: string
-  readonly localeOptions: OptionObject[]
+  readonly selectedLocales: OptionObject[]
   readonly versionID?: string
   readonly versionState: VersionState
 }

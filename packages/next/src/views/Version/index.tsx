@@ -136,13 +136,13 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
     }
   }
 
-  const localeOptions: OptionObject[] = []
+  const selectedLocales: OptionObject[] = []
   if (localization) {
     if (localeCodesFromParams) {
       for (const code of localeCodesFromParams) {
         const locale = localization.locales.find((locale) => locale.code === code)
         if (locale) {
-          localeOptions.push({
+          selectedLocales.push({
             label: locale.label,
             value: locale.code,
           })
@@ -150,7 +150,7 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
       }
     } else {
       for (const { code, label } of localization.locales) {
-        localeOptions.push({
+        selectedLocales.push({
           label,
           value: code,
         })
@@ -234,7 +234,7 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
     fieldPermissions: docPermissions?.fields,
     fields: (collectionConfig || globalConfig)?.fields,
     i18n,
-    locales: localeOptions && localeOptions.map((locale) => locale.value),
+    locales: selectedLocales && selectedLocales.map((locale) => locale.value),
     parentIndexPath: '',
     parentPath: '',
     parentSchemaPath: '',
@@ -254,7 +254,7 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
       doc={doc}
       latestDraftVersion={latestDraftVersion?.id}
       latestPublishedVersion={latestPublishedVersion?.id}
-      localeOptions={localeOptions}
+      selectedLocales={selectedLocales}
       versionID={versionID}
       versionState={versionState}
     />

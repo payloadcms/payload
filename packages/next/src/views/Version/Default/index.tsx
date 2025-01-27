@@ -4,7 +4,7 @@ import type { OptionObject } from 'payload'
 import { Gutter, useConfig, useDocumentInfo, useTranslation } from '@payloadcms/ui'
 import { formatDate } from '@payloadcms/ui/shared'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation.js'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
 import type { CompareOption, DefaultVersionsViewProps } from './types.js'
 
@@ -22,11 +22,22 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   doc,
   latestDraftVersion,
   latestPublishedVersion,
-  localeOptions,
+  selectedLocales: selectedLocalesProp,
   versionID,
   versionState,
 }) => {
   const { config, getEntityConfig } = useConfig()
+
+  const availableLocales = useMemo(
+    () =>
+      config.localization
+        ? config.localization.locales.map((locale) => ({
+            label: locale.label,
+            value: locale.code,
+          }))
+        : [],
+    [config.localization],
+  )
 
   const { i18n } = useTranslation()
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
@@ -35,7 +46,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
 
   const [globalConfig] = useState(() => getEntityConfig({ globalSlug }))
 
-  const [locales, setLocales] = useState<OptionObject[]>(localeOptions)
+  const [selectedLocales, setSelectedLocales] = useState<OptionObject[]>(selectedLocalesProp)
 
   const [compareValue, setCompareValue] = useState<CompareOption>()
   const router = useRouter()
@@ -52,16 +63,16 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
     } else {
       current.set('compareValue', compareValue?.value)
     }
-    if (!locales) {
+    if (!selectedLocales) {
       current.delete('localeCodes')
     } else {
-      current.set('localeCodes', JSON.stringify(locales.map((locale) => locale.value)))
+      current.set('localeCodes', JSON.stringify(selectedLocales.map((locale) => locale.value)))
     }
 
     const search = current.toString()
     const query = search ? `?${search}` : ''
     router.push(`${pathname}${query}`)
-  }, [compareValue, pathname, router, searchParams, locales])
+  }, [compareValue, pathname, router, searchParams, selectedLocales])
 
   const {
     admin: { dateFormat },
@@ -126,7 +137,11 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
             versionID={versionID}
           />
           {localization && (
-            <SelectLocales onChange={setLocales} options={localeOptions} value={locales} />
+            <SelectLocales
+              onChange={setSelectedLocales}
+              options={availableLocales}
+              value={selectedLocales}
+            />
           )}
         </div>
         {doc?.version && <RenderFieldsToDiff fields={versionState.versionFields} />}
