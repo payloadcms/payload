@@ -239,6 +239,7 @@ export const enTranslations = {
     duplicate: 'Duplicate',
     duplicateWithoutSaving: 'Duplicate without saving changes',
     edit: 'Edit',
+    editAll: 'Edit all',
     editedSince: 'Edited since',
     editing: 'Editing',
     editingLabel_many: 'Editing {{count}} {{label}}',
@@ -375,8 +376,8 @@ export const enTranslations = {
     within: 'within',
   },
   upload: {
-    addFile: 'Add File',
-    addFiles: 'Add Files',
+    addFile: 'Add file',
+    addFiles: 'Add files',
     bulkUpload: 'Bulk Upload',
     crop: 'Crop',
     cropToolDescription:
@@ -443,6 +444,8 @@ export const enTranslations = {
     autosavedSuccessfully: 'Autosaved successfully.',
     autosavedVersion: 'Autosaved version',
     changed: 'Changed',
+    changedFieldsCount_one: '{{count}} changed field',
+    changedFieldsCount_other: '{{count}} changed fields',
     compareVersion: 'Compare version against:',
     confirmPublish: 'Confirm publish',
     confirmRevertToSaved: 'Confirm revert to saved',

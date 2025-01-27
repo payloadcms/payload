@@ -23,6 +23,8 @@ import type {
   BlocksFieldClientProps,
   BlocksFieldErrorClientComponent,
   BlocksFieldErrorServerComponent,
+  BlocksFieldLabelClientComponent,
+  BlocksFieldLabelServerComponent,
   CheckboxFieldClientProps,
   CheckboxFieldErrorClientComponent,
   CheckboxFieldErrorServerComponent,
@@ -164,6 +166,7 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
   findMany?: boolean
   /** The global which the field belongs to. If the field belongs to a collection, this will be null. */
   global: null | SanitizedGlobalConfig
+  indexPath: number[]
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
   operation?: 'create' | 'delete' | 'read' | 'update'
   /** The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. */
@@ -342,6 +345,7 @@ export type LabelsClient = {
 export type BaseValidateOptions<TData, TSiblingData, TValue> = {
   collectionSlug?: string
   data: Partial<TData>
+  event?: 'onChange' | 'submit'
   id?: number | string
   operation?: Operation
   preferences: DocumentPreferences
@@ -714,6 +718,10 @@ export type CollapsibleFieldClient = {
   Pick<CollapsibleField, 'type'>
 
 type TabBase = {
+  /**
+   * @deprecated
+   * Use `admin.description` instead. This will be removed in a future major version.
+   */
   description?: LabelFunction | StaticDescription
   fields: Field[]
   interfaceName?: string
@@ -1335,6 +1343,7 @@ export type BlocksField = {
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
       Error?: CustomComponent<BlocksFieldErrorClientComponent | BlocksFieldErrorServerComponent>
+      Label?: CustomComponent<BlocksFieldLabelClientComponent | BlocksFieldLabelServerComponent>
     } & Admin['components']
     initCollapsed?: boolean
     /**

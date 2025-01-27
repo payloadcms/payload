@@ -24,7 +24,7 @@ export const LoginForm: React.FC<{
   prefillUsername?: string
   searchParams: { [key: string]: string | string[] | undefined }
 }> = ({ prefillEmail, prefillPassword, prefillUsername, searchParams }) => {
-  const { config } = useConfig()
+  const { config, getEntityConfig } = useConfig()
 
   const {
     admin: {
@@ -34,7 +34,7 @@ export const LoginForm: React.FC<{
     routes: { admin: adminRoute, api: apiRoute },
   } = config
 
-  const collectionConfig = config.collections?.find((collection) => collection?.slug === userSlug)
+  const collectionConfig = getEntityConfig({ collectionSlug: userSlug })
   const { auth: authOptions } = collectionConfig
   const loginWithUsername = authOptions.loginWithUsername
   const { canLoginWithEmail, canLoginWithUsername } = getLoginOptions(loginWithUsername)

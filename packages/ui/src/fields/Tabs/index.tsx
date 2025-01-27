@@ -147,7 +147,7 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
 
   const activeTabConfig = tabs[activeTabIndex]
 
-  const activeTabDescription = activeTabConfig.description
+  const activeTabDescription = activeTabConfig.admin?.description ?? activeTabConfig.description
 
   const activeTabStaticDescription =
     typeof activeTabDescription === 'function'
@@ -198,8 +198,12 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
               parentSchemaPath={activePathSchemaChildrenPath}
               path={activeTabPath}
               permissions={
-                'name' in activeTabConfig && permissions?.[activeTabConfig.name]?.fields
-                  ? permissions[activeTabConfig.name].fields
+                permissions && typeof permissions === 'object' && 'name' in activeTabConfig
+                  ? permissions[activeTabConfig.name] &&
+                    typeof permissions[activeTabConfig.name] === 'object' &&
+                    'fields' in permissions[activeTabConfig.name]
+                    ? permissions[activeTabConfig.name].fields
+                    : permissions[activeTabConfig.name]
                   : permissions
               }
               readOnly={readOnly}
@@ -257,7 +261,9 @@ function ActiveTabContent({
     >
       <RenderCustomComponent
         CustomComponent={Description}
-        Fallback={<FieldDescription description={description} path={path} />}
+        Fallback={
+          <FieldDescription description={description} marginPlacement="bottom" path={path} />
+        }
       />
       {BeforeInput}
       <RenderFields

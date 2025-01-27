@@ -20,10 +20,10 @@ function DrawerContent() {
   const { addFiles, forms, isInitializing } = useFormsManager()
   const { closeModal } = useModal()
   const { collectionSlug, drawerSlug } = useBulkUpload()
-  const { config } = useConfig()
+  const { getEntityConfig } = useConfig()
   const { t } = useTranslation()
 
-  const uploadCollection = config.collections.find((col) => col.slug === collectionSlug)
+  const uploadCollection = getEntityConfig({ collectionSlug })
   const uploadConfig = uploadCollection?.upload
   const uploadMimeTypes = uploadConfig?.mimeTypes
 

@@ -18,9 +18,7 @@ export async function getAccessResults({
 
   const isLoggedIn = !!user
   const userCollectionConfig =
-    user && user.collection
-      ? payload.config.collections.find((collection) => collection.slug === user.collection)
-      : null
+    user && user.collection ? payload?.collections?.[user.collection]?.config : null
 
   if (userCollectionConfig && payload.config.admin.user === user?.collection) {
     results.canAccessAdmin = userCollectionConfig.access.admin

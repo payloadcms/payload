@@ -69,7 +69,7 @@ export const sanitizeLocales = ({
     })
   }
 
-  if (locale === '*') {
+  if (['*', 'all'].includes(locale)) {
     locale = 'all'
   } else if (localization && !localization.localeCodes.includes(locale) && localization.fallback) {
     locale = localization.defaultLocale

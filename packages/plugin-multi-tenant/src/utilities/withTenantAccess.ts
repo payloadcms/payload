@@ -31,7 +31,7 @@ export const withTenantAccess =
     if (
       args.req.user &&
       !userHasAccessToAllTenants(
-        args.req.user as ConfigType extends { user: User } ? ConfigType['user'] : User,
+        args.req.user as ConfigType extends { user: unknown } ? ConfigType['user'] : User,
       )
     ) {
       constraints.push(

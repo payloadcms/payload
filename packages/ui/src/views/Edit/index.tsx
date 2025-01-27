@@ -1,12 +1,6 @@
 'use client'
 
-import type {
-  ClientCollectionConfig,
-  ClientGlobalConfig,
-  ClientSideEditViewProps,
-  ClientUser,
-  FormState,
-} from 'payload'
+import type { ClientSideEditViewProps, ClientUser, FormState } from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -109,8 +103,8 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
     getEntityConfig,
   } = useConfig()
 
-  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
-  const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
+  const collectionConfig = getEntityConfig({ collectionSlug })
+  const globalConfig = getEntityConfig({ globalSlug })
 
   const depth = useEditDepth()
 

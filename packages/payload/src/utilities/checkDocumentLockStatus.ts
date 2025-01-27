@@ -27,7 +27,7 @@ export const checkDocumentLockStatus = async ({
 
   // Retrieve the lockDocuments property for either collection or global
   const lockDocumentsProp = collectionSlug
-    ? payload.config?.collections?.find((c) => c.slug === collectionSlug)?.lockDocuments
+    ? payload.collections?.[collectionSlug]?.config?.lockDocuments
     : payload.config?.globals?.find((g) => g.slug === globalSlug)?.lockDocuments
 
   const isLockingEnabled = lockDocumentsProp !== false

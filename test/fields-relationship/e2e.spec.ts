@@ -273,7 +273,7 @@ describe('Relationship Field', () => {
     await expect(field).toHaveText(relationOneDoc.id)
   })
 
-  async function runFilterOptionsTest(fieldName: string) {
+  async function runFilterOptionsTest(fieldName: string, fieldLabel: string) {
     await page.reload()
     await page.goto(url.edit(docWithExistingRelations.id))
     const field = page.locator('#field-relationship')
@@ -293,7 +293,9 @@ describe('Relationship Field', () => {
     await expect(field).toContainText(anotherRelationOneDoc.id)
     await wait(2000) // Need to wait form state to come back before clicking save
     await page.locator('#action-save').click()
-    await expect(page.locator('.payload-toast-container')).toContainText(`is invalid: ${fieldName}`)
+    await expect(page.locator('.payload-toast-container')).toContainText(
+      `is invalid: ${fieldLabel}`,
+    )
     filteredField = page.locator(`#field-${fieldName} .react-select`)
     await filteredField.click({ delay: 100 })
     filteredOptions = filteredField.locator('.rs__option')
@@ -305,12 +307,12 @@ describe('Relationship Field', () => {
 
   // TODO: Flaky test. Fix this! (This is an actual issue not just an e2e flake)
   test('should allow dynamic filterOptions', async () => {
-    await runFilterOptionsTest('relationshipFiltered')
+    await runFilterOptionsTest('relationshipFiltered', 'Relationship Filtered')
   })
 
   // TODO: Flaky test. Fix this! (This is an actual issue not just an e2e flake)
   test('should allow dynamic async filterOptions', async () => {
-    await runFilterOptionsTest('relationshipFilteredAsync')
+    await runFilterOptionsTest('relationshipFilteredAsync', 'Relationship Filtered Async')
   })
 
   test('should allow usage of relationTo in filterOptions', async () => {

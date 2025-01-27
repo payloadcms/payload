@@ -190,6 +190,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             id,
             collectionSlug,
             data: fullData,
+            event: 'onChange',
             jsonError,
             operation,
             preferences,
@@ -297,8 +298,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             const collapsed = (() => {
               // First, check if `previousFormState` has a matching row
               const previousRow = previousRows.find((prevRow) => prevRow.id === row.id)
-              if (previousRow?.collapsed !== undefined) {
-                return previousRow.collapsed
+              if (previousRow) {
+                return previousRow.collapsed ?? false
               }
 
               // If previousFormState is undefined, check preferences
@@ -364,7 +365,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             }
 
             const parentPath = path + '.' + i
-            const rowSchemaPath = schemaPath + '.' + block.slug
 
             if (block) {
               row.id = row?.id || new ObjectId().toHexString()
@@ -434,7 +434,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   parentIndexPath: '',
                   parentPassesCondition: passesCondition,
                   parentPath,
-                  parentSchemaPath: rowSchemaPath,
+                  parentSchemaPath: schemaPath + '.' + block.slug,
                   permissions:
                     fieldPermissions === true
                       ? fieldPermissions
@@ -740,10 +740,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         includeSchema,
         omitParents,
         operation,
-        parentIndexPath: tabHasName(tab) ? '' : tabIndexPath,
+        parentIndexPath: isNamedTab ? '' : tabIndexPath,
         parentPassesCondition: passesCondition,
-        parentPath: tabHasName(tab) ? tabPath : parentPath,
-        parentSchemaPath: tabHasName(tab) ? tabSchemaPath : parentSchemaPath,
+        parentPath: isNamedTab ? tabPath : parentPath,
+        parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
         permissions: childPermissions,
         preferences,
         previousFormState,

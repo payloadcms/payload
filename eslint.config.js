@@ -21,6 +21,7 @@ export const defaultESLintIgnores = [
   '**/temp/',
   '**/*.spec.ts',
   'next-env.d.ts',
+  '**/app',
 ]
 
 /** @typedef {import('eslint').Linter.Config} Config */
@@ -63,6 +64,14 @@ export const rootEslintConfig = [
     files: ['scripts/**/*.ts'],
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
+      'no-console': 'off',
+      'perfectionist/sort-object-types': 'off',
+      'perfectionist/sort-objects': 'off',
+    },
+  },
+  {
+    files: ['tools/**/*.ts'],
+    rules: {
       'no-console': 'off',
       'perfectionist/sort-object-types': 'off',
       'perfectionist/sort-objects': 'off',

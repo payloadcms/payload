@@ -53,7 +53,7 @@ export const DuplicateDocument: React.FC<Props> = ({
     getEntityConfig,
   } = useConfig()
 
-  const collectionConfig = getEntityConfig({ collectionSlug: slug }) as ClientCollectionConfig
+  const collectionConfig = getEntityConfig({ collectionSlug: slug })
 
   const [hasClicked, setHasClicked] = useState<boolean>(false)
   const { i18n, t } = useTranslation()

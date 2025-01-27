@@ -19,9 +19,10 @@ type Args<T> = {
   id?: number | string
   operation: 'create' | 'update'
   overrideAccess: boolean
-  path: (number | string)[]
+  parentIndexPath: string
+  parentPath: string
+  parentSchemaPath: string
   req: PayloadRequest
-  schemaPath: string[]
   siblingData: JsonObject
   /**
    * The original siblingData (not modified by any hooks)
@@ -39,13 +40,15 @@ export const traverseFields = async <T>({
   global,
   operation,
   overrideAccess,
-  path,
+  parentIndexPath,
+  parentPath,
+  parentSchemaPath,
   req,
-  schemaPath,
   siblingData,
   siblingDoc,
 }: Args<T>): Promise<void> => {
   const promises = []
+
   fields.forEach((field, fieldIndex) => {
     promises.push(
       promise({
@@ -59,13 +62,15 @@ export const traverseFields = async <T>({
         global,
         operation,
         overrideAccess,
-        parentPath: path,
-        parentSchemaPath: schemaPath,
+        parentIndexPath,
+        parentPath,
+        parentSchemaPath,
         req,
         siblingData,
         siblingDoc,
       }),
     )
   })
+
   await Promise.all(promises)
 }

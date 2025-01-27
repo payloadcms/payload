@@ -1,7 +1,7 @@
 import type { Endpoint, PayloadHandler } from 'payload'
 
-import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
-import httpStatus from 'http-status'
+import { status as httpStatus } from 'http-status'
+import { addDataAndFileToRequest } from 'payload'
 
 import { path } from './reInitializeDB.js'
 import { seedDB } from './seed.js'
