@@ -8,7 +8,7 @@ import { v4 as uuid } from 'uuid'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { postsSlug } from './shared.js'
+import { errorOnUnnamedFieldsSlug, postsSlug } from './shared.js'
 
 const defaultValueField: TextField = {
   name: 'defaultValue',
@@ -155,6 +155,32 @@ export default buildConfigWithDefaults({
           },
         ],
       },
+    },
+    {
+      slug: errorOnUnnamedFieldsSlug,
+      fields: [
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              label: 'UnnamedTab',
+              fields: [
+                {
+                  name: 'groupWithinUnnamedTab',
+                  type: 'group',
+                  fields: [
+                    {
+                      name: 'text',
+                      type: 'text',
+                      required: true,
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
     },
     {
       slug: 'default-values',

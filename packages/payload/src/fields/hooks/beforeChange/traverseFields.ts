@@ -25,9 +25,10 @@ type Args = {
   id?: number | string
   mergeLocaleActions: (() => Promise<void>)[]
   operation: Operation
-  path: (number | string)[]
+  parentIndexPath: string
+  parentPath: string
+  parentSchemaPath: string
   req: PayloadRequest
-  schemaPath: string[]
   siblingData: JsonObject
   /**
    * The original siblingData (not modified by any hooks)
@@ -60,9 +61,10 @@ export const traverseFields = async ({
   global,
   mergeLocaleActions,
   operation,
-  path,
+  parentIndexPath,
+  parentPath,
+  parentSchemaPath,
   req,
-  schemaPath,
   siblingData,
   siblingDoc,
   siblingDocWithLocales,
@@ -85,8 +87,9 @@ export const traverseFields = async ({
         global,
         mergeLocaleActions,
         operation,
-        parentPath: path,
-        parentSchemaPath: schemaPath,
+        parentIndexPath,
+        parentPath,
+        parentSchemaPath,
         req,
         siblingData,
         siblingDoc,
