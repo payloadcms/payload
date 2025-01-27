@@ -1,5 +1,6 @@
 'use client'
 import { getTranslation } from '@payloadcms/translations'
+import { useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
 import type { DiffComponentProps } from '../types.js'
@@ -11,14 +12,14 @@ const baseClass = 'collapsible-diff'
 
 export const Collapsible: React.FC<DiffComponentProps> = ({
   comparison,
-  diffComponents,
   field,
-  fieldPermissions,
   fields,
-  i18n,
   locales,
   version,
+  versionField,
 }) => {
+  const { i18n } = useTranslation()
+
   return (
     <div className={baseClass}>
       <DiffCollapser
@@ -32,15 +33,7 @@ export const Collapsible: React.FC<DiffComponentProps> = ({
         locales={locales}
         version={version}
       >
-        <RenderFieldsToDiff
-          comparison={comparison}
-          diffComponents={diffComponents}
-          fieldPermissions={fieldPermissions}
-          fields={fields}
-          i18n={i18n}
-          locales={locales}
-          version={version}
-        />
+        <RenderFieldsToDiff fields={versionField.fields} />
       </DiffCollapser>
     </div>
   )

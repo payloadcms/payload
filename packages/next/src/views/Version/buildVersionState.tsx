@@ -33,6 +33,7 @@ export type VersionField = {
     [locale: TypedLocale]: React.ReactNode
   }
   fields: VersionField[]
+  rows?: VersionField[][]
   tabs?: VersionTab[]
   type: FieldTypes
 }
@@ -80,6 +81,7 @@ type Result = {
    * Path for this field specifically.
    */
   path: string
+  pathWithIndex: string
   /**
    * Schema path for this field specifically.
    */
@@ -98,6 +100,7 @@ export function getFieldPaths2({
     return {
       indexPath: `${parentIndexPath ? parentIndexPath + '-' : ''}${index}`,
       path: `${parentPath ? parentPath + (parentPath.endsWith('.') ? '' : '.') : ''}${field.name}`,
+      pathWithIndex: `${parentPath ? parentPath + (parentPath.endsWith('.') ? '' : '.') : ''}${field.name}`,
       schemaPath: `${parentSchemaPath ? parentSchemaPath + (parentSchemaPath.endsWith('.') ? '' : '.') : ''}${field.name}`,
       schemaPathWithIndex: `${parentSchemaPath ? parentSchemaPath + (parentSchemaPath.endsWith('.') ? '' : '.') : ''}${field.name}`,
     }
@@ -107,7 +110,9 @@ export function getFieldPaths2({
 
   return {
     indexPath: `${parentIndexPath ? parentIndexPath + '-' : ''}${index}`,
-    path: `${parentPath ? parentPath + (parentPath.endsWith('.') ? '' : '.') : ''}${indexSuffix}`,
+    path: `${parentPath ? parentPath + (parentPath.endsWith('.') ? '' : '.') : ''}`,
+    pathWithIndex: `${parentPath ? parentPath + (parentPath.endsWith('.') ? '' : '.') : ''}${indexSuffix}`,
+
     schemaPath: `${
       parentSchemaPath ? parentSchemaPath + (parentSchemaPath.endsWith('.') ? '' : '.') : ''
     }`,
@@ -205,26 +210,75 @@ export const buildVersionState = ({
           label: tab.label,
         })
       }
-    }
+    } // At this point, we are dealing with a `row`, etc
+    else if ('fields' in field) {
+      if (field.type === 'array') {
+        const arraySiblingData = versionSiblingData?.[field.name]
+        versionField.rows = []
+        for (let i = 0; i < arraySiblingData.length; i++) {
+          const comparisonRow = comparisonSiblingData?.[field.name]?.[i] || {}
+          const versionRow = arraySiblingData[i] || {}
+          versionField.rows[i] = buildVersionState({
+            clientSchemaMap,
+            comparisonSiblingData: comparisonRow,
+            customDiffComponents,
+            entitySlug,
+            fieldPermissions,
+            fields: field.fields,
+            i18n,
+            locales,
+            parentIndexPath: 'name' in field ? '' : indexPath,
+            parentPath: path + '.' + i,
+            parentSchemaPath: schemaPath,
+            payload,
+            versionSiblingData: versionRow,
+          }).versionFields
+        }
+      } else {
+        versionField.fields = buildVersionState({
+          clientSchemaMap,
+          comparisonSiblingData:
+            'name' in field ? comparisonSiblingData?.[field.name] : comparisonSiblingData,
+          customDiffComponents,
+          entitySlug,
+          fieldPermissions,
+          fields: field.fields,
+          i18n,
+          locales,
+          parentIndexPath: 'name' in field ? '' : indexPath,
+          parentPath: path,
+          parentSchemaPath: schemaPath,
+          payload,
+          versionSiblingData:
+            'name' in field ? versionSiblingData?.[field.name] : versionSiblingData,
+        }).versionFields
+      }
+    } else if (field.type === 'blocks') {
+      const blockSiblingData = versionSiblingData?.[field.name]
+      versionField.rows = []
 
-    // At this point, we are dealing with a `row`, etc
-    if ('fields' in field) {
-      versionField.fields = buildVersionState({
-        clientSchemaMap,
-        comparisonSiblingData:
-          'name' in field ? comparisonSiblingData?.[field.name] : comparisonSiblingData,
-        customDiffComponents,
-        entitySlug,
-        fieldPermissions,
-        fields: field.fields,
-        i18n,
-        locales,
-        parentIndexPath: 'name' in field ? '' : indexPath,
-        parentPath: path,
-        parentSchemaPath: schemaPath,
-        payload,
-        versionSiblingData: 'name' in field ? versionSiblingData?.[field.name] : versionSiblingData,
-      }).versionFields
+      for (let i = 0; i < blockSiblingData.length; i++) {
+        const comparisonRow = comparisonSiblingData?.[field.name]?.[i] || {}
+        const versionRow = blockSiblingData[i] || {}
+
+        const block = field.blocks.find((block) => block.slug === versionRow.blockType)
+
+        versionField.rows[i] = buildVersionState({
+          clientSchemaMap,
+          comparisonSiblingData: comparisonRow,
+          customDiffComponents,
+          entitySlug,
+          fieldPermissions,
+          fields: block.fields,
+          i18n,
+          locales,
+          parentIndexPath: 'name' in field ? '' : indexPath,
+          parentPath: path + '.' + i,
+          parentSchemaPath: schemaPath + '.' + block.slug,
+          payload,
+          versionSiblingData: versionRow,
+        }).versionFields
+      }
     }
 
     const fieldName: null | string = 'name' in field ? field.name : null
@@ -267,7 +321,11 @@ export const buildVersionState = ({
       isRichText,
       locales,
       version: versionValue,
-      versionField,
+      versionField: {
+        ...versionField,
+        CustomComponent: undefined,
+        CustomComponentByLocale: undefined,
+      },
     }
 
     const serverCellProps: FieldDiffPropsServer = {

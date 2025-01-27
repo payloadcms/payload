@@ -222,7 +222,7 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
 
   const versionState = buildVersionState({
     clientSchemaMap,
-    comparisonDoc: comparisonDoc?.version,
+    comparisonSiblingData: comparisonDoc?.version,
     customDiffComponents,
     entitySlug: collectionSlug || globalSlug,
     fieldPermissions: docPermissions?.fields,
@@ -233,7 +233,7 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
     parentPath: '',
     parentSchemaPath: '',
     payload,
-    version: globalConfig
+    versionSiblingData: globalConfig
       ? {
           ...doc?.version,
           createdAt: doc?.version?.createdAt || doc.createdAt,

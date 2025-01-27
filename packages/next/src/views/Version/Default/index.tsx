@@ -85,8 +85,6 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
 
   const draftsEnabled = Boolean((collectionConfig || globalConfig)?.versions.drafts)
 
-  console.log('versionState', versionState)
-
   return (
     <main className={baseClass}>
       <SetStepNav

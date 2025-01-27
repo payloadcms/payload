@@ -63,6 +63,7 @@ export const Iterable: React.FC<DiffComponentProps> = ({
               const { fields, versionFields } = getFieldsForRowComparison({
                 comparisonRow,
                 field,
+                row: i,
                 versionField,
                 versionRow,
               })

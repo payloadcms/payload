@@ -1,8 +1,10 @@
 'use client'
 import { getTranslation } from '@payloadcms/translations'
-import React from 'react'
+import { useTranslation } from '@payloadcms/ui'
 
 import './index.scss'
+
+import React from 'react'
 
 import type { DiffComponentProps } from '../types.js'
 
@@ -13,15 +15,15 @@ const baseClass = 'group-diff'
 
 export const Group: React.FC<DiffComponentProps> = ({
   comparison,
-  diffComponents,
   field,
-  fieldPermissions,
   fields,
-  i18n,
   locale,
   locales,
   version,
+  versionField,
 }) => {
+  const { i18n } = useTranslation()
+
   return (
     <div className={baseClass}>
       <DiffCollapser
@@ -40,15 +42,7 @@ export const Group: React.FC<DiffComponentProps> = ({
         locales={locales}
         version={version}
       >
-        <RenderFieldsToDiff
-          comparison={comparison}
-          diffComponents={diffComponents}
-          fieldPermissions={fieldPermissions}
-          fields={fields}
-          i18n={i18n}
-          locales={locales}
-          version={version}
-        />
+        <RenderFieldsToDiff fields={versionField.fields} />
       </DiffCollapser>
     </div>
   )

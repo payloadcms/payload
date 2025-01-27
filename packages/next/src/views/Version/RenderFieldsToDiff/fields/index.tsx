@@ -1,3 +1,7 @@
+import type { FieldTypes } from 'payload'
+
+import type { DiffComponentProps } from './types.js'
+
 import { Collapsible } from './Collapsible/index.js'
 import { Group } from './Group/index.js'
 import { Iterable } from './Iterable/index.js'
@@ -16,6 +20,7 @@ export const diffComponents: Record<FieldTypes, React.FC<DiffComponentProps<any>
   date: Text,
   email: Text,
   group: Group,
+  join: null,
   json: Text,
   number: Text,
   point: Text,

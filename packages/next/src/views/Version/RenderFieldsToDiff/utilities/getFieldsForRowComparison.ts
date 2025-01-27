@@ -13,11 +13,13 @@ import type { VersionField } from '../../buildVersionState.js'
 export function getFieldsForRowComparison({
   comparisonRow,
   field,
+  row,
   versionField,
   versionRow,
 }: {
   comparisonRow: any
   field: ArrayFieldClient | BlocksFieldClient
+  row: number
   versionField: VersionField
   versionRow: any
 }): { fields: ClientField[]; versionFields: VersionField[] } {
@@ -26,10 +28,8 @@ export function getFieldsForRowComparison({
 
   if (field.type === 'array' && 'fields' in field) {
     fields = field.fields
-    versionFields = versionField.fields
-  }
-
-  if (field.type === 'blocks') {
+    versionFields = versionField.rows?.length ? versionField.rows[row] : versionField.fields
+  } else if (field.type === 'blocks') {
     if (versionRow?.blockType === comparisonRow?.blockType) {
       const matchedBlock = ('blocks' in field &&
         field.blocks?.find((block) => block.slug === versionRow?.blockType)) || {
@@ -37,7 +37,7 @@ export function getFieldsForRowComparison({
       }
 
       fields = matchedBlock.fields
-      versionFields = versionField.fields // TODO
+      versionFields = versionField.rows?.length ? versionField.rows[row] : versionField.fields
     } else {
       const matchedVersionBlock = ('blocks' in field &&
         field.blocks?.find((block) => block.slug === versionRow?.blockType)) || {
@@ -52,7 +52,7 @@ export function getFieldsForRowComparison({
         [...matchedVersionBlock.fields, ...matchedComparisonBlock.fields],
         'name',
       )
-      versionFields = versionField.fields // TODO
+      versionFields = versionField.rows?.length ? versionField.rows[row] : versionField.fields
     }
   }
 
