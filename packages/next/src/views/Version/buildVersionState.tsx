@@ -10,10 +10,8 @@ import type {
   PayloadComponent,
   PayloadRequest,
   SanitizedFieldPermissions,
-  Tab,
   TabAsField,
   TabAsFieldClient,
-  TypedLocale,
   VersionField,
   VersionState,
 } from 'payload'
@@ -28,7 +26,9 @@ import { diffComponents } from './RenderFieldsToDiff/fields/index.js'
 type Args = {
   clientSchemaMap: ClientFieldSchemaMap
   comparisonSiblingData: object
-  customDiffComponents: Record<FieldTypes, PayloadComponent<null, null>>
+  customDiffComponents: Partial<
+    Record<FieldTypes, PayloadComponent<DiffComponentServerProps, DiffComponentProps>>
+  >
   entitySlug: string
   fieldPermissions:
     | {
@@ -259,7 +259,7 @@ const buildVersionFieldState = ({
     return null
   }
 
-  const CustomComponent = customDiffComponents?.[field.type]
+  const CustomComponent = field?.admin?.components?.Diff ?? customDiffComponents?.[field.type]
   const DefaultComponent = diffComponents?.[field.type]
 
   const baseVersionField: BaseVersionField = {

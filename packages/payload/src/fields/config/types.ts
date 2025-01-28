@@ -107,6 +107,8 @@ import type {
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
 import type {
   CustomComponent,
+  DiffComponentProps,
+  DiffComponentServerProps,
   LabelFunction,
   PayloadComponent,
   StaticLabel,
@@ -271,6 +273,7 @@ type Admin = {
   components?: {
     Cell?: CustomComponent
     Description?: CustomComponent<FieldDescriptionClientComponent | FieldDescriptionServerComponent>
+    Diff?: PayloadComponent<DiffComponentServerProps, DiffComponentProps>
     Field?: CustomComponent<FieldClientComponent | FieldServerComponent>
     /**
      * The Filter component has to be a client component

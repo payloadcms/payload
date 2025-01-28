@@ -4,23 +4,15 @@ import { richTextCollectionSlug } from '../slugs.js'
 
 export const RichText: CollectionConfig = {
   slug: richTextCollectionSlug,
-  admin: {
-    components: {
-      views: {
-        edit: {
-          version: {
-            diffComponents: {
-              richText: './elements/RichTextDiffComponent/index.js#RichTextDiffComponent',
-            },
-          },
-        },
-      },
-    },
-  },
   fields: [
     {
       name: 'richtext',
       type: 'richText',
+      admin: {
+        components: {
+          Diff: './elements/RichTextDiffComponent/index.js#RichTextDiffComponent',
+        },
+      },
     },
   ],
   versions: {

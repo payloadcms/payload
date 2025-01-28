@@ -191,24 +191,6 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
     comparisonDoc = latestVersion
   }
 
-  /**
-   * Handle custom diff field components
-   */
-  const customDiffComponents = (collectionConfig ?? globalConfig)?.admin?.components?.views?.edit
-    ?.version?.diffComponents
-
-  const customRenderedDiffComponents = {}
-  if (customDiffComponents) {
-    for (const [key, component] of Object.entries(customDiffComponents)) {
-      customRenderedDiffComponents[key] = RenderServerComponent({
-        clientProps: {} as DiffComponentProps,
-        Component: component,
-        importMap: payload.importMap,
-        serverProps: {},
-      })
-    }
-  }
-
   const schemaMap = getSchemaMap({
     collectionSlug,
     config,
@@ -228,7 +210,7 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
   const versionState = buildVersionState({
     clientSchemaMap,
     comparisonSiblingData: comparisonDoc?.version,
-    customDiffComponents,
+    customDiffComponents: {},
     entitySlug: collectionSlug || globalSlug,
     fieldPermissions: docPermissions?.fields,
     fields: (collectionConfig || globalConfig)?.fields,

@@ -1194,11 +1194,7 @@ export type EditConfigWithoutRoot = {
   default?: Partial<EditViewConfig>
   livePreview?: Partial<EditViewConfig>
   root?: never
-  version?: {
-    diffComponents?: Partial<
-      Record<FieldTypes, PayloadComponent<DiffComponentServerProps, DiffComponentProps>>
-    >
-  } & Partial<EditViewConfig>
+  version?: Partial<EditViewConfig>
   versions?: Partial<EditViewConfig>
 }
 
