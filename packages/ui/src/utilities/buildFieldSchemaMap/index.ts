@@ -56,6 +56,7 @@ export const buildFieldSchemaMap = (args: {
         fields: fieldsToSet,
         i18n,
         parentIndexPath: '',
+        parentPath: '',
         parentSchemaPath: collectionSlug,
         schemaMap,
       })
@@ -73,6 +74,7 @@ export const buildFieldSchemaMap = (args: {
         fields: matchedGlobal.fields,
         i18n,
         parentIndexPath: '',
+        parentPath: '',
         parentSchemaPath: globalSlug,
         schemaMap,
       })

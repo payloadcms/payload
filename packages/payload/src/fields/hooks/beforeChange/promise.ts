@@ -11,7 +11,7 @@ import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
 import { getLabelFromPath } from '../../../utilities/getLabelFromPath.js'
 import { getTranslatedLabel } from '../../../utilities/getTranslatedLabel.js'
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
-import { getFieldPathsModified as getFieldPaths } from '../../getFieldPaths.js'
+import { getFieldPaths } from '../../getFieldPaths.js'
 import { getExistingRowDoc } from './getExistingRowDoc.js'
 import { traverseFields } from './traverseFields.js'
 

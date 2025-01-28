@@ -142,7 +142,11 @@ describe('Field Paths', () => {
       const fieldSchemaKeys: string[] = []
 
       fieldSchemaMap.forEach((value, key) => {
-        fieldSchemaKeys.push(key)
+        if (key === fieldPathsSlug || key.endsWith('_FieldPaths')) {
+          return
+        }
+
+        fieldSchemaKeys.push(key.replace(`${fieldPathsSlug}.`, ''))
       })
 
       expect(fieldSchemaKeys).toEqual([
@@ -151,8 +155,10 @@ describe('Field Paths', () => {
         'array.fieldWithinArray',
         'array.nestedArray',
         'array.nestedArray.fieldWithinNestedArray',
-        'array_index-2',
-        'array_index-2.fieldWithinRowWithinArray', // THIS ONE IS WRONG!
+        'array.nestedArray.id',
+        'array._index-2',
+        'array._index-2.fieldWithinRowWithinArray', // THIS ONE IS WRONG!
+        'array.id',
         '_index-2',
         '_index-2.fieldWithinRow', // THIS ONE IS WRONG!
         '_index-3',
@@ -163,6 +169,8 @@ describe('Field Paths', () => {
         '_index-3-0-1-0.fieldWithinNestedUnnamedTab', // THIS ONE IS WRONG
         '_index-3.namedTab', // THIS ONE IS WRONG!
         '_index-3.namedTab.fieldWithinNamedTab', // THIS ONE IS WRONG!
+        'updatedAt',
+        'createdAt',
       ])
     })
   })

@@ -4,7 +4,7 @@ import type { JsonObject, PayloadRequest } from '../../../types/index.js'
 import type { Field, FieldHookArgs, TabAsField } from '../../config/types.js'
 
 import { fieldAffectsData } from '../../config/types.js'
-import { getFieldPathsModified as getFieldPaths } from '../../getFieldPaths.js'
+import { getFieldPaths } from '../../getFieldPaths.js'
 import { runBeforeDuplicateHooks } from './runHook.js'
 import { traverseFields } from './traverseFields.js'
 
