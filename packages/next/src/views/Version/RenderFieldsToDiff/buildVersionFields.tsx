@@ -85,6 +85,19 @@ export const buildVersionFields = ({
 
     const clientField = clientSchemaMap.get(entitySlug + '.' + schemaPath)
 
+    if (!clientField) {
+      req.payload.logger.error({
+        clientFieldKey: entitySlug + '.' + schemaPath,
+        clientSchemaMapKeys: Array.from(clientSchemaMap.keys()),
+        msg: 'No client field found for ' + entitySlug + '.' + schemaPath,
+        parentPath,
+        parentSchemaPath,
+        path,
+        schemaPath,
+      })
+      throw new Error('No client field found for ' + entitySlug + '.' + schemaPath)
+    }
+
     const versionField: VersionField = {
       type: field.type,
     }
