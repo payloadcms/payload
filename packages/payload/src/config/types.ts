@@ -455,6 +455,14 @@ export type BaseLocalizationConfig = {
    * @example `"en"`
    */
   defaultLocale: string
+  /**
+   * Change the locale used by the default Publish button.
+   * If set to `all`, all locales will be published.
+   * If set to `active`, only the locale currently being edited will be published.
+   * The non-default option will be available via the secondary button.
+   * @default 'all'
+   */
+  defaultLocalePublishOption?: 'active' | 'all'
   /** Set to `true` to let missing values in localised fields fall back to the values in `defaultLocale`
    *
    * If false, then no requests will fallback unless a fallbackLocale is specified in the request.

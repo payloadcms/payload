@@ -179,6 +179,7 @@ export default buildConfigWithDefaults({
     },
   },
   localization: {
+    defaultLocalePublishOption: 'active',
     defaultLocale: 'en',
     locales: [
       {
