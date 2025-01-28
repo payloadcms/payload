@@ -67,6 +67,7 @@ const Tab: React.FC<TabProps> = ({
   i18n,
   locale,
   locales,
+  modifiedOnly,
   tab,
   version,
 }) => {
@@ -94,6 +95,7 @@ const Tab: React.FC<TabProps> = ({
         fields={tab.fields}
         i18n={i18n}
         locales={locales}
+        modifiedOnly={modifiedOnly}
         version={version}
       />
     </DiffCollapser>

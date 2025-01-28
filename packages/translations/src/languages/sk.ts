@@ -456,6 +456,7 @@ export const skTranslations: DefaultTranslationsObject = {
     draft: 'Návrh',
     draftSavedSuccessfully: 'Návrh úspešne uložený.',
     lastSavedAgo: 'Naposledy uložené pred {{distance}}',
+    modifiedOnly: 'Iba upravené',
     noFurtherVersionsFound: 'Nenájdené ďalšie verzie',
     noRowsFound: 'Nenájdené {{label}}',
     noRowsSelected: 'Nie je vybraté žiadne {{označenie}}',

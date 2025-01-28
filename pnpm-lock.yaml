@@ -683,6 +683,9 @@ importers:
       busboy:
         specifier: ^1.6.0
         version: 1.6.0
+      dequal:
+        specifier: 2.0.3
+        version: 2.0.3
       file-type:
         specifier: 19.3.0
         version: 19.3.0

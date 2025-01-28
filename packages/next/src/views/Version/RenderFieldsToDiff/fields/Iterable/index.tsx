@@ -22,6 +22,7 @@ export const Iterable: React.FC<DiffComponentProps> = ({
   i18n,
   locale,
   locales,
+  modifiedOnly,
   version,
 }) => {
   const versionRowCount = Array.isArray(version) ? version.length : 0
@@ -82,9 +83,9 @@ export const Iterable: React.FC<DiffComponentProps> = ({
                       fields={fields}
                       i18n={i18n}
                       locales={locales}
-                      version={versionRow}
-                    />
-                  </DiffCollapser>
+                      modifiedOnly
+                  version={versionRow}
+                /></DiffCollapser>
                 </div>
               )
             })}

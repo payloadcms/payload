@@ -456,6 +456,7 @@ export const plTranslations: DefaultTranslationsObject = {
     draft: 'Szkic',
     draftSavedSuccessfully: 'Wersja robocza została pomyślnie zapisana.',
     lastSavedAgo: 'Ostatnio zapisane {{distance}} temu',
+    modifiedOnly: 'Tylko zmodyfikowany',
     noFurtherVersionsFound: 'Nie znaleziono dalszych wersji',
     noRowsFound: 'Nie znaleziono {{label}}',
     noRowsSelected: 'Nie wybrano {{etykieta}}',

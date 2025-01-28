@@ -442,6 +442,7 @@ export const heTranslations: DefaultTranslationsObject = {
     draft: 'טיוטה',
     draftSavedSuccessfully: 'טיוטה נשמרה בהצלחה.',
     lastSavedAgo: 'נשמר לאחרונה לפני {{distance}}',
+    modifiedOnly: 'מותאם בלבד',
     noFurtherVersionsFound: 'לא נמצאו עוד גרסאות',
     noRowsFound: 'לא נמצאו {{label}}',
     noRowsSelected: 'לא נבחר {{תווית}}',

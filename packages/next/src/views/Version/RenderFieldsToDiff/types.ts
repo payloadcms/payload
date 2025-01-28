@@ -15,6 +15,7 @@ export type Props = {
   readonly fields: ClientField[]
   readonly i18n: I18nClient
   readonly locales: string[]
+  readonly modifiedOnly?: boolean
   readonly version: Record<string, any>
 }
 

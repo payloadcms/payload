@@ -1,7 +1,8 @@
 'use client'
 import type { DiffMethod } from 'react-diff-viewer-continued'
 
-import { ShimmerEffect, StaggeredShimmers } from '@payloadcms/ui'
+import { ShimmerEffect } from '@payloadcms/ui'
+import { dequal } from 'dequal/lite'
 import { fieldAffectsData, fieldIsID } from 'payload/shared'
 import React, { Fragment, useEffect } from 'react'
 
@@ -20,6 +21,7 @@ export const RenderFieldsToDiff: React.FC<Props> = ({
   fields,
   i18n,
   locales,
+  modifiedOnly,
   version,
 }) => {
   // typing it as `as typeof _diffComponents` here ensures the TField generics of DiffComponentProps are respected.
@@ -65,6 +67,10 @@ export const RenderFieldsToDiff: React.FC<Props> = ({
                   ? JSON.stringify(comparison?.[fieldName])
                   : comparison?.[fieldName]
 
+                if (modifiedOnly && dequal(versionValue, comparisonValue)) {
+                  return null
+                }
+
                 const hasPermission =
                   fieldPermissions === true ||
                   fieldPermissions?.[fieldName] === true ||
@@ -89,6 +95,7 @@ export const RenderFieldsToDiff: React.FC<Props> = ({
                   i18n,
                   isRichText,
                   locales,
+                  modifiedOnly,
                   version: versionValue,
                 }
 

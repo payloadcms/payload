@@ -87,6 +87,7 @@
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "busboy": "^1.6.0",
+    "dequal": "2.0.3",
     "file-type": "19.3.0",
     "graphql-http": "^1.22.0",
     "graphql-playground-html": "1.6.30",
