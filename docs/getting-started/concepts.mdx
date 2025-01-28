@@ -50,7 +50,7 @@ Everything Payload does (create, read, update, delete, login, logout, etc.) is e
 
 - [Local API](#local-api) - Extremely fast, direct-to-database access
 - [REST API](#rest-api) - Standard HTTP endpoints for querying and mutating data
-- [GraphQL](#graphql) - A full GraphQL API with a GraphQL Playground
+- [GraphQL](#graphql-api) - A full GraphQL API with a GraphQL Playground
 
 <Banner type="success">
   **Note:**
@@ -157,7 +157,7 @@ All of Payload's GraphQL functionality is abstracted into a separate package. Pa
 
 This is the UI library that Payload's Admin Panel uses. All components are exported from this package and can be re-used as you build extensions to the Payload admin UI, or want to use Payload components in your own React apps. Some exports are server components and some are client components.
 
-`@payloadcms/db-postgres`, `@payloadcms/db-vercel-postgres`, `@payloadcms/db-mongodb`
+`@payloadcms/db-postgres`, `@payloadcms/db-vercel-postgres`, `@payloadcms/db-mongodb`, `@payloadcms/db-sqlite`
 
 You can choose which Database Adapter you'd like to use for your project, and no matter which you choose, the entire data layer for Payload is contained within these packages. You can only use one at a time for any given project.
 
