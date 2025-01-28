@@ -16,14 +16,16 @@ export type VersionTab = {
 export type BaseVersionField = {
   CustomComponent?: React.ReactNode
   fields: VersionField[]
+  path: string
   rows?: VersionField[][]
+  schemaPath: string
   tabs?: VersionTab[]
+  type: FieldTypes
 }
 
 export type VersionField = {
   field?: BaseVersionField
   fieldByLocale?: Record<TypedLocale, BaseVersionField>
-  type: FieldTypes
 }
 
 /**

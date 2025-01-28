@@ -44,7 +44,11 @@ export const RenderVersionFieldsToDiff = ({
             )
           } else if (field.field) {
             return (
-              <div className={`${baseClass}__field field__${field.type}`} key={fieldIndex}>
+              <div
+                className={`${baseClass}__field field__${field.field.type}`}
+                data-field-path={field.field.path}
+                key={fieldIndex}
+              >
                 {field.field.CustomComponent}
               </div>
             )

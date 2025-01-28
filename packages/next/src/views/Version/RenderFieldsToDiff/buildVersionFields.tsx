@@ -98,9 +98,7 @@ export const buildVersionFields = ({
       throw new Error('No client field found for ' + entitySlug + '.' + schemaPath)
     }
 
-    const versionField: VersionField = {
-      type: field.type,
-    }
+    const versionField: VersionField = {}
     const isLocalized = 'localized' in field && field.localized
     const fieldName: null | string = 'name' in field ? field.name : null
 
@@ -216,7 +214,10 @@ const buildVersionField = ({
   const DefaultComponent = diffComponents?.[field.type]
 
   const baseVersionField: BaseVersionField = {
+    type: field.type,
     fields: [],
+    path,
+    schemaPath,
   }
 
   if (field.type === 'tabs' && 'tabs' in field) {
