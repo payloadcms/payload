@@ -416,11 +416,14 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
   joinQuery = operation === 'create' ? false : joinQuery
 
+  // TODO:
+  // When we support joins for write operations (create/update) - pass collectionSlug here
+  // Make a new argument in upsertRow.ts and pass the slug from every operation.
   const findManyArgs = buildFindManyArgs({
     adapter,
     depth: 0,
     fields,
-    joinQuery,
+    joinQuery: false,
     select,
     tableName,
   })
