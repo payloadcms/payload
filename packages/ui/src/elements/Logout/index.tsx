@@ -30,6 +30,7 @@ export const Logout: React.FC<{
     className: `${baseClass}__log-out`,
     prefetch: Link ? false : undefined,
     tabIndex,
+    title: t('authentication:logOut'),
   }
 
   return (
