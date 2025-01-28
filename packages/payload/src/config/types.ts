@@ -1174,7 +1174,7 @@ export type EditConfigWithRoot = {
 }
 
 export type EditConfigWithoutRoot = {
-  [key: string]: EditViewConfig & Record<string, unknown>
+  [key: string]: EditViewConfig
   /**
    * Replace or modify individual nested routes, or add new ones:
    * + `default` - `/admin/collections/:collection/:id`
