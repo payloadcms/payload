@@ -105,7 +105,7 @@ export const payloadCloudPlugin =
     const DEFAULT_CRON_JOB = {
       cron: DEFAULT_CRON,
       limit: DEFAULT_LIMIT,
-      queue: 'default (every minute)',
+      queue: 'default',
     }
     config.globals = [
       ...(config.globals || []),
@@ -131,6 +131,10 @@ export const payloadCloudPlugin =
     const oldAutoRunCopy = config.jobs.autoRun ?? []
 
     const newAutoRun = async (payload: Payload) => {
+      if (!Array.isArray(payload.config.jobs?.tasks) || payload.config.jobs.tasks?.length <= 0) {
+        return []
+      }
+
       const instance = generateRandomString()
 
       await payload.updateGlobal({
@@ -154,6 +158,10 @@ export const payloadCloudPlugin =
       }
 
       return typeof oldAutoRunCopy === 'function' ? await oldAutoRunCopy(payload) : oldAutoRunCopy
+    }
+
+    if (!config.jobs) {
+      config.jobs = { tasks: [] }
     }
 
     config.jobs.autoRun = newAutoRun
