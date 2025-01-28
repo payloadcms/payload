@@ -86,8 +86,7 @@ const Tab: React.FC<TabProps> = ({
         )
       }
       locales={locales}
-      modifiedOnly
-                version={version}
+      version={version}
     >
       <RenderFieldsToDiff
         comparison={comparison}
@@ -96,7 +95,7 @@ const Tab: React.FC<TabProps> = ({
         fields={tab.fields}
         i18n={i18n}
         locales={locales}
-        modifiedOnly
+        modifiedOnly={modifiedOnly}
         version={version}
       />
     </DiffCollapser>
