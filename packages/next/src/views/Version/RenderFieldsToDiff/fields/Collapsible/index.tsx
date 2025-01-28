@@ -1,5 +1,5 @@
 'use client'
-import type { CollapsibleFieldClient, DiffComponentProps } from 'payload'
+import type { CollapsibleFieldDiffClientComponent } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useTranslation } from '@payloadcms/ui'
@@ -11,7 +11,7 @@ import { RenderVersionFieldsToDiff } from '../../RenderVersionFieldsToDiff.js'
 
 const baseClass = 'collapsible-diff'
 
-export const Collapsible: React.FC<DiffComponentProps<CollapsibleFieldClient>> = ({
+export const Collapsible: CollapsibleFieldDiffClientComponent = ({
   baseVersionField,
   comparisonValue,
   field,

@@ -1,5 +1,5 @@
 'use client'
-import type { DiffComponentProps, TextFieldClient } from 'payload'
+import type { TextFieldDiffClientComponent } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useTranslation } from '@payloadcms/ui'
@@ -12,7 +12,7 @@ import { DiffViewer } from './DiffViewer/index.js'
 
 const baseClass = 'text-diff'
 
-export const Text: React.FC<DiffComponentProps<TextFieldClient>> = ({
+export const Text: TextFieldDiffClientComponent = ({
   comparisonValue,
   diffMethod,
   field,

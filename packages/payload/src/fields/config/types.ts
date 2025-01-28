@@ -45,14 +45,18 @@ import type {
   DateFieldErrorServerComponent,
   DateFieldLabelClientComponent,
   DateFieldLabelServerComponent,
+  DefaultCellComponentProps,
+  DefaultServerCellComponentProps,
   Description,
   EmailFieldClientProps,
   EmailFieldErrorClientComponent,
   EmailFieldErrorServerComponent,
   EmailFieldLabelClientComponent,
   EmailFieldLabelServerComponent,
-  FieldDescriptionClientComponent,
-  FieldDescriptionServerComponent,
+  FieldDescriptionClientProps,
+  FieldDescriptionServerProps,
+  FieldDiffClientComponent,
+  FieldDiffServerProps,
   GroupFieldClientProps,
   GroupFieldLabelClientComponent,
   GroupFieldLabelServerComponent,
@@ -107,8 +111,6 @@ import type {
 import type { SanitizedCollectionConfig, TypeWithID } from '../../collections/config/types.js'
 import type {
   CustomComponent,
-  DiffComponentProps,
-  DiffComponentServerProps,
   LabelFunction,
   PayloadComponent,
   StaticLabel,
@@ -271,10 +273,10 @@ export type FilterOptions<TData = any> =
 type Admin = {
   className?: string
   components?: {
-    Cell?: CustomComponent
-    Description?: CustomComponent<FieldDescriptionClientComponent | FieldDescriptionServerComponent>
-    Diff?: PayloadComponent<DiffComponentServerProps, DiffComponentProps>
-    Field?: CustomComponent<FieldClientComponent | FieldServerComponent>
+    Cell?: PayloadComponent<DefaultServerCellComponentProps, DefaultCellComponentProps>
+    Description?: PayloadComponent<FieldDescriptionServerProps, FieldDescriptionClientProps>
+    Diff?: PayloadComponent<FieldDiffServerProps, FieldDiffClientComponent>
+    Field?: PayloadComponent<FieldClientComponent | FieldServerComponent>
     /**
      * The Filter component has to be a client component
      */

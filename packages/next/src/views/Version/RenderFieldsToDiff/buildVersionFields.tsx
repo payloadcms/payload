@@ -3,9 +3,9 @@ import type {
   BaseVersionField,
   ClientField,
   ClientFieldSchemaMap,
-  DiffComponentProps,
-  DiffComponentServerProps,
   Field,
+  FieldDiffClientProps,
+  FieldDiffServerProps,
   FieldTypes,
   PayloadComponent,
   PayloadRequest,
@@ -25,7 +25,7 @@ export type BuildVersionFieldsArgs = {
   clientSchemaMap: ClientFieldSchemaMap
   comparisonSiblingData: object
   customDiffComponents: Partial<
-    Record<FieldTypes, PayloadComponent<DiffComponentServerProps, DiffComponentProps>>
+    Record<FieldTypes, PayloadComponent<FieldDiffServerProps, FieldDiffClientProps>>
   >
   entitySlug: string
   fieldPermissions:
@@ -350,7 +350,7 @@ const buildVersionField = ({
     }
   }
 
-  const clientCellProps: DiffComponentProps = {
+  const clientCellProps: FieldDiffClientProps = {
     baseVersionField: {
       ...baseVersionField,
       CustomComponent: undefined,
@@ -362,7 +362,7 @@ const buildVersionField = ({
     versionValue,
   }
 
-  const serverCellProps: DiffComponentServerProps = {
+  const serverCellProps: FieldDiffServerProps = {
     ...clientCellProps,
     clientField,
     field,
@@ -376,7 +376,7 @@ const buildVersionField = ({
       ? ({
           ...clientCellProps,
           locale,
-        } as DiffComponentProps)
+        } as FieldDiffClientProps)
       : clientCellProps,
     Component: CustomComponent,
     Fallback: DefaultComponent,
@@ -386,7 +386,7 @@ const buildVersionField = ({
       ? ({
           ...serverCellProps,
           locale,
-        } as DiffComponentServerProps)
+        } as FieldDiffServerProps)
       : serverCellProps,
   })
 

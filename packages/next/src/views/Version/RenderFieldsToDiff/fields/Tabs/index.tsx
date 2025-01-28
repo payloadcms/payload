@@ -1,5 +1,11 @@
 'use client'
-import type { ClientTab, DiffComponentProps, TabsFieldClient, VersionTab } from 'payload'
+import type {
+  ClientTab,
+  FieldDiffClientProps,
+  TabsFieldClient,
+  TabsFieldDiffClientComponent,
+  VersionTab,
+} from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useTranslation } from '@payloadcms/ui'
@@ -12,7 +18,7 @@ import { RenderVersionFieldsToDiff } from '../../RenderVersionFieldsToDiff.js'
 
 const baseClass = 'tabs-diff'
 
-export const Tabs: React.FC<DiffComponentProps<TabsFieldClient>> = (props) => {
+export const Tabs: TabsFieldDiffClientComponent = (props) => {
   const { baseVersionField, comparisonValue, field, versionValue } = props
   const { selectedLocales } = useSelectedLocales()
 
@@ -68,7 +74,7 @@ export const Tabs: React.FC<DiffComponentProps<TabsFieldClient>> = (props) => {
 type TabProps = {
   fieldTab: ClientTab
   tab: VersionTab
-} & DiffComponentProps<TabsFieldClient>
+} & FieldDiffClientProps<TabsFieldClient>
 
 const Tab: React.FC<TabProps> = ({ comparisonValue, fieldTab, locale, tab, versionValue }) => {
   const { i18n } = useTranslation()

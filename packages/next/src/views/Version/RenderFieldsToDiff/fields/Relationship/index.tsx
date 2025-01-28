@@ -2,8 +2,7 @@
 import type {
   ClientCollectionConfig,
   ClientField,
-  DiffComponentProps,
-  RelationshipFieldClient,
+  RelationshipFieldDiffClientComponent,
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -102,7 +101,7 @@ const generateLabelFromValue = (
   return valueToReturn
 }
 
-export const Relationship: React.FC<DiffComponentProps<RelationshipFieldClient>> = ({
+export const Relationship: RelationshipFieldDiffClientComponent = ({
   comparisonValue,
   field,
   locale,

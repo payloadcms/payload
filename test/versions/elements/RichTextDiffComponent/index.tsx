@@ -1,5 +1,5 @@
-import type { DiffComponentServerProps } from 'payload'
+import type { RichTextFieldDiffServerComponent } from 'payload'
 
-export const RichTextDiffComponent: React.FC<DiffComponentServerProps> = () => {
+export const RichTextDiffComponent: RichTextFieldDiffServerComponent = () => {
   return <p>Test</p>
 }
