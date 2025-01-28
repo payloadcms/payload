@@ -1,7 +1,7 @@
 'use client'
 import type { DiffMethod } from 'react-diff-viewer-continued'
 
-import { ShimmerEffect, StaggeredShimmers } from '@payloadcms/ui'
+import { ShimmerEffect } from '@payloadcms/ui'
 import { dequal } from 'dequal/lite'
 import { fieldAffectsData, fieldIsID } from 'payload/shared'
 import React, { Fragment, useEffect } from 'react'
@@ -67,10 +67,7 @@ export const RenderFieldsToDiff: React.FC<Props> = ({
                   ? JSON.stringify(comparison?.[fieldName])
                   : comparison?.[fieldName]
 
-                if (
-                  modifiedOnly &&
-                  (dequal(versionValue, comparisonValue) || field.admin?.hidden)
-                ) {
+                if (modifiedOnly && dequal(versionValue, comparisonValue)) {
                   return null
                 }
 
