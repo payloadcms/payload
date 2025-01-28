@@ -5,13 +5,15 @@ import React from 'react'
 import { fileURLToPath } from 'url'
 
 import config from '@/payload.config'
-import './globals.css'
+import './styles.css'
 
 export default async function HomePage() {
   const headers = await getHeaders()
-  const payload = await getPayload({ config })
+  const payloadConfig = await config
+  const payload = await getPayload({ config: payloadConfig })
   const { user } = await payload.auth({ headers })
 
+  const adminRoute = payloadConfig.routes?.admin || '/admin'
   const fileURL = `vscode://file/${fileURLToPath(import.meta.url)}`
 
   return (
@@ -21,7 +23,7 @@ export default async function HomePage() {
           <source srcSet="https://raw.githubusercontent.com/payloadcms/payload/main/packages/ui/src/assets/payload-favicon.svg" />
           <Image
             alt="Payload Logo"
-            height={13}
+            height={65}
             src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/ui/src/assets/payload-favicon.svg"
             width={65}
           />
@@ -29,7 +31,7 @@ export default async function HomePage() {
         {!user && <h1>Welcome to your new project.</h1>}
         {user && <h1>Welcome back, {user.email}</h1>}
         <div className="links">
-          <a className="admin" href="/admin" rel="noopener noreferrer" target="_blank">
+          <a className="admin" href={adminRoute} rel="noopener noreferrer" target="_blank">
             Go to admin panel
           </a>
           <a
@@ -42,13 +44,12 @@ export default async function HomePage() {
           </a>
         </div>
       </div>
-
-      <p className="footer">
-        Update this page by editing{' '}
+      <div className="footer">
+        <p>Update this page by editing</p>
         <a className="codeLink" href={fileURL}>
           <code>app/(frontend)/page.tsx</code>
         </a>
-      </p>
+      </div>
     </div>
   )
 }
