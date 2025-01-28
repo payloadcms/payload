@@ -370,7 +370,6 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'version:previouslyPublished',
   'version:problemRestoringVersion',
   'version:publish',
-  'version:publishAllLocales',
   'version:publishChanges',
   'version:published',
   'version:publishIn',

@@ -464,7 +464,6 @@ export const enTranslations = {
     previouslyPublished: 'Previously Published',
     problemRestoringVersion: 'There was a problem restoring this version',
     publish: 'Publish',
-    publishAllLocales: 'Publish all locales',
     publishChanges: 'Publish changes',
     published: 'Published',
     publishIn: 'Publish in {{locale}}',

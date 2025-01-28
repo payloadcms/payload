@@ -466,7 +466,6 @@ export const ruTranslations: DefaultTranslationsObject = {
     previouslyPublished: 'Ранее опубликовано',
     problemRestoringVersion: 'Возникла проблема с восстановлением этой версии',
     publish: 'Публиковать',
-    publishAllLocales: 'Опубликовать все локали',
     publishChanges: 'Опубликовать изменения',
     published: 'Опубликовано',
     publishIn: 'Опубликовать на {{locale}}',
