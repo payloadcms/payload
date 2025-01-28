@@ -7,7 +7,8 @@ export const draftWithMaxCollectionSlug = 'draft-with-max-posts'
 
 export const postCollectionSlug = 'posts'
 
-export const richTextCollectionSlug = 'richText'
+export const diffCollectionSlug = 'diff'
+export const mediaCollectionSlug = 'media'
 
 export const versionCollectionSlug = 'version-posts'
 
@@ -19,7 +20,8 @@ export const collectionSlugs = [
   autosaveCollectionSlug,
   draftCollectionSlug,
   postCollectionSlug,
-  richTextCollectionSlug,
+  diffCollectionSlug,
+  mediaCollectionSlug,
   versionCollectionSlug,
 ]
 
