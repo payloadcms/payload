@@ -166,7 +166,7 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
   )
 
   const publishAll =
-    localization && localization.defaultLocalePublishOption !== 'active' ? true : false
+    !localization || (localization && localization.defaultLocalePublishOption !== 'active')
 
   const activeLocale =
     localization &&
@@ -175,9 +175,10 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
     )
 
   const activeLocaleLabel =
-    typeof activeLocale.label === 'string'
+    activeLocale &&
+    (typeof activeLocale.label === 'string'
       ? activeLocale.label
-      : (activeLocale.label?.[localeCode] ?? undefined)
+      : (activeLocale.label?.[localeCode] ?? undefined))
 
   const defaultPublish = publishAll ? publish : () => publishSpecificLocale(activeLocale.code)
   const defaultLabel = publishAll ? label : t('version:publishIn', { locale: activeLocaleLabel })
