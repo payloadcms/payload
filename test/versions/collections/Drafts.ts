@@ -122,6 +122,25 @@ const DraftPosts: CollectionConfig = {
       name: 'restrictedToUpdate',
       type: 'checkbox',
     },
+    {
+      name: 'hiddenField',
+      type: 'text',
+      hidden: true,
+    },
+    {
+      name: 'adminHiddenField',
+      type: 'text',
+      admin: {
+        hidden: true,
+      },
+    },
+    {
+      name: 'adminDisabledField',
+      type: 'text',
+      admin: {
+        disabled: true,
+      },
+    },
   ],
   versions: {
     drafts: {

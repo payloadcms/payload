@@ -302,6 +302,11 @@ type Admin = {
    */
   disableListFilter?: boolean
   hidden?: boolean
+  /**
+   * Shows / hides fields in the version diff view.
+   * @type boolean
+   */
+  hiddenInVersionView?: boolean
   position?: 'sidebar'
   readOnly?: boolean
   style?: CSSProperties
@@ -326,6 +331,11 @@ export type AdminClient = {
    */
   disableListFilter?: boolean
   hidden?: boolean
+  /**
+   * Shows / hides fields in the version diff view.
+   * @type boolean
+   */
+  hiddenInVersionView?: boolean
   position?: 'sidebar'
   readOnly?: boolean
   style?: { '--field-width'?: CSSProperties['width'] } & CSSProperties
