@@ -1,7 +1,4 @@
 export const diffStyles = {
-  banner: {
-    display: 'none',
-  },
   diffContainer: {
     minWidth: 'unset',
   },
