@@ -22,7 +22,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     },
   ]
 
-  const imageFilePath = path.resolve(dirname, './image.jng')
+  const imageFilePath = path.resolve(dirname, './image.jpg')
   const imageFile = await getFileByPath(imageFilePath)
 
   const { id: uploadedImage } = await _payload.create({
