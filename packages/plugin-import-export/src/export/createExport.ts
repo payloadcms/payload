@@ -161,7 +161,15 @@ export const createExport = async (args: Args) => {
               data[key] = docRef[segment]
             }
           } else {
-            docRef = docRef[segment]
+            if (Array.isArray(docRef[segment])) {
+              docRef[segment].forEach((item: Record<string, unknown>, i) => {
+                Object.entries(item).forEach(([itemKey, itemValue]) => {
+                  data[`${segment}_${i}_${itemKey}`] = itemValue
+                })
+              })
+            } else {
+              docRef = docRef[segment]
+            }
           }
         })
       })
