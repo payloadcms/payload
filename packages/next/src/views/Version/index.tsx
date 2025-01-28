@@ -57,7 +57,7 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
       doc = await payload.findVersionByID({
         id: versionID,
         collection: slug,
-        depth: 1,
+        depth: 0,
         locale: 'all',
         overrideAccess: false,
         req,
@@ -69,16 +69,20 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
           slug,
           type: 'collection',
           locale: 'all',
+          overrideAccess: false,
           parentID: id,
           payload,
+          req,
           status: 'draft',
         })
         latestPublishedVersion = await getLatestVersion({
           slug,
           type: 'collection',
           locale: 'all',
+          overrideAccess: false,
           parentID: id,
           payload,
+          req,
           status: 'published',
         })
       }
@@ -96,7 +100,7 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
       doc = await payload.findGlobalVersionByID({
         id: versionID,
         slug,
-        depth: 1,
+        depth: 0,
         locale: 'all',
         overrideAccess: false,
         req,
@@ -108,14 +112,18 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
           slug,
           type: 'global',
           locale: 'all',
+          overrideAccess: false,
           payload,
+          req,
           status: 'draft',
         })
         latestPublishedVersion = await getLatestVersion({
           slug,
           type: 'global',
           locale: 'all',
+          overrideAccess: false,
           payload,
+          req,
           status: 'published',
         })
       }
@@ -176,6 +184,8 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
         collection: collectionSlug,
         depth: 0,
         locale: 'all',
+        overrideAccess: false,
+        req,
       })
     } else {
       comparisonDoc = await payload.findGlobalVersionByID({
@@ -183,6 +193,8 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
         slug: globalSlug,
         depth: 0,
         locale: 'all',
+        overrideAccess: false,
+        req,
       })
     }
   } else {
