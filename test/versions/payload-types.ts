@@ -19,6 +19,8 @@ export interface Config {
     'localized-posts': LocalizedPost;
     'version-posts': VersionPost;
     'custom-ids': CustomId;
+    diff: Diff;
+    media: Media;
     users: User;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -35,6 +37,8 @@ export interface Config {
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
     'version-posts': VersionPostsSelect<false> | VersionPostsSelect<true>;
     'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
+    diff: DiffSelect<false> | DiffSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -210,6 +214,102 @@ export interface CustomId {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "diff".
+ */
+export interface Diff {
+  id: string;
+  array?:
+    | {
+        textInArray?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocks?:
+    | {
+        textInBlock?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'TextBlock';
+      }[]
+    | null;
+  checkbox?: boolean | null;
+  code?: string | null;
+  textInCollapsible?: string | null;
+  date?: string | null;
+  email?: string | null;
+  group?: {
+    textInGroup?: string | null;
+  };
+  number?: number | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  point?: [number, number] | null;
+  radio?: ('option1' | 'option2') | null;
+  relationship?: (string | null) | DraftPost;
+  richtext?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  richtextWithCustomDiff?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  textInRow?: string | null;
+  select?: ('option1' | 'option2') | null;
+  namedTab1?: {
+    textInNamedTab1?: string | null;
+  };
+  textInUnnamedTab2?: string | null;
+  text?: string | null;
+  textArea?: string | null;
+  upload?: (string | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -355,6 +455,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'custom-ids';
         value: string | CustomId;
+      } | null)
+    | ({
+        relationTo: 'diff';
+        value: string | Diff;
+      } | null)
+    | ({
+        relationTo: 'media';
+        value: string | Media;
       } | null)
     | ({
         relationTo: 'users';
@@ -521,6 +629,75 @@ export interface CustomIdsSelect<T extends boolean = true> {
   title?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "diff_select".
+ */
+export interface DiffSelect<T extends boolean = true> {
+  array?:
+    | T
+    | {
+        textInArray?: T;
+        id?: T;
+      };
+  blocks?:
+    | T
+    | {
+        TextBlock?:
+          | T
+          | {
+              textInBlock?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  checkbox?: T;
+  code?: T;
+  textInCollapsible?: T;
+  date?: T;
+  email?: T;
+  group?:
+    | T
+    | {
+        textInGroup?: T;
+      };
+  number?: T;
+  point?: T;
+  radio?: T;
+  relationship?: T;
+  richtext?: T;
+  richtextWithCustomDiff?: T;
+  textInRow?: T;
+  select?: T;
+  namedTab1?:
+    | T
+    | {
+        textInNamedTab1?: T;
+      };
+  textInUnnamedTab2?: T;
+  text?: T;
+  textArea?: T;
+  upload?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select".
+ */
+export interface MediaSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
