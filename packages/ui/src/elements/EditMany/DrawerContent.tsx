@@ -185,6 +185,7 @@ export const EditManyDrawerContent: React.FC<
           operation: 'update',
           schemaPath: slug,
           signal: controller.signal,
+          skipValidation: true,
         })
 
         setInitialState(result)

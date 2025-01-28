@@ -59,10 +59,11 @@ export const recursivelyPopulateFieldsForGraphQL = ({
     global: null, // Pass from core? This is only needed for hooks, so we can leave this null for now
     locale: req.locale!,
     overrideAccess,
-    path: [],
+    parentIndexPath: '',
+    parentPath: '',
+    parentSchemaPath: '',
     populationPromises, // This is not the same as populationPromises passed into this recurseNestedFields. These are just promises resolved at the very end.
     req,
-    schemaPath: [],
     showHiddenFields,
     siblingDoc,
     triggerHooks: false,

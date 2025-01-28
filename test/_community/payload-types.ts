@@ -70,7 +70,7 @@ export interface UserAuthOperations {
 export interface Post {
   id: string;
   title?: string | null;
-  richText?: {
+  content?: {
     root: {
       type: string;
       children: {
@@ -217,7 +217,7 @@ export interface PayloadMigration {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
-  richText?: T;
+  content?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -339,23 +339,6 @@ export interface MenuSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ContactBlock".
- */
-export interface ContactBlock {
-  /**
-   * ...
-   */
-  first: string;
-  /**
-   * ...
-   */
-  two: string;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'contact';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
