@@ -1120,10 +1120,10 @@ describe('Versions', () => {
       const textInUnamedTab2 = page.locator('[data-field-path="textInUnnamedTab2"]')
 
       await expect(textInUnamedTab2.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
-        'textInUnamedTab2',
+        'textInUnnamedTab2',
       )
       await expect(textInUnamedTab2.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
-        'textInUnamedTab22',
+        'textInUnnamedTab22',
       )
     })
 
