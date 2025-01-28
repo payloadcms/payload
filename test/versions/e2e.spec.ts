@@ -1117,7 +1117,7 @@ describe('Versions', () => {
     test('correctly renders diff for unnamed tabs', async () => {
       await navigateToVersionFieldsDiff()
 
-      const textInUnamedTab2 = page.locator('[data-field-path="namedTab1.textInUnamedTab2"]')
+      const textInUnamedTab2 = page.locator('[data-field-path="textInUnnamedTab2"]')
 
       await expect(textInUnamedTab2.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
         'textInUnamedTab2',
