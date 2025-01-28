@@ -262,10 +262,10 @@ Custom validation functions should return either `true` or a `string` representi
 
 The following arguments are provided to the `validate` function:
 
-|  Argument  |  Description                                                                                    |
+|   Argument   |   Description                                                                                     |
 | --- | --- |
-|  `value`   |  The value of the field being validated.                                                         |
-|  `ctx`    |  An object with additional data and context. [More details](#validation-context)  |
+|   `value`    |   The value of the field being validated.                                                          |
+|   `ctx`     |   An object with additional data and context. [More details](#validation-context)   |
 
 #### Validation Context
 
@@ -286,14 +286,14 @@ export const MyField: Field = {
 
 The following additional properties are provided in the `ctx` object:
 
-|  Property       |  Description                                                                                                                            |
+|   Property        |   Description                                                                                                                             |
 | --- | --- |
-|  `data`         |  An object containing the full collection or global document currently being edited.                                                    |
-|  `siblingData`  |  An object containing document data that is scoped to only fields within the same parent of this field.                                 |
-|  `operation`    |  Will be `create` or `update` depending on the UI action or API call.                                                                   |
-|  `id`           |  The `id` of the current document being edited. `id` is `undefined` during the `create` operation.                                      |
-|  `req`          |  The current HTTP request object. Contains `payload`, `user`, etc.                                                                      |
-|  `event`        |  Either `onChange` or `submit` depending on the current action. Used as a performance opt-in. [More details](#async-field-validations).  |
+|   `data`          |   An object containing the full collection or global document currently being edited.                                                     |
+|   `siblingData`   |   An object containing document data that is scoped to only fields within the same parent of this field.                                  |
+|   `operation`     |   Will be `create` or `update` depending on the UI action or API call.                                                                    |
+|   `id`            |   The `id` of the current document being edited. `id` is `undefined` during the `create` operation.                                       |
+|   `req`           |   The current HTTP request object. Contains `payload`, `user`, etc.                                                                       |
+|   `event`         |   Either `onChange` or `submit` depending on the current action. Used as a performance opt-in. [More details](#async-field-validations).   |
 
 #### Reusing Default Field Validations
 
@@ -426,21 +426,21 @@ export const CollectionConfig: CollectionConfig = {
 
 The following options are available:
 
-|  Option                   |  Description                                                                                                                                                                                                                       |
+|   Option                    |   Description                                                                                                                                                                                                                        |
 | --- | --- |
-|  **`condition`**          |  Programmatically show / hide fields based on other fields. [More details](#conditional-logic).                                                                                                                     |
-|  **`components`**         |  All Field Components can be swapped out for [Custom Components](../admin/components) that you define.                                                                                            |
-|  **`description`**        |  Helper text to display alongside the field to provide more information for the editor. [More details](#description).                                                                                               |
-|  **`position`**           |  Specify if the field should be rendered in the sidebar by defining `position: 'sidebar'`.                                                                                                                                         |
-|  **`width`**              |  Restrict the width of a field. You can pass any string-based value here, be it pixels, percentages, etc. This property is especially useful when fields are nested within a `Row` type where they can be organized horizontally.  |
-|  **`style`**              |  [CSS Properties](https://developer.mozilla.org/en-US/docs/Web/CSS) to inject into the root element of the field.                                                                                                                  |
-|  **`className`**          |  Attach a [CSS class attribute](https://developer.mozilla.org/en-US/docs/Web/CSS/Class_selectors) to the root DOM element of a field.                                                                                              |
-|  **`readOnly`**           |  Setting a field to `readOnly` has no effect on the API whatsoever but disables the admin component's editability to prevent editors from modifying the field's value.                                                             |
-|  **`disabled`**           |  If a field is `disabled`, it is completely omitted from the [Admin Panel](../admin/overview) entirely.                                                                                                                            |
-|  **`disableBulkEdit`**    |  Set `disableBulkEdit` to `true` to prevent fields from appearing in the select options when making edits for multiple documents. Defaults to `true` for UI fields.                                                                |
-|  **`disableListColumn`**  |  Set `disableListColumn` to `true` to prevent fields from appearing in the list view column selector.                                                                                                                              |
-|  **`disableListFilter`**  |  Set `disableListFilter` to `true` to prevent fields from appearing in the list view filter options.                                                                                                                               |
-|  **`hidden`**             |  Will transform the field into a `hidden` input type. Its value will still submit with requests in the Admin Panel, but the field itself will not be visible to editors.                                                           |
+|   **`condition`**           |   Programmatically show / hide fields based on other fields. [More details](#conditional-logic).                                                                                                                      |
+|   **`components`**          |   All Field Components can be swapped out for [Custom Components](../admin/components) that you define.                                                                                             |
+|   **`description`**         |   Helper text to display alongside the field to provide more information for the editor. [More details](#description).                                                                                                |
+|   **`position`**            |   Specify if the field should be rendered in the sidebar by defining `position: 'sidebar'`.                                                                                                                                          |
+|   **`width`**               |   Restrict the width of a field. You can pass any string-based value here, be it pixels, percentages, etc. This property is especially useful when fields are nested within a `Row` type where they can be organized horizontally.   |
+|   **`style`**               |   [CSS Properties](https://developer.mozilla.org/en-US/docs/Web/CSS) to inject into the root element of the field.                                                                                                                   |
+|   **`className`**           |   Attach a [CSS class attribute](https://developer.mozilla.org/en-US/docs/Web/CSS/Class_selectors) to the root DOM element of a field.                                                                                               |
+|   **`readOnly`**            |   Setting a field to `readOnly` has no effect on the API whatsoever but disables the admin component's editability to prevent editors from modifying the field's value.                                                              |
+|   **`disabled`**            |   If a field is `disabled`, it is completely omitted from the [Admin Panel](../admin/overview) entirely.                                                                                                                             |
+|   **`disableBulkEdit`**     |   Set `disableBulkEdit` to `true` to prevent fields from appearing in the select options when making edits for multiple documents. Defaults to `true` for UI fields.                                                                 |
+|   **`disableListColumn`**   |   Set `disableListColumn` to `true` to prevent fields from appearing in the list view column selector.                                                                                                                               |
+|   **`disableListFilter`**   |   Set `disableListFilter` to `true` to prevent fields from appearing in the list view filter options.                                                                                                                                |
+|   **`hidden`**              |   Will transform the field into a `hidden` input type. Its value will still submit with requests in the Admin Panel, but the field itself will not be visible to editors.                                                            |
 
 ### Field Descriptions
 
@@ -502,9 +502,9 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
 
 All Description Functions receive the following arguments:
 
-|  Argument        |  Description                                                       |
+|   Argument         |   Description                                                        |
 | --- | --- |
-|  **`t`**         |  The `t` function used to internationalize the Admin Panel. [More details](../configuration/i18n)  |
+|   **`t`**          |   The `t` function used to internationalize the Admin Panel. [More details](../configuration/i18n)   |
 
 <Banner type="info">
   **Note:** If you need to subscribe to live updates within your form, use a Description Component instead. [More details](#description).
@@ -581,17 +581,17 @@ export const CollectionConfig: CollectionConfig = {
 
 The following options are available:
 
-|  Component     |  Description                                                                                                                  |
+|   Component      |   Description                                                                                                                   |
 | --- | --- |
-|  **`Field`**   |  The form field rendered of the Edit View. [More details](#field).                                                 |
-|  **`Cell`**    |  The table cell rendered of the List View. [More details](#cell).               |
-|  **`Filter`**  |  The filter component rendered in the List View. [More details](#filter).  |
-|  **`Label`**        |  Override the default Label of the Field Component. [More details](#label).                                     |
-|  **`Error`**        |  Override the default Error of the Field Component. [More details](#error).                                     |
-| **`Diff`** | Override the default Diff component rendered in the Version Diff View. [More details](#diff).               |
-|  **`Description`**  |  Override the default Description of the Field Component. [More details](#description).                       |
-|  **`beforeInput`**  |  An array of elements that will be added before the input of the Field Component. [More details](#afterinput-and-beforeinput). |
-|  **`afterInput`**   |  An array of elements that will be added after the input of the Field Component. [More details](#afterinput-and-beforeinput).  |
+|   **`Field`**    |   The form field rendered of the Edit View. [More details](#field).                                                  |
+|   **`Cell`**     |   The table cell rendered of the List View. [More details](#cell).                |
+|   **`Filter`**   |   The filter component rendered in the List View. [More details](#filter).   |
+|   **`Label`**         |   Override the default Label of the Field Component. [More details](#label).                                      |
+|   **`Error`**         |   Override the default Error of the Field Component. [More details](#error).                                      |
+|  **`Diff`**  |  Override the default Diff component rendered in the Version Diff View. [More details](#diff).                |
+|   **`Description`**   |   Override the default Description of the Field Component. [More details](#description).                        |
+|   **`beforeInput`**   |   An array of elements that will be added before the input of the Field Component. [More details](#afterinput-and-beforeinput).  |
+|   **`afterInput`**    |   An array of elements that will be added after the input of the Field Component. [More details](#afterinput-and-beforeinput).   |
 
 #### Field
 
@@ -628,31 +628,31 @@ export const CollectionConfig: CollectionConfig = {
 
 All Field Components receive the following props by default:
 
-|  Property              |  Description                                                                                                                                                                                                                          |
+|   Property               |   Description                                                                                                                                                                                                                           |
 | --- | --- |
-|  **`docPreferences`**  |  An object that contains the [Preferences](../admin/preferences) for the document.                                                                                                                                                           |
-|  **`field`**           |  In Client Components, this is the sanitized Client Field Config. In Server Components, this is the original Field Config. Server Components will also receive the sanitized field config through the`clientField` prop (see below).  |
-|  **`locale`**          |  The locale of the field. [More details](../configuration/localization).                                                                                                                                                              |
-|  **`readOnly`**        |  A boolean value that represents if the field is read-only or not.                                                                                                                                                                    |
-|  **`user`**            |  The currently authenticated user. [More details](../authentication/overview).                                                                                                                                                        |
-|  **`validate`**        |  A function that can be used to validate the field.                                                                                                                                                                                   |
-|  **`path`**            |  A string representing the direct, dynamic path to the field at runtime, i.e. `myGroup.myArray.0.myField`.                                                                                                                            |
-|  **`schemaPath`**      |  A string representing the direct, static path to the Field Config, i.e. `posts.myGroup.myArray.myField`.                                                                                                       |
-|  **`indexPath`**       |  A hyphen-notated string representing the path to the field *within the nearest named ancestor field*, i.e. `0-0`                                                                                                                     |
+|   **`docPreferences`**   |   An object that contains the [Preferences](../admin/preferences) for the document.                                                                                                                                                            |
+|   **`field`**            |   In Client Components, this is the sanitized Client Field Config. In Server Components, this is the original Field Config. Server Components will also receive the sanitized field config through the`clientField` prop (see below).   |
+|   **`locale`**           |   The locale of the field. [More details](../configuration/localization).                                                                                                                                                               |
+|   **`readOnly`**         |   A boolean value that represents if the field is read-only or not.                                                                                                                                                                     |
+|   **`user`**             |   The currently authenticated user. [More details](../authentication/overview).                                                                                                                                                         |
+|   **`validate`**         |   A function that can be used to validate the field.                                                                                                                                                                                    |
+|   **`path`**             |   A string representing the direct, dynamic path to the field at runtime, i.e. `myGroup.myArray.0.myField`.                                                                                                                             |
+|   **`schemaPath`**       |   A string representing the direct, static path to the Field Config, i.e. `posts.myGroup.myArray.myField`.                                                                                                        |
+|   **`indexPath`**        |   A hyphen-notated string representing the path to the field *within the nearest named ancestor field*, i.e. `0-0`                                                                                                                      |
 
 In addition to the above props, all Server Components will also receive the following props:
 
-|  Property           |  Description                                                                    |
+|   Property            |   Description                                                                     |
 | --- | --- |
-|  **`clientField`**  |  The serializable Client Field Config.                                          |
-|  **`field`**        |  The Field Config.                                                              |
-|  **`data`**         |  The current document being edited.                                             |
-|  **`i18n`**         |  The [i18n](../configuration/i18n) object.                                      |
-|  **`payload`**      |  The [Payload](../local-api/overview) class.                                    |
-|  **`permissions`**  |  The field permissions based on the currently authenticated user.               |
-|  **`siblingData`**  |  The data of the field's siblings.                                              |
-|  **`user`**         |  The currently authenticated user. [More details](../authentication/overview).  |
-|  **`value`**        |  The value of the field at render-time.                                         |
+|   **`clientField`**   |   The serializable Client Field Config.                                           |
+|   **`field`**         |   The Field Config.                                                               |
+|   **`data`**          |   The current document being edited.                                              |
+|   **`i18n`**          |   The [i18n](../configuration/i18n) object.                                       |
+|   **`payload`**       |   The [Payload](../local-api/overview) class.                                     |
+|   **`permissions`**   |   The field permissions based on the currently authenticated user.                |
+|   **`siblingData`**   |   The data of the field's siblings.                                               |
+|   **`user`**          |   The currently authenticated user. [More details](../authentication/overview).   |
+|   **`value`**         |   The value of the field at render-time.                                          |
 
 ##### Sending and receiving values from the form
 
@@ -718,10 +718,10 @@ export const myField: Field = {
 
 All Cell Components receive the same [Default Field Component Props](#field), plus the following:
 
-|  Property          |  Description                                                        |
+|   Property           |   Description                                                         |
 | --- | --- |
-|  **`link`**  |  A boolean representing whether this cell should be wrapped in a link.  |
-|  **`onClick`**  |  A function that is called when the cell is clicked.  |
+|   **`link`**   |   A boolean representing whether this cell should be wrapped in a link.   |
+|   **`onClick`**   |   A function that is called when the cell is clicked.   |
 
 For details on how to build Custom Components themselves, see [Building Custom Components](../admin/components#building-custom-components).
 
@@ -862,6 +862,75 @@ import type {
   // And so on for each Field Type
 } from 'payload'
 ```
+
+#### Diff
+
+The Diff Component is rendered in the Version Diff view. It will only be visible in entities with versioning enabled,
+
+To swap in your own Diff Component, use the `admin.components.Diff` property in your Field Config:
+
+```ts
+import type { Field } from 'payload'
+
+export const myField: Field = {
+  name: 'myField',
+  type: 'text',
+  admin: {
+    components: {
+      Diff: '/path/to/MyCustomDiffComponent', // highlight-line
+    },
+  },
+}
+```
+
+All Error Components receive the [Default Field Component Props](#field).
+
+For details on how to build Custom Components themselves, see [Building Custom Components](../admin/components#building-custom-components).
+
+##### TypeScript#diff-component-types
+
+When building Custom Diff Components, you can import the component types to ensure type safety in your component. There is an explicit type for the Diff Component, one for every Field Type and server/client environment. The convention is to append `DiffServerComponent` or `DiffClientComponent` to the type of field, i.e. `TextFieldDiffClientComponent`.
+
+```tsx
+import type {
+  TextFieldDiffServerComponent,
+  TextFieldDiffClientComponent,
+  // And so on for each Field Type
+} from 'payload'
+```
+
+#### afterInput and beforeInput
+
+With these properties you can add multiple components *before* and *after* the input element, as their name suggests. This is useful when you need to render additional elements alongside the field without replacing the entire field component.
+
+To add components before and after the input element, use the `admin.components.beforeInput` and `admin.components.afterInput` properties in your Field Config:
+
+```ts
+import type { SanitizedCollectionConfig } from 'payload'
+
+export const MyCollectionConfig: SanitizedCollectionConfig = {
+  // ...
+  fields: [
+    // ...
+    {
+      name: 'myField',
+      type: 'text',
+      admin: {
+        components: {
+          // highlight-start
+          beforeInput: ['/path/to/MyCustomComponent'],
+          afterInput: ['/path/to/MyOtherCustomComponent'],
+          // highlight-end
+        }
+      }
+    }
+  ]
+}
+```
+
+All `afterInput` and `beforeInput` Components receive the same [Default Field Component Props](#field).
+
+For details on how to build Custom Components, see [Building Custom Components](../admin/components#building-custom-components).
 
 #### afterInput and beforeInput
 
