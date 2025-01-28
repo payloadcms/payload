@@ -8,7 +8,6 @@ import React, { useEffect, useMemo, useState } from 'react'
 
 import type { CompareOption, DefaultVersionsViewProps } from './types.js'
 
-import { RenderFieldsToDiff } from '../RenderFieldsToDiff/index.js'
 import Restore from '../Restore/index.js'
 import { SelectComparison } from '../SelectComparison/index.js'
 import './index.scss'
@@ -23,9 +22,9 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   doc,
   latestDraftVersion,
   latestPublishedVersion,
+  RenderedDiff,
   selectedLocales: selectedLocalesProp,
   versionID,
-  versionState,
 }) => {
   const { config, getEntityConfig } = useConfig()
 
@@ -148,7 +147,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
         <SelectedLocalesContext.Provider
           value={{ selectedLocales: selectedLocales.map((locale) => locale.value) }}
         >
-          {doc?.version && <RenderFieldsToDiff fields={versionState.versionFields} />}
+          {doc?.version && RenderedDiff}
         </SelectedLocalesContext.Provider>
       </Gutter>
     </main>

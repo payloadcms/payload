@@ -1226,10 +1226,6 @@ export type VersionField = {
   type: FieldTypes
 }
 
-export type VersionState = {
-  versionFields: VersionField[]
-}
-
 /**
  * Taken from react-diff-viewer-continued
  */

@@ -13,17 +13,16 @@ import type {
   TabAsField,
   TabAsFieldClient,
   VersionField,
-  VersionState,
 } from 'payload'
 import type { DiffMethod } from 'react-diff-viewer-continued'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { fieldIsID, getUniqueListBy, tabHasName } from 'payload/shared'
 
-import { diffMethods } from './RenderFieldsToDiff/fields/diffMethods.js'
-import { diffComponents } from './RenderFieldsToDiff/fields/index.js'
+import { diffMethods } from './fields/diffMethods.js'
+import { diffComponents } from './fields/index.js'
 
-type Args = {
+export type BuildVersionFieldsArgs = {
   clientSchemaMap: ClientFieldSchemaMap
   comparisonSiblingData: object
   customDiffComponents: Partial<
@@ -112,7 +111,7 @@ export function getFieldPaths2({
  * Here, the server is responsible for traversing through the document data and building up this
  * version state object.
  */
-export const buildVersionState = ({
+export const buildVersionFields = ({
   clientSchemaMap,
   comparisonSiblingData,
   customDiffComponents,
@@ -126,10 +125,10 @@ export const buildVersionState = ({
   req,
   selectedLocales,
   versionSiblingData,
-}: Args): VersionState => {
-  const versionState: VersionState = {
-    versionFields: [],
-  }
+}: BuildVersionFieldsArgs): {
+  versionFields: VersionField[]
+} => {
+  const versionFields: VersionField[] = []
   let fieldIndex = -1
   for (const field of fields) {
     fieldIndex++
@@ -161,7 +160,7 @@ export const buildVersionState = ({
       versionField.fieldByLocale = {}
 
       for (const locale of selectedLocales) {
-        versionField.fieldByLocale[locale] = buildVersionFieldState({
+        versionField.fieldByLocale[locale] = buildVersionField({
           clientField: clientField as ClientField,
           clientSchemaMap,
           comparisonValue: comparisonValue?.[locale],
@@ -182,7 +181,7 @@ export const buildVersionState = ({
         })
       }
     } else {
-      versionField.field = buildVersionFieldState({
+      versionField.field = buildVersionField({
         clientField: clientField as ClientField,
         clientSchemaMap,
         comparisonValue,
@@ -202,13 +201,15 @@ export const buildVersionState = ({
       })
     }
 
-    versionState.versionFields.push(versionField)
+    versionFields.push(versionField)
   }
 
-  return versionState
+  return {
+    versionFields,
+  }
 }
 
-const buildVersionFieldState = ({
+const buildVersionField = ({
   clientField,
   clientSchemaMap,
   comparisonValue,
@@ -236,7 +237,7 @@ const buildVersionFieldState = ({
   schemaPath: string
   versionValue: unknown
 } & Omit<
-  Args,
+  BuildVersionFieldsArgs,
   'comparisonSiblingData' | 'fields' | 'parentIndexPath' | 'versionSiblingData'
 >): BaseVersionField | null => {
   const fieldName: null | string = 'name' in field ? field.name : null
@@ -289,7 +290,7 @@ const buildVersionFieldState = ({
       })
       baseVersionField.tabs.push({
         name: 'name' in tab ? tab.name : null,
-        fields: buildVersionState({
+        fields: buildVersionFields({
           clientSchemaMap,
           comparisonSiblingData: 'name' in tab ? comparisonValue?.[tab.name] : comparisonValue,
           customDiffComponents,
@@ -318,7 +319,7 @@ const buildVersionFieldState = ({
       for (let i = 0; i < versionValue.length; i++) {
         const comparisonRow = comparisonValue?.[i] || {}
         const versionRow = versionValue?.[i] || {}
-        baseVersionField.rows[i] = buildVersionState({
+        baseVersionField.rows[i] = buildVersionFields({
           clientSchemaMap,
           comparisonSiblingData: comparisonRow,
           customDiffComponents,
@@ -335,7 +336,7 @@ const buildVersionFieldState = ({
         }).versionFields
       }
     } else {
-      baseVersionField.fields = buildVersionState({
+      baseVersionField.fields = buildVersionFields({
         clientSchemaMap,
         comparisonSiblingData: comparisonValue as object,
         customDiffComponents,
@@ -379,7 +380,7 @@ const buildVersionFieldState = ({
         }
       }
 
-      baseVersionField.rows[i] = buildVersionState({
+      baseVersionField.rows[i] = buildVersionFields({
         clientSchemaMap,
         comparisonSiblingData: comparisonRow,
         customDiffComponents,

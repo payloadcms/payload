@@ -10,7 +10,7 @@ import React from 'react'
 
 import { useSelectedLocales } from '../../../Default/SelectedLocalesContext.js'
 import { DiffCollapser } from '../../DiffCollapser/index.js'
-import { RenderFieldsToDiff } from '../../index.js'
+import { RenderVersionFieldsToDiff } from '../../RenderVersionFieldsToDiff.js'
 
 const baseClass = 'group-diff'
 
@@ -42,7 +42,7 @@ export const Group: React.FC<DiffComponentProps<GroupFieldClient>> = ({
         locales={selectedLocales}
         version={versionValue}
       >
-        <RenderFieldsToDiff fields={baseVersionField.fields} />
+        <RenderVersionFieldsToDiff versionFields={baseVersionField.fields} />
       </DiffCollapser>
     </div>
   )

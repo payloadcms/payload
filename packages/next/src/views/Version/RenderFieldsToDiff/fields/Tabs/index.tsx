@@ -8,7 +8,7 @@ import React from 'react'
 import './index.scss'
 import { useSelectedLocales } from '../../../Default/SelectedLocalesContext.js'
 import { DiffCollapser } from '../../DiffCollapser/index.js'
-import { RenderFieldsToDiff } from '../../index.js'
+import { RenderVersionFieldsToDiff } from '../../RenderVersionFieldsToDiff.js'
 
 const baseClass = 'tabs-diff'
 
@@ -91,7 +91,7 @@ const Tab: React.FC<TabProps> = ({ comparisonValue, fieldTab, locale, tab, versi
       locales={selectedLocales}
       version={versionValue}
     >
-      <RenderFieldsToDiff fields={tab.fields} />
+      <RenderVersionFieldsToDiff versionFields={tab.fields} />
     </DiffCollapser>
   )
 }

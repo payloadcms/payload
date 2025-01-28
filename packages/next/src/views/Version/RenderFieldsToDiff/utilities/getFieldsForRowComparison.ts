@@ -61,7 +61,7 @@ export function getFieldsForRowComparison({
         'name',
       )
 
-      // buildVersionState already merged the fields of the version and comparison rows together
+      // buildVersionFields already merged the fields of the version and comparison rows together
       versionFields = baseVersionField.rows?.length
         ? baseVersionField.rows[row]
         : baseVersionField.fields

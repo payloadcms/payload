@@ -12,7 +12,7 @@ import React from 'react'
 
 import { useSelectedLocales } from '../../../Default/SelectedLocalesContext.js'
 import { DiffCollapser } from '../../DiffCollapser/index.js'
-import { RenderFieldsToDiff } from '../../index.js'
+import { RenderVersionFieldsToDiff } from '../../RenderVersionFieldsToDiff.js'
 import { getFieldsForRowComparison } from '../../utilities/getFieldsForRowComparison.js'
 
 const baseClass = 'iterable-diff'
@@ -80,7 +80,7 @@ export const Iterable: React.FC<DiffComponentProps> = ({
                     locales={selectedLocales}
                     version={versionRow}
                   >
-                    <RenderFieldsToDiff fields={versionFields} />
+                    <RenderVersionFieldsToDiff versionFields={versionFields} />
                   </DiffCollapser>
                 </div>
               )

@@ -1,5 +1,4 @@
 import type {
-  DiffComponentProps,
   Document,
   EditViewComponent,
   OptionObject,
@@ -8,7 +7,6 @@ import type {
   SanitizedGlobalPermission,
 } from 'payload'
 
-import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { getClientSchemaMap } from '@payloadcms/ui/utilities/getClientSchemaMap'
 import { getSchemaMap } from '@payloadcms/ui/utilities/getSchemaMap'
@@ -16,8 +14,8 @@ import { notFound } from 'next/navigation.js'
 import React from 'react'
 
 import { getLatestVersion } from '../Versions/getLatestVersion.js'
-import { buildVersionState } from './buildVersionState.js'
 import { DefaultVersionView } from './Default/index.js'
+import { RenderDiff } from './RenderFieldsToDiff/index.js'
 
 export const VersionView: PayloadServerReactComponent<EditViewComponent> = async (props) => {
   const { i18n, initPageResult, routeSegments, searchParams } = props
@@ -207,7 +205,7 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
     schemaMap,
   })
 
-  const versionState = buildVersionState({
+  const RenderedDiff = RenderDiff({
     clientSchemaMap,
     comparisonSiblingData: comparisonDoc?.version,
     customDiffComponents: {},
@@ -235,9 +233,9 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
       doc={doc}
       latestDraftVersion={latestDraftVersion?.id}
       latestPublishedVersion={latestPublishedVersion?.id}
+      RenderedDiff={RenderedDiff}
       selectedLocales={selectedLocales}
       versionID={versionID}
-      versionState={versionState}
     />
   )
 }
