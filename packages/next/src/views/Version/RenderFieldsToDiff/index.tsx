@@ -52,7 +52,7 @@ export const RenderFieldsToDiff: React.FC<Props> = ({
               ? JSON.stringify(comparison?.[fieldName])
               : comparison?.[fieldName]
 
-            if (modifiedOnly && (dequal(versionValue, comparisonValue))) {
+            if (modifiedOnly && (dequal(versionValue, comparisonValue) || field.admin?.hidden)) {
               return null
             }
 
