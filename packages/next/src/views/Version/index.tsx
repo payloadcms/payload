@@ -39,6 +39,8 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
     : null
   const comparisonVersionIDFromParams: string = searchParams.compareValue as string
 
+  const modifiedOnly: boolean = searchParams.modifiedOnly === 'true'
+
   const { localization } = config
 
   let docPermissions: SanitizedCollectionPermission | SanitizedGlobalPermission
@@ -225,6 +227,7 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
     fieldPermissions: docPermissions?.fields,
     fields: (collectionConfig || globalConfig)?.fields,
     i18n,
+    modifiedOnly,
     parentIndexPath: '',
     parentPath: '',
     parentSchemaPath: '',

@@ -464,6 +464,7 @@ export const roTranslations: DefaultTranslationsObject = {
     draft: 'Proiect',
     draftSavedSuccessfully: 'Proiect salvat cu succes.',
     lastSavedAgo: 'Ultima salvare acum {{distance}}',
+    modifiedOnly: 'Modificat doar',
     noFurtherVersionsFound: 'Nu s-au găsit alte versiuni',
     noRowsFound: 'Nu s-a găsit niciun {{label}}',
     noRowsSelected: 'Niciun {{etichetă}} selectat',

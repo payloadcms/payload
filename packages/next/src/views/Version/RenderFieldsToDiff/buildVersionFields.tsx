@@ -15,6 +15,7 @@ import type {
 import type { DiffMethod } from 'react-diff-viewer-continued'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { dequal } from 'dequal/lite'
 import { fieldIsID, getUniqueListBy, tabHasName } from 'payload/shared'
 
 import { diffMethods } from './fields/diffMethods.js'
@@ -35,6 +36,7 @@ export type BuildVersionFieldsArgs = {
     | true
   fields: Field[]
   i18n: I18nClient
+  modifiedOnly: boolean
   parentIndexPath: string
   parentPath: string
   parentSchemaPath: string
@@ -58,6 +60,7 @@ export const buildVersionFields = ({
   fieldPermissions,
   fields,
   i18n,
+  modifiedOnly,
   parentIndexPath,
   parentPath,
   parentSchemaPath,
@@ -121,6 +124,7 @@ export const buildVersionFields = ({
           i18n,
           indexPath,
           locale,
+          modifiedOnly,
           parentPath,
           parentSchemaPath,
           path,
@@ -141,6 +145,7 @@ export const buildVersionFields = ({
         fieldPermissions,
         i18n,
         indexPath,
+        modifiedOnly,
         parentPath,
         parentSchemaPath,
         path,
@@ -170,6 +175,7 @@ const buildVersionField = ({
   i18n,
   indexPath,
   locale,
+  modifiedOnly,
   parentPath,
   parentSchemaPath,
   path,
@@ -183,6 +189,7 @@ const buildVersionField = ({
   field: Field
   indexPath: string
   locale?: string
+  modifiedOnly?: boolean
   path: string
   schemaPath: string
   versionValue: unknown
@@ -207,6 +214,10 @@ const buildVersionField = ({
     fieldPermissions?.[fieldName]?.fields
 
   if (!hasPermission) {
+    return null
+  }
+
+  if (modifiedOnly && dequal(versionValue, comparisonValue)) {
     return null
   }
 
@@ -251,6 +262,7 @@ const buildVersionField = ({
           fieldPermissions,
           fields: tab.fields,
           i18n,
+          modifiedOnly,
           parentIndexPath: isNamedTab ? '' : tabIndexPath,
           parentPath: tabPath,
           parentSchemaPath: tabSchemaPath,
@@ -280,6 +292,7 @@ const buildVersionField = ({
           fieldPermissions,
           fields: field.fields,
           i18n,
+          modifiedOnly,
           parentIndexPath: 'name' in field ? '' : indexPath,
           parentPath: path + '.' + i,
           parentSchemaPath: schemaPath,
@@ -297,6 +310,7 @@ const buildVersionField = ({
         fieldPermissions,
         fields: field.fields,
         i18n,
+        modifiedOnly,
         parentIndexPath: 'name' in field ? '' : indexPath,
         parentPath: path,
         parentSchemaPath: schemaPath,
@@ -341,6 +355,7 @@ const buildVersionField = ({
         fieldPermissions,
         fields,
         i18n,
+        modifiedOnly,
         parentIndexPath: 'name' in field ? '' : indexPath,
         parentPath: path + '.' + i,
         parentSchemaPath: schemaPath + '.' + versionBlock.slug,

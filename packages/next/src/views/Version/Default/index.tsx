@@ -1,7 +1,7 @@
 'use client'
 import type { OptionObject } from 'payload'
 
-import { Gutter, useConfig, useDocumentInfo, useTranslation } from '@payloadcms/ui'
+import { CheckboxInput, Gutter, useConfig, useDocumentInfo, useTranslation } from '@payloadcms/ui'
 import { formatDate } from '@payloadcms/ui/shared'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation.js'
 import React, { useEffect, useMemo, useState } from 'react'
@@ -52,6 +52,10 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const [modifiedOnly, setModifiedOnly] = useState(false)
+  function onToggleModifiedOnly() {
+    setModifiedOnly(!modifiedOnly)
+  }
 
   useEffect(() => {
     // If the selected comparison doc or locales change, update URL params so that version page RSC
@@ -69,10 +73,16 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
       current.set('localeCodes', JSON.stringify(selectedLocales.map((locale) => locale.value)))
     }
 
+    if (!modifiedOnly) {
+      current.delete('modifiedOnly')
+    } else {
+      current.set('modifiedOnly', 'true')
+    }
+
     const search = current.toString()
     const query = search ? `?${search}` : ''
     router.push(`${pathname}${query}`)
-  }, [compareValue, pathname, router, searchParams, selectedLocales])
+  }, [compareValue, pathname, router, searchParams, selectedLocales, modifiedOnly])
 
   const {
     admin: { dateFormat },
@@ -123,6 +133,14 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
                 versionID={versionID}
               />
             )}
+            <span className={`${baseClass}__modifiedCheckBox`}>
+              <CheckboxInput
+                checked={modifiedOnly}
+                id={'modifiedOnly'}
+                label={i18n.t('version:modifiedOnly')}
+                onToggle={onToggleModifiedOnly}
+              />
+            </span>
           </header>
         </div>
         <div className={`${baseClass}__controls`}>
