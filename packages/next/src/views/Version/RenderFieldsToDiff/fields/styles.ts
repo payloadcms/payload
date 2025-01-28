@@ -1,4 +1,10 @@
 export const diffStyles = {
+  banner: {
+    display: 'none',
+  },
+  diffContainer: {
+    minWidth: 'unset',
+  },
   variables: {
     dark: {
       addedBackground: 'var(--theme-success-900)',
