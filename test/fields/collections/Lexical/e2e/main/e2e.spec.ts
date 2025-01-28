@@ -264,6 +264,19 @@ describe('lexicalMain', () => {
     })
   })
 
+  test('should be able to externally mutate editor state', async () => {
+    await navigateToLexicalFields()
+    const richTextField = page.locator('.rich-text-lexical').nth(1).locator('.editor-scroller') // first
+    await expect(richTextField).toBeVisible()
+    await richTextField.click() // Use click, because focus does not work
+    await page.keyboard.type('some text')
+    const spanInEditor = richTextField.locator('span').first()
+    await expect(spanInEditor).toHaveText('some text')
+    await saveDocAndAssert(page)
+    await page.locator('#clear-lexical-lexicalSimple').click()
+    await expect(spanInEditor).not.toBeAttached()
+  })
+
   test('should be able to bold text using floating select toolbar', async () => {
     await navigateToLexicalFields()
     const richTextField = page.locator('.rich-text-lexical').nth(2) // second
