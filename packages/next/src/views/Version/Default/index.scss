@@ -47,8 +47,7 @@
     }
 
     &__modifiedCheckBox {
-      margin-left: 2rem;
-      margin-top: 0.2rem;
+      margin: 0 0 0 var(--base);
     }
 
     @include mid-break {
