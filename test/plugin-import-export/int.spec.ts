@@ -75,6 +75,55 @@ describe('@payloadcms/plugin-import-export', () => {
 
       expect(data[0].group_value).toStrictEqual('group value')
     })
+
+    it('should create a file for collection csv from defined fields', async () => {
+      // large data set
+      for (let i = 0; i < 5; i++) {
+        await payload.create({
+          collection: 'pages',
+          data: {
+            title: `Array ${i}`,
+            array: [
+              {
+                field1: 'foo',
+                field2: 'bar',
+              },
+              {
+                field1: 'foo',
+                field2: 'baz',
+              },
+            ],
+          },
+        })
+      }
+
+      let doc = await payload.create({
+        collection: 'exports',
+        data: {
+          collections: [
+            {
+              slug: 'pages',
+              fields: ['id', 'array'],
+            },
+          ],
+          format: 'csv',
+        },
+      })
+
+      doc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(doc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', doc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      expect(data[0].array_0_field1).toStrictEqual('foo')
+      expect(data[0].array_0_field2).toStrictEqual('bar')
+      expect(data[0].array_1_field1).toStrictEqual('foo')
+      expect(data[0].array_1_field2).toStrictEqual('baz')
+    })
   })
 })
 

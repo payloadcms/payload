@@ -37,6 +37,20 @@ export const Pages: CollectionConfig = {
       ],
     },
     {
+      name: 'array',
+      type: 'array',
+      fields: [
+        {
+          name: 'field1',
+          type: 'text',
+        },
+        {
+          name: 'field2',
+          type: 'text',
+        },
+      ],
+    },
+    {
       name: 'relationship',
       type: 'relationship',
       relationTo: 'users',

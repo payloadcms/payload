@@ -42,28 +42,28 @@ export const createExport = async (args: Args) => {
     let headers: Record<string, string> = {}
 
     /**
-      reduce fields to filter:
-      input will be: ['id', 'title', 'group.value', 'createdAt', 'updatedAt']
-      select will be:
-      {
-        id: true,
-        title: true,
-        group: {
-          value: true,
-        },
-        createdAt: true,
-        updatedAt: true
-      }
+     reduce fields to filter:
+     input will be: ['id', 'title', 'group.value', 'createdAt', 'updatedAt']
+     select will be:
+     {
+     id: true,
+     title: true,
+     group: {
+     value: true,
+     },
+     createdAt: true,
+     updatedAt: true
+     }
 
-      field headers will be:
-      {
-        id: 'id',
-        title: 'title',
-        group_value: 'group.value',
-        createdAt: 'createdAt',
-        updatedAt: 'updatedAt'
-       }
-      */
+     field headers will be:
+     {
+     id: 'id',
+     title: 'title',
+     group_value: 'group.value',
+     createdAt: 'createdAt',
+     updatedAt: 'updatedAt'
+     }
+     */
 
     const traverseFieldsCallback: TraverseFieldsCallback<Record<string, unknown>> = ({
       field,
@@ -128,8 +128,12 @@ export const createExport = async (args: Args) => {
 
     const { docs } = await payload.find({
       collection: slug,
+      // TODO: populate the relationship fields
+      // populate: {
+      //
+      // },
       select,
-      // default limit of 1000, need to handle streams for larger exports
+      // TODO: default limit of 1000, need to handle streams for larger exports
       limit: 1000,
       locale,
       req,
@@ -137,7 +141,7 @@ export const createExport = async (args: Args) => {
     })
 
     // TODO: handle relationship subfields
-    // TODO: build array index headers for arrays/blocks/hasMany fields
+    // TODO: build localized data object
 
     const csvInput = docs.map((doc) => {
       const data: Record<string, unknown> = {}
@@ -147,7 +151,15 @@ export const createExport = async (args: Args) => {
 
         segments.forEach((segment, i) => {
           if (i === segments.length - 1) {
-            data[key] = docRef[segment]
+            if (Array.isArray(docRef[segment])) {
+              docRef[segment].forEach((item: Record<string, unknown>, i) => {
+                Object.entries(item).forEach(([itemKey, itemValue]) => {
+                  data[`${key}_${i}_${itemKey}`] = itemValue
+                })
+              })
+            } else {
+              data[key] = docRef[segment]
+            }
           } else {
             docRef = docRef[segment]
           }
