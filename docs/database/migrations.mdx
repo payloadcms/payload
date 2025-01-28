@@ -274,5 +274,5 @@ export default buildConfig({
 Passing your migrations as shown above will tell Payload, in production only, to execute any migrations that need to be run prior to completing the initialization of Payload. This is ideal for long-running services where Payload will only be initialized at startup.
 
 <Banner type="warning">
-  Warning - if Payload is instructed to run migrations in production, this may slow down serverless cold starts on platforms such as Vercel. Generally, this option should only be used for long-running servers / containers.
+  **Warning:** if Payload is instructed to run migrations in production, this may slow down serverless cold starts on platforms such as Vercel. Generally, this option should only be used for long-running servers / containers.
 </Banner>

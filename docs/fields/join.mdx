@@ -123,11 +123,11 @@ powerful Admin UI.
 
 | Option                 | Description                                                                                                                                                                                    |
 |------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **`name`** *          | To be used as the property name when retrieved from the database. [More](./overview#field-names)                                                                                    |
-| **`collection`** *    | The `slug`s having the relationship field.                                                                                                                                                     |
-| **`on`** *            | The name of the relationship or upload field that relates to the collection document. Use dot notation for nested paths, like 'myGroup.relationName'.                                         |
+| **`name`** *           | To be used as the property name when retrieved from the database. [More](./overview#field-names)                                                                                               |
+| **`collection`** *     | The `slug`s having the relationship field.                                                                                                                                                     |
+| **`on`** *             | The name of the relationship or upload field that relates to the collection document. Use dot notation for nested paths, like 'myGroup.relationName'.                                          |
 | **`where`**            | A `Where` query to hide related documents from appearing. Will be merged with any `where` specified in the request.                                                                            |
-| **`maxDepth`**         | Default is 1, Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached. [Max Depth](/docs/getting-started/concepts#field-level-max-depth). |
+| **`maxDepth`**         | Default is 1, Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached. [Max Depth](../queries/depth#max-depth).                           |
 | **`label`**            | Text used as a field label in the Admin Panel or an object with keys for each language.                                                                                                        |
 | **`hooks`**            | Provide Field Hooks to control logic for this field. [More details](../hooks/fields).                                                                                                          |
 | **`access`**           | Provide Field Access Control to denote what users can see and do with this field's data. [More details](../access-control/fields).                                                             |

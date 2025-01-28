@@ -472,6 +472,7 @@ export const roTranslations: DefaultTranslationsObject = {
     previouslyPublished: 'Publicat anterior',
     problemRestoringVersion: 'A existat o problemă la restaurarea acestei versiuni',
     publish: 'Publicați',
+    publishAllLocales: 'Publicați toate configurările regionale și lingvistice',
     publishChanges: 'Publicați modificările',
     published: 'Publicat',
     publishIn: 'Publicați în {{locale}}',

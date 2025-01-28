@@ -457,6 +457,7 @@ export const etTranslations: DefaultTranslationsObject = {
     previouslyPublished: 'Varem avaldatud',
     problemRestoringVersion: 'Selle versiooni taastamisel tekkis probleem',
     publish: 'Avalda',
+    publishAllLocales: 'Avaldage kõik lokaadid',
     publishChanges: 'Avalda muudatused',
     published: 'Avaldatud',
     publishIn: 'Avalda keeles {{locale}}',

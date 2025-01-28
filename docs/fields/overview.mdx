@@ -10,7 +10,7 @@ Fields are the building blocks of Payload. They define the schema of the Documen
 
 There are many [Field Types](#field-types) to choose from, ranging anywhere from simple text strings to nested arrays and blocks. Most fields save data to the database, while others are strictly presentational. Fields can have [Custom Validations](#validation), [Conditional Logic](./overview#conditional-logic), [Access Control](#field-level-access-control), [Hooks](#field-level-hooks), and so much more.
 
-Fields can be endlessly customized in their appearance and behavior without affecting their underlying data structure. Fields are designed to withstand heavy modification or even complete replacement through the use of [Custom Field Components](../admin/components#custom-components).
+Fields can be endlessly customized in their appearance and behavior without affecting their underlying data structure. Fields are designed to withstand heavy modification or even complete replacement through the use of [Custom Field Components](#custom-components).
 
 To configure fields, use the `fields` property in your [Collection](../configuration/collections) or [Global](../configuration/globals) config:
 
@@ -154,7 +154,7 @@ The following field names are forbidden and cannot be used:
 
 ### Field-level Hooks
 
-In addition to being able to define [Hooks](.../admin/hooks/overview) on a document-level, you can define extremely granular logic field-by-field.
+In addition to being able to define [Hooks](../hooks/overview) on a document-level, you can define extremely granular logic field-by-field.
 
 To define Field-level Hooks, use the `hooks` property in your Field Config:
 
@@ -172,7 +172,7 @@ export const MyField: Field = {
 }
 ```
 
-For full details on Field-level Hooks, see the [Field Hooks](.../admin/hooks/fields) documentation.
+For full details on Field-level Hooks, see the [Field Hooks](../hooks/fields) documentation.
 
 ### Field-level Access Control
 

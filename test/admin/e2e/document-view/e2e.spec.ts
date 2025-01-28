@@ -531,6 +531,15 @@ describe('Document View', () => {
       })
     })
   })
+
+  describe('publish button', () => {
+    test('should show publish active locale button with defaultLocalePublishOption', async () => {
+      await navigateToDoc(page, postsUrl)
+      const publishButton = await page.locator('#action-save')
+      await expect(publishButton).toBeVisible()
+      await expect(publishButton).toContainText('Publish in English')
+    })
+  })
 })
 
 async function createPost(overrides?: Partial<Post>): Promise<Post> {
