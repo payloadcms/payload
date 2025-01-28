@@ -462,6 +462,7 @@ export const daTranslations: DefaultTranslationsObject = {
     previouslyPublished: 'Tidligere offentliggjort',
     problemRestoringVersion: 'Der opstod et problem med at gendanne denne version',
     publish: 'Offentliggør',
+    publishAllLocales: 'Udgiv alle lokalindstillinger',
     publishChanges: 'Offentliggør ændringer',
     published: 'Offentliggjort',
     publishIn: 'Offentliggør i',

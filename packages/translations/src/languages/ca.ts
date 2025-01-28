@@ -466,6 +466,7 @@ export const caTranslations: DefaultTranslationsObject = {
     previouslyPublished: 'Publicat anteriorment',
     problemRestoringVersion: 'Hi ha hagut un problema en restaurar aquesta versió',
     publish: 'Publicar',
+    publishAllLocales: 'Publica totes les configuracions regionals',
     publishChanges: 'Publicar canvis',
     published: 'Publicat',
     publishIn: 'Publicar en {{locale}}',
