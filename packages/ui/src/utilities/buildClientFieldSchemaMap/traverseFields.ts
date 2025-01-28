@@ -48,7 +48,7 @@ export const traverseFields = ({
 
     switch (field.type) {
       case 'array':
-      case 'group':
+      case 'group': {
         traverseFields({
           clientSchemaMap,
           config,
@@ -62,8 +62,9 @@ export const traverseFields = ({
         })
 
         break
+      }
 
-      case 'blocks':
+      case 'blocks': {
         field.blocks.map((block) => {
           const blockSchemaPath = `${schemaPath}.${block.slug}`
 
@@ -82,8 +83,10 @@ export const traverseFields = ({
         })
 
         break
+      }
+
       case 'collapsible':
-      case 'row':
+      case 'row': {
         traverseFields({
           clientSchemaMap,
           config,
@@ -96,6 +99,7 @@ export const traverseFields = ({
           schemaMap,
         })
         break
+      }
 
       case 'richText': {
         // richText sub-fields are not part of the ClientConfig or the Config.

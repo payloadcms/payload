@@ -2,12 +2,13 @@ import type {
   ClientFieldSchemaMap,
   Data,
   DocumentPreferences,
-  Field as FieldSchema,
+  Field,
   FieldSchemaMap,
   FormState,
   FormStateWithoutComponents,
   PayloadRequest,
   SanitizedFieldsPermissions,
+  TabAsField,
 } from 'payload'
 
 import { getFieldPaths } from 'payload/shared'
@@ -26,7 +27,7 @@ type Args = {
   clientFieldSchemaMap?: ClientFieldSchemaMap
   collectionSlug?: string
   data: Data
-  fields: FieldSchema[]
+  fields: (Field | TabAsField)[]
   fieldSchemaMap: FieldSchemaMap
   filter?: (args: AddFieldStatePromiseArgs) => boolean
   /**
@@ -108,7 +109,7 @@ export const iterateFields = async ({
     const { indexPath, path, schemaPath } = getFieldPaths({
       field,
       index: fieldIndex,
-      parentIndexPath: 'name' in field ? '' : parentIndexPath,
+      parentIndexPath,
       parentPath,
       parentSchemaPath,
     })

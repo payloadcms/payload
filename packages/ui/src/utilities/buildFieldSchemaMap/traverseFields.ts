@@ -49,7 +49,7 @@ export const traverseFields = ({
 
         break
 
-      case 'blocks':
+      case 'blocks': {
         field.blocks.map((block) => {
           const blockSchemaPath = `${schemaPath}.${block.slug}`
 
@@ -66,6 +66,8 @@ export const traverseFields = ({
         })
 
         break
+      }
+
       case 'collapsible':
       case 'row':
         traverseFields({
@@ -80,7 +82,7 @@ export const traverseFields = ({
 
         break
 
-      case 'richText':
+      case 'richText': {
         if (!field?.editor) {
           throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
         }
@@ -100,6 +102,7 @@ export const traverseFields = ({
         }
 
         break
+      }
 
       case 'tab': {
         const isNamedTab = tabHasName(field)
