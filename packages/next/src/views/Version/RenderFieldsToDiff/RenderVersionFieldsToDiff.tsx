@@ -1,3 +1,4 @@
+'use client'
 const baseClass = 'render-field-diffs'
 import type { VersionField } from 'payload'
 
