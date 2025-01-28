@@ -453,7 +453,7 @@ export const slTranslations: DefaultTranslationsObject = {
     draft: 'Osnutek',
     draftSavedSuccessfully: 'Osnutek uspešno shranjen.',
     lastSavedAgo: 'Nazadnje shranjeno pred {{distance}}',
-    modifiedOnly: undefined,
+    modifiedOnly: 'Samo spremenjeno',
     noFurtherVersionsFound: 'Ni najdenih nadaljnjih različic',
     noRowsFound: 'Ni najdenih {{label}}',
     noRowsSelected: 'Ni izbranih {{label}}',

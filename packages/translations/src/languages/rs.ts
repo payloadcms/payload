@@ -452,7 +452,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     draft: 'Нацрт',
     draftSavedSuccessfully: 'Нацрт успешно сачуван.',
     lastSavedAgo: 'Задњи пут сачувано пре {{distance}',
-    modifiedOnly: undefined,
+    modifiedOnly: 'Samo izmenjen',
     noFurtherVersionsFound: 'Нису пронађене наредне верзије',
     noRowsFound: '{{label}} није пронађено',
     noRowsSelected: 'Nije odabrana {{label}}',
