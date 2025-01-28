@@ -13,7 +13,6 @@ export default async function HomePage() {
   const payload = await getPayload({ config: payloadConfig })
   const { user } = await payload.auth({ headers })
 
-  const adminRoute = payloadConfig.routes?.admin || '/admin'
   const fileURL = `vscode://file/${fileURLToPath(import.meta.url)}`
 
   return (
@@ -31,7 +30,12 @@ export default async function HomePage() {
         {!user && <h1>Welcome to your new project.</h1>}
         {user && <h1>Welcome back, {user.email}</h1>}
         <div className="links">
-          <a className="admin" href={adminRoute} rel="noopener noreferrer" target="_blank">
+          <a
+            className="admin"
+            href={payloadConfig.routes.admin}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
             Go to admin panel
           </a>
           <a
