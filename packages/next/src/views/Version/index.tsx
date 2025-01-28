@@ -248,6 +248,7 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
       doc={doc}
       latestDraftVersion={latestDraftVersion?.id}
       latestPublishedVersion={latestPublishedVersion?.id}
+      modifiedOnly={modifiedOnly}
       RenderedDiff={RenderedDiff}
       selectedLocales={selectedLocales}
       versionID={versionID}

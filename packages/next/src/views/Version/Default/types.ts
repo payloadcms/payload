@@ -12,6 +12,7 @@ export type DefaultVersionsViewProps = {
   readonly doc: Document
   readonly latestDraftVersion?: string
   readonly latestPublishedVersion?: string
+  modifiedOnly: boolean
   readonly RenderedDiff: React.ReactNode
   readonly selectedLocales: OptionObject[]
   readonly versionID?: string

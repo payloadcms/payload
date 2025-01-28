@@ -22,6 +22,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   doc,
   latestDraftVersion,
   latestPublishedVersion,
+  modifiedOnly: modifiedOnlyProp,
   RenderedDiff,
   selectedLocales: selectedLocalesProp,
   versionID,
@@ -52,7 +53,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const [modifiedOnly, setModifiedOnly] = useState(false)
+  const [modifiedOnly, setModifiedOnly] = useState(modifiedOnlyProp)
   function onToggleModifiedOnly() {
     setModifiedOnly(!modifiedOnly)
   }

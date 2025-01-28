@@ -20,6 +20,10 @@ export const Collapsible: CollapsibleFieldDiffClientComponent = ({
   const { i18n } = useTranslation()
   const { selectedLocales } = useSelectedLocales()
 
+  if (!baseVersionField.fields?.length) {
+    return null
+  }
+
   return (
     <div className={baseClass}>
       <DiffCollapser

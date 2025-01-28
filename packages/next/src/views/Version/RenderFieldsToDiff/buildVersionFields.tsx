@@ -133,6 +133,9 @@ export const buildVersionFields = ({
           selectedLocales,
           versionValue: versionValue?.[locale],
         })
+        if (!versionField.fieldByLocale[locale]) {
+          continue
+        }
       }
     } else {
       versionField.field = buildVersionField({
@@ -154,6 +157,10 @@ export const buildVersionFields = ({
         selectedLocales,
         versionValue,
       })
+
+      if (!versionField.field) {
+        continue
+      }
     }
 
     versionFields.push(versionField)

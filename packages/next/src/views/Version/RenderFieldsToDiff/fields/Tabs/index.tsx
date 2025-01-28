@@ -25,6 +25,9 @@ export const Tabs: TabsFieldDiffClientComponent = (props) => {
   return (
     <div className={baseClass}>
       {baseVersionField.tabs.map((tab, i) => {
+        if (!tab?.fields?.length) {
+          return null
+        }
         const fieldTab = field.tabs?.[i]
         return (
           <div className={`${baseClass}__tab`} key={i}>
@@ -79,6 +82,10 @@ type TabProps = {
 const Tab: React.FC<TabProps> = ({ comparisonValue, fieldTab, locale, tab, versionValue }) => {
   const { i18n } = useTranslation()
   const { selectedLocales } = useSelectedLocales()
+
+  if (!tab.fields?.length) {
+    return null
+  }
 
   return (
     <DiffCollapser
