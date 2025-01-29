@@ -178,9 +178,11 @@ export function countChangedFieldsInRows({
     const comparisonRow = comparisonRows?.[i] || {}
     const versionRow = versionRows?.[i] || {}
 
-    const rowFields = getFieldsForRowComparison({
+    const { fields: rowFields } = getFieldsForRowComparison({
+      baseVersionField: { type: 'text', fields: [], path: '', schemaPath: '' }, // Doesn't matter, as we don't need the versionFields output here
       comparisonRow,
       field,
+      row: i,
       versionRow,
     })
 
