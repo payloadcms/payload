@@ -10,7 +10,7 @@ export const contact: Partial<Page> = {
     {
       blockType: 'formBlock',
       enableIntro: true,
-      // @ts-ignore
+      // @ts-expect-error this should dissapear when upgrading to the latest version of Payload
       form: '{{CONTACT_FORM_ID}}',
       introContent: {
         root: {
