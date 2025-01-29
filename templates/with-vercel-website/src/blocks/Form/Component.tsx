@@ -32,7 +32,7 @@ export const FormBlock: React.FC<
   } = props
 
   const formMethods = useForm({
-    defaultValues: formFromProps.fields,
+    defaultValues: formFromProps.fields as any,
   })
   const {
     control,
