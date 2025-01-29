@@ -1,5 +1,5 @@
 'use client'
-import type { LexicalCommand, LexicalEditor, TextNode } from 'lexical'
+import type { BaseSelection, LexicalCommand, LexicalEditor, TextNode } from 'lexical'
 import type { JSX, ReactPortal, RefObject } from 'react'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
@@ -7,6 +7,7 @@ import { mergeRegister } from '@lexical/utils'
 import {
   $getSelection,
   $isRangeSelection,
+  $setSelection,
   COMMAND_PRIORITY_LOW,
   createCommand,
   KEY_ARROW_DOWN_COMMAND,
@@ -266,6 +267,17 @@ export function LexicalMenu({
       })
 
       setTimeout(() => {
+        // Needed in Firefox. See https://github.com/payloadcms/payload/issues/10724
+        let selection: BaseSelection | undefined
+        editor.read(() => {
+          selection = $getSelection()?.clone()
+        })
+        editor.update(() => {
+          if (selection) {
+            $setSelection(selection)
+          }
+        })
+
         selectedItem.onSelect({
           editor,
           queryString: resolution.match ? resolution.match.matchingString : '',
