@@ -11,7 +11,8 @@ export interface Config {
     users: UserAuthOperations;
   };
   collections: {
-    posts: Post;
+    authors: Author;
+    'changelog-posts': ChangelogPost;
     media: Media;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -20,7 +21,8 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
-    posts: PostsSelect<false> | PostsSelect<true>;
+    authors: AuthorsSelect<false> | AuthorsSelect<true>;
+    'changelog-posts': ChangelogPostsSelect<false> | ChangelogPostsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -65,12 +67,13 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
+ * via the `definition` "authors".
  */
-export interface Post {
+export interface Author {
   id: string;
-  title?: string | null;
-  content?: {
+  name: string;
+  avatar: string | Media;
+  biography?: {
     root: {
       type: string;
       children: {
@@ -85,6 +88,9 @@ export interface Post {
     };
     [k: string]: unknown;
   } | null;
+  isFromContentful?: boolean | null;
+  noIndex?: boolean | null;
+  originalContentfulId?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -135,6 +141,39 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "changelog-posts".
+ */
+export interface ChangelogPost {
+  id: string;
+  title: string;
+  slug: string;
+  publishDate: string;
+  author: (string | Author)[];
+  featuredImage: string | Media;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  isFromContentful?: boolean | null;
+  noIndex?: boolean | null;
+  originalContentfulId?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -158,8 +197,12 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
-        relationTo: 'posts';
-        value: string | Post;
+        relationTo: 'authors';
+        value: string | Author;
+      } | null)
+    | ({
+        relationTo: 'changelog-posts';
+        value: string | ChangelogPost;
       } | null)
     | ({
         relationTo: 'media';
@@ -213,11 +256,33 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts_select".
+ * via the `definition` "authors_select".
  */
-export interface PostsSelect<T extends boolean = true> {
+export interface AuthorsSelect<T extends boolean = true> {
+  name?: T;
+  avatar?: T;
+  biography?: T;
+  isFromContentful?: T;
+  noIndex?: T;
+  originalContentfulId?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "changelog-posts_select".
+ */
+export interface ChangelogPostsSelect<T extends boolean = true> {
   title?: T;
+  slug?: T;
+  publishDate?: T;
+  author?: T;
+  featuredImage?: T;
   content?: T;
+  isFromContentful?: T;
+  noIndex?: T;
+  originalContentfulId?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

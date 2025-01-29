@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
-export const contentfulDefaultFields: CollectionConfig['fields'] = [
+
+const contentfulDefaultFields: CollectionConfig['fields'] = [
   {
     name: 'isFromContentful',
     type: 'checkbox',
@@ -18,10 +19,10 @@ export const contentfulDefaultFields: CollectionConfig['fields'] = [
   },
 ]
 
-export const ChangelogPosts: CollectionConfig = {
-  slug: 'changelog-posts',
+export const Authors: CollectionConfig = {
+  slug: 'authors',
   admin: {
-    useAsTitle: 'title',
+    useAsTitle: 'name',
   },
   versions: {
     drafts: true,
@@ -35,46 +36,22 @@ export const ChangelogPosts: CollectionConfig = {
   },
   fields: [
     {
-      name: 'title',
+      name: 'name',
       type: 'text',
-      label: 'Title',
-      required: true,
-      localized: true,
-    },
-    {
-      name: 'slug',
-      type: 'text',
-      label: 'Slug',
-      required: true,
-      index: true,
-    },
-    {
-      name: 'publishDate',
-      type: 'date',
-      label: 'Publish Date',
+      label: 'Name',
       required: true,
     },
     {
-      name: 'author',
-      type: 'relationship',
-      label: 'Author',
-      required: true,
-      relationTo: 'authors',
-      hasMany: true,
-    },
-    {
-      name: 'featuredImage',
+      name: 'avatar',
       type: 'upload',
-      label: 'Featured Image',
-      required: true,
       relationTo: 'media',
+      label: 'Avatar',
+      required: true,
     },
     {
-      name: 'content',
+      name: 'biography',
       type: 'richText',
-      label: 'Content',
-      required: true,
-      localized: true,
+      label: 'Biography',
     },
     ...contentfulDefaultFields,
   ],
