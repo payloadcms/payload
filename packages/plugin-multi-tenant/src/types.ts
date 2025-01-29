@@ -72,6 +72,18 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
          */
         arrayFieldAccess?: ArrayField['access']
         /**
+         * Name of the array field
+         *
+         * @default 'tenants'
+         */
+        arrayFieldName?: string
+        /**
+         * Name of the tenant field
+         *
+         * @default 'tenant'
+         */
+        arrayTenantFieldName?: string
+        /**
          * When `includeDefaultField` is `true`, the field will be added to the users collection automatically
          */
         includeDefaultField?: true
@@ -86,6 +98,8 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
       }
     | {
         arrayFieldAccess?: never
+        arrayFieldName?: string
+        arrayTenantFieldName?: string
         /**
          * When `includeDefaultField` is `false`, you must include the field on your users collection manually
          */
