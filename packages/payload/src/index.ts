@@ -882,8 +882,10 @@ export const getPayload = async (
       try {
         const port = process.env.PORT || '3000'
 
+        const path = '/_next/webpack-hmr'
+        const prefix = process.env.NEXT_BASE_PATH ?? process.env.NEXT_ASSET_PREFIX ?? ''
         cached.ws = new WebSocket(
-          `ws://localhost:${port}${process.env.NEXT_BASE_PATH ?? ''}/_next/webpack-hmr`,
+          process.env.PAYLOAD_HMR_URL_OVERRIDE ?? `ws://localhost:${port}${prefix}${path}`,
         )
 
         cached.ws.onmessage = (event) => {
