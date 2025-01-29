@@ -34,6 +34,20 @@ export const Pages: CollectionConfig = {
           name: 'ignore',
           type: 'text',
         },
+        {
+          name: 'array',
+          type: 'array',
+          fields: [
+            {
+              name: 'field1',
+              type: 'text',
+            },
+            {
+              name: 'field2',
+              type: 'text',
+            },
+          ],
+        },
       ],
     },
     {
@@ -49,6 +63,11 @@ export const Pages: CollectionConfig = {
           type: 'text',
         },
       ],
+    },
+    {
+      name: 'author',
+      type: 'relationship',
+      relationTo: 'users',
     },
     {
       name: 'hasManyNumber',

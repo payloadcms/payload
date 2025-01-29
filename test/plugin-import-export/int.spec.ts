@@ -34,6 +34,9 @@ describe('@payloadcms/plugin-import-export', () => {
           collection: 'pages',
           data: {
             title: `Page ${i}`,
+            group: {
+              array: [{ field1: 'test' }],
+            },
           },
         })
       }
@@ -45,7 +48,14 @@ describe('@payloadcms/plugin-import-export', () => {
             {
               slug: 'pages',
               sort: 'createdAt',
-              fields: ['id', 'title', 'group.value', 'createdAt', 'updatedAt'],
+              fields: [
+                'id',
+                'title',
+                'group.value',
+                'group.array.field1',
+                'createdAt',
+                'updatedAt',
+              ],
             },
           ],
           format: 'csv',
@@ -65,6 +75,7 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].title).toStrictEqual('Page 0')
       expect(data[0].group_value).toStrictEqual('group value')
       expect(data[0].group_ignore).toBeUndefined()
+      expect(data[0].group_array_0_field1).toStrictEqual('test')
       expect(data[0].createdAt).toBeDefined()
       expect(data[0].updatedAt).toBeDefined()
     })
