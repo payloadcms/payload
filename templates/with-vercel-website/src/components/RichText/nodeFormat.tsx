@@ -1,10 +1,6 @@
 //This copy-and-pasted from lexical here: https://github.com/facebook/lexical/blob/c2ceee223f46543d12c574e62155e619f9a18a5d/packages/lexical/src/LexicalConstants.ts
 
 import type { ElementFormatType, TextFormatType } from '@payloadcms/richtext-lexical/lexical'
-import type {
-  TextDetailType,
-  TextModeType,
-} from '@payloadcms/richtext-lexical/lexical/nodes/LexicalTextNode'
 
 /**
  * Copyright (c) Meta Platforms, Inc. and affiliates.
@@ -90,7 +86,7 @@ export const TEXT_TYPE_TO_FORMAT: Record<TextFormatType | string, number> = {
   underline: IS_UNDERLINE,
 }
 
-export const DETAIL_TYPE_TO_DETAIL: Record<TextDetailType | string, number> = {
+export const DETAIL_TYPE_TO_DETAIL: Record<string, number> = {
   directionless: IS_DIRECTIONLESS,
   unmergeable: IS_UNMERGEABLE,
 }
@@ -113,13 +109,13 @@ export const ELEMENT_FORMAT_TO_TYPE: Record<number, ElementFormatType> = {
   [IS_ALIGN_START]: 'start',
 }
 
-export const TEXT_MODE_TO_TYPE: Record<TextModeType, 0 | 1 | 2> = {
+export const TEXT_MODE_TO_TYPE: Record<string, 0 | 1 | 2> = {
   normal: IS_NORMAL,
   segmented: IS_SEGMENTED,
   token: IS_TOKEN,
 }
 
-export const TEXT_TYPE_TO_MODE: Record<number, TextModeType> = {
+export const TEXT_TYPE_TO_MODE: Record<number, string> = {
   [IS_NORMAL]: 'normal',
   [IS_SEGMENTED]: 'segmented',
   [IS_TOKEN]: 'token',
