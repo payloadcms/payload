@@ -896,6 +896,7 @@ export {
   HTMLConverterFeature,
   type HTMLConverterFeatureProps,
 } from './features/converters/html/index.js'
+export { DebugJsxConverterFeature } from './features/debug/jsxConverter/server/index.js'
 export { TestRecorderFeature } from './features/debug/testRecorder/server/index.js'
 export { TreeViewFeature } from './features/debug/treeView/server/index.js'
 export { EXPERIMENTAL_TableFeature } from './features/experimental_table/server/index.js'
