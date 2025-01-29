@@ -1,32 +1,44 @@
 'use client'
 import type { OptionObject } from 'payload'
 
-import { Gutter, useConfig, useDocumentInfo, usePayloadAPI, useTranslation } from '@payloadcms/ui'
+import { CheckboxInput, Gutter, useConfig, useDocumentInfo, useTranslation } from '@payloadcms/ui'
 import { formatDate } from '@payloadcms/ui/shared'
-import React, { useState } from 'react'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation.js'
+import React, { useEffect, useMemo, useState } from 'react'
 
 import type { CompareOption, DefaultVersionsViewProps } from './types.js'
 
-import { diffComponents } from '../RenderFieldsToDiff/fields/index.js'
-import { RenderFieldsToDiff } from '../RenderFieldsToDiff/index.js'
 import Restore from '../Restore/index.js'
 import { SelectComparison } from '../SelectComparison/index.js'
-import { SelectLocales } from '../SelectLocales/index.js'
 import './index.scss'
+import { SelectLocales } from '../SelectLocales/index.js'
+import { SelectedLocalesContext } from './SelectedLocalesContext.js'
 import { SetStepNav } from './SetStepNav.js'
 
 const baseClass = 'view-version'
 
 export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
+  canUpdate,
   doc,
-  docPermissions,
-  initialComparisonDoc,
   latestDraftVersion,
   latestPublishedVersion,
-  localeOptions,
+  modifiedOnly: modifiedOnlyProp,
+  RenderedDiff,
+  selectedLocales: selectedLocalesProp,
   versionID,
 }) => {
   const { config, getEntityConfig } = useConfig()
+
+  const availableLocales = useMemo(
+    () =>
+      config.localization
+        ? config.localization.locales.map((locale) => ({
+            label: locale.label,
+            value: locale.code,
+          }))
+        : [],
+    [config.localization],
+  )
 
   const { i18n } = useTranslation()
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
@@ -35,9 +47,43 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
 
   const [globalConfig] = useState(() => getEntityConfig({ globalSlug }))
 
-  const [locales, setLocales] = useState<OptionObject[]>(localeOptions)
+  const [selectedLocales, setSelectedLocales] = useState<OptionObject[]>(selectedLocalesProp)
 
   const [compareValue, setCompareValue] = useState<CompareOption>()
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const [modifiedOnly, setModifiedOnly] = useState(modifiedOnlyProp)
+  function onToggleModifiedOnly() {
+    setModifiedOnly(!modifiedOnly)
+  }
+
+  useEffect(() => {
+    // If the selected comparison doc or locales change, update URL params so that version page RSC
+    // can update the version comparison state
+    const current = new URLSearchParams(Array.from(searchParams.entries()))
+
+    if (!compareValue) {
+      current.delete('compareValue')
+    } else {
+      current.set('compareValue', compareValue?.value)
+    }
+    if (!selectedLocales) {
+      current.delete('localeCodes')
+    } else {
+      current.set('localeCodes', JSON.stringify(selectedLocales.map((locale) => locale.value)))
+    }
+
+    if (!modifiedOnly) {
+      current.delete('modifiedOnly')
+    } else {
+      current.set('modifiedOnly', 'true')
+    }
+
+    const search = current.toString()
+    const query = search ? `?${search}` : ''
+    router.push(`${pathname}${query}`)
+  }, [compareValue, pathname, router, searchParams, selectedLocales, modifiedOnly])
 
   const {
     admin: { dateFormat },
@@ -53,19 +99,6 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   const compareBaseURL = `${serverURL}${apiRoute}/${globalSlug ? 'globals/' : ''}${
     collectionSlug || globalSlug
   }/versions`
-
-  const compareFetchURL = compareValue?.value && `${compareBaseURL}/${compareValue.value}`
-
-  const [{ data: currentComparisonDoc }] = usePayloadAPI(compareFetchURL, {
-    initialData: initialComparisonDoc,
-    initialParams: { depth: 1, draft: 'true', locale: 'all' },
-  })
-
-  const comparison = compareValue?.value && currentComparisonDoc?.version // the `version` key is only present on `versions` documents
-
-  const canUpdate = docPermissions?.update
-
-  const localeValues = locales && locales.map((locale) => locale.value)
 
   const draftsEnabled = Boolean((collectionConfig || globalConfig)?.versions.drafts)
 
@@ -101,6 +134,14 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
                 versionID={versionID}
               />
             )}
+            <span className={`${baseClass}__modifiedCheckBox`}>
+              <CheckboxInput
+                checked={modifiedOnly}
+                id={'modifiedOnly'}
+                label={i18n.t('version:modifiedOnly')}
+                onToggle={onToggleModifiedOnly}
+              />
+            </span>
           </header>
         </div>
         <div className={`${baseClass}__controls`}>
@@ -115,28 +156,18 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
             versionID={versionID}
           />
           {localization && (
-            <SelectLocales onChange={setLocales} options={localeOptions} value={locales} />
+            <SelectLocales
+              onChange={setSelectedLocales}
+              options={availableLocales}
+              value={selectedLocales}
+            />
           )}
         </div>
-        {doc?.version && (
-          <RenderFieldsToDiff
-            comparison={comparison}
-            diffComponents={diffComponents}
-            fieldPermissions={docPermissions?.fields}
-            fields={(collectionConfig || globalConfig)?.fields}
-            i18n={i18n}
-            locales={localeValues}
-            version={
-              globalConfig
-                ? {
-                    ...doc?.version,
-                    createdAt: doc?.version?.createdAt || doc.createdAt,
-                    updatedAt: doc?.version?.updatedAt || doc.updatedAt,
-                  }
-                : doc?.version
-            }
-          />
-        )}
+        <SelectedLocalesContext.Provider
+          value={{ selectedLocales: selectedLocales.map((locale) => locale.value) }}
+        >
+          {doc?.version && RenderedDiff}
+        </SelectedLocalesContext.Provider>
       </Gutter>
     </main>
   )

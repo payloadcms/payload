@@ -1,4 +1,4 @@
-export const getFormattedLabel = (path: (number | string)[]): string => {
+export const getLabelFromPath = (path: (number | string)[]): string => {
   return path
     .filter((pathSegment) => !(typeof pathSegment === 'string' && pathSegment.includes('_index')))
     .reduce<string[]>((acc, part) => {

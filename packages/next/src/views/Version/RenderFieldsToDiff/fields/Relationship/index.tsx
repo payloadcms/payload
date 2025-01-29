@@ -1,20 +1,19 @@
 'use client'
-import type { ClientCollectionConfig, ClientField, RelationshipFieldClient } from 'payload'
+import type {
+  ClientCollectionConfig,
+  ClientField,
+  RelationshipFieldDiffClientComponent,
+} from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useConfig } from '@payloadcms/ui'
+import { useConfig, useTranslation } from '@payloadcms/ui'
 import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
 import React from 'react'
-import ReactDiffViewerImport from 'react-diff-viewer-continued'
-
-import type { DiffComponentProps } from '../types.js'
+import ReactDiffViewer from 'react-diff-viewer-continued'
 
 import Label from '../../Label/index.js'
-import { diffStyles } from '../styles.js'
 import './index.scss'
-
-const ReactDiffViewer = (ReactDiffViewerImport.default ||
-  ReactDiffViewerImport) as unknown as typeof ReactDiffViewerImport.default
+import { diffStyles } from '../styles.js'
 
 const baseClass = 'relationship-diff'
 
@@ -99,13 +98,14 @@ const generateLabelFromValue = (
   return valueToReturn
 }
 
-export const Relationship: React.FC<DiffComponentProps<RelationshipFieldClient>> = ({
-  comparison,
+export const Relationship: RelationshipFieldDiffClientComponent = ({
+  comparisonValue,
   field,
-  i18n,
   locale,
-  version,
+  versionValue,
 }) => {
+  const { i18n } = useTranslation()
+
   const placeholder = `[${i18n.t('general:noValue')}]`
 
   const {
@@ -115,25 +115,27 @@ export const Relationship: React.FC<DiffComponentProps<RelationshipFieldClient>>
   let versionToRender: string | undefined = placeholder
   let comparisonToRender: string | undefined = placeholder
 
-  if (version) {
-    if ('hasMany' in field && field.hasMany && Array.isArray(version)) {
+  if (versionValue) {
+    if ('hasMany' in field && field.hasMany && Array.isArray(versionValue)) {
       versionToRender =
-        version.map((val) => generateLabelFromValue(collections, field, locale, val)).join(', ') ||
-        placeholder
+        versionValue
+          .map((val) => generateLabelFromValue(collections, field, locale, val))
+          .join(', ') || placeholder
     } else {
-      versionToRender = generateLabelFromValue(collections, field, locale, version) || placeholder
+      versionToRender =
+        generateLabelFromValue(collections, field, locale, versionValue) || placeholder
     }
   }
 
-  if (comparison) {
-    if ('hasMany' in field && field.hasMany && Array.isArray(comparison)) {
+  if (comparisonValue) {
+    if ('hasMany' in field && field.hasMany && Array.isArray(comparisonValue)) {
       comparisonToRender =
-        comparison
+        comparisonValue
           .map((val) => generateLabelFromValue(collections, field, locale, val))
           .join(', ') || placeholder
     } else {
       comparisonToRender =
-        generateLabelFromValue(collections, field, locale, comparison) || placeholder
+        generateLabelFromValue(collections, field, locale, comparisonValue) || placeholder
     }
   }
 
