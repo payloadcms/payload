@@ -13,6 +13,7 @@ import classes from './index.module.scss'
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config })
+
   const pages = await payload.find({
     collection: 'pages',
     draft: false,
