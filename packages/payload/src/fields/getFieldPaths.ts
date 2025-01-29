@@ -32,30 +32,6 @@ export function getFieldPaths({
   parentPath,
   parentSchemaPath,
 }: Args): FieldPaths {
-  if ('name' in field) {
-    return {
-      indexPath: `${parentIndexPath ? parentIndexPath + '-' : ''}${index}`,
-      path: `${parentPath ? parentPath + '.' : ''}${field.name}`,
-      schemaPath: `${parentSchemaPath ? parentSchemaPath + '.' : ''}${field.name}`,
-    }
-  }
-
-  const indexSuffix = `_index-${`${parentIndexPath ? parentIndexPath + '-' : ''}${index}`}`
-
-  return {
-    indexPath: `${parentIndexPath ? parentIndexPath + '-' : ''}${index}`,
-    path: `${parentPath ? parentPath + '.' : ''}${indexSuffix}`,
-    schemaPath: `${parentSchemaPath ? parentSchemaPath + '.' : ''}${indexSuffix}`,
-  }
-}
-
-export function getFieldPathsModified({
-  field,
-  index,
-  parentIndexPath,
-  parentPath,
-  parentSchemaPath,
-}: Args): FieldPaths {
   const parentPathSegments = parentPath.split('.')
 
   const parentIsUnnamed = parentPathSegments[parentPathSegments.length - 1].startsWith('_index-')

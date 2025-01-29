@@ -1,14 +1,15 @@
 import type { I18n } from '@payloadcms/translations'
-import type { Field, FieldSchemaMap, SanitizedConfig } from 'payload'
+import type { Field, FieldSchemaMap, SanitizedConfig, TabAsField } from 'payload'
 
 import { MissingEditorProp } from 'payload'
 import { getFieldPaths, tabHasName } from 'payload/shared'
 
 type Args = {
   config: SanitizedConfig
-  fields: Field[]
+  fields: (Field | TabAsField)[]
   i18n: I18n<any, any>
   parentIndexPath: string
+  parentPath: string
   parentSchemaPath: string
   schemaMap: FieldSchemaMap
 }
@@ -18,15 +19,16 @@ export const traverseFields = ({
   fields,
   i18n,
   parentIndexPath,
+  parentPath,
   parentSchemaPath,
   schemaMap,
 }: Args) => {
   for (const [index, field] of fields.entries()) {
-    const { indexPath, schemaPath } = getFieldPaths({
+    const { indexPath, path, schemaPath } = getFieldPaths({
       field,
       index,
-      parentIndexPath: 'name' in field ? '' : parentIndexPath,
-      parentPath: '',
+      parentIndexPath,
+      parentPath,
       parentSchemaPath,
     })
 
@@ -40,13 +42,14 @@ export const traverseFields = ({
           fields: field.fields,
           i18n,
           parentIndexPath: '',
+          parentPath: path + '.' + 0, // mock the row index
           parentSchemaPath: schemaPath,
           schemaMap,
         })
 
         break
 
-      case 'blocks':
+      case 'blocks': {
         field.blocks.map((block) => {
           const blockSchemaPath = `${schemaPath}.${block.slug}`
 
@@ -56,12 +59,15 @@ export const traverseFields = ({
             fields: block.fields,
             i18n,
             parentIndexPath: '',
-            parentSchemaPath: blockSchemaPath,
+            parentPath: path + '.' + 0, // mock the row index
+            parentSchemaPath: schemaPath + '.' + block.slug,
             schemaMap,
           })
         })
 
         break
+      }
+
       case 'collapsible':
       case 'row':
         traverseFields({
@@ -69,13 +75,14 @@ export const traverseFields = ({
           fields: field.fields,
           i18n,
           parentIndexPath: indexPath,
-          parentSchemaPath,
+          parentPath,
+          parentSchemaPath: schemaPath,
           schemaMap,
         })
 
         break
 
-      case 'richText':
+      case 'richText': {
         if (!field?.editor) {
           throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
         }
@@ -95,35 +102,37 @@ export const traverseFields = ({
         }
 
         break
+      }
 
-      case 'tabs':
-        field.tabs.map((tab, tabIndex) => {
-          const isNamedTab = tabHasName(tab)
+      case 'tab': {
+        const isNamedTab = tabHasName(field)
 
-          const { indexPath: tabIndexPath, schemaPath: tabSchemaPath } = getFieldPaths({
-            field: {
-              ...tab,
-              type: 'tab',
-            },
-            index: tabIndex,
-            parentIndexPath: indexPath,
-            parentPath: '',
-            parentSchemaPath,
-          })
-
-          schemaMap.set(tabSchemaPath, tab)
-
-          traverseFields({
-            config,
-            fields: tab.fields,
-            i18n,
-            parentIndexPath: isNamedTab ? '' : tabIndexPath,
-            parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
-            schemaMap,
-          })
+        traverseFields({
+          config,
+          fields: field.fields,
+          i18n,
+          parentIndexPath: isNamedTab ? '' : indexPath,
+          parentPath: isNamedTab ? path : parentPath,
+          parentSchemaPath: schemaPath,
+          schemaMap,
         })
 
         break
+      }
+
+      case 'tabs': {
+        traverseFields({
+          config,
+          fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+          i18n,
+          parentIndexPath: indexPath,
+          parentPath: path,
+          parentSchemaPath: schemaPath,
+          schemaMap,
+        })
+
+        break
+      }
     }
   }
 }
