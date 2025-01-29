@@ -146,9 +146,6 @@ export const withPayload = (nextConfig = {}) => {
   if (nextConfig.basePath) {
     toReturn.env.NEXT_BASE_PATH = nextConfig.basePath
   }
-  if (nextConfig.assetPrefix) {
-    toReturn.env.NEXT_ASSET_PREFIX = nextConfig.assetPrefix
-  }
 
   return toReturn
 }

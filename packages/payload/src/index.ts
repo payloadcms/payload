@@ -883,7 +883,9 @@ export const getPayload = async (
         const port = process.env.PORT || '3000'
 
         const path = '/_next/webpack-hmr'
-        const prefix = process.env.NEXT_BASE_PATH ?? process.env.NEXT_ASSET_PREFIX ?? ''
+        // The __NEXT_ASSET_PREFIX env variable is set for both assetPrefix and basePath (tested in Next.js 15.1.6)
+        const prefix = process.env.__NEXT_ASSET_PREFIX ?? ''
+
         cached.ws = new WebSocket(
           process.env.PAYLOAD_HMR_URL_OVERRIDE ?? `ws://localhost:${port}${prefix}${path}`,
         )
