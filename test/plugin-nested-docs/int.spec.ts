@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { Page } from './payload-types.js'
+import { update } from 'node_modules/payload/src/preferences/operations/update.js'
 
 let payload: Payload
 
@@ -109,6 +110,36 @@ describe('@payloadcms/plugin-nested-docs', () => {
       expect(firstUpdatedChildBreadcrumbs).toBeDefined()
       // @ts-ignore
       expect(lastUpdatedChildBreadcrumbs[0].url).toStrictEqual('/11-children-updated')
+    })
+
+    it('should return breadcrumbs as an array of objects', async () => {
+      const parentDoc = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'parent doc',
+          slug: 'parent-doc',
+          _status: 'published',
+        },
+      })
+
+      const childDoc = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'child doc',
+          slug: 'child-doc',
+          parent: parentDoc.id,
+          _status: 'published',
+        },
+      })
+
+      // expect breadcrumbs to be an array
+      expect(childDoc.breadcrumbs).toBeInstanceOf(Array)
+      expect(childDoc.breadcrumbs).toBeDefined()
+
+      // expect each to be objects
+      childDoc.breadcrumbs?.map((breadcrumb) => {
+        expect(breadcrumb).toBeInstanceOf(Object)
+      })
     })
   })
 
