@@ -53,6 +53,16 @@
       "types": "./src/utilities/buildTableState.ts",
       "default": "./src/utilities/buildTableState.ts"
     },
+    "./utilities/getClientSchemaMap": {
+      "import": "./src/utilities/getClientSchemaMap.ts",
+      "types": "./src/utilities/getClientSchemaMap.ts",
+      "default": "./src/utilities/getClientSchemaMap.ts"
+    },
+    "./utilities/getSchemaMap": {
+      "import": "./src/utilities/getSchemaMap.ts",
+      "types": "./src/utilities/getSchemaMap.ts",
+      "default": "./src/utilities/getSchemaMap.ts"
+    },
     "./utilities/schedulePublishHandler": {
       "import": "./src/utilities/schedulePublishHandler.ts",
       "types": "./src/utilities/schedulePublishHandler.ts",

@@ -42,10 +42,10 @@ export const BlocksDrawer: React.FC<Props> = (props) => {
   const { i18n, t } = useTranslation()
 
   useEffect(() => {
-    if (!isModalOpen) {
+    if (!isModalOpen(drawerSlug)) {
       setSearchTerm('')
     }
-  }, [isModalOpen])
+  }, [isModalOpen, drawerSlug])
 
   useEffect(() => {
     const searchTermToUse = searchTerm.toLowerCase()

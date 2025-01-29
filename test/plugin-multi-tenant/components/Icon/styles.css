@@ -2,7 +2,7 @@
   border-radius: 100%;
   height: 18px;
   width: 18px;
-  background-color: var(--theme-error-300);
+  background-color: var(--theme-error-400);
 }
 
 [data-selected-tenant-title="Blue Dog"] #tenant-icon {

@@ -80,8 +80,19 @@ export const multiTenantPlugin =
      * Add tenants array field to users collection
      */
     if (pluginConfig?.tenantsArrayField?.includeDefaultField !== false) {
-      adminUsersCollection.fields.push(tenantsArrayField(pluginConfig?.tenantsArrayField || {}))
+      adminUsersCollection.fields.push(
+        tenantsArrayField({
+          ...(pluginConfig?.tenantsArrayField || {}),
+          tenantsCollectionSlug,
+        }),
+      )
     }
+
+    addCollectionAccess({
+      collection: adminUsersCollection,
+      fieldName: 'tenants.tenant',
+      userHasAccessToAllTenants,
+    })
 
     let tenantCollection: CollectionConfig | undefined
 
@@ -110,6 +121,10 @@ export const multiTenantPlugin =
       if (collection.slug === tenantsCollectionSlug) {
         tenantCollection = collection
 
+        /**
+         * Add access control constraint to tenants collection
+         * - constrains access a users assigned tenants
+         */
         addCollectionAccess({
           collection,
           fieldName: 'id',
@@ -126,6 +141,7 @@ export const multiTenantPlugin =
             collection,
             enabledSlugs: [...collectionSlugs, ...globalCollectionSlugs],
             tenantFieldName,
+            tenantsCollectionSlug,
             usersSlug: adminUsersCollection.slug,
           })
         }
@@ -143,6 +159,8 @@ export const multiTenantPlugin =
           fields: collection.fields,
           tenantEnabledCollectionSlugs: collectionSlugs,
           tenantEnabledGlobalSlugs: globalCollectionSlugs,
+          tenantFieldName,
+          tenantsCollectionSlug,
         })
 
         /**
@@ -170,6 +188,7 @@ export const multiTenantPlugin =
           collection.admin.baseListFilter = withTenantListFilter({
             baseListFilter: collection.admin?.baseListFilter,
             tenantFieldName,
+            tenantsCollectionSlug,
           })
         }
 
@@ -210,6 +229,8 @@ export const multiTenantPlugin =
         serverProps: {
           globalSlugs: globalCollectionSlugs,
           tenantFieldName,
+          tenantsCollectionSlug,
+          useAsTitle: tenantCollection.admin?.useAsTitle || 'id',
         },
       })
     }

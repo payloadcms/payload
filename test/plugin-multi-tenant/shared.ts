@@ -2,6 +2,6 @@ export const tenantsSlug = 'tenants'
 
 export const usersSlug = 'users'
 
-export const menuItemsSlug = 'menu-items'
+export const menuItemsSlug = 'food-items'
 
-export const menuSlug = 'menu'
+export const menuSlug = 'food-menu'

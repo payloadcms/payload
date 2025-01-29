@@ -1,11 +1,12 @@
 import type { CollectionConfig } from 'payload'
 
-import { menuSlug } from '../shared.js'
+import { menuItemsSlug, menuSlug } from '../shared.js'
 
 export const Menu: CollectionConfig = {
   slug: menuSlug,
   admin: {
     useAsTitle: 'title',
+    group: 'Tenant Globals',
   },
   fields: [
     {
@@ -27,7 +28,7 @@ export const Menu: CollectionConfig = {
           name: 'menuItem',
           label: 'Menu Item',
           type: 'relationship',
-          relationTo: 'menu-items',
+          relationTo: menuItemsSlug,
           required: true,
           admin: {
             description: 'Automatically filtered by selected tenant',
