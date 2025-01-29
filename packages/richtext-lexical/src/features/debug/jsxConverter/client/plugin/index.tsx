@@ -16,18 +16,5 @@ export function RichTextPlugin() {
     })
   }, [editor])
 
-  return (
-    <RichText
-      converters={defaultJSXConverters}
-      data={editorState}
-      // className={cn(
-      //   {
-      //     'container ': enableGutter,
-      //     'max-w-none': !enableGutter,
-      //     'mx-auto prose md:prose-md dark:prose-invert ': enableProse,
-      //   },
-      //   className,
-      // )}
-    />
-  )
+  return <RichText converters={defaultJSXConverters} data={editorState} />
 }
