@@ -1,13 +1,17 @@
-import type { PayloadRequest, SelectType, TraverseFieldsCallback } from 'payload'
+import type { PaginatedDocs, PayloadRequest, Sort } from 'payload'
 
 import { Buffer } from 'buffer'
 import { stringify } from 'csv-stringify/sync'
-import { traverseFields } from 'payload'
+import { APIError } from 'payload'
+
+import { flattenObject } from './flattenObject.js'
+import { getSelect } from './getSelect.js'
 
 type Export = {
   collections: {
     fields?: string[]
     slug: string
+    sort: Sort
   }[]
   format: 'csv' | 'json'
   globals?: string[]
@@ -21,170 +25,57 @@ type Args = {
 
 export const createExport = async (args: Args) => {
   const {
-    data: { collections = [], format, globals },
+    data: { collections = [], format },
     req: { locale, payload, user },
     req,
   } = args
 
-  // TODO: handle globals
-
-  // TODO: handle more than one collection
-
   if (collections.length === 1 && format === 'csv') {
-    const { slug, fields } = collections[0] as { fields?: string[]; slug: string }
+    const { slug, fields, sort } = collections[0] as Export['collections'][0]
     const collection = payload.config.collections.find((collection) => collection.slug === slug)
     if (!collection) {
       throw new Error(`Collection with slug ${slug} not found`)
     }
 
-    const select: SelectType = {}
-    let selectRef = select
-    let headers: Record<string, string> = {}
-
-    /**
-     reduce fields to filter:
-     input will be: ['id', 'title', 'group.value', 'createdAt', 'updatedAt']
-     select will be:
-     {
-     id: true,
-     title: true,
-     group: {
-     value: true,
-     },
-     createdAt: true,
-     updatedAt: true
-     }
-
-     field headers will be:
-     {
-     id: 'id',
-     title: 'title',
-     group_value: 'group.value',
-     createdAt: 'createdAt',
-     updatedAt: 'updatedAt'
-     }
-     */
-
-    const traverseFieldsCallback: TraverseFieldsCallback<Record<string, unknown>> = ({
-      field,
-      parentRef,
-      ref,
-    }) => {
-      // always false because we are using flattenedFields but useful for type narrowing
-      if (!('name' in field)) {
-        return
-      }
-
-      if (field.type === 'group') {
-        selectRef = select[field.name] = {}
-        ref._name = field.name
-      }
-      const prefix =
-        typeof parentRef === 'object' && parentRef?._name && typeof parentRef._name === 'string'
-          ? `${parentRef._name}.`
-          : ''
-
-      // when fields aren't defined we assume all fields are included
-      if (
-        fields &&
-        'name' in field &&
-        !fields.some((f) => {
-          const segment = f.indexOf('.') > -1 ? f.substring(0, f.indexOf('.')) : f
-          return segment === `${prefix}${field.name}`
-        })
-      ) {
-        return
-      }
-
-      if (field.name) {
-        selectRef[field.name] = true
-      }
+    if (!fields) {
+      throw new APIError('fields must be defined when exporting')
     }
 
-    if (fields) {
-      headers = fields.reduce((acc: Record<string, string>, field) => {
-        const segments = field.split('.')
-        let selectRef = select
-        segments.forEach((segment, i) => {
-          if (i === segments.length - 1) {
-            selectRef[segment] = true
-          } else {
-            if (!selectRef[segment]) {
-              selectRef[segment] = {}
-            }
-            selectRef = selectRef[segment] as SelectType
-          }
-        })
-        acc[field.replaceAll(/\./g, '_')] = field
-        return acc
-      }, {})
-    } else {
-      traverseFields({
-        callback: traverseFieldsCallback,
-        fields: collection.flattenedFields,
-        fillEmpty: false,
-      })
-    }
-
-    const { docs } = await payload.find({
+    const findArgs = {
       collection: slug,
-      // TODO: populate the relationship fields
-      // populate: {
-      //
-      // },
-      select,
-      // TODO: default limit of 1000, need to handle streams for larger exports
-      limit: 1000,
+      depth: 0,
+      limit: 100,
       locale,
       req,
+      select: getSelect(fields),
+      sort,
       user,
-    })
+    }
 
-    // TODO: handle relationship subfields
-    // TODO: build localized data object
+    let result: PaginatedDocs = { hasNextPage: true } as PaginatedDocs
+    const csvData: string[] = []
 
-    const csvInput = docs.map((doc) => {
-      const data: Record<string, unknown> = {}
-      Object.entries(headers).forEach(([key, value]) => {
-        const segments = value.split('.')
-        let docRef = doc
+    let isFirstBatch = true
 
-        segments.forEach((segment, i) => {
-          if (i === segments.length - 1) {
-            if (Array.isArray(docRef[segment])) {
-              docRef[segment].forEach((item: Record<string, unknown>, i) => {
-                Object.entries(item).forEach(([itemKey, itemValue]) => {
-                  data[`${key}_${i}_${itemKey}`] = itemValue
-                })
-              })
-            } else {
-              data[key] = docRef[segment]
-            }
-          } else {
-            if (Array.isArray(docRef[segment])) {
-              docRef[segment].forEach((item: Record<string, unknown>, i) => {
-                Object.entries(item).forEach(([itemKey, itemValue]) => {
-                  data[`${segment}_${i}_${itemKey}`] = itemValue
-                })
-              })
-            } else {
-              docRef = docRef[segment]
-            }
-          }
-        })
+    while (result.hasNextPage) {
+      result = await payload.find(findArgs)
+      const csvInput = result.docs.map((doc) => flattenObject(doc))
+
+      const csvString = stringify(csvInput, {
+        header: isFirstBatch, // Only include header in the first batch
       })
-      return data
-    })
 
-    const csv = stringify(csvInput, {
-      header: true,
-    })
+      csvData.push(csvString)
+      isFirstBatch = false
+    }
+
+    const csvBuffer = Buffer.from(csvData.join(''))
 
     req.file = {
       name: `${collection.slug}.csv`,
-      data: Buffer.from(csv),
+      data: csvBuffer,
       mimetype: 'text/csv',
-      size: csv.length,
+      size: csvBuffer.length,
     }
   }
 }

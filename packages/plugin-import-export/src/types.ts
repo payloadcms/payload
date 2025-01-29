@@ -1,6 +1,9 @@
 import type { CollectionConfig, UploadConfig } from 'payload'
 
-export type CollectionOverride = { upload: UploadConfig } & CollectionConfig
+export type CollectionOverride = {
+  admin: CollectionConfig['admin']
+  upload: UploadConfig
+} & CollectionConfig
 
 export type ImportExportPluginConfig = {
   /**

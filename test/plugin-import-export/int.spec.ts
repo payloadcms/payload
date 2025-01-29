@@ -16,21 +16,8 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 describe('@payloadcms/plugin-import-export', () => {
-  let pageData = {
-    title: 'Test',
-    group: {
-      value: 'Group Value',
-      ignore: 'Ignore',
-    },
-  }
-
   beforeAll(async () => {
     ;({ payload } = await initPayloadInt(dirname))
-
-    page = await payload.create({
-      collection: 'pages',
-      data: pageData,
-    })
   })
 
   afterAll(async () => {
@@ -57,6 +44,7 @@ describe('@payloadcms/plugin-import-export', () => {
           collections: [
             {
               slug: 'pages',
+              sort: 'createdAt',
               fields: ['id', 'title', 'group.value', 'createdAt', 'updatedAt'],
             },
           ],
@@ -73,7 +61,12 @@ describe('@payloadcms/plugin-import-export', () => {
       const expectedPath = path.join(dirname, './uploads', doc.filename as string)
       const data = await readCSV(expectedPath)
 
+      expect(data[0].id).toBeDefined()
+      expect(data[0].title).toStrictEqual('Page 0')
       expect(data[0].group_value).toStrictEqual('group value')
+      expect(data[0].group_ignore).toBeUndefined()
+      expect(data[0].createdAt).toBeDefined()
+      expect(data[0].updatedAt).toBeDefined()
     })
 
     it('should create a file for collection csv from array', async () => {
@@ -172,6 +165,47 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].array_0_field2).toBeUndefined()
       expect(data[0].array_1_field1).toStrictEqual('foo')
       expect(data[0].array_1_field2).toBeUndefined()
+    })
+
+    it('should create a file for collection csv from hasMany field', async () => {
+      // large data set
+      for (let i = 0; i < 5; i++) {
+        await payload.create({
+          collection: 'pages',
+          data: {
+            title: `Array ${i}`,
+            hasManyNumber: [0, 1, 1, 2, 3, 5, 8, 13, 21],
+          },
+        })
+      }
+
+      let doc = await payload.create({
+        collection: 'exports',
+        data: {
+          collections: [
+            {
+              slug: 'pages',
+              fields: ['id', 'hasManyNumber'],
+            },
+          ],
+          format: 'csv',
+        },
+      })
+
+      doc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(doc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', doc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      expect(data[0].hasManyNumber_0).toStrictEqual('0')
+      expect(data[0].hasManyNumber_1).toStrictEqual('1')
+      expect(data[0].hasManyNumber_2).toStrictEqual('1')
+      expect(data[0].hasManyNumber_3).toStrictEqual('2')
+      expect(data[0].hasManyNumber_4).toStrictEqual('3')
     })
   })
 })

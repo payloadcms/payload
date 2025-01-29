@@ -51,6 +51,11 @@ export const Pages: CollectionConfig = {
       ],
     },
     {
+      name: 'hasManyNumber',
+      type: 'number',
+      hasMany: true,
+    },
+    {
       name: 'relationship',
       type: 'relationship',
       relationTo: 'users',

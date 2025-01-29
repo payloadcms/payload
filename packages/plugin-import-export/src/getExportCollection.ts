@@ -32,6 +32,11 @@ export const getExportCollection = ({
             type: 'text',
             hasMany: true,
           },
+          {
+            name: 'sort',
+            type: 'text',
+            hasMany: true,
+          },
           // other options like where filters, limit, drafts, etc.
         ],
       },
