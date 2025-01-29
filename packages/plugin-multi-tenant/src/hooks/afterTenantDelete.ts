@@ -9,12 +9,14 @@ import { generateCookie, mergeHeaders } from 'payload'
 
 import type { UserWithTenantsField } from '../types.js'
 
+import { getCollectionIDType } from '../utilities/getCollectionIDType.js'
 import { getTenantFromCookie } from '../utilities/getTenantFromCookie.js'
 
 type Args = {
   collection: CollectionConfig
   enabledSlugs: string[]
   tenantFieldName: string
+  tenantsCollectionSlug: string
   usersSlug: string
 }
 /**
@@ -26,6 +28,7 @@ export const addTenantCleanup = ({
   collection,
   enabledSlugs,
   tenantFieldName,
+  tenantsCollectionSlug,
   usersSlug,
 }: Args) => {
   if (!collection.hooks) {
@@ -38,6 +41,7 @@ export const addTenantCleanup = ({
     afterTenantDelete({
       enabledSlugs,
       tenantFieldName,
+      tenantsCollectionSlug,
       usersSlug,
     }),
   )
@@ -47,10 +51,15 @@ export const afterTenantDelete =
   ({
     enabledSlugs,
     tenantFieldName,
+    tenantsCollectionSlug,
     usersSlug,
   }: Omit<Args, 'collection'>): CollectionAfterDeleteHook =>
   async ({ id, req }) => {
-    const currentTenantCookieID = getTenantFromCookie(req.headers, req.payload.db.defaultIDType)
+    const idType = getCollectionIDType({
+      collectionSlug: tenantsCollectionSlug,
+      payload: req.payload,
+    })
+    const currentTenantCookieID = getTenantFromCookie(req.headers, idType)
     if (currentTenantCookieID === id) {
       const newHeaders = new Headers({
         'Set-Cookie': generateCookie<string>({

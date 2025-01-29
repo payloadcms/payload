@@ -6,6 +6,7 @@ export const MenuItems: CollectionConfig = {
   slug: menuItemsSlug,
   admin: {
     useAsTitle: 'name',
+    group: 'Tenant Collections',
   },
   fields: [
     {

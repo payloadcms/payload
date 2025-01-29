@@ -46,6 +46,10 @@
       margin: 0 0 0 var(--base);
     }
 
+    &__modifiedCheckBox {
+      margin: 0 0 0 var(--base);
+    }
+
     @include mid-break {
       &__intro,
       &__header {
@@ -56,6 +60,7 @@
         flex-direction: column;
         gap: calc(var(--base) / 4);
       }
+
 
       &__restore {
         margin: calc(var(--base) * 0.5) 0 0 0;

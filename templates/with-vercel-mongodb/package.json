@@ -19,13 +19,13 @@
     "@payloadcms/next": "latest",
     "@payloadcms/payload-cloud": "latest",
     "@payloadcms/richtext-lexical": "latest",
-    "@payloadcms/storage-vercel-blob": "latest",
     "cross-env": "^7.0.3",
     "graphql": "^16.8.1",
     "next": "15.1.5",
     "payload": "latest",
     "react": "19.0.0",
-    "react-dom": "19.0.0"
+    "react-dom": "19.0.0",
+    "@payloadcms/storage-vercel-blob": "latest"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -39,5 +39,10 @@
   },
   "engines": {
     "node": "^18.20.2 || >=20.9.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "sharp"
+    ]
   }
 }

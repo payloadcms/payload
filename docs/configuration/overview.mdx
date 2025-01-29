@@ -24,7 +24,7 @@ The Payload Config is strongly typed and ties directly into Payload's TypeScript
 
 <Banner type="success">
   **Tip:**
-  The location of your Payload Config can be customized. [More details](#customizing--automating-config-location-detection).
+  The location of your Payload Config can be customized. [More details](#customizing-the-config-location).
 </Banner>
 
 ## Config Options
@@ -73,7 +73,7 @@ The following options are available:
 | **`collections`**          | An array of Collections for Payload to manage. [More details](./collections).                                                                                                                                                |
 | **`compatibility`**        | Compatibility flags for earlier versions of Payload. [More details](#compatibility-flags).                                                                                                                                   |
 | **`globals`**              | An array of Globals for Payload to manage. [More details](./globals).                                                                                                                                                        |
-| **`cors`**                 | Cross-origin resource sharing (CORS) is a mechanism that accept incoming requests from given domains. You can also customize the `Access-Control-Allow-Headers` header. [More details](#cross-origin-resource-sharing-cors). |
+| **`cors`**                 | Cross-origin resource sharing (CORS) is a mechanism that accept incoming requests from given domains. You can also customize the `Access-Control-Allow-Headers` header. [More details](#cors).                               |
 | **`localization`**         | Opt-in to translate your content into multiple locales. [More details](./localization).                                                                                                                                      |
 | **`logger`**               | Logger options, logger options with a destination stream, or an instantiated logger instance. [More details](https://getpino.io/#/docs/api?id=options).                                                                      |
 | **`loggingLevels`**        | An object to override the level to use in the logger for Payload's errors.                                                                                                                                                   |
@@ -181,7 +181,7 @@ If none was in either location, Payload will finally check the `dist` directory.
 
 ### Customizing the Config Location
 
-In addition to the above automated detection, you can specify your own location for the Payload Config. This can be useful in situations where your config is not in a standard location, or you wish to switch between multiple configurations. To do this, Payload exposes an [Environment Variable](..environment-variables) to bypass all automatic config detection.
+In addition to the above automated detection, you can specify your own location for the Payload Config. This can be useful in situations where your config is not in a standard location, or you wish to switch between multiple configurations. To do this, Payload exposes an [Environment Variable](./environment-variables) to bypass all automatic config detection.
 
 To use a custom config location, set the `PAYLOAD_CONFIG_PATH` environment variable:
 

@@ -10,6 +10,7 @@ import type {
   PayloadRequest,
   SanitizedFieldPermissions,
   SanitizedFieldsPermissions,
+  Validate,
 } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
@@ -167,7 +168,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       return
     }
 
-    const validate = field.validate
+    const validate: Validate = field.validate
 
     let validationResult: string | true = true
 
@@ -183,21 +184,21 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       }
 
       try {
-        validationResult = await validate(
-          data?.[field.name] as never,
-          {
-            ...field,
-            id,
-            collectionSlug,
-            data: fullData,
-            event: 'onChange',
-            jsonError,
-            operation,
-            preferences,
-            req,
-            siblingData: data,
-          } as any,
-        )
+        validationResult = await validate(data?.[field.name], {
+          ...field,
+          id,
+          collectionSlug,
+          data: fullData,
+          event: 'onChange',
+          // @AlessioGr added `jsonError` in https://github.com/payloadcms/payload/commit/c7ea62a39473408c3ea912c4fbf73e11be4b538d
+          // @ts-expect-error-next-line
+          jsonError,
+          operation,
+          preferences,
+          previousValue: previousFormState?.[path]?.initialValue,
+          req,
+          siblingData: data,
+        })
       } catch (err) {
         validationResult = `Error validating field at path: ${path}`
 
@@ -365,7 +366,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             }
 
             const parentPath = path + '.' + i
-            const rowSchemaPath = schemaPath + '.' + block.slug
 
             if (block) {
               row.id = row?.id || new ObjectId().toHexString()
@@ -435,7 +435,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   parentIndexPath: '',
                   parentPassesCondition: passesCondition,
                   parentPath,
-                  parentSchemaPath: rowSchemaPath,
+                  parentSchemaPath: schemaPath + '.' + block.slug,
                   permissions:
                     fieldPermissions === true
                       ? fieldPermissions
@@ -741,10 +741,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         includeSchema,
         omitParents,
         operation,
-        parentIndexPath: tabHasName(tab) ? '' : tabIndexPath,
+        parentIndexPath: isNamedTab ? '' : tabIndexPath,
         parentPassesCondition: passesCondition,
-        parentPath: tabHasName(tab) ? tabPath : parentPath,
-        parentSchemaPath: tabHasName(tab) ? tabSchemaPath : parentSchemaPath,
+        parentPath: isNamedTab ? tabPath : parentPath,
+        parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
         permissions: childPermissions,
         preferences,
         previousFormState,
