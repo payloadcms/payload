@@ -23,10 +23,6 @@ export const home: RequiredDataFromCollectionSlug<'pages'> = {
         },
       },
     ],
-<<<<<<< HEAD
-=======
-    // @ts-expect-error - this should disappear when upgrading to the latest version of Payload
->>>>>>> origin/main
     media: '{{IMAGE_1}}',
     richText: {
       root: {
@@ -505,10 +501,6 @@ export const home: RequiredDataFromCollectionSlug<'pages'> = {
     {
       blockName: 'Media Block',
       blockType: 'mediaBlock',
-<<<<<<< HEAD
-=======
-      // @ts-expect-error - this should disappear when upgrading to the latest version of Payload
->>>>>>> origin/main
       media: '{{IMAGE_2}}',
     },
     {
@@ -665,10 +657,6 @@ export const home: RequiredDataFromCollectionSlug<'pages'> = {
   ],
   meta: {
     description: 'An open-source website built with Payload and Next.js.',
-<<<<<<< HEAD
-=======
-    // @ts-expect-error - this should disappear when upgrading to the latest version of Payload
->>>>>>> origin/main
     image: '{{IMAGE_1}}',
     title: 'Payload Website Template',
   },
