@@ -12,22 +12,16 @@ type Props = {
 }
 
 export const generatePreviewPath = ({ collection, slug, req }: Props) => {
-  const path = `${collectionPrefixMap[collection]}/${slug}`
-
-  const params = {
+  const encodedParams = new URLSearchParams({
     slug,
     collection,
-    path,
-  }
-
-  const encodedParams = new URLSearchParams()
-
-  Object.entries(params).forEach(([key, value]) => {
-    encodedParams.append(key, value)
+    path: `${collectionPrefixMap[collection]}/${slug}`,
+    previewSecret: process.env.PREVIEW_SECRET || '',
   })
 
   const isProduction =
     process.env.NODE_ENV === 'production' || Boolean(process.env.VERCEL_PROJECT_PRODUCTION_URL)
+
   const protocol = isProduction ? 'https:' : req.protocol
 
   const url = `${protocol}//${req.host}/next/preview?${encodedParams.toString()}`
