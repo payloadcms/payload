@@ -1,11 +1,10 @@
-import type { CollectionSlug, PayloadRequest, getPayload } from 'payload'
+import type { CollectionSlug, PayloadRequest } from 'payload'
+import { getPayload } from 'payload'
 
 import { draftMode } from 'next/headers'
 import { redirect } from 'next/navigation'
 
 import configPromise from '@payload-config'
-
-const payloadToken = 'payload-token'
 
 export async function GET(
   req: {
@@ -17,11 +16,12 @@ export async function GET(
   } & Request,
 ): Promise<Response> {
   const payload = await getPayload({ config: configPromise })
+
   const { searchParams } = new URL(req.url)
+
   const path = searchParams.get('path')
   const collection = searchParams.get('collection') as CollectionSlug
   const slug = searchParams.get('slug')
-
   const previewSecret = searchParams.get('previewSecret')
 
   if (previewSecret !== process.env.PREVIEW_SECRET) {

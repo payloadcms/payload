@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
 import React, { cache, Fragment } from 'react'
 
-import type { Page as PageType } from '../../../payload-types'
+import type { Page as PageType } from '@payload-types'
 
 import { Gutter } from '../../../components/Gutter'
 import RichText from '../../../components/RichText'
