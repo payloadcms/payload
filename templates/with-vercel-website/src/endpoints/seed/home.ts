@@ -23,6 +23,7 @@ export const home: RequiredDataFromCollectionSlug<'pages'> = {
         },
       },
     ],
+    // @ts-ignore
     media: '{{IMAGE_1}}',
     richText: {
       root: {
