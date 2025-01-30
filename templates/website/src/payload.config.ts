@@ -16,6 +16,7 @@ import { Header } from './Header/config'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
+import { chargeSucceededTask } from '@/stripe/webhooks/chargeSucceeded'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -89,6 +90,20 @@ export default buildConfig({
         return authHeader === `Bearer ${process.env.CRON_SECRET}`
       },
     },
-    tasks: [],
+    tasks: [
+      {
+        retries: 1,
+
+        // This is a unique identifier for the task
+        slug: 'stripePaymentSucceeded',
+
+        inputSchema: {
+          type: 'json',
+          name: 'event',
+        },
+
+        handler: chargeSucceededTask,
+      },
+    ],
   },
 })
