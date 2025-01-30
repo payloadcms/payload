@@ -948,9 +948,9 @@ describe('Versions', () => {
     test('correctly renders diff for localized array fields', async () => {
       await navigateToVersionFieldsDiff()
 
-      const textInArray = page.locator(
-        '[data-field-path="array.0.textInArrayLocalized"][data-locale="en"]',
-      )
+      const textInArray = page
+        .locator('[data-field-path="arrayLocalized"][data-locale="en"]')
+        .locator('[data-field-path="arrayLocalized.0.textInArrayLocalized"]')
 
       await expect(textInArray.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
         'textInArrayLocalized',
