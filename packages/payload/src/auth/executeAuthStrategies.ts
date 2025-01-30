@@ -1,5 +1,7 @@
 import type { AuthStrategyFunctionArgs, AuthStrategyResult } from './index.js'
 
+import { mergeHeaders } from '../utilities/mergeHeaders.js'
+
 export const executeAuthStrategies = async (
   args: AuthStrategyFunctionArgs,
 ): Promise<AuthStrategyResult> => {
@@ -10,7 +12,18 @@ export const executeAuthStrategies = async (
         // add the configured AuthStrategy `name` to the strategy function args
         args.strategyName = strategy.name
 
-        return strategy.authenticate(args)
+        const authenticateResult = await strategy.authenticate(args)
+        if (result.responseHeaders) {
+          return {
+            ...authenticateResult,
+            responseHeaders: mergeHeaders(
+              result.responseHeaders || new Headers(),
+              authenticateResult.responseHeaders || new Headers(),
+            ),
+          }
+        } else {
+          return authenticateResult
+        }
       }
       return result
     },
