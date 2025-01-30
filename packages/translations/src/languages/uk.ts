@@ -328,6 +328,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     takeOver: 'Перейняти',
     thisLanguage: 'Українська',
     time: 'Час',
+    timezone: 'Часовий пояс',
     titleDeleted: '{{label}} "{{title}}" успішно видалено.',
     true: 'Правда',
     unauthorized: 'Немає доступу',

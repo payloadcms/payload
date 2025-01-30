@@ -328,6 +328,7 @@ export const daTranslations: DefaultTranslationsObject = {
     takeOver: 'Overtag',
     thisLanguage: 'Dansk',
     time: 'Tid',
+    timezone: 'Tidszone',
     titleDeleted: '{{label}} "{{title}}" slettet.',
     true: 'Sandt',
     unauthorized: 'Uautoriseret',

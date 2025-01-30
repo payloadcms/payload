@@ -326,6 +326,7 @@ export const arTranslations: DefaultTranslationsObject = {
     takeOver: 'تولي',
     thisLanguage: 'العربية',
     time: 'الوقت',
+    timezone: 'المنطقة الزمنية',
     titleDeleted: 'تم حذف {{label}} "{{title}}" بنجاح.',
     true: 'صحيح',
     unauthorized: 'غير مصرح به',

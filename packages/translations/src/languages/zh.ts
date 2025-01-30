@@ -318,6 +318,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     takeOver: '接管',
     thisLanguage: '中文 (简体)',
     time: '时间',
+    timezone: '时区',
     titleDeleted: '{{label}} "{{title}}"已被成功删除。',
     true: '真实',
     unauthorized: '未经授权',

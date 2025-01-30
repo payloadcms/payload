@@ -332,6 +332,7 @@ export const huTranslations: DefaultTranslationsObject = {
     takeOver: 'Átvétel',
     thisLanguage: 'Magyar',
     time: 'Idő',
+    timezone: 'Időzóna',
     titleDeleted: '{{label}} "{{title}}" sikeresen törölve.',
     true: 'Igaz',
     unauthorized: 'Jogosulatlan',

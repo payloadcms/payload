@@ -329,6 +329,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     takeOver: 'Preuzmi',
     thisLanguage: 'Hrvatski',
     time: 'Vrijeme',
+    timezone: 'Vremenska zona',
     titleDeleted: '{{label}} "{{title}}" uspješno izbrisano.',
     true: 'Istinito',
     unauthorized: 'Neovlašteno',

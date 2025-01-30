@@ -325,6 +325,7 @@ export const thTranslations: DefaultTranslationsObject = {
     takeOver: 'เข้ายึด',
     thisLanguage: 'ไทย',
     time: 'เวลา',
+    timezone: 'เขตเวลา',
     titleDeleted: 'ลบ {{label}} "{{title}}" สำเร็จ',
     true: 'จริง',
     unauthorized: 'ไม่ได้รับอนุญาต',

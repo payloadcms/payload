@@ -333,6 +333,7 @@ export const itTranslations: DefaultTranslationsObject = {
     takeOver: 'Prendi il controllo',
     thisLanguage: 'Italiano',
     time: 'Tempo',
+    timezone: 'Fuso orario',
     titleDeleted: '{{label}} {{title}} eliminato con successo.',
     true: 'Vero',
     unauthorized: 'Non autorizzato',

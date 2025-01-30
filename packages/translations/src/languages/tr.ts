@@ -333,6 +333,7 @@ export const trTranslations: DefaultTranslationsObject = {
     takeOver: 'Devralmak',
     thisLanguage: 'Türkçe',
     time: 'Zaman',
+    timezone: 'Saat dilimi',
     titleDeleted: '{{label}} {{title}} başarıyla silindi.',
     true: 'Doğru',
     unauthorized: 'Yetkisiz',

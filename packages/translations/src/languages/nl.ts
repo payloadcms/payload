@@ -333,6 +333,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     takeOver: 'Overnemen',
     thisLanguage: 'Nederlands',
     time: 'Tijd',
+    timezone: 'Tijdzone',
     titleDeleted: '{{label}} "{{title}}" succesvol verwijderd.',
     true: 'Waar',
     unauthorized: 'Onbevoegd',

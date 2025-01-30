@@ -1,14 +1,14 @@
 'use client'
 
 import { useMemo } from 'react'
-import { components as SelectComponents } from 'react-select'
 
 import type { Props } from './types.js'
 
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import { ReactSelect } from '../ReactSelect/index.js'
-import { timezones } from './timezones.js'
 import './index.scss'
+import { timezones } from './timezones.js'
 
 export const TimezonePicker = (props: Props) => {
   const {
@@ -16,6 +16,8 @@ export const TimezonePicker = (props: Props) => {
     onChange: onChangeFromProps,
     selectedTimezone: selectedTimezoneFromProps,
   } = props
+
+  const { t } = useTranslation()
 
   const selectedTimezone = useMemo(() => {
     if (enabled) {
@@ -32,12 +34,11 @@ export const TimezonePicker = (props: Props) => {
 
   return (
     <div className="timezone-picker-wrapper" suppressHydrationWarning>
-      <FieldLabel htmlFor="timezone-picker" label={'Timezone:'} unstyled />
+      <FieldLabel htmlFor="timezone-picker" label={`${t('general:timezone')}`} unstyled />
       <ReactSelect
         className="timezone-picker"
         inputId="timezone-picker"
         isClearable={false}
-        // menuIsOpen={true}
         onChange={(val: (typeof timezones)[number]) => {
           if (onChangeFromProps) {
             onChangeFromProps(val.value)

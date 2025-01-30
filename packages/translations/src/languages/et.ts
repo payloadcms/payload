@@ -326,6 +326,7 @@ export const etTranslations: DefaultTranslationsObject = {
     takeOver: 'Võta üle',
     thisLanguage: 'Eesti',
     time: 'Aeg',
+    timezone: 'Ajavöönd',
     titleDeleted: '{{label}} "{{title}}" edukalt kustutatud.',
     true: 'Tõene',
     unauthorized: 'Volitamata',

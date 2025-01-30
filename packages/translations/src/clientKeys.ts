@@ -265,6 +265,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:takeOver',
   'general:thisLanguage',
   'general:time',
+  'general:timezone',
   'general:titleDeleted',
   'general:true',
   'general:upcomingEvents',

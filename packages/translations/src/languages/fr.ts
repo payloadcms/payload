@@ -337,6 +337,7 @@ export const frTranslations: DefaultTranslationsObject = {
     takeOver: 'Prendre en charge',
     thisLanguage: 'Français',
     time: 'Temps',
+    timezone: 'Fuseau horaire',
     titleDeleted: '{{label}} "{{title}}" supprimé(e) avec succès.',
     true: 'Vrai',
     unauthorized: 'Non autorisé',

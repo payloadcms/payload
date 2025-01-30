@@ -332,6 +332,7 @@ export const myTranslations: DefaultTranslationsObject = {
     takeOver: 'တာဝန်ယူပါ',
     thisLanguage: 'မြန်မာစာ',
     time: 'Masa',
+    timezone: 'Masa Wilayah',
     titleDeleted: '{{label}} {{title}} အောင်မြင်စွာ ဖျက်သိမ်းခဲ့သည်။',
     true: 'အမှန်',
     unauthorized: 'အခွင့်မရှိပါ။',

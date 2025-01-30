@@ -329,6 +329,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     takeOver: 'Поемане',
     thisLanguage: 'Български',
     time: 'Време',
+    timezone: 'Часова зона',
     titleDeleted: '{{label}} "{{title}}" успешно изтрит.',
     true: 'Вярно',
     unauthorized: 'Неоторизиран',

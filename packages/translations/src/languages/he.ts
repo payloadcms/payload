@@ -322,6 +322,7 @@ export const heTranslations: DefaultTranslationsObject = {
     takeOver: 'קח פיקוד',
     thisLanguage: 'עברית',
     time: 'זמן',
+    timezone: 'אזור זמן',
     titleDeleted: '{{label}} "{{title}}" נמחק בהצלחה.',
     true: 'True',
     unauthorized: 'אין הרשאה',

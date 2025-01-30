@@ -333,6 +333,7 @@ export const deTranslations: DefaultTranslationsObject = {
     takeOver: 'Übernehmen',
     thisLanguage: 'Deutsch',
     time: 'Zeit',
+    timezone: 'Zeitzone',
     titleDeleted: '{{label}} {{title}} wurde erfolgreich gelöscht.',
     true: 'Wahr',
     unauthorized: 'Nicht autorisiert',

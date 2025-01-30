@@ -330,6 +330,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     takeOver: 'Assumir',
     thisLanguage: 'Português',
     time: 'Tempo',
+    timezone: 'Fuso horário',
     titleDeleted: '{{label}} {{title}} excluído com sucesso.',
     true: 'Verdadeiro',
     unauthorized: 'Não autorizado',

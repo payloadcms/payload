@@ -330,6 +330,7 @@ export const caTranslations: DefaultTranslationsObject = {
     takeOver: 'Prendre el control',
     thisLanguage: 'Catala',
     time: 'Temps',
+    timezone: 'Fus horari',
     titleDeleted: '{{label}} "{{title}}" eliminat correctament.',
     true: 'Veritat',
     unauthorized: 'No autoritzat',

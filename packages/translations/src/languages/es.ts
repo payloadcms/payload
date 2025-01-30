@@ -334,6 +334,7 @@ export const esTranslations: DefaultTranslationsObject = {
     takeOver: 'Tomar el control',
     thisLanguage: 'Español',
     time: 'Tiempo',
+    timezone: 'Zona horaria',
     titleDeleted: '{{label}} {{title}} eliminado correctamente.',
     true: 'Verdadero',
     unauthorized: 'No autorizado',

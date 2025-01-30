@@ -329,6 +329,7 @@ export const azTranslations: DefaultTranslationsObject = {
     takeOver: 'Əvvəl',
     thisLanguage: 'Azərbaycan dili',
     time: 'Vaxt',
+    timezone: 'Saat qurşağı',
     titleDeleted: '{{label}} "{{title}}" uğurla silindi.',
     true: 'Doğru',
     unauthorized: 'İcazəsiz',

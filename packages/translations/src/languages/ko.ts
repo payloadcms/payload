@@ -327,6 +327,7 @@ export const koTranslations: DefaultTranslationsObject = {
     takeOver: '인수하기',
     thisLanguage: '한국어',
     time: '시간',
+    timezone: '시간대',
     titleDeleted: '{{label}} "{{title}}"을(를) 삭제했습니다.',
     true: '참',
     unauthorized: '권한 없음',

@@ -327,6 +327,7 @@ export const csTranslations: DefaultTranslationsObject = {
     takeOver: 'Převzít',
     thisLanguage: 'Čeština',
     time: 'Čas',
+    timezone: 'Časové pásmo',
     titleDeleted: '{{label}} "{{title}}" úspěšně smazáno.',
     true: 'Pravda',
     unauthorized: 'Neoprávněný',

@@ -330,6 +330,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     takeOver: 'Ta over',
     thisLanguage: 'Norsk',
     time: 'Tid',
+    timezone: 'Tidssone',
     titleDeleted: '{{label}} "{{title}}" ble slettet.',
     true: 'Sann',
     unauthorized: 'Ikke autorisert',

@@ -331,6 +331,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     takeOver: 'Взять на себя',
     thisLanguage: 'Русский',
     time: 'Время',
+    timezone: 'Часовой пояс',
     titleDeleted: '{{label}} {{title}} успешно удалено.',
     true: 'Правда',
     unauthorized: 'Нет доступа',

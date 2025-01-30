@@ -330,6 +330,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     takeOver: 'Preuzeti',
     thisLanguage: 'Srpski (latinica)',
     time: 'Vreme',
+    timezone: 'Vremenska zona',
     titleDeleted: '{{label}} "{{title}}" uspešno obrisano.',
     true: 'Istinito',
     unauthorized: 'Niste autorizovani',

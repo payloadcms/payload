@@ -330,6 +330,7 @@ export const skTranslations: DefaultTranslationsObject = {
     takeOver: 'Prevziať',
     thisLanguage: 'Slovenčina',
     time: 'Čas',
+    timezone: 'Časové pásmo',
     titleDeleted: '{{label}} "{{title}}" úspešne zmazané.',
     true: 'Pravda',
     unauthorized: 'Neoprávnený prístup',

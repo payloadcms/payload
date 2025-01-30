@@ -329,6 +329,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     takeOver: '引き継ぐ',
     thisLanguage: 'Japanese',
     time: '時間',
+    timezone: 'タイムゾーン',
     titleDeleted: '{{label}} "{{title}}" が削除されました。',
     true: '真実',
     unauthorized: '未認証',

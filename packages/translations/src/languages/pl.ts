@@ -329,6 +329,7 @@ export const plTranslations: DefaultTranslationsObject = {
     takeOver: 'Przejąć',
     thisLanguage: 'Polski',
     time: 'Czas',
+    timezone: 'Strefa czasowa',
     titleDeleted: 'Pomyślnie usunięto {{label}} {{title}}',
     true: 'Prawda',
     unauthorized: 'Brak autoryzacji',

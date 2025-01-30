@@ -327,6 +327,7 @@ export const faTranslations: DefaultTranslationsObject = {
     takeOver: 'تحویل گرفتن',
     thisLanguage: 'فارسی',
     time: 'زمان',
+    timezone: 'منطقه زمانی',
     titleDeleted: '{{label}} "{{title}}" با موفقیت پاک شد.',
     true: 'درست',
     unauthorized: 'غیرمجاز',

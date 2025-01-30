@@ -328,6 +328,7 @@ export const slTranslations: DefaultTranslationsObject = {
     takeOver: 'Prevzemi',
     thisLanguage: 'Slovenščina',
     time: 'Čas',
+    timezone: 'Časovni pas',
     titleDeleted: '{{label}} "{{title}}" uspešno izbrisan.',
     true: 'Da',
     unauthorized: 'Nepooblaščeno',

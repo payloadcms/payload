@@ -330,6 +330,7 @@ export const svTranslations: DefaultTranslationsObject = {
     takeOver: 'Ta över',
     thisLanguage: 'Svenska',
     time: 'Tid',
+    timezone: 'Tidszon',
     titleDeleted: '{{label}} "{{title}}" togs bort framgångsrikt.',
     true: 'Sann',
     unauthorized: 'Obehörig',

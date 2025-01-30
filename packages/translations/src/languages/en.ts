@@ -330,6 +330,7 @@ export const enTranslations = {
     takeOver: 'Take over',
     thisLanguage: 'English',
     time: 'Time',
+    timezone: 'Timezone',
     titleDeleted: '{{label}} "{{title}}" successfully deleted.',
     true: 'True',
     unauthorized: 'Unauthorized',

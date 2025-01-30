@@ -329,6 +329,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     takeOver: 'Превузети',
     thisLanguage: 'Српски (ћирилица)',
     time: 'Vreme',
+    timezone: 'Vremenska zona',
     titleDeleted: '{{label}} "{{title}}" успешно обрисано.',
     true: 'Istinito',
     unauthorized: 'Нисте ауторизовани',

@@ -333,6 +333,7 @@ export const roTranslations: DefaultTranslationsObject = {
     takeOver: 'Preia controlul',
     thisLanguage: 'Română',
     time: 'Timp',
+    timezone: 'Fus orar',
     titleDeleted: '{{label}} "{{title}}" șters cu succes.',
     true: 'Adevărat',
     unauthorized: 'neautorizat(ă)',

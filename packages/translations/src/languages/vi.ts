@@ -328,6 +328,7 @@ export const viTranslations: DefaultTranslationsObject = {
     takeOver: 'Tiếp quản',
     thisLanguage: 'Vietnamese (Tiếng Việt)',
     time: 'Thời gian',
+    timezone: 'Múi giờ',
     titleDeleted: '{{label}} {{title}} đã được xóa thành công.',
     true: 'Thật',
     unauthorized: 'Không có quyền truy cập.',
