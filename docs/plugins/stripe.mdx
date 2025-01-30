@@ -174,7 +174,29 @@ export default config
 
 For a full list of available webhooks, see [here](https://stripe.com/docs/cli/trigger#trigger-event).
 
-## Node
+### Serverless Environments
+
+When using the Stripe Plugin within a serverless environment, the process that handles running webhooks will immediately close before these webhooks finish executing.
+
+The reason for this is that the webhook handler that this plugin opens processes webhooks asynchronously. This is because Stripe places a timeout on these requests, and if the request takes longer than 10-20 seconds to respond with a 2xx status code, it assumes that the event has failed and will retry at a later date. Stripe expects an immediate response from your application. If your webhooks interact with the database or perform other slow API requests, for example, this can lead to multiple, duplicative events, and potentially data inconsistencies.
+
+From the Stripe docs:
+
+> Your endpoint must quickly return a successful status code (2xx) prior to any complex logic that could cause a timeout. For example, you must return a 200 response before updating a customer’s invoice as paid in your accounting system.
+
+Reference: https://docs.stripe.com/webhooks#acknowledge-events-immediately
+
+If you're on Vercel, you could wrap your custom webhook handler in their `waitUntil` function. This will do process the function in another thread that stays open after the webhook handler has closed.
+
+To do this, install the @vercel/functions package in your project, import the `waitUntil` function into your custom webhook, then wrap your synchronous logic with it.
+
+From the Vercel docs:
+
+> The waitUntil() method enqueues an asynchronous task to be performed during the lifecycle of the request. You can use it for anything that can be done after the response is sent, such as logging, sending analytics, or updating a cache, without blocking the response from being sent.
+
+Reference: https://vercel.com/docs/functions/functions-api-reference#waituntil
+
+## Node.js
 
 On the server you should interface with Stripe directly using the [stripe](https://www.npmjs.com/package/stripe) npm module. That might look something like this:
 
@@ -233,9 +255,7 @@ This option will setup a basic sync between Payload collections and Stripe resou
 
 <Banner type="info">
   **Note:**
-
-  If you wish to enable a _two-way_ sync, be sure to setup [`webhooks`](#webhooks) and pass the
-  `stripeWebhooksEndpointSecret` through your config.
+  If you wish to enable a _two-way_ sync, be sure to setup [`webhooks`](#webhooks) and pass the `stripeWebhooksEndpointSecret` through your config.
 </Banner>
 
 ```ts
@@ -269,7 +289,6 @@ export default config
 
 <Banner type="warning">
   **Note:**
-
   Due to limitations in the Stripe API, this currently only works with top-level fields. This is
   because every Stripe object is a separate entity, making it difficult to abstract into a simple
   reusable library. In the future, we may find a pattern around this. But for now, cases like that

@@ -40,8 +40,16 @@ export const stripeWebhooks = async (args: {
         returnStatus = 400
       }
 
+      /**
+       * Run webhook handlers asynchronously in a separate endpoint.
+       * This allows the request to immediately return a 2xx status code to Stripe without waiting for the webhook handlers to complete.
+       * This is important because Stripe will retry the webhook if it doesn't receive a 2xx status code within the 10-20 second timeout window.
+       * This is because webhooks can be potentially slow if performing database queries or other synchronous API requests.
+       * When a webhook fails, Stripe will retry it, causing duplicate events and potential data inconsistencies.
+       * {@link https://docs.stripe.com/webhooks#acknowledge-events-immediately}
+       */
       if (event) {
-        handleWebhooks({
+        void handleWebhooks({
           config,
           event,
           payload: req.payload,
@@ -52,7 +60,7 @@ export const stripeWebhooks = async (args: {
 
         // Fire external webhook handlers if they exist
         if (typeof webhooks === 'function') {
-          webhooks({
+          void webhooks({
             config,
             event,
             payload: req.payload,
@@ -65,7 +73,7 @@ export const stripeWebhooks = async (args: {
         if (typeof webhooks === 'object') {
           const webhookEventHandler = webhooks[event.type]
           if (typeof webhookEventHandler === 'function') {
-            webhookEventHandler({
+            void webhookEventHandler({
               config,
               event,
               payload: req.payload,
