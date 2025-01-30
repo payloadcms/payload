@@ -1,7 +1,5 @@
 'use client'
 
-import type { ClientCollectionConfig } from 'payload'
-
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import React, { useCallback, useEffect } from 'react'
 
@@ -110,7 +108,7 @@ export function EditForm({ submitted }: EditFormProps) {
   )
 
   const onChange: NonNullable<FormProps['onChange']>[0] = useCallback(
-    async ({ formState: prevFormState }) => {
+    async ({ formState: prevFormState, submitted }) => {
       const controller = handleAbortRef(abortOnChangeRef)
 
       const docPreferences = await getDocPreferences()
@@ -123,6 +121,7 @@ export function EditForm({ submitted }: EditFormProps) {
         operation: 'create',
         schemaPath,
         signal: controller.signal,
+        skipValidation: !submitted,
       })
 
       abortOnChangeRef.current = null

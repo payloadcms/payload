@@ -4,7 +4,7 @@ import type {
   SerializedParagraphNode,
   SerializedTextNode,
 } from '@payloadcms/richtext-lexical/lexical'
-import type { BrowserContext, Page } from '@playwright/test'
+import type { BrowserContext, Locator, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -28,6 +28,7 @@ import { RESTClient } from '../../../../../helpers/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../../../playwright.config.js'
 import { lexicalFieldsSlug } from '../../../../slugs.js'
 import { lexicalDocData } from '../../data.js'
+import { except } from 'drizzle-orm/mysql-core'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -261,6 +262,19 @@ describe('lexicalMain', () => {
     }).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
+  })
+
+  test('should be able to externally mutate editor state', async () => {
+    await navigateToLexicalFields()
+    const richTextField = page.locator('.rich-text-lexical').nth(1).locator('.editor-scroller') // first
+    await expect(richTextField).toBeVisible()
+    await richTextField.click() // Use click, because focus does not work
+    await page.keyboard.type('some text')
+    const spanInEditor = richTextField.locator('span').first()
+    await expect(spanInEditor).toHaveText('some text')
+    await saveDocAndAssert(page)
+    await page.locator('#clear-lexical-lexicalSimple').click()
+    await expect(spanInEditor).not.toBeAttached()
   })
 
   test('should be able to bold text using floating select toolbar', async () => {
@@ -1293,5 +1307,60 @@ describe('lexicalMain', () => {
     test.skip('ensure simple localized lexical field works', async () => {
       await navigateToLexicalFields(true, true)
     })
+  })
+
+  test('select decoratorNodes', async () => {
+    // utils
+    const decoratorLocator = page.locator('.decorator-selected') // [data-lexical-decorator="true"]
+    const expectInsideSelectedDecorator = async (innerLocator: Locator) => {
+      await expect(decoratorLocator).toBeVisible()
+      await expect(decoratorLocator.locator(innerLocator)).toBeVisible()
+    }
+
+    // test
+    await navigateToLexicalFields()
+    const bottomOfUploadNode = page
+      .locator('div')
+      .filter({ hasText: /^payload\.jpg$/ })
+      .first()
+    await bottomOfUploadNode.click()
+    await expectInsideSelectedDecorator(bottomOfUploadNode)
+
+    const textNode = page.getByText('Upload Node:', { exact: true })
+    await textNode.click()
+    await expect(decoratorLocator).not.toBeVisible()
+
+    const closeTagInMultiSelect = page
+      .getByRole('button', { name: 'payload.jpg Edit payload.jpg' })
+      .getByLabel('Remove')
+    await closeTagInMultiSelect.click()
+    await expect(decoratorLocator).not.toBeVisible()
+
+    const labelInsideCollapsableBody = page.locator('label').getByText('Sub Blocks')
+    await labelInsideCollapsableBody.click()
+    await expectInsideSelectedDecorator(labelInsideCollapsableBody)
+
+    const textNodeInNestedEditor = page.getByText('Some text below relationship node 1')
+    await textNodeInNestedEditor.click()
+    await expect(decoratorLocator).not.toBeVisible()
+
+    await page.getByRole('button', { name: 'Tab2' }).click()
+    await expect(decoratorLocator).not.toBeVisible()
+
+    const labelInsideCollapsableBody2 = page.getByText('Text2')
+    await labelInsideCollapsableBody2.click()
+    await expectInsideSelectedDecorator(labelInsideCollapsableBody2)
+
+    // TEST DELETE!
+    await page.keyboard.press('Backspace')
+    await expect(labelInsideCollapsableBody2).not.toBeVisible()
+
+    const monacoLabel = page.locator('label').getByText('Code')
+    await monacoLabel.click()
+    await expectInsideSelectedDecorator(monacoLabel)
+
+    const monacoCode = page.getByText('Some code')
+    await monacoCode.click()
+    await expect(decoratorLocator).not.toBeVisible()
   })
 })

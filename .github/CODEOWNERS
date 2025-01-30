@@ -1,29 +1,26 @@
 # Order matters. The last matching pattern takes precedence.
-# Approvals are not required currently but may be enabled in the future.
 
 ### Package Exports ###
-/**/exports/ @denolfe @jmikrut @DanRibbens
+**/exports/ @denolfe @jmikrut @DanRibbens
 
 ### Packages ###
-/packages/plugin-cloud*/src/ @denolfe
-/packages/email-*/src/ @denolfe
-/packages/storage-*/src/ @denolfe
-/packages/create-payload-app/src/ @denolfe
-/packages/eslint-*/ @denolfe @AlessioGr
+/packages/plugin-cloud*/src/ @denolfe @jmikrut @DanRibbens
+/packages/email-*/src/ @denolfe @jmikrut @DanRibbens
+/packages/storage-*/src/ @denolfe @jmikrut @DanRibbens
+/packages/create-payload-app/src/ @denolfe @jmikrut @DanRibbens
+/packages/eslint-*/ @denolfe @jmikrut @DanRibbens @AlessioGr
 
 ### Templates ###
-/templates/_data/ @denolfe
-/templates/_template/ @denolfe
+/templates/_data/ @denolfe @jmikrut @DanRibbens
+/templates/_template/ @denolfe @jmikrut @DanRibbens
 
 ### Build Files ###
-/tsconfig.json @denolfe
-/**/tsconfig*.json @denolfe
-/jest.config.js @denolfe
-/**/jest.config.js @denolfe
+**/tsconfig*.json @denolfe @jmikrut @DanRibbens @AlessioGr
+**/jest.config.js @denolfe @jmikrut @DanRibbens @AlessioGr
 
 ### Root ###
-/package.json @denolfe
-/scripts/ @denolfe
-/.husky/ @denolfe
-/.vscode/ @denolfe @AlessioGr
-/.github/ @denolfe
+/package.json @denolfe @jmikrut @DanRibbens
+/tools/ @denolfe @jmikrut @DanRibbens
+/.husky/ @denolfe @jmikrut @DanRibbens
+/.vscode/ @denolfe @jmikrut @DanRibbens @AlessioGr
+/.github/ @denolfe @jmikrut @DanRibbens

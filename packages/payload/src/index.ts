@@ -1152,6 +1152,7 @@ export {
   type ServerOnlyFieldProperties,
 } from './fields/config/client.js'
 export { sanitizeFields } from './fields/config/sanitize.js'
+
 export type {
   AdminClient,
   ArrayField,
@@ -1404,7 +1405,7 @@ export { getCollectionIDFieldTypes } from './utilities/getCollectionIDFieldTypes
 export { getObjectDotNotation } from './utilities/getObjectDotNotation.js'
 export { getRequestLanguage } from './utilities/getRequestLanguage.js'
 export { handleEndpoints } from './utilities/handleEndpoints.js'
-export { headersWithCors_public as headersWithCors } from './utilities/headersWithCors.js'
+export { headersWithCors } from './utilities/headersWithCors.js'
 export { initTransaction } from './utilities/initTransaction.js'
 export { isEntityHidden } from './utilities/isEntityHidden.js'
 export { default as isolateObjectProperty } from './utilities/isolateObjectProperty.js'
@@ -1428,7 +1429,6 @@ export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
 export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
-
 export { saveVersion } from './versions/saveVersion.js'
 export type { SchedulePublishTaskInput } from './versions/schedule/types.js'
 export type { TypeWithVersion } from './versions/types.js'

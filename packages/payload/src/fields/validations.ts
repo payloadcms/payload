@@ -166,7 +166,7 @@ export const email: EmailFieldValidation = (
   {
     collectionSlug,
     req: {
-      payload: { collections },
+      payload: { collections, config },
       t,
     },
     required,
@@ -174,7 +174,9 @@ export const email: EmailFieldValidation = (
   },
 ) => {
   if (collectionSlug) {
-    const collection = collections?.[collectionSlug]?.config
+    const collection =
+      collections?.[collectionSlug]?.config ??
+      config.collections.find(({ slug }) => slug === collectionSlug) // If this is run on the client, `collections` will be undefined, but `config.collections` will be available
 
     if (
       collection.auth.loginWithUsername &&
@@ -211,7 +213,9 @@ export const username: UsernameFieldValidation = (
   let maxLength: number
 
   if (collectionSlug) {
-    const collection = collections?.[collectionSlug]?.config
+    const collection =
+      collections?.[collectionSlug]?.config ??
+      config.collections.find(({ slug }) => slug === collectionSlug) // If this is run on the client, `collections` will be undefined, but `config.collections` will be available
 
     if (
       collection.auth.loginWithUsername &&
@@ -640,6 +644,7 @@ export type UploadFieldSingleValidation = Validate<unknown, unknown, unknown, Up
 
 export const upload: UploadFieldValidation = async (value, options) => {
   const {
+    event,
     maxRows,
     minRows,
     relationTo,
@@ -710,6 +715,10 @@ export const upload: UploadFieldValidation = async (value, options) => {
         })
         .join(', ')}`
     }
+  }
+
+  if (event === 'onChange') {
+    return true
   }
 
   return validateFilterOptions(value, options)
@@ -738,6 +747,7 @@ export type RelationshipFieldSingleValidation = Validate<
 
 export const relationship: RelationshipFieldValidation = async (value, options) => {
   const {
+    event,
     maxRows,
     minRows,
     relationTo,
@@ -808,6 +818,10 @@ export const relationship: RelationshipFieldValidation = async (value, options) 
         })
         .join(', ')}`
     }
+  }
+
+  if (event === 'onChange') {
+    return true
   }
 
   return validateFilterOptions(value, options)

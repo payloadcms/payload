@@ -4,6 +4,7 @@ import type { PayloadHandler } from '../../config/types.js'
 import type { Where } from '../../types/index.js'
 
 import { getRequestGlobal } from '../../utilities/getRequestEntity.js'
+import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { isNumber } from '../../utilities/isNumber.js'
 import { sanitizePopulateParam } from '../../utilities/sanitizePopulateParam.js'
 import { sanitizeSelectParam } from '../../utilities/sanitizeSelectParam.js'
@@ -36,6 +37,10 @@ export const findVersionsHandler: PayloadHandler = async (req) => {
   })
 
   return Response.json(result, {
+    headers: headersWithCors({
+      headers: new Headers(),
+      req,
+    }),
     status: httpStatus.OK,
   })
 }

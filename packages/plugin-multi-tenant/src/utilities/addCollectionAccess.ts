@@ -27,6 +27,7 @@ type Args<ConfigType> = {
 
 /**
  * Adds tenant access constraint to collection
+ * - constrains access a users assigned tenants
  */
 export const addCollectionAccess = <ConfigType>({
   collection,
