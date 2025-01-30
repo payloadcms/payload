@@ -1,6 +1,5 @@
 'use client'
 import { useWindowInfo } from '@faceless-ui/window-info'
-import { clearAllBodyScrollLocks, disableBodyScroll, enableBodyScroll } from 'body-scroll-lock'
 import React, { useEffect, useRef } from 'react'
 
 import { usePreferences } from '../../providers/Preferences/index.js'
@@ -73,9 +72,9 @@ export const NavProvider: React.FC<{
   useEffect(() => {
     if (navRef.current) {
       if (navOpen && midBreak) {
-        disableBodyScroll(navRef.current)
+        navRef.current.style.overscrollBehavior = 'contain'
       } else {
-        enableBodyScroll(navRef.current)
+        navRef.current.style.overscrollBehavior = 'auto'
       }
     }
   }, [navOpen, midBreak])
@@ -97,7 +96,7 @@ export const NavProvider: React.FC<{
   // when the component unmounts, clear all body scroll locks
   useEffect(() => {
     return () => {
-      clearAllBodyScrollLocks()
+      navRef.current.style.overscrollBehavior = 'auto'
     }
   }, [])
 
