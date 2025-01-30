@@ -13,6 +13,7 @@ import { collapsibleDoc } from './collections/Collapsible/shared.js'
 import { conditionalLogicDoc } from './collections/ConditionalLogic/shared.js'
 import { customRowID, customTabID, nonStandardID } from './collections/CustomID/shared.js'
 import { dateDoc } from './collections/Date/shared.js'
+import { dateWithTimezonesDoc } from './collections/DateWithTimezone/shared.js'
 import { anotherEmailDoc, emailDoc } from './collections/Email/shared.js'
 import { groupDoc } from './collections/Group/shared.js'
 import { jsonDoc } from './collections/JSON/shared.js'
@@ -40,6 +41,7 @@ import {
   customRowIDSlug,
   customTabIDSlug,
   dateFieldsSlug,
+  dateFieldsWithTimezoneSlug,
   emailFieldsSlug,
   groupFieldsSlug,
   jsonFieldsSlug,
@@ -305,6 +307,13 @@ export const seed = async (_payload: Payload) => {
   await _payload.create({
     collection: dateFieldsSlug,
     data: dateDoc,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  await _payload.create({
+    collection: dateFieldsWithTimezoneSlug,
+    data: dateWithTimezonesDoc,
     depth: 0,
     overrideAccess: true,
   })

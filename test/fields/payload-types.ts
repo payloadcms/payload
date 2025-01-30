@@ -44,6 +44,7 @@ export interface Config {
     'custom-tab-id': CustomTabId;
     'custom-row-id': CustomRowId;
     'date-fields': DateField;
+    'date-fields-with-timezone': DateFieldsWithTimezone;
     'email-fields': EmailField;
     'radio-fields': RadioField;
     'group-fields': GroupField;
@@ -89,6 +90,7 @@ export interface Config {
     'custom-tab-id': CustomTabIdSelect<false> | CustomTabIdSelect<true>;
     'custom-row-id': CustomRowIdSelect<false> | CustomRowIdSelect<true>;
     'date-fields': DateFieldsSelect<false> | DateFieldsSelect<true>;
+    'date-fields-with-timezone': DateFieldsWithTimezoneSelect<false> | DateFieldsWithTimezoneSelect<true>;
     'email-fields': EmailFieldsSelect<false> | EmailFieldsSelect<true>;
     'radio-fields': RadioFieldsSelect<false> | RadioFieldsSelect<true>;
     'group-fields': GroupFieldsSelect<false> | GroupFieldsSelect<true>;
@@ -1017,6 +1019,19 @@ export interface DateField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "date-fields-with-timezone".
+ */
+export interface DateFieldsWithTimezone {
+  id: string;
+  default: string;
+  dayAndTime?: string | null;
+  default_timezone?: string | null;
+  dayAndTime_timezone?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "email-fields".
  */
 export interface EmailField {
@@ -1845,6 +1860,10 @@ export interface PayloadLockedDocument {
         value: string | DateField;
       } | null)
     | ({
+        relationTo: 'date-fields-with-timezone';
+        value: string | DateFieldsWithTimezone;
+      } | null)
+    | ({
         relationTo: 'email-fields';
         value: string | EmailField;
       } | null)
@@ -2614,6 +2633,18 @@ export interface DateFieldsSelect<T extends boolean = true> {
   dayOnly?: T;
   dayAndTime?: T;
   monthOnly?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "date-fields-with-timezone_select".
+ */
+export interface DateFieldsWithTimezoneSelect<T extends boolean = true> {
+  default?: T;
+  dayAndTime?: T;
+  default_timezone?: T;
+  dayAndTime_timezone?: T;
   updatedAt?: T;
   createdAt?: T;
 }

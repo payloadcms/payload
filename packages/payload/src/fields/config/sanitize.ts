@@ -282,6 +282,19 @@ export const sanitizeFields = async ({
       field.admin.disableBulkEdit = true
     }
 
+    if (field.type === 'date' && field.timezone) {
+      const timezonePath = field.name + '_timezone'
+
+      fields.push({
+        name: timezonePath,
+        type: 'text',
+        admin: {
+          hidden: true,
+        },
+        defaultValue: 'UTC',
+      })
+    }
+
     if ('_sanitized' in field) {
       field._sanitized = true
     }
