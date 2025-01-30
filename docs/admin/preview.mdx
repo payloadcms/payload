@@ -61,17 +61,17 @@ preview: (doc, { req }) => `${req.protocol}//${req.host}/${doc.slug}` // highlig
 
 ## Draft Preview
 
-The Preview feature can be used to achieve "Draft Preview", where you enter into a "draft mode" after clicking the preview button. While in "draft mode", you can adjust your page's query to include the `draft: true` in its params. Payload will read this param on the request, and when present, send back a draft document as opposed to a published one based on the document's `_status` field.
+The Preview feature can be used to achieve "Draft Preview". After clicking the preview button from the Admin Panel, you can enter into "draft mode" within your front-end application. This will allow you to adjust your page queries to include the `draft: true` param. When this param is present on the request, Payload will send back a draft document as opposed to a published one based on the document's `_status` field.
 
-To enter draft mode, the URL provided to the `preview` function can point to a custom endpoint in your front-end application that sets a cookie or session variable to indicate that you are in "draft mode". This is framework specific, so the mechanisms here very from framework to framework although the underlying concept is the same.
+To enter draft mode, the URL provided to the `preview` function can point to a custom endpoint in your front-end application that sets a cookie or session variable to indicate that draft mode is enabled. This is framework specific, so the mechanisms here very from framework to framework although the underlying concept is the same.
 
 ### Next.js
 
-If you're using Next.js, you can do the following code to enter draft mode.
+If you're using Next.js, you can do the following code to enter [Draft Mode](https://nextjs.org/docs/app/building-your-application/configuring/draft-mode).
 
-#### Step 1: Create an API Route
+#### Step 1: Format the Preview URL
 
-First, format your `preview` function to point to a custom endpoint that you'll open on your front-end. This URL will include a few key query search params:
+First, format your `admin.preview` function to point to a custom endpoint that you'll open on your front-end. This URL should include a few key query search params:
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -79,17 +79,15 @@ import type { CollectionConfig } from 'payload'
 export const Pages: CollectionConfig = {
   slug: 'pages',
   admin: {
-    preview: ({ slug }, { req }) => {
-      const path = `/${slug}`
-
+    preview: ({ slug, collection }) => {
       const encodedParams = new URLSearchParams({
         slug,
         collection,
-        path,
-        previewSecret: process.env.PREVIEW_SECRET
+        path: `/${slug}`,
+        previewSecret: process.env.PREVIEW_SECRET || ''
       })
 
-      return `/next/preview?${encodedParams.toString()}` // highlight-line
+      return `/preview?${encodedParams.toString()}` // highlight-line
     }
   },
   fields: [
@@ -105,17 +103,16 @@ export const Pages: CollectionConfig = {
 
 Then, create an API route that verifies the preview secret, authenticates the user, and enters draft mode:
 
-`/preview/route.ts`
+`/app/preview/route.ts`
 
 ```ts
-import type { CollectionSlug, PayloadRequest, getPayload } from 'payload'
+import type { CollectionSlug, PayloadRequest } from 'payload'
+import { getPayload } from 'payload'
 
 import { draftMode } from 'next/headers'
 import { redirect } from 'next/navigation'
 
 import configPromise from '@payload-config'
-
-const payloadToken = 'payload-token'
 
 export async function GET(
   req: {
@@ -161,11 +158,12 @@ export async function GET(
 
   const draft = await draftMode()
 
-  // You can add additional checks here to see if the user is allowed to preview this page
   if (!user) {
     draft.disable()
     return new Response('You are not allowed to preview this page', { status: 403 })
   }
+
+  // You can add additional checks here to see if the user is allowed to preview this page
 
   draft.enable()
 
@@ -177,7 +175,7 @@ export async function GET(
 
 Finally, in your front-end application, you can detect draft mode and adjust your queries to include drafts:
 
-`/pages/[slug].tsx`
+`/app/[slug]/page.tsx`
 
 ```ts
 export default async function Page({ params: paramsPromise }) {
