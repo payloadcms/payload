@@ -79,10 +79,6 @@ const RichTextComponent: React.FC<
   const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   const [isSmallWidthViewport, setIsSmallWidthViewport] = useState<boolean>(false)
-  const [rerenderProviderKey, setRerenderProviderKey] = useState<Date>()
-
-  const prevInitialValueRef = React.useRef<SerializedEditorState | undefined>(initialValue)
-  const prevValueRef = React.useRef<SerializedEditorState | undefined>(value)
 
   useEffect(() => {
     const updateViewPortWidth = () => {
@@ -117,23 +113,12 @@ const RichTextComponent: React.FC<
 
   const handleChange = useCallback(
     (editorState: EditorState) => {
-      const newState = editorState.toJSON()
-      prevValueRef.current = newState
-      setValue(newState)
+      setValue(editorState.toJSON())
     },
     [setValue],
   )
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
-
-  useEffect(() => {
-    if (JSON.stringify(initialValue) !== JSON.stringify(prevInitialValueRef.current)) {
-      prevInitialValueRef.current = initialValue
-      if (JSON.stringify(prevValueRef.current) !== JSON.stringify(value)) {
-        setRerenderProviderKey(new Date())
-      }
-    }
-  }, [initialValue, value])
 
   return (
     <div className={classes} key={pathWithEditDepth} style={styles}>
@@ -150,7 +135,7 @@ const RichTextComponent: React.FC<
             editorConfig={editorConfig}
             fieldProps={props}
             isSmallWidthViewport={isSmallWidthViewport}
-            key={JSON.stringify({ path, rerenderProviderKey })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010)
+            key={JSON.stringify({ initialValue, path })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010)
             onChange={handleChange}
             readOnly={disabled}
             value={value}
