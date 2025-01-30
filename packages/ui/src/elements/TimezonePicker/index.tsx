@@ -11,33 +11,20 @@ import './index.scss'
 import { timezones } from './timezones.js'
 
 export const TimezonePicker = (props: Props) => {
-  const {
-    enabled,
-    onChange: onChangeFromProps,
-    selectedTimezone: selectedTimezoneFromProps,
-  } = props
+  const { id, onChange: onChangeFromProps, selectedTimezone: selectedTimezoneFromProps } = props
 
   const { t } = useTranslation()
 
   const selectedTimezone = useMemo(() => {
-    if (enabled) {
-      return (
-        timezones.find((t) => t.value === (selectedTimezoneFromProps || 'UTC')) ?? {
-          label: 'UTC',
-          value: 'UTC',
-        }
-      )
-    }
-
-    return { label: 'UTC', value: 'UTC' }
-  }, [enabled, selectedTimezoneFromProps])
+    return timezones.find((t) => t.value === (selectedTimezoneFromProps || 'UTC'))
+  }, [selectedTimezoneFromProps])
 
   return (
-    <div className="timezone-picker-wrapper" suppressHydrationWarning>
-      <FieldLabel htmlFor="timezone-picker" label={`${t('general:timezone')}`} unstyled />
+    <div className="timezone-picker-wrapper">
+      <FieldLabel htmlFor={id} label={`${t('general:timezone')}`} unstyled />
       <ReactSelect
         className="timezone-picker"
-        inputId="timezone-picker"
+        inputId={id}
         isClearable={false}
         onChange={(val: (typeof timezones)[number]) => {
           if (onChangeFromProps) {

@@ -1,6 +1,5 @@
 export type Props = {
-  enabled?: true
+  id: string
   onChange?: (val: string) => void
-  readOnly?: boolean
   selectedTimezone?: string
 }
