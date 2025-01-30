@@ -224,6 +224,12 @@ export interface Diff {
         id?: string | null;
       }[]
     | null;
+  arrayLocalized?:
+    | {
+        textInArrayLocalized?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   blocks?:
     | {
         textInBlock?: string | null;
@@ -639,6 +645,12 @@ export interface DiffSelect<T extends boolean = true> {
     | T
     | {
         textInArray?: T;
+        id?: T;
+      };
+  arrayLocalized?:
+    | T
+    | {
+        textInArrayLocalized?: T;
         id?: T;
       };
   blocks?:
