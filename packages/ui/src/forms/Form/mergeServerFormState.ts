@@ -43,7 +43,7 @@ export const mergeServerFormState = ({
 
     for (const [path, newFieldState] of Object.entries(existingState)) {
       if (!incomingState[path]) {
-        return
+        continue
       }
       let fieldChanged = false
 
