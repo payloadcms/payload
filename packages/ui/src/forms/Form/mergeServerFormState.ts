@@ -33,7 +33,6 @@ export const mergeServerFormState = ({
 
   if (acceptValues) {
     serverPropsToAccept.push('value')
-    serverPropsToAccept.push('initialValue')
   }
 
   let changed = false
