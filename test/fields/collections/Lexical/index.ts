@@ -318,20 +318,6 @@ export const LexicalFields: CollectionConfig = {
       }),
     },
     {
-      type: 'ui',
-      name: 'clearLexicalState',
-      admin: {
-        components: {
-          Field: {
-            path: '/collections/Lexical/components/ClearState.js#ClearState',
-            clientProps: {
-              fieldName: 'lexicalSimple',
-            },
-          },
-        },
-      },
-    },
-    {
       name: 'lexicalWithBlocks',
       type: 'richText',
       editor: lexicalEditor({
