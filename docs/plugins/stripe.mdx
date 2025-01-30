@@ -174,7 +174,7 @@ export default config
 
 For a full list of available webhooks, see [here](https://stripe.com/docs/cli/trigger#trigger-event).
 
-## Node
+## Node.js
 
 On the server you should interface with Stripe directly using the [stripe](https://www.npmjs.com/package/stripe) npm module. That might look something like this:
 
@@ -269,7 +269,6 @@ export default config
 
 <Banner type="warning">
   **Note:**
-
   Due to limitations in the Stripe API, this currently only works with top-level fields. This is
   because every Stripe object is a separate entity, making it difficult to abstract into a simple
   reusable library. In the future, we may find a pattern around this. But for now, cases like that

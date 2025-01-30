@@ -8,6 +8,7 @@ import { deleteFromStripe } from './hooks/deleteFromStripe.js'
 import { syncExistingWithStripe } from './hooks/syncExistingWithStripe.js'
 import { stripeREST } from './routes/rest.js'
 import { stripeWebhooks } from './routes/webhooks.js'
+import { stripeWebhooksRunner } from './routes/webhooks-runner.js'
 
 export { stripeProxy } from './utilities/stripeProxy.js'
 
@@ -41,6 +42,19 @@ export const stripePlugin =
         },
         method: 'post',
         path: '/stripe/webhooks',
+      },
+      {
+        handler: async (req) => {
+          const res = await stripeWebhooksRunner({
+            config,
+            pluginConfig,
+            req,
+          })
+
+          return res
+        },
+        method: 'post',
+        path: '/stripe/webhooks-runner',
       },
     ]
 

@@ -3,8 +3,7 @@ import type { Config as PayloadConfig, PayloadRequest } from 'payload'
 import Stripe from 'stripe'
 
 import type { StripePluginConfig } from '../types.js'
-
-import { handleWebhooks } from '../webhooks/index.js'
+import type { WebhookRunnerData } from './webhooks-runner.js'
 
 export const stripeWebhooks = async (args: {
   config: PayloadConfig
@@ -12,9 +11,10 @@ export const stripeWebhooks = async (args: {
   req: PayloadRequest
 }): Promise<any> => {
   const { config, pluginConfig, req } = args
+
   let returnStatus = 200
 
-  const { stripeSecretKey, stripeWebhooksEndpointSecret, webhooks } = pluginConfig
+  const { stripeSecretKey, stripeWebhooksEndpointSecret } = pluginConfig
 
   if (stripeWebhooksEndpointSecret) {
     const stripe = new Stripe(stripeSecretKey, {
@@ -40,40 +40,27 @@ export const stripeWebhooks = async (args: {
         returnStatus = 400
       }
 
+      /**
+       * Run webhook handlers asynchronously in a separate endpoint. This will start a separate process which is useful in serverless environments.
+       * This allows the request to immediately return a 2xx status code to Stripe without waiting for the webhook handlers to complete.
+       * This is important because Stripe will retry the webhook if it doesn't receive a 2xx status code within the 10 second timeout window.
+       * This is because webhooks can be potentially slow if performing database queries or other synchronous API requests.
+       * When a webhook fails, Stripe will retry it, causing duplicate events and potential data inconsistencies.
+       * {@link https://docs.stripe.com/webhooks#acknowledge-events-immediately}
+       */
       if (event) {
-        handleWebhooks({
-          config,
-          event,
-          payload: req.payload,
-          pluginConfig,
-          req,
-          stripe,
-        })
-
-        // Fire external webhook handlers if they exist
-        if (typeof webhooks === 'function') {
-          webhooks({
-            config,
-            event,
-            payload: req.payload,
-            pluginConfig,
-            req,
-            stripe,
+        try {
+          void fetch(`${config.serverURL}/stripe/webhooks-runner`, {
+            body: JSON.stringify({ stripe } satisfies WebhookRunnerData),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            method: 'POST',
           })
-        }
-
-        if (typeof webhooks === 'object') {
-          const webhookEventHandler = webhooks[event.type]
-          if (typeof webhookEventHandler === 'function') {
-            webhookEventHandler({
-              config,
-              event,
-              payload: req.payload,
-              pluginConfig,
-              req,
-              stripe,
-            })
-          }
+        } catch (err: unknown) {
+          const msg: string = err instanceof Error ? err.message : JSON.stringify(err)
+          req.payload.logger.error(`Error fetching webhook runner: ${msg}`)
+          returnStatus = 500
         }
       }
     }
