@@ -502,6 +502,7 @@ export const home: RequiredDataFromCollectionSlug<'pages'> = {
     {
       blockName: 'Media Block',
       blockType: 'mediaBlock',
+      // @ts-ignore
       media: '{{IMAGE_2}}',
     },
     {
@@ -658,6 +659,7 @@ export const home: RequiredDataFromCollectionSlug<'pages'> = {
   ],
   meta: {
     description: 'An open-source website built with Payload and Next.js.',
+    // @ts-ignore
     image: '{{IMAGE_1}}',
     title: 'Payload Website Template',
   },
