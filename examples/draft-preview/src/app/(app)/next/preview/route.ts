@@ -50,38 +50,12 @@ export async function GET(
 
   const draft = await draftMode()
 
-  // You can add additional checks here to see if the user is allowed to preview this page
   if (!user) {
     draft.disable()
     return new Response('You are not allowed to preview this page', { status: 403 })
   }
 
-  // Verify the given slug exists
-  try {
-    const docs = await payload.find({
-      collection,
-      draft: true,
-      limit: 1,
-      depth: 0,
-      select: {
-        slug: true,
-      },
-      where: {
-        slug: {
-          equals: slug,
-        },
-      },
-    })
-
-    if (!docs.docs.length) {
-      return new Response('Document not found', { status: 404 })
-    }
-  } catch (error) {
-    payload.logger.error({
-      err: error,
-      msg: 'Error verifying token for live preview:',
-    })
-  }
+  // You can add additional checks here to see if the user is allowed to preview this page
 
   draft.enable()
 
