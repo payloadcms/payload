@@ -16,6 +16,8 @@ export const LinkToDocClient: React.FC = () => {
     serverURL,
   } = config
 
+  const basePath = process.env.NEXT_BASE_PATH || ''
+
   const { value } = useField<{ relationTo?: string; value?: string }>({ path: 'doc' })
 
   if (!value?.relationTo || !value?.value) {
@@ -24,6 +26,7 @@ export const LinkToDocClient: React.FC = () => {
 
   const href = `${serverURL}${formatAdminURL({
     adminRoute,
+    basePath,
     path: `/collections/${value.relationTo || ''}/${value.value || ''}`,
   })}`
 
