@@ -64,7 +64,6 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
   })
 
   const timezonePath = path + '_timezone'
-
   const timezoneField = useFormFields(([fields, _]) => fields?.[timezonePath])
   const timezoneOptions = 'options' in siblingField ? siblingField?.options : null
 
@@ -72,14 +71,18 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
 
   // The displayed value should be the original value, adjusted to the user's timezone
   const displayedValue = useMemo(() => {
-    if (timezone && selectedTimezone && value) {
+    if (timezone && selectedTimezone && userTimezone && value) {
+      // Create TZDate instances for the selected timezone and the user's timezone
+      // These instances allow us to transpose the date between timezones while keeping the same time value
       const DateWithOriginalTz = TZDate.tz(selectedTimezone)
       const DateWithUserTz = TZDate.tz(userTimezone)
 
       const modifiedDate = new TZDate(value).withTimeZone(selectedTimezone)
 
+      // Transpose the date to the selected timezone
       const dateWithTimezone = transpose(modifiedDate, DateWithOriginalTz)
 
+      // Transpose the date to the user's timezone - this is necessary because the react-datepicker component insists on displaying the date in the user's timezone
       const dateWithUserTimezone = transpose(dateWithTimezone, DateWithUserTz)
 
       return dateWithUserTimezone.toISOString()
@@ -151,11 +154,6 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
           onChange={onChange}
           overrides={{
             ...datePickerProps?.overrides,
-            ...(timezone
-              ? {
-                  locale: undefined,
-                }
-              : {}),
           }}
           placeholder={getTranslation(placeholder, i18n)}
           readOnly={readOnly}
