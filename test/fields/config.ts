@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+import { timezoneOptions } from 'payload/shared'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -127,6 +128,12 @@ export default buildConfigWithDefaults({
       client: {
         'new-value': 'client available',
       },
+    },
+    timezone: {
+      options: [
+        ...timezoneOptions,
+        { label: '(Moon Time) Lunar Time Coordinates', value: 'Space/Lunar' },
+      ],
     },
   },
   localization: {

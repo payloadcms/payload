@@ -191,6 +191,28 @@ describe('Date with timezone', () => {
     await expect(newDateValue).not.toEqual(initialDateValue)
   })
 
+  test('can see custom timezone in timezone picker', async () => {
+    // Tests to see if the date value is updated when the timezone is changed,
+    // it should change to the equivalent time in the new timezone as the UTC value remains the same
+    const {
+      docs: [existingDoc],
+    } = await payload.find({
+      collection: dateFieldsWithTimezoneSlug,
+    })
+
+    await page.goto(url.edit(existingDoc!.id))
+
+    const dropdownControlSelector = `#field-dayAndTime .rs__control`
+
+    const timezoneOptionSelector = `#field-dayAndTime .rs__menu .rs__option:has-text("Lunar Time")`
+
+    await page.click(dropdownControlSelector)
+
+    const timezoneOption = page.locator(timezoneOptionSelector)
+
+    await expect(timezoneOption).toBeVisible()
+  })
+
   describe('while timezone is set to London', () => {
     test('displayed value should be the same while timezone is set to London', async () => {
       const {
