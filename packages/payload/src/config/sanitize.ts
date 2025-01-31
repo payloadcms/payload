@@ -16,7 +16,7 @@ import { authRootEndpoints } from '../auth/endpoints/index.js'
 import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
-import { timezoneOptions } from '../fields/baseFields/timezone/timezoneOptions.js'
+import { supportedTimezones } from '../fields/baseFields/timezone/supportedTimezones.js'
 import { sanitizeGlobal } from '../globals/config/sanitize.js'
 import { getLockedDocumentsCollection } from '../lockedDocuments/lockedDocumentsCollection.js'
 import getPreferencesCollection from '../preferences/preferencesCollection.js'
@@ -58,12 +58,17 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
   }
 
   if (sanitizedConfig?.admin?.timezone) {
-    if (!sanitizedConfig?.admin?.timezone?.options) {
-      sanitizedConfig.admin.timezone.options = timezoneOptions
+    if (!sanitizedConfig?.admin?.timezone?.supportedTimezones) {
+      sanitizedConfig.admin.timezone.supportedTimezones = supportedTimezones
+    }
+
+    if (!sanitizedConfig?.admin?.timezone?.defaultTimezone) {
+      sanitizedConfig.admin.timezone.defaultTimezone = 'UTC'
     }
   } else {
     sanitizedConfig.admin.timezone = {
-      options: timezoneOptions,
+      defaultTimezone: 'UTC',
+      supportedTimezones,
     }
   }
 

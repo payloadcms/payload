@@ -61,6 +61,59 @@ const DateFields: CollectionConfig = {
         },
       },
     },
+    {
+      name: 'defaultWithTimezone',
+      type: 'date',
+      required: true,
+      timezone: true,
+    },
+    {
+      name: 'dayAndTimeWithTimezone',
+      type: 'date',
+      admin: {
+        date: {
+          pickerAppearance: 'dayAndTime',
+        },
+      },
+      timezone: true,
+    },
+    {
+      type: 'blocks',
+      name: 'timezoneBlocks',
+      blocks: [
+        {
+          slug: 'dateBlock',
+          fields: [
+            {
+              name: 'dayAndTime',
+              type: 'date',
+              admin: {
+                date: {
+                  pickerAppearance: 'dayAndTime',
+                },
+              },
+              timezone: true,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      type: 'array',
+      name: 'timezoneArray',
+      fields: [
+        {
+          name: 'dayAndTime',
+          type: 'date',
+          admin: {
+            date: {
+              pickerAppearance: 'dayAndTime',
+            },
+          },
+          timezone: true,
+        },
+      ],
+    },
   ],
 }
 

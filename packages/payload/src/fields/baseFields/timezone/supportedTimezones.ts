@@ -7,7 +7,7 @@
  * @example
  * { label: '(UTC-12:00) International Date Line West', value: 'Etc/GMT+12' }
  */
-export const timezoneOptions = [
+export const supportedTimezones = [
   { label: '(UTC-12:00) International Date Line West', value: 'Etc/GMT+12' },
   { label: '(UTC-11:00) Midway Island, Samoa', value: 'Pacific/Midway' },
   { label: '(UTC-11:00) Niue', value: 'Pacific/Niue' },

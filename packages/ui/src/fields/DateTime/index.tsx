@@ -66,7 +66,7 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
 
   const timezonePath = path + '_timezone'
   const timezoneField = useFormFields(([fields, _]) => fields?.[timezonePath])
-  const timezoneOptions = config.admin.timezone.options
+  const supportedTimezones = config.admin.timezone.supportedTimezones
 
   const selectedTimezone = timezoneField?.value as string
 
@@ -164,11 +164,11 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
           readOnly={readOnly}
           value={displayedValue}
         />
-        {timezone && timezoneOptions.length > 0 && (
+        {timezone && supportedTimezones.length > 0 && (
           <TimezonePicker
             id={`${path}-timezone-picker`}
             onChange={onChangeTimezone}
-            options={timezoneOptions}
+            options={supportedTimezones}
             selectedTimezone={selectedTimezone}
           />
         )}

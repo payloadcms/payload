@@ -876,13 +876,19 @@ export type Config = {
      */
     timezone?: {
       /**
+       * The default timezone to use for the admin panel.
+       *
+       * @default 'UTC'
+       */
+      defaultTimezone?: string
+      /**
        * Provide your own list of supported timezones for the admin panel
        *
        * Values should be IANA timezone names, eg. `America/New_York`
        *
        * We use `@date-fns/tz` to handle timezones
        */
-      options?: Option[]
+      supportedTimezones?: Option[]
     }
     /** The slug of a Collection that you want to be used to log in to the Admin dashboard. */
     user?: string

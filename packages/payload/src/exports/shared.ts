@@ -12,7 +12,7 @@ export { defaults as collectionDefaults } from '../collections/config/defaults.j
 
 export { serverProps } from '../config/types.js'
 
-export { timezoneOptions } from '../fields/baseFields/timezone/timezoneOptions.js'
+export { supportedTimezones } from '../fields/baseFields/timezone/supportedTimezones.js'
 
 export {
   fieldAffectsData,

@@ -7,6 +7,62 @@
  */
 
 /**
+ * Supported timezones in IANA format.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supportedTimezones".
+ */
+export type SupportedTimezones =
+  | 'Etc/GMT+12'
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Argentina/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'UTC'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Kolkata'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji'
+  | 'Space/Lunar';
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "BlockColumns".
  */
@@ -471,7 +527,7 @@ export interface SelectVersionsField {
     | null;
   blocks?:
     | {
-        hasManyArr?: ('a' | 'b' | 'c')[] | null;
+        hasManyBlocks?: ('a' | 'b' | 'c')[] | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'block';
@@ -1040,6 +1096,26 @@ export interface DateField {
   dayOnly?: string | null;
   dayAndTime?: string | null;
   monthOnly?: string | null;
+  defaultWithTimezone: string;
+  defaultWithTimezone_timezone?: SupportedTimezones;
+  dayAndTimeWithTimezone?: string | null;
+  dayAndTimeWithTimezone_timezone?: SupportedTimezones;
+  timezoneBlocks?:
+    | {
+        dayAndTime?: string | null;
+        dayAndTime_timezone?: SupportedTimezones;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'dateBlock';
+      }[]
+    | null;
+  timezoneArray?:
+    | {
+        dayAndTime?: string | null;
+        dayAndTime_timezone?: SupportedTimezones;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1050,166 +1126,13 @@ export interface DateField {
 export interface DateFieldsWithTimezone {
   id: string;
   default: string;
-  default_timezone?:
-    | (
-        | 'Etc/GMT+12'
-        | 'Pacific/Midway'
-        | 'Pacific/Niue'
-        | 'Pacific/Honolulu'
-        | 'Pacific/Rarotonga'
-        | 'America/Anchorage'
-        | 'Pacific/Gambier'
-        | 'America/Los_Angeles'
-        | 'America/Tijuana'
-        | 'America/Denver'
-        | 'America/Phoenix'
-        | 'America/Chicago'
-        | 'America/Guatemala'
-        | 'America/New_York'
-        | 'America/Bogota'
-        | 'America/Caracas'
-        | 'America/Santiago'
-        | 'America/Argentina/Buenos_Aires'
-        | 'America/Sao_Paulo'
-        | 'Atlantic/South_Georgia'
-        | 'Atlantic/Azores'
-        | 'Atlantic/Cape_Verde'
-        | 'UTC'
-        | 'Europe/London'
-        | 'Europe/Berlin'
-        | 'Africa/Lagos'
-        | 'Europe/Athens'
-        | 'Africa/Cairo'
-        | 'Europe/Moscow'
-        | 'Asia/Riyadh'
-        | 'Asia/Dubai'
-        | 'Asia/Baku'
-        | 'Asia/Karachi'
-        | 'Asia/Tashkent'
-        | 'Asia/Kolkata'
-        | 'Asia/Dhaka'
-        | 'Asia/Almaty'
-        | 'Asia/Jakarta'
-        | 'Asia/Bangkok'
-        | 'Asia/Shanghai'
-        | 'Asia/Singapore'
-        | 'Asia/Tokyo'
-        | 'Asia/Seoul'
-        | 'Australia/Sydney'
-        | 'Pacific/Guam'
-        | 'Pacific/Noumea'
-        | 'Pacific/Auckland'
-        | 'Pacific/Fiji'
-      )
-    | null;
+  default_timezone?: SupportedTimezones;
   dayAndTime?: string | null;
-  dayAndTime_timezone?:
-    | (
-        | 'Etc/GMT+12'
-        | 'Pacific/Midway'
-        | 'Pacific/Niue'
-        | 'Pacific/Honolulu'
-        | 'Pacific/Rarotonga'
-        | 'America/Anchorage'
-        | 'Pacific/Gambier'
-        | 'America/Los_Angeles'
-        | 'America/Tijuana'
-        | 'America/Denver'
-        | 'America/Phoenix'
-        | 'America/Chicago'
-        | 'America/Guatemala'
-        | 'America/New_York'
-        | 'America/Bogota'
-        | 'America/Caracas'
-        | 'America/Santiago'
-        | 'America/Argentina/Buenos_Aires'
-        | 'America/Sao_Paulo'
-        | 'Atlantic/South_Georgia'
-        | 'Atlantic/Azores'
-        | 'Atlantic/Cape_Verde'
-        | 'UTC'
-        | 'Europe/London'
-        | 'Europe/Berlin'
-        | 'Africa/Lagos'
-        | 'Europe/Athens'
-        | 'Africa/Cairo'
-        | 'Europe/Moscow'
-        | 'Asia/Riyadh'
-        | 'Asia/Dubai'
-        | 'Asia/Baku'
-        | 'Asia/Karachi'
-        | 'Asia/Tashkent'
-        | 'Asia/Kolkata'
-        | 'Asia/Dhaka'
-        | 'Asia/Almaty'
-        | 'Asia/Jakarta'
-        | 'Asia/Bangkok'
-        | 'Asia/Shanghai'
-        | 'Asia/Singapore'
-        | 'Asia/Tokyo'
-        | 'Asia/Seoul'
-        | 'Australia/Sydney'
-        | 'Pacific/Guam'
-        | 'Pacific/Noumea'
-        | 'Pacific/Auckland'
-        | 'Pacific/Fiji'
-      )
-    | null;
+  dayAndTime_timezone?: SupportedTimezones;
   blocks?:
     | {
         dayAndTime?: string | null;
-        dayAndTime_timezone?:
-          | (
-              | 'Etc/GMT+12'
-              | 'Pacific/Midway'
-              | 'Pacific/Niue'
-              | 'Pacific/Honolulu'
-              | 'Pacific/Rarotonga'
-              | 'America/Anchorage'
-              | 'Pacific/Gambier'
-              | 'America/Los_Angeles'
-              | 'America/Tijuana'
-              | 'America/Denver'
-              | 'America/Phoenix'
-              | 'America/Chicago'
-              | 'America/Guatemala'
-              | 'America/New_York'
-              | 'America/Bogota'
-              | 'America/Caracas'
-              | 'America/Santiago'
-              | 'America/Argentina/Buenos_Aires'
-              | 'America/Sao_Paulo'
-              | 'Atlantic/South_Georgia'
-              | 'Atlantic/Azores'
-              | 'Atlantic/Cape_Verde'
-              | 'UTC'
-              | 'Europe/London'
-              | 'Europe/Berlin'
-              | 'Africa/Lagos'
-              | 'Europe/Athens'
-              | 'Africa/Cairo'
-              | 'Europe/Moscow'
-              | 'Asia/Riyadh'
-              | 'Asia/Dubai'
-              | 'Asia/Baku'
-              | 'Asia/Karachi'
-              | 'Asia/Tashkent'
-              | 'Asia/Kolkata'
-              | 'Asia/Dhaka'
-              | 'Asia/Almaty'
-              | 'Asia/Jakarta'
-              | 'Asia/Bangkok'
-              | 'Asia/Shanghai'
-              | 'Asia/Singapore'
-              | 'Asia/Tokyo'
-              | 'Asia/Seoul'
-              | 'Australia/Sydney'
-              | 'Pacific/Guam'
-              | 'Pacific/Noumea'
-              | 'Pacific/Auckland'
-              | 'Pacific/Fiji'
-            )
-          | null;
+        dayAndTime_timezone?: SupportedTimezones;
         id?: string | null;
         blockName?: string | null;
         blockType: 'dateBlock';
@@ -1218,58 +1141,7 @@ export interface DateFieldsWithTimezone {
   array?:
     | {
         dayAndTime?: string | null;
-        dayAndTime_timezone?:
-          | (
-              | 'Etc/GMT+12'
-              | 'Pacific/Midway'
-              | 'Pacific/Niue'
-              | 'Pacific/Honolulu'
-              | 'Pacific/Rarotonga'
-              | 'America/Anchorage'
-              | 'Pacific/Gambier'
-              | 'America/Los_Angeles'
-              | 'America/Tijuana'
-              | 'America/Denver'
-              | 'America/Phoenix'
-              | 'America/Chicago'
-              | 'America/Guatemala'
-              | 'America/New_York'
-              | 'America/Bogota'
-              | 'America/Caracas'
-              | 'America/Santiago'
-              | 'America/Argentina/Buenos_Aires'
-              | 'America/Sao_Paulo'
-              | 'Atlantic/South_Georgia'
-              | 'Atlantic/Azores'
-              | 'Atlantic/Cape_Verde'
-              | 'UTC'
-              | 'Europe/London'
-              | 'Europe/Berlin'
-              | 'Africa/Lagos'
-              | 'Europe/Athens'
-              | 'Africa/Cairo'
-              | 'Europe/Moscow'
-              | 'Asia/Riyadh'
-              | 'Asia/Dubai'
-              | 'Asia/Baku'
-              | 'Asia/Karachi'
-              | 'Asia/Tashkent'
-              | 'Asia/Kolkata'
-              | 'Asia/Dhaka'
-              | 'Asia/Almaty'
-              | 'Asia/Jakarta'
-              | 'Asia/Bangkok'
-              | 'Asia/Shanghai'
-              | 'Asia/Singapore'
-              | 'Asia/Tokyo'
-              | 'Asia/Seoul'
-              | 'Australia/Sydney'
-              | 'Pacific/Guam'
-              | 'Pacific/Noumea'
-              | 'Pacific/Auckland'
-              | 'Pacific/Fiji'
-            )
-          | null;
+        dayAndTime_timezone?: SupportedTimezones;
         id?: string | null;
       }[]
     | null;
@@ -2361,7 +2233,7 @@ export interface SelectVersionsFieldsSelect<T extends boolean = true> {
         block?:
           | T
           | {
-              hasManyArr?: T;
+              hasManyBlocks?: T;
               id?: T;
               blockName?: T;
             };
@@ -2909,6 +2781,29 @@ export interface DateFieldsSelect<T extends boolean = true> {
   dayOnly?: T;
   dayAndTime?: T;
   monthOnly?: T;
+  defaultWithTimezone?: T;
+  defaultWithTimezone_timezone?: T;
+  dayAndTimeWithTimezone?: T;
+  dayAndTimeWithTimezone_timezone?: T;
+  timezoneBlocks?:
+    | T
+    | {
+        dateBlock?:
+          | T
+          | {
+              dayAndTime?: T;
+              dayAndTime_timezone?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  timezoneArray?:
+    | T
+    | {
+        dayAndTime?: T;
+        dayAndTime_timezone?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }

@@ -1,6 +1,6 @@
 import type { SelectField } from '../../config/types.js'
 
-import { timezoneOptions } from './timezoneOptions.js'
+import { supportedTimezones } from './supportedTimezones.js'
 
 export const baseTimezoneField: (args: Partial<SelectField>) => SelectField = ({ name }) => {
   return {
@@ -10,6 +10,6 @@ export const baseTimezoneField: (args: Partial<SelectField>) => SelectField = ({
       hidden: true,
     },
     defaultValue: 'UTC',
-    options: timezoneOptions,
+    options: supportedTimezones,
   }
 }
