@@ -17,7 +17,6 @@
         min-width: calc(var(--base) * 14);
         overflow: hidden;
         border-radius: calc(var(--base) * 0.25);
-        top: calc(100% + var(--base) * 0.25) !important;
       }
 
       .rs__value-container {
@@ -36,26 +35,6 @@
         &:hover {
           cursor: pointer;
           box-shadow: unset;
-        }
-
-        // Arrow indicator
-        &::before {
-          content: '';
-          position: absolute;
-          z-index: 8;
-          width: 0;
-          height: 0;
-          bottom: calc(0% - var(--base) * 0.25);
-          left: calc(50% - var(--base) * 0.25);
-          display: none;
-
-          border-left: calc(var(--base) * 0.5) solid transparent;
-          border-right: calc(var(--base) * 0.5) solid transparent;
-          border-bottom: calc(var(--base) * 0.5) solid var(--theme-elevation-50);
-
-          [data-theme='light'] & {
-            border-bottom-color: var(--theme-elevation-0);
-          }
         }
 
         &.rs__control--menu-is-open::before {

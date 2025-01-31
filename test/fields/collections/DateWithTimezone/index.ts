@@ -26,6 +26,43 @@ const DateFields: CollectionConfig = {
       },
       timezone: true,
     },
+    {
+      type: 'blocks',
+      name: 'blocks',
+      blocks: [
+        {
+          slug: 'dateBlock',
+          fields: [
+            {
+              name: 'dayAndTime',
+              type: 'date',
+              admin: {
+                date: {
+                  pickerAppearance: 'dayAndTime',
+                },
+              },
+              timezone: true,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      type: 'array',
+      name: 'array',
+      fields: [
+        {
+          name: 'dayAndTime',
+          type: 'date',
+          admin: {
+            date: {
+              pickerAppearance: 'dayAndTime',
+            },
+          },
+          timezone: true,
+        },
+      ],
+    },
   ],
 }
 

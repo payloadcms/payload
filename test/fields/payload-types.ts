@@ -1024,9 +1024,229 @@ export interface DateField {
 export interface DateFieldsWithTimezone {
   id: string;
   default: string;
+  default_timezone?:
+    | (
+        | 'Etc/GMT+12'
+        | 'Pacific/Midway'
+        | 'Pacific/Niue'
+        | 'Pacific/Honolulu'
+        | 'Pacific/Rarotonga'
+        | 'America/Anchorage'
+        | 'Pacific/Gambier'
+        | 'America/Los_Angeles'
+        | 'America/Tijuana'
+        | 'America/Denver'
+        | 'America/Phoenix'
+        | 'America/Chicago'
+        | 'America/Guatemala'
+        | 'America/New_York'
+        | 'America/Bogota'
+        | 'America/Caracas'
+        | 'America/Santiago'
+        | 'America/Argentina/Buenos_Aires'
+        | 'America/Sao_Paulo'
+        | 'Atlantic/South_Georgia'
+        | 'Atlantic/Azores'
+        | 'Atlantic/Cape_Verde'
+        | 'UTC'
+        | 'Europe/London'
+        | 'Europe/Berlin'
+        | 'Africa/Lagos'
+        | 'Europe/Athens'
+        | 'Africa/Cairo'
+        | 'Europe/Moscow'
+        | 'Asia/Riyadh'
+        | 'Asia/Dubai'
+        | 'Asia/Baku'
+        | 'Asia/Karachi'
+        | 'Asia/Tashkent'
+        | 'Asia/Kolkata'
+        | 'Asia/Dhaka'
+        | 'Asia/Almaty'
+        | 'Asia/Jakarta'
+        | 'Asia/Bangkok'
+        | 'Asia/Shanghai'
+        | 'Asia/Singapore'
+        | 'Asia/Tokyo'
+        | 'Asia/Seoul'
+        | 'Australia/Sydney'
+        | 'Pacific/Guam'
+        | 'Pacific/Noumea'
+        | 'Pacific/Auckland'
+        | 'Pacific/Fiji'
+      )
+    | null;
   dayAndTime?: string | null;
-  default_timezone?: string | null;
-  dayAndTime_timezone?: string | null;
+  dayAndTime_timezone?:
+    | (
+        | 'Etc/GMT+12'
+        | 'Pacific/Midway'
+        | 'Pacific/Niue'
+        | 'Pacific/Honolulu'
+        | 'Pacific/Rarotonga'
+        | 'America/Anchorage'
+        | 'Pacific/Gambier'
+        | 'America/Los_Angeles'
+        | 'America/Tijuana'
+        | 'America/Denver'
+        | 'America/Phoenix'
+        | 'America/Chicago'
+        | 'America/Guatemala'
+        | 'America/New_York'
+        | 'America/Bogota'
+        | 'America/Caracas'
+        | 'America/Santiago'
+        | 'America/Argentina/Buenos_Aires'
+        | 'America/Sao_Paulo'
+        | 'Atlantic/South_Georgia'
+        | 'Atlantic/Azores'
+        | 'Atlantic/Cape_Verde'
+        | 'UTC'
+        | 'Europe/London'
+        | 'Europe/Berlin'
+        | 'Africa/Lagos'
+        | 'Europe/Athens'
+        | 'Africa/Cairo'
+        | 'Europe/Moscow'
+        | 'Asia/Riyadh'
+        | 'Asia/Dubai'
+        | 'Asia/Baku'
+        | 'Asia/Karachi'
+        | 'Asia/Tashkent'
+        | 'Asia/Kolkata'
+        | 'Asia/Dhaka'
+        | 'Asia/Almaty'
+        | 'Asia/Jakarta'
+        | 'Asia/Bangkok'
+        | 'Asia/Shanghai'
+        | 'Asia/Singapore'
+        | 'Asia/Tokyo'
+        | 'Asia/Seoul'
+        | 'Australia/Sydney'
+        | 'Pacific/Guam'
+        | 'Pacific/Noumea'
+        | 'Pacific/Auckland'
+        | 'Pacific/Fiji'
+      )
+    | null;
+  blocks?:
+    | {
+        dayAndTime?: string | null;
+        dayAndTime_timezone?:
+          | (
+              | 'Etc/GMT+12'
+              | 'Pacific/Midway'
+              | 'Pacific/Niue'
+              | 'Pacific/Honolulu'
+              | 'Pacific/Rarotonga'
+              | 'America/Anchorage'
+              | 'Pacific/Gambier'
+              | 'America/Los_Angeles'
+              | 'America/Tijuana'
+              | 'America/Denver'
+              | 'America/Phoenix'
+              | 'America/Chicago'
+              | 'America/Guatemala'
+              | 'America/New_York'
+              | 'America/Bogota'
+              | 'America/Caracas'
+              | 'America/Santiago'
+              | 'America/Argentina/Buenos_Aires'
+              | 'America/Sao_Paulo'
+              | 'Atlantic/South_Georgia'
+              | 'Atlantic/Azores'
+              | 'Atlantic/Cape_Verde'
+              | 'UTC'
+              | 'Europe/London'
+              | 'Europe/Berlin'
+              | 'Africa/Lagos'
+              | 'Europe/Athens'
+              | 'Africa/Cairo'
+              | 'Europe/Moscow'
+              | 'Asia/Riyadh'
+              | 'Asia/Dubai'
+              | 'Asia/Baku'
+              | 'Asia/Karachi'
+              | 'Asia/Tashkent'
+              | 'Asia/Kolkata'
+              | 'Asia/Dhaka'
+              | 'Asia/Almaty'
+              | 'Asia/Jakarta'
+              | 'Asia/Bangkok'
+              | 'Asia/Shanghai'
+              | 'Asia/Singapore'
+              | 'Asia/Tokyo'
+              | 'Asia/Seoul'
+              | 'Australia/Sydney'
+              | 'Pacific/Guam'
+              | 'Pacific/Noumea'
+              | 'Pacific/Auckland'
+              | 'Pacific/Fiji'
+            )
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'dateBlock';
+      }[]
+    | null;
+  array?:
+    | {
+        dayAndTime?: string | null;
+        dayAndTime_timezone?:
+          | (
+              | 'Etc/GMT+12'
+              | 'Pacific/Midway'
+              | 'Pacific/Niue'
+              | 'Pacific/Honolulu'
+              | 'Pacific/Rarotonga'
+              | 'America/Anchorage'
+              | 'Pacific/Gambier'
+              | 'America/Los_Angeles'
+              | 'America/Tijuana'
+              | 'America/Denver'
+              | 'America/Phoenix'
+              | 'America/Chicago'
+              | 'America/Guatemala'
+              | 'America/New_York'
+              | 'America/Bogota'
+              | 'America/Caracas'
+              | 'America/Santiago'
+              | 'America/Argentina/Buenos_Aires'
+              | 'America/Sao_Paulo'
+              | 'Atlantic/South_Georgia'
+              | 'Atlantic/Azores'
+              | 'Atlantic/Cape_Verde'
+              | 'UTC'
+              | 'Europe/London'
+              | 'Europe/Berlin'
+              | 'Africa/Lagos'
+              | 'Europe/Athens'
+              | 'Africa/Cairo'
+              | 'Europe/Moscow'
+              | 'Asia/Riyadh'
+              | 'Asia/Dubai'
+              | 'Asia/Baku'
+              | 'Asia/Karachi'
+              | 'Asia/Tashkent'
+              | 'Asia/Kolkata'
+              | 'Asia/Dhaka'
+              | 'Asia/Almaty'
+              | 'Asia/Jakarta'
+              | 'Asia/Bangkok'
+              | 'Asia/Shanghai'
+              | 'Asia/Singapore'
+              | 'Asia/Tokyo'
+              | 'Asia/Seoul'
+              | 'Australia/Sydney'
+              | 'Pacific/Guam'
+              | 'Pacific/Noumea'
+              | 'Pacific/Auckland'
+              | 'Pacific/Fiji'
+            )
+          | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2642,9 +2862,28 @@ export interface DateFieldsSelect<T extends boolean = true> {
  */
 export interface DateFieldsWithTimezoneSelect<T extends boolean = true> {
   default?: T;
-  dayAndTime?: T;
   default_timezone?: T;
+  dayAndTime?: T;
   dayAndTime_timezone?: T;
+  blocks?:
+    | T
+    | {
+        dateBlock?:
+          | T
+          | {
+              dayAndTime?: T;
+              dayAndTime_timezone?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  array?:
+    | T
+    | {
+        dayAndTime?: T;
+        dayAndTime_timezone?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }

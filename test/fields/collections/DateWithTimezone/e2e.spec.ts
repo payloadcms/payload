@@ -129,31 +129,70 @@ describe('Date with timezone', () => {
     await expect(newDateValue).not.toEqual(initialDateValue)
   })
 
-  // /// copied for tests
-  // test('create EST day only date', async () => {
-  //   await page.goto(url.create)
-  //   await page.waitForURL(`**/${url.create}`)
-  //   const dateField = page.locator('#field-default input')
+  test('can change timezone inside a block', async () => {
+    // Tests to see if the date value is updated when the timezone is changed,
+    // it should change to the equivalent time in the new timezone as the UTC value remains the same
+    const {
+      docs: [existingDoc],
+    } = await payload.find({
+      collection: dateFieldsWithTimezoneSlug,
+    })
 
-  //   // enter date in default date field
-  //   await dateField.fill('02/07/2023')
-  //   await saveDocAndAssert(page)
+    await page.goto(url.edit(existingDoc!.id))
 
-  //   // get the ID of the doc
-  //   const routeSegments = page.url().split('/')
-  //   const id = routeSegments.pop()
+    const dateTimeLocator = page.locator(
+      '#field-blocks__0__dayAndTime .react-datepicker-wrapper input',
+    )
 
-  //   // fetch the doc (need the date string from the DB)
-  //   const { doc } = await client.findByID({ id, auth: true, slug: 'date-fields' })
+    const initialDateValue = await dateTimeLocator.inputValue()
 
-  //   expect(doc.default).toEqual('2023-02-07T12:00:00.000Z')
-  // })
-  // /// copied for tests
+    const dropdownControlSelector = `#field-blocks__0__dayAndTime .rs__control`
+
+    const timezoneOptionSelector = `#field-blocks__0__dayAndTime .rs__menu .rs__option:has-text("London")`
+
+    await page.click(dropdownControlSelector)
+
+    await wait(250)
+
+    await page.click(timezoneOptionSelector)
+
+    const newDateValue = await dateTimeLocator.inputValue()
+
+    await expect(newDateValue).not.toEqual(initialDateValue)
+  })
+
+  test('can change timezone inside an array', async () => {
+    // Tests to see if the date value is updated when the timezone is changed,
+    // it should change to the equivalent time in the new timezone as the UTC value remains the same
+    const {
+      docs: [existingDoc],
+    } = await payload.find({
+      collection: dateFieldsWithTimezoneSlug,
+    })
+
+    await page.goto(url.edit(existingDoc!.id))
+
+    const dateTimeLocator = page.locator(
+      '#field-array__0__dayAndTime .react-datepicker-wrapper input',
+    )
+
+    const initialDateValue = await dateTimeLocator.inputValue()
+
+    const dropdownControlSelector = `#field-array__0__dayAndTime .rs__control`
+
+    const timezoneOptionSelector = `#field-array__0__dayAndTime .rs__menu .rs__option:has-text("London")`
+
+    await page.click(dropdownControlSelector)
+
+    await page.click(timezoneOptionSelector)
+
+    const newDateValue = await dateTimeLocator.inputValue()
+
+    await expect(newDateValue).not.toEqual(initialDateValue)
+  })
 
   describe('while timezone is set to London', () => {
-    test('displayed value should be the same while timezone is set to London', async ({
-      timezoneId,
-    }) => {
+    test('displayed value should be the same while timezone is set to London', async () => {
       const {
         docs: [existingDoc],
       } = await payload.find({
