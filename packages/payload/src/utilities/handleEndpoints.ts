@@ -11,10 +11,10 @@ import { headersWithCors } from './headersWithCors.js'
 import { mergeHeaders } from './mergeHeaders.js'
 import { routeError } from './routeError.js'
 
-const notFoundResponse = (req: PayloadRequest) => {
+const notFoundResponse = (req: PayloadRequest, pathname?: string) => {
   return Response.json(
     {
-      message: `Route not found "${new URL(req.url).pathname}"`,
+      message: `Route not found "${pathname ?? new URL(req.url).pathname}"`,
     },
     {
       headers: headersWithCors({
@@ -61,10 +61,13 @@ const notFoundResponse = (req: PayloadRequest) => {
 export const handleEndpoints = async ({
   basePath = '',
   config: incomingConfig,
+  path,
   request,
 }: {
   basePath?: string
   config: Promise<SanitizedConfig> | SanitizedConfig
+  /** Override path from the request */
+  path?: string
   request: Request
 }): Promise<Response> => {
   let handler: PayloadHandler
@@ -85,6 +88,7 @@ export const handleEndpoints = async ({
     const response = await handleEndpoints({
       basePath,
       config: incomingConfig,
+      path,
       request: new Request(url, {
         cache: request.cache,
         credentials: request.credentials,
@@ -116,10 +120,10 @@ export const handleEndpoints = async ({
     const { payload } = req
     const { config } = payload
 
-    const pathname = `${basePath}${new URL(req.url).pathname}`
+    const pathname = `${basePath}${path ?? new URL(req.url).pathname}`
 
     if (!pathname.startsWith(config.routes.api)) {
-      return notFoundResponse(req)
+      return notFoundResponse(req, pathname)
     }
 
     // /api/posts/route -> /posts/route
@@ -213,7 +217,7 @@ export const handleEndpoints = async ({
     }
 
     if (!handler) {
-      return notFoundResponse(req)
+      return notFoundResponse(req, pathname)
     }
 
     const response = await handler(req)

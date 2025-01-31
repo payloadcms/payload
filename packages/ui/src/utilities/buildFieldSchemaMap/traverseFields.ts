@@ -102,6 +102,8 @@ export const traverseFields = ({
 
       case 'tabs':
         field.tabs.map((tab, tabIndex) => {
+          const isNamedTab = tabHasName(tab)
+
           const { indexPath: tabIndexPath, schemaPath: tabSchemaPath } = getFieldPaths({
             field: {
               ...tab,
@@ -119,8 +121,8 @@ export const traverseFields = ({
             config,
             fields: tab.fields,
             i18n,
-            parentIndexPath: tabHasName(tab) ? '' : tabIndexPath,
-            parentSchemaPath: tabHasName(tab) ? tabSchemaPath : parentSchemaPath,
+            parentIndexPath: isNamedTab ? '' : tabIndexPath,
+            parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
             schemaMap,
           })
         })

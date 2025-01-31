@@ -22,6 +22,7 @@ export interface Config {
     relations: Relation;
     'hooks-users': HooksUser;
     'data-hooks': DataHook;
+    'field-paths': FieldPath;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -39,6 +40,7 @@ export interface Config {
     relations: RelationsSelect<false> | RelationsSelect<true>;
     'hooks-users': HooksUsersSelect<false> | HooksUsersSelect<true>;
     'data-hooks': DataHooksSelect<false> | DataHooksSelect<true>;
+    'field-paths': FieldPathsSelect<false> | FieldPathsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -238,6 +240,323 @@ export interface DataHook {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "field-paths".
+ */
+export interface FieldPath {
+  id: string;
+  topLevelNamedField?: string | null;
+  array?:
+    | {
+        fieldWithinArray?: string | null;
+        nestedArray?:
+          | {
+              fieldWithinNestedArray?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        fieldWithinRowWithinArray?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  fieldWithinRow?: string | null;
+  fieldWithinUnnamedTab?: string | null;
+  fieldWithinNestedUnnamedTab?: string | null;
+  namedTab?: {
+    fieldWithinNamedTab?: string | null;
+  };
+  topLevelNamedField_beforeValidate_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  topLevelNamedField_beforeChange_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  topLevelNamedField_afterRead_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  topLevelNamedField_beforeDuplicate_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinArray_beforeValidate_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinArray_beforeChange_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinArray_afterRead_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinArray_beforeDuplicate_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinNestedArray_beforeValidate_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinNestedArray_beforeChange_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinNestedArray_afterRead_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinNestedArray_beforeDuplicate_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinRowWithinArray_beforeValidate_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinRowWithinArray_beforeChange_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinRowWithinArray_afterRead_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinRowWithinArray_beforeDuplicate_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinRow_beforeValidate_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinRow_beforeChange_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinRow_afterRead_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinRow_beforeDuplicate_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinUnnamedTab_beforeValidate_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinUnnamedTab_beforeChange_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinUnnamedTab_afterRead_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinUnnamedTab_beforeDuplicate_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinNestedUnnamedTab_beforeValidate_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinNestedUnnamedTab_beforeChange_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinNestedUnnamedTab_afterRead_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinNestedUnnamedTab_beforeDuplicate_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinNamedTab_beforeValidate_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinNamedTab_beforeChange_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinNamedTab_afterRead_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  fieldWithinNamedTab_beforeDuplicate_FieldPaths?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -286,6 +605,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'data-hooks';
         value: string | DataHook;
+      } | null)
+    | ({
+        relationTo: 'field-paths';
+        value: string | FieldPath;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -467,6 +790,68 @@ export interface DataHooksSelect<T extends boolean = true> {
   collection_beforeRead_collection?: T;
   collection_afterRead_collection?: T;
   collection_afterOperation_collection?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "field-paths_select".
+ */
+export interface FieldPathsSelect<T extends boolean = true> {
+  topLevelNamedField?: T;
+  array?:
+    | T
+    | {
+        fieldWithinArray?: T;
+        nestedArray?:
+          | T
+          | {
+              fieldWithinNestedArray?: T;
+              id?: T;
+            };
+        fieldWithinRowWithinArray?: T;
+        id?: T;
+      };
+  fieldWithinRow?: T;
+  fieldWithinUnnamedTab?: T;
+  fieldWithinNestedUnnamedTab?: T;
+  namedTab?:
+    | T
+    | {
+        fieldWithinNamedTab?: T;
+      };
+  topLevelNamedField_beforeValidate_FieldPaths?: T;
+  topLevelNamedField_beforeChange_FieldPaths?: T;
+  topLevelNamedField_afterRead_FieldPaths?: T;
+  topLevelNamedField_beforeDuplicate_FieldPaths?: T;
+  fieldWithinArray_beforeValidate_FieldPaths?: T;
+  fieldWithinArray_beforeChange_FieldPaths?: T;
+  fieldWithinArray_afterRead_FieldPaths?: T;
+  fieldWithinArray_beforeDuplicate_FieldPaths?: T;
+  fieldWithinNestedArray_beforeValidate_FieldPaths?: T;
+  fieldWithinNestedArray_beforeChange_FieldPaths?: T;
+  fieldWithinNestedArray_afterRead_FieldPaths?: T;
+  fieldWithinNestedArray_beforeDuplicate_FieldPaths?: T;
+  fieldWithinRowWithinArray_beforeValidate_FieldPaths?: T;
+  fieldWithinRowWithinArray_beforeChange_FieldPaths?: T;
+  fieldWithinRowWithinArray_afterRead_FieldPaths?: T;
+  fieldWithinRowWithinArray_beforeDuplicate_FieldPaths?: T;
+  fieldWithinRow_beforeValidate_FieldPaths?: T;
+  fieldWithinRow_beforeChange_FieldPaths?: T;
+  fieldWithinRow_afterRead_FieldPaths?: T;
+  fieldWithinRow_beforeDuplicate_FieldPaths?: T;
+  fieldWithinUnnamedTab_beforeValidate_FieldPaths?: T;
+  fieldWithinUnnamedTab_beforeChange_FieldPaths?: T;
+  fieldWithinUnnamedTab_afterRead_FieldPaths?: T;
+  fieldWithinUnnamedTab_beforeDuplicate_FieldPaths?: T;
+  fieldWithinNestedUnnamedTab_beforeValidate_FieldPaths?: T;
+  fieldWithinNestedUnnamedTab_beforeChange_FieldPaths?: T;
+  fieldWithinNestedUnnamedTab_afterRead_FieldPaths?: T;
+  fieldWithinNestedUnnamedTab_beforeDuplicate_FieldPaths?: T;
+  fieldWithinNamedTab_beforeValidate_FieldPaths?: T;
+  fieldWithinNamedTab_beforeChange_FieldPaths?: T;
+  fieldWithinNamedTab_afterRead_FieldPaths?: T;
+  fieldWithinNamedTab_beforeDuplicate_FieldPaths?: T;
   updatedAt?: T;
   createdAt?: T;
 }

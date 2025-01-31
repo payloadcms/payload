@@ -312,6 +312,49 @@ describe('lexicalBlocks', () => {
     })
   })
 
+  test('ensure async hooks are awaited properly', async () => {
+    const { richTextField } = await navigateToLexicalFields()
+
+    const lastParagraph = richTextField.locator('p').last()
+    await lastParagraph.scrollIntoViewIfNeeded()
+    await expect(lastParagraph).toBeVisible()
+
+    await lastParagraph.click()
+
+    await page.keyboard.press('Enter')
+    await page.keyboard.press('/')
+    await page.keyboard.type('Async')
+
+    // CreateBlock
+    const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
+    await expect(slashMenuPopover).toBeVisible()
+
+    const asyncHooksBlockSelectButton = slashMenuPopover.locator('button').first()
+    await expect(asyncHooksBlockSelectButton).toBeVisible()
+    await expect(asyncHooksBlockSelectButton).toContainText('Async Hooks Block')
+    await asyncHooksBlockSelectButton.click()
+    await expect(slashMenuPopover).toBeHidden()
+
+    const newBlock = richTextField
+      .locator('.lexical-block:not(.lexical-block .lexical-block)')
+      .nth(8) // The :not(.lexical-block .lexical-block) makes sure this does not select sub-blocks
+    await newBlock.scrollIntoViewIfNeeded()
+    await newBlock.locator('#field-test1').fill('text1')
+    await newBlock.locator('#field-test2').fill('text2')
+
+    await wait(300)
+
+    // save document and assert
+    await saveDocAndAssert(page)
+    await wait(300)
+
+    // Reload page
+    await page.reload()
+
+    await expect(newBlock.locator('#field-test1')).toHaveValue('TEXT1')
+    await expect(newBlock.locator('#field-test2')).toHaveValue('TEXT2')
+  })
+
   describe('nested lexical editor in block', () => {
     test('should type and save typed text', async () => {
       const { richTextField } = await navigateToLexicalFields()

@@ -185,7 +185,12 @@
 
     &__header__actions {
       display: flex;
+      align-items: center;
       gap: var(--base);
+    }
+
+    &__header__addFile {
+      height: fit-content;
     }
 
     &__toggler {

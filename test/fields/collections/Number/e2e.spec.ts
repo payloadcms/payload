@@ -131,7 +131,7 @@ describe('Number', () => {
     await page.keyboard.press('Enter')
     await page.click('#action-save', { delay: 100 })
     await expect(page.locator('.payload-toast-container')).toContainText(
-      'The following field is invalid: withMinRows',
+      'The following field is invalid: With Min Rows',
     )
   })
 

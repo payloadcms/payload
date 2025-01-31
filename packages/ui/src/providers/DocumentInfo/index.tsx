@@ -1,11 +1,5 @@
 'use client'
-import type {
-  ClientCollectionConfig,
-  ClientGlobalConfig,
-  ClientUser,
-  DocumentPreferences,
-  SanitizedDocumentPermissions,
-} from 'payload'
+import type { ClientUser, DocumentPreferences, SanitizedDocumentPermissions } from 'payload'
 
 import * as qs from 'qs-esm'
 import React, {
@@ -79,8 +73,8 @@ const DocumentInfo: React.FC<
     getEntityConfig,
   } = useConfig()
 
-  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
-  const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
+  const collectionConfig = getEntityConfig({ collectionSlug })
+  const globalConfig = getEntityConfig({ globalSlug })
 
   const abortControllerRef = useRef(new AbortController())
   const docConfig = collectionConfig || globalConfig

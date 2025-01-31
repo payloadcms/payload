@@ -110,5 +110,7 @@ export function genImportMapIterateFields({
 
     hasKey(field?.admin?.components, 'RowLabel') &&
       addToImportMap(field?.admin?.components?.RowLabel)
+
+    hasKey(field?.admin?.components, 'Diff') && addToImportMap(field?.admin?.components?.Diff)
   }
 }

@@ -11,6 +11,7 @@ import {
   noApiViewCollectionSlug,
   postsCollectionSlug,
   usersCollectionSlug,
+  with300DocumentsSlug,
 } from './slugs.js'
 
 export const seed = async (_payload) => {
@@ -117,6 +118,26 @@ export const seed = async (_payload) => {
     ],
     false,
   )
+
+  // delete all with300Documents
+  await _payload.delete({
+    collection: with300DocumentsSlug,
+    where: {},
+  })
+
+  // Create 300 documents of with300Documents
+  const manyDocumentsPromises: Promise<unknown>[] = Array.from({ length: 300 }, (_, i) => {
+    const index = (i + 1).toString().padStart(3, '0')
+    return _payload.create({
+      collection: with300DocumentsSlug,
+      data: {
+        id: index,
+        text: `document ${index}`,
+      },
+    })
+  })
+
+  await Promise.all([...manyDocumentsPromises])
 }
 
 export async function clearAndSeedEverything(_payload: Payload) {

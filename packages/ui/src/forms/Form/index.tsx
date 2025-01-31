@@ -131,6 +131,7 @@ export const Form: React.FC<FormProps> = (props) => {
               id,
               collectionSlug,
               data,
+              event: 'submit',
               operation,
               preferences: {} as any,
               req: {
@@ -504,6 +505,7 @@ export const Form: React.FC<FormProps> = (props) => {
         renderAllFields: true,
         schemaPath: collectionSlug ? collectionSlug : globalSlug,
         signal: controller.signal,
+        skipValidation: true,
       })
 
       contextRef.current = { ...initContextState } as FormContextType
@@ -635,7 +637,12 @@ export const Form: React.FC<FormProps> = (props) => {
   useEffect(() => {
     if (initialState) {
       contextRef.current = { ...initContextState } as FormContextType
-      dispatchFields({ type: 'REPLACE_STATE', optimize: false, state: initialState })
+      dispatchFields({
+        type: 'REPLACE_STATE',
+        optimize: false,
+        sanitize: true,
+        state: initialState,
+      })
     }
   }, [initialState, dispatchFields])
 
@@ -664,6 +671,7 @@ export const Form: React.FC<FormProps> = (props) => {
             // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
             revalidatedFormState = await onChangeFn({
               formState: deepCopyObjectSimpleWithoutReactComponents(contextRef.current.fields),
+              submitted,
             })
           }
 
@@ -698,7 +706,7 @@ export const Form: React.FC<FormProps> = (props) => {
         `fields` updates before `modified`, because setModified is in a setTimeout.
         So on the first change, modified is false, so we don't trigger the effect even though we should.
     **/
-    [contextRef.current.fields, modified],
+    [contextRef.current.fields, modified, submitted],
     [dispatchFields, onChange],
     {
       delay: 250,

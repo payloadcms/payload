@@ -8,12 +8,6 @@ import type { SerializedHorizontalRuleNode } from '../../server/nodes/Horizontal
 
 import { HorizontalRuleServerNode } from '../../server/nodes/HorizontalRuleNode.js'
 
-const HorizontalRuleComponent = React.lazy(() =>
-  import('../../client/component/index.js').then((module) => ({
-    default: module.HorizontalRuleComponent,
-  })),
-)
-
 export class HorizontalRuleNode extends HorizontalRuleServerNode {
   static override clone(node: HorizontalRuleServerNode): HorizontalRuleServerNode {
     return super.clone(node)
@@ -33,8 +27,8 @@ export class HorizontalRuleNode extends HorizontalRuleServerNode {
   /**
    * Allows you to render a React component within whatever createDOM returns.
    */
-  override decorate(): React.ReactElement {
-    return <HorizontalRuleComponent nodeKey={this.__key} />
+  override decorate() {
+    return null
   }
 
   override exportJSON(): SerializedLexicalNode {

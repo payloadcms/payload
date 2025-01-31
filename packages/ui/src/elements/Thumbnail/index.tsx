@@ -92,12 +92,16 @@ export function ThumbnailComponent(props: ThumbnailComponentProps) {
     }
   }, [fileSrc])
 
+  let src: string = ''
+
   /**
    * If an imageCacheTag is provided, append it to the fileSrc
    * Check if the fileSrc already has a query string, if it does, append the imageCacheTag with an ampersand
    */
-  const queryChar = fileSrc.includes('?') ? '&' : '?'
-  const src = imageCacheTag ? `${fileSrc}${queryChar}${imageCacheTag}` : fileSrc
+  if (fileSrc) {
+    const queryChar = fileSrc?.includes('?') ? '&' : '?'
+    src = imageCacheTag ? `${fileSrc}${queryChar}${imageCacheTag}` : fileSrc
+  }
 
   return (
     <div className={classNames}>

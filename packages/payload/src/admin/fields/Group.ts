@@ -12,6 +12,8 @@ import type {
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
+  FieldDiffClientComponent,
+  FieldDiffServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
 } from '../types.js'
@@ -60,3 +62,7 @@ export type GroupFieldErrorServerComponent = FieldErrorServerComponent<
 >
 
 export type GroupFieldErrorClientComponent = FieldErrorClientComponent<GroupFieldClientWithoutType>
+
+export type GroupFieldDiffServerComponent = FieldDiffServerComponent<GroupField, GroupFieldClient>
+
+export type GroupFieldDiffClientComponent = FieldDiffClientComponent<GroupFieldClient>

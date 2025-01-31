@@ -13,7 +13,7 @@ import { parse } from 'url'
 import { getNextRootDir } from './helpers/getNextRootDir.js'
 import startMemoryDB from './helpers/startMemoryDB.js'
 import { runInit } from './runInit.js'
-import { child, safelyRunScriptFunction } from './safelyRunScript.js'
+import { child } from './safelyRunScript.js'
 import { createTestHooks } from './testHooks.js'
 
 const prod = process.argv.includes('--prod')
@@ -80,13 +80,13 @@ const app = nextImport({
 
 const handle = app.getRequestHandler()
 
-let resolveServer
+let resolveServer: () => void
 
-const serverPromise = new Promise((res) => (resolveServer = res))
+const serverPromise = new Promise<void>((res) => (resolveServer = res))
 
 void app.prepare().then(() => {
   createServer(async (req, res) => {
-    const parsedUrl = parse(req.url, true)
+    const parsedUrl = parse(req.url || '', true)
     await handle(req, res, parsedUrl)
   }).listen(port, () => {
     resolveServer()

@@ -5,10 +5,12 @@ const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import AutosavePosts from './collections/Autosave.js'
 import CustomIDs from './collections/CustomIDs.js'
+import { Diff } from './collections/Diff.js'
 import DisablePublish from './collections/DisablePublish.js'
 import DraftPosts from './collections/Drafts.js'
 import DraftWithMax from './collections/DraftsWithMax.js'
 import LocalizedPosts from './collections/Localized.js'
+import { Media } from './collections/Media.js'
 import Posts from './collections/Posts.js'
 import VersionPosts from './collections/Versions.js'
 import AutosaveGlobal from './globals/Autosave.js'
@@ -35,6 +37,8 @@ export default buildConfigWithDefaults({
     LocalizedPosts,
     VersionPosts,
     CustomIDs,
+    Diff,
+    Media,
   ],
   globals: [AutosaveGlobal, DraftGlobal, DraftWithMaxGlobal, DisablePublishGlobal, LocalizedGlobal],
   indexSortableFields: true,

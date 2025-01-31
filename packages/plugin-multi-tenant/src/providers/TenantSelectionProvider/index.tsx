@@ -2,6 +2,8 @@ import type { OptionObject, Payload, User } from 'payload'
 
 import { cookies as getCookies } from 'next/headers.js'
 
+import { SELECT_ALL } from '../../constants.js'
+import { findTenantOptions } from '../../queries/findTenantOptions.js'
 import { TenantSelectionProviderClient } from './index.client.js'
 
 type Args = {
@@ -19,29 +21,45 @@ export const TenantSelectionProvider = async ({
   useAsTitle,
   user,
 }: Args) => {
-  const { docs: userTenants } = await payload.find({
-    collection: tenantsCollectionSlug,
-    depth: 0,
-    limit: 1000,
-    overrideAccess: false,
-    sort: useAsTitle,
-    user,
-  })
+  let tenantOptions: OptionObject[] = []
 
-  const tenantOptions: OptionObject[] = userTenants.map((doc) => ({
-    label: String(doc[useAsTitle]),
-    value: String(doc.id),
-  }))
+  try {
+    const { docs } = await findTenantOptions({
+      limit: 0,
+      payload,
+      tenantsCollectionSlug,
+      useAsTitle,
+      user,
+    })
+    tenantOptions = docs.map((doc) => ({
+      label: String(doc[useAsTitle]),
+      value: String(doc.id),
+    }))
+  } catch (_) {
+    // user likely does not have access
+  }
+
   const cookies = await getCookies()
-  const tenantCookie = cookies.get('payload-tenant')?.value
-  const selectedTenant =
-    tenantOptions.find((option) => option.value === tenantCookie)?.label || tenantCookie
+  let tenantCookie = cookies.get('payload-tenant')?.value
+  let initialValue = undefined
+  const isValidTenantCookie =
+    (tenantOptions.length > 1 && tenantCookie === SELECT_ALL) ||
+    tenantOptions.some((option) => option.value === tenantCookie)
+
+  if (isValidTenantCookie) {
+    initialValue = tenantCookie
+  } else {
+    tenantCookie = undefined
+    initialValue = tenantOptions.length > 1 ? SELECT_ALL : tenantOptions[0]?.value
+  }
 
   return (
-    <span data-selected-tenant-id={tenantCookie} data-selected-tenant-title={selectedTenant}>
-      <TenantSelectionProviderClient initialValue={tenantCookie} tenantOptions={tenantOptions}>
-        {children}
-      </TenantSelectionProviderClient>
-    </span>
+    <TenantSelectionProviderClient
+      initialValue={initialValue}
+      tenantCookie={tenantCookie}
+      tenantOptions={tenantOptions}
+    >
+      {children}
+    </TenantSelectionProviderClient>
   )
 }

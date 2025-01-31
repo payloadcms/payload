@@ -4,7 +4,7 @@ import type { PaginatedDocs, Where } from 'payload'
 
 import { fieldBaseClass, Pill, ReactSelect, useConfig, useTranslation } from '@payloadcms/ui'
 import { formatDate } from '@payloadcms/ui/shared'
-import * as qs from 'qs-esm'
+import { stringify } from 'qs-esm'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { Props } from './types.js'
@@ -87,7 +87,7 @@ export const SelectComparison: React.FC<Props> = (props) => {
         })
       }
 
-      const search = qs.stringify(query)
+      const search = stringify(query)
 
       const response = await fetch(`${baseURL}?${search}`, {
         credentials: 'include',
@@ -163,8 +163,12 @@ export const SelectComparison: React.FC<Props> = (props) => {
   )
 
   useEffect(() => {
+    if (!i18n.dateFNS) {
+      // If dateFNS is not loaded, we can't format the date in getResults
+      return
+    }
     void getResults({ lastLoadedPage: 1 })
-  }, [getResults])
+  }, [getResults, i18n.dateFNS])
 
   const filteredOptions = options.filter(
     (option, index, self) => self.findIndex((t) => t.value === option.value) === index,
