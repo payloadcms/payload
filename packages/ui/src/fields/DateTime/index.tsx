@@ -1,7 +1,7 @@
 'use client'
 import type { DateFieldClientComponent, DateFieldValidation } from 'payload'
 
-import { TZDateMini as TZDate } from '@date-fns/tz'
+import { TZDateMini as TZDate } from '@date-fns/tz/date/mini'
 import { getTranslation } from '@payloadcms/translations'
 import { transpose } from 'date-fns'
 import { useCallback, useMemo } from 'react'
@@ -65,10 +65,10 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
 
   const timezonePath = path + '_timezone'
 
-  const timezoneField = useFormFields(([fields, _]) => fields[timezonePath])
+  const timezoneField = useFormFields(([fields, _]) => fields?.[timezonePath])
   const timezoneOptions = 'options' in siblingField ? siblingField?.options : null
 
-  const selectedTimezone = timezoneField.value as string
+  const selectedTimezone = timezoneField?.value as string
 
   // The displayed value should be the original value, adjusted to the user's timezone
   const displayedValue = useMemo(() => {
@@ -84,7 +84,8 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
 
       return dateWithUserTimezone.toISOString()
     }
-    return null
+
+    return value
   }, [timezone, selectedTimezone, value, userTimezone])
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
