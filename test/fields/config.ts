@@ -35,6 +35,7 @@ import RelationshipFields from './collections/Relationship/index.js'
 import RichTextFields from './collections/RichText/index.js'
 import RowFields from './collections/Row/index.js'
 import SelectFields from './collections/Select/index.js'
+import SelectVersionsFields from './collections/SelectVersions/index.js'
 import TabsFields from './collections/Tabs/index.js'
 import { TabsFields2 } from './collections/Tabs2/index.js'
 import TextFields from './collections/Text/index.js'
@@ -69,7 +70,7 @@ export const collectionSlugs: CollectionConfig[] = [
     ],
   },
   LexicalInBlock,
-
+  SelectVersionsFields,
   ArrayFields,
   BlockFields,
   CheckboxFields,

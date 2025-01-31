@@ -88,6 +88,10 @@ export const traverseFields = ({
   texts,
   withinArrayOrBlockLocale,
 }: Args) => {
+  if (row._uuid) {
+    data._uuid = row._uuid
+  }
+
   fields.forEach((field) => {
     let columnName = ''
     let fieldName = ''
