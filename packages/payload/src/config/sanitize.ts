@@ -16,6 +16,7 @@ import { authRootEndpoints } from '../auth/endpoints/index.js'
 import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
+import { timezoneOptions } from '../fields/baseFields/timezone/timezoneOptions.js'
 import { sanitizeGlobal } from '../globals/config/sanitize.js'
 import { getLockedDocumentsCollection } from '../lockedDocuments/lockedDocumentsCollection.js'
 import getPreferencesCollection from '../preferences/preferencesCollection.js'
@@ -54,6 +55,16 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
     throw new InvalidConfiguration(
       `${sanitizedConfig.admin.user} is not a valid admin user collection`,
     )
+  }
+
+  if (sanitizedConfig?.admin?.timezone) {
+    if (!sanitizedConfig?.admin?.timezone?.options) {
+      sanitizedConfig.admin.timezone.options = timezoneOptions
+    }
+  } else {
+    sanitizedConfig.admin.timezone = {
+      options: timezoneOptions,
+    }
   }
 
   return sanitizedConfig as unknown as Partial<SanitizedConfig>

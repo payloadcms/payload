@@ -98,8 +98,6 @@ export const RenderFields: React.FC<RenderFieldsProps> = (props) => {
             parentSchemaPath,
           })
 
-          const siblingField = fields?.[i + 1] ?? undefined
-
           return (
             <RenderField
               clientFieldConfig={field}
@@ -118,7 +116,6 @@ export const RenderFields: React.FC<RenderFieldsProps> = (props) => {
               }
               readOnly={isReadOnly}
               schemaPath={schemaPath}
-              siblingField={siblingField}
             />
           )
         })}

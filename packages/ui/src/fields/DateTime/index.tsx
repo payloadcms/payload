@@ -16,6 +16,7 @@ import { useForm, useFormFields } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import './index.scss'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
@@ -34,13 +35,13 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
     },
     path,
     readOnly,
-    siblingField,
     validate,
   } = props
 
   // Get the user timezone so we can adjust the displayed value against it
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
+  const { config } = useConfig()
   const { i18n } = useTranslation()
   const { dispatchFields, setModified } = useForm()
 
@@ -65,7 +66,7 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
 
   const timezonePath = path + '_timezone'
   const timezoneField = useFormFields(([fields, _]) => fields?.[timezonePath])
-  const timezoneOptions = 'options' in siblingField ? siblingField?.options : null
+  const timezoneOptions = config.admin.timezone.options
 
   const selectedTimezone = timezoneField?.value as string
 
@@ -97,9 +98,13 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
     (incomingDate: Date) => {
       if (!readOnly) {
         if (timezone && selectedTimezone && incomingDate) {
+          // Create TZDate instances for the selected timezone
           const tzDateWithUTC = TZDate.tz(selectedTimezone)
+
+          // Creates a TZDate instance for the user's timezone  — this is default behaviour of TZDate as it wraps the Date constructor
           const dateToUserTz = new TZDate(incomingDate)
 
+          // Transpose the date to the selected timezone
           const dateWithTimezone = transpose(dateToUserTz, tzDateWithUTC)
 
           setValue(dateWithTimezone.toISOString() || null)

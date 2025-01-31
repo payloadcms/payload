@@ -37,10 +37,6 @@ import { useFormFields } from '../../forms/Form/index.js'
 type RenderFieldProps = {
   clientFieldConfig: ClientField
   permissions: SanitizedFieldPermissions
-  /**
-   * The client config of the next direct sibling. Useful for fields that come in pairs such as Timezone picker for DateTime
-   */
-  siblingField?: ClientField
 } & FieldPaths &
   Pick<ClientComponentProps, 'forceRender' | 'readOnly' | 'schemaPath'>
 
@@ -54,7 +50,6 @@ export function RenderField({
   permissions,
   readOnly,
   schemaPath,
-  siblingField,
 }: RenderFieldProps) {
   const CustomField = useFormFields(([fields]) => fields && fields?.[path]?.customComponents?.Field)
 
@@ -100,14 +95,7 @@ export function RenderField({
       return <CollapsibleField {...iterableFieldProps} field={clientFieldConfig} path={path} />
 
     case 'date':
-      return (
-        <DateTimeField
-          {...baseFieldProps}
-          field={clientFieldConfig}
-          path={path}
-          siblingField={siblingField}
-        />
-      )
+      return <DateTimeField {...baseFieldProps} field={clientFieldConfig} path={path} />
 
     case 'email':
       return <EmailField {...baseFieldProps} field={clientFieldConfig} path={path} />

@@ -40,7 +40,7 @@ import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { ErrorName } from '../errors/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { JobsConfig, Payload, RequestContext, TypedUser } from '../index.js'
+import type { JobsConfig, Option, Payload, RequestContext, TypedUser } from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -871,6 +871,19 @@ export type Config = {
      * @default 'all' // The theme can be configured by users
      */
     theme?: 'all' | 'dark' | 'light'
+    /**
+     * Configure timezone related settings for the admin panel.
+     */
+    timezone?: {
+      /**
+       * Provide your own list of supported timezones for the admin panel
+       *
+       * Values should be IANA timezone names, eg. `America/New_York`
+       *
+       * We use `@date-fns/tz` to handle timezones
+       */
+      options?: Option[]
+    }
     /** The slug of a Collection that you want to be used to log in to the Admin dashboard. */
     user?: string
   }
