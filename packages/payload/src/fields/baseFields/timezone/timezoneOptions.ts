@@ -1,8 +1,8 @@
 /**
  * List of supported timezones
  *
- * Label: UTC offset and location
- * Value: IANA timezone name
+ * label: UTC offset and location
+ * value: IANA timezone name
  *
  * @example
  * { label: '(UTC-12:00) International Date Line West', value: 'Etc/GMT+12' }

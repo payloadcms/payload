@@ -1,6 +1,7 @@
 'use client'
 
 import type { OptionObject } from 'payload'
+import type React from 'react'
 
 import { useMemo } from 'react'
 
@@ -12,7 +13,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { ReactSelect } from '../ReactSelect/index.js'
 import { formatOptions } from '../WhereBuilder/Condition/Select/formatOptions.js'
 
-export const TimezonePicker = (props: Props) => {
+export const TimezonePicker: React.FC<Props> = (props) => {
   const {
     id,
     onChange: onChangeFromProps,
