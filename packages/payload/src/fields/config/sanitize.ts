@@ -14,6 +14,7 @@ import {
 import { formatLabels, toWords } from '../../utilities/formatLabels.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'
+import { baseTimezoneField } from '../baseFields/timezone/baseField.js'
 import { setDefaultBeforeDuplicate } from '../setDefaultBeforeDuplicate.js'
 import { validations } from '../validations.js'
 import { sanitizeJoinField } from './sanitizeJoinField.js'
@@ -282,24 +283,20 @@ export const sanitizeFields = async ({
       field.admin.disableBulkEdit = true
     }
 
-    if (field.type === 'date' && field.timezone) {
-      const timezonePath = field.name + '_timezone'
-
-      fields.push({
-        name: timezonePath,
-        type: 'text',
-        admin: {
-          hidden: true,
-        },
-        defaultValue: 'UTC',
-      })
-    }
-
     if ('_sanitized' in field) {
       field._sanitized = true
     }
 
     fields[i] = field
+
+    // Insert our field after assignment
+    if (field.type === 'date' && field.timezone) {
+      const name = field.name + '_timezone'
+
+      const timezoneField = baseTimezoneField({ name })
+
+      fields.splice(++i, 0, timezoneField)
+    }
   }
 
   return fields

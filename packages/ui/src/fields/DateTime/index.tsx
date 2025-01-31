@@ -14,8 +14,8 @@ import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useForm, useFormFields } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
-import { withCondition } from '../../forms/withCondition/index.js'
 import './index.scss'
+import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
@@ -34,9 +34,11 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
     },
     path,
     readOnly,
+    siblingField,
     validate,
   } = props
 
+  // Get the user timezone so we can adjust the displayed value against it
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
   const { i18n } = useTranslation()
@@ -64,10 +66,12 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
   const timezonePath = path + '_timezone'
 
   const timezoneField = useFormFields(([fields, _]) => fields[timezonePath])
+  const timezoneOptions = 'options' in siblingField ? siblingField?.options : null
 
   const selectedTimezone = timezoneField.value as string
 
-  const absoluteValue = useMemo(() => {
+  // The displayed value should be the original value, adjusted to the user's timezone
+  const displayedValue = useMemo(() => {
     if (timezone && selectedTimezone && value) {
       const DateWithOriginalTz = TZDate.tz(selectedTimezone)
       const DateWithUserTz = TZDate.tz(userTimezone)
@@ -154,12 +158,13 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
           }}
           placeholder={getTranslation(placeholder, i18n)}
           readOnly={readOnly}
-          value={absoluteValue}
+          value={displayedValue}
         />
-        {timezone && (
+        {timezone && timezoneOptions.length > 0 && (
           <TimezonePicker
             id={`${path}-timezone-picker`}
             onChange={onChangeTimezone}
+            options={timezoneOptions}
             selectedTimezone={selectedTimezone}
           />
         )}

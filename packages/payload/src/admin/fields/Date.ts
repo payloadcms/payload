@@ -1,6 +1,6 @@
 import type { MarkOptional } from 'ts-essentials'
 
-import type { DateField, DateFieldClient } from '../../fields/config/types.js'
+import type { ClientField, DateField, DateFieldClient } from '../../fields/config/types.js'
 import type { DateFieldValidation } from '../../fields/validations.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
 import type {
@@ -23,6 +23,7 @@ type DateFieldClientWithoutType = MarkOptional<DateFieldClient, 'type'>
 
 type DateFieldBaseClientProps = {
   readonly path: string
+  readonly siblingField?: ClientField
   readonly validate?: DateFieldValidation
 }
 

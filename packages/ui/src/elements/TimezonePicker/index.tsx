@@ -1,23 +1,35 @@
 'use client'
 
+import type { OptionObject } from 'payload'
+
 import { useMemo } from 'react'
 
 import type { Props } from './types.js'
 
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
+import './index.scss'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ReactSelect } from '../ReactSelect/index.js'
-import './index.scss'
-import { timezones } from './timezones.js'
+import { formatOptions } from '../WhereBuilder/Condition/Select/formatOptions.js'
 
 export const TimezonePicker = (props: Props) => {
-  const { id, onChange: onChangeFromProps, selectedTimezone: selectedTimezoneFromProps } = props
+  const {
+    id,
+    onChange: onChangeFromProps,
+    options: optionsFromProps,
+    selectedTimezone: selectedTimezoneFromProps,
+  } = props
 
   const { t } = useTranslation()
 
+  const options = formatOptions(optionsFromProps)
+
   const selectedTimezone = useMemo(() => {
-    return timezones.find((t) => t.value === (selectedTimezoneFromProps || 'UTC'))
-  }, [selectedTimezoneFromProps])
+    return options.find((t) => {
+      const value = typeof t === 'string' ? t : t.value
+      return value === (selectedTimezoneFromProps || 'UTC')
+    })
+  }, [options, selectedTimezoneFromProps])
 
   return (
     <div className="timezone-picker-wrapper">
@@ -26,12 +38,12 @@ export const TimezonePicker = (props: Props) => {
         className="timezone-picker"
         inputId={id}
         isClearable={false}
-        onChange={(val: (typeof timezones)[number]) => {
+        onChange={(val: OptionObject) => {
           if (onChangeFromProps) {
             onChangeFromProps(val.value)
           }
         }}
-        options={timezones}
+        options={options}
         value={selectedTimezone}
       />
     </div>
