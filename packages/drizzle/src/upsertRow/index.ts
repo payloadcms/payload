@@ -20,7 +20,10 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
   db,
   fields,
   ignoreResult,
-  joinQuery,
+  // TODO:
+  // When we support joins for write operations (create/update) - pass collectionSlug to the buildFindManyArgs
+  // Make a new argument in upsertRow.ts and pass the slug from every operation.
+  joinQuery: _joinQuery,
   operation,
   path = '',
   req,
@@ -414,13 +417,11 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
   // RETRIEVE NEWLY UPDATED ROW
   // //////////////////////////////////
 
-  joinQuery = operation === 'create' ? false : joinQuery
-
   const findManyArgs = buildFindManyArgs({
     adapter,
     depth: 0,
     fields,
-    joinQuery,
+    joinQuery: false,
     select,
     tableName,
   })
@@ -438,7 +439,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     config: adapter.payload.config,
     data: doc,
     fields,
-    joinQuery,
+    joinQuery: false,
   })
 
   return result
