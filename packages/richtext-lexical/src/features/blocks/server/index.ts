@@ -12,12 +12,12 @@ import { ServerInlineBlockNode } from './nodes/InlineBlocksNode.js'
 import { blockValidationHOC } from './validate.js'
 
 export type BlocksFeatureProps = {
-  blocks?: Block[]
-  inlineBlocks?: Block[]
+  blocks?: (Block | string)[]
+  inlineBlocks?: (Block | string)[]
 }
 
 export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatureProps>({
-  feature: async ({ config: _config, isRoot, parentIsLocalized, props }) => {
+  feature: async ({ config: _config, isRoot, parentIsLocalized, props: _props }) => {
     const validRelationships = _config.collections.map((c) => c.slug) || []
 
     const sanitized = await sanitizeFields({
@@ -26,12 +26,12 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
         {
           name: 'lexical_blocks',
           type: 'blocks',
-          blocks: props.blocks ?? [],
+          blocks: _props.blocks ?? [],
         },
         {
           name: 'lexical_inline_blocks',
           type: 'blocks',
-          blocks: props.inlineBlocks ?? [],
+          blocks: _props.inlineBlocks ?? [],
         },
       ],
       parentIsLocalized,
@@ -39,8 +39,25 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
       validRelationships,
     })
 
-    props.blocks = (sanitized[0] as BlocksField).blocks
-    props.inlineBlocks = (sanitized[1] as BlocksField).blocks
+    const pureBlocks: Block[] = []
+    for (const _block of (sanitized[0] as BlocksField).blocks) {
+      const block =
+        typeof _block === 'string' ? _config?.blocks?.find((b) => b.slug === _block) : _block
+      if (!block) {
+        throw new Error(`Block not found for slug: ${_block}`)
+      }
+      pureBlocks.push(block)
+    }
+
+    const pureInlineBlocks: Block[] = []
+    for (const _block of (sanitized[1] as BlocksField).blocks) {
+      const block =
+        typeof _block === 'string' ? _config?.blocks?.find((b) => b.slug === _block) : _block
+      if (!block) {
+        throw new Error(`Block not found for slug: ${_block}`)
+      }
+      pureInlineBlocks.push(block)
+    }
 
     return {
       ClientFeature: '@payloadcms/richtext-lexical/client#BlocksFeatureClient',
@@ -53,30 +70,34 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
           i18n,
           interfaceNameDefinitions,
         }) => {
-          if (!props?.blocks?.length && !props?.inlineBlocks?.length) {
+          if (!pureBlocks?.length && !pureInlineBlocks?.length) {
             return currentSchema
           }
 
           const fields: FlattenedBlocksField[] = []
 
-          if (props?.blocks?.length) {
+          if (pureBlocks?.length) {
             fields.push({
               name: field?.name + '_lexical_blocks',
               type: 'blocks',
-              blocks: props.blocks.map((block) => ({
-                ...block,
-                flattenedFields: flattenAllFields({ fields: block.fields }),
-              })),
+              blocks: pureBlocks.map((block) => {
+                return {
+                  ...block,
+                  flattenedFields: flattenAllFields({ fields: block.fields }),
+                }
+              }),
             })
           }
-          if (props?.inlineBlocks?.length) {
+          if (pureInlineBlocks?.length) {
             fields.push({
               name: field?.name + '_lexical_inline_blocks',
               type: 'blocks',
-              blocks: props.inlineBlocks.map((block) => ({
-                ...block,
-                flattenedFields: flattenAllFields({ fields: block.fields }),
-              })),
+              blocks: pureInlineBlocks.map((block) => {
+                return {
+                  ...block,
+                  flattenedFields: flattenAllFields({ fields: block.fields }),
+                }
+              }),
             })
           }
 
@@ -95,15 +116,15 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
           return currentSchema
         },
       },
-      generateSchemaMap: ({ props }) => {
+      generateSchemaMap: ({ config }) => {
         /**
          * Add sub-fields to the schemaMap. E.g. if you have an array field as part of the block, and it runs addRow, it will request these
          * sub-fields from the component map. Thus, we need to put them in the component map here.
          */
         const schemaMap: FieldSchemaMap = new Map()
 
-        if (props?.blocks?.length) {
-          for (const block of props.blocks) {
+        if (pureBlocks?.length) {
+          for (const block of pureBlocks) {
             const blockFields = [...block.fields]
 
             if (block?.admin?.components) {
@@ -129,9 +150,9 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
           }
         }
 
-        if (props?.inlineBlocks?.length) {
+        if (pureInlineBlocks?.length) {
           // To generate block schemaMap which generates things like the componentMap for admin.Label
-          for (const block of props.inlineBlocks) {
+          for (const block of pureInlineBlocks) {
             const blockFields = [...block.fields]
 
             if (block?.admin?.components) {
@@ -163,8 +184,8 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
       },
       i18n,
       markdownTransformers: getBlockMarkdownTransformers({
-        blocks: props.blocks,
-        inlineBlocks: props.inlineBlocks,
+        blocks: pureBlocks,
+        inlineBlocks: pureInlineBlocks,
       }),
 
       nodes: [
@@ -172,12 +193,12 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
           // @ts-expect-error - TODO: fix this
           getSubFields: ({ node }) => {
             if (!node) {
-              if (props?.blocks?.length) {
+              if (pureBlocks?.length) {
                 return [
                   {
                     name: 'lexical_blocks',
                     type: 'blocks',
-                    blocks: props.blocks,
+                    blocks: pureBlocks,
                   },
                 ]
               }
@@ -186,26 +207,26 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
 
             const blockType = node.fields.blockType
 
-            const block = props.blocks?.find((block) => block.slug === blockType)
+            const block = pureBlocks?.find((block) => block.slug === blockType)
             return block?.fields
           },
           getSubFieldsData: ({ node }) => {
             return node?.fields
           },
-          graphQLPopulationPromises: [blockPopulationPromiseHOC(props.blocks)],
+          graphQLPopulationPromises: [blockPopulationPromiseHOC(pureBlocks)],
           node: ServerBlockNode,
-          validations: [blockValidationHOC(props.blocks)],
+          validations: [blockValidationHOC(pureBlocks)],
         }),
         createNode({
           // @ts-expect-error - TODO: fix this
           getSubFields: ({ node }) => {
             if (!node) {
-              if (props?.inlineBlocks?.length) {
+              if (pureInlineBlocks?.length) {
                 return [
                   {
                     name: 'lexical_inline_blocks',
                     type: 'blocks',
-                    blocks: props.inlineBlocks,
+                    blocks: pureInlineBlocks,
                   },
                 ]
               }
@@ -214,18 +235,18 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
 
             const blockType = node.fields.blockType
 
-            const block = props.inlineBlocks?.find((block) => block.slug === blockType)
+            const block = pureInlineBlocks?.find((block) => block.slug === blockType)
             return block?.fields
           },
           getSubFieldsData: ({ node }) => {
             return node?.fields
           },
-          graphQLPopulationPromises: [blockPopulationPromiseHOC(props.inlineBlocks)],
+          graphQLPopulationPromises: [blockPopulationPromiseHOC(pureInlineBlocks)],
           node: ServerInlineBlockNode,
-          validations: [blockValidationHOC(props.inlineBlocks)],
+          validations: [blockValidationHOC(pureInlineBlocks)],
         }),
       ],
-      sanitizedServerFeatureProps: props,
+      sanitizedServerFeatureProps: _props,
     }
   },
   key: 'blocks',

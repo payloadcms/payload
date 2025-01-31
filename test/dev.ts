@@ -39,7 +39,7 @@ const {
   ...args
 } = minimist(process.argv.slice(2))
 
-if (!fs.existsSync(path.resolve(dirname, testSuiteArg))) {
+if (!testSuiteArg || !fs.existsSync(path.resolve(dirname, testSuiteArg))) {
   console.log(chalk.red(`ERROR: The test folder "${testSuiteArg}" does not exist`))
   process.exit(0)
 }
@@ -53,7 +53,7 @@ await beforeTest()
 
 const { rootDir, adminRoute } = getNextRootDir(testSuiteArg)
 
-await safelyRunScriptFunction(runInit, 4000, testSuiteArg, true)
+await runInit(testSuiteArg, true)
 
 if (shouldStartMemoryDB) {
   await startMemoryDB()

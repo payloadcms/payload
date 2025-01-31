@@ -80,6 +80,10 @@ const hasRelationshipOrUploadField = ({ fields }: { fields: Field[] }): boolean 
 
     if ('blocks' in field) {
       for (const block of field.blocks) {
+        if (typeof block === 'string') {
+          // Skip - string blocks have been added in v3 and thus don't need to be migrated
+          continue
+        }
         if (hasRelationshipOrUploadField({ fields: block.fields })) {
           return true
         }

@@ -2,6 +2,7 @@ import type { I18nClient } from '@payloadcms/translations'
 import type { DeepPartial } from 'ts-essentials'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
+import type { ClientBlock } from '../fields/config/types.js'
 import type {
   LivePreviewConfig,
   SanitizedConfig,
@@ -12,8 +13,8 @@ import {
   type ClientCollectionConfig,
   createClientCollectionConfigs,
 } from '../collections/config/client.js'
+import { createClientBlocks } from '../fields/config/client.js'
 import { type ClientGlobalConfig, createClientGlobalConfigs } from '../globals/config/client.js'
-
 export type ServerOnlyRootProperties = keyof Pick<
   SanitizedConfig,
   | 'bin'
@@ -42,6 +43,7 @@ export type ClientConfig = {
   admin: {
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
   } & Omit<SanitizedConfig['admin'], 'components' | 'dependencies' | 'livePreview'>
+  blocks: ClientBlock[]
   collections: ClientCollectionConfig[]
   custom?: Record<string, any>
   globals: ClientGlobalConfig[]
@@ -107,6 +109,16 @@ export const createClientConfig = ({
           }
         }
         break
+      case 'blocks': {
+        ;(clientConfig.blocks as ClientBlock[]) = createClientBlocks({
+          blocks: config.blocks,
+          defaultIDType: config.db.defaultIDType,
+          i18n,
+          importMap,
+        })
+
+        break
+      }
       case 'collections':
         ;(clientConfig.collections as ClientCollectionConfig[]) = createClientCollectionConfigs({
           collections: config.collections,
@@ -123,6 +135,7 @@ export const createClientConfig = ({
           importMap,
         })
         break
+
       case 'localization':
         if (typeof config.localization === 'object' && config.localization) {
           clientConfig.localization = {}

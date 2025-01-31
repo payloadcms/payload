@@ -2,6 +2,7 @@ import type { I18nClient } from '@payloadcms/translations'
 
 import type {
   AdminClient,
+  Block,
   BlockJSX,
   BlocksFieldClient,
   ClientBlock,
@@ -70,6 +71,81 @@ const serverOnlyFieldAdminProperties: Partial<ServerOnlyFieldAdminProperties>[] 
 type FieldWithDescription = {
   admin: AdminClient
 } & ClientField
+
+export const createClientBlocks = ({
+  blocks,
+  defaultIDType,
+  i18n,
+  importMap,
+}: {
+  blocks: (Block | string)[]
+  defaultIDType: Payload['config']['db']['defaultIDType']
+  i18n: I18nClient
+  importMap: ImportMap
+}): ClientBlock[] => {
+  const clientBlocks: ClientBlock[] = []
+  for (let i = 0; i < blocks.length; i++) {
+    const block = blocks[i]
+
+    if (typeof block === 'string') {
+      continue // Do not process blocks that are just strings - they are processed once in the client config
+    }
+
+    const clientBlock: ClientBlock = {
+      slug: block.slug,
+      fields: [],
+    }
+    if (block.imageAltText) {
+      clientBlock.imageAltText = block.imageAltText
+    }
+    if (block.imageURL) {
+      clientBlock.imageURL = block.imageURL
+    }
+
+    if (block.admin?.custom) {
+      clientBlock.admin = {
+        custom: block.admin.custom,
+      }
+    }
+
+    if (block?.admin?.jsx) {
+      const jsxResolved = getFromImportMap<BlockJSX>({
+        importMap,
+        PayloadComponent: block.admin.jsx,
+        schemaPath: '',
+      })
+      clientBlock.jsx = jsxResolved
+    }
+
+    if (block.labels) {
+      clientBlock.labels = {} as unknown as LabelsClient
+
+      if (block.labels.singular) {
+        if (typeof block.labels.singular === 'function') {
+          clientBlock.labels.singular = block.labels.singular({ t: i18n.t })
+        } else {
+          clientBlock.labels.singular = block.labels.singular
+        }
+        if (typeof block.labels.plural === 'function') {
+          clientBlock.labels.plural = block.labels.plural({ t: i18n.t })
+        } else {
+          clientBlock.labels.plural = block.labels.plural
+        }
+      }
+    }
+
+    clientBlock.fields = createClientFields({
+      defaultIDType,
+      fields: block.fields,
+      i18n,
+      importMap,
+    })
+
+    clientBlocks.push(clientBlock)
+  }
+
+  return clientBlocks
+}
 
 export const createClientField = ({
   defaultIDType,
@@ -169,62 +245,12 @@ export const createClientField = ({
       const field = clientField as unknown as BlocksFieldClient
 
       if (incomingField.blocks?.length) {
-        for (let i = 0; i < incomingField.blocks.length; i++) {
-          const block = incomingField.blocks[i]
-
-          // prevent $undefined from being passed through the rsc requests
-          const clientBlock = removeUndefined<ClientBlock>({
-            slug: block.slug,
-            fields: field.blocks?.[i]?.fields || [],
-            imageAltText: block.imageAltText,
-            imageURL: block.imageURL,
-          }) satisfies ClientBlock
-
-          if (block.admin?.custom) {
-            clientBlock.admin = {
-              custom: block.admin.custom,
-            }
-          }
-
-          if (block?.admin?.jsx) {
-            const jsxResolved = getFromImportMap<BlockJSX>({
-              importMap,
-              PayloadComponent: block.admin.jsx,
-              schemaPath: '',
-            })
-            clientBlock.jsx = jsxResolved
-          }
-
-          if (block.labels) {
-            clientBlock.labels = {} as unknown as LabelsClient
-
-            if (block.labels.singular) {
-              if (typeof block.labels.singular === 'function') {
-                clientBlock.labels.singular = block.labels.singular({ t: i18n.t })
-              } else {
-                clientBlock.labels.singular = block.labels.singular
-              }
-              if (typeof block.labels.plural === 'function') {
-                clientBlock.labels.plural = block.labels.plural({ t: i18n.t })
-              } else {
-                clientBlock.labels.plural = block.labels.plural
-              }
-            }
-          }
-
-          clientBlock.fields = createClientFields({
-            defaultIDType,
-            fields: block.fields,
-            i18n,
-            importMap,
-          })
-
-          if (!field.blocks) {
-            field.blocks = []
-          }
-
-          field.blocks[i] = clientBlock
-        }
+        field.blocks = createClientBlocks({
+          blocks: incomingField.blocks,
+          defaultIDType,
+          i18n,
+          importMap,
+        })
       }
 
       break

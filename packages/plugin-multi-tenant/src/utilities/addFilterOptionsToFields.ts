@@ -1,13 +1,15 @@
-import type { Field, FilterOptionsProps, RelationshipField, Where } from 'payload'
+import type { Config, Field, FilterOptionsProps, RelationshipField, SanitizedConfig } from 'payload'
 
 import { getTenantFromCookie } from './getTenantFromCookie.js'
 
 type AddFilterOptionsToFieldsArgs = {
+  config: Config | SanitizedConfig
   fields: Field[]
   tenantEnabledCollectionSlugs: string[]
   tenantEnabledGlobalSlugs: string[]
 }
 export function addFilterOptionsToFields({
+  config,
   fields,
   tenantEnabledCollectionSlugs,
   tenantEnabledGlobalSlugs,
@@ -48,6 +50,7 @@ export function addFilterOptionsToFields({
       field.type === 'group'
     ) {
       addFilterOptionsToFields({
+        config,
         fields: field.fields,
         tenantEnabledCollectionSlugs,
         tenantEnabledGlobalSlugs,
@@ -55,18 +58,28 @@ export function addFilterOptionsToFields({
     }
 
     if (field.type === 'blocks') {
-      field.blocks.forEach((block) => {
-        addFilterOptionsToFields({
-          fields: block.fields,
-          tenantEnabledCollectionSlugs,
-          tenantEnabledGlobalSlugs,
-        })
+      field.blocks.forEach((_block) => {
+        const block =
+          typeof _block === 'string'
+            ? // TODO: iterate over blocks mapped to block slug in v4, or pass through payload.blocks
+              config?.blocks?.find((b) => b.slug === _block)
+            : _block
+
+        if (block?.fields) {
+          addFilterOptionsToFields({
+            config,
+            fields: block.fields,
+            tenantEnabledCollectionSlugs,
+            tenantEnabledGlobalSlugs,
+          })
+        }
       })
     }
 
     if (field.type === 'tabs') {
       field.tabs.forEach((tab) => {
         addFilterOptionsToFields({
+          config,
           fields: tab.fields,
           tenantEnabledCollectionSlugs,
           tenantEnabledGlobalSlugs,

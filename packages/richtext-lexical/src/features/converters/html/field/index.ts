@@ -1,5 +1,5 @@
 import type { SerializedEditorState } from 'lexical'
-import type { Field, FieldAffectingData, RichTextField } from 'payload'
+import type { Field, FieldAffectingData, PayloadRequest, RichTextField } from 'payload'
 
 import type { SanitizedServerEditorConfig } from '../../../../lexical/config/types.js'
 import type { AdapterProps, LexicalRichTextAdapter } from '../../../../types.js'
@@ -88,6 +88,7 @@ function findFieldPathAndSiblingFields(
   fields: Field[],
   path: string[],
   field: FieldAffectingData,
+  req?: PayloadRequest,
 ): {
   path: string[]
   siblingFields: Field[]
@@ -121,12 +122,15 @@ function findFieldPathAndSiblingFields(
         }
       }
     } else if ('blocks' in curField) {
-      for (const block of curField.blocks) {
+      for (const _block of curField.blocks) {
+        const block = typeof _block === 'string' ? req?.payload.blocks[_block] : _block
+
         if (block?.fields?.length) {
           const result = findFieldPathAndSiblingFields(
             block.fields,
             [...path, curField.name, block.slug],
             field,
+            req,
           )
           if (result) {
             return result
@@ -174,7 +178,7 @@ export const lexicalHTML: (
         }) => {
           const fields = collection ? collection.fields : global!.fields
 
-          const foundSiblingFields = findFieldPathAndSiblingFields(fields, [], field)
+          const foundSiblingFields = findFieldPathAndSiblingFields(fields, [], field, req)
 
           if (!foundSiblingFields) {
             throw new Error(

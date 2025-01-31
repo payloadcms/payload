@@ -12,8 +12,10 @@ export const PostsCollection: CollectionConfig = {
       name: 'title',
       type: 'text',
     },
+    {
+      name: 'blocks',
+      type: 'blocks',
+      blocks: ['ConfigBlockTest'],
+    },
   ],
-  versions: {
-    drafts: true,
-  },
 }

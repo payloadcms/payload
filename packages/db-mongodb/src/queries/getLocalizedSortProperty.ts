@@ -65,7 +65,10 @@ export const getLocalizedSortProperty = ({
     }
 
     if (matchedField.type === 'blocks') {
-      nextFields = matchedField.blocks.reduce((flattenedBlockFields, block) => {
+      nextFields = matchedField.blocks.reduce((flattenedBlockFields, _block) => {
+        // TODO: iterate over blocks mapped to block slug in v4, or pass through payload.blocks
+        const block =
+          typeof _block === 'string' ? config.blocks.find((b) => b.slug === _block) : _block
         return [
           ...flattenedBlockFields,
           ...block.flattenedFields.filter(

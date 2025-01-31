@@ -3,7 +3,6 @@ import type { IndexOptions, Schema, SchemaOptions, SchemaTypeOptions } from 'mon
 import mongoose from 'mongoose'
 import {
   type ArrayField,
-  type Block,
   type BlocksField,
   type CheckboxField,
   type CodeField,
@@ -194,10 +193,12 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       [field.name]: localizeSchema(field, fieldSchema, payload.config.localization),
     })
 
-    field.blocks.forEach((blockItem: Block) => {
+    field.blocks.forEach((blockItem) => {
       const blockSchema = new mongoose.Schema({}, { _id: false, id: false })
 
-      blockItem.fields.forEach((blockField) => {
+      const block = typeof blockItem === 'string' ? payload.config.blocks[blockItem] : blockItem
+
+      block.fields.forEach((blockField) => {
         const addFieldSchema: FieldSchemaGenerator = fieldToSchemaMap[blockField.type]
         if (addFieldSchema) {
           addFieldSchema(blockField, blockSchema, payload, buildSchemaOptions)
@@ -207,11 +208,11 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
       if (field.localized && payload.config.localization) {
         payload.config.localization.localeCodes.forEach((localeCode) => {
           // @ts-expect-error Possible incorrect typing in mongoose types, this works
-          schema.path(`${field.name}.${localeCode}`).discriminator(blockItem.slug, blockSchema)
+          schema.path(`${field.name}.${localeCode}`).discriminator(block.slug, blockSchema)
         })
       } else {
         // @ts-expect-error Possible incorrect typing in mongoose types, this works
-        schema.path(field.name).discriminator(blockItem.slug, blockSchema)
+        schema.path(field.name).discriminator(block.slug, blockSchema)
       }
     })
   },

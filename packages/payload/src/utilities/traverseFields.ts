@@ -1,15 +1,18 @@
-import type { ArrayField, BlocksField, Field, TabAsField } from '../fields/config/types.js'
+import type { SanitizedConfig } from '../config/types.js'
+import type { ArrayField, Block, BlocksField, Field, TabAsField } from '../fields/config/types.js'
 
 import { fieldHasSubFields } from '../fields/config/types.js'
 
 const traverseArrayOrBlocksField = ({
   callback,
+  config,
   data,
   field,
   fillEmpty,
   parentRef,
 }: {
   callback: TraverseFieldsCallback
+  config: SanitizedConfig
   data: Record<string, unknown>[]
   field: ArrayField | BlocksField
   fillEmpty: boolean
@@ -17,26 +20,32 @@ const traverseArrayOrBlocksField = ({
 }) => {
   if (fillEmpty) {
     if (field.type === 'array') {
-      traverseFields({ callback, fields: field.fields, parentRef })
+      traverseFields({ callback, config, fields: field.fields, parentRef })
     }
     if (field.type === 'blocks') {
-      field.blocks.forEach((block) => {
-        traverseFields({ callback, fields: block.fields, parentRef })
-      })
+      for (const _block of field.blocks) {
+        // TODO: iterate over blocks mapped to block slug in v4, or pass through payload.blocks
+        const block =
+          typeof _block === 'string' ? config.blocks.find((b) => b.slug === _block) : _block
+        traverseFields({ callback, config, fields: block.fields, parentRef })
+      }
     }
     return
   }
   for (const ref of data) {
     let fields: Field[]
     if (field.type === 'blocks' && typeof ref?.blockType === 'string') {
-      const block = field.blocks.find((block) => block.slug === ref.blockType)
+      // TODO: iterate over blocks mapped to block slug in v4, or pass through payload.blocks
+      const block = [...config.blocks, ...field.blocks].find(
+        (block) => typeof block !== 'string' && block.slug === ref.blockType,
+      ) as Block | undefined
       fields = block?.fields
     } else if (field.type === 'array') {
       fields = field.fields
     }
 
     if (fields) {
-      traverseFields({ callback, fields, fillEmpty, parentRef, ref })
+      traverseFields({ callback, config, fields, fillEmpty, parentRef, ref })
     }
   }
 }
@@ -62,6 +71,7 @@ export type TraverseFieldsCallback = (args: {
 
 type TraverseFieldsArgs = {
   callback: TraverseFieldsCallback
+  config: SanitizedConfig
   fields: (Field | TabAsField)[]
   fillEmpty?: boolean
   parentRef?: Record<string, unknown> | unknown
@@ -79,6 +89,7 @@ type TraverseFieldsArgs = {
  */
 export const traverseFields = ({
   callback,
+  config,
   fields,
   fillEmpty = true,
   parentRef = {},
@@ -125,6 +136,7 @@ export const traverseFields = ({
               if (tabRef[key] && typeof tabRef[key] === 'object') {
                 traverseFields({
                   callback,
+                  config,
                   fields: tab.fields,
                   fillEmpty,
                   parentRef: currentParentRef,
@@ -150,6 +162,7 @@ export const traverseFields = ({
 
         traverseFields({
           callback,
+          config,
           fields: tab.fields,
           fillEmpty,
           parentRef: currentParentRef,
@@ -191,6 +204,7 @@ export const traverseFields = ({
           if (currentRef[key]) {
             traverseFields({
               callback,
+              config,
               fields: field.fields,
               fillEmpty,
               parentRef: currentParentRef,
@@ -219,6 +233,7 @@ export const traverseFields = ({
 
             traverseArrayOrBlocksField({
               callback,
+              config,
               data: localeData,
               field,
               fillEmpty,
@@ -228,6 +243,7 @@ export const traverseFields = ({
         } else if (Array.isArray(currentRef)) {
           traverseArrayOrBlocksField({
             callback,
+            config,
             data: currentRef as Record<string, unknown>[],
             field,
             fillEmpty,
@@ -237,6 +253,7 @@ export const traverseFields = ({
       } else if (currentRef && typeof currentRef === 'object' && 'fields' in field) {
         traverseFields({
           callback,
+          config,
           fields: field.fields,
           fillEmpty,
           parentRef: currentParentRef,

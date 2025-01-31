@@ -875,7 +875,7 @@ export type Config = {
   }
   /** Custom Payload bin scripts can be injected via the config. */
   bin?: BinScriptConfig[]
-  blocks?: Record<string, MarkOptional<Block, 'slug'>>
+  blocks?: Block[]
   /**
    * Manage the datamodel of your application
    *
@@ -1131,7 +1131,7 @@ export type Config = {
 }
 
 export type SanitizedConfig = {
-  blocks?: Record<string, FlattenedBlock>
+  blocks?: FlattenedBlock[]
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */
   editor?: RichTextAdapter<any, any, any>
