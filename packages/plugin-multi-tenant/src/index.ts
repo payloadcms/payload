@@ -128,15 +128,17 @@ export const multiTenantPlugin =
       if (collection.slug === tenantsCollectionSlug) {
         tenantCollection = collection
 
-        /**
-         * Add access control constraint to tenants collection
-         * - constrains access a users assigned tenants
-         */
-        addCollectionAccess({
-          collection,
-          fieldName: 'id',
-          userHasAccessToAllTenants,
-        })
+        if (pluginConfig.useTenantsCollectionAccess !== false) {
+          /**
+           * Add access control constraint to tenants collection
+           * - constrains access a users assigned tenants
+           */
+          addCollectionAccess({
+            collection,
+            fieldName: 'id',
+            userHasAccessToAllTenants,
+          })
+        }
 
         if (pluginConfig.cleanupAfterTenantDelete !== false) {
           /**

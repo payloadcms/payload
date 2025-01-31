@@ -121,6 +121,10 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
   userHasAccessToAllTenants?: (
     user: ConfigTypes extends { user: unknown } ? ConfigTypes['user'] : User,
   ) => boolean
+  /**
+   * Opt out of adding access constraints to the tenants collection
+   */
+  useTenantsCollectionAccess?: boolean
 }
 
 export type Tenant<IDType = number | string> = {

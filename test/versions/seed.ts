@@ -122,10 +122,16 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
 
   const diffDoc = await _payload.create({
     collection: diffCollectionSlug,
+    locale: 'en',
     data: {
       array: [
         {
           textInArray: 'textInArray',
+        },
+      ],
+      arrayLocalized: [
+        {
+          textInArrayLocalized: 'textInArrayLocalized',
         },
       ],
       blocks: [
@@ -164,10 +170,16 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
   const updatedDiffDoc = await _payload.update({
     id: diffDoc.id,
     collection: diffCollectionSlug,
+    locale: 'en',
     data: {
       array: [
         {
           textInArray: 'textInArray2',
+        },
+      ],
+      arrayLocalized: [
+        {
+          textInArrayLocalized: 'textInArrayLocalized2',
         },
       ],
       blocks: [

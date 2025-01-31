@@ -637,7 +637,12 @@ export const Form: React.FC<FormProps> = (props) => {
   useEffect(() => {
     if (initialState) {
       contextRef.current = { ...initContextState } as FormContextType
-      dispatchFields({ type: 'REPLACE_STATE', optimize: false, state: initialState })
+      dispatchFields({
+        type: 'REPLACE_STATE',
+        optimize: false,
+        sanitize: true,
+        state: initialState,
+      })
     }
   }, [initialState, dispatchFields])
 

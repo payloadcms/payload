@@ -282,15 +282,13 @@ const buildVersionField = ({
     }
   } // At this point, we are dealing with a `row`, etc
   else if ('fields' in field) {
-    if (field.type === 'array') {
-      if (!Array.isArray(versionValue)) {
-        throw new Error('Expected versionValue to be an array')
-      }
+    if (field.type === 'array' && versionValue) {
+      const arrayValue = Array.isArray(versionValue) ? versionValue : []
       baseVersionField.rows = []
 
-      for (let i = 0; i < versionValue.length; i++) {
+      for (let i = 0; i < arrayValue.length; i++) {
         const comparisonRow = comparisonValue?.[i] || {}
-        const versionRow = versionValue?.[i] || {}
+        const versionRow = arrayValue?.[i] || {}
         baseVersionField.rows[i] = buildVersionFields({
           clientSchemaMap,
           comparisonSiblingData: comparisonRow,
@@ -329,13 +327,11 @@ const buildVersionField = ({
   } else if (field.type === 'blocks') {
     baseVersionField.rows = []
 
-    if (!Array.isArray(versionValue)) {
-      throw new Error('Expected versionValue to be an array')
-    }
+    const blocksValue = Array.isArray(versionValue) ? versionValue : []
 
-    for (let i = 0; i < versionValue.length; i++) {
+    for (let i = 0; i < blocksValue.length; i++) {
       const comparisonRow = comparisonValue?.[i] || {}
-      const versionRow = versionValue[i] || {}
+      const versionRow = blocksValue[i] || {}
       const versionBlock = field.blocks.find((block) => block.slug === versionRow.blockType)
 
       let fields = []
