@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "3.19.0",
+  "version": "3.20.0",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -87,13 +87,14 @@
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "busboy": "^1.6.0",
+    "dequal": "2.0.3",
     "file-type": "19.3.0",
     "graphql-http": "^1.22.0",
     "graphql-playground-html": "1.6.30",
     "http-status": "2.1.0",
     "path-to-regexp": "6.3.0",
     "qs-esm": "7.0.2",
-    "react-diff-viewer-continued": "3.2.6",
+    "react-diff-viewer-continued": "4.0.4",
     "sass": "1.77.4",
     "sonner": "^1.7.0",
     "uuid": "10.0.0"

@@ -1,16 +1,15 @@
 'use client'
 import type { I18nClient } from '@payloadcms/translations'
-import type { OptionObject, SelectField, SelectFieldClient } from 'payload'
+import type { OptionObject, SelectField, SelectFieldDiffClientComponent } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
-import type { DiffComponentProps } from '../types.js'
-
 import Label from '../../Label/index.js'
+import './index.scss'
 import { diffStyles } from '../styles.js'
 import { DiffViewer } from './DiffViewer/index.js'
-import './index.scss'
 
 const baseClass = 'select-diff'
 
@@ -45,30 +44,45 @@ const getTranslatedOptions = (
   return typeof options === 'string' ? options : getTranslation(options.label, i18n)
 }
 
-export const Select: React.FC<DiffComponentProps<SelectFieldClient>> = ({
-  comparison,
+export const Select: SelectFieldDiffClientComponent = ({
+  comparisonValue,
   diffMethod,
   field,
-  i18n,
   locale,
-  version,
+  versionValue,
 }) => {
+  const { i18n } = useTranslation()
+
   let placeholder = ''
 
-  if (version === comparison) {
+  if (versionValue == comparisonValue) {
     placeholder = `[${i18n.t('general:noValue')}]`
   }
 
   const options = 'options' in field && field.options
 
   const comparisonToRender =
-    typeof comparison !== 'undefined'
-      ? getTranslatedOptions(getOptionsToRender(comparison, options, field.hasMany), i18n)
+    typeof comparisonValue !== 'undefined'
+      ? getTranslatedOptions(
+          getOptionsToRender(
+            typeof comparisonValue === 'string' ? comparisonValue : JSON.stringify(comparisonValue),
+            options,
+            field.hasMany,
+          ),
+          i18n,
+        )
       : placeholder
 
   const versionToRender =
-    typeof version !== 'undefined'
-      ? getTranslatedOptions(getOptionsToRender(version, options, field.hasMany), i18n)
+    typeof versionValue !== 'undefined'
+      ? getTranslatedOptions(
+          getOptionsToRender(
+            typeof versionValue === 'string' ? versionValue : JSON.stringify(versionValue),
+            options,
+            field.hasMany,
+          ),
+          i18n,
+        )
       : placeholder
 
   return (

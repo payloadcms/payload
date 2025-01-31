@@ -30,11 +30,12 @@ type Args = {
   global: null | SanitizedGlobalConfig
   locale: null | string
   overrideAccess: boolean
-  path: (number | string)[]
+  parentIndexPath: string
+  parentPath: string
+  parentSchemaPath: string
   populate?: PopulateType
   populationPromises: Promise<void>[]
   req: PayloadRequest
-  schemaPath: string[]
   select?: SelectType
   selectMode?: SelectMode
   showHiddenFields: boolean
@@ -58,11 +59,12 @@ export const traverseFields = ({
   global,
   locale,
   overrideAccess,
-  path,
+  parentIndexPath,
+  parentPath,
+  parentSchemaPath,
   populate,
   populationPromises,
   req,
-  schemaPath,
   select,
   selectMode,
   showHiddenFields,
@@ -88,8 +90,9 @@ export const traverseFields = ({
         global,
         locale,
         overrideAccess,
-        parentPath: path,
-        parentSchemaPath: schemaPath,
+        parentIndexPath,
+        parentPath,
+        parentSchemaPath,
         populate,
         populationPromises,
         req,

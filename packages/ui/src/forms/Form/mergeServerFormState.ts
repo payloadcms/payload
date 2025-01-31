@@ -22,29 +22,30 @@ export const mergeServerFormState = ({
   existingState,
   incomingState,
 }: Args): { changed: boolean; newState: FormState } => {
-  const serverPropsToAccept = [
-    'passesCondition',
-    'valid',
-    'errorMessage',
-    'rows',
-    'customComponents',
-    'requiresRender',
-  ]
-
-  if (acceptValues) {
-    serverPropsToAccept.push('value')
-    serverPropsToAccept.push('initialValue')
-  }
-
   let changed = false
 
   const newState = {}
 
   if (existingState) {
-    Object.entries(existingState).forEach(([path, newFieldState]) => {
+    const serverPropsToAccept = [
+      'passesCondition',
+      'valid',
+      'errorMessage',
+      'rows',
+      'customComponents',
+      'requiresRender',
+    ]
+
+    if (acceptValues) {
+      serverPropsToAccept.push('value')
+      serverPropsToAccept.push('initialValue')
+    }
+
+    for (const [path, newFieldState] of Object.entries(existingState)) {
       if (!incomingState[path]) {
-        return
+        continue
       }
+      let fieldChanged = false
 
       /**
        * Handle error paths
@@ -66,6 +67,7 @@ export const mergeServerFormState = ({
       if (incomingState[path]?.filterOptions || newFieldState.filterOptions) {
         if (!dequal(incomingState[path]?.filterOptions, newFieldState.filterOptions)) {
           changed = true
+          fieldChanged = true
           newFieldState.filterOptions = incomingState[path].filterOptions
         }
       }
@@ -76,6 +78,7 @@ export const mergeServerFormState = ({
       serverPropsToAccept.forEach((prop) => {
         if (!dequal(incomingState[path]?.[prop], newFieldState[prop])) {
           changed = true
+          fieldChanged = true
           if (!(prop in incomingState[path])) {
             // Regarding excluding the customComponents prop from being deleted: the incoming state might not have been rendered, as rendering components for every form onchange is expensive.
             // Thus, we simply re-use the initial render state
@@ -88,18 +91,25 @@ export const mergeServerFormState = ({
         }
       })
 
+      if (newFieldState.valid !== false) {
+        newFieldState.valid = true
+      }
+      if (newFieldState.passesCondition !== false) {
+        newFieldState.passesCondition = true
+      }
+
       // Conditions don't work if we don't memcopy the new state, as the object references would otherwise be the same
-      newState[path] = { ...newFieldState }
-    })
+      newState[path] = fieldChanged ? { ...newFieldState } : newFieldState
+    }
 
     // Now loop over values that are part of incoming state but not part of existing state, and add them to the new state.
     // This can happen if a new array row was added. In our local state, we simply add out stubbed `array` and `array.[index].id` entries to the local form state.
     // However, all other array sub-fields are not added to the local state - those will be added by the server and may be incoming here.
 
-    for (const [path, newFieldState] of Object.entries(incomingState)) {
+    for (const [path, field] of Object.entries(incomingState)) {
       if (!existingState[path]) {
         changed = true
-        newState[path] = newFieldState
+        newState[path] = field
       }
     }
   }

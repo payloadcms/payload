@@ -1,32 +1,34 @@
 'use client'
+import type { GroupFieldDiffClientComponent } from 'payload'
+
 import { getTranslation } from '@payloadcms/translations'
-import React from 'react'
 
 import './index.scss'
 
-import type { DiffComponentProps } from '../types.js'
+import { useTranslation } from '@payloadcms/ui'
+import React from 'react'
 
+import { useSelectedLocales } from '../../../Default/SelectedLocalesContext.js'
 import { DiffCollapser } from '../../DiffCollapser/index.js'
-import { RenderFieldsToDiff } from '../../index.js'
+import { RenderVersionFieldsToDiff } from '../../RenderVersionFieldsToDiff.js'
 
 const baseClass = 'group-diff'
 
-export const Group: React.FC<DiffComponentProps> = ({
-  comparison,
-  diffComponents,
+export const Group: GroupFieldDiffClientComponent = ({
+  baseVersionField,
+  comparisonValue,
   field,
-  fieldPermissions,
-  fields,
-  i18n,
   locale,
-  locales,
-  version,
+  versionValue,
 }) => {
+  const { i18n } = useTranslation()
+  const { selectedLocales } = useSelectedLocales()
+
   return (
     <div className={baseClass}>
       <DiffCollapser
-        comparison={comparison}
-        fields={fields}
+        comparison={comparisonValue}
+        fields={field.fields}
         label={
           'label' in field &&
           field.label &&
@@ -37,18 +39,10 @@ export const Group: React.FC<DiffComponentProps> = ({
             </span>
           )
         }
-        locales={locales}
-        version={version}
+        locales={selectedLocales}
+        version={versionValue}
       >
-        <RenderFieldsToDiff
-          comparison={comparison}
-          diffComponents={diffComponents}
-          fieldPermissions={fieldPermissions}
-          fields={fields}
-          i18n={i18n}
-          locales={locales}
-          version={version}
-        />
+        <RenderVersionFieldsToDiff versionFields={baseVersionField.fields} />
       </DiffCollapser>
     </div>
   )

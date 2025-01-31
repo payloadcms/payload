@@ -239,7 +239,7 @@ export const findOperation = async <
           doc._isLocked = !!lockedDoc
           doc._userEditing = lockedDoc ? lockedDoc?.user?.value : null
         }
-      } catch (error) {
+      } catch (_err) {
         for (const doc of result.docs) {
           doc._isLocked = false
           doc._userEditing = null

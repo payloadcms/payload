@@ -86,6 +86,33 @@ describe('Block fields', () => {
     )
   })
 
+  test('should reset search state in blocks drawer on re-open', async () => {
+    await page.goto(url.create)
+    const addButton = page.locator('#field-blocks > .blocks-field__drawer-toggler')
+    await expect(addButton).toContainText('Add Block')
+    await addButton.click()
+
+    const blocksDrawer = page.locator('[id^=drawer_1_blocks-drawer-]')
+    await expect(blocksDrawer).toBeVisible()
+
+    const searchInput = page.locator('.block-search__input')
+    await searchInput.fill('Number')
+
+    // select the first block in the drawer
+    const firstBlockSelector = blocksDrawer
+      .locator('.blocks-drawer__blocks .blocks-drawer__block')
+      .first()
+
+    await expect(firstBlockSelector).toContainText('Number')
+
+    await page.locator('.drawer__header__close').click()
+    await addButton.click()
+
+    await expect(blocksDrawer).toBeVisible()
+    await expect(searchInput).toHaveValue('')
+    await expect(firstBlockSelector).toContainText('Content')
+  })
+
   test('should open blocks drawer from block row and add below', async () => {
     await page.goto(url.create)
     const firstRow = page.locator('#field-blocks #blocks-row-0')

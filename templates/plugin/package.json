@@ -103,5 +103,10 @@
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts"
   },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "sharp"
+    ]
+  },
   "registry": "https://registry.npmjs.org/"
 }

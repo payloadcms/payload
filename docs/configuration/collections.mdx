@@ -32,7 +32,7 @@ export default buildConfig({
 
 ## Config Options
 
-It's often best practice to write your Collections in separate files and then import them into the main [Payload Config](../overview).
+It's often best practice to write your Collections in separate files and then import them into the main [Payload Config](./overview).
 
 Here is what a simple Collection Config might look like:
 
@@ -95,7 +95,7 @@ Fields define the schema of the Documents within a Collection. To learn more, go
 
 ## Admin Options
 
-The behavior of Collections within the [Admin Panel](../admin/overview) can be fully customized to fit the needs of your application. This includes grouping or hiding their navigation links, adding [Custom Components](./components), selecting which fields to display in the List View, and more.
+The behavior of Collections within the [Admin Panel](../admin/overview) can be fully customized to fit the needs of your application. This includes grouping or hiding their navigation links, adding [Custom Components](../admin/components), selecting which fields to display in the List View, and more.
 
 To configure Admin Options for Collections, use the `admin` property in your Collection Config:
 
@@ -124,7 +124,7 @@ The following options are available:
 | **`enableRichTextLink`**         | The [Rich Text](../fields/rich-text) field features a `Link` element which allows for users to automatically reference related documents within their rich text. Set to `true` by default.                                   |
 | **`enableRichTextRelationship`** | The [Rich Text](../fields/rich-text) field features a `Relationship` element which allows for users to automatically reference related documents within their rich text. Set to `true` by default.                           |
 | **`meta`**                       | Page metadata overrides to apply to this Collection within the Admin Panel. [More details](../admin/metadata).                                                                                                                      |
-| **`preview`**                    | Function to generate preview URLs within the Admin Panel that can point to your app. [More details](#preview).                                                                                                               |
+| **`preview`**                    | Function to generate preview URLs within the Admin Panel that can point to your app. [More details](../admin/preview).                                                                                                               |
 | **`livePreview`**                | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).                                                                                                |
 | **`components`**                 | Swap in your own React components to be used within this Collection. [More details](#custom-components).                                                                                                                     |
 | **`listSearchableFields`**       | Specify which fields should be searched in the List search view. [More details](#list-searchable-fields).                                                                                                                    |
@@ -162,58 +162,13 @@ The following options are available:
 | **`edit.SaveButton`**      | Replace the default Save Button with a Custom Component. [Drafts](../versions/drafts) must be disabled.                                    |
 | **`edit.SaveDraftButton`** | Replace the default Save Draft Button with a Custom Component. [Drafts](../versions/drafts) must be enabled and autosave must be disabled. |
 | **`edit.PublishButton`**   | Replace the default Publish Button with a Custom Component. [Drafts](../versions/drafts) must be enabled.                                  |
-| **`edit.PreviewButton`**   | Replace the default Preview Button with a Custom Component. [Preview](#preview) must be enabled.                                           |
+| **`edit.PreviewButton`**   | Replace the default Preview Button with a Custom Component. [Preview](../admin/preview) must be enabled.                                           |
 | **`edit.Upload`**          | Replace the default Upload component with a Custom Component. [Upload](../upload/overview) must be enabled.                                |
 | **`views`**                | Override or create new views within the Admin Panel. [More details](../admin/views).                                                              |
 
 <Banner type="success">
   **Note:**
   For details on how to build Custom Components, see [Building Custom Components](../admin/components#building-custom-components).
-</Banner>
-
-### Preview
-
-It is possible to display a Preview Button within the Edit View of the Admin Panel. This will allow editors to visit the frontend of your app the corresponds to the document they are actively editing. This way they can preview the latest, potentially unpublished changes.
-
-To configure the Preview Button, set the `admin.preview` property to a function in your Collection Config:
-
-```ts
-import type { CollectionConfig } from 'payload'
-
-export const Posts: CollectionConfig = {
-  // ...
-  admin: {
-    // highlight-start
-    preview: (doc, { locale }) => {
-      if (doc?.slug) {
-        return `/${doc.slug}?locale=${locale}`
-      }
-
-      return null
-    },
-    // highlight-end
-  },
-}
-```
-
-The `preview` property resolves to a string that points to your front-end application with additional URL parameters. This can be an absolute URL or a relative path.
-
-The preview function receives two arguments:
-
-| Argument | Description |
-| --- | --- |
-| **`doc`** | The Document being edited. |
-| **`ctx`** | An object containing `locale`, `token`, and `req` properties. The `token` is the currently logged-in user's JWT. |
-
-If your application requires a fully qualified URL, such as within deploying to Vercel Preview Deployments, you can use the `req` property to build this URL:
-
-```ts
-preview: (doc, { req }) => `${req.protocol}//${req.host}/${doc.slug}` // highlight-line
-```
-
-<Banner type="success">
-  **Note:**
-  For fully working example of this, check of the official [Draft Preview Example](https://github.com/payloadcms/payload/tree/main/examples/draft-preview) in the [Examples Directory](https://github.com/payloadcms/payload/tree/main/examples).
 </Banner>
 
 ### Pagination

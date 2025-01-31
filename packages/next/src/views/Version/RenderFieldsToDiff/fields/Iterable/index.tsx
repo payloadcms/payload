@@ -1,31 +1,34 @@
 'use client'
-import type { ClientField } from 'payload'
+
+import type { FieldDiffClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { useTranslation } from '@payloadcms/ui'
+
+import './index.scss'
+
 import { fieldIsArrayType, fieldIsBlockType } from 'payload/shared'
 import React from 'react'
 
-import type { DiffComponentProps } from '../types.js'
-
+import { useSelectedLocales } from '../../../Default/SelectedLocalesContext.js'
 import { DiffCollapser } from '../../DiffCollapser/index.js'
-import './index.scss'
-import { RenderFieldsToDiff } from '../../index.js'
+import { RenderVersionFieldsToDiff } from '../../RenderVersionFieldsToDiff.js'
 import { getFieldsForRowComparison } from '../../utilities/getFieldsForRowComparison.js'
 
 const baseClass = 'iterable-diff'
 
-export const Iterable: React.FC<DiffComponentProps> = ({
-  comparison,
-  diffComponents,
+export const Iterable: React.FC<FieldDiffClientProps> = ({
+  baseVersionField,
+  comparisonValue,
   field,
-  fieldPermissions,
-  i18n,
   locale,
-  locales,
-  version,
+  versionValue,
 }) => {
-  const versionRowCount = Array.isArray(version) ? version.length : 0
-  const comparisonRowCount = Array.isArray(comparison) ? comparison.length : 0
+  const { i18n } = useTranslation()
+  const { selectedLocales } = useSelectedLocales()
+
+  const versionRowCount = Array.isArray(versionValue) ? versionValue.length : 0
+  const comparisonRowCount = Array.isArray(comparisonValue) ? comparisonValue.length : 0
   const maxRows = Math.max(versionRowCount, comparisonRowCount)
 
   if (!fieldIsArrayType(field) && !fieldIsBlockType(field)) {
@@ -35,7 +38,7 @@ export const Iterable: React.FC<DiffComponentProps> = ({
   return (
     <div className={baseClass}>
       <DiffCollapser
-        comparison={comparison}
+        comparison={comparisonValue}
         field={field}
         isIterable
         label={
@@ -48,18 +51,20 @@ export const Iterable: React.FC<DiffComponentProps> = ({
             </span>
           )
         }
-        locales={locales}
-        version={version}
+        locales={selectedLocales}
+        version={versionValue}
       >
         {maxRows > 0 && (
           <div className={`${baseClass}__rows`}>
             {Array.from(Array(maxRows).keys()).map((row, i) => {
-              const versionRow = version?.[i] || {}
-              const comparisonRow = comparison?.[i] || {}
+              const versionRow = versionValue?.[i] || {}
+              const comparisonRow = comparisonValue?.[i] || {}
 
-              const fields: ClientField[] = getFieldsForRowComparison({
+              const { fields, versionFields } = getFieldsForRowComparison({
+                baseVersionField,
                 comparisonRow,
                 field,
+                row: i,
                 versionRow,
               })
 
@@ -72,18 +77,10 @@ export const Iterable: React.FC<DiffComponentProps> = ({
                     comparison={comparisonRow}
                     fields={fields}
                     label={rowLabel}
-                    locales={locales}
+                    locales={selectedLocales}
                     version={versionRow}
                   >
-                    <RenderFieldsToDiff
-                      comparison={comparisonRow}
-                      diffComponents={diffComponents}
-                      fieldPermissions={fieldPermissions}
-                      fields={fields}
-                      i18n={i18n}
-                      locales={locales}
-                      version={versionRow}
-                    />
+                    <RenderVersionFieldsToDiff versionFields={versionFields} />
                   </DiffCollapser>
                 </div>
               )

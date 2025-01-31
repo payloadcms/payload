@@ -25,6 +25,18 @@ This plugin sets up multi-tenancy for your application from within your [Admin P
 - Adds a `tenant` field to each specified collection
 - Adds a tenant selector to the admin panel, allowing you to switch between tenants
 - Filters list view results by selected tenant
+- Filters relationship fields by selected tenant
+- Ability to create "global" like collections, 1 doc per tenant
+- Automatically assign a tenant to new documents
+
+<Banner type="error">
+  **Warning**
+
+  By default this plugin cleans up documents when a tenant is deleted. You should ensure you have 
+  strong access control on your tenants collection to prevent deletions by unauthorized users.
+
+  You can disabled this behavior by setting `cleanupAfterTenantDelete` to `false` in the plugin options.
+</Banner>
 
 ## Installation
 
@@ -40,7 +52,7 @@ The plugin accepts an object with the following properties:
 
 ```ts
 type MultiTenantPluginConfig<ConfigTypes = unknown> = {
-  /**
+/**
    * After a tenant is deleted, the plugin will attempt to clean up related documents
    * - removing documents with the tenant ID
    * - removing the tenant from users
@@ -144,8 +156,12 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    * Useful for super-admin type users
    */
   userHasAccessToAllTenants?: (
-    user: ConfigTypes extends { user } ? ConfigTypes['user'] : User,
+    user: ConfigTypes extends { user: unknown } ? ConfigTypes['user'] : User,
   ) => boolean
+  /**
+   * Opt out of adding access constraints to the tenants collection
+   */
+  useTenantsCollectionAccess?: boolean
 }
 ```
 

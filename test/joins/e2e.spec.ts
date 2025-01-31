@@ -439,4 +439,11 @@ test.describe('Join Field', () => {
     await expect(rows).toHaveCount(1)
     await expect(joinField.locator('.cell-canRead')).not.toContainText('false')
   })
+
+  test('should render create-first-user with when users collection has a join field and hide it', async () => {
+    await payload.delete({ collection: 'users', where: {} })
+    const url = new AdminUrlUtil(serverURL, 'users')
+    await page.goto(url.admin + '/create-first-user')
+    await expect(page.locator('.field-type.join')).toBeHidden()
+  })
 })

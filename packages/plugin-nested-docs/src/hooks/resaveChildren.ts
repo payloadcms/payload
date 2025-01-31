@@ -22,64 +22,91 @@ type ResaveArgs = {
 
 const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs) => {
   const parentSlug = pluginConfig?.parentFieldSlug || 'parent'
-  const parentDocIsPublished = doc._status === 'published'
-  const children = await req.payload.find({
-    collection: collection.slug,
-    depth: 0,
-    draft: true,
-    limit: 0,
-    locale: req.locale,
-    req,
-    where: {
-      [parentSlug]: {
-        equals: doc.id,
-      },
-    },
-  })
-
   const breadcrumbSlug = pluginConfig.breadcrumbsFieldSlug || 'breadcrumbs'
 
-  try {
-    for (const child of children.docs) {
-      const childIsPublished =
-        typeof collection.versions === 'object' &&
-        collection.versions.drafts &&
-        child._status === 'published'
-
-      if (!parentDocIsPublished && childIsPublished) {
-        continue
-      }
-
-      await req.payload.update({
-        id: child.id,
-        collection: collection.slug,
-        data: {
-          ...child,
-          [breadcrumbSlug]: await populateBreadcrumbs(req, pluginConfig, collection, child),
+  if (draft) {
+    // If the parent is a draft, don't resave children
+    return
+  } else {
+    const initialDraftChildren = await req.payload.find({
+      collection: collection.slug,
+      depth: 0,
+      draft: true,
+      limit: 0,
+      locale: req.locale,
+      req,
+      where: {
+        [parentSlug]: {
+          equals: doc.id,
         },
-        depth: 0,
-        draft: !childIsPublished,
-        locale: req.locale,
-        req,
-      })
-    }
-  } catch (err: unknown) {
-    req.payload.logger.error(
-      `Nested Docs plugin has had an error while re-saving a child document${
-        draft ? ' as draft' : ' as published'
-      }.`,
-    )
-    req.payload.logger.error(err)
+      },
+    })
 
-    // Use type assertion until we can use instanceof reliably with our Error types
-    if (
-      (err as ValidationError)?.name === 'ValidationError' &&
-      (err as ValidationError)?.data?.errors?.length
-    ) {
-      throw new APIError(
-        'Could not publish or save changes: One or more children are invalid.',
-        400,
-      )
+    const draftChildren = initialDraftChildren.docs.filter((child) => child._status === 'draft')
+
+    const publishedChildren = await req.payload.find({
+      collection: collection.slug,
+      depth: 0,
+      draft: false,
+      limit: 0,
+      locale: req.locale,
+      req,
+      where: {
+        [parentSlug]: {
+          equals: doc.id,
+        },
+      },
+    })
+
+    const childrenById = [...draftChildren, ...publishedChildren.docs].reduce((acc, child) => {
+      acc[child.id] = acc[child.id] || []
+      acc[child.id].push(child)
+      return acc
+    }, {})
+
+    const sortedChildren = Object.values(childrenById).flatMap((group: JsonObject[]) => {
+      return group.sort((a, b) => {
+        if (a.updatedAt !== b.updatedAt) {
+          return a.updatedAt > b.updatedAt ? 1 : -1
+        }
+        return a._status === 'published' ? 1 : -1
+      })
+    })
+
+    if (sortedChildren) {
+      try {
+        for (const child of sortedChildren) {
+          const isDraft = child._status !== 'published'
+
+          await req.payload.update({
+            id: child.id,
+            collection: collection.slug,
+            data: {
+              ...child,
+              [breadcrumbSlug]: await populateBreadcrumbs(req, pluginConfig, collection, child),
+            },
+            depth: 0,
+            draft: isDraft,
+            locale: req.locale,
+            req,
+          })
+        }
+      } catch (err: unknown) {
+        req.payload.logger.error(
+          `Nested Docs plugin encountered an error while re-saving a child document.`,
+        )
+        req.payload.logger.error(err)
+
+        if (
+          (err as ValidationError)?.name === 'ValidationError' &&
+          (err as ValidationError)?.data?.errors?.length
+        ) {
+          throw new APIError(
+            'Could not publish or save changes: One or more children are invalid.',
+            400,
+          )
+        }
+      }
     }
   }
 }
@@ -90,20 +117,10 @@ export const resaveChildren =
     await resave({
       collection,
       doc,
-      draft: true,
+      draft: doc._status === 'published' ? false : true,
       pluginConfig,
       req,
     })
-
-    if (doc._status === 'published') {
-      await resave({
-        collection,
-        doc,
-        draft: false,
-        pluginConfig,
-        req,
-      })
-    }
 
     return undefined
   }

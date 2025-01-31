@@ -12,7 +12,8 @@ import { withTenantListFilter } from './utilities/withTenantListFilter.js'
 const defaults = {
   tenantCollectionSlug: 'tenants',
   tenantFieldName: 'tenant',
-  userTenantsArrayFieldName: 'tenants',
+  tenantsArrayFieldName: 'tenants',
+  tenantsArrayTenantFieldName: 'tenant',
 }
 
 export const multiTenantPlugin =
@@ -34,6 +35,10 @@ export const multiTenantPlugin =
     const tenantsCollectionSlug = (pluginConfig.tenantsSlug =
       pluginConfig.tenantsSlug || defaults.tenantCollectionSlug)
     const tenantFieldName = pluginConfig?.tenantField?.name || defaults.tenantFieldName
+    const tenantsArrayFieldName =
+      pluginConfig?.tenantsArrayField?.arrayFieldName || defaults.tenantsArrayFieldName
+    const tenantsArrayTenantFieldName =
+      pluginConfig?.tenantsArrayField?.arrayTenantFieldName || defaults.tenantsArrayTenantFieldName
 
     /**
      * Add defaults for admin properties
@@ -80,12 +85,19 @@ export const multiTenantPlugin =
      * Add tenants array field to users collection
      */
     if (pluginConfig?.tenantsArrayField?.includeDefaultField !== false) {
-      adminUsersCollection.fields.push(tenantsArrayField(pluginConfig?.tenantsArrayField || {}))
+      adminUsersCollection.fields.push(
+        tenantsArrayField({
+          ...(pluginConfig?.tenantsArrayField || {}),
+          tenantsArrayFieldName,
+          tenantsArrayTenantFieldName,
+          tenantsCollectionSlug,
+        }),
+      )
     }
 
     addCollectionAccess({
       collection: adminUsersCollection,
-      fieldName: 'tenants.tenant',
+      fieldName: `${tenantsArrayFieldName}.${tenantsArrayTenantFieldName}`,
       userHasAccessToAllTenants,
     })
 
@@ -116,15 +128,17 @@ export const multiTenantPlugin =
       if (collection.slug === tenantsCollectionSlug) {
         tenantCollection = collection
 
-        /**
-         * Add access control constraint to tenants collection
-         * - constrains access a users assigned tenants
-         */
-        addCollectionAccess({
-          collection,
-          fieldName: 'id',
-          userHasAccessToAllTenants,
-        })
+        if (pluginConfig.useTenantsCollectionAccess !== false) {
+          /**
+           * Add access control constraint to tenants collection
+           * - constrains access a users assigned tenants
+           */
+          addCollectionAccess({
+            collection,
+            fieldName: 'id',
+            userHasAccessToAllTenants,
+          })
+        }
 
         if (pluginConfig.cleanupAfterTenantDelete !== false) {
           /**
@@ -136,7 +150,10 @@ export const multiTenantPlugin =
             collection,
             enabledSlugs: [...collectionSlugs, ...globalCollectionSlugs],
             tenantFieldName,
+            tenantsCollectionSlug,
             usersSlug: adminUsersCollection.slug,
+            usersTenantsArrayFieldName: tenantsArrayFieldName,
+            usersTenantsArrayTenantFieldName: tenantsArrayTenantFieldName,
           })
         }
       } else if (pluginConfig.collections?.[collection.slug]) {
@@ -153,6 +170,8 @@ export const multiTenantPlugin =
           fields: collection.fields,
           tenantEnabledCollectionSlugs: collectionSlugs,
           tenantEnabledGlobalSlugs: globalCollectionSlugs,
+          tenantFieldName,
+          tenantsCollectionSlug,
         })
 
         /**
@@ -180,6 +199,7 @@ export const multiTenantPlugin =
           collection.admin.baseListFilter = withTenantListFilter({
             baseListFilter: collection.admin?.baseListFilter,
             tenantFieldName,
+            tenantsCollectionSlug,
           })
         }
 

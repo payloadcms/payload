@@ -1,46 +1,43 @@
 'use client'
+import type { CollapsibleFieldDiffClientComponent } from 'payload'
+
 import { getTranslation } from '@payloadcms/translations'
+import { useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
-import type { DiffComponentProps } from '../types.js'
-
+import { useSelectedLocales } from '../../../Default/SelectedLocalesContext.js'
 import { DiffCollapser } from '../../DiffCollapser/index.js'
-import { RenderFieldsToDiff } from '../../index.js'
+import { RenderVersionFieldsToDiff } from '../../RenderVersionFieldsToDiff.js'
 
 const baseClass = 'collapsible-diff'
 
-export const Collapsible: React.FC<DiffComponentProps> = ({
-  comparison,
-  diffComponents,
+export const Collapsible: CollapsibleFieldDiffClientComponent = ({
+  baseVersionField,
+  comparisonValue,
   field,
-  fieldPermissions,
-  fields,
-  i18n,
-  locales,
-  version,
+  versionValue,
 }) => {
+  const { i18n } = useTranslation()
+  const { selectedLocales } = useSelectedLocales()
+
+  if (!baseVersionField.fields?.length) {
+    return null
+  }
+
   return (
     <div className={baseClass}>
       <DiffCollapser
-        comparison={comparison}
-        fields={fields}
+        comparison={comparisonValue}
+        fields={field.fields}
         label={
           'label' in field &&
           field.label &&
           typeof field.label !== 'function' && <span>{getTranslation(field.label, i18n)}</span>
         }
-        locales={locales}
-        version={version}
+        locales={selectedLocales}
+        version={versionValue}
       >
-        <RenderFieldsToDiff
-          comparison={comparison}
-          diffComponents={diffComponents}
-          fieldPermissions={fieldPermissions}
-          fields={fields}
-          i18n={i18n}
-          locales={locales}
-          version={version}
-        />
+        <RenderVersionFieldsToDiff versionFields={baseVersionField.fields} />
       </DiffCollapser>
     </div>
   )

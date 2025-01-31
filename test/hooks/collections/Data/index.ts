@@ -18,7 +18,6 @@ export const DataHooks: CollectionConfig = {
         return args
       },
     ],
-
     beforeChange: [
       ({ context, data, collection }) => {
         context['collection_beforeChange_collection'] = JSON.stringify(collection)
@@ -69,7 +68,6 @@ export const DataHooks: CollectionConfig = {
             return value
           },
         ],
-
         afterRead: [
           ({ collection, field, context }) => {
             return (
