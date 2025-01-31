@@ -266,6 +266,9 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       }
     }
 
+    // When versions are enabled, this is used to track mapping between blocks/arrays ObjectID to their numeric generated representation, then we use it for nested to arrays/blocks select hasMany in versions.
+    const arraysBlocksUUIDMap: Record<string, number | string> = {}
+
     for (const [blockName, blockRows] of Object.entries(blocksToInsert)) {
       const blockTableName = adapter.tableNameMap.get(`${tableName}_blocks_${blockName}`)
       insertedBlockRows[blockName] = await adapter.insert({
@@ -276,6 +279,12 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
       insertedBlockRows[blockName].forEach((row, i) => {
         blockRows[i].row = row
+        if (
+          typeof row._uuid === 'string' &&
+          (typeof row.id === 'string' || typeof row.id === 'number')
+        ) {
+          arraysBlocksUUIDMap[row._uuid] = row.id
+        }
       })
 
       const blockLocaleIndexMap: number[] = []
@@ -308,6 +317,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         arrays: blockRows.map(({ arrays }) => arrays),
         db,
         parentRows: insertedBlockRows[blockName],
+        uuidMap: arraysBlocksUUIDMap,
       })
     }
 
@@ -331,6 +341,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       arrays: [rowToInsert.arrays],
       db,
       parentRows: [insertedRow],
+      uuidMap: arraysBlocksUUIDMap,
     })
 
     // //////////////////////////////////
@@ -344,6 +355,14 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
           db,
           tableName: selectTableName,
           where: eq(selectTable.parent, insertedRow.id),
+        })
+      }
+
+      if (Object.keys(arraysBlocksUUIDMap).length > 0) {
+        tableRows.forEach((row: any) => {
+          if (row.parent in arraysBlocksUUIDMap) {
+            row.parent = arraysBlocksUUIDMap[row.parent]
+          }
         })
       }
 
