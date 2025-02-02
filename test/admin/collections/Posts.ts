@@ -13,6 +13,7 @@ export const Posts: CollectionConfig = {
     group: 'One',
     listSearchableFields: ['id', 'title', 'description', 'number'],
     components: {
+      beforeActions: ['/components/ResetColumns/index.js#ResetDefaultColumnsButton'],
       beforeListTable: [
         '/components/ResetColumns/index.js#ResetDefaultColumnsButton',
         {

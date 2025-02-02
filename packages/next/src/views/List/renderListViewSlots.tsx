@@ -42,6 +42,15 @@ export const renderListViewSlots = ({
     })
   }
 
+  if (collectionConfig.admin.components?.beforeActions) {
+    result.BeforeActions = RenderServerComponent({
+      clientProps,
+      Component: collectionConfig.admin.components.beforeActions,
+      importMap: payload.importMap,
+      serverProps,
+    })
+  }
+
   if (collectionConfig.admin.components?.beforeList) {
     result.BeforeList = RenderServerComponent({
       clientProps,

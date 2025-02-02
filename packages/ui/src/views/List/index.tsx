@@ -45,6 +45,7 @@ const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.
 export type ListViewSlots = {
   AfterList?: React.ReactNode
   AfterListTable?: React.ReactNode
+  BeforeActions?: React.ReactNode
   BeforeList?: React.ReactNode
   BeforeListTable?: React.ReactNode
   Description?: React.ReactNode
@@ -69,7 +70,8 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
   const {
     AfterList,
     AfterListTable,
-    beforeActions,
+    BeforeActions,
+    beforeActions: beforeActionsFromProps,
     BeforeList,
     BeforeListTable,
     collectionSlug,
@@ -171,6 +173,15 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
     }
   }, [setStepNav, labels, drawerDepth])
 
+  const beforeActions = [
+    ...(BeforeActions ? (Array.isArray(BeforeActions) ? BeforeActions : [BeforeActions]) : []),
+    ...(beforeActionsFromProps ?? []),
+  ]
+  const beforeActionsWithSelection =
+    enableRowSelections && typeof onBulkSelect === 'function'
+      ? [...beforeActions, <SelectMany key="select-many" onClick={onBulkSelect} />]
+      : beforeActions
+
   return (
     <Fragment>
       <TableColumnsProvider
@@ -207,13 +218,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                 t={t}
               />
               <ListControls
-                beforeActions={
-                  enableRowSelections && typeof onBulkSelect === 'function'
-                    ? beforeActions
-                      ? [...beforeActions, <SelectMany key="select-many" onClick={onBulkSelect} />]
-                      : [<SelectMany key="select-many" onClick={onBulkSelect} />]
-                    : beforeActions
-                }
+                beforeActions={beforeActionsWithSelection}
                 collectionConfig={collectionConfig}
                 collectionSlug={collectionSlug}
                 disableBulkDelete={disableBulkDelete}
@@ -281,14 +286,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                             label={getTranslation(collectionConfig.labels.plural, i18n)}
                           />
                           <div className={`${baseClass}__list-selection-actions`}>
-                            {enableRowSelections && typeof onBulkSelect === 'function'
-                              ? beforeActions
-                                ? [
-                                    ...beforeActions,
-                                    <SelectMany key="select-many" onClick={onBulkSelect} />,
-                                  ]
-                                : [<SelectMany key="select-many" onClick={onBulkSelect} />]
-                              : beforeActions}
+                            {beforeActionsWithSelection}
                             {!disableBulkEdit && (
                               <Fragment>
                                 <EditMany collection={collectionConfig} />
