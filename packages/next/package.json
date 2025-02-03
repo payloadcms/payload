@@ -100,10 +100,10 @@
     "uuid": "10.0.0"
   },
   "devDependencies": {
-    "@babel/cli": "7.25.9",
-    "@babel/core": "7.26.0",
-    "@babel/preset-env": "7.26.0",
-    "@babel/preset-react": "7.25.9",
+    "@babel/cli": "7.26.4",
+    "@babel/core": "7.26.7",
+    "@babel/preset-env": "7.26.7",
+    "@babel/preset-react": "7.26.3",
     "@babel/preset-typescript": "7.26.0",
     "@next/eslint-plugin-next": "15.1.5",
     "@payloadcms/eslint-config": "workspace:*",
@@ -111,12 +111,12 @@
     "@types/react": "19.0.1",
     "@types/react-dom": "19.0.1",
     "@types/uuid": "10.0.0",
-    "babel-plugin-react-compiler": "19.0.0-beta-df7b47d-20241124",
-    "esbuild": "0.24.0",
+    "babel-plugin-react-compiler": "19.0.0-beta-714736e-20250131",
+    "esbuild": "0.24.2",
     "esbuild-sass-plugin": "3.3.1",
-    "eslint-plugin-react-compiler": "19.0.0-beta-df7b47d-20241124",
+    "eslint-plugin-react-compiler": "19.0.0-beta-714736e-20250131",
     "payload": "workspace:*",
-    "swc-plugin-transform-remove-imports": "2.0.0"
+    "swc-plugin-transform-remove-imports": "3.1.0"
   },
   "peerDependencies": {
     "graphql": "^16.8.1",
