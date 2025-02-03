@@ -31,6 +31,12 @@ export type BeforeSync = (args: {
 export type FieldsOverride = (args: { defaultFields: Field[] }) => Field[]
 
 export type SearchPluginConfig = {
+  /**
+   * @deprecated
+   * This plugin gets the api route from the config directly and does not need to be passed in.
+   * As long as you have `routes.api` set in your Payload config, the plugin will use that.
+   * This property will be removed in the next major version.
+   */
   apiBasePath?: string
   beforeSync?: BeforeSync
   collections?: string[]
