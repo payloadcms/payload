@@ -16,6 +16,8 @@ export async function createGlobal<T extends Record<string, unknown>>(
 
   const tableName = this.tableNameMap.get(toSnakeCase(globalConfig.slug))
 
+  data.createdAt = new Date().toISOString()
+
   const result = await upsertRow<{ globalType: string } & T>({
     adapter: this,
     data,

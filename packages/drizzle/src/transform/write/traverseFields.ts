@@ -486,7 +486,9 @@ export const traverseFields = ({
             formattedValue = value.toISOString()
           }
         }
-      } else if (field.type === 'date' && fieldName === 'updatedAt') {
+      }
+
+      if (field.type === 'date' && fieldName === 'updatedAt') {
         // let the db handle this
         formattedValue = new Date().toISOString()
       }
