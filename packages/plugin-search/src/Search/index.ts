@@ -1,7 +1,6 @@
 import type { CollectionConfig, Field } from 'payload'
 
 import type { SearchPluginConfigWithLocales } from '../types.js'
-import type { ReindexButtonServerProps } from './ui/ReindexButton/types.js'
 
 import { generateReindexHandler } from '../utilities/generateReindexHandler.js'
 
@@ -74,7 +73,7 @@ export const generateSearchCollection = (
                   collectionLabels,
                   searchCollections,
                   searchSlug,
-                } satisfies ReindexButtonServerProps,
+                },
               },
             ],
           },
