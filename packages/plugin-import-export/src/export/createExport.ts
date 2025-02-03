@@ -5,6 +5,7 @@ import { stringify } from 'csv-stringify/sync'
 import { APIError } from 'payload'
 
 import { flattenObject } from './flattenObject.js'
+import { getFilename } from './getFilename.js'
 import { getSelect } from './getSelect.js'
 
 type Export = {
@@ -16,6 +17,7 @@ type Export = {
   format: 'csv' | 'json'
   globals?: string[]
   id: number | string
+  name: string
 }
 
 type Args = {
@@ -25,7 +27,7 @@ type Args = {
 
 export const createExport = async (args: Args) => {
   const {
-    data: { collections = [], format },
+    data: { name: nameArg, collections = [], format },
     req: { locale, payload, user },
     req,
   } = args
@@ -36,6 +38,7 @@ export const createExport = async (args: Args) => {
     if (!collection) {
       throw new Error(`Collection with slug ${slug} not found`)
     }
+    const name = nameArg ?? `${getFilename()}-${collection.slug}`
 
     if (!fields) {
       throw new APIError('fields must be defined when exporting')
@@ -73,7 +76,7 @@ export const createExport = async (args: Args) => {
     const csvBuffer = Buffer.from(csvData.join(''))
 
     req.file = {
-      name: `${collection.slug}.csv`,
+      name: `${name}-${collection.slug}.csv`,
       data: csvBuffer,
       mimetype: 'text/csv',
       size: csvBuffer.length,

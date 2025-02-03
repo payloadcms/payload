@@ -68,7 +68,7 @@ describe('@payloadcms/plugin-import-export', () => {
         id: doc.id,
       })
 
-      expect(doc.filename).toBeDefined()
+      expect(doc.filename).toContain('pages.csv')
       const expectedPath = path.join(dirname, './uploads', doc.filename as string)
       const data = await readCSV(expectedPath)
 

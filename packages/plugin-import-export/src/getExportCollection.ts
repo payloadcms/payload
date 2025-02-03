@@ -3,6 +3,7 @@ import type { CollectionConfig } from 'payload'
 import type { CollectionOverride, ImportExportPluginConfig } from './types.js'
 
 import { createExport } from './export/createExport.js'
+import { getFilename } from './export/getFilename.js'
 
 export const getExportCollection = ({
   pluginConfig,
@@ -15,9 +16,16 @@ export const getExportCollection = ({
     slug: 'exports',
     admin: {
       group: false,
+      useAsTitle: 'filename',
     },
     disableDuplicate: true,
     fields: [
+      {
+        name: 'name',
+        type: 'text',
+        defaultValue: () => getFilename(),
+        virtual: true,
+      },
       {
         name: 'collections',
         type: 'array',
