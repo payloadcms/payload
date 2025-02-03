@@ -156,6 +156,18 @@ describe('List View', () => {
     })
   })
 
+  describe('list view custom components', () => {
+    test('should render custom beforeAction component', async () => {
+      await page.goto(postsUrl.list)
+      const beforeActionButton = page.locator('.list-controls__buttons-wrap button').first()
+      await expect(
+        beforeActionButton.locator('span', {
+          hasText: exactText('Reset to default columns'),
+        }),
+      ).toBeVisible()
+    })
+  })
+
   describe('search', () => {
     test('should prefill search input from query param', async () => {
       await createPost({ title: 'dennis' })
