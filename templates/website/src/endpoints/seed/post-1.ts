@@ -1,17 +1,21 @@
 import type { Media, User } from '@/payload-types'
 import { RequiredDataFromCollectionSlug } from 'payload'
 
-export type postParameters = {
-  heroImage: Media;
-  blockImage: Media;
-  author: User;
+export type PostArgs = {
+  heroImage: Media
+  blockImage: Media
+  author: User
 }
 
-export const post1: (
-  { heroImage, blockImage, author }: postParameters,
-) => RequiredDataFromCollectionSlug<'posts'> = (
-  { heroImage, blockImage, author }: postParameters,
-): RequiredDataFromCollectionSlug<'posts'> => {
+export const post1: ({
+  heroImage,
+  blockImage,
+  author,
+}: PostArgs) => RequiredDataFromCollectionSlug<'posts'> = ({
+  heroImage,
+  blockImage,
+  author,
+}: PostArgs): RequiredDataFromCollectionSlug<'posts'> => {
   return {
     slug: 'digital-horizons',
     _status: 'published',
@@ -182,7 +186,7 @@ export const post1: (
             fields: {
               blockName: 'Generate Text',
               blockType: 'code',
-              code: 'async function generateText(prompt) {\n    const apiKey = \'your-api-key\';\n    const apiUrl = \'https://api.example.com/generate-text\';\n\n    const response = await fetch(apiUrl, {\n        method: \'POST\',\n        headers: {\n            \'Content-Type\': \'application/json\',\n            \'Authorization\': `Bearer ${apiKey}`\n        },\n        body: JSON.stringify({\n            model: \'text-generation-model\',\n            prompt: prompt,\n            max_tokens: 50\n        })\n    });\n\n    const data = await response.json();\n    console.log(data.choices[0].text.trim());\n}\n\n// Example usage\ngenerateText("Once upon a time in a faraway land,");\n',
+              code: "async function generateText(prompt) {\n    const apiKey = 'your-api-key';\n    const apiUrl = 'https://api.example.com/generate-text';\n\n    const response = await fetch(apiUrl, {\n        method: 'POST',\n        headers: {\n            'Content-Type': 'application/json',\n            'Authorization': `Bearer ${apiKey}`\n        },\n        body: JSON.stringify({\n            model: 'text-generation-model',\n            prompt: prompt,\n            max_tokens: 50\n        })\n    });\n\n    const data = await response.json();\n    console.log(data.choices[0].text.trim());\n}\n\n// Example usage\ngenerateText(\"Once upon a time in a faraway land,\");\n",
               language: 'javascript',
             },
             format: '',
@@ -216,7 +220,7 @@ export const post1: (
                 format: 0,
                 mode: 'normal',
                 style: '',
-                text: 'In today\'s rapidly evolving technological landscape, the Internet of Things (IoT) stands out as a revolutionary force. From transforming our residences with smart home systems to redefining transportation through connected cars, IoT\'s influence is palpable in nearly every facet of our daily lives.',
+                text: "In today's rapidly evolving technological landscape, the Internet of Things (IoT) stands out as a revolutionary force. From transforming our residences with smart home systems to redefining transportation through connected cars, IoT's influence is palpable in nearly every facet of our daily lives.",
                 version: 1,
               },
             ],
@@ -235,7 +239,7 @@ export const post1: (
                 format: 0,
                 mode: 'normal',
                 style: '',
-                text: 'This technology hinges on the seamless integration of devices and systems, allowing them to communicate and collaborate effortlessly. With each connected device, we move a step closer to a world where convenience and efficiency are embedded in the very fabric of our existence. As a result, we\'re transitioning into an era where our surroundings intuitively respond to our needs, heralding a smarter and more interconnected global community.',
+                text: "This technology hinges on the seamless integration of devices and systems, allowing them to communicate and collaborate effortlessly. With each connected device, we move a step closer to a world where convenience and efficiency are embedded in the very fabric of our existence. As a result, we're transitioning into an era where our surroundings intuitively respond to our needs, heralding a smarter and more interconnected global community.",
                 version: 1,
               },
             ],
@@ -273,7 +277,7 @@ export const post1: (
                           format: 0,
                           mode: 'normal',
                           style: '',
-                          text: 'This content above is completely dynamic using custom layout building blocks configured in the CMS. This can be anything you\'d like from rich text and images, to highly designed, complex components.',
+                          text: "This content above is completely dynamic using custom layout building blocks configured in the CMS. This can be anything you'd like from rich text and images, to highly designed, complex components.",
                           version: 1,
                         },
                       ],

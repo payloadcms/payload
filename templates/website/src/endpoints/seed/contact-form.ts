@@ -1,4 +1,3 @@
-import type { Form } from '@/payload-types'
 import { RequiredDataFromCollectionSlug } from 'payload'
 
 export const contactForm: RequiredDataFromCollectionSlug<'forms'> = {

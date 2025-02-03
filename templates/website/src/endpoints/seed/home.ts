@@ -1,14 +1,18 @@
 import type { RequiredDataFromCollectionSlug } from 'payload'
 import type { Media } from '@/payload-types'
 
-export type homeParameters = {
-  heroImage: Media;
+type HomeArgs = {
+  heroImage: Media
   metaImage: Media
 }
 
-export const home: ({ heroImage, metaImage }: homeParameters) => RequiredDataFromCollectionSlug<'pages'> = (
-  { heroImage, metaImage }: homeParameters,
-): RequiredDataFromCollectionSlug<'pages'> => {
+export const home: ({
+  heroImage,
+  metaImage,
+}: HomeArgs) => RequiredDataFromCollectionSlug<'pages'> = ({
+  heroImage,
+  metaImage,
+}: HomeArgs): RequiredDataFromCollectionSlug<'pages'> => {
   return {
     slug: 'home',
     _status: 'published',
@@ -88,7 +92,7 @@ export const home: ({ heroImage, metaImage }: homeParameters) => RequiredDataFro
                   format: 0,
                   mode: 'normal',
                   style: '',
-                  text: ' to begin managing this site\'s content. The code for this template is completely open-source and can be found ',
+                  text: " to begin managing this site's content. The code for this template is completely open-source and can be found ",
                   version: 1,
                 },
                 {
@@ -210,7 +214,7 @@ export const home: ({ heroImage, metaImage }: homeParameters) => RequiredDataFro
                         format: 0,
                         mode: 'normal',
                         style: '',
-                        text: 'Manage this site\'s pages and posts from the ',
+                        text: "Manage this site's pages and posts from the ",
                         version: 1,
                       },
                       {

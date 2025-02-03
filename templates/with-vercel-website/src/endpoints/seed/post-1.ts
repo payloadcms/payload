@@ -1,7 +1,7 @@
 import type { Media, User } from '@/payload-types'
 import { RequiredDataFromCollectionSlug } from 'payload'
 
-export type postParameters = {
+export type PostArgs = {
   heroImage: Media
   blockImage: Media
   author: User
@@ -11,11 +11,11 @@ export const post1: ({
   heroImage,
   blockImage,
   author,
-}: postParameters) => RequiredDataFromCollectionSlug<'posts'> = ({
+}: PostArgs) => RequiredDataFromCollectionSlug<'posts'> = ({
   heroImage,
   blockImage,
   author,
-}: postParameters): RequiredDataFromCollectionSlug<'posts'> => {
+}: PostArgs): RequiredDataFromCollectionSlug<'posts'> => {
   return {
     slug: 'digital-horizons',
     _status: 'published',

@@ -1,12 +1,15 @@
-import type { Media, User } from '@/payload-types'
 import { RequiredDataFromCollectionSlug } from 'payload'
-import { postParameters } from './post-1'
+import type { PostArgs } from './post-1'
 
-export const post2: (
-  { heroImage, blockImage, author }: postParameters,
-) => RequiredDataFromCollectionSlug<'posts'> = (
-  { heroImage, blockImage, author }: postParameters,
-): RequiredDataFromCollectionSlug<'posts'> => {
+export const post2: ({
+  heroImage,
+  blockImage,
+  author,
+}: PostArgs) => RequiredDataFromCollectionSlug<'posts'> = ({
+  heroImage,
+  blockImage,
+  author,
+}: PostArgs): RequiredDataFromCollectionSlug<'posts'> => {
   return {
     slug: 'global-gaze',
     _status: 'published',
