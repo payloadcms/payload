@@ -292,9 +292,17 @@ export const sanitizeFields = async ({
     // Insert our field after assignment
     if (field.type === 'date' && field.timezone) {
       const name = field.name + '_timezone'
+      const supportedTimezones = config.admin.timezone.supportedTimezones
       const defaultValue = config.admin.timezone.defaultTimezone || 'UTC'
 
-      const timezoneField = baseTimezoneField({ name, defaultValue })
+      // Need to set the options here manually so that any database enums are generated correctly
+      // The UI component will import the options from the config
+      const timezoneField = baseTimezoneField({
+        name,
+        defaultValue,
+        options: supportedTimezones,
+        required: field.required,
+      })
 
       fields.splice(++i, 0, timezoneField)
     }
