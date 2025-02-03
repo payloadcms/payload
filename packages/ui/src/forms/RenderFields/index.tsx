@@ -80,7 +80,7 @@ export const RenderFields: React.FC<RenderFieldsProps> = (props) => {
           // If the user does not have access control to begin with, force it to be read-only
           const hasOperationPermission =
             permissions === true ||
-            permissions[operation] === true ||
+            permissions?.[operation] === true ||
             permissions?.[parentName] === true ||
             ('name' in field &&
               typeof permissions === 'object' &&
