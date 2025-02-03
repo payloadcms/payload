@@ -17,7 +17,6 @@ import { CustomRowID } from './collections/CustomID/CustomRowID.js'
 import { CustomTabID } from './collections/CustomID/CustomTabID.js'
 import { CustomID } from './collections/CustomID/index.js'
 import DateFields from './collections/Date/index.js'
-import DateWithTimezoneFields from './collections/DateWithTimezone/index.js'
 import EmailFields from './collections/Email/index.js'
 import GroupFields from './collections/Group/index.js'
 import IndexedFields from './collections/Indexed/index.js'
@@ -81,7 +80,6 @@ export const collectionSlugs: CollectionConfig[] = [
   CustomTabID,
   CustomRowID,
   DateFields,
-  DateWithTimezoneFields,
   EmailFields,
   RadioFields,
   GroupFields,

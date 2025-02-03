@@ -333,6 +333,16 @@ describe('Date', () => {
       await expect(timezoneOption).toBeVisible()
     })
 
+    test('can see default timezone in timezone picker', async () => {
+      await page.goto(url.create)
+
+      const selectedTimezoneSelector = `#field-dayAndTimeWithTimezone .rs__value-container`
+
+      const selectedTimezone = page.locator(selectedTimezoneSelector)
+
+      await expect(selectedTimezone).toContainText('Lunar Time Coordinates')
+    })
+
     describe('while timezone is set to London', () => {
       test('displayed value should be the same while timezone is set to London', async () => {
         const {

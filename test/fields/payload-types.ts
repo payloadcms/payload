@@ -101,7 +101,6 @@ export interface Config {
     'custom-tab-id': CustomTabId;
     'custom-row-id': CustomRowId;
     'date-fields': DateField;
-    'date-fields-with-timezone': DateFieldsWithTimezone;
     'email-fields': EmailField;
     'radio-fields': RadioField;
     'group-fields': GroupField;
@@ -148,7 +147,6 @@ export interface Config {
     'custom-tab-id': CustomTabIdSelect<false> | CustomTabIdSelect<true>;
     'custom-row-id': CustomRowIdSelect<false> | CustomRowIdSelect<true>;
     'date-fields': DateFieldsSelect<false> | DateFieldsSelect<true>;
-    'date-fields-with-timezone': DateFieldsWithTimezoneSelect<false> | DateFieldsWithTimezoneSelect<true>;
     'email-fields': EmailFieldsSelect<false> | EmailFieldsSelect<true>;
     'radio-fields': RadioFieldsSelect<false> | RadioFieldsSelect<true>;
     'group-fields': GroupFieldsSelect<false> | GroupFieldsSelect<true>;
@@ -1096,7 +1094,7 @@ export interface DateField {
   dayOnly?: string | null;
   dayAndTime?: string | null;
   monthOnly?: string | null;
-  defaultWithTimezone: string;
+  defaultWithTimezone?: string | null;
   defaultWithTimezone_timezone?: SupportedTimezones;
   dayAndTimeWithTimezone?: string | null;
   dayAndTimeWithTimezone_timezone?: SupportedTimezones;
@@ -1110,35 +1108,6 @@ export interface DateField {
       }[]
     | null;
   timezoneArray?:
-    | {
-        dayAndTime?: string | null;
-        dayAndTime_timezone?: SupportedTimezones;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "date-fields-with-timezone".
- */
-export interface DateFieldsWithTimezone {
-  id: string;
-  default: string;
-  default_timezone?: SupportedTimezones;
-  dayAndTime?: string | null;
-  dayAndTime_timezone?: SupportedTimezones;
-  blocks?:
-    | {
-        dayAndTime?: string | null;
-        dayAndTime_timezone?: SupportedTimezones;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'dateBlock';
-      }[]
-    | null;
-  array?:
     | {
         dayAndTime?: string | null;
         dayAndTime_timezone?: SupportedTimezones;
@@ -1982,10 +1951,6 @@ export interface PayloadLockedDocument {
         value: string | DateField;
       } | null)
     | ({
-        relationTo: 'date-fields-with-timezone';
-        value: string | DateFieldsWithTimezone;
-      } | null)
-    | ({
         relationTo: 'email-fields';
         value: string | EmailField;
       } | null)
@@ -2798,37 +2763,6 @@ export interface DateFieldsSelect<T extends boolean = true> {
             };
       };
   timezoneArray?:
-    | T
-    | {
-        dayAndTime?: T;
-        dayAndTime_timezone?: T;
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "date-fields-with-timezone_select".
- */
-export interface DateFieldsWithTimezoneSelect<T extends boolean = true> {
-  default?: T;
-  default_timezone?: T;
-  dayAndTime?: T;
-  dayAndTime_timezone?: T;
-  blocks?:
-    | T
-    | {
-        dateBlock?:
-          | T
-          | {
-              dayAndTime?: T;
-              dayAndTime_timezone?: T;
-              id?: T;
-              blockName?: T;
-            };
-      };
-  array?:
     | T
     | {
         dayAndTime?: T;
