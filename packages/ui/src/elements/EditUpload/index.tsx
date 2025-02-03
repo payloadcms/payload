@@ -3,7 +3,7 @@
 import type { UploadEdits } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import React, { forwardRef, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import ReactCrop from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
 
@@ -18,11 +18,12 @@ const baseClass = 'edit-upload'
 type Props = {
   name: string
   onChange: (value: string) => void
+  ref?: React.RefObject<HTMLInputElement>
   value: string
 }
 
-const Input = forwardRef<HTMLInputElement, Props>((props, ref) => {
-  const { name, onChange, value } = props
+const Input: React.FC<Props> = (props) => {
+  const { name, onChange, ref, value } = props
 
   return (
     <div className={`${baseClass}__input`}>
@@ -36,7 +37,7 @@ const Input = forwardRef<HTMLInputElement, Props>((props, ref) => {
       />
     </div>
   )
-})
+}
 
 type FocalPosition = {
   x: number

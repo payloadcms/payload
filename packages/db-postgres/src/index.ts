@@ -2,6 +2,7 @@ import type { DatabaseAdapterObj, Payload } from 'payload'
 
 import {
   beginTransaction,
+  buildCreateMigration,
   commitTransaction,
   count,
   countGlobalVersions,
@@ -9,6 +10,7 @@ import {
   create,
   createGlobal,
   createGlobalVersion,
+  createSchemaGenerator,
   createVersion,
   deleteMany,
   deleteOne,
@@ -35,22 +37,20 @@ import {
   updateVersion,
 } from '@payloadcms/drizzle'
 import {
+  columnToCodeConverter,
   countDistinct,
   createDatabase,
   createExtensions,
   createJSONQuery,
-  createMigration,
   defaultDrizzleSnapshot,
   deleteWhere,
   dropDatabase,
   execute,
-  getMigrationTemplate,
   init,
   insert,
   requireDrizzleKit,
 } from '@payloadcms/drizzle/postgres'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
-import path from 'path'
 import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
 import { fileURLToPath } from 'url'
 
@@ -59,7 +59,6 @@ import type { Args, PostgresAdapter } from './types.js'
 import { connect } from './connect.js'
 
 const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
 
 export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter> {
   const postgresIDType = args.idType || 'serial'
@@ -93,9 +92,13 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       beforeSchemaInit: args.beforeSchemaInit ?? [],
       createDatabase,
       createExtensions,
-      createMigration(args) {
-        return createMigration.bind(this)({ ...args, dirname })
-      },
+      createMigration: buildCreateMigration({
+        executeMethod: 'execute',
+        filename,
+        sanitizeStatements({ sqlExecute, statements }) {
+          return `${sqlExecute}\n ${statements.join('\n')}\`)`
+        },
+      }),
       defaultDrizzleSnapshot,
       disableCreateDatabase: args.disableCreateDatabase ?? false,
       drizzle: undefined,
@@ -105,7 +108,14 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
         json: true,
       },
       fieldConstraints: {},
-      getMigrationTemplate,
+      generateSchema: createSchemaGenerator({
+        columnToCodeConverter,
+        corePackageSuffix: 'pg-core',
+        defaultOutputFile: args.generateSchemaOutputFile,
+        enumImport: 'pgEnum',
+        schemaImport: 'pgSchema',
+        tableImport: 'pgTable',
+      }),
       idType: postgresIDType,
       initializing,
       localesSuffix: args.localesSuffix || '_locales',
@@ -167,6 +177,8 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       packageName: '@payloadcms/db-postgres',
       payload,
       queryDrafts,
+      rawRelations: {},
+      rawTables: {},
       rejectInitializing,
       requireDrizzleKit,
       resolveInitializing,
@@ -186,4 +198,5 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
 }
 
 export type { MigrateDownArgs, MigrateUpArgs } from '@payloadcms/drizzle/postgres'
+export { geometryColumn } from '@payloadcms/drizzle/postgres'
 export { sql } from 'drizzle-orm'

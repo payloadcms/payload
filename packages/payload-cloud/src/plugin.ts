@@ -1,4 +1,4 @@
-import type { Config } from 'payload'
+import type { Config, Payload } from 'payload'
 
 import type { PluginOptions } from './types.js'
 
@@ -10,6 +10,11 @@ import {
   getCacheUploadsAfterDeleteHook,
 } from './hooks/uploadCache.js'
 import { getStaticHandler } from './staticHandler.js'
+
+export const generateRandomString = (): string => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  return Array.from({ length: 24 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
+}
 
 export const payloadCloudPlugin =
   (pluginOptions?: PluginOptions) =>
@@ -93,5 +98,73 @@ export const payloadCloudPlugin =
       })
     }
 
+    // We make sure to only run cronjobs on one instance using a instance identifier stored in a global.
+
+    const DEFAULT_CRON = '* * * * *'
+    const DEFAULT_LIMIT = 10
+    const DEFAULT_CRON_JOB = {
+      cron: DEFAULT_CRON,
+      limit: DEFAULT_LIMIT,
+      queue: 'default (every minute)',
+    }
+    config.globals = [
+      ...(config.globals || []),
+      {
+        slug: 'payload-cloud-instance',
+        admin: {
+          hidden: true,
+        },
+        fields: [
+          {
+            name: 'instance',
+            type: 'text',
+            required: true,
+          },
+        ],
+      },
+    ]
+
+    if (pluginOptions?.enableAutoRun === false || !config.jobs) {
+      return config
+    }
+
+    const oldAutoRunCopy = config.jobs.autoRun ?? []
+
+    const newAutoRun = async (payload: Payload) => {
+      const instance = generateRandomString()
+
+      await payload.updateGlobal({
+        slug: 'payload-cloud-instance',
+        data: {
+          instance,
+        },
+      })
+
+      await waitRandomTime()
+
+      const cloudInstance = await payload.findGlobal({
+        slug: 'payload-cloud-instance',
+      })
+
+      if (cloudInstance.instance !== instance) {
+        return []
+      }
+      if (!config.jobs?.autoRun) {
+        return [DEFAULT_CRON_JOB]
+      }
+
+      return typeof oldAutoRunCopy === 'function' ? await oldAutoRunCopy(payload) : oldAutoRunCopy
+    }
+
+    config.jobs.autoRun = newAutoRun
+
     return config
   }
+
+function waitRandomTime(): Promise<void> {
+  const min = 1000 // 1 second in milliseconds
+  const max = 5000 // 5 seconds in milliseconds
+  const randomTime = Math.floor(Math.random() * (max - min + 1)) + min
+
+  return new Promise((resolve) => setTimeout(resolve, randomTime))
+}

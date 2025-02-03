@@ -8,8 +8,8 @@ import { CMSLink } from '@/components/Link'
 import Link from 'next/link'
 import { SearchIcon } from 'lucide-react'
 
-export const HeaderNav: React.FC<{ header: HeaderType }> = ({ header }) => {
-  const navItems = header?.navItems || []
+export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
+  const navItems = data?.navItems || []
 
   return (
     <nav className="flex gap-3 items-center">

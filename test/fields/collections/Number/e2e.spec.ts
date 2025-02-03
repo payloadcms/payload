@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { openListFilters } from 'helpers/e2e/openListFilters.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -37,7 +38,7 @@ describe('Number', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, serverURL } = await initPayloadE2ENoConfig({
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
       // prebuild,
     }))
@@ -73,8 +74,7 @@ describe('Number', () => {
   test('should filter Number fields in the collection view - greaterThanOrEqual', async () => {
     await page.goto(url.list)
     await expect(page.locator('table >> tbody >> tr')).toHaveCount(3)
-    await page.locator('.list-controls__toggle-where').click()
-    await expect(page.locator('.list-controls__where.rah-static--height-auto')).toBeVisible()
+    await openListFilters(page, {})
     await page.locator('.where-builder__add-first-filter').click()
     const initialField = page.locator('.condition__field')
     const operatorField = page.locator('.condition__operator')
@@ -131,7 +131,7 @@ describe('Number', () => {
     await page.keyboard.press('Enter')
     await page.click('#action-save', { delay: 100 })
     await expect(page.locator('.payload-toast-container')).toContainText(
-      'The following field is invalid: withMinRows',
+      'The following field is invalid: With Min Rows',
     )
   })
 

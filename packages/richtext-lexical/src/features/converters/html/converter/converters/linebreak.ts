@@ -1,8 +1,7 @@
-import type { SerializedParagraphNode } from 'lexical'
-
+import type { SerializedLineBreakNode } from '../../../../../nodeTypes.js'
 import type { HTMLConverter } from '../types.js'
 
-export const LinebreakHTMLConverter: HTMLConverter<SerializedParagraphNode> = {
+export const LinebreakHTMLConverter: HTMLConverter<SerializedLineBreakNode> = {
   converter() {
     return `<br>`
   },

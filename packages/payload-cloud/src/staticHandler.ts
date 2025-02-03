@@ -11,7 +11,7 @@ interface Args {
 }
 
 // Convert a stream into a promise that resolves with a Buffer
-const streamToBuffer = async (readableStream) => {
+const streamToBuffer = async (readableStream: any) => {
   const chunks = []
   for await (const chunk of readableStream) {
     chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk)
@@ -37,10 +37,11 @@ export const getStaticHandler = ({ cachingOptions, collection }: Args): StaticHa
     collCacheConfig?.enabled !== false
 
   return async (req, { params }) => {
+    let key = ''
     try {
       const { identityID, storageClient } = await getStorageClient()
 
-      const Key = createKey({
+      key = createKey({
         collection: collection.slug,
         filename: params.filename,
         identityID,
@@ -48,10 +49,10 @@ export const getStaticHandler = ({ cachingOptions, collection }: Args): StaticHa
 
       const object = await storageClient.getObject({
         Bucket: process.env.PAYLOAD_CLOUD_BUCKET,
-        Key,
+        Key: key,
       })
 
-      if (!object.Body) {
+      if (!object.Body || !object.ContentType || !object.ETag) {
         return new Response(null, { status: 404, statusText: 'Not Found' })
       }
 
@@ -67,7 +68,34 @@ export const getStaticHandler = ({ cachingOptions, collection }: Args): StaticHa
         status: 200,
       })
     } catch (err: unknown) {
-      req.payload.logger.error({ err, msg: 'Error getting file from cloud storage' })
+      /**
+       * If object key does not found, the getObject function attempts a ListBucket operation.
+       * Because of permissions, this will throw very specific error that we can catch and handle.
+       */
+      if (
+        err instanceof Error &&
+        err.name === 'AccessDenied' &&
+        err.message?.includes('s3:ListBucket') &&
+        'type' in err &&
+        err.type === 'S3ServiceException'
+      ) {
+        req.payload.logger.error({
+          collectionSlug: collection.slug,
+          err,
+          msg: `Requested file not found in cloud storage: ${params.filename}`,
+          params,
+          requestedKey: key,
+        })
+        return new Response(null, { status: 404, statusText: 'Not Found' })
+      }
+
+      req.payload.logger.error({
+        collectionSlug: collection.slug,
+        err,
+        msg: `Error getting file from cloud storage: ${params.filename}`,
+        params,
+        requestedKey: key,
+      })
       return new Response('Internal Server Error', { status: 500 })
     }
   }

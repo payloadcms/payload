@@ -1,4 +1,3 @@
-import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type {
   Document,
   PayloadRequest,
@@ -8,11 +7,19 @@ import type {
 } from '../../../types/index.js'
 import type { File } from '../../../uploads/types.js'
 import type {
+  DataFromCollectionSlug,
   RequiredDataFromCollectionSlug,
   SelectFromCollectionSlug,
 } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
+import {
+  type CollectionSlug,
+  deepCopyObjectSimple,
+  type Payload,
+  type RequestContext,
+  type TypedLocale,
+} from '../../../index.js'
 import { getFileByPath } from '../../../uploads/getFileByPath.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { createOperation } from '../create.js'
@@ -28,6 +35,7 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
   disableTransaction?: boolean
   disableVerificationEmail?: boolean
   draft?: boolean
+  duplicateFromID?: DataFromCollectionSlug<TSlug>['id']
   fallbackLocale?: false | TypedLocale
   file?: File
   filePath?: string
@@ -35,7 +43,7 @@ export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = 
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
   populate?: PopulateType
-  req?: PayloadRequest
+  req?: Partial<PayloadRequest>
   select?: TSelect
   showHiddenFields?: boolean
   user?: Document
@@ -56,6 +64,7 @@ export default async function createLocal<
     disableTransaction,
     disableVerificationEmail,
     draft,
+    duplicateFromID,
     file,
     filePath,
     overrideAccess = true,
@@ -77,11 +86,12 @@ export default async function createLocal<
 
   return createOperation<TSlug, TSelect>({
     collection,
-    data,
+    data: deepCopyObjectSimple(data), // Ensure mutation of data in create operation hooks doesn't affect the original data
     depth,
     disableTransaction,
     disableVerificationEmail,
     draft,
+    duplicateFromID,
     overrideAccess,
     overwriteExistingFiles,
     populate,

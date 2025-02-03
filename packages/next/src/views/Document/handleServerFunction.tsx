@@ -1,4 +1,11 @@
-import type { Data, DocumentPreferences, FormState, PayloadRequest, VisibleEntities } from 'payload'
+import type {
+  Data,
+  DocumentPreferences,
+  FormState,
+  Locale,
+  PayloadRequest,
+  VisibleEntities,
+} from 'payload'
 
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { headers as getHeaders } from 'next/headers.js'
@@ -19,6 +26,7 @@ export const renderDocumentHandler = async (args: {
   drawerSlug?: string
   initialData?: Data
   initialState?: FormState
+  locale?: Locale
   overrideEntityVisibility?: boolean
   redirectAfterDelete: boolean
   redirectAfterDuplicate: boolean
@@ -30,6 +38,7 @@ export const renderDocumentHandler = async (args: {
     docID,
     drawerSlug,
     initialData,
+    locale,
     overrideEntityVisibility,
     redirectAfterDelete,
     redirectAfterDuplicate,
@@ -134,17 +143,17 @@ export const renderDocumentHandler = async (args: {
   const { data, Document } = await renderDocument({
     clientConfig,
     disableActions,
+    documentSubViewType: 'default',
     drawerSlug,
     importMap: payload.importMap,
     initialData,
     initPageResult: {
-      collectionConfig: payload.config.collections.find(
-        (collection) => collection.slug === collectionSlug,
-      ),
+      collectionConfig: payload?.collections?.[collectionSlug]?.config,
       cookies,
       docID,
       globalConfig: payload.config.globals.find((global) => global.slug === collectionSlug),
       languageOptions: undefined, // TODO
+      locale,
       permissions,
       req,
       translations: undefined, // TODO
@@ -157,6 +166,7 @@ export const renderDocumentHandler = async (args: {
     redirectAfterDelete,
     redirectAfterDuplicate,
     searchParams: {},
+    viewType: 'document',
   })
 
   return {

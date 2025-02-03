@@ -23,6 +23,8 @@ import type {
   BlocksFieldClientProps,
   BlocksFieldErrorClientComponent,
   BlocksFieldErrorServerComponent,
+  BlocksFieldLabelClientComponent,
+  BlocksFieldLabelServerComponent,
   CheckboxFieldClientProps,
   CheckboxFieldErrorClientComponent,
   CheckboxFieldErrorServerComponent,
@@ -43,14 +45,18 @@ import type {
   DateFieldErrorServerComponent,
   DateFieldLabelClientComponent,
   DateFieldLabelServerComponent,
+  DefaultCellComponentProps,
+  DefaultServerCellComponentProps,
   Description,
   EmailFieldClientProps,
   EmailFieldErrorClientComponent,
   EmailFieldErrorServerComponent,
   EmailFieldLabelClientComponent,
   EmailFieldLabelServerComponent,
-  FieldDescriptionClientComponent,
-  FieldDescriptionServerComponent,
+  FieldDescriptionClientProps,
+  FieldDescriptionServerProps,
+  FieldDiffClientComponent,
+  FieldDiffServerProps,
   GroupFieldClientProps,
   GroupFieldLabelClientComponent,
   GroupFieldLabelServerComponent,
@@ -127,7 +133,7 @@ import type {
   TextareaFieldValidation,
 } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
-import type { Operation, PayloadRequest, Where } from '../../types/index.js'
+import type { DefaultValue, Operation, PayloadRequest, Where } from '../../types/index.js'
 import type {
   NumberFieldManyValidation,
   NumberFieldSingleValidation,
@@ -164,6 +170,7 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
   findMany?: boolean
   /** The global which the field belongs to. If the field belongs to a collection, this will be null. */
   global: null | SanitizedGlobalConfig
+  indexPath: number[]
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
   operation?: 'create' | 'delete' | 'read' | 'update'
   /** The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. */
@@ -243,6 +250,7 @@ export type FilterOptionsProps<TData = any> = {
    * The collection `slug` to filter against, limited to this field's `relationTo` property.
    */
   relationTo: CollectionSlug
+  req: PayloadRequest
   /**
    * An object containing document data that is scoped to only fields within the same parent of this field.
    */
@@ -265,9 +273,10 @@ export type FilterOptions<TData = any> =
 type Admin = {
   className?: string
   components?: {
-    Cell?: CustomComponent
-    Description?: CustomComponent<FieldDescriptionClientComponent | FieldDescriptionServerComponent>
-    Field?: CustomComponent<FieldClientComponent | FieldServerComponent>
+    Cell?: PayloadComponent<DefaultServerCellComponentProps, DefaultCellComponentProps>
+    Description?: PayloadComponent<FieldDescriptionServerProps, FieldDescriptionClientProps>
+    Diff?: PayloadComponent<FieldDiffServerProps, FieldDiffClientComponent>
+    Field?: PayloadComponent<FieldClientComponent | FieldServerComponent>
     /**
      * The Filter component has to be a client component
      */
@@ -280,6 +289,10 @@ type Admin = {
   condition?: Condition
   /** Extension point to add your custom data. Available in server and client. */
   custom?: Record<string, any>
+  /**
+   * The field description will be displayed next to the field in the admin UI. Additionally,
+   * we use the field description to generate JSDoc comments for the generated TypeScript types.
+   */
   description?: Description
   disableBulkEdit?: boolean
   disabled?: boolean
@@ -337,6 +350,7 @@ export type LabelsClient = {
 export type BaseValidateOptions<TData, TSiblingData, TValue> = {
   collectionSlug?: string
   data: Partial<TData>
+  event?: 'onChange' | 'submit'
   id?: number | string
   operation?: Operation
   preferences: DocumentPreferences
@@ -370,6 +384,17 @@ export type OptionObject = {
 
 export type Option = OptionObject | string
 
+export type FieldGraphQLType = {
+  graphQL?: {
+    /**
+     * Complexity for the query. This is used to limit the complexity of the join query.
+     *
+     * @default 10
+     */
+    complexity?: number
+  }
+}
+
 export interface FieldBase {
   /**
    * Do not set this property manually. This is set to true during sanitization, to avoid
@@ -384,7 +409,7 @@ export interface FieldBase {
   admin?: Admin
   /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
-  defaultValue?: any
+  defaultValue?: DefaultValue
   hidden?: boolean
   hooks?: {
     afterChange?: FieldHook[]
@@ -647,7 +672,7 @@ export type RowField = {
   admin?: Omit<Admin, 'description'>
   fields: Field[]
   type: 'row'
-} & Omit<FieldBase, 'admin' | 'label' | 'name' | 'validate' | 'virtual'>
+} & Omit<FieldBase, 'admin' | 'label' | 'localized' | 'name' | 'validate' | 'virtual'>
 
 export type RowFieldClient = {
   admin?: Omit<AdminClient, 'description'>
@@ -686,7 +711,7 @@ export type CollapsibleField = {
       label: Required<FieldBase['label']>
     }
 ) &
-  Omit<FieldBase, 'label' | 'name' | 'validate' | 'virtual'>
+  Omit<FieldBase, 'label' | 'localized' | 'name' | 'validate' | 'virtual'>
 
 export type CollapsibleFieldClient = {
   admin?: {
@@ -698,6 +723,10 @@ export type CollapsibleFieldClient = {
   Pick<CollapsibleField, 'type'>
 
 type TabBase = {
+  /**
+   * @deprecated
+   * Use `admin.description` instead. This will be removed in a future major version.
+   */
   description?: LabelFunction | StaticDescription
   fields: Field[]
   interfaceName?: string
@@ -844,6 +873,7 @@ type SharedUploadProperties = {
       validate?: UploadFieldSingleValidation
     }
 ) &
+  FieldGraphQLType &
   Omit<FieldBase, 'validate'>
 
 type SharedUploadPropertiesClient = FieldBaseClient &
@@ -1023,6 +1053,7 @@ type SharedRelationshipProperties = {
       validate?: RelationshipFieldSingleValidation
     }
 ) &
+  FieldGraphQLType &
   Omit<FieldBase, 'validate'>
 
 type SharedRelationshipPropertiesClient = FieldBaseClient &
@@ -1317,6 +1348,7 @@ export type BlocksField = {
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
       Error?: CustomComponent<BlocksFieldErrorClientComponent | BlocksFieldErrorServerComponent>
+      Label?: CustomComponent<BlocksFieldLabelClientComponent | BlocksFieldLabelServerComponent>
     } & Admin['components']
     initCollapsed?: boolean
     /**
@@ -1325,7 +1357,7 @@ export type BlocksField = {
     isSortable?: boolean
   } & Admin
   blocks: Block[]
-  defaultValue?: unknown
+  defaultValue?: DefaultValue
   labels?: Labels
   maxRows?: number
   minRows?: number
@@ -1377,6 +1409,7 @@ export type JoinField = {
       Error?: CustomComponent<JoinFieldErrorClientComponent | JoinFieldErrorServerComponent>
       Label?: CustomComponent<JoinFieldLabelClientComponent | JoinFieldLabelServerComponent>
     } & Admin['components']
+    defaultColumns?: string[]
     disableBulkEdit?: never
     readOnly?: never
   } & Admin
@@ -1397,6 +1430,13 @@ export type JoinField = {
    * This does not need to be set and will be overridden by the relationship field's localized property.
    */
   localized?: boolean
+  /**
+   * The maximum allowed depth to be permitted application-wide. This setting helps prevent against malicious queries.
+   *
+   * @see https://payloadcms.com/docs/getting-started/concepts#depth
+   *
+   * @default 1
+   */
   maxDepth?: number
   /**
    * A string for the field in the collection being joined to.
@@ -1405,11 +1445,13 @@ export type JoinField = {
   type: 'join'
   validate?: never
   where?: Where
-} & FieldBase
+} & FieldBase &
+  FieldGraphQLType
 
 export type JoinFieldClient = {
-  admin?: AdminClient & Pick<JoinField['admin'], 'allowCreate' | 'disableBulkEdit' | 'readOnly'>
-} & FieldBaseClient &
+  admin?: AdminClient &
+    Pick<JoinField['admin'], 'allowCreate' | 'defaultColumns' | 'disableBulkEdit' | 'readOnly'>
+} & { targetField: Pick<RelationshipFieldClient, 'relationTo'> } & FieldBaseClient &
   Pick<
     JoinField,
     'collection' | 'defaultLimit' | 'defaultSort' | 'index' | 'maxDepth' | 'on' | 'type' | 'where'
@@ -1435,6 +1477,10 @@ export type FlattenedTabAsField = {
   flattenedFields: FlattenedField[]
 } & MarkRequired<TabAsField, 'name'>
 
+export type FlattenedJoinField = {
+  targetField: RelationshipField | UploadField
+} & JoinField
+
 export type FlattenedField =
   | CheckboxField
   | CodeField
@@ -1443,8 +1489,8 @@ export type FlattenedField =
   | FlattenedArrayField
   | FlattenedBlocksField
   | FlattenedGroupField
+  | FlattenedJoinField
   | FlattenedTabAsField
-  | JoinField
   | JSONField
   | NumberField
   | PointField

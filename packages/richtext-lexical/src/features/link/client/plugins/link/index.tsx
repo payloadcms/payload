@@ -18,7 +18,7 @@ import type { LinkPayload } from '../floatingLinkEditor/types.js'
 import { validateUrl } from '../../../../../lexical/utils/url.js'
 import { $toggleLink, LinkNode, TOGGLE_LINK_COMMAND } from '../../../nodes/LinkNode.js'
 
-export const LinkPlugin: PluginComponent<ClientProps> = () => {
+export const LinkPlugin: PluginComponent<ClientProps> = ({ clientProps }) => {
   const [editor] = useLexicalComposerContext()
 
   useEffect(() => {
@@ -29,7 +29,17 @@ export const LinkPlugin: PluginComponent<ClientProps> = () => {
       editor.registerCommand(
         TOGGLE_LINK_COMMAND,
         (payload: LinkPayload) => {
-          $toggleLink(payload)
+          if (payload === null) {
+            $toggleLink(null)
+            return true
+          }
+          if (!payload.fields?.linkType) {
+            payload.fields.linkType = clientProps.defaultLinkType as any
+          }
+          if (!payload.fields?.url) {
+            payload.fields.url = clientProps.defaultLinkURL as any
+          }
+          $toggleLink(payload as { fields: LinkFields } & LinkPayload)
           return true
         },
         COMMAND_PRIORITY_LOW,
@@ -70,7 +80,7 @@ export const LinkPlugin: PluginComponent<ClientProps> = () => {
         COMMAND_PRIORITY_LOW,
       ),
     )
-  }, [editor])
+  }, [clientProps.defaultLinkType, clientProps.defaultLinkURL, editor])
 
   return null
 }

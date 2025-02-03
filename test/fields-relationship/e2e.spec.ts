@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
+import { openListFilters } from 'helpers/e2e/openListFilters.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -50,7 +51,7 @@ const { beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
 
-describe('fields - relationship', () => {
+describe('Relationship Field', () => {
   let url: AdminUrlUtil
   let versionedRelationshipFieldURL: AdminUrlUtil
   let page: Page
@@ -272,7 +273,7 @@ describe('fields - relationship', () => {
     await expect(field).toHaveText(relationOneDoc.id)
   })
 
-  async function runFilterOptionsTest(fieldName: string) {
+  async function runFilterOptionsTest(fieldName: string, fieldLabel: string) {
     await page.reload()
     await page.goto(url.edit(docWithExistingRelations.id))
     const field = page.locator('#field-relationship')
@@ -292,7 +293,9 @@ describe('fields - relationship', () => {
     await expect(field).toContainText(anotherRelationOneDoc.id)
     await wait(2000) // Need to wait form state to come back before clicking save
     await page.locator('#action-save').click()
-    await expect(page.locator('.payload-toast-container')).toContainText(`is invalid: ${fieldName}`)
+    await expect(page.locator('.payload-toast-container')).toContainText(
+      `is invalid: ${fieldLabel}`,
+    )
     filteredField = page.locator(`#field-${fieldName} .react-select`)
     await filteredField.click({ delay: 100 })
     filteredOptions = filteredField.locator('.rs__option')
@@ -304,12 +307,12 @@ describe('fields - relationship', () => {
 
   // TODO: Flaky test. Fix this! (This is an actual issue not just an e2e flake)
   test('should allow dynamic filterOptions', async () => {
-    await runFilterOptionsTest('relationshipFiltered')
+    await runFilterOptionsTest('relationshipFiltered', 'Relationship Filtered')
   })
 
   // TODO: Flaky test. Fix this! (This is an actual issue not just an e2e flake)
   test('should allow dynamic async filterOptions', async () => {
-    await runFilterOptionsTest('relationshipFilteredAsync')
+    await runFilterOptionsTest('relationshipFilteredAsync', 'Relationship Filtered Async')
   })
 
   test('should allow usage of relationTo in filterOptions', async () => {
@@ -485,8 +488,7 @@ describe('fields - relationship', () => {
     await page.goto(versionedRelationshipFieldURL.list)
 
     await page.locator('.list-controls__toggle-columns').click()
-    await page.locator('.list-controls__toggle-where').click()
-    await page.waitForSelector('.list-controls__where.rah-static--height-auto')
+    await openListFilters(page, {})
     await page.locator('.where-builder__add-first-filter').click()
 
     const conditionField = page.locator('.condition__field')

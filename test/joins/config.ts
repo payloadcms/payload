@@ -6,11 +6,14 @@ import { Categories } from './collections/Categories.js'
 import { CategoriesVersions } from './collections/CategoriesVersions.js'
 import { HiddenPosts } from './collections/HiddenPosts.js'
 import { Posts } from './collections/Posts.js'
+import { SelfJoins } from './collections/SelfJoins.js'
 import { Singular } from './collections/Singular.js'
 import { Uploads } from './collections/Uploads.js'
 import { Versions } from './collections/Versions.js'
 import { seed } from './seed.js'
 import {
+  categoriesJoinRestrictedSlug,
+  collectionRestrictedSlug,
   localizedCategoriesSlug,
   localizedPostsSlug,
   postsSlug,
@@ -26,8 +29,21 @@ export default buildConfigWithDefaults({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    user: 'users',
   },
   collections: [
+    {
+      slug: 'users',
+      auth: true,
+      fields: [
+        {
+          type: 'join',
+          collection: 'posts',
+          on: 'author',
+          name: 'posts',
+        },
+      ],
+    },
     Posts,
     Categories,
     HiddenPosts,
@@ -35,6 +51,7 @@ export default buildConfigWithDefaults({
     Versions,
     CategoriesVersions,
     Singular,
+    SelfJoins,
     {
       slug: localizedPostsSlug,
       admin: {
@@ -96,6 +113,25 @@ export default buildConfigWithDefaults({
       ],
     },
     {
+      slug: categoriesJoinRestrictedSlug,
+      admin: {
+        useAsTitle: 'name',
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+        {
+          // join collection with access.read: () => false which should not populate
+          name: 'collectionRestrictedJoin',
+          type: 'join',
+          collection: collectionRestrictedSlug,
+          on: 'category',
+        },
+      ],
+    },
+    {
       slug: restrictedPostsSlug,
       admin: {
         useAsTitle: 'title',
@@ -117,6 +153,70 @@ export default buildConfigWithDefaults({
           name: 'category',
           type: 'relationship',
           relationTo: restrictedCategoriesSlug,
+        },
+      ],
+    },
+    {
+      slug: collectionRestrictedSlug,
+      admin: {
+        useAsTitle: 'title',
+      },
+      access: {
+        read: () => ({ canRead: { equals: true } }),
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'canRead',
+          type: 'checkbox',
+          defaultValue: false,
+        },
+        {
+          name: 'category',
+          type: 'relationship',
+          relationTo: categoriesJoinRestrictedSlug,
+        },
+      ],
+    },
+    {
+      slug: 'depth-joins-1',
+      fields: [
+        {
+          name: 'rel',
+          type: 'relationship',
+          relationTo: 'depth-joins-2',
+        },
+        {
+          name: 'joins',
+          type: 'join',
+          collection: 'depth-joins-3',
+          on: 'rel',
+          maxDepth: 2,
+        },
+      ],
+    },
+    {
+      slug: 'depth-joins-2',
+      fields: [
+        {
+          name: 'joins',
+          type: 'join',
+          collection: 'depth-joins-1',
+          on: 'rel',
+          maxDepth: 2,
+        },
+      ],
+    },
+    {
+      slug: 'depth-joins-3',
+      fields: [
+        {
+          name: 'rel',
+          type: 'relationship',
+          relationTo: 'depth-joins-1',
         },
       ],
     },

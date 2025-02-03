@@ -18,7 +18,10 @@ import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type { DocumentTabConfig, RichTextAdapter } from '../admin/types.js'
 import type {
   AdminViewConfig,
+  DocumentSubViewTypes,
+  ServerPropsFromView,
   ServerSideEditViewProps,
+  ViewTypes,
   VisibleEntities,
 } from '../admin/views/types.js'
 import type { SanitizedPermissions } from '../auth/index.js'
@@ -400,6 +403,7 @@ type ClientProps = {
 }
 
 export type ServerProps = {
+  readonly documentSubViewType?: DocumentSubViewTypes
   readonly i18n: I18nClient
   readonly locale?: Locale
   readonly params?: { [key: string]: string | string[] | undefined }
@@ -407,6 +411,7 @@ export type ServerProps = {
   readonly permissions?: SanitizedPermissions
   readonly searchParams?: { [key: string]: string | string[] | undefined }
   readonly user?: TypedUser
+  readonly viewType?: ViewTypes
   readonly visibleEntities?: VisibleEntities
 } & ClientProps
 
@@ -450,6 +455,14 @@ export type BaseLocalizationConfig = {
    * @example `"en"`
    */
   defaultLocale: string
+  /**
+   * Change the locale used by the default Publish button.
+   * If set to `all`, all locales will be published.
+   * If set to `active`, only the locale currently being edited will be published.
+   * The non-default option will be available via the secondary button.
+   * @default 'all'
+   */
+  defaultLocalePublishOption?: 'active' | 'all'
   /** Set to `true` to let missing values in localised fields fall back to the values in `defaultLocale`
    *
    * If false, then no requests will fallback unless a fallbackLocale is specified in the request.
@@ -704,7 +717,7 @@ export type Config = {
       | 'default'
       | 'gravatar'
       | {
-          Component: PayloadComponent<never>
+          Component: PayloadComponent
         }
     /**
      * Add extra and/or replace built-in components with custom components
@@ -789,7 +802,13 @@ export type Config = {
      * dependency is 'component'
      */
     dependencies?: AdminDependencies
-    /** If set to true, the entire Admin panel will be disabled. */
+    /**
+     * @deprecated
+     * This option is deprecated and will be removed in v4.
+     * To disable the admin panel itself, delete your `/app/(payload)/admin` directory.
+     * To disable all REST API and GraphQL endpoints, delete your `/app/(payload)/api` directory.
+     * Note: If you've modified the default paths via `admin.routes`, delete those directories instead.
+     */
     disable?: boolean
     importMap?: {
       /**
@@ -797,7 +816,6 @@ export type Config = {
        * @default true
        */
       autoGenerate?: boolean
-
       /** The base directory for component paths starting with /.
        *
        * By default, this is process.cwd()
@@ -841,6 +859,12 @@ export type Config = {
       /** The route for the unauthorized page. */
       unauthorized?: string
     }
+    /**
+     * Suppresses React hydration mismatch warnings during the hydration of the root <html> tag.
+     * Useful in scenarios where the server-rendered HTML might intentionally differ from the client-rendered DOM.
+     * @default false
+     */
+    suppressHydrationWarning?: boolean
     /**
      * Restrict the Admin Panel theme to use only one of your choice
      *
@@ -944,6 +968,12 @@ export type Config = {
      * Filepath to write the generated schema to
      */
     schemaOutputFile?: string
+    /**
+     * Function that returns an array of validation rules to apply to the GraphQL schema
+     *
+     * @see https://payloadcms.com/docs/graphql/overview#custom-validation-rules
+     */
+    validationRules?: (args: GraphQL.ExecutionArgs) => GraphQL.ValidationRule[]
   }
   /**
    * Tap into Payload-wide hooks.
@@ -1173,3 +1203,5 @@ export type EntityDescriptionFunction = ({ t }: { t: TFunction }) => string
 export type EntityDescription = EntityDescriptionFunction | Record<string, string> | string
 
 export type { EmailAdapter, SendEmailOptions }
+
+export type { DocumentSubViewTypes, ServerPropsFromView, ViewTypes }

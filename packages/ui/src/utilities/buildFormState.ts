@@ -115,6 +115,7 @@ export const buildFormState = async (
     },
     returnLockStatus,
     schemaPath = collectionSlug || globalSlug,
+    skipValidation,
     updateLastEdited,
   } = args
 
@@ -201,6 +202,7 @@ export const buildFormState = async (
     renderFieldFn: renderField,
     req,
     schemaPath,
+    skipValidation,
   })
 
   // Maintain form state of auth / upload fields

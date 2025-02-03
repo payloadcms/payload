@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
+import { openListFilters } from 'helpers/e2e/openListFilters.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -41,7 +42,7 @@ describe('relationship', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, serverURL } = await initPayloadE2ENoConfig({
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
     }))
 
@@ -564,7 +565,7 @@ describe('relationship', () => {
 
     await page.click('#action-save', { delay: 100 })
     await expect(page.locator('.payload-toast-container')).toContainText(
-      'The following field is invalid: relationshipWithMinRows',
+      'The following field is invalid: Relationship With Min Rows',
     )
   })
 
@@ -614,8 +615,7 @@ describe('relationship', () => {
     await page.locator('.list-controls__toggle-columns').click()
     await wait(400)
 
-    await page.locator('.list-controls__toggle-where').click()
-    await expect(page.locator('.list-controls__where.rah-static--height-auto')).toBeVisible()
+    await openListFilters(page, {})
     await wait(400)
 
     await page.locator('.where-builder__add-first-filter').click()

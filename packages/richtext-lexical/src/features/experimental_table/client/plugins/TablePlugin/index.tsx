@@ -143,7 +143,11 @@ export const TablePlugin: PluginComponent = () => {
         schemaPath={schemaPath}
         schemaPathSuffix="fields"
       />
-      <LexicalReactTablePlugin hasCellBackgroundColor={false} hasCellMerge />
+      <LexicalReactTablePlugin
+        hasCellBackgroundColor={false}
+        hasCellMerge
+        hasHorizontalScroll={true}
+      />
     </React.Fragment>
   )
 }

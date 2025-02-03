@@ -29,6 +29,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         id: (subFieldState?.id?.value as string) || new ObjectId().toHexString(),
         blockType: blockType || undefined,
         collapsed: false,
+        isLoading: true,
       }
 
       withNewRow.splice(rowIndex, 0, newRow)
@@ -43,6 +44,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
 
       // add new row to array _field state_
       const { remainingFields, rows: siblingRows } = separateRows(path, state)
+
       siblingRows.splice(rowIndex, 0, subFieldState)
 
       const newState: FormState = {
@@ -282,19 +284,38 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         // ..
         // This is a performance enhancement for saving
         // large documents with hundreds of fields
-        const newState = {}
+        const newState: FormState = {}
 
-        Object.entries(action.state).forEach(([path, field]) => {
+        for (const [path, newField] of Object.entries(action.state)) {
           const oldField = state[path]
-          const newField = field
+
+          if (newField.valid !== false) {
+            newField.valid = true
+          }
+          if (newField.passesCondition !== false) {
+            newField.passesCondition = true
+          }
 
           if (!dequal(oldField, newField)) {
             newState[path] = newField
           } else if (oldField) {
             newState[path] = oldField
           }
-        })
+        }
+
         return newState
+      }
+
+      //TODO: Remove this in 4.0 - this is a temporary fix to prevent a breaking change
+      if (action.sanitize) {
+        for (const field of Object.values(action.state)) {
+          if (field.valid !== false) {
+            field.valid = true
+          }
+          if (field.passesCondition !== false) {
+            field.passesCondition = true
+          }
+        }
       }
       // If we're not optimizing, just set the state to the new state
       return action.state

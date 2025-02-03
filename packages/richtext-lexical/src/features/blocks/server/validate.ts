@@ -21,7 +21,7 @@ export const blockValidationHOC = (
 
     // validate block
     if (!block) {
-      return 'Block not found'
+      return `Block ${blockFieldData.blockType} not found`
     }
 
     /**

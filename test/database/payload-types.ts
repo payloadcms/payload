@@ -12,6 +12,7 @@ export interface Config {
   };
   collections: {
     posts: Post;
+    'error-on-unnamed-fields': ErrorOnUnnamedField;
     'default-values': DefaultValue;
     'relation-a': RelationA;
     'relation-b': RelationB;
@@ -30,6 +31,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
+    'error-on-unnamed-fields': ErrorOnUnnamedFieldsSelect<false> | ErrorOnUnnamedFieldsSelect<true>;
     'default-values': DefaultValuesSelect<false> | DefaultValuesSelect<true>;
     'relation-a': RelationASelect<false> | RelationASelect<true>;
     'relation-b': RelationBSelect<false> | RelationBSelect<true>;
@@ -88,8 +90,41 @@ export interface UserAuthOperations {
 export interface Post {
   id: string;
   title: string;
+  D1?: {
+    D2?: {
+      D3?: {
+        D4?: string | null;
+      };
+    };
+  };
   hasTransaction?: boolean | null;
   throwAfterChange?: boolean | null;
+  arrayWithIDs?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocksWithIDs?:
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block';
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "error-on-unnamed-fields".
+ */
+export interface ErrorOnUnnamedField {
+  id: string;
+  groupWithinUnnamedTab: {
+    text: string;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -335,6 +370,10 @@ export interface PayloadLockedDocument {
         value: string | Post;
       } | null)
     | ({
+        relationTo: 'error-on-unnamed-fields';
+        value: string | ErrorOnUnnamedField;
+      } | null)
+    | ({
         relationTo: 'default-values';
         value: string | DefaultValue;
       } | null)
@@ -426,8 +465,51 @@ export interface PayloadMigration {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
+  D1?:
+    | T
+    | {
+        D2?:
+          | T
+          | {
+              D3?:
+                | T
+                | {
+                    D4?: T;
+                  };
+            };
+      };
   hasTransaction?: T;
   throwAfterChange?: T;
+  arrayWithIDs?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  blocksWithIDs?:
+    | T
+    | {
+        block?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "error-on-unnamed-fields_select".
+ */
+export interface ErrorOnUnnamedFieldsSelect<T extends boolean = true> {
+  groupWithinUnnamedTab?:
+    | T
+    | {
+        text?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }

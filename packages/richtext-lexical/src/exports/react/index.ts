@@ -5,8 +5,10 @@ export { LinebreakJSXConverter } from './components/RichText/converter/converter
 export { LinkJSXConverter } from './components/RichText/converter/converters/link.js'
 export { ListJSXConverter } from './components/RichText/converter/converters/list.js'
 export { ParagraphJSXConverter } from './components/RichText/converter/converters/paragraph.js'
+export { TabJSXConverter } from './components/RichText/converter/converters/tab.js'
 export { TableJSXConverter } from './components/RichText/converter/converters/table.js'
 export { TextJSXConverter } from './components/RichText/converter/converters/text.js'
+
 export { UploadJSXConverter } from './components/RichText/converter/converters/upload.js'
 
 export { defaultJSXConverters } from './components/RichText/converter/defaultConverters.js'

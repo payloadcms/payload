@@ -116,7 +116,7 @@ export type BaseRichTextHookArgs<
   field: FieldAffectingData
   /** The global which the field belongs to. If the field belongs to a collection, this will be null. */
   global: null | SanitizedGlobalConfig
-
+  indexPath: number[]
   /** The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. */
   originalDoc?: TData
   /**
@@ -215,16 +215,11 @@ type RichTextAdapterBase<
   }) => void
   hooks?: RichTextHooks
   i18n?: Partial<GenericLanguages>
-  outputSchema?: ({
-    collectionIDFieldTypes,
-    config,
-    field,
-    interfaceNameDefinitions,
-    isRequired,
-  }: {
+  outputSchema?: (args: {
     collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
     config?: SanitizedConfig
     field: RichTextField<Value, AdapterProps, ExtraFieldProperties>
+    i18n?: I18n
     /**
      * Allows you to define new top-level interfaces that can be re-used in the output schema.
      */
