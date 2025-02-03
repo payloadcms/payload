@@ -64,7 +64,6 @@ const DateFields: CollectionConfig = {
     {
       name: 'defaultWithTimezone',
       type: 'date',
-      required: true,
       timezone: true,
     },
     {
