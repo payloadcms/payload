@@ -46,7 +46,7 @@ export const createExport = async (args: Args) => {
       depth: 0,
       limit: 100,
       locale,
-      req,
+      page: 0,
       select: getSelect(fields),
       sort,
       user,
@@ -58,6 +58,7 @@ export const createExport = async (args: Args) => {
     let isFirstBatch = true
 
     while (result.hasNextPage) {
+      findArgs.page = findArgs.page + 1
       result = await payload.find(findArgs)
       const csvInput = result.docs.map((doc) => flattenObject(doc))
 
