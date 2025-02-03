@@ -65,6 +65,30 @@ export const Pages: CollectionConfig = {
       ],
     },
     {
+      name: 'blocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'hero',
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          slug: 'content',
+          fields: [
+            {
+              name: 'richText',
+              type: 'richText',
+            },
+          ],
+        },
+      ],
+    },
+    {
       name: 'author',
       type: 'relationship',
       relationTo: 'users',

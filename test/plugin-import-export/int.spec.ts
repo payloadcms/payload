@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url'
 import type { Page } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { richTextData } from './seed/richTextData.js'
 
 let payload: Payload
 let page: Page
@@ -217,6 +218,119 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].hasManyNumber_2).toStrictEqual('1')
       expect(data[0].hasManyNumber_3).toStrictEqual('2')
       expect(data[0].hasManyNumber_4).toStrictEqual('3')
+    })
+
+    it('should create a file for collection csv from blocks field', async () => {
+      // large data set
+      const allPromises = []
+      let promises = []
+      for (let i = 0; i < 5; i++) {
+        promises.push(
+          payload.create({
+            collection: 'pages',
+            data: {
+              title: `Array ${i}`,
+              blocks: [
+                {
+                  blockType: 'hero',
+                  title: 'test',
+                },
+                {
+                  blockType: 'content',
+                  richText: richTextData,
+                },
+              ],
+            },
+          }),
+        )
+      }
+      await Promise.all(promises)
+
+      let doc = await payload.create({
+        collection: 'exports',
+        data: {
+          collections: [
+            {
+              slug: 'pages',
+              fields: ['id', 'blocks'],
+            },
+          ],
+          format: 'csv',
+        },
+      })
+
+      doc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(doc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', doc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      expect(data[0].blocks_0_blockType).toStrictEqual('hero')
+      expect(data[0].blocks_1_blockType).toStrictEqual('content')
+    })
+
+    // disabled so we don't always run a massive test
+    it.skip('should create a file from a large set of collection documents', async () => {
+      const allPromises = []
+      let promises = []
+      for (let i = 0; i < 100000; i++) {
+        promises.push(
+          payload.create({
+            collection: 'pages',
+            data: {
+              title: `Array ${i}`,
+              blocks: [
+                {
+                  blockType: 'hero',
+                  title: 'test',
+                },
+                {
+                  blockType: 'content',
+                  richText: richTextData,
+                },
+              ],
+            },
+          }),
+        )
+        if (promises.length >= 500) {
+          await Promise.all(promises)
+          promises = []
+        }
+        if (i % 1000 === 0) {
+          console.log('created', i)
+        }
+      }
+      await Promise.all(promises)
+
+      console.log('seeded')
+
+      let doc = await payload.create({
+        collection: 'exports',
+        data: {
+          collections: [
+            {
+              slug: 'pages',
+              fields: ['id', 'blocks'],
+            },
+          ],
+          format: 'csv',
+        },
+      })
+
+      doc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(doc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', doc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      expect(data[0].blocks_0_blockType).toStrictEqual('hero')
+      expect(data[0].blocks_1_blockType).toStrictEqual('content')
     })
   })
 })
