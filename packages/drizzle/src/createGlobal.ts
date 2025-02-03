@@ -16,7 +16,7 @@ export async function createGlobal<T extends Record<string, unknown>>(
 
   const tableName = this.tableNameMap.get(toSnakeCase(globalConfig.slug))
 
-  const result = await upsertRow<T>({
+  const result = await upsertRow<{ globalType: string } & T>({
     adapter: this,
     data,
     db,
@@ -25,6 +25,8 @@ export async function createGlobal<T extends Record<string, unknown>>(
     req,
     tableName,
   })
+
+  result.globalType = slug
 
   return result
 }
