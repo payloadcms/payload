@@ -252,8 +252,6 @@ export const EditManyDrawerContent: React.FC<
     closeModal(drawerSlug)
   }
 
-  console.log(selected)
-
   return (
     <DocumentInfoProvider
       collectionSlug={slug}
