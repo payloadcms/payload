@@ -7,6 +7,9 @@ export const executeAuthStrategies = async (
     async (accumulatorPromise, strategy) => {
       const result: AuthStrategyResult = await accumulatorPromise
       if (!result.user) {
+        // add the configured AuthStrategy `name` to the strategy function args
+        args.strategyName = strategy.name
+
         return strategy.authenticate(args)
       }
       return result

@@ -17,15 +17,15 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageRe
     req,
     req: {
       payload: {
+        collections,
         config: {
           admin: { user: userSlug },
         },
-        config,
       },
     },
   } = initPageResult
 
-  const collectionConfig = config.collections?.find((collection) => collection?.slug === userSlug)
+  const collectionConfig = collections?.[userSlug]?.config
   const { auth: authOptions } = collectionConfig
   const loginWithUsername = authOptions.loginWithUsername
 
@@ -34,6 +34,7 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageRe
     collectionSlug: collectionConfig.slug,
     locale,
     payload: req.payload,
+    req,
     user: req.user,
   })
 
@@ -62,6 +63,7 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageRe
     renderAllFields: true,
     req,
     schemaPath: collectionConfig.slug,
+    skipValidation: true,
   })
 
   return (

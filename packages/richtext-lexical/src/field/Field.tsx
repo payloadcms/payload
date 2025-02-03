@@ -11,7 +11,7 @@ import {
   useField,
 } from '@payloadcms/ui'
 import { mergeFieldStyles } from '@payloadcms/ui/shared'
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 
 import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
@@ -78,13 +78,37 @@ const RichTextComponent: React.FC<
 
   const disabled = readOnlyFromProps || formProcessing || formInitializing
 
+  const [isSmallWidthViewport, setIsSmallWidthViewport] = useState<boolean>(false)
+  const [rerenderProviderKey, setRerenderProviderKey] = useState<Date>()
+
+  const prevInitialValueRef = React.useRef<SerializedEditorState | undefined>(initialValue)
+  const prevValueRef = React.useRef<SerializedEditorState | undefined>(value)
+
+  useEffect(() => {
+    const updateViewPortWidth = () => {
+      const isNextSmallWidthViewport = window.matchMedia('(max-width: 768px)').matches
+
+      if (isNextSmallWidthViewport !== isSmallWidthViewport) {
+        setIsSmallWidthViewport(isNextSmallWidthViewport)
+      }
+    }
+    updateViewPortWidth()
+    window.addEventListener('resize', updateViewPortWidth)
+
+    return () => {
+      window.removeEventListener('resize', updateViewPortWidth)
+    }
+  }, [isSmallWidthViewport])
+
   const classes = [
     baseClass,
     'field-type',
     className,
     showError && 'error',
     disabled && `${baseClass}--read-only`,
-    editorConfig?.admin?.hideGutter !== true ? `${baseClass}--show-gutter` : null,
+    editorConfig?.admin?.hideGutter !== true && !isSmallWidthViewport
+      ? `${baseClass}--show-gutter`
+      : null,
   ]
     .filter(Boolean)
     .join(' ')
@@ -93,12 +117,23 @@ const RichTextComponent: React.FC<
 
   const handleChange = useCallback(
     (editorState: EditorState) => {
-      setValue(editorState.toJSON())
+      const newState = editorState.toJSON()
+      prevValueRef.current = newState
+      setValue(newState)
     },
     [setValue],
   )
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
+
+  useEffect(() => {
+    if (JSON.stringify(initialValue) !== JSON.stringify(prevInitialValueRef.current)) {
+      prevInitialValueRef.current = initialValue
+      if (JSON.stringify(prevValueRef.current) !== JSON.stringify(value)) {
+        setRerenderProviderKey(new Date())
+      }
+    }
+  }, [initialValue, value])
 
   return (
     <div className={classes} key={pathWithEditDepth} style={styles}>
@@ -114,7 +149,8 @@ const RichTextComponent: React.FC<
             composerKey={pathWithEditDepth}
             editorConfig={editorConfig}
             fieldProps={props}
-            key={JSON.stringify({ initialValue, path })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010)
+            isSmallWidthViewport={isSmallWidthViewport}
+            key={JSON.stringify({ path, rerenderProviderKey })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010)
             onChange={handleChange}
             readOnly={disabled}
             value={value}

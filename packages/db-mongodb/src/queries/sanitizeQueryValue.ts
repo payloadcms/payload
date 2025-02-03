@@ -37,22 +37,6 @@ const buildExistsQuery = (formattedValue, path, treatEmptyString = true) => {
   }
 }
 
-const sanitizeCoordinates = (coordinates: unknown[]): unknown[] => {
-  const result: unknown[] = []
-
-  for (const value of coordinates) {
-    if (typeof value === 'string') {
-      result.push(Number(value))
-    } else if (Array.isArray(value)) {
-      result.push(sanitizeCoordinates(value))
-    } else {
-      result.push(value)
-    }
-  }
-
-  return result
-}
-
 // returns nestedField Field object from blocks.nestedField path because getLocalizedPaths splits them only for relationships
 const getFieldFromSegments = ({
   field,
@@ -340,6 +324,19 @@ export const sanitizeQueryValue = ({
         }
       }
     }
+
+    if (
+      operator === 'all' &&
+      Array.isArray(relationTo) &&
+      path.endsWith('.value') &&
+      Array.isArray(formattedValue)
+    ) {
+      formattedValue.forEach((v, i) => {
+        if (Types.ObjectId.isValid(v)) {
+          formattedValue[i] = new Types.ObjectId(v)
+        }
+      })
+    }
   }
 
   // Set up specific formatting necessary by operators
@@ -365,24 +362,17 @@ export const sanitizeQueryValue = ({
         $geometry: { type: 'Point', coordinates: [parseFloat(lng), parseFloat(lat)] },
       }
 
-      if (maxDistance) {
+      if (maxDistance && !Number.isNaN(Number(maxDistance))) {
         formattedValue.$maxDistance = parseFloat(maxDistance)
       }
-      if (minDistance) {
+
+      if (minDistance && !Number.isNaN(Number(minDistance))) {
         formattedValue.$minDistance = parseFloat(minDistance)
       }
     }
   }
 
   if (operator === 'within' || operator === 'intersects') {
-    if (
-      formattedValue &&
-      typeof formattedValue === 'object' &&
-      Array.isArray(formattedValue.coordinates)
-    ) {
-      formattedValue.coordinates = sanitizeCoordinates(formattedValue.coordinates)
-    }
-
     formattedValue = {
       $geometry: formattedValue,
     }

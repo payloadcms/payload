@@ -53,12 +53,10 @@ describe('Relationship Fields', () => {
         collection: versionedRelationshipFieldSlug,
         data: {
           title: 'Version 1 Title',
-          relationshipField: [
-            {
-              value: relatedDoc.id,
-              relationTo: collection1Slug,
-            },
-          ],
+          relationshipField: {
+            value: relatedDoc.id,
+            relationTo: collection1Slug,
+          },
         },
       })
 

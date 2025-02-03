@@ -31,7 +31,7 @@ test.describe('Join Field', () => {
   let categoriesURL: AdminUrlUtil
   let uploadsURL: AdminUrlUtil
   let categoriesJoinRestrictedURL: AdminUrlUtil
-  let categoryID
+  let categoryID: string | number
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -49,6 +49,10 @@ test.describe('Join Field', () => {
         },
       },
     })
+
+    if (!docs[0]) {
+      throw new Error('No category found with the name "example"')
+    }
 
     ;({ id: categoryID } = docs[0])
 
@@ -87,6 +91,9 @@ test.describe('Join Field', () => {
       limit: 1,
     })
     const category = result.docs[0]
+    if (!category) {
+      throw new Error('No category found')
+    }
     // seed additional posts to test defaultLimit (5)
     await payload.create({
       collection: postsSlug,
@@ -291,6 +298,39 @@ test.describe('Join Field', () => {
     await expect(joinField.locator('tbody .row-1')).toContainText('Test Post 1 Updated')
   })
 
+  test('should update relationship table when document is deleted', async () => {
+    await page.goto(categoriesURL.edit(categoryID))
+    const joinField = page.locator('#field-group__relatedPosts.field-type.join')
+    await expect(joinField).toBeVisible()
+
+    const expectedRows = 3
+    const rows = joinField.locator('.relationship-table tbody tr')
+    await expect(rows).toHaveCount(expectedRows)
+
+    const editButton = joinField.locator(
+      'tbody tr:first-child td:nth-child(2) button.doc-drawer__toggler',
+    )
+    await expect(editButton).toBeVisible()
+    await editButton.click()
+    const drawer = page.locator('[id^=doc-drawer_posts_1_]')
+    await expect(drawer).toBeVisible()
+    const popupButton = drawer.locator('button.popup-button')
+    await expect(popupButton).toBeVisible()
+    await popupButton.click()
+    const deleteButton = drawer.locator('#action-delete')
+    await expect(deleteButton).toBeVisible()
+    await deleteButton.click()
+    const deleteConfirmModal = page.locator('dialog[id^="delete-"][open]')
+    await expect(deleteConfirmModal).toBeVisible()
+    const confirmDeleteButton = deleteConfirmModal.locator('button#confirm-delete')
+    await expect(confirmDeleteButton).toBeVisible()
+    await confirmDeleteButton.click()
+    await expect(drawer).toBeHidden()
+
+    // We should have one less row than we started with
+    await expect(rows).toHaveCount(expectedRows - 1)
+  })
+
   test('should create join collection from polymorphic relationships', async () => {
     await page.goto(categoriesURL.edit(categoryID))
     const joinField = page.locator('#field-polymorphic.field-type.join')
@@ -398,5 +438,12 @@ test.describe('Join Field', () => {
     const rows = joinField.locator('.relationship-table tbody tr')
     await expect(rows).toHaveCount(1)
     await expect(joinField.locator('.cell-canRead')).not.toContainText('false')
+  })
+
+  test('should render create-first-user with when users collection has a join field and hide it', async () => {
+    await payload.delete({ collection: 'users', where: {} })
+    const url = new AdminUrlUtil(serverURL, 'users')
+    await page.goto(url.admin + '/create-first-user')
+    await expect(page.locator('.field-type.join')).toBeHidden()
   })
 })

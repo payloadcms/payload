@@ -27,6 +27,7 @@ export interface Config {
     geo: Geo;
     'disable-duplicate': DisableDuplicate;
     'base-list-filters': BaseListFilter;
+    with300documents: With300Document;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -49,6 +50,7 @@ export interface Config {
     geo: GeoSelect<false> | GeoSelect<true>;
     'disable-duplicate': DisableDuplicateSelect<false> | DisableDuplicateSelect<true>;
     'base-list-filters': BaseListFiltersSelect<false> | BaseListFiltersSelect<true>;
+    with300documents: With300DocumentsSelect<false> | With300DocumentsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -123,6 +125,16 @@ export interface Upload {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
 }
 /**
  * This is a custom collection description.
@@ -170,10 +182,19 @@ export interface Post {
   defaultValueField?: string | null;
   relationship?: (string | null) | Post;
   customCell?: string | null;
+  upload?: (string | null) | Upload;
+  hiddenField?: string | null;
+  adminHiddenField?: string | null;
+  disableListColumnText?: string | null;
+  disableListFilterText?: string | null;
   /**
    * This is a very long description that takes many characters to complete and hopefully will wrap instead of push the sidebar open, lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, voluptatum voluptates. Quisquam, voluptatum voluptates.
    */
   sidebarField?: string | null;
+  /**
+   * This field should only validate on submit. Try typing "Not allowed" and submitting the form.
+   */
+  validateUsingEvent?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -343,34 +364,6 @@ export interface Geo {
   createdAt: string;
 }
 /**
- * Description
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "customIdTab".
- */
-export interface CustomIdTab {
-  title?: string | null;
-  id: string;
-  description?: string | null;
-  number?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Description
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "customIdRow".
- */
-export interface CustomIdRow {
-  title?: string | null;
-  id: string;
-  description?: string | null;
-  number?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "disable-duplicate".
  */
@@ -387,6 +380,17 @@ export interface DisableDuplicate {
 export interface BaseListFilter {
   id: string;
   title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "with300documents".
+ */
+export interface With300Document {
+  id: string;
+  text?: string | null;
+  selfRelation?: (string | null) | With300Document;
   updatedAt: string;
   createdAt: string;
 }
@@ -460,6 +464,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'base-list-filters';
         value: string | BaseListFilter;
+      } | null)
+    | ({
+        relationTo: 'with300documents';
+        value: string | With300Document;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -520,6 +528,20 @@ export interface UploadsSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -567,7 +589,13 @@ export interface PostsSelect<T extends boolean = true> {
   defaultValueField?: T;
   relationship?: T;
   customCell?: T;
+  upload?: T;
+  hiddenField?: T;
+  adminHiddenField?: T;
+  disableListColumnText?: T;
+  disableListFilterText?: T;
   sidebarField?: T;
+  validateUsingEvent?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -733,6 +761,16 @@ export interface DisableDuplicateSelect<T extends boolean = true> {
  */
 export interface BaseListFiltersSelect<T extends boolean = true> {
   title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "with300documents_select".
+ */
+export interface With300DocumentsSelect<T extends boolean = true> {
+  text?: T;
+  selfRelation?: T;
   updatedAt?: T;
   createdAt?: T;
 }

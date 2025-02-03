@@ -288,13 +288,20 @@ export {
   type ListViewClientProps,
   type ListViewSlots,
 } from '../../views/List/index.js'
-export type {
-  ListComponentClientProps,
-  ListComponentServerProps,
-  ListPreferences,
-} from '../../views/List/types.js'
+
+export type { ListComponentClientProps, ListComponentServerProps } from '../../views/List/types.js'
+
+/*
+  @deprecated
+  This export will be removed in the next major version.
+  Use `import { ListPreferences } from 'payload'` instead.
+*/
+export type { ListPreferences } from 'payload'
+
 export type { ListHeaderProps } from '../../views/List/ListHeader/index.js'
 
 export { DefaultEditView } from '../../views/Edit/index.js'
 export { SetDocumentStepNav } from '../../views/Edit/SetDocumentStepNav/index.js'
 export { SetDocumentTitle } from '../../views/Edit/SetDocumentTitle/index.js'
+
+export { parseSearchParams } from '../../utilities/parseSearchParams.js'

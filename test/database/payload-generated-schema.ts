@@ -20,7 +20,7 @@ import { sql, relations } from '@payloadcms/db-sqlite/drizzle'
 export const posts = sqliteTable(
   'posts',
   {
-    id: integer('id').primaryKey(),
+    id: integer('id').primaryKey({ autoIncrement: true }),
     title: text('title').notNull(),
     hasTransaction: integer('has_transaction', { mode: 'boolean' }),
     throwAfterChange: integer('throw_after_change', { mode: 'boolean' }).default(false),
@@ -59,12 +59,12 @@ export const default_values_array = sqliteTable(
 export const default_values = sqliteTable(
   'default_values',
   {
-    id: integer('id').primaryKey(),
+    id: integer('id').primaryKey({ autoIncrement: true }),
     title: text('title'),
     defaultValue: text('default_value').default('default value from database'),
     group_defaultValue: text('group_default_value').default('default value from database'),
     select: text('select', { enum: ['option0', 'option1', 'default'] }).default('default'),
-    point: text('point', { mode: 'json' }).default('"SRID=4326;POINT(10 20)"'),
+    point: text('point', { mode: 'json' }).default('[10,20]'),
     updatedAt: text('updated_at')
       .notNull()
       .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
@@ -81,7 +81,7 @@ export const default_values = sqliteTable(
 export const relation_a = sqliteTable(
   'relation_a',
   {
-    id: integer('id').primaryKey(),
+    id: integer('id').primaryKey({ autoIncrement: true }),
     title: text('title'),
     richText: text('rich_text', { mode: 'json' }),
     updatedAt: text('updated_at')
@@ -100,7 +100,7 @@ export const relation_a = sqliteTable(
 export const relation_b = sqliteTable(
   'relation_b',
   {
-    id: integer('id').primaryKey(),
+    id: integer('id').primaryKey({ autoIncrement: true }),
     title: text('title'),
     relationship: integer('relationship_id').references(() => relation_a.id, {
       onDelete: 'set null',
@@ -243,7 +243,7 @@ export const pg_migrations_blocks_my_block_locales = sqliteTable(
 export const pg_migrations = sqliteTable(
   'pg_migrations',
   {
-    id: integer('id').primaryKey(),
+    id: integer('id').primaryKey({ autoIncrement: true }),
     relation1: integer('relation1_id').references(() => relation_a.id, {
       onDelete: 'set null',
     }),
@@ -292,7 +292,7 @@ export const _pg_migrations_v_version_my_array_my_sub_array = sqliteTable(
   {
     _order: integer('_order').notNull(),
     _parentID: integer('_parent_id').notNull(),
-    id: integer('id').primaryKey(),
+    id: integer('id').primaryKey({ autoIncrement: true }),
     _uuid: text('_uuid'),
   },
   (columns) => ({
@@ -338,7 +338,7 @@ export const _pg_migrations_v_version_my_array = sqliteTable(
   {
     _order: integer('_order').notNull(),
     _parentID: integer('_parent_id').notNull(),
-    id: integer('id').primaryKey(),
+    id: integer('id').primaryKey({ autoIncrement: true }),
     relation2: integer('relation2_id').references(() => relation_b.id, {
       onDelete: 'set null',
     }),
@@ -364,7 +364,7 @@ export const _pg_migrations_v_blocks_my_block = sqliteTable(
     _order: integer('_order').notNull(),
     _parentID: integer('_parent_id').notNull(),
     _path: text('_path').notNull(),
-    id: integer('id').primaryKey(),
+    id: integer('id').primaryKey({ autoIncrement: true }),
     relation5: integer('relation5_id').references(() => relation_a.id, {
       onDelete: 'set null',
     }),
@@ -414,7 +414,7 @@ export const _pg_migrations_v_blocks_my_block_locales = sqliteTable(
 export const _pg_migrations_v = sqliteTable(
   '_pg_migrations_v',
   {
-    id: integer('id').primaryKey(),
+    id: integer('id').primaryKey({ autoIncrement: true }),
     parent: integer('parent_id').references(() => pg_migrations.id, {
       onDelete: 'set null',
     }),
@@ -485,7 +485,7 @@ export const customs_customSelect = sqliteTable(
     order: integer('order').notNull(),
     parent: integer('parent_id').notNull(),
     value: text('value', { enum: ['a', 'b', 'c'] }),
-    id: integer('id').primaryKey(),
+    id: integer('id').primaryKey({ autoIncrement: true }),
   },
   (columns) => ({
     orderIdx: index('customs_customSelect_order_idx').on(columns.order),
@@ -584,7 +584,7 @@ export const customBlocks_locales = sqliteTable(
 export const customs = sqliteTable(
   'customs',
   {
-    id: integer('id').primaryKey(),
+    id: integer('id').primaryKey({ autoIncrement: true }),
     text: text('text'),
     radio: text('radio', { enum: ['a', 'b', 'c'] }),
     updatedAt: text('updated_at')
@@ -658,7 +658,7 @@ export const __customs_v_version_customSelect_v = sqliteTable(
     order: integer('order').notNull(),
     parent: integer('parent_id').notNull(),
     value: text('value', { enum: ['a', 'b', 'c'] }),
-    id: integer('id').primaryKey(),
+    id: integer('id').primaryKey({ autoIncrement: true }),
   },
   (columns) => ({
     orderIdx: index('__customs_v_version_customSelect_v_order_idx').on(columns.order),
@@ -676,7 +676,7 @@ export const _customArrays_v = sqliteTable(
   {
     _order: integer('_order').notNull(),
     _parentID: integer('_parent_id').notNull(),
-    id: integer('id').primaryKey(),
+    id: integer('id').primaryKey({ autoIncrement: true }),
     text: text('text'),
     _uuid: text('_uuid'),
   },
@@ -718,7 +718,7 @@ export const _customBlocks_v = sqliteTable(
     _order: integer('_order').notNull(),
     _parentID: integer('_parent_id').notNull(),
     _path: text('_path').notNull(),
-    id: integer('id').primaryKey(),
+    id: integer('id').primaryKey({ autoIncrement: true }),
     text: text('text'),
     _uuid: text('_uuid'),
     blockName: text('block_name'),
@@ -759,7 +759,7 @@ export const _customBlocks_v_locales = sqliteTable(
 export const _customs_v = sqliteTable(
   '_customs_v',
   {
-    id: integer('id').primaryKey(),
+    id: integer('id').primaryKey({ autoIncrement: true }),
     parent: integer('parent_id').references(() => customs.id, {
       onDelete: 'set null',
     }),
@@ -856,7 +856,7 @@ export const _customs_v_rels = sqliteTable(
 export const places = sqliteTable(
   'places',
   {
-    id: integer('id').primaryKey(),
+    id: integer('id').primaryKey({ autoIncrement: true }),
     country: text('country'),
     city: text('city'),
     updatedAt: text('updated_at')
@@ -875,7 +875,7 @@ export const places = sqliteTable(
 export const fields_persistance = sqliteTable(
   'fields_persistance',
   {
-    id: integer('id').primaryKey(),
+    id: integer('id').primaryKey({ autoIncrement: true }),
     updatedAt: text('updated_at')
       .notNull()
       .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
@@ -916,7 +916,7 @@ export const custom_ids = sqliteTable(
 export const _custom_ids_v = sqliteTable(
   '_custom_ids_v',
   {
-    id: integer('id').primaryKey(),
+    id: integer('id').primaryKey({ autoIncrement: true }),
     parent: text('parent_id').references(() => custom_ids.id, {
       onDelete: 'set null',
     }),
@@ -962,7 +962,7 @@ export const _custom_ids_v = sqliteTable(
 export const fake_custom_ids = sqliteTable(
   'fake_custom_ids',
   {
-    id: integer('id').primaryKey(),
+    id: integer('id').primaryKey({ autoIncrement: true }),
     title: text('title'),
     updatedAt: text('updated_at')
       .notNull()
@@ -980,7 +980,7 @@ export const fake_custom_ids = sqliteTable(
 export const relationships_migration = sqliteTable(
   'relationships_migration',
   {
-    id: integer('id').primaryKey(),
+    id: integer('id').primaryKey({ autoIncrement: true }),
     relationship: integer('relationship_id').references(() => default_values.id, {
       onDelete: 'set null',
     }),
@@ -1036,7 +1036,7 @@ export const relationships_migration_rels = sqliteTable(
 export const _relationships_migration_v = sqliteTable(
   '_relationships_migration_v',
   {
-    id: integer('id').primaryKey(),
+    id: integer('id').primaryKey({ autoIncrement: true }),
     parent: integer('parent_id').references(() => relationships_migration.id, {
       onDelete: 'set null',
     }),
@@ -1110,7 +1110,7 @@ export const _relationships_migration_v_rels = sqliteTable(
 export const users = sqliteTable(
   'users',
   {
-    id: integer('id').primaryKey(),
+    id: integer('id').primaryKey({ autoIncrement: true }),
     updatedAt: text('updated_at')
       .notNull()
       .default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
@@ -1137,7 +1137,7 @@ export const users = sqliteTable(
 export const payload_locked_documents = sqliteTable(
   'payload_locked_documents',
   {
-    id: integer('id').primaryKey(),
+    id: integer('id').primaryKey({ autoIncrement: true }),
     globalSlug: text('global_slug'),
     updatedAt: text('updated_at')
       .notNull()
@@ -1290,7 +1290,7 @@ export const payload_locked_documents_rels = sqliteTable(
 export const payload_preferences = sqliteTable(
   'payload_preferences',
   {
-    id: integer('id').primaryKey(),
+    id: integer('id').primaryKey({ autoIncrement: true }),
     key: text('key'),
     value: text('value', { mode: 'json' }),
     updatedAt: text('updated_at')
@@ -1343,7 +1343,7 @@ export const payload_preferences_rels = sqliteTable(
 export const payload_migrations = sqliteTable(
   'payload_migrations',
   {
-    id: integer('id').primaryKey(),
+    id: integer('id').primaryKey({ autoIncrement: true }),
     name: text('name'),
     batch: numeric('batch'),
     updatedAt: text('updated_at')
@@ -1364,7 +1364,7 @@ export const payload_migrations = sqliteTable(
 )
 
 export const customGlobal = sqliteTable('customGlobal', {
-  id: integer('id').primaryKey(),
+  id: integer('id').primaryKey({ autoIncrement: true }),
   text: text('text'),
   updatedAt: text('updated_at').default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
   createdAt: text('created_at').default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
@@ -1373,7 +1373,7 @@ export const customGlobal = sqliteTable('customGlobal', {
 export const _customGlobal_v = sqliteTable(
   '_customGlobal_v',
   {
-    id: integer('id').primaryKey(),
+    id: integer('id').primaryKey({ autoIncrement: true }),
     version_text: text('version_text'),
     version_updatedAt: text('version_updated_at').default(
       sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`,

@@ -166,7 +166,7 @@ export const email: EmailFieldValidation = (
   {
     collectionSlug,
     req: {
-      payload: { config },
+      payload: { collections, config },
       t,
     },
     required,
@@ -174,7 +174,9 @@ export const email: EmailFieldValidation = (
   },
 ) => {
   if (collectionSlug) {
-    const collection = config.collections.find(({ slug }) => slug === collectionSlug)
+    const collection =
+      collections?.[collectionSlug]?.config ??
+      config.collections.find(({ slug }) => slug === collectionSlug) // If this is run on the client, `collections` will be undefined, but `config.collections` will be available
 
     if (
       collection.auth.loginWithUsername &&
@@ -201,7 +203,7 @@ export const username: UsernameFieldValidation = (
   {
     collectionSlug,
     req: {
-      payload: { config },
+      payload: { collections, config },
       t,
     },
     required,
@@ -211,7 +213,9 @@ export const username: UsernameFieldValidation = (
   let maxLength: number
 
   if (collectionSlug) {
-    const collection = config.collections.find(({ slug }) => slug === collectionSlug)
+    const collection =
+      collections?.[collectionSlug]?.config ??
+      config.collections.find(({ slug }) => slug === collectionSlug) // If this is run on the client, `collections` will be undefined, but `config.collections` will be available
 
     if (
       collection.auth.loginWithUsername &&
@@ -525,6 +529,7 @@ const validateFilterOptions: Validate<
                 id,
                 data,
                 relationTo: collection,
+                req,
                 siblingData,
                 user,
               })
@@ -639,6 +644,7 @@ export type UploadFieldSingleValidation = Validate<unknown, unknown, unknown, Up
 
 export const upload: UploadFieldValidation = async (value, options) => {
   const {
+    event,
     maxRows,
     minRows,
     relationTo,
@@ -709,6 +715,10 @@ export const upload: UploadFieldValidation = async (value, options) => {
         })
         .join(', ')}`
     }
+  }
+
+  if (event === 'onChange') {
+    return true
   }
 
   return validateFilterOptions(value, options)
@@ -737,6 +747,7 @@ export type RelationshipFieldSingleValidation = Validate<
 
 export const relationship: RelationshipFieldValidation = async (value, options) => {
   const {
+    event,
     maxRows,
     minRows,
     relationTo,
@@ -807,6 +818,10 @@ export const relationship: RelationshipFieldValidation = async (value, options) 
         })
         .join(', ')}`
     }
+  }
+
+  if (event === 'onChange') {
+    return true
   }
 
   return validateFilterOptions(value, options)
@@ -875,12 +890,7 @@ export type PointFieldValidation = Validate<
   PointField
 >
 
-export const point: PointFieldValidation = (value, { req: { t }, required }) => {
-  // Allow to pass null to clear the field
-  if (!value) {
-    value = ['', '']
-  }
-
+export const point: PointFieldValidation = (value = ['', ''], { req: { t }, required }) => {
   const lng = parseFloat(String(value[0]))
   const lat = parseFloat(String(value[1]))
   if (

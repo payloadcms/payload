@@ -8,7 +8,7 @@ import type { AdminViewProps, ListQuery, Where } from 'payload'
 
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { renderFilters, renderTable } from '@payloadcms/ui/rsc'
+import { renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
 import { formatAdminURL, mergeListSearchAndWhere } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
 import { isNumber } from 'payload/shared'
@@ -48,12 +48,7 @@ export const renderListView = async (
 
   const {
     collectionConfig,
-    collectionConfig: {
-      slug: collectionSlug,
-      admin: { useAsTitle },
-      defaultSort,
-      fields,
-    },
+    collectionConfig: { slug: collectionSlug },
     locale: fullLocale,
     permissions,
     req,
@@ -74,39 +69,14 @@ export const renderListView = async (
 
   const query = queryFromArgs || queryFromReq
 
-  let listPreferences: ListPreferences
-  const preferenceKey = `${collectionSlug}-list`
-
-  try {
-    listPreferences = (await payload
-      .find({
-        collection: 'payload-preferences',
-        depth: 0,
-        limit: 1,
-        req,
-        user,
-        where: {
-          and: [
-            {
-              key: {
-                equals: preferenceKey,
-              },
-            },
-            {
-              'user.relationTo': {
-                equals: user.collection,
-              },
-            },
-            {
-              'user.value': {
-                equals: user?.id,
-              },
-            },
-          ],
-        },
-      })
-      ?.then((res) => res?.docs?.[0]?.value)) as ListPreferences
-  } catch (_err) {} // eslint-disable-line no-empty
+  const listPreferences = await upsertPreferences<ListPreferences>({
+    key: `${collectionSlug}-list`,
+    req,
+    value: {
+      limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
+      sort: query?.sort as string,
+    },
+  })
 
   const {
     routes: { admin: adminRoute },
@@ -119,23 +89,17 @@ export const renderListView = async (
 
     const page = isNumber(query?.page) ? Number(query.page) : 0
 
-    let whereQuery = mergeListSearchAndWhere({
+    const limit = listPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
+
+    const sort =
+      listPreferences?.sort ||
+      (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
+
+    let where = mergeListSearchAndWhere({
       collectionConfig,
       search: typeof query?.search === 'string' ? query.search : undefined,
       where: (query?.where as Where) || undefined,
     })
-
-    const limit = isNumber(query?.limit)
-      ? Number(query.limit)
-      : listPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
-
-    const sort =
-      query?.sort && typeof query.sort === 'string'
-        ? query.sort
-        : listPreferences?.sort ||
-          (typeof collectionConfig.defaultSort === 'string'
-            ? collectionConfig.defaultSort
-            : undefined)
 
     if (typeof collectionConfig.admin?.baseListFilter === 'function') {
       const baseListFilter = await collectionConfig.admin.baseListFilter({
@@ -146,8 +110,8 @@ export const renderListView = async (
       })
 
       if (baseListFilter) {
-        whereQuery = {
-          and: [whereQuery, baseListFilter].filter(Boolean),
+        where = {
+          and: [where, baseListFilter].filter(Boolean),
         }
       }
     }
@@ -165,7 +129,7 @@ export const renderListView = async (
       req,
       sort,
       user,
-      where: whereQuery || {},
+      where: where || {},
     })
 
     const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
@@ -180,10 +144,10 @@ export const renderListView = async (
       enableRowSelections,
       i18n: req.i18n,
       payload,
-      useAsTitle,
+      useAsTitle: collectionConfig.admin.useAsTitle,
     })
 
-    const renderedFilters = renderFilters(fields, req.payload.importMap)
+    const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
 
     const staticDescription =
       typeof collectionConfig.admin.description === 'function'
@@ -238,12 +202,10 @@ export const renderListView = async (
         <Fragment>
           <HydrateAuthProvider permissions={permissions} />
           <ListQueryProvider
-            collectionSlug={collectionSlug}
             data={data}
             defaultLimit={limit}
             defaultSort={sort}
             modifySearchParams={!isInDrawer}
-            preferenceKey={preferenceKey}
           >
             {RenderServerComponent({
               clientProps,

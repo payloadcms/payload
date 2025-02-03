@@ -31,6 +31,7 @@ export type BeforeSync = (args: {
 export type FieldsOverride = (args: { defaultFields: Field[] }) => Field[]
 
 export type SearchPluginConfig = {
+  apiBasePath?: string
   beforeSync?: BeforeSync
   collections?: string[]
   defaultPriorities?: {

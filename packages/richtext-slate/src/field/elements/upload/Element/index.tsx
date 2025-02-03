@@ -46,15 +46,15 @@ const UploadElementComponent: React.FC<{ enabledCollectionSlugs?: string[] }> = 
 
   const {
     config: {
-      collections,
       routes: { api },
       serverURL,
     },
+    getEntityConfig,
   } = useConfig()
   const { i18n, t } = useTranslation()
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0)
   const [relatedCollection, setRelatedCollection] = useState<ClientCollectionConfig>(() =>
-    collections.find((coll) => coll.slug === relationTo),
+    getEntityConfig({ collectionSlug: relationTo }),
   )
 
   const drawerSlug = useDrawerSlug('upload-drawer')
@@ -121,14 +121,14 @@ const UploadElementComponent: React.FC<{ enabledCollectionSlugs?: string[] }> = 
 
       const elementPath = ReactEditor.findPath(editor, element)
 
-      setRelatedCollection(collections.find((coll) => coll.slug === collectionSlug))
+      setRelatedCollection(getEntityConfig({ collectionSlug }))
 
       Transforms.setNodes(editor, newNode, { at: elementPath })
 
       dispatchCacheBust()
       closeListDrawer()
     },
-    [closeListDrawer, editor, element, collections],
+    [closeListDrawer, editor, element, getEntityConfig],
   )
 
   const relatedFieldSchemaPath = `${uploadFieldsSchemaPath}.${relatedCollection.slug}`

@@ -2,13 +2,14 @@
 import type { FormState, SanitizedCollectionConfig, UploadEdits } from 'payload'
 
 import { isImage } from 'payload/shared'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { FieldError } from '../../fields/FieldError/index.js'
 import { fieldBaseClass } from '../../fields/shared/index.js'
 import { useForm, useFormProcessing } from '../../forms/Form/index.js'
 import { useField } from '../../forms/useField/index.js'
+import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -18,9 +19,9 @@ import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { Dropzone } from '../Dropzone/index.js'
 import { EditUpload } from '../EditUpload/index.js'
 import { FileDetails } from '../FileDetails/index.js'
+import './index.scss'
 import { PreviewSizes } from '../PreviewSizes/index.js'
 import { Thumbnail } from '../Thumbnail/index.js'
-import './index.scss'
 
 const baseClass = 'file-field'
 export const editDrawerSlug = 'edit-upload'
@@ -49,7 +50,8 @@ export const UploadActions = ({
 }: UploadActionsArgs) => {
   const { t } = useTranslation()
 
-  const fileTypeIsAdjustable = isImage(mimeType) && mimeType !== 'image/svg+xml'
+  const fileTypeIsAdjustable =
+    isImage(mimeType) && mimeType !== 'image/svg+xml' && mimeType !== 'image/jxl'
 
   if (!fileTypeIsAdjustable && (!customActions || customActions.length === 0)) {
     return null
@@ -91,10 +93,17 @@ export type UploadProps = {
 export const Upload: React.FC<UploadProps> = (props) => {
   const { collectionSlug, customActions, initialState, onChange, uploadConfig } = props
 
+  const {
+    config: {
+      routes: { api },
+      serverURL,
+    },
+  } = useConfig()
+
   const { t } = useTranslation()
   const { setModified } = useForm()
   const { resetUploadEdits, updateUploadEdits, uploadEdits } = useUploadEdits()
-  const { docPermissions, savedDocumentData } = useDocumentInfo()
+  const { id, docPermissions, savedDocumentData, setUploadStatus } = useDocumentInfo()
   const isFormSubmitting = useFormProcessing()
   const { errorMessage, setValue, showError, value } = useField<File>({
     path: 'file',
@@ -109,6 +118,9 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
   const urlInputRef = useRef<HTMLInputElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  const useServerSideFetch =
+    typeof uploadConfig?.pasteURL === 'object' && uploadConfig.pasteURL.allowList?.length > 0
 
   const handleFileChange = useCallback(
     (newFile: File) => {
@@ -173,20 +185,53 @@ export const Upload: React.FC<UploadProps> = (props) => {
   )
 
   const handleUrlSubmit = async () => {
-    if (fileUrl) {
-      try {
-        const response = await fetch(fileUrl)
-        const data = await response.blob()
+    if (!fileUrl || uploadConfig?.pasteURL === false) {
+      return
+    }
 
-        // Extract the file name from the URL
-        const fileName = fileUrl.split('/').pop()
+    setUploadStatus('uploading')
+    try {
+      // Attempt client-side fetch
+      const clientResponse = await fetch(fileUrl)
 
-        // Create a new File object from the Blob data
-        const file = new File([data], fileName, { type: data.type })
-        handleFileChange(file)
-      } catch (e) {
-        toast.error(e.message)
+      if (!clientResponse.ok) {
+        throw new Error(`Fetch failed with status: ${clientResponse.status}`)
       }
+
+      const blob = await clientResponse.blob()
+      const fileName = decodeURIComponent(fileUrl.split('/').pop() || '')
+      const file = new File([blob], fileName, { type: blob.type })
+
+      handleFileChange(file)
+      setUploadStatus('idle')
+      return // Exit if client-side fetch succeeds
+    } catch (_clientError) {
+      if (!useServerSideFetch) {
+        // If server-side fetch is not enabled, show client-side error
+        toast.error('Failed to fetch the file.')
+        setUploadStatus('failed')
+        return
+      }
+    }
+
+    // Attempt server-side fetch if client-side fetch fails and useServerSideFetch is true
+    try {
+      const pasteURL = `/${collectionSlug}/paste-url${id ? `/${id}?` : '?'}src=${encodeURIComponent(fileUrl)}`
+      const serverResponse = await fetch(`${serverURL}${api}${pasteURL}`)
+
+      if (!serverResponse.ok) {
+        throw new Error(`Fetch failed with status: ${serverResponse.status}`)
+      }
+
+      const blob = await serverResponse.blob()
+      const fileName = decodeURIComponent(fileUrl.split('/').pop() || '')
+      const file = new File([blob], fileName, { type: blob.type })
+
+      handleFileChange(file)
+      setUploadStatus('idle')
+    } catch (_serverError) {
+      toast.error('The provided URL is not allowed.')
+      setUploadStatus('failed')
     }
   }
 
@@ -234,7 +279,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
           enableAdjustments={showCrop || showFocalPoint}
           handleRemove={canRemoveUpload ? handleFileRemoval : undefined}
           hasImageSizes={hasImageSizes}
-          imageCacheTag={savedDocumentData.updatedAt}
+          imageCacheTag={uploadConfig?.cacheTags && savedDocumentData.updatedAt}
           uploadConfig={uploadConfig}
         />
       )}
@@ -268,16 +313,20 @@ export const Upload: React.FC<UploadProps> = (props) => {
                     ref={inputRef}
                     type="file"
                   />
-                  <span className={`${baseClass}__orText`}>{t('general:or')}</span>
-                  <Button
-                    buttonStyle="pill"
-                    onClick={() => {
-                      setShowUrlInput(true)
-                    }}
-                    size="small"
-                  >
-                    {t('upload:pasteURL')}
-                  </Button>
+                  {uploadConfig?.pasteURL !== false && (
+                    <Fragment>
+                      <span className={`${baseClass}__orText`}>{t('general:or')}</span>
+                      <Button
+                        buttonStyle="pill"
+                        onClick={() => {
+                          setShowUrlInput(true)
+                        }}
+                        size="small"
+                      >
+                        {t('upload:pasteURL')}
+                      </Button>
+                    </Fragment>
+                  )}
                 </div>
 
                 <p className={`${baseClass}__dragAndDropText`}>

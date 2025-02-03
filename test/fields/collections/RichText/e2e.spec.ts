@@ -31,7 +31,7 @@ describe('Rich Text', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ serverURL } = await initPayloadE2ENoConfig({
+    ;({ serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
     }))
 
@@ -60,7 +60,7 @@ describe('Rich Text', () => {
   async function navigateToRichTextFields() {
     const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'rich-text-fields')
     await page.goto(url.list)
-    await page.waitForURL(url.list)
+    await page.waitForURL('**' + url.list + '**')
 
     const linkToDoc = page.locator('.row-1 .cell-title a').first()
     await expect(() => expect(linkToDoc).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })

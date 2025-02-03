@@ -1,9 +1,8 @@
-import type { ClientSession } from 'mongodb'
 import type { FilterQuery } from 'mongoose'
 import type { FlattenedField, Operator, Payload, Where } from 'payload'
 
 import { deepMergeWithCombinedArrays } from 'payload'
-import { validOperators } from 'payload/shared'
+import { validOperatorSet } from 'payload/shared'
 
 import { buildAndOrConditions } from './buildAndOrConditions.js'
 import { buildSearchParam } from './buildSearchParams.js'
@@ -14,7 +13,6 @@ export async function parseParams({
   globalSlug,
   locale,
   payload,
-  session,
   where,
 }: {
   collectionSlug?: string
@@ -22,7 +20,6 @@ export async function parseParams({
   globalSlug?: string
   locale: string
   payload: Payload
-  session?: ClientSession
   where: Where
 }): Promise<Record<string, unknown>> {
   let result = {} as FilterQuery<any>
@@ -56,7 +53,7 @@ export async function parseParams({
         const pathOperators = where[relationOrPath]
         if (typeof pathOperators === 'object') {
           for (const operator of Object.keys(pathOperators)) {
-            if (validOperators.includes(operator as Operator)) {
+            if (validOperatorSet.has(operator as Operator)) {
               const searchParam = await buildSearchParam({
                 collectionSlug,
                 fields,
@@ -65,7 +62,6 @@ export async function parseParams({
                 locale,
                 operator,
                 payload,
-                session,
                 val: pathOperators[operator],
               })
 

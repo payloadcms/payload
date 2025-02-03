@@ -10,7 +10,7 @@ import React, { useState } from 'react'
 import { FormHeader } from '../../../elements/FormHeader/index.js'
 
 export const ForgotPasswordForm: React.FC = () => {
-  const { config } = useConfig()
+  const { config, getEntityConfig } = useConfig()
 
   const {
     admin: { user: userSlug },
@@ -19,7 +19,7 @@ export const ForgotPasswordForm: React.FC = () => {
 
   const { t } = useTranslation()
   const [hasSubmitted, setHasSubmitted] = useState(false)
-  const collectionConfig = config.collections?.find((collection) => collection?.slug === userSlug)
+  const collectionConfig = getEntityConfig({ collectionSlug: userSlug })
   const loginWithUsername = collectionConfig?.auth?.loginWithUsername
 
   const handleResponse: FormProps['handleResponse'] = (res, successToast, errorToast) => {
@@ -92,6 +92,7 @@ export const ForgotPasswordForm: React.FC = () => {
               name: 'username',
               type: 'text',
               data: {},
+              event: 'onChange',
               preferences: { fields: {} },
               req: {
                 payload: {
@@ -120,6 +121,7 @@ export const ForgotPasswordForm: React.FC = () => {
               name: 'email',
               type: 'email',
               data: {},
+              event: 'onChange',
               preferences: { fields: {} },
               req: { payload: { config }, t } as unknown as PayloadRequest,
               required: true,

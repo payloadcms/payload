@@ -254,17 +254,11 @@ jobs:
         if: matrix.database == 'supabase'
 
       - name: Integration Tests
-        uses: nick-fields/retry@v3
+        run: pnpm test:int
         env:
           NODE_OPTIONS: --max-old-space-size=8096
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ env.POSTGRES_URL }}
-        with:
-          retry_on: any
-          max_attempts: 5
-          timeout_minutes: 15
-          command: pnpm test:int
-          on_retry_command: pnpm clean:build && pnpm install --no-frozen-lockfile
 
   tests-e2e:
     runs-on: ubuntu-24.04
@@ -278,9 +272,9 @@ jobs:
         suite:
           - _community
           - access-control
-          - admin__e2e__1
-          - admin__e2e__2
-          - admin__e2e__3
+          - admin__e2e__general
+          - admin__e2e__list-view
+          - admin__e2e__document-view
           - admin-root
           - auth
           - auth-basic
@@ -289,6 +283,7 @@ jobs:
           - fields-relationship
           - fields__collections__Array
           - fields__collections__Blocks
+          - fields__collections__Checkbox
           - fields__collections__Collapsible
           - fields__collections__ConditionalLogic
           - fields__collections__CustomID
@@ -367,13 +362,7 @@ jobs:
         run: pnpm exec playwright install-deps chromium
 
       - name: E2E Tests
-        uses: nick-fields/retry@v3
-        with:
-          retry_on: any
-          max_attempts: 5
-          timeout_minutes: 20
-          command: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e:prod:ci ${{ matrix.suite }}
-          on_retry_command: pnpm clean:build && pnpm install --no-frozen-lockfile && pnpm build:all
+        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e:prod:ci ${{ matrix.suite }}
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}.json
           NEXT_TELEMETRY_DISABLED: 1
@@ -413,6 +402,8 @@ jobs:
             database: postgres
           - template: with-vercel-postgres
             database: postgres
+
+          - template: plugin
 
           # Re-enable once PG conncection is figured out
           # - template: with-vercel-website
@@ -467,11 +458,14 @@ jobs:
         uses: supercharge/mongodb-github-action@1.11.0
         with:
           mongodb-version: 6.0
+        if: matrix.database == 'mongodb'
 
       - name: Build Template
         run: |
           pnpm run script:pack --dest templates/${{ matrix.template }}
-          pnpm runts scripts/build-template-with-local-pkgs.ts ${{ matrix.template }} $POSTGRES_URL
+          pnpm run script:build-template-with-local-pkgs ${{ matrix.template }} $POSTGRES_URL
+        env:
+          NODE_OPTIONS: --max-old-space-size=8096
 
   tests-type-generation:
     runs-on: ubuntu-24.04

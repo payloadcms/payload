@@ -39,6 +39,8 @@ const dirname = path.dirname(filename)
 
 type EasierChained = { id: string; relation: EasierChained }
 
+const mongoIt = process.env.PAYLOAD_DATABASE === 'mongodb' ? it : it.skip
+
 describe('Relationships', () => {
   beforeAll(async () => {
     ;({ payload, restClient } = await initPayloadInt(dirname))
@@ -363,6 +365,38 @@ describe('Relationships', () => {
         expect(docs[0].id).toBe(doc.id)
       })
 
+      it('should allow querying within tabs-blocks-tabs', async () => {
+        const movie = await payload.create({ collection: 'movies', data: { name: 'Pulp Fiction' } })
+
+        const { id } = await payload.create({
+          collection: 'deep-nested',
+          data: {
+            content: {
+              blocks: [
+                {
+                  blockType: 'testBlock',
+                  meta: {
+                    movie: movie.id,
+                  },
+                },
+              ],
+            },
+          },
+        })
+
+        const result = await payload.find({
+          collection: 'deep-nested',
+          where: {
+            'content.blocks.meta.movie': {
+              equals: movie.id,
+            },
+          },
+        })
+
+        expect(result.totalDocs).toBe(1)
+        expect(result.docs[0].id).toBe(id)
+      })
+
       describe('Custom ID', () => {
         it('should query a custom id relation', async () => {
           const { customIdRelation } = await restClient
@@ -425,6 +459,46 @@ describe('Relationships', () => {
 
           expect(query1.totalDocs).toStrictEqual(1)
           expect(query2.totalDocs).toStrictEqual(2)
+        })
+
+        // all operator is not supported in Postgres yet for any fields
+        mongoIt('should query using "all" by hasMany relationship field', async () => {
+          const movie1 = await payload.create({
+            collection: 'movies',
+            data: {},
+          })
+          const movie2 = await payload.create({
+            collection: 'movies',
+            data: {},
+          })
+
+          await payload.create({
+            collection: 'directors',
+            data: {
+              name: 'Quentin Tarantino',
+              movies: [movie2.id, movie1.id],
+            },
+          })
+
+          await payload.create({
+            collection: 'directors',
+            data: {
+              name: 'Quentin Tarantino',
+              movies: [movie2.id],
+            },
+          })
+
+          const query1 = await payload.find({
+            collection: 'directors',
+            depth: 0,
+            where: {
+              movies: {
+                all: [movie1.id],
+              },
+            },
+          })
+
+          expect(query1.totalDocs).toStrictEqual(1)
         })
 
         it('should sort by a property of a hasMany relationship', async () => {
@@ -530,7 +604,7 @@ describe('Relationships', () => {
               // @ts-expect-error Sending bad data to test error handling
               customIdRelation: 1234,
             }),
-          ).rejects.toThrow('The following field is invalid: customIdRelation')
+          ).rejects.toThrow('The following field is invalid: Custom Id Relation')
         })
 
         it('should validate the format of number id relationships', async () => {
@@ -539,7 +613,7 @@ describe('Relationships', () => {
               // @ts-expect-error Sending bad data to test error handling
               customIdNumberRelation: 'bad-input',
             }),
-          ).rejects.toThrow('The following field is invalid: customIdNumberRelation')
+          ).rejects.toThrow('The following field is invalid: Custom Id Number Relation')
         })
 
         it('should allow update removing a relationship', async () => {
@@ -1320,6 +1394,39 @@ describe('Relationships', () => {
       expect(queryTwo.docs).toHaveLength(1)
     })
 
+    // all operator is not supported in Postgres yet for any fields
+    mongoIt('should allow REST all querying on polymorphic relationships', async () => {
+      const movie = await payload.create({
+        collection: 'movies',
+        data: {
+          name: 'Pulp Fiction 2',
+        },
+      })
+      await payload.create({
+        collection: polymorphicRelationshipsSlug,
+        data: {
+          polymorphic: {
+            relationTo: 'movies',
+            value: movie.id,
+          },
+        },
+      })
+
+      const queryOne = await restClient
+        .GET(`/${polymorphicRelationshipsSlug}`, {
+          query: {
+            where: {
+              'polymorphic.value': {
+                all: [movie.id],
+              },
+            },
+          },
+        })
+        .then((res) => res.json())
+
+      expect(queryOne.docs).toHaveLength(1)
+    })
+
     it('should allow querying on polymorphic relationships with an object syntax', async () => {
       const movie = await payload.create({
         collection: 'movies',
@@ -1469,6 +1576,23 @@ describe('Relationships', () => {
 
       expect(res.docs).toHaveLength(1)
       expect(res.docs[0].id).toBe(id)
+    })
+
+    it('should update document that polymorphicaly joined to another collection', async () => {
+      const item = await payload.create({ collection: 'items', data: { status: 'pending' } })
+
+      await payload.create({
+        collection: 'relations',
+        data: { item: { relationTo: 'items', value: item } },
+      })
+
+      const updated = await payload.update({
+        collection: 'items',
+        data: { status: 'completed' },
+        id: item.id,
+      })
+
+      expect(updated.status).toBe('completed')
     })
   })
 })

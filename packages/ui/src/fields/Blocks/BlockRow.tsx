@@ -2,7 +2,7 @@
 import type { ClientBlock, ClientField, Labels, Row, SanitizedFieldPermissions } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React from 'react'
+import React, { Fragment } from 'react'
 
 import type { UseDraggableSortableReturn } from '../../elements/DraggableSortable/useDraggableSortable/types.js'
 import type { RenderFieldsProps } from '../../forms/RenderFields/types.js'
@@ -140,10 +140,12 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
             : undefined
         }
         header={
-          isLoading
-            ? null
-            : Label || (
-                <div className={`${baseClass}__block-header`}>
+          isLoading ? (
+            <ShimmerEffect height="1rem" width="8rem" />
+          ) : (
+            <div className={`${baseClass}__block-header`}>
+              {Label || (
+                <Fragment>
                   <span className={`${baseClass}__block-number`}>
                     {String(rowIndex + 1).padStart(2, '0')}
                   </span>
@@ -155,8 +157,10 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
                   </Pill>
                   <SectionTitle path={`${path}.blockName`} readOnly={readOnly} />
                   {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
-                </div>
-              )
+                </Fragment>
+              )}
+            </div>
+          )
         }
         isCollapsed={row.collapsed}
         key={row.id}

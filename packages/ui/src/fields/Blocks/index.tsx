@@ -97,7 +97,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   )
 
   const {
-    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label, RowLabels } = {},
     errorPaths,
     rows = [],
     showError,
@@ -286,7 +286,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                       hasMaxRows={hasMaxRows}
                       isLoading={isLoading}
                       isSortable={isSortable}
-                      Label={Label}
+                      Label={RowLabels?.[i]}
                       labels={labels}
                       moveRow={moveRow}
                       parentPath={path}

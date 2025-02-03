@@ -424,6 +424,8 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    */
   graphQL?:
     | {
+        disableMutations?: true
+        disableQueries?: true
         pluralName?: string
         singularName?: string
       }
@@ -515,6 +517,7 @@ export type SanitizedJoin = {
    * The field configuration defining the join
    */
   field: JoinField
+  getForeignPath?(args: { locale?: TypedLocale }): string
   /**
    * The path of the join field in dot notation
    */

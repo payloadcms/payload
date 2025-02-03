@@ -43,8 +43,8 @@ export const PublicUser: CollectionConfig = {
 
 **Payload will automatically open up the following queries:**
 
-| Query Name              | Operation           |
-| ------------------      | ------------------- |
+| Query Name          | Operation           |
+| ------------------- | ------------------- |
 | `PublicUser`        | `findByID`          |
 | `PublicUsers`       | `find`              |
 | `countPublicUsers`  | `count`             |
@@ -94,7 +94,7 @@ const Header: GlobalConfig = {
 
 ## Preferences
 
-User [preferences](/docs/admin/overview#preferences) for the [Admin Panel](../admin/overview) are also available to GraphQL the same way as other collection schemas are generated. To query preferences you must supply an authorization token in the header and only the preferences of that user will be accessible.
+User [preferences](../admin/preferences) for the [Admin Panel](../admin/overview) are also available to GraphQL the same way as other collection schemas are generated. To query preferences you must supply an authorization token in the header and only the preferences of that user will be accessible.
 
 **Payload will open the following query:**
 
@@ -116,8 +116,8 @@ GraphQL Playground is enabled by default for development purposes, but disabled 
 You can even log in using the `login[collection-singular-label-here]` mutation to use the Playground as an authenticated user.
 
 <Banner type="success">
-  <strong>Tip:</strong>
-  <br />
+  **Tip:**
+
   To see more regarding how the above queries and mutations are used, visit your GraphQL playground
   (by default at
   [`${SERVER_URL}/api/graphql-playground`](http://localhost:3000/api/graphql-playground))
@@ -153,7 +153,7 @@ const NoProductionIntrospection: GraphQL.ValidationRule = (context) => ({
             { nodes: [node] }
           )
         );
-      }	
+      }
     }
   }
 })

@@ -34,12 +34,14 @@ export interface Config {
     'uploads-1': Uploads1;
     'uploads-2': Uploads2;
     'admin-thumbnail-function': AdminThumbnailFunction;
+    'admin-thumbnail-with-search-queries': AdminThumbnailWithSearchQuery;
     'admin-thumbnail-size': AdminThumbnailSize;
     'optional-file': OptionalFile;
     'required-file': RequiredFile;
     versions: Version;
     'custom-upload-field': CustomUploadField;
     'media-with-relation-preview': MediaWithRelationPreview;
+    'media-without-cache-tags': MediaWithoutCacheTag;
     'media-without-relation-preview': MediaWithoutRelationPreview;
     'relation-preview': RelationPreview;
     users: User;
@@ -72,12 +74,14 @@ export interface Config {
     'uploads-1': Uploads1Select<false> | Uploads1Select<true>;
     'uploads-2': Uploads2Select<false> | Uploads2Select<true>;
     'admin-thumbnail-function': AdminThumbnailFunctionSelect<false> | AdminThumbnailFunctionSelect<true>;
+    'admin-thumbnail-with-search-queries': AdminThumbnailWithSearchQueriesSelect<false> | AdminThumbnailWithSearchQueriesSelect<true>;
     'admin-thumbnail-size': AdminThumbnailSizeSelect<false> | AdminThumbnailSizeSelect<true>;
     'optional-file': OptionalFileSelect<false> | OptionalFileSelect<true>;
     'required-file': RequiredFileSelect<false> | RequiredFileSelect<true>;
     versions: VersionsSelect<false> | VersionsSelect<true>;
     'custom-upload-field': CustomUploadFieldSelect<false> | CustomUploadFieldSelect<true>;
     'media-with-relation-preview': MediaWithRelationPreviewSelect<false> | MediaWithRelationPreviewSelect<true>;
+    'media-without-cache-tags': MediaWithoutCacheTagsSelect<false> | MediaWithoutCacheTagsSelect<true>;
     'media-without-relation-preview': MediaWithoutRelationPreviewSelect<false> | MediaWithoutRelationPreviewSelect<true>;
     'relation-preview': RelationPreviewSelect<false> | RelationPreviewSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -744,6 +748,14 @@ export interface Enlarge {
       filesize?: number | null;
       filename?: string | null;
     };
+    undefinedHeightWithoutEnlargement?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
   };
 }
 /**
@@ -947,6 +959,7 @@ export interface Uploads1 {
  */
 export interface Uploads2 {
   id: string;
+  prefix: string;
   title?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -965,6 +978,24 @@ export interface Uploads2 {
  * via the `definition` "admin-thumbnail-function".
  */
 export interface AdminThumbnailFunction {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admin-thumbnail-with-search-queries".
+ */
+export interface AdminThumbnailWithSearchQuery {
   id: string;
   updatedAt: string;
   createdAt: string;
@@ -1074,6 +1105,25 @@ export interface CustomUploadField {
  * via the `definition` "media-with-relation-preview".
  */
 export interface MediaWithRelationPreview {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-without-cache-tags".
+ */
+export interface MediaWithoutCacheTag {
   id: string;
   title?: string | null;
   updatedAt: string;
@@ -1239,6 +1289,10 @@ export interface PayloadLockedDocument {
         value: string | AdminThumbnailFunction;
       } | null)
     | ({
+        relationTo: 'admin-thumbnail-with-search-queries';
+        value: string | AdminThumbnailWithSearchQuery;
+      } | null)
+    | ({
         relationTo: 'admin-thumbnail-size';
         value: string | AdminThumbnailSize;
       } | null)
@@ -1261,6 +1315,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media-with-relation-preview';
         value: string | MediaWithRelationPreview;
+      } | null)
+    | ({
+        relationTo: 'media-without-cache-tags';
+        value: string | MediaWithoutCacheTag;
       } | null)
     | ({
         relationTo: 'media-without-relation-preview';
@@ -2009,6 +2067,16 @@ export interface EnlargeSelect<T extends boolean = true> {
               filesize?: T;
               filename?: T;
             };
+        undefinedHeightWithoutEnlargement?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
       };
 }
 /**
@@ -2213,6 +2281,7 @@ export interface Uploads1Select<T extends boolean = true> {
  * via the `definition` "uploads-2_select".
  */
 export interface Uploads2Select<T extends boolean = true> {
+  prefix?: T;
   title?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -2231,6 +2300,23 @@ export interface Uploads2Select<T extends boolean = true> {
  * via the `definition` "admin-thumbnail-function_select".
  */
 export interface AdminThumbnailFunctionSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admin-thumbnail-with-search-queries_select".
+ */
+export interface AdminThumbnailWithSearchQueriesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -2360,6 +2446,24 @@ export interface CustomUploadFieldSelect<T extends boolean = true> {
  * via the `definition` "media-with-relation-preview_select".
  */
 export interface MediaWithRelationPreviewSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-without-cache-tags_select".
+ */
+export interface MediaWithoutCacheTagsSelect<T extends boolean = true> {
   title?: T;
   updatedAt?: T;
   createdAt?: T;

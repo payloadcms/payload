@@ -20,6 +20,7 @@ import { $convertToMarkdownString } from '@payloadcms/richtext-lexical/lexical/m
 
 import { lexicalFieldsSlug } from '../../slugs.js'
 import {
+  AsyncHooksBlock,
   CodeBlock,
   ConditionalLayoutBlock,
   RadioButtonsBlock,
@@ -32,6 +33,7 @@ import {
   TextBlock,
   UploadAndRichTextBlock,
 } from './blocks.js'
+import { ModifyInlineBlockFeature } from './ModifyInlineBlockFeature/feature.server.js'
 
 const editorConfig: ServerEditorConfig = {
   features: [
@@ -69,8 +71,10 @@ const editorConfig: ServerEditorConfig = {
         },
       },
     }),
+    ModifyInlineBlockFeature(),
     BlocksFeature({
       blocks: [
+        AsyncHooksBlock,
         RichTextBlock,
         TextBlock,
         UploadAndRichTextBlock,
@@ -174,6 +178,25 @@ const editorConfig: ServerEditorConfig = {
         },
       ],
       inlineBlocks: [
+        {
+          slug: 'AvatarGroup',
+          interfaceName: 'AvatarGroupBlock',
+          fields: [
+            {
+              name: 'avatars',
+              type: 'array',
+              minRows: 1,
+              maxRows: 6,
+              fields: [
+                {
+                  name: 'image',
+                  type: 'upload',
+                  relationTo: 'uploads',
+                },
+              ],
+            },
+          ],
+        },
         {
           slug: 'myInlineBlock',
           admin: {
@@ -344,7 +367,7 @@ export const LexicalFields: CollectionConfig = {
             }
 
             // Export to markdown
-            let markdown: string
+            let markdown: string = ''
             headlessEditor.getEditorState().read(() => {
               markdown = $convertToMarkdownString(
                 yourSanitizedEditorConfig?.features?.markdownTransformers,

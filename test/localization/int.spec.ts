@@ -1,10 +1,21 @@
+import type { Payload, User, Where } from 'payload'
+
 import path from 'path'
-import { type Payload, type Where } from 'payload'
+import { createLocalReq } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-import type { LocalizedPost, LocalizedSort, WithLocalizedRelationship } from './payload-types.js'
+import type {
+  LocalizedPost,
+  LocalizedSort,
+  Nested,
+  WithLocalizedRelationship,
+} from './payload-types.js'
 
+import { devUser } from '../credentials.js'
+
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { copyDataFromLocaleHandler } from '../../packages/ui/src/utilities/copyDataFromLocale.js'
 import { idToString } from '../helpers/idToString.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { arrayCollectionSlug } from './collections/Array/index.js'
@@ -260,6 +271,34 @@ describe('Localization', () => {
             collection,
             locale: 'all',
           })
+
+          expect(localized.title.en).toEqual(englishTitle)
+          expect(localized.title.es).toEqual(spanishTitle)
+        })
+
+        it('REST all locales with all', async () => {
+          const response = await restClient.GET(`/${collection}/${localizedPost.id}`, {
+            query: {
+              locale: 'all',
+            },
+          })
+
+          expect(response.status).toBe(200)
+          const localized = await response.json()
+
+          expect(localized.title.en).toEqual(englishTitle)
+          expect(localized.title.es).toEqual(spanishTitle)
+        })
+
+        it('REST all locales with asterisk', async () => {
+          const response = await restClient.GET(`/${collection}/${localizedPost.id}`, {
+            query: {
+              locale: '*',
+            },
+          })
+
+          expect(response.status).toBe(200)
+          const localized = await response.json()
 
           expect(localized.title.en).toEqual(englishTitle)
           expect(localized.title.es).toEqual(spanishTitle)
@@ -1635,7 +1674,19 @@ describe('Localization', () => {
         expect(all.groupLocalizedRow.es.text).toBe('hola world or something')
       })
 
-      it('should properly create/update/read localized tab field', async () => {
+      it('should not crash on empty localized tab', async () => {
+        const result = await payload.create({
+          collection: tabSlug,
+          locale: englishLocale,
+          data: {
+            tabLocalized: {},
+          },
+        })
+
+        expect(result).toBeTruthy()
+      })
+
+      it('should properly create/update/read array field inside localized tab field', async () => {
         const result = await payload.create({
           collection: tabSlug,
           locale: englishLocale,
@@ -1673,6 +1724,50 @@ describe('Localization', () => {
 
         expect(docEn.tabLocalized.title).toBe('hello en')
         expect(docEs.tabLocalized.title).toBe('hello es')
+      })
+
+      it('should properly create/update/read localized tab field', async () => {
+        const result = await payload.create({
+          collection: tabSlug,
+          locale: englishLocale,
+          data: {
+            tabLocalized: {
+              array: [
+                {
+                  title: 'hello en',
+                },
+              ],
+            },
+          },
+        })
+
+        expect(result.tabLocalized.array[0].title).toBe('hello en')
+
+        await payload.update({
+          collection: tabSlug,
+          locale: spanishLocale,
+          id: result.id,
+          data: {
+            tabLocalized: {
+              array: [{ title: 'hello es' }],
+            },
+          },
+        })
+
+        const docEn = await payload.findByID({
+          collection: tabSlug,
+          locale: englishLocale,
+          id: result.id,
+        })
+
+        const docEs = await payload.findByID({
+          collection: tabSlug,
+          locale: spanishLocale,
+          id: result.id,
+        })
+
+        expect(docEn.tabLocalized.array[0].title).toBe('hello en')
+        expect(docEs.tabLocalized.array[0].title).toBe('hello es')
       })
 
       it('should properly create/update/read localized field inside of tab', async () => {
@@ -2449,6 +2544,108 @@ describe('Localization', () => {
             },
           }),
         ).rejects.toBeTruthy()
+      })
+    })
+
+    describe('Copying To Locale', () => {
+      let user: User
+
+      beforeAll(async () => {
+        user = (
+          await payload.find({
+            collection: 'users',
+            where: {
+              email: {
+                equals: devUser.email,
+              },
+            },
+          })
+        ).docs[0] as unknown as User
+
+        user['collection'] = 'users'
+      })
+
+      it('should copy to locale', async () => {
+        const doc = await payload.create({
+          collection: 'localized-posts',
+          data: {
+            title: 'Hello',
+            group: {
+              children: 'Children',
+            },
+            unique: 'unique-field',
+            localizedCheckbox: true,
+          },
+        })
+
+        const req = await createLocalReq({ user }, payload)
+
+        const res = (await copyDataFromLocaleHandler({
+          fromLocale: 'en',
+          req,
+          toLocale: 'es',
+          docID: doc.id,
+          collectionSlug: 'localized-posts',
+        })) as LocalizedPost
+
+        expect(res.title).toBe('Hello')
+        expect(res.group.children).toBe('Children')
+        expect(res.unique).toBe('unique-field')
+        expect(res.localizedCheckbox).toBe(true)
+      })
+
+      it('should copy localized nested to arrays', async () => {
+        const doc = await payload.create({
+          collection: 'nested',
+          locale: 'en',
+          data: {
+            topLevelArray: [
+              {
+                localizedText: 'some-localized-text',
+                notLocalizedText: 'some-not-localized-text',
+              },
+            ],
+          },
+        })
+
+        const req = await createLocalReq({ user }, payload)
+
+        const res = (await copyDataFromLocaleHandler({
+          fromLocale: 'en',
+          req,
+          toLocale: 'es',
+          docID: doc.id,
+          collectionSlug: 'nested',
+        })) as Nested
+
+        expect(res.topLevelArray[0].localizedText).toBe('some-localized-text')
+        expect(res.topLevelArray[0].notLocalizedText).toBe('some-not-localized-text')
+      })
+
+      it('should copy localized arrays', async () => {
+        const doc = await payload.create({
+          collection: 'nested',
+          locale: 'en',
+          data: {
+            topLevelArrayLocalized: [
+              {
+                text: 'some-text',
+              },
+            ],
+          },
+        })
+
+        const req = await createLocalReq({ user }, payload)
+
+        const res = (await copyDataFromLocaleHandler({
+          fromLocale: 'en',
+          req,
+          toLocale: 'es',
+          docID: doc.id,
+          collectionSlug: 'nested',
+        })) as Nested
+
+        expect(res.topLevelArrayLocalized[0].text).toBe('some-text')
       })
     })
   })
