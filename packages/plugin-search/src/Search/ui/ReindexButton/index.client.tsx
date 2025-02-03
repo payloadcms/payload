@@ -65,7 +65,7 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
         toast.success(message)
         router.refresh()
       }
-    } catch (err: unknown) {
+    } catch (_err: unknown) {
       // swallow error, toast shown above
     } finally {
       setReindexCollections([])

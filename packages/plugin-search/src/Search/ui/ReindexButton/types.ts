@@ -1,18 +1,19 @@
-import type { CustomComponent, PayloadServerReactComponent, StaticLabel } from 'payload'
+import type { CustomComponent, PayloadServerReactComponent } from 'payload'
 
-import type { CollectionLabels } from '../../../types.js'
+import type { CollectionLabels, ResolvedCollectionLabels } from '../../../types.js'
 
 export type ReindexButtonProps = {
-  collectionLabels: Record<string, StaticLabel>
+  collectionLabels: ResolvedCollectionLabels
   searchCollections: string[]
   searchSlug: string
 }
 
-type ReindexButtonServerProps = {
+export type ReindexButtonServerProps = {
   collectionLabels: CollectionLabels
-} & ReindexButtonProps
+} & Omit<ReindexButtonProps, 'collectionLabels'>
 
 export type SearchReindexButtonClientComponent = ReindexButtonProps
+
 export type SearchReindexButtonServerComponent = PayloadServerReactComponent<
   CustomComponent<ReindexButtonServerProps>
 >
