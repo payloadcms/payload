@@ -394,7 +394,7 @@
   },
   "peerDependencies": {
     "@faceless-ui/modal": "3.0.0-beta.2",
-    "@faceless-ui/scroll-info": "2.0.0-beta.0",
+    "@faceless-ui/scroll-info": "2.0.0",
     "@lexical/headless": "0.21.0",
     "@lexical/html": "0.21.0",
     "@lexical/link": "0.21.0",
