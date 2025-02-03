@@ -25,7 +25,6 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
   searchCollections,
   searchSlug,
 }) => {
-  const apiBasePath = useConfig().config.routes.api
   const { closeModal, openModal } = useModal()
 
   const { config } = useConfig()
