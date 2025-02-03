@@ -788,19 +788,20 @@ describe('General', () => {
 
     test('should bulk edit fields with subfields', async () => {
       await deleteAllPosts()
+      const { id: docID } = await createPost()
       await page.goto(postsUrl.list)
       await page.locator('input#select-all').check()
       await page.locator('.edit-many__toggle').click()
       await page.locator('.field-select .rs__control').click()
 
-      const titleOption = page.locator('.field-select .rs__option', {
+      const bulkEditModal = page.locator('#edit-posts')
+
+      const titleOption = bulkEditModal.locator('.field-select .rs__option', {
         hasText: exactText('Group > Title'),
       })
 
-      await expect(titleOption).toBeVisible()
       await titleOption.click()
-      const titleInput = page.locator('#field-group__title')
-      await expect(titleInput).toBeVisible()
+      const titleInput = bulkEditModal.locator('#field-title')
       await titleInput.fill('New Group Title')
       await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
       await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
