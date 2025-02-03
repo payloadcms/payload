@@ -6,7 +6,7 @@ desc: Fully customize your Admin Panel by swapping in your own React components.
 keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-The Payload [Admin Panel](./overview) is designed to be as minimal and straightforward as possible to allow for easy customization and full control over the UI. In order for Payload to support this level of customization, Payload provides a pattern for you to supply your own React components through your [Payload Config](../configuration/overview).
+The Payload [Admin Panel](../admin/overview) is designed to be as minimal and straightforward as possible to allow for easy customization and full control over the UI. In order for Payload to support this level of customization, Payload provides a pattern for you to supply your own React components through your [Payload Config](../configuration/overview).
 
 All Custom Components in Payload are [React Server Components](https://react.dev/reference/rsc/server-components) by default. This enables the use of the [Local API](../local-api/overview) directly on the front-end. Custom Components are available for nearly every part of the Admin Panel for extreme granularity and control.
 
@@ -269,7 +269,7 @@ export default async function MyServerComponent({
 
 But, the Payload Config is [non-serializable](https://react.dev/reference/rsc/use-client#serializable-types) by design. It is full of custom validation functions, React components, etc. This means that the Payload Config, in its entirety, cannot be passed directly to Client Components.
 
-For this reason, Payload creates a Client Config and passes it into the Config Provider. This is a serializable version of the Payload Config that can be accessed from any Client Component via the [`useConfig`](./hooks#useconfig) hook:
+For this reason, Payload creates a Client Config and passes it into the Config Provider. This is a serializable version of the Payload Config that can be accessed from any Client Component via the [`useConfig`](../admin/hooks#useconfig) hook:
 
 ```tsx
 'use client'
@@ -346,12 +346,12 @@ export const MyClientComponent: React.FC = () => {
 ```
 
 <Banner type="success">
-  See the [Hooks](./hooks) documentation for a full list of available hooks.
+  See the [Hooks](../admin/hooks) documentation for a full list of available hooks.
 </Banner>
 
 ### Getting the Current Locale
 
-All [Custom Views](./views) can support multiple locales to be consistent with Payload's [Localization](../configuration/localization). They automatically receive the `locale` object as a prop by default. This can be used to scope API requests, etc.:
+All [Custom Views](../admin/views) can support multiple locales to be consistent with Payload's [Localization](../configuration/localization). They automatically receive the `locale` object as a prop by default. This can be used to scope API requests, etc.:
 
 ```tsx
 import React from 'react'
@@ -391,12 +391,12 @@ const Greeting: React.FC = () => {
 ```
 
 <Banner type="success">
-  See the [Hooks](./hooks) documentation for a full list of available hooks.
+  See the [Hooks](../admin/hooks) documentation for a full list of available hooks.
 </Banner>
 
 ### Using Hooks
 
-To make it easier to [build your Custom Components](#building-custom-components), you can use [Payload's built-in React Hooks](./hooks) in any Client Component. For example, you might want to interact with one of Payload's many React Contexts. To do this, you can one of the many hooks available depending on your needs.
+To make it easier to [build your Custom Components](#building-custom-components), you can use [Payload's built-in React Hooks](../admin/hooks) in any Client Component. For example, you might want to interact with one of Payload's many React Contexts. To do this, you can one of the many hooks available depending on your needs.
 
 ```tsx
 'use client'
@@ -413,12 +413,12 @@ export const MyClientComponent: React.FC = () => {
 ```
 
 <Banner type="success">
-  See the [Hooks](./hooks) documentation for a full list of available hooks.
+  See the [Hooks](../admin/hooks) documentation for a full list of available hooks.
 </Banner>
 
 ### Adding Styles
 
-Payload has a robust [CSS Library](./customizing-css) that you can use to style your Custom Components similarly to Payload's built-in styling. This will ensure that your Custom Components match the existing design system, and so that they automatically adapt to any theme changes that might occur.
+Payload has a robust [CSS Library](../admin/customizing-css) that you can use to style your Custom Components similarly to Payload's built-in styling. This will ensure that your Custom Components match the existing design system, and so that they automatically adapt to any theme changes that might occur.
 
 To apply custom styles, simply import your own `.css` or `.scss` file into your Custom Component:
 
@@ -456,13 +456,13 @@ Payload also exports its [SCSS](https://sass-lang.com) library for reuse which i
 
 <Banner type="success">
   **Note:**
-  You can also drill into Payload's own component styles, or easily apply global, app-wide CSS. More on that [here](./customizing-css).
+  You can also drill into Payload's own component styles, or easily apply global, app-wide CSS. More on that [here](../admin/customizing-css).
 </Banner>
 
 
 ## Root Components
 
-Root Components are those that affect the [Admin Panel](./overview) generally, such as the logo or the main nav.
+Root Components are those that affect the [Admin Panel](../admin/overview) generally, such as the logo or the main nav.
 
 To override Root Components, use the `admin.components` property in your [Payload Config](../configuration/overview):
 
@@ -500,7 +500,7 @@ The following options are available:
 | **`providers`**       | Custom [React Context](https://react.dev/learn/scaling-up-with-reducer-and-context) providers that will wrap the entire Admin Panel. [More details](#custom-providers).                                       |
 | **`actions`**         | An array of Custom Components to be rendered _within_ the header of the Admin Panel, providing additional interactivity and functionality.                                                                  |
 | **`header`**          | An array of Custom Components to be injected above the Payload header.                                                   |
-| **`views`**           | Override or create new views within the Admin Panel. [More details](./views).                                                                                                                                 |
+| **`views`**           | Override or create new views within the Admin Panel. [More details](../admin/views).                                                                                                                                 |
 
 <Banner type="success">
   **Note:**
@@ -509,7 +509,7 @@ The following options are available:
 
 ### Custom Providers
 
-As you add more and more Custom Components to your [Admin Panel](./overview), you may find it helpful to add additional [React Context](https://react.dev/learn/scaling-up-with-reducer-and-context)(s). Payload allows you to inject your own context providers in your app so you can export your own custom hooks, etc.
+As you add more and more Custom Components to your [Admin Panel](../admin/overview), you may find it helpful to add additional [React Context](https://react.dev/learn/scaling-up-with-reducer-and-context)(s). Payload allows you to inject your own context providers in your app so you can export your own custom hooks, etc.
 
 To add a Custom Provider, use the `admin.components.providers` property in your [Payload Config](../configuration/overview):
 
