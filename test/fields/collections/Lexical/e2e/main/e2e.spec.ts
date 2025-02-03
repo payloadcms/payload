@@ -944,7 +944,7 @@ describe('lexicalMain', () => {
     await paragraph.click()
     await page.keyboard.type('Text')
 
-    // Select "there" by pressing shift + arrow left
+    // Select text
     for (let i = 0; i < 4; i++) {
       await page.keyboard.press('Shift+ArrowLeft')
     }
@@ -955,10 +955,6 @@ describe('lexicalMain', () => {
     const linkButton = inlineToolbar.locator('.toolbar-popup__button-link')
     await expect(linkButton).toBeVisible()
     await linkButton.click()
-
-    /**
-     * Link Drawer
-     */
 
     const linkDrawer = page.locator('dialog[id^=drawer_1_lexical-rich-text-link-]').first() // IDs starting with drawer_1_lexical-rich-text-link- (there's some other symbol after the underscore)
     await expect(linkDrawer).toBeVisible()
