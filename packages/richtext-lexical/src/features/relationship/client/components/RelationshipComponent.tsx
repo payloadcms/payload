@@ -2,27 +2,16 @@
 import type { ElementFormatType } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
-import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection.js'
-import { mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
 import { Button, useConfig, usePayloadAPI, useTranslation } from '@payloadcms/ui'
-import {
-  $getNodeByKey,
-  $getSelection,
-  $isNodeSelection,
-  CLICK_COMMAND,
-  COMMAND_PRIORITY_LOW,
-  KEY_BACKSPACE_COMMAND,
-  KEY_DELETE_COMMAND,
-} from 'lexical'
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import { $getNodeByKey } from 'lexical'
+import React, { useCallback, useReducer, useRef, useState } from 'react'
 
 import type { RelationshipData } from '../../server/nodes/RelationshipNode.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { useLexicalDocumentDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDocumentDrawer.js'
 import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from '../drawer/commands.js'
-import { $isRelationshipNode } from '../nodes/RelationshipNode.js'
 import './index.scss'
 
 const baseClass = 'lexical-relationship'
@@ -53,21 +42,18 @@ const Component: React.FC<Props> = (props) => {
   const relationshipElemRef = useRef<HTMLDivElement | null>(null)
 
   const [editor] = useLexicalComposerContext()
-  const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey!)
   const {
     fieldProps: { readOnly },
   } = useEditorConfigContext()
   const {
     config: {
-      collections,
       routes: { api },
       serverURL,
     },
+    getEntityConfig,
   } = useConfig()
 
-  const [relatedCollection, setRelatedCollection] = useState(
-    () => collections.find((coll) => coll.slug === relationTo)!,
-  )
+  const [relatedCollection] = useState(() => getEntityConfig({ collectionSlug: relationTo }))
 
   const { i18n, t } = useTranslation()
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0)
@@ -97,63 +83,8 @@ const Component: React.FC<Props> = (props) => {
     dispatchCacheBust()
   }, [cacheBust, setParams, closeDocumentDrawer])
 
-  const $onDelete = useCallback(
-    (payload: KeyboardEvent) => {
-      const deleteSelection = $getSelection()
-      if (isSelected && $isNodeSelection(deleteSelection)) {
-        const event: KeyboardEvent = payload
-        event.preventDefault()
-        editor.update(() => {
-          deleteSelection.getNodes().forEach((node) => {
-            if ($isRelationshipNode(node)) {
-              node.remove()
-            }
-          })
-        })
-      }
-      return false
-    },
-    [editor, isSelected],
-  )
-  const onClick = useCallback(
-    (payload: MouseEvent) => {
-      const event = payload
-      // Check if relationshipElemRef.target or anything WITHIN relationshipElemRef.target was clicked
-      if (
-        event.target === relationshipElemRef.current ||
-        relationshipElemRef.current?.contains(event.target as Node)
-      ) {
-        if (event.shiftKey) {
-          setSelected(!isSelected)
-        } else {
-          if (!isSelected) {
-            clearSelection()
-            setSelected(true)
-          }
-        }
-        return true
-      }
-
-      return false
-    },
-    [isSelected, setSelected, clearSelection],
-  )
-
-  useEffect(() => {
-    return mergeRegister(
-      editor.registerCommand<MouseEvent>(CLICK_COMMAND, onClick, COMMAND_PRIORITY_LOW),
-
-      editor.registerCommand(KEY_DELETE_COMMAND, $onDelete, COMMAND_PRIORITY_LOW),
-      editor.registerCommand(KEY_BACKSPACE_COMMAND, $onDelete, COMMAND_PRIORITY_LOW),
-    )
-  }, [clearSelection, editor, isSelected, nodeKey, $onDelete, setSelected, onClick])
-
   return (
-    <div
-      className={[baseClass, isSelected && `${baseClass}--selected`].filter(Boolean).join(' ')}
-      contentEditable={false}
-      ref={relationshipElemRef}
-    >
+    <div className={baseClass} contentEditable={false} ref={relationshipElemRef}>
       <div className={`${baseClass}__wrap`}>
         <p className={`${baseClass}__label`}>
           {t('fields:labelRelationship', {

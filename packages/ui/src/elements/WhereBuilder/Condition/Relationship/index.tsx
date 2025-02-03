@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, PaginatedDocs, Where } from 'payload'
+import type { PaginatedDocs, Where } from 'payload'
 
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useReducer, useState } from 'react'
@@ -28,7 +28,6 @@ export const RelationshipField: React.FC<Props> = (props) => {
 
   const {
     config: {
-      collections,
       routes: { api },
       serverURL,
     },
@@ -55,7 +54,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
 
   const addOptions = useCallback(
     (data, relation) => {
-      const collection = getEntityConfig({ collectionSlug: relation }) as ClientCollectionConfig
+      const collection = getEntityConfig({ collectionSlug: relation })
       dispatchOptions({ type: 'ADD', collection, data, hasMultipleRelations, i18n, relation })
     },
     [hasMultipleRelations, i18n, getEntityConfig],
@@ -72,22 +71,21 @@ export const RelationshipField: React.FC<Props> = (props) => {
       if (relationSlug && partiallyLoadedRelationshipSlugs.current.includes(relationSlug)) {
         const collection = getEntityConfig({
           collectionSlug: relationSlug,
-        }) as ClientCollectionConfig
+        })
         const fieldToSearch = collection?.admin?.useAsTitle || 'id'
         const pageIndex = nextPageByRelationshipRef.current.get(relationSlug)
 
-        const query: {
-          depth?: number
-          limit?: number
-          page?: number
-          where: Where
-        } = {
+        const where: Where = {
+          and: [],
+        }
+        const query = {
           depth: 0,
           limit: maxResultsPerRequest,
           page: pageIndex,
-          where: {
-            and: [],
+          select: {
+            [fieldToSearch]: true,
           },
+          where,
         }
 
         if (debouncedSearch) {
@@ -115,15 +113,13 @@ export const RelationshipField: React.FC<Props> = (props) => {
             if (data.docs.length > 0) {
               addOptions(data, relationSlug)
 
-              if (!debouncedSearch) {
-                if (data.nextPage) {
-                  nextPageByRelationshipRef.current.set(relationSlug, data.nextPage)
-                } else {
-                  partiallyLoadedRelationshipSlugs.current =
-                    partiallyLoadedRelationshipSlugs.current.filter(
-                      (partiallyLoadedRelation) => partiallyLoadedRelation !== relationSlug,
-                    )
-                }
+              if (data.nextPage) {
+                nextPageByRelationshipRef.current.set(relationSlug, data.nextPage)
+              } else {
+                partiallyLoadedRelationshipSlugs.current =
+                  partiallyLoadedRelationshipSlugs.current.filter(
+                    (partiallyLoadedRelation) => partiallyLoadedRelation !== relationSlug,
+                  )
               }
             }
           } else {
@@ -138,7 +134,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
 
       setHasLoadedFirstOptions(true)
     },
-    [addOptions, api, collections, debouncedSearch, i18n.language, serverURL, t],
+    [addOptions, api, debouncedSearch, getEntityConfig, i18n.language, serverURL, t],
   )
 
   const loadMoreOptions = React.useCallback(() => {
@@ -208,14 +204,13 @@ export const RelationshipField: React.FC<Props> = (props) => {
     return undefined
   }, [hasMany, hasMultipleRelations, value, options])
 
-  const handleInputChange = useCallback(
-    (newSearch) => {
-      if (search !== newSearch) {
-        setSearch(newSearch)
-      }
-    },
-    [search],
-  )
+  const handleInputChange = (input: string) => {
+    dispatchOptions({ type: 'CLEAR', i18n, required: false })
+    const relationSlug = partiallyLoadedRelationshipSlugs.current[0]
+    partiallyLoadedRelationshipSlugs.current = relationSlugs
+    nextPageByRelationshipRef.current.set(relationSlug, 1)
+    setSearch(input)
+  }
 
   const addOptionByID = useCallback(
     async (id, relation) => {

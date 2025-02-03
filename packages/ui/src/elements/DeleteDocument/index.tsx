@@ -54,7 +54,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
     getEntityConfig,
   } = useConfig()
 
-  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
+  const collectionConfig = getEntityConfig({ collectionSlug })
 
   const { setModified } = useForm()
   const [deleting, setDeleting] = useState(false)

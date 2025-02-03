@@ -5,5 +5,5 @@ import { CheckboxField } from '@payloadcms/ui'
 import React from 'react'
 
 export const CustomCheckboxFieldClient: CheckboxFieldClientComponent = (props) => {
-  return <CheckboxField field={props?.field} path={props?.path} />
+  return <CheckboxField {...props} />
 }

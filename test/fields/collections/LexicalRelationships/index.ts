@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import {
   defaultEditorFeatures,
+  FixedToolbarFeature,
   lexicalEditor,
   RelationshipFeature,
 } from '@payloadcms/richtext-lexical'
@@ -30,7 +31,7 @@ export const LexicalRelationshipsFields: CollectionConfig = {
       name: 'richText2',
       type: 'richText',
       editor: lexicalEditor({
-        features: [...defaultEditorFeatures, RelationshipFeature()],
+        features: [...defaultEditorFeatures, RelationshipFeature(), FixedToolbarFeature()],
       }),
     },
   ],

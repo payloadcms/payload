@@ -91,9 +91,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   const [query, setQuery] = useState<ListQuery>()
   const [openColumnSelector, setOpenColumnSelector] = useState(false)
 
-  const [collectionConfig] = useState(
-    () => getEntityConfig({ collectionSlug: relationTo }) as ClientCollectionConfig,
-  )
+  const [collectionConfig] = useState(() => getEntityConfig({ collectionSlug: relationTo }))
 
   const [isLoadingTable, setIsLoadingTable] = useState(!disableTable)
   const [data, setData] = useState<PaginatedDocs>(initialData)
@@ -114,7 +112,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         newQuery.where = hoistQueryParamsToAnd(newQuery.where, filterOptions)
       }
 
-      // map columns from string[] to ColumnPreferences
+      // map columns from string[] to ListPreferences['columns']
       const defaultColumns = field.admin.defaultColumns
         ? field.admin.defaultColumns.map((accessor) => ({
             accessor,
@@ -254,14 +252,12 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           {data.docs && data.docs.length > 0 && (
             <RelationshipProvider>
               <ListQueryProvider
-                collectionSlug={relationTo}
                 data={data}
                 defaultLimit={
                   field.defaultLimit ?? collectionConfig?.admin?.pagination?.defaultLimit
                 }
                 modifySearchParams={false}
                 onQueryChange={setQuery}
-                preferenceKey={preferenceKey}
               >
                 <TableColumnsProvider
                   collectionSlug={relationTo}

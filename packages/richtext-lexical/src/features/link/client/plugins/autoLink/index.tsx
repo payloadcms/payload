@@ -357,7 +357,7 @@ function handleBadNeighbors(
 
   if ($isAutoLinkNode(previousSibling)) {
     const isEmailURI = previousSibling.getFields()?.url
-      ? previousSibling.getFields()?.url?.startsWith('mailto:')
+      ? (previousSibling.getFields()?.url?.startsWith('mailto:') ?? false)
       : false
     if (!startsWithSeparator(text) || startsWithTLD(text, isEmailURI)) {
       previousSibling.append(textNode)

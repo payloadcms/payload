@@ -7,14 +7,18 @@ import type {
   SanitizedGlobalPermission,
 } from 'payload'
 
+import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
+import { getClientSchemaMap } from '@payloadcms/ui/utilities/getClientSchemaMap'
+import { getSchemaMap } from '@payloadcms/ui/utilities/getSchemaMap'
 import { notFound } from 'next/navigation.js'
 import React from 'react'
 
 import { getLatestVersion } from '../Versions/getLatestVersion.js'
 import { DefaultVersionView } from './Default/index.js'
+import { RenderDiff } from './RenderFieldsToDiff/index.js'
 
 export const VersionView: PayloadServerReactComponent<EditViewComponent> = async (props) => {
-  const { initPageResult, routeSegments } = props
+  const { i18n, initPageResult, routeSegments, searchParams } = props
 
   const {
     collectionConfig,
@@ -29,6 +33,13 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
 
   const collectionSlug = collectionConfig?.slug
   const globalSlug = globalConfig?.slug
+
+  const localeCodesFromParams = searchParams.localeCodes
+    ? JSON.parse(searchParams.localeCodes as string)
+    : null
+  const comparisonVersionIDFromParams: string = searchParams.compareValue as string
+
+  const modifiedOnly: boolean = searchParams.modifiedOnly === 'true'
 
   const { localization } = config
 
@@ -48,8 +59,8 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
       doc = await payload.findVersionByID({
         id: versionID,
         collection: slug,
-        depth: 1,
-        locale: '*',
+        depth: 0,
+        locale: 'all',
         overrideAccess: false,
         req,
         user,
@@ -59,15 +70,21 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
         latestDraftVersion = await getLatestVersion({
           slug,
           type: 'collection',
+          locale: 'all',
+          overrideAccess: false,
           parentID: id,
           payload,
+          req,
           status: 'draft',
         })
         latestPublishedVersion = await getLatestVersion({
           slug,
           type: 'collection',
+          locale: 'all',
+          overrideAccess: false,
           parentID: id,
           payload,
+          req,
           status: 'published',
         })
       }
@@ -85,8 +102,8 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
       doc = await payload.findGlobalVersionByID({
         id: versionID,
         slug,
-        depth: 1,
-        locale: '*',
+        depth: 0,
+        locale: 'all',
         overrideAccess: false,
         req,
         user,
@@ -96,13 +113,19 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
         latestDraftVersion = await getLatestVersion({
           slug,
           type: 'global',
+          locale: 'all',
+          overrideAccess: false,
           payload,
+          req,
           status: 'draft',
         })
         latestPublishedVersion = await getLatestVersion({
           slug,
           type: 'global',
+          locale: 'all',
+          overrideAccess: false,
           payload,
+          req,
           status: 'published',
         })
       }
@@ -120,12 +143,27 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
     }
   }
 
-  const localeOptions: OptionObject[] =
-    localization &&
-    localization.locales.map(({ code, label }) => ({
-      label,
-      value: code,
-    }))
+  const selectedLocales: OptionObject[] = []
+  if (localization) {
+    if (localeCodesFromParams) {
+      for (const code of localeCodesFromParams) {
+        const locale = localization.locales.find((locale) => locale.code === code)
+        if (locale) {
+          selectedLocales.push({
+            label: locale.label,
+            value: locale.code,
+          })
+        }
+      }
+    } else {
+      for (const { code, label } of localization.locales) {
+        selectedLocales.push({
+          label,
+          value: code,
+        })
+      }
+    }
+  }
 
   const latestVersion =
     latestPublishedVersion?.updatedAt > latestDraftVersion?.updatedAt
@@ -136,14 +174,83 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
     return notFound()
   }
 
+  /**
+   * The doc to compare this version to is either the latest version, or a specific version if specified in the URL.
+   * This specific version is added to the URL when a user selects a version to compare to.
+   */
+  let comparisonDoc = null
+  if (comparisonVersionIDFromParams) {
+    if (collectionSlug) {
+      comparisonDoc = await payload.findVersionByID({
+        id: comparisonVersionIDFromParams,
+        collection: collectionSlug,
+        depth: 0,
+        locale: 'all',
+        overrideAccess: false,
+        req,
+      })
+    } else {
+      comparisonDoc = await payload.findGlobalVersionByID({
+        id: comparisonVersionIDFromParams,
+        slug: globalSlug,
+        depth: 0,
+        locale: 'all',
+        overrideAccess: false,
+        req,
+      })
+    }
+  } else {
+    comparisonDoc = latestVersion
+  }
+
+  const schemaMap = getSchemaMap({
+    collectionSlug,
+    config,
+    globalSlug,
+    i18n,
+  })
+
+  const clientSchemaMap = getClientSchemaMap({
+    collectionSlug,
+    config: getClientConfig({ config: payload.config, i18n, importMap: payload.importMap }),
+    globalSlug,
+    i18n,
+    payload,
+    schemaMap,
+  })
+
+  const RenderedDiff = RenderDiff({
+    clientSchemaMap,
+    comparisonSiblingData: comparisonDoc?.version,
+    customDiffComponents: {},
+    entitySlug: collectionSlug || globalSlug,
+    fieldPermissions: docPermissions?.fields,
+    fields: (collectionConfig || globalConfig)?.fields,
+    i18n,
+    modifiedOnly,
+    parentIndexPath: '',
+    parentPath: '',
+    parentSchemaPath: '',
+    req,
+    selectedLocales: selectedLocales && selectedLocales.map((locale) => locale.value),
+    versionSiblingData: globalConfig
+      ? {
+          ...doc?.version,
+          createdAt: doc?.version?.createdAt || doc.createdAt,
+          updatedAt: doc?.version?.updatedAt || doc.updatedAt,
+        }
+      : doc?.version,
+  })
+
   return (
     <DefaultVersionView
+      canUpdate={docPermissions?.update}
       doc={doc}
-      docPermissions={docPermissions}
-      initialComparisonDoc={latestVersion}
       latestDraftVersion={latestDraftVersion?.id}
       latestPublishedVersion={latestPublishedVersion?.id}
-      localeOptions={localeOptions}
+      modifiedOnly={modifiedOnly}
+      RenderedDiff={RenderedDiff}
+      selectedLocales={selectedLocales}
       versionID={versionID}
     />
   )

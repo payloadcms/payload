@@ -4,7 +4,7 @@ import type { FlattenedField, Operator, Where } from 'payload'
 import { and, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
 import { PgUUID } from 'drizzle-orm/pg-core'
 import { QueryError } from 'payload'
-import { validOperators } from 'payload/shared'
+import { validOperatorSet } from 'payload/shared'
 
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
@@ -73,7 +73,7 @@ export function parseParams({
           const pathOperators = where[relationOrPath]
           if (typeof pathOperators === 'object') {
             for (let operator of Object.keys(pathOperators)) {
-              if (validOperators.includes(operator as Operator)) {
+              if (validOperatorSet.has(operator as Operator)) {
                 const val = where[relationOrPath][operator]
 
                 const {
@@ -319,12 +319,22 @@ export function parseParams({
 
                     case 'near': {
                       const [lng, lat, maxDistance, minDistance] = queryValue as number[]
+                      const geoConstraints: SQL[] = []
 
-                      let constraint = sql`ST_DWithin(ST_Transform(${table[columnName]}, 3857), ST_Transform(ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326), 3857), ${maxDistance})`
-                      if (typeof minDistance === 'number' && !Number.isNaN(minDistance)) {
-                        constraint = sql`${constraint} AND ST_Distance(ST_Transform(${table[columnName]}, 3857), ST_Transform(ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326), 3857)) >= ${minDistance}`
+                      if (typeof maxDistance === 'number' && !Number.isNaN(maxDistance)) {
+                        geoConstraints.push(
+                          sql`ST_DWithin(ST_Transform(${table[columnName]}, 3857), ST_Transform(ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326), 3857), ${maxDistance})`,
+                        )
                       }
-                      constraints.push(constraint)
+
+                      if (typeof minDistance === 'number' && !Number.isNaN(minDistance)) {
+                        geoConstraints.push(
+                          sql`ST_Distance(ST_Transform(${table[columnName]}, 3857), ST_Transform(ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326), 3857)) >= ${minDistance}`,
+                        )
+                      }
+                      if (geoConstraints.length) {
+                        constraints.push(and(...geoConstraints))
+                      }
                       break
                     }
 

@@ -14,6 +14,11 @@ export const Posts: CollectionConfig = {
       type: 'text',
     },
     {
+      name: 'author',
+      type: 'relationship',
+      relationTo: 'users',
+    },
+    {
       name: 'isFiltered',
       type: 'checkbox',
       defaultValue: false,
@@ -96,6 +101,18 @@ export const Posts: CollectionConfig = {
     {
       name: 'array',
       type: 'array',
+      fields: [
+        {
+          name: 'category',
+          type: 'relationship',
+          relationTo: categoriesSlug,
+        },
+      ],
+    },
+    {
+      name: 'localizedArray',
+      type: 'array',
+      localized: true,
       fields: [
         {
           name: 'category',
