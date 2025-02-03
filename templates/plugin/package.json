@@ -51,7 +51,7 @@
     "@payloadcms/richtext-lexical": "3.17.1",
     "@payloadcms/ui": "3.17.1",
     "@swc-node/register": "1.10.9",
-    "@swc/cli": "0.5.1",
+    "@swc/cli": "0.6.0",
     "@swc/jest": "^0.2.37",
     "@types/jest": "29.5.12",
     "@types/node": "^22.5.4",
