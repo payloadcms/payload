@@ -2,9 +2,12 @@
 
 import { useConfig, useField } from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
+import LinkImport from 'next/link.js'
 import React from 'react'
 // TODO: fix this import to work in dev mode within the monorepo in a way that is backwards compatible with 1.x
 // import CopyToClipboard from 'payload/dist/admin/components/elements/CopyToClipboard'
+
+const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export const LinkToDocClient: React.FC = () => {
   const { config } = useConfig()
@@ -16,7 +19,8 @@ export const LinkToDocClient: React.FC = () => {
     serverURL,
   } = config
 
-  const basePath = process.env.NEXT_BASE_PATH || ''
+  // for displaying the full URL
+  const basePath = process.env.NEXT_BASE_PATH || false
 
   const { value } = useField<{ relationTo?: string; value?: string }>({ path: 'doc' })
 
@@ -26,7 +30,6 @@ export const LinkToDocClient: React.FC = () => {
 
   const href = `${serverURL}${formatAdminURL({
     adminRoute,
-    basePath,
     path: `/collections/${value.relationTo || ''}/${value.value || ''}`,
   })}`
 
@@ -50,9 +53,10 @@ export const LinkToDocClient: React.FC = () => {
           textOverflow: 'ellipsis',
         }}
       >
-        <a href={href} target="_blank">
+        <Link href={href} passHref {...{ rel: 'noopener noreferrer', target: '_blank' }}>
+          {basePath && basePath}
           {href}
-        </a>
+        </Link>
       </div>
     </div>
   )
