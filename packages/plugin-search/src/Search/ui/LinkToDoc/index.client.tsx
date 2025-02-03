@@ -1,11 +1,9 @@
 'use client'
 
-import { useConfig, useField } from '@payloadcms/ui'
+import { CopyToClipboard, useConfig, useField } from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import LinkImport from 'next/link.js'
 import React from 'react'
-// TODO: fix this import to work in dev mode within the monorepo in a way that is backwards compatible with 1.x
-// import CopyToClipboard from 'payload/dist/admin/components/elements/CopyToClipboard'
 
 const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
@@ -19,9 +17,6 @@ export const LinkToDocClient: React.FC = () => {
     serverURL,
   } = config
 
-  // for displaying the full URL
-  const basePath = process.env.NEXT_BASE_PATH || false
-
   const { value } = useField<{ relationTo?: string; value?: string }>({ path: 'doc' })
 
   if (!value?.relationTo || !value?.value) {
@@ -32,6 +27,8 @@ export const LinkToDocClient: React.FC = () => {
     adminRoute,
     path: `/collections/${value.relationTo || ''}/${value.value || ''}`,
   })}`
+
+  const hrefToDisplay = `${process.env.NEXT_BASE_PATH || ''}${href}`
 
   return (
     <div style={{ marginBottom: 'var(--spacing-field, 1rem)' }}>
@@ -44,7 +41,7 @@ export const LinkToDocClient: React.FC = () => {
         >
           Doc URL
         </span>
-        {/* <CopyToClipboard value={href} /> */}
+        <CopyToClipboard value={hrefToDisplay} />
       </div>
       <div
         style={{
@@ -54,8 +51,7 @@ export const LinkToDocClient: React.FC = () => {
         }}
       >
         <Link href={href} passHref {...{ rel: 'noopener noreferrer', target: '_blank' }}>
-          {basePath && basePath}
-          {href}
+          {hrefToDisplay}
         </Link>
       </div>
     </div>
