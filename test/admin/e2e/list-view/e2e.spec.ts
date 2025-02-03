@@ -327,6 +327,29 @@ describe('List View', () => {
       await expect(page.locator('.condition__value input')).toHaveValue('')
     })
 
+    test('should reset query value when operator is changed', async () => {
+      const id = (await page.locator('.cell-id').first().innerText()).replace('ID: ', '')
+      await page.locator('.list-controls__toggle-columns').click()
+      await openListFilters(page, {})
+      await page.locator('.where-builder__add-first-filter').click()
+
+      const operatorField = page.locator('.condition__operator')
+      await operatorField.click()
+
+      const dropdownOperatorOptions = operatorField.locator('.rs__option')
+      await dropdownOperatorOptions.locator('text=equals').click()
+      const valueField = page.locator('.condition__value > input')
+      await valueField.fill(id)
+
+      // change operator to "not equals"
+      await operatorField.click()
+      await dropdownOperatorOptions.locator('text=not equals').click()
+
+      // expect value field to reset (be empty)
+      await expect(valueField.locator('.rs__placeholder')).toContainText('Select a value')
+      await expect(page.locator('.condition__value input')).toHaveValue('')
+    })
+
     test('should accept where query from valid URL where parameter', async () => {
       // delete all posts created by the seed
       await deleteAllPosts()

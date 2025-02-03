@@ -145,6 +145,7 @@ export const Condition: React.FC<Props> = (props) => {
               isClearable={false}
               onChange={(operator: Option<Operator>) => {
                 setInternalOperatorOption(operator.value)
+                setInternalQueryValue(undefined)
               }}
               options={fieldOption?.operators}
               value={

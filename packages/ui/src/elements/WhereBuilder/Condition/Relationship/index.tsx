@@ -23,6 +23,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
     disabled,
     field: { admin: { isSortable } = {}, hasMany, relationTo },
     onChange,
+    operator,
     value,
   } = props
 
@@ -96,38 +97,40 @@ export const RelationshipField: React.FC<Props> = (props) => {
           })
         }
 
-        try {
-          const response = await fetch(
-            `${serverURL}${api}/${relationSlug}${qs.stringify(query, { addQueryPrefix: true })}`,
-            {
-              credentials: 'include',
-              headers: {
-                'Accept-Language': i18n.language,
+        if (operator) {
+          try {
+            const response = await fetch(
+              `${serverURL}${api}/${relationSlug}${qs.stringify(query, { addQueryPrefix: true })}`,
+              {
+                credentials: 'include',
+                headers: {
+                  'Accept-Language': i18n.language,
+                },
+                signal: abortController.signal,
               },
-              signal: abortController.signal,
-            },
-          )
+            )
 
-          if (response.ok) {
-            const data: PaginatedDocs = await response.json()
-            if (data.docs.length > 0) {
-              addOptions(data, relationSlug)
+            if (response.ok) {
+              const data: PaginatedDocs = await response.json()
+              if (data.docs.length > 0) {
+                addOptions(data, relationSlug)
 
-              if (data.nextPage) {
-                nextPageByRelationshipRef.current.set(relationSlug, data.nextPage)
-              } else {
-                partiallyLoadedRelationshipSlugs.current =
-                  partiallyLoadedRelationshipSlugs.current.filter(
-                    (partiallyLoadedRelation) => partiallyLoadedRelation !== relationSlug,
-                  )
+                if (data.nextPage) {
+                  nextPageByRelationshipRef.current.set(relationSlug, data.nextPage)
+                } else {
+                  partiallyLoadedRelationshipSlugs.current =
+                    partiallyLoadedRelationshipSlugs.current.filter(
+                      (partiallyLoadedRelation) => partiallyLoadedRelation !== relationSlug,
+                    )
+                }
               }
+            } else {
+              setErrorLoading(t('error:unspecific'))
             }
-          } else {
-            setErrorLoading(t('error:unspecific'))
-          }
-        } catch (e) {
-          if (!abortController.signal.aborted) {
-            console.error(e)
+          } catch (e) {
+            if (!abortController.signal.aborted) {
+              console.error(e)
+            }
           }
         }
       }
