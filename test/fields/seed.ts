@@ -495,10 +495,12 @@ export const seed = async (_payload: Payload) => {
     data: {
       text: 'text',
     },
+    depth: 0,
   })
 
   await _payload.create({
     collection: 'LexicalInBlock',
+    depth: 0,
     data: {
       content: {
         root: {
@@ -537,24 +539,36 @@ export const seed = async (_payload: Payload) => {
     },
   })
 
+  await _payload.create({
+    collection: 'lexical-access-control',
+    data: {
+      richText: textToLexicalJSON({ text: 'text' }),
+      title: 'title',
+    },
+    depth: 0,
+  })
+
   await Promise.all([
     _payload.create({
       collection: customIDSlug,
       data: {
         id: nonStandardID,
       },
+      depth: 0,
     }),
     _payload.create({
       collection: customTabIDSlug,
       data: {
         id: customTabID,
       },
+      depth: 0,
     }),
     _payload.create({
       collection: customRowIDSlug,
       data: {
         id: customRowID,
       },
+      depth: 0,
     }),
   ])
 }
