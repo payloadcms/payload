@@ -76,8 +76,6 @@ const RichTextComponent: React.FC<
     validate: memoizedValidate,
   })
 
-  const a = useEffectEvent()
-
   const disabled = readOnlyFromProps || formProcessing || formInitializing
 
   const [isSmallWidthViewport, setIsSmallWidthViewport] = useState<boolean>(false)
