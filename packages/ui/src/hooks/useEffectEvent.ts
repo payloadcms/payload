@@ -23,6 +23,7 @@ import { useCallback, useInsertionEffect, useRef } from 'react'
 //
 // Also, you should avoid calling the returned function during rendering
 // since the values captured by it are going to lag behind.
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 export function useEffectEvent<T extends Function>(fn: T): T {
   const ref = useRef(fn)
   useInsertionEffect(() => {
