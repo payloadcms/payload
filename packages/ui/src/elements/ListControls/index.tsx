@@ -197,7 +197,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                 {t('general:sort')}
               </Pill>
             )}
-            {React.isValidElement(afterListControls) && (
+            {afterListControls != null && afterListControls !== false && (
               <Popup
                 button={<Dots />}
                 className={`${baseClass}__popup`}
