@@ -5,7 +5,7 @@ import { type DependencyList, useRef } from 'react'
 import { useDebouncedEffect } from './useDebouncedEffect.js'
 
 /**
- * Effect hook that compares the current and previous dependencies by value instead of reference.
+ * Debounced effect hook that compares the current and previous dependencies by value instead of reference.
  * On initial render, the effect will run regardless of deep equality of dependencies
  */
 export const useDebouncedDeepCompareInitialRenderEffect = (
