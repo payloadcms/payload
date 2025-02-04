@@ -10,6 +10,7 @@ import { setCookieBasedOnDomain } from './hooks/setCookieBasedOnDomain'
 import { tenantsArrayField } from '@payloadcms/plugin-multi-tenant/fields'
 
 const defaultTenantArrayField = tenantsArrayField({
+  tenantsCollectionSlug: 'tenants',
   arrayFieldAccess: {},
   tenantFieldAccess: {},
   rowFields: [
