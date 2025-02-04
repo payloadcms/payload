@@ -9,6 +9,7 @@ export type FileSize = {
   filesize: null | number
   height: null | number
   mimeType: null | string
+  url: null | string
   width: null | number
 }
 
