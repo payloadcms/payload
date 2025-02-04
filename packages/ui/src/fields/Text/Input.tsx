@@ -78,7 +78,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
             filterOption={() =>
               !maxRows ? true : !(Array.isArray(value) && maxRows && value.length >= maxRows)
             }
-            isClearable
+            isClearable={false}
             isCreatable
             isMulti
             isSortable
