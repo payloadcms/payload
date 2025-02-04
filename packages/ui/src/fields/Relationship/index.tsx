@@ -20,6 +20,7 @@ import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useDebouncedCallback } from '../../hooks/useDebouncedCallback.js'
+import { useDeepCompareInitialRenderEffect } from '../../hooks/useDeepCompareInitialRenderEffect.js'
 import { useUpdateEffect } from '../../hooks/useUpdateEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -27,10 +28,10 @@ import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
+import './index.scss'
 import { createRelationMap } from './createRelationMap.js'
 import { findOptionsByValue } from './findOptionsByValue.js'
 import { optionsReducer } from './optionsReducer.js'
-import './index.scss'
 import { MultiValueLabel } from './select-components/MultiValueLabel/index.js'
 import { SingleValue } from './select-components/SingleValue/index.js'
 
@@ -375,7 +376,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
   // ///////////////////////////////////
   // Ensure we have an option for each value
   // ///////////////////////////////////
-  useEffect(() => {
+  useDeepCompareInitialRenderEffect(() => {
     handleValueChange(value)
   }, [value])
 
@@ -396,9 +397,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
 
   // When (`relationTo` || `filterOptions` || `locale`) changes, reset component
   // Note - effect should not run on first run
-  useEffect(() => {
-    // TODO: consider useUpdateEffect due to "effect should not run on first run"
-
+  useUpdateEffect(() => {
     // If the menu is open while filterOptions changes
     // due to latency of form state and fast clicking into this field,
     // re-fetch options
