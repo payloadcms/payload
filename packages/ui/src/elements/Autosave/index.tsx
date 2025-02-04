@@ -113,7 +113,23 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
   // When debounced fields change, autosave
   useIgnoredEffect(
-    () => {
+    ({
+      id,
+      api,
+      collection,
+      dispatchFields,
+      globalDoc,
+      i18n,
+      incrementVersionCount,
+      modified,
+      mostRecentVersionIsAutosaved,
+      reportUpdate,
+      serverURL,
+      setLastUpdateTime,
+      setMostRecentVersionIsAutosaved,
+      setSubmitted,
+      submitted,
+    }) => {
       const abortController = new AbortController()
       let autosaveTimeout = undefined
       // We need to log the time in order to figure out if we need to trigger the state off later
@@ -279,25 +295,23 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
       }
     },
     [debouncedFields],
-    [
+    {
+      id,
       api,
       collection,
       dispatchFields,
       globalDoc,
       i18n,
-      id,
-      interval,
+      incrementVersionCount,
       modified,
+      mostRecentVersionIsAutosaved,
       reportUpdate,
       serverURL,
-      setSubmitted,
-      versionsConfig?.drafts,
-      submitted,
       setLastUpdateTime,
-      mostRecentVersionIsAutosaved,
-      incrementVersionCount,
       setMostRecentVersionIsAutosaved,
-    ],
+      setSubmitted,
+      submitted,
+    },
   )
 
   return (

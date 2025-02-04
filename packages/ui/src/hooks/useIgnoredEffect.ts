@@ -1,4 +1,3 @@
-import { dequal } from 'dequal/lite'
 import { useEffect, useRef } from 'react'
 
 import { useDebouncedEffect } from './useDebouncedEffect.js'
@@ -8,64 +7,47 @@ import { useDebouncedEffect } from './useDebouncedEffect.js'
  * @constructor
  * @param {React.EffectCallback} effect - The effect to run
  * @param {React.DependencyList} deps - Dependencies that should trigger the effect
- * @param {React.DependencyList} ignoredDeps - Dependencies that should _not_ trigger the effect
- * @param {Object} options - Additional options to configure the hook
- * @param {boolean} options.runOnFirstRender - Whether the effect should run on the first render
+ * @param {object} ignoredDeps - Dependencies that should _not_ trigger the effect
  * @example
- * useIgnoredEffect(() => {
- *  console.log('This will run when `foo` changes, but not when `bar` changes')
- * }, [foo], [bar])
+ * useIgnoredEffect(({bar}}) => {
+ *  console.log('This will run when `foo` changes, but not when `bar` changes. The current value of `bar` is:', bar)
+ * }, [foo], {bar})
  */
-export function useIgnoredEffect(
-  effect: React.EffectCallback,
+export function useIgnoredEffect<TIgnoredDependencyList extends object>(
+  effect: (ignoredDeps: TIgnoredDependencyList) => (() => undefined | void) | void,
   deps: React.DependencyList,
-  ignoredDeps: React.DependencyList,
-  options?: { runOnFirstRender?: boolean },
+  ignoredDeps: TIgnoredDependencyList,
 ) {
-  const hasInitialized = useRef(
-    typeof options?.runOnFirstRender !== 'undefined' ? Boolean(!options?.runOnFirstRender) : false,
-  )
+  const ignoredDepsRef = useRef(ignoredDeps)
 
-  const prevDeps = useRef(deps)
-
+  // Keep the ref updated with the latest ignoredDeps, but do NOT trigger the main effect
   useEffect(() => {
-    const depsHaveChanged = deps.some(
-      (dep, index) => !ignoredDeps.includes(dep) && !dequal(dep, prevDeps.current[index]),
-    )
+    ignoredDepsRef.current = ignoredDeps
+  }, [ignoredDeps])
 
-    if (depsHaveChanged || !hasInitialized.current) {
-      effect()
-    }
-
-    prevDeps.current = deps
-    hasInitialized.current = true
+  // The main effect that only runs when deps change. Ignored deps are passed as an argument
+  useEffect(() => {
+    return effect(ignoredDepsRef.current)
   }, deps)
 }
 
-export function useIgnoredEffectDebounced(
-  effect: React.EffectCallback,
+export function useIgnoredEffectDebounced<TIgnoredDependencyList extends object>(
+  effect: (ignoredDeps: TIgnoredDependencyList) => (() => undefined | void) | void,
   deps: React.DependencyList,
-  ignoredDeps: React.DependencyList,
-  options?: { delay?: number; runOnFirstRender?: boolean },
+  ignoredDeps: TIgnoredDependencyList,
+  options?: { delay?: number },
 ) {
-  const hasInitialized = useRef(
-    typeof options?.runOnFirstRender !== 'undefined' ? Boolean(!options?.runOnFirstRender) : false,
-  )
+  const ignoredDepsRef = useRef(ignoredDeps)
 
-  const prevDeps = useRef(deps)
+  // Keep the ref updated with the latest ignoredDeps, but do NOT trigger the main effect
+  useEffect(() => {
+    ignoredDepsRef.current = ignoredDeps
+  }, [ignoredDeps])
 
+  // The main effect that only runs when deps change. Ignored deps are passed as an argument
   useDebouncedEffect(
     () => {
-      const depsHaveChanged = deps.some(
-        (dep, index) => !ignoredDeps.includes(dep) && !dequal(dep, prevDeps.current[index]),
-      )
-
-      if (depsHaveChanged || !hasInitialized.current) {
-        effect()
-      }
-
-      prevDeps.current = deps
-      hasInitialized.current = true
+      return effect(ignoredDepsRef.current)
     },
     deps,
     options?.delay || 0,

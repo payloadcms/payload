@@ -662,7 +662,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const classes = [className, baseClass].filter(Boolean).join(' ')
 
   useIgnoredEffectDebounced(
-    () => {
+    ({ dispatchFields, onChange }) => {
       const executeOnChange = async () => {
         if (Array.isArray(onChange)) {
           let revalidatedFormState: FormState = contextRef.current.fields
@@ -707,7 +707,7 @@ export const Form: React.FC<FormProps> = (props) => {
         So on the first change, modified is false, so we don't trigger the effect even though we should.
     **/
     [contextRef.current.fields, modified, submitted],
-    [dispatchFields, onChange],
+    { dispatchFields, onChange },
     {
       delay: 250,
     },

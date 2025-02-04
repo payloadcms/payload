@@ -310,7 +310,18 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
   // Ensure we have an option for each value
   // ///////////////////////////////////
   useIgnoredEffect(
-    () => {
+    ({
+      api,
+      config,
+      errorLoading,
+      getEntityConfig,
+      hasMany,
+      i18n,
+      locale,
+      options,
+      relationTo,
+      serverURL,
+    }) => {
       const relationMap = createRelationMap({
         hasMany,
         relationTo,
@@ -375,19 +386,18 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       }, Promise.resolve())
     },
     [value],
-    [
-      options,
-      hasMany,
+    {
+      api,
+      config,
       errorLoading,
       getEntityConfig,
-      hasMultipleRelations,
-      serverURL,
-      api,
+      hasMany,
       i18n,
-      relationTo,
       locale,
-      config,
-    ],
+      options,
+      relationTo,
+      serverURL,
+    },
   )
 
   // Determine if we should switch to word boundary search
@@ -404,7 +414,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
   // When (`relationTo` || `filterOptions` || `locale`) changes, reset component
   // Note - effect should not run on first run
   useIgnoredEffect(
-    () => {
+    ({ getResults }) => {
       // If the menu is open while filterOptions changes
       // due to latency of form state and fast clicking into this field,
       // re-fetch options
@@ -432,7 +442,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       setLastLoadedPage({})
     },
     [relationTo, filterOptions, locale, path, menuIsOpen],
-    [getResults],
+    { getResults },
   )
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>(

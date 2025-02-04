@@ -153,13 +153,13 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   )
 
   useIgnoredEffect(
-    () => {
+    ({ renderTable, Table }) => {
       if (!disableTable && (!Table || query)) {
         void renderTable()
       }
     },
     [query, disableTable],
-    [Table, renderTable],
+    { renderTable, Table },
   )
 
   const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer, openDrawer }] = useDocumentDrawer({

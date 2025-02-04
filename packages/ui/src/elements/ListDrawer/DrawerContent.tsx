@@ -60,7 +60,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       collectionSlug: selectedOption.value,
     })
   useIgnoredEffect(
-    () => {
+    ({ selectedOption }) => {
       if (selectedCollectionFromProps && selectedCollectionFromProps !== selectedOption?.value) {
         setSelectedOption({
           label: getEntityConfig({ collectionSlug: selectedCollectionFromProps })?.labels,
@@ -69,7 +69,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       }
     },
     [selectedCollectionFromProps],
-    [collections, selectedOption],
+    { selectedOption },
   )
 
   const renderList = useCallback(
