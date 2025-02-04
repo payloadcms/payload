@@ -198,9 +198,13 @@ describe('List View', () => {
 
     test('should render custom afterListControls component', async () => {
       await page.goto(postsUrl.list)
+      const kebabMenu = page.locator('.list-controls__popup')
+      await expect(kebabMenu).toBeVisible()
+      await kebabMenu.click()
+
       await expect(
-        page.locator('.collection-list__wrap').locator('div', {
-          hasText: exactText('AfterListControls'),
+        page.locator('.popup-button-list__button').locator('div', {
+          hasText: 'AfterListControls',
         }),
       ).toBeVisible()
     })
