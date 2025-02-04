@@ -706,7 +706,7 @@ export const Form: React.FC<FormProps> = (props) => {
         }
         console.log('fields updated', modified)
 
-        void executeOnChange(submitted, contextRef.current.fields)
+        void executeOnChange(submitted)
       }
     },
     /*
