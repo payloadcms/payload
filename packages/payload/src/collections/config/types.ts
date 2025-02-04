@@ -276,6 +276,7 @@ export type CollectionAdminOptions = {
    */
   components?: {
     afterList?: CustomComponent[]
+    afterListControls?: CustomComponent[]
     afterListTable?: CustomComponent[]
     beforeList?: CustomComponent[]
     beforeListTable?: CustomComponent[]

@@ -196,6 +196,15 @@ describe('List View', () => {
       ).toBeVisible()
     })
 
+    test('should render custom afterListControls component', async () => {
+      await page.goto(postsUrl.list)
+      await expect(
+        page.locator('.collection-list__wrap').locator('div', {
+          hasText: exactText('AfterListControls'),
+        }),
+      ).toBeVisible()
+    })
+
     test('should render custom afterListTable component', async () => {
       await page.goto(postsUrl.list)
       await expect(

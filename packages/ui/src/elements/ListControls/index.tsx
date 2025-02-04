@@ -26,6 +26,7 @@ import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched.js'
 const baseClass = 'list-controls'
 
 export type ListControlsProps = {
+  readonly afterListControls?: React.ReactNode | React.ReactNode[]
   readonly beforeActions?: React.ReactNode[]
   readonly collectionConfig: ClientCollectionConfig
   readonly collectionSlug: string
@@ -46,6 +47,7 @@ export type ListControlsProps = {
  */
 export const ListControls: React.FC<ListControlsProps> = (props) => {
   const {
+    afterListControls,
     beforeActions,
     collectionConfig,
     collectionSlug,
@@ -193,6 +195,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                 {t('general:sort')}
               </Pill>
             )}
+            {afterListControls}
           </div>
         </div>
       </div>
