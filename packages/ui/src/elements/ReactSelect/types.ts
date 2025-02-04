@@ -11,7 +11,7 @@ type CustomSelectProps = {
   editableProps?: (
     data: Option<{ label: string; value: string }>,
     className: string,
-    selectProps: ReactSelectStateManagerProps<Option, IsMulti, Group>,
+    selectProps: ReactSelectStateManagerProps,
   ) => any
   onDelete?: DocumentDrawerProps['onDelete']
   onDocumentDrawerOpen?: (args: {
