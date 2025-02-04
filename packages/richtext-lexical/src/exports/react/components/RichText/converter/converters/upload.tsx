@@ -1,3 +1,5 @@
+import type { FileSize_P4 } from 'payload'
+
 import type { UploadData_P4 } from '../../../../../../features/upload/server/nodes/UploadNode.js'
 import type { SerializedUploadNode } from '../../../../../../nodeTypes.js'
 import type { JSXConverters } from '../types.js'
@@ -43,7 +45,7 @@ export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
 
     // Iterate through each size in the data.sizes object
     for (const size in uploadDocument.value.sizes) {
-      const imageSize = uploadDocument.value.sizes[size]
+      const imageSize = uploadDocument.value.sizes[size] as FileSize_P4
 
       // Skip if any property of the size object is null
       if (
