@@ -22,7 +22,7 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
         {...props}
         innerProps={{
           className,
-          ...(editableProps(data, className, props.selectProps) || {}),
+          ...((editableProps && editableProps(data, className, props.selectProps)) || {}),
           ...(draggableProps || {}),
         }}
       />
