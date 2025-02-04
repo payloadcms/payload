@@ -375,7 +375,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
   // ///////////////////////////////////
   // Ensure we have an option for each value
   // ///////////////////////////////////
-  useUpdateEffect(() => {
+  useEffect(() => {
     handleValueChange(value)
   }, [value])
 
@@ -396,7 +396,9 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
 
   // When (`relationTo` || `filterOptions` || `locale`) changes, reset component
   // Note - effect should not run on first run
-  useUpdateEffect(() => {
+  useEffect(() => {
+    // TODO: consider useUpdateEffect due to "effect should not run on first run"
+
     // If the menu is open while filterOptions changes
     // due to latency of form state and fast clicking into this field,
     // re-fetch options

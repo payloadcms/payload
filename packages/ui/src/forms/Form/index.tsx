@@ -684,6 +684,9 @@ export const Form: React.FC<FormProps> = (props) => {
         incomingState: revalidatedFormState,
       })
 
+      // @ts-ignore
+      newState._internal_updated_from_onChange = true
+
       if (changed) {
         dispatchFields({
           type: 'REPLACE_STATE',
@@ -697,7 +700,13 @@ export const Form: React.FC<FormProps> = (props) => {
   useUpdateDebouncedEffect(
     () => {
       if (modified) {
-        void executeOnChange(submitted)
+        if (contextRef.current.fields._internal_updated_from_onChange) {
+          delete contextRef.current.fields._internal_updated_from_onChange
+          return
+        }
+        console.log('fields updated', modified)
+
+        void executeOnChange(submitted, contextRef.current.fields)
       }
     },
     /*
