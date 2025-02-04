@@ -1538,9 +1538,6 @@ importers:
       use-context-selector:
         specifier: 2.0.0
         version: 2.0.0(react@19.0.0)(scheduler@0.25.0)
-      use-effect-event:
-        specifier: 1.0.2
-        version: 1.0.2(react@19.0.0)
       uuid:
         specifier: 10.0.0
         version: 10.0.0
@@ -9871,11 +9868,6 @@ packages:
     peerDependencies:
       react: 19.0.0
       scheduler: '>=0.19.0'
-
-  use-effect-event@1.0.2:
-    resolution: {integrity: sha512-9c8AAmtQja4LwJXI0EQPhQCip6dmrcSe0FMcTUZBeGh/XTCOLgw3Qbt0JdUT8Rcrm/ZH+Web7MIcMdqgQKdXJg==}
-    peerDependencies:
-      react: 19.0.0
 
   use-isomorphic-layout-effect@1.2.0:
     resolution: {integrity: sha512-q6ayo8DWoPZT0VdG4u3D3uxcgONP3Mevx2i2b0434cwWBoL+aelL1DzkXI6w3PhTZzUeR2kaVlZn70iCiseP6w==}
@@ -19775,10 +19767,6 @@ snapshots:
     dependencies:
       react: 19.0.0
       scheduler: 0.25.0
-
-  use-effect-event@1.0.2(react@19.0.0):
-    dependencies:
-      react: 19.0.0
 
   use-isomorphic-layout-effect@1.2.0(@types/react@19.0.1)(react@19.0.0):
     dependencies:

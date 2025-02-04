@@ -3,9 +3,8 @@
 import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
 
 import { versionDefaults } from 'payload/shared'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { useEffectEvent } from 'use-effect-event'
 
 import {
   useAllFormFields,
@@ -14,14 +13,15 @@ import {
   useFormSubmitted,
 } from '../../forms/Form/context.js'
 import { useDebounce } from '../../hooks/useDebounce.js'
+import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useUpdateEffect } from '../../hooks/useUpdateEffect.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { formatTimeToNow } from '../../utilities/formatDate.js'
 import './index.scss'
+import { formatTimeToNow } from '../../utilities/formatDate.js'
 import { reduceFieldsToValuesWithValidation } from '../../utilities/reduceFieldsToValuesWithValidation.js'
 
 const baseClass = 'autosave'

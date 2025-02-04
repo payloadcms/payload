@@ -136,7 +136,6 @@
     "sonner": "^1.7.2",
     "ts-essentials": "10.0.3",
     "use-context-selector": "2.0.0",
-    "use-effect-event": "1.0.2",
     "uuid": "10.0.0"
   },
   "devDependencies": {

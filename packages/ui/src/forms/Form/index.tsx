@@ -12,7 +12,6 @@ import {
 } from 'payload/shared'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { useEffectEvent } from 'use-effect-event'
 
 import type {
   CreateFormData,
@@ -23,6 +22,7 @@ import type {
 } from './types.js'
 
 import { useDebouncedDeepCompareInitialRenderEffect } from '../../hooks/useDebouncedDeepCompareInitialRenderEffect.js'
+import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
