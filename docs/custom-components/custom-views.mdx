@@ -82,19 +82,19 @@ The following options are available:
 
 | Property        | Description                                                                   |
 | --------------- | ----------------------------------------------------------------------------- |
-| **`account`**   | The Account view is used to show the currently logged in user's Account page. |
-| **`dashboard`** | The main landing page of the [Admin Panel](./overview).                                     |
+| `account`   | The Account view is used to show the currently logged in user's Account page. |
+| `dashboard` | The main landing page of the [Admin Panel](./overview).                                     |
 
 For more granular control, pass a configuration object instead. Payload exposes the following properties for each view:
 
 | Property           | Description                                                                                                                                                                                |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **`Component`** * | Pass in the component path that should be rendered when a user navigates to this route.                                                                                                         |
-| **`path`** *      | Any valid URL path or array of paths that [`path-to-regexp`](https://www.npmjs.com/package/path-to-regex) understands.                                                                     |
-| **`exact`**        | Boolean. When true, will only match if the path matches the `usePathname()` exactly.                                                                                                     |
-| **`strict`**       | When true, a path that has a trailing slash will only match a `location.pathname` with a trailing slash. This has no effect when there are additional URL segments in the pathname. |
-| **`sensitive`**    | When true, will match if the path is case sensitive.|
-| **`meta`**         | Page metadata overrides to apply to this view within the Admin Panel. [More details](./metadata).                                                                           |
+| `Component` * | Pass in the component path that should be rendered when a user navigates to this route.                                                                                                         |
+| `path` *      | Any valid URL path or array of paths that [`path-to-regexp`](https://www.npmjs.com/package/path-to-regex) understands.                                                                     |
+| `exact`        | Boolean. When true, will only match if the path matches the `usePathname()` exactly.                                                                                                     |
+| `strict`       | When true, a path that has a trailing slash will only match a `location.pathname` with a trailing slash. This has no effect when there are additional URL segments in the pathname. |
+| `sensitive`    | When true, will match if the path is case sensitive.|
+| `meta`         | Page metadata overrides to apply to this view within the Admin Panel. [More details](./metadata).                                                                           |
 
 _* An asterisk denotes that a property is required._
 
@@ -126,7 +126,6 @@ The above example shows how to add a new [Root View](#root-views), but the patte
 
 <Banner type="warning">
   **Note:**
-
   Routes are cascading, so unless explicitly given the `exact` property, they will
   match on URLs that simply _start_ with the route's path. This is helpful when creating catch-all
   routes in your application. Alternatively, define your nested route _before_ your parent
@@ -135,7 +134,6 @@ The above example shows how to add a new [Root View](#root-views), but the patte
 
 <Banner type="warning">
   **Custom views are public**
-
   Custom views are public by default. If your view requires a user to be logged in or to have certain access rights, you should handle that within your view component yourself.
 </Banner>
 
@@ -179,15 +177,15 @@ _For details on how to build Custom Views, including all available props, see [B
 
 <Banner type="warning">
   **Note:**
-  The `root` property will replace the _entire_ Edit View, including the title, tabs, etc., _as well as all nested [Document Views](#document-views)_, such as the API, Live Preview, and Version views. To replace only the Edit View precisely, use the `edit.default` key instead.
+  The `root` property will replace the _entire_ [Edit View](../custom-components/edit-view), including the title, tabs, etc., _as well as all nested [Document Views](#document-views)_, such as the API, Live Preview, and Version views. To replace only the Edit View precisely, use the `edit.default` key instead.
 </Banner>
 
 The following options are available:
 
 | Property   | Description                                                                                                       |
 | ---------- | ----------------------------------------------------------------------------------------------------------------- |
-| **`edit`** | The Edit View is used to edit a single document for any given Collection. [More details](#document-views).     |
-| **`list`** | The List View is used to show a list of documents for any given Collection.                                         |
+| `edit` | The Edit View is used to edit a single document for any given Collection. [More details](#document-views).     |
+| `list` | The List View is used to show a list of documents for any given Collection.                                         |
 
 <Banner type="success">
   **Note:**
@@ -196,7 +194,7 @@ The following options are available:
 
 ## Global Views
 
-Global Views are views that are scoped under the `/globals` route, such as the Document Edit View.
+Global Views are views that are scoped under the `/globals` route, such as the Edit View.
 
 To swap out Global Views with your own or [create entirely new ones](#adding-new-views), use the `admin.components.views` property in your [Global Config](../configuration/globals):
 
@@ -237,7 +235,7 @@ The following options are available:
 
 | Property   | Description                                                         |
 | ---------- | ------------------------------------------------------------------- |
-| **`edit`** | The Edit View is used to edit a single document for any given Global. [More details](#document-views). |
+| `edit` | The Edit View is used to edit a single document for any given Global. [More details](#document-views). |
 
 <Banner type="success">
   **Note:**
@@ -248,7 +246,7 @@ The following options are available:
 
 Document Views are views that are scoped under the `/collections/:collectionSlug/:id` or the `/globals/:globalSlug` route, such as the Edit View or the API View. All Document Views keep their overall structure across navigation changes, such as their title and tabs, and replace only the content below.
 
-To swap out Document Views with your own, or to [create entirely new ones](#adding-new-views), use the `admin.components.views.Edit[key]` property in your [Collection Config](../configuration/collections) or [Global Config](../configuration/globals):
+To swap out Document Views with your own, or to [create entirely new ones](#adding-new-views), use the `admin.components.views.edit[key]` property in your [Collection Config](../configuration/collections) or [Global Config](../configuration/globals):
 
 ```ts
 import type { SanitizedCollectionConfig } from 'payload'
@@ -280,12 +278,12 @@ The following options are available:
 
 | Property          | Description                                                                                                                                                     |
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`root`**        | The Root View overrides all other nested views and routes. No document controls or tabs are rendered when this key is set.                                      |
-| **`default`**     | The Default View is the primary view in which your document is edited. It is rendered within the "Edit" tab.                                                    |
-| **`versions`**    | The Versions View is used to navigate the version history of a single document. It is rendered within the "Versions" tab. [More details](../versions/overview). |
-| **`version`**     | The Version View is used to edit a single version of a document. It is rendered within the "Version" tab. [More details](../versions/overview).                 |
-| **`api`**         | The API View is used to display the REST API JSON response for a given document. It is rendered within the "API" tab.                                           |
-| **`livePreview`** | The LivePreview view is used to display the Live Preview interface. It is rendered within the "Live Preview" tab. [More details](../live-preview/overview).     |
+| `root`        | The Root View overrides all other nested views and routes. No document controls or tabs are rendered when this key is set.                                      |
+| `default`     | The Default View is the primary view in which your document is edited. It is rendered within the "Edit" tab. [More details](../custom-components/edit-view).                                                    |
+| `versions`    | The Versions View is used to navigate the version history of a single document. It is rendered within the "Versions" tab. [More details](../versions/overview). |
+| `version`     | The Version View is used to edit a single version of a document. It is rendered within the "Version" tab. [More details](../versions/overview).                 |
+| `api`         | The API View is used to display the REST API JSON response for a given document. It is rendered within the "API" tab.                                           |
+| `livePreview` | The LivePreview view is used to display the Live Preview interface. It is rendered within the "Live Preview" tab. [More details](../live-preview/overview).     |
 
 ### Document Tabs
 
@@ -356,12 +354,12 @@ Your Custom Views will be provided with the following props:
 
 | Prop                      | Description                                                                                                                        |
 | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| **`initPageResult`**      | An object containing `req`, `payload`, `permissions`, etc.                                                                         |
-| **`clientConfig`**        | The Client Config object. [More details](../custom-components/overview#accessing-the-payload-config).                                        |
-| **`importMap`**           | The import map object.                                                                                                             |
-| **`params`**              | An object containing the [Dynamic Route Parameters](https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes). |
-| **`searchParams`**        | An object containing the [Search Parameters](https://developer.mozilla.org/docs/Learn/Common_questions/What_is_a_URL#parameters).  |
-| **`doc`**                 | The document being edited. Only available in Document Views. [More details](#document-views).                                      |
+| `initPageResult`      | An object containing `req`, `payload`, `permissions`, etc.                                                                         |
+| `clientConfig`        | The Client Config object. [More details](../custom-components/overview#accessing-the-payload-config).                                        |
+| `importMap`           | The import map object.                                                                                                             |
+| `params`              | An object containing the [Dynamic Route Parameters](https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes). |
+| `searchParams`        | An object containing the [Search Parameters](https://developer.mozilla.org/docs/Learn/Common_questions/What_is_a_URL#parameters).  |
+| `doc`                 | The document being edited. Only available in Document Views. [More details](#document-views).                                      |
 
 <Banner type="success">
   **Reminder:**
@@ -370,6 +368,5 @@ Your Custom Views will be provided with the following props:
 
 <Banner type="warning">
   **Important:**
-  It's up to you to secure your custom views. If your view requires a user to be logged in or to
-  have certain access rights, you should handle that within your view component yourself.
+  It's up to you to secure your custom views. If your view requires a user to be logged in or to have certain access rights, you should handle that within your view component yourself.
 </Banner>

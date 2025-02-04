@@ -1,0 +1,47 @@
+---
+title: Swap in your own React components
+label: List View
+order: 50
+desc:
+keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
+---
+
+## Config Options
+
+To override List View components for a Collection, use the `admin.components.edit` property in your [Collection Config](../configuration/collections):
+
+```ts
+import type { SanitizedCollectionConfig } from 'payload'
+
+export const MyCollection: SanitizedCollectionConfig = {
+  // ...
+  admin: {
+    components: {
+      edit: { // highlight-line
+        // ...
+      },
+    },
+  },
+}
+```
+
+The following options are available:
+
+| Path                  | Description                                                                                                                                                                                                         |
+|-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SaveButton`         | A button that saves the current document.                                                                                                                                  |
+| `SaveDraftButton`    | A button that saves the current document as a draft.                                                                                                                                  |
+| `PublishButton`      | A button that publishes the current document.                                                                                                                                  |
+| `PreviewButton`      | A button that previews the current document.                                                                                                                                  |
+| `Upload`             | A file upload component.                                                                                                                                  |
+
+## beforeList
+
+## beforeListTable
+
+## afterList
+
+## afterListTable
+
+## Description
+

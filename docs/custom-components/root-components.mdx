@@ -1,0 +1,308 @@
+---
+title: Swap in your own React components
+label: Root Components
+order: 20
+desc:
+keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
+---
+
+Root Components are those that affect the [Admin Panel](../admin/overview) generally, such as the logo or the main nav. You can swap out these components with your own [Custom Components](./overview) to create a completely custom look and feel.
+
+When combined with [Custom CSS](../admin/customizing-css), you can create a truly unique experience for your users, essentially white-labeling the Admin Panel to match your brand.
+
+To override Root Components, use the `admin.components` property in your [Payload Config](../configuration/overview):
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  admin: {
+    // highlight-start
+    components: {
+      // ...
+    },
+    // highlight-end
+  },
+})
+```
+
+_For details on how to build Custom Components, see [Building Custom Components](#building-custom-components)._
+
+## Config Options
+
+The following options are available:
+
+| Path                  | Description                                                                                                                                                                                                         |
+|-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `actions`         | An array of Custom Components to be rendered _within_ the header of the Admin Panel, providing additional interactivity and functionality.                                                                  |
+| `afterDashboard`  | An array of Custom Components to inject into the built-in Dashboard, _after_ the default dashboard contents.                                                                                                        |
+| `afterLogin`      | An array of Custom Components to inject into the built-in Login, _after_ the default login form.                                                                                                                    |
+| `afterNavLinks`   | An array of Custom Components to inject into the built-in Nav, _after_ the links.                                                                                                                                   |
+| `beforeDashboard` | An array of Custom Components to inject into the built-in Dashboard, _before_ the default dashboard contents.                                                                                                       |
+| `beforeLogin`     | An array of Custom Components to inject into the built-in Login, _before_ the default login form.                                                                                                                   |
+| `beforeNavLinks`  | An array of Custom Components to inject into the built-in Nav, _before_ the links themselves.                                                                                                                       |
+| `graphics.Icon`   | The simplified logo used in contexts like the the `Nav` component.                                                                                                                                                  |
+| `graphics.Logo`   | The full logo used in contexts like the `Login` view.                                                                                                                                                               |
+| `header`          | An array of Custom Components to be injected above the Payload header.                                                   |
+| `logout.Button`   | The button displayed in the sidebar that logs the user out.                                                                                                                                                         |
+| `Nav`             | Contains the sidebar / mobile menu in its entirety.                                                                                                                                                                 |
+| `providers`       | Custom [React Context](https://react.dev/learn/scaling-up-with-reducer-and-context) providers that will wrap the entire Admin Panel. [More details](./custom-providers).                                       |
+| `views`           | Override or create new views within the Admin Panel. [More details](../custom-components/custom-views).                                                                                                                                 |
+
+<Banner type="success">
+  **Note:**
+  You can also use set [Collection Components](../configuration/collections#custom-components) and [Global Components](../configuration/globals#custom-components) in their respective configs.
+</Banner>
+
+### actions
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  admin: {
+    // highlight-start
+    components: {
+      // ...
+    },
+    // highlight-end
+  },
+})
+```
+
+```tsx
+ // Example here
+```
+
+### afterDashboard
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  admin: {
+    // highlight-start
+    components: {
+      // ...
+    },
+    // highlight-end
+  },
+})
+```
+
+```tsx
+ // Example here
+```
+
+### afterLogin
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  admin: {
+    // highlight-start
+    components: {
+      // ...
+    },
+    // highlight-end
+  },
+})
+```
+
+```tsx
+ // Example here
+```
+
+### afterNavLinks
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  admin: {
+    // highlight-start
+    components: {
+      // ...
+    },
+    // highlight-end
+  },
+})
+```
+
+```tsx
+ // Example here
+```
+
+### beforeDashboard
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  admin: {
+    // highlight-start
+    components: {
+      // ...
+    },
+    // highlight-end
+  },
+})
+```
+
+```tsx
+ // Example here
+```
+
+### beforeLogin
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  admin: {
+    // highlight-start
+    components: {
+      // ...
+    },
+    // highlight-end
+  },
+})
+```
+
+```tsx
+ // Example here
+```
+
+### beforeNavLinks
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  admin: {
+    // highlight-start
+    components: {
+      // ...
+    },
+    // highlight-end
+  },
+})
+```
+
+```tsx
+ // Example here
+```
+
+### graphics.Icon
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  admin: {
+    // highlight-start
+    components: {
+      // ...
+    },
+    // highlight-end
+  },
+})
+```
+
+```tsx
+ // Example here
+```
+
+### graphics.Logo
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  admin: {
+    // highlight-start
+    components: {
+      // ...
+    },
+    // highlight-end
+  },
+})
+```
+
+```tsx
+ // Example here
+```
+
+### header
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  admin: {
+    // highlight-start
+    components: {
+      // ...
+    },
+    // highlight-end
+  },
+})
+```
+
+```tsx
+ // Example here
+```
+
+### logout.Button
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  admin: {
+    // highlight-start
+    components: {
+      // ...
+    },
+    // highlight-end
+  },
+})
+```
+
+```tsx
+ // Example here
+```
+
+### Nav
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  admin: {
+    // highlight-start
+    components: {
+      // ...
+    },
+    // highlight-end
+  },
+})
+```
+
+```tsx
+ // Example here
+```

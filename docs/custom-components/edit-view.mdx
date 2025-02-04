@@ -1,0 +1,84 @@
+---
+title: Swap in your own React components
+label: Edit View
+order: 40
+desc:
+keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
+---
+
+The Edit View is where users interact with individual [Collection](../collections/overview) and [Global](../globals/overview) Documents. This is where they can view, edit, and save their content.
+
+## Collections
+
+In addition to swapping out the entire Edit View with a [Custom View](../custom-components/custom-views), you can also override individual components. This allows you to customize the Edit View parts of the Edit View without swapping out the entire view for your own.
+
+### Config Options
+
+To override Edit View components for a Collection, use the `admin.components.edit` property in your [Collection Config](../configuration/collections):
+
+```ts
+import type { SanitizedCollectionConfig } from 'payload'
+
+export const MyCollection: SanitizedCollectionConfig = {
+  // ...
+  admin: {
+    components: {
+      edit: { // highlight-line
+        // ...
+      },
+    },
+  },
+}
+```
+
+The following options are available:
+
+| Path                  | Description                                                                                                                                                                                                         |
+|-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SaveButton`         | A button that saves the current document.                                                                                                                                  |
+| `SaveDraftButton`    | A button that saves the current document as a draft.                                                                                                                                  |
+| `PublishButton`      | A button that publishes the current document.                                                                                                                                  |
+| `PreviewButton`      | A button that previews the current document.                                                                                                                                  |
+| `Upload`             | A file upload component.                                                                                                                                  |
+
+## Globals
+
+To override Edit View components for Globals, use the `admin.components.elements` property in your [Global Config](../configuration/globals):
+
+```ts
+import type { SanitizedCollectionConfig } from 'payload'
+
+export const MyCollection: SanitizedCollectionConfig = {
+  // ...
+  admin: {
+    components: {
+      elements: { // highlight-line
+        // ...
+      },
+    },
+  },
+}
+```
+
+The following options are available:
+
+| Path                  | Description                                                                                                                                                                                                         |
+|-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SaveButton`         | A button that saves the current document.                                                                                                                                  |
+| `SaveDraftButton`    | A button that saves the current document as a draft.                                                                                                                                  |
+| `PublishButton`      | A button that publishes the current document.                                                                                                                                  |
+| `PreviewButton`      | A button that previews the current document.                                                                                                                                  |
+
+
+## Examples
+
+### SaveButton
+
+### SaveDraftButton
+
+### PublishButton
+
+### PreviewButton
+
+### Upload
+

@@ -152,19 +152,42 @@ export const MyCollection: SanitizedCollectionConfig = {
 
 The following options are available:
 
-| Path                       | Description                                                                                                                                |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `beforeList`           | An array of components to inject _before_ the built-in List View                                                                           |
-| `beforeListTable`      | An array of components to inject _before_ the built-in List View's table                                                                   |
-| `afterList`            | An array of components to inject _after_ the built-in List View                                                                            |
-| `afterListTable`       | An array of components to inject _after_ the built-in List View's table                                                                    |
-| `Description`          | A component to render below the Collection label in the List View. An alternative to the `admin.description` property.                     |
-| `edit.SaveButton`      | Replace the default Save Button with a Custom Component. [Drafts](../versions/drafts) must be disabled.                                    |
-| `edit.SaveDraftButton` | Replace the default Save Draft Button with a Custom Component. [Drafts](../versions/drafts) must be enabled and autosave must be disabled. |
-| `edit.PublishButton`   | Replace the default Publish Button with a Custom Component. [Drafts](../versions/drafts) must be enabled.                                  |
-| `edit.PreviewButton`   | Replace the default Preview Button with a Custom Component. [Preview](../admin/preview) must be enabled.                                           |
-| `edit.Upload`          | Replace the default Upload component with a Custom Component. [Upload](../upload/overview) must be enabled.                                |
-| `views`                | Override or create new views within the Admin Panel. [More details](../admin/views).                                                              |
+| Option                 | Description                                                                                                                                 |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `afterList`            | An array of components to inject _after_ the built-in List View.                                                                            |
+| `afterListTable`       | An array of components to inject _after_ the built-in List View's table.                                                                    |
+| `beforeList`           | An array of components to inject _before_ the built-in List View.                                                                           |
+| `beforeListTable`      | An array of components to inject _before_ the built-in List View's table.                                                                   |
+| `Description`          | A component to render below the Collection label in the List View. An alternative to the `admin.description` property.                      |
+| `edit`                 | Override specific components within the Edit View. [More details](#edit-view-options).                                                      |
+| `views`                | Override or create new views within the Admin Panel. [More details](../custom-components/custom-views).                                                        |
+
+#### Edit View Options
+
+```ts
+import type { SanitizedCollectionConfig } from 'payload'
+
+export const MyCollection: SanitizedCollectionConfig = {
+  // ...
+  admin: {
+    components: {
+      edit: { // highlight-line
+        // ...
+      },
+    },
+  },
+}
+```
+
+The following options are available:
+
+| Option                 | Description                                                                                                                                |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `SaveButton`      | Replace the default Save Button within the Edit View. [Drafts](../versions/drafts) must be disabled. [More details](../custom-components/edit-view#save-button). |
+| `SaveDraftButton` | Replace the default Save Draft Button within the Edit View. [Drafts](../versions/drafts) must be enabled and autosave must be disabled. [More details](../custom-components/edit-view#save-draft-button). |
+| `PublishButton`   | Replace the default Publish Button within the Edit View. [Drafts](../versions/drafts) must be enabled. [More details](../custom-components/edit-view#publish-button). |
+| `PreviewButton`   | Replace the default Preview Button within the Edit View. [Preview](../admin/preview) must be enabled. [More details](../custom-components/edit-view#preview-button). |
+| `Upload`          | Replace the default Upload component within the Edit View. [Upload](../upload/overview) must be enabled. [More details](../custom-components/edit-view#upload). |
 
 <Banner type="success">
   **Note:**
