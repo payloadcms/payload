@@ -12,7 +12,7 @@ export type ImportExportPluginConfig = {
    */
   collections?: string[]
   /**
-   * Globals to include the SEO fields in
+   * Globals to include the Import/Export controls in
    */
   globals?: string[]
 

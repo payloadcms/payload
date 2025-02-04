@@ -17,6 +17,15 @@ export const importExportPlugin =
       config.collections = [exportCollection]
     }
 
+    // Ensure that `config.admin` and `config.admin.components` are initialized
+    config.admin = config.admin || {}
+    config.admin.components = config.admin.components || {}
+    // Now we can safely push to `actions`
+    config.admin.components.actions = config.admin.components.actions || []
+    config.admin.components.actions.push({
+      path: '@payloadcms/plugin-import-export/rsc#ExportButton',
+    })
+
     config.i18n = deepMergeSimple(translations, config.i18n?.translations ?? {})
 
     return config

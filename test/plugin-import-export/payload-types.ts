@@ -83,6 +83,57 @@ export interface User {
 export interface Page {
   id: string;
   title: string;
+  group?: {
+    value?: string | null;
+    ignore?: string | null;
+    array?:
+      | {
+          field1?: string | null;
+          field2?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  array?:
+    | {
+        field1?: string | null;
+        field2?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocks?:
+    | (
+        | {
+            title?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hero';
+          }
+        | {
+            richText?: {
+              root: {
+                type: string;
+                children: {
+                  type: string;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'content';
+          }
+      )[]
+    | null;
+  author?: (string | null) | User;
+  hasManyNumber?: number[] | null;
+  relationship?: (string | null) | User;
   excerpt?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -94,10 +145,16 @@ export interface Page {
  */
 export interface Export {
   id: string;
-  collections: {
-    slug?: string | null;
-    id?: string | null;
-  }[];
+  name?: string | null;
+  collections?:
+    | {
+        slug: string;
+        fields?: string[] | null;
+        sort?: string[] | null;
+        id?: string | null;
+      }[]
+    | null;
+  locales?: string[] | null;
   globals?: string[] | null;
   format: 'json' | 'csv';
   updatedAt: string;
@@ -194,6 +251,47 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
+  group?:
+    | T
+    | {
+        value?: T;
+        ignore?: T;
+        array?:
+          | T
+          | {
+              field1?: T;
+              field2?: T;
+              id?: T;
+            };
+      };
+  array?:
+    | T
+    | {
+        field1?: T;
+        field2?: T;
+        id?: T;
+      };
+  blocks?:
+    | T
+    | {
+        hero?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        content?:
+          | T
+          | {
+              richText?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  author?: T;
+  hasManyNumber?: T;
+  relationship?: T;
   excerpt?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -204,12 +302,16 @@ export interface PagesSelect<T extends boolean = true> {
  * via the `definition` "exports_select".
  */
 export interface ExportsSelect<T extends boolean = true> {
+  name?: T;
   collections?:
     | T
     | {
         slug?: T;
+        fields?: T;
+        sort?: T;
         id?: T;
       };
+  locales?: T;
   globals?: T;
   format?: T;
   updatedAt?: T;
@@ -266,6 +368,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }
