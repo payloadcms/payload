@@ -3,11 +3,11 @@ import type { ListQuery } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import React, { useCallback, useEffect, useState } from 'react'
+import { useEffectEvent } from 'use-effect-event'
 
 import type { ListDrawerProps } from './types.js'
 
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
-import { useIgnoredEffect } from '../../hooks/useIgnoredEffect.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { hoistQueryParamsToAnd } from '../../utilities/mergeListSearchAndWhere.js'
@@ -59,18 +59,19 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     useDocumentDrawer({
       collectionSlug: selectedOption.value,
     })
-  useIgnoredEffect(
-    ({ selectedOption }) => {
-      if (selectedCollectionFromProps && selectedCollectionFromProps !== selectedOption?.value) {
-        setSelectedOption({
-          label: getEntityConfig({ collectionSlug: selectedCollectionFromProps })?.labels,
-          value: selectedCollectionFromProps,
-        })
-      }
-    },
-    [selectedCollectionFromProps],
-    { selectedOption },
-  )
+
+  const updateSelectedOption = useEffectEvent((selectedCollectionFromProps: string) => {
+    if (selectedCollectionFromProps && selectedCollectionFromProps !== selectedOption?.value) {
+      setSelectedOption({
+        label: getEntityConfig({ collectionSlug: selectedCollectionFromProps })?.labels,
+        value: selectedCollectionFromProps,
+      })
+    }
+  })
+
+  useEffect(() => {
+    updateSelectedOption(selectedCollectionFromProps)
+  }, [selectedCollectionFromProps])
 
   const renderList = useCallback(
     async (slug: string, query?: ListQuery) => {

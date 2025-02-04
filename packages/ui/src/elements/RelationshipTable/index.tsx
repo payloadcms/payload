@@ -1,21 +1,15 @@
 'use client'
-import type {
-  ClientCollectionConfig,
-  JoinFieldClient,
-  ListQuery,
-  PaginatedDocs,
-  Where,
-} from 'payload'
+import type { JoinFieldClient, ListQuery, PaginatedDocs, Where } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { Fragment, useCallback, useState } from 'react'
+import React, { Fragment, useCallback, useEffect, useState } from 'react'
+import { useEffectEvent } from 'use-effect-event'
 
 import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
 import type { Column } from '../Table/index.js'
 
 import { Button } from '../../elements/Button/index.js'
 import { Pill } from '../../elements/Pill/index.js'
-import { useIgnoredEffect } from '../../hooks/useIgnoredEffect.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -27,8 +21,8 @@ import { AnimateHeight } from '../AnimateHeight/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
-import { TableColumnsProvider } from '../TableColumns/index.js'
 import './index.scss'
+import { TableColumnsProvider } from '../TableColumns/index.js'
 import { DrawerLink } from './cells/DrawerLink/index.js'
 import { RelationshipTablePagination } from './Pagination.js'
 
@@ -152,15 +146,15 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     ],
   )
 
-  useIgnoredEffect(
-    ({ renderTable, Table }) => {
-      if (!disableTable && (!Table || query)) {
-        void renderTable()
-      }
-    },
-    [query, disableTable],
-    { renderTable, Table },
-  )
+  const handleTableRender = useEffectEvent((query: ListQuery, disableTable: boolean) => {
+    if (!disableTable && (!Table || query)) {
+      void renderTable()
+    }
+  })
+
+  useEffect(() => {
+    handleTableRender(query, disableTable)
+  }, [query, disableTable])
 
   const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer, openDrawer }] = useDocumentDrawer({
     collectionSlug: relationTo,
