@@ -22,8 +22,7 @@ import type {
   SubmitOptions,
 } from './types.js'
 
-import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
-import { useUpdateDebouncedEffect } from '../../hooks/useDebouncedUpdateEffect.js'
+import { useDebouncedDeepCompareInitialRenderEffect } from '../../hooks/useDebouncedDeepCompareInitialRenderEffect.js'
 import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -684,9 +683,6 @@ export const Form: React.FC<FormProps> = (props) => {
         incomingState: revalidatedFormState,
       })
 
-      // @ts-ignore
-      newState._internal_updated_from_onChange = true
-
       if (changed) {
         dispatchFields({
           type: 'REPLACE_STATE',
@@ -697,15 +693,9 @@ export const Form: React.FC<FormProps> = (props) => {
     }
   })
 
-  useUpdateDebouncedEffect(
+  useDebouncedDeepCompareInitialRenderEffect(
     () => {
       if (modified) {
-        if (contextRef.current.fields._internal_updated_from_onChange) {
-          delete contextRef.current.fields._internal_updated_from_onChange
-          return
-        }
-        console.log('fields updated', modified)
-
         void executeOnChange(submitted)
       }
     },
