@@ -1,5 +1,4 @@
 'use client'
-import { useDebouncedEffect } from '@payloadcms/ui'
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import { useRouter } from 'next/navigation.js'
 import { serialize } from 'object-to-formdata'
@@ -23,6 +22,7 @@ import type {
   SubmitOptions,
 } from './types.js'
 
+import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
 import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
