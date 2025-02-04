@@ -153,7 +153,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     }
   })
 
-  useUpdateEffect(() => {
+  useEffect(() => {
     handleTableRender(query, disableTable)
   }, [query, disableTable])
 
