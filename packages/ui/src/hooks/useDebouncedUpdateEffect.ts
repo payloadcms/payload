@@ -1,7 +1,9 @@
 'use client'
 import type { DependencyList } from 'react'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
+
+import { useUpdateEffect } from './useUpdateEffect.js'
 
 /**
  * Run a debounced effect only on updates, not on the first render
@@ -11,8 +13,6 @@ export function useUpdateDebouncedEffect(
   deps: DependencyList,
   delay: number,
 ): void {
-  const isFirstRenderRef = useRef(true)
-
   const [debouncedEffect, setDebouncedEffect] = useState<() => void>(() => effect)
 
   useEffect(() => {
@@ -25,11 +25,7 @@ export function useUpdateDebouncedEffect(
     }
   }, [...deps, delay])
 
-  useEffect(() => {
-    if (isFirstRenderRef.current) {
-      isFirstRenderRef.current = false
-      return
-    }
+  useUpdateEffect(() => {
     debouncedEffect()
   }, [debouncedEffect])
 }
