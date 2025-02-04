@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { Payload, User } from 'payload'
 import fs from 'fs'
 import { parse } from 'csv-parse'
 
@@ -9,9 +9,11 @@ import type { Page } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { richTextData } from './seed/richTextData.js'
+import { devUser } from '../credentials.js'
 
 let payload: Payload
 let page: Page
+let user: any
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -19,6 +21,13 @@ const dirname = path.dirname(filename)
 describe('@payloadcms/plugin-import-export', () => {
   beforeAll(async () => {
     ;({ payload } = await initPayloadInt(dirname))
+    user = await payload.login({
+      collection: 'users',
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+      },
+    })
   })
 
   afterAll(async () => {
@@ -44,6 +53,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let doc = await payload.create({
         collection: 'exports',
+        user,
         data: {
           collections: [
             {
@@ -104,6 +114,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let doc = await payload.create({
         collection: 'exports',
+        user,
         data: {
           collections: [
             {
@@ -153,6 +164,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let doc = await payload.create({
         collection: 'exports',
+        user,
         data: {
           collections: [
             {
@@ -193,6 +205,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let doc = await payload.create({
         collection: 'exports',
+        user,
         data: {
           collections: [
             {
@@ -248,6 +261,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let doc = await payload.create({
         collection: 'exports',
+        user,
         data: {
           collections: [
             {
@@ -270,6 +284,28 @@ describe('@payloadcms/plugin-import-export', () => {
 
       expect(data[0].blocks_0_blockType).toStrictEqual('hero')
       expect(data[0].blocks_1_blockType).toStrictEqual('content')
+    })
+
+    it('should create jobs task for exports', async () => {
+      let doc = await payload.create({
+        collection: 'exports-tasks',
+        user,
+        data: {
+          collections: [
+            {
+              slug: 'pages',
+              fields: ['id', 'title'],
+            },
+          ],
+          format: 'csv',
+        },
+      })
+
+      const jobs = await payload.find({
+        collection: 'payload-jobs',
+      })
+
+      expect(jobs.docs).toHaveLength(1)
     })
 
     // disabled so we don't always run a massive test
@@ -309,6 +345,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       let doc = await payload.create({
         collection: 'exports',
+        user,
         data: {
           collections: [
             {

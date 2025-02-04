@@ -12,10 +12,13 @@ export type ImportExportPluginConfig = {
    */
   collections?: string[]
   /**
+   * Enable to force the export to run synchronously
+   */
+  disableJobsQueue?: boolean
+  /**
    * Globals to include the Import/Export controls in
    */
   globals?: string[]
-
   /**
    * This function takes the default export collection configured in the plugin and allows you to override it by modifying and returning it
    * @param collection

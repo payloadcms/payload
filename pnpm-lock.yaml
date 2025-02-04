@@ -1003,9 +1003,15 @@ importers:
 
   packages/plugin-import-export:
     dependencies:
+      '@faceless-ui/modal':
+        specifier: 3.0.0-beta.2
+        version: 3.0.0-beta.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@payloadcms/translations':
         specifier: workspace:*
         version: link:../translations
+      '@payloadcms/ui':
+        specifier: workspace:*
+        version: link:../ui
       csv-parse:
         specifier: ^5.6.0
         version: 5.6.0

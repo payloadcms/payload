@@ -1,9 +1,10 @@
-import type { Config } from 'payload'
+import type { Config, JobsConfig } from 'payload'
 
 import { deepMergeSimple } from 'payload'
 
 import type { ImportExportPluginConfig } from './types.js'
 
+import { createCollectionExportTask } from './export/createExportCollectionTask.js'
 import { getExportCollection } from './getExportCollection.js'
 import { translations } from './translations/index.js'
 
@@ -16,6 +17,13 @@ export const importExportPlugin =
     } else {
       config.collections = [exportCollection]
     }
+
+    // inject the createExport job into the config
+    config.jobs =
+      config.jobs ||
+      ({
+        tasks: [createCollectionExportTask],
+      } as unknown as JobsConfig) // cannot type jobs config inside of plugins
 
     // Ensure that `config.admin` and `config.admin.components` are initialized
     config.admin = config.admin || {}

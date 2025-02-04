@@ -40,6 +40,15 @@ export default buildConfigWithDefaults({
         collection.upload.staticDir = path.resolve(dirname, 'uploads')
         return collection
       },
+      disableJobsQueue: true,
+    }),
+    importExportPlugin({
+      overrideExportCollection: (collection) => {
+        collection.slug = 'exports-tasks'
+        collection.admin.group = 'System'
+        collection.upload.staticDir = path.resolve(dirname, 'uploads')
+        return collection
+      },
     }),
   ],
   typescript: {

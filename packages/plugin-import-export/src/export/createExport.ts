@@ -1,4 +1,4 @@
-import type { PaginatedDocs, PayloadRequest, Sort } from 'payload'
+import type { PaginatedDocs, PayloadRequest, Sort, User } from 'payload'
 
 import { Buffer } from 'buffer'
 import { stringify } from 'csv-stringify/sync'
@@ -18,17 +18,20 @@ type Export = {
   globals?: string[]
   id: number | string
   name: string
+  user: string
+  userCollection: string
 }
 
-type Args = {
-  data: Export
+export type CreateExportArgs = {
+  input: Export
   req: PayloadRequest
+  user?: User
 }
 
-export const createExport = async (args: Args) => {
+export const createExport = async (args: CreateExportArgs) => {
   const {
-    data: { name: nameArg, collections = [], format },
-    req: { locale, payload, user },
+    input: { id, name: nameArg, collections = [], format, user },
+    req: { locale, payload },
     req,
   } = args
 
@@ -49,6 +52,7 @@ export const createExport = async (args: Args) => {
       depth: 0,
       limit: 100,
       locale,
+      overrideAccess: false,
       page: 0,
       select: getSelect(fields),
       sort,
@@ -75,11 +79,26 @@ export const createExport = async (args: Args) => {
 
     const csvBuffer = Buffer.from(csvData.join(''))
 
-    req.file = {
-      name: `${name}-${collection.slug}.csv`,
-      data: csvBuffer,
-      mimetype: 'text/csv',
-      size: csvBuffer.length,
+    // when `disableJobsQueue` is true, the export is created synchronously in a beforeOperation hook
+    if (!id) {
+      req.file = {
+        name: `${name}-${collection.slug}.csv`,
+        data: csvBuffer,
+        mimetype: 'text/csv',
+        size: csvBuffer.length,
+      }
+    } else {
+      await req.payload.update({
+        id,
+        collection: 'exports',
+        data: {},
+        file: {
+          name: `${name}.${format}`,
+          data: csvBuffer,
+          mimetype: 'text/csv',
+          size: csvBuffer.length,
+        },
+      })
     }
   }
 }
