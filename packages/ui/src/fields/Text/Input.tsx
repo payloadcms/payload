@@ -73,6 +73,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
         {hasMany ? (
           <ReactSelect
             className={`field-${path.replace(/\./g, '__')}`}
+            components={{ DropdownIndicator: null }}
             disabled={readOnly}
             // prevent adding additional options if maxRows is reached
             filterOption={() =>
@@ -82,6 +83,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
             isCreatable
             isMulti
             isSortable
+            menuIsOpen={false}
             noOptionsMessage={() => {
               const isOverHasMany = Array.isArray(value) && value.length >= maxRows
               if (isOverHasMany) {
