@@ -708,7 +708,7 @@ export const Form: React.FC<FormProps> = (props) => {
         `fields` updates before `modified`, because setModified is in a setTimeout.
         So on the first change, modified is false, so we don't trigger the effect even though we should.
     **/
-    [modified, submitted],
+    [modified, submitted, contextRef.current.fields],
     250,
   )
 
