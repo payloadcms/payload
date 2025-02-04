@@ -24,6 +24,7 @@ import {
   customTabLabel,
   customTabViewPath,
   customTabViewTitle,
+  customTabAdminDescription,
 } from '../../shared.js'
 import {
   customFieldsSlug,
@@ -189,6 +190,13 @@ describe('Document View', () => {
       await saveDocAndAssert(page)
       await expect(page.locator('#field-title')).toBeEnabled()
     })
+
+    test('should thread proper event argument to validation functions', async () => {
+      await page.goto(postsUrl.create)
+      await page.locator('#field-title').fill(title)
+      await page.locator('#field-validateUsingEvent').fill('Not allowed')
+      await saveDocAndAssert(page, '#action-save', 'error')
+    })
   })
 
   describe('document titles', () => {
@@ -259,6 +267,28 @@ describe('Document View', () => {
       await globalLabel.click()
       await checkPageTitle(page, label)
       await checkBreadcrumb(page, label)
+    })
+  })
+
+  describe('breadcrumbs', () => {
+    test('List drawer should not effect underlying breadcrumbs', async () => {
+      await navigateToDoc(page, postsUrl)
+
+      expect(await page.locator('.step-nav.app-header__step-nav a').nth(1).innerText()).toBe(
+        'Posts',
+      )
+
+      await page.locator('#field-upload button.upload__listToggler').click()
+      await expect(page.locator('[id^=list-drawer_1_]')).toBeVisible()
+      await wait(100) // wait for the component to re-render
+
+      await expect(
+        page.locator('.step-nav.app-header__step-nav .step-nav__last'),
+      ).not.toContainText('Uploads')
+
+      expect(await page.locator('.step-nav.app-header__step-nav a').nth(1).innerText()).toBe(
+        'Posts',
+      )
     })
   })
 
@@ -353,6 +383,31 @@ describe('Document View', () => {
       await expect(drawer2Content).toBeVisible()
       const drawer2Left = await drawer2Content.boundingBox().then((box) => box.x)
       expect(drawer2Left > drawerLeft).toBe(true)
+    })
+  })
+
+  describe('descriptions', () => {
+    test('should render tab admin description', async () => {
+      await page.goto(postsUrl.create)
+      await page.waitForURL(postsUrl.create)
+
+      const tabsContent = page.locator('.tabs-field__content-wrap')
+      await expect(tabsContent.locator('.field-description')).toHaveText(customTabAdminDescription)
+    })
+
+    test('should render tab admin description as a translation function', async () => {
+      await page.goto(postsUrl.create)
+      await page.waitForURL(postsUrl.create)
+
+      const secondTab = page.locator('.tabs-field__tab-button').nth(1)
+      secondTab.click()
+
+      wait(500)
+
+      const tabsContent = page.locator('.tabs-field__content-wrap')
+      await expect(
+        tabsContent.locator('.field-description', { hasText: `t:${customTabAdminDescription}` }),
+      ).toBeVisible()
     })
   })
 
@@ -474,6 +529,15 @@ describe('Document View', () => {
         await page.locator('#field-customSelectField .rs__control').click()
         await expect(page.locator('#field-customSelectField .rs__option')).toHaveCount(2)
       })
+    })
+  })
+
+  describe('publish button', () => {
+    test('should show publish active locale button with defaultLocalePublishOption', async () => {
+      await navigateToDoc(page, postsUrl)
+      const publishButton = await page.locator('#action-save')
+      await expect(publishButton).toBeVisible()
+      await expect(publishButton).toContainText('Publish in English')
     })
   })
 })

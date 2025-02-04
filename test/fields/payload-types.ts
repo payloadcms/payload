@@ -34,6 +34,7 @@ export interface Config {
     lexicalObjectReferenceBug: LexicalObjectReferenceBug;
     users: User;
     LexicalInBlock: LexicalInBlock;
+    'select-versions-fields': SelectVersionsField;
     'array-fields': ArrayField;
     'block-fields': BlockField;
     'checkbox-fields': CheckboxField;
@@ -79,6 +80,7 @@ export interface Config {
     lexicalObjectReferenceBug: LexicalObjectReferenceBugSelect<false> | LexicalObjectReferenceBugSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     LexicalInBlock: LexicalInBlockSelect<false> | LexicalInBlockSelect<true>;
+    'select-versions-fields': SelectVersionsFieldsSelect<false> | SelectVersionsFieldsSelect<true>;
     'array-fields': ArrayFieldsSelect<false> | ArrayFieldsSelect<true>;
     'block-fields': BlockFieldsSelect<false> | BlockFieldsSelect<true>;
     'checkbox-fields': CheckboxFieldsSelect<false> | CheckboxFieldsSelect<true>;
@@ -454,6 +456,30 @@ export interface LexicalInBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "select-versions-fields".
+ */
+export interface SelectVersionsField {
+  id: string;
+  hasMany?: ('a' | 'b' | 'c')[] | null;
+  array?:
+    | {
+        hasManyArr?: ('a' | 'b' | 'c')[] | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocks?:
+    | {
+        hasManyArr?: ('a' | 'b' | 'c')[] | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block';
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "array-fields".
  */
 export interface ArrayField {
@@ -466,6 +492,8 @@ export interface ArrayField {
     subArray?:
       | {
           text?: string | null;
+          textTwo: string;
+          textInRow: string;
           id?: string | null;
         }[]
       | null;
@@ -878,10 +906,11 @@ export interface CodeField {
 export interface CollapsibleField {
   id: string;
   text: string;
-  group?: {
+  group: {
     textWithinGroup?: string | null;
-    subGroup?: {
+    subGroup: {
       textWithinSubGroup?: string | null;
+      requiredTextWithinSubGroup: string;
     };
   };
   someText?: string | null;
@@ -1802,6 +1831,10 @@ export interface PayloadLockedDocument {
         value: string | LexicalInBlock;
       } | null)
     | ({
+        relationTo: 'select-versions-fields';
+        value: string | SelectVersionsField;
+      } | null)
+    | ({
         relationTo: 'array-fields';
         value: string | ArrayField;
       } | null)
@@ -2073,6 +2106,32 @@ export interface LexicalInBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "select-versions-fields_select".
+ */
+export interface SelectVersionsFieldsSelect<T extends boolean = true> {
+  hasMany?: T;
+  array?:
+    | T
+    | {
+        hasManyArr?: T;
+        id?: T;
+      };
+  blocks?:
+    | T
+    | {
+        block?:
+          | T
+          | {
+              hasManyArr?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "array-fields_select".
  */
 export interface ArrayFieldsSelect<T extends boolean = true> {
@@ -2087,6 +2146,8 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
           | T
           | {
               text?: T;
+              textTwo?: T;
+              textInRow?: T;
               id?: T;
             };
         id?: T;
@@ -2490,6 +2551,7 @@ export interface CollapsibleFieldsSelect<T extends boolean = true> {
           | T
           | {
               textWithinSubGroup?: T;
+              requiredTextWithinSubGroup?: T;
             };
       };
   someText?: T;
@@ -3373,6 +3435,21 @@ export interface LexicalBlocksRadioButtonsBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'radioButtons';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "AvatarGroupBlock".
+ */
+export interface AvatarGroupBlock {
+  avatars?:
+    | {
+        image?: (string | null) | Upload;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'AvatarGroup';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

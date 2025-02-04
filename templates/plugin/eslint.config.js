@@ -25,6 +25,11 @@ export const defaultESLintIgnores = [
 export default [
   ...payloadEsLintConfig,
   {
+    rules: {
+      'no-restricted-exports': 'off',
+    },
+  },
+  {
     languageOptions: {
       parserOptions: {
         sourceType: 'module',

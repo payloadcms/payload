@@ -1,6 +1,6 @@
-import type { Language } from '../types.js'
+import type { DefaultTranslationsObject, Language } from '../types.js'
 
-export const etTranslations = {
+export const etTranslations: DefaultTranslationsObject = {
   authentication: {
     account: 'Konto',
     accountOfCurrentUser: 'Praeguse kasutaja konto',
@@ -236,6 +236,7 @@ export const etTranslations = {
     duplicate: 'Dubleeri',
     duplicateWithoutSaving: 'Dubleeri ilma muudatusi salvestamata',
     edit: 'Muuda',
+    editAll: 'Muuda kõiki',
     editedSince: 'Muudetud alates',
     editing: 'Muutmine',
     editingLabel_many: 'Muudan {{count}} {{label}}',
@@ -296,6 +297,9 @@ export const etTranslations = {
     reindexingAll: 'Indekseerin uuesti kõik {{collections}}.',
     remove: 'Eemalda',
     reset: 'Lähtesta',
+    resetPreferences: 'Lähtesta eelistused',
+    resetPreferencesDescription: 'See lähtestab kõik teie eelistused vaikeväärtustele.',
+    resettingPreferences: 'Lähtestan eelistusi.',
     row: 'Rida',
     rows: 'Read',
     save: 'Salvesta',
@@ -433,6 +437,8 @@ export const etTranslations = {
     autosavedSuccessfully: 'Automaatselt salvestatud.',
     autosavedVersion: 'Automaatselt salvestatud versioon',
     changed: 'Muudetud',
+    changedFieldsCount_one: '{{count}} muudetud väli',
+    changedFieldsCount_other: '{{count}} muudetud välja',
     compareVersion: 'Võrdle versiooni:',
     confirmPublish: 'Kinnita avaldamine',
     confirmRevertToSaved: 'Kinnita taastamine salvestatud seisundisse',
@@ -444,6 +450,7 @@ export const etTranslations = {
     draft: 'Mustand',
     draftSavedSuccessfully: 'Mustand edukalt salvestatud.',
     lastSavedAgo: 'Viimati salvestatud {{distance}} tagasi',
+    modifiedOnly: 'Muudetud ainult',
     noFurtherVersionsFound: 'Rohkem versioone ei leitud',
     noRowsFound: '{{label}} ei leitud',
     noRowsSelected: '{{label}} pole valitud',
@@ -451,6 +458,7 @@ export const etTranslations = {
     previouslyPublished: 'Varem avaldatud',
     problemRestoringVersion: 'Selle versiooni taastamisel tekkis probleem',
     publish: 'Avalda',
+    publishAllLocales: 'Avaldage kõik lokaadid',
     publishChanges: 'Avalda muudatused',
     published: 'Avaldatud',
     publishIn: 'Avalda keeles {{locale}}',

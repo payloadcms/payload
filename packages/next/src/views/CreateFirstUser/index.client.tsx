@@ -1,7 +1,6 @@
 'use client'
 import type { FormProps, UserWithToken } from '@payloadcms/ui'
 import type {
-  ClientCollectionConfig,
   DocumentPreferences,
   FormState,
   LoginWithUsernameOptions,
@@ -45,10 +44,10 @@ export const CreateFirstUserClient: React.FC<{
 
   const abortOnChangeRef = React.useRef<AbortController>(null)
 
-  const collectionConfig = getEntityConfig({ collectionSlug: userSlug }) as ClientCollectionConfig
+  const collectionConfig = getEntityConfig({ collectionSlug: userSlug })
 
   const onChange: FormProps['onChange'][0] = React.useCallback(
-    async ({ formState: prevFormState }) => {
+    async ({ formState: prevFormState, submitted }) => {
       const controller = handleAbortRef(abortOnChangeRef)
 
       const response = await getFormState({
@@ -59,6 +58,7 @@ export const CreateFirstUserClient: React.FC<{
         operation: 'create',
         schemaPath: userSlug,
         signal: controller.signal,
+        skipValidation: !submitted,
       })
 
       abortOnChangeRef.current = null

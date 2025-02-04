@@ -428,6 +428,32 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'relations',
+      fields: [
+        {
+          name: 'item',
+          type: 'relationship',
+          relationTo: ['items'],
+        },
+      ],
+    },
+    {
+      slug: 'items',
+      fields: [
+        {
+          type: 'select',
+          options: ['completed', 'failed', 'pending'],
+          name: 'status',
+        },
+        {
+          type: 'join',
+          on: 'item',
+          collection: 'relations',
+          name: 'relation',
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     await payload.create({

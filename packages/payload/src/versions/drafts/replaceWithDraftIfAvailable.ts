@@ -98,7 +98,6 @@ const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
     return doc
   }
 
-  draft = deepCopyObjectSimple(draft)
   draft = sanitizeInternalFields(draft)
 
   // Patch globalType onto version doc

@@ -35,13 +35,13 @@ const Restore: React.FC<Props> = ({
 }) => {
   const {
     config: {
-      collections,
       routes: { admin: adminRoute, api: apiRoute },
       serverURL,
     },
+    getEntityConfig,
   } = useConfig()
 
-  const collectionConfig = collections.find((collection) => collection.slug === collectionSlug)
+  const collectionConfig = getEntityConfig({ collectionSlug })
 
   const { toggleModal } = useModal()
   const [processing, setProcessing] = useState(false)
@@ -100,14 +100,16 @@ const Restore: React.FC<Props> = ({
           className={[canRestoreAsDraft && `${baseClass}__button`].filter(Boolean).join(' ')}
           onClick={() => toggleModal(modalSlug)}
           size="small"
-          SubMenuPopupContent={() =>
-            canRestoreAsDraft && (
-              <PopupList.ButtonGroup>
-                <PopupList.Button onClick={() => [setDraft(true), toggleModal(modalSlug)]}>
-                  {t('version:restoreAsDraft')}
-                </PopupList.Button>
-              </PopupList.ButtonGroup>
-            )
+          SubMenuPopupContent={
+            canRestoreAsDraft
+              ? () => (
+                  <PopupList.ButtonGroup>
+                    <PopupList.Button onClick={() => [setDraft(true), toggleModal(modalSlug)]}>
+                      {t('version:restoreAsDraft')}
+                    </PopupList.Button>
+                  </PopupList.ButtonGroup>
+                )
+              : null
           }
         >
           {t('version:restoreThisVersion')}

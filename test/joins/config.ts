@@ -29,8 +29,21 @@ export default buildConfigWithDefaults({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    user: 'users',
   },
   collections: [
+    {
+      slug: 'users',
+      auth: true,
+      fields: [
+        {
+          type: 'join',
+          collection: 'posts',
+          on: 'author',
+          name: 'posts',
+        },
+      ],
+    },
     Posts,
     Categories,
     HiddenPosts,
@@ -165,6 +178,45 @@ export default buildConfigWithDefaults({
           name: 'category',
           type: 'relationship',
           relationTo: categoriesJoinRestrictedSlug,
+        },
+      ],
+    },
+    {
+      slug: 'depth-joins-1',
+      fields: [
+        {
+          name: 'rel',
+          type: 'relationship',
+          relationTo: 'depth-joins-2',
+        },
+        {
+          name: 'joins',
+          type: 'join',
+          collection: 'depth-joins-3',
+          on: 'rel',
+          maxDepth: 2,
+        },
+      ],
+    },
+    {
+      slug: 'depth-joins-2',
+      fields: [
+        {
+          name: 'joins',
+          type: 'join',
+          collection: 'depth-joins-1',
+          on: 'rel',
+          maxDepth: 2,
+        },
+      ],
+    },
+    {
+      slug: 'depth-joins-3',
+      fields: [
+        {
+          name: 'rel',
+          type: 'relationship',
+          relationTo: 'depth-joins-1',
         },
       ],
     },

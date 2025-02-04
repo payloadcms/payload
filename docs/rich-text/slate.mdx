@@ -6,9 +6,13 @@ desc: The Slate editor has been supported by Payload since beta. It's very power
 keywords: slatejs, slate, rich text, editor, headless cms
 ---
 
-The Slate editor has been supported by Payload since we released our initial beta. It's battle-tested and will continue to be supported into the future.
+<Banner type="warning">
 
-If you are migrating a Payload project from 1.x or earlier, you can continue to use the Slate editor as long as you'd like.
+  The [default Payload editor](/docs/rich-text/overview) is currently based on Lexical. This documentation 
+  is about our old Slate-based editor. You can continue using it because it is still supported, or you can 
+  see the optional [migration guide](/docs/rich-text/migration) to migrate from Slate to Lexical (recommended).
+
+</Banner>
 
 To use the Slate editor, first you need to install it:
 
@@ -127,7 +131,7 @@ Similar to the `relationship` element, the `upload` element is a user-friendly w
 
   Collections are automatically allowed to be selected within the Rich Text relationship and upload
   elements by default. If you want to disable a collection from being able to be referenced in Rich
-  Text fields, set the collection admin options of **enableRichTextLink** and{' '}
+  Text fields, set the collection admin options of **enableRichTextLink** and
   **enableRichTextRelationship** to false.
 </Banner>
 

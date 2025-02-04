@@ -51,6 +51,8 @@ export type {
   ArrayFieldClientProps,
   ArrayFieldDescriptionClientComponent,
   ArrayFieldDescriptionServerComponent,
+  ArrayFieldDiffClientComponent,
+  ArrayFieldDiffServerComponent,
   ArrayFieldErrorClientComponent,
   ArrayFieldErrorServerComponent,
   ArrayFieldLabelClientComponent,
@@ -60,10 +62,14 @@ export type {
 } from './fields/Array.js'
 
 export type {
+  BlockRowLabelClientComponent,
+  BlockRowLabelServerComponent,
   BlocksFieldClientComponent,
   BlocksFieldClientProps,
   BlocksFieldDescriptionClientComponent,
   BlocksFieldDescriptionServerComponent,
+  BlocksFieldDiffClientComponent,
+  BlocksFieldDiffServerComponent,
   BlocksFieldErrorClientComponent,
   BlocksFieldErrorServerComponent,
   BlocksFieldLabelClientComponent,
@@ -77,6 +83,8 @@ export type {
   CheckboxFieldClientProps,
   CheckboxFieldDescriptionClientComponent,
   CheckboxFieldDescriptionServerComponent,
+  CheckboxFieldDiffClientComponent,
+  CheckboxFieldDiffServerComponent,
   CheckboxFieldErrorClientComponent,
   CheckboxFieldErrorServerComponent,
   CheckboxFieldLabelClientComponent,
@@ -90,6 +98,8 @@ export type {
   CodeFieldClientProps,
   CodeFieldDescriptionClientComponent,
   CodeFieldDescriptionServerComponent,
+  CodeFieldDiffClientComponent,
+  CodeFieldDiffServerComponent,
   CodeFieldErrorClientComponent,
   CodeFieldErrorServerComponent,
   CodeFieldLabelClientComponent,
@@ -103,6 +113,8 @@ export type {
   CollapsibleFieldClientProps,
   CollapsibleFieldDescriptionClientComponent,
   CollapsibleFieldDescriptionServerComponent,
+  CollapsibleFieldDiffClientComponent,
+  CollapsibleFieldDiffServerComponent,
   CollapsibleFieldErrorClientComponent,
   CollapsibleFieldErrorServerComponent,
   CollapsibleFieldLabelClientComponent,
@@ -116,6 +128,8 @@ export type {
   DateFieldClientProps,
   DateFieldDescriptionClientComponent,
   DateFieldDescriptionServerComponent,
+  DateFieldDiffClientComponent,
+  DateFieldDiffServerComponent,
   DateFieldErrorClientComponent,
   DateFieldErrorServerComponent,
   DateFieldLabelClientComponent,
@@ -129,6 +143,8 @@ export type {
   EmailFieldClientProps,
   EmailFieldDescriptionClientComponent,
   EmailFieldDescriptionServerComponent,
+  EmailFieldDiffClientComponent,
+  EmailFieldDiffServerComponent,
   EmailFieldErrorClientComponent,
   EmailFieldErrorServerComponent,
   EmailFieldLabelClientComponent,
@@ -142,6 +158,8 @@ export type {
   GroupFieldClientProps,
   GroupFieldDescriptionClientComponent,
   GroupFieldDescriptionServerComponent,
+  GroupFieldDiffClientComponent,
+  GroupFieldDiffServerComponent,
   GroupFieldErrorClientComponent,
   GroupFieldErrorServerComponent,
   GroupFieldLabelClientComponent,
@@ -157,6 +175,8 @@ export type {
   JoinFieldClientProps,
   JoinFieldDescriptionClientComponent,
   JoinFieldDescriptionServerComponent,
+  JoinFieldDiffClientComponent,
+  JoinFieldDiffServerComponent,
   JoinFieldErrorClientComponent,
   JoinFieldErrorServerComponent,
   JoinFieldLabelClientComponent,
@@ -170,6 +190,8 @@ export type {
   JSONFieldClientProps,
   JSONFieldDescriptionClientComponent,
   JSONFieldDescriptionServerComponent,
+  JSONFieldDiffClientComponent,
+  JSONFieldDiffServerComponent,
   JSONFieldErrorClientComponent,
   JSONFieldErrorServerComponent,
   JSONFieldLabelClientComponent,
@@ -183,6 +205,8 @@ export type {
   NumberFieldClientProps,
   NumberFieldDescriptionClientComponent,
   NumberFieldDescriptionServerComponent,
+  NumberFieldDiffClientComponent,
+  NumberFieldDiffServerComponent,
   NumberFieldErrorClientComponent,
   NumberFieldErrorServerComponent,
   NumberFieldLabelClientComponent,
@@ -196,6 +220,8 @@ export type {
   PointFieldClientProps,
   PointFieldDescriptionClientComponent,
   PointFieldDescriptionServerComponent,
+  PointFieldDiffClientComponent,
+  PointFieldDiffServerComponent,
   PointFieldErrorClientComponent,
   PointFieldErrorServerComponent,
   PointFieldLabelClientComponent,
@@ -209,6 +235,8 @@ export type {
   RadioFieldClientProps,
   RadioFieldDescriptionClientComponent,
   RadioFieldDescriptionServerComponent,
+  RadioFieldDiffClientComponent,
+  RadioFieldDiffServerComponent,
   RadioFieldErrorClientComponent,
   RadioFieldErrorServerComponent,
   RadioFieldLabelClientComponent,
@@ -222,6 +250,8 @@ export type {
   RelationshipFieldClientProps,
   RelationshipFieldDescriptionClientComponent,
   RelationshipFieldDescriptionServerComponent,
+  RelationshipFieldDiffClientComponent,
+  RelationshipFieldDiffServerComponent,
   RelationshipFieldErrorClientComponent,
   RelationshipFieldErrorServerComponent,
   RelationshipFieldLabelClientComponent,
@@ -235,6 +265,8 @@ export type {
   RichTextFieldClientProps,
   RichTextFieldDescriptionClientComponent,
   RichTextFieldDescriptionServerComponent,
+  RichTextFieldDiffClientComponent,
+  RichTextFieldDiffServerComponent,
   RichTextFieldErrorClientComponent,
   RichTextFieldErrorServerComponent,
   RichTextFieldLabelClientComponent,
@@ -248,6 +280,8 @@ export type {
   RowFieldClientProps,
   RowFieldDescriptionClientComponent,
   RowFieldDescriptionServerComponent,
+  RowFieldDiffClientComponent,
+  RowFieldDiffServerComponent,
   RowFieldErrorClientComponent,
   RowFieldErrorServerComponent,
   RowFieldLabelClientComponent,
@@ -261,6 +295,8 @@ export type {
   SelectFieldClientProps,
   SelectFieldDescriptionClientComponent,
   SelectFieldDescriptionServerComponent,
+  SelectFieldDiffClientComponent,
+  SelectFieldDiffServerComponent,
   SelectFieldErrorClientComponent,
   SelectFieldErrorServerComponent,
   SelectFieldLabelClientComponent,
@@ -275,6 +311,8 @@ export type {
   TabsFieldClientProps,
   TabsFieldDescriptionClientComponent,
   TabsFieldDescriptionServerComponent,
+  TabsFieldDiffClientComponent,
+  TabsFieldDiffServerComponent,
   TabsFieldErrorClientComponent,
   TabsFieldErrorServerComponent,
   TabsFieldLabelClientComponent,
@@ -288,6 +326,8 @@ export type {
   TextFieldClientProps,
   TextFieldDescriptionClientComponent,
   TextFieldDescriptionServerComponent,
+  TextFieldDiffClientComponent,
+  TextFieldDiffServerComponent,
   TextFieldErrorClientComponent,
   TextFieldErrorServerComponent,
   TextFieldLabelClientComponent,
@@ -301,6 +341,8 @@ export type {
   TextareaFieldClientProps,
   TextareaFieldDescriptionClientComponent,
   TextareaFieldDescriptionServerComponent,
+  TextareaFieldDiffClientComponent,
+  TextareaFieldDiffServerComponent,
   TextareaFieldErrorClientComponent,
   TextareaFieldErrorServerComponent,
   TextareaFieldLabelClientComponent,
@@ -312,6 +354,8 @@ export type {
 export type {
   UIFieldClientComponent,
   UIFieldClientProps,
+  UIFieldDiffClientComponent,
+  UIFieldDiffServerComponent,
   UIFieldServerComponent,
   UIFieldServerProps,
 } from './fields/UI.js'
@@ -321,6 +365,8 @@ export type {
   UploadFieldClientProps,
   UploadFieldDescriptionClientComponent,
   UploadFieldDescriptionServerComponent,
+  UploadFieldDiffClientComponent,
+  UploadFieldDiffServerComponent,
   UploadFieldErrorClientComponent,
   UploadFieldErrorServerComponent,
   UploadFieldLabelClientComponent,
@@ -339,6 +385,17 @@ export type {
   GenericDescriptionProps,
   StaticDescription,
 } from './forms/Description.js'
+
+export type {
+  BaseVersionField,
+  DiffMethod,
+  FieldDiffClientComponent,
+  FieldDiffClientProps,
+  FieldDiffServerComponent,
+  FieldDiffServerProps,
+  VersionField,
+  VersionTab,
+} from './forms/Diff.js'
 
 export type {
   FieldErrorClientComponent,
@@ -453,6 +510,12 @@ export type RenderedField = {
   Field: React.ReactNode
   indexPath?: string
   initialSchemaPath?: string
+  /**
+   * @deprecated
+   * This is a legacy property that will be removed in v4.
+   * Please use `fieldIsSidebar(field)` from `payload` instead.
+   * Or check `field.admin.position === 'sidebar'` directly.
+   */
   isSidebar: boolean
   path: string
   schemaPath: string

@@ -4,7 +4,14 @@ import type { SanitizedPermissions } from '../../auth/index.js'
 import type { ImportMap } from '../../bin/generateImportMap/index.js'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { ClientConfig } from '../../config/client.js'
-import type { Locale, MetaConfig, PayloadComponent, ServerProps } from '../../config/types.js'
+import type {
+  CustomComponent,
+  Locale,
+  MetaConfig,
+  PayloadComponent,
+  SanitizedConfig,
+  ServerProps,
+} from '../../config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { LanguageOptions } from '../LanguageOptions.js'
@@ -23,6 +30,7 @@ export type AdminViewConfig = {
 export type AdminViewProps = {
   readonly clientConfig: ClientConfig
   readonly disableActions?: boolean
+  readonly documentSubViewType?: DocumentSubViewTypes
   readonly drawerSlug?: string
   readonly importMap: ImportMap
   readonly initialData?: Data
@@ -31,6 +39,7 @@ export type AdminViewProps = {
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
   readonly searchParams: { [key: string]: string | string[] | undefined }
+  readonly viewType: ViewTypes
 }
 
 export type AdminViewComponent = PayloadComponent<AdminViewProps>
@@ -67,3 +76,19 @@ export type ServerSideEditViewProps = {
   ServerProps
 
 export type ClientSideEditViewProps = {} & DocumentSlots
+
+export type ViewTypes =
+  | 'account'
+  | 'dashboard'
+  | 'document'
+  | 'list'
+  | 'reset'
+  | 'verify'
+  | 'version'
+export type DocumentSubViewTypes = 'api' | 'default' | 'livePreview' | 'version' | 'versions'
+
+export type ServerPropsFromView = {
+  collectionConfig?: SanitizedConfig['collections'][number]
+  globalConfig?: SanitizedConfig['globals'][number]
+  viewActions: CustomComponent[]
+}

@@ -5,7 +5,7 @@ import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-import type { Category, Config, Post, Singular } from './payload-types.js'
+import type { Category, Config, DepthJoins1, DepthJoins3, Post, Singular } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { idToString } from '../helpers/idToString.js'
@@ -115,6 +115,7 @@ describe('Joins Field', () => {
           camelCaseCategory: category.id,
         },
         array: [{ category: category.id }],
+        localizedArray: [{ category: category.id }],
         blocks: [{ blockType: 'block', category: category.id }],
       })
     }
@@ -212,6 +213,16 @@ describe('Joins Field', () => {
     })
 
     expect(categoryWithPosts.arrayPosts.docs).toBeDefined()
+  })
+
+  it('should populate joins with localized array relationships', async () => {
+    const categoryWithPosts = await payload.findByID({
+      id: category.id,
+      collection: categoriesSlug,
+    })
+
+    expect(categoryWithPosts.localizedArrayPosts.docs).toBeDefined()
+    expect(categoryWithPosts.localizedArrayPosts.docs).toHaveLength(10)
   })
 
   it('should populate joins with blocks relationships', async () => {
@@ -983,6 +994,35 @@ describe('Joins Field', () => {
     const data = await payload.findByID({ collection: 'self-joins', id: doc_1.id, depth: 1 })
 
     expect((data.joins.docs[0] as TypeWithID).id).toBe(doc_2.id)
+  })
+
+  it('should populate joins on depth 2', async () => {
+    const depthJoin_2 = await payload.create({ collection: 'depth-joins-2', data: {}, depth: 0 })
+    const depthJoin_1 = await payload.create({
+      collection: 'depth-joins-1',
+      data: { rel: depthJoin_2 },
+      depth: 0,
+    })
+
+    const depthJoin_3 = await payload.create({
+      collection: 'depth-joins-3',
+      data: { rel: depthJoin_1 },
+      depth: 0,
+    })
+
+    const data = await payload.findByID({
+      collection: 'depth-joins-2',
+      id: depthJoin_2.id,
+      depth: 2,
+    })
+
+    const joinedDoc = data.joins.docs[0] as DepthJoins1
+
+    expect(joinedDoc.id).toBe(depthJoin_1.id)
+
+    const joinedDoc2 = joinedDoc.joins.docs[0] as DepthJoins3
+
+    expect(joinedDoc2.id).toBe(depthJoin_3.id)
   })
 })
 

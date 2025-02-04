@@ -28,8 +28,7 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Canary release script
-        # dry run hard-coded to true for testing and no npm token provided
-        run: pnpm tsx ./scripts/publish-canary.ts
+        run: pnpm release:canary
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true

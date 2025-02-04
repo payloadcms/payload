@@ -11,6 +11,7 @@ export interface Config {
     users: UserAuthOperations;
   };
   collections: {
+    users: User;
     posts: Post;
     categories: Category;
     'hidden-posts': HiddenPost;
@@ -25,12 +26,17 @@ export interface Config {
     'categories-join-restricted': CategoriesJoinRestricted;
     'restricted-posts': RestrictedPost;
     'collection-restricted': CollectionRestricted;
-    users: User;
+    'depth-joins-1': DepthJoins1;
+    'depth-joins-2': DepthJoins2;
+    'depth-joins-3': DepthJoins3;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {
+    users: {
+      posts: 'posts';
+    };
     categories: {
       relatedPosts: 'posts';
       hasManyPosts: 'posts';
@@ -38,6 +44,7 @@ export interface Config {
       'group.relatedPosts': 'posts';
       'group.camelCasePosts': 'posts';
       arrayPosts: 'posts';
+      localizedArrayPosts: 'posts';
       blocksPosts: 'posts';
       polymorphic: 'posts';
       polymorphics: 'posts';
@@ -66,8 +73,15 @@ export interface Config {
     'categories-join-restricted': {
       collectionRestrictedJoin: 'collection-restricted';
     };
+    'depth-joins-1': {
+      joins: 'depth-joins-3';
+    };
+    'depth-joins-2': {
+      joins: 'depth-joins-1';
+    };
   };
   collectionsSelect: {
+    users: UsersSelect<false> | UsersSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     'hidden-posts': HiddenPostsSelect<false> | HiddenPostsSelect<true>;
@@ -82,7 +96,9 @@ export interface Config {
     'categories-join-restricted': CategoriesJoinRestrictedSelect<false> | CategoriesJoinRestrictedSelect<true>;
     'restricted-posts': RestrictedPostsSelect<false> | RestrictedPostsSelect<true>;
     'collection-restricted': CollectionRestrictedSelect<false> | CollectionRestrictedSelect<true>;
-    users: UsersSelect<false> | UsersSelect<true>;
+    'depth-joins-1': DepthJoins1Select<false> | DepthJoins1Select<true>;
+    'depth-joins-2': DepthJoins2Select<false> | DepthJoins2Select<true>;
+    'depth-joins-3': DepthJoins3Select<false> | DepthJoins3Select<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -121,11 +137,33 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: string;
+  posts?: {
+    docs?: (string | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
 export interface Post {
   id: string;
   title?: string | null;
+  author?: (string | null) | User;
   /**
    * Hides posts for the `filtered` join field in categories
    */
@@ -182,6 +220,12 @@ export interface Post {
     camelCaseCategory?: (string | null) | Category;
   };
   array?:
+    | {
+        category?: (string | null) | Category;
+        id?: string | null;
+      }[]
+    | null;
+  localizedArray?:
     | {
         category?: (string | null) | Category;
         id?: string | null;
@@ -260,6 +304,10 @@ export interface Category {
     docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
+  localizedArrayPosts?: {
+    docs?: (string | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
   blocksPosts?: {
     docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
@@ -311,23 +359,6 @@ export interface Singular {
   category?: (string | null) | Category;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: string;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  password?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -453,11 +484,52 @@ export interface RestrictedPost {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "depth-joins-1".
+ */
+export interface DepthJoins1 {
+  id: string;
+  rel?: (string | null) | DepthJoins2;
+  joins?: {
+    docs?: (string | DepthJoins3)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "depth-joins-2".
+ */
+export interface DepthJoins2 {
+  id: string;
+  joins?: {
+    docs?: (string | DepthJoins1)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "depth-joins-3".
+ */
+export interface DepthJoins3 {
+  id: string;
+  rel?: (string | null) | DepthJoins1;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
   id: string;
   document?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
     | ({
         relationTo: 'posts';
         value: string | Post;
@@ -515,8 +587,16 @@ export interface PayloadLockedDocument {
         value: string | CollectionRestricted;
       } | null)
     | ({
-        relationTo: 'users';
-        value: string | User;
+        relationTo: 'depth-joins-1';
+        value: string | DepthJoins1;
+      } | null)
+    | ({
+        relationTo: 'depth-joins-2';
+        value: string | DepthJoins2;
+      } | null)
+    | ({
+        relationTo: 'depth-joins-3';
+        value: string | DepthJoins3;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -562,10 +642,27 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  posts?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
+  author?: T;
   isFiltered?: T;
   restrictedField?: T;
   upload?: T;
@@ -583,6 +680,12 @@ export interface PostsSelect<T extends boolean = true> {
         camelCaseCategory?: T;
       };
   array?:
+    | T
+    | {
+        category?: T;
+        id?: T;
+      };
+  localizedArray?:
     | T
     | {
         category?: T;
@@ -619,6 +722,7 @@ export interface CategoriesSelect<T extends boolean = true> {
         camelCasePosts?: T;
       };
   arrayPosts?: T;
+  localizedArrayPosts?: T;
   blocksPosts?: T;
   polymorphic?: T;
   polymorphics?: T;
@@ -763,18 +867,31 @@ export interface CollectionRestrictedSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_select".
+ * via the `definition` "depth-joins-1_select".
  */
-export interface UsersSelect<T extends boolean = true> {
+export interface DepthJoins1Select<T extends boolean = true> {
+  rel?: T;
+  joins?: T;
   updatedAt?: T;
   createdAt?: T;
-  email?: T;
-  resetPasswordToken?: T;
-  resetPasswordExpiration?: T;
-  salt?: T;
-  hash?: T;
-  loginAttempts?: T;
-  lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "depth-joins-2_select".
+ */
+export interface DepthJoins2Select<T extends boolean = true> {
+  joins?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "depth-joins-3_select".
+ */
+export interface DepthJoins3Select<T extends boolean = true> {
+  rel?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

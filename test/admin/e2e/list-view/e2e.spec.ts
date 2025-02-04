@@ -16,7 +16,12 @@ import {
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { customAdminRoutes } from '../../shared.js'
-import { customViews1CollectionSlug, geoCollectionSlug, postsCollectionSlug } from '../../slugs.js'
+import {
+  customViews1CollectionSlug,
+  geoCollectionSlug,
+  postsCollectionSlug,
+  with300DocumentsSlug,
+} from '../../slugs.js'
 
 const { beforeAll, beforeEach, describe } = test
 
@@ -48,6 +53,7 @@ describe('List View', () => {
   let postsUrl: AdminUrlUtil
   let baseListFiltersUrl: AdminUrlUtil
   let customViewsUrl: AdminUrlUtil
+  let with300DocumentsUrl: AdminUrlUtil
 
   let serverURL: string
   let adminRoutes: ReturnType<typeof getRoutes>
@@ -65,6 +71,7 @@ describe('List View', () => {
 
     geoUrl = new AdminUrlUtil(serverURL, geoCollectionSlug)
     postsUrl = new AdminUrlUtil(serverURL, postsCollectionSlug)
+    with300DocumentsUrl = new AdminUrlUtil(serverURL, with300DocumentsSlug)
     baseListFiltersUrl = new AdminUrlUtil(serverURL, 'base-list-filters')
     customViewsUrl = new AdminUrlUtil(serverURL, customViews1CollectionSlug)
 
@@ -608,6 +615,35 @@ describe('List View', () => {
     })
   })
 
+  describe('WhereBuilder', () => {
+    test('should render where builder', async () => {
+      await page.goto(
+        `${with300DocumentsUrl.list}?limit=10&page=1&where%5Bor%5D%5B0%5D%5Band%5D%5B0%5D%5BselfRelation%5D%5Bequals%5D=null`,
+      )
+      const valueField = page.locator('.condition__value')
+      await valueField.click()
+      await page.keyboard.type('4')
+      const options = page.getByRole('option')
+      expect(options).toHaveCount(10)
+      for (const option of await options.all()) {
+        expect(option).toHaveText('4')
+      }
+      await page.keyboard.press('Backspace')
+      await page.keyboard.type('5')
+      expect(options).toHaveCount(10)
+      for (const option of await options.all()) {
+        expect(option).toHaveText('5')
+      }
+      // await options.last().scrollIntoViewIfNeeded()
+      await options.first().hover()
+      // three times because react-select is not very reliable
+      await page.mouse.wheel(0, 50)
+      await page.mouse.wheel(0, 50)
+      await page.mouse.wheel(0, 50)
+      expect(options).toHaveCount(20)
+    })
+  })
+
   describe('table columns', () => {
     test('should hide field column when field.hidden is true', async () => {
       await page.goto(postsUrl.list)
@@ -1000,6 +1036,57 @@ describe('List View', () => {
       await expect(columnAfterSort).not.toHaveClass('column-selector__column--active')
       await expect(page.locator('#heading-id')).toBeHidden()
       await expect(page.locator('.cell-id')).toHaveCount(0)
+    })
+
+    test('should sort without resetting column preferences', async () => {
+      await payload.delete({
+        collection: 'payload-preferences',
+        where: {
+          key: {
+            equals: `${postsCollectionSlug}.list`,
+          },
+        },
+      })
+
+      await page.goto(postsUrl.list)
+
+      // sort by title
+      await page.locator('#heading-title button.sort-column__asc').click()
+      await page.waitForURL(/sort=title/)
+
+      // enable a column that is _not_ part of this collection's default columns
+      await toggleColumn(page, { columnLabel: 'Status', targetState: 'on' })
+      await page.locator('#heading-_status').waitFor({ state: 'visible' })
+
+      const columnAfterSort = page.locator(
+        `.list-controls__columns .column-selector .column-selector__column`,
+        {
+          hasText: exactText('Status'),
+        },
+      )
+
+      await expect(columnAfterSort).toHaveClass(/column-selector__column--active/)
+      await expect(page.locator('#heading-_status')).toBeVisible()
+      await expect(page.locator('.cell-_status').first()).toBeVisible()
+
+      // sort by title again in descending order
+      await page.locator('#heading-title button.sort-column__desc').click()
+      await page.waitForURL(/sort=-title/)
+
+      // allow time for components to re-render
+      await wait(100)
+
+      // ensure the column is still visible
+      const columnAfterSecondSort = page.locator(
+        `.list-controls__columns .column-selector .column-selector__column`,
+        {
+          hasText: exactText('Status'),
+        },
+      )
+
+      await expect(columnAfterSecondSort).toHaveClass(/column-selector__column--active/)
+      await expect(page.locator('#heading-_status')).toBeVisible()
+      await expect(page.locator('.cell-_status').first()).toBeVisible()
     })
   })
 

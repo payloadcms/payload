@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { cn } from 'src/utilities/cn'
+import { cn } from '@/utilities/ui'
 import { GeistMono } from 'geist/font/mono'
 import { GeistSans } from 'geist/font/sans'
 import React from 'react'
@@ -20,6 +20,7 @@ import { getMessages, setRequestLocale } from 'next-intl/server'
 import { NextIntlClientProvider } from 'next-intl'
 import { routing } from '@/i18n/routing'
 import { notFound } from 'next/navigation'
+import localization from '@/i18n/localization'
 
 type Args = {
   children: React.ReactNode
@@ -30,6 +31,8 @@ type Args = {
 
 export default async function RootLayout({ children, params }: Args) {
   const { locale } = await params
+  const currentLocale = localization.locales.find((loc) => loc.code === locale)
+  const direction = currentLocale?.rtl ? 'rtl' : 'ltr'
 
   if (!routing.locales.includes(locale as any)) {
     notFound()
@@ -43,6 +46,7 @@ export default async function RootLayout({ children, params }: Args) {
     <html
       className={cn(GeistSans.variable, GeistMono.variable)}
       lang={locale}
+      dir={direction}
       suppressHydrationWarning
     >
       <head>

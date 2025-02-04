@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientCollectionConfig } from 'payload'
+import type { ListPreferences } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import LinkImport from 'next/link.js'
@@ -9,7 +9,6 @@ import { formatFilesize, isNumber } from 'payload/shared'
 import React, { Fragment, useEffect, useState } from 'react'
 
 import type { Column } from '../../elements/Table/index.js'
-import type { ListPreferences } from './types.js'
 
 import { useBulkUpload } from '../../elements/BulkUpload/index.js'
 import { Button } from '../../elements/Button/index.js'
@@ -114,7 +113,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
   const { setCollectionSlug, setCurrentActivePath, setOnSuccess } = useBulkUpload()
   const { drawerSlug: bulkUploadDrawerSlug } = useBulkUpload()
 
-  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
+  const collectionConfig = getEntityConfig({ collectionSlug })
 
   const { labels, upload } = collectionConfig
 
@@ -163,7 +162,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
   ])
 
   useEffect(() => {
-    if (drawerDepth <= 1) {
+    if (!drawerDepth) {
       setStepNav([
         {
           label: labels?.plural,
