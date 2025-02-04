@@ -4,6 +4,7 @@ import type { ChangeEvent } from 'react'
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
+import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
 import type { TextInputProps } from './types.js'
 
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
@@ -44,6 +45,39 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
 
   const { i18n, t } = useTranslation()
 
+  const editableProps: ReactSelectAdapterProps['customProps']['editableProps'] = (
+    data,
+    className,
+    selectProps,
+  ) => {
+    const editableClassName = `${className}--editable`
+
+    return {
+      onBlur: (event: React.FocusEvent<HTMLDivElement>) => {
+        event.currentTarget.contentEditable = 'false'
+      },
+      onClick: (event: React.MouseEvent<HTMLDivElement>) => {
+        event.currentTarget.contentEditable = 'true'
+        event.currentTarget.classList.add(editableClassName)
+        event.currentTarget.focus()
+      },
+      onKeyDown: (event: React.KeyboardEvent<HTMLDivElement>) => {
+        if (event.key === 'Enter' || event.key === 'Tab' || event.key === 'Escape') {
+          event.currentTarget.contentEditable = 'false'
+          event.currentTarget.classList.remove(editableClassName)
+          data.value.value = event.currentTarget.innerText
+          data.label = event.currentTarget.innerText
+          selectProps.onChange(selectProps.value, {
+            action: 'create-option',
+            option: data,
+          })
+          event.preventDefault()
+        }
+        event.stopPropagation()
+      },
+    }
+  }
+
   return (
     <div
       className={[
@@ -74,6 +108,9 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
           <ReactSelect
             className={`field-${path.replace(/\./g, '__')}`}
             components={{ DropdownIndicator: null }}
+            customProps={{
+              editableProps,
+            }}
             disabled={readOnly}
             // prevent adding additional options if maxRows is reached
             filterOption={() =>
