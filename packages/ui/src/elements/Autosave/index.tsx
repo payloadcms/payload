@@ -14,14 +14,15 @@ import {
   useFormSubmitted,
 } from '../../forms/Form/context.js'
 import { useDebounce } from '../../hooks/useDebounce.js'
+import { useUpdateEffect } from '../../hooks/useUpdateEffect.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatTimeToNow } from '../../utilities/formatDate.js'
-import { reduceFieldsToValuesWithValidation } from '../../utilities/reduceFieldsToValuesWithValidation.js'
 import './index.scss'
+import { reduceFieldsToValuesWithValidation } from '../../utilities/reduceFieldsToValuesWithValidation.js'
 
 const baseClass = 'autosave'
 // The minimum time the saving state should be shown
@@ -262,7 +263,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   })
 
   // When debounced fields change, autosave
-  useEffect(() => {
+  useUpdateEffect(() => {
     const { abortController, autosaveTimeout } = handleAutosave()
 
     return () => {

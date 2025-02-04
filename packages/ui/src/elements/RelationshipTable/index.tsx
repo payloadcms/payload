@@ -10,6 +10,7 @@ import type { Column } from '../Table/index.js'
 
 import { Button } from '../../elements/Button/index.js'
 import { Pill } from '../../elements/Pill/index.js'
+import { useUpdateEffect } from '../../hooks/useUpdateEffect.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -20,8 +21,8 @@ import { hoistQueryParamsToAnd } from '../../utilities/mergeListSearchAndWhere.j
 import { AnimateHeight } from '../AnimateHeight/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
-import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
 import './index.scss'
+import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
 import { TableColumnsProvider } from '../TableColumns/index.js'
 import { DrawerLink } from './cells/DrawerLink/index.js'
 import { RelationshipTablePagination } from './Pagination.js'
@@ -152,7 +153,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     }
   })
 
-  useEffect(() => {
+  useUpdateEffect(() => {
     handleTableRender(query, disableTable)
   }, [query, disableTable])
 

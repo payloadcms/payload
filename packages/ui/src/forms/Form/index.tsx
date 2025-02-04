@@ -23,6 +23,7 @@ import type {
 } from './types.js'
 
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
+import { useUpdateDebouncedEffect } from '../../hooks/useDebouncedUpdateEffect.js'
 import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -693,7 +694,7 @@ export const Form: React.FC<FormProps> = (props) => {
     }
   })
 
-  useDebouncedEffect(
+  useUpdateDebouncedEffect(
     () => {
       if (modified) {
         void executeOnChange(submitted)

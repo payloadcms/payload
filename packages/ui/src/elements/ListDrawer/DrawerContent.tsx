@@ -8,6 +8,7 @@ import { useEffectEvent } from 'use-effect-event'
 import type { ListDrawerProps } from './types.js'
 
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
+import { useUpdateEffect } from '../../hooks/useUpdateEffect.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { hoistQueryParamsToAnd } from '../../utilities/mergeListSearchAndWhere.js'
@@ -69,7 +70,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     }
   })
 
-  useEffect(() => {
+  useUpdateEffect(() => {
     updateSelectedOption(selectedCollectionFromProps)
   }, [selectedCollectionFromProps])
 
