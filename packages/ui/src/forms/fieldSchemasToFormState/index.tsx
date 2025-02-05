@@ -50,18 +50,22 @@ type Args = {
   schemaPath: string
   skipValidation?: boolean
   /**
-   * If this is undefined, the `data` passed to this function will serve as `fullData`, `data` and `topLevelData` when iterating over the fields to generate the * form state.
+   * If this is undefined, the `data` passed to this function will serve as `fullData`, `data` and `topLevelData` when iterating over
+   * the top-level-fields to generate form state.
    * For sub fields, the `data` will be narrowed down to the sub fields, while `fullData` and `topLevelData` remain the same.
    *
-   * Usually, the `data` passed to this function will be the document data. This means that things like validation or filterOptions that are executed
-   * here will have access to the full document through the passed `data` parameter, and that `fullData` and `topLevelData` will be identical.
+   * Usually, the `data` passed to this function will be the document data. This means that running validation, read access control
+   * or executing filterOptions here will have access to the full document through the passed `fullData` parameter, and that `fullData` and `topLevelData` will be identical.
    *
-   * In some cases however, form state for sub fields will be generated independent from the parent form state. This means that `data` will be the form state
-   * of the sub fields - the document data won't be available here.
+   * In some cases however, this function is used to generate form state solely for sub fields - independent from the parent form state.
+   * This means that `data` will be the form state of the sub fields - the document data won't be available here.
    *
-   * With `topLevelData`, we can pass the full document data, which will be available as `topLevelData` in these cases.
+   * In these cases, we can use `topLevelData` to pass the full document data, which will be available as `topLevelData` in validation,
+   * read access control and filterOptions.
    *
-   * This is useful for lexical blocks, as block fields there are not part of the parent form state, yet we still want document data to be available for validation and filterOptions, under the `topLevelData` key. In this case, `fullData` and `topLevelData` will no longer be identical.
+   * This is useful for lexical blocks, as lexical block fields there are not part of the parent form state, yet we still want
+   * document data to be available for validation and filterOptions, under the `topLevelData` key.
+   * In this case, `fullData` and `topLevelData` will no longer be identical.
    */
   topLevelData?: Data
 }
