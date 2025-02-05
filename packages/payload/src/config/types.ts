@@ -1,6 +1,7 @@
 import type {
   DefaultTranslationKeys,
   DefaultTranslationsObject,
+  I18n,
   I18nClient,
   I18nOptions,
   TFunction,
@@ -455,6 +456,14 @@ export type BaseLocalizationConfig = {
    * @example `"en"`
    */
   defaultLocale: string
+  /**
+   * Change the locale used by the default Publish button.
+   * If set to `all`, all locales will be published.
+   * If set to `active`, only the locale currently being edited will be published.
+   * The non-default option will be available via the secondary button.
+   * @default 'all'
+   */
+  defaultLocalePublishOption?: 'active' | 'all'
   /** Set to `true` to let missing values in localised fields fall back to the values in `defaultLocale`
    *
    * If false, then no requests will fallback unless a fallbackLocale is specified in the request.
@@ -1114,7 +1123,16 @@ export type Config = {
      * Allows you to modify the base JSON schema that is generated during generate:types. This JSON schema will be used
      * to generate the TypeScript interfaces.
      */
-    schema?: Array<(args: { jsonSchema: JSONSchema4 }) => JSONSchema4>
+    schema?: Array<
+      (args: {
+        collectionIDFieldTypes: {
+          [key: string]: 'number' | 'string'
+        }
+        config: SanitizedConfig
+        i18n: I18n
+        jsonSchema: JSONSchema4
+      }) => JSONSchema4
+    >
   }
   /**
    * Customize the handling of incoming file uploads for collections that have uploads enabled.

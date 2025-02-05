@@ -45,14 +45,18 @@ import type {
   DateFieldErrorServerComponent,
   DateFieldLabelClientComponent,
   DateFieldLabelServerComponent,
+  DefaultCellComponentProps,
+  DefaultServerCellComponentProps,
   Description,
   EmailFieldClientProps,
   EmailFieldErrorClientComponent,
   EmailFieldErrorServerComponent,
   EmailFieldLabelClientComponent,
   EmailFieldLabelServerComponent,
-  FieldDescriptionClientComponent,
-  FieldDescriptionServerComponent,
+  FieldDescriptionClientProps,
+  FieldDescriptionServerProps,
+  FieldDiffClientComponent,
+  FieldDiffServerProps,
   GroupFieldClientProps,
   GroupFieldLabelClientComponent,
   GroupFieldLabelServerComponent,
@@ -166,6 +170,7 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
   findMany?: boolean
   /** The global which the field belongs to. If the field belongs to a collection, this will be null. */
   global: null | SanitizedGlobalConfig
+  indexPath: number[]
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
   operation?: 'create' | 'delete' | 'read' | 'update'
   /** The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. */
@@ -268,9 +273,10 @@ export type FilterOptions<TData = any> =
 type Admin = {
   className?: string
   components?: {
-    Cell?: CustomComponent
-    Description?: CustomComponent<FieldDescriptionClientComponent | FieldDescriptionServerComponent>
-    Field?: CustomComponent<FieldClientComponent | FieldServerComponent>
+    Cell?: PayloadComponent<DefaultServerCellComponentProps, DefaultCellComponentProps>
+    Description?: PayloadComponent<FieldDescriptionServerProps, FieldDescriptionClientProps>
+    Diff?: PayloadComponent<FieldDiffServerProps, FieldDiffClientComponent>
+    Field?: PayloadComponent<FieldClientComponent | FieldServerComponent>
     /**
      * The Filter component has to be a client component
      */

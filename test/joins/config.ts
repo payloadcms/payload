@@ -29,8 +29,21 @@ export default buildConfigWithDefaults({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    user: 'users',
   },
   collections: [
+    {
+      slug: 'users',
+      auth: true,
+      fields: [
+        {
+          type: 'join',
+          collection: 'posts',
+          on: 'author',
+          name: 'posts',
+        },
+      ],
+    },
     Posts,
     Categories,
     HiddenPosts,

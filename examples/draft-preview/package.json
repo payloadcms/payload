@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Payload preview example.",
   "license": "MIT",
+  "type": "module",
   "main": "dist/server.js",
   "scripts": {
     "build": "cross-env NODE_OPTIONS=--no-deprecation next build",

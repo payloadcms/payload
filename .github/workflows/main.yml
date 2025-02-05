@@ -362,6 +362,12 @@ jobs:
         if: steps.cache-playwright-browsers.outputs.cache-hit == 'true'
         run: pnpm exec playwright install-deps chromium
 
+      - name: E2E Tests
+        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e:prod:ci ${{ matrix.suite }}
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}.json
+          NEXT_TELEMETRY_DISABLED: 1
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -448,14 +454,6 @@ jobs:
           psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "SELECT version();"
           echo "POSTGRES_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
         if: matrix.database == 'postgres'
-
-      # Login to Docker Hub in order to up rate-limit
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-        if: matrix.database == 'mongodb'
 
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.11.0

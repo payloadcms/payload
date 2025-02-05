@@ -280,6 +280,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
           returnLockStatus: false,
           schemaPath: schemaPathSegments.join('.'),
           signal: controller.signal,
+          skipValidation: true,
         })
 
         // Unlock the document after save
@@ -323,7 +324,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   )
 
   const onChange: FormProps['onChange'][0] = useCallback(
-    async ({ formState: prevFormState }) => {
+    async ({ formState: prevFormState, submitted }) => {
       const controller = handleAbortRef(abortOnChangeRef)
 
       const currentTime = Date.now()
@@ -345,6 +346,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
         formState: prevFormState,
         globalSlug,
         operation,
+        skipValidation: !submitted,
         // Performance optimization: Setting it to false ensure that only fields that have explicit requireRender set in the form state will be rendered (e.g. new array rows).
         // We only want to render ALL fields on initial render, not in onChange.
         renderAllFields: false,

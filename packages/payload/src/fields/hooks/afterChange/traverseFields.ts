@@ -14,11 +14,12 @@ type Args = {
   fields: (Field | TabAsField)[]
   global: null | SanitizedGlobalConfig
   operation: 'create' | 'update'
-  path: (number | string)[]
+  parentIndexPath: string
+  parentPath: string
+  parentSchemaPath: string
   previousDoc: JsonObject
   previousSiblingDoc: JsonObject
   req: PayloadRequest
-  schemaPath: string[]
   siblingData: JsonObject
   siblingDoc: JsonObject
 }
@@ -31,11 +32,12 @@ export const traverseFields = async ({
   fields,
   global,
   operation,
-  path,
+  parentIndexPath,
+  parentPath,
+  parentSchemaPath,
   previousDoc,
   previousSiblingDoc,
   req,
-  schemaPath,
   siblingData,
   siblingDoc,
 }: Args): Promise<void> => {
@@ -52,8 +54,9 @@ export const traverseFields = async ({
         fieldIndex,
         global,
         operation,
-        parentPath: path,
-        parentSchemaPath: schemaPath,
+        parentIndexPath,
+        parentPath,
+        parentSchemaPath,
         previousDoc,
         previousSiblingDoc,
         req,

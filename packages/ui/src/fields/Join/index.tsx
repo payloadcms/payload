@@ -161,18 +161,22 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
     }
 
     return where
-  }, [docID, field.targetField.relationTo, field.where, on, docConfig.slug])
+  }, [docID, field.targetField.relationTo, field.where, on, docConfig?.slug])
 
   const initialDrawerData = useMemo(() => {
     const relatedCollection = getEntityConfig({ collectionSlug: field.collection })
 
     return getInitialDrawerData({
-      collectionSlug: docConfig.slug,
+      collectionSlug: docConfig?.slug,
       docID,
       fields: relatedCollection.fields,
       segments: field.on.split('.'),
     })
-  }, [getEntityConfig, field.collection, field.on, docConfig.slug, docID])
+  }, [getEntityConfig, field.collection, field.on, docConfig?.slug, docID])
+
+  if (!docConfig) {
+    return null
+  }
 
   return (
     <div

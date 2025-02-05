@@ -1,7 +1,7 @@
 ---
 title: Swap in your own React components
 label: Custom Components
-order: 40
+order: 20
 desc: Fully customize your Admin Panel by swapping in your own React components. Add fields, remove views, update routes and change functions to sculpt your perfect Dashboard.
 keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
@@ -185,7 +185,7 @@ Each Custom Component receives the following props by default:
 
 <Banner type="warning">
   **Reminder:**
-  All Custom Components also receive various other props that are specific component being rendered. See [Root Components](#root-components), [Collection Components](../configuration/collections#custom-components), [Global Components](../configuraiton/globals#custom-components), or [Field Components](../fields/overview#custom-components) for a complete list of all default props per component.
+  All Custom Components also receive various other props that are specific component being rendered. See [Root Components](#root-components), [Collection Components](../configuration/collections#custom-components), [Global Components](../configuration/globals#custom-components), or [Field Components](../fields/overview#custom-components) for a complete list of all default props per component.
 </Banner>
 
 ### Custom Props
@@ -462,7 +462,7 @@ Payload also exports its [SCSS](https://sass-lang.com) library for reuse which i
 
 ## Root Components
 
-Root Components are those that effect the [Admin Panel](./overview) generally, such as the logo or the main nav.
+Root Components are those that affect the [Admin Panel](./overview) generally, such as the logo or the main nav.
 
 To override Root Components, use the `admin.components` property in your [Payload Config](../configuration/overview):
 
@@ -511,7 +511,7 @@ The following options are available:
 
 As you add more and more Custom Components to your [Admin Panel](./overview), you may find it helpful to add additional [React Context](https://react.dev/learn/scaling-up-with-reducer-and-context)(s). Payload allows you to inject your own context providers in your app so you can export your own custom hooks, etc.
 
-To add a Custom Provider, use the `admin.components.providers` property in your [Payload Config](../getting-started/overview):
+To add a Custom Provider, use the `admin.components.providers` property in your [Payload Config](../configuration/overview):
 
 ```ts
 import { buildConfig } from 'payload'
@@ -546,5 +546,5 @@ export const useMyCustomContext = () => useContext(MyCustomContext)
 ```
 
 <Banner type="warning">
-  **Reminder:**React Context exists only within Client Components. This means they must include the `use client` directive at the top of their files and cannot contain server-only code. To use a Server Component here, simply _wrap_ your Client Component with it.
+  **Reminder:** React Context exists only within Client Components. This means they must include the `use client` directive at the top of their files and cannot contain server-only code. To use a Server Component here, simply _wrap_ your Client Component with it.
 </Banner>

@@ -52,7 +52,7 @@ export default buildConfig({
 
 <Banner type="info">
   **Note:**
-  If you're using `vercelPostgresAdapter` your `process.env.POSTGRES_URL` or `pool.connectionString` points to a local database (e.g hostname has `localhost` or `127.0.0.1`) we use the `pg` module for pooling instead of `@vercel/postgres`. This is because `@vercel/postgres` doesn't work with local databases, if you want to disable that behavior, you can pass `forceUseVercelPostgres: true` to adapter's 'args and follow [Vercel guide](https://vercel.com/docs/storage/vercel-postgres/local-development#option-2:-local-postgres-instance-with-docker) for a Docker Neon DB setup.
+  If you're using `vercelPostgresAdapter` your `process.env.POSTGRES_URL` or `pool.connectionString` points to a local database (e.g hostname has `localhost` or `127.0.0.1`) we use the `pg` module for pooling instead of `@vercel/postgres`. This is because `@vercel/postgres` doesn't work with local databases, if you want to disable that behavior, you can pass `forceUseVercelPostgres: true` to the adapter's args and follow [Vercel guide](https://vercel.com/docs/storage/vercel-postgres/local-development#option-2:-local-postgres-instance-with-docker) for a Docker Neon DB setup.
 </Banner>
 
 ## Options

@@ -1,17 +1,22 @@
 import type { Field, FilterOptionsProps, RelationshipField } from 'payload'
 
+import { getCollectionIDType } from './getCollectionIDType.js'
 import { getTenantFromCookie } from './getTenantFromCookie.js'
 
 type AddFilterOptionsToFieldsArgs = {
   fields: Field[]
   tenantEnabledCollectionSlugs: string[]
   tenantEnabledGlobalSlugs: string[]
+  tenantFieldName: string
+  tenantsCollectionSlug: string
 }
 
 export function addFilterOptionsToFields({
   fields,
   tenantEnabledCollectionSlugs,
   tenantEnabledGlobalSlugs,
+  tenantFieldName,
+  tenantsCollectionSlug,
 }: AddFilterOptionsToFieldsArgs) {
   fields.forEach((field) => {
     if (field.type === 'relationship') {
@@ -26,7 +31,7 @@ export function addFilterOptionsToFields({
           )
         }
         if (tenantEnabledCollectionSlugs.includes(field.relationTo)) {
-          addFilter(field, tenantEnabledCollectionSlugs)
+          addFilter({ field, tenantEnabledCollectionSlugs, tenantFieldName, tenantsCollectionSlug })
         }
       } else {
         field.relationTo.map((relationTo) => {
@@ -36,7 +41,12 @@ export function addFilterOptionsToFields({
             )
           }
           if (tenantEnabledCollectionSlugs.includes(relationTo)) {
-            addFilter(field, tenantEnabledCollectionSlugs)
+            addFilter({
+              field,
+              tenantEnabledCollectionSlugs,
+              tenantFieldName,
+              tenantsCollectionSlug,
+            })
           }
         })
       }
@@ -52,6 +62,8 @@ export function addFilterOptionsToFields({
         fields: field.fields,
         tenantEnabledCollectionSlugs,
         tenantEnabledGlobalSlugs,
+        tenantFieldName,
+        tenantsCollectionSlug,
       })
     }
 
@@ -61,6 +73,8 @@ export function addFilterOptionsToFields({
           fields: block.fields,
           tenantEnabledCollectionSlugs,
           tenantEnabledGlobalSlugs,
+          tenantFieldName,
+          tenantsCollectionSlug,
         })
       })
     }
@@ -71,13 +85,26 @@ export function addFilterOptionsToFields({
           fields: tab.fields,
           tenantEnabledCollectionSlugs,
           tenantEnabledGlobalSlugs,
+          tenantFieldName,
+          tenantsCollectionSlug,
         })
       })
     }
   })
 }
 
-function addFilter(field: RelationshipField, tenantEnabledCollectionSlugs: string[]) {
+type AddFilterArgs = {
+  field: RelationshipField
+  tenantEnabledCollectionSlugs: string[]
+  tenantFieldName: string
+  tenantsCollectionSlug: string
+}
+function addFilter({
+  field,
+  tenantEnabledCollectionSlugs,
+  tenantFieldName,
+  tenantsCollectionSlug,
+}: AddFilterArgs) {
   // User specified filter
   const originalFilter = field.filterOptions
   field.filterOptions = async (args) => {
@@ -95,7 +122,11 @@ function addFilter(field: RelationshipField, tenantEnabledCollectionSlugs: strin
     }
 
     // Custom tenant filter
-    const tenantFilterResults = filterOptionsByTenant(args)
+    const tenantFilterResults = filterOptionsByTenant({
+      ...args,
+      tenantFieldName,
+      tenantsCollectionSlug,
+    })
 
     // If the tenant filter returns true, just use the original filter
     if (tenantFilterResults === true) {
@@ -115,9 +146,18 @@ function addFilter(field: RelationshipField, tenantEnabledCollectionSlugs: strin
 
 type Args = {
   tenantFieldName?: string
+  tenantsCollectionSlug: string
 } & FilterOptionsProps
-const filterOptionsByTenant = ({ req, tenantFieldName = 'tenant' }: Args) => {
-  const selectedTenant = getTenantFromCookie(req.headers, req.payload.db.defaultIDType)
+const filterOptionsByTenant = ({
+  req,
+  tenantFieldName = 'tenant',
+  tenantsCollectionSlug,
+}: Args) => {
+  const idType = getCollectionIDType({
+    collectionSlug: tenantsCollectionSlug,
+    payload: req.payload,
+  })
+  const selectedTenant = getTenantFromCookie(req.headers, idType)
   if (!selectedTenant) {
     return true
   }

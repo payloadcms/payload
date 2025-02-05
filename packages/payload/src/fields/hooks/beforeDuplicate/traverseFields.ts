@@ -12,9 +12,10 @@ type Args<T> = {
   fields: (Field | TabAsField)[]
   id?: number | string
   overrideAccess: boolean
-  path: (number | string)[]
+  parentIndexPath: string
+  parentPath: string
+  parentSchemaPath: string
   req: PayloadRequest
-  schemaPath: string[]
   siblingDoc: JsonObject
 }
 
@@ -25,12 +26,14 @@ export const traverseFields = async <T>({
   doc,
   fields,
   overrideAccess,
-  path,
+  parentIndexPath,
+  parentPath,
+  parentSchemaPath,
   req,
-  schemaPath,
   siblingDoc,
 }: Args<T>): Promise<void> => {
   const promises = []
+
   fields.forEach((field, fieldIndex) => {
     promises.push(
       promise({
@@ -41,8 +44,9 @@ export const traverseFields = async <T>({
         field,
         fieldIndex,
         overrideAccess,
-        parentPath: path,
-        parentSchemaPath: schemaPath,
+        parentIndexPath,
+        parentPath,
+        parentSchemaPath,
         req,
         siblingDoc,
       }),

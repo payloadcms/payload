@@ -26,7 +26,7 @@ import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { isMongoose } from '../helpers/isMongoose.js'
 import removeFiles from '../helpers/removeFiles.js'
-import { postsSlug } from './shared.js'
+import { errorOnUnnamedFieldsSlug, postsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -895,7 +895,7 @@ describe('database', () => {
       await expect(errorMessage).toBe('The following field is invalid: Title')
     })
 
-    it('should return proper deeply nested field validation errors', async () => {
+    it('should return validation errors in response', async () => {
       try {
         await payload.create({
           collection: postsSlug,
@@ -919,6 +919,22 @@ describe('database', () => {
               ? 'SQLite3 can only bind numbers, strings, bigints, buffers, and null'
               : '',
         )
+      }
+    })
+
+    it('should return validation errors with proper field paths for unnamed fields', async () => {
+      try {
+        await payload.create({
+          collection: errorOnUnnamedFieldsSlug,
+          data: {
+            groupWithinUnnamedTab: {
+              // @ts-expect-error
+              text: undefined,
+            },
+          },
+        })
+      } catch (e: any) {
+        expect(e.data?.errors?.[0]?.path).toBe('groupWithinUnnamedTab.text')
       }
     })
   })

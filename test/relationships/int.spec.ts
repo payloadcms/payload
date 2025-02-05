@@ -1577,6 +1577,23 @@ describe('Relationships', () => {
       expect(res.docs).toHaveLength(1)
       expect(res.docs[0].id).toBe(id)
     })
+
+    it('should update document that polymorphicaly joined to another collection', async () => {
+      const item = await payload.create({ collection: 'items', data: { status: 'pending' } })
+
+      await payload.create({
+        collection: 'relations',
+        data: { item: { relationTo: 'items', value: item } },
+      })
+
+      const updated = await payload.update({
+        collection: 'items',
+        data: { status: 'completed' },
+        id: item.id,
+      })
+
+      expect(updated.status).toBe('completed')
+    })
   })
 })
 
