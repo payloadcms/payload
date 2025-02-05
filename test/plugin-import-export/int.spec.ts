@@ -1,4 +1,4 @@
-import type { Payload, User } from 'payload'
+import type { CollectionSlug, Payload, User } from 'payload'
 import fs from 'fs'
 import { parse } from 'csv-parse'
 
@@ -286,9 +286,49 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].blocks_1_blockType).toStrictEqual('content')
     })
 
+    it('should create a file for collection csv using a where filter', async () => {
+      // data set
+      for (let i = 0; i < 5; i++) {
+        await payload.create({
+          collection: 'pages',
+          data: {
+            title: `Array ${i}`,
+          },
+        })
+      }
+
+      let doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collections: [
+            {
+              slug: 'pages',
+              fields: ['id', 'title'],
+              where: {
+                title: { equals: 'Array 2' },
+              },
+            },
+          ],
+          format: 'csv',
+        },
+      })
+
+      doc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(doc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', doc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      expect(data[0].title).toStrictEqual('Array 2')
+    })
+
     it('should create jobs task for exports', async () => {
       let doc = await payload.create({
-        collection: 'exports-tasks',
+        collection: 'exports-tasks' as CollectionSlug,
         user,
         data: {
           collections: [
@@ -302,7 +342,7 @@ describe('@payloadcms/plugin-import-export', () => {
       })
 
       const jobs = await payload.find({
-        collection: 'payload-jobs',
+        collection: 'payload-jobs' as CollectionSlug,
       })
 
       expect(jobs.docs).toHaveLength(1)
