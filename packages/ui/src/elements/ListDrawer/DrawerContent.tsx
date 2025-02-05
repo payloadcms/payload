@@ -8,7 +8,6 @@ import type { ListDrawerProps } from './types.js'
 
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
-import { useUpdateEffect } from '../../hooks/useUpdateEffect.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { hoistQueryParamsToAnd } from '../../utilities/mergeListSearchAndWhere.js'

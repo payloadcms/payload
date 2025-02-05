@@ -14,7 +14,6 @@ import {
 } from '../../forms/Form/context.js'
 import { useDebounce } from '../../hooks/useDebounce.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
-import { useUpdateEffect } from '../../hooks/useUpdateEffect.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
