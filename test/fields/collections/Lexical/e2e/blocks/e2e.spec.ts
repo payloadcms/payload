@@ -30,6 +30,7 @@ import { RESTClient } from '../../../../../helpers/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../../../playwright.config.js'
 import { lexicalFieldsSlug } from '../../../../slugs.js'
 import { lexicalDocData } from '../../data.js'
+import { trackNetworkRequests } from '../../../../../helpers/e2e/trackNetworkRequests.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -309,6 +310,194 @@ describe('lexicalBlocks', () => {
         expect((paragraphNode.children[0] as SerializedTextNode).text).toBe('123')
         expect((paragraphNode.children[0] as SerializedTextNode).format).toBe(1)
       },
+    })
+  })
+
+  describe('block filterOptions', () => {
+    async function setupFilterOptionsTests() {
+      const { richTextField } = await navigateToLexicalFields()
+
+      await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'invalid',
+        },
+        depth: 0,
+      })
+
+      const lastParagraph = richTextField.locator('p').last()
+      await lastParagraph.scrollIntoViewIfNeeded()
+      await expect(lastParagraph).toBeVisible()
+
+      await lastParagraph.click()
+
+      await page.keyboard.press('Enter')
+      await page.keyboard.press('/')
+      await page.keyboard.type('filter')
+
+      // CreateBlock
+      const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
+      await expect(slashMenuPopover).toBeVisible()
+
+      const blockSelectButton = slashMenuPopover.locator('button').first()
+      await expect(blockSelectButton).toBeVisible()
+      await expect(blockSelectButton).toContainText('Filter Options Block')
+      await blockSelectButton.click()
+      await expect(slashMenuPopover).toBeHidden()
+
+      const newBlock = richTextField
+        .locator('.lexical-block:not(.lexical-block .lexical-block)')
+        .nth(8) // The :not(.lexical-block .lexical-block) makes sure this does not select sub-blocks
+      await newBlock.scrollIntoViewIfNeeded()
+
+      await saveDocAndAssert(page)
+
+      const topLevelDocTextField = page.locator('#field-title').first()
+      const blockTextField = newBlock.locator('#field-text').first()
+      const blockGroupTextField = newBlock.locator('#field-group__groupText').first()
+
+      const dependsOnDocData = newBlock.locator('#field-group__dependsOnDocData').first()
+      const dependsOnSiblingData = newBlock.locator('#field-group__dependsOnSiblingData').first()
+      const dependsOnBlockData = newBlock.locator('#field-group__dependsOnBlockData').first()
+
+      return {
+        topLevelDocTextField,
+        blockTextField,
+        blockGroupTextField,
+        dependsOnDocData,
+        dependsOnSiblingData,
+        dependsOnBlockData,
+        newBlock,
+      }
+    }
+
+    test('ensure block fields with filter options have access to document-level data', async () => {
+      const {
+        blockGroupTextField,
+        blockTextField,
+        dependsOnBlockData,
+        dependsOnDocData,
+        dependsOnSiblingData,
+        newBlock,
+        topLevelDocTextField,
+      } = await setupFilterOptionsTests()
+
+      await dependsOnDocData.locator('.rs__control').click()
+      await expect(newBlock.locator('.rs__menu')).toHaveText('No options')
+      await dependsOnDocData.locator('.rs__control').click()
+
+      await dependsOnSiblingData.locator('.rs__control').click()
+      await expect(newBlock.locator('.rs__menu')).toContainText('Seeded text document')
+      await expect(newBlock.locator('.rs__menu')).toContainText('Another text document')
+      await dependsOnSiblingData.locator('.rs__control').click()
+
+      await dependsOnBlockData.locator('.rs__control').click()
+      await expect(newBlock.locator('.rs__menu')).toContainText('Seeded text document')
+      await expect(newBlock.locator('.rs__menu')).toContainText('Another text document')
+      await dependsOnBlockData.locator('.rs__control').click()
+
+      // Fill and wait for form state to come back
+      await trackNetworkRequests(page, '/admin/collections/lexical-fields', async () => {
+        await topLevelDocTextField.fill('invalid')
+      })
+      // Ensure block form state is updated and comes back (=> filter options are updated)
+      await trackNetworkRequests(
+        page,
+        '/admin/collections/lexical-fields',
+        async () => {
+          await blockTextField.fill('.')
+          await blockTextField.fill('')
+        },
+        { allowedNumberOfRequests: 2 },
+      )
+
+      await dependsOnDocData.locator('.rs__control').click()
+      await expect(newBlock.locator('.rs__menu')).toHaveText('Text Fieldsinvalid')
+      await dependsOnDocData.locator('.rs__control').click()
+
+      await dependsOnSiblingData.locator('.rs__control').click()
+      await expect(newBlock.locator('.rs__menu')).toContainText('Seeded text document')
+      await expect(newBlock.locator('.rs__menu')).toContainText('Another text document')
+      await dependsOnSiblingData.locator('.rs__control').click()
+
+      await dependsOnBlockData.locator('.rs__control').click()
+      await expect(newBlock.locator('.rs__menu')).toContainText('Seeded text document')
+      await expect(newBlock.locator('.rs__menu')).toContainText('Another text document')
+      await dependsOnBlockData.locator('.rs__control').click()
+
+      await saveDocAndAssert(page)
+    })
+
+    test('ensure block fields with filter options have access to sibling data', async () => {
+      const {
+        blockGroupTextField,
+        blockTextField,
+        dependsOnBlockData,
+        dependsOnDocData,
+        dependsOnSiblingData,
+        newBlock,
+        topLevelDocTextField,
+      } = await setupFilterOptionsTests()
+
+      await trackNetworkRequests(
+        page,
+        '/admin/collections/lexical-fields',
+        async () => {
+          await blockGroupTextField.fill('invalid')
+        },
+        { allowedNumberOfRequests: 2 },
+      )
+
+      await dependsOnDocData.locator('.rs__control').click()
+      await expect(newBlock.locator('.rs__menu')).toHaveText('No options')
+      await dependsOnDocData.locator('.rs__control').click()
+
+      await dependsOnSiblingData.locator('.rs__control').click()
+      await expect(newBlock.locator('.rs__menu')).toHaveText('Text Fieldsinvalid')
+      await dependsOnSiblingData.locator('.rs__control').click()
+
+      await dependsOnBlockData.locator('.rs__control').click()
+      await expect(newBlock.locator('.rs__menu')).toContainText('Seeded text document')
+      await expect(newBlock.locator('.rs__menu')).toContainText('Another text document')
+      await dependsOnBlockData.locator('.rs__control').click()
+
+      await saveDocAndAssert(page)
+    })
+
+    test('ensure block fields with filter options have access to block-level data', async () => {
+      const {
+        blockGroupTextField,
+        blockTextField,
+        dependsOnBlockData,
+        dependsOnDocData,
+        dependsOnSiblingData,
+        newBlock,
+        topLevelDocTextField,
+      } = await setupFilterOptionsTests()
+
+      await trackNetworkRequests(
+        page,
+        '/admin/collections/lexical-fields',
+        async () => {
+          await blockTextField.fill('invalid')
+        },
+        { allowedNumberOfRequests: 2 },
+      )
+
+      await dependsOnDocData.locator('.rs__control').click()
+      await expect(newBlock.locator('.rs__menu')).toHaveText('No options')
+      await dependsOnDocData.locator('.rs__control').click()
+
+      await dependsOnSiblingData.locator('.rs__control').click()
+      await expect(newBlock.locator('.rs__menu')).toContainText('Seeded text document')
+      await expect(newBlock.locator('.rs__menu')).toContainText('Another text document')
+      await dependsOnSiblingData.locator('.rs__control').click()
+
+      await dependsOnBlockData.locator('.rs__control').click()
+      await expect(newBlock.locator('.rs__menu')).toHaveText('Text Fieldsinvalid')
+      await dependsOnBlockData.locator('.rs__control').click()
+
+      await saveDocAndAssert(page)
     })
   })
 
