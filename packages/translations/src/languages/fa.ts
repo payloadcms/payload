@@ -268,6 +268,7 @@ export const faTranslations: DefaultTranslationsObject = {
     locale: 'زبان',
     locales: 'زبان‌ها',
     menu: 'منو',
+    moreListControls: 'کنترل های لیست بیشتر',
     moveDown: 'حرکت به پایین',
     moveUp: 'حرکت به بالا',
     newPassword: 'گذرواژه تازه',

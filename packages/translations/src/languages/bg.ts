@@ -269,6 +269,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     locale: 'Локализация',
     locales: 'Локализации',
     menu: 'Меню',
+    moreListControls: 'Повече контроли за списъци',
     moveDown: 'Надолу',
     moveUp: 'Нагоре',
     newPassword: 'Нова парола',

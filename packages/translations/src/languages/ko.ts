@@ -268,6 +268,7 @@ export const koTranslations: DefaultTranslationsObject = {
     locale: 'locale',
     locales: 'locale',
     menu: '메뉴',
+    moreListControls: '더 많은 목록 컨트롤',
     moveDown: '아래로 이동',
     moveUp: '위로 이동',
     newPassword: '새 비밀번호',

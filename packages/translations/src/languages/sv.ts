@@ -270,6 +270,7 @@ export const svTranslations: DefaultTranslationsObject = {
     locale: 'Lokal',
     locales: 'Språk',
     menu: 'Meny',
+    moreListControls: 'Fler listkontroller',
     moveDown: 'Flytta Ner',
     moveUp: 'Flytta Upp',
     newPassword: 'Nytt Lösenord',

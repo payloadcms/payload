@@ -266,6 +266,7 @@ export const arTranslations: DefaultTranslationsObject = {
     locale: 'اللّغة',
     locales: 'اللّغات',
     menu: 'قائمة',
+    moreListControls: 'مزيد من عناصر التحكم في القائمة',
     moveDown: 'التّحريك إلى الأسفل',
     moveUp: 'التّحريك إلى الأعلى',
     newPassword: 'كلمة مرور جديدة',

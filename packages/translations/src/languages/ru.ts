@@ -272,6 +272,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     locale: 'Локаль',
     locales: 'Локали',
     menu: 'Меню',
+    moreListControls: 'Больше элементов управления списком',
     moveDown: 'Сдвинуть вниз',
     moveUp: 'Сдвинуть вверх',
     newPassword: 'Новый пароль',

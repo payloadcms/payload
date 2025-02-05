@@ -269,6 +269,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     locale: 'Локаль',
     locales: 'Локалі',
     menu: 'Меню',
+    moreListControls: 'Більше елементів керування списком',
     moveDown: 'Перемістити нижче',
     moveUp: 'Перемістити вище',
     newPassword: 'Новий пароль',

@@ -197,22 +197,18 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                 {t('general:sort')}
               </Pill>
             )}
-            {listControlsMenu != null && listControlsMenu !== false && (
+            {listControlsMenu && Array.isArray(listControlsMenu) && (
               <Popup
-                button={<Dots />}
+                button={<Dots ariaLabel={t('general:listControlMenu')} />}
                 className={`${baseClass}__popup`}
                 horizontalAlign="right"
                 size="large"
                 verticalAlign="bottom"
               >
                 <PopupList.ButtonGroup>
-                  {Array.isArray(listControlsMenu) ? (
-                    listControlsMenu.map((control, index) => (
-                      <PopupList.Button key={index}>{control}</PopupList.Button>
-                    ))
-                  ) : (
-                    <PopupList.Button>{listControlsMenu}</PopupList.Button>
-                  )}
+                  {listControlsMenu.map((control, index) => (
+                    <PopupList.Button key={index}>{control}</PopupList.Button>
+                  ))}
                 </PopupList.ButtonGroup>
               </Popup>
             )}

@@ -270,6 +270,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     locale: 'Local',
     locales: 'Localizações',
     menu: 'Cardápio',
+    moreListControls: 'Mais controles de lista',
     moveDown: 'Mover para Baixo',
     moveUp: 'Mover para Cima',
     newPassword: 'Nova Senha',

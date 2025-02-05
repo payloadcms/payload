@@ -277,6 +277,7 @@ export const frTranslations: DefaultTranslationsObject = {
     locale: 'Paramètres régionaux',
     locales: 'Paramètres régionaux',
     menu: 'Menu',
+    moreListControls: 'Plus de contrôles de liste',
     moveDown: 'Déplacer vers le bas',
     moveUp: 'Déplacer vers le haut',
     newPassword: 'Nouveau mot de passe',

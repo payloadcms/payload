@@ -272,6 +272,7 @@ export const myTranslations: DefaultTranslationsObject = {
     locale: 'ဒေသ',
     locales: 'Locales',
     menu: 'မီနူး',
+    moreListControls: 'ပိုမိုစာရင်းထိန်းချုပ်ခြင်းများ',
     moveDown: 'Move Down',
     moveUp: 'Move Up',
     newPassword: 'စကားဝှက် အသစ်',

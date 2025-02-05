@@ -268,6 +268,7 @@ export const csTranslations: DefaultTranslationsObject = {
     locale: 'Místní verze',
     locales: 'Lokality',
     menu: 'Jídelní lístek',
+    moreListControls: 'Více ovládacích prvků pro seznamy',
     moveDown: 'Posunout dolů',
     moveUp: 'Posunout nahoru',
     newPassword: 'Nové heslo',

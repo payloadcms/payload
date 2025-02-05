@@ -270,6 +270,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     locale: 'ロケール',
     locales: 'ロケール',
     menu: 'メニュー',
+    moreListControls: 'さらにリストコントロール',
     moveDown: '下へ移動',
     moveUp: '上へ移動',
     newPassword: '新しいパスワード',

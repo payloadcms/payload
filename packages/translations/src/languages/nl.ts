@@ -273,6 +273,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     locale: 'Taal',
     locales: 'Landinstellingen',
     menu: 'Menu',
+    moreListControls: 'Meer lijstcontroles',
     moveDown: 'Verplaats naar beneden',
     moveUp: 'Verplaats naar boven',
     newPassword: 'Nieuw wachtwoord',

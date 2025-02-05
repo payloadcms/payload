@@ -268,6 +268,7 @@ export const daTranslations: DefaultTranslationsObject = {
     locale: 'Lokalitet',
     locales: 'Lokaliteter',
     menu: 'Menu',
+    moreListControls: 'Flere liste kontroller',
     moveDown: 'Ryk ned',
     moveUp: 'Ryk op',
     newPassword: 'Ny adgangskode',

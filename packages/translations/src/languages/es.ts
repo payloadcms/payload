@@ -274,6 +274,7 @@ export const esTranslations: DefaultTranslationsObject = {
     locale: 'Regional',
     locales: 'Locales',
     menu: 'Menú',
+    moreListControls: 'Más controles de lista',
     moveDown: 'Mover abajo',
     moveUp: 'Mover arriba',
     newPassword: 'Nueva contraseña',
