@@ -1,8 +1,8 @@
 import type { CollectionConfig } from 'payload'
 
-import { collection1Slug, versionedRelationshipFieldSlug } from '../../collectionSlugs.js'
+import { collection1Slug, versionedRelationshipFieldSlug } from '../../slugs.js'
 
-export const VersionedRelationshipFieldCollection: CollectionConfig = {
+export const Versions: CollectionConfig = {
   slug: versionedRelationshipFieldSlug,
   fields: [
     {
