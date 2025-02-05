@@ -200,6 +200,7 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
         enableSubMenu={canSchedulePublish}
         onClick={defaultPublish}
         size="medium"
+        subMenuOverrideDisabled={canSchedulePublish}
         SubMenuPopupContent={
           localization || canSchedulePublish
             ? ({ close }) => {
