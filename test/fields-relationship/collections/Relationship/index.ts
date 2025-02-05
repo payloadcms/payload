@@ -57,6 +57,7 @@ export const Relationship: CollectionConfig = {
     },
     {
       name: 'relationshipFilteredByID',
+      label: 'Relationship Filtered By ID',
       filterOptions: (args: FilterOptionsProps<FieldsRelationship>) => {
         return {
           id: {
@@ -70,6 +71,22 @@ export const Relationship: CollectionConfig = {
         description:
           'This will filter the relationship options based on id, which is the same as the relationship field in this document',
       },
+    },
+    {
+      name: 'relationshipFilteredByField',
+      filterOptions: () => {
+        return {
+          filter: {
+            equals: 'Include me',
+          },
+        }
+      },
+      admin: {
+        description:
+          'This will filter the relationship options if the filter field in this document is set to "Include me"',
+      },
+      relationTo: slug,
+      type: 'relationship',
     },
     {
       name: 'relationshipFilteredAsync',

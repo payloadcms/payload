@@ -17,6 +17,7 @@ import { RESTClient } from '../../../helpers/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { emailFieldsSlug } from '../../slugs.js'
 import { emailDoc } from './shared.js'
+import { addListFilter } from 'helpers/e2e/addListFilter.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -131,25 +132,13 @@ describe('Email', () => {
 
     // open the first filter options
     await openListFilters(page, {})
-    await page.locator('.where-builder__add-first-filter').click()
 
-    const firstInitialField = page.locator('.condition__field')
-    const firstOperatorField = page.locator('.condition__operator')
-    const firstValueField = page.locator('.condition__value >> input')
-
-    await firstInitialField.click()
-    const firstInitialFieldOptions = firstInitialField.locator('.rs__option')
-    await firstInitialFieldOptions.locator('text=text').first().click()
-    await expect(firstInitialField.locator('.rs__single-value')).toContainText('Text')
-
-    await firstOperatorField.click()
-    await firstOperatorField.locator('.rs__option').locator('text=equals').click()
-
-    await firstValueField.fill('hello')
-
-    await wait(500)
-
-    await expect(firstValueField).toHaveValue('hello')
+    await addListFilter({
+      page,
+      fieldLabel: 'text',
+      operatorLabel: 'equals',
+      value: 'hello',
+    })
 
     // open the second filter options
     await page.locator('.condition__actions-add').click()
@@ -174,19 +163,15 @@ describe('Email', () => {
     await openListFilters(page, {})
     await page.locator('.where-builder__add-first-filter').click()
 
-    const firstInitialField = page.locator('.condition__field')
-    const firstOperatorField = page.locator('.condition__operator')
-    const firstValueField = page.locator('.condition__value >> input')
-
-    await firstInitialField.click()
-    const firstInitialFieldOptions = firstInitialField.locator('.rs__option')
-    await firstInitialFieldOptions.locator('text=text').first().click()
-    await expect(firstInitialField.locator('.rs__single-value')).toContainText('Text')
-
-    await firstOperatorField.click()
-    await firstOperatorField.locator('.rs__option').locator('text=equals').click()
+    await addListFilter({
+      page,
+      fieldLabel: 'text',
+      operatorLabel: 'equals',
+      skipValueInput: true,
+    })
 
     // Type into the input field instead of filling it
+    const firstValueField = page.locator('.condition__value >> input')
     await firstValueField.click()
     await firstValueField.type('hello', { delay: 100 }) // Add a delay to simulate typing speed
 
@@ -202,25 +187,13 @@ describe('Email', () => {
 
     // open the first filter options
     await openListFilters(page, {})
-    await page.locator('.where-builder__add-first-filter').click()
 
-    const firstInitialField = page.locator('.condition__field')
-    const firstOperatorField = page.locator('.condition__operator')
-    const firstValueField = page.locator('.condition__value >> input')
-
-    await firstInitialField.click()
-    const firstInitialFieldOptions = firstInitialField.locator('.rs__option')
-    await firstInitialFieldOptions.locator('text=text').first().click()
-    await expect(firstInitialField.locator('.rs__single-value')).toContainText('Text')
-
-    await firstOperatorField.click()
-    await firstOperatorField.locator('.rs__option').locator('text=equals').click()
-
-    await firstValueField.fill('hello')
-
-    await wait(500)
-
-    await expect(firstValueField).toHaveValue('hello')
+    await addListFilter({
+      page,
+      fieldLabel: 'text',
+      operatorLabel: 'equals',
+      value: 'hello',
+    })
 
     // open the second filter options
     await page.locator('.condition__actions-add').click()

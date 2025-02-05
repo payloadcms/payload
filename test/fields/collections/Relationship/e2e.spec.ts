@@ -26,6 +26,7 @@ import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../helpers/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { relationshipFieldsSlug, textFieldsSlug } from '../../slugs.js'
+import { addListFilter } from 'helpers/e2e/addListFilter.js'
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../')
@@ -616,37 +617,13 @@ describe('relationship', () => {
     await wait(400)
 
     await openListFilters(page, {})
-    await wait(400)
 
-    await page.locator('.where-builder__add-first-filter').click()
-
-    await wait(400)
-    const conditionField = page.locator('.condition__field')
-    await expect(conditionField.locator('input')).toBeEnabled()
-    await conditionField.click()
-    await wait(400)
-
-    const dropdownFieldOptions = conditionField.locator('.rs__option')
-    await dropdownFieldOptions.locator('text=Relationship').nth(0).click()
-    await wait(400)
-
-    const operatorField = page.locator('.condition__operator')
-    await expect(operatorField.locator('input')).toBeEnabled()
-    await operatorField.click()
-    await wait(400)
-
-    const dropdownOperatorOptions = operatorField.locator('.rs__option')
-    await dropdownOperatorOptions.locator('text=equals').click()
-    await wait(400)
-
-    const valueField = page.locator('.condition__value')
-    await expect(valueField.locator('input')).toBeEnabled()
-    await valueField.click()
-    await wait(400)
-
-    const dropdownValueOptions = valueField.locator('.rs__option')
-    await dropdownValueOptions.locator('text=some text').click()
-    await wait(400)
+    await addListFilter({
+      page,
+      fieldLabel: 'Relationship',
+      operatorLabel: 'equals',
+      value: 'some text',
+    })
 
     await expect(page.locator(tableRowLocator)).toHaveCount(1)
   })

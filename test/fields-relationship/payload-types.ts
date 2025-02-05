@@ -121,7 +121,7 @@ export interface FieldsRelationship {
   /**
    * This will filter the relationship options if the filter field in this document is set to "Include me"
    */
-  relationshipFilteredByField?: (string | null) | RelationOne;
+  relationshipFilteredByField?: (string | null) | FieldsRelationship;
   relationshipFilteredAsync?: (string | null) | RelationOne;
   relationshipManyFiltered?:
     | (

@@ -43,6 +43,7 @@ import {
   slug,
   versionedRelationshipFieldSlug,
 } from './slugs.js'
+import { addListFilter } from 'helpers/e2e/addListFilter.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -314,6 +315,41 @@ describe('Relationship Field', () => {
     // TODO: Flaky test. Fix this! (This is an actual issue not just an e2e flake)
     test('should allow dynamic async filterOptions', async () => {
       await runFilterOptionsTest('relationshipFilteredAsync', 'Relationship Filtered Async')
+    })
+
+    test('should apply filter options within list view filter controls', async () => {
+      // write the test here
+      // use 'relationshipFilteredByField' field
+      const { id: idToInclude } = await payload.create({
+        collection: slug,
+        data: {
+          filter: 'Include me',
+        },
+      })
+
+      // first ensure that filter options are applied in the edit view
+      await page.goto(url.edit(idToInclude))
+      const field = page.locator('#field-relationshipFilteredByField')
+      await field.click({ delay: 100 })
+      const options = page.locator('.rs__option')
+      await expect(options).toHaveCount(1)
+      await expect(options).toContainText(idToInclude)
+
+      // now ensure that the same filter options are applied in the list view
+      await page.goto(url.list)
+      await openListFilters(page, {})
+
+      await addListFilter({
+        page,
+        fieldLabel: 'Relationship Filtered By Field',
+        operatorLabel: 'equals',
+        skipValueInput: true,
+      })
+
+      const valueField = page.locator('.condition__value input')
+      await valueField.click()
+      await expect(page.locator('.rs__menu')).toHaveCount(1)
+      await expect(page.locator('.rs__option')).toHaveText(idToInclude)
     })
 
     test('should allow usage of relationTo in filterOptions', async () => {
