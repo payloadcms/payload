@@ -20,28 +20,60 @@ export const FilterOptionsBlock: Block = {
       type: 'text',
     },
     {
-      name: 'dependsOnDocData',
-      type: 'relationship',
-      relationTo: 'text-fields',
-      filterOptions: ({ data }) => {
-        return {
-          text: {
-            equals: data.title,
+      name: 'group',
+      type: 'group',
+      fields: [
+        {
+          name: 'groupText',
+          type: 'text',
+        },
+        {
+          name: 'dependsOnDocData',
+          type: 'relationship',
+          relationTo: 'text-fields',
+          filterOptions: ({ topLevelData }) => {
+            if (!topLevelData.title) {
+              return true
+            }
+            return {
+              text: {
+                equals: topLevelData.title,
+              },
+            }
           },
-        }
-      },
-    },
-    {
-      name: 'dependsOnSiblingData',
-      type: 'relationship',
-      relationTo: 'text-fields',
-      filterOptions: ({ siblingData }) => {
-        return {
-          text: {
-            equals: (siblingData as any)?.text,
+        },
+        {
+          name: 'dependsOnSiblingData',
+          type: 'relationship',
+          relationTo: 'text-fields',
+          filterOptions: ({ siblingData }) => {
+            // @ts-expect-error
+            if (!siblingData?.title) {
+              return true
+            }
+            return {
+              text: {
+                equals: (siblingData as any)?.groupText,
+              },
+            }
           },
-        }
-      },
+        },
+        {
+          name: 'dependsOnBlockData',
+          type: 'relationship',
+          relationTo: 'text-fields',
+          filterOptions: ({ data }) => {
+            if (!data?.title) {
+              return true
+            }
+            return {
+              text: {
+                equals: data?.text,
+              },
+            }
+          },
+        },
+      ],
     },
   ],
 }
@@ -50,23 +82,42 @@ export const ValidationBlock: Block = {
   slug: 'validationBlock',
   fields: [
     {
-      name: 'textDependsOnDocData',
+      name: 'text',
       type: 'text',
-      validate: ((value, { data, topLevelData }) => {
-        if ((data as any)?.title === 'invalid') {
-          return 'doc title cannot be invalid'
-        }
-        return true
-      }) as TextFieldSingleValidation,
     },
     {
-      name: 'textDependsOnSiblingData',
-      type: 'text',
-      validate: ((value, { data, siblingData }) => {
-        if ((siblingData as any)?.textDependsOnDocData === 'invalid') {
-          return 'textDependsOnDocData sibling field cannot be invalid'
-        }
-      }) as TextFieldSingleValidation,
+      name: 'group',
+      type: 'group',
+      fields: [
+        {
+          name: 'textDependsOnDocData',
+          type: 'text',
+          validate: ((value, { topLevelData }) => {
+            if ((topLevelData as any)?.title === 'invalid') {
+              return 'doc title cannot be invalid'
+            }
+            return true
+          }) as TextFieldSingleValidation,
+        },
+        {
+          name: 'textDependsOnSiblingData',
+          type: 'text',
+          validate: ((value, { siblingData }) => {
+            if ((siblingData as any)?.text === 'invalid') {
+              return 'textDependsOnSiblingData sibling field cannot be invalid'
+            }
+          }) as TextFieldSingleValidation,
+        },
+        {
+          name: 'textDependsOnGroupData',
+          type: 'text',
+          validate: ((value, { data }) => {
+            if ((data as any)?.textDependsOnDocData === 'invalid') {
+              return 'textDependsOnGroupData sibling field cannot be invalid'
+            }
+          }) as TextFieldSingleValidation,
+        },
+      ],
     },
   ],
 }
