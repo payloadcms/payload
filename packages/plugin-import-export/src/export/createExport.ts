@@ -1,4 +1,4 @@
-import type { PaginatedDocs, PayloadRequest, Sort, User } from 'payload'
+import type { PaginatedDocs, PayloadRequest, Sort, User, Where } from 'payload'
 
 import { Buffer } from 'buffer'
 import { stringify } from 'csv-stringify/sync'
@@ -13,6 +13,7 @@ type Export = {
     fields?: string[]
     slug: string
     sort: Sort
+    where?: Where
   }[]
   format: 'csv' | 'json'
   globals?: string[]
@@ -36,7 +37,7 @@ export const createExport = async (args: CreateExportArgs) => {
   } = args
 
   if (collections.length === 1 && format === 'csv') {
-    const { slug, fields, sort } = collections[0] as Export['collections'][0]
+    const { slug, fields, sort, where } = collections[0] as Export['collections'][0]
     const collection = payload.config.collections.find((collection) => collection.slug === slug)
     if (!collection) {
       throw new Error(`Collection with slug ${slug} not found`)
@@ -57,6 +58,7 @@ export const createExport = async (args: CreateExportArgs) => {
       select: getSelect(fields),
       sort,
       user,
+      where,
     }
 
     let result: PaginatedDocs = { hasNextPage: true } as PaginatedDocs
