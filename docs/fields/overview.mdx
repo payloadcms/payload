@@ -455,9 +455,9 @@ A description can be configured in three ways:
 To add a Custom Description to a field, use the `admin.description` property in your Field Config:
 
 ```ts
-import type { SanitizedCollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
-export const MyCollectionConfig: SanitizedCollectionConfig = {
+export const MyCollectionConfig: CollectionConfig = {
   // ...
   fields: [
     // ...
@@ -483,9 +483,9 @@ Custom Descriptions can also be defined as a function. Description Functions are
 To add a Description Function to a field, set the `admin.description` property to a *function* in your Field Config:
 
 ```ts
-import type { SanitizedCollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
-export const MyCollectionConfig: SanitizedCollectionConfig = {
+export const MyCollectionConfig: CollectionConfig = {
   // ...
   fields: [
     // ...
@@ -792,9 +792,9 @@ Alternatively to the [Description Property](#field-descriptions), you can also u
 To add a Description Component to a field, use the `admin.components.Description` property in your Field Config:
 
 ```ts
-import type { SanitizedCollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
-export const MyCollectionConfig: SanitizedCollectionConfig = {
+export const MyCollectionConfig: CollectionConfig = {
   // ...
   fields: [
     // ...
@@ -906,9 +906,9 @@ With these properties you can add multiple components *before* and *after* the i
 To add components before and after the input element, use the `admin.components.beforeInput` and `admin.components.afterInput` properties in your Field Config:
 
 ```ts
-import type { SanitizedCollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
-export const MyCollectionConfig: SanitizedCollectionConfig = {
+export const MyCollectionConfig: CollectionConfig = {
   // ...
   fields: [
     // ...

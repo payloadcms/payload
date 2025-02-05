@@ -6,21 +6,31 @@ desc:
 keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-## Config Options
+The List View is where users interact with a list of Documents within a [Collection](../collections/overview). This is where they can view, sort, filter, and paginate their documents to find exactly what they're looking for. This is also where users can perform bulk operations on multiple documents at once, such as deleting, editing, or publishing them.
 
-To override List View components for a Collection, use the `admin.components.edit` property in your [Collection Config](../configuration/collections):
+The List View can be injected with a number of [Custom Components](./overview) to add additional functionality or presentational elements, or it can be swapped out in its entirety for a [Custom View](./custom-views).
+
+## Custom List View
+
+```tsx
+
+```
+
+## Custom Components
+
+To override List View components for a Collection, use the `admin.components` property in your [Collection Config](../configuration/collections):
 
 ```ts
-import type { SanitizedCollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
-export const MyCollection: SanitizedCollectionConfig = {
+export const MyCollection: CollectionConfig = {
   // ...
   admin: {
+    // highlight-start
     components: {
-      edit: { // highlight-line
-        // ...
-      },
+      // ...
     },
+    // highlight-end
   },
 }
 ```
@@ -37,6 +47,25 @@ The following options are available:
 
 ## beforeList
 
+The `beforeList` property allows you to inject custom components before the list of documents in the List View. This is useful for adding additional information or functionality to the List View without replacing the entire view.
+
+To add `beforeList` components, use the `components.beforeList` property in your Collection Config:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const MyCollection: CollectionConfig = {
+  // ...
+  admin: {
+    components: {
+      beforeList: [
+        // Add your custom components here
+      ],
+    },
+  },
+}
+```
+
 ## beforeListTable
 
 ## afterList
@@ -44,4 +73,3 @@ The following options are available:
 ## afterListTable
 
 ## Description
-

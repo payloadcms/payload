@@ -99,7 +99,7 @@ export default function MyCustomAction() {
 
 The `beforeDashboard` property allows you to inject Custom Components into the built-in Dashboard, before the default dashboard contents. This is useful for adding additional information or functionality to the Dashboard without replacing the entire view.
 
-To add `beforeDashboard` components, use the `beforeDashboard` property in your `admin.components` config:
+To add `beforeDashboard` components, use the `admin.components.beforeDashboard` property in your Payload Config:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -132,7 +132,7 @@ export default function MyBeforeDashboardComponent() {
 
 Similar to `beforeDashboard`, the `afterDashboard` property allows you to inject Custom Components into the built-in Dashboard, _after_ the default dashboard contents.
 
-To add `afterDashboard` components, use the `afterDashboard` property in your `admin.components` config:
+To add `afterDashboard` components, use the `admin.components.afterDashboard` property in your Payload Config:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -165,7 +165,7 @@ export default function MyAfterDashboardComponent() {
 
 The `beforeLogin` property allows you to inject Custom Components into the built-in Login view, before the default login form. This is useful for adding additional information or functionality to the Login view without replacing the entire view.
 
-To add `beforeLogin` components, use the `beforeLogin` property in your `admin.components` config:
+To add `beforeLogin` components, use the `admin.components.beforeLogin` property in your Payload Config:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -198,7 +198,7 @@ export default function MyBeforeLoginComponent() {
 
 Similar to `beforeLogin`, the `afterLogin` property allows you to inject Custom Components into the built-in Login view, _after_ the default login form.
 
-To add `afterLogin` components, use the `afterLogin` property in your `admin.components` config:
+To add `afterLogin` components, use the `admin.components.afterLogin` property in your Payload Config:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -231,7 +231,7 @@ export default function MyAfterLoginComponent() {
 
 The `beforeNavLinks` property allows you to inject Custom Components into the built-in [Nav Component](#nav), _before_ the links themselves. This is useful for adding additional information or functionality to the nav without replacing the entire nav component.
 
-To add `beforeNavLinks` components, use the `beforeNavLinks` property in your `admin.components` config:
+To add `beforeNavLinks` components, use the `admin.components.beforeNavLinks` property in your Payload Config:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -264,7 +264,7 @@ export default function MyBeforeNavLinksComponent() {
 
 Similar to `beforeNavLinks`, the `afterNavLinks` property allows you to inject Custom Components into the built-in Nav, _after_ the links themselves.
 
-To add `afterNavLinks` components, use the `afterNavLinks` property in your `admin.components` config:
+To add `afterNavLinks` components, use the `admin.components.afterNavLinks` property in your Payload Config:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -297,7 +297,7 @@ export default function MyAfterNavLinksComponent() {
 
 The `Nav` property contains the sidebar / mobile menu in its entirety. This is useful for completely replacing the built-in Nav with your own custom navigation.
 
-To add a custom nav, use the `Nav` property in your `admin.components` config:
+To add a custom nav, use the `admin.components.Nav` property in your Payload Config:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -338,7 +338,7 @@ export default function MyCustomNav() {
 
 The `Icon` property is the simplified logo used in contexts like the `Nav` component. This is typically a small, square icon that represents your brand.
 
-To add a custom icon, use the `Icon` property in your `admin.components.graphics` config:
+To add a custom icon, use the `admin.components.graphics.Icon` property in your Payload Config:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -371,7 +371,7 @@ export default function MyCustomIcon() {
 
 The `Logo` property is the full logo used in contexts like the `Login` view. This is typically a larger, more detailed representation of your brand.
 
-To add a custom logo, use the `Logo` property in your `admin.components.graphics` config:
+To add a custom logo, use the `admin.components.graphic.Logo` property in your Payload Config:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -406,7 +406,7 @@ The `header` property allows you to inject Custom Components above the Payload h
 
 Examples of a custom header components might include an announcements banner, a notifications bar, or anything else you'd like to display at the top of the Admin Panel in a prominent location.
 
-To add `header` components, use the `header` property in your `admin.components` config:
+To add `header` components, use the `admin.components.header` property in your Payload Config:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -439,7 +439,7 @@ export default function MyCustomHeader() {
 
 The `logout.Button` property is the button displayed in the sidebar that logs the user out. This is typically a simple button that logs the user out when clicked.
 
-To add a custom logout button, use the `logout.Button` property in your `admin.components` config:
+To add a custom logout button, use the `admin.components.logout.Button` property in your Payload Config:
 
 ```ts
 import { buildConfig } from 'payload'

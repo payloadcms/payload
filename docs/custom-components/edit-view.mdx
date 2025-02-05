@@ -12,14 +12,12 @@ The Edit View is where users interact with individual [Collection](../collection
 
 In addition to swapping out the entire Edit View with a [Custom View](../custom-components/custom-views), you can also override individual components. This allows you to customize the Edit View parts of the Edit View without swapping out the entire view for your own.
 
-### Config Options
-
 To override Edit View components for a Collection, use the `admin.components.edit` property in your [Collection Config](../configuration/collections):
 
 ```ts
-import type { SanitizedCollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
-export const MyCollection: SanitizedCollectionConfig = {
+export const MyCollection: CollectionConfig = {
   // ...
   admin: {
     components: {
@@ -46,9 +44,9 @@ The following options are available:
 To override Edit View components for Globals, use the `admin.components.elements` property in your [Global Config](../configuration/globals):
 
 ```ts
-import type { SanitizedCollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
-export const MyCollection: SanitizedCollectionConfig = {
+export const MyCollection: CollectionConfig = {
   // ...
   admin: {
     components: {

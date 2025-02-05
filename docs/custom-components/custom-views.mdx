@@ -144,9 +144,9 @@ Collection Views are views that are scoped under the `/collections` route, such 
 To swap out Collection Views with your own, or to [create entirely new ones](#adding-new-views), use the `admin.components.views` property of your [Collection Config](../configuration/collections):
 
 ```ts
-import type { SanitizedCollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
-export const MyCollectionConfig: SanitizedCollectionConfig = {
+export const MyCollectionConfig: CollectionConfig = {
   // ...
   admin: {
     components: {
@@ -249,9 +249,9 @@ Document Views are views that are scoped under the `/collections/:collectionSlug
 To swap out Document Views with your own, or to [create entirely new ones](#adding-new-views), use the `admin.components.views.edit[key]` property in your [Collection Config](../configuration/collections) or [Global Config](../configuration/globals):
 
 ```ts
-import type { SanitizedCollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
-export const MyCollectionOrGlobalConfig: SanitizedCollectionConfig = {
+export const MyCollectionOrGlobalConfig: CollectionConfig = {
   // ...
   admin: {
     components: {
@@ -290,9 +290,9 @@ The following options are available:
 Each Custom View can be given a new tab in the Edit View, if desired. Tabs are highly configurable, from as simple as changing the label to swapping out the entire component, they can be modified in any way. To add or customize tabs in the Edit View, use the `tab` key:
 
 ```ts
-import type { SanitizedCollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
-export const MyCollection: SanitizedCollectionConfig = {
+export const MyCollection: CollectionConfig = {
   slug: 'my-collection',
   admin: {
     components: {
@@ -332,9 +332,9 @@ export const MyCollection: SanitizedCollectionConfig = {
 Custom Views are just [Custom Components](./overview) rendered at the page-level. To understand how to build Custom Views, first review the [Building Custom Components](./overview#building-custom-components) guide. Once you have a Custom Component ready, you can use it as a Custom View.
 
 ```ts
-import type { SanitizedCollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
-export const MyCollectionConfig: SanitizedCollectionConfig = {
+export const MyCollectionConfig: CollectionConfig = {
   // ...
   admin: {
     components: {

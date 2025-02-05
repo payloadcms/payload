@@ -138,9 +138,9 @@ Collections can set their own [Custom Components](../custom-components/overview)
 To override Collection Components, use the `admin.components` property in your Collection Config:
 
 ```ts
-import type { SanitizedCollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
-export const MyCollection: SanitizedCollectionConfig = {
+export const MyCollection: CollectionConfig = {
   // ...
   admin: {
     components: { // highlight-line
@@ -165,9 +165,9 @@ The following options are available:
 #### Edit View Options
 
 ```ts
-import type { SanitizedCollectionConfig } from 'payload'
+import type { CollectionCOnfig } from 'payload'
 
-export const MyCollection: SanitizedCollectionConfig = {
+export const MyCollection: CollectionCOnfig = {
   // ...
   admin: {
     components: {
