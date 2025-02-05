@@ -501,6 +501,136 @@ describe('lexicalBlocks', () => {
     })
   })
 
+  describe('block validation data', () => {
+    async function setupValidationTests() {
+      const { richTextField } = await navigateToLexicalFields()
+
+      await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'invalid',
+        },
+        depth: 0,
+      })
+
+      const lastParagraph = richTextField.locator('p').last()
+      await lastParagraph.scrollIntoViewIfNeeded()
+      await expect(lastParagraph).toBeVisible()
+
+      await lastParagraph.click()
+
+      await page.keyboard.press('Enter')
+      await page.keyboard.press('/')
+      await page.keyboard.type('validation')
+
+      // CreateBlock
+      const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
+      await expect(slashMenuPopover).toBeVisible()
+
+      const blockSelectButton = slashMenuPopover.locator('button').first()
+      await expect(blockSelectButton).toBeVisible()
+      await expect(blockSelectButton).toContainText('Validation Block')
+      await blockSelectButton.click()
+      await expect(slashMenuPopover).toBeHidden()
+
+      const newBlock = richTextField
+        .locator('.lexical-block:not(.lexical-block .lexical-block)')
+        .nth(8) // The :not(.lexical-block .lexical-block) makes sure this does not select sub-blocks
+      await newBlock.scrollIntoViewIfNeeded()
+
+      await saveDocAndAssert(page)
+
+      const topLevelDocTextField = page.locator('#field-title').first()
+      const blockTextField = newBlock.locator('#field-text').first()
+      const blockGroupTextField = newBlock.locator('#field-group__groupText').first()
+
+      const dependsOnDocData = newBlock.locator('#field-group__textDependsOnDocData').first()
+      const dependsOnSiblingData = newBlock
+        .locator('#field-group__textDependsOnSiblingData')
+        .first()
+      const dependsOnBlockData = newBlock.locator('#field-group__textDependsOnBlockData').first()
+
+      return {
+        topLevelDocTextField,
+        blockTextField,
+        blockGroupTextField,
+        dependsOnDocData,
+        dependsOnSiblingData,
+        dependsOnBlockData,
+        newBlock,
+      }
+    }
+
+    test('ensure block fields with validations have access to document-level data', async () => {
+      const { topLevelDocTextField } = await setupValidationTests()
+
+      await topLevelDocTextField.fill('invalid')
+
+      await saveDocAndAssert(page, '#action-save', 'error')
+      await expect(page.locator('.payload-toast-container')).toHaveText(
+        'The following fields are invalid: Lexical With Blocks, LexicalWithBlocks > Group > Text Depends On Doc Data',
+      )
+      await expect(page.locator('.payload-toast-container')).not.toBeVisible()
+
+      await trackNetworkRequests(
+        page,
+        '/admin/collections/lexical-fields',
+        async () => {
+          await topLevelDocTextField.fill('Rich Text') // Default value
+        },
+        { allowedNumberOfRequests: 2 },
+      )
+
+      await saveDocAndAssert(page)
+    })
+
+    test('ensure block fields with validations have access to sibling data', async () => {
+      const { blockGroupTextField } = await setupValidationTests()
+
+      await blockGroupTextField.fill('invalid')
+
+      await saveDocAndAssert(page, '#action-save', 'error')
+      await expect(page.locator('.payload-toast-container')).toHaveText(
+        'The following fields are invalid: Lexical With Blocks, LexicalWithBlocks > Group > Text Depends On Sibling Data',
+      )
+
+      await trackNetworkRequests(
+        page,
+        '/admin/collections/lexical-fields',
+        async () => {
+          await blockGroupTextField.fill('')
+        },
+        { allowedNumberOfRequests: 2 },
+      )
+
+      await saveDocAndAssert(page)
+    })
+
+    test('ensure block fields with validations have access to block-level data', async () => {
+      const { blockTextField } = await setupValidationTests()
+
+      await blockTextField.fill('invalid')
+
+      await saveDocAndAssert(page, '#action-save', 'error')
+      await expect(page.locator('.payload-toast-container')).toHaveText(
+        'The following fields are invalid: Lexical With Blocks, LexicalWithBlocks > Group > Text Depends On Block Data',
+      )
+
+      await expect(page.locator('.payload-toast-container')).not.toBeVisible()
+
+      await trackNetworkRequests(
+        page,
+        '/admin/collections/lexical-fields',
+        async () => {
+          await blockTextField.fill('')
+        },
+        { allowedNumberOfRequests: 2 },
+      )
+
+      await saveDocAndAssert(page)
+    })
+  })
+
   test('ensure async hooks are awaited properly', async () => {
     const { richTextField } = await navigateToLexicalFields()
 
