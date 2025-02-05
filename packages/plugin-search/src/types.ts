@@ -3,7 +3,6 @@ import type {
   CollectionAfterDeleteHook,
   CollectionConfig,
   Field,
-  LabelFunction,
   Locale,
   Payload,
   PayloadRequest,
@@ -51,10 +50,11 @@ export type SearchPluginConfig = {
 }
 
 export type CollectionLabels = {
-  [collection: string]: {
-    plural?: LabelFunction | StaticLabel
-    singular?: LabelFunction | StaticLabel
-  }
+  [collection: string]: CollectionConfig['labels']
+}
+
+export type ResolvedCollectionLabels = {
+  [collection: string]: StaticLabel
 }
 
 export type SearchPluginConfigWithLocales = {
@@ -68,7 +68,7 @@ export type SyncWithSearchArgs = {
 } & Omit<Parameters<CollectionAfterChangeHook>[0], 'collection'>
 
 export type SyncDocArgs = {
-  locale?: string
+  locale?: Locale['code']
   onSyncError?: () => void
 } & Omit<SyncWithSearchArgs, 'context' | 'previousDoc'>
 

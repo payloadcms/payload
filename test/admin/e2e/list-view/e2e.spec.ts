@@ -156,6 +156,56 @@ describe('List View', () => {
     })
   })
 
+  describe('list view custom components', () => {
+    test('should render custom beforeList component', async () => {
+      await page.goto(postsUrl.list)
+      await expect(
+        page.locator('.collection-list--posts').locator('div', {
+          hasText: exactText('BeforeList custom component'),
+        }),
+      ).toBeVisible()
+    })
+
+    test('should render custom beforeListTable component', async () => {
+      await page.goto(postsUrl.list)
+      await expect(
+        page.locator('.collection-list__wrap').locator('div', {
+          hasText: exactText('BeforeListTable custom component'),
+        }),
+      ).toBeVisible()
+    })
+
+    test('should render custom Cell component in table', async () => {
+      await page.goto(postsUrl.list)
+      await expect(
+        page
+          .locator(`${tableRowLocator} td.cell-demoUIField`)
+          .first()
+          .locator('p', {
+            hasText: exactText('Demo UI Field Cell'),
+          }),
+      ).toBeVisible()
+    })
+
+    test('should render custom afterList component', async () => {
+      await page.goto(postsUrl.list)
+      await expect(
+        page.locator('.collection-list__wrap').locator('div', {
+          hasText: exactText('AfterListTable custom component'),
+        }),
+      ).toBeVisible()
+    })
+
+    test('should render custom afterListTable component', async () => {
+      await page.goto(postsUrl.list)
+      await expect(
+        page.locator('.collection-list--posts').locator('div', {
+          hasText: exactText('AfterList custom component'),
+        }),
+      ).toBeVisible()
+    })
+  })
+
   describe('search', () => {
     test('should prefill search input from query param', async () => {
       await createPost({ title: 'dennis' })
