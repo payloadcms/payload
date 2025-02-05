@@ -46,7 +46,11 @@ export const ListJSXConverter: JSXConverters<SerializedListItemNode | Serialized
       )
     } else {
       return (
-        <li className={hasSubLists ? 'nestedListItem' : ''} value={node?.value}>
+        <li
+          className={`${hasSubLists ? 'nestedListItem' : ''}`}
+          style={hasSubLists ? { listStyleType: 'none' } : undefined}
+          value={node?.value}
+        >
           {children}
         </li>
       )
