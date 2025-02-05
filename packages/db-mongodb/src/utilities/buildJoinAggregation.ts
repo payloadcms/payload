@@ -68,6 +68,7 @@ export const buildJoinAggregation = async ({
 
       const {
         limit: limitJoin = join.field.defaultLimit ?? 10,
+        page,
         sort: sortJoin = join.field.defaultSort || collectionConfig.defaultSort,
         where: whereJoin,
       } = joins?.[join.joinPath] || {}
@@ -94,6 +95,12 @@ export const buildJoinAggregation = async ({
           $sort: { [sortProperty]: sortDirection },
         },
       ]
+
+      if (page) {
+        pipeline.push({
+          $skip: (page - 1) * limitJoin,
+        })
+      }
 
       if (limitJoin > 0) {
         pipeline.push({

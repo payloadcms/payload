@@ -145,6 +145,7 @@ export type JoinQuery<TSlug extends CollectionSlug = string> =
             [K in keyof TypedCollectionJoins[TSlug]]:
               | {
                   limit?: number
+                  page?: number
                   sort?: string
                   where?: Where
                 }
