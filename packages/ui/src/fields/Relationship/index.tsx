@@ -1,6 +1,7 @@
 'use client'
 import type { PaginatedDocs, RelationshipFieldClientComponent, Where } from 'payload'
 
+import { dequal } from 'dequal/lite'
 import { wordBoundariesRegex } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
@@ -19,15 +20,14 @@ import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useDebouncedCallback } from '../../hooks/useDebouncedCallback.js'
-import { useDeepCompareInitialRenderEffect } from '../../hooks/useDeepCompareInitialRenderEffect.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useUpdateEffect } from '../../hooks/useUpdateEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import './index.scss'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { createRelationMap } from './createRelationMap.js'
 import { findOptionsByValue } from './findOptionsByValue.js'
@@ -373,11 +373,17 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     }, Promise.resolve())
   })
 
+  const prevValue = useRef(value)
+  const isFirstRenderRef = useRef(true)
   // ///////////////////////////////////
   // Ensure we have an option for each value
   // ///////////////////////////////////
-  useDeepCompareInitialRenderEffect(() => {
-    handleValueChange(value)
+  useEffect(() => {
+    if (isFirstRenderRef.current || !dequal(value, prevValue.current)) {
+      handleValueChange(value)
+    }
+    isFirstRenderRef.current = false
+    prevValue.current = value
   }, [value])
 
   // Determine if we should switch to word boundary search

@@ -21,7 +21,7 @@ import type {
   SubmitOptions,
 } from './types.js'
 
-import { useDebouncedDeepCompareInitialRenderEffect } from '../../hooks/useDebouncedDeepCompareInitialRenderEffect.js'
+import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
@@ -693,11 +693,19 @@ export const Form: React.FC<FormProps> = (props) => {
     }
   })
 
-  useDebouncedDeepCompareInitialRenderEffect(
+  const prevFields = useRef(contextRef.current.fields)
+  const isFirstRenderRef = useRef(true)
+
+  useDebouncedEffect(
     () => {
-      if (modified) {
-        void executeOnChange(submitted)
+      if (isFirstRenderRef.current || !dequal(contextRef.current.fields, prevFields.current)) {
+        if (modified) {
+          void executeOnChange(submitted)
+        }
       }
+
+      isFirstRenderRef.current = false
+      prevFields.current = contextRef.current.fields
     },
     /*
       Make sure we trigger this whenever modified changes (not just when `fields` changes),
