@@ -151,6 +151,7 @@ export interface Export {
         slug: string;
         fields?: string[] | null;
         sort?: string[] | null;
+        where?: unknown | null;
         id?: string | null;
       }[]
     | null;
