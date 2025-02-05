@@ -42,10 +42,25 @@ export type SearchPluginConfig = {
   defaultPriorities?: {
     [collection: string]: ((doc: any) => number | Promise<number>) | number
   }
+  /**
+   * Controls whether drafts are deleted from the search index
+   *
+   * @default true
+   */
   deleteDrafts?: boolean
   localize?: boolean
+  /**
+   * We use batching when re-indexing large collections. You can control the amount of items per batch, lower numbers should help with memory.
+   *
+   * @default 50
+   */
   reindexBatchSize?: number
   searchOverrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
+  /**
+   * Controls whether drafts are synced to the search index
+   *
+   * @default false
+   */
   syncDrafts?: boolean
 }
 
