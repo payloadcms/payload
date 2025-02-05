@@ -23,6 +23,7 @@ import {
   AsyncHooksBlock,
   CodeBlock,
   ConditionalLayoutBlock,
+  FilterOptionsBlock,
   RadioButtonsBlock,
   RelationshipBlock,
   RelationshipHasManyBlock,
@@ -32,6 +33,7 @@ import {
   TabBlock,
   TextBlock,
   UploadAndRichTextBlock,
+  ValidationBlock,
 } from './blocks.js'
 import { ModifyInlineBlockFeature } from './ModifyInlineBlockFeature/feature.server.js'
 
@@ -74,6 +76,8 @@ const editorConfig: ServerEditorConfig = {
     ModifyInlineBlockFeature(),
     BlocksFeature({
       blocks: [
+        ValidationBlock,
+        FilterOptionsBlock,
         AsyncHooksBlock,
         RichTextBlock,
         TextBlock,

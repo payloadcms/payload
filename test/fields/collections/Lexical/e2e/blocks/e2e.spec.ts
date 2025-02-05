@@ -301,13 +301,13 @@ describe('lexicalBlocks', () => {
       fn: async ({ lexicalWithBlocks }) => {
         const rscBlock: SerializedBlockNode = lexicalWithBlocks.root
           .children[14] as SerializedBlockNode
-        const paragraphBlock: SerializedBlockNode = lexicalWithBlocks.root
-          .children[12] as SerializedBlockNode
+        const paragraphNode: SerializedParagraphNode = lexicalWithBlocks.root
+          .children[12] as SerializedParagraphNode
 
         expect(rscBlock.fields.blockType).toBe('BlockRSC')
         expect(rscBlock.fields.key).toBe('value2')
-        expect((paragraphBlock.children[0] as SerializedTextNode).text).toBe('123')
-        expect((paragraphBlock.children[0] as SerializedTextNode).format).toBe(1)
+        expect((paragraphNode.children[0] as SerializedTextNode).text).toBe('123')
+        expect((paragraphNode.children[0] as SerializedTextNode).format).toBe(1)
       },
     })
   })
