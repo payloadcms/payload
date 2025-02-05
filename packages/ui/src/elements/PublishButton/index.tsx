@@ -199,6 +199,7 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
         disabled={!canPublish}
         onClick={defaultPublish}
         size="medium"
+        subMenuOverrideDisabled={canSchedulePublish}
         SubMenuPopupContent={
           localization || canSchedulePublish
             ? ({ close }) => {
@@ -211,7 +212,7 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
                         </PopupList.Button>
                       </PopupList.ButtonGroup>
                     )}
-                    {localization && (
+                    {localization && canPublish && (
                       <PopupList.ButtonGroup>
                         <PopupList.Button onClick={secondaryPublish}>
                           {secondaryLabel}

@@ -34,6 +34,10 @@ export type Props = {
   round?: boolean
   secondaryActions?: secondaryAction | secondaryAction[]
   size?: 'large' | 'medium' | 'small'
+  /**
+   * Allow the submenu to be opened when the button is disabled
+   */
+  subMenuOverrideDisabled?: boolean
   SubMenuPopupContent?: (props: { close: () => void }) => React.ReactNode
   to?: string
   tooltip?: string
