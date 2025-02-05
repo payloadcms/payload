@@ -305,6 +305,7 @@ export const promise = async ({
             doc,
             req,
             siblingData: siblingDoc,
+            topLevelData: doc,
           })
 
       if (!result) {

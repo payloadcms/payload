@@ -50,6 +50,7 @@ export const APIKey: React.FC<{ readonly enabled: boolean; readonly readOnly?: b
         t,
       } as unknown as PayloadRequest,
       siblingData: {},
+      topLevelData: {},
     })
 
   const apiKeyValue = apiKey?.value

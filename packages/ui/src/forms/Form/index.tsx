@@ -41,6 +41,7 @@ import {
   ModifiedContext,
   ProcessingContext,
   SubmittedContext,
+  useDocumentForm,
 } from './context.js'
 import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
@@ -78,6 +79,8 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const router = useRouter()
 
+  const documentForm = useDocumentForm()
+
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
   const { refreshCookie, user } = useAuth()
@@ -111,8 +114,7 @@ export const Form: React.FC<FormProps> = (props) => {
     const validatedFieldState = {}
     let isValid = true
 
-    const dataFromContext = contextRef.current.getData()
-    const data = dataFromContext
+    const data = contextRef.current.getData()
 
     const validationPromises = Object.entries(contextRef.current.fields).map(
       async ([path, field]) => {
@@ -135,6 +137,7 @@ export const Form: React.FC<FormProps> = (props) => {
               data,
               event: 'submit',
               operation,
+              // If there is a parent document form, we can get the data from that form
               preferences: {} as any,
               req: {
                 payload: {
@@ -144,6 +147,7 @@ export const Form: React.FC<FormProps> = (props) => {
                 user,
               } as unknown as PayloadRequest,
               siblingData: contextRef.current.getSiblingData(path),
+              topLevelData: documentForm?.getData ? documentForm.getData() : data,
             })
 
             if (typeof validationResult === 'string') {
@@ -171,7 +175,7 @@ export const Form: React.FC<FormProps> = (props) => {
     }
 
     return isValid
-  }, [collectionSlug, config, dispatchFields, id, operation, t, user])
+  }, [collectionSlug, config, dispatchFields, id, operation, t, user, documentForm])
 
   const submit = useCallback(
     async (options: SubmitOptions = {}, e): Promise<void> => {

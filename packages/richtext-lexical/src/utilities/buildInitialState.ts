@@ -76,7 +76,6 @@ export async function buildInitialState({
         data: blockNode.fields,
         fields: (context.fieldSchemaMap.get(schemaFieldsPath) as any)?.fields,
         fieldSchemaMap: context.fieldSchemaMap,
-        fullDataOverride: context.documentData,
         operation: context.operation as any, // TODO: Type
         permissions: true,
         preferences: context.preferences,
@@ -84,6 +83,7 @@ export async function buildInitialState({
         renderFieldFn: context.renderFieldFn,
         req: context.req,
         schemaPath: schemaFieldsPath,
+        topLevelData: context.documentData,
       })
 
       if (!initialState[id]) {

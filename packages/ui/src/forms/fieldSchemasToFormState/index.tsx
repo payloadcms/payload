@@ -31,16 +31,6 @@ type Args = {
    * then the field schema map is not required.
    */
   fieldSchemaMap: FieldSchemaMap | undefined
-  /**
-   * By default, the full data will be the data passed to the form state, without being narrowed down to the sub-fields.
-   * In some cases, form state for sub fields will be generated independent from the parent form state. In these cases, the parent form state
-   * is not available and the full data would be the partial sub data.
-   *
-   * With fullDataOverride, we can pass the real full data, which will be used for `fullData` instead of the data passed to the form state request.
-   *
-   * This is useful for lexical blocks, as block fields there are not part of the parent form state, yet we still want full data to be available.
-   */
-  fullDataOverride?: Data
   id?: number | string
   operation?: 'create' | 'update'
   permissions: SanitizedFieldsPermissions
@@ -59,6 +49,21 @@ type Args = {
   req: PayloadRequest
   schemaPath: string
   skipValidation?: boolean
+  /**
+   * If this is undefined, the `data` passed to this function will serve as `fullData`, `data` and `topLevelData` when iterating over the fields to generate the * form state.
+   * For sub fields, the `data` will be narrowed down to the sub fields, while `fullData` and `topLevelData` remain the same.
+   *
+   * Usually, the `data` passed to this function will be the document data. This means that things like validation or filterOptions that are executed
+   * here will have access to the full document through the passed `data` parameter, and that `fullData` and `topLevelData` will be identical.
+   *
+   * In some cases however, form state for sub fields will be generated independent from the parent form state. This means that `data` will be the form state
+   * of the sub fields - the document data won't be available here.
+   *
+   * With `topLevelData`, we can pass the full document data, which will be available as `topLevelData` in these cases.
+   *
+   * This is useful for lexical blocks, as block fields there are not part of the parent form state, yet we still want document data to be available for validation and filterOptions, under the `topLevelData` key. In this case, `fullData` and `topLevelData` will no longer be identical.
+   */
+  topLevelData?: Data
 }
 
 export const fieldSchemasToFormState = async ({
@@ -68,7 +73,6 @@ export const fieldSchemasToFormState = async ({
   data = {},
   fields,
   fieldSchemaMap,
-  fullDataOverride,
   operation,
   permissions,
   preferences,
@@ -78,6 +82,7 @@ export const fieldSchemasToFormState = async ({
   req,
   schemaPath,
   skipValidation,
+  topLevelData,
 }: Args): Promise<FormState> => {
   if (!clientFieldSchemaMap && renderFieldFn) {
     console.warn(
@@ -100,7 +105,7 @@ export const fieldSchemasToFormState = async ({
       user: req.user,
     })
 
-    const fullData = fullDataOverride ?? dataWithDefaultValues
+    const fullData = dataWithDefaultValues
 
     await iterateFields({
       id,
@@ -124,6 +129,7 @@ export const fieldSchemasToFormState = async ({
       req,
       skipValidation,
       state,
+      topLevelData: topLevelData ?? fullData,
     })
 
     return state

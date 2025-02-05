@@ -131,12 +131,12 @@ export const BlockComponent: React.FC<Props> = (props) => {
         data: formData,
         docPermissions: { fields: true },
         docPreferences: await getDocPreferences(),
-        fullFormStateOverride: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields),
         globalSlug,
         operation: 'update',
         renderAllFields: true,
         schemaPath: schemaFieldsPath,
         signal: abortController.signal,
+        topLevelFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields),
       })
 
       if (state) {
@@ -203,12 +203,12 @@ export const BlockComponent: React.FC<Props> = (props) => {
         },
         docPreferences: await getDocPreferences(),
         formState: prevFormState,
-        fullFormStateOverride: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields),
         globalSlug,
         operation: 'update',
         renderAllFields: submit ? true : false,
         schemaPath: schemaFieldsPath,
         signal: controller.signal,
+        topLevelFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields),
       })
 
       if (!newFormState) {

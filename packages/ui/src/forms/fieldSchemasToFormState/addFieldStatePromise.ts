@@ -90,6 +90,7 @@ export type AddFieldStatePromiseArgs = {
    */
   skipValidation?: boolean
   state: FormStateWithoutComponents
+  topLevelData: Data
 }
 
 /**
@@ -127,6 +128,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     skipConditionChecks = false,
     skipValidation = false,
     state,
+    topLevelData,
   } = args
 
   if (!args.clientFieldSchemaMap && args.renderFieldFn) {
@@ -159,7 +161,13 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       fieldPermissions === true || deepCopyObjectSimple(fieldPermissions?.read)
 
     if (typeof field?.access?.read === 'function') {
-      hasPermission = await field.access.read({ id, data: fullData, req, siblingData: data })
+      hasPermission = await field.access.read({
+        id,
+        data: fullData,
+        req,
+        siblingData: data,
+        topLevelData,
+      })
     } else {
       hasPermission = true
     }
@@ -190,6 +198,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           collectionSlug,
           data: fullData,
           event: 'onChange',
+          topLevelData,
           // @AlessioGr added `jsonError` in https://github.com/payloadcms/payload/commit/c7ea62a39473408c3ea912c4fbf73e11be4b538d
           // @ts-expect-error-next-line
           jsonError,
@@ -282,6 +291,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 skipConditionChecks,
                 skipValidation,
                 state,
+                topLevelData,
               }),
             )
 
@@ -450,6 +460,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   skipConditionChecks,
                   skipValidation,
                   state,
+                  topLevelData,
                 }),
               )
 
@@ -542,6 +553,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           skipConditionChecks,
           skipValidation,
           state,
+          topLevelData,
         })
 
         break
@@ -569,6 +581,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               relationTo: field.relationTo,
               req,
               siblingData: data,
+              topLevelData,
               user: req.user,
             })
 
@@ -689,6 +702,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       skipConditionChecks,
       skipValidation,
       state,
+      topLevelData,
     })
   } else if (field.type === 'tabs') {
     const promises = field.tabs.map((tab, tabIndex) => {
@@ -754,6 +768,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         skipConditionChecks,
         skipValidation,
         state,
+        topLevelData,
       })
     })
 

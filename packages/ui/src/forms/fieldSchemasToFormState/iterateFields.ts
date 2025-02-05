@@ -66,6 +66,7 @@ type Args = {
    */
   skipValidation?: boolean
   state?: FormStateWithoutComponents
+  topLevelData: Data
 }
 
 /**
@@ -99,6 +100,7 @@ export const iterateFields = async ({
   skipConditionChecks = false,
   skipValidation = false,
   state = {},
+  topLevelData,
 }: Args): Promise<void> => {
   const promises = []
 
@@ -163,6 +165,7 @@ export const iterateFields = async ({
         skipConditionChecks,
         skipValidation,
         state,
+        topLevelData,
       }),
     )
   })

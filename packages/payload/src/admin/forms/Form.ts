@@ -70,7 +70,6 @@ export type BuildFormStateArgs = {
   docPreferences: DocumentPreferences
   fallbackLocale?: false | TypedLocale
   formState?: FormState
-  fullFormStateOverride?: FormState
   id?: number | string
   /*
     If not i18n was passed, the language can be passed to init i18n
@@ -86,6 +85,7 @@ export type BuildFormStateArgs = {
   returnLockStatus?: boolean
   schemaPath: string
   skipValidation?: boolean
+  topLevelFormState?: FormState
   updateLastEdited?: boolean
 } & (
   | {

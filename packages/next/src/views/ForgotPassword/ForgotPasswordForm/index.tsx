@@ -102,6 +102,7 @@ export const ForgotPasswordForm: React.FC = () => {
               } as unknown as PayloadRequest,
               required: true,
               siblingData: {},
+              topLevelData: {},
             })
           }
         />
@@ -126,6 +127,7 @@ export const ForgotPasswordForm: React.FC = () => {
               req: { payload: { config }, t } as unknown as PayloadRequest,
               required: true,
               siblingData: {},
+              topLevelData: {},
             })
           }
         />

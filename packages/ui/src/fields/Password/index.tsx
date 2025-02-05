@@ -60,6 +60,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
         } as unknown as PayloadRequest,
         required: true,
         siblingData: {},
+        topLevelData: {},
       })
     },
     [validate, config, t, required],

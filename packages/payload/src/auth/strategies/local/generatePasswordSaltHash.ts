@@ -40,6 +40,7 @@ export const generatePasswordSaltHash = async ({
     req,
     required: true,
     siblingData: {},
+    topLevelData: {},
   })
 
   if (typeof validationResult === 'string') {

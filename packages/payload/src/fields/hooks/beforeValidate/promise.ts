@@ -298,7 +298,7 @@ export const promise = async <T>({
     if (field.access && field.access[operation]) {
       const result = overrideAccess
         ? true
-        : await field.access[operation]({ id, data, doc, req, siblingData })
+        : await field.access[operation]({ id, data, doc, req, siblingData, topLevelData: data })
 
       if (!result) {
         delete siblingData[field.name]
