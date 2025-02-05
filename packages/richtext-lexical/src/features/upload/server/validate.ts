@@ -17,6 +17,7 @@ export const uploadValidation = (
         preferences,
         req,
         req: { payload, t },
+        topLevelData,
       },
     },
   }) => {
@@ -54,6 +55,7 @@ export const uploadValidation = (
       renderAllFields: false,
       req,
       schemaPath: '',
+      topLevelData,
     })
 
     let errorPaths: string[] = []

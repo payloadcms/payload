@@ -4,7 +4,7 @@ import type { ValidationFieldError } from '../../../errors/index.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, Operation, PayloadRequest } from '../../../types/index.js'
-import type { Field, TabAsField } from '../../config/types.js'
+import type { Field, TabAsField, Validate } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
@@ -139,22 +139,27 @@ export const promise = async ({
         }
       }
 
-      const validationResult = await field.validate(
-        valueToValidate as never,
-        {
-          ...field,
-          id,
-          collectionSlug: collection?.slug,
-          data: deepMergeWithSourceArrays(doc, data),
-          event: 'submit',
-          jsonError,
-          operation,
-          preferences: { fields: {} },
-          previousValue: siblingDoc[field.name],
-          req,
-          siblingData: deepMergeWithSourceArrays(siblingDoc, siblingData),
-        } as any,
-      )
+      const validateFn: Validate<object, object, object, object> = field.validate as Validate<
+        object,
+        object,
+        object,
+        object
+      >
+      const validationResult = await validateFn(valueToValidate as never, {
+        ...field,
+        id,
+        collectionSlug: collection?.slug,
+        data: deepMergeWithSourceArrays(doc, data),
+        event: 'submit',
+        // @ts-expect-error
+        jsonError,
+        operation,
+        preferences: { fields: {} },
+        previousValue: siblingDoc[field.name],
+        req,
+        siblingData: deepMergeWithSourceArrays(siblingDoc, siblingData),
+        topLevelData: data,
+      })
 
       if (typeof validationResult === 'string') {
         const label = getTranslatedLabel(field?.label || field?.name, req.i18n)

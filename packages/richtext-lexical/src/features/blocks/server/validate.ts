@@ -13,7 +13,7 @@ export const blockValidationHOC = (
     const blockFieldData = node.fields ?? ({} as BlockFields)
 
     const {
-      options: { id, collectionSlug, operation, preferences, req, topLevelData },
+      options: { id, collectionSlug, data, operation, preferences, req, topLevelData },
     } = validation
 
     // find block

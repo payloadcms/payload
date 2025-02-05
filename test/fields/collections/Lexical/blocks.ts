@@ -52,7 +52,7 @@ export const ValidationBlock: Block = {
     {
       name: 'textDependsOnDocData',
       type: 'text',
-      validate: ((value, { data }) => {
+      validate: ((value, { data, topLevelData }) => {
         if ((data as any)?.title === 'invalid') {
           return 'doc title cannot be invalid'
         }

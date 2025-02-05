@@ -13,7 +13,7 @@ export const linkValidation = (
   return async ({
     node,
     validation: {
-      options: { id, collectionSlug, operation, preferences, req },
+      options: { id, collectionSlug, operation, preferences, req, topLevelData },
     },
   }) => {
     /**
@@ -32,6 +32,7 @@ export const linkValidation = (
       renderAllFields: false,
       req,
       schemaPath: '',
+      topLevelData,
     })
 
     let errorPaths: string[] = []
