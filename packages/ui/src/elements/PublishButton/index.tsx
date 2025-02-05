@@ -232,7 +232,12 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
       >
         {localization ? defaultLabel : label}
       </FormSubmit>
-      {canSchedulePublish && isModalOpen(drawerSlug) && <ScheduleDrawer slug={drawerSlug} />}
+      {canSchedulePublish && isModalOpen(drawerSlug) && (
+        <ScheduleDrawer
+          defaultType={!hasNewerVersions ? 'unpublish' : 'publish'}
+          slug={drawerSlug}
+        />
+      )}
     </React.Fragment>
   )
 }

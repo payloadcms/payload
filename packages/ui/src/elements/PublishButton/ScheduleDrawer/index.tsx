@@ -34,6 +34,7 @@ import './index.scss'
 const baseClass = 'schedule-publish'
 
 type Props = {
+  defaultType?: PublishType
   slug: string
 }
 
@@ -42,7 +43,7 @@ const defaultLocaleOption = {
   value: 'all',
 }
 
-export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
+export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType }) => {
   const { toggleModal } = useModal()
   const {
     config: {
@@ -55,7 +56,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
   const { id, collectionSlug, globalSlug, title } = useDocumentInfo()
   const { i18n, t } = useTranslation()
   const { schedulePublish } = useServerFunctions()
-  const [type, setType] = React.useState<PublishType>('publish')
+  const [type, setType] = React.useState<PublishType>(defaultType || 'publish')
   const [date, setDate] = React.useState<Date>()
   const [locale, setLocale] = React.useState<{ label: string; value: string }>(defaultLocaleOption)
   const [processing, setProcessing] = React.useState(false)
