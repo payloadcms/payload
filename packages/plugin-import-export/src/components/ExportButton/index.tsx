@@ -1,35 +1,28 @@
 'use client'
-// import { Popup, PopupList, useModal } from '@payloadcms/ui'
-
-import './index.scss'
-
+import { useModal } from '@payloadcms/ui'
 import React from 'react'
 
-import { Dots } from '../Dots/index.js'
+import { ExportDrawer } from '../ExportDrawer'
+import './index.scss'
 
-const baseClass = 'export-controls'
-export const ExportButton: React.FC<{}> = () => {
-  // const { toggleModal } = useModal()
-
-  // get collection slug from url
-  const collectionSlug = window.location.pathname.split('/')[2]
-
-  const exportDrawerSlug = `export-drawer-${collectionSlug}`
+const baseClass = 'export-button'
+export const ExportButton: React.FC<{ collectionSlug: string; exportCollectionSlug: string }> = ({
+  collectionSlug,
+  exportCollectionSlug,
+}) => {
+  const { toggleModal } = useModal()
+  const exportDrawerSlug = `export-${collectionSlug}`
 
   return (
-    <div className={baseClass}>
-      EXPORT
-      {/* <Popup
-        button={<Dots />}
-        className={`${baseClass}__popup`}
-        horizontalAlign="right"
-        size="large"
-        verticalAlign="bottom"
-      >
-        <PopupList.ButtonGroup>
-          <PopupList.Button onClick={() => toggleModal(exportDrawerSlug)}>Export</PopupList.Button>
-        </PopupList.ButtonGroup>
-      </Popup> */}
-    </div>
+    <React.Fragment>
+      <button className={baseClass} onClick={() => toggleModal(exportDrawerSlug)} type="button">
+        Export
+      </button>
+      <ExportDrawer
+        collectionSlug={collectionSlug}
+        drawerSlug={exportDrawerSlug}
+        exportCollectionSlug={exportCollectionSlug}
+      />
+    </React.Fragment>
   )
 }

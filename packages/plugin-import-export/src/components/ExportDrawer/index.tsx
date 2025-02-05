@@ -1,181 +1,65 @@
 'use client'
-import type { ClientCollectionConfig, ClientField } from 'payload'
+import type { ClientCollectionConfig } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { Collapsible, Drawer, Form, FormSubmit, RenderFields, useConfig } from '@payloadcms/ui'
-import { fieldAffectsData } from 'payload/shared'
+import {
+  Collapsible,
+  Drawer,
+  Form,
+  FormSubmit,
+  RenderFields,
+  useConfig,
+  XIcon,
+} from '@payloadcms/ui'
 import React from 'react'
 
-import { initialState } from './exportFields.js'
 import './index.scss'
+import { initialState } from './exportFields.js'
 
 const baseClass = 'export-drawer'
 
 export const ExportDrawer: React.FC<{
-  collectionConfig: ClientCollectionConfig
-  collectionLabel: string | undefined
+  collectionSlug: string
   drawerSlug: string
-}> = ({ collectionConfig, collectionLabel, drawerSlug }) => {
+  exportCollectionSlug: string
+}> = ({ collectionSlug, drawerSlug, exportCollectionSlug }) => {
   const { toggleModal } = useModal()
   const {
-    config: { localization },
+    config: { collections },
   } = useConfig()
-  const localizationEnabled = localization && localization.locales.length > 1
-  const localeOptions = localizationEnabled
-    ? localization.locales.map((locale) => ({
-        label: typeof locale === 'string' ? locale : locale.label,
-        value: typeof locale === 'string' ? locale : locale.code,
-      }))
-    : []
 
-  const sortByFields = collectionConfig.fields.filter((field) => fieldAffectsData(field))
-  const sortByOptions = sortByFields.map((field) => ({
-    label: field.label || field.name,
-    value: field.name,
-  }))
+  const collectionConfig =
+    (collections.find(
+      (collection) => collection.slug === collectionSlug,
+    ) as ClientCollectionConfig) || {}
 
-  const exportFields: ClientField[] = [
-    {
-      name: 'filename',
-      type: 'text',
-      label: 'Filename',
-    },
-    {
-      type: 'row',
-      fields: [
-        {
-          name: 'format',
-          type: 'select',
-          admin: {
-            isClearable: false,
-            isSortable: false,
-            width: '33.3%',
-          },
-          label: 'Export Format',
-          options: [
-            {
-              label: 'CSV',
-              value: 'csv',
-            },
-          ],
-        },
-        {
-          name: 'limit',
-          type: 'number',
-          admin: {
-            autoComplete: '',
-            placeholder: '',
-            step: 1,
-            width: '33.3%',
-          },
-          label: 'Limit',
-        },
-        {
-          name: 'sortby',
-          type: 'select',
-          admin: {
-            isClearable: false,
-            isSortable: false,
-            width: '33.3%',
-          },
-          label: 'Sort By',
-          options: sortByOptions,
-        },
-      ],
-    },
-    {
-      type: 'row',
-      fields: [
-        {
-          name: 'locales',
-          type: 'select',
-          admin: {
-            hidden: !localizationEnabled,
-            isClearable: false,
-            isSortable: false,
-            width: '33.3%',
-          },
-          hasMany: true,
-          label: 'Locales',
-          options: [
-            {
-              label: 'All',
-              value: 'all',
-            },
-            ...localeOptions,
-          ],
-        },
-        {
-          name: 'drafts',
-          type: 'select',
-          admin: {
-            isClearable: false,
-            isSortable: false,
-            width: `${localizationEnabled ? '33.3%' : '50%'}`,
-          },
-          label: 'Drafts',
-          options: [
-            {
-              label: 'Include',
-              value: 'include',
-            },
-            {
-              label: 'Exclude',
-              value: 'exclude',
-            },
-          ],
-        },
-
-        {
-          name: 'depth',
-          type: 'number',
-          admin: {
-            autoComplete: '',
-            placeholder: '',
-            step: 1,
-            width: `${localizationEnabled ? '33.3%' : '50%'}`,
-          },
-          label: 'Depth',
-        },
-      ],
-    },
-    {
-      type: 'row',
-      fields: [
-        {
-          name: 'useCurrentFilters',
-          type: 'checkbox',
-          admin: {
-            width: 'min-content',
-          },
-          label: 'Use current selection',
-        },
-        {
-          name: 'useCurrentSelection',
-          type: 'checkbox',
-          admin: {
-            width: 'min-content',
-          },
-          label: 'Use selected documents',
-        },
-      ],
-    },
-  ]
+  const collectionLabel = collectionConfig.labels
+    ? collectionConfig.labels.singular
+    : collectionSlug || 'Collection'
 
   const onSuccess = React.useCallback(() => {
     console.log('Exported')
     toggleModal(drawerSlug)
   }, [toggleModal, drawerSlug])
 
+  const exportCollection =
+    collections.find((collection) => collection.slug === exportCollectionSlug) || {}
+
+  const exportFields = exportCollection.fields || []
+
   return (
     <Drawer
       className={baseClass}
       gutter={false}
       Header={
-        <div>
+        <div className={`${baseClass}__header`}>
           <h2>{`Export ${collectionLabel}`}</h2>
-          <button onClick={toggleModal(drawerSlug)} type="button">
-            'X'
+          <button
+            className={`${baseClass}__close`}
+            onClick={() => toggleModal(drawerSlug)}
+            type="button"
+          >
+            <XIcon className={`${baseClass}__icon`} />
           </button>
         </div>
       }

@@ -25,13 +25,32 @@ export const importExportPlugin =
         tasks: [createCollectionExportTask],
       } as unknown as JobsConfig) // cannot type jobs config inside of plugins
 
-    // Ensure that `config.admin` and `config.admin.components` are initialized
-    config.admin = config.admin || {}
-    config.admin.components = config.admin.components || {}
-    // Now we can safely push to `actions`
-    config.admin.components.actions = config.admin.components.actions || []
-    config.admin.components.actions.push({
-      path: '@payloadcms/plugin-import-export/rsc#ExportButton',
+    let collectionsToUpdate = config.collections
+
+    const usePluginCollections = pluginConfig.collections && pluginConfig.collections?.length > 0
+
+    if (usePluginCollections) {
+      collectionsToUpdate = config.collections?.filter((collection) => {
+        return pluginConfig.collections?.includes(collection.slug)
+      })
+    }
+
+    collectionsToUpdate.forEach((collection) => {
+      if (!collection.admin) {
+        collection.admin = { components: { afterListControls: [] } }
+      }
+      if (!collection.admin.components) {
+        collection.admin.components = { afterListControls: [] }
+      }
+      if (!collection.admin.components.afterListControls) {
+        collection.admin.components.afterListControls = []
+      }
+      collection.admin.components.afterListControls.push({
+        clientProps: {
+          exportCollectionSlug: exportCollection.slug,
+        },
+        path: '@payloadcms/plugin-import-export/rsc#ExportButton',
+      })
     })
 
     config.i18n = deepMergeSimple(translations, config.i18n?.translations ?? {})
