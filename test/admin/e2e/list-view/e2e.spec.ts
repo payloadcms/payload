@@ -196,7 +196,7 @@ describe('List View', () => {
       ).toBeVisible()
     })
 
-    test('should render custom afterListControls component', async () => {
+    test('should render custom listControlsMenu component', async () => {
       await page.goto(postsUrl.list)
       const kebabMenu = page.locator('.list-controls__popup')
       await expect(kebabMenu).toBeVisible()
@@ -204,7 +204,7 @@ describe('List View', () => {
 
       await expect(
         page.locator('.popup-button-list__button').locator('div', {
-          hasText: 'AfterListControls',
+          hasText: 'ListControlsMenu',
         }),
       ).toBeVisible()
     })

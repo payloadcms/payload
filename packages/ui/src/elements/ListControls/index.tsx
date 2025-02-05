@@ -28,7 +28,6 @@ import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched.js'
 const baseClass = 'list-controls'
 
 export type ListControlsProps = {
-  readonly afterListControls?: React.ReactNode | React.ReactNode[]
   readonly beforeActions?: React.ReactNode[]
   readonly collectionConfig: ClientCollectionConfig
   readonly collectionSlug: string
@@ -39,6 +38,7 @@ export type ListControlsProps = {
   readonly handleSearchChange?: (search: string) => void
   readonly handleSortChange?: (sort: string) => void
   readonly handleWhereChange?: (where: Where) => void
+  readonly listControlsMenu?: React.ReactNode | React.ReactNode[]
   readonly renderedFilters?: Map<string, React.ReactNode>
 }
 
@@ -49,7 +49,6 @@ export type ListControlsProps = {
  */
 export const ListControls: React.FC<ListControlsProps> = (props) => {
   const {
-    afterListControls,
     beforeActions,
     collectionConfig,
     collectionSlug,
@@ -57,6 +56,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     disableBulkEdit,
     enableColumns = true,
     enableSort = false,
+    listControlsMenu,
     renderedFilters,
   } = props
 
@@ -197,7 +197,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                 {t('general:sort')}
               </Pill>
             )}
-            {afterListControls != null && afterListControls !== false && (
+            {listControlsMenu != null && listControlsMenu !== false && (
               <Popup
                 button={<Dots />}
                 className={`${baseClass}__popup`}
@@ -206,12 +206,12 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                 verticalAlign="bottom"
               >
                 <PopupList.ButtonGroup>
-                  {Array.isArray(afterListControls) ? (
-                    afterListControls.map((control, index) => (
+                  {Array.isArray(listControlsMenu) ? (
+                    listControlsMenu.map((control, index) => (
                       <PopupList.Button key={index}>{control}</PopupList.Button>
                     ))
                   ) : (
-                    <PopupList.Button>{afterListControls}</PopupList.Button>
+                    <PopupList.Button>{listControlsMenu}</PopupList.Button>
                   )}
                 </PopupList.ButtonGroup>
               </Popup>

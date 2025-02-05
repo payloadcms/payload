@@ -33,11 +33,11 @@ export const Posts: CollectionConfig = {
           },
         },
       ],
-      afterListControls: [
+      listControlsMenu: [
         {
           path: '/components/Banner/index.js#Banner',
           clientProps: {
-            message: 'AfterListControls',
+            message: 'ListControlsMenu',
           },
         },
         {
