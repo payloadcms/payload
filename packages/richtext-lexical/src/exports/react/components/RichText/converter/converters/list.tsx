@@ -29,6 +29,7 @@ export const ListJSXConverter: JSXConverters<SerializedListItemNode | Serialized
           className={`list-item-checkbox${node.checked ? ' list-item-checkbox-checked' : ' list-item-checkbox-unchecked'}${hasSubLists ? ' nestedListItem' : ''}`}
           // eslint-disable-next-line jsx-a11y/no-noninteractive-element-to-interactive-role
           role="checkbox"
+          style={{ listStyleType: 'none' }}
           tabIndex={-1}
           value={node?.value}
         >
