@@ -6,7 +6,7 @@ desc:
 keywords:
 ---
 
-Views are the individual pages that make up the [Admin Panel](./overview), such as the Dashboard, List, and Edit views. One of the most powerful ways to customize the Admin Panel is to create Custom Views. These are [Custom Components](./components) that can either replace built-in views or can be entirely new.
+Views are the individual pages that make up the [Admin Panel](../admin/overview), such as the Dashboard, [List View](./list-view), and [Edit View](./edit-view). One of the most powerful ways to customize the Admin Panel is to create Custom Views. These are [Custom Components](./overview) that can either replace built-in views or can be entirely new.
 
 There are four types of views within the Admin Panel:
 
@@ -19,7 +19,7 @@ To swap in your own Custom View, first consult the list of available components,
 
 ## Root Views
 
-Root Views are the main views of the [Admin Panel](./overview). These are views that are scoped directly under the `/admin` route, such as the Dashboard or Account views.
+Root Views are the main views of the [Admin Panel](../admin/overview). These are views that are scoped directly under the `/admin` route, such as the Dashboard or Account views.
 
 To swap Root Views with your own, or to [create entirely new ones](#adding-new-views), use the `admin.components.views` property of your root [Payload Config](../configuration/overview):
 
@@ -83,7 +83,7 @@ The following options are available:
 | Property        | Description                                                                   |
 | --------------- | ----------------------------------------------------------------------------- |
 | `account`   | The Account view is used to show the currently logged in user's Account page. |
-| `dashboard` | The main landing page of the [Admin Panel](./overview).                                     |
+| `dashboard` | The main landing page of the [Admin Panel](../admin/overview).                                     |
 
 For more granular control, pass a configuration object instead. Payload exposes the following properties for each view:
 
@@ -100,7 +100,7 @@ _* An asterisk denotes that a property is required._
 
 ### Adding New Views
 
-To add a _new_ views to the [Admin Panel](./overview), simply add your own key to the `views` object with at least a `path` and `Component` property. For example:
+To add a _new_ views to the [Admin Panel](../admin/overview), simply add your own key to the `views` object with at least a `path` and `Component` property. For example:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -279,7 +279,7 @@ The following options are available:
 | Property          | Description                                                                                                                                                     |
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `root`        | The Root View overrides all other nested views and routes. No document controls or tabs are rendered when this key is set.                                      |
-| `default`     | The Default View is the primary view in which your document is edited. It is rendered within the "Edit" tab. [More details](../custom-components/edit-view).                                                    |
+| `default`     | The Default View is the primary view in which your document is edited. It is rendered within the "Edit" tab. [More details](./edit-view).                                                    |
 | `versions`    | The Versions View is used to navigate the version history of a single document. It is rendered within the "Versions" tab. [More details](../versions/overview). |
 | `version`     | The Version View is used to edit a single version of a document. It is rendered within the "Version" tab. [More details](../versions/overview).                 |
 | `api`         | The API View is used to display the REST API JSON response for a given document. It is rendered within the "API" tab.                                           |
@@ -329,7 +329,7 @@ export const MyCollection: SanitizedCollectionConfig = {
 
 ## Building Custom Views
 
-Custom Views are just [Custom Components](./components) rendered at the page-level. To understand how to build Custom Views, first review the [Building Custom Components](./components#building-custom-components) guide. Once you have a Custom Component ready, you can use it as a Custom View.
+Custom Views are just [Custom Components](./overview) rendered at the page-level. To understand how to build Custom Views, first review the [Building Custom Components](./overview#building-custom-components) guide. Once you have a Custom Component ready, you can use it as a Custom View.
 
 ```ts
 import type { SanitizedCollectionConfig } from 'payload'
@@ -363,7 +363,7 @@ Your Custom Views will be provided with the following props:
 
 <Banner type="success">
   **Reminder:**
-  All [Custom Server Components](./components) receive `payload` and `i18n` by default. See [Building Custom Components](./components#building-custom-components) for more details.
+  All [Custom Server Components](./overview) receive `payload` and `i18n` by default. See [Building Custom Components](./overview#building-custom-components) for more details.
 </Banner>
 
 <Banner type="warning">
