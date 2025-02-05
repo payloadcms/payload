@@ -67,10 +67,22 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
           event.currentTarget.classList.remove(editableClassName)
           data.value.value = event.currentTarget.innerText
           data.label = event.currentTarget.innerText
-          selectProps.onChange(selectProps.value, {
-            action: 'create-option',
-            option: data,
-          })
+
+          if (data.value.value.replaceAll('\n', '')) {
+            selectProps.onChange(selectProps.value, {
+              action: 'create-option',
+              option: data,
+            })
+          } else {
+            if (Array.isArray(selectProps.value)) {
+              const newValues = selectProps.value.filter((v) => v.id !== data.id)
+              selectProps.onChange(newValues, {
+                action: 'pop-value',
+                removedValue: data,
+              })
+            }
+          }
+
           event.preventDefault()
         }
         event.stopPropagation()
