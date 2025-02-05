@@ -11,7 +11,6 @@ export interface Config {
     users: UserAuthOperations;
   };
   collections: {
-    'fields-relationship': FieldsRelationship;
     'relation-filter-false': RelationFilterFalse;
     'relation-filter-true': RelationFilterTrue;
     'relation-one': RelationOne;
@@ -32,7 +31,6 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
-    'fields-relationship': FieldsRelationshipSelect<false> | FieldsRelationshipSelect<true>;
     'relation-filter-false': RelationFilterFalseSelect<false> | RelationFilterFalseSelect<true>;
     'relation-filter-true': RelationFilterTrueSelect<false> | RelationFilterTrueSelect<true>;
     'relation-one': RelationOneSelect<false> | RelationOneSelect<true>;
@@ -85,66 +83,21 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "fields-relationship".
+ * via the `definition` "relation-filter-false".
  */
-export interface FieldsRelationship {
+export interface RelationFilterFalse {
   id: string;
-  relationship?: (string | null) | RelationOne;
-  relationshipHasMany?: (string | RelationOne)[] | null;
-  relationshipMultiple?:
-    | ({
-        relationTo: 'relation-one';
-        value: string | RelationOne;
-      } | null)
-    | ({
-        relationTo: 'relation-two';
-        value: string | RelationTwo;
-      } | null);
-  relationshipHasManyMultiple?:
-    | (
-        | {
-            relationTo: 'relation-one';
-            value: string | RelationOne;
-          }
-        | {
-            relationTo: 'relation-two';
-            value: string | RelationTwo;
-          }
-      )[]
-    | null;
-  relationshipRestricted?: (string | null) | RelationRestricted;
-  relationshipWithTitle?: (string | null) | RelationWithTitle;
-  /**
-   * This will filter the relationship options based on id, which is the same as the relationship field in this document
-   */
-  relationshipFilteredByID?: (string | null) | RelationOne;
-  /**
-   * This will filter the relationship options if the filter field in this document is set to "Include me"
-   */
-  relationshipFilteredByField?: (string | null) | RelationOne;
-  relationshipFilteredAsync?: (string | null) | RelationOne;
-  relationshipManyFiltered?:
-    | (
-        | {
-            relationTo: 'relation-with-title';
-            value: string | RelationWithTitle;
-          }
-        | {
-            relationTo: 'relation-filter-false';
-            value: string | RelationFilterFalse;
-          }
-        | {
-            relationTo: 'relation-filter-true';
-            value: string | RelationFilterTrue;
-          }
-        | {
-            relationTo: 'relation-one';
-            value: string | RelationOne;
-          }
-      )[]
-    | null;
-  filter?: string | null;
-  relationshipReadOnly?: (string | null) | RelationOne;
+  name?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-filter-true".
+ */
+export interface RelationFilterTrue {
+  id: string;
+  name?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -188,26 +141,6 @@ export interface RelationWithTitle {
   meta?: {
     title?: string | null;
   };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relation-filter-false".
- */
-export interface RelationFilterFalse {
-  id: string;
-  name?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relation-filter-true".
- */
-export interface RelationFilterTrue {
-  id: string;
-  name?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -337,10 +270,6 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
-        relationTo: 'fields-relationship';
-        value: string | FieldsRelationship;
-      } | null)
-    | ({
         relationTo: 'relation-filter-false';
         value: string | RelationFilterFalse;
       } | null)
@@ -437,26 +366,6 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "fields-relationship_select".
- */
-export interface FieldsRelationshipSelect<T extends boolean = true> {
-  relationship?: T;
-  relationshipHasMany?: T;
-  relationshipMultiple?: T;
-  relationshipHasManyMultiple?: T;
-  relationshipRestricted?: T;
-  relationshipWithTitle?: T;
-  relationshipFilteredByID?: T;
-  relationshipFilteredByField?: T;
-  relationshipFilteredAsync?: T;
-  relationshipManyFiltered?: T;
-  filter?: T;
-  relationshipReadOnly?: T;
-  updatedAt?: T;
-  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

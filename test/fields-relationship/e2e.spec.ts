@@ -42,7 +42,7 @@ import {
   relationWithTitleSlug,
   slug,
   versionedRelationshipFieldSlug,
-} from './collectionSlugs.js'
+} from './slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
