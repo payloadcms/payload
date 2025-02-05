@@ -57,6 +57,7 @@ export const Button: React.FC<Props> = (props) => {
     className,
     disabled,
     el = 'button',
+    enableSubmenu,
     icon,
     iconPosition = 'right',
     iconStyle = 'without-border',
@@ -67,7 +68,6 @@ export const Button: React.FC<Props> = (props) => {
     ref,
     round,
     size = 'medium',
-    subMenuOverrideDisabled,
     SubMenuPopupContent,
     to,
     tooltip,
@@ -184,8 +184,8 @@ export const Button: React.FC<Props> = (props) => {
         <Popup
           button={<ChevronIcon />}
           buttonSize={size}
-          className={disabled && !subMenuOverrideDisabled ? `${baseClass}--popup-disabled` : ''}
-          disabled={disabled && !subMenuOverrideDisabled}
+          className={disabled && !enableSubmenu ? `${baseClass}--popup-disabled` : ''}
+          disabled={disabled && !enableSubmenu}
           horizontalAlign="right"
           noBackground
           render={({ close }) => SubMenuPopupContent({ close: () => close() })}

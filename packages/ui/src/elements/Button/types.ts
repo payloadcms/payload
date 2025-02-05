@@ -14,6 +14,10 @@ export type Props = {
   className?: string
   disabled?: boolean
   el?: 'anchor' | 'link' | ElementType
+  /**
+   * Setting to `true` will allow the submenu to be opened when the button is disabled
+   */
+  enableSubmenu?: boolean
   icon?: ['chevron' | 'edit' | 'plus' | 'x'] | React.ReactNode
   iconPosition?: 'left' | 'right'
   iconStyle?: 'none' | 'with-border' | 'without-border'
@@ -34,10 +38,6 @@ export type Props = {
   round?: boolean
   secondaryActions?: secondaryAction | secondaryAction[]
   size?: 'large' | 'medium' | 'small'
-  /**
-   * Allow the submenu to be opened when the button is disabled
-   */
-  subMenuOverrideDisabled?: boolean
   SubMenuPopupContent?: (props: { close: () => void }) => React.ReactNode
   to?: string
   tooltip?: string
