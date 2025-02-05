@@ -70,7 +70,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     }
   })
 
-  useUpdateEffect(() => {
+  useEffect(() => {
     updateSelectedOption(selectedCollectionFromProps)
   }, [selectedCollectionFromProps])
 

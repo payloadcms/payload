@@ -3,7 +3,7 @@
 import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
 
 import { versionDefaults } from 'payload/shared'
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import {
@@ -263,7 +263,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   })
 
   // When debounced fields change, autosave
-  useUpdateEffect(() => {
+  useEffect(() => {
     const { abortController, autosaveTimeout } = handleAutosave()
 
     return () => {

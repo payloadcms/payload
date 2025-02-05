@@ -403,7 +403,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
 
   // When (`relationTo` || `filterOptions` || `locale`) changes, reset component
   // Note - effect should not run on first run
-  useUpdateEffect(() => {
+  useEffect(() => {
     // If the menu is open while filterOptions changes
     // due to latency of form state and fast clicking into this field,
     // re-fetch options
