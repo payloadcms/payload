@@ -8,7 +8,7 @@ keywords: admin, components, custom, documentation, Content Management System, c
 
 Root Components are those that affect the [Admin Panel](../admin/overview) generally, such as the logo or the main nav. You can swap out these components with your own [Custom Components](./overview) to create a completely custom look and feel.
 
-When combined with [Custom CSS](../admin/customizing-css), you can create a truly unique experience for your users, essentially white-labeling the Admin Panel to match your brand.
+When combined with [Custom CSS](../admin/customizing-css), you can create a truly unique experience for your users, such as white-labeling the Admin Panel to match your brand.
 
 To override Root Components, use the `admin.components` property in your [Payload Config](../configuration/overview):
 
@@ -26,8 +26,6 @@ export default buildConfig({
   },
 })
 ```
-
-_For details on how to build Custom Components, see [Building Custom Components](#building-custom-components)._
 
 ## Config Options
 
@@ -50,6 +48,8 @@ The following options are available:
 | `providers`       | Custom [React Context](https://react.dev/learn/scaling-up-with-reducer-and-context) providers that will wrap the entire Admin Panel. [More details](./custom-providers).                                       |
 | `views`           | Override or create new views within the Admin Panel. [More details](../custom-components/custom-views).                                                                                                                                 |
 
+_For details on how to build Custom Components, see [Building Custom Components](./overview#building-custom-components)._
+
 <Banner type="success">
   **Note:**
   You can also use set [Collection Components](../configuration/collections#custom-components) and [Global Components](../configuration/globals#custom-components) in their respective configs.
@@ -57,6 +57,10 @@ The following options are available:
 
 ### actions
 
+Actions are rendered within a dropdown in the header of the Admin Panel. Actions are typically used to display buttons that add additional interactivity and functionality, although these can be anything you'd like.
+
+To add an action, use the `actions` property in your `admin.components` config:
+
 ```ts
 import { buildConfig } from 'payload'
 
@@ -65,19 +69,71 @@ export default buildConfig({
   admin: {
     // highlight-start
     components: {
-      // ...
+      actions: [
+        '/path/to/your/component',
+      ],
     },
     // highlight-end
   },
 })
 ```
 
+Here is an example of a simple Action component:
+
 ```tsx
- // Example here
+export default function MyCustomAction() {
+  return (
+    <button onClick={() => alert('Hello, world!')}>
+      This is a custom action component
+    </button>
+  )
+}
+```
+
+<Banner type="success">
+  **Note:**
+  You can also use set Actions on the [Edit View](./edit-view) and [List View](./list-view) in their respective configs.
+</Banner>
+
+### beforeDashboard
+
+The `beforeDashboard` property allows you to inject Custom Components into the built-in Dashboard, before the default dashboard contents. This is useful for adding additional information or functionality to the Dashboard without replacing the entire view.
+
+To add `beforeDashboard` components, use the `beforeDashboard` property in your `admin.components` config:
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  admin: {
+    // highlight-start
+    components: {
+      beforeDashboard: [
+        '/path/to/your/component',
+      ],
+    },
+    // highlight-end
+  },
+})
+```
+
+Here is an example of a simple `beforeDashboard` component:
+
+```tsx
+export default function MyBeforeDashboardComponent() {
+  return (
+    <p>This is a custom component injected before the Dashboard.</p>
+  )
+}
 ```
 
 ### afterDashboard
 
+Similar to `beforeDashboard`, the `afterDashboard` property allows you to inject Custom Components into the built-in Dashboard, _after_ the default dashboard contents.
+
+To add `afterDashboard` components, use the `afterDashboard` property in your `admin.components` config:
+
 ```ts
 import { buildConfig } from 'payload'
 
@@ -86,39 +142,65 @@ export default buildConfig({
   admin: {
     // highlight-start
     components: {
-      // ...
+      afterDashboard: [
+        '/path/to/your/component',
+      ],
     },
     // highlight-end
   },
 })
 ```
 
+Here is an example of a simple `afterDashboard` component:
+
 ```tsx
- // Example here
+export default function MyAfterDashboardComponent() {
+  return (
+    <p>This is a custom component injected after the Dashboard.</p>
+  )
+}
+```
+
+_For details on how to build Custom Components, see [Building Custom Components](./overview#building-custom-components)._
+
+### beforeLogin
+
+The `beforeLogin` property allows you to inject Custom Components into the built-in Login view, before the default login form. This is useful for adding additional information or functionality to the Login view without replacing the entire view.
+
+To add `beforeLogin` components, use the `beforeLogin` property in your `admin.components` config:
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  admin: {
+    // highlight-start
+    components: {
+      beforeLogin: [
+        '/path/to/your/component',
+      ],
+    },
+    // highlight-end
+  },
+})
+```
+
+Here is an example of a simple `beforeLogin` component:
+
+```tsx
+export default function MyBeforeLoginComponent() {
+  return (
+    <p>This is a custom component injected before the Login form.</p>
+  )
+}
 ```
 
 ### afterLogin
 
-```ts
-import { buildConfig } from 'payload'
+Similar to `beforeLogin`, the `afterLogin` property allows you to inject Custom Components into the built-in Login view, _after_ the default login form.
 
-export default buildConfig({
-  // ...
-  admin: {
-    // highlight-start
-    components: {
-      // ...
-    },
-    // highlight-end
-  },
-})
-```
-
-```tsx
- // Example here
-```
-
-### afterNavLinks
+To add `afterLogin` components, use the `afterLogin` property in your `admin.components` config:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -128,81 +210,30 @@ export default buildConfig({
   admin: {
     // highlight-start
     components: {
-      // ...
+      afterLogin: [
+        '/path/to/your/component',
+      ],
     },
     // highlight-end
   },
 })
 ```
 
-```tsx
- // Example here
-```
-
-### beforeDashboard
-
-```ts
-import { buildConfig } from 'payload'
-
-export default buildConfig({
-  // ...
-  admin: {
-    // highlight-start
-    components: {
-      // ...
-    },
-    // highlight-end
-  },
-})
-```
+Here is an example of a simple `afterLogin` component:
 
 ```tsx
- // Example here
-```
-
-### beforeLogin
-
-```ts
-import { buildConfig } from 'payload'
-
-export default buildConfig({
-  // ...
-  admin: {
-    // highlight-start
-    components: {
-      // ...
-    },
-    // highlight-end
-  },
-})
-```
-
-```tsx
- // Example here
+export default function MyAfterLoginComponent() {
+  return (
+    <p>This is a custom component injected after the Login form.</p>
+  )
+}
 ```
 
 ### beforeNavLinks
 
-```ts
-import { buildConfig } from 'payload'
+The `beforeNavLinks` property allows you to inject Custom Components into the built-in [Nav Component](#nav), _before_ the links themselves. This is useful for adding additional information or functionality to the nav without replacing the entire nav component.
 
-export default buildConfig({
-  // ...
-  admin: {
-    // highlight-start
-    components: {
-      // ...
-    },
-    // highlight-end
-  },
-})
-```
-
-```tsx
- // Example here
-```
-
-### graphics.Icon
+To add `beforeNavLinks` components, use the `beforeNavLinks` property in your `admin.components` config:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -212,18 +243,30 @@ export default buildConfig({
   admin: {
     // highlight-start
     components: {
-      // ...
+      beforeNavLinks: [
+        '/path/to/your/component',
+      ],
     },
     // highlight-end
   },
 })
 ```
 
+Here is an example of a simple `beforeNavLinks` component:
+
 ```tsx
- // Example here
+export default function MyBeforeNavLinksComponent() {
+  return (
+    <p>This is a custom component injected before the Nav links.</p>
+  )
+}
 ```
 
-### graphics.Logo
+### afterNavLinks
+
+Similar to `beforeNavLinks`, the `afterNavLinks` property allows you to inject Custom Components into the built-in Nav, _after_ the links themselves.
+
+To add `afterNavLinks` components, use the `afterNavLinks` property in your `admin.components` config:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -233,61 +276,31 @@ export default buildConfig({
   admin: {
     // highlight-start
     components: {
-      // ...
+      afterNavLinks: [
+        '/path/to/your/component',
+      ],
     },
     // highlight-end
   },
 })
 ```
 
-```tsx
- // Example here
-```
-
-### header
-
-```ts
-import { buildConfig } from 'payload'
-
-export default buildConfig({
-  // ...
-  admin: {
-    // highlight-start
-    components: {
-      // ...
-    },
-    // highlight-end
-  },
-})
-```
+Here is an example of a simple `afterNavLinks` component:
 
 ```tsx
- // Example here
-```
-
-### logout.Button
-
-```ts
-import { buildConfig } from 'payload'
-
-export default buildConfig({
-  // ...
-  admin: {
-    // highlight-start
-    components: {
-      // ...
-    },
-    // highlight-end
-  },
-})
-```
-
-```tsx
- // Example here
+export default function MyAfterNavLinksComponent() {
+  return (
+    <p>This is a custom component injected after the Nav links.</p>
+  )
+}
 ```
 
 ### Nav
 
+The `Nav` property contains the sidebar / mobile menu in its entirety. This is useful for completely replacing the built-in Nav with your own custom navigation.
+
+To add a custom nav, use the `Nav` property in your `admin.components` config:
+
 ```ts
 import { buildConfig } from 'payload'
 
@@ -296,13 +309,165 @@ export default buildConfig({
   admin: {
     // highlight-start
     components: {
-      // ...
+      Nav: '/path/to/your/component',
     },
     // highlight-end
   },
 })
 ```
 
+Here is an example of a simple `Nav` component:
+
 ```tsx
- // Example here
+import { Link } from 'next/link'
+
+export default function MyCustomNav() {
+  return (
+    <nav>
+      <ul>
+        <li>
+          <Link href="/dashboard">
+            Dashboard
+          </Link>
+        </li>
+      </ul>
+    </nav>
+  )
+}
+```
+
+### graphics.Icon
+
+The `Icon` property is the simplified logo used in contexts like the `Nav` component. This is typically a small, square icon that represents your brand.
+
+To add a custom icon, use the `Icon` property in your `admin.components.graphics` config:
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  admin: {
+    // highlight-start
+    components: {
+      graphics: {
+        Icon: '/path/to/your/component',
+      },
+    },
+    // highlight-end
+  },
+})
+```
+
+Here is an example of a simple `Icon` component:
+
+```tsx
+export default function MyCustomIcon() {
+  return (
+    <img src="/path/to/your/icon.png" alt="My Custom Icon" />
+  )
+}
+```
+
+### graphics.Logo
+
+The `Logo` property is the full logo used in contexts like the `Login` view. This is typically a larger, more detailed representation of your brand.
+
+To add a custom logo, use the `Logo` property in your `admin.components.graphics` config:
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  admin: {
+    // highlight-start
+    components: {
+      graphics: {
+        Logo: '/path/to/your/component',
+      },
+    },
+    // highlight-end
+  },
+})
+```
+
+Here is an example of a simple `Logo` component:
+
+```tsx
+export default function MyCustomLogo() {
+  return (
+    <img src="/path/to/your/logo.png" alt="My Custom Logo" />
+  )
+}
+```
+
+### Header
+
+The `header` property allows you to inject Custom Components above the Payload header. This is useful for adding additional information or functionality to your app without replacing the entire header.
+
+Examples of a custom header components might include an announcements banner, a notifications bar, or anything else you'd like to display at the top of the Admin Panel in a prominent location.
+
+To add `header` components, use the `header` property in your `admin.components` config:
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  admin: {
+    // highlight-start
+    components: {
+      header: ['/path/to/your/component'],
+    },
+    // highlight-end
+  },
+})
+```
+
+Here is an example of a simple `header` component:
+
+```tsx
+export default function MyCustomHeader() {
+  return (
+    <header>
+      <h1>My Custom Header</h1>
+    </header>
+  )
+}
+```
+
+### logout.Button
+
+The `logout.Button` property is the button displayed in the sidebar that logs the user out. This is typically a simple button that logs the user out when clicked.
+
+To add a custom logout button, use the `logout.Button` property in your `admin.components` config:
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  admin: {
+    // highlight-start
+    components: {
+      logout: {
+        Button: '/path/to/your/component',
+      }
+    },
+    // highlight-end
+  },
+})
+```
+
+Here is an example of a simple `logout.Button` component:
+
+```tsx
+export default function MyCustomLogoutButton() {
+  return (
+    <button onClick={() => alert('Logging out!')}>
+      Log Out
+    </button>
+  )
+}
 ```
