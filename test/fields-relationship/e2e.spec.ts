@@ -311,11 +311,6 @@ describe('Relationship Field', () => {
       await runFilterOptionsTest('relationshipFilteredByID', 'Relationship Filtered')
     })
 
-    test('should apply filter options within list view filter controls', async () => {
-      // write the test here
-      // use 'relationshipFilteredByField' field
-    })
-
     // TODO: Flaky test. Fix this! (This is an actual issue not just an e2e flake)
     test('should allow dynamic async filterOptions', async () => {
       await runFilterOptionsTest('relationshipFilteredAsync', 'Relationship Filtered Async')
