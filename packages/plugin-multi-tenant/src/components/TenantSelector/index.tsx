@@ -42,7 +42,7 @@ export const TenantSelector = ({ viewType }: { viewType?: ViewTypes }) => {
           selectedTenantID
             ? selectedTenantID === SELECT_ALL
               ? undefined
-              : String(selectedTenantID)
+              : (selectedTenantID as string)
             : undefined
         }
       />
