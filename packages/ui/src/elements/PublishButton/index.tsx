@@ -71,7 +71,10 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
     entityConfig?.versions?.drafts.schedulePublish
 
   const canSchedulePublish = Boolean(
-    scheduledPublishEnabled && hasPublishPermission && (globalSlug || (collectionSlug && id)),
+    scheduledPublishEnabled &&
+      hasPublishPermission &&
+      (globalSlug || (collectionSlug && id)) &&
+      !modified,
   )
 
   const operation = useOperation()
