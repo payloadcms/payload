@@ -654,6 +654,26 @@ const ExampleCollection = {
   ]}
 />
 
+## useDocumentForm
+
+The `useDocumentForm` hook works the same way as the [useForm](#useform) hook, but it always gives you access to the top-level `Form` of a document. This is useful if you need to access the document's `Form` context from within a child  `Form`.
+
+An example where this could happen would be custom components within lexical blocks, as lexical blocks initialize their own child `Form`.
+
+```tsx
+'use client'
+
+import { useDocumentForm } from '@payloadcms/ui'
+
+const MyComponent: React.FC = () => {
+  const { fields: parentDocumentFields } = useDocumentForm()
+
+  return (
+    <p>The document's Form has ${Object.keys(parentDocumentFields).length} fields</p>
+  )
+}
+```
+
 ## useCollapsible
 
 The `useCollapsible` hook allows you to control parent collapsibles:
