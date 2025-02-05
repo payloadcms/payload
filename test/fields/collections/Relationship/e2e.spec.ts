@@ -573,17 +573,15 @@ describe('relationship', () => {
   test('should sort relationship options by sortOptions property (ID in ascending order)', async () => {
     await page.goto(url.create)
     await page.waitForURL(url.create)
-    await wait(400)
 
     const field = page.locator('#field-relationship')
-    await wait(400)
     await field.click()
     await wait(400)
 
     const textDocsGroup = page.locator('.rs__group-heading:has-text("Text Fields")')
     const firstTextDocOption = textDocsGroup.locator('+div .rs__option').first()
     const firstOptionLabel = await firstTextDocOption.textContent()
-    expect(firstOptionLabel.trim()).toBe('Another text document')
+    expect(firstOptionLabel?.trim()).toBe('Another text document')
   })
 
   test('should sort relationHasManyPolymorphic options by sortOptions property: text-fields collection (items in descending order)', async () => {
@@ -611,10 +609,6 @@ describe('relationship', () => {
 
     await page.goto(url.list)
     await page.waitForURL(new RegExp(url.list))
-    await wait(400)
-
-    await page.locator('.list-controls__toggle-columns').click()
-    await wait(400)
 
     await openListFilters(page, {})
 

@@ -27,18 +27,17 @@ export const addListFilter = async ({
   await dropdownFieldOption.click()
   await expect(page.locator('.condition__field')).toContainText(fieldLabel)
 
-  const operatorField = page.locator('.condition__operator')
-  const valueField = page.locator('.condition__value input')
+  const operatorInput = page.locator('.condition__operator')
 
-  await operatorField.click()
+  await operatorInput.click()
 
-  const dropdownOptions = operatorField.locator('.rs__option')
+  const dropdownOptions = operatorInput.locator('.rs__option')
   await dropdownOptions.locator(`text=${operatorLabel}`).click()
 
   if (!skipValueInput) {
-    await valueField.fill(value)
+    const valueInput = page.locator('.condition__value >> input')
+    await valueInput.fill(value)
     await wait(500)
-    const firstValueField = page.locator('.condition__value >> input')
-    await expect(firstValueField).toHaveValue('hello')
+    await expect(valueInput).toHaveValue(value)
   }
 }

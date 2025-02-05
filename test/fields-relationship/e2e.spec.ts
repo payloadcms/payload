@@ -318,8 +318,6 @@ describe('Relationship Field', () => {
     })
 
     test('should apply filter options within list view filter controls', async () => {
-      // write the test here
-      // use 'relationshipFilteredByField' field
       const { id: idToInclude } = await payload.create({
         collection: slug,
         data: {
@@ -331,7 +329,7 @@ describe('Relationship Field', () => {
       await page.goto(url.edit(idToInclude))
       const field = page.locator('#field-relationshipFilteredByField')
       await field.click({ delay: 100 })
-      const options = page.locator('.rs__option')
+      const options = field.locator('.rs__option')
       await expect(options).toHaveCount(1)
       await expect(options).toContainText(idToInclude)
 
@@ -346,10 +344,10 @@ describe('Relationship Field', () => {
         skipValueInput: true,
       })
 
-      const valueField = page.locator('.condition__value input')
-      await valueField.click()
-      await expect(page.locator('.rs__menu')).toHaveCount(1)
-      await expect(page.locator('.rs__option')).toHaveText(idToInclude)
+      const valueInput = page.locator('.condition__value input')
+      await valueInput.click()
+      await expect(valueInput.locator('.rs__menu')).toHaveCount(1)
+      await expect(valueInput.locator('.rs__option')).toHaveText(idToInclude)
     })
 
     test('should allow usage of relationTo in filterOptions', async () => {
