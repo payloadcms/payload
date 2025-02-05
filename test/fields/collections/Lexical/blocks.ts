@@ -47,8 +47,9 @@ export const FilterOptionsBlock: Block = {
           type: 'relationship',
           relationTo: 'text-fields',
           filterOptions: ({ siblingData }) => {
+            console.log('SD', siblingData)
             // @ts-expect-error
-            if (!siblingData?.title) {
+            if (!siblingData?.groupText) {
               return true
             }
             return {
@@ -63,7 +64,7 @@ export const FilterOptionsBlock: Block = {
           type: 'relationship',
           relationTo: 'text-fields',
           filterOptions: ({ data }) => {
-            if (!data?.title) {
+            if (!data?.text) {
               return true
             }
             return {
@@ -90,6 +91,10 @@ export const ValidationBlock: Block = {
       type: 'group',
       fields: [
         {
+          name: 'groupText',
+          type: 'text',
+        },
+        {
           name: 'textDependsOnDocData',
           type: 'text',
           validate: ((value, { topLevelData }) => {
@@ -103,17 +108,17 @@ export const ValidationBlock: Block = {
           name: 'textDependsOnSiblingData',
           type: 'text',
           validate: ((value, { siblingData }) => {
-            if ((siblingData as any)?.text === 'invalid') {
+            if ((siblingData as any)?.groupText === 'invalid') {
               return 'textDependsOnSiblingData sibling field cannot be invalid'
             }
           }) as TextFieldSingleValidation,
         },
         {
-          name: 'textDependsOnGroupData',
+          name: 'textDependsOnBlockData',
           type: 'text',
           validate: ((value, { data }) => {
-            if ((data as any)?.textDependsOnDocData === 'invalid') {
-              return 'textDependsOnGroupData sibling field cannot be invalid'
+            if ((data as any)?.text === 'invalid') {
+              return 'textDependsOnBlockData sibling field cannot be invalid'
             }
           }) as TextFieldSingleValidation,
         },
