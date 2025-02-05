@@ -80,7 +80,8 @@
     "payload": "^3.17.1"
   },
   "engines": {
-    "node": "^18.20.2 || >=20.9.0"
+    "node": "^18.20.2 || >=20.9.0",
+    "pnpm": "^9"
   },
   "publishConfig": {
     "exports": {

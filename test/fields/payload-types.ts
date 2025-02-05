@@ -1439,6 +1439,8 @@ export interface RelationshipField {
     | null;
   relationToRow?: (string | null) | RowField;
   relationToRowMany?: (string | RowField)[] | null;
+  disableRelation?: boolean | null;
+  filteredRelationship?: (string | null) | RelationshipField;
   updatedAt: string;
   createdAt: string;
 }
@@ -3028,6 +3030,8 @@ export interface RelationshipFieldsSelect<T extends boolean = true> {
   relationshipWithMinRows?: T;
   relationToRow?: T;
   relationToRowMany?: T;
+  disableRelation?: T;
+  filteredRelationship?: T;
   updatedAt?: T;
   createdAt?: T;
 }

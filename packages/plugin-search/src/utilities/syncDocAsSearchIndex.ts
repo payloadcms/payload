@@ -142,15 +142,42 @@ export const syncDocAsSearchIndex = async ({
             }
           }
           if (deleteDrafts && status === 'draft') {
-            // do not include draft docs in search results, so delete the record
-            try {
-              await payload.delete({
-                id: searchDocID,
-                collection: searchSlug,
-                req,
-              })
-            } catch (err: unknown) {
-              payload.logger.error({ err, msg: `Error deleting ${searchSlug} document.` })
+            // Check to see if there's a published version of the doc
+            // We don't want to remove the search doc if there is a published version but a new draft has been created
+            const {
+              docs: [docWithPublish],
+            } = await payload.find({
+              collection,
+              draft: false,
+              locale: syncLocale,
+              req,
+              where: {
+                and: [
+                  {
+                    _status: {
+                      equals: 'published',
+                    },
+                  },
+                  {
+                    id: {
+                      equals: id,
+                    },
+                  },
+                ],
+              },
+            })
+
+            if (!docWithPublish) {
+              // do not include draft docs in search results, so delete the record
+              try {
+                await payload.delete({
+                  id: searchDocID,
+                  collection: searchSlug,
+                  req,
+                })
+              } catch (err: unknown) {
+                payload.logger.error({ err, msg: `Error deleting ${searchSlug} document.` })
+              }
             }
           }
         } else if (doSync) {

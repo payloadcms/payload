@@ -113,7 +113,7 @@ export const buildVersionFields = ({
       versionField.fieldByLocale = {}
 
       for (const locale of selectedLocales) {
-        versionField.fieldByLocale[locale] = buildVersionField({
+        const localizedVersionField = buildVersionField({
           clientField: clientField as ClientField,
           clientSchemaMap,
           comparisonValue: comparisonValue?.[locale],
@@ -133,12 +133,12 @@ export const buildVersionFields = ({
           selectedLocales,
           versionValue: versionValue?.[locale],
         })
-        if (!versionField.fieldByLocale[locale]) {
-          continue
+        if (localizedVersionField) {
+          versionField.fieldByLocale[locale] = localizedVersionField
         }
       }
     } else {
-      versionField.field = buildVersionField({
+      const baseVersionField = buildVersionField({
         clientField: clientField as ClientField,
         clientSchemaMap,
         comparisonValue,
@@ -158,8 +158,8 @@ export const buildVersionFields = ({
         versionValue,
       })
 
-      if (!versionField.field) {
-        continue
+      if (baseVersionField) {
+        versionField.field = baseVersionField
       }
     }
 

@@ -42,7 +42,7 @@ import {
   relationWithTitleSlug,
   slug,
   versionedRelationshipFieldSlug,
-} from './collectionSlugs.js'
+} from './slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -305,97 +305,99 @@ describe('Relationship Field', () => {
     await saveDocAndAssert(page)
   }
 
-  // TODO: Flaky test. Fix this! (This is an actual issue not just an e2e flake)
-  test('should allow dynamic filterOptions', async () => {
-    await runFilterOptionsTest('relationshipFiltered', 'Relationship Filtered')
-  })
-
-  // TODO: Flaky test. Fix this! (This is an actual issue not just an e2e flake)
-  test('should allow dynamic async filterOptions', async () => {
-    await runFilterOptionsTest('relationshipFilteredAsync', 'Relationship Filtered Async')
-  })
-
-  test('should allow usage of relationTo in filterOptions', async () => {
-    const { id: include } = (await payload.create({
-      collection: relationOneSlug,
-      data: {
-        name: 'include',
-      },
-    })) as any
-    const { id: exclude } = (await payload.create({
-      collection: relationOneSlug,
-      data: {
-        name: 'exclude',
-      },
-    })) as any
-
-    await page.goto(url.create)
-
-    // select relationshipMany field that relies on siblingData field above
-    await page.locator('#field-relationshipManyFiltered .rs__control').click()
-
-    const options = page.locator('#field-relationshipManyFiltered .rs__menu')
-    await expect(options).toContainText(include)
-    await expect(options).not.toContainText(exclude)
-  })
-
-  test('should allow usage of siblingData in filterOptions', async () => {
-    await payload.create({
-      collection: relationWithTitleSlug,
-      data: {
-        name: 'exclude',
-      },
+  describe('filterOptions', () => {
+    // TODO: Flaky test. Fix this! (This is an actual issue not just an e2e flake)
+    test('should allow dynamic filterOptions', async () => {
+      await runFilterOptionsTest('relationshipFilteredByID', 'Relationship Filtered')
     })
 
-    await page.goto(url.create)
-
-    // enter a filter for relationshipManyFiltered to use
-    await page.locator('#field-filter').fill('include')
-
-    // select relationshipMany field that relies on siblingData field above
-    await page.locator('#field-relationshipManyFiltered .rs__control').click()
-
-    const options = page.locator('#field-relationshipManyFiltered .rs__menu')
-    await expect(options).not.toContainText('exclude')
-  })
-
-  // TODO: Flaky test in CI - fix. https://github.com/payloadcms/payload/actions/runs/8559547748/job/23456806365
-  test.skip('should not query for a relationship when filterOptions returns false', async () => {
-    await payload.create({
-      collection: relationFalseFilterOptionSlug,
-      data: {
-        name: 'whatever',
-      },
+    // TODO: Flaky test. Fix this! (This is an actual issue not just an e2e flake)
+    test('should allow dynamic async filterOptions', async () => {
+      await runFilterOptionsTest('relationshipFilteredAsync', 'Relationship Filtered Async')
     })
 
-    await page.goto(url.create)
+    test('should allow usage of relationTo in filterOptions', async () => {
+      const { id: include } = (await payload.create({
+        collection: relationOneSlug,
+        data: {
+          name: 'include',
+        },
+      })) as any
+      const { id: exclude } = (await payload.create({
+        collection: relationOneSlug,
+        data: {
+          name: 'exclude',
+        },
+      })) as any
 
-    // select relationshipMany field that relies on siblingData field above
-    await page.locator('#field-relationshipManyFiltered .rs__control').click()
+      await page.goto(url.create)
 
-    const options = page.locator('#field-relationshipManyFiltered .rs__menu')
-    await expect(options).toContainText('Relation With Titles')
-    await expect(options).not.toContainText('whatever')
-  })
+      // select relationshipMany field that relies on siblingData field above
+      await page.locator('#field-relationshipManyFiltered .rs__control').click()
 
-  // TODO: Flaky test in CI - fix.
-  test('should show a relationship when filterOptions returns true', async () => {
-    await payload.create({
-      collection: relationTrueFilterOptionSlug,
-      data: {
-        name: 'truth',
-      },
+      const options = page.locator('#field-relationshipManyFiltered .rs__menu')
+      await expect(options).toContainText(include)
+      await expect(options).not.toContainText(exclude)
     })
 
-    await page.goto(url.create)
-    // wait for relationship options to load
-    const relationFilterOptionsReq = page.waitForResponse(/api\/relation-filter-true/)
-    // select relationshipMany field that relies on siblingData field above
-    await page.locator('#field-relationshipManyFiltered .rs__control').click()
-    await relationFilterOptionsReq
+    test('should allow usage of siblingData in filterOptions', async () => {
+      await payload.create({
+        collection: relationWithTitleSlug,
+        data: {
+          name: 'exclude',
+        },
+      })
 
-    const options = page.locator('#field-relationshipManyFiltered .rs__menu')
-    await expect(options).toContainText('truth')
+      await page.goto(url.create)
+
+      // enter a filter for relationshipManyFiltered to use
+      await page.locator('#field-filter').fill('include')
+
+      // select relationshipMany field that relies on siblingData field above
+      await page.locator('#field-relationshipManyFiltered .rs__control').click()
+
+      const options = page.locator('#field-relationshipManyFiltered .rs__menu')
+      await expect(options).not.toContainText('exclude')
+    })
+
+    // TODO: Flaky test in CI - fix. https://github.com/payloadcms/payload/actions/runs/8559547748/job/23456806365
+    test.skip('should not query for a relationship when filterOptions returns false', async () => {
+      await payload.create({
+        collection: relationFalseFilterOptionSlug,
+        data: {
+          name: 'whatever',
+        },
+      })
+
+      await page.goto(url.create)
+
+      // select relationshipMany field that relies on siblingData field above
+      await page.locator('#field-relationshipManyFiltered .rs__control').click()
+
+      const options = page.locator('#field-relationshipManyFiltered .rs__menu')
+      await expect(options).toContainText('Relation With Titles')
+      await expect(options).not.toContainText('whatever')
+    })
+
+    // TODO: Flaky test in CI - fix.
+    test('should show a relationship when filterOptions returns true', async () => {
+      await payload.create({
+        collection: relationTrueFilterOptionSlug,
+        data: {
+          name: 'truth',
+        },
+      })
+
+      await page.goto(url.create)
+      // wait for relationship options to load
+      const relationFilterOptionsReq = page.waitForResponse(/api\/relation-filter-true/)
+      // select relationshipMany field that relies on siblingData field above
+      await page.locator('#field-relationshipManyFiltered .rs__control').click()
+      await relationFilterOptionsReq
+
+      const options = page.locator('#field-relationshipManyFiltered .rs__menu')
+      await expect(options).toContainText('truth')
+    })
   })
 
   test('should allow docs with same ID but different collections to be selectable', async () => {
