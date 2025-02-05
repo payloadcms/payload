@@ -17,7 +17,7 @@ export type Props = {
   /**
    * Setting to `true` will allow the submenu to be opened when the button is disabled
    */
-  enableSubmenu?: boolean
+  enableSubMenu?: boolean
   icon?: ['chevron' | 'edit' | 'plus' | 'x'] | React.ReactNode
   iconPosition?: 'left' | 'right'
   iconStyle?: 'none' | 'with-border' | 'without-border'

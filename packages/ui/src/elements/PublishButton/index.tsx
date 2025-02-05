@@ -197,7 +197,7 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
       <FormSubmit
         buttonId="action-save"
         disabled={!canPublish}
-        enableSubmenu={canSchedulePublish}
+        enableSubMenu={canSchedulePublish}
         onClick={defaultPublish}
         size="medium"
         SubMenuPopupContent={
