@@ -240,4 +240,44 @@ describe('Text', () => {
     await expect(field.locator('.rs__value-container')).toContainText(input)
     await expect(field.locator('.rs__value-container')).toContainText(furtherInput)
   })
+
+  test('should allow editing hasMany text field values by clicking', async () => {
+    const originalText = 'original'
+    const newText = 'new'
+
+    await page.goto(url.create)
+
+    // fill required field
+    const requiredField = page.locator('#field-text')
+    await requiredField.fill(String(originalText))
+
+    const field = page.locator('.field-hasMany')
+
+    // Add initial value
+    await field.click()
+    await page.keyboard.type(originalText)
+    await page.keyboard.press('Enter')
+
+    // Click to edit existing value
+    const value = field.locator('.multi-value-label__text')
+    await value.click()
+    await value.dblclick()
+    await page.keyboard.type(newText)
+    await page.keyboard.press('Enter')
+
+    await saveDocAndAssert(page)
+    await expect(field.locator('.rs__value-container')).toContainText(`${newText}`)
+  })
+
+  test('should not allow editing hasMany text field values when disabled', async () => {
+    await page.goto(url.create)
+    const field = page.locator('.field-readOnlyHasMany')
+
+    // Try to click to edit
+    const value = field.locator('.multi-value-label__text')
+    await value.click({ force: true })
+
+    // Verify it does not become editable
+    await expect(field.locator('.multi-value-label__text')).not.toHaveClass(/.*--editable/)
+  })
 })

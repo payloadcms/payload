@@ -34,6 +34,7 @@ export interface Config {
     lexicalObjectReferenceBug: LexicalObjectReferenceBug;
     users: User;
     LexicalInBlock: LexicalInBlock;
+    'lexical-access-control': LexicalAccessControl;
     'select-versions-fields': SelectVersionsField;
     'array-fields': ArrayField;
     'block-fields': BlockField;
@@ -80,6 +81,7 @@ export interface Config {
     lexicalObjectReferenceBug: LexicalObjectReferenceBugSelect<false> | LexicalObjectReferenceBugSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     LexicalInBlock: LexicalInBlockSelect<false> | LexicalInBlockSelect<true>;
+    'lexical-access-control': LexicalAccessControlSelect<false> | LexicalAccessControlSelect<true>;
     'select-versions-fields': SelectVersionsFieldsSelect<false> | SelectVersionsFieldsSelect<true>;
     'array-fields': ArrayFieldsSelect<false> | ArrayFieldsSelect<true>;
     'block-fields': BlockFieldsSelect<false> | BlockFieldsSelect<true>;
@@ -456,6 +458,31 @@ export interface LexicalInBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-access-control".
+ */
+export interface LexicalAccessControl {
+  id: string;
+  title?: string | null;
+  richText?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "select-versions-fields".
  */
 export interface SelectVersionsField {
@@ -469,7 +496,7 @@ export interface SelectVersionsField {
     | null;
   blocks?:
     | {
-        hasManyArr?: ('a' | 'b' | 'c')[] | null;
+        hasManyBlocks?: ('a' | 'b' | 'c')[] | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'block';
@@ -1412,6 +1439,8 @@ export interface RelationshipField {
     | null;
   relationToRow?: (string | null) | RowField;
   relationToRowMany?: (string | RowField)[] | null;
+  disableRelation?: boolean | null;
+  filteredRelationship?: (string | null) | RelationshipField;
   updatedAt: string;
   createdAt: string;
 }
@@ -1831,6 +1860,10 @@ export interface PayloadLockedDocument {
         value: string | LexicalInBlock;
       } | null)
     | ({
+        relationTo: 'lexical-access-control';
+        value: string | LexicalAccessControl;
+      } | null)
+    | ({
         relationTo: 'select-versions-fields';
         value: string | SelectVersionsField;
       } | null)
@@ -2106,6 +2139,16 @@ export interface LexicalInBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-access-control_select".
+ */
+export interface LexicalAccessControlSelect<T extends boolean = true> {
+  title?: T;
+  richText?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "select-versions-fields_select".
  */
 export interface SelectVersionsFieldsSelect<T extends boolean = true> {
@@ -2122,7 +2165,7 @@ export interface SelectVersionsFieldsSelect<T extends boolean = true> {
         block?:
           | T
           | {
-              hasManyArr?: T;
+              hasManyBlocks?: T;
               id?: T;
               blockName?: T;
             };
@@ -2987,6 +3030,8 @@ export interface RelationshipFieldsSelect<T extends boolean = true> {
   relationshipWithMinRows?: T;
   relationToRow?: T;
   relationToRowMany?: T;
+  disableRelation?: T;
+  filteredRelationship?: T;
   updatedAt?: T;
   createdAt?: T;
 }

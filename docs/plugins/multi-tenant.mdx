@@ -6,7 +6,7 @@ desc: Scaffolds multi-tenancy for your Payload application
 keywords: plugins, multi-tenant, multi-tenancy, plugin, payload, cms, seo, indexing, search, search engine
 ---
 
-[![npm](https://img.shields.io/npm/v/@payloadcms/plugin-multi-tenant)](https://www.npmjs.com/package/@payloadcms/plugin-multi-tenant)
+![https://www.npmjs.com/package/@payloadcms/plugin-multi-tenant](https://img.shields.io/npm/v/@payloadcms/plugin-multi-tenant)
 
 This plugin sets up multi-tenancy for your application from within your [Admin Panel](../admin/overview). It does so by adding a `tenant` field to all specified collections. Your front-end application can then query data by tenant. You must add the Tenants collection so you control what fields are available for each tenant.
 
@@ -32,7 +32,7 @@ This plugin sets up multi-tenancy for your application from within your [Admin P
 <Banner type="error">
   **Warning**
 
-  By default this plugin cleans up documents when a tenant is deleted. You should ensure you have 
+  By default this plugin cleans up documents when a tenant is deleted. You should ensure you have
   strong access control on your tenants collection to prevent deletions by unauthorized users.
 
   You can disabled this behavior by setting `cleanupAfterTenantDelete` to `false` in the plugin options.
