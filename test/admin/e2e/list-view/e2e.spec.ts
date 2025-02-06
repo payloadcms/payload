@@ -391,8 +391,7 @@ describe('List View', () => {
 
       await page.waitForURL(/&where/)
 
-      const valueInput = page.locator('.condition__value')
-      const removeButton = valueInput.locator('.clear-indicator').click()
+      page.locator('.condition__value').locator('.clear-indicator').click()
 
       await page.waitForURL(/^(?!.*&where)/)
     })
