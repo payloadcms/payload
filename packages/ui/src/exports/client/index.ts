@@ -18,6 +18,8 @@ export { useIntersect } from '../../hooks/useIntersect.js'
 export { usePayloadAPI } from '../../hooks/usePayloadAPI.js'
 export { useResize } from '../../hooks/useResize.js'
 export { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
+export { useEffectEvent } from '../../hooks/useEffectEvent.js'
+
 export { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 
 // elements
