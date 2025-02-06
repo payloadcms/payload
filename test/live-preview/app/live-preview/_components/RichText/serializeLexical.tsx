@@ -4,6 +4,7 @@ import React from 'react'
 
 import { CMSLink } from '../Link/index.js'
 import { Media } from '../Media/index.js'
+import { MediaBlock } from '../../_blocks/MediaBlock/index.js'
 
 const serializer = (
   content?: SerializedEditorState['root']['children'],
@@ -79,6 +80,12 @@ const serializer = (
         }
 
         return <Media key={i} resource={node?.value} />
+
+      case 'block':
+        switch (node.fields.blockType) {
+          case 'mediaBlock':
+            return <MediaBlock key={i} {...node.fields} />
+        }
     }
   })
 

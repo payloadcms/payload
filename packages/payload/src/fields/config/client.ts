@@ -14,6 +14,7 @@ import type {
   JoinFieldClient,
   LabelsClient,
   RadioFieldClient,
+  RichTextFieldClient,
   RowFieldClient,
   SelectFieldClient,
   TabsFieldClient,
@@ -312,6 +313,25 @@ export const createClientField = ({
 
       if (typeof incomingField?.editor === 'function') {
         throw new Error('Attempted to access unsanitized rich text editor.')
+      }
+
+      const field = clientField as unknown as RichTextFieldClient
+      const blocksFeature =
+        'features' in incomingField.editor && Array.isArray(incomingField.editor.features)
+          ? incomingField.editor.features.find((feature) => feature.key === 'blocks')
+          : undefined
+      if (blocksFeature) {
+        field.blocks = blocksFeature.serverFeatureProps.blocks.map((block) => {
+          return {
+            slug: block.slug,
+            fields: createClientFields({
+              defaultIDType,
+              fields: block.fields,
+              i18n,
+              importMap,
+            }),
+          }
+        })
       }
 
       break
