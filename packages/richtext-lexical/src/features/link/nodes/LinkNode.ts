@@ -307,7 +307,7 @@ export function $toggleLink(payload: ({ fields: LinkFields } & LinkPayload) | nu
   }
   // Add or merge LinkNodes
   if (nodes?.length === 1) {
-    const firstNode = nodes[0]
+    const firstNode = nodes[0]!
     // if the first node is a LinkNode or if its
     // parent is a LinkNode, we update the URL, target and rel.
     const linkNode: LinkNode | null = $isLinkNode(firstNode)

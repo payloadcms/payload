@@ -373,7 +373,7 @@ function getMarkdownTransformerForBlock(
               nextNodes = markdownToLexical({ markdown: afterEndLine })?.root?.children
               const lastChild = rootNode.getChildren()[rootNode.getChildren().length - 1]
 
-              const children = ($parseSerializedNode(nextNodes[0]) as ElementNode)?.getChildren()
+              const children = ($parseSerializedNode(nextNodes[0]!) as ElementNode)?.getChildren()
               if (children?.length) {
                 for (const child of children) {
                   ;(lastChild as ElementNode).append(child)
