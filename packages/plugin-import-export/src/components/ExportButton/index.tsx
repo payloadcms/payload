@@ -2,7 +2,7 @@
 import { useModal } from '@payloadcms/ui'
 import React from 'react'
 
-import { ExportDrawer } from '../ExportDrawer'
+import { ExportDrawer } from '../ExportDrawer/index.js'
 import './index.scss'
 
 const baseClass = 'export-button'
@@ -15,9 +15,9 @@ export const ExportButton: React.FC<{ collectionSlug: string; exportCollectionSl
 
   return (
     <React.Fragment>
-      <button className={baseClass} onClick={() => toggleModal(exportDrawerSlug)} type="button">
+      {/* <button className={baseClass} onClick={() => toggleModal(exportDrawerSlug)} type="button">
         Export
-      </button>
+      </button> */}
       <ExportDrawer
         collectionSlug={collectionSlug}
         drawerSlug={exportDrawerSlug}
