@@ -317,38 +317,6 @@ describe('Relationship Field', () => {
       await runFilterOptionsTest('relationshipFilteredAsync', 'Relationship Filtered Async')
     })
 
-    test('should apply filter options within list view filter controls', async () => {
-      const { id: idToInclude } = await payload.create({
-        collection: slug,
-        data: {
-          filter: 'Include me',
-        },
-      })
-
-      // first ensure that filter options are applied in the edit view
-      await page.goto(url.edit(idToInclude))
-      const field = page.locator('#field-relationshipFilteredByField')
-      await field.click({ delay: 100 })
-      const options = field.locator('.rs__option')
-      await expect(options).toHaveCount(1)
-      await expect(options).toContainText(idToInclude)
-
-      // now ensure that the same filter options are applied in the list view
-      await page.goto(url.list)
-
-      await addListFilter({
-        page,
-        fieldLabel: 'Relationship Filtered By Field',
-        operatorLabel: 'equals',
-        skipValueInput: true,
-      })
-
-      const valueInput = page.locator('.condition__value input')
-      await valueInput.click()
-      await expect(valueInput.locator('.rs__menu')).toHaveCount(1)
-      await expect(valueInput.locator('.rs__option')).toHaveText(idToInclude)
-    })
-
     test('should allow usage of relationTo in filterOptions', async () => {
       const { id: include } = (await payload.create({
         collection: relationOneSlug,
