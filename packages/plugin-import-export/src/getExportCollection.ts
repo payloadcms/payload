@@ -19,34 +19,7 @@ export const getExportCollection = ({
   const beforeOperation: CollectionBeforeOperationHook[] = []
   const afterChange: CollectionAfterChangeHook[] = []
 
-  if (pluginConfig.disableJobsQueue) {
-    beforeOperation.push(async ({ args, operation, req }) => {
-      if (operation !== 'create') {
-        return
-      }
-      const { user } = req
-      if (args.data.collections.length === 1) {
-        await createExport({ input: { ...args.data, user }, req })
-      }
-    })
-  } else {
-    afterChange.push(async ({ doc, operation, req }) => {
-      if (operation !== 'create') {
-        return
-      }
-
-      if (doc.collections.length === 1) {
-        const input = { ...doc, user: req?.user?.id }
-        const { id } = await req.payload.jobs.queue({
-          input,
-          task: 'createCollectionExport',
-        })
-        void req.payload.jobs.runByID({ id })
-      }
-    })
-  }
-
-  const collection: CollectionOverride = {
+  let collection: CollectionOverride = {
     slug: 'exports',
     access: {
       update: () => false,
@@ -69,7 +42,39 @@ export const getExportCollection = ({
   }
 
   if (typeof overrideExportCollection === 'function') {
-    return overrideExportCollection(collection)
+    collection = overrideExportCollection(collection)
+  }
+
+  if (pluginConfig.disableJobsQueue) {
+    beforeOperation.push(async ({ args, operation, req }) => {
+      if (operation !== 'create') {
+        return
+      }
+      const { user } = req
+      if (args.data.collections.length === 1) {
+        await createExport({ input: { ...args.data, user }, req })
+      }
+    })
+  } else {
+    afterChange.push(async ({ doc, operation, req }) => {
+      if (operation !== 'create') {
+        return
+      }
+
+      if (doc.collections.length === 1) {
+        const input = {
+          ...doc,
+          exportsCollection: collection.slug,
+          user: req?.user?.id || req?.user?.user?.id,
+          userCollection: 'users',
+        }
+        const { id } = await req.payload.jobs.queue({
+          input,
+          task: 'createCollectionExport',
+        })
+        void req.payload.jobs.runByID({ id })
+      }
+    })
   }
 
   return collection
