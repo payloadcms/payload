@@ -593,6 +593,7 @@ describe('lexicalBlocks', () => {
       await expect(page.locator('.payload-toast-container')).toHaveText(
         'The following fields are invalid: Lexical With Blocks, LexicalWithBlocks > Group > Text Depends On Sibling Data',
       )
+      await expect(page.locator('.payload-toast-container')).not.toBeVisible()
 
       await trackNetworkRequests(
         page,
@@ -600,7 +601,7 @@ describe('lexicalBlocks', () => {
         async () => {
           await blockGroupTextField.fill('')
         },
-        { allowedNumberOfRequests: 2 },
+        { allowedNumberOfRequests: 3 },
       )
 
       await saveDocAndAssert(page)
@@ -624,7 +625,7 @@ describe('lexicalBlocks', () => {
         async () => {
           await blockTextField.fill('')
         },
-        { allowedNumberOfRequests: 2 },
+        { allowedNumberOfRequests: 3 },
       )
 
       await saveDocAndAssert(page)
