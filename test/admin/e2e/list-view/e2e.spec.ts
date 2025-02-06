@@ -22,7 +22,6 @@ import {
   postsCollectionSlug,
   with300DocumentsSlug,
 } from '../../slugs.js'
-import { parseSearchParams } from '../../../../packages/ui/src/utilities/parseSearchParams.js'
 
 const { beforeAll, beforeEach, describe } = test
 
@@ -45,7 +44,7 @@ import { reorderColumns } from '../../../helpers/e2e/reorderColumns.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { addListFilter } from 'helpers/e2e/addListFilter.js'
-import { ReadonlyURLSearchParams } from 'next/navigation.js'
+
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../')
