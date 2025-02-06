@@ -57,6 +57,7 @@ export const Relationship: CollectionConfig = {
     },
     {
       name: 'relationshipFilteredByID',
+      label: 'Relationship Filtered By ID',
       filterOptions: (args: FilterOptionsProps<FieldsRelationship>) => {
         return {
           id: {

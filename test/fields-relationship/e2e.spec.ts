@@ -43,6 +43,7 @@ import {
   slug,
   versionedRelationshipFieldSlug,
 } from './slugs.js'
+import { addListFilter } from 'helpers/e2e/addListFilter.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)

@@ -43,6 +43,7 @@ import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
 import { reorderColumns } from '../../../helpers/e2e/reorderColumns.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+import { addListFilter } from 'helpers/e2e/addListFilter.js'
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../')
@@ -311,27 +312,12 @@ describe('List View', () => {
 
       await expect(page.locator(tableRowLocator)).toHaveCount(2)
 
-      await openListFilters(page, {})
-
-      await page.locator('.where-builder__add-first-filter').click()
-
-      const conditionField = page.locator('.condition__field')
-      await conditionField.click()
-      const dropdownFieldOption = conditionField.locator('.rs__option', {
-        hasText: exactText('ID'),
+      await addListFilter({
+        page,
+        fieldLabel: 'ID',
+        operatorLabel: 'equals',
+        value: id,
       })
-      await dropdownFieldOption.click()
-      await expect(page.locator('.condition__field')).toContainText('ID')
-
-      const operatorField = page.locator('.condition__operator')
-      const valueField = page.locator('.condition__value input')
-
-      await operatorField.click()
-
-      const dropdownOptions = operatorField.locator('.rs__option')
-      await dropdownOptions.locator('text=equals').click()
-
-      await valueField.fill(id)
 
       const tableRows = page.locator(tableRowLocator)
 
@@ -347,20 +333,12 @@ describe('List View', () => {
     test('should reset filter value and operator on field update', async () => {
       const id = (await page.locator('.cell-id').first().innerText()).replace('ID: ', '')
 
-      // open the column controls
-      await page.locator('.list-controls__toggle-columns').click()
-      await openListFilters(page, {})
-      await page.locator('.where-builder__add-first-filter').click()
-
-      const operatorField = page.locator('.condition__operator')
-      await operatorField.click()
-
-      const dropdownOperatorOptions = operatorField.locator('.rs__option')
-      await dropdownOperatorOptions.locator('text=equals').click()
-
-      // execute filter (where ID equals id value)
-      const valueField = page.locator('.condition__value > input')
-      await valueField.fill(id)
+      await addListFilter({
+        page,
+        fieldLabel: 'ID',
+        operatorLabel: 'equals',
+        value: id,
+      })
 
       const filterField = page.locator('.condition__field')
       await filterField.click()
@@ -373,6 +351,7 @@ describe('List View', () => {
       await expect(filterField).toContainText('Status')
 
       // expect operator & value field to reset (be empty)
+      const operatorField = page.locator('.condition__operator')
       await expect(operatorField.locator('.rs__placeholder')).toContainText('Select a value')
       await expect(page.locator('.condition__value input')).toHaveValue('')
     })
@@ -490,14 +469,14 @@ describe('List View', () => {
       await expect(page.locator('.collection-list__page-info')).toHaveText('1-5 of 6')
       await expect(page.locator('.per-page')).toContainText('Per Page: 5')
       await page.goto(`${postsUrl.list}?limit=5&page=2`)
-      await openListFilters(page, {})
-      await page.locator('.where-builder__add-first-filter').click()
-      await page.locator('.condition__field .rs__control').click()
-      const options = page.locator('.rs__option')
-      await options.locator('text=Tab 1 > Title').click()
-      await page.locator('.condition__operator .rs__control').click()
-      await options.locator('text=equals').click()
-      await page.locator('.condition__value input').fill('test')
+
+      await addListFilter({
+        page,
+        fieldLabel: 'Tab 1 > Title',
+        operatorLabel: 'equals',
+        value: 'test',
+      })
+
       await page.waitForURL(new RegExp(`${postsUrl.list}\\?limit=5&page=1`))
       await expect(page.locator('.collection-list__page-info')).toHaveText('1-3 of 3')
     })
@@ -505,6 +484,7 @@ describe('List View', () => {
     test('should reset filter values for every additional filters', async () => {
       await page.goto(postsUrl.list)
       await openListFilters(page, {})
+
       await page.locator('.where-builder__add-first-filter').click()
       const firstConditionField = page.locator('.condition__field')
       const firstOperatorField = page.locator('.condition__operator')
@@ -536,48 +516,36 @@ describe('List View', () => {
 
     test('should not re-render page upon typing in a value in the filter value field', async () => {
       await page.goto(postsUrl.list)
-      await openListFilters(page, {})
-      await page.locator('.where-builder__add-first-filter').click()
-      const firstConditionField = page.locator('.condition__field')
-      const firstOperatorField = page.locator('.condition__operator')
-      const firstValueField = page.locator('.condition__value >> input')
 
-      await firstConditionField.click()
-      await firstConditionField
-        .locator('.rs__option', { hasText: exactText('Tab 1 > Title') })
-        .click()
-      await expect(firstConditionField.locator('.rs__single-value')).toContainText('Tab 1 > Title')
+      await addListFilter({
+        page,
+        fieldLabel: 'Tab 1 > Title',
+        operatorLabel: 'equals',
+        skipValueInput: true,
+      })
 
-      await firstOperatorField.click()
-      await firstOperatorField.locator('.rs__option').locator('text=equals').click()
+      const valueInput = page.locator('.condition__value >> input')
 
       // Type into the input field instead of filling it
-      await firstValueField.click()
-      await firstValueField.type('Test', { delay: 100 }) // Add a delay to simulate typing speed
+      await valueInput.click()
+      await valueInput.type('Test', { delay: 100 }) // Add a delay to simulate typing speed
 
       // Wait for a short period to see if the input loses focus
       await page.waitForTimeout(500)
 
       // Check if the input still has the correct value
-      await expect(firstValueField).toHaveValue('Test')
+      await expect(valueInput).toHaveValue('Test')
     })
 
     test('should still show second filter if two filters exist and first filter is removed', async () => {
       await page.goto(postsUrl.list)
-      await openListFilters(page, {})
-      await page.locator('.where-builder__add-first-filter').click()
-      const firstConditionField = page.locator('.condition__field')
-      const firstOperatorField = page.locator('.condition__operator')
-      const firstValueField = page.locator('.condition__value >> input')
-      await firstConditionField.click()
-      await firstConditionField
-        .locator('.rs__option', { hasText: exactText('Tab 1 > Title') })
-        .click()
-      await expect(firstConditionField.locator('.rs__single-value')).toContainText('Tab 1 > Title')
-      await firstOperatorField.click()
-      await firstOperatorField.locator('.rs__option').locator('text=equals').click()
-      await firstValueField.fill('Test 1')
-      await expect(firstValueField).toHaveValue('Test 1')
+
+      await addListFilter({
+        page,
+        fieldLabel: 'Tab 1 > Title',
+        operatorLabel: 'equals',
+        value: 'Test 1',
+      })
 
       await wait(500)
 
@@ -609,6 +577,7 @@ describe('List View', () => {
       await removeButton.click()
       const filterListItems = page.locator('.where-builder__and-filters li')
       await expect(filterListItems).toHaveCount(1)
+      const firstValueField = page.locator('.condition__value >> input')
       await expect(firstValueField).toHaveValue('Test 2')
     })
 
@@ -646,8 +615,6 @@ describe('List View', () => {
           { addQueryPrefix: true },
         )}`,
       )
-
-      console.log('URL', page.url())
 
       await openListFilters(page, {})
 
@@ -1150,23 +1117,22 @@ describe('List View', () => {
     test('should display translated field titles', async () => {
       await createPost()
 
-      // column controls
       await page.locator('.list-controls__toggle-columns').click()
+
       await expect(
         page.locator('.column-selector__column', {
           hasText: exactText('Title'),
         }),
       ).toHaveText('Title')
 
-      // filters
       await openListFilters(page, {})
+
       await page.locator('.where-builder__add-first-filter').click()
       await page.locator('.condition__field .rs__control').click()
       const options = page.locator('.rs__option')
 
       await expect(options.locator('text=Tab 1 > Title')).toHaveText('Tab 1 > Title')
 
-      // list columns
       await expect(page.locator('#heading-title .sort-column__label')).toHaveText('Title')
       await expect(page.locator('.search-filter input')).toHaveAttribute('placeholder', /(Title)/)
     })

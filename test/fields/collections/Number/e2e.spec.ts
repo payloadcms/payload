@@ -20,6 +20,7 @@ import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../helpers/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { numberDoc } from './shared.js'
+import { addListFilter } from 'helpers/e2e/addListFilter.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -74,25 +75,14 @@ describe('Number', () => {
   test('should filter Number fields in the collection view - greaterThanOrEqual', async () => {
     await page.goto(url.list)
     await expect(page.locator('table >> tbody >> tr')).toHaveCount(3)
-    await openListFilters(page, {})
-    await page.locator('.where-builder__add-first-filter').click()
-    const initialField = page.locator('.condition__field')
-    const operatorField = page.locator('.condition__operator')
-    const valueField = page.locator('.condition__value >> input')
-    await initialField.click()
-    const initialFieldOptions = initialField.locator('.rs__option')
-    await initialFieldOptions.locator('text=number').first().click()
-    await expect(initialField.locator('.rs__single-value')).toContainText('Number')
-    await operatorField.click()
-    const operatorOptions = operatorField.locator('.rs__option')
-    await operatorOptions.last().click()
-    await expect(operatorField.locator('.rs__single-value')).toContainText(
-      'is greater than or equal to',
-    )
 
-    // enter value of 3
-    await valueField.fill('3')
-    await expect(valueField).toHaveValue('3')
+    await addListFilter({
+      page,
+      fieldLabel: 'Number',
+      operatorLabel: 'is greater than or equal to',
+      value: '3',
+    })
+
     await wait(300)
     await expect(page.locator('table >> tbody >> tr')).toHaveCount(2)
   })
