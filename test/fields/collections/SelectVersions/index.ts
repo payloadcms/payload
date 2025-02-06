@@ -4,7 +4,7 @@ import { selectVersionsFieldsSlug } from '../../slugs.js'
 
 const SelectVersionsFields: CollectionConfig = {
   slug: selectVersionsFieldsSlug,
-  versions: true,
+  versions: { drafts: { autosave: true } },
   fields: [
     {
       type: 'select',

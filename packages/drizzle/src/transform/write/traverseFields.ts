@@ -42,6 +42,10 @@ type Args = {
   fieldPrefix: string
   fields: FlattenedField[]
   forcedLocale?: string
+  /**
+   * Tracks whether the current traversion context is from array or block.
+   */
+  insideArrayOrBlock?: boolean
   locales: {
     [locale: string]: Record<string, unknown>
   }
@@ -77,6 +81,7 @@ export const traverseFields = ({
   fieldPrefix,
   fields,
   forcedLocale,
+  insideArrayOrBlock = false,
   locales,
   numbers,
   parentTableName,
@@ -230,6 +235,7 @@ export const traverseFields = ({
               fieldPrefix: `${fieldName}_`,
               fields: field.flattenedFields,
               forcedLocale: localeKey,
+              insideArrayOrBlock,
               locales,
               numbers,
               parentTableName,
@@ -258,6 +264,7 @@ export const traverseFields = ({
             existingLocales,
             fieldPrefix: `${fieldName}_`,
             fields: field.flattenedFields,
+            insideArrayOrBlock,
             locales,
             numbers,
             parentTableName,
@@ -420,7 +427,7 @@ export const traverseFields = ({
           Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
             if (Array.isArray(localeData)) {
               const newRows = transformSelects({
-                id: data._uuid || data.id,
+                id: insideArrayOrBlock ? data._uuid || data.id : undefined,
                 data: localeData,
                 locale: localeKey,
               })
@@ -431,7 +438,7 @@ export const traverseFields = ({
         }
       } else if (Array.isArray(data[field.name])) {
         const newRows = transformSelects({
-          id: data._uuid || data.id,
+          id: insideArrayOrBlock ? data._uuid || data.id : undefined,
           data: data[field.name],
           locale: withinArrayOrBlockLocale,
         })
