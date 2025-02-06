@@ -295,9 +295,9 @@ export function $toggleLink(payload: ({ fields: LinkFields } & LinkPayload) | nu
       if ($isLinkNode(parent)) {
         const children = parent.getChildren()
 
-        for (let i = 0; i < children.length; i += 1) {
-          parent.insertBefore(children[i])
-        }
+        children.forEach((child) => {
+          parent.insertBefore(child)
+        })
 
         parent.remove()
       }
@@ -307,7 +307,7 @@ export function $toggleLink(payload: ({ fields: LinkFields } & LinkPayload) | nu
   }
   // Add or merge LinkNodes
   if (nodes?.length === 1) {
-    const firstNode = nodes[0]
+    const firstNode = nodes[0]!
     // if the first node is a LinkNode or if its
     // parent is a LinkNode, we update the URL, target and rel.
     const linkNode: LinkNode | null = $isLinkNode(firstNode)
@@ -375,10 +375,7 @@ export function $toggleLink(payload: ({ fields: LinkFields } & LinkPayload) | nu
       }
       if (linkNode !== null) {
         const children = node.getChildren()
-
-        for (let i = 0; i < children.length; i += 1) {
-          linkNode.append(children[i])
-        }
+        linkNode.append(...children)
       }
 
       node.remove()
