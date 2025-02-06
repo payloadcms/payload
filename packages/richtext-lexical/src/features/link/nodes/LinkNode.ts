@@ -295,9 +295,9 @@ export function $toggleLink(payload: ({ fields: LinkFields } & LinkPayload) | nu
       if ($isLinkNode(parent)) {
         const children = parent.getChildren()
 
-        for (let i = 0; i < children.length; i += 1) {
-          parent.insertBefore(children[i])
-        }
+        children.forEach((child) => {
+          parent.insertBefore(child)
+        })
 
         parent.remove()
       }
