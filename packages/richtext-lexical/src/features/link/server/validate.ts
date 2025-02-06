@@ -36,12 +36,15 @@ export const linkValidation = (
       schemaPath: '',
     })
 
-    let errorPaths: string[] = []
+    const errorPathsSet = new Set<string>()
     for (const fieldKey in result) {
-      if (result[fieldKey]?.errorPaths) {
-        errorPaths = errorPaths.concat(result[fieldKey].errorPaths)
+      if (result[fieldKey].errorPaths?.length) {
+        for (const errorPath of result[fieldKey].errorPaths) {
+          errorPathsSet.add(errorPath)
+        }
       }
     }
+    const errorPaths = Array.from(errorPathsSet)
 
     if (errorPaths.length) {
       return 'The following fields are invalid: ' + errorPaths.join(', ')
