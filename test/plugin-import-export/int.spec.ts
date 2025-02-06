@@ -326,6 +326,46 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].title).toStrictEqual('Array 2')
     })
 
+    it('should create a JSON file for collection', async () => {
+      // data set
+      for (let i = 0; i < 5; i++) {
+        await payload.create({
+          collection: 'pages',
+          data: {
+            title: `Array ${i}`,
+          },
+        })
+      }
+
+      let doc = await payload.create({
+        collection: 'exports-tasks' as CollectionSlug,
+        user,
+        data: {
+          collections: [
+            {
+              slug: 'pages',
+              fields: ['id', 'title'],
+            },
+          ],
+          format: 'json',
+        },
+      })
+
+      // Wait for job to complete...
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
+      doc = await payload.findByID({
+        collection: 'exports-tasks' as CollectionSlug,
+        id: doc.id,
+      })
+
+      expect(doc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', doc.filename as string)
+      const data = await readJSON(expectedPath)
+
+      expect(data[0].title).toStrictEqual('Array 0')
+    })
+
     it('should create jobs task for exports', async () => {
       let doc = await payload.create({
         collection: 'exports-tasks' as CollectionSlug,
@@ -446,4 +486,17 @@ export const readCSV = async (path: string): Promise<any[]> => {
   await promise
 
   return data
+}
+
+export const readJSON = async (path: string): Promise<any[]> => {
+  const buffer = fs.readFileSync(path)
+  const str = buffer.toString()
+
+  try {
+    const json = JSON.parse(str)
+    return json
+  } catch (error) {
+    console.error('Error reading JSON file:', error)
+    throw error
+  }
 }
