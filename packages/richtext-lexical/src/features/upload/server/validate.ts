@@ -13,7 +13,6 @@ export const uploadValidation = (
     validation: {
       options: {
         id,
-        blockData,
         data,
         operation,
         preferences,
@@ -52,7 +51,7 @@ export const uploadValidation = (
       documentData: data,
       fields: collection.fields,
       fieldSchemaMap: undefined,
-      initialBlockData: blockData,
+      initialBlockData: node?.fields ?? {},
       operation: operation === 'create' || operation === 'update' ? operation : 'update',
       permissions: {},
       preferences,

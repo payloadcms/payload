@@ -13,7 +13,7 @@ export const linkValidation = (
   return async ({
     node,
     validation: {
-      options: { id, blockData, collectionSlug, data, operation, preferences, req },
+      options: { id, collectionSlug, data, operation, preferences, req },
     },
   }) => {
     /**
@@ -27,7 +27,7 @@ export const linkValidation = (
       documentData: data,
       fields: sanitizedFieldsWithoutText, // Sanitized in feature.server.ts
       fieldSchemaMap: undefined,
-      initialBlockData: blockData,
+      initialBlockData: node.fields,
       operation: operation === 'create' || operation === 'update' ? operation : 'update',
       permissions: {},
       preferences,
