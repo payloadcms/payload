@@ -16,6 +16,7 @@ import {
   FormSubmit,
   RenderFields,
   ShimmerEffect,
+  useDocumentForm,
   useDocumentInfo,
   useEditDepth,
   useServerFunctions,
@@ -26,6 +27,7 @@ import { $getNodeByKey } from 'lexical'
 
 import './index.scss'
 
+import { deepCopyObjectSimpleWithoutReactComponents } from 'payload/shared'
 import { v4 as uuid } from 'uuid'
 
 import type { InlineBlockFields } from '../../server/nodes/InlineBlocksNode.js'
@@ -77,6 +79,8 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     setCreatedInlineBlock,
     uuid: uuidFromContext,
   } = useEditorConfigContext()
+  const { fields: parentDocumentFields } = useDocumentForm()
+
   const { getFormState } = useServerFunctions()
   const editDepth = useEditDepth()
   const firstTimeDrawer = useRef(false)
@@ -112,29 +116,25 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
 
   const clientSchemaMap = featureClientSchemaMap['blocks']
 
-  const blocksField: BlocksFieldClient = clientSchemaMap[
+  const blocksField: BlocksFieldClient = clientSchemaMap?.[
     componentMapRenderedBlockPath
   ]?.[0] as BlocksFieldClient
 
   const clientBlock = blocksField?.blocks?.[0]
 
+  const clientBlockFields = clientBlock?.fields ?? []
+
   // Open drawer on "mount"
   useEffect(() => {
     if (!firstTimeDrawer.current && createdInlineBlock?.getKey() === nodeKey) {
       // > 2 because they always have "id" and "blockName" fields
-      if (clientBlock?.fields?.length > 2) {
+      if (clientBlockFields.length > 2) {
         toggleDrawer()
       }
       setCreatedInlineBlock?.(undefined)
       firstTimeDrawer.current = true
     }
-  }, [
-    clientBlock?.fields?.length,
-    createdInlineBlock,
-    nodeKey,
-    setCreatedInlineBlock,
-    toggleDrawer,
-  ])
+  }, [clientBlockFields.length, createdInlineBlock, nodeKey, setCreatedInlineBlock, toggleDrawer])
 
   const removeInlineBlock = useCallback(() => {
     editor.update(() => {
@@ -165,7 +165,10 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         data: formData,
         docPermissions: { fields: true },
         docPreferences: await getDocPreferences(),
+        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields),
         globalSlug,
+        initialBlockData: formData,
+        initialBlockFormState: formData,
         operation: 'update',
         renderAllFields: true,
         schemaPath: schemaFieldsPath,
@@ -195,6 +198,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     collectionSlug,
     globalSlug,
     getDocPreferences,
+    parentDocumentFields,
   ])
 
   /**
@@ -214,8 +218,10 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
           fields: true,
         },
         docPreferences: await getDocPreferences(),
+        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields),
         formState: prevFormState,
         globalSlug,
+        initialBlockFormState: prevFormState,
         operation: 'update',
         renderAllFields: submit ? true : false,
         schemaPath: schemaFieldsPath,
@@ -233,7 +239,15 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
 
       return state
     },
-    [getFormState, id, collectionSlug, getDocPreferences, globalSlug, schemaFieldsPath],
+    [
+      getFormState,
+      id,
+      collectionSlug,
+      getDocPreferences,
+      parentDocumentFields,
+      globalSlug,
+      schemaFieldsPath,
+    ],
   )
   // cleanup effect
   useEffect(() => {
