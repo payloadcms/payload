@@ -114,7 +114,14 @@ export interface FieldsRelationship {
     | null;
   relationshipRestricted?: (string | null) | RelationRestricted;
   relationshipWithTitle?: (string | null) | RelationWithTitle;
-  relationshipFiltered?: (string | null) | RelationOne;
+  /**
+   * This will filter the relationship options based on id, which is the same as the relationship field in this document
+   */
+  relationshipFilteredByID?: (string | null) | RelationOne;
+  /**
+   * This will filter the relationship options if the filter field in this document is set to "Include me"
+   */
+  relationshipFilteredByField?: (string | null) | RelationOne;
   relationshipFilteredAsync?: (string | null) | RelationOne;
   relationshipManyFiltered?:
     | (
@@ -442,7 +449,8 @@ export interface FieldsRelationshipSelect<T extends boolean = true> {
   relationshipHasManyMultiple?: T;
   relationshipRestricted?: T;
   relationshipWithTitle?: T;
-  relationshipFiltered?: T;
+  relationshipFilteredByID?: T;
+  relationshipFilteredByField?: T;
   relationshipFilteredAsync?: T;
   relationshipManyFiltered?: T;
   filter?: T;

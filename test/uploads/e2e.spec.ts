@@ -374,71 +374,73 @@ describe('Uploads', () => {
     await expect(page.locator('.row-3 .cell-title')).toContainText('draft')
   })
 
-  test('should restrict mimetype based on filterOptions', async () => {
-    const audioDoc = (
-      await payload.find({
-        collection: audioSlug,
-        depth: 0,
-        pagination: false,
-      })
-    ).docs[0]
+  describe('filterOptions', () => {
+    test('should restrict mimetype based on filterOptions', async () => {
+      const audioDoc = (
+        await payload.find({
+          collection: audioSlug,
+          depth: 0,
+          pagination: false,
+        })
+      ).docs[0]
 
-    await page.goto(audioURL.edit(audioDoc.id))
-    await page.waitForURL(audioURL.edit(audioDoc.id))
+      await page.goto(audioURL.edit(audioDoc.id))
+      await page.waitForURL(audioURL.edit(audioDoc.id))
 
-    // remove the selection and open the list drawer
-    await wait(500) // flake workaround
-    await page.locator('#field-audio .upload-relationship-details__remove').click()
+      // remove the selection and open the list drawer
+      await wait(500) // flake workaround
+      await page.locator('#field-audio .upload-relationship-details__remove').click()
 
-    await openDocDrawer(page, '#field-audio .upload__listToggler')
+      await openDocDrawer(page, '#field-audio .upload__listToggler')
 
-    const listDrawer = page.locator('[id^=list-drawer_1_]')
-    await expect(listDrawer).toBeVisible()
+      const listDrawer = page.locator('[id^=list-drawer_1_]')
+      await expect(listDrawer).toBeVisible()
 
-    await openDocDrawer(page, 'button.list-drawer__create-new-button.doc-drawer__toggler')
-    await expect(page.locator('[id^=doc-drawer_media_1_]')).toBeVisible()
+      await openDocDrawer(page, 'button.list-drawer__create-new-button.doc-drawer__toggler')
+      await expect(page.locator('[id^=doc-drawer_media_1_]')).toBeVisible()
 
-    // upload an image and try to select it
-    await page
-      .locator('[id^=doc-drawer_media_1_] .file-field__upload input[type="file"]')
-      .setInputFiles(path.resolve(dirname, './image.png'))
-    await page.locator('[id^=doc-drawer_media_1_] button#action-save').click()
-    await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
-      'successfully',
-    )
-    await page
-      .locator('.payload-toast-container .toast-success .payload-toast-close-button')
-      .click()
+      // upload an image and try to select it
+      await page
+        .locator('[id^=doc-drawer_media_1_] .file-field__upload input[type="file"]')
+        .setInputFiles(path.resolve(dirname, './image.png'))
+      await page.locator('[id^=doc-drawer_media_1_] button#action-save').click()
+      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+        'successfully',
+      )
+      await page
+        .locator('.payload-toast-container .toast-success .payload-toast-close-button')
+        .click()
 
-    // save the document and expect an error
-    await page.locator('button#action-save').click()
-    await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
-      'The following field is invalid: Audio',
-    )
-  })
+      // save the document and expect an error
+      await page.locator('button#action-save').click()
+      await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
+        'The following field is invalid: Audio',
+      )
+    })
 
-  test('should restrict uploads in drawer based on filterOptions', async () => {
-    const audioDoc = (
-      await payload.find({
-        collection: audioSlug,
-        depth: 0,
-        pagination: false,
-      })
-    ).docs[0]
+    test('should restrict uploads in drawer based on filterOptions', async () => {
+      const audioDoc = (
+        await payload.find({
+          collection: audioSlug,
+          depth: 0,
+          pagination: false,
+        })
+      ).docs[0]
 
-    await page.goto(audioURL.edit(audioDoc.id))
-    await page.waitForURL(audioURL.edit(audioDoc.id))
+      await page.goto(audioURL.edit(audioDoc.id))
+      await page.waitForURL(audioURL.edit(audioDoc.id))
 
-    // remove the selection and open the list drawer
-    await wait(500) // flake workaround
-    await page.locator('#field-audio .upload-relationship-details__remove').click()
+      // remove the selection and open the list drawer
+      await wait(500) // flake workaround
+      await page.locator('#field-audio .upload-relationship-details__remove').click()
 
-    await openDocDrawer(page, '.upload__listToggler')
+      await openDocDrawer(page, '.upload__listToggler')
 
-    const listDrawer = page.locator('[id^=list-drawer_1_]')
-    await expect(listDrawer).toBeVisible()
+      const listDrawer = page.locator('[id^=list-drawer_1_]')
+      await expect(listDrawer).toBeVisible()
 
-    await expect(listDrawer.locator('tbody tr')).toHaveCount(1)
+      await expect(listDrawer.locator('tbody tr')).toHaveCount(1)
+    })
   })
 
   test('should throw error when file is larger than the limit and abortOnLimit is true', async () => {
