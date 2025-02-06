@@ -880,6 +880,7 @@ export interface TextField {
   fieldWithDefaultValue?: string | null;
   dependentOnFieldWithDefaultValue?: string | null;
   hasMany?: string[] | null;
+  readOnlyHasMany?: string[] | null;
   validatesHasMany?: string[] | null;
   localizedHasMany?: string[] | null;
   withMinRows?: string[] | null;
@@ -1439,8 +1440,6 @@ export interface RelationshipField {
     | null;
   relationToRow?: (string | null) | RowField;
   relationToRowMany?: (string | RowField)[] | null;
-  disableRelation?: boolean | null;
-  filteredRelationship?: (string | null) | RelationshipField;
   updatedAt: string;
   createdAt: string;
 }
@@ -3030,8 +3029,6 @@ export interface RelationshipFieldsSelect<T extends boolean = true> {
   relationshipWithMinRows?: T;
   relationToRow?: T;
   relationToRowMany?: T;
-  disableRelation?: T;
-  filteredRelationship?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3245,6 +3242,7 @@ export interface TextFieldsSelect<T extends boolean = true> {
   fieldWithDefaultValue?: T;
   dependentOnFieldWithDefaultValue?: T;
   hasMany?: T;
+  readOnlyHasMany?: T;
   validatesHasMany?: T;
   localizedHasMany?: T;
   withMinRows?: T;
