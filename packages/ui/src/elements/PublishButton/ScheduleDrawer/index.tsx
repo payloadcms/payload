@@ -250,8 +250,9 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType }) => {
           </li>
         </ul>
         <br />
-        <FieldLabel label={t('general:time')} required />
+        <FieldLabel label={t('general:time')} path={'time'} required />
         <DatePickerField
+          id="time"
           minDate={new Date()}
           onChange={(e) => setDate(e)}
           pickerAppearance="dayAndTime"
@@ -272,7 +273,13 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType }) => {
           </React.Fragment>
         )}
         <div className={`${baseClass}__actions`}>
-          <Button buttonStyle="primary" disabled={processing} onClick={handleSave} type="button">
+          <Button
+            buttonStyle="primary"
+            disabled={processing}
+            id="scheduled-publish-save"
+            onClick={handleSave}
+            type="button"
+          >
             {t('general:save')}
           </Button>
           {processing ? <span>{t('general:saving')}</span> : null}

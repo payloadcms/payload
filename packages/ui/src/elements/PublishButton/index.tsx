@@ -210,7 +210,10 @@ export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }
                   <React.Fragment>
                     {canSchedulePublish && (
                       <PopupList.ButtonGroup key="schedule-publish">
-                        <PopupList.Button onClick={() => [toggleModal(drawerSlug), close()]}>
+                        <PopupList.Button
+                          id="schedule-publish"
+                          onClick={() => [toggleModal(drawerSlug), close()]}
+                        >
                           {t('version:schedulePublish')}
                         </PopupList.Button>
                       </PopupList.ButtonGroup>
