@@ -265,6 +265,7 @@ export const svTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'Lämna ändå',
     leaveWithoutSaving: 'Lämna utan att spara',
     light: 'Ljus',
+    listControlMenu: 'Kontrollmeny för lista',
     livePreview: 'Förhandsvisa',
     loading: 'Läser in',
     locale: 'Lokal',

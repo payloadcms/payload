@@ -263,6 +263,7 @@ export const csTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'Přesto odejít',
     leaveWithoutSaving: 'Odejít bez uložení',
     light: 'Světlé',
+    listControlMenu: 'Nabídka ovládání seznamu',
     livePreview: 'Náhled',
     loading: 'Načítání',
     locale: 'Místní verze',

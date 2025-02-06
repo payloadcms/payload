@@ -269,6 +269,7 @@ export const deTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'Trotzdem verlassen',
     leaveWithoutSaving: 'Ohne speichern verlassen',
     light: 'Hell',
+    listControlMenu: 'Kontrollmenü auflisten',
     livePreview: 'Vorschau',
     loading: 'Lädt',
     locale: 'Sprache',
