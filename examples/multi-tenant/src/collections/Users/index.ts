@@ -11,6 +11,8 @@ import { tenantsArrayField } from '@payloadcms/plugin-multi-tenant/fields'
 
 const defaultTenantArrayField = tenantsArrayField({
   tenantsCollectionSlug: 'tenants',
+  tenantsArrayFieldName: 'tenants',
+  tenantsArrayTenantFieldName: 'tenant',
   arrayFieldAccess: {},
   tenantFieldAccess: {},
   rowFields: [
