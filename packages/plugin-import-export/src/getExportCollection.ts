@@ -2,78 +2,12 @@ import type {
   CollectionAfterChangeHook,
   CollectionBeforeOperationHook,
   CollectionConfig,
-  Field,
 } from 'payload'
 
 import type { CollectionOverride, ImportExportPluginConfig } from './types.js'
 
 import { createExport } from './export/createExport.js'
-import { getFilename } from './export/getFilename.js'
-
-export const exportCollectionFields: Field[] = [
-  {
-    name: 'slug',
-    type: 'text',
-    required: true,
-  },
-  {
-    name: 'fields',
-    type: 'text',
-    hasMany: true,
-  },
-  {
-    name: 'sort',
-    type: 'text',
-    hasMany: true,
-  },
-  {
-    name: 'limit',
-    type: 'number',
-  },
-  {
-    name: 'where',
-    type: 'json',
-  },
-]
-
-export const fields: Field[] = [
-  {
-    name: 'name',
-    type: 'text',
-    defaultValue: () => getFilename(),
-    virtual: true,
-  },
-  {
-    name: 'collections',
-    type: 'array',
-    fields: exportCollectionFields,
-  },
-  {
-    name: 'locales',
-    type: 'text',
-    hasMany: true,
-  },
-  // {
-  //   name: 'globals',
-  //   type: 'text',
-  //   hasMany: true,
-  // },
-  {
-    name: 'format',
-    type: 'radio',
-    options: [
-      {
-        label: 'JSON',
-        value: 'json',
-      },
-      {
-        label: 'CSV',
-        value: 'csv',
-      },
-    ],
-    required: true,
-  },
-]
+import { fields } from './exportFields.js'
 
 export const getExportCollection = ({
   pluginConfig,

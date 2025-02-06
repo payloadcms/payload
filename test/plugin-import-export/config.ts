@@ -34,15 +34,16 @@ export default buildConfigWithDefaults({
     await seed(payload)
   },
   plugins: [
+    // importExportPlugin({
+    //   overrideExportCollection: (collection) => {
+    //     collection.admin.group = 'System'
+    //     collection.upload.staticDir = path.resolve(dirname, 'uploads')
+    //     return collection
+    //   },
+    //   disableJobsQueue: true,
+    // }),
     importExportPlugin({
-      overrideExportCollection: (collection) => {
-        collection.admin.group = 'System'
-        collection.upload.staticDir = path.resolve(dirname, 'uploads')
-        return collection
-      },
-      disableJobsQueue: true,
-    }),
-    importExportPlugin({
+      collections: ['pages'],
       overrideExportCollection: (collection) => {
         collection.slug = 'exports-tasks'
         collection.admin.group = 'System'

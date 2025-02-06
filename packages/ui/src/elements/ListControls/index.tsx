@@ -22,14 +22,14 @@ import { PublishMany } from '../PublishMany/index.js'
 import { SearchFilter } from '../SearchFilter/index.js'
 import { UnpublishMany } from '../UnpublishMany/index.js'
 import { WhereBuilder } from '../WhereBuilder/index.js'
-import validateWhereQuery from '../WhereBuilder/validateWhereQuery.js'
-import { ExportDrawer } from './ExportDrawer/index.js'
-import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched.js'
 import './index.scss'
+import validateWhereQuery from '../WhereBuilder/validateWhereQuery.js'
+import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched.js'
 
 const baseClass = 'list-controls'
 
 export type ListControlsProps = {
+  readonly afterListControls?: React.ReactNode | React.ReactNode[]
   readonly beforeActions?: React.ReactNode[]
   readonly collectionConfig: ClientCollectionConfig
   readonly collectionSlug: string
@@ -50,6 +50,7 @@ export type ListControlsProps = {
  */
 export const ListControls: React.FC<ListControlsProps> = (props) => {
   const {
+    afterListControls,
     beforeActions,
     collectionConfig,
     collectionSlug,
@@ -201,19 +202,25 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                 {t('general:sort')}
               </Pill>
             )}
-            <Popup
-              button={<Dots />}
-              className={`${baseClass}__popup`}
-              horizontalAlign="right"
-              size="large"
-              verticalAlign="bottom"
-            >
-              <PopupList.ButtonGroup>
-                <PopupList.Button onClick={() => toggleModal(exportDrawerSlug)}>
-                  Export
-                </PopupList.Button>
-              </PopupList.ButtonGroup>
-            </Popup>
+            {afterListControls != null && afterListControls !== false && (
+              <Popup
+                button={<Dots />}
+                className={`${baseClass}__popup`}
+                horizontalAlign="right"
+                size="large"
+                verticalAlign="bottom"
+              >
+                <PopupList.ButtonGroup>
+                  {Array.isArray(afterListControls) ? (
+                    afterListControls.map((control, index) => (
+                      <PopupList.Button key={index}>{control}</PopupList.Button>
+                    ))
+                  ) : (
+                    <PopupList.Button>{afterListControls}</PopupList.Button>
+                  )}
+                </PopupList.ButtonGroup>
+              </Popup>
+            )}
           </div>
         </div>
       </div>
@@ -253,11 +260,6 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
           /> */}
         </AnimateHeight>
       )}
-      <ExportDrawer
-        collectionConfig={collectionConfig}
-        collectionLabel={collectionLabel}
-        drawerSlug={exportDrawerSlug}
-      />
     </div>
   )
 }

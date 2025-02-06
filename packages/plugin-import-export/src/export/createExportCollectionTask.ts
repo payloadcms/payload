@@ -2,7 +2,7 @@ import type { TaskHandler, User } from 'payload'
 
 import type { CreateExportArgs } from './createExport.js'
 
-import { fields } from '../getExportCollection.js'
+import { fields } from '../exportFields.js'
 import { createExport } from './createExport.js'
 
 const inputSchema = fields.concat(

@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig } from 'payload'
+import type { ClientCollectionConfig, ClientField } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import {
@@ -14,6 +14,8 @@ import {
 import React from 'react'
 
 import './index.scss'
+import { modifyFields } from '../../export/modifyFields.js'
+import { fields } from '../../exportFields.js'
 import { initialState } from './exportFields.js'
 
 const baseClass = 'export-drawer'
@@ -42,11 +44,8 @@ export const ExportDrawer: React.FC<{
     toggleModal(drawerSlug)
   }, [toggleModal, drawerSlug])
 
-  const exportCollection =
-    collections.find((collection) => collection.slug === exportCollectionSlug) || {}
-
-  const exportFields = exportCollection.fields || []
-
+  const exportFields = modifyFields(fields) as ClientField[]
+  console.log(exportFields)
   return (
     <Drawer
       className={baseClass}
