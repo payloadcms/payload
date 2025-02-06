@@ -11,8 +11,8 @@ import { useDebounce } from '../../../../hooks/useDebounce.js'
 import { useConfig } from '../../../../providers/Config/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { ReactSelect } from '../../../ReactSelect/index.js'
-import optionsReducer from './optionsReducer.js'
 import './index.scss'
+import optionsReducer from './optionsReducer.js'
 
 const baseClass = 'condition-value-relationship'
 
@@ -22,7 +22,6 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
   const {
     disabled,
     field: { admin: { isSortable } = {}, hasMany, relationTo },
-    filterOptions,
     onChange,
     value,
   } = props
@@ -75,14 +74,12 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
         const collection = getEntityConfig({
           collectionSlug: relationSlug,
         })
-
         const fieldToSearch = collection?.admin?.useAsTitle || 'id'
         const pageIndex = nextPageByRelationshipRef.current.get(relationSlug)
 
         const where: Where = {
           and: [],
         }
-
         const query = {
           depth: 0,
           limit: maxResultsPerRequest,
@@ -92,12 +89,6 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
           },
           where,
         }
-
-        if (filterOptions) {
-          query.where.and.push(filterOptions)
-        }
-
-        console.log('query', filterOptions, query.where)
 
         if (debouncedSearch) {
           query.where.and.push({
@@ -145,7 +136,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
 
       setHasLoadedFirstOptions(true)
     },
-    [addOptions, api, debouncedSearch, getEntityConfig, i18n.language, serverURL, filterOptions, t],
+    [addOptions, api, debouncedSearch, getEntityConfig, i18n.language, serverURL, t],
   )
 
   const loadMoreOptions = React.useCallback(() => {

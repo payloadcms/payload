@@ -1,6 +1,6 @@
 'use client'
 
-import type { ListPreferences, Where } from 'payload'
+import type { ListPreferences } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import LinkImport from 'next/link.js'
@@ -63,7 +63,6 @@ export type ListViewClientProps = {
   newDocumentURL: string
   preferenceKey?: string
   renderedFilters?: Map<string, React.ReactNode>
-  resolvedFilterOptions?: Map<string, Where>
 } & ListViewSlots
 
 export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
@@ -84,7 +83,6 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
     newDocumentURL,
     preferenceKey,
     renderedFilters,
-    resolvedFilterOptions,
     Table: InitialTable,
   } = props
 
@@ -221,7 +219,6 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                 disableBulkDelete={disableBulkDelete}
                 disableBulkEdit={disableBulkEdit}
                 renderedFilters={renderedFilters}
-                resolvedFilterOptions={resolvedFilterOptions}
               />
               {BeforeListTable}
               {docs.length > 0 && <RelationshipProvider>{Table}</RelationshipProvider>}

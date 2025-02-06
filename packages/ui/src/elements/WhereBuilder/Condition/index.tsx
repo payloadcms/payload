@@ -17,7 +17,6 @@ export type Props = {
   }) => void
   readonly andIndex: number
   readonly fieldName: string
-  readonly filterOptions: Where
   readonly initialValue: string
   readonly operator: Operator
   readonly options: FieldCondition[]
@@ -39,7 +38,7 @@ export type Props = {
   }) => void
 }
 
-import type { Operator, Where } from 'payload'
+import type { Operator } from 'payload'
 
 import type { Option } from '../../ReactSelect/index.js'
 
@@ -57,7 +56,6 @@ export const Condition: React.FC<Props> = (props) => {
     addCondition,
     andIndex,
     fieldName,
-    filterOptions,
     initialValue,
     operator,
     options,
@@ -165,7 +163,6 @@ export const Condition: React.FC<Props> = (props) => {
                   !fieldOption ||
                   fieldOption?.field?.admin?.disableListFilter
                 }
-                filterOptions={filterOptions}
                 internalField={fieldOption}
                 onChange={setInternalQueryValue}
                 operator={internalOperatorOption}
