@@ -46,7 +46,9 @@ export default buildConfigWithDefaults({
       collections: ['pages'],
       overrideExportCollection: (collection) => {
         collection.slug = 'exports-tasks'
-        collection.admin.group = 'System'
+        if (collection.admin) {
+          collection.admin.group = 'System'
+        }
         collection.upload.staticDir = path.resolve(dirname, 'uploads')
         return collection
       },
