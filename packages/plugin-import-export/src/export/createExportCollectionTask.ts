@@ -14,6 +14,10 @@ const inputSchema = fields.concat(
     name: 'userCollection',
     type: 'text',
   },
+  {
+    name: 'exportsCollection',
+    type: 'text',
+  },
 )
 
 export const createCollectionExportTask: TaskHandler<any, string> = {
