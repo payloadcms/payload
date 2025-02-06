@@ -101,7 +101,7 @@ export const fieldSchemasToFormState = async ({
   if (fields && fields.length) {
     const state: FormStateWithoutComponents = {}
 
-    const dataWithDefaultValues = documentData ?? { ...data }
+    const dataWithDefaultValues = { ...data }
 
     await calculateDefaultValues({
       id,
@@ -113,6 +113,14 @@ export const fieldSchemasToFormState = async ({
       user: req.user,
     })
 
+    let fullData = dataWithDefaultValues
+
+    if (documentData) {
+      // By the time this function is used to get form state for nested forms, their default values should have already been calculated
+      // => no need to run calculateDefaultValues here
+      fullData = documentData
+    }
+
     await iterateFields({
       id,
       addErrorPathToParent: null,
@@ -122,7 +130,7 @@ export const fieldSchemasToFormState = async ({
       data: dataWithDefaultValues,
       fields,
       fieldSchemaMap,
-      fullData: dataWithDefaultValues,
+      fullData,
       operation,
       parentIndexPath: '',
       parentPassesCondition: true,
