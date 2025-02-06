@@ -10,7 +10,7 @@ import {
   reduceFieldsToValues,
   wait,
 } from 'payload/shared'
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import type {
@@ -34,6 +34,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 import { requests } from '../../utilities/api.js'
 import {
+  DocumentFormContext,
   FormContext,
   FormFieldsContext,
   FormWatchContext,
@@ -41,6 +42,7 @@ import {
   ModifiedContext,
   ProcessingContext,
   SubmittedContext,
+  useDocumentForm,
 } from './context.js'
 import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
@@ -63,6 +65,7 @@ export const Form: React.FC<FormProps> = (props) => {
     // fields: fieldsFromProps = collection?.fields || global?.fields,
     handleResponse,
     initialState, // fully formed initial field state
+    isDocumentForm,
     isInitializing: initializingFromProps,
     onChange,
     onSubmit,
@@ -76,6 +79,8 @@ export const Form: React.FC<FormProps> = (props) => {
   const method = 'method' in props ? props?.method : undefined
 
   const router = useRouter()
+
+  const documentForm = useDocumentForm()
 
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
@@ -110,8 +115,7 @@ export const Form: React.FC<FormProps> = (props) => {
     const validatedFieldState = {}
     let isValid = true
 
-    const dataFromContext = contextRef.current.getData()
-    const data = dataFromContext
+    const data = contextRef.current.getData()
 
     const validationPromises = Object.entries(contextRef.current.fields).map(
       async ([path, field]) => {
@@ -131,7 +135,9 @@ export const Form: React.FC<FormProps> = (props) => {
               ...field,
               id,
               collectionSlug,
-              data,
+              // If there is a parent document form, we can get the data from that form
+              blockData: undefined, // Will be expensive to get - not worth to pass to client-side validation, as this can be obtained by the user using `useFormFields()`
+              data: documentForm?.getData ? documentForm.getData() : data,
               event: 'submit',
               operation,
               preferences: {} as any,
@@ -170,7 +176,7 @@ export const Form: React.FC<FormProps> = (props) => {
     }
 
     return isValid
-  }, [collectionSlug, config, dispatchFields, id, operation, t, user])
+  }, [collectionSlug, config, dispatchFields, id, operation, t, user, documentForm])
 
   const submit = useCallback(
     async (options: SubmitOptions = {}, e): Promise<void> => {
@@ -719,6 +725,16 @@ export const Form: React.FC<FormProps> = (props) => {
     250,
   )
 
+  const DocumentFormContextComponent: React.FC<any> = isDocumentForm
+    ? DocumentFormContext.Provider
+    : React.Fragment
+
+  const documentFormContextProps = isDocumentForm
+    ? {
+        value: contextRef.current,
+      }
+    : {}
+
   return (
     <form
       action={typeof action === 'function' ? void action : action}
@@ -728,31 +744,34 @@ export const Form: React.FC<FormProps> = (props) => {
       onSubmit={(e) => void contextRef.current.submit({}, e)}
       ref={formRef}
     >
-      <FormContext.Provider value={contextRef.current}>
-        <FormWatchContext.Provider
-          value={{
-            fields,
-            ...contextRef.current,
-          }}
-        >
-          <SubmittedContext.Provider value={submitted}>
-            <InitializingContext.Provider value={!isMounted || (isMounted && initializing)}>
-              <ProcessingContext.Provider value={processing}>
-                <ModifiedContext.Provider value={modified}>
-                  <FormFieldsContext.Provider value={fieldsReducer}>
-                    {children}
-                  </FormFieldsContext.Provider>
-                </ModifiedContext.Provider>
-              </ProcessingContext.Provider>
-            </InitializingContext.Provider>
-          </SubmittedContext.Provider>
-        </FormWatchContext.Provider>
-      </FormContext.Provider>
+      <DocumentFormContextComponent {...documentFormContextProps}>
+        <FormContext.Provider value={contextRef.current}>
+          <FormWatchContext.Provider
+            value={{
+              fields,
+              ...contextRef.current,
+            }}
+          >
+            <SubmittedContext.Provider value={submitted}>
+              <InitializingContext.Provider value={!isMounted || (isMounted && initializing)}>
+                <ProcessingContext.Provider value={processing}>
+                  <ModifiedContext.Provider value={modified}>
+                    <FormFieldsContext.Provider value={fieldsReducer}>
+                      {children}
+                    </FormFieldsContext.Provider>
+                  </ModifiedContext.Provider>
+                </ProcessingContext.Provider>
+              </InitializingContext.Provider>
+            </SubmittedContext.Provider>
+          </FormWatchContext.Provider>
+        </FormContext.Provider>
+      </DocumentFormContextComponent>
     </form>
   )
 }
 
 export {
+  DocumentFormContext,
   FormContext,
   FormFieldsContext,
   FormWatchContext,
@@ -760,6 +779,7 @@ export {
   ProcessingContext,
   SubmittedContext,
   useAllFormFields,
+  useDocumentForm,
   useForm,
   useFormFields,
   useFormModified,
