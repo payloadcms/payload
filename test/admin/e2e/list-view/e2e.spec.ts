@@ -312,8 +312,6 @@ describe('List View', () => {
 
       await expect(page.locator(tableRowLocator)).toHaveCount(2)
 
-      await openListFilters(page, {})
-
       await addListFilter({
         page,
         fieldLabel: 'ID',
@@ -334,8 +332,6 @@ describe('List View', () => {
 
     test('should reset filter value and operator on field update', async () => {
       const id = (await page.locator('.cell-id').first().innerText()).replace('ID: ', '')
-
-      await openListFilters(page, {})
 
       await addListFilter({
         page,
@@ -473,7 +469,6 @@ describe('List View', () => {
       await expect(page.locator('.collection-list__page-info')).toHaveText('1-5 of 6')
       await expect(page.locator('.per-page')).toContainText('Per Page: 5')
       await page.goto(`${postsUrl.list}?limit=5&page=2`)
-      await openListFilters(page, {})
 
       await addListFilter({
         page,
@@ -521,7 +516,6 @@ describe('List View', () => {
 
     test('should not re-render page upon typing in a value in the filter value field', async () => {
       await page.goto(postsUrl.list)
-      await openListFilters(page, {})
 
       await addListFilter({
         page,
@@ -545,7 +539,6 @@ describe('List View', () => {
 
     test('should still show second filter if two filters exist and first filter is removed', async () => {
       await page.goto(postsUrl.list)
-      await openListFilters(page, {})
 
       await addListFilter({
         page,

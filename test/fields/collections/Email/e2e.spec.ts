@@ -130,12 +130,9 @@ describe('Email', () => {
   test('should reset filter conditions when adding additional filters', async () => {
     await page.goto(url.list)
 
-    // open the first filter options
-    await openListFilters(page, {})
-
     await addListFilter({
       page,
-      fieldLabel: 'text',
+      fieldLabel: 'Text en',
       operatorLabel: 'equals',
       value: 'hello',
     })
@@ -159,13 +156,9 @@ describe('Email', () => {
   test('should not re-render page upon typing in a value in the filter value field', async () => {
     await page.goto(url.list)
 
-    // open the first filter options
-    await openListFilters(page, {})
-    await page.locator('.where-builder__add-first-filter').click()
-
     await addListFilter({
       page,
-      fieldLabel: 'text',
+      fieldLabel: 'Text en',
       operatorLabel: 'equals',
       skipValueInput: true,
     })
@@ -185,12 +178,9 @@ describe('Email', () => {
   test('should still show second filter if two filters exist and first filter is removed', async () => {
     await page.goto(url.list)
 
-    // open the first filter options
-    await openListFilters(page, {})
-
     await addListFilter({
       page,
-      fieldLabel: 'text',
+      fieldLabel: 'Text en',
       operatorLabel: 'equals',
       value: 'hello',
     })
@@ -228,6 +218,7 @@ describe('Email', () => {
     const filterListItems = page.locator('.where-builder__and-filters li')
     await expect(filterListItems).toHaveCount(1)
 
+    const firstValueField = page.locator('.condition__value >> input')
     await expect(firstValueField).toHaveValue('world')
   })
 })

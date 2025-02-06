@@ -4,6 +4,8 @@ import { expect } from '@playwright/test'
 import { exactText } from 'helpers.js'
 import { wait } from 'payload/shared'
 
+import { openListFilters } from './openListFilters.js'
+
 export const addListFilter = async ({
   page,
   fieldLabel = 'ID',
@@ -17,27 +19,35 @@ export const addListFilter = async ({
   skipValueInput?: boolean
   value?: string
 }) => {
-  await page.locator('.where-builder__add-first-filter').click()
+  await openListFilters(page, {})
 
-  const conditionField = page.locator('.condition__field')
+  const whereBuilder = page.locator('.where-builder')
+
+  await whereBuilder.locator('.where-builder__add-first-filter').click()
+
+  const conditionField = whereBuilder.locator('.condition__field')
   await conditionField.click()
-  const dropdownFieldOption = conditionField.locator('.rs__option', {
+
+  const conditionOptions = conditionField.locator('.rs__option', {
     hasText: exactText(fieldLabel),
   })
-  await dropdownFieldOption.click()
-  await expect(page.locator('.condition__field')).toContainText(fieldLabel)
 
-  const operatorInput = page.locator('.condition__operator')
+  await conditionOptions.click()
+  await expect(whereBuilder.locator('.condition__field')).toContainText(fieldLabel)
 
+  const operatorInput = whereBuilder.locator('.condition__operator')
   await operatorInput.click()
-
-  const dropdownOptions = operatorInput.locator('.rs__option')
-  await dropdownOptions.locator(`text=${operatorLabel}`).click()
+  const operatorOptions = operatorInput.locator('.rs__option')
+  await operatorOptions.locator(`text=${operatorLabel}`).click()
 
   if (!skipValueInput) {
-    const valueInput = page.locator('.condition__value >> input')
+    const valueInput = whereBuilder.locator('.condition__value >> input')
     await valueInput.fill(value)
-    await wait(500)
+    await wait(100)
     await expect(valueInput).toHaveValue(value)
+    const valueOptions = whereBuilder.locator('.condition__value').locator('.rs__option')
+    if (whereBuilder.locator('.condition__value >> input.rs__input').count() > 0) {
+      await valueOptions.locator(`text=${value}`).click()
+    }
   }
 }

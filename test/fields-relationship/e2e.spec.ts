@@ -335,7 +335,6 @@ describe('Relationship Field', () => {
 
       // now ensure that the same filter options are applied in the list view
       await page.goto(url.list)
-      await openListFilters(page, {})
 
       await addListFilter({
         page,

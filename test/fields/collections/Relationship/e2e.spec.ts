@@ -610,8 +610,6 @@ describe('relationship', () => {
     await page.goto(url.list)
     await page.waitForURL(new RegExp(url.list))
 
-    await openListFilters(page, {})
-
     await addListFilter({
       page,
       fieldLabel: 'Relationship',

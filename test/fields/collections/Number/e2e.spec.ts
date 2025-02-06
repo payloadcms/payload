@@ -76,8 +76,6 @@ describe('Number', () => {
     await page.goto(url.list)
     await expect(page.locator('table >> tbody >> tr')).toHaveCount(3)
 
-    await openListFilters(page, {})
-
     await addListFilter({
       page,
       fieldLabel: 'Number',

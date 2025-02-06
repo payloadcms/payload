@@ -61,8 +61,6 @@ describe('Checkboxes', () => {
   test('should not crash on filtering where checkbox is first field', async () => {
     await page.goto(url.list)
 
-    await openListFilters(page, {})
-
     await addListFilter({
       page,
       fieldLabel: 'Checkbox',
