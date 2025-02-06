@@ -23,6 +23,10 @@ type Args = {
    * if any parents is localized, then the field is localized. @default false
    */
   anyParentLocalized?: boolean
+  /**
+   * Data of the nearest parent block, or undefined
+   */
+  blockData: Data | undefined
   clientFieldSchemaMap?: ClientFieldSchemaMap
   collectionSlug?: string
   data: Data
@@ -66,7 +70,6 @@ type Args = {
    */
   skipValidation?: boolean
   state?: FormStateWithoutComponents
-  topLevelData: Data
 }
 
 /**
@@ -76,6 +79,7 @@ export const iterateFields = async ({
   id,
   addErrorPathToParent: addErrorPathToParentArg,
   anyParentLocalized = false,
+  blockData,
   clientFieldSchemaMap,
   collectionSlug,
   data,
@@ -100,7 +104,6 @@ export const iterateFields = async ({
   skipConditionChecks = false,
   skipValidation = false,
   state = {},
-  topLevelData,
 }: Args): Promise<void> => {
   const promises = []
 
@@ -137,6 +140,7 @@ export const iterateFields = async ({
         id,
         addErrorPathToParent: addErrorPathToParentArg,
         anyParentLocalized,
+        blockData,
         clientFieldSchemaMap,
         collectionSlug,
         data,
@@ -165,7 +169,6 @@ export const iterateFields = async ({
         skipConditionChecks,
         skipValidation,
         state,
-        topLevelData,
       }),
     )
   })

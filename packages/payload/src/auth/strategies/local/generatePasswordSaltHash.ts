@@ -34,13 +34,13 @@ export const generatePasswordSaltHash = async ({
   const validationResult = password(passwordToSet, {
     name: 'password',
     type: 'text',
+    blockData: {},
     data: {},
     event: 'submit',
     preferences: { fields: {} },
     req,
     required: true,
     siblingData: {},
-    topLevelData: {},
   })
 
   if (typeof validationResult === 'string') {

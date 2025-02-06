@@ -102,8 +102,11 @@ export const buildFormState = async (
     data: incomingData,
     docPermissions,
     docPreferences,
+    documentFormState,
     formState,
     globalSlug,
+    initialBlockData,
+    initialBlockFormState,
     operation,
     renderAllFields,
     req,
@@ -115,7 +118,6 @@ export const buildFormState = async (
     returnLockStatus,
     schemaPath = collectionSlug || globalSlug,
     skipValidation,
-    topLevelFormState,
     updateLastEdited,
   } = args
 
@@ -166,9 +168,14 @@ export const buildFormState = async (
     data = reduceFieldsToValues(formState, true)
   }
 
-  let topLevelData = undefined
-  if (topLevelFormState) {
-    topLevelData = reduceFieldsToValues(topLevelFormState, true)
+  let documentData = undefined
+  if (documentFormState) {
+    documentData = reduceFieldsToValues(documentFormState, true)
+  }
+
+  let blockData = initialBlockData
+  if (initialBlockFormState) {
+    blockData = reduceFieldsToValues(initialBlockFormState, true)
   }
 
   /**
@@ -191,8 +198,10 @@ export const buildFormState = async (
     clientFieldSchemaMap: clientSchemaMap,
     collectionSlug,
     data,
+    documentData,
     fields,
     fieldSchemaMap: schemaMap,
+    initialBlockData: blockData,
     operation,
     permissions: docPermissions?.fields || {},
     preferences: docPreferences || { fields: {} },
@@ -202,7 +211,6 @@ export const buildFormState = async (
     req,
     schemaPath,
     skipValidation,
-    topLevelData,
   })
 
   // Maintain form state of auth / upload fields

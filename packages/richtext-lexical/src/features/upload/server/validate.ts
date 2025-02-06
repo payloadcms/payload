@@ -13,11 +13,12 @@ export const uploadValidation = (
     validation: {
       options: {
         id,
+        blockData,
+        data,
         operation,
         preferences,
         req,
         req: { payload, t },
-        topLevelData,
       },
     },
   }) => {
@@ -46,16 +47,18 @@ export const uploadValidation = (
     const result = await fieldSchemasToFormState({
       id,
       collectionSlug: node.relationTo,
+
       data: node?.fields ?? {},
+      documentData: data,
       fields: collection.fields,
       fieldSchemaMap: undefined,
+      initialBlockData: blockData,
       operation: operation === 'create' || operation === 'update' ? operation : 'update',
       permissions: {},
       preferences,
       renderAllFields: false,
       req,
       schemaPath: '',
-      topLevelData,
     })
 
     let errorPaths: string[] = []

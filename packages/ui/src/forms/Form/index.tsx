@@ -134,10 +134,11 @@ export const Form: React.FC<FormProps> = (props) => {
               ...field,
               id,
               collectionSlug,
-              data,
+              // If there is a parent document form, we can get the data from that form
+              blockData: undefined, // Will be expensive to get - not worth to pass to client-side validation, as this can be obtained by the user using `useFormFields()`
+              data: documentForm?.getData ? documentForm.getData() : data,
               event: 'submit',
               operation,
-              // If there is a parent document form, we can get the data from that form
               preferences: {} as any,
               req: {
                 payload: {
@@ -147,7 +148,6 @@ export const Form: React.FC<FormProps> = (props) => {
                 user,
               } as unknown as PayloadRequest,
               siblingData: contextRef.current.getSiblingData(path),
-              topLevelData: documentForm?.getData ? documentForm.getData() : data,
             })
 
             if (typeof validationResult === 'string') {

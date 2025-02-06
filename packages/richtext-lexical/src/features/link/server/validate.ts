@@ -13,7 +13,7 @@ export const linkValidation = (
   return async ({
     node,
     validation: {
-      options: { id, collectionSlug, operation, preferences, req, topLevelData },
+      options: { id, blockData, collectionSlug, data, operation, preferences, req },
     },
   }) => {
     /**
@@ -24,15 +24,16 @@ export const linkValidation = (
       id,
       collectionSlug,
       data: node.fields,
+      documentData: data,
       fields: sanitizedFieldsWithoutText, // Sanitized in feature.server.ts
       fieldSchemaMap: undefined,
+      initialBlockData: blockData,
       operation: operation === 'create' || operation === 'update' ? operation : 'update',
       permissions: {},
       preferences,
       renderAllFields: false,
       req,
       schemaPath: '',
-      topLevelData,
     })
 
     let errorPaths: string[] = []

@@ -24,6 +24,23 @@ type Args = {
   clientFieldSchemaMap?: ClientFieldSchemaMap
   collectionSlug?: string
   data?: Data
+  /**
+   * If this is undefined, the `data` passed to this function will serve as `fullData` and `data` when iterating over
+   * the top-level-fields to generate form state.
+   * For sub fields, the `data` will be narrowed down to the sub fields, while `fullData` remains the same.
+   *
+   * Usually, the `data` passed to this function will be the document data. This means that running validation, read access control
+   * or executing filterOptions here will have access to the full document through the passed `fullData` parameter, and that `fullData` and `data` will be identical.
+   *
+   * In some cases however, this function is used to generate form state solely for sub fields - independent from the parent form state.
+   * This means that `data` will be the form state of the sub fields - the document data won't be available here.
+   *
+   * In these cases, you can pass `documentData` which will be used as `fullData` instead of `data`.
+   *
+   * This is useful for lexical blocks, as lexical block fields there are not part of the parent form state, yet we still want
+   * document data to be available for validation and filterOptions, under the `data` key.
+   */
+  documentData?: Data
   fields: Field[] | undefined
   /**
    * The field schema map is required for field rendering.
@@ -32,6 +49,11 @@ type Args = {
    */
   fieldSchemaMap: FieldSchemaMap | undefined
   id?: number | string
+  /**
+   * Validation, filterOptions and read access control will receive the `blockData`, which is the data of the nearest parent block. You can pass in
+   * the initial block data here, which will be used as `blockData` for the top-level fields, until the first block is encountered.
+   */
+  initialBlockData?: Data
   operation?: 'create' | 'update'
   permissions: SanitizedFieldsPermissions
   preferences: DocumentPreferences
@@ -49,25 +71,6 @@ type Args = {
   req: PayloadRequest
   schemaPath: string
   skipValidation?: boolean
-  /**
-   * If this is undefined, the `data` passed to this function will serve as `fullData`, `data` and `topLevelData` when iterating over
-   * the top-level-fields to generate form state.
-   * For sub fields, the `data` will be narrowed down to the sub fields, while `fullData` and `topLevelData` remain the same.
-   *
-   * Usually, the `data` passed to this function will be the document data. This means that running validation, read access control
-   * or executing filterOptions here will have access to the full document through the passed `fullData` parameter, and that `fullData` and `topLevelData` will be identical.
-   *
-   * In some cases however, this function is used to generate form state solely for sub fields - independent from the parent form state.
-   * This means that `data` will be the form state of the sub fields - the document data won't be available here.
-   *
-   * In these cases, we can use `topLevelData` to pass the full document data, which will be available as `topLevelData` in validation,
-   * read access control and filterOptions.
-   *
-   * This is useful for lexical blocks, as lexical block fields there are not part of the parent form state, yet we still want
-   * document data to be available for validation and filterOptions, under the `topLevelData` key.
-   * In this case, `fullData` and `topLevelData` will no longer be identical.
-   */
-  topLevelData?: Data
 }
 
 export const fieldSchemasToFormState = async ({
@@ -75,8 +78,10 @@ export const fieldSchemasToFormState = async ({
   clientFieldSchemaMap,
   collectionSlug,
   data = {},
+  documentData,
   fields,
   fieldSchemaMap,
+  initialBlockData,
   operation,
   permissions,
   preferences,
@@ -86,7 +91,6 @@ export const fieldSchemasToFormState = async ({
   req,
   schemaPath,
   skipValidation,
-  topLevelData,
 }: Args): Promise<FormState> => {
   if (!clientFieldSchemaMap && renderFieldFn) {
     console.warn(
@@ -97,7 +101,7 @@ export const fieldSchemasToFormState = async ({
   if (fields && fields.length) {
     const state: FormStateWithoutComponents = {}
 
-    const dataWithDefaultValues = { ...data }
+    const dataWithDefaultValues = documentData ?? { ...data }
 
     await calculateDefaultValues({
       id,
@@ -109,17 +113,16 @@ export const fieldSchemasToFormState = async ({
       user: req.user,
     })
 
-    const fullData = dataWithDefaultValues
-
     await iterateFields({
       id,
       addErrorPathToParent: null,
+      blockData: initialBlockData,
       clientFieldSchemaMap,
       collectionSlug,
       data: dataWithDefaultValues,
       fields,
       fieldSchemaMap,
-      fullData,
+      fullData: dataWithDefaultValues,
       operation,
       parentIndexPath: '',
       parentPassesCondition: true,
@@ -133,7 +136,6 @@ export const fieldSchemasToFormState = async ({
       req,
       skipValidation,
       state,
-      topLevelData: topLevelData ?? fullData,
     })
 
     return state

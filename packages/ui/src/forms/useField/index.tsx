@@ -149,8 +149,9 @@ export const useField = <TValue,>(options: Options): FieldType<TValue> => {
           typeof validate === 'function'
             ? await validate(valueToValidate, {
                 id,
+                blockData: undefined, // Will be expensive to get - not worth to pass to client-side validation, as this can be obtained by the user using `useFormFields()`
                 collectionSlug,
-                data,
+                data: documentForm?.getData ? documentForm.getData() : data,
                 event: 'onChange',
                 operation,
                 preferences: {} as any,
@@ -162,7 +163,6 @@ export const useField = <TValue,>(options: Options): FieldType<TValue> => {
                   user,
                 } as unknown as PayloadRequest,
                 siblingData: getSiblingData(path),
-                topLevelData: documentForm?.getData ? documentForm.getData() : data,
               })
             : typeof prevErrorMessage.current === 'string'
               ? prevErrorMessage.current

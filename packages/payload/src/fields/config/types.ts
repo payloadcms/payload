@@ -133,7 +133,13 @@ import type {
   TextareaFieldValidation,
 } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
-import type { DefaultValue, Operation, PayloadRequest, Where } from '../../types/index.js'
+import type {
+  DefaultValue,
+  JsonObject,
+  Operation,
+  PayloadRequest,
+  Where,
+} from '../../types/index.js'
 import type {
   NumberFieldManyValidation,
   NumberFieldSingleValidation,
@@ -148,6 +154,10 @@ import type {
 } from '../validations.js'
 
 export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSiblingData = any> = {
+  /**
+   * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
+   */
+  blockData: JsonObject | undefined
   /** The collection which the field belongs to. If the field belongs to a global, this will be null. */
   collection: null | SanitizedCollectionConfig
   context: RequestContext
@@ -212,7 +222,11 @@ export type FieldHook<TData extends TypeWithID = any, TValue = any, TSiblingData
 
 export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (args: {
   /**
-   * The incoming data used to `create` or `update` the document with.
+   * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
+   */
+  blockData?: JsonObject | undefined
+  /**
+   * The incoming, top-level document data used to `create` or `update` the document with.
    */
   data?: Partial<TData>
   /**
@@ -229,12 +243,6 @@ export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (a
    * Immediately adjacent data to this field. For example, if this is a `group` field, then `siblingData` will be the other fields within the group.
    */
   siblingData?: Partial<TSiblingData>
-  /**
-   * The incoming, top-level document data used to `create` or `update` the document with.
-   * In normal fields, topLevelData is equal to data. In fields within lexical blocks, `topLevelData` is the full, parent document, while
-   * `data` is the top-level data scoped to the lexical block.
-   */
-  topLevelData: Partial<TData>
 }) => boolean | Promise<boolean>
 
 export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
@@ -244,6 +252,10 @@ export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
 ) => boolean
 
 export type FilterOptionsProps<TData = any> = {
+  /**
+   * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
+   */
+  blockData: TData
   /**
    * An object containing the full collection or global document currently being edited.
    */
@@ -261,11 +273,6 @@ export type FilterOptionsProps<TData = any> = {
    * An object containing document data that is scoped to only fields within the same parent of this field.
    */
   siblingData: unknown
-  /**
-   * In normal fields, topLevelData is equal to `data`. In fields within lexical blocks, `topLevelData` is the full, parent document, while
-   * `data` is the top-level data scoped to the lexical block.
-   */
-  topLevelData: TData
   /**
    * An object containing the currently authenticated user.
    */
@@ -359,6 +366,11 @@ export type LabelsClient = {
 }
 
 export type BaseValidateOptions<TData, TSiblingData, TValue> = {
+  /**
+  /**
+   * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
+   */
+  blockData: Partial<TData>
   collectionSlug?: string
   data: Partial<TData>
   event?: 'onChange' | 'submit'
@@ -369,11 +381,6 @@ export type BaseValidateOptions<TData, TSiblingData, TValue> = {
   req: PayloadRequest
   required?: boolean
   siblingData: Partial<TSiblingData>
-  /**
-   * In normal fields, topLevelData is equal to data. In fields within lexical blocks, `topLevelData` is the full, parent document, while
-   * `data` is the top-level data scoped to the lexical block.
-   */
-  topLevelData: Partial<TData>
 }
 
 export type ValidateOptions<

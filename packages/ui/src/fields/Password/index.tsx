@@ -49,6 +49,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
       return password(value, {
         name: 'password',
         type: 'text',
+        blockData: {},
         data: {},
         event: 'onChange',
         preferences: { fields: {} },
@@ -60,7 +61,6 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
         } as unknown as PayloadRequest,
         required: true,
         siblingData: {},
-        topLevelData: {},
       })
     },
     [validate, config, t, required],

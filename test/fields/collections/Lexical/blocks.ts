@@ -31,13 +31,13 @@ export const FilterOptionsBlock: Block = {
           name: 'dependsOnDocData',
           type: 'relationship',
           relationTo: 'text-fields',
-          filterOptions: ({ topLevelData }) => {
-            if (!topLevelData.title) {
+          filterOptions: ({ data }) => {
+            if (!data.title) {
               return true
             }
             return {
               text: {
-                equals: topLevelData.title,
+                equals: data.title,
               },
             }
           },
@@ -63,13 +63,13 @@ export const FilterOptionsBlock: Block = {
           name: 'dependsOnBlockData',
           type: 'relationship',
           relationTo: 'text-fields',
-          filterOptions: ({ data }) => {
-            if (!data?.text) {
+          filterOptions: ({ blockData }) => {
+            if (!blockData?.text) {
               return true
             }
             return {
               text: {
-                equals: data?.text,
+                equals: blockData?.text,
               },
             }
           },
@@ -97,8 +97,8 @@ export const ValidationBlock: Block = {
         {
           name: 'textDependsOnDocData',
           type: 'text',
-          validate: ((value, { topLevelData }) => {
-            if ((topLevelData as any)?.title === 'invalid') {
+          validate: ((value, { data }) => {
+            if ((data as any)?.title === 'invalid') {
               return 'doc title cannot be invalid'
             }
             return true
@@ -116,8 +116,8 @@ export const ValidationBlock: Block = {
         {
           name: 'textDependsOnBlockData',
           type: 'text',
-          validate: ((value, { data }) => {
-            if ((data as any)?.text === 'invalid') {
+          validate: ((value, { blockData }) => {
+            if ((blockData as any)?.text === 'invalid') {
               return 'textDependsOnBlockData sibling field cannot be invalid'
             }
           }) as TextFieldSingleValidation,

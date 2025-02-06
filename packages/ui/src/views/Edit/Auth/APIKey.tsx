@@ -38,6 +38,7 @@ export const APIKey: React.FC<{ readonly enabled: boolean; readonly readOnly?: b
     text(val, {
       name: 'apiKey',
       type: 'text',
+      blockData: {},
       data: {},
       event: 'onChange',
       maxLength: 48,
@@ -50,7 +51,6 @@ export const APIKey: React.FC<{ readonly enabled: boolean; readonly readOnly?: b
         t,
       } as unknown as PayloadRequest,
       siblingData: {},
-      topLevelData: {},
     })
 
   const apiKeyValue = apiKey?.value

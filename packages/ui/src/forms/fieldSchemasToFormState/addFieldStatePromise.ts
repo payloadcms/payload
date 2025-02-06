@@ -39,6 +39,10 @@ export type AddFieldStatePromiseArgs = {
    * if all parents are localized, then the field is localized
    */
   anyParentLocalized?: boolean
+  /**
+   * Data of the nearest parent block, or undefined
+   */
+  blockData: Data | undefined
   clientFieldSchemaMap?: ClientFieldSchemaMap
   collectionSlug?: string
   data: Data
@@ -90,7 +94,6 @@ export type AddFieldStatePromiseArgs = {
    */
   skipValidation?: boolean
   state: FormStateWithoutComponents
-  topLevelData: Data
 }
 
 /**
@@ -102,6 +105,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     id,
     addErrorPathToParent: addErrorPathToParentArg,
     anyParentLocalized = false,
+    blockData,
     clientFieldSchemaMap,
     collectionSlug,
     data,
@@ -128,7 +132,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     skipConditionChecks = false,
     skipValidation = false,
     state,
-    topLevelData,
   } = args
 
   if (!args.clientFieldSchemaMap && args.renderFieldFn) {
@@ -163,10 +166,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     if (typeof field?.access?.read === 'function') {
       hasPermission = await field.access.read({
         id,
+        blockData,
         data: fullData,
         req,
         siblingData: data,
-        topLevelData,
       })
     } else {
       hasPermission = true
@@ -195,10 +198,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         validationResult = await validate(data?.[field.name], {
           ...field,
           id,
+          blockData,
           collectionSlug,
           data: fullData,
           event: 'onChange',
-          topLevelData,
           // @AlessioGr added `jsonError` in https://github.com/payloadcms/payload/commit/c7ea62a39473408c3ea912c4fbf73e11be4b538d
           // @ts-expect-error-next-line
           jsonError,
@@ -266,6 +269,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 id,
                 addErrorPathToParent,
                 anyParentLocalized: field.localized || anyParentLocalized,
+                blockData,
                 clientFieldSchemaMap,
                 collectionSlug,
                 data: row,
@@ -291,7 +295,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 skipConditionChecks,
                 skipValidation,
                 state,
-                topLevelData,
               }),
             )
 
@@ -431,6 +434,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   id,
                   addErrorPathToParent,
                   anyParentLocalized: field.localized || anyParentLocalized,
+                  blockData: row,
                   clientFieldSchemaMap,
                   collectionSlug,
                   data: row,
@@ -460,7 +464,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   skipConditionChecks,
                   skipValidation,
                   state,
-                  topLevelData,
                 }),
               )
 
@@ -528,6 +531,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           id,
           addErrorPathToParent,
           anyParentLocalized: field.localized || anyParentLocalized,
+          blockData,
           clientFieldSchemaMap,
           collectionSlug,
           data: data?.[field.name] || {},
@@ -553,7 +557,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           skipConditionChecks,
           skipValidation,
           state,
-          topLevelData,
         })
 
         break
@@ -577,11 +580,11 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           if (typeof field.filterOptions === 'function') {
             const query = await getFilterOptionsQuery(field.filterOptions, {
               id,
+              blockData,
               data: fullData,
               relationTo: field.relationTo,
               req,
               siblingData: data,
-              topLevelData,
               user: req.user,
             })
 
@@ -678,6 +681,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       // passthrough parent functionality
       addErrorPathToParent: addErrorPathToParentArg,
       anyParentLocalized: fieldIsLocalized(field) || anyParentLocalized,
+      blockData,
       clientFieldSchemaMap,
       collectionSlug,
       data,
@@ -702,7 +706,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       skipConditionChecks,
       skipValidation,
       state,
-      topLevelData,
     })
   } else if (field.type === 'tabs') {
     const promises = field.tabs.map((tab, tabIndex) => {
@@ -744,6 +747,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         id,
         addErrorPathToParent: addErrorPathToParentArg,
         anyParentLocalized: tab.localized || anyParentLocalized,
+        blockData,
         clientFieldSchemaMap,
         collectionSlug,
         data: isNamedTab ? data?.[tab.name] || {} : data,
@@ -768,7 +772,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         skipConditionChecks,
         skipValidation,
         state,
-        topLevelData,
       })
     })
 

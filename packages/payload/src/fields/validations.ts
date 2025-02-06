@@ -510,16 +510,7 @@ const validateFilterOptions: Validate<
   RelationshipField | UploadField
 > = async (
   value,
-  {
-    id,
-    data,
-    filterOptions,
-    relationTo,
-    req,
-    req: { payload, t, user },
-    siblingData,
-    topLevelData,
-  },
+  { id, blockData, data, filterOptions, relationTo, req, req: { payload, t, user }, siblingData },
 ) => {
   if (typeof filterOptions !== 'undefined' && value) {
     const options: {
@@ -536,11 +527,11 @@ const validateFilterOptions: Validate<
           typeof filterOptions === 'function'
             ? await filterOptions({
                 id,
+                blockData,
                 data,
                 relationTo: collection,
                 req,
                 siblingData,
-                topLevelData,
                 user,
               })
             : filterOptions

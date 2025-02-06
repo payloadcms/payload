@@ -16,6 +16,10 @@ import { getExistingRowDoc } from './getExistingRowDoc.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
+  /**
+   * Data of the nearest parent block. If no parent block exists, this will be the `undefined`
+   */
+  blockData?: JsonObject
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   data: JsonObject
@@ -48,6 +52,7 @@ type Args = {
 
 export const promise = async ({
   id,
+  blockData,
   collection,
   context,
   data,
@@ -102,6 +107,7 @@ export const promise = async ({
         await priorHook
 
         const hookedValue = await currentHook({
+          blockData,
           collection,
           context,
           data,
@@ -148,6 +154,7 @@ export const promise = async ({
       const validationResult = await validateFn(valueToValidate as never, {
         ...field,
         id,
+        blockData,
         collectionSlug: collection?.slug,
         data: deepMergeWithSourceArrays(doc, data),
         event: 'submit',
@@ -158,7 +165,6 @@ export const promise = async ({
         previousValue: siblingDoc[field.name],
         req,
         siblingData: deepMergeWithSourceArrays(siblingDoc, siblingData),
-        topLevelData: data,
       })
 
       if (typeof validationResult === 'string') {
@@ -222,6 +228,7 @@ export const promise = async ({
           promises.push(
             traverseFields({
               id,
+              blockData,
               collection,
               context,
               data,
@@ -273,6 +280,7 @@ export const promise = async ({
             promises.push(
               traverseFields({
                 id,
+                blockData: row,
                 collection,
                 context,
                 data,
@@ -306,6 +314,7 @@ export const promise = async ({
     case 'row': {
       await traverseFields({
         id,
+        blockData,
         collection,
         context,
         data,
@@ -344,6 +353,7 @@ export const promise = async ({
 
       await traverseFields({
         id,
+        blockData,
         collection,
         context,
         data,
@@ -460,6 +470,7 @@ export const promise = async ({
 
       await traverseFields({
         id,
+        blockData,
         collection,
         context,
         data,
@@ -486,6 +497,7 @@ export const promise = async ({
     case 'tabs': {
       await traverseFields({
         id,
+        blockData,
         collection,
         context,
         data,
