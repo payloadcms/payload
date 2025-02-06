@@ -21,7 +21,8 @@ import type {
   SubmitOptions,
 } from './types.js'
 
-import { useIgnoredEffectDebounced } from '../../hooks/useIgnoredEffect.js'
+import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
+import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -661,42 +662,50 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const classes = [className, baseClass].filter(Boolean).join(' ')
 
-  useIgnoredEffectDebounced(
+  const executeOnChange = useEffectEvent(async (submitted: boolean) => {
+    if (Array.isArray(onChange)) {
+      let revalidatedFormState: FormState = contextRef.current.fields
+
+      for (const onChangeFn of onChange) {
+        // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
+        revalidatedFormState = await onChangeFn({
+          formState: deepCopyObjectSimpleWithoutReactComponents(contextRef.current.fields),
+          submitted,
+        })
+      }
+
+      if (!revalidatedFormState) {
+        return
+      }
+
+      const { changed, newState } = mergeServerFormState({
+        existingState: contextRef.current.fields || {},
+        incomingState: revalidatedFormState,
+      })
+
+      if (changed) {
+        dispatchFields({
+          type: 'REPLACE_STATE',
+          optimize: false,
+          state: newState,
+        })
+      }
+    }
+  })
+
+  const prevFields = useRef(contextRef.current.fields)
+  const isFirstRenderRef = useRef(true)
+
+  useDebouncedEffect(
     () => {
-      const executeOnChange = async () => {
-        if (Array.isArray(onChange)) {
-          let revalidatedFormState: FormState = contextRef.current.fields
-
-          for (const onChangeFn of onChange) {
-            // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
-            revalidatedFormState = await onChangeFn({
-              formState: deepCopyObjectSimpleWithoutReactComponents(contextRef.current.fields),
-              submitted,
-            })
-          }
-
-          if (!revalidatedFormState) {
-            return
-          }
-
-          const { changed, newState } = mergeServerFormState({
-            existingState: contextRef.current.fields || {},
-            incomingState: revalidatedFormState,
-          })
-
-          if (changed) {
-            dispatchFields({
-              type: 'REPLACE_STATE',
-              optimize: false,
-              state: newState,
-            })
-          }
+      if (isFirstRenderRef.current || !dequal(contextRef.current.fields, prevFields.current)) {
+        if (modified) {
+          void executeOnChange(submitted)
         }
       }
 
-      if (modified) {
-        void executeOnChange()
-      }
+      isFirstRenderRef.current = false
+      prevFields.current = contextRef.current.fields
     },
     /*
       Make sure we trigger this whenever modified changes (not just when `fields` changes),
@@ -706,11 +715,8 @@ export const Form: React.FC<FormProps> = (props) => {
         `fields` updates before `modified`, because setModified is in a setTimeout.
         So on the first change, modified is false, so we don't trigger the effect even though we should.
     **/
-    [contextRef.current.fields, modified, submitted],
-    [dispatchFields, onChange],
-    {
-      delay: 250,
-    },
+    [modified, submitted, contextRef.current.fields],
+    250,
   )
 
   return (
