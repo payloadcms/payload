@@ -1,27 +1,37 @@
 import type { ArrayField, RelationshipField } from 'payload'
 
-export const tenantsArrayField = (args: {
+import { defaults } from '../../defaults.js'
+
+type Args = {
   arrayFieldAccess?: ArrayField['access']
   rowFields?: ArrayField['fields']
   tenantFieldAccess?: RelationshipField['access']
   tenantsArrayFieldName: ArrayField['name']
   tenantsArrayTenantFieldName: RelationshipField['name']
   tenantsCollectionSlug: string
-}): ArrayField => ({
-  name: args.tenantsArrayFieldName,
+}
+export const tenantsArrayField = ({
+  arrayFieldAccess,
+  rowFields,
+  tenantFieldAccess,
+  tenantsArrayFieldName = defaults.tenantsArrayFieldName,
+  tenantsArrayTenantFieldName = defaults.tenantsArrayFieldName,
+  tenantsCollectionSlug = defaults.tenantCollectionSlug,
+}: Args): ArrayField => ({
+  name: tenantsArrayFieldName,
   type: 'array',
-  access: args?.arrayFieldAccess,
+  access: arrayFieldAccess,
   fields: [
     {
-      name: args.tenantsArrayTenantFieldName,
+      name: tenantsArrayTenantFieldName,
       type: 'relationship',
-      access: args.tenantFieldAccess,
+      access: tenantFieldAccess,
       index: true,
-      relationTo: args.tenantsCollectionSlug,
+      relationTo: tenantsCollectionSlug,
       required: true,
       saveToJWT: true,
     },
-    ...(args?.rowFields || []),
+    ...(rowFields || []),
   ],
   saveToJWT: true,
 })
