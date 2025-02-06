@@ -27,6 +27,7 @@ import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { isMongoose } from '../helpers/isMongoose.js'
 import removeFiles from '../helpers/removeFiles.js'
 import { errorOnUnnamedFieldsSlug, postsSlug } from './shared.js'
+import { Global2 } from './payload-types.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -1356,5 +1357,55 @@ describe('database', () => {
     await payload.delete({ id, collection: postsSlug })
     const { id: id_2 } = await payload.create({ collection: postsSlug, data: { title: 'ASD' } })
     expect(id_2).not.toBe(id)
+  })
+
+  it('payload.db.createGlobal should have globalType, updatedAt, createdAt fields', async () => {
+    let timestamp = Date.now()
+    let result = (await payload.db.createGlobal({
+      slug: 'global-2',
+      data: { text: 'this is global-2' },
+    })) as Global2 & { globalType: string }
+
+    expect(result.text).toBe('this is global-2')
+    expect(result.globalType).toBe('global-2')
+    expect(timestamp).toBeLessThanOrEqual(new Date(result.createdAt as string).getTime())
+    expect(timestamp).toBeLessThanOrEqual(new Date(result.updatedAt as string).getTime())
+
+    const createdAt = new Date(result.createdAt as string).getTime()
+
+    result = (await payload.db.updateGlobal({
+      slug: 'global-2',
+      data: { text: 'this is global-2 but updated' },
+    })) as Global2 & { globalType: string }
+
+    expect(result.text).toBe('this is global-2 but updated')
+    expect(result.globalType).toBe('global-2')
+    expect(createdAt).toEqual(new Date(result.createdAt as string).getTime())
+    expect(createdAt).toBeLessThan(new Date(result.updatedAt as string).getTime())
+  })
+
+  it('payload.updateGlobal should have globalType, updatedAt, createdAt fields', async () => {
+    let timestamp = Date.now()
+    let result = (await payload.updateGlobal({
+      slug: 'global-3',
+      data: { text: 'this is global-3' },
+    })) as Global2 & { globalType: string }
+
+    expect(result.text).toBe('this is global-3')
+    expect(result.globalType).toBe('global-3')
+    expect(timestamp).toBeLessThanOrEqual(new Date(result.createdAt as string).getTime())
+    expect(timestamp).toBeLessThanOrEqual(new Date(result.updatedAt as string).getTime())
+
+    const createdAt = new Date(result.createdAt as string).getTime()
+
+    result = (await payload.updateGlobal({
+      slug: 'global-3',
+      data: { text: 'this is global-3 but updated' },
+    })) as Global2 & { globalType: string }
+
+    expect(result.text).toBe('this is global-3 but updated')
+    expect(result.globalType).toBe('global-3')
+    expect(createdAt).toEqual(new Date(result.createdAt as string).getTime())
+    expect(createdAt).toBeLessThan(new Date(result.updatedAt as string).getTime())
   })
 })

@@ -470,6 +470,14 @@ export type BaseLocalizationConfig = {
    * @default true
    */
   fallback?: boolean
+  /**
+   * Define a function to filter the locales made available in Payload admin UI
+   * based on user.
+   */
+  filterAvailableLocales?: (args: {
+    locales: Locale[]
+    req: PayloadRequest
+  }) => Locale[] | Promise<Locale[]>
 }
 
 export type LocalizationConfigWithNoLabels = Prettify<

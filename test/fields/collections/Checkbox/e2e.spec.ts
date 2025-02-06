@@ -12,6 +12,8 @@ import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../helpers/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { checkboxFieldsSlug } from '../../slugs.js'
+import { openListFilters } from 'helpers/e2e/openListFilters.js'
+import { addListFilter } from 'helpers/e2e/addListFilter.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -59,23 +61,12 @@ describe('Checkboxes', () => {
   test('should not crash on filtering where checkbox is first field', async () => {
     await page.goto(url.list)
 
-    const filterButton = page.locator('.list-controls__toggle-where')
-    await filterButton.click()
-
-    const addButton = page.locator('.where-builder__add-first-filter')
-    await addButton.click()
-
-    const operator = page.locator('.condition__operator .rs__control')
-    await operator.click()
-
-    const equals = page.locator('.rs__option:has-text("equals")')
-    await equals.click()
-
-    const value = page.locator('.condition__value')
-    await value.click()
-
-    const trueOption = page.locator('.rs__option:has-text("True")')
-    await trueOption.click()
+    await addListFilter({
+      page,
+      fieldLabel: 'Checkbox',
+      operatorLabel: 'equals',
+      value: 'True',
+    })
 
     await wait(1000)
 

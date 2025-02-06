@@ -4,12 +4,12 @@ import { selectVersionsFieldsSlug } from '../../slugs.js'
 
 const SelectVersionsFields: CollectionConfig = {
   slug: selectVersionsFieldsSlug,
-  versions: true,
+  versions: { drafts: { autosave: true } },
   fields: [
     {
       type: 'select',
       hasMany: true,
-      options: ['a', 'b', 'c'],
+      options: ['a', 'b', 'c', 'd'],
       name: 'hasMany',
     },
     {
