@@ -15,6 +15,7 @@ export type FileSize = {
 /**
  * FileSize_P4 is a more precise type, and will replace FileSize in Payload v4.
  * I am not encouraging users to use this type via tsdoc yet, in case we find more breaking changes to do prior to v4.
+ * @internal
  */
 export type FileSize_P4 = {
   url: null | string
