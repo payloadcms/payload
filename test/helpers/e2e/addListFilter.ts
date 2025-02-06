@@ -46,7 +46,7 @@ export const addListFilter = async ({
     await wait(100)
     await expect(valueInput).toHaveValue(value)
     const valueOptions = whereBuilder.locator('.condition__value').locator('.rs__option')
-    if (whereBuilder.locator('.condition__value >> input.rs__input').count() > 0) {
+    if ((await whereBuilder.locator('.condition__value >> input.rs__input').count()) > 0) {
       await valueOptions.locator(`text=${value}`).click()
     }
   }

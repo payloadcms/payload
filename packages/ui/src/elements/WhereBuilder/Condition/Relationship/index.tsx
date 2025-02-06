@@ -11,8 +11,8 @@ import { useDebounce } from '../../../../hooks/useDebounce.js'
 import { useConfig } from '../../../../providers/Config/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { ReactSelect } from '../../../ReactSelect/index.js'
-import './index.scss'
 import optionsReducer from './optionsReducer.js'
+import './index.scss'
 
 const baseClass = 'condition-value-relationship'
 
@@ -22,6 +22,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
   const {
     disabled,
     field: { admin: { isSortable } = {}, hasMany, relationTo },
+    filterOptions,
     onChange,
     value,
   } = props
@@ -42,6 +43,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
   const debouncedSearch = useDebounce(search, 300)
   const { i18n, t } = useTranslation()
   const relationSlugs = hasMultipleRelations ? relationTo : [relationTo]
+
   const initialRelationMap = () => {
     const map: Map<string, number> = new Map()
     relationSlugs.forEach((relation) => {
@@ -49,6 +51,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
     })
     return map
   }
+
   const nextPageByRelationshipRef = React.useRef<Map<string, number>>(initialRelationMap())
   const partiallyLoadedRelationshipSlugs = React.useRef<string[]>(relationSlugs)
 
@@ -72,12 +75,14 @@ export const RelationshipField: React.FC<Props> = (props) => {
         const collection = getEntityConfig({
           collectionSlug: relationSlug,
         })
+
         const fieldToSearch = collection?.admin?.useAsTitle || 'id'
         const pageIndex = nextPageByRelationshipRef.current.get(relationSlug)
 
         const where: Where = {
           and: [],
         }
+
         const query = {
           depth: 0,
           limit: maxResultsPerRequest,
@@ -87,6 +92,12 @@ export const RelationshipField: React.FC<Props> = (props) => {
           },
           where,
         }
+
+        if (filterOptions) {
+          query.where.and.push(filterOptions)
+        }
+
+        console.log('query', filterOptions, query.where)
 
         if (debouncedSearch) {
           query.where.and.push({
@@ -134,7 +145,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
 
       setHasLoadedFirstOptions(true)
     },
-    [addOptions, api, debouncedSearch, getEntityConfig, i18n.language, serverURL, t],
+    [addOptions, api, debouncedSearch, getEntityConfig, i18n.language, serverURL, filterOptions, t],
   )
 
   const loadMoreOptions = React.useCallback(() => {

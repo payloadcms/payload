@@ -5,6 +5,7 @@ export type WhereBuilderProps = {
   readonly collectionSlug: SanitizedCollectionConfig['slug']
   readonly fields?: ClientField[]
   readonly renderedFilters?: Map<string, React.ReactNode>
+  readonly resolvedFilterOptions?: Map<string, Where>
 }
 
 export type FieldCondition = {
