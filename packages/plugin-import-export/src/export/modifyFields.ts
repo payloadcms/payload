@@ -1,59 +1,69 @@
-import type { Field } from 'payload'
+import type { CollectionConfig, Field } from 'payload'
 
 const fieldsToHide = ['slug', 'fields', 'where']
 
-const fieldsToAdd = [
-  {
-    name: 'drafts',
-    type: 'select',
-    label: 'Drafts',
-    options: [
-      {
-        label: 'True',
-        value: 'true',
-      },
-      {
-        label: 'False',
-        value: 'false',
-      },
-    ],
-  },
-  {
-    name: 'depth',
-    type: 'number',
-    defaultValue: 1,
-    label: 'Depth',
-    required: true,
-  },
-  {
-    name: 'selectionToUse',
-    type: 'radio',
-    options: [
-      {
-        label: 'Use current selection',
-        value: 'currentSelection',
-      },
-      {
-        label: 'Use current filters',
-        value: 'currentFilters',
-      },
-      {
-        label: 'Use all documents',
-        value: 'all',
-      },
-    ],
-  },
-  {
-    name: 'columnsToExport',
-    type: 'select',
-    hasMany: true,
-    label: 'Columns to Export',
-    options: [
-      // need to push all collection fields here
-    ],
-  },
-]
-export function modifyFields(fields: Field[]): Field[] {
+export function modifyFields(fields: Field[], collectionConfig: CollectionConfig): Field[] {
+  const columns = collectionConfig.fields
+    .map((field: Field) =>
+      'name' in field
+        ? {
+            label: field.name,
+            value: field.name,
+          }
+        : null,
+    )
+    .filter(Boolean)
+
+  const fieldsToAdd = [
+    {
+      name: 'drafts',
+      type: 'select',
+      label: 'Drafts',
+      options: [
+        {
+          label: 'True',
+          value: 'true',
+        },
+        {
+          label: 'False',
+          value: 'false',
+        },
+      ],
+    },
+    {
+      name: 'depth',
+      type: 'number',
+      defaultValue: 1,
+      label: 'Depth',
+      required: true,
+    },
+    {
+      name: 'selectionToUse',
+      type: 'radio',
+      options: [
+        {
+          label: 'Use current selection',
+          value: 'currentSelection',
+        },
+        {
+          label: 'Use current filters',
+          value: 'currentFilters',
+        },
+        {
+          label: 'Use all documents',
+          value: 'all',
+        },
+      ],
+    },
+    {
+      name: 'columnsToExport',
+      type: 'select',
+      hasMany: true,
+      label: 'Columns to Export',
+      options: columns,
+    },
+  ]
+
   const flattenFields = (fields: Field[]): Field[] => {
     let result: Field[] = []
 
