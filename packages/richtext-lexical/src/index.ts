@@ -287,6 +287,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
                 if (subFields?.length) {
                   await afterChangeTraverseFields({
+                    blockData: nodeSiblingData,
                     collection,
                     context,
                     data: data ?? {},
@@ -395,10 +396,11 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
               if (subFieldFn && subFieldDataFn) {
                 const subFields = subFieldFn({ node, req })
-                const nodeSliblingData = subFieldDataFn({ node, req }) ?? {}
+                const nodeSiblingData = subFieldDataFn({ node, req }) ?? {}
 
                 if (subFields?.length) {
                   afterReadTraverseFields({
+                    blockData: nodeSiblingData,
                     collection,
                     context,
                     currentDepth: currentDepth!,
@@ -420,7 +422,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     populationPromises: populationPromises!,
                     req,
                     showHiddenFields: showHiddenFields!,
-                    siblingDoc: nodeSliblingData,
+                    siblingDoc: nodeSiblingData,
                     triggerAccessControl,
                     triggerHooks,
                   })
@@ -564,6 +566,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                 if (subFields?.length) {
                   await beforeChangeTraverseFields({
                     id,
+                    blockData: nodeSiblingData,
                     collection,
                     context,
                     data: data ?? {},
@@ -758,6 +761,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                 if (subFields?.length) {
                   await beforeValidateTraverseFields({
                     id,
+                    blockData: nodeSiblingData,
                     collection,
                     context,
                     data,

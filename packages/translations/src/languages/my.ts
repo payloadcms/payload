@@ -267,6 +267,7 @@ export const myTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'ဘာဖြစ်ဖြစ် ထွက်မည်။',
     leaveWithoutSaving: 'မသိမ်းဘဲ ထွက်မည်။',
     light: 'အလင်း',
+    listControlMenu: 'စာရင်းထိန်းချုပ် မီနူး',
     livePreview: 'အစမ်းကြည့်ရန်',
     loading: 'ဖွင့်နေသည်',
     locale: 'ဒေသ',

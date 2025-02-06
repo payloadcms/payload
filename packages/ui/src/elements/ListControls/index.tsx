@@ -22,14 +22,13 @@ import { PublishMany } from '../PublishMany/index.js'
 import { SearchFilter } from '../SearchFilter/index.js'
 import { UnpublishMany } from '../UnpublishMany/index.js'
 import { WhereBuilder } from '../WhereBuilder/index.js'
-import './index.scss'
 import validateWhereQuery from '../WhereBuilder/validateWhereQuery.js'
 import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched.js'
+import './index.scss'
 
 const baseClass = 'list-controls'
 
 export type ListControlsProps = {
-  readonly afterListControls?: React.ReactNode | React.ReactNode[]
   readonly beforeActions?: React.ReactNode[]
   readonly collectionConfig: ClientCollectionConfig
   readonly collectionSlug: string
@@ -40,6 +39,7 @@ export type ListControlsProps = {
   readonly handleSearchChange?: (search: string) => void
   readonly handleSortChange?: (sort: string) => void
   readonly handleWhereChange?: (where: Where) => void
+  readonly listControlsMenu?: React.ReactNode | React.ReactNode[]
   readonly renderedFilters?: Map<string, React.ReactNode>
 }
 
@@ -50,7 +50,6 @@ export type ListControlsProps = {
  */
 export const ListControls: React.FC<ListControlsProps> = (props) => {
   const {
-    afterListControls,
     beforeActions,
     collectionConfig,
     collectionSlug,
@@ -58,6 +57,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     disableBulkEdit,
     enableColumns = true,
     enableSort = false,
+    listControlsMenu,
     renderedFilters,
   } = props
 
@@ -202,22 +202,18 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                 {t('general:sort')}
               </Pill>
             )}
-            {afterListControls != null && afterListControls !== false && (
+            {listControlsMenu && Array.isArray(listControlsMenu) && (
               <Popup
-                button={<Dots />}
+                button={<Dots ariaLabel={t('general:listControlMenu')} />}
                 className={`${baseClass}__popup`}
                 horizontalAlign="right"
                 size="large"
                 verticalAlign="bottom"
               >
                 <PopupList.ButtonGroup>
-                  {Array.isArray(afterListControls) ? (
-                    afterListControls.map((control, index) => (
-                      <PopupList.Button key={index}>{control}</PopupList.Button>
-                    ))
-                  ) : (
-                    <PopupList.Button>{afterListControls}</PopupList.Button>
-                  )}
+                  {listControlsMenu.map((control, index) => (
+                    <PopupList.Button key={index}>{control}</PopupList.Button>
+                  ))}
                 </PopupList.ButtonGroup>
               </Popup>
             )}

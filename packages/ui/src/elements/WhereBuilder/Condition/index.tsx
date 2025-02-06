@@ -76,12 +76,20 @@ export const Condition: React.FC<Props> = (props) => {
   const debouncedValue = useDebounce(internalQueryValue, 300)
 
   useEffect(() => {
-    // This is to trigger changes when the debounced value changes
-    if (
-      (fieldOption?.value || typeof fieldOption?.value === 'number') &&
-      internalOperatorOption &&
-      ![null, undefined].includes(debouncedValue)
-    ) {
+    if (debouncedValue === undefined) {
+      return
+    }
+
+    if (debouncedValue === null) {
+      removeCondition({
+        andIndex,
+        orIndex,
+      })
+
+      return
+    }
+
+    if ((fieldOption?.value || typeof fieldOption?.value === 'number') && internalOperatorOption) {
       updateCondition({
         andIndex,
         fieldName: fieldOption.value,
@@ -98,6 +106,7 @@ export const Condition: React.FC<Props> = (props) => {
     orIndex,
     updateCondition,
     operator,
+    removeCondition,
   ])
 
   const booleanSelect =

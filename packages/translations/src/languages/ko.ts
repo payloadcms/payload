@@ -263,6 +263,7 @@ export const koTranslations: DefaultTranslationsObject = {
     leaveAnyway: '그래도 나가시겠습니까?',
     leaveWithoutSaving: '저장하지 않고 나가기',
     light: '라이트',
+    listControlMenu: '목록 제어 메뉴',
     livePreview: '실시간 미리보기',
     loading: '불러오는 중',
     locale: 'locale',

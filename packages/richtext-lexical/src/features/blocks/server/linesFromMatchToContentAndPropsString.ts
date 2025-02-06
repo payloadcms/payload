@@ -43,12 +43,12 @@ export function linesFromStartToContentAndPropsString({
 
   let endLineIndex = startLineIndex
 
-  mainLoop: for (let lineIndex = 0; lineIndex < linesCopy.length; lineIndex++) {
-    const line = trimChildren ? linesCopy[lineIndex].trim() : linesCopy[lineIndex]
+  mainLoop: for (const [lineIndex, lineCopy] of linesCopy.entries()) {
+    const line = trimChildren ? lineCopy.trim() : lineCopy
     let amountOfBeginningSpacesRemoved = 0
     if (trimChildren) {
-      for (let i = 0; i < linesCopy[lineIndex].length; i++) {
-        if (linesCopy[lineIndex][i] === ' ') {
+      for (let i = 0; i < lineCopy.length; i++) {
+        if (lineCopy[i] === ' ') {
           amountOfBeginningSpacesRemoved++
         } else {
           break

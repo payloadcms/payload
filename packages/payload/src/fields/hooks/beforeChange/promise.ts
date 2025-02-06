@@ -4,7 +4,7 @@ import type { ValidationFieldError } from '../../../errors/index.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, Operation, PayloadRequest } from '../../../types/index.js'
-import type { Field, TabAsField } from '../../config/types.js'
+import type { Field, TabAsField, Validate } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
@@ -16,6 +16,10 @@ import { getExistingRowDoc } from './getExistingRowDoc.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
+  /**
+   * Data of the nearest parent block. If no parent block exists, this will be the `undefined`
+   */
+  blockData?: JsonObject
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   data: JsonObject
@@ -48,6 +52,7 @@ type Args = {
 
 export const promise = async ({
   id,
+  blockData,
   collection,
   context,
   data,
@@ -77,7 +82,7 @@ export const promise = async ({
   })
 
   const passesCondition = field.admin?.condition
-    ? Boolean(field.admin.condition(data, siblingData, { user: req.user }))
+    ? Boolean(field.admin.condition(data, siblingData, { blockData, user: req.user }))
     : true
   let skipValidationFromHere = skipValidation || !passesCondition
   const { localization } = req.payload.config
@@ -102,6 +107,7 @@ export const promise = async ({
         await priorHook
 
         const hookedValue = await currentHook({
+          blockData,
           collection,
           context,
           data,
@@ -139,22 +145,27 @@ export const promise = async ({
         }
       }
 
-      const validationResult = await field.validate(
-        valueToValidate as never,
-        {
-          ...field,
-          id,
-          collectionSlug: collection?.slug,
-          data: deepMergeWithSourceArrays(doc, data),
-          event: 'submit',
-          jsonError,
-          operation,
-          preferences: { fields: {} },
-          previousValue: siblingDoc[field.name],
-          req,
-          siblingData: deepMergeWithSourceArrays(siblingDoc, siblingData),
-        } as any,
-      )
+      const validateFn: Validate<object, object, object, object> = field.validate as Validate<
+        object,
+        object,
+        object,
+        object
+      >
+      const validationResult = await validateFn(valueToValidate as never, {
+        ...field,
+        id,
+        blockData,
+        collectionSlug: collection?.slug,
+        data: deepMergeWithSourceArrays(doc, data),
+        event: 'submit',
+        // @ts-expect-error
+        jsonError,
+        operation,
+        preferences: { fields: {} },
+        previousValue: siblingDoc[field.name],
+        req,
+        siblingData: deepMergeWithSourceArrays(siblingDoc, siblingData),
+      })
 
       if (typeof validationResult === 'string') {
         const label = getTranslatedLabel(field?.label || field?.name, req.i18n)
@@ -217,6 +228,7 @@ export const promise = async ({
           promises.push(
             traverseFields({
               id,
+              blockData,
               collection,
               context,
               data,
@@ -268,6 +280,7 @@ export const promise = async ({
             promises.push(
               traverseFields({
                 id,
+                blockData: row,
                 collection,
                 context,
                 data,
@@ -301,6 +314,7 @@ export const promise = async ({
     case 'row': {
       await traverseFields({
         id,
+        blockData,
         collection,
         context,
         data,
@@ -339,6 +353,7 @@ export const promise = async ({
 
       await traverseFields({
         id,
+        blockData,
         collection,
         context,
         data,
@@ -455,6 +470,7 @@ export const promise = async ({
 
       await traverseFields({
         id,
+        blockData,
         collection,
         context,
         data,
@@ -481,6 +497,7 @@ export const promise = async ({
     case 'tabs': {
       await traverseFields({
         id,
+        blockData,
         collection,
         context,
         data,

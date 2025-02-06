@@ -9,6 +9,10 @@ import { runBeforeDuplicateHooks } from './runHook.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args<T> = {
+  /**
+   * Data of the nearest parent block. If no parent block exists, this will be the `undefined`
+   */
+  blockData?: JsonObject
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   doc: T
@@ -25,6 +29,7 @@ type Args<T> = {
 
 export const promise = async <T>({
   id,
+  blockData,
   collection,
   context,
   doc,
@@ -63,6 +68,7 @@ export const promise = async <T>({
             const localizedValues = await localizedValuesPromise
 
             const beforeDuplicateArgs: FieldHookArgs = {
+              blockData,
               collection,
               context,
               data: doc,
@@ -96,6 +102,7 @@ export const promise = async <T>({
         siblingDoc[field.name] = localeData
       } else {
         const beforeDuplicateArgs: FieldHookArgs = {
+          blockData,
           collection,
           context,
           data: doc,
@@ -143,6 +150,7 @@ export const promise = async <T>({
                   promises.push(
                     traverseFields({
                       id,
+                      blockData,
                       collection,
                       context,
                       doc,
@@ -177,6 +185,7 @@ export const promise = async <T>({
                   promises.push(
                     traverseFields({
                       id,
+                      blockData: row,
                       collection,
                       context,
                       doc,
@@ -199,6 +208,7 @@ export const promise = async <T>({
               promises.push(
                 traverseFields({
                   id,
+                  blockData,
                   collection,
                   context,
                   doc,
@@ -234,6 +244,7 @@ export const promise = async <T>({
               promises.push(
                 traverseFields({
                   id,
+                  blockData,
                   collection,
                   context,
                   doc,
@@ -270,6 +281,7 @@ export const promise = async <T>({
                 promises.push(
                   traverseFields({
                     id,
+                    blockData: row,
                     collection,
                     context,
                     doc,
@@ -300,6 +312,7 @@ export const promise = async <T>({
 
           await traverseFields({
             id,
+            blockData,
             collection,
             context,
             doc,
@@ -324,6 +337,7 @@ export const promise = async <T>({
 
           await traverseFields({
             id,
+            blockData,
             collection,
             context,
             doc,
@@ -347,6 +361,7 @@ export const promise = async <T>({
       case 'row': {
         await traverseFields({
           id,
+          blockData,
           collection,
           context,
           doc,
@@ -367,6 +382,7 @@ export const promise = async <T>({
       case 'tab': {
         await traverseFields({
           id,
+          blockData,
           collection,
           context,
           doc,
@@ -386,6 +402,7 @@ export const promise = async <T>({
       case 'tabs': {
         await traverseFields({
           id,
+          blockData,
           collection,
           context,
           doc,

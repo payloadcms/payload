@@ -487,7 +487,7 @@ export interface LexicalAccessControl {
  */
 export interface SelectVersionsField {
   id: string;
-  hasMany?: ('a' | 'b' | 'c')[] | null;
+  hasMany?: ('a' | 'b' | 'c' | 'd')[] | null;
   array?:
     | {
         hasManyArr?: ('a' | 'b' | 'c')[] | null;
@@ -504,6 +504,7 @@ export interface SelectVersionsField {
     | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2170,6 +2171,7 @@ export interface SelectVersionsFieldsSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

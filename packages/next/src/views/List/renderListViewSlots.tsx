@@ -33,10 +33,10 @@ export const renderListViewSlots = ({
     })
   }
 
-  if (collectionConfig.admin.components?.afterListControls) {
-    result.AfterListControls = RenderServerComponent({
+  if (collectionConfig.admin.components?.listControlsMenu) {
+    result.ListControlsMenu = RenderServerComponent({
       clientProps,
-      Component: collectionConfig.admin.components.afterListControls,
+      Component: collectionConfig.admin.components.listControlsMenu,
       importMap: payload.importMap,
       serverProps,
     })

@@ -7,6 +7,10 @@ import type { Field, TabAsField } from '../../config/types.js'
 import { promise } from './promise.js'
 
 type Args = {
+  /**
+   * Data of the nearest parent block. If no parent block exists, this will be the `undefined`
+   */
+  blockData?: JsonObject
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   data: JsonObject
@@ -25,6 +29,7 @@ type Args = {
 }
 
 export const traverseFields = async ({
+  blockData,
   collection,
   context,
   data,
@@ -46,6 +51,7 @@ export const traverseFields = async ({
   fields.forEach((field, fieldIndex) => {
     promises.push(
       promise({
+        blockData,
         collection,
         context,
         data,

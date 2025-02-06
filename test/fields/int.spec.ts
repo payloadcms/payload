@@ -702,6 +702,40 @@ describe('Fields', () => {
 
       expect(block.blocks[0]?.hasManyBlocks).toStrictEqual(['a', 'b'])
     })
+
+    it('should work with autosave ', async () => {
+      let data = await payload.create({
+        collection: 'select-versions-fields',
+        data: { hasMany: ['a', 'b', 'c'] },
+      })
+      expect(data.hasMany).toStrictEqual(['a', 'b', 'c'])
+
+      data = await payload.update({
+        id: data.id,
+        collection: 'select-versions-fields',
+        data: { hasMany: ['a'] },
+        draft: true,
+      })
+      expect(data.hasMany).toStrictEqual(['a'])
+
+      data = await payload.update({
+        id: data.id,
+        collection: 'select-versions-fields',
+        data: { hasMany: ['a', 'b', 'c', 'd'] },
+        draft: true,
+        autosave: true,
+      })
+      expect(data.hasMany).toStrictEqual(['a', 'b', 'c', 'd'])
+
+      data = await payload.update({
+        id: data.id,
+        collection: 'select-versions-fields',
+        data: { hasMany: ['a'] },
+        draft: true,
+        autosave: true,
+      })
+      expect(data.hasMany).toStrictEqual(['a'])
+    })
   })
 
   describe('number', () => {

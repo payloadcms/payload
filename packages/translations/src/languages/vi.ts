@@ -264,6 +264,7 @@ export const viTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'Tiếp tục thoát',
     leaveWithoutSaving: 'Thay đổi chưa được lưu',
     light: 'Nền sáng',
+    listControlMenu: 'Menu điều khiển danh sách',
     livePreview: 'Xem trước',
     loading: 'Đang tải',
     locale: 'Ngôn ngữ',
