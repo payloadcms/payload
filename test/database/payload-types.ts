@@ -52,9 +52,13 @@ export interface Config {
   };
   globals: {
     global: Global;
+    'global-2': Global2;
+    'global-3': Global3;
   };
   globalsSelect: {
     global: GlobalSelect<false> | GlobalSelect<true>;
+    'global-2': Global2Select<false> | Global2Select<true>;
+    'global-3': Global3Select<false> | Global3Select<true>;
   };
   locale: 'en' | 'es';
   user: User & {
@@ -755,9 +759,49 @@ export interface Global {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-2".
+ */
+export interface Global2 {
+  id: string;
+  text?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-3".
+ */
+export interface Global3 {
+  id: string;
+  text?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global_select".
  */
 export interface GlobalSelect<T extends boolean = true> {
+  text?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-2_select".
+ */
+export interface Global2Select<T extends boolean = true> {
+  text?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-3_select".
+ */
+export interface Global3Select<T extends boolean = true> {
   text?: T;
   updatedAt?: T;
   createdAt?: T;
