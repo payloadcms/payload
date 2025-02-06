@@ -8,18 +8,22 @@ import {
   FieldLabel,
   RenderCustomComponent,
   useEditDepth,
+  useEffectEvent,
   useField,
 } from '@payloadcms/ui'
 import { mergeFieldStyles } from '@payloadcms/ui/shared'
+import { dequal } from 'dequal/lite'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 
 import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
-import type { LexicalRichTextFieldProps } from '../types.js'
 
 import '../lexical/theme/EditorTheme.scss'
 import './bundled.css'
 import './index.scss'
+
+import type { LexicalRichTextFieldProps } from '../types.js'
+
 import { LexicalProvider } from '../lexical/LexicalProvider.js'
 
 const baseClass = 'rich-text-lexical'
@@ -126,14 +130,26 @@ const RichTextComponent: React.FC<
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
 
-  useEffect(() => {
-    if (JSON.stringify(initialValue) !== JSON.stringify(prevInitialValueRef.current)) {
-      prevInitialValueRef.current = initialValue
-      if (JSON.stringify(prevValueRef.current) !== JSON.stringify(value)) {
+  const handleInitialValueChange = useEffectEvent(
+    (initialValue: SerializedEditorState | undefined) => {
+      // Object deep equality check here, as re-mounting the editor if
+      // the new value is the same as the old one is not necessary
+      if (!dequal(prevValueRef.current, value)) {
+        prevInitialValueRef.current = initialValue
         setRerenderProviderKey(new Date())
       }
+    },
+  )
+
+  useEffect(() => {
+    // Needs to trigger for object reference changes - otherwise,
+    // reacting to the same initial value change twice will cause
+    // the second change to be ignored, even though the value has changed.
+    // That's because initialValue is not kept up-to-date
+    if (!Object.is(initialValue, prevInitialValueRef.current)) {
+      handleInitialValueChange(initialValue)
     }
-  }, [initialValue, value])
+  }, [initialValue])
 
   return (
     <div className={classes} key={pathWithEditDepth} style={styles}>
