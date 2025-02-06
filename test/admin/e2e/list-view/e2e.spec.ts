@@ -44,6 +44,7 @@ import { reorderColumns } from '../../../helpers/e2e/reorderColumns.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { addListFilter } from 'helpers/e2e/addListFilter.js'
+
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../')
@@ -354,6 +355,24 @@ describe('List View', () => {
       const operatorField = page.locator('.condition__operator')
       await expect(operatorField.locator('.rs__placeholder')).toContainText('Select a value')
       await expect(page.locator('.condition__value input')).toHaveValue('')
+    })
+
+    test('should remove condition from URL when value is cleared', async () => {
+      await page.goto(postsUrl.list)
+
+      await addListFilter({
+        page,
+        fieldLabel: 'Relationship',
+        operatorLabel: 'equals',
+        value: 'post1',
+      })
+
+      await page.waitForURL(/&where/)
+
+      const valueInput = page.locator('.condition__value')
+      const removeButton = valueInput.locator('.clear-indicator').click()
+
+      await page.waitForURL(/^(?!.*&where)/)
     })
 
     test('should accept where query from valid URL where parameter', async () => {
