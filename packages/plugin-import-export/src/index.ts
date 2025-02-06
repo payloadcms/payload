@@ -37,15 +37,15 @@ export const importExportPlugin =
 
     collectionsToUpdate.forEach((collection) => {
       if (!collection.admin) {
-        collection.admin = { components: { afterListControls: [] } }
+        collection.admin = { components: { listControlsMenu: [] } }
       }
       if (!collection.admin.components) {
-        collection.admin.components = { afterListControls: [] }
+        collection.admin.components = { listControlsMenu: [] }
       }
-      if (!collection.admin.components.afterListControls) {
-        collection.admin.components.afterListControls = []
+      if (!collection.admin.components.listControlsMenu) {
+        collection.admin.components.listControlsMenu = []
       }
-      collection.admin.components.afterListControls.push({
+      collection.admin.components.listControlsMenu.push({
         clientProps: {
           exportCollectionSlug: exportCollection.slug,
         },
