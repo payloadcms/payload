@@ -8,8 +8,10 @@ import {
   Drawer,
   Form,
   FormSubmit,
+  PlusIcon,
   RenderFields,
   useConfig,
+  useDocumentDrawer,
   useSelection,
   useServerFunctions,
   XIcon,
@@ -17,7 +19,7 @@ import {
 
 import './index.scss'
 
-import React from 'react'
+import React, { Fragment } from 'react'
 
 import { modifyFields } from '../../export/modifyFields.js'
 import { fields } from '../../exportFields.js'
@@ -30,6 +32,12 @@ export const ExportDrawer: React.FC<{
   drawerSlug: string
   exportCollectionSlug: string
 }> = ({ collectionSlug, drawerSlug, exportCollectionSlug }) => {
+  const [DocumentDrawer, DocumentDrawerToggler, { isDrawerOpen, toggleDrawer }] = useDocumentDrawer(
+    {
+      collectionSlug: exportCollectionSlug,
+    },
+  )
+
   const { toggleModal } = useModal()
   const { getFormState } = useServerFunctions()
   const [selectionToUse, setSelectionToUse] = React.useState('')
@@ -52,11 +60,19 @@ export const ExportDrawer: React.FC<{
   const exportFields = modifyFields(fields, collectionConfig) as ClientField[]
   const initialState = useInitialState({ collectionConfig, localization })
 
-  const onChange: FormProps['onChange'][0] = React.useCallback((formData) => {
-    const currentSelection = formData.formState.selectionToUse.value
-    if (currentSelection !== selectionToUse) {
-      setSelectionToUse(currentSelection)
-    }
+  const onChange: FormProps['onChange'][0] = React.useCallback(
+    (formData: any) => {
+      const currentSelection = formData.formState.selectionToUse.value
+      if (currentSelection !== selectionToUse) {
+        setSelectionToUse(currentSelection)
+      }
+      console.log('formData', formData)
+    },
+    [setSelectionToUse],
+  )
+
+  const onSubmit = React.useCallback(() => {
+    console.log('Submit')
   }, [])
 
   const selectedDocs = []
@@ -68,56 +84,70 @@ export const ExportDrawer: React.FC<{
   })
 
   return (
-    <Drawer
-      className={baseClass}
-      gutter={false}
-      Header={
-        <div className={`${baseClass}__header`}>
-          <h2>{`Export ${collectionLabel}`}</h2>
-          <button
-            className={`${baseClass}__close`}
-            onClick={() => toggleModal(drawerSlug)}
-            type="button"
-          >
-            <XIcon className={`${baseClass}__icon`} />
-          </button>
-        </div>
-      }
-      slug={drawerSlug}
-    >
-      <div className={`${baseClass}__subheader`}>
-        <div>Creating export{collectionLabel ? ` from ${collectionLabel}` : ''}</div>
-        <FormSubmit>Export</FormSubmit>
-      </div>
-      <div className={`${baseClass}__options`}>
-        <Collapsible header="Export options">
-          <Form
-            action={'/admin'}
-            initialState={initialState}
-            method="POST"
-            onChange={[onChange]}
-            onSuccess={onSuccess}
-          >
-            <RenderFields
-              fields={exportFields}
-              parentIndexPath=""
-              parentPath=""
-              parentSchemaPath=""
-              permissions={true}
-            />
-          </Form>
-        </Collapsible>
-      </div>
-      <div className={`${baseClass}__preview`}>
-        <div className={`${baseClass}__preview-title`}>
-          <h3>Preview</h3>
-          <span>(result count) total documents</span>
-        </div>
-        (data preview here)
-        {/* if selectionToUse is current selection, return only the selected docs */}
-        {/* if selectionToUse is all, return all docs and apply export settings */}
-        {/* if selectionToUse is current filters, add filters to all docs and export settings */}
-      </div>
-    </Drawer>
+    <Fragment>
+      <DocumentDrawerToggler
+      // className={[`${baseClass}__add-button`].filter(Boolean).join(' ')}
+      // onClick={() => setShowTooltip(false)}
+      // onMouseEnter={() => setShowTooltip(true)}
+      // onMouseLeave={() => setShowTooltip(false)}
+      >
+        Export
+      </DocumentDrawerToggler>
+      <DocumentDrawer
+
+      // onSave={onSave}
+      />
+    </Fragment>
+    // <Drawer
+    //   className={baseClass}
+    //   gutter={false}
+    //   Header={
+    //     <div className={`${baseClass}__header`}>
+    //       <h2>{`Export ${collectionLabel}`}</h2>
+    //       <button
+    //         className={`${baseClass}__close`}
+    //         onClick={() => toggleModal(drawerSlug)}
+    //         type="button"
+    //       >
+    //         <XIcon className={`${baseClass}__icon`} />
+    //       </button>
+    //     </div>
+    //   }
+    //   slug={drawerSlug}
+    // >
+    //   <div className={`${baseClass}__subheader`}>
+    //     <div>Creating export{collectionLabel ? ` from ${collectionLabel}` : ''}</div>
+    //     <FormSubmit onClick={onSubmit}>Export</FormSubmit>
+    //   </div>
+    //   <div className={`${baseClass}__options`}>
+    //     <Collapsible header="Export options">
+    //       <Form
+    //         action={'/admin'}
+    //         initialState={initialState}
+    //         method="POST"
+    //         onChange={[onChange]}
+    //         onSuccess={onSuccess}
+    //       >
+    //         <RenderFields
+    //           fields={exportFields}
+    //           parentIndexPath=""
+    //           parentPath=""
+    //           parentSchemaPath=""
+    //           permissions={true}
+    //         />
+    //       </Form>
+    //     </Collapsible>
+    //   </div>
+    //   <div className={`${baseClass}__preview`}>
+    //     <div className={`${baseClass}__preview-title`}>
+    //       <h3>Preview</h3>
+    //       <span>(result count) total documents</span>
+    //     </div>
+    //     (data preview here)
+    //     {/* if selectionToUse is current selection, return only the selected docs */}
+    //     {/* if selectionToUse is all, return all docs and apply export settings */}
+    //     {/* if selectionToUse is current filters, add filters to all docs and export settings */}
+    //   </div>
+    // </Drawer>
   )
 }
