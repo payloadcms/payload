@@ -89,7 +89,7 @@ export const sanitizeQueryValue = ({
       }
     }
 
-    if (!Array.isArray(formattedValue) || formattedValue.length === 0) {
+    if (!Array.isArray(formattedValue)) {
       return null
     }
   }

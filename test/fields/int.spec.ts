@@ -2984,6 +2984,7 @@ describe('Fields', () => {
       })
 
       expect(query.docs).toBeDefined()
+      expect(query.docs).toEqual([])
     })
   })
 

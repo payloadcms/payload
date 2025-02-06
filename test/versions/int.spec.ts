@@ -1164,19 +1164,23 @@ describe('Versions', () => {
           and: [
             {
               id: {
-                not_in: allDocs.docs[0].id,
+                not_in: [allDocs.docs[0].id],
               },
             },
             {
-              title: {
-                like: 'Published',
+              radio: {
+                exists: true,
               },
             },
           ],
         },
       })
 
-      expect(results.docs).toHaveLength(1)
+      const manuallyFiltered = allDocs.docs
+        .filter((doc) => doc.id !== allDocs.docs[0].id)
+        .filter((doc) => Boolean(doc.radio))
+
+      expect(results.docs).toEqual(manuallyFiltered)
     })
   })
 
