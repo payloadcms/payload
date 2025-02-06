@@ -105,6 +105,13 @@ describe('Localization', () => {
       await expect(page.locator('.localizer .popup.popup--active')).toBeVisible()
     })
 
+    test('should filter locale with filterAvailableLocales', async () => {
+      await page.goto(url.create)
+      await expect(page.locator('.localizer.app-header__localizer')).toBeVisible()
+      await page.locator('.localizer >> button').first().click()
+      await expect(page.locator('.localizer .popup.popup--active')).not.toContainText('FILTERED')
+    })
+
     test('should disable control for active locale', async () => {
       await page.goto(url.create)
 
