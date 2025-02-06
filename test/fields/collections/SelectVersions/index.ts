@@ -9,7 +9,7 @@ const SelectVersionsFields: CollectionConfig = {
     {
       type: 'select',
       hasMany: true,
-      options: ['a', 'b', 'c'],
+      options: ['a', 'b', 'c', 'd'],
       name: 'hasMany',
     },
     {
