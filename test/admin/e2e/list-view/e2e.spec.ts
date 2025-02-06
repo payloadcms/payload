@@ -300,9 +300,9 @@ describe('List View', () => {
       await page.locator('.condition__actions .btn.condition__actions-remove').click()
 
       await page.waitForURL(/^(?!.*&where)/)
-      await wait(2000)
+
       const whereBuilder = page.locator('.list-controls__where.rah-static.rah-static--height-auto')
-      expect(whereBuilder).toBeVisible()
+      await expect(whereBuilder).toBeVisible()
     })
 
     test('should respect base list filters', async () => {
