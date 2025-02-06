@@ -408,7 +408,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
               linkParent = getSelectedNode(selection).getParent()
             } else {
               if (selectedNodes.length) {
-                linkParent = selectedNodes[0].getParent()
+                linkParent = selectedNodes[0]?.getParent() ?? null
               }
             }
 

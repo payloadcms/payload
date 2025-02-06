@@ -13,6 +13,7 @@ export const uploadValidation = (
     validation: {
       options: {
         id,
+        data,
         operation,
         preferences,
         req,
@@ -45,9 +46,12 @@ export const uploadValidation = (
     const result = await fieldSchemasToFormState({
       id,
       collectionSlug: node.relationTo,
+
       data: node?.fields ?? {},
+      documentData: data,
       fields: collection.fields,
       fieldSchemaMap: undefined,
+      initialBlockData: node?.fields ?? {},
       operation: operation === 'create' || operation === 'update' ? operation : 'update',
       permissions: {},
       preferences,

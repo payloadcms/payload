@@ -516,8 +516,8 @@ importers:
         specifier: 3.9.1
         version: 3.9.1(eslint@9.14.0(jiti@1.21.6))(typescript@5.7.3)
       eslint-plugin-react-hooks:
-        specifier: 5.0.0
-        version: 5.0.0(eslint@9.14.0(jiti@1.21.6))
+        specifier: 0.0.0-experimental-a4b2d0d5-20250203
+        version: 0.0.0-experimental-a4b2d0d5-20250203(eslint@9.14.0(jiti@1.21.6))
       eslint-plugin-regexp:
         specifier: 2.6.0
         version: 2.6.0(eslint@9.14.0(jiti@1.21.6))
@@ -570,8 +570,8 @@ importers:
         specifier: 3.9.1
         version: 3.9.1(eslint@9.14.0(jiti@1.21.6))(typescript@5.7.3)
       eslint-plugin-react-hooks:
-        specifier: 5.0.0
-        version: 5.0.0(eslint@9.14.0(jiti@1.21.6))
+        specifier: 0.0.0-experimental-a4b2d0d5-20250203
+        version: 0.0.0-experimental-a4b2d0d5-20250203(eslint@9.14.0(jiti@1.21.6))
       eslint-plugin-regexp:
         specifier: 2.6.0
         version: 2.6.0(eslint@9.14.0(jiti@1.21.6))
@@ -6609,8 +6609,8 @@ packages:
       typescript:
         optional: true
 
-  eslint-plugin-react-hooks@5.0.0:
-    resolution: {integrity: sha512-hIOwI+5hYGpJEc4uPRmz2ulCjAGD/N13Lukkh8cLV0i2IRk/bdZDYjgLVHj+U9Z704kLIdIO6iueGvxNur0sgw==}
+  eslint-plugin-react-hooks@0.0.0-experimental-a4b2d0d5-20250203:
+    resolution: {integrity: sha512-g2X7ucBnIbWs2fJGa3XMCgB0HzCqmwEjsUam+HI8J3fxv9cdoktDqOrS/zpVG/YGTXrhWml2C+fbKYdGGoGrKg==}
     engines: {node: '>=10'}
     peerDependencies:
       eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0
@@ -7829,6 +7829,7 @@ packages:
 
   lodash.get@4.4.2:
     resolution: {integrity: sha512-z+Uw/vLuy6gQe8cfaFWD7p0wVv8fJl3mbzXh33RS+0oW2wvUqiRXiQ69gLWSLpgB5/6sU+r6BlQR0MBILadqTQ==}
+    deprecated: This package is deprecated. Use the optional chaining (?.) operator instead.
 
   lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
@@ -16044,7 +16045,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-react-hooks@5.0.0(eslint@9.14.0(jiti@1.21.6)):
+  eslint-plugin-react-hooks@0.0.0-experimental-a4b2d0d5-20250203(eslint@9.14.0(jiti@1.21.6)):
     dependencies:
       eslint: 9.14.0(jiti@1.21.6)
 

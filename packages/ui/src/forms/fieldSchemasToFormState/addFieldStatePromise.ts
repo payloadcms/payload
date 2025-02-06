@@ -39,6 +39,10 @@ export type AddFieldStatePromiseArgs = {
    * if all parents are localized, then the field is localized
    */
   anyParentLocalized?: boolean
+  /**
+   * Data of the nearest parent block, or undefined
+   */
+  blockData: Data | undefined
   clientFieldSchemaMap?: ClientFieldSchemaMap
   collectionSlug?: string
   data: Data
@@ -101,6 +105,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     id,
     addErrorPathToParent: addErrorPathToParentArg,
     anyParentLocalized = false,
+    blockData,
     clientFieldSchemaMap,
     collectionSlug,
     data,
@@ -159,7 +164,13 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       fieldPermissions === true || deepCopyObjectSimple(fieldPermissions?.read)
 
     if (typeof field?.access?.read === 'function') {
-      hasPermission = await field.access.read({ id, data: fullData, req, siblingData: data })
+      hasPermission = await field.access.read({
+        id,
+        blockData,
+        data: fullData,
+        req,
+        siblingData: data,
+      })
     } else {
       hasPermission = true
     }
@@ -187,6 +198,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         validationResult = await validate(data?.[field.name], {
           ...field,
           id,
+          blockData,
           collectionSlug,
           data: fullData,
           event: 'onChange',
@@ -257,6 +269,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 id,
                 addErrorPathToParent,
                 anyParentLocalized: field.localized || anyParentLocalized,
+                blockData,
                 clientFieldSchemaMap,
                 collectionSlug,
                 data: row,
@@ -421,6 +434,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   id,
                   addErrorPathToParent,
                   anyParentLocalized: field.localized || anyParentLocalized,
+                  blockData: row,
                   clientFieldSchemaMap,
                   collectionSlug,
                   data: row,
@@ -517,6 +531,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           id,
           addErrorPathToParent,
           anyParentLocalized: field.localized || anyParentLocalized,
+          blockData,
           clientFieldSchemaMap,
           collectionSlug,
           data: data?.[field.name] || {},
@@ -565,6 +580,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           if (typeof field.filterOptions === 'function') {
             const query = await getFilterOptionsQuery(field.filterOptions, {
               id,
+              blockData,
               data: fullData,
               relationTo: field.relationTo,
               req,
@@ -665,6 +681,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       // passthrough parent functionality
       addErrorPathToParent: addErrorPathToParentArg,
       anyParentLocalized: fieldIsLocalized(field) || anyParentLocalized,
+      blockData,
       clientFieldSchemaMap,
       collectionSlug,
       data,
@@ -730,6 +747,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         id,
         addErrorPathToParent: addErrorPathToParentArg,
         anyParentLocalized: tab.localized || anyParentLocalized,
+        blockData,
         clientFieldSchemaMap,
         collectionSlug,
         data: isNamedTab ? data?.[tab.name] || {} : data,
