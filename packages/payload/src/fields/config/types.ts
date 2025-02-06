@@ -245,10 +245,26 @@ export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (a
   siblingData?: Partial<TSiblingData>
 }) => boolean | Promise<boolean>
 
+//TODO: In 4.0, we should replace the three parameters of the condition function with a single, named parameter object
 export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
+  /**
+   * The top-level document data
+   */
   data: Partial<TData>,
+  /**
+   * Immediately adjacent data to this field. For example, if this is a `group` field, then `siblingData` will be the other fields within the group.
+   */
   siblingData: Partial<TSiblingData>,
-  { user }: { user: PayloadRequest['user'] },
+  {
+    blockData,
+    user,
+  }: {
+    /**
+     * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
+     */
+    blockData: Partial<TData>
+    user: PayloadRequest['user']
+  },
 ) => boolean
 
 export type FilterOptionsProps<TData = any> = {

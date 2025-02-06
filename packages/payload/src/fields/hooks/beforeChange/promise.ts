@@ -82,7 +82,7 @@ export const promise = async ({
   })
 
   const passesCondition = field.admin?.condition
-    ? Boolean(field.admin.condition(data, siblingData, { user: req.user }))
+    ? Boolean(field.admin.condition(data, siblingData, { blockData, user: req.user }))
     : true
   let skipValidationFromHere = skipValidation || !passesCondition
   const { localization } = req.payload.config
