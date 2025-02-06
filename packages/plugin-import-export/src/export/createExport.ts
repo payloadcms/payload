@@ -15,6 +15,7 @@ type Export = {
     sort: Sort
     where?: Where
   }[]
+  exportsCollection: string
   format: 'csv' | 'json'
   globals?: string[]
   id: number | string
@@ -31,12 +32,12 @@ export type CreateExportArgs = {
 
 export const createExport = async (args: CreateExportArgs) => {
   const {
-    input: { id, name: nameArg, collections = [], format, user },
+    input: { id, name: nameArg, collections = [], exportsCollection, format, user },
     req: { locale, payload },
     req,
   } = args
 
-  if (collections.length === 1 && format === 'csv') {
+  if (collections.length === 1) {
     const { slug, fields, sort, where } = collections[0] as Export['collections'][0]
     const collection = payload.config.collections.find((collection) => collection.slug === slug)
     if (!collection) {
@@ -62,43 +63,53 @@ export const createExport = async (args: CreateExportArgs) => {
     }
 
     let result: PaginatedDocs = { hasNextPage: true } as PaginatedDocs
-    const csvData: string[] = []
+    const outputData: string[] = []
 
     let isFirstBatch = true
 
     while (result.hasNextPage) {
       findArgs.page = findArgs.page + 1
       result = await payload.find(findArgs)
-      const csvInput = result.docs.map((doc) => flattenObject(doc))
 
-      const csvString = stringify(csvInput, {
-        header: isFirstBatch, // Only include header in the first batch
-      })
+      if (format === 'csv') {
+        const csvInput = result.docs.map((doc) => flattenObject(doc))
 
-      csvData.push(csvString)
-      isFirstBatch = false
+        const csvString = stringify(csvInput, {
+          header: isFirstBatch, // Only include header in the first batch
+        })
+
+        outputData.push(csvString)
+        isFirstBatch = false
+      }
+
+      if (format === 'json') {
+        const jsonInput = result.docs.map((doc) => JSON.stringify(doc))
+        outputData.push(jsonInput.join(',\n'))
+      }
     }
 
-    const csvBuffer = Buffer.from(csvData.join(''))
+    const buffer = Buffer.from(
+      format === 'json' ? `[${outputData.join(',')}]` : outputData.join(''),
+    )
 
     // when `disableJobsQueue` is true, the export is created synchronously in a beforeOperation hook
     if (!id) {
       req.file = {
-        name: `${name}-${collection.slug}.csv`,
-        data: csvBuffer,
-        mimetype: 'text/csv',
-        size: csvBuffer.length,
+        name: `${name}-${collection.slug}.${format}`,
+        data: buffer,
+        mimetype: format === 'json' ? 'application/json' : `text/${format}`,
+        size: buffer.length,
       }
     } else {
       await req.payload.update({
         id,
-        collection: 'exports',
+        collection: exportsCollection,
         data: {},
         file: {
           name: `${name}.${format}`,
-          data: csvBuffer,
-          mimetype: 'text/csv',
-          size: csvBuffer.length,
+          data: buffer,
+          mimetype: format === 'json' ? 'application/json' : `text/${format}`,
+          size: buffer.length,
         },
       })
     }
