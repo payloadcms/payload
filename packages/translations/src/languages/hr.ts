@@ -265,7 +265,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'Svejedno napusti',
     leaveWithoutSaving: 'Napusti bez spremanja',
     light: 'Svijetlo',
-    listControlMenu: 'Izbornik za kontrolu popisa',
+    listControlsMenu: 'Izbornik za kontrolu popisa',
     livePreview: 'Pregled',
     loading: 'Učitavanje',
     locale: 'Jezik',

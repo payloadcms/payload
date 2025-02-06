@@ -264,7 +264,7 @@ export const slTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'Vseeno zapusti',
     leaveWithoutSaving: 'Zapusti brez shranjevanja',
     light: 'Svetlo',
-    listControlMenu: 'Meni za nadzor seznama',
+    listControlsMenu: 'Meni za nadzor seznama',
     livePreview: 'Predogled',
     loading: 'Nalaganje',
     locale: 'Jezik',

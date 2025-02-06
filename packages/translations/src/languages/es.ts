@@ -269,7 +269,7 @@ export const esTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'Salir de todos modos',
     leaveWithoutSaving: 'Salir sin guardar',
     light: 'Claro',
-    listControlMenu: 'Menú de control de lista',
+    listControlsMenu: 'Menú de control de lista',
     livePreview: 'Previsualizar',
     loading: 'Cargando',
     locale: 'Regional',

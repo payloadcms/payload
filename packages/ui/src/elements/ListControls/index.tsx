@@ -199,7 +199,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
             )}
             {listControlsMenu && Array.isArray(listControlsMenu) && (
               <Popup
-                button={<Dots ariaLabel={t('general:listControlMenu')} />}
+                button={<Dots ariaLabel={t('general:listControlsMenu')} />}
                 className={`${baseClass}__popup`}
                 horizontalAlign="right"
                 size="large"

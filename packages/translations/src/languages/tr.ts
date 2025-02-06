@@ -268,7 +268,7 @@ export const trTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'Yine de ayrıl',
     leaveWithoutSaving: 'Kaydetmeden ayrıl',
     light: 'Aydınlık',
-    listControlMenu: 'Liste kontrol menüsü',
+    listControlsMenu: 'Liste kontrol menüsü',
     livePreview: 'Önizleme',
     loading: 'Yükleniyor',
     locale: 'Yerel ayar',

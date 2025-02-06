@@ -267,7 +267,7 @@ export const huTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'Távozás mindenképp',
     leaveWithoutSaving: 'Távozás mentés nélkül',
     light: 'Világos',
-    listControlMenu: 'Lista vezérlő menü',
+    listControlsMenu: 'Lista vezérlő menü',
     livePreview: 'Előnézet',
     loading: 'Betöltés',
     locale: 'Nyelv',

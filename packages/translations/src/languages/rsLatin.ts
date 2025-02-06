@@ -265,7 +265,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'Svejedno napusti',
     leaveWithoutSaving: 'Napusti bez čuvanja',
     light: 'Svetlo',
-    listControlMenu: 'Kontrolni meni liste',
+    listControlsMenu: 'Kontrolni meni liste',
     livePreview: 'Pregled',
     loading: 'Učitavanje',
     locale: 'Jezik',
