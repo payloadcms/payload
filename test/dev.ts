@@ -35,7 +35,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 const {
-  _: [testSuiteArg],
+  _: [testSuiteArg = '_community'],
   ...args
 } = minimist(process.argv.slice(2))
 
@@ -43,6 +43,8 @@ if (!testSuiteArg || !fs.existsSync(path.resolve(dirname, testSuiteArg))) {
   console.log(chalk.red(`ERROR: The test folder "${testSuiteArg}" does not exist`))
   process.exit(0)
 }
+
+console.log(`Selected test suite: ${testSuiteArg}`)
 
 if (args.turbo === true) {
   process.env.TURBOPACK = '1'
