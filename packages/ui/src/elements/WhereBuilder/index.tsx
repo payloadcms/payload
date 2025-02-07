@@ -11,8 +11,6 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import { Condition } from './Condition/index.js'
 import { reduceClientFields } from './reduceClientFields.js'
-import { transformWhereQuery } from './transformWhereQuery.js'
-import validateWhereQuery from './validateWhereQuery.js'
 import './index.scss'
 
 const baseClass = 'where-builder'
@@ -33,60 +31,15 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
     setOptions(reduceClientFields({ fields, i18n }))
   }, [fields, i18n])
 
-  const { handleWhereChange, query } = useListQuery()
+  const { handleWhereChange } = useListQuery()
   const [shouldUpdateQuery, setShouldUpdateQuery] = React.useState(false)
 
-  // This handles initializing the where conditions from the search query (URL). That way, if you pass in
-  // query params to the URL, the where conditions will be initialized from those and displayed in the UI.
-  // Example: /admin/collections/posts?where[or][0][and][0][text][equals]=example%20post
-  /*
-    stored conditions look like this:
-    [
-      _or_ & _and_ queries have the same shape:
-      {
-        and: [{
-          category: {
-            equals: 'category-a'
-          }
-        }]
-      },
-
-      {
-        and:[{
-          category: {
-            equals: 'category-b'
-          },
-          text: {
-            not_equals: 'oranges'
-          },
-        }]
-      }
-    ]
-  */
-
-  const [conditions, setConditions] = React.useState(() => {
-    const whereFromSearch = query.where
-
-    if (whereFromSearch) {
-      if (validateWhereQuery(whereFromSearch)) {
-        return whereFromSearch.or
-      }
-      // Transform the where query to be in the right format. This will transform something simple like [text][equals]=example%20post to the right format
-      const transformedWhere = transformWhereQuery(whereFromSearch)
-
-      if (validateWhereQuery(transformedWhere)) {
-        return transformedWhere.or
-      }
-
-      console.warn(`Invalid where query in URL: ${JSON.stringify(whereFromSearch)}`) // eslint-disable-line no-console
-    }
-
-    return []
-  })
+  const [conditions, setConditions] = React.useState(() => [])
 
   const addCondition = React.useCallback(
     ({ andIndex, fieldName, orIndex, relation }) => {
       const newConditions = [...conditions]
+
       if (relation === 'and') {
         newConditions[orIndex].and.splice(andIndex, 0, { [fieldName]: {} })
       } else {
@@ -98,6 +51,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
           ],
         })
       }
+
       setConditions(newConditions)
     },
     [conditions],
@@ -106,8 +60,10 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   const updateCondition = React.useCallback(
     ({ andIndex, fieldName, operator, orIndex, value: valueArg }) => {
       const existingRowCondition = conditions[orIndex].and[andIndex]
-      if (typeof existingRowCondition === 'object' && fieldName && operator) {
+
+      if (typeof existingRowCondition === 'object' && fieldName) {
         const value = valueArg ?? (operator ? existingRowCondition[operator] : '')
+
         const newRowCondition = {
           [fieldName]: operator ? { [operator]: value } : {},
         }
@@ -116,6 +72,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
           const newConditions = [...conditions]
           newConditions[orIndex].and[andIndex] = newRowCondition
           setConditions(newConditions)
+
           if (![null, undefined].includes(value)) {
             // only update query when field/operator/value are filled out
             setShouldUpdateQuery(true)
@@ -166,15 +123,23 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
                   <ul className={`${baseClass}__and-filters`}>
                     {Array.isArray(or?.and) &&
                       or.and.map((_, andIndex) => {
-                        const initialFieldName = Object.keys(conditions[orIndex].and[andIndex])[0]
-                        const initialOperator =
-                          (Object.keys(
-                            conditions[orIndex].and[andIndex]?.[initialFieldName] || {},
-                          )?.[0] as Operator) || undefined
-                        const initialValue =
-                          conditions[orIndex].and[andIndex]?.[initialFieldName]?.[
-                            initialOperator
-                          ] || undefined
+                        const condition = conditions[orIndex].and[andIndex]
+                        const conditionFieldName = Object.keys(condition)[0]
+
+                        const conditionOperator =
+                          (Object.keys(condition?.[conditionFieldName] || {})?.[0] as Operator) ||
+                          undefined
+
+                        const conditionValue =
+                          condition?.[conditionFieldName]?.[conditionOperator] || undefined
+
+                        console.log(
+                          'condition',
+                          condition,
+                          conditionFieldName,
+                          conditionOperator,
+                          conditionValue,
+                        )
 
                         return (
                           <li key={andIndex}>
@@ -184,13 +149,13 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
                             <Condition
                               addCondition={addCondition}
                               andIndex={andIndex}
-                              fieldName={initialFieldName}
-                              initialValue={initialValue}
-                              operator={initialOperator}
+                              fieldName={conditionFieldName}
+                              initialValue={conditionValue}
+                              operator={conditionOperator}
                               options={options}
                               orIndex={orIndex}
                               removeCondition={removeCondition}
-                              RenderedFilter={renderedFilters?.get(initialFieldName)}
+                              RenderedFilter={renderedFilters?.get(conditionFieldName)}
                               updateCondition={updateCondition}
                             />
                           </li>

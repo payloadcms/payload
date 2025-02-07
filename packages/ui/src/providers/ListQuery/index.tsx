@@ -8,6 +8,8 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
+import { transformWhereQuery } from './transformWhereQuery.js'
+import validateWhereQuery from './validateWhereQuery.js'
 
 type ContextHandlers = {
   handlePageChange?: (page: number) => Promise<void>
@@ -79,6 +81,16 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
       if ('where' in query || 'search' in query) {
         page = '1'
+      }
+
+      if (!validateWhereQuery(query.where)) {
+        const transformedWhere = transformWhereQuery(query.where)
+
+        if (validateWhereQuery(transformedWhere)) {
+          query.where = transformedWhere
+        } else {
+          console.warn(`Invalid where query in URL: ${JSON.stringify(query.where)}`) // eslint-disable-line no-console
+        }
       }
 
       const newQuery: ListQuery = {

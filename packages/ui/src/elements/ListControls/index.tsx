@@ -19,9 +19,8 @@ import { PublishMany } from '../PublishMany/index.js'
 import { SearchFilter } from '../SearchFilter/index.js'
 import { UnpublishMany } from '../UnpublishMany/index.js'
 import { WhereBuilder } from '../WhereBuilder/index.js'
-import validateWhereQuery from '../WhereBuilder/validateWhereQuery.js'
-import './index.scss'
 import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched.js'
+import './index.scss'
 
 const baseClass = 'list-controls'
 
@@ -86,9 +85,8 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
 
   const hasWhereParam = useRef(Boolean(query?.where))
 
-  const shouldInitializeWhereOpened = validateWhereQuery(query?.where)
   const [visibleDrawer, setVisibleDrawer] = useState<'columns' | 'sort' | 'where'>(
-    shouldInitializeWhereOpened ? 'where' : undefined,
+    query?.where ? 'where' : undefined,
   )
 
   useEffect(() => {
