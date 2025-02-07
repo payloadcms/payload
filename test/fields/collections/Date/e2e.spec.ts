@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
@@ -18,7 +19,6 @@ import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../helpers/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { dateFieldsSlug } from '../../slugs.js'
-import { wait } from 'payload/shared'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -119,9 +119,11 @@ describe('Date', () => {
         const id = routeSegments.pop()
 
         // fetch the doc (need the date string from the DB)
-        const { doc } = await client.findByID({ id, auth: true, slug: 'date-fields' })
+        const { doc } = await client.findByID({ id: id!, auth: true, slug: 'date-fields' })
 
-        expect(doc.default).toEqual('2023-02-07T12:00:00.000Z')
+        await expect(() => {
+          expect(doc.default).toEqual('2023-02-07T12:00:00.000Z')
+        }).toPass({ timeout: 10000, intervals: [100] })
       })
     })
 
@@ -148,9 +150,11 @@ describe('Date', () => {
         const id = routeSegments.pop()
 
         // fetch the doc (need the date string from the DB)
-        const { doc } = await client.findByID({ id, auth: true, slug: 'date-fields' })
+        const { doc } = await client.findByID({ id: id!, auth: true, slug: 'date-fields' })
 
-        expect(doc.default).toEqual('2023-02-07T12:00:00.000Z')
+        await expect(() => {
+          expect(doc.default).toEqual('2023-02-07T12:00:00.000Z')
+        }).toPass({ timeout: 10000, intervals: [100] })
       })
     })
 
@@ -177,9 +181,11 @@ describe('Date', () => {
         const id = routeSegments.pop()
 
         // fetch the doc (need the date string from the DB)
-        const { doc } = await client.findByID({ id, auth: true, slug: 'date-fields' })
+        const { doc } = await client.findByID({ id: id!, auth: true, slug: 'date-fields' })
 
-        expect(doc.default).toEqual('2023-02-07T12:00:00.000Z')
+        await expect(() => {
+          expect(doc.default).toEqual('2023-02-07T12:00:00.000Z')
+        }).toPass({ timeout: 10000, intervals: [100] })
       })
     })
   })
@@ -212,11 +218,12 @@ describe('Date', () => {
       const expectedUTCValue = '2027-08-12T01:00:00.000Z' // This is the expected UTC value for the above
       const expectedTimezone = 'Asia/Tokyo'
 
-      const dateValue = await dateTimeLocator.inputValue()
+      await expect(dateTimeLocator).toHaveValue(expectedValue)
 
-      await expect(dateValue).toEqual(expectedValue)
-      await expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedUTCValue)
-      await expect(existingDoc?.dayAndTimeWithTimezone_timezone).toEqual(expectedTimezone)
+      await expect(() => {
+        expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedUTCValue)
+        expect(existingDoc?.dayAndTimeWithTimezone_timezone).toEqual(expectedTimezone)
+      }).toPass({ timeout: 10000, intervals: [100] })
     })
 
     test('changing the timezone should update the date to the new equivalent', async () => {
@@ -244,9 +251,7 @@ describe('Date', () => {
 
       await page.click(timezoneOptionSelector)
 
-      const newDateValue = await dateTimeLocator.inputValue()
-
-      await expect(newDateValue).not.toEqual(initialDateValue)
+      await expect(dateTimeLocator).not.toHaveValue(initialDateValue)
     })
 
     test('can change timezone inside a block', async () => {
@@ -276,9 +281,7 @@ describe('Date', () => {
 
       await page.click(timezoneOptionSelector)
 
-      const newDateValue = await dateTimeLocator.inputValue()
-
-      await expect(newDateValue).not.toEqual(initialDateValue)
+      await expect(dateTimeLocator).not.toHaveValue(initialDateValue)
     })
 
     test('can change timezone inside an array', async () => {
@@ -306,9 +309,7 @@ describe('Date', () => {
 
       await page.click(timezoneOptionSelector)
 
-      const newDateValue = await dateTimeLocator.inputValue()
-
-      await expect(newDateValue).not.toEqual(initialDateValue)
+      await expect(dateTimeLocator).not.toHaveValue(initialDateValue)
     })
 
     test('can see custom timezone in timezone picker', async () => {
@@ -357,8 +358,10 @@ describe('Date', () => {
           return Intl.DateTimeFormat().resolvedOptions().timeZone
         })
 
-        // Confirm that the emulated timezone is set to London
-        await expect(result).toEqual(londonTimezone)
+        await expect(() => {
+          // Confirm that the emulated timezone is set to London
+          expect(result).toEqual(londonTimezone)
+        }).toPass({ timeout: 10000, intervals: [100] })
 
         const dateTimeLocator = page.locator(
           '#field-dayAndTimeWithTimezone .react-datepicker-wrapper input',
@@ -366,9 +369,7 @@ describe('Date', () => {
 
         const expectedValue = 'Aug 12, 2027 10:00 AM' // This is the seeded value for 10AM at Asia/Tokyo time
 
-        const dateValue = await dateTimeLocator.inputValue()
-
-        await expect(dateValue).toEqual(expectedValue)
+        await expect(dateTimeLocator).toHaveValue(expectedValue)
       })
     })
   })
