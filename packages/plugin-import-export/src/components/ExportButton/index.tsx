@@ -1,9 +1,10 @@
 'use client'
-import { useModal } from '@payloadcms/ui'
-import React from 'react'
+import { useSelection } from '@payloadcms/ui'
+import React, { useEffect } from 'react'
 
 import { ExportDrawer } from '../ExportDrawer/index.js'
 import './index.scss'
+import { useImportExport } from '../ImportExportProvider/index.js'
 
 const baseClass = 'export-button'
 export const ExportButton: React.FC<{ collectionSlug: string; exportCollectionSlug: string }> = ({
@@ -11,6 +12,12 @@ export const ExportButton: React.FC<{ collectionSlug: string; exportCollectionSl
   exportCollectionSlug,
 }) => {
   const exportDrawerSlug = `export-${collectionSlug}`
+  const { selected } = useSelection()
+  const { setSelected } = useImportExport()
+
+  useEffect(() => {
+    setSelected(selected)
+  }, [selected, setSelected])
 
   return (
     <React.Fragment>
