@@ -64,7 +64,7 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
     validate: memoizedValidate,
   })
 
-  const timezonePath = path + '_timezone'
+  const timezonePath = path + '_tz'
   const timezoneField = useFormFields(([fields, _]) => fields?.[timezonePath])
   const supportedTimezones = config.admin.timezone.supportedTimezones
 

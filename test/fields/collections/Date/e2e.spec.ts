@@ -222,7 +222,7 @@ describe('Date', () => {
 
       await expect(() => {
         expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedUTCValue)
-        expect(existingDoc?.dayAndTimeWithTimezone_timezone).toEqual(expectedTimezone)
+        expect(existingDoc?.dayAndTimeWithTimezone_tz).toEqual(expectedTimezone)
       }).toPass({ timeout: 10000, intervals: [100] })
     })
 

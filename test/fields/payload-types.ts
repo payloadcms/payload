@@ -560,7 +560,7 @@ export interface SelectVersionsField {
     | null;
   updatedAt: string;
   createdAt: string;
-  _status?: ('draft' | 'published') | null;
+  _status?: SupportedTimezones;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1124,13 +1124,13 @@ export interface DateField {
   dayAndTime?: string | null;
   monthOnly?: string | null;
   defaultWithTimezone?: string | null;
-  defaultWithTimezone_timezone?: SupportedTimezones;
+  defaultWithTimezone_tz?: SupportedTimezones;
   dayAndTimeWithTimezone?: string | null;
-  dayAndTimeWithTimezone_timezone?: SupportedTimezones;
+  dayAndTimeWithTimezone_tz?: SupportedTimezones;
   timezoneBlocks?:
     | {
         dayAndTime?: string | null;
-        dayAndTime_timezone?: SupportedTimezones;
+        dayAndTime_tz?: SupportedTimezones;
         id?: string | null;
         blockName?: string | null;
         blockType: 'dateBlock';
@@ -1139,7 +1139,7 @@ export interface DateField {
   timezoneArray?:
     | {
         dayAndTime?: string | null;
-        dayAndTime_timezone?: SupportedTimezones;
+        dayAndTime_tz?: SupportedTimezones;
         id?: string | null;
       }[]
     | null;
@@ -2791,9 +2791,9 @@ export interface DateFieldsSelect<T extends boolean = true> {
   dayAndTime?: T;
   monthOnly?: T;
   defaultWithTimezone?: T;
-  defaultWithTimezone_timezone?: T;
+  defaultWithTimezone_tz?: T;
   dayAndTimeWithTimezone?: T;
-  dayAndTimeWithTimezone_timezone?: T;
+  dayAndTimeWithTimezone_tz?: T;
   timezoneBlocks?:
     | T
     | {
@@ -2801,7 +2801,7 @@ export interface DateFieldsSelect<T extends boolean = true> {
           | T
           | {
               dayAndTime?: T;
-              dayAndTime_timezone?: T;
+              dayAndTime_tz?: T;
               id?: T;
               blockName?: T;
             };
@@ -2810,7 +2810,7 @@ export interface DateFieldsSelect<T extends boolean = true> {
     | T
     | {
         dayAndTime?: T;
-        dayAndTime_timezone?: T;
+        dayAndTime_tz?: T;
         id?: T;
       };
   updatedAt?: T;
