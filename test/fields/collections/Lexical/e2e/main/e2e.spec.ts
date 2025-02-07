@@ -1337,7 +1337,6 @@ describe('lexicalMain', () => {
   })
 
   test('select decoratorNodes', async () => {
-    await navigateToLexicalFields()
     // utils
     const decoratorLocator = page.locator('.decorator-selected') // [data-lexical-decorator="true"]
     const expectInsideSelectedDecorator = async (innerLocator: Locator) => {
