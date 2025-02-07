@@ -1054,6 +1054,7 @@ export {
   createClientConfig,
   serverOnlyAdminConfigProperties,
   serverOnlyConfigProperties,
+  type UnsanitizedClientConfig,
 } from './config/client.js'
 export { defaults } from './config/defaults.js'
 

@@ -82,13 +82,14 @@ export const createClientBlocks = ({
   defaultIDType: Payload['config']['db']['defaultIDType']
   i18n: I18nClient
   importMap: ImportMap
-}): ClientBlock[] => {
-  const clientBlocks: ClientBlock[] = []
+}): (ClientBlock | string)[] => {
+  const clientBlocks: (ClientBlock | string)[] = []
   for (let i = 0; i < blocks.length; i++) {
     const block = blocks[i]
 
     if (typeof block === 'string') {
-      continue // Do not process blocks that are just strings - they are processed once in the client config
+      // Do not process blocks that are just strings - they are processed once in the client config
+      clientBlocks.push(block)
     }
 
     const clientBlock: ClientBlock = {
