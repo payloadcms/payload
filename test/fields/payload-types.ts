@@ -595,6 +595,12 @@ export interface ArrayField {
         id?: string | null;
       }[]
     | null;
+  arrayWithLabels?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -725,6 +731,14 @@ export interface BlockField {
         id?: string | null;
         blockName?: string | null;
         blockType: 'relationships';
+      }[]
+    | null;
+  blockWithLabels?:
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'text';
       }[]
     | null;
   updatedAt: string;
@@ -2265,6 +2279,12 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
         text?: T;
         id?: T;
       };
+  arrayWithLabels?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2442,6 +2462,17 @@ export interface BlockFieldsSelect<T extends boolean = true> {
           | T
           | {
               relationship?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  blockWithLabels?:
+    | T
+    | {
+        text?:
+          | T
+          | {
+              text?: T;
               id?: T;
               blockName?: T;
             };
