@@ -97,7 +97,6 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
 
   useEffect(() => {
     if (hasWhereParam.current && !query?.where) {
-      setVisibleDrawer(undefined)
       hasWhereParam.current = false
     } else if (query?.where) {
       hasWhereParam.current = true
