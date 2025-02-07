@@ -960,6 +960,18 @@ describe('Versions', () => {
       )
     })
 
+    test('correctly renders modified-only diff for localized array fields', async () => {
+      await navigateToVersionFieldsDiff()
+
+      const textInArrayES = page.locator('[data-field-path="arrayLocalized"][data-locale="es"]')
+
+      await expect(textInArrayES).toContainText('No Array Localizeds found')
+
+      await page.locator('#modifiedOnly').click()
+
+      await expect(textInArrayES).toBeHidden()
+    })
+
     test('correctly renders diff for block fields', async () => {
       await navigateToVersionFieldsDiff()
 

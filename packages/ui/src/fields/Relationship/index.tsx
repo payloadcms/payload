@@ -1,6 +1,7 @@
 'use client'
 import type { PaginatedDocs, RelationshipFieldClientComponent, Where } from 'payload'
 
+import { dequal } from 'dequal/lite'
 import { wordBoundariesRegex } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
@@ -19,11 +20,12 @@ import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useDebouncedCallback } from '../../hooks/useDebouncedCallback.js'
-import { useIgnoredEffect } from '../../hooks/useIgnoredEffect.js'
+import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import './index.scss'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { createRelationMap } from './createRelationMap.js'
@@ -31,7 +33,6 @@ import { findOptionsByValue } from './findOptionsByValue.js'
 import { optionsReducer } from './optionsReducer.js'
 import { MultiValueLabel } from './select-components/MultiValueLabel/index.js'
 import { SingleValue } from './select-components/SingleValue/index.js'
-import './index.scss'
 
 const maxResultsPerRequest = 10
 
@@ -306,89 +307,83 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     [search, updateSearch],
   )
 
+  const handleValueChange = useEffectEvent((value: Value | Value[]) => {
+    const relationMap = createRelationMap({
+      hasMany,
+      relationTo,
+      value,
+    })
+
+    void Object.entries(relationMap).reduce(async (priorRelation, [relation, ids]) => {
+      await priorRelation
+
+      const idsToLoad = ids.filter((id) => {
+        return !options.find((optionGroup) =>
+          optionGroup?.options?.find(
+            (option) => option.value === id && option.relationTo === relation,
+          ),
+        )
+      })
+
+      if (idsToLoad.length > 0) {
+        const query = {
+          depth: 0,
+          draft: true,
+          limit: idsToLoad.length,
+          locale,
+          where: {
+            id: {
+              in: idsToLoad,
+            },
+          },
+        }
+
+        if (!errorLoading) {
+          const response = await fetch(`${serverURL}${api}/${relation}`, {
+            body: qs.stringify(query),
+            credentials: 'include',
+            headers: {
+              'Accept-Language': i18n.language,
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'X-HTTP-Method-Override': 'GET',
+            },
+            method: 'POST',
+          })
+
+          const collection = getEntityConfig({ collectionSlug: relation })
+          let docs = []
+
+          if (response.ok) {
+            const data = await response.json()
+            docs = data.docs
+          }
+
+          dispatchOptions({
+            type: 'ADD',
+            collection,
+            config,
+            docs,
+            i18n,
+            ids: idsToLoad,
+            sort: true,
+          })
+        }
+      }
+    }, Promise.resolve())
+  })
+
+  const prevValue = useRef(value)
+  const isFirstRenderRef = useRef(true)
   // ///////////////////////////////////
   // Ensure we have an option for each value
   // ///////////////////////////////////
-  useIgnoredEffect(
-    () => {
-      const relationMap = createRelationMap({
-        hasMany,
-        relationTo,
-        value,
-      })
-
-      void Object.entries(relationMap).reduce(async (priorRelation, [relation, ids]) => {
-        await priorRelation
-
-        const idsToLoad = ids.filter((id) => {
-          return !options.find((optionGroup) =>
-            optionGroup?.options?.find(
-              (option) => option.value === id && option.relationTo === relation,
-            ),
-          )
-        })
-
-        if (idsToLoad.length > 0) {
-          const query = {
-            depth: 0,
-            draft: true,
-            limit: idsToLoad.length,
-            locale,
-            where: {
-              id: {
-                in: idsToLoad,
-              },
-            },
-          }
-
-          if (!errorLoading) {
-            const response = await fetch(`${serverURL}${api}/${relation}`, {
-              body: qs.stringify(query),
-              credentials: 'include',
-              headers: {
-                'Accept-Language': i18n.language,
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-HTTP-Method-Override': 'GET',
-              },
-              method: 'POST',
-            })
-
-            const collection = getEntityConfig({ collectionSlug: relation })
-            let docs = []
-
-            if (response.ok) {
-              const data = await response.json()
-              docs = data.docs
-            }
-
-            dispatchOptions({
-              type: 'ADD',
-              collection,
-              config,
-              docs,
-              i18n,
-              ids: idsToLoad,
-              sort: true,
-            })
-          }
-        }
-      }, Promise.resolve())
-    },
-    [value],
-    [
-      options,
-      hasMany,
-      errorLoading,
-      getEntityConfig,
-      hasMultipleRelations,
-      serverURL,
-      api,
-      i18n,
-      relationTo,
-      locale,
-      config,
-    ],
-  )
+  useEffect(() => {
+    if (isFirstRenderRef.current || !dequal(value, prevValue.current)) {
+      handleValueChange(value)
+    }
+    isFirstRenderRef.current = false
+    prevValue.current = value
+  }, [value])
 
   // Determine if we should switch to word boundary search
   useEffect(() => {
@@ -401,39 +396,39 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     setEnableWordBoundarySearch(!isIdOnly)
   }, [relationTo, getEntityConfig])
 
+  const getResultsEffectEvent: GetResults = useEffectEvent(async (args) => {
+    return await getResults(args)
+  })
+
   // When (`relationTo` || `filterOptions` || `locale`) changes, reset component
   // Note - effect should not run on first run
-  useIgnoredEffect(
-    () => {
-      // If the menu is open while filterOptions changes
-      // due to latency of form state and fast clicking into this field,
-      // re-fetch options
-      if (hasLoadedFirstPageRef.current && menuIsOpen) {
-        setIsLoading(true)
-        void getResults({
-          filterOptions,
-          lastLoadedPage: {},
-          onSuccess: () => {
-            hasLoadedFirstPageRef.current = true
-            setIsLoading(false)
-          },
-          value: valueRef.current,
-        })
-      }
-
-      // If the menu is not open, still reset the field state
-      // because we need to get new options next time the menu opens
-      dispatchOptions({
-        type: 'CLEAR',
-        exemptValues: valueRef.current,
+  useEffect(() => {
+    // If the menu is open while filterOptions changes
+    // due to latency of form state and fast clicking into this field,
+    // re-fetch options
+    if (hasLoadedFirstPageRef.current && menuIsOpen) {
+      setIsLoading(true)
+      void getResultsEffectEvent({
+        filterOptions,
+        lastLoadedPage: {},
+        onSuccess: () => {
+          hasLoadedFirstPageRef.current = true
+          setIsLoading(false)
+        },
+        value: valueRef.current,
       })
+    }
 
-      setLastFullyLoadedRelation(-1)
-      setLastLoadedPage({})
-    },
-    [relationTo, filterOptions, locale, path, menuIsOpen],
-    [getResults],
-  )
+    // If the menu is not open, still reset the field state
+    // because we need to get new options next time the menu opens
+    dispatchOptions({
+      type: 'CLEAR',
+      exemptValues: valueRef.current,
+    })
+
+    setLastFullyLoadedRelation(-1)
+    setLastLoadedPage({})
+  }, [relationTo, filterOptions, locale, path, menuIsOpen])
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {

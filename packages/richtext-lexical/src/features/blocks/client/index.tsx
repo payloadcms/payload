@@ -25,13 +25,17 @@ export const BlocksFeatureClient = createClientFeature(
     const schemaMapRenderedInlineBlockPathPrefix = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks`
     const clientSchema = featureClientSchemaMap['blocks']
 
+    if (!clientSchema) {
+      return {}
+    }
+
     const blocksFields: BlocksFieldClient[] = Object.entries(clientSchema)
       .filter(
         ([key]) =>
           key.startsWith(schemaMapRenderedBlockPathPrefix + '.') &&
           !key.replace(schemaMapRenderedBlockPathPrefix + '.', '').includes('.'),
       )
-      .map(([key, value]) => value[0] as BlocksFieldClient)
+      .map(([, value]) => value[0] as BlocksFieldClient)
 
     const inlineBlocksFields: BlocksFieldClient[] = Object.entries(clientSchema)
       .filter(
@@ -39,15 +43,19 @@ export const BlocksFeatureClient = createClientFeature(
           key.startsWith(schemaMapRenderedInlineBlockPathPrefix + '.') &&
           !key.replace(schemaMapRenderedInlineBlockPathPrefix + '.', '').includes('.'),
       )
-      .map(([key, value]) => value[0] as BlocksFieldClient)
+      .map(([, value]) => value[0] as BlocksFieldClient)
 
-    const clientBlocks: ClientBlock[] = blocksFields.map((field) => {
-      return field.blocks[0]
-    })
+    const clientBlocks: ClientBlock[] = blocksFields
+      .map((field) => {
+        return field.blocks[0]
+      })
+      .filter((block) => block !== undefined)
 
-    const clientInlineBlocks: ClientBlock[] = inlineBlocksFields.map((field) => {
-      return field.blocks[0]
-    })
+    const clientInlineBlocks: ClientBlock[] = inlineBlocksFields
+      .map((field) => {
+        return field.blocks[0]
+      })
+      .filter((block) => block !== undefined)
 
     return {
       nodes: [BlockNode, InlineBlockNode],

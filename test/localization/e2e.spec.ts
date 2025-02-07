@@ -83,7 +83,7 @@ describe('Localization', () => {
 
     initPageConsoleErrorCatch(page)
 
-    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
+    client = new RESTClient({ defaultSlug: 'users', serverURL })
     await client.login()
 
     await ensureCompilationIsDone({ page, serverURL })

@@ -5,6 +5,7 @@ import {
   Popup,
   PopupList,
   toast,
+  useConfig,
   useLocale,
   useModal,
   useTranslation,
@@ -20,15 +21,18 @@ import { ReindexConfirmModal } from './ReindexConfirmModal/index.js'
 const confirmReindexModalSlug = 'confirm-reindex-modal'
 
 export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
-  apiBasePath,
   collectionLabels,
   searchCollections,
   searchSlug,
 }) => {
   const { closeModal, openModal } = useModal()
+
+  const { config } = useConfig()
+
   const {
     i18n: { t },
   } = useTranslation()
+
   const locale = useLocale()
   const router = useRouter()
 
@@ -46,15 +50,16 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
     closeConfirmModal()
     setLoading(true)
 
-    const basePath = apiBasePath.endsWith('/') ? apiBasePath.slice(0, -1) : apiBasePath
-
     try {
-      const endpointRes = await fetch(`${basePath}/${searchSlug}/reindex?locale=${locale.code}`, {
-        body: JSON.stringify({
-          collections: reindexCollections,
-        }),
-        method: 'POST',
-      })
+      const endpointRes = await fetch(
+        `${config.routes.api}/${searchSlug}/reindex?locale=${locale.code}`,
+        {
+          body: JSON.stringify({
+            collections: reindexCollections,
+          }),
+          method: 'POST',
+        },
+      )
 
       const { message } = (await endpointRes.json()) as { message: string }
 
@@ -64,13 +69,13 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
         toast.success(message)
         router.refresh()
       }
-    } catch (err: unknown) {
+    } catch (_err: unknown) {
       // swallow error, toast shown above
     } finally {
       setReindexCollections([])
       setLoading(false)
     }
-  }, [closeConfirmModal, isLoading, reindexCollections, router, searchSlug, locale, apiBasePath])
+  }, [closeConfirmModal, isLoading, reindexCollections, router, searchSlug, locale, config])
 
   const handleShowConfirmModal = useCallback(
     (collections: string | string[] = searchCollections) => {

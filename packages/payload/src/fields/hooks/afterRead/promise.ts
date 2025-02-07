@@ -19,6 +19,10 @@ import { relationshipPopulationPromise } from './relationshipPopulationPromise.j
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
+  /**
+   * Data of the nearest parent block. If no parent block exists, this will be the `undefined`
+   */
+  blockData?: JsonObject
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   currentDepth: number
@@ -60,6 +64,7 @@ type Args = {
 // - Populate relationships
 
 export const promise = async ({
+  blockData,
   collection,
   context,
   currentDepth,
@@ -236,6 +241,7 @@ export const promise = async ({
           const hookPromises = Object.entries(siblingDoc[field.name]).map(([locale, value]) =>
             (async () => {
               const hookedValue = await currentHook({
+                blockData,
                 collection,
                 context,
                 currentDepth,
@@ -266,6 +272,7 @@ export const promise = async ({
           await Promise.all(hookPromises)
         } else {
           const hookedValue = await currentHook({
+            blockData,
             collection,
             context,
             currentDepth,
@@ -301,6 +308,7 @@ export const promise = async ({
         ? true
         : await field.access.read({
             id: doc.id as number | string,
+            blockData,
             data: doc,
             doc,
             req,
@@ -364,6 +372,7 @@ export const promise = async ({
       if (Array.isArray(rows)) {
         rows.forEach((row, rowIndex) => {
           traverseFields({
+            blockData,
             collection,
             context,
             currentDepth,
@@ -397,6 +406,7 @@ export const promise = async ({
           if (Array.isArray(localeRows)) {
             localeRows.forEach((row, rowIndex) => {
               traverseFields({
+                blockData,
                 collection,
                 context,
                 currentDepth,
@@ -480,6 +490,7 @@ export const promise = async ({
 
           if (block) {
             traverseFields({
+              blockData: row,
               collection,
               context,
               currentDepth,
@@ -523,6 +534,7 @@ export const promise = async ({
 
               if (block) {
                 traverseFields({
+                  blockData: row,
                   collection,
                   context,
                   currentDepth,
@@ -562,6 +574,7 @@ export const promise = async ({
     case 'collapsible':
     case 'row': {
       traverseFields({
+        blockData,
         collection,
         context,
         currentDepth,
@@ -603,6 +616,7 @@ export const promise = async ({
       const groupSelect = select?.[field.name]
 
       traverseFields({
+        blockData,
         collection,
         context,
         currentDepth,
@@ -755,6 +769,7 @@ export const promise = async ({
       }
 
       traverseFields({
+        blockData,
         collection,
         context,
         currentDepth,
@@ -788,6 +803,7 @@ export const promise = async ({
 
     case 'tabs': {
       traverseFields({
+        blockData,
         collection,
         context,
         currentDepth,

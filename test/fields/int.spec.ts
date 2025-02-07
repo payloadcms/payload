@@ -678,6 +678,64 @@ describe('Fields', () => {
 
       expect(upd.array[0].group.selectHasMany).toStrictEqual(['six'])
     })
+
+    it('should work with versions', async () => {
+      const base = await payload.create({
+        collection: 'select-versions-fields',
+        data: { hasMany: ['a', 'b'] },
+      })
+
+      expect(base.hasMany).toStrictEqual(['a', 'b'])
+
+      const array = await payload.create({
+        collection: 'select-versions-fields',
+        data: { array: [{ hasManyArr: ['a', 'b'] }] },
+        draft: true,
+      })
+
+      expect(array.array[0]?.hasManyArr).toStrictEqual(['a', 'b'])
+
+      const block = await payload.create({
+        collection: 'select-versions-fields',
+        data: { blocks: [{ blockType: 'block', hasManyBlocks: ['a', 'b'] }] },
+      })
+
+      expect(block.blocks[0]?.hasManyBlocks).toStrictEqual(['a', 'b'])
+    })
+
+    it('should work with autosave ', async () => {
+      let data = await payload.create({
+        collection: 'select-versions-fields',
+        data: { hasMany: ['a', 'b', 'c'] },
+      })
+      expect(data.hasMany).toStrictEqual(['a', 'b', 'c'])
+
+      data = await payload.update({
+        id: data.id,
+        collection: 'select-versions-fields',
+        data: { hasMany: ['a'] },
+        draft: true,
+      })
+      expect(data.hasMany).toStrictEqual(['a'])
+
+      data = await payload.update({
+        id: data.id,
+        collection: 'select-versions-fields',
+        data: { hasMany: ['a', 'b', 'c', 'd'] },
+        draft: true,
+        autosave: true,
+      })
+      expect(data.hasMany).toStrictEqual(['a', 'b', 'c', 'd'])
+
+      data = await payload.update({
+        id: data.id,
+        collection: 'select-versions-fields',
+        data: { hasMany: ['a'] },
+        draft: true,
+        autosave: true,
+      })
+      expect(data.hasMany).toStrictEqual(['a'])
+    })
   })
 
   describe('number', () => {

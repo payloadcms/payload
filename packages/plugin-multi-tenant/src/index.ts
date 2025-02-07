@@ -2,19 +2,13 @@ import type { CollectionConfig, Config } from 'payload'
 
 import type { MultiTenantPluginConfig } from './types.js'
 
+import { defaults } from './defaults.js'
 import { tenantField } from './fields/tenantField/index.js'
 import { tenantsArrayField } from './fields/tenantsArrayField/index.js'
 import { addTenantCleanup } from './hooks/afterTenantDelete.js'
 import { addCollectionAccess } from './utilities/addCollectionAccess.js'
 import { addFilterOptionsToFields } from './utilities/addFilterOptionsToFields.js'
 import { withTenantListFilter } from './utilities/withTenantListFilter.js'
-
-const defaults = {
-  tenantCollectionSlug: 'tenants',
-  tenantFieldName: 'tenant',
-  tenantsArrayFieldName: 'tenants',
-  tenantsArrayTenantFieldName: 'tenant',
-}
 
 export const multiTenantPlugin =
   <ConfigType>(pluginConfig: MultiTenantPluginConfig<ConfigType>) =>

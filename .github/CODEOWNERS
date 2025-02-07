@@ -8,14 +8,14 @@
 /packages/email-*/src/ @denolfe @jmikrut @DanRibbens
 /packages/storage-*/src/ @denolfe @jmikrut @DanRibbens
 /packages/create-payload-app/src/ @denolfe @jmikrut @DanRibbens
-/packages/eslint-*/ @denolfe @jmikrut @DanRibbens @AlessioGr
+/packages/eslint-*/ @denolfe @jmikrut @DanRibbens @AlessioGr @GermanJablo
 
 ### Templates ###
 /templates/_data/ @denolfe @jmikrut @DanRibbens
 /templates/_template/ @denolfe @jmikrut @DanRibbens
 
 ### Build Files ###
-**/tsconfig*.json @denolfe @jmikrut @DanRibbens @AlessioGr
+**/tsconfig*.json @denolfe @jmikrut @DanRibbens @AlessioGr @GermanJablo
 **/jest.config.js @denolfe @jmikrut @DanRibbens @AlessioGr
 
 ### Root ###

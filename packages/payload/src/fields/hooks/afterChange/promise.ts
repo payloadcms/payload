@@ -11,6 +11,10 @@ import { getFieldPathsModified as getFieldPaths } from '../../getFieldPaths.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
+  /**
+   * Data of the nearest parent block. If no parent block exists, this will be the `undefined`
+   */
+  blockData?: JsonObject
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   data: JsonObject
@@ -33,6 +37,7 @@ type Args = {
 // - Execute field hooks
 
 export const promise = async ({
+  blockData,
   collection,
   context,
   data,
@@ -69,6 +74,7 @@ export const promise = async ({
         await priorHook
 
         const hookedValue = await currentHook({
+          blockData,
           collection,
           context,
           data,
@@ -104,6 +110,7 @@ export const promise = async ({
         rows.forEach((row, rowIndex) => {
           promises.push(
             traverseFields({
+              blockData,
               collection,
               context,
               data,
@@ -146,6 +153,7 @@ export const promise = async ({
           if (block) {
             promises.push(
               traverseFields({
+                blockData: siblingData?.[field.name]?.[rowIndex],
                 collection,
                 context,
                 data,
@@ -175,6 +183,7 @@ export const promise = async ({
     case 'collapsible':
     case 'row': {
       await traverseFields({
+        blockData,
         collection,
         context,
         data,
@@ -197,6 +206,7 @@ export const promise = async ({
 
     case 'group': {
       await traverseFields({
+        blockData,
         collection,
         context,
         data,
@@ -273,6 +283,7 @@ export const promise = async ({
       }
 
       await traverseFields({
+        blockData,
         collection,
         context,
         data,
@@ -295,6 +306,7 @@ export const promise = async ({
 
     case 'tabs': {
       await traverseFields({
+        blockData,
         collection,
         context,
         data,
