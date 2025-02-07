@@ -881,6 +881,7 @@ export interface TextField {
   fieldWithDefaultValue?: string | null;
   dependentOnFieldWithDefaultValue?: string | null;
   hasMany?: string[] | null;
+  readOnlyHasMany?: string[] | null;
   validatesHasMany?: string[] | null;
   localizedHasMany?: string[] | null;
   withMinRows?: string[] | null;
@@ -3243,6 +3244,7 @@ export interface TextFieldsSelect<T extends boolean = true> {
   fieldWithDefaultValue?: T;
   dependentOnFieldWithDefaultValue?: T;
   hasMany?: T;
+  readOnlyHasMany?: T;
   validatesHasMany?: T;
   localizedHasMany?: T;
   withMinRows?: T;
