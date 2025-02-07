@@ -61,6 +61,14 @@ async function navigateToLexicalFields(
   await linkToDoc.click()
 
   await page.waitForURL(`**${linkDocHref}`)
+
+  if (collectionSlug === 'lexical-fields') {
+    const richTextField = page.locator('.rich-text-lexical').nth(2) // second
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+    // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
+    await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
+  }
 }
 
 describe('lexicalMain', () => {
@@ -1329,6 +1337,7 @@ describe('lexicalMain', () => {
   })
 
   test('select decoratorNodes', async () => {
+    await navigateToLexicalFields()
     // utils
     const decoratorLocator = page.locator('.decorator-selected') // [data-lexical-decorator="true"]
     const expectInsideSelectedDecorator = async (innerLocator: Locator) => {
@@ -1339,7 +1348,7 @@ describe('lexicalMain', () => {
     // test
     await navigateToLexicalFields()
     const bottomOfUploadNode = page
-      .locator('div')
+      .locator('.lexical-upload div')
       .filter({ hasText: /^payload\.jpg$/ })
       .first()
     await bottomOfUploadNode.click()
