@@ -19,7 +19,7 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-export const seed = async (_payload) => {
+export const seed = async (_payload: Payload) => {
   await _payload.create({
     collection: 'users',
     data: {
@@ -90,7 +90,7 @@ export const seed = async (_payload) => {
   await _payload.create({
     collection: postsSlug,
     data: {
-      upload: uploadedImage.id,
+      upload: uploadedImage,
     },
   })
 
@@ -123,6 +123,6 @@ export async function clearAndSeedEverything(_payload: Payload) {
     _payload,
     collectionSlugs,
     seedFunction: seed,
-    snapshotKey: 'adminTest',
+    snapshotKey: 'joinsTest',
   })
 }
