@@ -123,6 +123,18 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
          */
         arrayFieldAccess?: ArrayField['access']
         /**
+         * Name of the array field
+         *
+         * @default 'tenants'
+         */
+        arrayFieldName?: string
+        /**
+         * Name of the tenant field
+         *
+         * @default 'tenant'
+         */
+        arrayTenantFieldName?: string
+        /**
          * When `includeDefaultField` is `true`, the field will be added to the users collection automatically
          */
         includeDefaultField?: true
@@ -134,24 +146,11 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
          * Access configuration for the tenant field
          */
         tenantFieldAccess?: RelationshipField['access']
-        /**
-         * Name of the array field that stores tenant relationships
-         * @default 'tenants'
-         */
-        tenantsArrayFieldName?: string
-        /**
-         * Name of the field within the array that stores the tenant relationship
-         * @default 'tenant'
-         */
-        tenantsArrayTenantFieldName?: string
-        /**
-         * Collection slug where tenants are stored
-         * @default 'tenants'
-         */
-        tenantsCollectionSlug?: string
       }
     | {
         arrayFieldAccess?: never
+        arrayFieldName?: string
+        arrayTenantFieldName?: string
         /**
          * When `includeDefaultField` is `false`, you must include the field on your users collection manually
          */
