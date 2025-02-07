@@ -212,7 +212,7 @@ describe('Block fields', () => {
       .click()
 
     await expect(
-      await page.locator('#field-blocks .blocks-field__row .blocks-field__block-header', {
+      page.locator('#field-blocks .blocks-field__row .blocks-field__block-header', {
         hasText: 'Custom Block Label',
       }),
     ).toBeVisible()
@@ -289,6 +289,16 @@ describe('Block fields', () => {
     await page.click('#action-save', { delay: 100 })
     await expect(page.locator('.payload-toast-container')).toContainText(
       'The following field is invalid: Blocks With Min Rows',
+    )
+  })
+
+  test('ensure functions passed to blocks field labels property are respected', async () => {
+    await page.goto(url.create)
+
+    const blocksFieldWithLabels = page.locator('#field-blockWithLabels')
+
+    await expect(blocksFieldWithLabels.locator('.blocks-field__drawer-toggler')).toHaveText(
+      'Add Account',
     )
   })
 
