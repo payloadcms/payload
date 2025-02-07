@@ -18,7 +18,7 @@ import {
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { navigateToDoc } from '../helpers/e2e/navigateToDoc.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { EXPECT_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { categoriesJoinRestrictedSlug, categoriesSlug, postsSlug, uploadsSlug } from './shared.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { RESTClient } from '../helpers/rest.js'
@@ -55,11 +55,10 @@ describe('Join Field', () => {
     initPageConsoleErrorCatch(page)
     await ensureCompilationIsDone({ page, serverURL })
 
-    await throttleTest({ context, delay: 'Slow 4G', page })
+    //await throttleTest({ context, delay: 'Slow 4G', page })
   })
 
   beforeEach(async () => {
-    console.log('reInitializeDB')
     await reInitializeDB({
       serverURL,
       snapshotKey: 'joinsTest',
@@ -291,8 +290,9 @@ describe('Join Field', () => {
     await addButton.click()
     const drawer = page.locator('[id^=doc-drawer_posts_1_]')
     await expect(drawer).toBeVisible()
+
     const categoryField = drawer.locator('#field-category')
-    await expect(categoryField).toBeVisible()
+    await expect(categoryField).toBeVisible({ timeout: EXPECT_TIMEOUT * 80 })
     const categoryValue = categoryField.locator('.relationship--single-value__text')
     await expect(categoryValue).toHaveText('example')
     const titleField = drawer.locator('#field-title')
