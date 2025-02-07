@@ -133,7 +133,13 @@ import type {
   TextareaFieldValidation,
 } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
-import type { DefaultValue, Operation, PayloadRequest, Where } from '../../types/index.js'
+import type {
+  DefaultValue,
+  JsonObject,
+  Operation,
+  PayloadRequest,
+  Where,
+} from '../../types/index.js'
 import type {
   NumberFieldManyValidation,
   NumberFieldSingleValidation,
@@ -148,6 +154,10 @@ import type {
 } from '../validations.js'
 
 export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSiblingData = any> = {
+  /**
+   * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
+   */
+  blockData: JsonObject | undefined
   /** The collection which the field belongs to. If the field belongs to a global, this will be null. */
   collection: null | SanitizedCollectionConfig
   context: RequestContext
@@ -212,7 +222,11 @@ export type FieldHook<TData extends TypeWithID = any, TValue = any, TSiblingData
 
 export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (args: {
   /**
-   * The incoming data used to `create` or `update` the document with. `data` is undefined during the `read` operation.
+   * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
+   */
+  blockData?: JsonObject | undefined
+  /**
+   * The incoming, top-level document data used to `create` or `update` the document with.
    */
   data?: Partial<TData>
   /**
@@ -231,13 +245,33 @@ export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (a
   siblingData?: Partial<TSiblingData>
 }) => boolean | Promise<boolean>
 
+//TODO: In 4.0, we should replace the three parameters of the condition function with a single, named parameter object
 export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
+  /**
+   * The top-level document data
+   */
   data: Partial<TData>,
+  /**
+   * Immediately adjacent data to this field. For example, if this is a `group` field, then `siblingData` will be the other fields within the group.
+   */
   siblingData: Partial<TSiblingData>,
-  { user }: { user: PayloadRequest['user'] },
+  {
+    blockData,
+    user,
+  }: {
+    /**
+     * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
+     */
+    blockData: Partial<TData>
+    user: PayloadRequest['user']
+  },
 ) => boolean
 
 export type FilterOptionsProps<TData = any> = {
+  /**
+   * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
+   */
+  blockData: TData
   /**
    * An object containing the full collection or global document currently being edited.
    */
@@ -348,6 +382,11 @@ export type LabelsClient = {
 }
 
 export type BaseValidateOptions<TData, TSiblingData, TValue> = {
+  /**
+  /**
+   * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
+   */
+  blockData: Partial<TData>
   collectionSlug?: string
   data: Partial<TData>
   event?: 'onChange' | 'submit'

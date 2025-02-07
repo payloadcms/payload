@@ -4,9 +4,9 @@ import React from 'react'
 
 import type { FieldCondition } from '../../types.js'
 
-import { DateField } from '../Date/index.js'
-import { NumberField } from '../Number/index.js'
-import { RelationshipField } from '../Relationship/index.js'
+import { DateFilter } from '../Date/index.js'
+import { NumberFilter } from '../Number/index.js'
+import { RelationshipFilter } from '../Relationship/index.js'
 import { Select } from '../Select/index.js'
 import { Text } from '../Text/index.js'
 
@@ -47,7 +47,7 @@ export const DefaultFilter: React.FC<Props> = ({
   switch (internalField?.field?.type) {
     case 'date': {
       return (
-        <DateField
+        <DateFilter
           disabled={disabled}
           field={internalField.field}
           onChange={onChange}
@@ -59,7 +59,7 @@ export const DefaultFilter: React.FC<Props> = ({
 
     case 'number': {
       return (
-        <NumberField
+        <NumberFilter
           disabled={disabled}
           field={internalField.field}
           onChange={onChange}
@@ -71,7 +71,7 @@ export const DefaultFilter: React.FC<Props> = ({
 
     case 'relationship': {
       return (
-        <RelationshipField
+        <RelationshipFilter
           disabled={disabled}
           field={internalField.field}
           filterOptions={filterOptions}

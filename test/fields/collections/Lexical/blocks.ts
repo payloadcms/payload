@@ -1,4 +1,4 @@
-import type { ArrayField, Block } from 'payload'
+import type { ArrayField, Block, TextFieldSingleValidation } from 'payload'
 
 import { BlocksFeature, FixedToolbarFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
@@ -11,6 +11,122 @@ async function asyncFunction(param: string) {
     }, 1000)
   })
 }
+
+export const FilterOptionsBlock: Block = {
+  slug: 'filterOptionsBlock',
+  fields: [
+    {
+      name: 'text',
+      type: 'text',
+    },
+    {
+      name: 'group',
+      type: 'group',
+      fields: [
+        {
+          name: 'groupText',
+          type: 'text',
+        },
+        {
+          name: 'dependsOnDocData',
+          type: 'relationship',
+          relationTo: 'text-fields',
+          filterOptions: ({ data }) => {
+            if (!data.title) {
+              return true
+            }
+            return {
+              text: {
+                equals: data.title,
+              },
+            }
+          },
+        },
+        {
+          name: 'dependsOnSiblingData',
+          type: 'relationship',
+          relationTo: 'text-fields',
+          filterOptions: ({ siblingData }) => {
+            console.log('SD', siblingData)
+            // @ts-expect-error
+            if (!siblingData?.groupText) {
+              return true
+            }
+            return {
+              text: {
+                equals: (siblingData as any)?.groupText,
+              },
+            }
+          },
+        },
+        {
+          name: 'dependsOnBlockData',
+          type: 'relationship',
+          relationTo: 'text-fields',
+          filterOptions: ({ blockData }) => {
+            if (!blockData?.text) {
+              return true
+            }
+            return {
+              text: {
+                equals: blockData?.text,
+              },
+            }
+          },
+        },
+      ],
+    },
+  ],
+}
+
+export const ValidationBlock: Block = {
+  slug: 'validationBlock',
+  fields: [
+    {
+      name: 'text',
+      type: 'text',
+    },
+    {
+      name: 'group',
+      type: 'group',
+      fields: [
+        {
+          name: 'groupText',
+          type: 'text',
+        },
+        {
+          name: 'textDependsOnDocData',
+          type: 'text',
+          validate: ((value, { data }) => {
+            if ((data as any)?.title === 'invalid') {
+              return 'doc title cannot be invalid'
+            }
+            return true
+          }) as TextFieldSingleValidation,
+        },
+        {
+          name: 'textDependsOnSiblingData',
+          type: 'text',
+          validate: ((value, { siblingData }) => {
+            if ((siblingData as any)?.groupText === 'invalid') {
+              return 'textDependsOnSiblingData sibling field cannot be invalid'
+            }
+          }) as TextFieldSingleValidation,
+        },
+        {
+          name: 'textDependsOnBlockData',
+          type: 'text',
+          validate: ((value, { blockData }) => {
+            if ((blockData as any)?.text === 'invalid') {
+              return 'textDependsOnBlockData sibling field cannot be invalid'
+            }
+          }) as TextFieldSingleValidation,
+        },
+      ],
+    },
+  ],
+}
+
 export const AsyncHooksBlock: Block = {
   slug: 'asyncHooksBlock',
   fields: [

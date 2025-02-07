@@ -450,7 +450,6 @@ export interface FieldsRelationshipSelect<T extends boolean = true> {
   relationshipRestricted?: T;
   relationshipWithTitle?: T;
   relationshipFilteredByID?: T;
-  relationshipFilteredByField?: T;
   relationshipFilteredAsync?: T;
   relationshipManyFiltered?: T;
   filter?: T;
@@ -643,6 +642,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

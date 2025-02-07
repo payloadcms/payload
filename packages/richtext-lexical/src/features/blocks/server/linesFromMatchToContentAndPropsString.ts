@@ -38,17 +38,17 @@ export function linesFromStartToContentAndPropsString({
   let isSelfClosing = false
   let isWithinCodeBlockAmount = 0
 
-  const beforeStartLine = linesCopy[0].slice(0, startMatch.index)
+  const beforeStartLine = linesCopy[0]!.slice(0, startMatch.index)
   let endlineLastCharIndex = 0
 
   let endLineIndex = startLineIndex
 
-  mainLoop: for (let lineIndex = 0; lineIndex < linesCopy.length; lineIndex++) {
-    const line = trimChildren ? linesCopy[lineIndex].trim() : linesCopy[lineIndex]
+  mainLoop: for (const [lineIndex, lineCopy] of linesCopy.entries()) {
+    const line = trimChildren ? lineCopy.trim() : lineCopy
     let amountOfBeginningSpacesRemoved = 0
     if (trimChildren) {
-      for (let i = 0; i < linesCopy[lineIndex].length; i++) {
-        if (linesCopy[lineIndex][i] === ' ') {
+      for (let i = 0; i < lineCopy.length; i++) {
+        if (lineCopy[i] === ' ') {
           amountOfBeginningSpacesRemoved++
         } else {
           break
@@ -159,7 +159,7 @@ export function linesFromStartToContentAndPropsString({
     }
   }
 
-  const afterEndLine = linesCopy[endLineIndex].trim().slice(endlineLastCharIndex)
+  const afterEndLine = linesCopy[endLineIndex]!.trim().slice(endlineLastCharIndex)
 
   return {
     afterEndLine,

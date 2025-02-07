@@ -37,6 +37,13 @@ export type FormProps = {
     errorToast: (value: string) => void,
   ) => void
   initialState?: FormState
+  /**
+   * Determines if this Form is the main, top-level Form of a document. If set to true, the
+   * Form's children will be wrapped in a DocumentFormContext, which lets you access this document
+   * Form's data and fields from any child component - even if that child component is wrapped in a child
+   * Form (e.g. a lexical block).
+   */
+  isDocumentForm?: boolean
   isInitializing?: boolean
   log?: boolean
   onChange?: ((args: { formState: FormState; submitted?: boolean }) => Promise<FormState>)[]

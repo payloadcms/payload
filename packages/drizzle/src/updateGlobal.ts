@@ -17,7 +17,7 @@ export async function updateGlobal<T extends Record<string, unknown>>(
 
   const existingGlobal = await db.query[tableName].findFirst({})
 
-  const result = await upsertRow<T>({
+  const result = await upsertRow<{ globalType: string } & T>({
     ...(existingGlobal ? { id: existingGlobal.id, operation: 'update' } : { operation: 'create' }),
     adapter: this,
     data,
@@ -27,6 +27,8 @@ export async function updateGlobal<T extends Record<string, unknown>>(
     select,
     tableName,
   })
+
+  result.globalType = slug
 
   return result
 }
