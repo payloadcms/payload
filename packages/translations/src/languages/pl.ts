@@ -265,6 +265,7 @@ export const plTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'Wyjdź mimo to',
     leaveWithoutSaving: 'Wyjdź bez zapisywania',
     light: 'Jasny',
+    listControlMenu: 'Menu kontroli listy',
     livePreview: 'Podgląd',
     loading: 'Ładowanie',
     locale: 'Ustawienia regionalne',

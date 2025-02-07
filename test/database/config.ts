@@ -563,6 +563,24 @@ export default buildConfigWithDefaults({
       ],
       versions: true,
     },
+    {
+      slug: 'global-2',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'global-3',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
   ],
   localization: {
     defaultLocale: 'en',

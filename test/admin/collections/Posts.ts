@@ -33,6 +33,26 @@ export const Posts: CollectionConfig = {
           },
         },
       ],
+      listControlsMenu: [
+        {
+          path: '/components/Banner/index.js#Banner',
+          clientProps: {
+            message: 'ListControlsMenu',
+          },
+        },
+        {
+          path: '/components/Banner/index.js#Banner',
+          clientProps: {
+            message: 'Many of them',
+          },
+        },
+        {
+          path: '/components/Banner/index.js#Banner',
+          clientProps: {
+            message: 'Ok last one',
+          },
+        },
+      ],
       afterList: [
         {
           path: '/components/Banner/index.js#Banner',

@@ -261,6 +261,7 @@ export const arTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'المغادرة على أي حال',
     leaveWithoutSaving: 'المغادرة بدون حفظ',
     light: 'فاتح',
+    listControlMenu: 'قائمة التحكم',
     livePreview: 'معاينة مباشرة',
     loading: 'يتمّ التّحميل',
     locale: 'اللّغة',

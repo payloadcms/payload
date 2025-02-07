@@ -13,7 +13,7 @@ export const linkValidation = (
   return async ({
     node,
     validation: {
-      options: { id, collectionSlug, operation, preferences, req },
+      options: { id, collectionSlug, data, operation, preferences, req },
     },
   }) => {
     /**
@@ -24,8 +24,10 @@ export const linkValidation = (
       id,
       collectionSlug,
       data: node.fields,
+      documentData: data,
       fields: sanitizedFieldsWithoutText, // Sanitized in feature.server.ts
       fieldSchemaMap: undefined,
+      initialBlockData: node.fields,
       operation: operation === 'create' || operation === 'update' ? operation : 'update',
       permissions: {},
       preferences,
@@ -34,12 +36,15 @@ export const linkValidation = (
       schemaPath: '',
     })
 
-    let errorPaths: string[] = []
+    const errorPathsSet = new Set<string>()
     for (const fieldKey in result) {
-      if (result[fieldKey].errorPaths) {
-        errorPaths = errorPaths.concat(result[fieldKey].errorPaths)
+      if (result[fieldKey].errorPaths?.length) {
+        for (const errorPath of result[fieldKey].errorPaths) {
+          errorPathsSet.add(errorPath)
+        }
       }
     }
+    const errorPaths = Array.from(errorPathsSet)
 
     if (errorPaths.length) {
       return 'The following fields are invalid: ' + errorPaths.join(', ')

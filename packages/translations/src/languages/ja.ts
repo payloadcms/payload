@@ -265,6 +265,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'すぐに画面を離れる',
     leaveWithoutSaving: '内容が保存されていません',
     light: 'ライトモード',
+    listControlMenu: 'リスト制御メニュー',
     livePreview: 'プレビュー',
     loading: 'ローディング中',
     locale: 'ロケール',

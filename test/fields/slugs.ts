@@ -17,6 +17,9 @@ export const lexicalFieldsSlug = 'lexical-fields'
 export const lexicalLocalizedFieldsSlug = 'lexical-localized-fields'
 export const lexicalMigrateFieldsSlug = 'lexical-migrate-fields'
 export const lexicalRelationshipFieldsSlug = 'lexical-relationship-fields'
+
+export const lexicalAccessControlSlug = 'lexical-access-control'
+
 export const numberFieldsSlug = 'number-fields'
 export const pointFieldsSlug = 'point-fields'
 export const radioFieldsSlug = 'radio-fields'
@@ -52,6 +55,7 @@ export const collectionSlugs = [
   lexicalFieldsSlug,
   lexicalMigrateFieldsSlug,
   lexicalRelationshipFieldsSlug,
+  lexicalAccessControlSlug,
   numberFieldsSlug,
   pointFieldsSlug,
   radioFieldsSlug,

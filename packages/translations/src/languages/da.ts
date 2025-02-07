@@ -263,6 +263,7 @@ export const daTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'Forlad alligevel',
     leaveWithoutSaving: 'Forlad uden at gemme',
     light: 'Lys',
+    listControlMenu: 'Kontrolmenu for liste',
     livePreview: 'Live-forhåndsvisning',
     loading: 'Loader',
     locale: 'Lokalitet',

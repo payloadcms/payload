@@ -267,6 +267,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'Все равно уйти',
     leaveWithoutSaving: 'Выход без сохранения',
     light: 'Светлая',
+    listControlMenu: 'Меню управления списком',
     livePreview: 'Предпросмотр',
     loading: 'Загрузка',
     locale: 'Локаль',

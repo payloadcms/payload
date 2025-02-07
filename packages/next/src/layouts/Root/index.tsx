@@ -91,6 +91,20 @@ export const RootLayout = async ({
     importMap,
   })
 
+  if (
+    clientConfig.localization &&
+    config.localization &&
+    typeof config.localization.filterAvailableLocales === 'function'
+  ) {
+    clientConfig.localization.locales = (
+      await config.localization.filterAvailableLocales({
+        locales: config.localization.locales,
+        req,
+      })
+    ).map(({ toString, ...rest }) => rest)
+    clientConfig.localization.localeCodes = config.localization.locales.map(({ code }) => code)
+  }
+
   const locale = await getRequestLocale({
     req,
   })

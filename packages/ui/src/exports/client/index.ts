@@ -177,6 +177,7 @@ export { fieldBaseClass } from '../../fields/shared/index.js'
 
 export {
   useAllFormFields,
+  useDocumentForm,
   useForm,
   useFormFields,
   useFormInitializing,
@@ -276,9 +277,9 @@ export { TranslationProvider, useTranslation } from '../../providers/Translation
 export { useWindowInfo, WindowInfoProvider } from '../../providers/WindowInfo/index.js'
 export { Text as TextCondition } from '../../elements/WhereBuilder/Condition/Text/index.js'
 export { Select as SelectCondition } from '../../elements/WhereBuilder/Condition/Select/index.js'
-export { RelationshipField as RelationshipCondition } from '../../elements/WhereBuilder/Condition/Relationship/index.js'
-export { NumberField as NumberCondition } from '../../elements/WhereBuilder/Condition/Number/index.js'
-export { DateField as DateCondition } from '../../elements/WhereBuilder/Condition/Date/index.js'
+export { RelationshipFilter as RelationshipCondition } from '../../elements/WhereBuilder/Condition/Relationship/index.js'
+export { NumberFilter as NumberCondition } from '../../elements/WhereBuilder/Condition/Number/index.js'
+export { DateFilter as DateCondition } from '../../elements/WhereBuilder/Condition/Date/index.js'
 export { EmailAndUsernameFields } from '../../elements/EmailAndUsername/index.js'
 export { SelectAll } from '../../elements/SelectAll/index.js'
 export { SelectRow } from '../../elements/SelectRow/index.js'

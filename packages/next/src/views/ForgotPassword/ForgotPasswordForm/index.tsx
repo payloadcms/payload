@@ -91,6 +91,7 @@ export const ForgotPasswordForm: React.FC = () => {
             text(value, {
               name: 'username',
               type: 'text',
+              blockData: {},
               data: {},
               event: 'onChange',
               preferences: { fields: {} },
@@ -120,6 +121,7 @@ export const ForgotPasswordForm: React.FC = () => {
             email(value, {
               name: 'email',
               type: 'email',
+              blockData: {},
               data: {},
               event: 'onChange',
               preferences: { fields: {} },

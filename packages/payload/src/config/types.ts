@@ -1,6 +1,7 @@
 import type {
   DefaultTranslationKeys,
   DefaultTranslationsObject,
+  I18n,
   I18nClient,
   I18nOptions,
   TFunction,
@@ -469,6 +470,14 @@ export type BaseLocalizationConfig = {
    * @default true
    */
   fallback?: boolean
+  /**
+   * Define a function to filter the locales made available in Payload admin UI
+   * based on user.
+   */
+  filterAvailableLocales?: (args: {
+    locales: Locale[]
+    req: PayloadRequest
+  }) => Locale[] | Promise<Locale[]>
 }
 
 export type LocalizationConfigWithNoLabels = Prettify<
@@ -1141,7 +1150,16 @@ export type Config = {
      * Allows you to modify the base JSON schema that is generated during generate:types. This JSON schema will be used
      * to generate the TypeScript interfaces.
      */
-    schema?: Array<(args: { jsonSchema: JSONSchema4 }) => JSONSchema4>
+    schema?: Array<
+      (args: {
+        collectionIDFieldTypes: {
+          [key: string]: 'number' | 'string'
+        }
+        config: SanitizedConfig
+        i18n: I18n
+        jsonSchema: JSONSchema4
+      }) => JSONSchema4
+    >
   }
   /**
    * Customize the handling of incoming file uploads for collections that have uploads enabled.
