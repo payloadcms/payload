@@ -20,7 +20,6 @@ import { InlineBlockNode } from './nodes/InlineBlocksNode.js'
 import { INSERT_BLOCK_COMMAND, INSERT_INLINE_BLOCK_COMMAND } from './plugin/commands.js'
 import { BlocksPlugin } from './plugin/index.js'
 export const BlocksFeatureClient = createClientFeature(
-  // @ts-ignore
   ({ config, featureClientSchemaMap, props, schemaPath }) => {
     const schemaMapRenderedBlockPathPrefix = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks`
     const schemaMapRenderedInlineBlockPathPrefix = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks`
