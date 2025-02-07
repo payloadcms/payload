@@ -241,7 +241,7 @@ export function LexicalMenu({
       const allItems = groups.flatMap((group) => group.items)
 
       if (allItems.length) {
-        const firstMatchingItem = allItems[0]
+        const firstMatchingItem = allItems[0]!
         updateSelectedItem(firstMatchingItem)
       }
     }
@@ -334,6 +334,9 @@ export function LexicalMenu({
             const newSelectedIndex = selectedIndex !== allItems.length - 1 ? selectedIndex + 1 : 0
 
             const newSelectedItem = allItems[newSelectedIndex]
+            if (!newSelectedItem) {
+              return false
+            }
 
             updateSelectedItem(newSelectedItem)
             if (newSelectedItem.ref != null && newSelectedItem.ref.current) {
@@ -360,6 +363,9 @@ export function LexicalMenu({
             const newSelectedIndex = selectedIndex !== 0 ? selectedIndex - 1 : allItems.length - 1
 
             const newSelectedItem = allItems[newSelectedIndex]
+            if (!newSelectedItem) {
+              return false
+            }
 
             updateSelectedItem(newSelectedItem)
             if (newSelectedItem.ref != null && newSelectedItem.ref.current) {
