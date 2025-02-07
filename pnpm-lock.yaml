@@ -1021,6 +1021,9 @@ importers:
       csv-stringify:
         specifier: ^6.5.2
         version: 6.5.2
+      qs-esm:
+        specifier: 7.0.2
+        version: 7.0.2
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
