@@ -141,6 +141,7 @@ export const getFields = (config: Config): Field[] => {
               value: 'all',
             },
           ],
+          virtual: true,
         },
         {
           name: 'fields',
@@ -164,7 +165,9 @@ export const getFields = (config: Config): Field[] => {
           name: 'where',
           type: 'json',
           admin: {
-            hidden: true,
+            components: {
+              Field: '@payloadcms/plugin-import-export/rsc#WhereField',
+            },
           },
         },
       ],
