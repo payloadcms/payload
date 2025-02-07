@@ -9,7 +9,7 @@ import { getFilename } from './getFilename.js'
 import { getSelect } from './getSelect.js'
 
 type Export = {
-  collection: string
+  collectionSlug: string
   exportsCollection: string
   fields?: string[]
   format: 'csv' | 'json'
@@ -31,23 +31,33 @@ export type CreateExportArgs = {
 
 export const createExport = async (args: CreateExportArgs) => {
   const {
-    input: { id, name: nameArg, collection, exportsCollection, fields, format, sort, user, where },
+    input: {
+      id,
+      name: nameArg,
+      collectionSlug,
+      exportsCollection,
+      fields,
+      format,
+      sort,
+      user,
+      where,
+    },
     req: { locale, payload },
     req,
   } = args
 
-  const collectionConfig = payload.config.collections.find(({ slug }) => slug === collection)
+  const collectionConfig = payload.config.collections.find(({ slug }) => slug === collectionSlug)
   if (!collectionConfig) {
-    throw new Error(`Collection with slug ${collection} not found`)
+    throw new Error(`Collection with slug ${collectionSlug} not found`)
   }
-  const name = `${nameArg ?? `${getFilename()}-${collection}`}.${format}`
+  const name = `${nameArg ?? `${getFilename()}-${collectionSlug}`}.${format}`
 
   if (!fields) {
     throw new APIError('fields must be defined when exporting')
   }
 
   const findArgs = {
-    collection,
+    collection: collectionSlug,
     depth: 0,
     limit: 100,
     locale,

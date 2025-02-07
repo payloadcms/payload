@@ -48,12 +48,14 @@ export const Preview = () => {
     })
 
   const dataToRender = {} as any
-  return (
-    <React.Fragment>
-      <div className={baseClass}>
-        <h3>Preview</h3>
-        {/* <Table columns={columns} data={dataToRender} /> */}
-      </div>
-    </React.Fragment>
-  )
+
+  return null
+  // return (
+  //   <React.Fragment>
+  //     <div className={baseClass}>
+  //       <h3>Preview</h3>
+  //       {/* <Table columns={columns} data={dataToRender} /> */}
+  //     </div>
+  //   </React.Fragment>
+  // )
 }

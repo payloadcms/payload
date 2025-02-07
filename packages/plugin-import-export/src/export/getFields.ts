@@ -45,7 +45,7 @@ export const getFields = (config: Config): Field[] => {
               admin: {
                 width: '33%',
               },
-              defaultValue: 'CSV',
+              defaultValue: 'csv',
               label: 'Export Format',
               options: [
                 {
@@ -126,7 +126,7 @@ export const getFields = (config: Config): Field[] => {
         {
           name: 'selectionToUse',
           type: 'radio',
-          defaultValue: 'currentSelection',
+          defaultValue: 'all',
           options: [
             {
               label: 'Use current selection',
@@ -154,9 +154,12 @@ export const getFields = (config: Config): Field[] => {
           hasMany: true,
         },
         {
-          name: 'collection',
+          name: 'collectionSlug',
           type: 'text',
           admin: {
+            components: {
+              Field: '@payloadcms/plugin-import-export/rsc#CollectionField',
+            },
             hidden: true,
           },
           required: true,

@@ -8,6 +8,10 @@ export const getSelect = (fields: string[]): SelectType => {
   const select: SelectType = {}
 
   fields.forEach((field) => {
+    // TODO: this can likely be removed, the form was not saving, leaving in for now
+    if (!field) {
+      return
+    }
     const segments = field.split('.')
     let selectRef = select
 

@@ -55,7 +55,7 @@ describe('@payloadcms/plugin-import-export', () => {
         collection: 'exports',
         user,
         data: {
-          collection: 'pages',
+          collectionSlug: 'pages',
           sort: 'createdAt',
           fields: ['id', 'title', 'group.value', 'group.array.field1', 'createdAt', 'updatedAt'],
           format: 'csv',
@@ -105,7 +105,7 @@ describe('@payloadcms/plugin-import-export', () => {
         collection: 'exports',
         user,
         data: {
-          collection: 'pages',
+          collectionSlug: 'pages',
           fields: ['id', 'array'],
           format: 'csv',
         },
@@ -151,7 +151,7 @@ describe('@payloadcms/plugin-import-export', () => {
         collection: 'exports',
         user,
         data: {
-          collection: 'pages',
+          collectionSlug: 'pages',
           fields: ['id', 'array.field1'],
           format: 'csv',
         },
@@ -188,7 +188,7 @@ describe('@payloadcms/plugin-import-export', () => {
         collection: 'exports',
         user,
         data: {
-          collection: 'pages',
+          collectionSlug: 'pages',
           fields: ['id', 'hasManyNumber'],
           format: 'csv',
         },
@@ -240,7 +240,7 @@ describe('@payloadcms/plugin-import-export', () => {
         collection: 'exports',
         user,
         data: {
-          collection: 'pages',
+          collectionSlug: 'pages',
           fields: ['id', 'blocks'],
           format: 'csv',
         },
@@ -274,7 +274,7 @@ describe('@payloadcms/plugin-import-export', () => {
         collection: 'exports',
         user,
         data: {
-          collection: 'pages',
+          collectionSlug: 'pages',
           fields: ['id', 'title'],
           where: {
             title: { equals: 'Array 2' },
@@ -310,7 +310,7 @@ describe('@payloadcms/plugin-import-export', () => {
         collection: 'exports' as CollectionSlug,
         user,
         data: {
-          collection: 'pages',
+          collectionSlug: 'pages',
           fields: ['id', 'title'],
           format: 'json',
           sort: 'title',
@@ -344,7 +344,7 @@ describe('@payloadcms/plugin-import-export', () => {
         collection: 'exports-tasks' as CollectionSlug,
         user,
         data: {
-          collection: 'pages',
+          collectionSlug: 'pages',
           fields: ['id', 'title'],
           format: 'csv',
           sort: 'title',
@@ -366,7 +366,7 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(input.format).toStrictEqual('csv')
       expect(input.locale).toStrictEqual('all')
       expect(input.fields).toStrictEqual(['id', 'title'])
-      expect(input.collection).toStrictEqual('pages')
+      expect(input.collectionSlug).toStrictEqual('pages')
       expect(input.exportsCollection).toStrictEqual('exports-tasks')
       expect(input.user).toBeDefined()
       expect(input.userCollection).toBeDefined()
@@ -392,7 +392,7 @@ describe('@payloadcms/plugin-import-export', () => {
       for (let i = 0; i < 100000; i++) {
         promises.push(
           payload.create({
-            collection: 'pages',
+            collectionSlug: 'pages',
             data: {
               title: `Array ${i}`,
               blocks: [
@@ -424,7 +424,7 @@ describe('@payloadcms/plugin-import-export', () => {
         collection: 'exports',
         user,
         data: {
-          collection: 'pages',
+          collectionSlug: 'pages',
           fields: ['id', 'blocks'],
           format: 'csv',
         },

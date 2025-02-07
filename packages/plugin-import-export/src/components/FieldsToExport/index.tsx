@@ -1,8 +1,8 @@
 'use client'
 
-import type { OptionObject } from 'payload'
+import type { OptionObject, SelectFieldClientComponent } from 'payload'
 
-import { FieldLabel, ReactSelect, useConfig, useField } from '@payloadcms/ui'
+import { FieldLabel, ReactSelect, useConfig, useDocumentInfo, useField } from '@payloadcms/ui'
 import React, { useEffect } from 'react'
 
 import { useImportExport } from '../ImportExportProvider/index.js'
@@ -10,21 +10,22 @@ import { reduceFields } from './reduceFields.js'
 
 const baseClass = 'fields-to-export'
 
-export const FieldsToExport: React.FC = () => {
-  const { setValue, value } = useField({ path: 'fields' })
+export const FieldsToExport: SelectFieldClientComponent = (props) => {
+  const { id } = useDocumentInfo()
+  const { path } = props
+  const { setValue, value } = useField({ path })
+  const { value: collectionValue } = useField({ path: 'collectionSlug' })
   const { getEntityConfig } = useConfig()
   const { collection, setColumnsToExport } = useImportExport()
-  const collectionConfig = getEntityConfig({ collectionSlug: collection })
 
-  // const filteredFields = collectionConfig.fields.filter((field) => {
-  //   return Array.isArray(value) && value.some((value) => field === value)
-  // })
+  const collectionConfig = getEntityConfig({ collectionSlug: collectionValue ?? collection })
 
-  const reducedFields = reduceFields({ fields: collectionConfig.fields }) as any[]
+  const reducedFields = reduceFields({ fields: collectionConfig?.fields }) as any[]
 
   const fieldOptions = reducedFields.map((field) => {
     return {
-      label: field.label,
+      // TODO: the label should be used, for some reason on save there was a circular JSON error
+      label: field.value.path,
       value: field.value.path,
     }
   })
@@ -40,10 +41,16 @@ export const FieldsToExport: React.FC = () => {
     setColumnsToExport(value)
   }
 
+  // TODO: after save the form crashes, returning null to avoid errors when the id is present
+  if (id) {
+    return null
+  }
+
   return (
     <React.Fragment>
       <FieldLabel label="Columns to Export" />
       <ReactSelect
+        disabled={props.readOnly}
         isClearable={true}
         isMulti={true}
         isSortable={true}

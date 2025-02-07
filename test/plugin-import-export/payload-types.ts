@@ -14,7 +14,6 @@ export interface Config {
     users: User;
     pages: Page;
     exports: Export;
-    'exports-tasks': ExportsTask;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -25,7 +24,6 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     exports: ExportsSelect<false> | ExportsSelect<true>;
-    'exports-tasks': ExportsTasksSelect<false> | ExportsTasksSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -163,43 +161,7 @@ export interface Export {
   drafts?: ('true' | 'false') | null;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
   fields?: string[] | null;
-  collection: string;
-  where?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "exports-tasks".
- */
-export interface ExportsTask {
-  id: string;
-  name?: string | null;
-  format: 'csv' | 'json';
-  limit?: number | null;
-  sort?: string | null;
-  locale?: ('all' | 'en' | 'es' | 'de') | null;
-  drafts?: ('true' | 'false') | null;
-  selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
-  fields?: string[] | null;
-  collection: string;
+  collectionSlug: string;
   where?:
     | {
         [k: string]: unknown;
@@ -333,10 +295,6 @@ export interface PayloadLockedDocument {
         value: string | Export;
       } | null)
     | ({
-        relationTo: 'exports-tasks';
-        value: string | ExportsTask;
-      } | null)
-    | ({
         relationTo: 'payload-jobs';
         value: string | PayloadJob;
       } | null);
@@ -462,34 +420,7 @@ export interface ExportsSelect<T extends boolean = true> {
   drafts?: T;
   selectionToUse?: T;
   fields?: T;
-  collection?: T;
-  where?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "exports-tasks_select".
- */
-export interface ExportsTasksSelect<T extends boolean = true> {
-  name?: T;
-  format?: T;
-  limit?: T;
-  sort?: T;
-  locale?: T;
-  drafts?: T;
-  selectionToUse?: T;
-  fields?: T;
-  collection?: T;
+  collectionSlug?: T;
   where?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -580,7 +511,7 @@ export interface TaskCreateCollectionExport {
     drafts?: ('true' | 'false') | null;
     selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
     fields?: string[] | null;
-    collection: string;
+    collectionSlug: string;
     where?:
       | {
           [k: string]: unknown;
