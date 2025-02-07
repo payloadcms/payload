@@ -17,9 +17,6 @@ export const testEslintConfig = [
         tsconfigRootDir: import.meta.dirname,
       },
     },
-    plugins: {
-      payload: payloadPlugin,
-    },
     rules: {
       'payload/no-relative-monorepo-imports': 'error',
     },
@@ -61,7 +58,7 @@ export const testEslintConfig = [
       'jest/require-top-level-describe': 'off',
       'jest-dom/prefer-to-have-attribute': 'off',
       'playwright/prefer-web-first-assertions': 'error',
-      'payload/no-flaky-assertions': 'warn',
+      'payload/no-flaky-assertions': 'error',
       'payload/no-wait-function': 'warn',
       // Enable the no-non-retryable-assertions rule ONLY for hunting for flakes
       // 'payload/no-non-retryable-assertions': 'error',

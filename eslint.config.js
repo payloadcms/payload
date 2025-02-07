@@ -19,7 +19,7 @@ export const defaultESLintIgnores = [
   '**/build/',
   '**/node_modules/',
   '**/temp/',
-  '**/*.spec.ts',
+  '**/packages/*.spec.ts',
   'next-env.d.ts',
   '**/app',
 ]
