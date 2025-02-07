@@ -134,6 +134,21 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
          * Access configuration for the tenant field
          */
         tenantFieldAccess?: RelationshipField['access']
+        /**
+         * Name of the array field that stores tenant relationships
+         * @default 'tenants'
+         */
+        tenantsArrayFieldName?: string
+        /**
+         * Name of the field within the array that stores the tenant relationship
+         * @default 'tenant'
+         */
+        tenantsArrayTenantFieldName?: string
+        /**
+         * Collection slug where tenants are stored
+         * @default 'tenants'
+         */
+        tenantsCollectionSlug?: string
       }
     | {
         arrayFieldAccess?: never
