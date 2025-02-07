@@ -17,9 +17,6 @@ export const testEslintConfig = [
         tsconfigRootDir: import.meta.dirname,
       },
     },
-    plugins: {
-      payload: payloadPlugin,
-    },
     rules: {
       'payload/no-relative-monorepo-imports': 'error',
     },
