@@ -13,6 +13,7 @@ export interface Config {
   collections: {
     users: User;
     pages: Page;
+    exports: Export;
     'exports-tasks': ExportsTask;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -23,6 +24,7 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
+    exports: ExportsSelect<false> | ExportsSelect<true>;
     'exports-tasks': ExportsTasksSelect<false> | ExportsTasksSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -149,6 +151,42 @@ export interface Page {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "exports".
+ */
+export interface Export {
+  id: string;
+  name?: string | null;
+  format: 'csv' | 'json';
+  limit?: number | null;
+  sort?: string | null;
+  locale?: ('all' | 'en' | 'es' | 'de') | null;
+  drafts?: ('true' | 'false') | null;
+  selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
+  fields?: string[] | null;
+  collection: string;
+  where?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "exports-tasks".
  */
 export interface ExportsTask {
@@ -159,7 +197,6 @@ export interface ExportsTask {
   sort?: string | null;
   locale?: ('all' | 'en' | 'es' | 'de') | null;
   drafts?: ('true' | 'false') | null;
-  depth: number;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
   fields?: string[] | null;
   collection: string;
@@ -292,6 +329,10 @@ export interface PayloadLockedDocument {
         value: string | Page;
       } | null)
     | ({
+        relationTo: 'exports';
+        value: string | Export;
+      } | null)
+    | ({
         relationTo: 'exports-tasks';
         value: string | ExportsTask;
       } | null)
@@ -410,6 +451,33 @@ export interface PagesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "exports_select".
+ */
+export interface ExportsSelect<T extends boolean = true> {
+  name?: T;
+  format?: T;
+  limit?: T;
+  sort?: T;
+  locale?: T;
+  drafts?: T;
+  selectionToUse?: T;
+  fields?: T;
+  collection?: T;
+  where?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "exports-tasks_select".
  */
 export interface ExportsTasksSelect<T extends boolean = true> {
@@ -419,7 +487,6 @@ export interface ExportsTasksSelect<T extends boolean = true> {
   sort?: T;
   locale?: T;
   drafts?: T;
-  depth?: T;
   selectionToUse?: T;
   fields?: T;
   collection?: T;
@@ -511,7 +578,6 @@ export interface TaskCreateCollectionExport {
     sort?: string | null;
     locale?: ('all' | 'en' | 'es' | 'de') | null;
     drafts?: ('true' | 'false') | null;
-    depth: number;
     selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
     fields?: string[] | null;
     collection: string;

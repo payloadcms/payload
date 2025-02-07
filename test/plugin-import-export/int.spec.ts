@@ -55,20 +55,9 @@ describe('@payloadcms/plugin-import-export', () => {
         collection: 'exports',
         user,
         data: {
-          collections: [
-            {
-              slug: 'pages',
-              sort: 'createdAt',
-              fields: [
-                'id',
-                'title',
-                'group.value',
-                'group.array.field1',
-                'createdAt',
-                'updatedAt',
-              ],
-            },
-          ],
+          collection: 'pages',
+          sort: 'createdAt',
+          fields: ['id', 'title', 'group.value', 'group.array.field1', 'createdAt', 'updatedAt'],
           format: 'csv',
         },
       })
@@ -116,12 +105,8 @@ describe('@payloadcms/plugin-import-export', () => {
         collection: 'exports',
         user,
         data: {
-          collections: [
-            {
-              slug: 'pages',
-              fields: ['id', 'array'],
-            },
-          ],
+          collection: 'pages',
+          fields: ['id', 'array'],
           format: 'csv',
         },
       })
@@ -166,12 +151,8 @@ describe('@payloadcms/plugin-import-export', () => {
         collection: 'exports',
         user,
         data: {
-          collections: [
-            {
-              slug: 'pages',
-              fields: ['id', 'array.field1'],
-            },
-          ],
+          collection: 'pages',
+          fields: ['id', 'array.field1'],
           format: 'csv',
         },
       })
@@ -207,12 +188,8 @@ describe('@payloadcms/plugin-import-export', () => {
         collection: 'exports',
         user,
         data: {
-          collections: [
-            {
-              slug: 'pages',
-              fields: ['id', 'hasManyNumber'],
-            },
-          ],
+          collection: 'pages',
+          fields: ['id', 'hasManyNumber'],
           format: 'csv',
         },
       })
@@ -263,12 +240,8 @@ describe('@payloadcms/plugin-import-export', () => {
         collection: 'exports',
         user,
         data: {
-          collections: [
-            {
-              slug: 'pages',
-              fields: ['id', 'blocks'],
-            },
-          ],
+          collection: 'pages',
+          fields: ['id', 'blocks'],
           format: 'csv',
         },
       })
@@ -301,15 +274,11 @@ describe('@payloadcms/plugin-import-export', () => {
         collection: 'exports',
         user,
         data: {
-          collections: [
-            {
-              slug: 'pages',
-              fields: ['id', 'title'],
-              where: {
-                title: { equals: 'Array 2' },
-              },
-            },
-          ],
+          collection: 'pages',
+          fields: ['id', 'title'],
+          where: {
+            title: { equals: 'Array 2' },
+          },
           format: 'csv',
         },
       })
@@ -338,24 +307,18 @@ describe('@payloadcms/plugin-import-export', () => {
       }
 
       let doc = await payload.create({
-        collection: 'exports-tasks' as CollectionSlug,
+        collection: 'exports' as CollectionSlug,
         user,
         data: {
-          collections: [
-            {
-              slug: 'pages',
-              fields: ['id', 'title'],
-            },
-          ],
+          collection: 'pages',
+          fields: ['id', 'title'],
           format: 'json',
+          sort: 'title',
         },
       })
 
-      // Wait for job to complete...
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
       doc = await payload.findByID({
-        collection: 'exports-tasks' as CollectionSlug,
+        collection: 'exports' as CollectionSlug,
         id: doc.id,
       })
 
@@ -367,25 +330,59 @@ describe('@payloadcms/plugin-import-export', () => {
     })
 
     it('should create jobs task for exports', async () => {
+      // data set
+      for (let i = 0; i < 5; i++) {
+        await payload.create({
+          collection: 'pages',
+          data: {
+            title: `Array ${i}`,
+          },
+        })
+      }
+
       let doc = await payload.create({
         collection: 'exports-tasks' as CollectionSlug,
         user,
         data: {
-          collections: [
-            {
-              slug: 'pages',
-              fields: ['id', 'title'],
-            },
-          ],
+          collection: 'pages',
+          fields: ['id', 'title'],
           format: 'csv',
+          sort: 'title',
         },
       })
 
-      const jobs = await payload.find({
+      const { docs } = await payload.find({
         collection: 'payload-jobs' as CollectionSlug,
       })
+      const job = docs[0]
 
-      expect(jobs.docs).toHaveLength(1)
+      expect(job).toBeDefined()
+
+      // @ts-expect-error
+      const { input } = job
+
+      expect(input.id).toBeDefined()
+      expect(input.name).toBeDefined()
+      expect(input.format).toStrictEqual('csv')
+      expect(input.locale).toStrictEqual('all')
+      expect(input.fields).toStrictEqual(['id', 'title'])
+      expect(input.collection).toStrictEqual('pages')
+      expect(input.exportsCollection).toStrictEqual('exports-tasks')
+      expect(input.user).toBeDefined()
+      expect(input.userCollection).toBeDefined()
+
+      await payload.jobs.run()
+
+      const exportDoc = await payload.findByID({
+        collection: 'exports-tasks' as CollectionSlug,
+        id: doc.id,
+      })
+
+      expect(exportDoc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', exportDoc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      expect(data[0].title).toStrictEqual('Array 0')
     })
 
     // disabled so we don't always run a massive test
@@ -427,12 +424,8 @@ describe('@payloadcms/plugin-import-export', () => {
         collection: 'exports',
         user,
         data: {
-          collections: [
-            {
-              slug: 'pages',
-              fields: ['id', 'blocks'],
-            },
-          ],
+          collection: 'pages',
+          fields: ['id', 'blocks'],
           format: 'csv',
         },
       })

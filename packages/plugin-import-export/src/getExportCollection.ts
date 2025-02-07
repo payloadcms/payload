@@ -54,9 +54,7 @@ export const getExportCollection = ({
         return
       }
       const { user } = req
-      if (args.data.collections.length === 1) {
-        await createExport({ input: { ...args.data, user }, req })
-      }
+      await createExport({ input: { ...args.data, user }, req })
     })
   } else {
     afterChange.push(async ({ doc, operation, req }) => {
@@ -64,19 +62,16 @@ export const getExportCollection = ({
         return
       }
 
-      if (doc.collections.length === 1) {
-        const input = {
-          ...doc,
-          exportsCollection: collection.slug,
-          user: req?.user?.id || req?.user?.user?.id,
-          userCollection: 'users',
-        }
-        const { id } = await req.payload.jobs.queue({
-          input,
-          task: 'createCollectionExport',
-        })
-        void req.payload.jobs.runByID({ id })
+      const input = {
+        ...doc,
+        exportsCollection: collection.slug,
+        user: req?.user?.id || req?.user?.user?.id,
+        userCollection: 'users',
       }
+      await req.payload.jobs.queue({
+        input,
+        task: 'createCollectionExport',
+      })
     })
   }
 

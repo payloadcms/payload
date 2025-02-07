@@ -112,15 +112,15 @@ export const getFields = (config: Config): Field[] => {
                 },
               ],
             },
-            {
-              name: 'depth',
-              type: 'number',
-              admin: {
-                width: '33%',
-              },
-              defaultValue: 1,
-              required: true,
-            },
+            // {
+            //   name: 'depth',
+            //   type: 'number',
+            //   admin: {
+            //     width: '33%',
+            //   },
+            //   defaultValue: 1,
+            //   required: true,
+            // },
           ],
         },
         {
