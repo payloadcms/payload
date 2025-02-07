@@ -268,7 +268,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     originalNode: originalNodeIDMap[id],
                     parentRichTextFieldPath: path,
                     parentRichTextFieldSchemaPath: schemaPath,
-                    previousNode: previousNodeIDMap[id],
+                    previousNode: previousNodeIDMap[id]!,
                     req,
                   })
                 }
@@ -281,9 +281,9 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               if (subFieldFn && subFieldDataFn) {
                 const subFields = subFieldFn({ node, req })
                 const nodeSiblingData = subFieldDataFn({ node, req }) ?? {}
-                const nodeSiblingDoc = subFieldDataFn({ node: originalNodeIDMap[id], req }) ?? {}
+                const nodeSiblingDoc = subFieldDataFn({ node: originalNodeIDMap[id]!, req }) ?? {}
                 const nodePreviousSiblingDoc =
-                  subFieldDataFn({ node: previousNodeIDMap[id], req }) ?? {}
+                  subFieldDataFn({ node: previousNodeIDMap[id]!, req }) ?? {}
 
                 if (subFields?.length) {
                   await afterChangeTraverseFields({
@@ -538,7 +538,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     originalNodeWithLocales: originalNodeWithLocalesIDMap[id],
                     parentRichTextFieldPath: path,
                     parentRichTextFieldSchemaPath: schemaPath,
-                    previousNode: previousNodeIDMap[id],
+                    previousNode: previousNodeIDMap[id]!,
                     req,
                     skipValidation: skipValidation!,
                   })
@@ -555,11 +555,11 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                 const nodeSiblingData = subFieldDataFn({ node, req }) ?? {}
                 const nodeSiblingDocWithLocales =
                   subFieldDataFn({
-                    node: originalNodeWithLocalesIDMap[id],
+                    node: originalNodeWithLocalesIDMap[id]!,
                     req,
                   }) ?? {}
                 const nodePreviousSiblingDoc =
-                  subFieldDataFn({ node: previousNodeIDMap[id], req }) ?? {}
+                  subFieldDataFn({ node: previousNodeIDMap[id]!, req }) ?? {}
 
                 if (subFields?.length) {
                   await beforeChangeTraverseFields({
@@ -753,7 +753,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               if (subFieldFn && subFieldDataFn) {
                 const subFields = subFieldFn({ node, req })
                 const nodeSiblingData = subFieldDataFn({ node, req }) ?? {}
-                const nodeSiblingDoc = subFieldDataFn({ node: originalNodeIDMap[id], req }) ?? {}
+                const nodeSiblingDoc = subFieldDataFn({ node: originalNodeIDMap[id]!, req }) ?? {}
 
                 if (subFields?.length) {
                   await beforeValidateTraverseFields({

@@ -82,18 +82,18 @@ function getFullMatchOffset(documentText: string, entryText: string, offset: num
  * Split Lexical TextNode and return a new TextNode only containing matched text.
  * Common use cases include: removing the node, replacing with a new node.
  */
-function $splitNodeContainingQuery(match: MenuTextMatch): null | TextNode {
+function $splitNodeContainingQuery(match: MenuTextMatch): TextNode | undefined {
   const selection = $getSelection()
   if (!$isRangeSelection(selection) || !selection.isCollapsed()) {
-    return null
+    return
   }
   const anchor = selection.anchor
   if (anchor.type !== 'text') {
-    return null
+    return
   }
   const anchorNode = anchor.getNode()
   if (!anchorNode.isSimpleText()) {
-    return null
+    return
   }
   const selectionOffset = anchor.offset
   const textContent = anchorNode.getTextContent().slice(0, selectionOffset)
@@ -101,7 +101,7 @@ function $splitNodeContainingQuery(match: MenuTextMatch): null | TextNode {
   const queryOffset = getFullMatchOffset(textContent, match.matchingString, characterOffset)
   const startOffset = selectionOffset - queryOffset
   if (startOffset < 0) {
-    return null
+    return
   }
   let newNode
   if (startOffset === 0) {
