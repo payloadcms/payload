@@ -39,7 +39,6 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   const addCondition = React.useCallback(
     ({ andIndex, fieldName, orIndex, relation }) => {
       const newConditions = [...conditions]
-
       if (relation === 'and') {
         newConditions[orIndex].and.splice(andIndex, 0, { [fieldName]: {} })
       } else {
@@ -51,7 +50,6 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
           ],
         })
       }
-
       setConditions(newConditions)
     },
     [conditions],
@@ -60,10 +58,8 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   const updateCondition = React.useCallback(
     ({ andIndex, fieldName, operator, orIndex, value: valueArg }) => {
       const existingRowCondition = conditions[orIndex].and[andIndex]
-
-      if (typeof existingRowCondition === 'object' && fieldName) {
+      if (typeof existingRowCondition === 'object' && fieldName && operator) {
         const value = valueArg ?? (operator ? existingRowCondition[operator] : '')
-
         const newRowCondition = {
           [fieldName]: operator ? { [operator]: value } : {},
         }
@@ -72,7 +68,6 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
           const newConditions = [...conditions]
           newConditions[orIndex].and[andIndex] = newRowCondition
           setConditions(newConditions)
-
           if (![null, undefined].includes(value)) {
             // only update query when field/operator/value are filled out
             setShouldUpdateQuery(true)
@@ -123,23 +118,15 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
                   <ul className={`${baseClass}__and-filters`}>
                     {Array.isArray(or?.and) &&
                       or.and.map((_, andIndex) => {
-                        const condition = conditions[orIndex].and[andIndex]
-                        const conditionFieldName = Object.keys(condition)[0]
-
-                        const conditionOperator =
-                          (Object.keys(condition?.[conditionFieldName] || {})?.[0] as Operator) ||
-                          undefined
-
-                        const conditionValue =
-                          condition?.[conditionFieldName]?.[conditionOperator] || undefined
-
-                        console.log(
-                          'condition',
-                          condition,
-                          conditionFieldName,
-                          conditionOperator,
-                          conditionValue,
-                        )
+                        const initialFieldName = Object.keys(conditions[orIndex].and[andIndex])[0]
+                        const initialOperator =
+                          (Object.keys(
+                            conditions[orIndex].and[andIndex]?.[initialFieldName] || {},
+                          )?.[0] as Operator) || undefined
+                        const initialValue =
+                          conditions[orIndex].and[andIndex]?.[initialFieldName]?.[
+                            initialOperator
+                          ] || undefined
 
                         return (
                           <li key={andIndex}>
@@ -149,13 +136,13 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
                             <Condition
                               addCondition={addCondition}
                               andIndex={andIndex}
-                              fieldName={conditionFieldName}
-                              initialValue={conditionValue}
-                              operator={conditionOperator}
+                              fieldName={initialFieldName}
+                              initialValue={initialValue}
+                              operator={initialOperator}
                               options={options}
                               orIndex={orIndex}
                               removeCondition={removeCondition}
-                              RenderedFilter={renderedFilters?.get(conditionFieldName)}
+                              RenderedFilter={renderedFilters?.get(initialFieldName)}
                               updateCondition={updateCondition}
                             />
                           </li>
