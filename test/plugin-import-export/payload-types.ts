@@ -155,25 +155,22 @@ export interface ExportsTask {
   id: string;
   name?: string | null;
   format: 'json' | 'csv';
-  collections?:
+  limit?: number | null;
+  sort?: string[] | null;
+  locale?: ('all' | 'en' | 'es' | 'de') | null;
+  drafts?: ('true' | 'false') | null;
+  selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
+  fields?: string[] | null;
+  collection: string;
+  where?:
     | {
-        slug: string;
-        fields?: string[] | null;
-        limit?: number | null;
-        sort?: string[] | null;
-        where?:
-          | {
-              [k: string]: unknown;
-            }
-          | unknown[]
-          | string
-          | number
-          | boolean
-          | null;
-        id?: string | null;
-      }[]
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
     | null;
-  locales?: string[] | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -417,17 +414,14 @@ export interface PagesSelect<T extends boolean = true> {
 export interface ExportsTasksSelect<T extends boolean = true> {
   name?: T;
   format?: T;
-  collections?:
-    | T
-    | {
-        slug?: T;
-        fields?: T;
-        limit?: T;
-        sort?: T;
-        where?: T;
-        id?: T;
-      };
-  locales?: T;
+  limit?: T;
+  sort?: T;
+  locale?: T;
+  drafts?: T;
+  selectionToUse?: T;
+  fields?: T;
+  collection?: T;
+  where?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -511,26 +505,25 @@ export interface TaskCreateCollectionExport {
   input: {
     name?: string | null;
     format: 'json' | 'csv';
-    collections?:
+    limit?: number | null;
+    sort?: string[] | null;
+    locale?: ('all' | 'en' | 'es' | 'de') | null;
+    drafts?: ('true' | 'false') | null;
+    selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
+    fields?: string[] | null;
+    collection: string;
+    where?:
       | {
-          slug: string;
-          fields?: string[] | null;
-          limit?: number | null;
-          sort?: string[] | null;
-          where?:
-            | {
-                [k: string]: unknown;
-              }
-            | unknown[]
-            | string
-            | number
-            | boolean
-            | null;
-        }[]
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
       | null;
-    locales?: string[] | null;
     user?: string | null;
     userCollection?: string | null;
+    exportsCollection?: string | null;
   };
   output: {
     success?: boolean | null;

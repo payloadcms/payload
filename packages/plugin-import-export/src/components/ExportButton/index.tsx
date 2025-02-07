@@ -10,14 +10,10 @@ export const ExportButton: React.FC<{ collectionSlug: string; exportCollectionSl
   collectionSlug,
   exportCollectionSlug,
 }) => {
-  const { toggleModal } = useModal()
   const exportDrawerSlug = `export-${collectionSlug}`
 
   return (
     <React.Fragment>
-      {/* <button className={baseClass} onClick={() => toggleModal(exportDrawerSlug)} type="button">
-        Export
-      </button> */}
       <ExportDrawer
         collectionSlug={collectionSlug}
         drawerSlug={exportDrawerSlug}

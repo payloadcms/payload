@@ -2,16 +2,19 @@ import type {
   CollectionAfterChangeHook,
   CollectionBeforeOperationHook,
   CollectionConfig,
+  Config,
 } from 'payload'
 
 import type { CollectionOverride, ImportExportPluginConfig } from './types.js'
 
 import { createExport } from './export/createExport.js'
-import { fields } from './exportFields.js'
+import { getFields } from './export/getFields.js'
 
 export const getExportCollection = ({
+  config,
   pluginConfig,
 }: {
+  config: Config
   pluginConfig: ImportExportPluginConfig
 }): CollectionConfig => {
   const { overrideExportCollection } = pluginConfig
@@ -26,10 +29,10 @@ export const getExportCollection = ({
     },
     admin: {
       group: false,
-      useAsTitle: 'filename',
+      useAsTitle: 'name',
     },
     disableDuplicate: true,
-    fields,
+    fields: getFields(config),
     hooks: {
       afterChange,
       beforeOperation,
