@@ -292,7 +292,7 @@ describe('Join Field', () => {
     await expect(drawer).toBeVisible()
 
     const categoryField = drawer.locator('#field-category')
-    await expect(categoryField).toBeVisible({ timeout: EXPECT_TIMEOUT * 80 })
+    await expect(categoryField).toBeVisible({ timeout: EXPECT_TIMEOUT * 5 })
     const categoryValue = categoryField.locator('.relationship--single-value__text')
     await expect(categoryValue).toHaveText('example')
     const titleField = drawer.locator('#field-title')
