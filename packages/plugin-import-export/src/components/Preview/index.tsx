@@ -9,7 +9,7 @@ import { reduceFields } from '../FieldsToExport/reduceFields.js'
 import { useImportExport } from '../ImportExportProvider/index.js'
 import './index.scss'
 
-const baseClass = 'Preview'
+const baseClass = 'preview'
 
 interface Field {
   label?: string
@@ -17,12 +17,12 @@ interface Field {
     name: string
   }
 }
-
 export const Preview = () => {
   const { collection, columnsToExport } = useImportExport()
   const { config } = useConfig()
   const { value: whereIncoming } = useField({ path: 'where' })
   const [dataToRender, setDataToRender] = React.useState<any[]>([])
+  const [resultCount, setResultCount] = React.useState<any>('')
   const collectionSlug = typeof collection === 'string' && collection
   const collectionConfig = config.collections.find(
     (collection) => collection.slug === collectionSlug,
@@ -67,6 +67,7 @@ export const Preview = () => {
         if (response.ok) {
           const data = await response.json()
           // TODO: check if this data is in the correct format for the table
+          setResultCount(data.docs.length)
           setDataToRender(data.docs)
         }
       } catch (error) {
@@ -79,8 +80,11 @@ export const Preview = () => {
 
   return (
     <div className={baseClass}>
-      <h3>Preview</h3>
-      <Table columns={columns} data={dataToRender} />
+      <div className={`${baseClass}__header`}>
+        <h3>Preview</h3>
+        {resultCount && <span>{resultCount} total documents</span>}
+      </div>
+      {dataToRender && <Table columns={columns} data={dataToRender} />}
     </div>
   )
 }
