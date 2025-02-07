@@ -3,7 +3,7 @@
 import React, { createContext, useCallback, useEffect, useMemo, useRef } from 'react'
 const baseClass = 'inline-block'
 
-import type { BlocksFieldClient, Data, FormState } from 'payload'
+import type { BlocksFieldClient, ClientBlock, Data, FormState } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { getTranslation } from '@payloadcms/translations'
@@ -16,6 +16,7 @@ import {
   FormSubmit,
   RenderFields,
   ShimmerEffect,
+  useConfig,
   useDocumentForm,
   useDocumentInfo,
   useEditDepth,
@@ -111,6 +112,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
 
   const inlineBlockElemElemRef = useRef<HTMLDivElement | null>(null)
   const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
+  const { config } = useConfig()
 
   const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks.${formData.blockType}`
 
@@ -120,7 +122,10 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     componentMapRenderedBlockPath
   ]?.[0] as BlocksFieldClient
 
-  const clientBlock = blocksField?.blocks?.[0]
+  const clientBlock: ClientBlock | undefined =
+    blocksField?.blocks?.[0] && typeof blocksField?.blocks?.[0] === 'string'
+      ? config.blocksMap[blocksField?.blocks?.[0]]
+      : (blocksField?.blocks?.[0] as ClientBlock)
 
   const clientBlockFields = clientBlock?.fields ?? []
 

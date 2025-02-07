@@ -1407,7 +1407,7 @@ export type BlocksField = {
 
 export type BlocksFieldClient = {
   admin?: AdminClient & Pick<BlocksField['admin'], 'initCollapsed' | 'isSortable'>
-  blocks: ClientBlock[]
+  blocks: (ClientBlock | string)[]
   labels?: LabelsClient
 } & FieldBaseClient &
   Pick<BlocksField, 'maxRows' | 'minRows' | 'type'>

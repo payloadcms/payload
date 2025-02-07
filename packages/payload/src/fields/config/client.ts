@@ -22,7 +22,6 @@ import { getFromImportMap } from '../../bin/generateImportMap/getFromImportMap.j
 import { MissingEditorProp } from '../../errors/MissingEditorProp.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { flattenTopLevelFields, type ImportMap } from '../../index.js'
-import { removeUndefined } from '../../utilities/removeUndefined.js'
 
 // Should not be used - ClientField should be used instead. This is why we don't export ClientField, we don't want people
 // to accidentally use it instead of ClientField and get confused
@@ -90,6 +89,7 @@ export const createClientBlocks = ({
     if (typeof block === 'string') {
       // Do not process blocks that are just strings - they are processed once in the client config
       clientBlocks.push(block)
+      continue
     }
 
     const clientBlock: ClientBlock = {
