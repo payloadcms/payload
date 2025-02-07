@@ -80,7 +80,7 @@ export const Posts: CollectionConfig = {
             },
             {
               name: 'number',
-              type: 'number',
+              type: 'numberf',
             },
             {
               name: 'richText',
@@ -182,6 +182,14 @@ export const Posts: CollectionConfig = {
         position: 'sidebar',
       },
       relationTo: 'posts',
+    },
+    {
+      name: 'users',
+      type: 'relationship',
+      admin: {
+        position: 'sidebar',
+      },
+      relationTo: 'users',
     },
     {
       name: 'customCell',
