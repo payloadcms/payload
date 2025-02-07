@@ -265,7 +265,6 @@ export const caTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'Deixa-ho de totes maneres',
     leaveWithoutSaving: 'Deixa sense desar',
     light: 'Clar',
-    listControlMenu: 'Menú de control de llista',
     livePreview: 'Previsualització en viu',
     loading: 'Carregant',
     locale: 'Idioma',

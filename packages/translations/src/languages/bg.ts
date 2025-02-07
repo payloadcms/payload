@@ -264,7 +264,6 @@ export const bgTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'Напусни въпреки това',
     leaveWithoutSaving: 'Напусни без да запазиш',
     light: 'Светла',
-    listControlMenu: 'Меню за контрол на списъка',
     livePreview: 'Предварителен преглед',
     loading: 'Зарежда се',
     locale: 'Локализация',
