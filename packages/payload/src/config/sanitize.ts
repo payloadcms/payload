@@ -9,6 +9,7 @@ import type {
   LocalizationConfigWithLabels,
   LocalizationConfigWithNoLabels,
   SanitizedConfig,
+  Timezone,
 } from './types.js'
 
 import { defaultUserCollection } from '../auth/defaultUser.js'
@@ -16,7 +17,7 @@ import { authRootEndpoints } from '../auth/endpoints/index.js'
 import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
-import { supportedTimezones } from '../fields/baseFields/timezone/supportedTimezones.js'
+import { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones.js'
 import { sanitizeGlobal } from '../globals/config/sanitize.js'
 import { getLockedDocumentsCollection } from '../lockedDocuments/lockedDocumentsCollection.js'
 import getPreferencesCollection from '../preferences/preferencesCollection.js'
@@ -58,8 +59,13 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
   }
 
   if (sanitizedConfig?.admin?.timezone) {
+    if (typeof sanitizedConfig?.admin?.timezone?.supportedTimezones === 'function') {
+      sanitizedConfig.admin.timezone.supportedTimezones =
+        sanitizedConfig.admin.timezone.supportedTimezones({ defaultTimezones })
+    }
+
     if (!sanitizedConfig?.admin?.timezone?.supportedTimezones) {
-      sanitizedConfig.admin.timezone.supportedTimezones = supportedTimezones
+      sanitizedConfig.admin.timezone.supportedTimezones = defaultTimezones
     }
 
     if (!sanitizedConfig?.admin?.timezone?.defaultTimezone) {
@@ -68,9 +74,20 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
   } else {
     sanitizedConfig.admin.timezone = {
       defaultTimezone: 'UTC',
-      supportedTimezones,
+      supportedTimezones: defaultTimezones,
     }
   }
+  // Timezones supported by the Intl API
+  const _internalSupportedTimezones = Intl.supportedValuesOf('timeZone')
+
+  // We're casting here because it's already been sanitised above but TS still thinks it could be a function
+  ;(sanitizedConfig.admin.timezone.supportedTimezones as Timezone[]).forEach((timezone) => {
+    if (!_internalSupportedTimezones.includes(timezone.value)) {
+      throw new InvalidConfiguration(
+        `Timezone ${timezone.value} is not supported by the current runtime via the Intl API.`,
+      )
+    }
+  })
 
   return sanitizedConfig as unknown as Partial<SanitizedConfig>
 }

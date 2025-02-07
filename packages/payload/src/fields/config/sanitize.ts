@@ -15,6 +15,7 @@ import { formatLabels, toWords } from '../../utilities/formatLabels.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'
 import { baseTimezoneField } from '../baseFields/timezone/baseField.js'
+import { defaultTimezones } from '../baseFields/timezone/defaultTimezones.js'
 import { setDefaultBeforeDuplicate } from '../setDefaultBeforeDuplicate.js'
 import { validations } from '../validations.js'
 import { sanitizeJoinField } from './sanitizeJoinField.js'
@@ -292,15 +293,21 @@ export const sanitizeFields = async ({
     // Insert our field after assignment
     if (field.type === 'date' && field.timezone) {
       const name = field.name + '_tz'
+      const defaultTimezone = config.admin.timezone.defaultTimezone || 'UTC'
+
       const supportedTimezones = config.admin.timezone.supportedTimezones
-      const defaultValue = config.admin.timezone.defaultTimezone || 'UTC'
+
+      const options =
+        typeof supportedTimezones === 'function'
+          ? supportedTimezones({ defaultTimezones })
+          : supportedTimezones
 
       // Need to set the options here manually so that any database enums are generated correctly
       // The UI component will import the options from the config
       const timezoneField = baseTimezoneField({
         name,
-        defaultValue,
-        options: supportedTimezones,
+        defaultValue: defaultTimezone,
+        options,
         required: field.required,
       })
 

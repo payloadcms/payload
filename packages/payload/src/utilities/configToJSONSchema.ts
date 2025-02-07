@@ -579,7 +579,11 @@ export function fieldsToJSONSchema(
           }
           case 'select': {
             const optionEnums = buildOptionEnums(field.options)
-            const isTimezoneField = fields?.[index - 1]?.type === 'date'
+            // We get the previous field to check for a date in the case of a timezone select
+            // This works because timezone selects are always inserted right after a date with 'timezone: true'
+            const previousField = fields?.[index - 1]
+            const isTimezoneField =
+              previousField?.type === 'date' && previousField.timezone && field.name.includes('_tz')
 
             // Timezone selects should reference the supportedTimezones definition
             if (isTimezoneField) {

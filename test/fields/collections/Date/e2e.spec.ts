@@ -251,6 +251,7 @@ describe('Date', () => {
 
       await page.click(timezoneOptionSelector)
 
+      // todo: fix
       await expect(dateTimeLocator).not.toHaveValue(initialDateValue)
     })
 
@@ -325,7 +326,7 @@ describe('Date', () => {
 
       const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__control`
 
-      const timezoneOptionSelector = `#field-dayAndTimeWithTimezone .rs__menu .rs__option:has-text("Lunar Time")`
+      const timezoneOptionSelector = `#field-dayAndTimeWithTimezone .rs__menu .rs__option:has-text("Monterrey")`
 
       await page.click(dropdownControlSelector)
 
@@ -341,7 +342,7 @@ describe('Date', () => {
 
       const selectedTimezone = page.locator(selectedTimezoneSelector)
 
-      await expect(selectedTimezone).toContainText('Lunar Time Coordinates')
+      await expect(selectedTimezone).toContainText('Monterrey')
     })
 
     describe('while timezone is set to London', () => {

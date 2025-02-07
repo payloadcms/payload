@@ -560,7 +560,7 @@ export interface SelectVersionsField {
     | null;
   updatedAt: string;
   createdAt: string;
-  _status?: SupportedTimezones;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

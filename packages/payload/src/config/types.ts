@@ -41,7 +41,7 @@ import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { ErrorName } from '../errors/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { JobsConfig, Option, Payload, RequestContext, TypedUser } from '../index.js'
+import type { JobsConfig, Payload, RequestContext, TypedUser } from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -425,6 +425,34 @@ export const serverProps: (keyof ServerProps)[] = [
   'searchParams',
   'permissions',
 ]
+
+export type Timezone = {
+  label: string
+  value: string
+}
+
+type SupportedTimezonesFn = (args: { defaultTimezones: Timezone[] }) => Timezone[]
+
+type TimezoneConfig = {
+  /**
+   * The default timezone to use for the admin panel.
+   *
+   * @default 'UTC'
+   */
+  defaultTimezone?: string
+  /**
+   * Provide your own list of supported timezones for the admin panel
+   *
+   * Values should be IANA timezone names, eg. `America/New_York`
+   *
+   * We use `@date-fns/tz` to handle timezones
+   */
+  supportedTimezones?: SupportedTimezonesFn | Timezone[]
+}
+
+type SanitizedTimezoneConfig = {
+  supportedTimezones: Timezone[]
+} & Omit<TimezoneConfig, 'supportedTimezones'>
 
 export type CustomComponent<TAdditionalProps extends object = Record<string, any>> =
   PayloadComponent<ServerProps & TAdditionalProps, TAdditionalProps>
@@ -883,22 +911,7 @@ export type Config = {
     /**
      * Configure timezone related settings for the admin panel.
      */
-    timezone?: {
-      /**
-       * The default timezone to use for the admin panel.
-       *
-       * @default 'UTC'
-       */
-      defaultTimezone?: string
-      /**
-       * Provide your own list of supported timezones for the admin panel
-       *
-       * Values should be IANA timezone names, eg. `America/New_York`
-       *
-       * We use `@date-fns/tz` to handle timezones
-       */
-      supportedTimezones?: Option[]
-    }
+    timezone?: TimezoneConfig
     /** The slug of a Collection that you want to be used to log in to the Admin dashboard. */
     user?: string
   }
@@ -1168,6 +1181,9 @@ export type Config = {
 }
 
 export type SanitizedConfig = {
+  admin: {
+    timezone: SanitizedTimezoneConfig
+  } & DeepRequired<Config['admin']>
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */
   editor?: RichTextAdapter<any, any, any>
@@ -1192,7 +1208,7 @@ export type SanitizedConfig = {
   // E.g. in packages/ui/src/graphics/Account/index.tsx in getComponent, if avatar.Component is casted to what it's supposed to be,
   // the result type is different
   DeepRequired<Config>,
-  'collections' | 'editor' | 'endpoint' | 'globals' | 'i18n' | 'localization' | 'upload'
+  'admin' | 'collections' | 'editor' | 'endpoint' | 'globals' | 'i18n' | 'localization' | 'upload'
 >
 
 export type EditConfig = EditConfigWithoutRoot | EditConfigWithRoot

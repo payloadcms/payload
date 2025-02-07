@@ -2,7 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import { supportedTimezones } from 'payload/shared'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -131,11 +131,11 @@ export default buildConfigWithDefaults({
       },
     },
     timezone: {
-      supportedTimezones: [
-        ...supportedTimezones,
-        { label: '(Moon Time) Lunar Time Coordinates', value: 'Space/Lunar' },
+      supportedTimezones: ({ defaultTimezones }) => [
+        ...defaultTimezones,
+        { label: '(GMT-6) Monterrey, Nuevo Leon', value: 'America/Monterrey' },
       ],
-      defaultTimezone: 'Space/Lunar',
+      defaultTimezone: 'America/Monterrey',
     },
   },
   localization: {

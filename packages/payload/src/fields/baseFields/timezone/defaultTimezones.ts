@@ -1,3 +1,5 @@
+import type { Timezone } from '../../../config/types.js'
+
 /**
  * List of supported timezones
  *
@@ -5,10 +7,9 @@
  * value: IANA timezone name
  *
  * @example
- * { label: '(UTC-12:00) International Date Line West', value: 'Etc/GMT+12' }
+ * { label: '(UTC-12:00) International Date Line West', value: 'Dateline Standard Time' }
  */
-export const supportedTimezones = [
-  { label: '(UTC-12:00) International Date Line West', value: 'Etc/GMT+12' },
+export const defaultTimezones: Timezone[] = [
   { label: '(UTC-11:00) Midway Island, Samoa', value: 'Pacific/Midway' },
   { label: '(UTC-11:00) Niue', value: 'Pacific/Niue' },
   { label: '(UTC-10:00) Hawaii', value: 'Pacific/Honolulu' },
@@ -25,12 +26,11 @@ export const supportedTimezones = [
   { label: '(UTC-05:00) Bogota, Lima, Quito', value: 'America/Bogota' },
   { label: '(UTC-04:00) Caracas', value: 'America/Caracas' },
   { label: '(UTC-04:00) Santiago', value: 'America/Santiago' },
-  { label: '(UTC-03:00) Buenos Aires', value: 'America/Argentina/Buenos_Aires' },
+  { label: '(UTC-03:00) Buenos Aires', value: 'America/Buenos_Aires' },
   { label: '(UTC-03:00) Brasilia', value: 'America/Sao_Paulo' },
   { label: '(UTC-02:00) South Georgia', value: 'Atlantic/South_Georgia' },
   { label: '(UTC-01:00) Azores', value: 'Atlantic/Azores' },
   { label: '(UTC-01:00) Cape Verde', value: 'Atlantic/Cape_Verde' },
-  { label: '(UTC+00:00) Coordinated Universal Time', value: 'UTC' },
   { label: '(UTC+00:00) London (GMT)', value: 'Europe/London' },
   { label: '(UTC+01:00) Berlin, Paris', value: 'Europe/Berlin' },
   { label: '(UTC+01:00) Lagos', value: 'Africa/Lagos' },
@@ -42,7 +42,7 @@ export const supportedTimezones = [
   { label: '(UTC+04:00) Baku', value: 'Asia/Baku' },
   { label: '(UTC+05:00) Islamabad, Karachi', value: 'Asia/Karachi' },
   { label: '(UTC+05:00) Tashkent', value: 'Asia/Tashkent' },
-  { label: '(UTC+05:30) Chennai, Kolkata, Mumbai, New Delhi', value: 'Asia/Kolkata' },
+  { label: '(UTC+05:30) Chennai, Kolkata, Mumbai, New Delhi', value: 'Asia/Calcutta' },
   { label: '(UTC+06:00) Dhaka', value: 'Asia/Dhaka' },
   { label: '(UTC+06:00) Almaty', value: 'Asia/Almaty' },
   { label: '(UTC+07:00) Jakarta', value: 'Asia/Jakarta' },
