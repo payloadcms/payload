@@ -154,11 +154,12 @@ export interface Page {
 export interface ExportsTask {
   id: string;
   name?: string | null;
-  format: 'json' | 'csv';
+  format: 'csv' | 'json';
   limit?: number | null;
-  sort?: string[] | null;
+  sort?: string | null;
   locale?: ('all' | 'en' | 'es' | 'de') | null;
   drafts?: ('true' | 'false') | null;
+  depth: number;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
   fields?: string[] | null;
   collection: string;
@@ -418,6 +419,7 @@ export interface ExportsTasksSelect<T extends boolean = true> {
   sort?: T;
   locale?: T;
   drafts?: T;
+  depth?: T;
   selectionToUse?: T;
   fields?: T;
   collection?: T;
@@ -504,11 +506,12 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 export interface TaskCreateCollectionExport {
   input: {
     name?: string | null;
-    format: 'json' | 'csv';
+    format: 'csv' | 'json';
     limit?: number | null;
-    sort?: string[] | null;
+    sort?: string | null;
     locale?: ('all' | 'en' | 'es' | 'de') | null;
     drafts?: ('true' | 'false') | null;
+    depth: number;
     selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
     fields?: string[] | null;
     collection: string;

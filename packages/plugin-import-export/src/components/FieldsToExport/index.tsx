@@ -1,6 +1,8 @@
 'use client'
 
-import { ReactSelect, useConfig, useField } from '@payloadcms/ui'
+import type { OptionObject } from 'payload'
+
+import { FieldLabel, ReactSelect, useConfig, useField } from '@payloadcms/ui'
 import React, { useEffect } from 'react'
 
 import { useImportExport } from '../ImportExportProvider/index.js'
@@ -18,25 +20,30 @@ export const FieldsToExport: React.FC = () => {
   //   return Array.isArray(value) && value.some((value) => field === value)
   // })
 
+  const reducedFields = reduceFields({ fields: collectionConfig.fields }) as any[]
+
+  const fieldOptions = reducedFields.map((field) => {
+    return {
+      label: field.label,
+      value: field.value.path,
+    }
+  })
+
+  // set all fields to be selected by default
   useEffect(() => {
-    console.log(value)
-  }, [value])
-  // get the collection from the url
-
-  // set default fields from collection preferences
-
-  // get the fields from the current collection
-
-  console.log(collection, collectionConfig?.fields.length)
+    setValue(fieldOptions)
+  }, [])
 
   return (
     <React.Fragment>
+      <FieldLabel label="Columns to Export" />
       <ReactSelect
         isClearable={true}
         isMulti={true}
         isSortable={true}
         onChange={(value) => setValue(value ?? null)}
-        options={reduceFields({ fields: collectionConfig.fields })}
+        options={fieldOptions}
+        value={value as OptionObject}
       />
     </React.Fragment>
   )

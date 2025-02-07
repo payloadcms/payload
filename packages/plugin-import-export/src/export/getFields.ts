@@ -8,6 +8,10 @@ export const getFields = (config: Config): Field[] => {
     localeField = {
       name: 'locale',
       type: 'select',
+      admin: {
+        width: '33%',
+      },
+      defaultValue: 'all',
       label: 'Locale',
       options: [
         {
@@ -38,15 +42,19 @@ export const getFields = (config: Config): Field[] => {
             {
               name: 'format',
               type: 'select',
+              admin: {
+                width: '33%',
+              },
+              defaultValue: 'CSV',
               label: 'Export Format',
               options: [
                 {
-                  label: 'JSON',
-                  value: 'json',
-                },
-                {
                   label: 'CSV',
                   value: 'csv',
+                },
+                {
+                  label: 'JSON',
+                  value: 'json',
                 },
               ],
               required: true,
@@ -56,14 +64,17 @@ export const getFields = (config: Config): Field[] => {
               type: 'number',
               admin: {
                 placeholder: 'No limit',
+                width: '33%',
               },
             },
             {
               name: 'sort',
               type: 'text',
-              hasMany: true,
-              label: 'Sort By',
-              maxRows: 2,
+              admin: {
+                components: {
+                  Field: '@payloadcms/plugin-import-export/rsc#SortByFields',
+                },
+              },
             },
           ],
         },
@@ -75,15 +86,18 @@ export const getFields = (config: Config): Field[] => {
               name: 'drafts',
               type: 'select',
               admin: {
+                width: '33%',
                 // TODO: make sure condition works for draft enabled collections
                 condition: (data) => {
                   const collectionConfig = (config.collections ?? []).find(
                     (collection) => collection.slug === data.collection,
                   )
-                  return Boolean(
-                    typeof collectionConfig?.versions === 'object' &&
-                      collectionConfig.versions?.drafts,
-                  )
+
+                  return true
+                  // return Boolean(
+                  //   typeof collectionConfig?.versions === 'object' &&
+                  //     collectionConfig.versions?.drafts,
+                  // )
                 },
               },
               label: 'Drafts',
@@ -98,11 +112,21 @@ export const getFields = (config: Config): Field[] => {
                 },
               ],
             },
+            {
+              name: 'depth',
+              type: 'number',
+              admin: {
+                width: '33%',
+              },
+              defaultValue: 1,
+              required: true,
+            },
           ],
         },
         {
           name: 'selectionToUse',
           type: 'radio',
+          defaultValue: 'currentSelection',
           options: [
             {
               label: 'Use current selection',
@@ -127,7 +151,6 @@ export const getFields = (config: Config): Field[] => {
             },
           },
           hasMany: true,
-          label: 'Fields to Export',
         },
         {
           name: 'collection',
@@ -140,6 +163,9 @@ export const getFields = (config: Config): Field[] => {
         {
           name: 'where',
           type: 'json',
+          admin: {
+            hidden: true,
+          },
         },
       ],
       label: 'Export Options',
