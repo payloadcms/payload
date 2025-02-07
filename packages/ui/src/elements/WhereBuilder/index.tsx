@@ -31,10 +31,10 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
     setOptions(reduceClientFields({ fields, i18n }))
   }, [fields, i18n])
 
-  const { handleWhereChange } = useListQuery()
+  const { handleWhereChange, query } = useListQuery()
   const [shouldUpdateQuery, setShouldUpdateQuery] = React.useState(false)
 
-  const [conditions, setConditions] = React.useState(() => [])
+  const [conditions, setConditions] = React.useState(() => query?.where?.or || [])
 
   const addCondition = React.useCallback(
     ({ andIndex, fieldName, orIndex, relation }) => {
