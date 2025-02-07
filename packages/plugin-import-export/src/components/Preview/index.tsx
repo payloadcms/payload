@@ -52,7 +52,7 @@ export const Preview = () => {
     <React.Fragment>
       <div className={baseClass}>
         <h3>Preview</h3>
-        <Table columns={columns} data={dataToRender} />
+        {/* <Table columns={columns} data={dataToRender} /> */}
       </div>
     </React.Fragment>
   )
