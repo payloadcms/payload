@@ -1,5 +1,6 @@
 export { ExportButton } from '../components/ExportButton/index.js'
 export { FieldsToExport } from '../components/FieldsToExport/index.js'
 export { ImportExportProvider } from '../components/ImportExportProvider/index.js'
+export { Preview } from '../components/Preview/index.js'
 export { SortByFields } from '../components/SortBy/index.js'
 export { WhereField } from '../components/WhereField/index.js'

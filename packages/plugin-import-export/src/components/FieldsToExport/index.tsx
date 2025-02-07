@@ -13,7 +13,7 @@ const baseClass = 'fields-to-export'
 export const FieldsToExport: React.FC = () => {
   const { setValue, value } = useField({ path: 'fields' })
   const { getEntityConfig } = useConfig()
-  const { collection } = useImportExport()
+  const { collection, setColumnsToExport } = useImportExport()
   const collectionConfig = getEntityConfig({ collectionSlug: collection })
 
   // const filteredFields = collectionConfig.fields.filter((field) => {
@@ -32,7 +32,13 @@ export const FieldsToExport: React.FC = () => {
   // set all fields to be selected by default
   useEffect(() => {
     setValue(fieldOptions)
+    setColumnsToExport(fieldOptions as any)
   }, [])
+
+  const onChange = (value: any) => {
+    setValue(value)
+    setColumnsToExport(value)
+  }
 
   return (
     <React.Fragment>
@@ -41,7 +47,7 @@ export const FieldsToExport: React.FC = () => {
         isClearable={true}
         isMulti={true}
         isSortable={true}
-        onChange={(value) => setValue(value ?? null)}
+        onChange={onChange}
         options={fieldOptions}
         value={value as OptionObject}
       />

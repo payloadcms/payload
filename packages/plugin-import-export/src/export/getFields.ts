@@ -173,14 +173,14 @@ export const getFields = (config: Config): Field[] => {
       ],
       label: 'Export Options',
     },
-    // {
-    //   name: 'preview',
-    //   type: 'ui',
-    //   admin: {
-    //     components: {
-    //       // Field:
-    //     },
-    //   },
-    // },
+    {
+      name: 'preview',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@payloadcms/plugin-import-export/rsc#Preview',
+        },
+      },
+    },
   ]
 }

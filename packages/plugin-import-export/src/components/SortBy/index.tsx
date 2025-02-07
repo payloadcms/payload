@@ -1,13 +1,12 @@
 'use client'
-
 import type { OptionObject } from 'payload'
 
 import { FieldLabel, ReactSelect, useConfig, useField } from '@payloadcms/ui'
 import React, { useEffect } from 'react'
 
 import { reduceFields } from '../FieldsToExport/reduceFields.js'
-import './index.scss'
 import { useImportExport } from '../ImportExportProvider/index.js'
+import './index.scss'
 
 const baseClass = 'sort-by-fields'
 
