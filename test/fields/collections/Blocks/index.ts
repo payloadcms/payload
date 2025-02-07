@@ -374,6 +374,29 @@ const BlockFields: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'blockWithLabels',
+      type: 'blocks',
+      labels: {
+        singular: ({ t }) => t('authentication:account'),
+        plural: ({ t }) => t('authentication:generate'),
+      },
+      blocks: [
+        {
+          labels: {
+            singular: ({ t }) => t('authentication:account'),
+            plural: ({ t }) => t('authentication:generate'),
+          },
+          slug: 'text',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
   ],
 }
 

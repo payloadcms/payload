@@ -133,6 +133,13 @@ describe('Array', () => {
     await expect(page.locator('#field-items #items-row-0 .row-label')).toContainText('Item 01')
   })
 
+  test('ensure functions passed to array field labels property are respected', async () => {
+    await page.goto(url.create)
+
+    const arrayWithLabelsField = page.locator('#field-arrayWithLabels')
+    await expect(arrayWithLabelsField.locator('.array-field__add-row')).toHaveText('Add Account')
+  })
+
   describe('row manipulation', () => {
     test('should add, remove and duplicate rows', async () => {
       const assertText0 = 'array row 1'
