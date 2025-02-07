@@ -106,7 +106,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
     defaultLimit: initialLimit,
     handlePageChange,
     handlePerPageChange,
-    query,
+    query: { limit },
   } = useListQuery()
 
   const { openModal } = useModal()
@@ -271,7 +271,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                       </div>
                       <PerPage
                         handleChange={(limit) => void handlePerPageChange(limit)}
-                        limit={isNumber(query?.limit) ? Number(query.limit) : initialLimit}
+                        limit={isNumber(limit) ? Number(limit) : initialLimit}
                         limits={collectionConfig?.admin?.pagination?.limits}
                         resetPage={data.totalDocs <= data.pagingCounter}
                       />
