@@ -127,6 +127,8 @@ localization: {
 }
 ```
 
+Since the filtering happens at the root level of the application and its result is not calculated every time you navigate to a new page, you may want to call `router.refresh` in a custom component that watches when values that affect the result change. In the example above, you would want to do this when `supportedLocales` changes on the tenant document.
+
 
 ## Field Localization
 
