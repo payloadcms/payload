@@ -196,7 +196,12 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   const collectionSlugs = new Set<CollectionSlug>()
 
-  const validRelationships = config.collections.map((c) => c.slug) ?? []
+  const validRelationships = [
+    ...(config.collections.map((c) => c.slug) ?? []),
+    'payload-jobs',
+    'payload-locked-documents',
+    'payload-preferences',
+  ]
 
   /**
    * Blocks sanitization needs to happen before collections, as collection/global join field sanitization needs config.blocks
