@@ -178,7 +178,7 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
 
             await Promise.all(
               field.blocks.map(async (_block) => {
-                const block = typeof _block === 'string' ? payload.config.blocks[_block] : _block // TODO: Skip over string blocks
+                const block = typeof _block === 'string' ? payload.blocks[_block] : _block // TODO: Skip over string blocks
 
                 if (!mutablePolicies[field.name].blocks?.[block.slug]) {
                   mutablePolicies[field.name].blocks[block.slug] = {

@@ -1075,9 +1075,7 @@ export function configToJSONSchema(
     properties: {},
     required: [],
   }
-  for (const blockSlug in config.blocks) {
-    const block = config.blocks[blockSlug]
-
+  for (const block of config.blocks) {
     const blockFieldSchemas = fieldsToJSONSchema(
       collectionIDFieldTypes,
       block.flattenedFields,
@@ -1101,10 +1099,10 @@ export function configToJSONSchema(
     const interfaceName = block.interfaceName ?? block.slug
     interfaceNameDefinitions.set(interfaceName, blockSchema)
 
-    blocksDefinition.properties[blockSlug] = {
+    blocksDefinition.properties[block.slug] = {
       $ref: `#/definitions/${interfaceName}`,
     }
-    ;(blocksDefinition.required as string[]).push(blockSlug)
+    ;(blocksDefinition.required as string[]).push(block.slug)
   }
 
   let jsonSchema: JSONSchema4 = {

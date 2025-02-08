@@ -48,6 +48,8 @@ function sanitizeClientConfig(
   }
   const sanitizedConfig: ClientConfig = { ...unSanitizedConfig } as ClientConfig
 
+  sanitizedConfig.blocksMap = {}
+
   for (const block of unSanitizedConfig.blocks) {
     sanitizedConfig.blocksMap[block.slug] = block
   }

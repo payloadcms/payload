@@ -203,8 +203,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
    * to be populated with the sanitized blocks
    */
   config.blocks = []
-  for (const [blockSlug, block] of Object.entries(incomingConfig.blocks)) {
-    block.slug = blockSlug
+  for (const block of Object.values(incomingConfig.blocks)) {
     const sanitizedBlock = flattenBlock({ block })
 
     if (sanitizedBlock._sanitized === true) {

@@ -196,7 +196,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     field.blocks.forEach((blockItem) => {
       const blockSchema = new mongoose.Schema({}, { _id: false, id: false })
 
-      const block = typeof blockItem === 'string' ? payload.config.blocks[blockItem] : blockItem
+      const block = typeof blockItem === 'string' ? payload.blocks[blockItem] : blockItem
 
       block.fields.forEach((blockField) => {
         const addFieldSchema: FieldSchemaGenerator = fieldToSchemaMap[blockField.type]
