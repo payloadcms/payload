@@ -57,7 +57,7 @@ export function getLocalizedPaths({
           for (const _block of lastIncompletePath.field.blocks) {
             let block: FlattenedBlock
             if (typeof _block === 'string') {
-              block = payload?.config?.blocks[_block]
+              block = payload?.blocks[_block]
             } else {
               block = _block
             }

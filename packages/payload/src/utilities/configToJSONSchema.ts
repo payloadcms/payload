@@ -302,7 +302,7 @@ export function fieldsToJSONSchema(
                 ? {
                     oneOf: field.blocks.map((block) => {
                       if (typeof block === 'string') {
-                        const resolvedBlock = config?.blocks[block]
+                        const resolvedBlock = config?.blocks?.find((b) => b.slug === block)
                         return {
                           $ref: `#/definitions/${resolvedBlock.interfaceName ?? resolvedBlock.slug}`,
                         }

@@ -109,8 +109,9 @@ export const collectionSlugs: CollectionConfig[] = [
 export default buildConfigWithDefaults({
   collections: collectionSlugs,
   globals: [TabsWithRichText],
-  blocks: {
-    ConfigBlockTest: {
+  blocks: [
+    {
+      slug: 'ConfigBlockTest',
       fields: [
         {
           name: 'deduplicatedText',
@@ -118,7 +119,7 @@ export default buildConfigWithDefaults({
         },
       ],
     },
-  },
+  ],
   custom: {
     client: {
       'new-value': 'client available',

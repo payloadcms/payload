@@ -15,11 +15,6 @@ export const PostsCollection: CollectionConfig = {
       type: 'text',
     },
     {
-      name: 'blocks',
-      type: 'blocks',
-      blocks: ['ConfigBlockTest'],
-    },
-    {
       name: 'content',
       type: 'richText',
       editor: lexicalEditor({

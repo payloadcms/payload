@@ -20,17 +20,6 @@ export default buildConfigWithDefaults({
     },
   },
   editor: lexicalEditor({}),
-  blocks: [
-    {
-      slug: 'ConfigBlockTest',
-      fields: [
-        {
-          name: 'deduplicatedText',
-          type: 'text',
-        },
-      ],
-    },
-  ],
   globals: [
     // ...add more globals here
     MenuGlobal,
