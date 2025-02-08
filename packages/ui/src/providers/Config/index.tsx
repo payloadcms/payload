@@ -44,6 +44,7 @@ function sanitizeClientConfig(
   unSanitizedConfig: ClientConfig | UnsanitizedClientConfig,
 ): ClientConfig {
   if (!unSanitizedConfig?.blocks?.length || (unSanitizedConfig as ClientConfig).blocksMap) {
+    ;(unSanitizedConfig as ClientConfig).blocksMap = {}
     return unSanitizedConfig as ClientConfig
   }
   const sanitizedConfig: ClientConfig = { ...unSanitizedConfig } as ClientConfig
