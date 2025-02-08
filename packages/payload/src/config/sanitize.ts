@@ -203,27 +203,29 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
    * to be populated with the sanitized blocks
    */
   config.blocks = []
-  for (const block of Object.values(incomingConfig.blocks)) {
-    const sanitizedBlock = flattenBlock({ block })
+  if (incomingConfig.blocks?.length) {
+    for (const block of incomingConfig.blocks) {
+      const sanitizedBlock = flattenBlock({ block })
 
-    if (sanitizedBlock._sanitized === true) {
-      continue
+      if (sanitizedBlock._sanitized === true) {
+        continue
+      }
+      sanitizedBlock._sanitized = true
+      sanitizedBlock.fields = sanitizedBlock.fields.concat(baseBlockFields)
+      sanitizedBlock.labels = !sanitizedBlock.labels
+        ? formatLabels(sanitizedBlock.slug)
+        : sanitizedBlock.labels
+      sanitizedBlock.fields = await sanitizeFields({
+        config: config as unknown as Config,
+        existingFieldNames: new Set(),
+        fields: block.fields,
+        parentIsLocalized: false,
+        richTextSanitizationPromises,
+        validRelationships,
+      })
+
+      config.blocks.push(sanitizedBlock)
     }
-    sanitizedBlock._sanitized = true
-    sanitizedBlock.fields = sanitizedBlock.fields.concat(baseBlockFields)
-    sanitizedBlock.labels = !sanitizedBlock.labels
-      ? formatLabels(sanitizedBlock.slug)
-      : sanitizedBlock.labels
-    sanitizedBlock.fields = await sanitizeFields({
-      config: config as unknown as Config,
-      existingFieldNames: new Set(),
-      fields: block.fields,
-      parentIsLocalized: false,
-      richTextSanitizationPromises,
-      validRelationships,
-    })
-
-    config.blocks.push(sanitizedBlock)
   }
 
   for (let i = 0; i < config.collections.length; i++) {
