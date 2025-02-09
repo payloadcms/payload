@@ -426,6 +426,7 @@ export const caTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'Aquest camp requereix dos números.',
     shorterThanMax:
       'Aquest valor ha de ser més curt que la longitud màxima de {{maxLength}} caràcters.',
+    timezoneRequired: 'Es requereix una zona horària.',
     trueOrFalse: 'Aquest camp només pot ser igual a true o false.',
     username:
       "Si us plau, introdueix un nom d'usuari vàlid. Pot contenir lletres, números, guions, punts i guions baixos.",

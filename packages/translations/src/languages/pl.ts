@@ -423,6 +423,7 @@ export const plTranslations: DefaultTranslationsObject = {
     requiresNoMoreThan: 'To pole może posiadać co najmniej {{count}} {{label}}.',
     requiresTwoNumbers: 'To pole wymaga dwóch liczb.',
     shorterThanMax: 'Ta wartość musi być krótsza niż maksymalna długość znaków: {{maxLength}}.',
+    timezoneRequired: 'Wymagana jest strefa czasowa.',
     trueOrFalse: "To pole może mieć wartość tylko 'true' lub 'false'.",
     username:
       'Proszę wprowadzić prawidłową nazwę użytkownika. Może zawierać litery, cyfry, myślniki, kropki i podkreślniki.',

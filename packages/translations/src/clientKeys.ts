@@ -342,6 +342,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'validation:requiresAtLeast',
   'validation:shorterThanMax',
   'validation:greaterThanMax',
+  'validation:timezoneRequired',
   'validation:username',
 
   'version:aboutToPublishSelection',

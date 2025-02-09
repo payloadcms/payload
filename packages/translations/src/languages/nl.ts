@@ -427,6 +427,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     requiresNoMoreThan: 'Dit veld vereist niet meer dan {{count}} {{label}}.',
     requiresTwoNumbers: 'Dit veld vereist twee nummers.',
     shorterThanMax: 'Dit veld moet korter zijn dan de maximale lengte van {{maxLength}} tekens.',
+    timezoneRequired: 'Een tijdzone is vereist.',
     trueOrFalse: 'Dit veld kan alleen waar of onwaar zijn.',
     username:
       'Voer een geldige gebruikersnaam in. Kan letters, cijfers, koppeltekens, punten en underscores bevatten.',

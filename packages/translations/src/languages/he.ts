@@ -414,6 +414,7 @@ export const heTranslations: DefaultTranslationsObject = {
     requiresNoMoreThan: 'שדה זה דורש לא יותר מ-{{count}} {{label}}.',
     requiresTwoNumbers: 'שדה זה דורש שני מספרים.',
     shorterThanMax: 'ערך זה חייב להיות קצר מ-{{maxLength}} תווים.',
+    timezoneRequired: 'נדרשת אזור זמן.',
     trueOrFalse: 'שדה זה יכול להיות רק true או false.',
     username: 'אנא הזן שם משתמש חוקי. יכול להכיל אותיות, מספרים, מקפים, נקודות וקווים תחתונים.',
     validUploadID: 'שדה זה אינו מזהה העלאה תקני.',

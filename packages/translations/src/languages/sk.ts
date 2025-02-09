@@ -424,6 +424,7 @@ export const skTranslations: DefaultTranslationsObject = {
     requiresNoMoreThan: 'Toto pole vyžaduje nie viac ako {{count}} {{label}}.',
     requiresTwoNumbers: 'Toto pole vyžaduje dve čísla.',
     shorterThanMax: 'Táto hodnota musí byť kratšia ako maximálna dĺžka {{maxLength}} znakov.',
+    timezoneRequired: 'Je potrebné uviesť časové pásmo.',
     trueOrFalse: 'Toto pole môže byť rovné iba true alebo false.',
     username:
       'Prosím, zadajte platné používateľské meno. Môže obsahovať písmená, čísla, pomlčky, bodky a podčiarknutia.',

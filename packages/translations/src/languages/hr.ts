@@ -423,6 +423,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     requiresNoMoreThan: 'Ovo polje zahtjeva ne više od {{count}} {{label}}.',
     requiresTwoNumbers: 'Ovo polje zahtjeva dva broja.',
     shorterThanMax: 'Ova vrijednost mora biti kraća od maksimalne dužine od {{maxLength}} znakova',
+    timezoneRequired: 'Potrebna je vremenska zona.',
     trueOrFalse: 'Ovo polje može biti samo točno ili netočno',
     username:
       'Unesite važeće korisničko ime. Može sadržavati slova, brojeve, crtice, točke i donje crte.',

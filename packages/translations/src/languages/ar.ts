@@ -418,6 +418,7 @@ export const arTranslations: DefaultTranslationsObject = {
     requiresNoMoreThan: 'هذا الحقل يتطلب عدم تجاوز {{count}} {{label}}.',
     requiresTwoNumbers: 'هذا الحقل يتطلب رقمين.',
     shorterThanMax: 'يجب أن تكون هذه القيمة أقصر من الحد الأقصى للطول الذي هو {{maxLength}} أحرف.',
+    timezoneRequired: 'مطلوب منطقة زمنية.',
     trueOrFalse: 'يمكن أن يكون هذا الحقل مساويًا فقط للقيمتين صحيح أو خطأ.',
     username:
       'يرجى إدخال اسم مستخدم صالح. يمكن أن يحتوي على أحرف، أرقام، شرطات، فواصل وشرطات سفلية.',
