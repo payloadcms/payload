@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test'
 
+import { TZDateMini } from '@date-fns/tz/date/mini'
 import { expect, test } from '@playwright/test'
 import path from 'path'
 import { wait } from 'payload/shared'
@@ -88,6 +89,18 @@ describe('Date', () => {
     await expect(dateField).toBeVisible()
     await dateField.fill('02/07/2023')
     await expect(dateField).toHaveValue('02/07/2023')
+
+    // Fill in remaining required fields, this is just to make sure saving is possible
+    const dateWithTz = page.locator('#field-dayAndTimeWithTimezone .react-datepicker-wrapper input')
+
+    await dateWithTz.fill('08/12/2027 10:00 AM')
+
+    const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__control`
+
+    const timezoneOptionSelector = `#field-dayAndTimeWithTimezone .rs__menu .rs__option:has-text("London")`
+    await page.click(dropdownControlSelector)
+    await page.click(timezoneOptionSelector)
+
     await saveDocAndAssert(page)
 
     const clearButton = page.locator('#field-default .date-time-picker__clear-button')
@@ -112,6 +125,20 @@ describe('Date', () => {
 
         // enter date in default date field
         await dateField.fill('02/07/2023')
+
+        // Fill in remaining required fields, this is just to make sure saving is possible
+        const dateWithTz = page.locator(
+          '#field-dayAndTimeWithTimezone .react-datepicker-wrapper input',
+        )
+
+        await dateWithTz.fill('08/12/2027 10:00 AM')
+
+        const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__control`
+
+        const timezoneOptionSelector = `#field-dayAndTimeWithTimezone .rs__menu .rs__option:has-text("London")`
+        await page.click(dropdownControlSelector)
+        await page.click(timezoneOptionSelector)
+
         await saveDocAndAssert(page)
 
         // get the ID of the doc
@@ -143,6 +170,20 @@ describe('Date', () => {
 
         // enter date in default date field
         await dateField.fill('02/07/2023')
+
+        // Fill in remaining required fields, this is just to make sure saving is possible
+        const dateWithTz = page.locator(
+          '#field-dayAndTimeWithTimezone .react-datepicker-wrapper input',
+        )
+
+        await dateWithTz.fill('08/12/2027 10:00 AM')
+
+        const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__control`
+
+        const timezoneOptionSelector = `#field-dayAndTimeWithTimezone .rs__menu .rs__option:has-text("London")`
+        await page.click(dropdownControlSelector)
+        await page.click(timezoneOptionSelector)
+
         await saveDocAndAssert(page)
 
         // get the ID of the doc
@@ -174,6 +215,20 @@ describe('Date', () => {
 
         // enter date in default date field
         await dateField.fill('02/07/2023')
+
+        // Fill in remaining required fields, this is just to make sure saving is possible
+        const dateWithTz = page.locator(
+          '#field-dayAndTimeWithTimezone .react-datepicker-wrapper input',
+        )
+
+        await dateWithTz.fill('08/12/2027 10:00 AM')
+
+        const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__control`
+
+        const timezoneOptionSelector = `#field-dayAndTimeWithTimezone .rs__menu .rs__option:has-text("London")`
+        await page.click(dropdownControlSelector)
+        await page.click(timezoneOptionSelector)
+
         await saveDocAndAssert(page)
 
         // get the ID of the doc
@@ -273,13 +328,9 @@ describe('Date', () => {
       const initialDateValue = await dateTimeLocator.inputValue()
 
       const dropdownControlSelector = `#field-timezoneBlocks__0__dayAndTime .rs__control`
-
       const timezoneOptionSelector = `#field-timezoneBlocks__0__dayAndTime .rs__menu .rs__option:has-text("London")`
 
       await page.click(dropdownControlSelector)
-
-      await wait(250)
-
       await page.click(timezoneOptionSelector)
 
       await expect(dateTimeLocator).not.toHaveValue(initialDateValue)
@@ -343,6 +394,198 @@ describe('Date', () => {
       const selectedTimezone = page.locator(selectedTimezoneSelector)
 
       await expect(selectedTimezone).toContainText('Monterrey')
+    })
+
+    test('can see an error when the date field is required and timezone is empty', async () => {
+      await page.goto(url.create)
+
+      const dateField = page.locator('#field-default input')
+      await expect(dateField).toBeVisible()
+      await dateField.fill('02/07/2023')
+      await expect(dateField).toHaveValue('02/07/2023')
+
+      // Fill in the date but don't select a timezone
+      const dateWithTz = page.locator(
+        '#field-dayAndTimeWithTimezone .react-datepicker-wrapper input',
+      )
+
+      await dateWithTz.fill('08/12/2027 10:00 AM')
+
+      const timezoneClearButton = page.locator(
+        `#field-dayAndTimeWithTimezone .rs__control .clear-indicator`,
+      )
+      await timezoneClearButton.click()
+
+      // Expect an error here
+      await saveDocAndAssert(page, undefined, 'error')
+
+      const errorMessage = page.locator(
+        '#field-dayAndTimeWithTimezone .field-error .tooltip-content:has-text("A timezone is required.")',
+      )
+
+      await expect(errorMessage).toBeVisible()
+    })
+
+    test('can clear a selected timezone', async () => {
+      const {
+        docs: [existingDoc],
+      } = await payload.find({
+        collection: dateFieldsSlug,
+      })
+
+      await page.goto(url.edit(existingDoc!.id))
+
+      const dateField = page.locator(
+        '#field-dayAndTimeWithTimezone .react-datepicker-wrapper input',
+      )
+
+      const initialDate = await dateField.inputValue()
+
+      const timezoneClearButton = page.locator(
+        `#field-dayAndTimeWithTimezone .rs__control .clear-indicator`,
+      )
+      await timezoneClearButton.click()
+
+      const updatedDate = dateField.inputValue()
+
+      await expect(() => {
+        expect(updatedDate).not.toEqual(initialDate)
+      }).toPass({ timeout: 10000, intervals: [100] })
+    })
+
+    test('creates the expected UTC value when the timezone is Tokyo', async () => {
+      // We send this value through the input
+      const expectedDateInput = 'Jan 1, 2025 6:00 PM'
+
+      const expectedUTCValue = '2025-01-01T09:00:00.000Z'
+
+      await page.goto(url.create)
+
+      const dateField = page.locator('#field-default input')
+      await dateField.fill('01/01/2025')
+
+      const dateTimeLocator = page.locator(
+        '#field-dayAndTimeWithTimezone .react-datepicker-wrapper input',
+      )
+
+      const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__control`
+      const timezoneOptionSelector = `#field-dayAndTimeWithTimezone .rs__menu .rs__option:has-text("Tokyo")`
+
+      await page.click(dropdownControlSelector)
+      await page.click(timezoneOptionSelector)
+      await dateTimeLocator.fill(expectedDateInput)
+
+      await saveDocAndAssert(page)
+
+      const docID = page.url().split('/').pop()
+
+      // eslint-disable-next-line payload/no-flaky-assertions
+      expect(docID).toBeTruthy()
+
+      const {
+        docs: [existingDoc],
+      } = await payload.find({
+        collection: dateFieldsSlug,
+        where: {
+          id: {
+            equals: docID,
+          },
+        },
+      })
+
+      // eslint-disable-next-line payload/no-flaky-assertions
+      expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedUTCValue)
+    })
+
+    test('creates the expected UTC value when the timezone is Paris - no daylight savings', async () => {
+      // We send this value through the input
+      const expectedDateInput = 'Jan 1, 2025 6:00 PM'
+      // We're testing this specific date because Paris has no daylight savings time in January
+      // but the UTC date will be different from 6PM local time in the summer versus the winter
+      const expectedUTCValue = '2025-01-01T17:00:00.000Z'
+
+      await page.goto(url.create)
+
+      const dateField = page.locator('#field-default input')
+      await dateField.fill('01/01/2025')
+
+      const dateTimeLocator = page.locator(
+        '#field-dayAndTimeWithTimezone .react-datepicker-wrapper input',
+      )
+
+      const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__control`
+      const timezoneOptionSelector = `#field-dayAndTimeWithTimezone .rs__menu .rs__option:has-text("Paris")`
+
+      await page.click(dropdownControlSelector)
+      await page.click(timezoneOptionSelector)
+      await dateTimeLocator.fill(expectedDateInput)
+
+      await saveDocAndAssert(page)
+
+      const docID = page.url().split('/').pop()
+
+      // eslint-disable-next-line payload/no-flaky-assertions
+      expect(docID).toBeTruthy()
+
+      const {
+        docs: [existingDoc],
+      } = await payload.find({
+        collection: dateFieldsSlug,
+        where: {
+          id: {
+            equals: docID,
+          },
+        },
+      })
+
+      // eslint-disable-next-line payload/no-flaky-assertions
+      expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedUTCValue)
+    })
+
+    test('creates the expected UTC value when the timezone is Paris - with daylight savings', async () => {
+      // We send this value through the input
+      const expectedDateInput = 'Jul 1, 2025 6:00 PM'
+
+      // We're testing specific date because Paris has daylight savings time in July (+1 hour to the local timezone)
+      // but the UTC date will be different from 6PM local time in the summer versus the winter
+      const expectedUTCValue = '2025-07-01T16:00:00.000Z'
+
+      await page.goto(url.create)
+
+      const dateField = page.locator('#field-default input')
+      await dateField.fill('01/01/2025')
+
+      const dateTimeLocator = page.locator(
+        '#field-dayAndTimeWithTimezone .react-datepicker-wrapper input',
+      )
+
+      const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__control`
+      const timezoneOptionSelector = `#field-dayAndTimeWithTimezone .rs__menu .rs__option:has-text("Paris")`
+
+      await page.click(dropdownControlSelector)
+      await page.click(timezoneOptionSelector)
+      await dateTimeLocator.fill(expectedDateInput)
+
+      await saveDocAndAssert(page)
+
+      const docID = page.url().split('/').pop()
+
+      // eslint-disable-next-line payload/no-flaky-assertions
+      expect(docID).toBeTruthy()
+
+      const {
+        docs: [existingDoc],
+      } = await payload.find({
+        collection: dateFieldsSlug,
+        where: {
+          id: {
+            equals: docID,
+          },
+        },
+      })
+
+      // eslint-disable-next-line payload/no-flaky-assertions
+      expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedUTCValue)
     })
 
     describe('while timezone is set to London', () => {

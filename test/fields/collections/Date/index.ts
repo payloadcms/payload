@@ -69,10 +69,12 @@ const DateFields: CollectionConfig = {
     {
       name: 'dayAndTimeWithTimezone',
       type: 'date',
+      required: true,
       admin: {
         date: {
           pickerAppearance: 'dayAndTime',
         },
+        description: 'This date here should be required.',
       },
       timezone: true,
     },

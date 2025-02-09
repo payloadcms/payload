@@ -118,7 +118,7 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
 
   const onChangeTimezone = useCallback(
     (timezone: string) => {
-      if (timezone && timezonePath) {
+      if (timezonePath) {
         dispatchFields({
           type: 'UPDATE',
           path: timezonePath,

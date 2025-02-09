@@ -13,7 +13,6 @@
  * via the `definition` "supportedTimezones".
  */
 export type SupportedTimezones =
-  | 'Etc/GMT+12'
   | 'Pacific/Midway'
   | 'Pacific/Niue'
   | 'Pacific/Honolulu'
@@ -30,12 +29,11 @@ export type SupportedTimezones =
   | 'America/Bogota'
   | 'America/Caracas'
   | 'America/Santiago'
-  | 'America/Argentina/Buenos_Aires'
+  | 'America/Buenos_Aires'
   | 'America/Sao_Paulo'
   | 'Atlantic/South_Georgia'
   | 'Atlantic/Azores'
   | 'Atlantic/Cape_Verde'
-  | 'UTC'
   | 'Europe/London'
   | 'Europe/Berlin'
   | 'Africa/Lagos'
@@ -47,7 +45,7 @@ export type SupportedTimezones =
   | 'Asia/Baku'
   | 'Asia/Karachi'
   | 'Asia/Tashkent'
-  | 'Asia/Kolkata'
+  | 'Asia/Calcutta'
   | 'Asia/Dhaka'
   | 'Asia/Almaty'
   | 'Asia/Jakarta'
@@ -61,7 +59,7 @@ export type SupportedTimezones =
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
   | 'Pacific/Fiji'
-  | 'Space/Lunar';
+  | 'America/Monterrey';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "BlockColumns".
@@ -1125,8 +1123,11 @@ export interface DateField {
   monthOnly?: string | null;
   defaultWithTimezone?: string | null;
   defaultWithTimezone_tz?: SupportedTimezones;
-  dayAndTimeWithTimezone?: string | null;
-  dayAndTimeWithTimezone_tz?: SupportedTimezones;
+  /**
+   * This date here should be required.
+   */
+  dayAndTimeWithTimezone: string;
+  dayAndTimeWithTimezone_tz: SupportedTimezones;
   timezoneBlocks?:
     | {
         dayAndTime?: string | null;

@@ -44,10 +44,11 @@ export const TimezonePicker: React.FC<Props> = (props) => {
       <ReactSelect
         className="timezone-picker"
         inputId={id}
-        isClearable={false}
+        isClearable={true}
+        isCreatable={false}
         onChange={(val: OptionObject) => {
           if (onChangeFromProps) {
-            onChangeFromProps(val.value)
+            onChangeFromProps(val?.value || '')
           }
         }}
         options={options}
