@@ -253,7 +253,9 @@ The following options are available:
 | Option            | Description                                     |
 | ----------------- | ----------------------------------------------- |
 | `supportedTimezones`         | An array of label/value options for selectable timezones where the value is the IANA name eg. `America/Detroit`                        |
-| `defaultTimezone`               | The `value` of the default timezone. eg. `America/Los_Angeles`                        |
+| `defaultTimezone`               | The `value` of the default selected timezone. eg. `America/Los_Angeles`                        |
+
+We validate the supported timezones array by checking the value against the list of IANA timezones supported via the Intl API, specifically `Intl.supportedValuesOf('timeZone')`.
 
 <Banner type="info">
   **Important**

@@ -436,8 +436,6 @@ type SupportedTimezonesFn = (args: { defaultTimezones: Timezone[] }) => Timezone
 type TimezoneConfig = {
   /**
    * The default timezone to use for the admin panel.
-   *
-   * @default 'UTC'
    */
   defaultTimezone?: string
   /**
