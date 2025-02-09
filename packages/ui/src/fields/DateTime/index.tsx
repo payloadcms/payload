@@ -169,6 +169,7 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
             id={`${path}-timezone-picker`}
             onChange={onChangeTimezone}
             options={supportedTimezones}
+            required={required}
             selectedTimezone={selectedTimezone}
           />
         )}

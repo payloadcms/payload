@@ -293,7 +293,7 @@ export const sanitizeFields = async ({
     // Insert our field after assignment
     if (field.type === 'date' && field.timezone) {
       const name = field.name + '_tz'
-      const defaultTimezone = config.admin.timezone.defaultTimezone || 'UTC'
+      const defaultTimezone = config.admin.timezone.defaultTimezone
 
       const supportedTimezones = config.admin.timezone.supportedTimezones
 

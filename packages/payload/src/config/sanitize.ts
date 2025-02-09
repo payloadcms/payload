@@ -67,13 +67,8 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
     if (!sanitizedConfig?.admin?.timezone?.supportedTimezones) {
       sanitizedConfig.admin.timezone.supportedTimezones = defaultTimezones
     }
-
-    if (!sanitizedConfig?.admin?.timezone?.defaultTimezone) {
-      sanitizedConfig.admin.timezone.defaultTimezone = 'UTC'
-    }
   } else {
     sanitizedConfig.admin.timezone = {
-      defaultTimezone: 'UTC',
       supportedTimezones: defaultTimezones,
     }
   }

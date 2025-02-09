@@ -18,6 +18,7 @@ export const TimezonePicker: React.FC<Props> = (props) => {
     id,
     onChange: onChangeFromProps,
     options: optionsFromProps,
+    required,
     selectedTimezone: selectedTimezoneFromProps,
   } = props
 
@@ -34,7 +35,12 @@ export const TimezonePicker: React.FC<Props> = (props) => {
 
   return (
     <div className="timezone-picker-wrapper">
-      <FieldLabel htmlFor={id} label={`${t('general:timezone')}`} unstyled />
+      <FieldLabel
+        htmlFor={id}
+        label={`${t('general:timezone')} ${required ? '*' : ''}`}
+        required={required}
+        unstyled
+      />
       <ReactSelect
         className="timezone-picker"
         inputId={id}

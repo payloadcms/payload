@@ -8,6 +8,7 @@
     .field-label {
       margin-right: unset;
       color: var(--theme-elevation-400);
+      flex-shrink: 0;
     }
 
     .timezone-picker {
