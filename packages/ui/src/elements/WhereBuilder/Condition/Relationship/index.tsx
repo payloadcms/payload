@@ -225,23 +225,28 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
     return undefined
   }, [hasMany, hasMultipleRelations, value, options])
 
-  const handleInputChange = (input: string) => {
-    if (input !== search) {
-      dispatchOptions({ type: 'CLEAR', i18n, required: false })
+  const handleInputChange = useCallback(
+    (input: string) => {
+      if (input !== search) {
+        dispatchOptions({ type: 'CLEAR', i18n, required: false })
 
-      loadedRelationships.current = new Map(
-        relationSlugs.map((relation) => [
-          relation,
-          {
-            hasLoadedAll: false,
-            nextPage: 1,
-          },
-        ]),
-      )
+        const relationSlugs = Array.isArray(relationTo) ? relationTo : [relationTo]
 
-      setSearch(input)
-    }
-  }
+        loadedRelationships.current = new Map(
+          relationSlugs.map((relation) => [
+            relation,
+            {
+              hasLoadedAll: false,
+              nextPage: 1,
+            },
+          ]),
+        )
+
+        setSearch(input)
+      }
+    },
+    [i18n, relationTo, search],
+  )
 
   const addOptionByID = useCallback(
     async (id, relation) => {
@@ -311,7 +316,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
         }
       })
     }
-  }, [i18n, relationTo])
+  }, [i18n, relationTo, debouncedSearch])
 
   /**
    * Load any other options that might exist in the value that were not loaded already
