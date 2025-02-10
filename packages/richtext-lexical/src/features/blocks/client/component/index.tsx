@@ -249,7 +249,9 @@ export const BlockComponent: React.FC<Props> = (props) => {
       }
 
       const newFormStateData: BlockFields = reduceFieldsToValues(
-        deepCopyObjectSimpleWithoutReactComponents(newFormState),
+        removeEmptyArrayValues({
+          fields: deepCopyObjectSimpleWithoutReactComponents(newFormState),
+        }),
         true,
       ) as BlockFields
 
