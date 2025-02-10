@@ -729,9 +729,20 @@ export class BasePayload {
         typeof this.config.jobs.autoRun === 'function'
           ? await this.config.jobs.autoRun(this)
           : this.config.jobs.autoRun
+
       await Promise.all(
         cronJobs.map((cronConfig) => {
-          new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
+          const job = new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
+            if (typeof this.config.jobs.shouldAutoRun === 'function') {
+              const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
+
+              if (!shouldAutoRun) {
+                job.stop()
+
+                return false
+              }
+            }
+
             await this.jobs.run({
               limit: cronConfig.limit ?? DEFAULT_LIMIT,
               queue: cronConfig.queue,
