@@ -7,7 +7,7 @@ export type WhereBuilderProps = {
   readonly renderedFilters?: Map<string, React.ReactNode>
 }
 
-export type FieldCondition = {
+export type ConditionOption = {
   field: ClientField
   label: string
   operators: {

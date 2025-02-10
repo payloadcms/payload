@@ -394,7 +394,11 @@ describe('List View', () => {
       await page.waitForURL(/^(?!.*&where)/)
     })
 
-    test('should update values when field is changed', async () => {
+    test.skip('should remove condition from URL when field is changed', async () => {
+      // TODO: fix this bug and write this test
+    })
+
+    test('should refresh relationship values when a different field is selected', async () => {
       await page.goto(postsUrl.list)
 
       await addListFilter({

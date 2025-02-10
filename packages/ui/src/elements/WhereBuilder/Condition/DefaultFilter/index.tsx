@@ -2,7 +2,7 @@ import type { Operator, Option, SelectFieldClient, TextFieldClient } from 'paylo
 
 import React from 'react'
 
-import type { FieldCondition } from '../../types.js'
+import type { ConditionOption } from '../../types.js'
 
 import { DateFilter } from '../Date/index.js'
 import { NumberFilter } from '../Number/index.js'
@@ -13,7 +13,7 @@ import { Text } from '../Text/index.js'
 type Props = {
   booleanSelect: boolean
   disabled: boolean
-  internalField: FieldCondition
+  internalField: ConditionOption
   onChange: React.Dispatch<React.SetStateAction<string>>
   operator: Operator
   options: Option[]
