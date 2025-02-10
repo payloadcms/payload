@@ -1039,7 +1039,7 @@ export const MySetStepNavComponent: React.FC<{
 
 ## usePayloadAPI
 
-The `usePayloadAPI` hook is a powerful tool for making API requests to your Payload instance and handling responses reactively. It allows you to fetch and interact with data while automatically updating when parameters change.
+The `usePayloadAPI` hook is a useful tool for making REST API requests to your Payload instance and handling responses reactively. It allows you to fetch and interact with data while automatically updating when parameters change.
 
 This hook returns an array with two elements:
 
@@ -1078,9 +1078,16 @@ const MyComponent: React.FC = () => {
 | Property      | Description                                                                                     |
 | ------------- | ----------------------------------------------------------------------------------------------- |
 | **`url`**     | The API endpoint to fetch data from. Relative URLs will be prefixed with the Payload API route. |
-| **`options`** | An object containing initial request parameters. Supports `initialParams`.                      |
+| **`options`** | An object containing initial request parameters and initial state configuration.                |
 
-**Returned Object:**
+The `options` argument accepts the following properties:
+
+| Property            | Description                                                                                         |
+| ------------------- | --------------------------------------------------------------------------------------------------- |
+| **`initialData`**   | Uses this data instead of making an initial request. If not provided, the request runs immediately. |
+| **`initialParams`** | Defines the initial parameters to use in the request. Defaults to an empty object `{}`.             |
+
+**Returned Value:**
 
 The first item in the returned array is an object containing the following properties:
 
@@ -1104,7 +1111,7 @@ The `setParams` function can be used to update the request and trigger a refetch
 setParams({ depth: 2 })
 ```
 
-This is useful for scenarios where you need to refresh data dynamically.
+This is useful for scenarios where you need to trigger another fetch regardless of the `url` argument changing.
 
 
 
