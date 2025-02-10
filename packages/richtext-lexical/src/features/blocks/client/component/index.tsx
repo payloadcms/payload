@@ -87,8 +87,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const { getFormState } = useServerFunctions()
   const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${formData.blockType}.fields`
 
-  const [initialState, setInitialState] = React.useState<false | FormState | undefined>(
-    initialLexicalFormState?.[formData.id]?.formState
+  const [initialState, setInitialState] = React.useState<false | FormState | undefined>(() => {
+    return initialLexicalFormState?.[formData.id]?.formState
       ? {
           ...initialLexicalFormState?.[formData.id]?.formState,
           blockName: {
@@ -98,11 +98,20 @@ export const BlockComponent: React.FC<Props> = (props) => {
             value: formData.blockName,
           },
         }
-      : false,
-  )
+      : false
+  })
 
+  const hasMounted = useRef(false)
+  const prevCacheBuster = useRef(cacheBuster)
   useEffect(() => {
-    setInitialState(false)
+    if (hasMounted.current) {
+      if (prevCacheBuster.current !== cacheBuster) {
+        setInitialState(false)
+      }
+      prevCacheBuster.current = cacheBuster
+    } else {
+      hasMounted.current = true
+    }
   }, [cacheBuster])
 
   const [CustomLabel, setCustomLabel] = React.useState<React.ReactNode | undefined>(
@@ -148,6 +157,22 @@ export const BlockComponent: React.FC<Props> = (props) => {
           value: formData.blockName,
         }
 
+        const newFormStateData: BlockFields = reduceFieldsToValues(
+          deepCopyObjectSimpleWithoutReactComponents(state),
+          true,
+        ) as BlockFields
+
+        // Things like default values may come back from the server => update the node with the new data
+        editor.update(() => {
+          const node = $getNodeByKey(nodeKey)
+          if (node && $isBlockNode(node)) {
+            const newData = newFormStateData
+            newData.blockType = formData.blockType
+
+            node.setFields(newData, true)
+          }
+        })
+
         setInitialState(state)
         setCustomLabel(state._components?.customComponents?.BlockLabel)
         setCustomBlock(state._components?.customComponents?.Block)
@@ -166,6 +191,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
     schemaFieldsPath,
     id,
     formData,
+    editor,
+    nodeKey,
     initialState,
     collectionSlug,
     globalSlug,
