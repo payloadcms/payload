@@ -227,8 +227,7 @@ export const sanitizeFields = async ({
         throw new Error('You cannot have both blockReferences and blocks in the same blocks field')
       }
 
-      // No need to do this for blockReferences
-      for (const block of field.blocks) {
+      for (const block of field.blockReferences ?? field.blocks) {
         if (typeof block === 'string') {
           continue
         }
