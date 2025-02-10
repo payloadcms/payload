@@ -330,6 +330,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     takeOver: 'Ta over',
     thisLanguage: 'Norsk',
     time: 'Tid',
+    timezone: 'Tidssone',
     titleDeleted: '{{label}} "{{title}}" ble slettet.',
     true: 'Sann',
     unauthorized: 'Ikke autorisert',
@@ -422,6 +423,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     requiresNoMoreThan: 'Dette feltet krever maksimalt {{count}} {{label}}.',
     requiresTwoNumbers: 'Dette feltet krever to tall.',
     shorterThanMax: 'Denne verdien må være kortere enn maksimal lengde på {{maxLength}} tegn.',
+    timezoneRequired: 'En tidssone er nødvendig.',
     trueOrFalse: 'Dette feltet kan bare være likt true eller false.',
     username:
       'Vennligst oppgi et gyldig brukernavn. Kan inneholde bokstaver, nummer, bindestreker, punktum og understrek.',

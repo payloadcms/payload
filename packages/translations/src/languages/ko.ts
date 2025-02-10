@@ -327,6 +327,7 @@ export const koTranslations: DefaultTranslationsObject = {
     takeOver: '인수하기',
     thisLanguage: '한국어',
     time: '시간',
+    timezone: '시간대',
     titleDeleted: '{{label}} "{{title}}"을(를) 삭제했습니다.',
     true: '참',
     unauthorized: '권한 없음',
@@ -418,6 +419,7 @@ export const koTranslations: DefaultTranslationsObject = {
     requiresNoMoreThan: '이 입력란은 최대 {{count}} {{label}} 이하이어야 합니다.',
     requiresTwoNumbers: '이 입력란은 두 개의 숫자가 필요합니다.',
     shorterThanMax: '이 값은 최대 길이인 {{maxLength}}자보다 짧아야 합니다.',
+    timezoneRequired: '시간대가 필요합니다.',
     trueOrFalse: '이 입력란은 true 또는 false만 가능합니다.',
     username:
       '유효한 사용자 이름을 입력해 주세요. 글자, 숫자, 하이픈, 마침표, 및 밑줄을 사용할 수 있습니다.',

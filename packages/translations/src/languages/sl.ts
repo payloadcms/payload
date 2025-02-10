@@ -328,6 +328,7 @@ export const slTranslations: DefaultTranslationsObject = {
     takeOver: 'Prevzemi',
     thisLanguage: 'Slovenščina',
     time: 'Čas',
+    timezone: 'Časovni pas',
     titleDeleted: '{{label}} "{{title}}" uspešno izbrisan.',
     true: 'Da',
     unauthorized: 'Nepooblaščeno',
@@ -420,6 +421,7 @@ export const slTranslations: DefaultTranslationsObject = {
     requiresNoMoreThan: 'To polje zahteva največ {{count}} {{label}}.',
     requiresTwoNumbers: 'To polje zahteva dve številki.',
     shorterThanMax: 'Ta vrednost mora biti krajša od največje dolžine {{maxLength}} znakov.',
+    timezoneRequired: 'Potrebna je časovna cona.',
     trueOrFalse: 'To polje je lahko samo enako true ali false.',
     username:
       'Vnesite veljavno uporabniško ime. Lahko vsebuje črke, številke, vezaje, pike in podčrtaje.',

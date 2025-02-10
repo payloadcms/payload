@@ -327,6 +327,7 @@ export const faTranslations: DefaultTranslationsObject = {
     takeOver: 'تحویل گرفتن',
     thisLanguage: 'فارسی',
     time: 'زمان',
+    timezone: 'منطقه زمانی',
     titleDeleted: '{{label}} "{{title}}" با موفقیت پاک شد.',
     true: 'درست',
     unauthorized: 'غیرمجاز',
@@ -419,6 +420,7 @@ export const faTranslations: DefaultTranslationsObject = {
     requiresNoMoreThan: 'این رشته به بیش از {{count}} {{label}} نیاز دارد.',
     requiresTwoNumbers: 'این کادر به دو عدد نیاز دارد.',
     shorterThanMax: 'ورودی باید کمتر از {{maxLength}} واژه باشد.',
+    timezoneRequired: 'نیاز به منطقه زمانی است.',
     trueOrFalse: 'این کادر فقط می تواند به صورت true یا false باشد.',
     username:
       'لطفاً یک نام کاربری معتبر وارد کنید. می تواند شامل حروف، اعداد، خط فاصله، نقاط و خط زیر باشد.',

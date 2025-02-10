@@ -22,12 +22,13 @@ import {
 } from 'payload'
 import { fileURLToPath } from 'url'
 
+import type { Global2 } from './payload-types.js'
+
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { isMongoose } from '../helpers/isMongoose.js'
 import removeFiles from '../helpers/removeFiles.js'
 import { errorOnUnnamedFieldsSlug, postsSlug } from './shared.js'
-import { Global2 } from './payload-types.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -893,7 +894,7 @@ describe('database', () => {
         errorMessage = e.message
       }
 
-      await expect(errorMessage).toBe('The following field is invalid: Title')
+      expect(errorMessage).toBe('The following field is invalid: Title')
     })
 
     it('should return validation errors in response', async () => {
@@ -913,7 +914,7 @@ describe('database', () => {
           },
         })
       } catch (e: any) {
-        await expect(e.message).toMatch(
+        expect(e.message).toMatch(
           payload.db.name === 'mongoose'
             ? 'posts validation failed: D1.D2.D3.D4: Cast to string failed for value "{}" (type Object) at path "D4"'
             : payload.db.name === 'sqlite'
@@ -1360,11 +1361,11 @@ describe('database', () => {
   })
 
   it('payload.db.createGlobal should have globalType, updatedAt, createdAt fields', async () => {
-    let timestamp = Date.now()
+    const timestamp = Date.now()
     let result = (await payload.db.createGlobal({
       slug: 'global-2',
       data: { text: 'this is global-2' },
-    })) as Global2 & { globalType: string }
+    })) as { globalType: string } & Global2
 
     expect(result.text).toBe('this is global-2')
     expect(result.globalType).toBe('global-2')
@@ -1376,7 +1377,7 @@ describe('database', () => {
     result = (await payload.db.updateGlobal({
       slug: 'global-2',
       data: { text: 'this is global-2 but updated' },
-    })) as Global2 & { globalType: string }
+    })) as { globalType: string } & Global2
 
     expect(result.text).toBe('this is global-2 but updated')
     expect(result.globalType).toBe('global-2')
@@ -1385,11 +1386,11 @@ describe('database', () => {
   })
 
   it('payload.updateGlobal should have globalType, updatedAt, createdAt fields', async () => {
-    let timestamp = Date.now()
+    const timestamp = Date.now()
     let result = (await payload.updateGlobal({
       slug: 'global-3',
       data: { text: 'this is global-3' },
-    })) as Global2 & { globalType: string }
+    })) as { globalType: string } & Global2
 
     expect(result.text).toBe('this is global-3')
     expect(result.globalType).toBe('global-3')
@@ -1401,11 +1402,68 @@ describe('database', () => {
     result = (await payload.updateGlobal({
       slug: 'global-3',
       data: { text: 'this is global-3 but updated' },
-    })) as Global2 & { globalType: string }
+    })) as { globalType: string } & Global2
 
     expect(result.text).toBe('this is global-3 but updated')
     expect(result.globalType).toBe('global-3')
     expect(createdAt).toEqual(new Date(result.createdAt as string).getTime())
     expect(createdAt).toBeLessThan(new Date(result.updatedAt as string).getTime())
+  })
+
+  it('should group where conditions with AND', async () => {
+    // create 2 docs
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'post 1',
+      },
+    })
+
+    const doc2 = await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'post 2',
+      },
+    })
+
+    const query1 = await payload.find({
+      collection: postsSlug,
+      where: {
+        id: {
+          // where order, `in` last
+          not_in: [],
+          in: [doc2.id],
+        },
+      },
+    })
+
+    const query2 = await payload.find({
+      collection: postsSlug,
+      where: {
+        id: {
+          // where order, `in` first
+          in: [doc2.id],
+          not_in: [],
+        },
+      },
+    })
+
+    const query3 = await payload.find({
+      collection: postsSlug,
+      where: {
+        and: [
+          {
+            id: {
+              in: [doc2.id],
+              not_in: [],
+            },
+          },
+        ],
+      },
+    })
+
+    expect(query1.totalDocs).toEqual(1)
+    expect(query2.totalDocs).toEqual(1)
+    expect(query3.totalDocs).toEqual(1)
   })
 })

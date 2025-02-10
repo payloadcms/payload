@@ -1469,6 +1469,9 @@ importers:
 
   packages/ui:
     dependencies:
+      '@date-fns/tz':
+        specifier: 1.2.0
+        version: 1.2.0
       '@dnd-kit/core':
         specifier: 6.0.8
         version: 6.0.8(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -1593,6 +1596,9 @@ importers:
       '@aws-sdk/client-s3':
         specifier: ^3.614.0
         version: 3.687.0
+      '@date-fns/tz':
+        specifier: 1.2.0
+        version: 1.2.0
       '@next/env':
         specifier: 15.1.5
         version: 15.1.5
@@ -2774,6 +2780,9 @@ packages:
     resolution: {integrity: sha512-0MhX9/B4iL6Re04jPrttDm+BsP8y6mS7byuv0BvXgdXhbV5PdlsHt55dvNsuBCPZ7xq1oTAOOuotR9NFbQyMSA==}
     bundledDependencies:
       - is-unicode-supported
+
+  '@date-fns/tz@1.2.0':
+    resolution: {integrity: sha512-LBrd7MiJZ9McsOgxqWX7AaxrDjcFVjWH/tIKJd7pnR7McaslGYOP1QmmiBXdJH/H/yLCT+rcQ7FaPBUxRGUtrg==}
 
   '@discoveryjs/json-ext@0.5.7':
     resolution: {integrity: sha512-dBVuXR082gk3jsFp7Rd/JI4kytwGHecnCoTtXFb7DB6CNHp4rg5k1bhg0nWdLGLnOV71lmDzGQaLMy8iPLY0pw==}
@@ -11697,6 +11706,8 @@ snapshots:
       '@clack/core': 0.3.4
       picocolors: 1.1.1
       sisteransi: 1.0.5
+
+  '@date-fns/tz@1.2.0': {}
 
   '@discoveryjs/json-ext@0.5.7': {}
 
