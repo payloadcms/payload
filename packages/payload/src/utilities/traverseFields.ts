@@ -36,9 +36,11 @@ const traverseArrayOrBlocksField = ({
     let fields: Field[]
     if (field.type === 'blocks' && typeof ref?.blockType === 'string') {
       // TODO: iterate over blocks mapped to block slug in v4, or pass through payload.blocks
-      const block = [...config.blocks, ...field.blocks].find(
-        (block) => typeof block !== 'string' && block.slug === ref.blockType,
-      ) as Block | undefined
+      const block = (
+        config.blocks?.length ? [...config.blocks, ...field.blocks] : field.blocks
+      ).find((block) => typeof block !== 'string' && block.slug === ref.blockType) as
+        | Block
+        | undefined
       fields = block?.fields
     } else if (field.type === 'array') {
       fields = field.fields
