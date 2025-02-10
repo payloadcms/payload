@@ -2,6 +2,9 @@ import { jest } from '@jest/globals'
 import console from 'console'
 global.console = console
 
+import dotenv from 'dotenv'
+dotenv.config()
+
 import nodemailer from 'nodemailer'
 
 import { generateDatabaseAdapter } from './generateDatabaseAdapter.js'
