@@ -1405,7 +1405,7 @@ describe('lexicalMain', () => {
 
     await lastParagraph.click()
 
-    page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+    await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
 
     // Paste in a link copied from a html page
     const link = '<a href="https://www.google.com">Google</a>'
