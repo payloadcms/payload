@@ -28,6 +28,7 @@ export interface Config {
     'disable-duplicate': DisableDuplicate;
     'base-list-filters': BaseListFilter;
     with300documents: With300Document;
+    orders: Order;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -51,6 +52,7 @@ export interface Config {
     'disable-duplicate': DisableDuplicateSelect<false> | DisableDuplicateSelect<true>;
     'base-list-filters': BaseListFiltersSelect<false> | BaseListFiltersSelect<true>;
     with300documents: With300DocumentsSelect<false> | With300DocumentsSelect<true>;
+    orders: OrdersSelect<false> | OrdersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -393,6 +395,18 @@ export interface With300Document {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders".
+ */
+export interface Order {
+  id: string;
+  relationship?: (string | null) | Post;
+  users?: (string | null) | User;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -465,6 +479,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'with300documents';
         value: string | With300Document;
+      } | null)
+    | ({
+        relationTo: 'orders';
+        value: string | Order;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -766,6 +784,17 @@ export interface With300DocumentsSelect<T extends boolean = true> {
   selfRelation?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders_select".
+ */
+export interface OrdersSelect<T extends boolean = true> {
+  relationship?: T;
+  users?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

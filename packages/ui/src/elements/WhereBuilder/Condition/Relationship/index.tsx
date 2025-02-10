@@ -166,7 +166,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
         relationSlug: relationshipToLoad[0],
       })
     }
-  }, [loadOptions])
+  }, [])
 
   const findOptionsByValue = useCallback((): Option | Option[] => {
     if (value) {
@@ -311,7 +311,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
         }
       })
     }
-  }, [i18n, loadOptions, relationTo])
+  }, [i18n, relationTo])
 
   /**
    * Load any other options that might exist in the value that were not loaded already
