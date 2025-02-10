@@ -329,6 +329,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     takeOver: 'Превузети',
     thisLanguage: 'Српски (ћирилица)',
     time: 'Vreme',
+    timezone: 'Vremenska zona',
     titleDeleted: '{{label}} "{{title}}" успешно обрисано.',
     true: 'Istinito',
     unauthorized: 'Нисте ауторизовани',
@@ -421,6 +422,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     requiresNoMoreThan: 'Ово поље захтева не више од {{count}} {{label}}.',
     requiresTwoNumbers: 'Ово поље захтева два броја.',
     shorterThanMax: 'Ова вредност мора бити краћа од максималне дужине од {{maxLength}} карактера',
+    timezoneRequired: 'Потребна је временска зона.',
     trueOrFalse: 'Ово поље може бити само тачно или нетачно',
     username:
       'Molimo unesite važeće korisničko ime. Može sadržati slova, brojeve, crtice, tačke i donje crte.',

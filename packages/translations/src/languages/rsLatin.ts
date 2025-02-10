@@ -330,6 +330,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     takeOver: 'Preuzeti',
     thisLanguage: 'Srpski (latinica)',
     time: 'Vreme',
+    timezone: 'Vremenska zona',
     titleDeleted: '{{label}} "{{title}}" uspešno obrisano.',
     true: 'Istinito',
     unauthorized: 'Niste autorizovani',
@@ -422,6 +423,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     requiresNoMoreThan: 'Ovo polje zahteva ne više od {{count}} {{label}}.',
     requiresTwoNumbers: 'Ovo polje zahteva dva broja.',
     shorterThanMax: 'Ova vrednost mora biti kraća od maksimalne dužine od {{maxLength}} karaktera',
+    timezoneRequired: 'Potrebna je vremenska zona.',
     trueOrFalse: 'Ovo polje može biti samo tačno ili netačno',
     username:
       'Molimo unesite važeće korisničko ime. Može sadržavati slova, brojeve, crtice, tačke i donje crte.',

@@ -332,6 +332,7 @@ export const myTranslations: DefaultTranslationsObject = {
     takeOver: 'တာဝန်ယူပါ',
     thisLanguage: 'မြန်မာစာ',
     time: 'Masa',
+    timezone: 'Masa Wilayah',
     titleDeleted: '{{label}} {{title}} အောင်မြင်စွာ ဖျက်သိမ်းခဲ့သည်။',
     true: 'အမှန်',
     unauthorized: 'အခွင့်မရှိပါ။',
@@ -429,6 +430,7 @@ export const myTranslations: DefaultTranslationsObject = {
     requiresNoMoreThan: 'ဤအကွက်တွင် {{count}} {{label}} ထက် မပိုရပါ။',
     requiresTwoNumbers: 'ဤအကွက်သည် နံပါတ်နှစ်ခု လိုအပ်ပါသည်။',
     shorterThanMax: 'ဤတန်ဖိုးသည် စာလုံး {{maxLength}} လုံး၏ အမြင့်ဆုံးအရှည်ထက် ပိုတိုရပါမည်။',
+    timezoneRequired: 'အချိန်ဇုန်တစ်ခုလိုအပ်သည်။',
     trueOrFalse: 'ဤအကွက်သည် တစ်ခုခုဖြစ်ရပါမည်။',
     username:
       'Sila masukkan nama pengguna yang sah. Boleh mengandungi huruf, nombor, tanda hubung, titik dan garis bawah.',

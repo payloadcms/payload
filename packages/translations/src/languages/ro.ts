@@ -333,6 +333,7 @@ export const roTranslations: DefaultTranslationsObject = {
     takeOver: 'Preia controlul',
     thisLanguage: 'Română',
     time: 'Timp',
+    timezone: 'Fus orar',
     titleDeleted: '{{label}} "{{title}}" șters cu succes.',
     true: 'Adevărat',
     unauthorized: 'neautorizat(ă)',
@@ -429,6 +430,7 @@ export const roTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'Acest câmp necesită două numere.',
     shorterThanMax:
       'Această valoare trebuie să fie mai scurtă decât lungimea maximă de {{maxLength}} caractere.',
+    timezoneRequired: 'Este necesar un fus orar.',
     trueOrFalse: 'Acest câmp poate fi doar egal cu true sau false.',
     username:
       'Vă rugăm să introduceți un nume de utilizator valid. Poate conține litere, numere, cratime, puncte și sublinieri.',

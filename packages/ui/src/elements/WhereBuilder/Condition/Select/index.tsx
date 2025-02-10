@@ -1,5 +1,4 @@
 'use client'
-import type { Option, OptionObject } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -8,18 +7,7 @@ import type { Props } from './types.js'
 
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { ReactSelect } from '../../../ReactSelect/index.js'
-
-const formatOptions = (options: Option[]): OptionObject[] =>
-  options.map((option) => {
-    if (typeof option === 'object' && (option.value || option.value === '')) {
-      return option
-    }
-
-    return {
-      label: option,
-      value: option,
-    } as OptionObject
-  })
+import { formatOptions } from './formatOptions.js'
 
 export const Select: React.FC<Props> = ({
   disabled,
