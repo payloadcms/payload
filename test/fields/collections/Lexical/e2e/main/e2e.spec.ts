@@ -1519,4 +1519,84 @@ describe('lexicalMain', () => {
     await monacoCode.click()
     await expect(decoratorLocator).toBeHidden()
   })
+
+  test('arrow keys', async () => {
+    // utils
+    const selectedDecorator = page.locator('.decorator-selected')
+    const topLevelDecorator = page.locator(
+      '[data-lexical-decorator="true"]:not([data-lexical-decorator="true"] [data-lexical-decorator="true"])',
+    )
+    const selectedNthDecorator = async (nth: number) => {
+      await expect(selectedDecorator).toBeVisible()
+      const areSame = await selectedDecorator.evaluateHandle(
+        (el1, el2) => el1 === el2,
+        await topLevelDecorator.nth(nth).elementHandle(),
+      )
+      await expect.poll(async () => await areSame.jsonValue()).toBe(true)
+    }
+
+    // test
+    await navigateToLexicalFields()
+
+    const textNode = page.getByText('Upload Node:', { exact: true })
+    await textNode.click()
+    await expect(selectedDecorator).toBeHidden()
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(0)
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(1)
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(2)
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(3)
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(4)
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(5)
+    await page.keyboard.press('ArrowDown')
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(6)
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(7)
+    await page.keyboard.press('ArrowDown')
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(8)
+    await page.keyboard.press('ArrowDown')
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(9)
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(10)
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(10)
+
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(9)
+    await page.keyboard.press('ArrowUp')
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(8)
+    await page.keyboard.press('ArrowUp')
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(7)
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(6)
+    await page.keyboard.press('ArrowUp')
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(5)
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(4)
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(3)
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(2)
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(1)
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(0)
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(0)
+
+    // TODO: It would be nice to add tests with lists and nested lists
+    // before and after decoratorNodes and paragraphs. Tested manually,
+    // but these are complex cases.
+  })
 })
