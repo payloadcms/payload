@@ -66,9 +66,7 @@ export const traverseFields = ({
             typeof _block === 'string'
               ? config.blocksMap
                 ? config.blocksMap[_block]
-                : ((field.blockReferences ?? config.blocks).find(
-                    (block) => typeof block !== 'string' && block.slug === _block,
-                  ) as ClientBlock | undefined)
+                : config.blocks.find((block) => typeof block !== 'string' && block.slug === _block)
               : _block
 
           const blockSchemaPath = `${schemaPath}.${block.slug}`
