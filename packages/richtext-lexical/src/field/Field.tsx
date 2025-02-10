@@ -12,7 +12,6 @@ import {
   useField,
 } from '@payloadcms/ui'
 import { mergeFieldStyles } from '@payloadcms/ui/shared'
-import { dequal } from 'dequal/lite'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 
@@ -134,8 +133,12 @@ const RichTextComponent: React.FC<
     (initialValue: SerializedEditorState | undefined) => {
       // Object deep equality check here, as re-mounting the editor if
       // the new value is the same as the old one is not necessary
-      if (!dequal(prevValueRef.current, value)) {
+      if (
+        prevValueRef.current !== value &&
+        JSON.stringify(prevValueRef.current) !== JSON.stringify(value)
+      ) {
         prevInitialValueRef.current = initialValue
+        prevValueRef.current = value
         setRerenderProviderKey(new Date())
       }
     },
