@@ -47,7 +47,6 @@ export const FilterOptionsBlock: Block = {
           type: 'relationship',
           relationTo: 'text-fields',
           filterOptions: ({ siblingData }) => {
-            console.log('SD', siblingData)
             // @ts-expect-error
             if (!siblingData?.groupText) {
               return true
