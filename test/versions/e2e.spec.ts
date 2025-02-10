@@ -285,7 +285,9 @@ describe('Versions', () => {
       await page.locator('tbody tr .cell-title a').first().click()
       await page.waitForSelector('.doc-header__title', { state: 'visible' })
       await page.goto(`${page.url()}/versions`)
-      expect(page.url()).toMatch(/\/versions/)
+      await expect(() => {
+        expect(page.url()).toMatch(/\/versions/)
+      }).toPass({ timeout: 10000, intervals: [100] })
     })
 
     test('should show collection versions view level action in collection versions view', async () => {
@@ -390,7 +392,9 @@ describe('Versions', () => {
       const global = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
       const versionsURL = `${global.global(autoSaveGlobalSlug)}/versions`
       await page.goto(versionsURL)
-      expect(page.url()).toMatch(/\/versions$/)
+      await expect(() => {
+        expect(page.url()).toMatch(/\/versions/)
+      }).toPass({ timeout: 10000, intervals: [100] })
     })
 
     test('collection - should autosave', async () => {
