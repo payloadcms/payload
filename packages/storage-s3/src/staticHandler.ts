@@ -39,9 +39,11 @@ export const getHandler = ({ bucket, collection, getStorageClient }: Args): Stat
     try {
       const prefix = await getFilePrefix({ collection, filename, req })
 
+      const key = path.posix.join(prefix, filename)
+
       const object = await getStorageClient().getObject({
         Bucket: bucket,
-        Key: path.posix.join(prefix, filename),
+        Key: key,
       })
 
       if (!object.Body) {
@@ -74,7 +76,11 @@ export const getHandler = ({ bucket, collection, getStorageClient }: Args): Stat
       if (object.Body && isNodeReadableStream(object.Body)) {
         const stream = object.Body
         stream.on('error', (err) => {
-          console.error(err)
+          req.payload.logger.error({
+            err,
+            key,
+            msg: 'Error streaming S3 object, destroying stream',
+          })
           stream.destroy()
         })
       }
