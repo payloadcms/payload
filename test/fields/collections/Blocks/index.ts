@@ -9,7 +9,6 @@ export const getBlocksField = (prefix?: string): BlocksField => ({
   name: 'blocks',
   type: 'blocks',
   blocks: [
-    'ConfigBlockTest',
     {
       slug: prefix ? `${prefix}Content` : 'content',
       interfaceName: prefix ? `${prefix}ContentBlock` : 'ContentBlock',
@@ -396,6 +395,16 @@ const BlockFields: CollectionConfig = {
           ],
         },
       ],
+    },
+    {
+      name: 'deduplicatedBlocks',
+      type: 'blocks',
+      blocks: ['ConfigBlockTest'],
+    },
+    {
+      name: 'deduplicatedBlocks2',
+      type: 'blocks',
+      blocks: ['ConfigBlockTest'],
     },
   ],
 }
