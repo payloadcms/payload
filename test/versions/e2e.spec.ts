@@ -72,6 +72,8 @@ const { beforeAll, beforeEach, describe } = test
 let payload: PayloadTestSDK<Config>
 let context: BrowserContext
 
+const londonTimezone = 'Europe/London'
+
 describe('Versions', () => {
   let page: Page
   let url: AdminUrlUtil
@@ -436,7 +438,7 @@ describe('Versions', () => {
       await page.locator('#field-description').fill('initial description')
       await saveDocAndAssert(page)
 
-      const updatedAtWrapper = await page.locator(
+      const updatedAtWrapper = page.locator(
         '.doc-controls .doc-controls__content .doc-controls__list-item',
         {
           hasText: 'Last Modified',
@@ -450,9 +452,9 @@ describe('Versions', () => {
       await page.locator('#field-description').fill('changed description')
       await saveDocAndAssert(page)
 
-      const newUpdatedAt = await updatedAtWrapper.locator('.doc-controls__value').textContent()
+      const newUpdatedAt = updatedAtWrapper.locator('.doc-controls__value')
 
-      expect(newUpdatedAt).not.toEqual(initialUpdatedAt)
+      await expect(newUpdatedAt).not.toHaveText(initialUpdatedAt)
     })
 
     test('collection - should update updatedAt on autosave', async () => {
@@ -461,7 +463,7 @@ describe('Versions', () => {
       await waitForAutoSaveToRunAndComplete(page)
       await expect(page.locator('#field-title')).toHaveValue('autosave title')
 
-      const updatedAtWrapper = await page.locator(
+      const updatedAtWrapper = page.locator(
         '.doc-controls .doc-controls__content .doc-controls__list-item',
         {
           hasText: 'Last Modified',
@@ -475,9 +477,9 @@ describe('Versions', () => {
       await page.locator('#field-title').fill('autosave title updated')
       await waitForAutoSaveToRunAndComplete(page)
 
-      const newUpdatedAt = await updatedAtWrapper.locator('.doc-controls__value').textContent()
+      const newUpdatedAt = updatedAtWrapper.locator('.doc-controls__value')
 
-      expect(newUpdatedAt).not.toEqual(initialUpdatedAt)
+      await expect(newUpdatedAt).not.toHaveText(initialUpdatedAt)
     })
 
     test('global - should autosave', async () => {
@@ -1189,6 +1191,76 @@ describe('Versions', () => {
       await expect(upload.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
         String(uploadDocs?.docs?.[1]?.id),
       )
+    })
+  })
+
+  describe('Scheduled publish', () => {
+    test.use({
+      timezoneId: londonTimezone,
+    })
+
+    test('correctly sets a UTC date for the chosen timezone', async () => {
+      const post = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          title: 'new post',
+          description: 'new description',
+        },
+      })
+
+      await page.goto(`${serverURL}/admin/collections/${draftCollectionSlug}/${post.id}`)
+
+      const publishDropdown = page.locator('.doc-controls__controls .popup-button')
+      await publishDropdown.click()
+
+      const schedulePublishButton = page.locator(
+        '.popup-button-list__button:has-text("Schedule Publish")',
+      )
+      await schedulePublishButton.click()
+
+      const drawerContent = page.locator('.schedule-publish__scheduler')
+
+      const dropdownControlSelector = drawerContent.locator(`.timezone-picker .rs__control`)
+      const timezoneOptionSelector = drawerContent.locator(
+        `.timezone-picker .rs__menu .rs__option:has-text("Paris")`,
+      )
+      await dropdownControlSelector.click()
+      await timezoneOptionSelector.click()
+
+      const dateInput = drawerContent.locator('.date-time-picker__input-wrapper input')
+      // Create a date for 2049-01-01 18:00:00
+      const date = new Date(2049, 0, 1, 18, 0)
+
+      await dateInput.fill(date.toISOString())
+      await page.keyboard.press('Enter') // formats the date to the correct format
+
+      const saveButton = drawerContent.locator('.schedule-publish__actions button')
+
+      await saveButton.click()
+
+      const upcomingContent = page.locator('.schedule-publish__upcoming')
+      const createdDate = await upcomingContent.locator('.row-1 .cell-waitUntil').textContent()
+
+      await expect(() => {
+        expect(createdDate).toContain('6:00:00 PM')
+      }).toPass({ timeout: 10000, intervals: [100] })
+
+      const {
+        docs: [createdJob],
+      } = await payload.find({
+        collection: 'payload-jobs',
+        where: {
+          'input.doc.value': {
+            equals: String(post.id),
+          },
+        },
+      })
+
+      // eslint-disable-next-line payload/no-flaky-assertions
+      expect(createdJob).toBeTruthy()
+
+      // eslint-disable-next-line payload/no-flaky-assertions
+      expect(createdJob?.waitUntil).toEqual('2049-01-01T17:00:00.000Z')
     })
   })
 })
