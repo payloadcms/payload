@@ -560,7 +560,7 @@ describe('List View', () => {
       await expect(page.locator('.collection-list__page-info')).toHaveText('1-3 of 3')
     })
 
-    test('should reset filter values for every additional filters', async () => {
+    test('should reset filter values for every additional filter', async () => {
       await page.goto(postsUrl.list)
 
       await addListFilter({
