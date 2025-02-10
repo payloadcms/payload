@@ -1,24 +1,35 @@
 # Order matters. The last matching pattern takes precedence.
 
-### Package Exports ###
-**/exports/ @denolfe @jmikrut @DanRibbens
+### Package Exports
 
-### Packages ###
+\*\*/exports/ @denolfe @jmikrut @DanRibbens
+
+### Packages
+
 /packages/plugin-cloud*/src/ @denolfe @jmikrut @DanRibbens
 /packages/email-*/src/ @denolfe @jmikrut @DanRibbens
-/packages/storage-*/src/ @denolfe @jmikrut @DanRibbens
+/packages/live-preview*/src/ @jacobsfletch
+/packages/plugin-stripe/src/ @jacobsfletch
+/packages/plugin-multi-tenant/src/ @JarrodMFlesch
+/packages/richtext-*/src/ @AlessioGr @GermanJablo
+/packages/next/src/ @jmikrut @jacobsfletch @AlessioGr @JarrodMFlesch
+/packages/ui/src/ @jmikrut @jacobsfletch @AlessioGr @JarrodMFlesch
+/packages/storage-\*/src/ @denolfe @jmikrut @DanRibbens
 /packages/create-payload-app/src/ @denolfe @jmikrut @DanRibbens
-/packages/eslint-*/ @denolfe @jmikrut @DanRibbens @AlessioGr @GermanJablo
+/packages/eslint-\*/ @denolfe @jmikrut @DanRibbens @AlessioGr @GermanJablo
 
-### Templates ###
-/templates/_data/ @denolfe @jmikrut @DanRibbens
-/templates/_template/ @denolfe @jmikrut @DanRibbens
+### Templates
 
-### Build Files ###
-**/tsconfig*.json @denolfe @jmikrut @DanRibbens @AlessioGr @GermanJablo
+/templates/\_data/ @denolfe @jmikrut @DanRibbens
+/templates/\_template/ @denolfe @jmikrut @DanRibbens
+
+### Build Files
+
+**/tsconfig\*.json @denolfe @jmikrut @DanRibbens @AlessioGr @GermanJablo
 **/jest.config.js @denolfe @jmikrut @DanRibbens @AlessioGr
 
-### Root ###
+### Root
+
 /package.json @denolfe @jmikrut @DanRibbens
 /tools/ @denolfe @jmikrut @DanRibbens
 /.husky/ @denolfe @jmikrut @DanRibbens
