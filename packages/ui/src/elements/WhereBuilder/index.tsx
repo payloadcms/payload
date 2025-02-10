@@ -68,6 +68,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
           ],
         })
       }
+
       setConditions(newConditions)
     },
     [conditions],

@@ -47,8 +47,8 @@ import { useEffectEvent } from '../../../hooks/useEffectEvent.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { ReactSelect } from '../../ReactSelect/index.js'
-import './index.scss'
 import { DefaultFilter } from './DefaultFilter/index.js'
+import './index.scss'
 
 const baseClass = 'condition'
 
@@ -88,14 +88,15 @@ export const Condition: React.FC<Props> = (props) => {
   }
 
   const updateValue = useEffectEvent((debouncedValue) => {
-    console.log('run', debouncedValue)
-    updateCondition({
-      andIndex,
-      fieldName: conditionOption.value,
-      operator,
-      orIndex,
-      value: debouncedValue,
-    })
+    if (operator) {
+      updateCondition({
+        andIndex,
+        fieldName: conditionOption.value,
+        operator,
+        orIndex,
+        value: debouncedValue || null,
+      })
+    }
   })
 
   useEffect(() => {
