@@ -1525,7 +1525,7 @@ export type FlattenedBlocksField = {
    */
   blockReferences?: (FlattenedBlock | string)[]
   blocks: FlattenedBlock[]
-} & BlocksField
+} & Omit<BlocksField, 'blockReferences' | 'blocks'>
 
 export type FlattenedGroupField = {
   flattenedFields: FlattenedField[]

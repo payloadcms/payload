@@ -2,6 +2,7 @@ import type {
   Block,
   Field,
   FlattenedBlock,
+  FlattenedBlocksField,
   FlattenedField,
   FlattenedJoinField,
 } from '../fields/config/types.js'
@@ -28,8 +29,9 @@ export const flattenAllFields = ({ fields }: { fields: Field[] }): FlattenedFiel
 
       case 'blocks': {
         const blocks: FlattenedBlock[] = []
-        const blockReferences: (FlattenedBlock | string)[] = []
+        let blockReferences: (FlattenedBlock | string)[] | undefined = undefined
         if (field.blockReferences) {
+          blockReferences = []
           for (const block of field.blockReferences) {
             if (typeof block === 'string') {
               blockReferences.push(block)
@@ -47,11 +49,13 @@ export const flattenAllFields = ({ fields }: { fields: Field[] }): FlattenedFiel
           }
         }
 
-        result.push({
+        const resultField: FlattenedBlocksField = {
           ...field,
           blockReferences,
           blocks,
-        })
+        }
+
+        result.push(resultField)
         break
       }
 
