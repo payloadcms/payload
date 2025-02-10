@@ -487,7 +487,7 @@ export interface LexicalAccessControl {
  */
 export interface SelectVersionsField {
   id: string;
-  hasMany?: ('a' | 'b' | 'c')[] | null;
+  hasMany?: ('a' | 'b' | 'c' | 'd')[] | null;
   array?:
     | {
         hasManyArr?: ('a' | 'b' | 'c')[] | null;
@@ -504,6 +504,7 @@ export interface SelectVersionsField {
     | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -589,6 +590,12 @@ export interface ArrayField {
       }[]
     | null;
   customArrayField?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  arrayWithLabels?:
     | {
         text?: string | null;
         id?: string | null;
@@ -724,6 +731,14 @@ export interface BlockField {
         id?: string | null;
         blockName?: string | null;
         blockType: 'relationships';
+      }[]
+    | null;
+  blockWithLabels?:
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'text';
       }[]
     | null;
   updatedAt: string;
@@ -2171,6 +2186,7 @@ export interface SelectVersionsFieldsSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2258,6 +2274,12 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
         id?: T;
       };
   customArrayField?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  arrayWithLabels?:
     | T
     | {
         text?: T;
@@ -2440,6 +2462,17 @@ export interface BlockFieldsSelect<T extends boolean = true> {
           | T
           | {
               relationship?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  blockWithLabels?:
+    | T
+    | {
+        text?:
+          | T
+          | {
+              text?: T;
               id?: T;
               blockName?: T;
             };

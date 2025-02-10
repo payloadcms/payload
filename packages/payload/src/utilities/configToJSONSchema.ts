@@ -217,7 +217,9 @@ function entityOrFieldToJsDocs({
         description = entity?.admin?.description?.[i18n.language]
       }
     } else if (typeof entity?.admin?.description === 'function' && i18n) {
-      description = entity?.admin?.description(i18n)
+      // do not evaluate description functions for generating JSDocs. The output of
+      // those can differ depending on where and when they are called, creating
+      // inconsistencies in the generated JSDocs.
     }
   }
   return description
