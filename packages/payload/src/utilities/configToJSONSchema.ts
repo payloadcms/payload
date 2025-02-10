@@ -293,14 +293,16 @@ export function fieldsToJSONSchema(
             // Check for a case where no blocks are provided.
             // We need to generate an empty array for this case, note that JSON schema 4 doesn't support empty arrays
             // so the best we can get is `unknown[]`
-            const hasBlocks = Boolean(field.blocks.length)
+            const hasBlocks = Boolean(
+              field.blockReferences ? field.blockReferences.length : field.blocks.length,
+            )
 
             fieldSchema = {
               ...baseFieldSchema,
               type: withNullableJSONSchemaType('array', isRequired),
               items: hasBlocks
                 ? {
-                    oneOf: field.blocks.map((block) => {
+                    oneOf: (field.blockReferences ?? field.blocks).map((block) => {
                       if (typeof block === 'string') {
                         const resolvedBlock = config?.blocks?.find((b) => b.slug === block)
                         return {
@@ -778,7 +780,7 @@ export function fieldsToSelectJSONSchema({
           properties: {},
         }
 
-        for (const block of field.blocks) {
+        for (const block of field.blockReferences ?? field.blocks) {
           if (typeof block === 'string') {
             continue // TODO
           }

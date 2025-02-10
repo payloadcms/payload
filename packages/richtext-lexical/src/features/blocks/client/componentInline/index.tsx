@@ -122,10 +122,11 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     componentMapRenderedBlockPath
   ]?.[0] as BlocksFieldClient
 
-  const clientBlock: ClientBlock | undefined =
-    blocksField?.blocks?.[0] && typeof blocksField?.blocks?.[0] === 'string'
-      ? config.blocksMap[blocksField?.blocks?.[0]]
-      : (blocksField?.blocks?.[0] as ClientBlock)
+  const clientBlock: ClientBlock | undefined = blocksField.blockReferences
+    ? typeof blocksField?.blockReferences?.[0] === 'string'
+      ? config.blocksMap[blocksField?.blockReferences?.[0]]
+      : blocksField?.blockReferences?.[0]
+    : blocksField?.blocks?.[0]
 
   const clientBlockFields = clientBlock?.fields ?? []
 

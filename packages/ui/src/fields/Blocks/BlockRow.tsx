@@ -23,7 +23,7 @@ const baseClass = 'blocks-field'
 type BlocksFieldProps = {
   addRow: (rowIndex: number, blockType: string) => Promise<void> | void
   block: ClientBlock
-  blocks: (ClientBlock | string)[]
+  blocks: (ClientBlock | string)[] | ClientBlock[]
   duplicateRow: (rowIndex: number) => void
   errorCount: number
   fields: ClientField[]

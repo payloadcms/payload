@@ -39,6 +39,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     field: {
       name,
       admin: { className, description, isSortable = true } = {},
+      blockReferences,
       blocks,
       label,
       labels: labelsFromProps,
@@ -263,7 +264,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
             const { blockType, isLoading } = row
             const blockConfig: ClientBlock =
               config.blocksMap[blockType] ??
-              (blocks.find(
+              ((blockReferences ?? blocks).find(
                 (block) => typeof block !== 'string' && block.slug === blockType,
               ) as ClientBlock)
 
@@ -281,7 +282,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                       {...draggableSortableItemProps}
                       addRow={addRow}
                       block={blockConfig}
-                      blocks={blocks}
+                      blocks={blockReferences ?? blocks}
                       duplicateRow={duplicateRow}
                       errorCount={rowErrorCount}
                       fields={blockConfig.fields}
@@ -351,7 +352,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
           <BlocksDrawer
             addRow={addRow}
             addRowIndex={rows?.length || 0}
-            blocks={blocks}
+            blocks={blockReferences ?? blocks}
             drawerSlug={drawerSlug}
             labels={labels}
           />

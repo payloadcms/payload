@@ -168,7 +168,7 @@ export const traverseFields = ({
     }
 
     if (field.type === 'blocks') {
-      field.blocks.forEach((block) => {
+      ;(field.blockReferences ?? field.blocks).forEach((block) => {
         blocksToDelete.add(toSnakeCase(typeof block === 'string' ? block : block.slug))
       })
 

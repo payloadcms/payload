@@ -75,7 +75,7 @@ function iterateFields(
             toLocaleData[field.name].map((blockData: Data, index: number) => {
               const block =
                 req.payload.blocks[blockData.blockType] ??
-                (field.blocks.find(
+                ((field.blockReferences ?? field.blocks).find(
                   (block) => typeof block !== 'string' && block.slug === blockData.blockType,
                 ) as FlattenedBlock | undefined)
 

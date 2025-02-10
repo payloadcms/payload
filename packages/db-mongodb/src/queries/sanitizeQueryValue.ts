@@ -54,7 +54,7 @@ const getFieldFromSegments = ({
   segments: string[]
 }) => {
   if ('blocks' in field) {
-    for (const _block of field.blocks) {
+    for (const _block of field.blockReferences ?? field.blocks) {
       const block: FlattenedBlock = typeof _block === 'string' ? payload.blocks[_block] : _block
       const field = getFieldFromSegments({ field: block, payload, segments })
       if (field) {

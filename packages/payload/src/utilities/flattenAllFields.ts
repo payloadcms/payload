@@ -27,16 +27,29 @@ export const flattenAllFields = ({ fields }: { fields: Field[] }): FlattenedFiel
       }
 
       case 'blocks': {
-        const blocks = []
-        for (const block of field.blocks) {
-          if (typeof block === 'string') {
-            blocks.push(block)
-            continue
+        const blocks: FlattenedBlock[] = []
+        const blockReferences: (FlattenedBlock | string)[] = []
+        if (field.blockReferences) {
+          for (const block of field.blockReferences) {
+            if (typeof block === 'string') {
+              blockReferences.push(block)
+              continue
+            }
+            blockReferences.push(flattenBlock({ block }))
           }
-          blocks.push(flattenBlock({ block }))
+        } else {
+          for (const block of field.blocks) {
+            if (typeof block === 'string') {
+              blocks.push(block)
+              continue
+            }
+            blocks.push(flattenBlock({ block }))
+          }
         }
+
         result.push({
           ...field,
+          blockReferences,
           blocks,
         })
         break

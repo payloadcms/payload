@@ -399,12 +399,14 @@ const BlockFields: CollectionConfig = {
     {
       name: 'deduplicatedBlocks',
       type: 'blocks',
-      blocks: ['ConfigBlockTest'],
+      blockReferences: ['ConfigBlockTest'],
+      blocks: [],
     },
     {
       name: 'deduplicatedBlocks2',
       type: 'blocks',
-      blocks: ['ConfigBlockTest'],
+      blockReferences: ['ConfigBlockTest'],
+      blocks: [],
     },
   ],
 }

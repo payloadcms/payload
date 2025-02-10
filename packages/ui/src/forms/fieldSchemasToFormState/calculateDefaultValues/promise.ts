@@ -83,7 +83,7 @@ export const defaultValuePromise = async <T>({
           const blockTypeToMatch: string = row.blockType
           const block =
             req.payload.blocks[blockTypeToMatch] ??
-            (field.blocks.find(
+            ((field.blockReferences ?? field.blocks).find(
               (blockType) => typeof blockType !== 'string' && blockType.slug === blockTypeToMatch,
             ) as FlattenedBlock | undefined)
 

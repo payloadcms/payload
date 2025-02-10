@@ -185,7 +185,7 @@ export const traverseFields = ({
           }
         }
 
-        field.blocks.forEach((_block) => {
+        ;(field.blockReferences ?? field.blocks).forEach((_block) => {
           const block = typeof _block === 'string' ? adapter.payload.blocks[_block] : _block
           const blockKey = `_blocks_${block.slug}`
 

@@ -146,7 +146,7 @@ export const promise = async ({
 
           const block: Block | undefined =
             req.payload.blocks[blockTypeToMatch] ??
-            (field.blocks.find(
+            ((field.blockReferences ?? field.blocks).find(
               (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
             ) as Block | undefined)
 

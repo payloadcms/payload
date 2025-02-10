@@ -1396,7 +1396,13 @@ export type BlocksField = {
      */
     isSortable?: boolean
   } & Admin
-  blocks: (Block | BlockSlug)[]
+  /**
+   * Like `blocks`, but allows you to also pass strings that are slugs of blocks defined in `config.blocks`.
+   *
+   * @todo `blockReferences` will be merged with `blocks` in 4.0
+   */
+  blockReferences?: (Block | BlockSlug)[]
+  blocks: Block[]
   defaultValue?: DefaultValue
   labels?: Labels
   maxRows?: number
@@ -1407,7 +1413,13 @@ export type BlocksField = {
 
 export type BlocksFieldClient = {
   admin?: AdminClient & Pick<BlocksField['admin'], 'initCollapsed' | 'isSortable'>
-  blocks: (ClientBlock | string)[]
+  /**
+   * Like `blocks`, but allows you to also pass strings that are slugs of blocks defined in `config.blocks`.
+   *
+   * @todo `blockReferences` will be merged with `blocks` in 4.0
+   */
+  blockReferences?: (ClientBlock | string)[]
+  blocks: ClientBlock[]
   labels?: LabelsClient
 } & FieldBaseClient &
   Pick<BlocksField, 'maxRows' | 'minRows' | 'type'>
@@ -1502,7 +1514,13 @@ export type FlattenedBlock = {
 } & Block
 
 export type FlattenedBlocksField = {
-  blocks: (FlattenedBlock | string)[]
+  /**
+   * Like `blocks`, but allows you to also pass strings that are slugs of blocks defined in `config.blocks`.
+   *
+   * @todo `blockReferences` will be merged with `blocks` in 4.0
+   */
+  blockReferences?: (FlattenedBlock | string)[]
+  blocks: FlattenedBlock[]
 } & BlocksField
 
 export type FlattenedGroupField = {

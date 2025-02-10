@@ -337,7 +337,7 @@ const buildVersionField = ({
       const blockSlugToMatch: string = versionRow.blockType
       const versionBlock =
         req.payload.blocks[blockSlugToMatch] ??
-        (field.blocks.find(
+        ((field.blockReferences ?? field.blocks).find(
           (block) => typeof block !== 'string' && block.slug === blockSlugToMatch,
         ) as FlattenedBlock | undefined)
 
@@ -350,7 +350,7 @@ const buildVersionField = ({
 
         const comparisonBlock =
           req.payload.blocks[comparisonBlockSlugToMatch] ??
-          (field.blocks.find(
+          ((field.blockReferences ?? field.blocks).find(
             (block) => typeof block !== 'string' && block.slug === comparisonBlockSlugToMatch,
           ) as FlattenedBlock | undefined)
 

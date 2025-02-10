@@ -71,7 +71,7 @@ export function addFilterOptionsToFields({
     }
 
     if (field.type === 'blocks') {
-      field.blocks.forEach((_block) => {
+      ;(field.blockReferences ?? field.blocks).forEach((_block) => {
         const block =
           typeof _block === 'string'
             ? // TODO: iterate over blocks mapped to block slug in v4, or pass through payload.blocks

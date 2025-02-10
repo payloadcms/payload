@@ -192,8 +192,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     schema.add({
       [field.name]: localizeSchema(field, fieldSchema, payload.config.localization),
     })
-
-    field.blocks.forEach((blockItem) => {
+    ;(field.blockReferences ?? field.blocks).forEach((blockItem) => {
       const blockSchema = new mongoose.Schema({}, { _id: false, id: false })
 
       const block = typeof blockItem === 'string' ? payload.blocks[blockItem] : blockItem

@@ -12,8 +12,8 @@ import { ServerInlineBlockNode } from './nodes/InlineBlocksNode.js'
 import { blockValidationHOC } from './validate.js'
 
 export type BlocksFeatureProps = {
-  blocks?: (Block | string)[]
-  inlineBlocks?: (Block | string)[]
+  blocks?: (Block | string)[] | Block[]
+  inlineBlocks?: (Block | string)[] | Block[]
 }
 
 export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatureProps>({
@@ -26,12 +26,14 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
         {
           name: 'lexical_blocks',
           type: 'blocks',
-          blocks: _props.blocks ?? [],
+          blockReferences: _props.blocks ?? [],
+          blocks: [],
         },
         {
           name: 'lexical_inline_blocks',
           type: 'blocks',
-          blocks: _props.inlineBlocks ?? [],
+          blockReferences: _props.inlineBlocks ?? [],
+          blocks: [],
         },
       ],
       parentIsLocalized,
@@ -40,21 +42,27 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
     })
 
     const pureBlocks: Block[] = []
-    for (const _block of (sanitized[0] as BlocksField).blocks) {
+    for (const _block of (sanitized[0] as BlocksField).blockReferences ??
+      (sanitized[0] as BlocksField).blocks) {
       const block =
         typeof _block === 'string' ? _config?.blocks?.find((b) => b.slug === _block) : _block
       if (!block) {
-        throw new Error(`Block not found for slug: ${_block}`)
+        throw new Error(
+          `Block not found for slug: ${typeof _block === 'string' ? _block : _block?.slug}`,
+        )
       }
       pureBlocks.push(block)
     }
 
     const pureInlineBlocks: Block[] = []
-    for (const _block of (sanitized[1] as BlocksField).blocks) {
+    for (const _block of (sanitized[1] as BlocksField).blockReferences ??
+      (sanitized[1] as BlocksField).blocks) {
       const block =
         typeof _block === 'string' ? _config?.blocks?.find((b) => b.slug === _block) : _block
       if (!block) {
-        throw new Error(`Block not found for slug: ${_block}`)
+        throw new Error(
+          `Block not found for slug: ${typeof _block === 'string' ? _block : _block?.slug}`,
+        )
       }
       pureInlineBlocks.push(block)
     }

@@ -39,7 +39,7 @@ export const fieldSchemaToJSON = (fields: ClientField[], config: ClientConfig): 
         acc.push({
           name: field.name,
           type: field.type,
-          blocks: field.blocks.reduce((acc, _block) => {
+          blocks: (field.blockReferences ?? field.blocks).reduce((acc, _block) => {
             const block = typeof _block === 'string' ? config.blocksMap[_block] : _block
             acc[block.slug] = {
               fields: fieldSchemaToJSON(

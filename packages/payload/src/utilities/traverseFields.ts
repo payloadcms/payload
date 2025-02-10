@@ -23,7 +23,7 @@ const traverseArrayOrBlocksField = ({
       traverseFields({ callback, config, fields: field.fields, parentRef })
     }
     if (field.type === 'blocks') {
-      for (const _block of field.blocks) {
+      for (const _block of field.blockReferences ?? field.blocks) {
         // TODO: iterate over blocks mapped to block slug in v4, or pass through payload.blocks
         const block =
           typeof _block === 'string' ? config.blocks.find((b) => b.slug === _block) : _block
@@ -36,11 +36,13 @@ const traverseArrayOrBlocksField = ({
     let fields: Field[]
     if (field.type === 'blocks' && typeof ref?.blockType === 'string') {
       // TODO: iterate over blocks mapped to block slug in v4, or pass through payload.blocks
-      const block = (
-        config.blocks?.length ? [...config.blocks, ...field.blocks] : field.blocks
-      ).find((block) => typeof block !== 'string' && block.slug === ref.blockType) as
-        | Block
-        | undefined
+      const block = field.blockReferences
+        ? ((config.blocks.find((b) => b.slug === ref.blockType) ??
+            field.blockReferences.find(
+              (b) => typeof b !== 'string' && b.slug === ref.blockType,
+            )) as Block)
+        : field.blocks.find((b) => b.slug === ref.blockType)
+
       fields = block?.fields
     } else if (field.type === 'array') {
       fields = field.fields

@@ -122,7 +122,7 @@ function findFieldPathAndSiblingFields(
         }
       }
     } else if ('blocks' in curField) {
-      for (const _block of curField.blocks) {
+      for (const _block of curField.blockReferences ?? curField.blocks) {
         const block = typeof _block === 'string' ? req?.payload.blocks[_block] : _block
 
         if (block?.fields?.length) {
