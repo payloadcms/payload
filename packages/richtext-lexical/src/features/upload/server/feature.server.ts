@@ -59,18 +59,19 @@ export const UploadFeature = createServerFeature<
     if (props.collections) {
       for (const collection in props.collections) {
         clientProps.collections[collection] = {
-          hasExtraFields: props.collections[collection].fields.length >= 1,
+          hasExtraFields: props.collections[collection]!.fields.length >= 1,
         }
       }
     }
 
     const validRelationships = _config.collections.map((c) => c.slug) || []
 
-    for (const collection in props.collections) {
-      if (props.collections[collection].fields?.length) {
-        props.collections[collection].fields = await sanitizeFields({
+    for (const collectionKey in props.collections) {
+      const collection = props.collections[collectionKey]!
+      if (collection.fields?.length) {
+        collection.fields = await sanitizeFields({
           config: _config as unknown as Config,
-          fields: props.collections[collection].fields,
+          fields: collection.fields,
           parentIsLocalized,
           requireFieldLevelRichTextEditor: isRoot,
           validRelationships,
@@ -88,10 +89,11 @@ export const UploadFeature = createServerFeature<
 
         const schemaMap: FieldSchemaMap = new Map()
 
-        for (const collection in props.collections) {
-          if (props.collections[collection].fields?.length) {
-            schemaMap.set(collection, {
-              fields: props.collections[collection].fields,
+        for (const collectionKey in props.collections) {
+          const collection = props.collections[collectionKey]!
+          if (collection.fields?.length) {
+            schemaMap.set(collectionKey, {
+              fields: collection.fields,
             })
           }
         }

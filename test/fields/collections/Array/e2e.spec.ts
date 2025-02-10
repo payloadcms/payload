@@ -56,7 +56,7 @@ describe('Array', () => {
     if (client) {
       await client.logout()
     }
-    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
+    client = new RESTClient({ defaultSlug: 'users', serverURL })
     await client.login()
 
     await ensureCompilationIsDone({ page, serverURL })
@@ -131,6 +131,13 @@ describe('Array', () => {
   test('should show singular label for array rows', async () => {
     await page.goto(url.create)
     await expect(page.locator('#field-items #items-row-0 .row-label')).toContainText('Item 01')
+  })
+
+  test('ensure functions passed to array field labels property are respected', async () => {
+    await page.goto(url.create)
+
+    const arrayWithLabelsField = page.locator('#field-arrayWithLabels')
+    await expect(arrayWithLabelsField.locator('.array-field__add-row')).toHaveText('Add Account')
   })
 
   describe('row manipulation', () => {

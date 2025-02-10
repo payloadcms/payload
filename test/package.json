@@ -61,7 +61,7 @@
     "@types/jest": "29.5.12",
     "@types/react": "19.0.1",
     "@types/react-dom": "19.0.1",
-    "babel-plugin-react-compiler": "19.0.0-beta-df7b47d-20241124",
+    "babel-plugin-react-compiler": "19.0.0-beta-714736e-20250131",
     "comment-json": "^4.2.3",
     "create-payload-app": "workspace:*",
     "dotenv": "16.4.7",

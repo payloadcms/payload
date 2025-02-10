@@ -47,13 +47,10 @@ let serverURL: string
  */
 async function navigateToLexicalFields(
   navigateToListView: boolean = true,
-  localized: boolean = false,
+  collectionSlug: string = 'lexical-fields',
 ) {
   if (navigateToListView) {
-    const url: AdminUrlUtil = new AdminUrlUtil(
-      serverURL,
-      localized ? 'lexical-localized-fields' : 'lexical-fields',
-    )
+    const url: AdminUrlUtil = new AdminUrlUtil(serverURL, collectionSlug)
     await page.goto(url.list)
   }
 
@@ -64,6 +61,14 @@ async function navigateToLexicalFields(
   await linkToDoc.click()
 
   await page.waitForURL(`**${linkDocHref}`)
+
+  if (collectionSlug === 'lexical-fields') {
+    const richTextField = page.locator('.rich-text-lexical').nth(2) // second
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+    // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
+    await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
+  }
 }
 
 describe('lexicalMain', () => {
@@ -97,7 +102,7 @@ describe('lexicalMain', () => {
     if (client) {
       await client.logout()
     }
-    client = new RESTClient(null, { defaultSlug: 'rich-text-fields', serverURL })
+    client = new RESTClient({ defaultSlug: 'rich-text-fields', serverURL })
     await client.login()
   })
 
@@ -932,6 +937,41 @@ describe('lexicalMain', () => {
     })
   })
 
+  test('ensure link drawer displays fields if document does not have `create` permission', async () => {
+    await navigateToLexicalFields(true, 'lexical-access-control')
+    const richTextField = page.locator('.rich-text-lexical').first()
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+
+    const paragraph = richTextField.locator('.LexicalEditorTheme__paragraph').first()
+    await paragraph.scrollIntoViewIfNeeded()
+    await expect(paragraph).toBeVisible()
+    /**
+     * Type some text
+     */
+    await paragraph.click()
+    await page.keyboard.type('Text')
+
+    // Select text
+    for (let i = 0; i < 4; i++) {
+      await page.keyboard.press('Shift+ArrowLeft')
+    }
+    // Ensure inline toolbar appeared
+    const inlineToolbar = page.locator('.inline-toolbar-popup')
+    await expect(inlineToolbar).toBeVisible()
+
+    const linkButton = inlineToolbar.locator('.toolbar-popup__button-link')
+    await expect(linkButton).toBeVisible()
+    await linkButton.click()
+
+    const linkDrawer = page.locator('dialog[id^=drawer_1_lexical-rich-text-link-]').first() // IDs starting with drawer_1_lexical-rich-text-link- (there's some other symbol after the underscore)
+    await expect(linkDrawer).toBeVisible()
+
+    const urlInput = linkDrawer.locator('#field-url').first()
+
+    await expect(urlInput).toBeVisible()
+  })
+
   test('lexical cursor / selection should be preserved when swapping upload field and clicking within with its list drawer', async () => {
     await navigateToLexicalFields()
     const richTextField = page.locator('.rich-text-lexical').first()
@@ -1292,7 +1332,7 @@ describe('lexicalMain', () => {
       expect(htmlContent).toContain('Start typing, or press')
     })
     test.skip('ensure simple localized lexical field works', async () => {
-      await navigateToLexicalFields(true, true)
+      await navigateToLexicalFields(true, 'lexical-localized-fields')
     })
   })
 
@@ -1307,7 +1347,7 @@ describe('lexicalMain', () => {
     // test
     await navigateToLexicalFields()
     const bottomOfUploadNode = page
-      .locator('div')
+      .locator('.lexical-upload div')
       .filter({ hasText: /^payload\.jpg$/ })
       .first()
     await bottomOfUploadNode.click()

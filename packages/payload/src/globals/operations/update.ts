@@ -244,6 +244,11 @@ export const updateOperation = async <
     // /////////////////////////////////////
 
     if (!shouldSaveDraft) {
+      // Ensure global has createdAt
+      if (!result.createdAt) {
+        result.createdAt = new Date().toISOString()
+      }
+
       if (globalExists) {
         result = await payload.db.updateGlobal({
           slug,
