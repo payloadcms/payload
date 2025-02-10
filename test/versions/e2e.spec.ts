@@ -436,7 +436,7 @@ describe('Versions', () => {
       await page.locator('#field-description').fill('initial description')
       await saveDocAndAssert(page)
 
-      const updatedAtWrapper = await page.locator(
+      const updatedAtWrapper = page.locator(
         '.doc-controls .doc-controls__content .doc-controls__list-item',
         {
           hasText: 'Last Modified',
@@ -450,9 +450,9 @@ describe('Versions', () => {
       await page.locator('#field-description').fill('changed description')
       await saveDocAndAssert(page)
 
-      const newUpdatedAt = await updatedAtWrapper.locator('.doc-controls__value').textContent()
+      const newUpdatedAt = updatedAtWrapper.locator('.doc-controls__value')
 
-      expect(newUpdatedAt).not.toEqual(initialUpdatedAt)
+      await expect(newUpdatedAt).not.toHaveText(initialUpdatedAt)
     })
 
     test('collection - should update updatedAt on autosave', async () => {
@@ -461,7 +461,7 @@ describe('Versions', () => {
       await waitForAutoSaveToRunAndComplete(page)
       await expect(page.locator('#field-title')).toHaveValue('autosave title')
 
-      const updatedAtWrapper = await page.locator(
+      const updatedAtWrapper = page.locator(
         '.doc-controls .doc-controls__content .doc-controls__list-item',
         {
           hasText: 'Last Modified',
@@ -475,9 +475,9 @@ describe('Versions', () => {
       await page.locator('#field-title').fill('autosave title updated')
       await waitForAutoSaveToRunAndComplete(page)
 
-      const newUpdatedAt = await updatedAtWrapper.locator('.doc-controls__value').textContent()
+      const newUpdatedAt = updatedAtWrapper.locator('.doc-controls__value')
 
-      expect(newUpdatedAt).not.toEqual(initialUpdatedAt)
+      await expect(newUpdatedAt).not.toHaveText(initialUpdatedAt)
     })
 
     test('global - should autosave', async () => {
@@ -644,6 +644,52 @@ describe('Versions', () => {
       await expect(page.locator('.rs__option')).toHaveCount(1)
 
       await expect(page.locator('.rs__option')).toHaveText('some title')
+    })
+
+    test('correctly increments version count', async () => {
+      const createdDoc = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          description: 'some description',
+          title: 'some title',
+        },
+        draft: true,
+      })
+
+      await page.goto(url.edit(createdDoc.id))
+
+      const versionsCountSelector = `.doc-tabs__tabs .doc-tab__count`
+      const initialCount = await page.locator(versionsCountSelector).textContent()
+
+      const field = page.locator('#field-description')
+
+      await field.fill('new description 1')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      let newCount1: null | string
+
+      await expect(async () => {
+        newCount1 = await page.locator(versionsCountSelector).textContent()
+        expect(Number(newCount1)).toBeGreaterThan(Number(initialCount))
+      }).toPass({ timeout: 10000, intervals: [100] })
+
+      await field.fill('new description 2')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      let newCount2: null | string
+
+      await expect(async () => {
+        newCount2 = await page.locator(versionsCountSelector).textContent()
+        expect(Number(newCount2)).toBeGreaterThan(Number(newCount1))
+      }).toPass({ timeout: 10000, intervals: [100] })
+
+      await field.fill('new description 3')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      await expect(async () => {
+        const newCount3 = await page.locator(versionsCountSelector).textContent()
+        expect(Number(newCount3)).toBeGreaterThan(Number(newCount2))
+      }).toPass({ timeout: 10000, intervals: [100] })
     })
 
     test('collection — respects max number of versions', async () => {
