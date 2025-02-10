@@ -7,6 +7,7 @@ import type {
 import type { BrowserContext, Locator, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { except } from 'drizzle-orm/mysql-core'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -28,7 +29,6 @@ import { RESTClient } from '../../../../../helpers/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../../../playwright.config.js'
 import { lexicalFieldsSlug } from '../../../../slugs.js'
 import { lexicalDocData } from '../../data.js'
-import { except } from 'drizzle-orm/mysql-core'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -1243,9 +1243,9 @@ describe('lexicalMain', () => {
 
     const relationshipInput = page.locator('.drawer__content .rs__input').first()
     await expect(relationshipInput).toBeVisible()
-    await page.getByRole('heading', { name: 'Lexical Fields' })
+    page.getByRole('heading', { name: 'Lexical Fields' })
     await relationshipInput.click()
-    const user = await page.getByRole('option', { name: 'User' })
+    const user = page.getByRole('option', { name: 'User' })
     await user.click()
 
     const userListDrawer = page
@@ -1253,10 +1253,10 @@ describe('lexicalMain', () => {
       .filter({ hasText: /^User$/ })
       .first()
     await expect(userListDrawer).toBeVisible()
-    await page.getByRole('heading', { name: 'Users' })
-    const button = await page.getByLabel('Add new User')
+    page.getByRole('heading', { name: 'Users' })
+    const button = page.getByLabel('Add new User')
     await button.click()
-    await page.getByText('Creating new User')
+    page.getByText('Creating new User')
   })
 
   test('ensure links can created from clipboard and deleted', async () => {
@@ -1305,9 +1305,9 @@ describe('lexicalMain', () => {
     await expect(linkInput).toBeVisible()
 
     const linkInInput = linkInput.locator('a').first()
-    expect(linkInInput).toBeVisible()
+    await expect(linkInInput).toBeVisible()
 
-    expect(linkInInput).toContainText('https://www.google.com/')
+    await expect(linkInInput).toContainText('https://www.google.com/')
     await expect(linkInInput).toHaveAttribute('href', 'https://www.google.com/')
 
     // Click remove button
@@ -1315,7 +1315,7 @@ describe('lexicalMain', () => {
     await removeButton.click()
 
     // Expect link to be removed
-    await expect(linkNode).not.toBeVisible()
+    await expect(linkNode).toBeHidden()
   })
 
   describe('localization', () => {
@@ -1355,13 +1355,13 @@ describe('lexicalMain', () => {
 
     const textNode = page.getByText('Upload Node:', { exact: true })
     await textNode.click()
-    await expect(decoratorLocator).not.toBeVisible()
+    await expect(decoratorLocator).toBeHidden()
 
     const closeTagInMultiSelect = page
       .getByRole('button', { name: 'payload.jpg Edit payload.jpg' })
       .getByLabel('Remove')
     await closeTagInMultiSelect.click()
-    await expect(decoratorLocator).not.toBeVisible()
+    await expect(decoratorLocator).toBeHidden()
 
     const labelInsideCollapsableBody = page.locator('label').getByText('Sub Blocks')
     await labelInsideCollapsableBody.click()
@@ -1369,10 +1369,10 @@ describe('lexicalMain', () => {
 
     const textNodeInNestedEditor = page.getByText('Some text below relationship node 1')
     await textNodeInNestedEditor.click()
-    await expect(decoratorLocator).not.toBeVisible()
+    await expect(decoratorLocator).toBeHidden()
 
     await page.getByRole('button', { name: 'Tab2' }).click()
-    await expect(decoratorLocator).not.toBeVisible()
+    await expect(decoratorLocator).toBeHidden()
 
     const labelInsideCollapsableBody2 = page.getByText('Text2')
     await labelInsideCollapsableBody2.click()
@@ -1380,7 +1380,7 @@ describe('lexicalMain', () => {
 
     // TEST DELETE!
     await page.keyboard.press('Backspace')
-    await expect(labelInsideCollapsableBody2).not.toBeVisible()
+    await expect(labelInsideCollapsableBody2).toBeHidden()
 
     const monacoLabel = page.locator('label').getByText('Code')
     await monacoLabel.click()
@@ -1388,6 +1388,86 @@ describe('lexicalMain', () => {
 
     const monacoCode = page.getByText('Some code')
     await monacoCode.click()
-    await expect(decoratorLocator).not.toBeVisible()
+    await expect(decoratorLocator).toBeHidden()
+  })
+
+  test('arrow keys', async () => {
+    // utils
+    const selectedDecorator = page.locator('.decorator-selected')
+    const topLevelDecorator = page.locator(
+      '[data-lexical-decorator="true"]:not([data-lexical-decorator="true"] [data-lexical-decorator="true"])',
+    )
+    const selectedNthDecorator = async (nth: number) => {
+      await expect(selectedDecorator).toBeVisible()
+      const areSame = await selectedDecorator.evaluateHandle(
+        (el1, el2) => el1 === el2,
+        await topLevelDecorator.nth(nth).elementHandle(),
+      )
+      await expect.poll(async () => await areSame.jsonValue()).toBe(true)
+    }
+
+    // test
+    await navigateToLexicalFields()
+
+    const textNode = page.getByText('Upload Node:', { exact: true })
+    await textNode.click()
+    await expect(selectedDecorator).toBeHidden()
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(0)
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(1)
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(2)
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(3)
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(4)
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(5)
+    await page.keyboard.press('ArrowDown')
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(6)
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(7)
+    await page.keyboard.press('ArrowDown')
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(8)
+    await page.keyboard.press('ArrowDown')
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(9)
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(10)
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(10)
+
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(9)
+    await page.keyboard.press('ArrowUp')
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(8)
+    await page.keyboard.press('ArrowUp')
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(7)
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(6)
+    await page.keyboard.press('ArrowUp')
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(5)
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(4)
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(3)
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(2)
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(1)
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(0)
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(0)
+
+    // TODO: It would be nice to add tests with lists and nested lists
+    // before and after decoratorNodes and paragraphs. Tested manually,
+    // but these are complex cases.
   })
 })
