@@ -4,7 +4,7 @@ import type { Operator, Where } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useMemo } from 'react'
 
-import type { UpdateCondition, WhereBuilderProps } from './types.js'
+import type { AddCondition, UpdateCondition, WhereBuilderProps } from './types.js'
 
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -54,17 +54,25 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
     return []
   })
 
-  const addCondition = React.useCallback(
-    ({ andIndex, fieldName, orIndex, relation }) => {
+  const addCondition: AddCondition = React.useCallback(
+    ({ andIndex, field, orIndex, relation }) => {
       const newConditions = [...conditions]
 
+      const defaultOperator = fieldTypes[field.field.type].operators[0].value
+
       if (relation === 'and') {
-        newConditions[orIndex].and.splice(andIndex, 0, { [fieldName]: {} })
+        newConditions[orIndex].and.splice(andIndex, 0, {
+          [field.value]: {
+            [defaultOperator]: '',
+          },
+        })
       } else {
         newConditions.push({
           and: [
             {
-              [fieldName]: {},
+              [field.value]: {
+                [defaultOperator]: '',
+              },
             },
           ],
         })
@@ -76,9 +84,11 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   )
 
   const updateCondition: UpdateCondition = React.useCallback(
-    ({ andIndex, field, operator: incomingOperator, orIndex, value: valueArg }) => {
+    ({ andIndex, field, operator: incomingOperator, orIndex, value: valueArg = '' }) => {
       const existingRowCondition = conditions[orIndex].and[andIndex]
-      const operator = incomingOperator || fieldTypes[field.field.type].operators[0].value
+
+      const defaultOperator = fieldTypes[field.field.type].operators[0].value
+      const operator = incomingOperator || defaultOperator
 
       if (typeof existingRowCondition === 'object' && field.value) {
         const value = valueArg ?? (operator ? existingRowCondition[operator] : '')
@@ -181,7 +191,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
             onClick={() => {
               addCondition({
                 andIndex: 0,
-                fieldName: reducedFields[0].value,
+                field: reducedFields[0],
                 orIndex: conditions.length,
                 relation: 'or',
               })
@@ -204,8 +214,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
               if (reducedFields.length > 0) {
                 addCondition({
                   andIndex: 0,
-                  fieldName: reducedFields.find((field) => !field.field.admin?.disableListFilter)
-                    .value,
+                  field: reducedFields.find((field) => !field.field.admin?.disableListFilter),
                   orIndex: conditions.length,
                   relation: 'or',
                 })

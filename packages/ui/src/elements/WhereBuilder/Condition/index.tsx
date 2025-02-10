@@ -1,20 +1,10 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 
-import type { ReducedField, UpdateCondition } from '../types.js'
+import type { AddCondition, ReducedField, UpdateCondition } from '../types.js'
 
 export type Props = {
-  readonly addCondition: ({
-    andIndex,
-    fieldName,
-    orIndex,
-    relation,
-  }: {
-    andIndex: number
-    fieldName: string
-    orIndex: number
-    relation: 'and' | 'or'
-  }) => void
+  readonly addCondition: AddCondition
   readonly andIndex: number
   readonly fieldName: string
   readonly operator: Operator
@@ -82,7 +72,7 @@ export const Condition: React.FC<Props> = (props) => {
         field: reducedField,
         operator,
         orIndex,
-        value: debouncedValue || '',
+        value: debouncedValue,
       })
     }
   })
@@ -176,8 +166,7 @@ export const Condition: React.FC<Props> = (props) => {
             onClick={() =>
               addCondition({
                 andIndex: andIndex + 1,
-                fieldName: reducedFields.find((field) => !field.field.admin?.disableListFilter)
-                  .value,
+                field: reducedFields.find((field) => !field.field.admin?.disableListFilter),
                 orIndex,
                 relation: 'and',
               })

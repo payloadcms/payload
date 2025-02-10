@@ -48,6 +48,18 @@ export type State = {
   or: Where[]
 }
 
+export type AddCondition = ({
+  andIndex,
+  field,
+  orIndex,
+  relation,
+}: {
+  andIndex: number
+  field: ReducedField
+  orIndex: number
+  relation: 'and' | 'or'
+}) => void
+
 export type UpdateCondition = ({
   andIndex,
   field,

@@ -39,13 +39,13 @@ export const addListFilter = async ({
 
   const operatorInput = whereBuilder.locator('.condition__operator')
   await operatorInput.click()
+
   const operatorOptions = operatorInput.locator('.rs__option')
   await operatorOptions.locator(`text=${operatorLabel}`).click()
 
   if (!skipValueInput) {
     const valueInput = whereBuilder.locator('.condition__value >> input')
     await valueInput.fill(value)
-    await wait(100)
     await expect(valueInput).toHaveValue(value)
     const valueOptions = whereBuilder.locator('.condition__value .rs__option')
 
