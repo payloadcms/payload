@@ -937,6 +937,135 @@ describe('lexicalMain', () => {
     })
   })
 
+  test('ensure internal links can be created', async () => {
+    await navigateToLexicalFields()
+    const richTextField = page.locator('.rich-text-lexical').first()
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+    // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
+    await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
+      10,
+    )
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+
+    const paragraph = richTextField.locator('.LexicalEditorTheme__paragraph').first()
+    await paragraph.scrollIntoViewIfNeeded()
+    await expect(paragraph).toBeVisible()
+    /**
+     * Type some text
+     */
+    await paragraph.click()
+    await page.keyboard.type('Link')
+
+    // Select "Link" by pressing shift + arrow left
+    for (let i = 0; i < 4; i++) {
+      await page.keyboard.press('Shift+ArrowLeft')
+    }
+    // Ensure inline toolbar appeared
+    const inlineToolbar = page.locator('.inline-toolbar-popup')
+    await expect(inlineToolbar).toBeVisible()
+
+    const linkButton = inlineToolbar.locator('.toolbar-popup__button-link')
+    await expect(linkButton).toBeVisible()
+    await linkButton.click()
+
+    /**
+     * Link Drawer
+     */
+    const linkDrawer = page.locator('dialog[id^=drawer_1_lexical-rich-text-link-]').first() // IDs starting with drawer_1_lexical-rich-text-link- (there's some other symbol after the underscore)
+    await expect(linkDrawer).toBeVisible()
+    await wait(500)
+
+    // Check if has text "Internal Link"
+    await expect(linkDrawer.locator('.radio-input').nth(1)).toContainText('Internal Link')
+
+    // Get radio button for internal link with text "Internal Link"
+    const radioInternalLink = linkDrawer
+      .locator('.radio-input')
+      .nth(1)
+      .locator('.radio-input__styled-radio')
+
+    await radioInternalLink.click()
+
+    const internalLinkSelect = linkDrawer
+      .locator('#field-doc .rs__control .value-container')
+      .first()
+    await internalLinkSelect.click()
+
+    await expect(linkDrawer.locator('.rs__option').nth(0)).toBeVisible()
+    await expect(linkDrawer.locator('.rs__option').nth(0)).toContainText('Rich Text') // Link to itself - that way we can also test if depth 0 works
+    await linkDrawer.locator('.rs__option').nth(0).click()
+    await expect(internalLinkSelect).toContainText('Rich Text')
+
+    await linkDrawer.locator('button').getByText('Save').first().click()
+    await expect(linkDrawer).toBeHidden()
+    await wait(1500)
+
+    await saveDocAndAssert(page)
+
+    // Check if the text is bold. It's a self-relationship, so no need to follow relationship
+    await expect(async () => {
+      const lexicalDoc: LexicalField = (
+        await payload.find({
+          collection: lexicalFieldsSlug,
+          depth: 0,
+          overrideAccess: true,
+          where: {
+            title: {
+              equals: lexicalDocData.title,
+            },
+          },
+        })
+      ).docs[0] as never
+
+      const lexicalField: SerializedEditorState =
+        lexicalDoc.lexicalRootEditor as SerializedEditorState
+
+      const firstParagraph: SerializedParagraphNode = lexicalField.root
+        .children[0] as SerializedParagraphNode
+
+      expect(firstParagraph.children).toHaveLength(1)
+
+      const linkNode = firstParagraph.children[0] as SerializedLinkNode
+      expect(linkNode?.fields?.doc?.relationTo).toBe('lexical-fields')
+      // Expect to be string
+      expect(typeof linkNode?.fields?.doc?.value).toBe('string')
+    }).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+
+    // Now check if depth 1 works
+    await expect(async () => {
+      const lexicalDoc: LexicalField = (
+        await payload.find({
+          collection: lexicalFieldsSlug,
+          depth: 1,
+          overrideAccess: true,
+          where: {
+            title: {
+              equals: lexicalDocData.title,
+            },
+          },
+        })
+      ).docs[0] as never
+
+      const lexicalField: SerializedEditorState =
+        lexicalDoc.lexicalRootEditor as SerializedEditorState
+
+      const firstParagraph: SerializedParagraphNode = lexicalField.root
+        .children[0] as SerializedParagraphNode
+
+      expect(firstParagraph.children).toHaveLength(1)
+
+      const linkNode = firstParagraph.children[0] as SerializedLinkNode
+      expect(linkNode?.fields?.doc?.relationTo).toBe('lexical-fields')
+      expect(typeof linkNode?.fields?.doc?.value).toBe('object')
+      expect(typeof (linkNode?.fields?.doc?.value as Record<string, unknown>)?.id).toBe('string')
+    }).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+  })
+
   test('ensure link drawer displays fields if document does not have `create` permission', async () => {
     await navigateToLexicalFields(true, 'lexical-access-control')
     const richTextField = page.locator('.rich-text-lexical').first()
@@ -1276,7 +1405,7 @@ describe('lexicalMain', () => {
 
     await lastParagraph.click()
 
-    page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+    await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
 
     // Paste in a link copied from a html page
     const link = '<a href="https://www.google.com">Google</a>'
