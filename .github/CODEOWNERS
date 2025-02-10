@@ -2,7 +2,7 @@
 
 ### Package Exports
 
-\*\*/exports/ @denolfe @jmikrut @DanRibbens
+**/exports/ @denolfe @jmikrut @DanRibbens
 
 ### Packages
 
@@ -14,18 +14,18 @@
 /packages/richtext-*/src/ @AlessioGr @GermanJablo
 /packages/next/src/ @jmikrut @jacobsfletch @AlessioGr @JarrodMFlesch
 /packages/ui/src/ @jmikrut @jacobsfletch @AlessioGr @JarrodMFlesch
-/packages/storage-\*/src/ @denolfe @jmikrut @DanRibbens
+/packages/storage-*/src/ @denolfe @jmikrut @DanRibbens
 /packages/create-payload-app/src/ @denolfe @jmikrut @DanRibbens
-/packages/eslint-\*/ @denolfe @jmikrut @DanRibbens @AlessioGr @GermanJablo
+/packages/eslint-*/ @denolfe @jmikrut @DanRibbens @AlessioGr @GermanJablo
 
 ### Templates
 
-/templates/\_data/ @denolfe @jmikrut @DanRibbens
-/templates/\_template/ @denolfe @jmikrut @DanRibbens
+/templates/_data/ @denolfe @jmikrut @DanRibbens
+/templates/_template/ @denolfe @jmikrut @DanRibbens
 
 ### Build Files
 
-**/tsconfig\*.json @denolfe @jmikrut @DanRibbens @AlessioGr @GermanJablo
+**/tsconfig*.json @denolfe @jmikrut @DanRibbens @AlessioGr @GermanJablo
 **/jest.config.js @denolfe @jmikrut @DanRibbens @AlessioGr
 
 ### Root
