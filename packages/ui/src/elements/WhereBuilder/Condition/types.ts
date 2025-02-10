@@ -1,11 +1,11 @@
 import type { Operator, Where } from 'payload'
 
-import type { Action, ConditionOption } from '../types.js'
+import type { Action, ReducedField } from '../types.js'
 
 export type Props = {
   andIndex: number
   dispatch: (action: Action) => void
-  fields: ConditionOption[]
+  fields: ReducedField[]
   orIndex: number
   value: Where
 }
