@@ -173,6 +173,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       if (shouldUpdateQueryString) {
         setCurrentQuery(newQuery)
         // Do not use router.replace here to avoid re-rendering on initial load
+        console.log('what', newQuery)
         window.history.pushState(null, '', `?${qs.stringify(newQuery)}`)
       }
     }

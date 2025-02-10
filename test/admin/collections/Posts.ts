@@ -80,7 +80,7 @@ export const Posts: CollectionConfig = {
             },
             {
               name: 'number',
-              type: 'numberf',
+              type: 'number',
             },
             {
               name: 'richText',

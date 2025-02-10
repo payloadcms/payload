@@ -94,7 +94,7 @@ export const Condition: React.FC<Props> = (props) => {
         fieldName: conditionOption.value,
         operator,
         orIndex,
-        value: debouncedValue || null,
+        value: debouncedValue || '',
       })
     }
   })

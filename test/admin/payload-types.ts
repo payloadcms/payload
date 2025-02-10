@@ -148,6 +148,7 @@ export interface Post {
   id: string;
   title?: string | null;
   description?: string | null;
+  number?: number | null;
   richText?:
     | {
         [k: string]: unknown;
