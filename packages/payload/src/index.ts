@@ -734,7 +734,7 @@ export class BasePayload {
         cronJobs.map((cronConfig) => {
           const job = new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
             if (typeof this.config.jobs.shouldAutoRun === 'function') {
-              const shouldAutoRun = this.config.jobs.shouldAutoRun(this)
+              const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
 
               if (!shouldAutoRun) {
                 job.stop()

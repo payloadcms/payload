@@ -131,6 +131,8 @@ export const payloadCloudPlugin =
 
     const oldAutoRunCopy = config.jobs.autoRun ?? []
 
+    const hasExistingAutorun = Boolean(config.jobs.autoRun)
+
     const newShouldAutoRun = async (payload: Payload) => {
       if (process.env.PAYLOAD_CLOUD_JOBS_INSTANCE) {
         const retrievedGlobal = await payload.findGlobal({
@@ -163,7 +165,7 @@ export const payloadCloudPlugin =
         },
       })
 
-      if (!config.jobs?.autoRun) {
+      if (!hasExistingAutorun) {
         return [DEFAULT_CRON_JOB]
       }
 
