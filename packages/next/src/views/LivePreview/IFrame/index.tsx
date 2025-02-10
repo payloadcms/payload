@@ -28,7 +28,7 @@ export const IFrame: React.FC<Props> = (props) => {
       style={{
         transform: typeof zoom === 'number' ? `scale(${zoom}) ` : undefined,
       }}
-      title={formattedUrl}
+      title={url}
     />
   )
 }
