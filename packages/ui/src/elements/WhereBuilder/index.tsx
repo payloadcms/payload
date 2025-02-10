@@ -4,16 +4,17 @@ import type { Operator, Where } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useMemo } from 'react'
 
-import type { WhereBuilderProps } from './types.js'
+import type { UpdateCondition, WhereBuilderProps } from './types.js'
 
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import { Condition } from './Condition/index.js'
+import fieldTypes from './field-types.js'
 import { reduceFields } from './reduceFields.js'
 import { transformWhereQuery } from './transformWhereQuery.js'
-import validateWhereQuery from './validateWhereQuery.js'
 import './index.scss'
+import validateWhereQuery from './validateWhereQuery.js'
 
 const baseClass = 'where-builder'
 
@@ -27,7 +28,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   const { collectionPluralLabel, fields, renderedFilters } = props
   const { i18n, t } = useTranslation()
 
-  const conditionOptions = useMemo(() => reduceFields({ fields, i18n }), [fields, i18n])
+  const reducedFields = useMemo(() => reduceFields({ fields, i18n }), [fields, i18n])
 
   const { handleWhereChange, query } = useListQuery()
   const [shouldUpdateQuery, setShouldUpdateQuery] = React.useState(false)
@@ -74,15 +75,16 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
     [conditions],
   )
 
-  const updateCondition = React.useCallback(
-    ({ andIndex, fieldName, operator, orIndex, value: valueArg }) => {
+  const updateCondition: UpdateCondition = React.useCallback(
+    ({ andIndex, field, operator: incomingOperator, orIndex, value: valueArg }) => {
       const existingRowCondition = conditions[orIndex].and[andIndex]
+      const operator = incomingOperator || fieldTypes[field.field.type].operators[0].value
 
-      if (typeof existingRowCondition === 'object' && fieldName) {
+      if (typeof existingRowCondition === 'object' && field.value) {
         const value = valueArg ?? (operator ? existingRowCondition[operator] : '')
 
         const newRowCondition = {
-          [fieldName]: operator ? { [operator]: value } : {},
+          [field.value]: operator ? { [operator]: value } : {},
         }
 
         const newConditions = [...conditions]
@@ -153,10 +155,10 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
                             <Condition
                               addCondition={addCondition}
                               andIndex={andIndex}
-                              conditionOptions={conditionOptions}
                               fieldName={fieldName}
                               operator={operator}
                               orIndex={orIndex}
+                              reducedFields={reducedFields}
                               removeCondition={removeCondition}
                               RenderedFilter={renderedFilters?.get(fieldName)}
                               updateCondition={updateCondition}
@@ -179,7 +181,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
             onClick={() => {
               addCondition({
                 andIndex: 0,
-                fieldName: conditionOptions[0].value,
+                fieldName: reducedFields[0].value,
                 orIndex: conditions.length,
                 relation: 'or',
               })
@@ -199,10 +201,10 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
             iconPosition="left"
             iconStyle="with-border"
             onClick={() => {
-              if (conditionOptions.length > 0) {
+              if (reducedFields.length > 0) {
                 addCondition({
                   andIndex: 0,
-                  fieldName: conditionOptions.find((field) => !field.field.admin?.disableListFilter)
+                  fieldName: reducedFields.find((field) => !field.field.admin?.disableListFilter)
                     .value,
                   orIndex: conditions.length,
                   relation: 'or',

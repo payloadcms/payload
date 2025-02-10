@@ -1,7 +1,7 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 
-import type { ConditionOption } from '../types.js'
+import type { ReducedField, UpdateCondition } from '../types.js'
 
 export type Props = {
   readonly addCondition: ({
@@ -16,25 +16,13 @@ export type Props = {
     relation: 'and' | 'or'
   }) => void
   readonly andIndex: number
-  readonly conditionOptions: ConditionOption[]
   readonly fieldName: string
   readonly operator: Operator
   readonly orIndex: number
+  readonly reducedFields: ReducedField[]
   readonly removeCondition: ({ andIndex, orIndex }: { andIndex: number; orIndex: number }) => void
   readonly RenderedFilter: React.ReactNode
-  readonly updateCondition: ({
-    andIndex,
-    fieldName,
-    operator,
-    orIndex,
-    value,
-  }: {
-    andIndex: number
-    fieldName: string
-    operator: string
-    orIndex: number
-    value: string
-  }) => void
+  readonly updateCondition: UpdateCondition
   readonly value: string
 }
 
@@ -56,10 +44,10 @@ export const Condition: React.FC<Props> = (props) => {
   const {
     addCondition,
     andIndex,
-    conditionOptions,
     fieldName,
     operator,
     orIndex,
+    reducedFields,
     removeCondition,
     RenderedFilter,
     updateCondition,
@@ -68,13 +56,13 @@ export const Condition: React.FC<Props> = (props) => {
 
   const { t } = useTranslation()
 
-  const conditionOption = conditionOptions.find((field) => field.value === fieldName)
+  const reducedField = reducedFields.find((field) => field.value === fieldName)
 
   const [internalValue, setInternalValue] = useState<string>(value)
 
   const debouncedValue = useDebounce(internalValue, 300)
 
-  const booleanSelect = ['exists'].includes(operator) || conditionOption?.field?.type === 'checkbox'
+  const booleanSelect = ['exists'].includes(operator) || reducedField?.field?.type === 'checkbox'
 
   let valueOptions: PayloadOption[] = []
 
@@ -83,15 +71,15 @@ export const Condition: React.FC<Props> = (props) => {
       { label: t('general:true'), value: 'true' },
       { label: t('general:false'), value: 'false' },
     ]
-  } else if (conditionOption?.field && 'options' in conditionOption.field) {
-    valueOptions = conditionOption.field.options
+  } else if (reducedField?.field && 'options' in reducedField.field) {
+    valueOptions = reducedField.field.options
   }
 
   const updateValue = useEffectEvent((debouncedValue) => {
     if (operator) {
       updateCondition({
         andIndex,
-        fieldName: conditionOption.value,
+        field: reducedField,
         operator,
         orIndex,
         value: debouncedValue || '',
@@ -104,8 +92,8 @@ export const Condition: React.FC<Props> = (props) => {
   }, [debouncedValue])
 
   const disabled =
-    (!conditionOption?.value && typeof conditionOption?.value !== 'number') ||
-    conditionOption?.field?.admin?.disableListFilter
+    (!reducedField?.value && typeof reducedField?.value !== 'number') ||
+    reducedField?.field?.admin?.disableListFilter
 
   return (
     <div className={baseClass}>
@@ -119,16 +107,16 @@ export const Condition: React.FC<Props> = (props) => {
                 setInternalValue(undefined)
                 updateCondition({
                   andIndex,
-                  fieldName: field.value,
+                  field: reducedFields.find((option) => option.value === field.value),
                   operator,
                   orIndex,
-                  value: undefined,
+                  value: '',
                 })
               }}
-              options={conditionOptions.filter((field) => !field.field.admin.disableListFilter)}
+              options={reducedFields.filter((field) => !field.field.admin.disableListFilter)}
               value={
-                conditionOption || {
-                  value: conditionOption?.value,
+                reducedField || {
+                  value: reducedField?.value,
                 }
               }
             />
@@ -140,14 +128,14 @@ export const Condition: React.FC<Props> = (props) => {
               onChange={(operator: Option<Operator>) => {
                 updateCondition({
                   andIndex,
-                  fieldName,
+                  field: reducedField,
                   operator: operator.value,
                   orIndex,
                   value,
                 })
               }}
-              options={conditionOption?.operators}
-              value={conditionOption?.operators.find((o) => operator === o.value) || null}
+              options={reducedField?.operators}
+              value={reducedField?.operators.find((o) => operator === o.value) || null}
             />
           </div>
           <div className={`${baseClass}__value`}>
@@ -155,9 +143,9 @@ export const Condition: React.FC<Props> = (props) => {
               <DefaultFilter
                 booleanSelect={booleanSelect}
                 disabled={
-                  !operator || !conditionOption || conditionOption?.field?.admin?.disableListFilter
+                  !operator || !reducedField || reducedField?.field?.admin?.disableListFilter
                 }
-                internalField={conditionOption}
+                internalField={reducedField}
                 onChange={setInternalValue}
                 operator={operator}
                 options={valueOptions}
@@ -188,7 +176,7 @@ export const Condition: React.FC<Props> = (props) => {
             onClick={() =>
               addCondition({
                 andIndex: andIndex + 1,
-                fieldName: conditionOptions.find((field) => !field.field.admin?.disableListFilter)
+                fieldName: reducedFields.find((field) => !field.field.admin?.disableListFilter)
                   .value,
                 orIndex,
                 relation: 'and',

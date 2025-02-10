@@ -5,7 +5,7 @@ import type { ClientField } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import { fieldIsHiddenOrDisabled, fieldIsID, tabHasName } from 'payload/shared'
 
-import type { ConditionOption } from './types.js'
+import type { ReducedField } from './types.js'
 
 import { createNestedClientFieldPath } from '../../forms/Form/createNestedClientFieldPath.js'
 import { combineLabel } from '../FieldSelect/index.js'
@@ -27,7 +27,7 @@ export const reduceFields = ({
   i18n,
   labelPrefix,
   pathPrefix,
-}: ReduceFieldOptionsArgs): ConditionOption[] => {
+}: ReduceFieldOptionsArgs): ReducedField[] => {
   return fields.reduce((reduced, field) => {
     // Do not filter out `field.admin.disableListFilter` fields here, as these should still render as disabled if they appear in the URL query
     if (fieldIsHiddenOrDisabled(field) && !fieldIsID(field)) {
@@ -123,11 +123,13 @@ export const reduceFields = ({
           pathPrefix: pathWithPrefix,
         }),
       )
+
       return reduced
     }
 
     if (typeof fieldTypes[field.type] === 'object') {
       const operatorKeys = new Set()
+
       const operators = fieldTypes[field.type].operators.reduce((acc, operator) => {
         if (!operatorKeys.has(operator.value)) {
           operatorKeys.add(operator.value)
@@ -137,6 +139,7 @@ export const reduceFields = ({
             label: i18n.t(operatorKey),
           })
         }
+
         return acc
       }, [])
 
@@ -151,7 +154,7 @@ export const reduceFields = ({
 
       const fieldPath = pathPrefix ? createNestedClientFieldPath(pathPrefix, field) : field.name
 
-      const formattedField: ConditionOption = {
+      const formattedField: ReducedField = {
         label: formattedLabel,
         value: fieldPath,
         ...fieldTypes[field.type],

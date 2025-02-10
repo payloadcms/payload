@@ -7,7 +7,7 @@ export type WhereBuilderProps = {
   readonly renderedFilters?: Map<string, React.ReactNode>
 }
 
-export type ConditionOption = {
+export type ReducedField = {
   field: ClientField
   label: string
   operators: {
@@ -47,3 +47,17 @@ export type Action = ADD | REMOVE | UPDATE
 export type State = {
   or: Where[]
 }
+
+export type UpdateCondition = ({
+  andIndex,
+  field,
+  operator,
+  orIndex,
+  value,
+}: {
+  andIndex: number
+  field: ReducedField
+  operator: string
+  orIndex: number
+  value: string
+}) => void
