@@ -18,7 +18,7 @@ const baseClass = 'condition-value-relationship'
 
 const maxResultsPerRequest = 10
 
-export const RelationshipField: React.FC<Props> = (props) => {
+export const RelationshipFilter: React.FC<Props> = (props) => {
   const {
     disabled,
     field: { admin: { isSortable } = {}, hasMany, relationTo },
@@ -42,6 +42,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
   const debouncedSearch = useDebounce(search, 300)
   const { i18n, t } = useTranslation()
   const relationSlugs = hasMultipleRelations ? relationTo : [relationTo]
+
   const initialRelationMap = () => {
     const map: Map<string, number> = new Map()
     relationSlugs.forEach((relation) => {
@@ -49,6 +50,7 @@ export const RelationshipField: React.FC<Props> = (props) => {
     })
     return map
   }
+
   const nextPageByRelationshipRef = React.useRef<Map<string, number>>(initialRelationMap())
   const partiallyLoadedRelationshipSlugs = React.useRef<string[]>(relationSlugs)
 
@@ -205,11 +207,13 @@ export const RelationshipField: React.FC<Props> = (props) => {
   }, [hasMany, hasMultipleRelations, value, options])
 
   const handleInputChange = (input: string) => {
-    dispatchOptions({ type: 'CLEAR', i18n, required: false })
-    const relationSlug = partiallyLoadedRelationshipSlugs.current[0]
-    partiallyLoadedRelationshipSlugs.current = relationSlugs
-    nextPageByRelationshipRef.current.set(relationSlug, 1)
-    setSearch(input)
+    if (input !== search) {
+      dispatchOptions({ type: 'CLEAR', i18n, required: false })
+      const relationSlug = partiallyLoadedRelationshipSlugs.current[0]
+      partiallyLoadedRelationshipSlugs.current = relationSlugs
+      nextPageByRelationshipRef.current.set(relationSlug, 1)
+      setSearch(input)
+    }
   }
 
   const addOptionByID = useCallback(
