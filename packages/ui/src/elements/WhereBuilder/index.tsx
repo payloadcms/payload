@@ -88,11 +88,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
         newConditions[orIndex].and[andIndex] = newRowCondition
 
         setConditions(newConditions)
-
-        if (![null, undefined].includes(value)) {
-          // only update query when field/operator/value are filled out
-          setShouldUpdateQuery(true)
-        }
+        setShouldUpdateQuery(true)
       }
     },
     [conditions],

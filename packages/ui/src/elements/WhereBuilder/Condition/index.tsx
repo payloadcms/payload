@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import type { ConditionOption } from '../types.js'
 
@@ -43,11 +43,12 @@ import type { Operator, Option as PayloadOption } from 'payload'
 import type { Option } from '../../ReactSelect/index.js'
 
 import { useDebounce } from '../../../hooks/useDebounce.js'
+import { useEffectEvent } from '../../../hooks/useEffectEvent.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { ReactSelect } from '../../ReactSelect/index.js'
-import { DefaultFilter } from './DefaultFilter/index.js'
 import './index.scss'
+import { DefaultFilter } from './DefaultFilter/index.js'
 
 const baseClass = 'condition'
 
@@ -69,9 +70,9 @@ export const Condition: React.FC<Props> = (props) => {
 
   const conditionOption = conditionOptions.find((field) => field.value === fieldName)
 
-  const [internalQueryValue, setInternalQueryValue] = useState<string>(value)
+  const [internalValue, setInternalValue] = useState<string>(value)
 
-  const debouncedValue = useDebounce(internalQueryValue, 300)
+  const debouncedValue = useDebounce(internalValue, 300)
 
   const booleanSelect = ['exists'].includes(operator) || conditionOption?.field?.type === 'checkbox'
 
@@ -86,6 +87,21 @@ export const Condition: React.FC<Props> = (props) => {
     valueOptions = conditionOption.field.options
   }
 
+  const updateValue = useEffectEvent((debouncedValue) => {
+    console.log('run', debouncedValue)
+    updateCondition({
+      andIndex,
+      fieldName: conditionOption.value,
+      operator,
+      orIndex,
+      value: debouncedValue,
+    })
+  })
+
+  useEffect(() => {
+    updateValue(debouncedValue)
+  }, [debouncedValue])
+
   const disabled =
     (!conditionOption?.value && typeof conditionOption?.value !== 'number') ||
     conditionOption?.field?.admin?.disableListFilter
@@ -99,7 +115,7 @@ export const Condition: React.FC<Props> = (props) => {
               disabled={disabled}
               isClearable={false}
               onChange={(field: Option<string>) => {
-                setInternalQueryValue(undefined)
+                setInternalValue(undefined)
                 updateCondition({
                   andIndex,
                   fieldName: field.value,
@@ -141,10 +157,10 @@ export const Condition: React.FC<Props> = (props) => {
                   !operator || !conditionOption || conditionOption?.field?.admin?.disableListFilter
                 }
                 internalField={conditionOption}
-                onChange={setInternalQueryValue}
+                onChange={setInternalValue}
                 operator={operator}
                 options={valueOptions}
-                value={internalQueryValue ?? ''}
+                value={internalValue ?? ''}
               />
             )}
           </div>
