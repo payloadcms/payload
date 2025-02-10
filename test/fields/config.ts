@@ -130,7 +130,7 @@ export default buildConfigWithDefaults({
         'new-value': 'client available',
       },
     },
-    timezone: {
+    timezones: {
       supportedTimezones: ({ defaultTimezones }) => [
         ...defaultTimezones,
         { label: '(GMT-6) Monterrey, Nuevo Leon', value: 'America/Monterrey' },

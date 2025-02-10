@@ -433,7 +433,7 @@ export type Timezone = {
 
 type SupportedTimezonesFn = (args: { defaultTimezones: Timezone[] }) => Timezone[]
 
-type TimezoneConfig = {
+type TimezonesConfig = {
   /**
    * The default timezone to use for the admin panel.
    */
@@ -450,7 +450,7 @@ type TimezoneConfig = {
 
 type SanitizedTimezoneConfig = {
   supportedTimezones: Timezone[]
-} & Omit<TimezoneConfig, 'supportedTimezones'>
+} & Omit<TimezonesConfig, 'supportedTimezones'>
 
 export type CustomComponent<TAdditionalProps extends object = Record<string, any>> =
   PayloadComponent<ServerProps & TAdditionalProps, TAdditionalProps>
@@ -909,7 +909,7 @@ export type Config = {
     /**
      * Configure timezone related settings for the admin panel.
      */
-    timezone?: TimezoneConfig
+    timezones?: TimezonesConfig
     /** The slug of a Collection that you want to be used to log in to the Admin dashboard. */
     user?: string
   }
@@ -1180,7 +1180,7 @@ export type Config = {
 
 export type SanitizedConfig = {
   admin: {
-    timezone: SanitizedTimezoneConfig
+    timezones: SanitizedTimezoneConfig
   } & DeepRequired<Config['admin']>
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */

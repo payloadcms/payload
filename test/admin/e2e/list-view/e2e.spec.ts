@@ -198,19 +198,6 @@ describe('List View', () => {
       ).toBeVisible()
     })
 
-    test('should render custom listControlsMenu component', async () => {
-      await page.goto(postsUrl.list)
-      const kebabMenu = page.locator('.list-controls__popup')
-      await expect(kebabMenu).toBeVisible()
-      await kebabMenu.click()
-
-      await expect(
-        page.locator('.popup-button-list__button').locator('div', {
-          hasText: 'ListControlsMenu',
-        }),
-      ).toBeVisible()
-    })
-
     test('should render custom afterListTable component', async () => {
       await page.goto(postsUrl.list)
       await expect(
@@ -296,6 +283,28 @@ describe('List View', () => {
   })
 
   describe('filters', () => {
+    test('should not close where builder when clearing final condition', async () => {
+      await page.goto(postsUrl.list)
+      await openListFilters(page, {})
+      await page.locator('.where-builder__add-first-filter').click()
+      await page.locator('.condition__field').click()
+      await page.locator('.rs__option', { hasText: exactText('Relationship') }).click()
+      await page.locator('.condition__operator').click()
+      await page.locator('.rs__option', { hasText: exactText('equals') }).click()
+      const valueInput = await page.locator('.condition__value')
+      await valueInput.click()
+      await valueInput.locator('.rs__option').first().click()
+
+      await page.waitForURL(/&where/)
+
+      await page.locator('.condition__actions .btn.condition__actions-remove').click()
+
+      await page.waitForURL(/^(?!.*&where)/)
+
+      const whereBuilder = page.locator('.list-controls__where.rah-static.rah-static--height-auto')
+      await expect(whereBuilder).toBeVisible()
+    })
+
     test('should respect base list filters', async () => {
       await page.goto(baseListFiltersUrl.list)
       await page.waitForURL((url) => url.toString().startsWith(baseListFiltersUrl.list))
@@ -382,8 +391,7 @@ describe('List View', () => {
 
       await page.waitForURL(/&where/)
 
-      const valueInput = page.locator('.condition__value')
-      const removeButton = valueInput.locator('.clear-indicator').click()
+      page.locator('.condition__value').locator('.clear-indicator').click()
 
       await page.waitForURL(/^(?!.*&where)/)
     })
@@ -662,10 +670,8 @@ describe('List View', () => {
         condition2?.locator('.rs__menu-list:has-text("Disable List Filter Text")'),
       ).toBeHidden()
     })
-  })
 
-  describe('WhereBuilder', () => {
-    test('should render where builder', async () => {
+    test('should properly paginate many documents', async () => {
       await page.goto(
         `${with300DocumentsUrl.list}?limit=10&page=1&where%5Bor%5D%5B0%5D%5Band%5D%5B0%5D%5BselfRelation%5D%5Bequals%5D=null`,
       )

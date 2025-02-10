@@ -58,17 +58,17 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
     )
   }
 
-  if (sanitizedConfig?.admin?.timezone) {
-    if (typeof sanitizedConfig?.admin?.timezone?.supportedTimezones === 'function') {
-      sanitizedConfig.admin.timezone.supportedTimezones =
-        sanitizedConfig.admin.timezone.supportedTimezones({ defaultTimezones })
+  if (sanitizedConfig?.admin?.timezones) {
+    if (typeof sanitizedConfig?.admin?.timezones?.supportedTimezones === 'function') {
+      sanitizedConfig.admin.timezones.supportedTimezones =
+        sanitizedConfig.admin.timezones.supportedTimezones({ defaultTimezones })
     }
 
-    if (!sanitizedConfig?.admin?.timezone?.supportedTimezones) {
-      sanitizedConfig.admin.timezone.supportedTimezones = defaultTimezones
+    if (!sanitizedConfig?.admin?.timezones?.supportedTimezones) {
+      sanitizedConfig.admin.timezones.supportedTimezones = defaultTimezones
     }
   } else {
-    sanitizedConfig.admin.timezone = {
+    sanitizedConfig.admin.timezones = {
       supportedTimezones: defaultTimezones,
     }
   }
@@ -76,7 +76,7 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
   const _internalSupportedTimezones = Intl.supportedValuesOf('timeZone')
 
   // We're casting here because it's already been sanitised above but TS still thinks it could be a function
-  ;(sanitizedConfig.admin.timezone.supportedTimezones as Timezone[]).forEach((timezone) => {
+  ;(sanitizedConfig.admin.timezones.supportedTimezones as Timezone[]).forEach((timezone) => {
     if (!_internalSupportedTimezones.includes(timezone.value)) {
       throw new InvalidConfiguration(
         `Timezone ${timezone.value} is not supported by the current runtime via the Intl API.`,

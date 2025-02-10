@@ -268,7 +268,6 @@ export const nlTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'Toch weggaan',
     leaveWithoutSaving: 'Verlaten zonder op te slaan',
     light: 'Licht',
-    listControlMenu: 'Controlelijstmenu',
     livePreview: 'Voorbeeld',
     loading: 'Laden',
     locale: 'Taal',

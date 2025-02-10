@@ -293,9 +293,9 @@ export const sanitizeFields = async ({
     // Insert our field after assignment
     if (field.type === 'date' && field.timezone) {
       const name = field.name + '_tz'
-      const defaultTimezone = config.admin.timezone.defaultTimezone
+      const defaultTimezone = config.admin.timezones.defaultTimezone
 
-      const supportedTimezones = config.admin.timezone.supportedTimezones
+      const supportedTimezones = config.admin.timezones.supportedTimezones
 
       const options =
         typeof supportedTimezones === 'function'

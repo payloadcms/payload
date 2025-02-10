@@ -1,7 +1,10 @@
+/* eslint-disable perfectionist/sort-switch-case */
+// Keep perfectionist/sort-switch-case disabled - it incorrectly messes up the ordering of the switch cases, causing it to break
 import type { I18nClient } from '@payloadcms/translations'
 
 import type {
   AdminClient,
+  ArrayFieldClient,
   BlockJSX,
   BlocksFieldClient,
   ClientBlock,
@@ -144,7 +147,27 @@ export const createClientField = ({
   }
 
   switch (incomingField.type) {
-    case 'array':
+    case 'array': {
+      if (incomingField.labels) {
+        const field = clientField as unknown as ArrayFieldClient
+
+        field.labels = {} as unknown as LabelsClient
+
+        if (incomingField.labels.singular) {
+          if (typeof incomingField.labels.singular === 'function') {
+            field.labels.singular = incomingField.labels.singular({ t: i18n.t })
+          } else {
+            field.labels.singular = incomingField.labels.singular
+          }
+          if (typeof incomingField.labels.plural === 'function') {
+            field.labels.plural = incomingField.labels.plural({ t: i18n.t })
+          } else {
+            field.labels.plural = incomingField.labels.plural
+          }
+        }
+      }
+    }
+    // falls through
     case 'collapsible':
     case 'group':
     case 'row': {
@@ -167,6 +190,23 @@ export const createClientField = ({
 
     case 'blocks': {
       const field = clientField as unknown as BlocksFieldClient
+
+      if (incomingField.labels) {
+        field.labels = {} as unknown as LabelsClient
+
+        if (incomingField.labels.singular) {
+          if (typeof incomingField.labels.singular === 'function') {
+            field.labels.singular = incomingField.labels.singular({ t: i18n.t })
+          } else {
+            field.labels.singular = incomingField.labels.singular
+          }
+          if (typeof incomingField.labels.plural === 'function') {
+            field.labels.plural = incomingField.labels.plural({ t: i18n.t })
+          } else {
+            field.labels.plural = incomingField.labels.plural
+          }
+        }
+      }
 
       if (incomingField.blocks?.length) {
         for (let i = 0; i < incomingField.blocks.length; i++) {

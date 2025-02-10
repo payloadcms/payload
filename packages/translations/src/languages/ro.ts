@@ -269,7 +269,6 @@ export const roTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'Pleacă oricum',
     leaveWithoutSaving: 'Plecare fără a salva',
     light: 'Light',
-    listControlMenu: 'Meniu de control al listei',
     livePreview: 'Previzualizare',
     loading: 'Încărcare',
     locale: 'Localitate',

@@ -970,7 +970,7 @@ export function authCollectionToOperationsJSONSchema(
 
 // Generates the JSON Schema for supported timezones
 export function timezonesToJSONSchema(
-  supportedTimezones: SanitizedConfig['admin']['timezone']['supportedTimezones'],
+  supportedTimezones: SanitizedConfig['admin']['timezones']['supportedTimezones'],
 ): JSONSchema4 {
   return {
     description: 'Supported timezones in IANA format.',
@@ -1058,7 +1058,7 @@ export function configToJSONSchema(
     {},
   )
 
-  const timezoneDefinitions = timezonesToJSONSchema(config.admin.timezone.supportedTimezones)
+  const timezoneDefinitions = timezonesToJSONSchema(config.admin.timezones.supportedTimezones)
 
   const authOperationDefinitions = [...config.collections]
     .filter(({ auth }) => Boolean(auth))
