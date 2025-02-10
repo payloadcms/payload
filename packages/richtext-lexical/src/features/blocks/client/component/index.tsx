@@ -180,8 +180,6 @@ export const BlockComponent: React.FC<Props> = (props) => {
     }
 
     if (formData && !initialState) {
-      console.log('initialState11', initialState)
-
       void awaitInitialState()
     }
 
