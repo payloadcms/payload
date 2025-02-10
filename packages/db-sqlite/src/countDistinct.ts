@@ -1,7 +1,7 @@
 import type { ChainedMethods } from '@payloadcms/drizzle/types'
 
 import { chainMethods } from '@payloadcms/drizzle'
-import { count } from 'drizzle-orm'
+import { count, sql } from 'drizzle-orm'
 
 import type { CountDistinct, SQLiteAdapter } from './types.js'
 
@@ -11,18 +11,27 @@ export const countDistinct: CountDistinct = async function countDistinct(
 ) {
   const chainedMethods: ChainedMethods = []
 
-  joins.forEach(({ condition, table }) => {
+  // COUNT(DISTINCT id)  is slow on large tables, so we only use DISTINCT if we have to
+  const visitedPaths = new Set([])
+  let useDistinct = false
+  joins.forEach(({ condition, queryPath, table }) => {
+    if (!useDistinct && queryPath) {
+      if (visitedPaths.has(queryPath)) {
+        useDistinct = true
+      } else {
+        visitedPaths.add(queryPath)
+      }
+    }
     chainedMethods.push({
       args: [table, condition],
       method: 'leftJoin',
     })
   })
-
   const countResult = await chainMethods({
     methods: chainedMethods,
     query: db
       .select({
-        count: count(),
+        count: useDistinct ? sql`COUNT(DISTINCT ${this.tables[tableName].id})` : count(),
       })
       .from(this.tables[tableName])
       .where(where),

@@ -412,6 +412,51 @@ describe('Relationships', () => {
           expect(customIdNumberRelation).toMatchObject({ id: generatedCustomIdNumber })
         })
 
+        it('should retrieve totalDocs correctly with hasMany,', async () => {
+          const movie1 = await payload.create({
+            collection: 'movies',
+            data: {},
+          })
+          const movie2 = await payload.create({
+            collection: 'movies',
+            data: {},
+          })
+
+          await payload.create({
+            collection: 'directors',
+            data: {
+              name: 'Quentin Tarantino',
+              movies: [movie2.id, movie1.id],
+            },
+          })
+
+          const res = await payload.find({
+            collection: 'directors',
+            limit: 10,
+            where: {
+              or: [
+                {
+                  movies: {
+                    equals: movie2.id,
+                  },
+                },
+                {
+                  movies: {
+                    equals: movie1.id,
+                  },
+                },
+                {
+                  movies: {
+                    equals: movie1.id,
+                  },
+                },
+              ],
+            },
+          })
+
+          expect(res.totalDocs).toBe(1)
+        })
+
         it('should query using "contains" by hasMany relationship field', async () => {
           const movie1 = await payload.create({
             collection: 'movies',
