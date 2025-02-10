@@ -51,7 +51,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
     config: {
       admin: {
         dateFormat,
-        timezone: { defaultTimezone, supportedTimezones },
+        timezones: { defaultTimezone, supportedTimezones },
       },
       localization,
       routes: { api },
