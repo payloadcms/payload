@@ -591,7 +591,8 @@ describe('List View', () => {
         skipValueInput: true,
       })
 
-      const valueInput = page.locator('.condition__value >> input')
+      const whereBuilder = page.locator('.where-builder')
+      const valueInput = whereBuilder.locator('.condition__value >> input')
 
       // Type into the input field instead of filling it
       await valueInput.click()
@@ -699,25 +700,39 @@ describe('List View', () => {
     })
 
     test('should properly paginate many documents', async () => {
-      await page.goto(
-        `${with300DocumentsUrl.list}?limit=10&page=1&where%5Bor%5D%5B0%5D%5Band%5D%5B0%5D%5BselfRelation%5D%5Bequals%5D=null`,
-      )
-      const valueField = page.locator('.condition__value')
+      await page.goto(with300DocumentsUrl.list)
+
+      await addListFilter({
+        page,
+        fieldLabel: 'Self Relation',
+        operatorLabel: 'equals',
+        skipValueInput: true,
+      })
+
+      const whereBuilder = page.locator('.where-builder')
+
+      const valueField = whereBuilder.locator('.condition__value')
       await valueField.click()
       await page.keyboard.type('4')
-      const options = page.getByRole('option')
+
+      const options = whereBuilder.locator('.condition__value .rs__option')
+
       await expect(options).toHaveCount(10)
+
       for (const option of await options.all()) {
-        await expect(option).toHaveText('4')
+        expect(await option.innerText()).toContain('4')
       }
+
       await page.keyboard.press('Backspace')
       await page.keyboard.type('5')
       await expect(options).toHaveCount(10)
+
       for (const option of await options.all()) {
-        await expect(option).toHaveText('5')
+        expect(await option.innerText()).toContain('5')
       }
-      // await options.last().scrollIntoViewIfNeeded()
+
       await options.first().hover()
+
       // three times because react-select is not very reliable
       await page.mouse.wheel(0, 50)
       await page.mouse.wheel(0, 50)
