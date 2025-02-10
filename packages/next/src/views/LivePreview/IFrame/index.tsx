@@ -17,6 +17,17 @@ export const IFrame: React.FC<Props> = (props) => {
 
   const { zoom } = useLivePreviewContext()
 
+  const getAbsoluteUrl = (url: string) => {
+    try {
+      return new URL(url, window.location.origin).href
+    } catch {
+      return url
+    }
+  }
+
+  const formattedUrl =
+    url.startsWith('http://') || url.startsWith('https://') ? url : getAbsoluteUrl(url)
+
   return (
     <iframe
       className={baseClass}
@@ -28,7 +39,7 @@ export const IFrame: React.FC<Props> = (props) => {
       style={{
         transform: typeof zoom === 'number' ? `scale(${zoom}) ` : undefined,
       }}
-      title={url}
+      title={formattedUrl}
     />
   )
 }
