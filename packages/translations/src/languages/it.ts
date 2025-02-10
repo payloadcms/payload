@@ -333,6 +333,7 @@ export const itTranslations: DefaultTranslationsObject = {
     takeOver: 'Prendi il controllo',
     thisLanguage: 'Italiano',
     time: 'Tempo',
+    timezone: 'Fuso orario',
     titleDeleted: '{{label}} {{title}} eliminato con successo.',
     true: 'Vero',
     unauthorized: 'Non autorizzato',
@@ -427,6 +428,7 @@ export const itTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'Questo campo richiede due numeri.',
     shorterThanMax:
       'Questo valore deve essere inferiore alla lunghezza massima di {{maxLength}} caratteri.',
+    timezoneRequired: 'È richiesto un fuso orario.',
     trueOrFalse: "Questo campo può essere solo uguale a 'true' o 'false'.",
     username:
       'Inserisci un nome utente valido. Può contenere lettere, numeri, trattini, punti e underscore.',
