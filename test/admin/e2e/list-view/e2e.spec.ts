@@ -386,11 +386,14 @@ describe('List View', () => {
         value: 'post1',
       })
 
-      await page.waitForURL(/&where/)
+      const encodedQueryString =
+        '&' + encodeURIComponent('where[or][0][and][0][relationship][equals]') + '='
+
+      await page.waitForURL(new RegExp(encodedQueryString + '[^&]*'))
 
       await page.locator('.condition__value .clear-indicator').click()
 
-      await page.waitForURL(/^(?!.*&where)/)
+      await page.waitForURL(new RegExp(encodedQueryString))
     })
 
     test.skip('should remove condition from URL when a different field is selected', async () => {

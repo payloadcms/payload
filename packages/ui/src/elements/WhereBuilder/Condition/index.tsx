@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import type { AddCondition, ReducedField, UpdateCondition } from '../types.js'
 
@@ -66,7 +66,7 @@ export const Condition: React.FC<Props> = (props) => {
   }
 
   const updateValue = useEffectEvent((debouncedValue) => {
-    if (operator) {
+    if (operator && debouncedValue) {
       updateCondition({
         andIndex,
         field: reducedField,
@@ -85,6 +85,33 @@ export const Condition: React.FC<Props> = (props) => {
     (!reducedField?.value && typeof reducedField?.value !== 'number') ||
     reducedField?.field?.admin?.disableListFilter
 
+  const handleFieldChange = useCallback(
+    (field: Option<string>) => {
+      setInternalValue(undefined)
+      updateCondition({
+        andIndex,
+        field: reducedFields.find((option) => option.value === field.value),
+        operator,
+        orIndex,
+        value: undefined,
+      })
+    },
+    [andIndex, operator, orIndex, reducedFields, updateCondition],
+  )
+
+  const handleOperatorChange = useCallback(
+    (operator: Option<Operator>) => {
+      updateCondition({
+        andIndex,
+        field: reducedField,
+        operator: operator.value,
+        orIndex,
+        value,
+      })
+    },
+    [andIndex, reducedField, orIndex, updateCondition, value],
+  )
+
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__wrap`}>
@@ -93,16 +120,7 @@ export const Condition: React.FC<Props> = (props) => {
             <ReactSelect
               disabled={disabled}
               isClearable={false}
-              onChange={(field: Option<string>) => {
-                setInternalValue(undefined)
-                updateCondition({
-                  andIndex,
-                  field: reducedFields.find((option) => option.value === field.value),
-                  operator,
-                  orIndex,
-                  value: '',
-                })
-              }}
+              onChange={handleFieldChange}
               options={reducedFields.filter((field) => !field.field.admin.disableListFilter)}
               value={
                 reducedField || {
@@ -115,15 +133,7 @@ export const Condition: React.FC<Props> = (props) => {
             <ReactSelect
               disabled={disabled}
               isClearable={false}
-              onChange={(operator: Option<Operator>) => {
-                updateCondition({
-                  andIndex,
-                  field: reducedField,
-                  operator: operator.value,
-                  orIndex,
-                  value,
-                })
-              }}
+              onChange={handleOperatorChange}
               options={reducedField?.operators}
               value={reducedField?.operators.find((o) => operator === o.value) || null}
             />

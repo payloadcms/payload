@@ -279,9 +279,6 @@ export interface CustomField {
    * Static field description.
    */
   descriptionAsString?: string | null;
-  /**
-   * Function description
-   */
   descriptionAsFunction?: string | null;
   descriptionAsComponent?: string | null;
   customSelectField?: string | null;

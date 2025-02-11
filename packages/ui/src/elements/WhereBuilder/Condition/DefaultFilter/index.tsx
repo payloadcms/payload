@@ -34,6 +34,7 @@ export const DefaultFilter: React.FC<Props> = ({
       <Select
         disabled={disabled}
         field={internalField.field as SelectFieldClient}
+        isClearable={!booleanSelect}
         onChange={onChange}
         operator={operator}
         options={options}

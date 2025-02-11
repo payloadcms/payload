@@ -13,8 +13,8 @@ import { Condition } from './Condition/index.js'
 import fieldTypes from './field-types.js'
 import { reduceFields } from './reduceFields.js'
 import { transformWhereQuery } from './transformWhereQuery.js'
-import './index.scss'
 import validateWhereQuery from './validateWhereQuery.js'
+import './index.scss'
 
 const baseClass = 'where-builder'
 
@@ -63,7 +63,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
       if (relation === 'and') {
         newConditions[orIndex].and.splice(andIndex, 0, {
           [field.value]: {
-            [defaultOperator]: '',
+            [defaultOperator]: undefined,
           },
         })
       } else {
@@ -71,7 +71,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
           and: [
             {
               [field.value]: {
-                [defaultOperator]: '',
+                [defaultOperator]: undefined,
               },
             },
           ],
@@ -84,17 +84,17 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   )
 
   const updateCondition: UpdateCondition = React.useCallback(
-    ({ andIndex, field, operator: incomingOperator, orIndex, value: valueArg = '' }) => {
+    ({ andIndex, field, operator: incomingOperator, orIndex, value: valueArg }) => {
       const existingRowCondition = conditions[orIndex].and[andIndex]
 
-      const defaultOperator = fieldTypes[field.field.type].operators[0].value
-      const operator = incomingOperator || defaultOperator
+      const defaults = fieldTypes[field.field.type]
+      const operator = incomingOperator || defaults.operators[0].value
 
       if (typeof existingRowCondition === 'object' && field.value) {
-        const value = valueArg ?? (operator ? existingRowCondition[operator] : '')
+        const value = valueArg ?? existingRowCondition?.[operator]
 
         const newRowCondition = {
-          [field.value]: operator ? { [operator]: value } : {},
+          [field.value]: { [operator]: value },
         }
 
         const newConditions = [...conditions]
