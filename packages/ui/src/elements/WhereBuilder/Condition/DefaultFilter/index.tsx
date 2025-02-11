@@ -1,4 +1,10 @@
-import type { Operator, Option, SelectFieldClient, TextFieldClient } from 'payload'
+import type {
+  Operator,
+  Option,
+  ResolvedFilterOptions,
+  SelectFieldClient,
+  TextFieldClient,
+} from 'payload'
 
 import React from 'react'
 
@@ -13,6 +19,7 @@ import { Text } from '../Text/index.js'
 type Props = {
   booleanSelect: boolean
   disabled: boolean
+  filterOptions: ResolvedFilterOptions
   internalField: ReducedField
   onChange: React.Dispatch<React.SetStateAction<string>>
   operator: Operator
@@ -23,6 +30,7 @@ type Props = {
 export const DefaultFilter: React.FC<Props> = ({
   booleanSelect,
   disabled,
+  filterOptions,
   internalField,
   onChange,
   operator,
@@ -73,6 +81,7 @@ export const DefaultFilter: React.FC<Props> = ({
         <RelationshipFilter
           disabled={disabled}
           field={internalField.field}
+          filterOptions={filterOptions}
           onChange={onChange}
           operator={operator}
           value={value}

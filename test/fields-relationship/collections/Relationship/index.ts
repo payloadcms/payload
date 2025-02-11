@@ -73,6 +73,22 @@ export const Relationship: CollectionConfig = {
       },
     },
     {
+      name: 'relationshipFilteredByField',
+      filterOptions: () => {
+        return {
+          filter: {
+            equals: 'Include me',
+          },
+        }
+      },
+      admin: {
+        description:
+          'This will filter the relationship options if the filter field in this document is set to "Include me"',
+      },
+      relationTo: slug,
+      type: 'relationship',
+    },
+    {
       name: 'relationshipFilteredAsync',
       filterOptions: (args: FilterOptionsProps<FieldsRelationship>) => {
         return {

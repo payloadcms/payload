@@ -136,21 +136,19 @@ Note: If `sortOptions` is not defined, the default sorting behavior of the Relat
 
 ## Filtering relationship options
 
-Options can be dynamically limited by supplying a [query constraint](/docs/queries/overview), which will be used both
-for validating input and filtering available relationships in the UI.
+Options can be dynamically limited by supplying a [query constraint](/docs/queries/overview), which will be used both for validating input and filtering available relationships in the UI.
 
-The `filterOptions` property can either be a `Where` query, or a function returning `true` to not filter, `false` to
-prevent all, or a `Where` query. When using a function, it will be
-called with an argument object with the following properties:
+The `filterOptions` property can either be a `Where` query, or a function returning `true` to not filter, `false` to prevent all, or a `Where` query. When using a function, it will be called with an argument object with the following properties:
 
-| Property      | Description                                                                                           |
-| ------------- | ----------------------------------------------------------------------------------------------------- |
-| `relationTo`  | The collection `slug` to filter against, limited to this field's `relationTo` property                |
-| `data`        | An object containing the full collection or global document currently being edited                    |
-| `siblingData` | An object containing document data that is scoped to only fields within the same parent of this field |
-| `id`          | The `id` of the current document being edited. `id` is `undefined` during the `create` operation      |
-| `user`        | An object containing the currently authenticated user                                                 |
-| `req`         | The Payload Request, which contains references to `payload`, `user`, `locale`, and more.              |
+| Property      | Description                                                                                                                                                                              |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `blockData`        | The data of the nearest parent block. Will be `undefined` if the field is not within a block or when called on a `Filter` component within the list view.                           |
+| `data`        | An object containing the full collection or global document currently being edited. Will be an empty object when called on a `Filter` component within the list view.                    |
+| `id`          | The `id` of the current document being edited. Will be `undefined` during the `create` operation or when called on a `Filter` component within the list view.                            |
+| `relationTo`  | The collection `slug` to filter against, limited to this field's `relationTo` property.                                                                                                  |
+| `req`         | The Payload Request, which contains references to `payload`, `user`, `locale`, and more.                                                                                                 |
+| `siblingData` | An object containing document data that is scoped to only fields within the same parent of this field. Will be an emprt object when called on a `Filter` component within the list view. |
+| `user`        | An object containing the currently authenticated user.                                                                                                                                   |
 
 ## Example
 

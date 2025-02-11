@@ -23,6 +23,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
   const {
     disabled,
     field: { admin: { isSortable } = {}, hasMany, relationTo },
+    filterOptions,
     onChange,
     value,
   } = props
@@ -102,6 +103,10 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
             [fieldToSearch]: true,
           },
           where,
+        }
+
+        if (filterOptions && filterOptions?.[relationSlug]) {
+          query.where.and.push(filterOptions[relationSlug])
         }
 
         if (debouncedSearch) {
