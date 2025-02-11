@@ -1,7 +1,7 @@
 ---
 title: Customizing Views
 label: Customizing Views
-order: 30
+order: 40
 desc:
 keywords:
 ---
@@ -68,7 +68,6 @@ export const MyCustomView: React.FC<AdminViewProps> = ({
     >
       <Gutter>
         <h1>Custom Default Root View</h1>
-
         <p>This view uses the Default Template.</p>
       </Gutter>
     </DefaultTemplate>
@@ -177,15 +176,15 @@ _For details on how to build Custom Views, including all available props, see [B
 
 <Banner type="warning">
   **Note:**
-  The `root` property will replace the _entire_ [Edit View](../custom-components/edit-view), including the title, tabs, etc., _as well as all nested [Document Views](#document-views)_, such as the API, Live Preview, and Version views. To replace only the Edit View precisely, use the `edit.default` key instead.
+  The `root` property will replace the _entire_ [Edit View](./edit-view), including the title, tabs, etc., _as well as all nested [Document Views](#document-views)_, such as the API, Live Preview, and Version views. To replace only the Edit View precisely, use the `edit.default` key instead.
 </Banner>
 
 The following options are available:
 
-| Property   | Description                                                                                                       |
-| ---------- | ----------------------------------------------------------------------------------------------------------------- |
-| `edit` | The Edit View is used to edit a single document for any given Collection. [More details](#document-views).     |
-| `list` | The List View is used to show a list of documents for any given Collection.                                         |
+| Property   | Description                                                                                                                                                    |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `edit` | The Edit View is used to edit a single document for any given Collection. It is comprised of many different sub-views. [More details](#document-views).            |
+| `list` | The List View is used to show a list of documents for any given Collection. [More details](#list-view).                                                            |
 
 <Banner type="success">
   **Note:**
@@ -233,9 +232,9 @@ _For details on how to build Custom Views, including all available props, see [B
 
 The following options are available:
 
-| Property   | Description                                                         |
-| ---------- | ------------------------------------------------------------------- |
-| `edit` | The Edit View is used to edit a single document for any given Global. [More details](#document-views). |
+| Property   | Description                                                                                                                                     |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `edit` | The Edit View is used to edit a single document for any given Global. It is comprised of many different sub-views. [More details](#document-views). |
 
 <Banner type="success">
   **Note:**
@@ -355,7 +354,7 @@ Your Custom Views will be provided with the following props:
 | Prop                      | Description                                                                                                                        |
 | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | `initPageResult`      | An object containing `req`, `payload`, `permissions`, etc.                                                                         |
-| `clientConfig`        | The Client Config object. [More details](../custom-components/overview#accessing-the-payload-config).                                        |
+| `clientConfig`        | The Client Config object. [More details](./overview#accessing-the-payload-config).                                        |
 | `importMap`           | The import map object.                                                                                                             |
 | `params`              | An object containing the [Dynamic Route Parameters](https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes). |
 | `searchParams`        | An object containing the [Search Parameters](https://developer.mozilla.org/docs/Learn/Common_questions/What_is_a_URL#parameters).  |

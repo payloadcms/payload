@@ -46,7 +46,7 @@ The following options are available:
 | `logout.Button`   | The button displayed in the sidebar that logs the user out.                                                                                                                                                         |
 | `Nav`             | Contains the sidebar / mobile menu in its entirety.                                                                                                                                                                 |
 | `providers`       | Custom [React Context](https://react.dev/learn/scaling-up-with-reducer-and-context) providers that will wrap the entire Admin Panel. [More details](./custom-providers).                                       |
-| `views`           | Override or create new views within the Admin Panel. [More details](../custom-components/custom-views).                                                                                                                                 |
+| `views`           | Override or create new views within the Admin Panel. [More details](./custom-views).                                                                                                                                 |
 
 _For details on how to build Custom Components, see [Building Custom Components](./overview#building-custom-components)._
 
@@ -97,7 +97,7 @@ export default function MyCustomAction() {
 
 ### beforeDashboard
 
-The `beforeDashboard` property allows you to inject Custom Components into the built-in Dashboard, before the default dashboard contents. This is useful for adding additional information or functionality to the Dashboard without replacing the entire view.
+The `beforeDashboard` property allows you to inject Custom Components into the built-in Dashboard, before the default dashboard contents.
 
 To add `beforeDashboard` components, use the `admin.components.beforeDashboard` property in your Payload Config:
 
@@ -163,7 +163,7 @@ export default function MyAfterDashboardComponent() {
 
 ### beforeLogin
 
-The `beforeLogin` property allows you to inject Custom Components into the built-in Login view, before the default login form. This is useful for adding additional information or functionality to the Login view without replacing the entire view.
+The `beforeLogin` property allows you to inject Custom Components into the built-in Login view, before the default login form.
 
 To add `beforeLogin` components, use the `admin.components.beforeLogin` property in your Payload Config:
 
@@ -229,7 +229,7 @@ export default function MyAfterLoginComponent() {
 
 ### beforeNavLinks
 
-The `beforeNavLinks` property allows you to inject Custom Components into the built-in [Nav Component](#nav), _before_ the links themselves. This is useful for adding additional information or functionality to the nav without replacing the entire nav component.
+The `beforeNavLinks` property allows you to inject Custom Components into the built-in [Nav Component](#nav), _before_ the links themselves.
 
 To add `beforeNavLinks` components, use the `admin.components.beforeNavLinks` property in your Payload Config:
 
@@ -402,7 +402,7 @@ export default function MyCustomLogo() {
 
 ### Header
 
-The `header` property allows you to inject Custom Components above the Payload header. This is useful for adding additional information or functionality to your app without replacing the entire header.
+The `header` property allows you to inject Custom Components above the Payload header.
 
 Examples of a custom header components might include an announcements banner, a notifications bar, or anything else you'd like to display at the top of the Admin Panel in a prominent location.
 

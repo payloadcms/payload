@@ -148,10 +148,10 @@ The following options are available:
 
 #### General
 
-| Option                           | Description                                                                                                            |
+| Option                         | Description                                                                                                            |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| `elements`                 | Override or create new elements within the Edit View. [More details](#edit-view-options).                                |
-| `views`                    | Override or create new views within the Admin Panel. [More details](../custom-components/custom-views).                                     |
+| `elements`                 | Override or create new elements within the Edit View. [More details](#edit-view-options).                                  |
+| `views`                    | Override or create new views within the Admin Panel. [More details](../custom-components/custom-views).                    |
 
 #### Edit View Options
 
@@ -172,12 +172,12 @@ export const MyGlobal: SanitizedGlobalConfig = {
 
 The following options are available:
 
-| Option                           | Description                                                                                                            |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| `SaveButton`      | Replace the default Save Button with a Custom Component. [Drafts](../versions/drafts) must be disabled. [More details](../custom-components/edit-view#save-button). |
-| `SaveDraftButton` | Replace the default Save Draft Button with a Custom Component. [Drafts](../versions/drafts) must be enabled and autosave must be disabled. [More details](../custom-components/edit-view#save-draft-button). |
-| `PublishButton`   | Replace the default Publish Button with a Custom Component. [Drafts](../versions/drafts) must be enabled. [More details](../custom-components/edit-view#publish-button). |
-| `PreviewButton`   | Replace the default Preview Button with a Custom Component. [Preview](../admin/preview) must be enabled. [More details](../custom-components/edit-view#preview-button). |
+| Option                         | Description                                                                                                                                                                                                       |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SaveButton`      | Replace the default Save Button with a Custom Component. [Drafts](../versions/drafts) must be disabled. [More details](../custom-components/edit-view#save-button).                                                            |
+| `SaveDraftButton` | Replace the default Save Draft Button with a Custom Component. [Drafts](../versions/drafts) must be enabled and autosave must be disabled. [More details](../custom-components/edit-view#save-draft-button).                   |
+| `PublishButton`   | Replace the default Publish Button with a Custom Component. [Drafts](../versions/drafts) must be enabled. [More details](../custom-components/edit-view#publish-button).                                                       |
+| `PreviewButton`   | Replace the default Preview Button with a Custom Component. [Preview](../admin/preview) must be enabled. [More details](../custom-components/edit-view#preview-button).                                                        |
 
 <Banner type="success">
   **Note:**
@@ -192,9 +192,9 @@ You can also pass an object to the global's `graphQL` property, which allows you
 
 | Option                 | Description                                                                         |
 | ---------------------- | ----------------------------------------------------------------------------------- |
-| `name`             | Override the name that will be used in GraphQL schema generation.                   |
-| `disableQueries`   | Disable all GraphQL queries that correspond to this global by passing `true`.       |
-| `disableMutations` | Disable all GraphQL mutations that correspond to this global by passing `true`.     |
+| `name`             | Override the name that will be used in GraphQL schema generation.                       |
+| `disableQueries`   | Disable all GraphQL queries that correspond to this global by passing `true`.           |
+| `disableMutations` | Disable all GraphQL mutations that correspond to this global by passing `true`.         |
 
 ## TypeScript
 

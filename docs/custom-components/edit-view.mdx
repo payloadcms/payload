@@ -1,16 +1,65 @@
 ---
 title: Swap in your own React components
 label: Edit View
-order: 40
+order: 50
 desc:
 keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-The Edit View is where users interact with individual [Collection](../collections/overview) and [Global](../globals/overview) Documents. This is where they can view, edit, and save their content.
+The Edit View is where users interact with individual [Collection](../collections/overview) and [Global](../globals/overview) Documents within the [Admin Panel](../admin/overview). This is where they can view, edit, and save their content.
 
-## Collections
+The Edit View contains the form in which submits the data to the server. It also contains buttons for saving, publishing, and previewing the document, all of which can be customized.
 
-In addition to swapping out the entire Edit View with a [Custom View](../custom-components/custom-views), you can also override individual components. This allows you to customize the Edit View parts of the Edit View without swapping out the entire view for your own.
+<Banner type="info">
+  **Note:**
+  The Edit View is one of many [Document Views](./custom-views#document-views) in the Payload Admin Panel. Each Document View is responsible for a different aspect of the interacting with Documents. The Edit View is specifically designed for editing and saving Document data.
+</Banner>
+
+## Custom Edit View
+
+To swap out the entire Edit View with a [Custom View](./custom-views), use the `admin.components.views.edit` property in your [Payload Config](../configuration/overview):
+
+```tsx
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  admin: {
+    components: {
+      views: {
+        // highlight-start
+        edit: '/path/to/MyCustomEditView',
+        // highlight-end
+      },
+    },
+  },
+})
+```
+
+Here's an example of a simple Edit View component:
+
+```tsx
+import React from 'react'
+
+const MyCustomEditView: React.FC = () => {
+  return (
+    <div>
+      <p>This is a custom Edit View.</p>
+    </div>
+  )
+}
+```
+
+## Custom Components
+
+In addition to swapping out the entire Edit View with a [Custom View](./custom-views), you can also override individual components. This allows you to customize specific parts of the Edit View without swapping out the entire view for your own.
+
+<Banner type="warning">
+  **Note:**
+  Collection and Globals are keyed to a different property in the `admin.components` object have slightly different options. Be sure to use the correct key for the type of document you are working with.
+</Banner>
+
+#### Collections
 
 To override Edit View components for a Collection, use the `admin.components.edit` property in your [Collection Config](../configuration/collections):
 
@@ -21,9 +70,11 @@ export const MyCollection: CollectionConfig = {
   // ...
   admin: {
     components: {
-      edit: { // highlight-line
+      // highlight-start
+      edit: {
         // ...
       },
+      // highlight-end
     },
   },
 }
@@ -33,13 +84,13 @@ The following options are available:
 
 | Path                  | Description                                                                                                                                                                                                         |
 |-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `SaveButton`         | A button that saves the current document.                                                                                                                                  |
-| `SaveDraftButton`    | A button that saves the current document as a draft.                                                                                                                                  |
-| `PublishButton`      | A button that publishes the current document.                                                                                                                                  |
-| `PreviewButton`      | A button that previews the current document.                                                                                                                                  |
-| `Upload`             | A file upload component.                                                                                                                                  |
+| `SaveButton`         | A button that saves the current document. [More details](#SaveButton).                                                                                                                                  |
+| `SaveDraftButton`    | A button that saves the current document as a draft. [More details](#SaveDraftButton).                                                                                                                                  |
+| `PublishButton`      | A button that publishes the current document. [More details](#PublishButton).                                                                                                                                  |
+| `PreviewButton`      | A button that previews the current document. [More details](#PreviewButton).                                                                                                                                  |
+| `Upload`             | A file upload component. [More details](#Upload).                                                                                                                                  |
 
-## Globals
+#### Globals
 
 To override Edit View components for Globals, use the `admin.components.elements` property in your [Global Config](../configuration/globals):
 
@@ -62,21 +113,167 @@ The following options are available:
 
 | Path                  | Description                                                                                                                                                                                                         |
 |-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `SaveButton`         | A button that saves the current document.                                                                                                                                  |
-| `SaveDraftButton`    | A button that saves the current document as a draft.                                                                                                                                  |
-| `PublishButton`      | A button that publishes the current document.                                                                                                                                  |
-| `PreviewButton`      | A button that previews the current document.                                                                                                                                  |
-
-
-## Examples
+| `SaveButton`         | A button that saves the current document. [More details](#SaveButton).                                                                                                                                  |
+| `SaveDraftButton`    | A button that saves the current document as a draft. [More details](#SaveDraftButton).                                                                                                                                  |
+| `PublishButton`      | A button that publishes the current document. [More details](#PublishButton).                                                                                                                                  |
+| `PreviewButton`      | A button that previews the current document. [More details](#PreviewButton).                                                                                                                                  |
 
 ### SaveButton
 
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const MyCollection: CollectionConfig = {
+  // ...
+  admin: {
+    components: {
+      // highlight-start
+      afterListTable: [
+        '/path/to/MySaveButtonComponent',
+      ],
+      // highlight-end
+    },
+  },
+}
+```
+
+Here's an example of a simple `SaveButton` component:
+
+```tsx
+import React from 'react'
+
+const MySaveButtonComponent: React.FC = () => {
+  return (
+    <button>Save</button>
+  )
+}
+```
+
 ### SaveDraftButton
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const MyCollection: CollectionConfig = {
+  // ...
+  admin: {
+    components: {
+      // highlight-start
+      afterListTable: [
+        '/path/to/MySaveDraftComponent',
+      ],
+      // highlight-end
+    },
+  },
+}
+```
+
+Here's an example of a simple `SaveDraftButton` component:
+
+```tsx
+import React from 'react'
+
+const MySaveDraftComponent: React.FC = () => {
+  return (
+    <button>Save Draft</button>
+  )
+}
+```
 
 ### PublishButton
 
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const MyCollection: CollectionConfig = {
+  // ...
+  admin: {
+    components: {
+      // highlight-start
+      afterListTable: [
+        '/path/to/MyPublishButtonComponent',
+      ],
+      // highlight-end
+    },
+  },
+}
+```
+
+Here's an example of a simple `PublishButton` component:
+
+```tsx
+import React from 'react'
+
+const MyPublishButtonComponent: React.FC = () => {
+  return (
+    <button>Publish</button>
+  )
+}
+```
+
 ### PreviewButton
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const MyCollection: CollectionConfig = {
+  // ...
+  admin: {
+    components: {
+      // highlight-start
+      afterListTable: [
+        '/path/to/MyPreviewComponent',
+      ],
+      // highlight-end
+    },
+  },
+}
+```
+
+Here's an example of a simple `PreviewButton` component:
+
+```tsx
+import React from 'react'
+
+const MyPreviewComponent: React.FC = () => {
+  return (
+    <button>Preview</button>
+  )
+}
+```
 
 ### Upload
 
+<Banner type="warning">
+  **Note:**
+  The Upload component is only available for Collections.
+</Banner>
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const MyCollection: CollectionConfig = {
+  // ...
+  admin: {
+    components: {
+      // highlight-start
+      afterListTable: [
+        '/path/to/MyUploadComponent',
+      ],
+      // highlight-end
+    },
+  },
+}
+```
+
+Here's an example of a simple `Upload` component:
+
+```tsx
+import React from 'react'
+
+const MyUploadComponent: React.FC = () => {
+  return (
+    <input type="file" />
+  )
+}
+```

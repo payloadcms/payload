@@ -1,22 +1,58 @@
 ---
 title: Swap in your own React components
 label: List View
-order: 50
+order: 60
 desc:
 keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-The List View is where users interact with a list of Documents within a [Collection](../collections/overview). This is where they can view, sort, filter, and paginate their documents to find exactly what they're looking for. This is also where users can perform bulk operations on multiple documents at once, such as deleting, editing, or publishing them.
+The List View is where users interact with a list of [Collection](../collections/overview) Documents within the [Admin Panel](../admin/overview). This is where they can view, sort, filter, and paginate their documents to find exactly what they're looking for. This is also where users can perform bulk operations on multiple documents at once, such as deleting, editing, or publishing them.
 
 The List View can be injected with a number of [Custom Components](./overview) to add additional functionality or presentational elements, or it can be swapped out in its entirety for a [Custom View](./custom-views).
 
+<Banner type="info">
+  **Note:**
+  The List View only applies to Collections. Globals do not have a List View as they are treated as singletons.
+</Banner>
+
 ## Custom List View
 
-```tsx
+To swap out the entire List View with a [Custom View](./custom-views), use the `admin.components.views.list` property in your [Payload Config](../configuration/overview):
 
+```tsx
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  admin: {
+    components: {
+      views: {
+        // highlight-start
+        list: '/path/to/MyCustomListView',
+        // highlight-end
+      },
+    },
+  },
+})
+```
+
+Here's an example of a simple List View component:
+
+```tsx
+import React from 'react'
+
+const MyCustomListView: React.FC = () => {
+  return (
+    <div>
+      <p>This is a custom List View.</p>
+    </div>
+  )
+}
 ```
 
 ## Custom Components
+
+In addition to swapping out the entire List View with a [Custom View](./custom-views), you can also override individual components. This allows you to customize specific parts of the List View without swapping out the entire view for your own.
 
 To override List View components for a Collection, use the `admin.components` property in your [Collection Config](../configuration/collections):
 
@@ -37,17 +73,17 @@ export const MyCollection: CollectionConfig = {
 
 The following options are available:
 
-| Path                  | Description                                                                                                                                                                                                         |
-|-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `beforeList`         | A button that saves the current document.                                                                                                                                  |
-| `beforeListTable`    | A button that saves the current document as a draft.                                                                                                                                  |
-| `afterList`      | A button that publishes the current document.                                                                                                                                  |
-| `afterListTable`      | A button that previews the current document.                                                                                                                                  |
-| `Description`             | A file upload component.                                                                                                                                  |
+| Path                  | Description                                                                                                                  |
+|-----------------------|----------------------------------------------------------------------------------------------------------------------------- |
+| `beforeList`          | An array of custom components to inject before the list of documents in the List View. [More details](#beforeList).          |
+| `beforeListTable`     | An array of custom components to inject before the table of documents in the List View. [More details](#beforeListTable).    |
+| `afterList`           | An array of custom components to inject after the list of documents in the List View. [More details](#afterList).            |
+| `afterListTable`      | An array of custom components to inject after the table of documents in the List View. [More details](#afterListTable).      |
+| `Description`         | A component to render a description of the Collection. [More details](#Description).                                         |
 
-## beforeList
+### beforeList
 
-The `beforeList` property allows you to inject custom components before the list of documents in the List View. This is useful for adding additional information or functionality to the List View without replacing the entire view.
+The `beforeList` property allows you to inject custom components before the list of documents in the List View.
 
 To add `beforeList` components, use the `components.beforeList` property in your Collection Config:
 
@@ -58,18 +94,174 @@ export const MyCollection: CollectionConfig = {
   // ...
   admin: {
     components: {
+      // highlight-start
       beforeList: [
-        // Add your custom components here
+        '/path/to/MyBeforeListComponent',
       ],
+      // highlight-end
     },
   },
 }
 ```
 
-## beforeListTable
+Here's an example of a simple `beforeList` component:
 
-## afterList
+```tsx
+import React from 'react'
 
-## afterListTable
+const MyBeforeListComponent: React.FC = () => {
+  return (
+    <div>
+      <p>This is a custom component that appears before the list of documents.</p>
+    </div>
+  )
+}
+```
 
-## Description
+### beforeListTable
+
+The `beforeListTable` property allows you to inject custom components before the table of documents in the List View.
+
+To add `beforeListTable` components, use the `components.beforeListTable` property in your Collection Config:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const MyCollection: CollectionConfig = {
+  // ...
+  admin: {
+    components: {
+      // highlight-start
+      beforeListTable: [
+        '/path/to/MyBeforeListTableComponent',
+      ],
+      // highlight-end
+    },
+  },
+}
+```
+
+Here's an example of a simple `beforeListTable` component:
+
+```tsx
+import React from 'react'
+
+const MyBeforeListTableComponent: React.FC = () => {
+  return (
+    <div>
+      <p>This is a custom component that appears before the table of documents.</p>
+    </div>
+  )
+}
+```
+
+### afterList
+
+The `afterList` property allows you to inject custom components after the list of documents in the List View.
+
+To add `afterList` components, use the `components.afterList` property in your Collection Config:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const MyCollection: CollectionConfig = {
+  // ...
+  admin: {
+    components: {
+      // highlight-start
+      afterList: [
+        '/path/to/MyAfterListComponent',
+      ],
+      // highlight-end
+    },
+  },
+}
+```
+
+Here's an example of a simple `afterList` component:
+
+```tsx
+import React from 'react'
+
+const MyAfterListComponent: React.FC = () => {
+  return (
+    <div>
+      <p>This is a custom component that appears after the list of documents.</p>
+    </div>
+  )
+}
+```
+
+### afterListTable
+
+The `afterListTable` property allows you to inject custom components after the table of documents in the List View.
+
+To add `afterListTable` components, use the `components.afterListTable` property in your Collection Config:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const MyCollection: CollectionConfig = {
+  // ...
+  admin: {
+    components: {
+      // highlight-start
+      afterListTable: [
+        '/path/to/MyAfterListTableComponent',
+      ],
+      // highlight-end
+    },
+  },
+}
+```
+
+Here's an example of a simple `afterListTable` component:
+
+```tsx
+import React from 'react'
+
+const MyAfterListTableComponent: React.FC = () => {
+  return (
+    <div>
+      <p>This is a custom component that appears after the table of documents.</p>
+    </div>
+  )
+}
+```
+
+### Description
+
+The `Description` property allows you to render a custom description of the Collection in the List View.
+
+To add a `Description` component, use the `components.Description` property in your Collection Config:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const MyCollection: CollectionConfig = {
+  // ...
+  admin: {
+    components: {
+      // highlight-start
+      Description: [
+        '/path/to/MyDescriptionComponent',
+      ],
+      // highlight-end
+    },
+  },
+}
+```
+
+Here's an example of a simple `Description` component:
+
+```tsx
+import React from 'react'
+
+const MyDescriptionComponent: React.FC = () => {
+  return (
+    <div>
+      <p>This is a custom description of the Collection.</p>
+    </div>
+  )
+}
+```
