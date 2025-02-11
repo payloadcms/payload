@@ -43,7 +43,7 @@ export function getFieldsForRowComparison({
     if (versionRow?.blockType === comparisonRow?.blockType) {
       const matchedBlock: ClientBlock =
         config?.blocksMap?.[versionRow?.blockType] ??
-        ((('blocks' in field &&
+        (((('blocks' in field || 'blockReferences' in field) &&
           (field.blockReferences ?? field.blocks)?.find(
             (block) => typeof block !== 'string' && block.slug === versionRow?.blockType,
           )) || {
@@ -57,7 +57,7 @@ export function getFieldsForRowComparison({
     } else {
       const matchedVersionBlock =
         config?.blocksMap?.[versionRow?.blockType] ??
-        ((('blocks' in field &&
+        (((('blocks' in field || 'blockReferences' in field) &&
           (field.blockReferences ?? field.blocks)?.find(
             (block) => typeof block !== 'string' && block.slug === versionRow?.blockType,
           )) || {
@@ -66,7 +66,7 @@ export function getFieldsForRowComparison({
 
       const matchedComparisonBlock =
         config?.blocksMap?.[comparisonRow?.blockType] ??
-        ((('blocks' in field &&
+        (((('blocks' in field || 'blockReferences' in field) &&
           (field.blockReferences ?? field.blocks)?.find(
             (block) => typeof block !== 'string' && block.slug === comparisonRow?.blockType,
           )) || {

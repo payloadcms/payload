@@ -1,9 +1,9 @@
 import type {
   FlattenedBlock,
+  FlattenedBlocksField,
   FlattenedField,
   Payload,
   RelationshipField,
-  SanitizedConfig,
 } from 'payload'
 
 import { Types } from 'mongoose'
@@ -53,8 +53,9 @@ const getFieldFromSegments = ({
   payload: Payload
   segments: string[]
 }) => {
-  if ('blocks' in field) {
-    for (const _block of field.blockReferences ?? field.blocks) {
+  if ('blocks' in field || 'blockReferences' in field) {
+    const _field: FlattenedBlocksField = field as FlattenedBlocksField
+    for (const _block of _field.blockReferences ?? _field.blocks) {
       const block: FlattenedBlock = typeof _block === 'string' ? payload.blocks[_block] : _block
       const field = getFieldFromSegments({ field: block, payload, segments })
       if (field) {
