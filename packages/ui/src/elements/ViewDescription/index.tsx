@@ -23,7 +23,7 @@ export const ViewDescription: React.FC<ViewDescriptionProps> = (props) => {
   const { description } = props
 
   if (description) {
-    return <div>{getTranslation(description, i18n)}</div>
+    return <div className="custom-view-description">{getTranslation(description, i18n)}</div>
   }
 
   return null

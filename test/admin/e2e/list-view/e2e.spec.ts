@@ -112,7 +112,7 @@ describe('List View', () => {
     test('should render static collection descriptions', async () => {
       await page.goto(postsUrl.list)
       await expect(
-        page.locator('.view-description', {
+        page.locator('.custom-view-description', {
           hasText: exactText('This is a custom collection description.'),
         }),
       ).toBeVisible()
@@ -121,7 +121,7 @@ describe('List View', () => {
     test('should render dynamic collection description components', async () => {
       await page.goto(customViewsUrl.list)
       await expect(
-        page.locator('.view-description', {
+        page.locator('.custom-view-description', {
           hasText: exactText('This is a custom view description component.'),
         }),
       ).toBeVisible()
