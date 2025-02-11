@@ -158,7 +158,6 @@ export default buildConfigWithDefaults({
     DisableDuplicate,
     BaseListFilter,
     with300Documents,
-    Orders,
   ],
   globals: [
     GlobalHidden,

@@ -53,8 +53,8 @@ export const Select: React.FC<Props> = ({
 
   const onSelect = React.useCallback(
     (selectedOption) => {
-      console.log(selectedOption)
       let newValue
+
       if (!selectedOption) {
         newValue = null
       } else if (isMulti) {
