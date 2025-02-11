@@ -100,6 +100,7 @@ export const traverseFields = async ({
         siblingData,
         siblingDoc,
         siblingDocWithLocales,
+        siblingFields: fields,
         skipValidation,
       }),
     )

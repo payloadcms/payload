@@ -18,7 +18,9 @@ const validateWhereQuery = (whereQuery): whereQuery is Where => {
           if (typeof andQuery !== 'object') {
             return false
           }
+
           const andKeys = Object.keys(andQuery)
+
           // If there are no keys, it's not a valid WhereField.
           if (andKeys.length === 0) {
             return false

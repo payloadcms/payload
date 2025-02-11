@@ -370,7 +370,10 @@ export const getTableColumnFromPath = ({
           const {
             newAliasTable: aliasRelationshipTable,
             newAliasTableName: aliasRelationshipTableName,
-          } = getTableAlias({ adapter, tableName: relationTableName })
+          } = getTableAlias({
+            adapter,
+            tableName: relationTableName,
+          })
 
           if (selectLocale && field.localized && adapter.payload.config.localization) {
             selectFields._locale = aliasRelationshipTable.locale
@@ -387,17 +390,21 @@ export const getTableColumnFromPath = ({
               conditions.push(eq(aliasRelationshipTable.locale, locale))
             }
 
-            joins.push({
+            addJoinTable({
               condition: and(...conditions),
+              joins,
+              queryPath: `${constraintPath}.${field.name}`,
               table: aliasRelationshipTable,
             })
           } else {
             // Join in the relationships table
-            joins.push({
+            addJoinTable({
               condition: and(
                 eq((aliasTable || adapter.tables[rootTableName]).id, aliasRelationshipTable.parent),
                 like(aliasRelationshipTable.path, `${constraintPath}${field.name}`),
               ),
+              joins,
+              queryPath: `${constraintPath}.${field.name}`,
               table: aliasRelationshipTable,
             })
           }

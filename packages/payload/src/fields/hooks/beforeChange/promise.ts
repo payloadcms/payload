@@ -39,6 +39,7 @@ type Args = {
   siblingData: JsonObject
   siblingDoc: JsonObject
   siblingDocWithLocales?: JsonObject
+  siblingFields?: (Field | TabAsField)[]
   skipValidation: boolean
 }
 
@@ -71,6 +72,7 @@ export const promise = async ({
   siblingData,
   siblingDoc,
   siblingDocWithLocales,
+  siblingFields,
   skipValidation,
 }: Args): Promise<void> => {
   const { indexPath, path, schemaPath } = getFieldPaths({
@@ -123,6 +125,7 @@ export const promise = async ({
           schemaPath: schemaPathSegments,
           siblingData,
           siblingDocWithLocales,
+          siblingFields,
           value: siblingData[field.name],
         })
 

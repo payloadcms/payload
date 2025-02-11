@@ -51,6 +51,7 @@ type Args = {
   selectMode?: SelectMode
   showHiddenFields: boolean
   siblingDoc: JsonObject
+  siblingFields?: (Field | TabAsField)[]
   triggerAccessControl?: boolean
   triggerHooks?: boolean
 }
@@ -90,6 +91,7 @@ export const promise = async ({
   selectMode,
   showHiddenFields,
   siblingDoc,
+  siblingFields,
   triggerAccessControl = true,
   triggerHooks = true,
 }: Args): Promise<void> => {
@@ -260,6 +262,7 @@ export const promise = async ({
                 schemaPath: schemaPathSegments,
                 showHiddenFields,
                 siblingData: siblingDoc,
+                siblingFields,
                 value,
               })
 
@@ -291,6 +294,7 @@ export const promise = async ({
             schemaPath: schemaPathSegments,
             showHiddenFields,
             siblingData: siblingDoc,
+            siblingFields,
             value: siblingDoc[field.name],
           })
 

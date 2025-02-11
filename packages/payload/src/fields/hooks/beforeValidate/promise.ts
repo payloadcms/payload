@@ -40,6 +40,7 @@ type Args<T> = {
    * The original siblingData (not modified by any hooks)
    */
   siblingDoc: JsonObject
+  siblingFields?: (Field | TabAsField)[]
 }
 
 // This function is responsible for the following actions, in order:
@@ -67,6 +68,7 @@ export const promise = async <T>({
   req,
   siblingData,
   siblingDoc,
+  siblingFields,
 }: Args<T>): Promise<void> => {
   const { indexPath, path, schemaPath } = getFieldPaths({
     field,
@@ -291,6 +293,7 @@ export const promise = async <T>({
           req,
           schemaPath: schemaPathSegments,
           siblingData,
+          siblingFields,
           value: siblingData[field.name],
         })
 

@@ -25,6 +25,7 @@ type Args<T> = {
   parentSchemaPath: string
   req: PayloadRequest
   siblingDoc: JsonObject
+  siblingFields?: (Field | TabAsField)[]
 }
 
 export const promise = async <T>({
@@ -41,6 +42,7 @@ export const promise = async <T>({
   parentSchemaPath,
   req,
   siblingDoc,
+  siblingFields,
 }: Args<T>): Promise<void> => {
   const { indexPath, path, schemaPath } = getFieldPaths({
     field,
@@ -82,6 +84,7 @@ export const promise = async <T>({
               schemaPath: schemaPathSegments,
               siblingData: siblingDoc,
               siblingDocWithLocales: siblingDoc,
+              siblingFields,
               value: siblingDoc[field.name]?.[locale],
             }
 
@@ -116,6 +119,7 @@ export const promise = async <T>({
           schemaPath: schemaPathSegments,
           siblingData: siblingDoc,
           siblingDocWithLocales: siblingDoc,
+          siblingFields,
           value: siblingDoc[field.name],
         }
 
