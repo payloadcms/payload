@@ -96,7 +96,6 @@ export const traverseFields = ({
         global,
         locale,
         overrideAccess,
-        parentFields: fields,
         parentIndexPath,
         parentPath,
         parentSchemaPath,

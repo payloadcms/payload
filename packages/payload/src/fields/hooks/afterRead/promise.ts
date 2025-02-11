@@ -41,7 +41,6 @@ type Args = {
   global: null | SanitizedGlobalConfig
   locale: null | string
   overrideAccess: boolean
-  parentFields?: (Field | TabAsField)[]
   parentIndexPath: string
   parentPath: string
   parentSchemaPath: string
@@ -81,7 +80,6 @@ export const promise = async ({
   global,
   locale,
   overrideAccess,
-  parentFields,
   parentIndexPath,
   parentPath,
   parentSchemaPath,
@@ -262,7 +260,6 @@ export const promise = async ({
                 schemaPath: schemaPathSegments,
                 showHiddenFields,
                 siblingData: siblingDoc,
-                siblingFields: parentFields,
                 value,
               })
 
@@ -294,7 +291,6 @@ export const promise = async ({
             schemaPath: schemaPathSegments,
             showHiddenFields,
             siblingData: siblingDoc,
-            siblingFields: parentFields,
             value: siblingDoc[field.name],
           })
 
