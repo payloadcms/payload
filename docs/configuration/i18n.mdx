@@ -172,7 +172,11 @@ export const Articles: CollectionConfig = {
 }
 ```
 
-## Node
+## Changing Languages
+
+Users can change their preferred language in their account settings or by otherwise manipulating their [User Preferences](../admin/preferences).
+
+## Node.js#node
 
 Payload's backend sets the language on incoming requests before they are handled. This allows backend validation to return error messages in the user's own language or system generated emails to be sent using the correct translation. You can make HTTP requests with the `accept-language` header and Payload will use that language.
 
@@ -180,7 +184,7 @@ Anywhere in your Payload app that you have access to the `req` object, you can a
 
 ## TypeScript
 
-In order to use custom translations in your project, you need to provide the types for the translations.
+In order to use [Custom Translations](#custom-translations) in your project, you need to provide the types for the translations.
 
 Here we create a shareable translations object. We will import this in both our custom components and in our Payload config.
 
@@ -259,4 +263,3 @@ const field: Field = {
   ) => t('fields:addLabel'),
 }
 ```
-
