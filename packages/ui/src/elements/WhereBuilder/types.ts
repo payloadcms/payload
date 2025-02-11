@@ -9,7 +9,7 @@ export type WhereBuilderProps = {
 
 export type ReducedField = {
   field: ClientField
-  label: string
+  label: React.ReactNode
   operators: {
     label: string
     value: Operator
