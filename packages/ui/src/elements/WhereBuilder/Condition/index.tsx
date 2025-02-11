@@ -7,7 +7,7 @@ export type Props = {
   readonly addCondition: AddCondition
   readonly andIndex: number
   readonly fieldName: string
-  readonly filterOptions: Where
+  readonly filterOptions: ResolvedFilterOptions
   readonly operator: Operator
   readonly orIndex: number
   readonly reducedFields: ReducedField[]
@@ -17,7 +17,7 @@ export type Props = {
   readonly value: string
 }
 
-import type { Operator, Option as PayloadOption, Where } from 'payload'
+import type { Operator, Option as PayloadOption, ResolvedFilterOptions } from 'payload'
 
 import type { Option } from '../../ReactSelect/index.js'
 

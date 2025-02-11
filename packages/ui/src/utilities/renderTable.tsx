@@ -51,49 +51,49 @@ export const renderFilters = (
     new Map() as Map<string, React.ReactNode>,
   )
 
-export const resolveFilterOptions = async ({
-  fields,
-  relationTo,
-  req,
-  user,
-}: { fields: Field[] } & MarkOptional<
-  FilterOptionsProps,
-  'blockData' | 'data' | 'id' | 'siblingData'
->): Promise<Map<string, Where>> => {
-  const acc = new Map<string, Where>()
+// export const resolveFilterOptions = async ({
+//   fields,
+//   relationTo,
+//   req,
+//   user,
+// }: { fields: Field[] } & MarkOptional<
+//   FilterOptionsProps,
+//   'blockData' | 'data' | 'id' | 'siblingData'
+// >): Promise<Map<string, Where>> => {
+//   const acc = new Map<string, Where>()
 
-  for (const field of fields) {
-    if (fieldIsHiddenOrDisabled(field)) {
-      continue
-    }
+//   for (const field of fields) {
+//     if (fieldIsHiddenOrDisabled(field)) {
+//       continue
+//     }
 
-    if ('name' in field && 'filterOptions' in field && field.filterOptions) {
-      let resolvedFilterOption = {} as Where
+//     if ('name' in field && 'filterOptions' in field && field.filterOptions) {
+//       let resolvedFilterOption = {} as Where
 
-      if (typeof field.filterOptions === 'function') {
-        const result = await field.filterOptions({
-          id: undefined,
-          blockData: undefined,
-          data: {}, // use empty object to prevent breaking queries when accessing properties of data
-          relationTo,
-          req,
-          siblingData: {}, // use empty object to prevent breaking queries when accessing properties of siblingData
-          user,
-        })
+//       if (typeof field.filterOptions === 'function') {
+//         const result = await field.filterOptions({
+//           id: undefined,
+//           blockData: undefined,
+//           data: {}, // use empty object to prevent breaking queries when accessing properties of data
+//           relationTo,
+//           req,
+//           siblingData: {}, // use empty object to prevent breaking queries when accessing properties of siblingData
+//           user,
+//         })
 
-        if (result && typeof result === 'object') {
-          resolvedFilterOption = result
-        }
-      } else {
-        resolvedFilterOption = field.filterOptions
-      }
+//         if (result && typeof result === 'object') {
+//           resolvedFilterOption = result
+//         }
+//       } else {
+//         resolvedFilterOption = field.filterOptions
+//       }
 
-      acc.set(field.name, resolvedFilterOption)
-    }
-  }
+//       acc.set(field.name, resolvedFilterOption)
+//     }
+//   }
 
-  return acc
-}
+//   return acc
+// }
 
 export const renderTable = ({
   clientCollectionConfig,

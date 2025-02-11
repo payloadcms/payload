@@ -105,8 +105,8 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
           where,
         }
 
-        if (filterOptions) {
-          query.where.and.push(filterOptions)
+        if (filterOptions && filterOptions?.[relationSlug]) {
+          query.where.and.push(filterOptions[relationSlug])
         }
 
         if (debouncedSearch) {

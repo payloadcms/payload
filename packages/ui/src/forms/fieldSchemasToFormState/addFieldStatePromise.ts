@@ -27,7 +27,7 @@ import {
 
 import type { RenderFieldMethod } from './types.js'
 
-import { getFilterOptionsQuery } from './getFilterOptionsQuery.js'
+import { resolveFilterOptions } from '../../utilities/resolveFilterOptions.js'
 import { iterateFields } from './iterateFields.js'
 
 const ObjectId = (ObjectIdImport.default ||
@@ -578,7 +578,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           }
 
           if (typeof field.filterOptions === 'function') {
-            const query = await getFilterOptionsQuery(field.filterOptions, {
+            const query = await resolveFilterOptions(field.filterOptions, {
               id,
               blockData,
               data: fullData,

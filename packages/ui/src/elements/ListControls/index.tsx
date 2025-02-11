@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, Where } from 'payload'
+import type { ClientCollectionConfig, ResolvedFilterOptions, Where } from 'payload'
 
 import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
@@ -37,7 +37,7 @@ export type ListControlsProps = {
   readonly handleSortChange?: (sort: string) => void
   readonly handleWhereChange?: (where: Where) => void
   readonly renderedFilters?: Map<string, React.ReactNode>
-  readonly resolvedFilterOptions?: Map<string, Where>
+  readonly resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
 }
 
 /**

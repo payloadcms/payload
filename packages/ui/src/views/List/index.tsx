@@ -1,6 +1,6 @@
 'use client'
 
-import type { ListPreferences, Where } from 'payload'
+import type { ListPreferences, ResolvedFilterOptions } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import LinkImport from 'next/link.js'
@@ -63,7 +63,7 @@ export type ListViewClientProps = {
   newDocumentURL: string
   preferenceKey?: string
   renderedFilters?: Map<string, React.ReactNode>
-  resolvedFilterOptions?: Map<string, Where>
+  resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
 } & ListViewSlots
 
 export const DefaultListView: React.FC<ListViewClientProps> = (props) => {

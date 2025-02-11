@@ -8,18 +8,14 @@ import type { AdminViewProps, ListQuery, Where } from 'payload'
 
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import {
-  renderFilters,
-  renderTable,
-  resolveFilterOptions,
-  upsertPreferences,
-} from '@payloadcms/ui/rsc'
+import { renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
 import { formatAdminURL, mergeListSearchAndWhere } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
 import { isNumber } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { renderListViewSlots } from './renderListViewSlots.js'
+import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
 
 export { generateListMetadata } from './meta.js'
 
@@ -154,11 +150,9 @@ export const renderListView = async (
 
     const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
 
-    const resolvedFilterOptions = await resolveFilterOptions({
-      fields: collectionConfig.fields,
-      relationTo: collectionConfig.slug,
+    const resolvedFilterOptions = await resolveAllFilterOptions({
+      collectionConfig,
       req,
-      user: req.user,
     })
 
     const staticDescription =

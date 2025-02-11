@@ -239,3 +239,5 @@ export type TransformGlobalWithSelect<
   : DataFromGlobalSlug<TSlug>
 
 export type PopulateType = Partial<TypedCollectionSelect>
+
+export type ResolvedFilterOptions = { [collection: string]: Where }

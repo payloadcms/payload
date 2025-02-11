@@ -1,11 +1,16 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type { ClientCollectionConfig, PaginatedDocs, RelationshipFieldClient, Where } from 'payload'
+import type {
+  ClientCollectionConfig,
+  PaginatedDocs,
+  RelationshipFieldClient,
+  ResolvedFilterOptions,
+} from 'payload'
 
 import type { DefaultFilterProps } from '../types.js'
 
 export type Props = {
   readonly field: RelationshipFieldClient
-  readonly filterOptions: Where
+  readonly filterOptions: ResolvedFilterOptions
 } & DefaultFilterProps
 
 export type Option = {
