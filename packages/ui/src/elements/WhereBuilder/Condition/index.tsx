@@ -66,13 +66,13 @@ export const Condition: React.FC<Props> = (props) => {
   }
 
   const updateValue = useEffectEvent((debouncedValue) => {
-    if (operator && debouncedValue) {
+    if (operator) {
       updateCondition({
         andIndex,
         field: reducedField,
         operator,
         orIndex,
-        value: debouncedValue,
+        value: debouncedValue === null ? '' : debouncedValue,
       })
     }
   })

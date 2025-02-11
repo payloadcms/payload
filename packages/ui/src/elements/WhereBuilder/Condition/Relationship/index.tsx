@@ -376,6 +376,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
               onChange(null)
               return
             }
+
             if (hasMany && Array.isArray(selected)) {
               onChange(
                 selected
