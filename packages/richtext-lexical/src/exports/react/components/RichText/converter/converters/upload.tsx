@@ -1,13 +1,13 @@
-import type { FileSize_P4 } from 'payload'
+import type { FileSizeImproved } from 'payload'
 
-import type { UploadData_P4 } from '../../../../../../features/upload/server/nodes/UploadNode.js'
+import type { UploadDataImproved } from '../../../../../../features/upload/server/nodes/UploadNode.js'
 import type { SerializedUploadNode } from '../../../../../../nodeTypes.js'
 import type { JSXConverters } from '../types.js'
 
 export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
   upload: ({ node }) => {
     // TO-DO (v4): SerializedUploadNode should use UploadData_P4
-    const uploadDocument = node as UploadData_P4
+    const uploadDocument = node as UploadDataImproved
     if (typeof uploadDocument.value !== 'object') {
       return null
     }
@@ -45,7 +45,7 @@ export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
 
     // Iterate through each size in the data.sizes object
     for (const size in uploadDocument.value.sizes) {
-      const imageSize = uploadDocument.value.sizes[size] as FileSize_P4
+      const imageSize = uploadDocument.value.sizes[size] as FileSizeImproved
 
       // Skip if any property of the size object is null
       if (
