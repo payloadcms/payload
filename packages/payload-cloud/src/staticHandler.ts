@@ -94,25 +94,32 @@ export const getStaticHandler = ({ cachingOptions, collection }: Args): StaticHa
         status: 200,
       })
     } catch (err: unknown) {
-      /**
-       * If object key does not found, the getObject function attempts a ListBucket operation.
-       * Because of permissions, this will throw very specific error that we can catch and handle.
-       */
-      if (
-        err instanceof Error &&
-        err.name === 'AccessDenied' &&
-        err.message?.includes('s3:ListBucket') &&
-        'type' in err &&
-        err.type === 'S3ServiceException'
-      ) {
-        req.payload.logger.error({
-          collectionSlug: collection.slug,
-          err,
-          msg: `Requested file not found in cloud storage: ${params.filename}`,
-          params,
-          requestedKey: key,
-        })
-        return new Response(null, { status: 404, statusText: 'Not Found' })
+      // Handle each error explicitly
+      if (err instanceof Error) {
+        /**
+         * Note: If AccessDenied comes back, it typically means that the object key is not found.
+         * The AWS SDK throws this because it attempts an s3:ListBucket operation under the hood
+         * if it does not find the object key, which we have disallowed in our bucket policy.
+         */
+        if (err.name === 'AccessDenied') {
+          req.payload.logger.error({
+            collectionSlug: collection.slug,
+            err,
+            msg: `Requested file not found or accessible in cloud storage: ${params.filename}`,
+            params,
+            requestedKey: key,
+          })
+          return new Response(null, { status: 404, statusText: 'Not Found' })
+        } else if (err.name === 'NoSuchKey') {
+          req.payload.logger.error({
+            collectionSlug: collection.slug,
+            err,
+            msg: `Requested file not found in cloud storage: ${params.filename}`,
+            params,
+            requestedKey: key,
+          })
+          return new Response(null, { status: 404, statusText: 'Not Found' })
+        }
       }
 
       req.payload.logger.error({
