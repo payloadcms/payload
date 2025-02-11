@@ -1,10 +1,28 @@
-import type { I18n } from '@payloadcms/translations'
-
 import type { SanitizedPermissions } from '../../auth/types.js'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
-import type { PayloadComponent, SanitizedConfig } from '../../config/types.js'
+import type { PayloadComponent, SanitizedConfig, ServerProps } from '../../config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { Payload } from '../../index.js'
+import type { Data, DocumentSlots } from '../types.js'
+import type { InitPageResult } from './types.js'
+
+export type EditViewProps = {
+  readonly collectionSlug?: string
+  readonly globalSlug?: string
+}
+
+export type ServerSideEditViewProps = {
+  readonly doc: Data
+  readonly initPageResult: InitPageResult
+  readonly routeSegments: string[]
+} & ClientSideEditViewProps &
+  ServerProps
+
+export type ClientSideEditViewProps = {} & DocumentSlots
+
+export type DocumentSubViewTypes = 'api' | 'default' | 'livePreview' | 'version' | 'versions'
+
+import type { I18n } from '@payloadcms/translations'
 
 export type DocumentTabProps = {
   readonly apiURL?: string

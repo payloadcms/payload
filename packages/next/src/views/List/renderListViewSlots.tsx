@@ -1,9 +1,5 @@
-import type {
-  ListComponentClientProps,
-  ListComponentServerProps,
-  ListViewSlots,
-} from '@payloadcms/ui'
-import type { Payload, SanitizedCollectionConfig, StaticDescription } from 'payload'
+import type { ListComponentClientProps, ListComponentServerProps } from '@payloadcms/ui'
+import type { ListViewSlots, Payload, SanitizedCollectionConfig, StaticDescription } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 

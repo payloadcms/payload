@@ -2,9 +2,8 @@ import type {
   ListComponentClientProps,
   ListComponentServerProps,
   ListPreferences,
-  ListViewClientProps,
 } from '@payloadcms/ui'
-import type { AdminViewProps, ListQuery, Where } from 'payload'
+import type { AdminViewProps, ListQuery, ListViewClientProps, Where } from 'payload'
 
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
@@ -19,7 +18,7 @@ import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
 
 export { generateListMetadata } from './meta.js'
 
-type ListViewArgs = {
+type RenderListViewArgs = {
   customCellProps?: Record<string, any>
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
@@ -29,7 +28,7 @@ type ListViewArgs = {
 } & AdminViewProps
 
 export const renderListView = async (
-  args: ListViewArgs,
+  args: RenderListViewArgs,
 ): Promise<{
   List: React.ReactNode
 }> => {
@@ -235,7 +234,7 @@ export const renderListView = async (
   throw new Error('not-found')
 }
 
-export const ListView: React.FC<ListViewArgs> = async (args) => {
+export const ListView: React.FC<RenderListViewArgs> = async (args) => {
   try {
     const { List: RenderedList } = await renderListView({ ...args, enableRowSelections: true })
     return RenderedList

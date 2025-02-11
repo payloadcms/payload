@@ -10,12 +10,12 @@ import type {
   MetaConfig,
   PayloadComponent,
   SanitizedConfig,
-  ServerProps,
 } from '../../config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { LanguageOptions } from '../LanguageOptions.js'
-import type { Data, DocumentSlots } from '../types.js'
+import type { Data } from '../types.js'
+import type { DocumentSubViewTypes } from './document.js'
 
 export type AdminViewConfig = {
   Component: AdminViewComponent
@@ -44,11 +44,6 @@ export type AdminViewProps = {
 
 export type AdminViewComponent = PayloadComponent<AdminViewProps>
 
-export type EditViewProps = {
-  readonly collectionSlug?: string
-  readonly globalSlug?: string
-}
-
 export type VisibleEntities = {
   collections: SanitizedCollectionConfig['slug'][]
   globals: SanitizedGlobalConfig['slug'][]
@@ -68,15 +63,6 @@ export type InitPageResult = {
   visibleEntities: VisibleEntities
 }
 
-export type ServerSideEditViewProps = {
-  readonly doc: Data
-  readonly initPageResult: InitPageResult
-  readonly routeSegments: string[]
-} & ClientSideEditViewProps &
-  ServerProps
-
-export type ClientSideEditViewProps = {} & DocumentSlots
-
 export type ViewTypes =
   | 'account'
   | 'dashboard'
@@ -85,7 +71,6 @@ export type ViewTypes =
   | 'reset'
   | 'verify'
   | 'version'
-export type DocumentSubViewTypes = 'api' | 'default' | 'livePreview' | 'version' | 'versions'
 
 export type ServerPropsFromView = {
   collectionConfig?: SanitizedConfig['collections'][number]

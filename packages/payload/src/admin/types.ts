@@ -32,12 +32,8 @@ export type { CustomPreviewButton } from './elements/PreviewButton.js'
 export type { CustomPublishButton } from './elements/PublishButton.js'
 export type { CustomSaveButton } from './elements/SaveButton.js'
 export type { CustomSaveDraftButton } from './elements/SaveDraftButton.js'
-export type {
-  DocumentTabComponent,
-  DocumentTabCondition,
-  DocumentTabConfig,
-  DocumentTabProps,
-} from './elements/Tab.js'
+
+export type { Column } from './elements/Table.js'
 
 export type { CustomUpload } from './elements/Upload.js'
 
@@ -398,14 +394,6 @@ export type {
 } from './forms/Diff.js'
 
 export type {
-  FieldErrorClientComponent,
-  FieldErrorClientProps,
-  FieldErrorServerComponent,
-  FieldErrorServerProps,
-  GenericErrorProps,
-} from './forms/Error.js'
-
-export type {
   BuildFormStateArgs,
   Data,
   FieldState as FormField,
@@ -415,6 +403,14 @@ export type {
   FormStateWithoutComponents,
   Row,
 }
+
+export type {
+  FieldErrorClientComponent,
+  FieldErrorClientProps,
+  FieldErrorServerComponent,
+  FieldErrorServerProps,
+  GenericErrorProps,
+} from './forms/Error.js'
 
 export type {
   ClientComponentProps,
@@ -437,18 +433,6 @@ export type {
 } from './forms/Label.js'
 
 export type { RowLabel, RowLabelComponent } from './forms/RowLabel.js'
-
-export type {
-  BuildTableStateArgs,
-  DefaultServerFunctionArgs,
-  ListQuery,
-  ServerFunction,
-  ServerFunctionArgs,
-  ServerFunctionClient,
-  ServerFunctionClientArgs,
-  ServerFunctionConfig,
-  ServerFunctionHandler,
-} from './functions/index.js'
 
 export type MappedServerComponent<TComponentClientProps extends JsonObject = JsonObject> = {
   Component?: React.ComponentType<TComponentClientProps>
@@ -535,18 +519,39 @@ export type DocumentSlots = {
   Upload?: React.ReactNode
 }
 
+export type {
+  BuildTableStateArgs,
+  DefaultServerFunctionArgs,
+  ListQuery,
+  ServerFunction,
+  ServerFunctionArgs,
+  ServerFunctionClient,
+  ServerFunctionClientArgs,
+  ServerFunctionConfig,
+  ServerFunctionHandler,
+} from './functions/index.js'
+
 export type { LanguageOptions } from './LanguageOptions.js'
 
 export type { RichTextAdapter, RichTextAdapterProvider, RichTextHooks } from './RichText.js'
 
 export type {
+  ClientSideEditViewProps,
+  DocumentTabComponent,
+  DocumentTabCondition,
+  DocumentTabConfig,
+  DocumentTabProps,
+  EditViewProps,
+  ServerSideEditViewProps,
+} from './views/document.js'
+
+export type { ListViewClientProps, ListViewSlots } from './views/list.js'
+
+export type {
   AdminViewComponent,
   AdminViewConfig,
   AdminViewProps,
-  ClientSideEditViewProps,
-  EditViewProps,
   InitPageResult,
-  ServerSideEditViewProps,
   VisibleEntities,
 } from './views/types.js'
 
