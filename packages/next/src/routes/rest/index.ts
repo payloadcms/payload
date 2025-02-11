@@ -34,7 +34,9 @@ const handlerBuilder =
 
     const response = await handleEndpoints({
       config,
-      path: `${awaitedConfig.routes.api}/${awaitedParams.slug.join('/')}`,
+      path: awaitedParams
+        ? `${awaitedConfig.routes.api}/${awaitedParams.slug.join('/')}`
+        : undefined,
       request,
     })
 
