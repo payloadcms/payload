@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import type { Readable } from 'stream'
 
 import type { CollectionCachingConfig, PluginOptions, StaticHandler } from './types.js'
 
@@ -8,6 +9,18 @@ import { getStorageClient } from './utilities/getStorageClient.js'
 interface Args {
   cachingOptions?: PluginOptions['uploadCaching']
   collection: CollectionConfig
+}
+
+// Type guard for NodeJS.Readable streams
+const isNodeReadableStream = (body: unknown): body is Readable => {
+  return (
+    typeof body === 'object' &&
+    body !== null &&
+    'pipe' in body &&
+    typeof (body as any).pipe === 'function' &&
+    'destroy' in body &&
+    typeof (body as any).destroy === 'function'
+  )
 }
 
 // Convert a stream into a promise that resolves with a Buffer
@@ -54,6 +67,19 @@ export const getStaticHandler = ({ cachingOptions, collection }: Args): StaticHa
 
       if (!object.Body || !object.ContentType || !object.ETag) {
         return new Response(null, { status: 404, statusText: 'Not Found' })
+      }
+
+      // On error, manually destroy stream to close socket
+      if (object.Body && isNodeReadableStream(object.Body)) {
+        const stream = object.Body
+        stream.on('error', (err) => {
+          req.payload.logger.error({
+            err,
+            key,
+            msg: 'Error streaming S3 object, destroying stream',
+          })
+          stream.destroy()
+        })
       }
 
       const bodyBuffer = await streamToBuffer(object.Body)
