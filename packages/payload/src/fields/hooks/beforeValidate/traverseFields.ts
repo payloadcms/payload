@@ -74,6 +74,7 @@ export const traverseFields = async <T>({
         req,
         siblingData,
         siblingDoc,
+        siblingFields: fields,
       }),
     )
   })
