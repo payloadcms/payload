@@ -335,7 +335,7 @@ describe('Relationship Field', () => {
       // now ensure that the same filter options are applied in the list view
       await page.goto(url.list)
 
-      await addListFilter({
+      const whereBuilder = await addListFilter({
         page,
         fieldLabel: 'Relationship Filtered By Field',
         operatorLabel: 'equals',
@@ -344,8 +344,11 @@ describe('Relationship Field', () => {
 
       const valueInput = page.locator('.condition__value input')
       await valueInput.click()
-      await expect(valueInput.locator('.rs__menu')).toHaveCount(1)
-      await expect(valueInput.locator('.rs__option')).toHaveText(idToInclude)
+      const valueOptions = whereBuilder.locator('.condition__value .rs__option')
+
+      await expect(valueOptions).toHaveCount(2)
+      await expect(valueOptions.locator(`text=None`)).toBeVisible()
+      await expect(valueOptions.locator(`text=${idToInclude}`)).toBeVisible()
     })
 
     test('should allow usage of relationTo in filterOptions', async () => {

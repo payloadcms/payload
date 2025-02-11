@@ -155,12 +155,9 @@ export const renderListView = async (
     const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
 
     const resolvedFilterOptions = await resolveFilterOptions({
-      id: data.id,
-      data,
       fields: collectionConfig.fields,
-      relationTo: undefined, // TODO:
+      relationTo: collectionConfig.slug,
       req,
-      siblingData: {}, // TODO:
       user: req.user,
     })
 

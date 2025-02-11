@@ -302,8 +302,9 @@ describe('List View', () => {
 
       await page.waitForURL(new RegExp(encodedQueryString))
 
-      const whereBuilder = page.locator('.list-controls__where.rah-static.rah-static--height-auto')
-      await expect(whereBuilder).toBeVisible()
+      await expect(
+        page.locator('.list-controls__where.rah-static.rah-static--height-auto'),
+      ).toBeVisible()
     })
 
     test('should respect base list filters', async () => {
@@ -356,30 +357,31 @@ describe('List View', () => {
     test('should reset filter value when a different field is selected', async () => {
       const id = (await page.locator('.cell-id').first().innerText()).replace('ID: ', '')
 
-      await addListFilter({
+      const whereBuilder = await addListFilter({
         page,
         fieldLabel: 'ID',
         operatorLabel: 'equals',
         value: id,
       })
 
-      const filterField = page.locator('.condition__field')
+      const filterField = whereBuilder.locator('.condition__field')
       await filterField.click()
 
       // select new filter field of Number
       const dropdownFieldOption = filterField.locator('.rs__option', {
         hasText: exactText('Status'),
       })
+
       await dropdownFieldOption.click()
       await expect(filterField).toContainText('Status')
 
-      await expect(page.locator('.condition__value input')).toHaveValue('')
+      await expect(whereBuilder.locator('.condition__value input')).toHaveValue('')
     })
 
     test('should remove condition from URL when value is cleared', async () => {
       await page.goto(postsUrl.list)
 
-      await addListFilter({
+      const whereBuilder = await addListFilter({
         page,
         fieldLabel: 'Relationship',
         operatorLabel: 'equals',
@@ -391,7 +393,7 @@ describe('List View', () => {
 
       await page.waitForURL(new RegExp(encodedQueryString + '[^&]*'))
 
-      await page.locator('.condition__value .clear-indicator').click()
+      await whereBuilder.locator('.condition__value .clear-indicator').click()
 
       await page.waitForURL(new RegExp(encodedQueryString))
     })
@@ -403,14 +405,12 @@ describe('List View', () => {
     test('should refresh relationship values when a different field is selected', async () => {
       await page.goto(postsUrl.list)
 
-      await addListFilter({
+      const whereBuilder = await addListFilter({
         page,
         fieldLabel: 'Relationship',
         operatorLabel: 'equals',
         value: 'post1',
       })
-
-      const whereBuilder = page.locator('.where-builder')
 
       const conditionField = whereBuilder.locator('.condition__field')
       await conditionField.click()
@@ -565,15 +565,15 @@ describe('List View', () => {
     test('should reset filter values for every additional filter', async () => {
       await page.goto(postsUrl.list)
 
-      await addListFilter({
+      const whereBuilder = await addListFilter({
         page,
         fieldLabel: 'Tab 1 > Title',
         operatorLabel: 'equals',
         value: 'Test',
       })
 
-      await page.locator('.condition__actions-add').click()
-      const secondLi = page.locator('.where-builder__and-filters li:nth-child(2)')
+      await whereBuilder.locator('.condition__actions-add').click()
+      const secondLi = whereBuilder.locator('.where-builder__and-filters li:nth-child(2)')
       await expect(secondLi).toBeVisible()
 
       await expect(
@@ -587,14 +587,13 @@ describe('List View', () => {
     test('should not re-render page upon typing in a value in the filter value field', async () => {
       await page.goto(postsUrl.list)
 
-      await addListFilter({
+      const whereBuilder = await addListFilter({
         page,
         fieldLabel: 'Tab 1 > Title',
         operatorLabel: 'equals',
         skipValueInput: true,
       })
 
-      const whereBuilder = page.locator('.where-builder')
       const valueInput = whereBuilder.locator('.condition__value >> input')
 
       // Type into the input field instead of filling it
@@ -611,7 +610,7 @@ describe('List View', () => {
     test('should still show second filter if two filters exist and first filter is removed', async () => {
       await page.goto(postsUrl.list)
 
-      await addListFilter({
+      const whereBuilder = await addListFilter({
         page,
         fieldLabel: 'Tab 1 > Title',
         operatorLabel: 'equals',
@@ -620,9 +619,9 @@ describe('List View', () => {
 
       await wait(500)
 
-      await page.locator('.condition__actions-add').click()
+      await whereBuilder.locator('.condition__actions-add').click()
 
-      const secondLi = page.locator('.where-builder__and-filters li:nth-child(2)')
+      const secondLi = whereBuilder.locator('.where-builder__and-filters li:nth-child(2)')
       await expect(secondLi).toBeVisible()
       const secondConditionField = secondLi.locator('.condition__field')
       const secondOperatorField = secondLi.locator('.condition__operator')
@@ -705,14 +704,12 @@ describe('List View', () => {
     test('should properly paginate many documents', async () => {
       await page.goto(with300DocumentsUrl.list)
 
-      await addListFilter({
+      const whereBuilder = await addListFilter({
         page,
         fieldLabel: 'Self Relation',
         operatorLabel: 'equals',
         skipValueInput: true,
       })
-
-      const whereBuilder = page.locator('.where-builder')
 
       const valueField = whereBuilder.locator('.condition__value')
       await valueField.click()

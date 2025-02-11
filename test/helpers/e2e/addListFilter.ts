@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 import { exactText } from 'helpers.js'
@@ -18,7 +18,7 @@ export const addListFilter = async ({
   replaceExisting?: boolean
   skipValueInput?: boolean
   value?: string
-}) => {
+}): Promise<Locator> => {
   await openListFilters(page, {})
 
   const whereBuilder = page.locator('.where-builder')
@@ -52,4 +52,6 @@ export const addListFilter = async ({
       await valueOptions.locator(`text=${value}`).click()
     }
   }
+
+  return whereBuilder
 }

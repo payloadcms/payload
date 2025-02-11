@@ -10,6 +10,7 @@ import type {
   SanitizedCollectionConfig,
   Where,
 } from 'payload'
+import type { MarkOptional } from 'ts-essentials'
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
 import { fieldIsHiddenOrDisabled, flattenTopLevelFields } from 'payload/shared'
@@ -21,6 +22,7 @@ import { RenderServerComponent } from '../elements/RenderServerComponent/index.j
 import { buildColumnState } from '../elements/TableColumns/buildColumnState.js'
 import { filterFields } from '../elements/TableColumns/filterFields.js'
 import { getInitialColumns } from '../elements/TableColumns/getInitialColumns.js'
+
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import { Pill, SelectAll, SelectRow, Table } from '../exports/client/index.js'
 
@@ -50,14 +52,14 @@ export const renderFilters = (
   )
 
 export const resolveFilterOptions = async ({
-  id,
-  data,
   fields,
   relationTo,
   req,
-  siblingData,
   user,
-}: { fields: Field[] } & FilterOptionsProps): Promise<Map<string, Where>> => {
+}: { fields: Field[] } & MarkOptional<
+  FilterOptionsProps,
+  'blockData' | 'data' | 'id' | 'siblingData'
+>): Promise<Map<string, Where>> => {
   const acc = new Map<string, Where>()
 
   for (const field of fields) {
@@ -70,11 +72,12 @@ export const resolveFilterOptions = async ({
 
       if (typeof field.filterOptions === 'function') {
         const result = await field.filterOptions({
-          id,
-          data,
+          id: undefined,
+          blockData: undefined,
+          data: {}, // use empty object to prevent breaking queries when accessing properties of data
           relationTo,
           req,
-          siblingData,
+          siblingData: {}, // use empty object to prevent breaking queries when accessing properties of siblingData
           user,
         })
 
