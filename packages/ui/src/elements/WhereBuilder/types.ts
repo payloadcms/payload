@@ -1,7 +1,13 @@
-import type { ClientField, Operator, SanitizedCollectionConfig, Where } from 'payload'
+import type {
+  ClientField,
+  CollectionConfig,
+  Operator,
+  SanitizedCollectionConfig,
+  Where,
+} from 'payload'
 
 export type WhereBuilderProps = {
-  readonly collectionPluralLabel: SanitizedCollectionConfig['labels']['plural']
+  readonly collectionPluralLabel: CollectionConfig['labels']['plural']
   readonly collectionSlug: SanitizedCollectionConfig['slug']
   readonly fields?: ClientField[]
   readonly renderedFilters?: Map<string, React.ReactNode>
