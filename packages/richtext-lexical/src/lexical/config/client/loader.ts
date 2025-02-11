@@ -1,6 +1,6 @@
 'use client'
 
-import type { RichTextFieldClient } from 'payload'
+import type { ClientConfig, RichTextFieldClient } from 'payload'
 
 import type {
   ClientFeatureProviderMap,
@@ -15,11 +15,13 @@ import type { ClientEditorConfig } from '../types.js'
  * @param unSanitizedEditorConfig
  */
 export function loadClientFeatures({
+  config,
   featureClientSchemaMap,
   field,
   schemaPath,
   unSanitizedEditorConfig,
 }: {
+  config: ClientConfig
   featureClientSchemaMap: FeatureClientSchemaMap
   field?: RichTextFieldClient
   schemaPath: string
@@ -55,6 +57,7 @@ export function loadClientFeatures({
     const feature: Partial<ResolvedClientFeature<any>> =
       typeof featureProvider.feature === 'function'
         ? featureProvider.feature({
+            config,
             featureClientSchemaMap,
             featureProviderMap,
             field,

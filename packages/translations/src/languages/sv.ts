@@ -330,6 +330,7 @@ export const svTranslations: DefaultTranslationsObject = {
     takeOver: 'Ta över',
     thisLanguage: 'Svenska',
     time: 'Tid',
+    timezone: 'Tidszon',
     titleDeleted: '{{label}} "{{title}}" togs bort framgångsrikt.',
     true: 'Sann',
     unauthorized: 'Obehörig',
@@ -422,6 +423,7 @@ export const svTranslations: DefaultTranslationsObject = {
     requiresNoMoreThan: 'Detta fält kräver inte mer än {{count}} {{label}}.',
     requiresTwoNumbers: 'Detta fält kräver två nummer.',
     shorterThanMax: 'Detta värde måste vara kortare än maxlängden på {{maxLength}} tecken.',
+    timezoneRequired: 'En tidszon krävs.',
     trueOrFalse: 'Detta fält kan bara vara lika med sant eller falskt.',
     username:
       'Var god ange ett giltigt användarnamn. Kan innehålla bokstäver, siffror, bindestreck, punkter och understreck.',

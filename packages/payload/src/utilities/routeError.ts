@@ -22,6 +22,19 @@ export const routeError = async ({
   err: APIError
   req: PayloadRequest | Request
 }) => {
+  if ('payloadInitError' in err && err.payloadInitError === true) {
+    // do not attempt initializing Payload if the error is due to a failed initialization. Otherwise,
+    // it will cause an infinite loop of initialization attempts and endless error responses, without
+    // actually logging the error, as the error logging code will never be reached.
+    console.error(err)
+    return Response.json(
+      {
+        message: 'There was an error initializing Payload',
+      },
+      { status: httpStatus.INTERNAL_SERVER_ERROR },
+    )
+  }
+
   let payload = incomingReq && 'payload' in incomingReq && incomingReq?.payload
 
   if (!payload) {

@@ -12,6 +12,8 @@ export { defaults as collectionDefaults } from '../collections/config/defaults.j
 
 export { serverProps } from '../config/types.js'
 
+export { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones.js'
+
 export {
   fieldAffectsData,
   fieldHasMaxDepth,

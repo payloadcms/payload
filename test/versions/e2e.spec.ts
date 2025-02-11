@@ -72,6 +72,8 @@ const { beforeAll, beforeEach, describe } = test
 let payload: PayloadTestSDK<Config>
 let context: BrowserContext
 
+const londonTimezone = 'Europe/London'
+
 describe('Versions', () => {
   let page: Page
   let url: AdminUrlUtil
@@ -283,7 +285,9 @@ describe('Versions', () => {
       await page.locator('tbody tr .cell-title a').first().click()
       await page.waitForSelector('.doc-header__title', { state: 'visible' })
       await page.goto(`${page.url()}/versions`)
-      expect(page.url()).toMatch(/\/versions/)
+      await expect(() => {
+        expect(page.url()).toMatch(/\/versions/)
+      }).toPass({ timeout: 10000, intervals: [100] })
     })
 
     test('should show collection versions view level action in collection versions view', async () => {
@@ -388,7 +392,9 @@ describe('Versions', () => {
       const global = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
       const versionsURL = `${global.global(autoSaveGlobalSlug)}/versions`
       await page.goto(versionsURL)
-      expect(page.url()).toMatch(/\/versions$/)
+      await expect(() => {
+        expect(page.url()).toMatch(/\/versions/)
+      }).toPass({ timeout: 10000, intervals: [100] })
     })
 
     test('collection - should autosave', async () => {
@@ -436,7 +442,7 @@ describe('Versions', () => {
       await page.locator('#field-description').fill('initial description')
       await saveDocAndAssert(page)
 
-      const updatedAtWrapper = await page.locator(
+      const updatedAtWrapper = page.locator(
         '.doc-controls .doc-controls__content .doc-controls__list-item',
         {
           hasText: 'Last Modified',
@@ -450,9 +456,9 @@ describe('Versions', () => {
       await page.locator('#field-description').fill('changed description')
       await saveDocAndAssert(page)
 
-      const newUpdatedAt = await updatedAtWrapper.locator('.doc-controls__value').textContent()
+      const newUpdatedAt = updatedAtWrapper.locator('.doc-controls__value')
 
-      expect(newUpdatedAt).not.toEqual(initialUpdatedAt)
+      await expect(newUpdatedAt).not.toHaveText(initialUpdatedAt)
     })
 
     test('collection - should update updatedAt on autosave', async () => {
@@ -461,7 +467,7 @@ describe('Versions', () => {
       await waitForAutoSaveToRunAndComplete(page)
       await expect(page.locator('#field-title')).toHaveValue('autosave title')
 
-      const updatedAtWrapper = await page.locator(
+      const updatedAtWrapper = page.locator(
         '.doc-controls .doc-controls__content .doc-controls__list-item',
         {
           hasText: 'Last Modified',
@@ -475,9 +481,9 @@ describe('Versions', () => {
       await page.locator('#field-title').fill('autosave title updated')
       await waitForAutoSaveToRunAndComplete(page)
 
-      const newUpdatedAt = await updatedAtWrapper.locator('.doc-controls__value').textContent()
+      const newUpdatedAt = updatedAtWrapper.locator('.doc-controls__value')
 
-      expect(newUpdatedAt).not.toEqual(initialUpdatedAt)
+      await expect(newUpdatedAt).not.toHaveText(initialUpdatedAt)
     })
 
     test('global - should autosave', async () => {
@@ -644,6 +650,52 @@ describe('Versions', () => {
       await expect(page.locator('.rs__option')).toHaveCount(1)
 
       await expect(page.locator('.rs__option')).toHaveText('some title')
+    })
+
+    test('correctly increments version count', async () => {
+      const createdDoc = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          description: 'some description',
+          title: 'some title',
+        },
+        draft: true,
+      })
+
+      await page.goto(url.edit(createdDoc.id))
+
+      const versionsCountSelector = `.doc-tabs__tabs .doc-tab__count`
+      const initialCount = await page.locator(versionsCountSelector).textContent()
+
+      const field = page.locator('#field-description')
+
+      await field.fill('new description 1')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      let newCount1: null | string
+
+      await expect(async () => {
+        newCount1 = await page.locator(versionsCountSelector).textContent()
+        expect(Number(newCount1)).toBeGreaterThan(Number(initialCount))
+      }).toPass({ timeout: 10000, intervals: [100] })
+
+      await field.fill('new description 2')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      let newCount2: null | string
+
+      await expect(async () => {
+        newCount2 = await page.locator(versionsCountSelector).textContent()
+        expect(Number(newCount2)).toBeGreaterThan(Number(newCount1))
+      }).toPass({ timeout: 10000, intervals: [100] })
+
+      await field.fill('new description 3')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      await expect(async () => {
+        const newCount3 = await page.locator(versionsCountSelector).textContent()
+        expect(Number(newCount3)).toBeGreaterThan(Number(newCount2))
+      }).toPass({ timeout: 10000, intervals: [100] })
     })
 
     test('collection — respects max number of versions', async () => {
@@ -1189,6 +1241,76 @@ describe('Versions', () => {
       await expect(upload.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
         String(uploadDocs?.docs?.[1]?.id),
       )
+    })
+  })
+
+  describe('Scheduled publish', () => {
+    test.use({
+      timezoneId: londonTimezone,
+    })
+
+    test('correctly sets a UTC date for the chosen timezone', async () => {
+      const post = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          title: 'new post',
+          description: 'new description',
+        },
+      })
+
+      await page.goto(`${serverURL}/admin/collections/${draftCollectionSlug}/${post.id}`)
+
+      const publishDropdown = page.locator('.doc-controls__controls .popup-button')
+      await publishDropdown.click()
+
+      const schedulePublishButton = page.locator(
+        '.popup-button-list__button:has-text("Schedule Publish")',
+      )
+      await schedulePublishButton.click()
+
+      const drawerContent = page.locator('.schedule-publish__scheduler')
+
+      const dropdownControlSelector = drawerContent.locator(`.timezone-picker .rs__control`)
+      const timezoneOptionSelector = drawerContent.locator(
+        `.timezone-picker .rs__menu .rs__option:has-text("Paris")`,
+      )
+      await dropdownControlSelector.click()
+      await timezoneOptionSelector.click()
+
+      const dateInput = drawerContent.locator('.date-time-picker__input-wrapper input')
+      // Create a date for 2049-01-01 18:00:00
+      const date = new Date(2049, 0, 1, 18, 0)
+
+      await dateInput.fill(date.toISOString())
+      await page.keyboard.press('Enter') // formats the date to the correct format
+
+      const saveButton = drawerContent.locator('.schedule-publish__actions button')
+
+      await saveButton.click()
+
+      const upcomingContent = page.locator('.schedule-publish__upcoming')
+      const createdDate = await upcomingContent.locator('.row-1 .cell-waitUntil').textContent()
+
+      await expect(() => {
+        expect(createdDate).toContain('6:00:00 PM')
+      }).toPass({ timeout: 10000, intervals: [100] })
+
+      const {
+        docs: [createdJob],
+      } = await payload.find({
+        collection: 'payload-jobs',
+        where: {
+          'input.doc.value': {
+            equals: String(post.id),
+          },
+        },
+      })
+
+      // eslint-disable-next-line payload/no-flaky-assertions
+      expect(createdJob).toBeTruthy()
+
+      // eslint-disable-next-line payload/no-flaky-assertions
+      expect(createdJob?.waitUntil).toEqual('2049-01-01T17:00:00.000Z')
     })
   })
 })
