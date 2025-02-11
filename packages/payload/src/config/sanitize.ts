@@ -9,6 +9,7 @@ import type {
   LocalizationConfigWithLabels,
   LocalizationConfigWithNoLabels,
   SanitizedConfig,
+  Timezone,
 } from './types.js'
 
 import { defaultUserCollection } from '../auth/defaultUser.js'
@@ -16,6 +17,7 @@ import { authRootEndpoints } from '../auth/endpoints/index.js'
 import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
+import { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones.js'
 import { sanitizeGlobal } from '../globals/config/sanitize.js'
 import { getLockedDocumentsCollection } from '../lockedDocuments/lockedDocumentsCollection.js'
 import getPreferencesCollection from '../preferences/preferencesCollection.js'
@@ -55,6 +57,32 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
       `${sanitizedConfig.admin.user} is not a valid admin user collection`,
     )
   }
+
+  if (sanitizedConfig?.admin?.timezones) {
+    if (typeof sanitizedConfig?.admin?.timezones?.supportedTimezones === 'function') {
+      sanitizedConfig.admin.timezones.supportedTimezones =
+        sanitizedConfig.admin.timezones.supportedTimezones({ defaultTimezones })
+    }
+
+    if (!sanitizedConfig?.admin?.timezones?.supportedTimezones) {
+      sanitizedConfig.admin.timezones.supportedTimezones = defaultTimezones
+    }
+  } else {
+    sanitizedConfig.admin.timezones = {
+      supportedTimezones: defaultTimezones,
+    }
+  }
+  // Timezones supported by the Intl API
+  const _internalSupportedTimezones = Intl.supportedValuesOf('timeZone')
+
+  // We're casting here because it's already been sanitised above but TS still thinks it could be a function
+  ;(sanitizedConfig.admin.timezones.supportedTimezones as Timezone[]).forEach((timezone) => {
+    if (!_internalSupportedTimezones.includes(timezone.value)) {
+      throw new InvalidConfiguration(
+        `Timezone ${timezone.value} is not supported by the current runtime via the Intl API.`,
+      )
+    }
+  })
 
   return sanitizedConfig as unknown as Partial<SanitizedConfig>
 }

@@ -27,7 +27,7 @@ import { $getNodeByKey } from 'lexical'
 
 import './index.scss'
 
-import { deepCopyObjectSimpleWithoutReactComponents } from 'payload/shared'
+import { deepCopyObjectSimpleWithoutReactComponents, reduceFieldsToValues } from 'payload/shared'
 import { v4 as uuid } from 'uuid'
 
 import type { InlineBlockFields } from '../../server/nodes/InlineBlocksNode.js'
@@ -86,11 +86,20 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   const firstTimeDrawer = useRef(false)
 
   const [initialState, setInitialState] = React.useState<false | FormState | undefined>(
-    initialLexicalFormState?.[formData.id]?.formState,
+    () => initialLexicalFormState?.[formData.id]?.formState,
   )
 
+  const hasMounted = useRef(false)
+  const prevCacheBuster = useRef(cacheBuster)
   useEffect(() => {
-    setInitialState(false)
+    if (hasMounted.current) {
+      if (prevCacheBuster.current !== cacheBuster) {
+        setInitialState(false)
+      }
+      prevCacheBuster.current = cacheBuster
+    } else {
+      hasMounted.current = true
+    }
   }, [cacheBuster])
 
   const [CustomLabel, setCustomLabel] = React.useState<React.ReactNode | undefined>(
@@ -176,6 +185,22 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
       })
 
       if (state) {
+        const newFormStateData: InlineBlockFields = reduceFieldsToValues(
+          deepCopyObjectSimpleWithoutReactComponents(state),
+          true,
+        ) as InlineBlockFields
+
+        // Things like default values may come back from the server => update the node with the new data
+        editor.update(() => {
+          const node = $getNodeByKey(nodeKey)
+          if (node && $isInlineBlockNode(node)) {
+            const newData = newFormStateData
+            newData.blockType = formData.blockType
+
+            node.setFields(newData, true)
+          }
+        })
+
         setInitialState(state)
         setCustomLabel(state['_components']?.customComponents?.BlockLabel)
         setCustomBlock(state['_components']?.customComponents?.Block)
@@ -191,6 +216,8 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     }
   }, [
     getFormState,
+    editor,
+    nodeKey,
     schemaFieldsPath,
     id,
     formData,

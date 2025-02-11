@@ -248,7 +248,7 @@ export function fieldsToJSONSchema(
 
   return {
     properties: Object.fromEntries(
-      fields.reduce((fieldSchemas, field) => {
+      fields.reduce((fieldSchemas, field, index) => {
         const isRequired = fieldAffectsData(field) && fieldIsRequired(field)
         if (isRequired) {
           requiredFieldNames.add(field.name)
@@ -579,25 +579,37 @@ export function fieldsToJSONSchema(
           }
           case 'select': {
             const optionEnums = buildOptionEnums(field.options)
+            // We get the previous field to check for a date in the case of a timezone select
+            // This works because timezone selects are always inserted right after a date with 'timezone: true'
+            const previousField = fields?.[index - 1]
+            const isTimezoneField =
+              previousField?.type === 'date' && previousField.timezone && field.name.includes('_tz')
 
-            if (field.hasMany) {
+            // Timezone selects should reference the supportedTimezones definition
+            if (isTimezoneField) {
               fieldSchema = {
-                ...baseFieldSchema,
-                type: withNullableJSONSchemaType('array', isRequired),
-                items: {
-                  type: 'string',
-                },
-              }
-              if (optionEnums?.length) {
-                ;(fieldSchema.items as JSONSchema4).enum = optionEnums
+                $ref: `#/definitions/supportedTimezones`,
               }
             } else {
-              fieldSchema = {
-                ...baseFieldSchema,
-                type: withNullableJSONSchemaType('string', isRequired),
-              }
-              if (optionEnums?.length) {
-                fieldSchema.enum = optionEnums
+              if (field.hasMany) {
+                fieldSchema = {
+                  ...baseFieldSchema,
+                  type: withNullableJSONSchemaType('array', isRequired),
+                  items: {
+                    type: 'string',
+                  },
+                }
+                if (optionEnums?.length) {
+                  ;(fieldSchema.items as JSONSchema4).enum = optionEnums
+                }
+              } else {
+                fieldSchema = {
+                  ...baseFieldSchema,
+                  type: withNullableJSONSchemaType('string', isRequired),
+                }
+                if (optionEnums?.length) {
+                  fieldSchema.enum = optionEnums
+                }
               }
             }
 
@@ -956,6 +968,18 @@ export function authCollectionToOperationsJSONSchema(
   }
 }
 
+// Generates the JSON Schema for supported timezones
+export function timezonesToJSONSchema(
+  supportedTimezones: SanitizedConfig['admin']['timezones']['supportedTimezones'],
+): JSONSchema4 {
+  return {
+    description: 'Supported timezones in IANA format.',
+    enum: supportedTimezones.map((timezone) =>
+      typeof timezone === 'string' ? timezone : timezone.value,
+    ),
+  }
+}
+
 function generateAuthOperationSchemas(collections: SanitizedCollectionConfig[]): JSONSchema4 {
   const properties = collections.reduce((acc, collection) => {
     if (collection.auth) {
@@ -1034,6 +1058,8 @@ export function configToJSONSchema(
     {},
   )
 
+  const timezoneDefinitions = timezonesToJSONSchema(config.admin.timezones.supportedTimezones)
+
   const authOperationDefinitions = [...config.collections]
     .filter(({ auth }) => Boolean(auth))
     .reduce(
@@ -1057,6 +1083,7 @@ export function configToJSONSchema(
   let jsonSchema: JSONSchema4 = {
     additionalProperties: false,
     definitions: {
+      supportedTimezones: timezoneDefinitions,
       ...entityDefinitions,
       ...Object.fromEntries(interfaceNameDefinitions),
       ...authOperationDefinitions,

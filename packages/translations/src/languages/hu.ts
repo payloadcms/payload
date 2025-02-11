@@ -332,6 +332,7 @@ export const huTranslations: DefaultTranslationsObject = {
     takeOver: 'Átvétel',
     thisLanguage: 'Magyar',
     time: 'Idő',
+    timezone: 'Időzóna',
     titleDeleted: '{{label}} "{{title}}" sikeresen törölve.',
     true: 'Igaz',
     unauthorized: 'Jogosulatlan',
@@ -426,6 +427,7 @@ export const huTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'Ehhez a mezőhöz két szám szükséges.',
     shorterThanMax:
       'Ennek az értéknek rövidebbnek kell lennie, mint a maximálisan megengedett {{maxLength}} karakter.',
+    timezoneRequired: 'Időzóna szükséges.',
     trueOrFalse: 'Ez a mező csak igaz vagy hamis lehet.',
     username:
       'Adjon meg egy érvényes felhasználónevet. Tartalmazhat betűket, számokat, kötőjeleket, pontokat és aláhúzásokat.',

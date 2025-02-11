@@ -105,8 +105,9 @@ export const payloadCloudPlugin =
     const DEFAULT_CRON_JOB = {
       cron: DEFAULT_CRON,
       limit: DEFAULT_LIMIT,
-      queue: 'default (every minute)',
+      queue: 'default',
     }
+
     config.globals = [
       ...(config.globals || []),
       {
@@ -130,8 +131,32 @@ export const payloadCloudPlugin =
 
     const oldAutoRunCopy = config.jobs.autoRun ?? []
 
+    const hasExistingAutorun = Boolean(config.jobs.autoRun)
+
+    const newShouldAutoRun = async (payload: Payload) => {
+      if (process.env.PAYLOAD_CLOUD_JOBS_INSTANCE) {
+        const retrievedGlobal = await payload.findGlobal({
+          slug: 'payload-cloud-instance',
+        })
+
+        if (retrievedGlobal.instance === process.env.PAYLOAD_CLOUD_JOBS_INSTANCE) {
+          return true
+        } else {
+          process.env.PAYLOAD_CLOUD_JOBS_INSTANCE = ''
+        }
+      }
+
+      return false
+    }
+
+    if (!config.jobs.shouldAutoRun) {
+      config.jobs.shouldAutoRun = newShouldAutoRun
+    }
+
     const newAutoRun = async (payload: Payload) => {
       const instance = generateRandomString()
+
+      process.env.PAYLOAD_CLOUD_JOBS_INSTANCE = instance
 
       await payload.updateGlobal({
         slug: 'payload-cloud-instance',
@@ -140,16 +165,7 @@ export const payloadCloudPlugin =
         },
       })
 
-      await waitRandomTime()
-
-      const cloudInstance = await payload.findGlobal({
-        slug: 'payload-cloud-instance',
-      })
-
-      if (cloudInstance.instance !== instance) {
-        return []
-      }
-      if (!config.jobs?.autoRun) {
+      if (!hasExistingAutorun) {
         return [DEFAULT_CRON_JOB]
       }
 
@@ -160,11 +176,3 @@ export const payloadCloudPlugin =
 
     return config
   }
-
-function waitRandomTime(): Promise<void> {
-  const min = 1000 // 1 second in milliseconds
-  const max = 5000 // 5 seconds in milliseconds
-  const randomTime = Math.floor(Math.random() * (max - min + 1)) + min
-
-  return new Promise((resolve) => setTimeout(resolve, randomTime))
-}

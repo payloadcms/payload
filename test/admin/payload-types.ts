@@ -178,6 +178,7 @@ export interface Post {
     | null;
   defaultValueField?: string | null;
   relationship?: (string | null) | Post;
+  users?: (string | null) | User;
   customCell?: string | null;
   upload?: (string | null) | Upload;
   hiddenField?: string | null;
@@ -276,9 +277,6 @@ export interface CustomField {
    * Static field description.
    */
   descriptionAsString?: string | null;
-  /**
-   * Function description
-   */
   descriptionAsFunction?: string | null;
   descriptionAsComponent?: string | null;
   customSelectField?: string | null;
@@ -580,6 +578,7 @@ export interface PostsSelect<T extends boolean = true> {
       };
   defaultValueField?: T;
   relationship?: T;
+  users?: T;
   customCell?: T;
   upload?: T;
   hiddenField?: T;

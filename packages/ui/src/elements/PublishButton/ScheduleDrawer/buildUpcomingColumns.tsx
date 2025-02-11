@@ -56,8 +56,27 @@ export const buildUpcomingColumns = ({
       },
       Heading: <span>{t('general:time')}</span>,
       renderedCells: docs.map((doc) => (
-        <span key={doc.id}>{formatDate({ date: doc.waitUntil, i18n, pattern: dateFormat })}</span>
+        <span key={doc.id}>
+          {formatDate({
+            date: doc.waitUntil,
+            i18n,
+            pattern: dateFormat,
+            timezone: doc.input.timezone,
+          })}
+        </span>
       )),
+    },
+    {
+      accessor: 'input.timezone',
+      active: true,
+      field: {
+        name: '',
+        type: 'text',
+      },
+      Heading: <span>{t('general:timezone')}</span>,
+      renderedCells: docs.map((doc) => {
+        return <span key={doc.id}>{doc.input.timezone || t('general:noValue')}</span>
+      }),
     },
   ]
 

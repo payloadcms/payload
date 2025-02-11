@@ -671,6 +671,10 @@ export type DateField = {
     date?: ConditionalDateProps
     placeholder?: Record<string, string> | string
   } & Admin
+  /**
+   * Enable timezone selection in the admin interface.
+   */
+  timezone?: true
   type: 'date'
   validate?: DateFieldValidation
 } & Omit<FieldBase, 'validate'>
@@ -678,7 +682,7 @@ export type DateField = {
 export type DateFieldClient = {
   admin?: AdminClient & Pick<DateField['admin'], 'date' | 'placeholder'>
 } & FieldBaseClient &
-  Pick<DateField, 'type'>
+  Pick<DateField, 'timezone' | 'type'>
 
 export type GroupField = {
   admin?: {

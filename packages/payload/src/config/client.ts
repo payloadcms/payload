@@ -97,6 +97,7 @@ export const createClientConfig = ({
           meta: config.admin.meta,
           routes: config.admin.routes,
           theme: config.admin.theme,
+          timezones: config.admin.timezones,
           user: config.admin.user,
         }
         if (config.admin.livePreview) {

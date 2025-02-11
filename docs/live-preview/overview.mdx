@@ -109,7 +109,9 @@ The following arguments are provided to the `url` function:
 | **`globalConfig`** | The Global Admin Config of the Document being edited. [More details](../configuration/globals#admin-options).                          |
 | **`req`**          | The Payload Request object.  |
 
-If your application requires a fully qualified URL, such as within deploying to Vercel Preview Deployments, you can use the `req` property to build this URL:
+You can return either an absolute URL or relative URL from this function. If you don't know the URL of your frontend at build-time, you can return a relative URL, and in that case, Payload will automatically construct an absolute URL by injecting the protocol, domain, and port from your browser window. Returning a relative URL is helpful for platforms like Vercel where you may have preview deployment URLs that are unknown at build time.
+
+If your application requires a fully qualified URL, or you are attempting to preview with a frontend on a different domain, you can use the `req` property to build this URL:
 
 ```ts
 url: ({ data, req }) => `${req.protocol}//${req.host}/${data.slug}` // highlight-line

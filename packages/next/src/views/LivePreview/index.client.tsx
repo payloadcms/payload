@@ -61,6 +61,14 @@ type Props = {
   readonly serverURL: string
 } & DocumentSlots
 
+const getAbsoluteUrl = (url) => {
+  try {
+    return new URL(url, window.location.origin).href
+  } catch {
+    return url
+  }
+}
+
 const PreviewView: React.FC<Props> = ({
   collectionConfig,
   config,
@@ -552,7 +560,7 @@ export const LivePreviewClient: React.FC<
     readonly url: string
   } & DocumentSlots
 > = (props) => {
-  const { breakpoints, url } = props
+  const { breakpoints, url: incomingUrl } = props
   const { collectionSlug, globalSlug } = useDocumentInfo()
 
   const {
@@ -563,6 +571,11 @@ export const LivePreviewClient: React.FC<
     },
     getEntityConfig,
   } = useConfig()
+
+  const url =
+    incomingUrl.startsWith('http://') || incomingUrl.startsWith('https://')
+      ? incomingUrl
+      : getAbsoluteUrl(incomingUrl)
 
   const { isPopupOpen, openPopupWindow, popupRef } = usePopupWindow({
     eventType: 'payload-live-preview',

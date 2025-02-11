@@ -330,6 +330,7 @@ export const enTranslations = {
     takeOver: 'Take over',
     thisLanguage: 'English',
     time: 'Time',
+    timezone: 'Timezone',
     titleDeleted: '{{label}} "{{title}}" successfully deleted.',
     true: 'True',
     unauthorized: 'Unauthorized',
@@ -422,6 +423,7 @@ export const enTranslations = {
     requiresNoMoreThan: 'This field requires no more than {{count}} {{label}}.',
     requiresTwoNumbers: 'This field requires two numbers.',
     shorterThanMax: 'This value must be shorter than the max length of {{maxLength}} characters.',
+    timezoneRequired: 'A timezone is required.',
     trueOrFalse: 'This field can only be equal to true or false.',
     username:
       'Please enter a valid username. Can contain letters, numbers, hyphens, periods and underscores.',
