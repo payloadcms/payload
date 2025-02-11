@@ -35,7 +35,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 const {
-  _: [testSuiteArg],
+  _: [testSuiteArg = '_community'],
   ...args
 } = minimist(process.argv.slice(2))
 
@@ -43,6 +43,8 @@ if (!testSuiteArg || !fs.existsSync(path.resolve(dirname, testSuiteArg))) {
   console.log(chalk.red(`ERROR: The test folder "${testSuiteArg}" does not exist`))
   process.exit(0)
 }
+
+console.log(`Selected test suite: ${testSuiteArg}`)
 
 if (args.turbo === true) {
   process.env.TURBOPACK = '1'
@@ -68,13 +70,31 @@ if (args.o) {
   await open(`http://localhost:3000${adminRoute}`)
 }
 
+const findOpenPort = (startPort: number): Promise<number> => {
+  return new Promise((resolve, reject) => {
+    const server = createServer()
+    server.listen(startPort, () => {
+      console.log(`✓ Running on port ${startPort}`)
+      server.close(() => resolve(startPort))
+    })
+    server.on('error', () => {
+      console.log(`⚠ Port ${startPort} is in use, trying ${startPort + 1} instead.`)
+      findOpenPort(startPort + 1)
+        .then(resolve)
+        .catch(reject)
+    })
+  })
+}
+
 const port = process.env.PORT ? Number(process.env.PORT) : 3000
+
+const availablePort = await findOpenPort(port)
 
 // @ts-expect-error the same as in test/helpers/initPayloadE2E.ts
 const app = nextImport({
   dev: true,
   hostname: 'localhost',
-  port,
+  port: availablePort,
   dir: rootDir,
 })
 
@@ -88,7 +108,7 @@ void app.prepare().then(() => {
   createServer(async (req, res) => {
     const parsedUrl = parse(req.url || '', true)
     await handle(req, res, parsedUrl)
-  }).listen(port, () => {
+  }).listen(availablePort, () => {
     resolveServer()
   })
 })
@@ -97,8 +117,8 @@ await serverPromise
 process.env.PAYLOAD_DROP_DATABASE = process.env.PAYLOAD_DROP_DATABASE === 'false' ? 'false' : 'true'
 
 // fetch the admin url to force a render
-void fetch(`http://localhost:${port}${adminRoute}`)
-void fetch(`http://localhost:${port}/api/access`)
+void fetch(`http://localhost:${availablePort}${adminRoute}`)
+void fetch(`http://localhost:${availablePort}/api/access`)
 // This ensures that the next-server process is killed when this process is killed and doesn't linger around.
 process.on('SIGINT', () => {
   if (child) {

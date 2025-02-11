@@ -23,6 +23,7 @@ import {
   AsyncHooksBlock,
   CodeBlock,
   ConditionalLayoutBlock,
+  FilterOptionsBlock,
   RadioButtonsBlock,
   RelationshipBlock,
   RelationshipHasManyBlock,
@@ -32,6 +33,7 @@ import {
   TabBlock,
   TextBlock,
   UploadAndRichTextBlock,
+  ValidationBlock,
 } from './blocks.js'
 import { ModifyInlineBlockFeature } from './ModifyInlineBlockFeature/feature.server.js'
 
@@ -74,6 +76,8 @@ const editorConfig: ServerEditorConfig = {
     ModifyInlineBlockFeature(),
     BlocksFeature({
       blocks: [
+        ValidationBlock,
+        FilterOptionsBlock,
         AsyncHooksBlock,
         RichTextBlock,
         TextBlock,
@@ -316,6 +320,20 @@ export const LexicalFields: CollectionConfig = {
           HeadingFeature({ enabledHeadingSizes: ['h2', 'h4'] }),
         ],
       }),
+    },
+    {
+      type: 'ui',
+      name: 'clearLexicalState',
+      admin: {
+        components: {
+          Field: {
+            path: '/collections/Lexical/components/ClearState.js#ClearState',
+            clientProps: {
+              fieldName: 'lexicalSimple',
+            },
+          },
+        },
+      },
     },
     {
       name: 'lexicalWithBlocks',

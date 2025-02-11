@@ -93,7 +93,6 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
 
   useEffect(() => {
     if (hasWhereParam.current && !query?.where) {
-      setVisibleDrawer(undefined)
       hasWhereParam.current = false
     } else if (query?.where) {
       hasWhereParam.current = true
@@ -214,7 +213,6 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
           collectionPluralLabel={collectionConfig?.labels?.plural}
           collectionSlug={collectionConfig.slug}
           fields={collectionConfig?.fields}
-          key={String(hasWhereParam.current && !query?.where)}
           renderedFilters={renderedFilters}
         />
       </AnimateHeight>

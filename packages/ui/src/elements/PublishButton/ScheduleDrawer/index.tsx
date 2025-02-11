@@ -3,10 +3,12 @@
 
 import type { Where } from 'payload'
 
+import { TZDateMini as TZDate } from '@date-fns/tz/date/mini'
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
+import { transpose } from 'date-fns/transpose'
 import * as qs from 'qs-esm'
-import React from 'react'
+import React, { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 
 import type { Column } from '../../Table/index.js'
@@ -28,8 +30,9 @@ import { Gutter } from '../../Gutter/index.js'
 import { ReactSelect } from '../../ReactSelect/index.js'
 import { ShimmerEffect } from '../../ShimmerEffect/index.js'
 import { Table } from '../../Table/index.js'
-import { buildUpcomingColumns } from './buildUpcomingColumns.js'
 import './index.scss'
+import { TimezonePicker } from '../../TimezonePicker/index.js'
+import { buildUpcomingColumns } from './buildUpcomingColumns.js'
 
 const baseClass = 'schedule-publish'
 
@@ -46,7 +49,10 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
   const { toggleModal } = useModal()
   const {
     config: {
-      admin: { dateFormat },
+      admin: {
+        dateFormat,
+        timezones: { defaultTimezone, supportedTimezones },
+      },
       localization,
       routes: { api },
       serverURL,
@@ -57,12 +63,16 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
   const { schedulePublish } = useServerFunctions()
   const [type, setType] = React.useState<PublishType>('publish')
   const [date, setDate] = React.useState<Date>()
+  const [timezone, setTimezone] = React.useState<string>(defaultTimezone)
   const [locale, setLocale] = React.useState<{ label: string; value: string }>(defaultLocaleOption)
   const [processing, setProcessing] = React.useState(false)
   const modalTitle = t('general:schedulePublishFor', { title })
   const [upcoming, setUpcoming] = React.useState<UpcomingEvent[]>()
   const [upcomingColumns, setUpcomingColumns] = React.useState<Column[]>()
   const deleteHandlerRef = React.useRef<((id: number | string) => Promise<void>) | null>(() => null)
+
+  // Get the user timezone so we can adjust the displayed value against it
+  const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
   const localeOptions = React.useMemo(() => {
     if (localization) {
@@ -189,8 +199,10 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
           : undefined,
         global: globalSlug || undefined,
         locale: publishSpecificLocale,
+        timezone,
       })
 
+      setTimezone(defaultTimezone)
       setDate(undefined)
       toast.success(t('version:scheduledSuccessfully'))
       void fetchUpcoming()
@@ -200,7 +212,60 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
     }
 
     setProcessing(false)
-  }, [date, t, schedulePublish, type, locale, collectionSlug, id, globalSlug, fetchUpcoming])
+  }, [
+    date,
+    locale,
+    type,
+    t,
+    schedulePublish,
+    collectionSlug,
+    id,
+    globalSlug,
+    timezone,
+    defaultTimezone,
+    fetchUpcoming,
+  ])
+
+  const displayedValue = useMemo(() => {
+    if (timezone && userTimezone && date) {
+      // Create TZDate instances for the selected timezone and the user's timezone
+      // These instances allow us to transpose the date between timezones while keeping the same time value
+      const DateWithOriginalTz = TZDate.tz(timezone)
+      const DateWithUserTz = TZDate.tz(userTimezone)
+
+      const modifiedDate = new TZDate(date).withTimeZone(timezone)
+
+      // Transpose the date to the selected timezone
+      const dateWithTimezone = transpose(modifiedDate, DateWithOriginalTz)
+
+      // Transpose the date to the user's timezone - this is necessary because the react-datepicker component insists on displaying the date in the user's timezone
+      const dateWithUserTimezone = transpose(dateWithTimezone, DateWithUserTz)
+
+      return dateWithUserTimezone.toISOString()
+    }
+
+    return date
+  }, [timezone, date, userTimezone])
+
+  const onChangeDate = useCallback(
+    (incomingDate: Date) => {
+      if (timezone && incomingDate) {
+        // Create TZDate instances for the selected timezone
+        const tzDateWithUTC = TZDate.tz(timezone)
+
+        // Creates a TZDate instance for the user's timezone  — this is default behaviour of TZDate as it wraps the Date constructor
+        const dateToUserTz = new TZDate(incomingDate)
+
+        // Transpose the date to the selected timezone
+        const dateWithTimezone = transpose(dateToUserTz, tzDateWithUTC)
+
+        setDate(dateWithTimezone || null)
+      } else {
+        setDate(incomingDate || null)
+      }
+    },
+    [setDate, timezone],
+  )
 
   React.useEffect(() => {
     if (!upcoming) {
@@ -252,12 +317,20 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
         <FieldLabel label={t('general:time')} required />
         <DatePickerField
           minDate={new Date()}
-          onChange={(e) => setDate(e)}
+          onChange={(e) => onChangeDate(e)}
           pickerAppearance="dayAndTime"
           readOnly={processing}
           timeIntervals={5}
-          value={date}
+          value={displayedValue}
         />
+        {supportedTimezones.length > 0 && (
+          <TimezonePicker
+            id={`timezone-picker`}
+            onChange={setTimezone}
+            options={supportedTimezones}
+            selectedTimezone={timezone}
+          />
+        )}
         <br />
         {localeOptions.length > 0 && type === 'publish' && (
           <React.Fragment>

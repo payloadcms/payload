@@ -333,6 +333,7 @@ export const deTranslations: DefaultTranslationsObject = {
     takeOver: 'Übernehmen',
     thisLanguage: 'Deutsch',
     time: 'Zeit',
+    timezone: 'Zeitzone',
     titleDeleted: '{{label}} {{title}} wurde erfolgreich gelöscht.',
     true: 'Wahr',
     unauthorized: 'Nicht autorisiert',
@@ -427,6 +428,7 @@ export const deTranslations: DefaultTranslationsObject = {
     requiresNoMoreThan: 'Dieses Feld kann nicht mehr als {{count}} {{label}} enthalten.',
     requiresTwoNumbers: 'Dieses Feld muss zwei Nummern enthalten.',
     shorterThanMax: 'Dieser Wert muss kürzer als die maximale Länge von {{maxLength}} sein.',
+    timezoneRequired: 'Eine Zeitzone ist erforderlich.',
     trueOrFalse: 'Dieses Feld kann nur wahr oder falsch sein.',
     username:
       'Bitte geben Sie einen gültigen Benutzernamen ein. Dieser kann Buchstaben, Zahlen, Bindestriche, Punkte und Unterstriche enthalten.',

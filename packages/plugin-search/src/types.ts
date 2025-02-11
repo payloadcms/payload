@@ -3,7 +3,6 @@ import type {
   CollectionAfterDeleteHook,
   CollectionConfig,
   Field,
-  LabelFunction,
   Locale,
   Payload,
   PayloadRequest,
@@ -43,18 +42,34 @@ export type SearchPluginConfig = {
   defaultPriorities?: {
     [collection: string]: ((doc: any) => number | Promise<number>) | number
   }
+  /**
+   * Controls whether drafts are deleted from the search index
+   *
+   * @default true
+   */
   deleteDrafts?: boolean
   localize?: boolean
+  /**
+   * We use batching when re-indexing large collections. You can control the amount of items per batch, lower numbers should help with memory.
+   *
+   * @default 50
+   */
   reindexBatchSize?: number
   searchOverrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
+  /**
+   * Controls whether drafts are synced to the search index
+   *
+   * @default false
+   */
   syncDrafts?: boolean
 }
 
 export type CollectionLabels = {
-  [collection: string]: {
-    plural?: LabelFunction | StaticLabel
-    singular?: LabelFunction | StaticLabel
-  }
+  [collection: string]: CollectionConfig['labels']
+}
+
+export type ResolvedCollectionLabels = {
+  [collection: string]: StaticLabel
 }
 
 export type SearchPluginConfigWithLocales = {
@@ -68,7 +83,7 @@ export type SyncWithSearchArgs = {
 } & Omit<Parameters<CollectionAfterChangeHook>[0], 'collection'>
 
 export type SyncDocArgs = {
-  locale?: string
+  locale?: Locale['code']
   onSyncError?: () => void
 } & Omit<SyncWithSearchArgs, 'context' | 'previousDoc'>
 

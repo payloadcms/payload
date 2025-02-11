@@ -328,6 +328,7 @@ export const viTranslations: DefaultTranslationsObject = {
     takeOver: 'Tiếp quản',
     thisLanguage: 'Vietnamese (Tiếng Việt)',
     time: 'Thời gian',
+    timezone: 'Múi giờ',
     titleDeleted: '{{label}} {{title}} đã được xóa thành công.',
     true: 'Thật',
     unauthorized: 'Không có quyền truy cập.',
@@ -420,6 +421,7 @@ export const viTranslations: DefaultTranslationsObject = {
     requiresNoMoreThan: 'Field này không thể vượt quá {{count}} {{label}}.',
     requiresTwoNumbers: 'Field này cần tối thiểu 2 chữ số.',
     shorterThanMax: 'Giá trị phải ngắn hơn hoặc bằng {{maxLength}} ký tự.',
+    timezoneRequired: 'Yêu cầu phải có múi giờ.',
     trueOrFalse: 'Field này chỉ có thể chứa giá trị true hoặc false.',
     username:
       'Vui lòng nhập một tên người dùng hợp lệ. Có thể chứa các chữ cái, số, dấu gạch ngang, dấu chấm và dấu gạch dưới.',

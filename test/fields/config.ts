@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -128,6 +129,13 @@ export default buildConfigWithDefaults({
       client: {
         'new-value': 'client available',
       },
+    },
+    timezones: {
+      supportedTimezones: ({ defaultTimezones }) => [
+        ...defaultTimezones,
+        { label: '(GMT-6) Monterrey, Nuevo Leon', value: 'America/Monterrey' },
+      ],
+      defaultTimezone: 'America/Monterrey',
     },
   },
   localization: {

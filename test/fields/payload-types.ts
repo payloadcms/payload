@@ -7,6 +7,60 @@
  */
 
 /**
+ * Supported timezones in IANA format.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supportedTimezones".
+ */
+export type SupportedTimezones =
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji'
+  | 'America/Monterrey';
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "BlockColumns".
  */
@@ -487,7 +541,7 @@ export interface LexicalAccessControl {
  */
 export interface SelectVersionsField {
   id: string;
-  hasMany?: ('a' | 'b' | 'c')[] | null;
+  hasMany?: ('a' | 'b' | 'c' | 'd')[] | null;
   array?:
     | {
         hasManyArr?: ('a' | 'b' | 'c')[] | null;
@@ -504,6 +558,7 @@ export interface SelectVersionsField {
     | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -589,6 +644,12 @@ export interface ArrayField {
       }[]
     | null;
   customArrayField?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  arrayWithLabels?:
     | {
         text?: string | null;
         id?: string | null;
@@ -724,6 +785,14 @@ export interface BlockField {
         id?: string | null;
         blockName?: string | null;
         blockType: 'relationships';
+      }[]
+    | null;
+  blockWithLabels?:
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'text';
       }[]
     | null;
   updatedAt: string;
@@ -880,6 +949,7 @@ export interface TextField {
   fieldWithDefaultValue?: string | null;
   dependentOnFieldWithDefaultValue?: string | null;
   hasMany?: string[] | null;
+  readOnlyHasMany?: string[] | null;
   validatesHasMany?: string[] | null;
   localizedHasMany?: string[] | null;
   withMinRows?: string[] | null;
@@ -1065,6 +1135,29 @@ export interface DateField {
   dayOnly?: string | null;
   dayAndTime?: string | null;
   monthOnly?: string | null;
+  defaultWithTimezone?: string | null;
+  defaultWithTimezone_tz?: SupportedTimezones;
+  /**
+   * This date here should be required.
+   */
+  dayAndTimeWithTimezone: string;
+  dayAndTimeWithTimezone_tz: SupportedTimezones;
+  timezoneBlocks?:
+    | {
+        dayAndTime?: string | null;
+        dayAndTime_tz?: SupportedTimezones;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'dateBlock';
+      }[]
+    | null;
+  timezoneArray?:
+    | {
+        dayAndTime?: string | null;
+        dayAndTime_tz?: SupportedTimezones;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2170,6 +2263,7 @@ export interface SelectVersionsFieldsSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2257,6 +2351,12 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
         id?: T;
       };
   customArrayField?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  arrayWithLabels?:
     | T
     | {
         text?: T;
@@ -2439,6 +2539,17 @@ export interface BlockFieldsSelect<T extends boolean = true> {
           | T
           | {
               relationship?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  blockWithLabels?:
+    | T
+    | {
+        text?:
+          | T
+          | {
+              text?: T;
               id?: T;
               blockName?: T;
             };
@@ -2711,6 +2822,29 @@ export interface DateFieldsSelect<T extends boolean = true> {
   dayOnly?: T;
   dayAndTime?: T;
   monthOnly?: T;
+  defaultWithTimezone?: T;
+  defaultWithTimezone_tz?: T;
+  dayAndTimeWithTimezone?: T;
+  dayAndTimeWithTimezone_tz?: T;
+  timezoneBlocks?:
+    | T
+    | {
+        dateBlock?:
+          | T
+          | {
+              dayAndTime?: T;
+              dayAndTime_tz?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  timezoneArray?:
+    | T
+    | {
+        dayAndTime?: T;
+        dayAndTime_tz?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3241,6 +3375,7 @@ export interface TextFieldsSelect<T extends boolean = true> {
   fieldWithDefaultValue?: T;
   dependentOnFieldWithDefaultValue?: T;
   hasMany?: T;
+  readOnlyHasMany?: T;
   validatesHasMany?: T;
   localizedHasMany?: T;
   withMinRows?: T;

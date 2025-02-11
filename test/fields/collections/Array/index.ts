@@ -246,6 +246,20 @@ const ArrayFields: CollectionConfig = {
         },
       },
     },
+    {
+      name: 'arrayWithLabels',
+      type: 'array',
+      labels: {
+        singular: ({ t }) => t('authentication:account'),
+        plural: ({ t }) => t('authentication:generate'),
+      },
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
   ],
   slug: arrayFieldsSlug,
   versions: true,

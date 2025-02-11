@@ -328,6 +328,7 @@ export const daTranslations: DefaultTranslationsObject = {
     takeOver: 'Overtag',
     thisLanguage: 'Dansk',
     time: 'Tid',
+    timezone: 'Tidszone',
     titleDeleted: '{{label}} "{{title}}" slettet.',
     true: 'Sandt',
     unauthorized: 'Uautoriseret',
@@ -420,6 +421,7 @@ export const daTranslations: DefaultTranslationsObject = {
     requiresNoMoreThan: 'Dette felt kræver maks {{count}} {{label}}.',
     requiresTwoNumbers: 'Dette felt kræver to numre.',
     shorterThanMax: 'Denne værdi skal være kortere end den maksimale længde af {{maxLength}} tegn.',
+    timezoneRequired: 'En tidszone er nødvendig.',
     trueOrFalse: 'Denne værdi kan kun være lig med sandt eller falsk.',
     username:
       'Indtast et brugernavn. Kan indeholde bogstaver, tal, bindestreger, punktum og underscores.',

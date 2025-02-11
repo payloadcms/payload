@@ -52,30 +52,37 @@ export async function parseParams({
         // So we need to loop on keys again here to handle each operator independently
         const pathOperators = where[relationOrPath]
         if (typeof pathOperators === 'object') {
-          for (const operator of Object.keys(pathOperators)) {
-            if (validOperatorSet.has(operator as Operator)) {
-              const searchParam = await buildSearchParam({
-                collectionSlug,
-                fields,
-                globalSlug,
-                incomingPath: relationOrPath,
-                locale,
-                operator,
-                payload,
-                val: pathOperators[operator],
-              })
+          const validOperators = Object.keys(pathOperators).filter((operator) =>
+            validOperatorSet.has(operator as Operator),
+          )
+          for (const operator of validOperators) {
+            const searchParam = await buildSearchParam({
+              collectionSlug,
+              fields,
+              globalSlug,
+              incomingPath: relationOrPath,
+              locale,
+              operator,
+              payload,
+              val: pathOperators[operator],
+            })
 
-              if (searchParam?.value && searchParam?.path) {
-                result = {
-                  ...result,
-                  [searchParam.path]: searchParam.value,
+            if (searchParam?.value && searchParam?.path) {
+              if (validOperators.length > 1) {
+                if (!result.$and) {
+                  result.$and = []
                 }
-              } else if (typeof searchParam?.value === 'object') {
-                result = deepMergeWithCombinedArrays(result, searchParam.value, {
-                  // dont clone Types.ObjectIDs
-                  clone: false,
+                result.$and.push({
+                  [searchParam.path]: searchParam.value,
                 })
+              } else {
+                result[searchParam.path] = searchParam.value
               }
+            } else if (typeof searchParam?.value === 'object') {
+              result = deepMergeWithCombinedArrays(result, searchParam.value, {
+                // dont clone Types.ObjectIDs
+                clone: false,
+              })
             }
           }
         }

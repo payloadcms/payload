@@ -1,6 +1,7 @@
 import type {
   DefaultTranslationKeys,
   DefaultTranslationsObject,
+  I18n,
   I18nClient,
   I18nOptions,
   TFunction,
@@ -425,6 +426,32 @@ export const serverProps: (keyof ServerProps)[] = [
   'permissions',
 ]
 
+export type Timezone = {
+  label: string
+  value: string
+}
+
+type SupportedTimezonesFn = (args: { defaultTimezones: Timezone[] }) => Timezone[]
+
+type TimezonesConfig = {
+  /**
+   * The default timezone to use for the admin panel.
+   */
+  defaultTimezone?: string
+  /**
+   * Provide your own list of supported timezones for the admin panel
+   *
+   * Values should be IANA timezone names, eg. `America/New_York`
+   *
+   * We use `@date-fns/tz` to handle timezones
+   */
+  supportedTimezones?: SupportedTimezonesFn | Timezone[]
+}
+
+type SanitizedTimezoneConfig = {
+  supportedTimezones: Timezone[]
+} & Omit<TimezonesConfig, 'supportedTimezones'>
+
 export type CustomComponent<TAdditionalProps extends object = Record<string, any>> =
   PayloadComponent<ServerProps & TAdditionalProps, TAdditionalProps>
 
@@ -469,6 +496,14 @@ export type BaseLocalizationConfig = {
    * @default true
    */
   fallback?: boolean
+  /**
+   * Define a function to filter the locales made available in Payload admin UI
+   * based on user.
+   */
+  filterAvailableLocales?: (args: {
+    locales: Locale[]
+    req: PayloadRequest
+  }) => Locale[] | Promise<Locale[]>
 }
 
 export type LocalizationConfigWithNoLabels = Prettify<
@@ -871,6 +906,10 @@ export type Config = {
      * @default 'all' // The theme can be configured by users
      */
     theme?: 'all' | 'dark' | 'light'
+    /**
+     * Configure timezone related settings for the admin panel.
+     */
+    timezones?: TimezonesConfig
     /** The slug of a Collection that you want to be used to log in to the Admin dashboard. */
     user?: string
   }
@@ -1122,7 +1161,16 @@ export type Config = {
      * Allows you to modify the base JSON schema that is generated during generate:types. This JSON schema will be used
      * to generate the TypeScript interfaces.
      */
-    schema?: Array<(args: { jsonSchema: JSONSchema4 }) => JSONSchema4>
+    schema?: Array<
+      (args: {
+        collectionIDFieldTypes: {
+          [key: string]: 'number' | 'string'
+        }
+        config: SanitizedConfig
+        i18n: I18n
+        jsonSchema: JSONSchema4
+      }) => JSONSchema4
+    >
   }
   /**
    * Customize the handling of incoming file uploads for collections that have uploads enabled.
@@ -1131,6 +1179,9 @@ export type Config = {
 }
 
 export type SanitizedConfig = {
+  admin: {
+    timezones: SanitizedTimezoneConfig
+  } & DeepRequired<Config['admin']>
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */
   editor?: RichTextAdapter<any, any, any>
@@ -1155,7 +1206,7 @@ export type SanitizedConfig = {
   // E.g. in packages/ui/src/graphics/Account/index.tsx in getComponent, if avatar.Component is casted to what it's supposed to be,
   // the result type is different
   DeepRequired<Config>,
-  'collections' | 'editor' | 'endpoint' | 'globals' | 'i18n' | 'localization' | 'upload'
+  'admin' | 'collections' | 'editor' | 'endpoint' | 'globals' | 'i18n' | 'localization' | 'upload'
 >
 
 export type EditConfig = EditConfigWithoutRoot | EditConfigWithRoot
