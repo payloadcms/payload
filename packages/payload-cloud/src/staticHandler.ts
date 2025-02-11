@@ -102,18 +102,26 @@ export const getStaticHandler = ({ cachingOptions, collection }: Args): StaticHa
          * if it does not find the object key, which we have disallowed in our bucket policy.
          */
         if (err.name === 'AccessDenied') {
-          req.payload.logger.error({
+          req.payload.logger.warn({
+            awsErr: {
+              ...err,
+              // Remove stack trace, not relevant
+              stack: undefined,
+            },
             collectionSlug: collection.slug,
-            err,
             msg: `Requested file not found or accessible in cloud storage: ${params.filename}`,
             params,
             requestedKey: key,
           })
           return new Response(null, { status: 404, statusText: 'Not Found' })
         } else if (err.name === 'NoSuchKey') {
-          req.payload.logger.error({
+          req.payload.logger.warn({
+            awsErr: {
+              ...err,
+              // Remove stack trace, not relevant
+              stack: undefined,
+            },
             collectionSlug: collection.slug,
-            err,
             msg: `Requested file not found in cloud storage: ${params.filename}`,
             params,
             requestedKey: key,
