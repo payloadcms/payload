@@ -184,6 +184,14 @@ export const Posts: CollectionConfig = {
       relationTo: 'posts',
     },
     {
+      name: 'users',
+      type: 'relationship',
+      admin: {
+        position: 'sidebar',
+      },
+      relationTo: 'users',
+    },
+    {
       name: 'customCell',
       type: 'text',
       admin: {

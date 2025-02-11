@@ -1,8 +1,8 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { addListFilter } from 'helpers/e2e/addListFilter.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
-import { openListFilters } from 'helpers/e2e/openListFilters.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -43,7 +43,6 @@ import {
   slug,
   versionedRelationshipFieldSlug,
 } from './slugs.js'
-import { addListFilter } from 'helpers/e2e/addListFilter.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -491,25 +490,13 @@ describe('Relationship Field', () => {
     await page.goto(versionedRelationshipFieldURL.list)
 
     await page.locator('.list-controls__toggle-columns').click()
-    await openListFilters(page, {})
-    await page.locator('.where-builder__add-first-filter').click()
 
-    const conditionField = page.locator('.condition__field')
-    await conditionField.click()
-
-    const dropdownFieldOptions = conditionField.locator('.rs__option')
-    await dropdownFieldOptions.locator('text=Relationship Field').nth(0).click()
-
-    const operatorField = page.locator('.condition__operator')
-    await operatorField.click()
-
-    const dropdownOperatorOptions = operatorField.locator('.rs__option')
-    await dropdownOperatorOptions.locator('text=exists').click()
-
-    const valueField = page.locator('.condition__value')
-    await valueField.click()
-    const dropdownValueOptions = valueField.locator('.rs__option')
-    await dropdownValueOptions.locator('text=True').click()
+    await addListFilter({
+      page,
+      fieldLabel: 'Relationship Field',
+      operatorLabel: 'exists',
+      value: 'True',
+    })
 
     await expect(page.locator(tableRowLocator)).toHaveCount(1)
   })
