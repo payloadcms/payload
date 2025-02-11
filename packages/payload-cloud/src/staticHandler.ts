@@ -9,6 +9,7 @@ import { getStorageClient } from './utilities/getStorageClient.js'
 interface Args {
   cachingOptions?: PluginOptions['uploadCaching']
   collection: CollectionConfig
+  debug?: boolean
 }
 
 // Type guard for NodeJS.Readable streams
@@ -32,7 +33,7 @@ const streamToBuffer = async (readableStream: any) => {
   return Buffer.concat(chunks)
 }
 
-export const getStaticHandler = ({ cachingOptions, collection }: Args): StaticHandler => {
+export const getStaticHandler = ({ cachingOptions, collection, debug }: Args): StaticHandler => {
   let maxAge = 86400 // 24 hours default
   let collCacheConfig: CollectionCachingConfig | undefined
   if (cachingOptions !== false) {
@@ -103,24 +104,16 @@ export const getStaticHandler = ({ cachingOptions, collection }: Args): StaticHa
          */
         if (err.name === 'AccessDenied') {
           req.payload.logger.warn({
-            awsErr: {
-              ...err,
-              // Remove stack trace, not relevant
-              stack: undefined,
-            },
+            awsErr: debug ? err : err.name,
             collectionSlug: collection.slug,
-            msg: `Requested file not found or accessible in cloud storage: ${params.filename}`,
+            msg: `Requested file not found in cloud storage: ${params.filename}`,
             params,
             requestedKey: key,
           })
           return new Response(null, { status: 404, statusText: 'Not Found' })
         } else if (err.name === 'NoSuchKey') {
           req.payload.logger.warn({
-            awsErr: {
-              ...err,
-              // Remove stack trace, not relevant
-              stack: undefined,
-            },
+            awsErr: debug ? err : err.name,
             collectionSlug: collection.slug,
             msg: `Requested file not found in cloud storage: ${params.filename}`,
             params,
