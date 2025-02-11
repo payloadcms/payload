@@ -106,6 +106,7 @@ export const traverseFields = ({
         selectMode,
         showHiddenFields,
         siblingDoc,
+        siblingFields: fields,
         triggerAccessControl,
         triggerHooks,
       }),

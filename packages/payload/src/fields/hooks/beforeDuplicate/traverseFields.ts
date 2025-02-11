@@ -55,6 +55,7 @@ export const traverseFields = async <T>({
         parentSchemaPath,
         req,
         siblingDoc,
+        siblingFields: fields,
       }),
     )
   })

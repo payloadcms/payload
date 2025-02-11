@@ -26,6 +26,7 @@ type Args = {
   req: PayloadRequest
   siblingData: JsonObject
   siblingDoc: JsonObject
+  siblingFields?: (Field | TabAsField)[]
 }
 
 export const traverseFields = async ({
@@ -45,6 +46,7 @@ export const traverseFields = async ({
   req,
   siblingData,
   siblingDoc,
+  siblingFields,
 }: Args): Promise<void> => {
   const promises = []
 
@@ -68,6 +70,7 @@ export const traverseFields = async ({
         req,
         siblingData,
         siblingDoc,
+        siblingFields,
       }),
     )
   })

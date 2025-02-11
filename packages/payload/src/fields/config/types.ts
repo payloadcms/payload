@@ -164,7 +164,8 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
   /**
    * Only available in `afterRead` hooks
    */
-  currentDepth?: number /**
+  currentDepth?: number
+  /**
    * Only available in `afterRead` hooks
    */
   /** The data passed to update the document within create and update operations, and the full document itself in the afterRead hook. */
@@ -212,6 +213,10 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
    * The original siblingData with locales (not modified by any hooks). Only available in `beforeChange` and `beforeDuplicate` field hooks.
    */
   siblingDocWithLocales?: Record<string, unknown>
+  /**
+   * The sibling fields of the field which the hook is running against.
+   */
+  siblingFields: (Field | TabAsField)[]
   /** The value of the field. */
   value?: TValue
 }
