@@ -106,7 +106,7 @@ async function createInlineBlock({
    */
   await page.keyboard.press(' ')
   await page.keyboard.press('/')
-  await page.keyboard.type(name.includes(' ') ? name.split(' ')[0] : name)
+  await page.keyboard.type(name.includes(' ') ? (name.split(' ')?.[0] ?? name) : name)
 
   // Create Rich Text Block
   const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
@@ -900,8 +900,8 @@ describe('lexicalBlocks', () => {
         const popoverHeading2ButtonBoundingBox = await popoverHeading2Button.boundingBox()
         expect(popoverHeading2ButtonBoundingBox).not.toBeNull()
         expect(popoverHeading2ButtonBoundingBox).not.toBeUndefined()
-        expect(popoverHeading2ButtonBoundingBox.height).toBeGreaterThan(0)
-        expect(popoverHeading2ButtonBoundingBox.width).toBeGreaterThan(0)
+        expect(popoverHeading2ButtonBoundingBox?.height).toBeGreaterThan(0)
+        expect(popoverHeading2ButtonBoundingBox?.width).toBeGreaterThan(0)
 
         // Now click the button to see if it actually works. Simulate an actual mouse click instead of using .click()
         // by using page.mouse and the correct coordinates
@@ -910,8 +910,8 @@ describe('lexicalBlocks', () => {
         // This is why we use page.mouse.click() here. It's the most effective way of detecting such a z-index issue
         // and usually the only method which works.
 
-        const x = popoverHeading2ButtonBoundingBox.x
-        const y = popoverHeading2ButtonBoundingBox.y
+        const x = popoverHeading2ButtonBoundingBox?.x ?? 0
+        const y = popoverHeading2ButtonBoundingBox?.y ?? 0
 
         await page.mouse.click(x, y, { button: 'left' })
 
@@ -1465,7 +1465,7 @@ describe('lexicalBlocks', () => {
       await codeEditor.scrollIntoViewIfNeeded()
       await expect(codeEditor).toBeVisible()
 
-      const height = (await codeEditor.boundingBox()).height
+      const height = (await codeEditor.boundingBox())?.height
 
       await expect(() => {
         expect(height).toBe(56)
@@ -1473,7 +1473,7 @@ describe('lexicalBlocks', () => {
       await codeEditor.click()
       await page.keyboard.press('Enter')
 
-      const height2 = (await codeEditor.boundingBox()).height
+      const height2 = (await codeEditor.boundingBox())?.height
       await expect(() => {
         expect(height2).toBe(74)
       }).toPass()
