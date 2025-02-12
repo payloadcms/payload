@@ -1,12 +1,12 @@
 import { type Block, type BlockSlug, type Config, traverseFields } from 'payload'
 
 export const autoDedupeBlocksPlugin =
-  (args?: { debug?: boolean; disabled?: boolean }) =>
+  (args?: { debug?: boolean; disabled?: boolean; silent?: boolean }) =>
   (config: Config): Config => {
     if (!args) {
       args = {}
     }
-    const { disabled = false, debug = false } = args
+    const { disabled = false, debug = false, silent = false } = args
 
     if (disabled) {
       return config
@@ -31,13 +31,13 @@ export const autoDedupeBlocksPlugin =
               if (!block) {
                 continue
               }
-              deduplicateBlock({ block, config })
+              deduplicateBlock({ block, config, silent })
               field.blockReferences[i] = block.slug as BlockSlug
             }
             field.blocks = []
           }
 
-          if (debug) {
+          if (debug && !silent) {
             console.log('migrated field', field)
           }
         }
@@ -49,9 +49,11 @@ export const autoDedupeBlocksPlugin =
 export const deduplicateBlock = ({
   block: dedupedBlock,
   config,
+  silent,
 }: {
   block: Block
   config: Config
+  silent?: boolean
 }) => {
   /**
    * Will be true if a block with the same slug is found.
@@ -76,7 +78,8 @@ export const deduplicateBlock = ({
         }
         if (
           // Object reference check for just the block fields - it's more likely that top-level block keys have been spread
-          !Object.is(existingBlock.fields, dedupedBlock.fields)
+          !Object.is(existingBlock.fields, dedupedBlock.fields) &&
+          !silent
         ) {
           // only throw warning:
           console.warn(
