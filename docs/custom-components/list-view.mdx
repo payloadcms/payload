@@ -36,12 +36,14 @@ const config = buildConfig({
 })
 ```
 
-Here's an example of a simple List View component:
+Here's are some examples of simple List View components. These can be either Server or Client components, depending on your needs. Keep in mind that the props and types for these components are different depending on its type.
+
+### Server Component
 
 ```tsx
 import React from 'react'
 
-const MyCustomListView: React.FC = () => {
+const MyCustomServerListView: React.FC = () => {
   return (
     <div>
       <p>This is a custom List View.</p>
@@ -49,6 +51,25 @@ const MyCustomListView: React.FC = () => {
   )
 }
 ```
+
+_For details on how to build Custom Views, including all available props, see [Building Custom Views](./custom-views#building-custom-views)._
+
+### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+
+const MyCustomClientListView: React.FC = () => {
+  return (
+    <div>
+      <p>This is a custom List View.</p>
+    </div>
+  )
+}
+```
+
+_For details on how to build Custom Views, including all available props, see [Building Custom Views](./custom-views#building-custom-views)._
 
 ## Custom Components
 

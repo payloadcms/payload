@@ -36,19 +36,58 @@ const config = buildConfig({
 })
 ```
 
-Here's an example of a simple Edit View component:
+Here's are some examples of simple Edit View components. These can be either Server or Client components, depending on your needs. Keep in mind that the props and types for these components are different depending on its type.
+
+#### Server Component
 
 ```tsx
 import React from 'react'
 
-const MyCustomEditView: React.FC = () => {
+import type { ServerSideEditViewProps } from 'payload'
+
+import { DefaultEditView } from '@payloadcms/ui'
+
+const MyCustomServerEditView: React.FC<ServerSideEditViewProps> = ({
+  Description,
+  PreviewButton,
+  PublishButton,
+  SaveButton,
+  SaveDraftButton,
+  Upload
+}) => {
   return (
-    <div>
-      <p>This is a custom Edit View.</p>
-    </div>
+    <DefaultEditView
+      Description={Description}
+      PreviewButton={PreviewButton}
+      PublishButton={PublishButton}
+      SaveButton={SaveButton}
+      SaveDraftButton={SaveDraftButton}
+      Upload={Upload}
+    />
   )
 }
 ```
+
+_For details on how to build Custom Views, including all available props, see [Building Custom Views](./custom-views#building-custom-views)._
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+
+import type { ClientSideEditViewProps } from 'payload'
+
+import { DefaultEditView } from '@payloadcms/ui'
+
+const MyCustomClientEditView: React.FC<ClientSideEditViewProps> = (props) => {
+  return (
+    <DefaultEditView {...props} />
+  )
+}
+```
+
+_For details on how to build Custom Views, including all available props, see [Building Custom Views](./custom-views#building-custom-views)._
 
 ## Custom Components
 
@@ -141,10 +180,11 @@ Here's an example of a simple `SaveButton` component:
 
 ```tsx
 import React from 'react'
+import { SaveButton } from '@payloadcms/ui'
 
 const MySaveButtonComponent: React.FC = () => {
   return (
-    <button>Save</button>
+    <SaveButton label="Save" />
   )
 }
 ```
@@ -172,10 +212,11 @@ Here's an example of a simple `SaveDraftButton` component:
 
 ```tsx
 import React from 'react'
+import { SaveDraftButton } from '@payloadcms/ui'
 
 const MySaveDraftComponent: React.FC = () => {
   return (
-    <button>Save Draft</button>
+    <SaveDraftButton />
   )
 }
 ```
@@ -203,10 +244,11 @@ Here's an example of a simple `PublishButton` component:
 
 ```tsx
 import React from 'react'
+import { PublishButton } from '@payloadcms/ui'
 
 const MyPublishButtonComponent: React.FC = () => {
   return (
-    <button>Publish</button>
+    <PublishButton label="Publish" />
   )
 }
 ```
@@ -234,10 +276,11 @@ Here's an example of a simple `PreviewButton` component:
 
 ```tsx
 import React from 'react'
+import { PreviewButton } from '@payloadcms/ui'
 
 const MyPreviewComponent: React.FC = () => {
   return (
-    <button>Preview</button>
+    <PreviewButton />
   )
 }
 ```
