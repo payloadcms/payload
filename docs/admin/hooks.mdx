@@ -1115,7 +1115,9 @@ This is useful for scenarios where you need to trigger another fetch regardless 
 
 ## useRouteTransition
 
-Route transitions are useful in showing immediate visual feedback to the user when navigating between pages. By default, any instances of `Link` from `@payloadcms/ui` will already have trigger route transitions.
+Route transitions are useful in showing immediate visual feedback to the user when navigating between pages. This is especially useful on slow networks when navigating to data heavy or process intensive pages.
+
+By default, any instances of `Link` from `@payloadcms/ui` will trigger route transitions dy default.
 
 ```tsx
 import { Link } from '@payloadcms/ui'
@@ -1129,7 +1131,7 @@ const MyComponent = () => {
 }
 ```
 
-However, you may need to trigger route transitions programmatically in other scenarios, such as when using `router.push` from `next/router`. To do this, you'll need to wrap your function calls with the `startRouteTransition` method provided by the `useRouteTransition` hook.
+You can also trigger route transitions programmatically, such as when using `router.push` from `next/router`. To do this, wrap your function calls with the `startRouteTransition` method provided by the `useRouteTransition` hook.
 
 ```ts
 'use client'

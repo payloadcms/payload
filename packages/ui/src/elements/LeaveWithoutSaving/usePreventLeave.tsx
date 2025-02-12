@@ -10,7 +10,7 @@ import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 
 function on<T extends Document | EventTarget | HTMLElement | Window>(
   obj: null | T,
-  ...args: [string, () => null | void, ...any] | Parameters<T['addEventListener']>
+  ...args: [string, (() => void) | null, ...any] | Parameters<T['addEventListener']>
 ): void {
   if (obj && obj.addEventListener) {
     obj.addEventListener(...(args as Parameters<HTMLElement['addEventListener']>))
@@ -19,7 +19,7 @@ function on<T extends Document | EventTarget | HTMLElement | Window>(
 
 function off<T extends Document | EventTarget | HTMLElement | Window>(
   obj: null | T,
-  ...args: [string, () => null | void, ...any] | Parameters<T['removeEventListener']>
+  ...args: [string, (() => void) | null, ...any] | Parameters<T['removeEventListener']>
 ): void {
   if (obj && obj.removeEventListener) {
     obj.removeEventListener(...(args as Parameters<HTMLElement['removeEventListener']>))

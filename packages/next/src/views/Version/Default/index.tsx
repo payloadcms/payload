@@ -92,7 +92,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
     const search = current.toString()
     const query = search ? `?${search}` : ''
 
-    // TODO: this transition happens too frequently on initial renders, need to evaluate
+    // TODO: this transition occurs multiple times during the initial rendering phases, need to evaluate
     startRouteTransition(() => router.push(`${pathname}${query}`))
   }, [
     compareValue,
