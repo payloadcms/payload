@@ -238,7 +238,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   config.blocks = []
   if (incomingConfig.blocks?.length) {
     for (const block of incomingConfig.blocks) {
-      const sanitizedBlock = flattenBlock({ block })
+      const sanitizedBlock = block
 
       if (sanitizedBlock._sanitized === true) {
         continue
@@ -259,7 +259,9 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
         validRelationships,
       })
 
-      config.blocks.push(sanitizedBlock)
+      const flattenedSanitizedBlock = flattenBlock({ block })
+
+      config.blocks.push(flattenedSanitizedBlock)
     }
   }
 
