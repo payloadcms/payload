@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import type { AdminViewConfig } from '../../admin/views/types.js'
 import type { SanitizedConfig } from '../../config/types.js'

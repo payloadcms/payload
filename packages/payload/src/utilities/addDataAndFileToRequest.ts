@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { PayloadRequest } from '../types/index.js'
 
 import { APIError } from '../errors/APIError.js'

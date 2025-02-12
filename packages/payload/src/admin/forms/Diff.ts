@@ -1,3 +1,5 @@
+// @ts-strict-ignore
+
 import type { I18nClient } from '@payloadcms/translations'
 
 import type { ClientField, Field, FieldTypes, Tab } from '../../fields/config/types.js'
