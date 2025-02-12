@@ -1,7 +1,7 @@
 'use client'
 import NextLinkImport from 'next/link.js'
 import { useRouter } from 'next/navigation.js'
-import React, { startTransition } from 'react'
+import React from 'react'
 
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { formatUrl } from './formatUrl.js'
@@ -47,8 +47,7 @@ export const Link: React.FC<Parameters<typeof NextLink>[0]> = ({
           onClick(e)
         }
 
-        startTransition(() => {
-          startRouteTransition()
+        startRouteTransition(() => {
           const url = typeof href === 'string' ? href : formatUrl(href)
 
           if (replace) {

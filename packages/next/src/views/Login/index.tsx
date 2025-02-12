@@ -1,12 +1,11 @@
 import type { AdminViewProps } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
 import { Logo } from '../../elements/Logo/index.js'
-import './index.scss'
 import { LoginForm } from './LoginForm/index.js'
+import './index.scss'
 
 export { generateLoginMetadata } from './meta.js'
 
@@ -24,12 +23,11 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
 
   const {
     admin: { components: { afterLogin, beforeLogin } = {}, user: userSlug },
-    collections,
     routes: { admin },
   } = config
 
   if (user) {
-    redirect((searchParams.redirect as string) || admin)
+    return <Redirect href={(searchParams.redirect as string) || admin} />
   }
 
   const collectionConfig = payload?.collections?.[userSlug]?.config
@@ -78,7 +76,6 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
           user,
         },
       })}
-
       {!collectionConfig?.auth?.disableLocalStrategy && (
         <LoginForm
           prefillEmail={prefillEmail}
