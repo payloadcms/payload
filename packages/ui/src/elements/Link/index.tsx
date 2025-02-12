@@ -43,13 +43,12 @@ export const Link: React.FC<Parameters<typeof NextLink>[0]> = ({
           return
         }
 
+        if (onClick) {
+          onClick(e)
+        }
+
         startTransition(() => {
           startRouteTransition()
-
-          if (onClick) {
-            onClick(e)
-          }
-
           const url = typeof href === 'string' ? href : formatUrl(href)
 
           if (replace) {
