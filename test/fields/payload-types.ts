@@ -245,6 +245,8 @@ export interface UserAuthOperations {
  */
 export interface ConfigBlockTest {
   deduplicatedText?: string | null;
+  id?: string | null;
+  blockName?: string | null;
   blockType: 'ConfigBlockTest';
 }
 /**
@@ -267,6 +269,8 @@ export interface LexicalInBlock2 {
     };
     [k: string]: unknown;
   } | null;
+  id?: string | null;
+  blockName?: string | null;
   blockType: 'lexicalInBlock2';
 }
 /**
@@ -275,6 +279,8 @@ export interface LexicalInBlock2 {
  */
 export interface Block {
   hasManyBlocks?: ('a' | 'b' | 'c')[] | null;
+  id?: string | null;
+  blockName?: string | null;
   blockType: 'block';
 }
 /**
@@ -288,6 +294,8 @@ export interface ContentBlock {
         [k: string]: unknown;
       }[]
     | null;
+  id?: string | null;
+  blockName?: string | null;
   blockType: 'content';
 }
 /**
@@ -296,6 +304,8 @@ export interface ContentBlock {
  */
 export interface NumberBlock {
   number: number;
+  id?: string | null;
+  blockName?: string | null;
   blockType: 'number';
 }
 /**
@@ -307,11 +317,15 @@ export interface SubBlocksBlock {
     | (
         | {
             text: string;
+            id?: string | null;
+            blockName?: string | null;
             blockType: 'textRequired';
           }
         | NumberBlock
       )[]
     | null;
+  id?: string | null;
+  blockName?: string | null;
   blockType: 'subBlocks';
 }
 /**
@@ -321,6 +335,8 @@ export interface SubBlocksBlock {
 export interface TabsBlock {
   textInCollapsible?: string | null;
   textInRow?: string | null;
+  id?: string | null;
+  blockName?: string | null;
   blockType: 'tabs';
 }
 /**
@@ -334,6 +350,8 @@ export interface LocalizedContentBlock {
         [k: string]: unknown;
       }[]
     | null;
+  id?: string | null;
+  blockName?: string | null;
   blockType: 'localizedContent';
 }
 /**
@@ -342,6 +360,8 @@ export interface LocalizedContentBlock {
  */
 export interface LocalizedNumberBlock {
   number: number;
+  id?: string | null;
+  blockName?: string | null;
   blockType: 'localizedNumber';
 }
 /**
@@ -353,11 +373,15 @@ export interface LocalizedSubBlocksBlock {
     | (
         | {
             text: string;
+            id?: string | null;
+            blockName?: string | null;
             blockType: 'textRequired';
           }
         | NumberBlock
       )[]
     | null;
+  id?: string | null;
+  blockName?: string | null;
   blockType: 'localizedSubBlocks';
 }
 /**
@@ -367,6 +391,8 @@ export interface LocalizedSubBlocksBlock {
 export interface LocalizedTabsBlock {
   textInCollapsible?: string | null;
   textInRow?: string | null;
+  id?: string | null;
+  blockName?: string | null;
   blockType: 'localizedTabs';
 }
 /**
@@ -375,6 +401,8 @@ export interface LocalizedTabsBlock {
  */
 export interface TextInI18NBlock {
   text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
   blockType: 'textInI18nBlock';
 }
 /**
@@ -385,8 +413,11 @@ export interface LocalizedArray {
   array?:
     | {
         text?: string | null;
+        id?: string | null;
       }[]
     | null;
+  id?: string | null;
+  blockName?: string | null;
   blockType: 'localizedArray';
 }
 /**
@@ -397,8 +428,11 @@ export interface BlockA {
   items?:
     | {
         title: string;
+        id?: string | null;
       }[]
     | null;
+  id?: string | null;
+  blockName?: string | null;
   blockType: 'block-a';
 }
 /**
@@ -409,8 +443,11 @@ export interface BlockB {
   items?:
     | {
         title2: string;
+        id?: string | null;
       }[]
     | null;
+  id?: string | null;
+  blockName?: string | null;
   blockType: 'block-b';
 }
 /**
@@ -421,6 +458,8 @@ export interface GroupBlock {
   group?: {
     text?: string | null;
   };
+  id?: string | null;
+  blockName?: string | null;
   blockType: 'group-block';
 }
 /**
@@ -429,6 +468,8 @@ export interface GroupBlock {
  */
 export interface BlockWithMinRows {
   blockTitle?: string | null;
+  id?: string | null;
+  blockName?: string | null;
   blockType: 'blockWithMinRows';
 }
 /**
@@ -437,6 +478,8 @@ export interface BlockWithMinRows {
  */
 export interface Block1 {
   block1Title?: string | null;
+  id?: string | null;
+  blockName?: string | null;
   blockType: 'block-1';
 }
 /**
@@ -445,6 +488,8 @@ export interface Block1 {
  */
 export interface Block2 {
   block2Title?: string | null;
+  id?: string | null;
+  blockName?: string | null;
   blockType: 'block-2';
 }
 /**
@@ -453,6 +498,8 @@ export interface Block2 {
  */
 export interface Relationships {
   relationship?: (string | null) | TextField;
+  id?: string | null;
+  blockName?: string | null;
   blockType: 'relationships';
 }
 /**
@@ -506,6 +553,8 @@ export interface TextField {
  */
 export interface BlockWithText {
   texts?: string[] | null;
+  id?: string | null;
+  blockName?: string | null;
   blockType: 'blockWithText';
 }
 /**
@@ -514,6 +563,8 @@ export interface BlockWithText {
  */
 export interface Text {
   text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
   blockType: 'text';
 }
 /**
@@ -523,6 +574,8 @@ export interface Text {
 export interface BlockWithConditionalField {
   text?: string | null;
   textWithCondition?: string | null;
+  id?: string | null;
+  blockName?: string | null;
   blockType: 'blockWithConditionalField';
 }
 /**
@@ -531,6 +584,9 @@ export interface BlockWithConditionalField {
  */
 export interface DateBlock {
   dayAndTime?: string | null;
+  dayAndTime_tz?: SupportedTimezones;
+  id?: string | null;
+  blockName?: string | null;
   blockType: 'dateBlock';
 }
 /**
@@ -539,6 +595,8 @@ export interface DateBlock {
  */
 export interface BlockWithNumber {
   numbers?: number[] | null;
+  id?: string | null;
+  blockName?: string | null;
   blockType: 'blockWithNumber';
 }
 /**
@@ -547,6 +605,8 @@ export interface BlockWithNumber {
  */
 export interface TextBlock {
   text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
   blockType: 'textBlock';
 }
 /**
@@ -559,6 +619,8 @@ export interface RichTextBlock {
         [k: string]: unknown;
       }[]
     | null;
+  id?: string | null;
+  blockName?: string | null;
   blockType: 'richTextBlock';
 }
 /**

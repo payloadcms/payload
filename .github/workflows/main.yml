@@ -283,6 +283,7 @@ jobs:
           - fields-relationship
           - fields__collections__Array
           - fields__collections__Blocks
+          - fields__collections__Blocks#config.blockreferences.ts
           - fields__collections__Checkbox
           - fields__collections__Collapsible
           - fields__collections__ConditionalLogic
