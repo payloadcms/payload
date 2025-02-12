@@ -26,6 +26,7 @@ function isModifiedEvent(event: React.MouseEvent): boolean {
 export const Link: React.FC<Parameters<typeof NextLink>[0]> = ({
   children,
   href,
+  onClick,
   ref,
   replace,
   scroll,
@@ -42,10 +43,12 @@ export const Link: React.FC<Parameters<typeof NextLink>[0]> = ({
           return
         }
 
-        e.preventDefault()
-
         startTransition(() => {
           startRouteTransition()
+
+          if (onClick) {
+            onClick(e)
+          }
 
           const url = typeof href === 'string' ? href : formatUrl(href)
 
