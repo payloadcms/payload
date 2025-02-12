@@ -172,6 +172,7 @@ export const getFields = (config: Config): Field[] => {
               Field: '@payloadcms/plugin-import-export/rsc#WhereField',
             },
           },
+          defaultValue: {},
         },
       ],
       label: 'Export Options',
