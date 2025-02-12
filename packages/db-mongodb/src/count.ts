@@ -5,6 +5,7 @@ import { flattenWhereToOperators } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildQuery } from './queries/buildQuery.js'
 import { getSession } from './utilities/getSession.js'
 
 export const count: Count = async function count(
@@ -23,9 +24,11 @@ export const count: Count = async function count(
     hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'))
   }
 
-  const query = await Model.buildQuery({
+  const query = await buildQuery({
+    adapter: this,
+    collectionSlug: collection,
+    fields: this.payload.collections[collection].config.flattenedFields,
     locale,
-    payload: this.payload,
     where,
   })
 

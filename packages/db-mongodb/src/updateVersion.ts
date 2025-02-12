@@ -4,6 +4,7 @@ import { buildVersionCollectionFields, type UpdateVersion } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildQuery } from './queries/buildQuery.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { getSession } from './utilities/getSession.js'
 import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
@@ -19,25 +20,28 @@ export const updateVersion: UpdateVersion = async function updateVersion(
     this.payload.collections[collection].config,
   )
 
+  const flattenedFields = buildVersionCollectionFields(
+    this.payload.config,
+    this.payload.collections[collection].config,
+    true,
+  )
+
   const options: QueryOptions = {
     ...optionsArgs,
     lean: true,
     new: true,
     projection: buildProjectionFromSelect({
       adapter: this,
-      fields: buildVersionCollectionFields(
-        this.payload.config,
-        this.payload.collections[collection].config,
-        true,
-      ),
+      fields: flattenedFields,
       select,
     }),
     session: await getSession(this, req),
   }
 
-  const query = await VersionModel.buildQuery({
+  const query = await buildQuery({
+    adapter: this,
+    fields: flattenedFields,
     locale,
-    payload: this.payload,
     where: whereToUse,
   })
 

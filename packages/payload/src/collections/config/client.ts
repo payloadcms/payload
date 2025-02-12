@@ -17,7 +17,7 @@ import { createClientFields } from '../../fields/config/client.js'
 
 export type ServerOnlyCollectionProperties = keyof Pick<
   SanitizedCollectionConfig,
-  'access' | 'custom' | 'endpoints' | 'flattenedFields' | 'hooks' | 'joins'
+  'access' | 'custom' | 'endpoints' | 'flattenedFields' | 'hooks' | 'joins' | 'polymorphicJoins'
 >
 
 export type ServerOnlyCollectionAdminProperties = keyof Pick<
@@ -68,6 +68,7 @@ const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] 
   'endpoints',
   'custom',
   'joins',
+  'polymorphicJoins',
   'flattenedFields',
   // `upload`
   // `admin`

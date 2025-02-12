@@ -229,7 +229,9 @@ export function buildObjectType({
           name: joinName,
           fields: {
             docs: {
-              type: new GraphQLList(graphqlResult.collections[field.collection].graphQL.type),
+              type: Array.isArray(field.collection)
+                ? GraphQLJSON
+                : new GraphQLList(graphqlResult.collections[field.collection].graphQL.type),
             },
             hasNextPage: { type: GraphQLBoolean },
           },
@@ -238,11 +240,16 @@ export function buildObjectType({
           limit: {
             type: GraphQLInt,
           },
+          page: {
+            type: GraphQLInt,
+          },
           sort: {
             type: GraphQLString,
           },
           where: {
-            type: graphqlResult.collections[field.collection].graphQL.whereInputType,
+            type: Array.isArray(field.collection)
+              ? GraphQLJSON
+              : graphqlResult.collections[field.collection].graphQL.whereInputType,
           },
         },
         extensions: {
@@ -251,12 +258,16 @@ export function buildObjectType({
         },
         async resolve(parent, args, context: Context) {
           const { collection } = field
-          const { limit, sort, where } = args
+          const { limit, page, sort, where } = args
           const { req } = context
 
           const fullWhere = combineQueries(where, {
             [field.on]: { equals: parent._id ?? parent.id },
           })
+
+          if (Array.isArray(collection)) {
+            throw new Error('GraphQL with array of join.field.collection is not implemented')
+          }
 
           return await req.payload.find({
             collection,
@@ -265,6 +276,7 @@ export function buildObjectType({
             limit,
             locale: req.locale,
             overrideAccess: false,
+            page,
             req,
             sort,
             where: fullWhere,

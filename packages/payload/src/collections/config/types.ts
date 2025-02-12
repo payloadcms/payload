@@ -548,6 +548,12 @@ export interface SanitizedCollectionConfig
    * Object of collections to join 'Join Fields object keyed by collection
    */
   joins: SanitizedJoins
+
+  /**
+   * List of all polymorphic join fields
+   */
+  polymorphicJoins: SanitizedJoin[]
+
   slug: CollectionSlug
   upload: SanitizedUploadConfig
   versions: SanitizedCollectionVersions

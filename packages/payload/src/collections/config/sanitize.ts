@@ -1,7 +1,12 @@
 // @ts-strict-ignore
 import type { LoginWithUsernameOptions } from '../../auth/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
-import type { CollectionConfig, SanitizedCollectionConfig, SanitizedJoins } from './types.js'
+import type {
+  CollectionConfig,
+  SanitizedCollectionConfig,
+  SanitizedJoin,
+  SanitizedJoins,
+} from './types.js'
 
 import { getBaseAuthFields } from '../../auth/getAuthFields.js'
 import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
@@ -46,6 +51,7 @@ export const sanitizeCollection = async (
     [collection.slug],
   )
   const joins: SanitizedJoins = {}
+  const polymorphicJoins: SanitizedJoin[] = []
   sanitized.fields = await sanitizeFields({
     collectionConfig: sanitized,
     config,
@@ -53,6 +59,7 @@ export const sanitizeCollection = async (
     joinPath: '',
     joins,
     parentIsLocalized: false,
+    polymorphicJoins,
     richTextSanitizationPromises,
     validRelationships,
   })
@@ -224,6 +231,7 @@ export const sanitizeCollection = async (
   const sanitizedConfig = sanitized as SanitizedCollectionConfig
 
   sanitizedConfig.joins = joins
+  sanitizedConfig.polymorphicJoins = polymorphicJoins
 
   sanitizedConfig.flattenedFields = flattenAllFields({ fields: sanitizedConfig.fields })
 

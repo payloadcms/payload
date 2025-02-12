@@ -18,10 +18,10 @@ import {
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { navigateToDoc } from '../helpers/e2e/navigateToDoc.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { EXPECT_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { categoriesJoinRestrictedSlug, categoriesSlug, postsSlug, uploadsSlug } from './shared.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { RESTClient } from '../helpers/rest.js'
+import { EXPECT_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { categoriesJoinRestrictedSlug, categoriesSlug, postsSlug, uploadsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -35,9 +35,11 @@ const { beforeAll, beforeEach, describe } = test
 describe('Join Field', () => {
   let page: Page
   let categoriesURL: AdminUrlUtil
+  let foldersURL: AdminUrlUtil
   let uploadsURL: AdminUrlUtil
   let categoriesJoinRestrictedURL: AdminUrlUtil
-  let categoryID: string | number
+  let categoryID: number | string
+  let rootFolderID: number | string
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -49,6 +51,7 @@ describe('Join Field', () => {
     categoriesURL = new AdminUrlUtil(serverURL, categoriesSlug)
     uploadsURL = new AdminUrlUtil(serverURL, uploadsSlug)
     categoriesJoinRestrictedURL = new AdminUrlUtil(serverURL, categoriesJoinRestrictedSlug)
+    foldersURL = new AdminUrlUtil(serverURL, 'folders')
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -85,6 +88,9 @@ describe('Join Field', () => {
     }
 
     ;({ id: categoryID } = docs[0])
+
+    const folder = await payload.find({ collection: 'folders', sort: 'createdAt', depth: 0 })
+    rootFolderID = folder.docs[0]!.id
   })
 
   test('should populate joined relationships in table cells of list view', async () => {
@@ -466,6 +472,44 @@ describe('Join Field', () => {
     const rows = joinField.locator('.relationship-table tbody tr')
     await expect(rows).toHaveCount(1)
     await expect(joinField.locator('.cell-canRead')).not.toContainText('false')
+  })
+
+  test('should render join field with array of collections', async () => {
+    await page.goto(foldersURL.edit(rootFolderID))
+    const joinField = page.locator('#field-children.field-type.join')
+    await expect(joinField).toBeVisible()
+    await expect(
+      joinField.locator('.relationship-table tbody .row-1 .cell-collection .pill__label'),
+    ).toHaveText('Folder')
+    await expect(
+      joinField.locator('.relationship-table tbody .row-3 .cell-collection .pill__label'),
+    ).toHaveText('Example Post')
+    await expect(
+      joinField.locator('.relationship-table tbody .row-5 .cell-collection .pill__label'),
+    ).toHaveText('Example Page')
+  })
+
+  test('should create a new document from join field with array of collections', async () => {
+    await page.goto(foldersURL.edit(rootFolderID))
+    const joinField = page.locator('#field-children.field-type.join')
+    await expect(joinField).toBeVisible()
+
+    const select = joinField.locator('#field-selectCollection')
+    await expect(select).toBeVisible()
+    await expect(select.locator('.rs__single-value')).toHaveText('Folder')
+    await select.click()
+    await select.locator('.rs__option:nth-child(2)').click()
+    await expect(select.locator('.rs__single-value')).toHaveText('Example Page')
+    await joinField.locator('.relationship-table__add-new').click()
+    await page.locator('.drawer__content input#field-title').fill('Some new page')
+    await page.locator('.drawer__content #action-save').click()
+
+    await expect(
+      joinField.locator('.relationship-table tbody .row-1 .cell-collection .pill__label'),
+    ).toHaveText('Example Page')
+    await expect(
+      joinField.locator('.relationship-table tbody .row-1 .cell-title .drawer-link__cell'),
+    ).toHaveText('Some new page')
   })
 
   test('should render create-first-user with when users collection has a join field and hide it', async () => {

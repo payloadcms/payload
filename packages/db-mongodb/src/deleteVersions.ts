@@ -1,7 +1,8 @@
-import type { DeleteVersions } from 'payload'
+import { buildVersionCollectionFields, type DeleteVersions } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildQuery } from './queries/buildQuery.js'
 import { getSession } from './utilities/getSession.js'
 
 export const deleteVersions: DeleteVersions = async function deleteVersions(
@@ -12,9 +13,14 @@ export const deleteVersions: DeleteVersions = async function deleteVersions(
 
   const session = await getSession(this, req)
 
-  const query = await VersionsModel.buildQuery({
+  const query = await buildQuery({
+    adapter: this,
+    fields: buildVersionCollectionFields(
+      this.payload.config,
+      this.payload.collections[collection].config,
+      true,
+    ),
     locale,
-    payload: this.payload,
     where,
   })
 

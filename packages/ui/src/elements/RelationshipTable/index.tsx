@@ -1,14 +1,16 @@
 'use client'
-import type { JoinFieldClient, ListQuery, PaginatedDocs, Where } from 'payload'
+import type { CollectionSlug, JoinFieldClient, ListQuery, PaginatedDocs, Where } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
+import type { Option } from '../ReactSelect/types.js'
 import type { Column } from '../Table/index.js'
 
 import { Button } from '../../elements/Button/index.js'
 import { Pill } from '../../elements/Pill/index.js'
+import { SelectInput } from '../../fields/Select/Input.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
@@ -38,7 +40,12 @@ type RelationshipTableComponentProps = {
   readonly initialData?: PaginatedDocs
   readonly initialDrawerData?: DocumentDrawerProps['initialData']
   readonly Label?: React.ReactNode
-  readonly relationTo: string
+  readonly parent?: {
+    collectionSlug: CollectionSlug
+    id: number | string
+    joinPath: string
+  }
+  readonly relationTo: string | string[]
 }
 
 export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (props) => {
@@ -52,10 +59,11 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     initialData: initialDataFromProps,
     initialDrawerData,
     Label,
+    parent,
     relationTo,
   } = props
   const [Table, setTable] = useState<React.ReactNode>(null)
-  const { getEntityConfig } = useConfig()
+  const { config, getEntityConfig } = useConfig()
 
   const { permissions } = useAuth()
 
@@ -87,6 +95,9 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
   const [collectionConfig] = useState(() => getEntityConfig({ collectionSlug: relationTo }))
 
+  const [selectedCollection, setSelectedCollection] = useState(
+    Array.isArray(relationTo) ? relationTo[0] : relationTo,
+  )
   const [isLoadingTable, setIsLoadingTable] = useState(!disableTable)
   const [data, setData] = useState<PaginatedDocs>(initialData)
   const [columnState, setColumnState] = useState<Column[]>()
@@ -96,8 +107,8 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   const renderTable = useCallback(
     async (docs?: PaginatedDocs['docs']) => {
       const newQuery: ListQuery = {
-        limit: String(field.defaultLimit || collectionConfig.admin.pagination.defaultLimit),
-        sort: field.defaultSort || collectionConfig.defaultSort,
+        limit: String(field?.defaultLimit || collectionConfig?.admin?.pagination?.defaultLimit),
+        sort: field.defaultSort || collectionConfig?.defaultSort,
         ...(query || {}),
         where: { ...(query?.where || {}) },
       }
@@ -123,6 +134,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         columns: defaultColumns,
         docs,
         enableRowSelections: false,
+        parent,
         query: newQuery,
         renderRowTypes: true,
         tableAppearance: 'condensed',
@@ -137,12 +149,13 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       field.defaultLimit,
       field.defaultSort,
       field.admin.defaultColumns,
-      collectionConfig.admin.pagination.defaultLimit,
-      collectionConfig.defaultSort,
+      collectionConfig?.admin?.pagination?.defaultLimit,
+      collectionConfig?.defaultSort,
       query,
       filterOptions,
       getTableState,
       relationTo,
+      parent,
     ],
   )
 
@@ -157,7 +170,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   }, [query, disableTable])
 
   const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer, openDrawer }] = useDocumentDrawer({
-    collectionSlug: relationTo,
+    collectionSlug: selectedCollection,
   })
 
   const onDrawerSave = useCallback<DocumentDrawerProps['onSave']>(
@@ -175,7 +188,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
       void renderTable(withNewOrUpdatedDoc)
     },
-    [data.docs, renderTable],
+    [data?.docs, renderTable],
   )
 
   const onDrawerCreate = useCallback<DocumentDrawerProps['onSave']>(
@@ -191,12 +204,14 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       const newDocs = data.docs.filter((doc) => doc.id !== args.id)
       void renderTable(newDocs)
     },
-    [data.docs, renderTable],
+    [data?.docs, renderTable],
   )
 
-  const preferenceKey = `${relationTo}-list`
+  const preferenceKey = `${Array.isArray(relationTo) ? `${parent.collectionSlug}-${parent.joinPath}` : relationTo}-list`
 
-  const canCreate = allowCreate !== false && permissions?.collections?.[relationTo]?.create
+  const canCreate =
+    allowCreate !== false &&
+    permissions?.collections?.[Array.isArray(relationTo) ? relationTo[0] : relationTo]?.create
 
   return (
     <div className={baseClass}>
@@ -207,6 +222,22 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
             <DocumentDrawerToggler className={`${baseClass}__add-new`}>
               {i18n.t('fields:addNew')}
             </DocumentDrawerToggler>
+          )}
+          {Array.isArray(relationTo) && (
+            <SelectInput
+              isClearable={false}
+              name="selectCollection"
+              onChange={(opt) => setSelectedCollection((opt as Option).value as string)}
+              options={relationTo.map((collection) => ({
+                label: getTranslation(
+                  config.collections.find((each) => each.slug === collection).labels.singular,
+                  i18n,
+                ),
+                value: collection,
+              }))}
+              path="selectCollection"
+              value={selectedCollection}
+            />
           )}
           <Pill
             aria-controls={`${baseClass}-columns`}
@@ -227,7 +258,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         <p>{t('general:loading')}</p>
       ) : (
         <Fragment>
-          {data.docs && data.docs.length === 0 && (
+          {data?.docs && data.docs.length === 0 && (
             <div className={`${baseClass}__no-results`}>
               <p>
                 {i18n.t('general:noResults', {
@@ -254,7 +285,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                 onQueryChange={setQuery}
               >
                 <TableColumnsProvider
-                  collectionSlug={relationTo}
+                  collectionSlug={Array.isArray(relationTo) ? relationTo[0] : relationTo}
                   columnState={columnState}
                   docs={data.docs}
                   LinkedCellOverride={
@@ -274,7 +305,9 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                     id={`${baseClass}-columns`}
                   >
                     <div className={`${baseClass}__columns-inner`}>
-                      <ColumnSelector collectionSlug={collectionConfig.slug} />
+                      {collectionConfig && (
+                        <ColumnSelector collectionSlug={collectionConfig.slug} />
+                      )}
                     </div>
                   </AnimateHeight>
                   {Table}

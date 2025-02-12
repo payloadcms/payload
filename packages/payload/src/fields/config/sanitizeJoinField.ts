@@ -11,11 +11,15 @@ export const sanitizeJoinField = ({
   field,
   joinPath,
   joins,
+  polymorphicJoins,
+  validateOnly,
 }: {
   config: Config
   field: FlattenedJoinField | JoinField
   joinPath?: string
   joins?: SanitizedJoins
+  polymorphicJoins?: SanitizedJoin[]
+  validateOnly?: boolean
 }) => {
   // the `joins` arg is not passed for globals or when recursing on fields that do not allow a join field
   if (typeof joins === 'undefined') {
@@ -29,6 +33,30 @@ export const sanitizeJoinField = ({
     joinPath: `${joinPath ? joinPath + '.' : ''}${field.name}`,
     targetField: undefined,
   }
+
+  if (Array.isArray(field.collection)) {
+    for (const collection of field.collection) {
+      const sanitizedField = {
+        ...field,
+        collection,
+      } as FlattenedJoinField
+
+      sanitizeJoinField({
+        config,
+        field: sanitizedField,
+        joinPath,
+        joins,
+        validateOnly: true,
+      })
+    }
+
+    if (Array.isArray(polymorphicJoins)) {
+      polymorphicJoins.push(join)
+    }
+
+    return
+  }
+
   const joinCollection = config.collections.find(
     (collection) => collection.slug === field.collection,
   )
@@ -96,6 +124,10 @@ export const sanitizeJoinField = ({
 
   if (!joinRelationship) {
     throw new InvalidFieldJoin(join.field)
+  }
+
+  if (validateOnly) {
+    return
   }
 
   join.targetField = joinRelationship

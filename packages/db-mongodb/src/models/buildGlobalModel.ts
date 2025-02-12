@@ -4,7 +4,7 @@ import mongoose from 'mongoose'
 
 import type { GlobalModel } from '../types.js'
 
-import { getBuildQueryPlugin } from '../queries/buildQuery.js'
+import { getBuildQueryPlugin } from '../queries/getBuildQueryPlugin.js'
 import { buildSchema } from './buildSchema.js'
 
 export const buildGlobalModel = (payload: Payload): GlobalModel | null => {

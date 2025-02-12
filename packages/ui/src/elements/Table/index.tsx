@@ -24,8 +24,10 @@ export type Props = {
 }
 
 export const Table: React.FC<Props> = ({ appearance, columns, data }) => {
+  console.log('TABLE')
   const activeColumns = columns?.filter((col) => col?.active)
 
+  console.log(data, 'here')
   if (!activeColumns || activeColumns.length === 0) {
     return <div>No columns selected</div>
   }

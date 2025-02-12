@@ -148,11 +148,13 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
       }
     }
 
-    const where = {
-      [on]: {
-        equals: value,
-      },
-    }
+    const where = Array.isArray(collection)
+      ? {}
+      : {
+          [on]: {
+            equals: value,
+          },
+        }
 
     if (field.where) {
       return {
@@ -161,10 +163,12 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
     }
 
     return where
-  }, [docID, field.targetField.relationTo, field.where, on, docConfig?.slug])
+  }, [docID, collection, field.targetField.relationTo, field.where, on, docConfig?.slug])
 
   const initialDrawerData = useMemo(() => {
-    const relatedCollection = getEntityConfig({ collectionSlug: field.collection })
+    const relatedCollection = getEntityConfig({
+      collectionSlug: Array.isArray(field.collection) ? field.collection[0] : field.collection,
+    })
 
     return getInitialDrawerData({
       collectionSlug: docConfig?.slug,
@@ -198,6 +202,15 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
               <FieldLabel label={label} localized={localized} path={path} required={required} />
             )}
           </h4>
+        }
+        parent={
+          Array.isArray(collection)
+            ? {
+                id: docID,
+                collectionSlug: docConfig.slug,
+                joinPath: path,
+              }
+            : undefined
         }
         relationTo={collection}
       />

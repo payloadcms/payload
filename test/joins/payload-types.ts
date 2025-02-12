@@ -6,6 +6,60 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
+/**
+ * Supported timezones in IANA format.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supportedTimezones".
+ */
+export type SupportedTimezones =
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji';
+
 export interface Config {
   auth: {
     users: UserAuthOperations;
@@ -29,6 +83,12 @@ export interface Config {
     'depth-joins-1': DepthJoins1;
     'depth-joins-2': DepthJoins2;
     'depth-joins-3': DepthJoins3;
+    'multiple-collections-parents': MultipleCollectionsParent;
+    'multiple-collections-1': MultipleCollections1;
+    'multiple-collections-2': MultipleCollections2;
+    folders: Folder;
+    'example-pages': ExamplePage;
+    'example-posts': ExamplePost;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -79,6 +139,12 @@ export interface Config {
     'depth-joins-2': {
       joins: 'depth-joins-1';
     };
+    'multiple-collections-parents': {
+      children: 'multiple-collections-1' | 'multiple-collections-2';
+    };
+    folders: {
+      children: 'folders' | 'example-pages' | 'example-posts';
+    };
   };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
@@ -99,6 +165,12 @@ export interface Config {
     'depth-joins-1': DepthJoins1Select<false> | DepthJoins1Select<true>;
     'depth-joins-2': DepthJoins2Select<false> | DepthJoins2Select<true>;
     'depth-joins-3': DepthJoins3Select<false> | DepthJoins3Select<true>;
+    'multiple-collections-parents': MultipleCollectionsParentsSelect<false> | MultipleCollectionsParentsSelect<true>;
+    'multiple-collections-1': MultipleCollections1Select<false> | MultipleCollections1Select<true>;
+    'multiple-collections-2': MultipleCollections2Select<false> | MultipleCollections2Select<true>;
+    folders: FoldersSelect<false> | FoldersSelect<true>;
+    'example-pages': ExamplePagesSelect<false> | ExamplePagesSelect<true>;
+    'example-posts': ExamplePostsSelect<false> | ExamplePostsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -521,6 +593,108 @@ export interface DepthJoins3 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "multiple-collections-parents".
+ */
+export interface MultipleCollectionsParent {
+  id: string;
+  children?: {
+    docs?:
+      | (
+          | {
+              relationTo?: 'multiple-collections-1';
+              value: string | MultipleCollections1;
+            }
+          | {
+              relationTo?: 'multiple-collections-2';
+              value: string | MultipleCollections2;
+            }
+        )[]
+      | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "multiple-collections-1".
+ */
+export interface MultipleCollections1 {
+  id: string;
+  parent?: (string | null) | MultipleCollectionsParent;
+  title?: string | null;
+  name?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "multiple-collections-2".
+ */
+export interface MultipleCollections2 {
+  id: string;
+  parent?: (string | null) | MultipleCollectionsParent;
+  title?: string | null;
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folders".
+ */
+export interface Folder {
+  id: string;
+  folder?: (string | null) | Folder;
+  title?: string | null;
+  children?: {
+    docs?:
+      | (
+          | {
+              relationTo?: 'folders';
+              value: string | Folder;
+            }
+          | {
+              relationTo?: 'example-pages';
+              value: string | ExamplePage;
+            }
+          | {
+              relationTo?: 'example-posts';
+              value: string | ExamplePost;
+            }
+        )[]
+      | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "example-pages".
+ */
+export interface ExamplePage {
+  id: string;
+  folder?: (string | null) | Folder;
+  title?: string | null;
+  name?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "example-posts".
+ */
+export interface ExamplePost {
+  id: string;
+  folder?: (string | null) | Folder;
+  title?: string | null;
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -597,6 +771,30 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'depth-joins-3';
         value: string | DepthJoins3;
+      } | null)
+    | ({
+        relationTo: 'multiple-collections-parents';
+        value: string | MultipleCollectionsParent;
+      } | null)
+    | ({
+        relationTo: 'multiple-collections-1';
+        value: string | MultipleCollections1;
+      } | null)
+    | ({
+        relationTo: 'multiple-collections-2';
+        value: string | MultipleCollections2;
+      } | null)
+    | ({
+        relationTo: 'folders';
+        value: string | Folder;
+      } | null)
+    | ({
+        relationTo: 'example-pages';
+        value: string | ExamplePage;
+      } | null)
+    | ({
+        relationTo: 'example-posts';
+        value: string | ExamplePost;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -890,6 +1088,70 @@ export interface DepthJoins2Select<T extends boolean = true> {
  */
 export interface DepthJoins3Select<T extends boolean = true> {
   rel?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "multiple-collections-parents_select".
+ */
+export interface MultipleCollectionsParentsSelect<T extends boolean = true> {
+  children?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "multiple-collections-1_select".
+ */
+export interface MultipleCollections1Select<T extends boolean = true> {
+  parent?: T;
+  title?: T;
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "multiple-collections-2_select".
+ */
+export interface MultipleCollections2Select<T extends boolean = true> {
+  parent?: T;
+  title?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folders_select".
+ */
+export interface FoldersSelect<T extends boolean = true> {
+  folder?: T;
+  title?: T;
+  children?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "example-pages_select".
+ */
+export interface ExamplePagesSelect<T extends boolean = true> {
+  folder?: T;
+  title?: T;
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "example-posts_select".
+ */
+export interface ExamplePostsSelect<T extends boolean = true> {
+  folder?: T;
+  title?: T;
+  description?: T;
   updatedAt?: T;
   createdAt?: T;
 }
