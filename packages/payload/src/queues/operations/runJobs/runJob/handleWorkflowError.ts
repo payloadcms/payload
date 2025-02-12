@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { PayloadRequest } from '../../../../types/index.js'
 import type { BaseJob, WorkflowConfig, WorkflowTypes } from '../../../config/types/workflowTypes.js'
 import type { RunTaskFunctionState } from './getRunTaskFunction.js'

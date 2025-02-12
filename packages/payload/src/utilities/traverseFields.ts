@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { Config, SanitizedConfig } from '../config/types.js'
 import type { ArrayField, Block, BlocksField, Field, TabAsField } from '../fields/config/types.js'
 

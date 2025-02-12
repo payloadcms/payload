@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { ParsedArgs } from 'minimist'
 
 import type { SanitizedConfig } from '../config/types.js'
@@ -21,7 +22,7 @@ export const availableCommands = [
   'migrate:refresh',
   'migrate:reset',
   'migrate:status',
-  'migration:fresh',
+  'migrate:fresh',
 ]
 
 const availableCommandsMsg = `Available commands: ${availableCommands.join(', ')}`

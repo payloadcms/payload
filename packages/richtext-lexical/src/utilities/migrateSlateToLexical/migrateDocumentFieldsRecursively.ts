@@ -52,7 +52,7 @@ export const migrateDocumentFieldsRecursively = ({
       })
     } else if (Array.isArray(data[field.name])) {
       if (field.type === 'blocks') {
-        ;(data[field.name] as Array<Record<string, unknown>>).forEach((row, i) => {
+        ;(data[field.name] as Array<Record<string, unknown>>).forEach((row) => {
           const blockTypeToMatch: string = row?.blockType as string
           const block =
             payload?.blocks[blockTypeToMatch] ??
@@ -62,7 +62,7 @@ export const migrateDocumentFieldsRecursively = ({
 
           if (block) {
             found += migrateDocumentFieldsRecursively({
-              data: (data[field.name] as Array<Record<string, unknown>>)[i],
+              data: row,
               fields: block.fields,
               found,
               payload,
@@ -72,9 +72,9 @@ export const migrateDocumentFieldsRecursively = ({
       }
 
       if (field.type === 'array') {
-        ;(data[field.name] as Array<Record<string, unknown>>).forEach((_, i) => {
+        ;(data[field.name] as Array<Record<string, unknown>>).forEach((row) => {
           found += migrateDocumentFieldsRecursively({
-            data: (data[field.name] as Array<Record<string, unknown>>)[i],
+            data: row,
             fields: field.fields,
             found,
             payload,

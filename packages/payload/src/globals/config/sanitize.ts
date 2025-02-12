@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { GlobalConfig, SanitizedGlobalConfig } from './types.js'
 

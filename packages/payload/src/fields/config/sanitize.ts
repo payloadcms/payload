@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { deepMergeSimple } from '@payloadcms/translations/utilities'
 
 import type { CollectionConfig, SanitizedJoins } from '../../collections/config/types.js'

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { CollectionSlug } from '../../index.js'
 import type {
   PayloadRequest,
