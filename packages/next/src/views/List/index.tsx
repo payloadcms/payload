@@ -12,7 +12,7 @@ import { renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rs
 import { formatAdminURL, mergeListSearchAndWhere } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
 import { isNumber } from 'payload/shared'
-import React, { Fragment } from 'react'
+import React, { Fragment, Suspense } from 'react'
 
 import { renderListViewSlots } from './renderListViewSlots.js'
 import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
@@ -235,10 +235,20 @@ export const renderListView = async (
   throw new Error('not-found')
 }
 
-export const ListView: React.FC<ListViewArgs> = async (args) => {
+const ListViewWithData: React.FC<ListViewArgs> = async (args) => {
+  const { List: RenderedList } = await renderListView({ ...args, enableRowSelections: true })
+  return RenderedList
+}
+
+export const ListView: React.FC<ListViewArgs> = (args) => {
   try {
-    const { List: RenderedList } = await renderListView({ ...args, enableRowSelections: true })
-    return RenderedList
+    return (
+      <Suspense
+        key={`list-view-${args?.initPageResult?.collectionConfig?.slug ?? args?.initPageResult?.globalConfig?.slug}`}
+      >
+        <ListViewWithData {...args} />
+      </Suspense>
+    )
   } catch (error) {
     if (error.message === 'not-found') {
       notFound()

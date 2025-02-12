@@ -1,17 +1,18 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type { ImportMap, SanitizedConfig } from 'payload'
+import type { ImportMap, InitPageResult, SanitizedConfig } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { notFound, redirect } from 'next/navigation.js'
-import React, { Fragment } from 'react'
+import React, { Fragment, Suspense } from 'react'
 
 import { DefaultTemplate } from '../../templates/Default/index.js'
+import { DefaultTemplateLoading } from '../../templates/Default/Loading.js'
 import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { initPage } from '../../utilities/initPage/index.js'
-import { getViewFromConfig } from './getViewFromConfig.js'
+import { getViewFromConfig, type GetViewFromConfigResult } from './getViewFromConfig.js'
 
 export { generatePageMetadata } from './meta.js'
 
@@ -58,6 +59,14 @@ export const RootPage = async ({
 
   const searchParams = await searchParamsPromise
 
+  const getViewFromConfigResult = getViewFromConfig({
+    adminRoute,
+    config,
+    currentRoute,
+    importMap,
+    searchParams,
+    segments,
+  })
   const {
     DefaultView,
     documentSubViewType,
@@ -66,16 +75,179 @@ export const RootPage = async ({
     templateClassName,
     templateType,
     viewType,
-  } = getViewFromConfig({
+  } = getViewFromConfigResult
+
+  const rootPageProps: BaseRootPageWithDataProps = {
+    _createFirstUserRoute,
     adminRoute,
     config,
     currentRoute,
+    getViewFromConfigResult,
     importMap,
+    params,
     searchParams,
-    segments,
-  })
+    userSlug,
+  }
+
+  return (
+    <Fragment>
+      {!templateType && (
+        <Suspense key={`main-view-${currentRoute}`}>
+          <RootPageWithData {...rootPageProps} />
+        </Suspense>
+      )}
+      {templateType === 'minimal' && (
+        <MinimalTemplate className={templateClassName}>
+          <Suspense key={`main-view-${currentRoute}`}>
+            <RootPageWithData {...rootPageProps} />
+          </Suspense>
+        </MinimalTemplate>
+      )}
+      {templateType === 'default' && (
+        <Suspense
+          fallback={
+            <RootPageWithDefaultTemplateFallback
+              currentRoute={currentRoute}
+              getViewFromConfigResult={{
+                DefaultView,
+                documentSubViewType,
+                initPageOptions,
+                serverProps,
+                templateClassName,
+                templateType,
+                viewType,
+              }}
+              params={params}
+              rootPageProps={rootPageProps}
+              searchParams={searchParams}
+            />
+          }
+          key={`main-view-${currentRoute}`}
+        >
+          <RootPageWithDefaultTemplate
+            currentRoute={currentRoute}
+            getViewFromConfigResult={{
+              DefaultView,
+              documentSubViewType,
+              initPageOptions,
+              serverProps,
+              templateClassName,
+              templateType,
+              viewType,
+            }}
+            params={params}
+            rootPageProps={rootPageProps}
+            searchParams={searchParams}
+          />
+        </Suspense>
+      )}
+    </Fragment>
+  )
+}
+
+const RootPageWithDefaultTemplateFallback: React.FC<{
+  currentRoute: string
+  getViewFromConfigResult: GetViewFromConfigResult
+  params: { [key: string]: string | string[] }
+  rootPageProps: Omit<BaseRootPageWithDataProps, 'initPageResult'>
+  searchParams: { [key: string]: string | string[] }
+}> = (args) => {
+  const {
+    currentRoute,
+    getViewFromConfigResult: { documentSubViewType, initPageOptions, serverProps, viewType },
+    params,
+    rootPageProps,
+    searchParams,
+  } = args
+
+  return (
+    <DefaultTemplateLoading>
+      <Suspense key={`main-view-${currentRoute}`}>
+        <RootPageWithData {...rootPageProps} />
+      </Suspense>
+    </DefaultTemplateLoading>
+  )
+}
+
+const RootPageWithDefaultTemplate: React.FC<{
+  currentRoute: string
+  getViewFromConfigResult: GetViewFromConfigResult
+  params: { [key: string]: string | string[] }
+  rootPageProps: Omit<BaseRootPageWithDataProps, 'initPageResult'>
+  searchParams: { [key: string]: string | string[] }
+}> = async (args) => {
+  const {
+    currentRoute,
+    getViewFromConfigResult: { documentSubViewType, initPageOptions, serverProps, viewType },
+    params,
+    rootPageProps,
+    searchParams,
+  } = args
 
   const initPageResult = await initPage(initPageOptions)
+
+  return (
+    <DefaultTemplate
+      collectionSlug={initPageResult?.collectionConfig?.slug}
+      docID={initPageResult?.docID}
+      documentSubViewType={documentSubViewType}
+      globalSlug={initPageResult?.globalConfig?.slug}
+      i18n={initPageResult?.req.i18n}
+      locale={initPageResult?.locale}
+      params={params}
+      payload={initPageResult?.req.payload}
+      permissions={initPageResult?.permissions}
+      searchParams={searchParams}
+      user={initPageResult?.req.user}
+      viewActions={serverProps.viewActions}
+      viewType={viewType}
+      visibleEntities={{
+        // The reason we are not passing in initPageResult.visibleEntities directly is due to a "Cannot assign to read only property of object '#<Object>" error introduced in React 19
+        // which this caused as soon as initPageResult.visibleEntities is passed in
+        collections: initPageResult?.visibleEntities?.collections,
+        globals: initPageResult?.visibleEntities?.globals,
+      }}
+    >
+      <Suspense key={`main-view-${currentRoute}`}>
+        <RootPageWithData {...rootPageProps} />
+      </Suspense>
+    </DefaultTemplate>
+  )
+}
+
+type BaseRootPageWithDataProps = {
+  _createFirstUserRoute: string
+  adminRoute: string
+  config: SanitizedConfig
+  currentRoute: string
+  getViewFromConfigResult: GetViewFromConfigResult
+  importMap: ImportMap
+  initPageResult?: InitPageResult | Promise<InitPageResult>
+  params: { [key: string]: string | string[] }
+  searchParams: { [key: string]: string | string[] }
+  userSlug: string
+}
+
+const RootPageWithData: React.FC<BaseRootPageWithDataProps> = async (args) => {
+  const {
+    _createFirstUserRoute,
+    adminRoute,
+    config,
+    currentRoute,
+    getViewFromConfigResult: {
+      DefaultView,
+      documentSubViewType,
+      initPageOptions,
+      serverProps,
+      viewType,
+    },
+    importMap,
+    params,
+    searchParams,
+    userSlug,
+  } = args
+
+  const initPageResult = (await args?.initPageResult) ?? (await initPage(initPageOptions))
 
   const dbHasUser =
     initPageResult.req.user ||
@@ -122,7 +294,6 @@ export const RootPage = async ({
   if (!DefaultView?.Component && !DefaultView?.payloadComponent && !dbHasUser) {
     redirect(adminRoute)
   }
-
   const clientConfig = getClientConfig({
     config,
     i18n: initPageResult?.req.i18n,
@@ -147,37 +318,5 @@ export const RootPage = async ({
     },
   })
 
-  return (
-    <Fragment>
-      {!templateType && <Fragment>{RenderedView}</Fragment>}
-      {templateType === 'minimal' && (
-        <MinimalTemplate className={templateClassName}>{RenderedView}</MinimalTemplate>
-      )}
-      {templateType === 'default' && (
-        <DefaultTemplate
-          collectionSlug={initPageResult?.collectionConfig?.slug}
-          docID={initPageResult?.docID}
-          documentSubViewType={documentSubViewType}
-          globalSlug={initPageResult?.globalConfig?.slug}
-          i18n={initPageResult?.req.i18n}
-          locale={initPageResult?.locale}
-          params={params}
-          payload={initPageResult?.req.payload}
-          permissions={initPageResult?.permissions}
-          searchParams={searchParams}
-          user={initPageResult?.req.user}
-          viewActions={serverProps.viewActions}
-          viewType={viewType}
-          visibleEntities={{
-            // The reason we are not passing in initPageResult.visibleEntities directly is due to a "Cannot assign to read only property of object '#<Object>" error introduced in React 19
-            // which this caused as soon as initPageResult.visibleEntities is passed in
-            collections: initPageResult?.visibleEntities?.collections,
-            globals: initPageResult?.visibleEntities?.globals,
-          }}
-        >
-          {RenderedView}
-        </DefaultTemplate>
-      )}
-    </Fragment>
-  )
+  return RenderedView
 }

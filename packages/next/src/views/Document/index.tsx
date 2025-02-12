@@ -6,7 +6,7 @@ import { formatAdminURL, isEditing as getIsEditing } from '@payloadcms/ui/shared
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { notFound, redirect } from 'next/navigation.js'
 import { logError } from 'payload'
-import React from 'react'
+import React, { Suspense } from 'react'
 
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 import type { ViewFromConfig } from './getViewsFromConfig.js'
@@ -381,10 +381,19 @@ export const renderDocument = async ({
   }
 }
 
-export const Document: React.FC<AdminViewProps> = async (args) => {
+const DocumentWithData: React.FC<AdminViewProps> = async (args) => {
+  const { Document: RenderedDocument } = await renderDocument(args)
+  return RenderedDocument
+}
+export const Document: React.FC<AdminViewProps> = (args) => {
   try {
-    const { Document: RenderedDocument } = await renderDocument(args)
-    return RenderedDocument
+    return (
+      <Suspense
+        key={`document-view-${args?.initPageResult?.collectionConfig?.slug ?? args?.initPageResult?.globalConfig?.slug}`}
+      >
+        <DocumentWithData {...args} />
+      </Suspense>
+    )
   } catch (error) {
     if (error?.message === 'NEXT_REDIRECT') {
       throw error
