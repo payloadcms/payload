@@ -1,4 +1,11 @@
-import type { Block, BlocksField, Config, FieldSchemaMap, FlattenedBlocksField } from 'payload'
+import type {
+  Block,
+  BlocksField,
+  BlockSlug,
+  Config,
+  FieldSchemaMap,
+  FlattenedBlocksField,
+} from 'payload'
 
 import { fieldsToJSONSchema, flattenAllFields, sanitizeFields } from 'payload'
 
@@ -12,8 +19,8 @@ import { ServerInlineBlockNode } from './nodes/InlineBlocksNode.js'
 import { blockValidationHOC } from './validate.js'
 
 export type BlocksFeatureProps = {
-  blocks?: (Block | string)[] | Block[]
-  inlineBlocks?: (Block | string)[] | Block[]
+  blocks?: (Block | BlockSlug)[] | Block[]
+  inlineBlocks?: (Block | BlockSlug)[] | Block[]
 }
 
 export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatureProps>({
