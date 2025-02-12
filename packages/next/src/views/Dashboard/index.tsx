@@ -1,9 +1,9 @@
 import type { EntityToGroup } from '@payloadcms/ui/shared'
 import type { AdminViewProps } from 'payload'
 
-import { HydrateAuthProvider, SetStepNav } from '@payloadcms/ui'
+import { HydrateAuthProvider, Link, SetStepNav } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { EntityType, groupNavItems, Link } from '@payloadcms/ui/shared'
+import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
 import React, { Fragment } from 'react'
 
 import { DefaultDashboard } from './Default/index.js'

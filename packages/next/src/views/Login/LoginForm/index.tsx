@@ -7,8 +7,16 @@ const baseClass = 'login__form'
 import type { UserWithToken } from '@payloadcms/ui'
 import type { FormState } from 'payload'
 
-import { Form, FormSubmit, PasswordField, useAuth, useConfig, useTranslation } from '@payloadcms/ui'
-import { formatAdminURL, Link } from '@payloadcms/ui/shared'
+import {
+  Form,
+  FormSubmit,
+  Link,
+  PasswordField,
+  useAuth,
+  useConfig,
+  useTranslation,
+} from '@payloadcms/ui'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import { getLoginOptions } from 'payload/shared'
 
 import type { LoginFieldProps } from '../LoginField/index.js'

@@ -1,7 +1,8 @@
 import type { DefaultServerCellComponentProps, Payload } from 'payload'
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
-import { formatAdminURL, Link } from '@payloadcms/ui/shared'
+import { Link } from '@payloadcms/ui'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import React from 'react'
 
 export const RscEntrySlateCell: React.FC<

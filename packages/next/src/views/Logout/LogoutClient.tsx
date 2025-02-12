@@ -1,6 +1,6 @@
 'use client'
-import { Button, LoadingOverlay, toast, useAuth, useTranslation } from '@payloadcms/ui'
-import { formatAdminURL, Link } from '@payloadcms/ui/shared'
+import { Button, Link, LoadingOverlay, toast, useAuth, useTranslation } from '@payloadcms/ui'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import { useRouter } from 'next/navigation.js'
 import React, { useEffect } from 'react'
 

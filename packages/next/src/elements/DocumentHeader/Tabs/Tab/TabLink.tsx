@@ -1,7 +1,8 @@
 'use client'
 import type { SanitizedConfig } from 'payload'
 
-import { formatAdminURL, Link } from '@payloadcms/ui/shared'
+import { Link } from '@payloadcms/ui'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import { useParams, usePathname, useSearchParams } from 'next/navigation.js'
 import React from 'react'
 
