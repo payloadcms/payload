@@ -1,5 +1,5 @@
 'use client'
-import { cn } from '@/utilities/cn'
+import { cn } from '@/utilities/ui'
 import useClickableCard from '@/utilities/useClickableCard'
 import Link from 'next/link'
 import React, { Fragment } from 'react'
@@ -8,10 +8,12 @@ import type { Post } from '@/payload-types'
 
 import { Media } from '@/components/Media'
 
+export type CardPostData = Pick<Post, 'slug' | 'categories' | 'meta' | 'title'>
+
 export const Card: React.FC<{
   alignItems?: 'center'
   className?: string
-  doc?: Post
+  doc?: CardPostData
   relationTo?: 'posts'
   showCategories?: boolean
   title?: string
@@ -37,7 +39,7 @@ export const Card: React.FC<{
     >
       <div className="relative w-full ">
         {!metaImage && <div className="">No image</div>}
-        {metaImage && typeof metaImage !== 'string' && <Media resource={metaImage} size="360px" />}
+        {metaImage && typeof metaImage !== 'string' && <Media resource={metaImage} size="33vw" />}
       </div>
       <div className="p-4">
         {showCategories && hasCategories && (

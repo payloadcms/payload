@@ -1,6 +1,6 @@
 import type { Config, SanitizedConfig } from 'payload'
 
-import { sanitizeConfig } from 'payload'
+import { flattenAllFields, sanitizeConfig } from 'payload'
 
 import { getLocalizedSortProperty } from './getLocalizedSortProperty.js'
 
@@ -69,19 +69,21 @@ describe('get localized sort property', () => {
   it('properly localizes nested sort properties', () => {
     const result = getLocalizedSortProperty({
       config,
-      fields: [
-        {
-          name: 'group',
-          type: 'group',
-          fields: [
-            {
-              name: 'title',
-              type: 'text',
-              localized: true,
-            },
-          ],
-        },
-      ],
+      fields: flattenAllFields({
+        fields: [
+          {
+            name: 'group',
+            type: 'group',
+            fields: [
+              {
+                name: 'title',
+                type: 'text',
+                localized: true,
+              },
+            ],
+          },
+        ],
+      }),
       locale: 'en',
       segments: ['group', 'title'],
     })
@@ -92,19 +94,21 @@ describe('get localized sort property', () => {
   it('keeps requested locale with nested sort properties', () => {
     const result = getLocalizedSortProperty({
       config,
-      fields: [
-        {
-          name: 'group',
-          type: 'group',
-          fields: [
-            {
-              name: 'title',
-              type: 'text',
-              localized: true,
-            },
-          ],
-        },
-      ],
+      fields: flattenAllFields({
+        fields: [
+          {
+            name: 'group',
+            type: 'group',
+            fields: [
+              {
+                name: 'title',
+                type: 'text',
+                localized: true,
+              },
+            ],
+          },
+        ],
+      }),
       locale: 'en',
       segments: ['group', 'title', 'es'],
     })
@@ -115,18 +119,20 @@ describe('get localized sort property', () => {
   it('properly localizes field within row', () => {
     const result = getLocalizedSortProperty({
       config,
-      fields: [
-        {
-          type: 'row',
-          fields: [
-            {
-              name: 'title',
-              type: 'text',
-              localized: true,
-            },
-          ],
-        },
-      ],
+      fields: flattenAllFields({
+        fields: [
+          {
+            type: 'row',
+            fields: [
+              {
+                name: 'title',
+                type: 'text',
+                localized: true,
+              },
+            ],
+          },
+        ],
+      }),
       locale: 'en',
       segments: ['title'],
     })
@@ -137,23 +143,25 @@ describe('get localized sort property', () => {
   it('properly localizes field within named tab', () => {
     const result = getLocalizedSortProperty({
       config,
-      fields: [
-        {
-          type: 'tabs',
-          tabs: [
-            {
-              name: 'tab',
-              fields: [
-                {
-                  name: 'title',
-                  type: 'text',
-                  localized: true,
-                },
-              ],
-            },
-          ],
-        },
-      ],
+      fields: flattenAllFields({
+        fields: [
+          {
+            type: 'tabs',
+            tabs: [
+              {
+                name: 'tab',
+                fields: [
+                  {
+                    name: 'title',
+                    type: 'text',
+                    localized: true,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      }),
       locale: 'en',
       segments: ['tab', 'title'],
     })
@@ -164,23 +172,25 @@ describe('get localized sort property', () => {
   it('properly localizes field within unnamed tab', () => {
     const result = getLocalizedSortProperty({
       config,
-      fields: [
-        {
-          type: 'tabs',
-          tabs: [
-            {
-              fields: [
-                {
-                  name: 'title',
-                  type: 'text',
-                  localized: true,
-                },
-              ],
-              label: 'Tab',
-            },
-          ],
-        },
-      ],
+      fields: flattenAllFields({
+        fields: [
+          {
+            type: 'tabs',
+            tabs: [
+              {
+                fields: [
+                  {
+                    name: 'title',
+                    type: 'text',
+                    localized: true,
+                  },
+                ],
+                label: 'Tab',
+              },
+            ],
+          },
+        ],
+      }),
       locale: 'en',
       segments: ['title'],
     })

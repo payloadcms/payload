@@ -3,6 +3,7 @@ import type { JsonObject, Payload } from '../../../index.js'
 import type { PayloadRequest, SelectType, Where } from '../../../types/index.js'
 
 import { ValidationError } from '../../../errors/index.js'
+import { getLoginOptions } from '../../getLoginOptions.js'
 import { generatePasswordSaltHash } from './generatePasswordSaltHash.js'
 
 type Args = {
@@ -24,9 +25,11 @@ export const registerLocalStrategy = async ({
 }: Args): Promise<Record<string, unknown>> => {
   const loginWithUsername = collection?.auth?.loginWithUsername
 
+  const { canLoginWithEmail, canLoginWithUsername } = getLoginOptions(loginWithUsername)
+
   let whereConstraint: Where
 
-  if (!loginWithUsername) {
+  if (!canLoginWithUsername) {
     whereConstraint = {
       email: {
         equals: doc.email,
@@ -37,8 +40,8 @@ export const registerLocalStrategy = async ({
       or: [],
     }
 
-    if (doc.email) {
-      whereConstraint.or.push({
+    if (canLoginWithEmail && doc.email) {
+      whereConstraint.or?.push({
         email: {
           equals: doc.email,
         },
@@ -46,7 +49,7 @@ export const registerLocalStrategy = async ({
     }
 
     if (doc.username) {
-      whereConstraint.or.push({
+      whereConstraint.or?.push({
         username: {
           equals: doc.username,
         },
@@ -67,7 +70,7 @@ export const registerLocalStrategy = async ({
     throw new ValidationError({
       collection: collection.slug,
       errors: [
-        loginWithUsername
+        canLoginWithUsername
           ? {
               message: req.t('error:usernameAlreadyRegistered'),
               path: 'username',

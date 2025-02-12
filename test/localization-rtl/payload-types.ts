@@ -34,9 +34,9 @@ export interface Config {
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -75,6 +75,8 @@ export interface User {
   password?: string | null;
 }
 /**
+ * Description
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */

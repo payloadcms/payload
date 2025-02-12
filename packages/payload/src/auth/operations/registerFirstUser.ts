@@ -42,6 +42,10 @@ export const registerFirstUserOperation = async <TSlug extends CollectionSlug>(
     req: { payload },
   } = args
 
+  if (config.auth.disableLocalStrategy) {
+    throw new Forbidden(req.t)
+  }
+
   try {
     const shouldCommit = await initTransaction(req)
 

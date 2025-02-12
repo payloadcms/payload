@@ -1,15 +1,22 @@
 @import '../../../scss/styles.scss';
 
+$tab-width: 16px;
+
 @layer payload-default {
   .query-inspector {
     &__json-children {
       position: relative;
 
+      &--nested {
+        & li {
+          padding-left: $tab-width;
+        }
+      }
+
       &:before {
         content: '';
         position: absolute;
         top: 0;
-        left: 8px;
         width: 1px;
         height: 100%;
         border-left: 1px dashed var(--theme-elevation-200);
@@ -34,10 +41,6 @@
       align-items: center;
       left: -3px;
       width: calc(100% + 3px);
-
-      svg {
-        margin-left: 5px;
-      }
 
       svg .stroke {
         stroke: var(--theme-elevation-400);
@@ -76,15 +79,15 @@
       }
     }
 
-    &__row-line--nested {
-      margin-left: 25px;
-    }
-
     &__bracket {
       position: relative;
 
+      &--nested {
+        margin-left: $tab-width;
+      }
+
       &--position-end {
-        left: 5px;
+        left: 1px;
         width: calc(100% - 5px);
       }
     }

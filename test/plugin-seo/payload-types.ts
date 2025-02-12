@@ -38,9 +38,9 @@ export interface Config {
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -90,6 +90,9 @@ export interface Page {
   meta: {
     title: string;
     description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
     image?: (string | null) | Media;
     ogTitle?: string | null;
   };
@@ -146,6 +149,9 @@ export interface PagesWithImportedField {
       description?: string | null;
     };
     innerMedia?: {
+      /**
+       * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+       */
       image?: (string | null) | Media;
     };
   };
@@ -244,11 +250,9 @@ export interface PagesSelect<T extends boolean = true> {
   meta?:
     | T
     | {
-        overview?: T;
         title?: T;
         description?: T;
         image?: T;
-        preview?: T;
         ogTitle?: T;
       };
   updatedAt?: T;
@@ -280,14 +284,12 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface PagesWithImportedFieldsSelect<T extends boolean = true> {
   title?: T;
-  overview?: T;
   excerpt?: T;
   slug?: T;
   metaAndSEO?:
     | T
     | {
         title?: T;
-        preview?: T;
         innerMeta?:
           | T
           | {

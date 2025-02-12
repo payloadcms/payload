@@ -1,45 +1,50 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
   ClientCollectionConfig,
+  ClientComponentProps,
+  ClientField,
   DefaultCellComponentProps,
   DefaultServerCellComponentProps,
   Field,
+  ListPreferences,
   PaginatedDocs,
   Payload,
-  PayloadComponent,
   SanitizedCollectionConfig,
+  ServerComponentProps,
   StaticLabel,
 } from 'payload'
 
 import { MissingEditorProp } from 'payload'
-import { deepCopyObjectSimple, fieldIsPresentationalOnly } from 'payload/shared'
+import {
+  fieldIsHiddenOrDisabled,
+  fieldIsID,
+  fieldIsPresentationalOnly,
+  flattenTopLevelFields,
+} from 'payload/shared'
 import React from 'react'
 
-import type { ColumnPreferences } from '../../providers/ListQuery/index.js'
 import type { SortColumnProps } from '../SortColumn/index.js'
 import type { Column } from '../Table/index.js'
 
 import {
   RenderCustomComponent,
   RenderDefaultCell,
-  SelectAll,
-  SelectRow,
   SortColumn,
   // eslint-disable-next-line payload/no-imports-from-exports-dir
 } from '../../exports/client/index.js'
-import { flattenFieldMap } from '../../utilities/flattenFieldMap.js'
 import { RenderServerComponent } from '../RenderServerComponent/index.js'
+import { filterFields } from './filterFields.js'
 
 type Args = {
   beforeRows?: Column[]
-  collectionConfig: ClientCollectionConfig
-  columnPreferences: ColumnPreferences
-  columns?: ColumnPreferences
+  clientCollectionConfig: ClientCollectionConfig
+  collectionConfig: SanitizedCollectionConfig
+  columnPreferences: ListPreferences['columns']
+  columns?: ListPreferences['columns']
   customCellProps: DefaultCellComponentProps['customCellProps']
   docs: PaginatedDocs['docs']
   enableRowSelections: boolean
   enableRowTypes?: boolean
-  fields: Field[]
   i18n: I18nClient
   payload: Payload
   sortColumnProps?: Partial<SortColumnProps>
@@ -49,29 +54,34 @@ type Args = {
 export const buildColumnState = (args: Args): Column[] => {
   const {
     beforeRows,
+    clientCollectionConfig,
     collectionConfig,
     columnPreferences,
     columns,
     customCellProps,
     docs,
     enableRowSelections,
-    fields,
     i18n,
     payload,
     sortColumnProps,
     useAsTitle,
   } = args
 
-  const clientFields = collectionConfig.fields
-
   // clientFields contains the fake `id` column
-  let sortedFieldMap = flattenFieldMap(clientFields)
-  let _sortedFieldMap = flattenFieldMap(fields) // TODO: think of a way to avoid this additional flatten
+  let sortedFieldMap = flattenTopLevelFields(
+    filterFields(clientCollectionConfig.fields),
+    true,
+  ) as ClientField[]
+
+  let _sortedFieldMap = flattenTopLevelFields(
+    filterFields(collectionConfig.fields),
+    true,
+  ) as Field[] // TODO: think of a way to avoid this additional flatten
 
   // place the `ID` field first, if it exists
   // do the same for the `useAsTitle` field with precedence over the `ID` field
   // then sort the rest of the fields based on the `defaultColumns` or `columnPreferences`
-  const idFieldIndex = sortedFieldMap?.findIndex((field) => 'name' in field && field.name === 'id')
+  const idFieldIndex = sortedFieldMap?.findIndex((field) => fieldIsID(field))
 
   if (idFieldIndex > -1) {
     const idField = sortedFieldMap.splice(idFieldIndex, 1)[0]
@@ -118,6 +128,10 @@ export const buildColumnState = (args: Args): Column[] => {
   const activeColumnsIndices = []
 
   const sorted: Column[] = sortedFieldMap?.reduce((acc, field, index) => {
+    if (fieldIsHiddenOrDisabled(field) && !fieldIsID(field)) {
+      return acc
+    }
+
     const _field = _sortedFieldMap.find(
       (f) => 'name' in field && 'name' in f && f.name === field.name,
     )
@@ -151,9 +165,30 @@ export const buildColumnState = (args: Args): Column[] => {
         ? _field.admin.components.Label
         : undefined
 
-    const CustomLabel = CustomLabelToRender ? (
-      <RenderServerComponent Component={CustomLabelToRender} importMap={payload.importMap} />
-    ) : undefined
+    // TODO: customComponent will be optional in v4
+    const clientProps: Omit<ClientComponentProps, 'customComponents'> = {
+      field,
+    }
+
+    const customLabelServerProps: Pick<
+      ServerComponentProps,
+      'clientField' | 'collectionSlug' | 'field' | 'i18n' | 'payload'
+    > = {
+      clientField: field,
+      collectionSlug: collectionConfig.slug,
+      field: _field,
+      i18n,
+      payload,
+    }
+
+    const CustomLabel = CustomLabelToRender
+      ? RenderServerComponent({
+          clientProps,
+          Component: CustomLabelToRender,
+          importMap: payload.importMap,
+          serverProps: customLabelServerProps,
+        })
+      : undefined
 
     const fieldAffectsDataSubFields =
       field &&
@@ -172,16 +207,10 @@ export const buildColumnState = (args: Args): Column[] => {
 
     const baseCellClientProps: DefaultCellComponentProps = {
       cellData: undefined,
-      collectionConfig: deepCopyObjectSimple(collectionConfig),
+      collectionSlug: clientCollectionConfig.slug,
       customCellProps,
       field,
       rowData: undefined,
-    }
-
-    const serverProps: Pick<DefaultServerCellComponentProps, 'field' | 'i18n' | 'payload'> = {
-      field: _field,
-      i18n,
-      payload,
     }
 
     const column: Column = {
@@ -198,6 +227,21 @@ export const buildColumnState = (args: Args): Column[] => {
               ...baseCellClientProps,
               cellData: 'name' in field ? doc[field.name] : undefined,
               link: isLinkedColumn,
+              rowData: doc,
+            }
+
+            const cellServerProps: DefaultServerCellComponentProps = {
+              cellData: cellClientProps.cellData,
+              className: baseCellClientProps.className,
+              collectionConfig,
+              collectionSlug: collectionConfig.slug,
+              columnIndex: baseCellClientProps.columnIndex,
+              customCellProps: baseCellClientProps.customCellProps,
+              field: _field,
+              i18n,
+              link: cellClientProps.link,
+              onClick: baseCellClientProps.onClick,
+              payload,
               rowData: doc,
             }
 
@@ -220,41 +264,25 @@ export const buildColumnState = (args: Args): Column[] => {
                 _field.admin.components = {}
               }
 
-              /**
-               * We have to deep copy all the props we send to the client (= CellComponent.clientProps).
-               * That way, every editor's field / cell props we send to the client have their own object references.
-               *
-               * If we send the same object reference to the client twice (e.g. through some configurations where 2 or more fields
-               * reference the same editor object, like the root editor), the admin panel may hang indefinitely. This has been happening since
-               * a newer Next.js update that made it break when sending the same object reference to the client twice.
-               *
-               * We can use deepCopyObjectSimple as client props should be JSON-serializable.
-               */
-              const CellComponent: PayloadComponent = _field.editor.CellComponent
-              if (typeof CellComponent === 'object' && CellComponent.clientProps) {
-                CellComponent.clientProps = deepCopyObjectSimple(CellComponent.clientProps)
-              }
-
-              CustomCell = (
-                <RenderServerComponent
-                  clientProps={cellClientProps}
-                  Component={CellComponent}
-                  importMap={payload.importMap}
-                  serverProps={serverProps}
-                />
-              )
+              CustomCell = RenderServerComponent({
+                clientProps: cellClientProps,
+                Component: _field.editor.CellComponent,
+                importMap: payload.importMap,
+                serverProps: cellServerProps,
+              })
             } else {
-              CustomCell =
-                _field?.admin && 'components' in _field.admin && _field.admin.components?.Cell ? (
-                  <RenderServerComponent
-                    clientProps={cellClientProps}
-                    Component={
-                      _field?.admin && 'components' in _field.admin && _field.admin.components?.Cell
-                    }
-                    importMap={payload.importMap}
-                    serverProps={serverProps}
-                  />
-                ) : undefined
+              const CustomCellComponent = _field?.admin?.components?.Cell
+
+              if (CustomCellComponent) {
+                CustomCell = RenderServerComponent({
+                  clientProps: cellClientProps,
+                  Component: CustomCellComponent,
+                  importMap: payload.importMap,
+                  serverProps: cellServerProps,
+                })
+              } else {
+                CustomCell = undefined
+              }
             }
 
             return (
@@ -279,16 +307,6 @@ export const buildColumnState = (args: Args): Column[] => {
 
     return acc
   }, [])
-
-  if (enableRowSelections) {
-    sorted?.unshift({
-      accessor: '_select',
-      active: true,
-      field: null,
-      Heading: <SelectAll />,
-      renderedCells: docs.map((_, i) => <SelectRow key={i} rowData={docs[i]} />),
-    })
-  }
 
   if (beforeRows) {
     sorted.unshift(...beforeRows)

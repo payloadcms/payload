@@ -20,7 +20,10 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
   db,
   fields,
   ignoreResult,
-  joinQuery,
+  // TODO:
+  // When we support joins for write operations (create/update) - pass collectionSlug to the buildFindManyArgs
+  // Make a new argument in upsertRow.ts and pass the slug from every operation.
+  joinQuery: _joinQuery,
   operation,
   path = '',
   req,
@@ -114,13 +117,13 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     // store by table name and rows
     if (Object.keys(rowToInsert.selects).length > 0) {
       Object.entries(rowToInsert.selects).forEach(([selectTableName, selectRows]) => {
+        selectsToInsert[selectTableName] = []
+
         selectRows.forEach((row) => {
           if (typeof row.parent === 'undefined') {
             row.parent = insertedRow.id
           }
-          if (!selectsToInsert[selectTableName]) {
-            selectsToInsert[selectTableName] = []
-          }
+
           selectsToInsert[selectTableName].push(row)
         })
       })
@@ -263,6 +266,9 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       }
     }
 
+    // When versions are enabled, this is used to track mapping between blocks/arrays ObjectID to their numeric generated representation, then we use it for nested to arrays/blocks select hasMany in versions.
+    const arraysBlocksUUIDMap: Record<string, number | string> = {}
+
     for (const [blockName, blockRows] of Object.entries(blocksToInsert)) {
       const blockTableName = adapter.tableNameMap.get(`${tableName}_blocks_${blockName}`)
       insertedBlockRows[blockName] = await adapter.insert({
@@ -273,6 +279,12 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
       insertedBlockRows[blockName].forEach((row, i) => {
         blockRows[i].row = row
+        if (
+          typeof row._uuid === 'string' &&
+          (typeof row.id === 'string' || typeof row.id === 'number')
+        ) {
+          arraysBlocksUUIDMap[row._uuid] = row.id
+        }
       })
 
       const blockLocaleIndexMap: number[] = []
@@ -305,6 +317,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         arrays: blockRows.map(({ arrays }) => arrays),
         db,
         parentRows: insertedBlockRows[blockName],
+        uuidMap: arraysBlocksUUIDMap,
       })
     }
 
@@ -328,6 +341,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       arrays: [rowToInsert.arrays],
       db,
       parentRows: [insertedRow],
+      uuidMap: arraysBlocksUUIDMap,
     })
 
     // //////////////////////////////////
@@ -343,11 +357,22 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
           where: eq(selectTable.parent, insertedRow.id),
         })
       }
-      await adapter.insert({
-        db,
-        tableName: selectTableName,
-        values: tableRows,
-      })
+
+      if (Object.keys(arraysBlocksUUIDMap).length > 0) {
+        tableRows.forEach((row: any) => {
+          if (row.parent in arraysBlocksUUIDMap) {
+            row.parent = arraysBlocksUUIDMap[row.parent]
+          }
+        })
+      }
+
+      if (tableRows.length) {
+        await adapter.insert({
+          db,
+          tableName: selectTableName,
+          values: tableRows,
+        })
+      }
     }
 
     // //////////////////////////////////
@@ -391,12 +416,12 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
           id,
           errors: [
             {
-              message: req.t('error:valueMustBeUnique'),
+              message: req?.t ? req.t('error:valueMustBeUnique') : 'Value must be unique',
               path: fieldName,
             },
           ],
         },
-        req.t,
+        req?.t,
       )
     } else {
       throw error
@@ -415,7 +440,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     adapter,
     depth: 0,
     fields,
-    joinQuery,
+    joinQuery: false,
     select,
     tableName,
   })
@@ -433,7 +458,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     config: adapter.payload.config,
     data: doc,
     fields,
-    joinQuery,
+    joinQuery: false,
   })
 
   return result

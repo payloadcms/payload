@@ -30,6 +30,7 @@ import { clearAndSeedEverything } from './seed.js'
 import {
   arrayFieldsSlug,
   blockFieldsSlug,
+  collapsibleFieldsSlug,
   groupFieldsSlug,
   relationshipFieldsSlug,
   tabsFieldsSlug,
@@ -95,6 +96,20 @@ describe('Fields', () => {
       })
 
       expect(fieldWithDefaultValue).toEqual(dependentOnFieldWithDefaultValue)
+    })
+
+    it('should populate function default values from req', async () => {
+      const text = await payload.create({
+        req: {
+          context: {
+            defaultValue: 'from-context',
+          },
+        },
+        collection: 'text-fields',
+        data: { text: 'required' },
+      })
+
+      expect(text.defaultValueFromReq).toBe('from-context')
     })
 
     it('should localize an array of strings using hasMany', async () => {
@@ -439,6 +454,51 @@ describe('Fields', () => {
       expect(result.docs).toHaveLength(1)
       expect(result.docs[0]).toMatchObject(relationshipInArray)
     })
+
+    it('should query text in row after relationship', async () => {
+      const row = await payload.create({
+        collection: 'row-fields',
+        data: { title: 'some-title', id: 'custom-row-id' },
+      })
+      const textDoc = await payload.create({
+        collection: 'text-fields',
+        data: { text: 'asd' },
+      })
+
+      const rel = await payload.create({
+        collection: 'relationship-fields',
+        data: {
+          relationship: { relationTo: 'text-fields', value: textDoc },
+          relationToRow: row.id,
+          relationToRowMany: [row.id],
+        },
+      })
+
+      const result = await payload.find({
+        collection: 'relationship-fields',
+        where: {
+          'relationToRow.title': { equals: 'some-title' },
+          'relationToRowMany.title': { equals: 'some-title' },
+        },
+      })
+
+      expect(result.docs[0].id).toBe(rel.id)
+      expect(result.totalDocs).toBe(1)
+    })
+  })
+
+  describe('rows', () => {
+    it('should show proper validation error message on text field within row field', async () => {
+      await expect(async () =>
+        payload.create({
+          collection: 'row-fields',
+          data: {
+            id: 'some-id',
+            title: '',
+          },
+        }),
+      ).rejects.toThrow('The following field is invalid: Title within a row')
+    })
   })
 
   describe('timestamps', () => {
@@ -521,6 +581,25 @@ describe('Fields', () => {
       expect(updatedDoc.selectHasMany).toEqual(['one', 'two'])
     })
 
+    it('should clear select hasMany field', async () => {
+      const { id } = await payload.create({
+        collection: 'select-fields',
+        data: {
+          selectHasMany: ['one', 'two'],
+        },
+      })
+
+      const updatedDoc = await payload.update({
+        id,
+        collection: 'select-fields',
+        data: {
+          selectHasMany: [],
+        },
+      })
+
+      expect(updatedDoc.selectHasMany).toHaveLength(0)
+    })
+
     it('should query hasMany in', async () => {
       const hit = await payload.create({
         collection: 'select-fields',
@@ -599,6 +678,64 @@ describe('Fields', () => {
 
       expect(upd.array[0].group.selectHasMany).toStrictEqual(['six'])
     })
+
+    it('should work with versions', async () => {
+      const base = await payload.create({
+        collection: 'select-versions-fields',
+        data: { hasMany: ['a', 'b'] },
+      })
+
+      expect(base.hasMany).toStrictEqual(['a', 'b'])
+
+      const array = await payload.create({
+        collection: 'select-versions-fields',
+        data: { array: [{ hasManyArr: ['a', 'b'] }] },
+        draft: true,
+      })
+
+      expect(array.array[0]?.hasManyArr).toStrictEqual(['a', 'b'])
+
+      const block = await payload.create({
+        collection: 'select-versions-fields',
+        data: { blocks: [{ blockType: 'block', hasManyBlocks: ['a', 'b'] }] },
+      })
+
+      expect(block.blocks[0]?.hasManyBlocks).toStrictEqual(['a', 'b'])
+    })
+
+    it('should work with autosave ', async () => {
+      let data = await payload.create({
+        collection: 'select-versions-fields',
+        data: { hasMany: ['a', 'b', 'c'] },
+      })
+      expect(data.hasMany).toStrictEqual(['a', 'b', 'c'])
+
+      data = await payload.update({
+        id: data.id,
+        collection: 'select-versions-fields',
+        data: { hasMany: ['a'] },
+        draft: true,
+      })
+      expect(data.hasMany).toStrictEqual(['a'])
+
+      data = await payload.update({
+        id: data.id,
+        collection: 'select-versions-fields',
+        data: { hasMany: ['a', 'b', 'c', 'd'] },
+        draft: true,
+        autosave: true,
+      })
+      expect(data.hasMany).toStrictEqual(['a', 'b', 'c', 'd'])
+
+      data = await payload.update({
+        id: data.id,
+        collection: 'select-versions-fields',
+        data: { hasMany: ['a'] },
+        draft: true,
+        autosave: true,
+      })
+      expect(data.hasMany).toStrictEqual(['a'])
+    })
   })
 
   describe('number', () => {
@@ -629,7 +766,7 @@ describe('Fields', () => {
             min: 5,
           },
         }),
-      ).rejects.toThrow('The following field is invalid: min')
+      ).rejects.toThrow('The following field is invalid: Min')
     })
     it('should not create number above max', async () => {
       await expect(async () =>
@@ -639,7 +776,7 @@ describe('Fields', () => {
             max: 15,
           },
         }),
-      ).rejects.toThrow('The following field is invalid: max')
+      ).rejects.toThrow('The following field is invalid: Max')
     })
 
     it('should not create number below 0', async () => {
@@ -650,7 +787,7 @@ describe('Fields', () => {
             positiveNumber: -5,
           },
         }),
-      ).rejects.toThrow('The following field is invalid: positiveNumber')
+      ).rejects.toThrow('The following field is invalid: Positive Number')
     })
 
     it('should not create number above 0', async () => {
@@ -661,7 +798,7 @@ describe('Fields', () => {
             negativeNumber: 5,
           },
         }),
-      ).rejects.toThrow('The following field is invalid: negativeNumber')
+      ).rejects.toThrow('The following field is invalid: Negative Number')
     })
     it('should not create a decimal number below min', async () => {
       await expect(async () =>
@@ -671,7 +808,7 @@ describe('Fields', () => {
             decimalMin: -0.25,
           },
         }),
-      ).rejects.toThrow('The following field is invalid: decimalMin')
+      ).rejects.toThrow('The following field is invalid: Decimal Min')
     })
 
     it('should not create a decimal number above max', async () => {
@@ -682,7 +819,7 @@ describe('Fields', () => {
             decimalMax: 1.5,
           },
         }),
-      ).rejects.toThrow('The following field is invalid: decimalMax')
+      ).rejects.toThrow('The following field is invalid: Decimal Max')
     })
     it('should localize an array of numbers using hasMany', async () => {
       const localizedHasMany = [5, 10]
@@ -1064,7 +1201,7 @@ describe('Fields', () => {
             min: 5,
           },
         }),
-      ).rejects.toThrow('The following field is invalid: min')
+      ).rejects.toThrow('The following field is invalid: Min')
 
       expect(doc.point).toEqual(point)
       expect(doc.localized).toEqual(localized)
@@ -1598,6 +1735,46 @@ describe('Fields', () => {
 
       expect(res.id).toBe(doc.id)
     })
+
+    it('should show proper validation error on text field in nested array', async () => {
+      await expect(async () =>
+        payload.create({
+          collection,
+          data: {
+            items: [
+              {
+                text: 'required',
+                subArray: [
+                  {
+                    textTwo: '',
+                  },
+                ],
+              },
+            ],
+          },
+        }),
+      ).rejects.toThrow('The following field is invalid: Items 1 > SubArray 1 > Second text field')
+    })
+
+    it('should show proper validation error on text field in row field in nested array', async () => {
+      await expect(async () =>
+        payload.create({
+          collection,
+          data: {
+            items: [
+              {
+                text: 'required',
+                subArray: [
+                  {
+                    textInRow: '',
+                  },
+                ],
+              },
+            ],
+          },
+        }),
+      ).rejects.toThrow('The following field is invalid: Items 1 > SubArray 1 > Text In Row')
+    })
   })
 
   describe('group', () => {
@@ -2104,6 +2281,28 @@ describe('Fields', () => {
       expect(res.camelCaseTab.array[0].text).toBe('text')
       expect(res.camelCaseTab.array[0].array[0].text).toBe('nested')
     })
+
+    it('should show proper validation error message on text field within array within tab', async () => {
+      await expect(async () =>
+        payload.update({
+          id: document.id,
+          collection: tabsFieldsSlug,
+          data: {
+            array: [
+              {
+                text: 'one',
+              },
+              {
+                text: 'two',
+              },
+              {
+                text: '',
+              },
+            ],
+          },
+        }),
+      ).rejects.toThrow('The following field is invalid: Array 3 > Text')
+    })
   })
 
   describe('blocks', () => {
@@ -2195,23 +2394,6 @@ describe('Fields', () => {
       })
 
       expect(blockFieldsFail.docs).toHaveLength(0)
-    })
-
-    it('should create when existing block ids are used', async () => {
-      const blockFields = await payload.find({
-        collection: 'block-fields',
-        limit: 1,
-      })
-      const [doc] = blockFields.docs
-
-      const result = await payload.create({
-        collection: 'block-fields',
-        data: {
-          ...doc,
-        },
-      })
-
-      expect(result.id).toBeDefined()
     })
 
     it('should filter based on nested block fields', async () => {
@@ -2382,6 +2564,26 @@ describe('Fields', () => {
     })
   })
 
+  describe('collapsible', () => {
+    it('should show proper validation error message for fields nested in collapsible', async () => {
+      await expect(async () =>
+        payload.create({
+          collection: collapsibleFieldsSlug,
+          data: {
+            text: 'required',
+            group: {
+              subGroup: {
+                requiredTextWithinSubGroup: '',
+              },
+            },
+          },
+        }),
+      ).rejects.toThrow(
+        'The following field is invalid: Group > SubGroup > Required Text Within Sub Group',
+      )
+    })
+  })
+
   describe('json', () => {
     it('should save json data', async () => {
       const json = { foo: 'bar' }
@@ -2403,7 +2605,7 @@ describe('Fields', () => {
             json: '{ bad input: true }',
           },
         }),
-      ).rejects.toThrow('The following field is invalid: json')
+      ).rejects.toThrow('The following field is invalid: Json')
     })
 
     it('should validate json schema', async () => {
@@ -2414,7 +2616,7 @@ describe('Fields', () => {
             json: { foo: 'bad' },
           },
         }),
-      ).rejects.toThrow('The following field is invalid: json')
+      ).rejects.toThrow('The following field is invalid: Json')
     })
 
     it('should save empty json objects', async () => {

@@ -80,23 +80,21 @@ export const DocumentTabs: React.FC<{
                 const { path, tab } = CustomView
 
                 if (tab.Component) {
-                  return (
-                    <RenderServerComponent
-                      clientProps={{
-                        path,
-                      }}
-                      Component={tab.Component}
-                      importMap={payload.importMap}
-                      key={`tab-custom-${index}`}
-                      serverProps={{
-                        collectionConfig,
-                        globalConfig,
-                        i18n,
-                        payload,
-                        permissions,
-                      }}
-                    />
-                  )
+                  return RenderServerComponent({
+                    clientProps: {
+                      path,
+                    },
+                    Component: tab.Component,
+                    importMap: payload.importMap,
+                    key: `tab-custom-${index}`,
+                    serverProps: {
+                      collectionConfig,
+                      globalConfig,
+                      i18n,
+                      payload,
+                      permissions,
+                    },
+                  })
                 }
 
                 return (

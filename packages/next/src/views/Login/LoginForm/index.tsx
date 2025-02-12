@@ -17,6 +17,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
+import { getLoginOptions } from 'payload/shared'
 
 import type { LoginFieldProps } from '../LoginField/index.js'
 
@@ -29,7 +30,7 @@ export const LoginForm: React.FC<{
   prefillUsername?: string
   searchParams: { [key: string]: string | string[] | undefined }
 }> = ({ prefillEmail, prefillPassword, prefillUsername, searchParams }) => {
-  const { config } = useConfig()
+  const { config, getEntityConfig } = useConfig()
 
   const {
     admin: {
@@ -39,12 +40,10 @@ export const LoginForm: React.FC<{
     routes: { admin: adminRoute, api: apiRoute },
   } = config
 
-  const collectionConfig = config.collections?.find((collection) => collection?.slug === userSlug)
+  const collectionConfig = getEntityConfig({ collectionSlug: userSlug })
   const { auth: authOptions } = collectionConfig
   const loginWithUsername = authOptions.loginWithUsername
-  const canLoginWithEmail =
-    !authOptions.loginWithUsername || authOptions.loginWithUsername.allowEmailLogin
-  const canLoginWithUsername = authOptions.loginWithUsername
+  const { canLoginWithEmail, canLoginWithUsername } = getLoginOptions(loginWithUsername)
 
   const [loginType] = React.useState<LoginFieldProps['type']>(() => {
     if (canLoginWithEmail && canLoginWithUsername) {

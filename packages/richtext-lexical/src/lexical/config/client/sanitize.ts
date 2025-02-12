@@ -6,7 +6,7 @@ import type {
   ResolvedClientFeatureMap,
   SanitizedClientFeatures,
 } from '../../../features/typesClient.js'
-import type { LexicalFieldAdminProps } from '../../../types.js'
+import type { LexicalFieldAdminClientProps } from '../../../types.js'
 import type { SanitizedClientEditorConfig } from '../types.js'
 
 export const sanitizeClientFeatures = (
@@ -14,6 +14,7 @@ export const sanitizeClientFeatures = (
 ): SanitizedClientFeatures => {
   const sanitized: SanitizedClientFeatures = {
     enabledFeatures: [],
+    enabledFormats: [],
     markdownTransformers: [],
     nodes: [],
     plugins: [],
@@ -39,6 +40,10 @@ export const sanitizeClientFeatures = (
       sanitized.providers = sanitized.providers.concat(feature.providers)
     }
 
+    if (feature.enableFormats?.length) {
+      sanitized.enabledFormats.push(...feature.enableFormats)
+    }
+
     if (feature.nodes?.length) {
       // Important: do not use concat
       for (const node of feature.nodes) {
@@ -49,7 +54,7 @@ export const sanitizeClientFeatures = (
       feature.plugins.forEach((plugin, i) => {
         sanitized.plugins?.push({
           clientProps: feature.sanitizedClientFeatureProps,
-          Component: plugin.Component,
+          Component: plugin.Component as any, // Appeases strict: true
           key: feature.key + i,
           position: plugin.position,
         })
@@ -214,7 +219,7 @@ export const sanitizeClientFeatures = (
 export function sanitizeClientEditorConfig(
   resolvedClientFeatureMap: ResolvedClientFeatureMap,
   lexical?: LexicalEditorConfig,
-  admin?: LexicalFieldAdminProps,
+  admin?: LexicalFieldAdminClientProps,
 ): SanitizedClientEditorConfig {
   return {
     admin,

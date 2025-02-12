@@ -1,6 +1,6 @@
 import type { ClientField, SanitizedFieldPermissions } from 'payload'
 
-export type Props = {
+export type RenderFieldsProps = {
   readonly className?: string
   readonly fields: ClientField[]
   /**

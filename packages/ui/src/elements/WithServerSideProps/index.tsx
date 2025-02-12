@@ -18,7 +18,7 @@ export const WithServerSideProps: WithServerSidePropsComponent = ({
       return <Component {...propsWithServerOnlyProps} />
     }
 
-    return <WithServerSideProps {...rest} />
+    return WithServerSideProps(rest)
   }
 
   return null

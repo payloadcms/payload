@@ -28,12 +28,11 @@ export function getValidTemplates(): ProjectTemplate[] {
       description: 'Website Template',
       url: `https://github.com/payloadcms/payload/templates/website#v${PACKAGE_VERSION}`,
     },
-
-    // {
-    //   name: 'plugin',
-    //   type: 'plugin',
-    //   description: 'Template for creating a Payload plugin',
-    //   url: 'https://github.com/payloadcms/plugin-template#beta',
-    // },
+    {
+      name: 'plugin',
+      type: 'plugin',
+      description: 'Template for creating a Payload plugin',
+      url: 'https://github.com/payloadcms/payload/templates/plugin#main',
+    },
   ]
 }

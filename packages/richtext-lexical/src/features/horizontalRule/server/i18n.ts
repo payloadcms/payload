@@ -13,6 +13,9 @@ export const i18n: Partial<GenericLanguages> = {
   cs: {
     label: 'Vodorovný pravítko',
   },
+  da: {
+    label: 'Horisontal Regel',
+  },
   de: {
     label: 'Trennlinie',
   },
@@ -21,6 +24,9 @@ export const i18n: Partial<GenericLanguages> = {
   },
   es: {
     label: 'Regla Horizontal',
+  },
+  et: {
+    label: 'Horisontaalne reegel',
   },
   fa: {
     label: 'قاعده افقی',
@@ -65,7 +71,7 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Linie orizontală',
   },
   rs: {
-    label: 'Horizontalna linija',
+    label: 'Хоризонтална линија',
   },
   'rs-latin': {
     label: 'Horizontalna linija',
@@ -76,11 +82,14 @@ export const i18n: Partial<GenericLanguages> = {
   sk: {
     label: 'Vodorovná čiara',
   },
+  sl: {
+    label: 'Vodoravna črta',
+  },
   sv: {
     label: 'Horisontell linje',
   },
   th: {
-    label: 'กฎขีดตรง',
+    label: 'เส้นขอบแนวนอน',
   },
   tr: {
     label: 'Yatay Çizgi',

@@ -18,6 +18,8 @@ import type {
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
+  FieldDiffClientComponent,
+  FieldDiffServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
 } from '../types.js'
@@ -26,7 +28,7 @@ export type ClientTab =
   | ({ fields: ClientField[]; readonly path?: string } & Omit<NamedTab, 'fields'>)
   | ({ fields: ClientField[] } & Omit<UnnamedTab, 'fields'>)
 
-type TabsFieldBaseClientProps = FieldPaths & Pick<ServerFieldBase, 'permissions'>
+type TabsFieldBaseClientProps = FieldPaths
 
 type TabsFieldClientWithoutType = MarkOptional<TabsFieldClient, 'type'>
 
@@ -63,3 +65,7 @@ export type TabsFieldErrorServerComponent = FieldErrorServerComponent<
 >
 
 export type TabsFieldErrorClientComponent = FieldErrorClientComponent<TabsFieldClientWithoutType>
+
+export type TabsFieldDiffServerComponent = FieldDiffServerComponent<TabsField, TabsFieldClient>
+
+export type TabsFieldDiffClientComponent = FieldDiffClientComponent<TabsFieldClient>

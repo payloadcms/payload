@@ -8,13 +8,14 @@ import type { AdminViewProps, ListQuery, Where } from 'payload'
 
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { renderFilters, renderTable } from '@payloadcms/ui/rsc'
+import { renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
 import { formatAdminURL, mergeListSearchAndWhere } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
 import { isNumber } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { renderListViewSlots } from './renderListViewSlots.js'
+import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
 
 export { generateListMetadata } from './meta.js'
 
@@ -23,6 +24,7 @@ type ListViewArgs = {
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   enableRowSelections: boolean
+  overrideEntityVisibility?: boolean
   query: ListQuery
 } & AdminViewProps
 
@@ -39,6 +41,7 @@ export const renderListView = async (
     drawerSlug,
     enableRowSelections,
     initPageResult,
+    overrideEntityVisibility,
     params,
     query: queryFromArgs,
     searchParams,
@@ -46,12 +49,7 @@ export const renderListView = async (
 
   const {
     collectionConfig,
-    collectionConfig: {
-      slug: collectionSlug,
-      admin: { useAsTitle },
-      defaultSort,
-      fields,
-    },
+    collectionConfig: { slug: collectionSlug },
     locale: fullLocale,
     permissions,
     req,
@@ -72,68 +70,37 @@ export const renderListView = async (
 
   const query = queryFromArgs || queryFromReq
 
-  let listPreferences: ListPreferences
-  const preferenceKey = `${collectionSlug}-list`
-
-  try {
-    listPreferences = (await payload
-      .find({
-        collection: 'payload-preferences',
-        depth: 0,
-        limit: 1,
-        req,
-        user,
-        where: {
-          and: [
-            {
-              key: {
-                equals: preferenceKey,
-              },
-            },
-            {
-              'user.relationTo': {
-                equals: user.collection,
-              },
-            },
-            {
-              'user.value': {
-                equals: user?.id,
-              },
-            },
-          ],
-        },
-      })
-      ?.then((res) => res?.docs?.[0]?.value)) as ListPreferences
-  } catch (_err) {} // eslint-disable-line no-empty
+  const listPreferences = await upsertPreferences<ListPreferences>({
+    key: `${collectionSlug}-list`,
+    req,
+    value: {
+      limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
+      sort: query?.sort as string,
+    },
+  })
 
   const {
     routes: { admin: adminRoute },
   } = config
 
   if (collectionConfig) {
-    if (!visibleEntities.collections.includes(collectionSlug)) {
+    if (!visibleEntities.collections.includes(collectionSlug) && !overrideEntityVisibility) {
       throw new Error('not-found')
     }
 
     const page = isNumber(query?.page) ? Number(query.page) : 0
 
-    let whereQuery = mergeListSearchAndWhere({
+    const limit = listPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
+
+    const sort =
+      listPreferences?.sort ||
+      (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
+
+    let where = mergeListSearchAndWhere({
       collectionConfig,
       search: typeof query?.search === 'string' ? query.search : undefined,
       where: (query?.where as Where) || undefined,
     })
-
-    const limit = isNumber(query?.limit)
-      ? Number(query.limit)
-      : listPreferences?.limit || collectionConfig.admin.pagination.defaultLimit
-
-    const sort =
-      query?.sort && typeof query.sort === 'string'
-        ? query.sort
-        : listPreferences?.sort ||
-          (typeof collectionConfig.defaultSort === 'string'
-            ? collectionConfig.defaultSort
-            : undefined)
 
     if (typeof collectionConfig.admin?.baseListFilter === 'function') {
       const baseListFilter = await collectionConfig.admin.baseListFilter({
@@ -144,8 +111,8 @@ export const renderListView = async (
       })
 
       if (baseListFilter) {
-        whereQuery = {
-          and: [whereQuery, baseListFilter].filter(Boolean),
+        where = {
+          and: [where, baseListFilter].filter(Boolean),
         }
       }
     }
@@ -163,25 +130,30 @@ export const renderListView = async (
       req,
       sort,
       user,
-      where: whereQuery || {},
+      where: where || {},
     })
 
     const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
 
     const { columnState, Table } = renderTable({
-      collectionConfig: clientCollectionConfig,
+      clientCollectionConfig,
+      collectionConfig,
       columnPreferences: listPreferences?.columns,
       customCellProps,
       docs: data.docs,
       drawerSlug,
       enableRowSelections,
-      fields,
       i18n: req.i18n,
       payload,
-      useAsTitle,
+      useAsTitle: collectionConfig.admin.useAsTitle,
     })
 
-    const renderedFilters = renderFilters(fields, req.payload.importMap)
+    const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
+
+    const resolvedFilterOptions = await resolveAllFilterOptions({
+      collectionConfig,
+      req,
+    })
 
     const staticDescription =
       typeof collectionConfig.admin.description === 'function'
@@ -226,6 +198,7 @@ export const renderListView = async (
       enableRowSelections,
       listPreferences,
       renderedFilters,
+      resolvedFilterOptions,
       Table,
     }
 
@@ -236,25 +209,23 @@ export const renderListView = async (
         <Fragment>
           <HydrateAuthProvider permissions={permissions} />
           <ListQueryProvider
-            collectionSlug={collectionSlug}
             data={data}
             defaultLimit={limit}
             defaultSort={sort}
             modifySearchParams={!isInDrawer}
-            preferenceKey={preferenceKey}
           >
-            <RenderServerComponent
-              clientProps={clientProps}
-              Component={collectionConfig?.admin?.components?.views?.list?.Component}
-              Fallback={DefaultListView}
-              importMap={payload.importMap}
-              serverProps={{
+            {RenderServerComponent({
+              clientProps,
+              Component: collectionConfig?.admin?.components?.views?.list?.Component,
+              Fallback: DefaultListView,
+              importMap: payload.importMap,
+              serverProps: {
                 ...sharedServerProps,
                 data,
                 listPreferences,
                 listSearchableFields: collectionConfig.admin.listSearchableFields,
-              }}
-            />
+              },
+            })}
           </ListQueryProvider>
         </Fragment>
       ),

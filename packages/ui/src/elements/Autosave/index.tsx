@@ -13,15 +13,15 @@ import {
   useFormSubmitted,
 } from '../../forms/Form/context.js'
 import { useDebounce } from '../../hooks/useDebounce.js'
-import { useIgnoredEffect } from '../../hooks/useIgnoredEffect.js'
+import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import './index.scss'
 import { formatTimeToNow } from '../../utilities/formatDate.js'
 import { reduceFieldsToValuesWithValidation } from '../../utilities/reduceFieldsToValuesWithValidation.js'
-import './index.scss'
 
 const baseClass = 'autosave'
 // The minimum time the saving state should be shown
@@ -48,14 +48,19 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     mostRecentVersionIsAutosaved,
     setLastUpdateTime,
     setMostRecentVersionIsAutosaved,
+    setUnpublishedVersionCount,
+    updateSavedDocumentData,
   } = useDocumentInfo()
+  const queueRef = useRef([])
+  const isProcessingRef = useRef(false)
+
   const { reportUpdate } = useDocumentEvents()
   const { dispatchFields, setSubmitted } = useForm()
   const submitted = useFormSubmitted()
   const versionsConfig = docConfig?.versions
 
   const [fields] = useAllFormFields()
-  const formModified = useFormModified()
+  const modified = useFormModified()
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
 
@@ -66,7 +71,6 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
   const [saving, setSaving] = useState(false)
   const debouncedFields = useDebounce(fields, interval)
-  const modified = useDebounce(formModified, interval)
   const fieldRef = useRef(fields)
   const modifiedRef = useRef(modified)
   const localeRef = useRef(locale)
@@ -88,184 +92,193 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   // can always retrieve the most to date locale
   localeRef.current = locale
 
-  // When debounced fields change, autosave
-  useIgnoredEffect(
-    () => {
-      const abortController = new AbortController()
-      let autosaveTimeout = undefined
-      // We need to log the time in order to figure out if we need to trigger the state off later
-      let startTimestamp = undefined
-      let endTimestamp = undefined
+  const processQueue = React.useCallback(async () => {
+    if (isProcessingRef.current || queueRef.current.length === 0) {
+      return
+    }
 
-      const autosave = () => {
-        if (modified) {
-          startTimestamp = new Date().getTime()
+    isProcessingRef.current = true
+    const latestAction = queueRef.current[queueRef.current.length - 1]
+    queueRef.current = []
 
-          setSaving(true)
+    try {
+      await latestAction()
+    } finally {
+      isProcessingRef.current = false
+      if (queueRef.current.length > 0) {
+        await processQueue()
+      }
+    }
+  }, [])
 
-          let url: string
-          let method: string
-          let entitySlug: string
+  const handleAutosave = useEffectEvent(() => {
+    const abortController = new AbortController()
+    let autosaveTimeout = undefined
+    // We need to log the time in order to figure out if we need to trigger the state off later
+    let startTimestamp = undefined
+    let endTimestamp = undefined
 
-          if (collection && id) {
-            entitySlug = collection.slug
-            url = `${serverURL}${api}/${entitySlug}/${id}?draft=true&autosave=true&locale=${localeRef.current}`
-            method = 'PATCH'
-          }
+    const autosave = async () => {
+      if (modified) {
+        startTimestamp = new Date().getTime()
 
-          if (globalDoc) {
-            entitySlug = globalDoc.slug
-            url = `${serverURL}${api}/globals/${entitySlug}?draft=true&autosave=true&locale=${localeRef.current}`
-            method = 'POST'
-          }
+        setSaving(true)
 
-          if (url) {
-            if (modifiedRef.current) {
-              const { data, valid } = {
-                ...reduceFieldsToValuesWithValidation(fieldRef.current, true),
-              }
-              data._status = 'draft'
-              const skipSubmission =
-                submitted && !valid && versionsConfig?.drafts && versionsConfig?.drafts?.validate
+        let url: string
+        let method: string
+        let entitySlug: string
 
-              if (!skipSubmission) {
-                void fetch(url, {
-                  body: JSON.stringify(data),
-                  credentials: 'include',
-                  headers: {
-                    'Accept-Language': i18n.language,
-                    'Content-Type': 'application/json',
-                  },
-                  method,
-                  signal: abortController.signal,
+        if (collection && id) {
+          entitySlug = collection.slug
+          url = `${serverURL}${api}/${entitySlug}/${id}?draft=true&autosave=true&locale=${localeRef.current}`
+          method = 'PATCH'
+        }
+
+        if (globalDoc) {
+          entitySlug = globalDoc.slug
+          url = `${serverURL}${api}/globals/${entitySlug}?draft=true&autosave=true&locale=${localeRef.current}`
+          method = 'POST'
+        }
+
+        if (url) {
+          if (modifiedRef.current) {
+            const { data, valid } = {
+              ...reduceFieldsToValuesWithValidation(fieldRef.current, true),
+            }
+            data._status = 'draft'
+            const skipSubmission =
+              submitted && !valid && versionsConfig?.drafts && versionsConfig?.drafts?.validate
+
+            if (!skipSubmission) {
+              await fetch(url, {
+                body: JSON.stringify(data),
+                credentials: 'include',
+                headers: {
+                  'Accept-Language': i18n.language,
+                  'Content-Type': 'application/json',
+                },
+                method,
+                signal: abortController.signal,
+              })
+                .then((res) => {
+                  const newDate = new Date()
+                  // We need to log the time in order to figure out if we need to trigger the state off later
+                  endTimestamp = newDate.getTime()
+
+                  if (res.status === 200) {
+                    setLastUpdateTime(newDate.getTime())
+
+                    reportUpdate({
+                      id,
+                      entitySlug,
+                      updatedAt: newDate.toISOString(),
+                    })
+
+                    if (!mostRecentVersionIsAutosaved) {
+                      incrementVersionCount()
+                      setMostRecentVersionIsAutosaved(true)
+                      setUnpublishedVersionCount((prev) => prev + 1)
+                    }
+                  }
+
+                  return res.json()
                 })
-                  .then((res) => {
-                    const newDate = new Date()
-                    // We need to log the time in order to figure out if we need to trigger the state off later
-                    endTimestamp = newDate.getTime()
+                .then((json) => {
+                  if (versionsConfig?.drafts && versionsConfig?.drafts?.validate && json?.errors) {
+                    if (Array.isArray(json.errors)) {
+                      const [fieldErrors, nonFieldErrors] = json.errors.reduce(
+                        ([fieldErrs, nonFieldErrs], err) => {
+                          const newFieldErrs = []
+                          const newNonFieldErrs = []
 
-                    if (res.status === 200) {
-                      setLastUpdateTime(newDate.getTime())
+                          if (err?.message) {
+                            newNonFieldErrs.push(err)
+                          }
 
-                      reportUpdate({
-                        id,
-                        entitySlug,
-                        updatedAt: newDate.toISOString(),
+                          if (Array.isArray(err?.data)) {
+                            err.data.forEach((dataError) => {
+                              if (dataError?.field) {
+                                newFieldErrs.push(dataError)
+                              } else {
+                                newNonFieldErrs.push(dataError)
+                              }
+                            })
+                          }
+
+                          return [
+                            [...fieldErrs, ...newFieldErrs],
+                            [...nonFieldErrs, ...newNonFieldErrs],
+                          ]
+                        },
+                        [[], []],
+                      )
+
+                      dispatchFields({
+                        type: 'ADD_SERVER_ERRORS',
+                        errors: fieldErrors,
                       })
 
-                      if (!mostRecentVersionIsAutosaved) {
-                        incrementVersionCount()
-                        setMostRecentVersionIsAutosaved(true)
-                      }
-                    } else {
-                      return res.json()
-                    }
-                  })
-                  .then((json) => {
-                    if (
-                      versionsConfig?.drafts &&
-                      versionsConfig?.drafts?.validate &&
-                      json?.errors
-                    ) {
-                      if (Array.isArray(json.errors)) {
-                        const [fieldErrors, nonFieldErrors] = json.errors.reduce(
-                          ([fieldErrs, nonFieldErrs], err) => {
-                            const newFieldErrs = []
-                            const newNonFieldErrs = []
+                      nonFieldErrors.forEach((err) => {
+                        toast.error(err.message || i18n.t('error:unknown'))
+                      })
 
-                            if (err?.message) {
-                              newNonFieldErrs.push(err)
-                            }
-
-                            if (Array.isArray(err?.data)) {
-                              err.data.forEach((dataError) => {
-                                if (dataError?.field) {
-                                  newFieldErrs.push(dataError)
-                                } else {
-                                  newNonFieldErrs.push(dataError)
-                                }
-                              })
-                            }
-
-                            return [
-                              [...fieldErrs, ...newFieldErrs],
-                              [...nonFieldErrs, ...newNonFieldErrs],
-                            ]
-                          },
-                          [[], []],
-                        )
-
-                        dispatchFields({
-                          type: 'ADD_SERVER_ERRORS',
-                          errors: fieldErrors,
-                        })
-
-                        nonFieldErrors.forEach((err) => {
-                          toast.error(err.message || i18n.t('error:unknown'))
-                        })
-
-                        setSubmitted(true)
-                        setSaving(false)
-                        return
-                      }
-                    }
-                  })
-                  .then(() => {
-                    // If request was faster than minimum animation time, animate the difference
-                    if (endTimestamp - startTimestamp < minimumAnimationTime) {
-                      autosaveTimeout = setTimeout(
-                        () => {
-                          setSaving(false)
-                        },
-                        minimumAnimationTime - (endTimestamp - startTimestamp),
-                      )
-                    } else {
+                      setSubmitted(true)
                       setSaving(false)
+                      return
                     }
-                  })
-              }
+                  } else {
+                    // If it's not an error then we can update the document data inside the context
+                    const document = json?.doc || json?.result
+
+                    // Manually update the data since this function doesn't fire the `submit` function from useForm
+                    if (document) {
+                      updateSavedDocumentData(document)
+                    }
+                  }
+                })
+                .then(() => {
+                  // If request was faster than minimum animation time, animate the difference
+                  if (endTimestamp - startTimestamp < minimumAnimationTime) {
+                    autosaveTimeout = setTimeout(
+                      () => {
+                        setSaving(false)
+                      },
+                      minimumAnimationTime - (endTimestamp - startTimestamp),
+                    )
+                  } else {
+                    setSaving(false)
+                  }
+                })
             }
           }
         }
       }
+    }
 
-      void autosave()
+    queueRef.current.push(autosave)
+    void processQueue()
 
-      return () => {
-        if (autosaveTimeout) {
-          clearTimeout(autosaveTimeout)
-        }
-        if (abortController.signal) {
-          try {
-            abortController.abort('Autosave closed early.')
-          } catch (error) {
-            // swallow error
-          }
-        }
-        setSaving(false)
+    return { abortController, autosaveTimeout }
+  })
+
+  // When debounced fields change, autosave
+  useEffect(() => {
+    const { abortController, autosaveTimeout } = handleAutosave()
+
+    return () => {
+      if (autosaveTimeout) {
+        clearTimeout(autosaveTimeout)
       }
-    },
-    [debouncedFields],
-    [
-      api,
-      collection,
-      dispatchFields,
-      globalDoc,
-      i18n,
-      id,
-      interval,
-      modified,
-      reportUpdate,
-      serverURL,
-      setSubmitted,
-      versionsConfig?.drafts,
-      submitted,
-      setLastUpdateTime,
-      mostRecentVersionIsAutosaved,
-      incrementVersionCount,
-      setMostRecentVersionIsAutosaved,
-    ],
-  )
+      if (abortController.signal) {
+        try {
+          abortController.abort('Autosave closed early.')
+        } catch (error) {
+          // swallow error
+        }
+      }
+      setSaving(false)
+    }
+  }, [debouncedFields])
 
   return (
     <div className={baseClass}>

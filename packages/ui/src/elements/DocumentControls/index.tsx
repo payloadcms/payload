@@ -13,6 +13,7 @@ import React, { Fragment, useEffect } from 'react'
 
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 
+import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -20,6 +21,7 @@ import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { formatDate } from '../../utilities/formatDate.js'
 import { Autosave } from '../Autosave/index.js'
 import { Button } from '../Button/index.js'
+import { CopyLocaleData } from '../CopyLocaleData/index.js'
 import { DeleteDocument } from '../DeleteDocument/index.js'
 import { DuplicateDocument } from '../DuplicateDocument/index.js'
 import { Gutter } from '../Gutter/index.js'
@@ -96,18 +98,22 @@ export const DocumentControls: React.FC<{
 
   const { config, getEntityConfig } = useConfig()
 
-  const collectionConfig = getEntityConfig({ collectionSlug: slug }) as ClientCollectionConfig
+  const collectionConfig = getEntityConfig({ collectionSlug: slug })
 
-  const globalConfig = getEntityConfig({ globalSlug: slug }) as ClientGlobalConfig
+  const globalConfig = getEntityConfig({ globalSlug: slug })
 
   const {
     admin: { dateFormat },
+    localization,
     routes: { admin: adminRoute },
   } = config
 
   // Settings these in state to avoid hydration issues if there is a mismatch between the server and client
   const [updatedAt, setUpdatedAt] = React.useState<string>('')
   const [createdAt, setCreatedAt] = React.useState<string>('')
+
+  const processing = useFormProcessing()
+  const initializing = useFormInitializing()
 
   useEffect(() => {
     if (data?.updatedAt) {
@@ -253,11 +259,13 @@ export const DocumentControls: React.FC<{
                 </div>
               }
               className={`${baseClass}__popup`}
+              disabled={initializing || processing}
               horizontalAlign="right"
               size="large"
               verticalAlign="bottom"
             >
               <PopupList.ButtonGroup>
+                {localization && <CopyLocaleData />}
                 {hasCreatePermission && (
                   <React.Fragment>
                     {!disableCreate && (

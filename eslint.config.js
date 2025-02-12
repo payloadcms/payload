@@ -19,6 +19,10 @@ export const defaultESLintIgnores = [
   '**/build/',
   '**/node_modules/',
   '**/temp/',
+  'packages/**/*.spec.ts',
+  'next-env.d.ts',
+  '**/app',
+  'src/**/*.spec.ts',
 ]
 
 /** @typedef {import('eslint').Linter.Config} Config */
@@ -26,10 +30,7 @@ export const defaultESLintIgnores = [
 export const rootParserOptions = {
   sourceType: 'module',
   ecmaVersion: 'latest',
-  projectService: {
-    maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: 40,
-    allowDefaultProject: ['scripts/*.ts', '*.js', '*.mjs', '*.d.ts'],
-  },
+  projectService: true,
 }
 
 /** @type {Config[]} */
@@ -42,6 +43,7 @@ export const rootEslintConfig = [
       'test/live-preview/next-app',
       'packages/**/*.spec.ts',
       'templates/**',
+      'examples/**',
     ],
   },
   {
@@ -60,6 +62,14 @@ export const rootEslintConfig = [
     files: ['scripts/**/*.ts'],
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
+      'no-console': 'off',
+      'perfectionist/sort-object-types': 'off',
+      'perfectionist/sort-objects': 'off',
+    },
+  },
+  {
+    files: ['tools/**/*.ts'],
+    rules: {
       'no-console': 'off',
       'perfectionist/sort-object-types': 'off',
       'perfectionist/sort-objects': 'off',

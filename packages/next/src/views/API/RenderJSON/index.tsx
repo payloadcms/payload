@@ -52,9 +52,9 @@ export const RenderJSON = ({
   const objectKeys = object ? Object.keys(object) : []
   const objectLength = objectKeys.length
   const [isOpen, setIsOpen] = React.useState<boolean>(true)
-  const isNestedAndEmpty = isEmpty && (parentType === 'object' || parentType === 'array')
+  const isNested = parentType === 'object' || parentType === 'array'
   return (
-    <li className={isNestedAndEmpty ? `${baseClass}__row-line--nested` : ''}>
+    <li className={isNested ? `${baseClass}__row-line--nested` : ''}>
       <button
         aria-label="toggle"
         className={`${baseClass}__list-toggle ${isEmpty ? `${baseClass}__list-toggle--empty` : ''}`}
@@ -75,7 +75,9 @@ export const RenderJSON = ({
         </span>
       </button>
 
-      <ul className={`${baseClass}__json-children`}>
+      <ul
+        className={`${baseClass}__json-children ${isNested ? `${baseClass}__json-children--nested` : ''}`}
+      >
         {isOpen &&
           objectKeys.map((key, keyIndex) => {
             let value = object[key]
@@ -142,7 +144,7 @@ export const RenderJSON = ({
       </ul>
 
       {!isEmpty && (
-        <span>
+        <span className={isNested ? `${baseClass}__bracket--nested` : ''}>
           <Bracket comma={trailingComma} position="end" type={parentType} />
         </span>
       )}

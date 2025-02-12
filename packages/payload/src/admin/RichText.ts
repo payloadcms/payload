@@ -1,19 +1,13 @@
-import type { GenericLanguages, I18n, I18nClient } from '@payloadcms/translations'
+import type { GenericLanguages, I18n } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 
-import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { Config, PayloadComponent, SanitizedConfig } from '../config/types.js'
 import type { ValidationFieldError } from '../errors/ValidationError.js'
-import type {
-  FieldAffectingData,
-  RichTextField,
-  RichTextFieldClient,
-  Validate,
-} from '../fields/config/types.js'
+import type { FieldAffectingData, RichTextField, Validate } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { RequestContext } from '../index.js'
-import type { JsonObject, Payload, PayloadRequest, PopulateType } from '../types/index.js'
+import type { JsonObject, PayloadRequest, PopulateType } from '../types/index.js'
 import type { RichTextFieldClientProps } from './fields/RichText.js'
 import type { FieldSchemaMap } from './types.js'
 
@@ -122,7 +116,7 @@ export type BaseRichTextHookArgs<
   field: FieldAffectingData
   /** The global which the field belongs to. If the field belongs to a collection, this will be null. */
   global: null | SanitizedGlobalConfig
-
+  indexPath: number[]
   /** The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. */
   originalDoc?: TData
   /**
@@ -221,16 +215,11 @@ type RichTextAdapterBase<
   }) => void
   hooks?: RichTextHooks
   i18n?: Partial<GenericLanguages>
-  outputSchema?: ({
-    collectionIDFieldTypes,
-    config,
-    field,
-    interfaceNameDefinitions,
-    isRequired,
-  }: {
+  outputSchema?: (args: {
     collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
     config?: SanitizedConfig
     field: RichTextField<Value, AdapterProps, ExtraFieldProperties>
+    i18n?: I18n
     /**
      * Allows you to define new top-level interfaces that can be re-used in the output schema.
      */

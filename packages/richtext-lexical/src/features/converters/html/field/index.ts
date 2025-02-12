@@ -83,62 +83,6 @@ export const consolidateHTMLConverters = ({
   return filteredConverters
 }
 
-// find the path of this field, as well as its sibling fields, by looking for this `field` in fields and traversing it recursively
-function findFieldPathAndSiblingFields(
-  fields: Field[],
-  path: string[],
-  field: FieldAffectingData,
-): {
-  path: string[]
-  siblingFields: Field[]
-} | null {
-  for (const curField of fields) {
-    if (curField === field) {
-      return {
-        path: [...path, curField.name],
-        siblingFields: fields,
-      }
-    }
-
-    if ('fields' in curField) {
-      const result = findFieldPathAndSiblingFields(
-        curField.fields,
-        'name' in curField ? [...path, curField.name] : [...path],
-        field,
-      )
-      if (result) {
-        return result
-      }
-    } else if ('tabs' in curField) {
-      for (const tab of curField.tabs) {
-        const result = findFieldPathAndSiblingFields(
-          tab.fields,
-          'name' in tab ? [...path, tab.name] : [...path],
-          field,
-        )
-        if (result) {
-          return result
-        }
-      }
-    } else if ('blocks' in curField) {
-      for (const block of curField.blocks) {
-        if (block?.fields?.length) {
-          const result = findFieldPathAndSiblingFields(
-            block.fields,
-            [...path, curField.name, block.slug],
-            field,
-          )
-          if (result) {
-            return result
-          }
-        }
-      }
-    }
-  }
-
-  return null
-}
-
 export const lexicalHTML: (
   /**
    * A string which matches the lexical field name you want to convert to HTML.
@@ -161,28 +105,22 @@ export const lexicalHTML: (
     hooks: {
       afterRead: [
         async ({
-          collection,
           currentDepth,
           depth,
           draft,
           field,
-          global,
           overrideAccess,
           req,
           showHiddenFields,
           siblingData,
+          siblingFields,
         }) => {
-          const fields = collection ? collection.fields : global!.fields
-
-          const foundSiblingFields = findFieldPathAndSiblingFields(fields, [], field)
-
-          if (!foundSiblingFields) {
+          if (!siblingFields) {
             throw new Error(
               `Could not find sibling fields of current lexicalHTML field with name ${field?.name}`,
             )
           }
 
-          const { siblingFields } = foundSiblingFields
           const lexicalField: RichTextField<SerializedEditorState, AdapterProps> =
             siblingFields.find(
               (field) => 'name' in field && field.name === lexicalFieldName,

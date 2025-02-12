@@ -15,7 +15,11 @@ export const getBaseAuthFields = (authConfig: IncomingAuthType): Field[] => {
     authFields.push(...apiKeyFields)
   }
 
-  if (!authConfig.disableLocalStrategy) {
+  if (
+    !authConfig.disableLocalStrategy ||
+    (typeof authConfig.disableLocalStrategy === 'object' &&
+      authConfig.disableLocalStrategy.enableFields)
+  ) {
     const emailField = { ...emailFieldConfig }
     let usernameField: TextField | undefined
 
@@ -27,6 +31,9 @@ export const getBaseAuthFields = (authConfig: IncomingAuthType): Field[] => {
         }
         if (authConfig.loginWithUsername.requireUsername === false) {
           usernameField.required = false
+        }
+        if (authConfig.loginWithUsername.allowEmailLogin === false) {
+          emailField.unique = false
         }
       }
     }
@@ -42,7 +49,7 @@ export const getBaseAuthFields = (authConfig: IncomingAuthType): Field[] => {
       authFields.push(...verificationFields)
     }
 
-    if (authConfig.maxLoginAttempts > 0) {
+    if (authConfig?.maxLoginAttempts && authConfig.maxLoginAttempts > 0) {
       authFields.push(...accountLockFields)
     }
   }

@@ -127,7 +127,7 @@ export const updateOperation = async <
       collection: null,
       context: req.context,
       depth: 0,
-      doc: globalJSON,
+      doc: deepCopyObjectSimple(globalJSON),
       draft: draftArg,
       fallbackLocale,
       global: globalConfig,
@@ -244,6 +244,11 @@ export const updateOperation = async <
     // /////////////////////////////////////
 
     if (!shouldSaveDraft) {
+      // Ensure global has createdAt
+      if (!result.createdAt) {
+        result.createdAt = new Date().toISOString()
+      }
+
       if (globalExists) {
         result = await payload.db.updateGlobal({
           slug,

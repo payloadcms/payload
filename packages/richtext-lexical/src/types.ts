@@ -1,12 +1,14 @@
 import type { EditorConfig as LexicalEditorConfig, SerializedEditorState } from 'lexical'
 import type {
   ClientField,
-  DefaultCellComponentProps,
+  DefaultServerCellComponentProps,
+  LabelFunction,
   RichTextAdapter,
   RichTextFieldClient,
   RichTextFieldClientProps,
   SanitizedConfig,
   ServerFieldBase,
+  StaticLabel,
 } from 'payload'
 
 import type {
@@ -22,7 +24,19 @@ export type LexicalFieldAdminProps = {
    * Controls if the gutter (padding to the left & gray vertical line) should be hidden. @default false
    */
   hideGutter?: boolean
+  /**
+   * Controls if the insert paragraph at the end button should be hidden. @default false
+   */
+  hideInsertParagraphAtEnd?: boolean
+  /**
+   * Changes the placeholder text in the editor if no content is present.
+   */
+  placeholder?: LabelFunction | StaticLabel
 }
+
+export type LexicalFieldAdminClientProps = {
+  placeholder?: string
+} & Omit<LexicalFieldAdminProps, 'placeholder'>
 
 export type LexicalEditorProps = {
   admin?: LexicalFieldAdminProps
@@ -80,14 +94,15 @@ export type LexicalRichTextAdapterProvider =
     parentIsLocalized: boolean
   }) => Promise<LexicalRichTextAdapter>
 
+export type SingleFeatureClientSchemaMap = {
+  [key: string]: ClientField[]
+}
 export type FeatureClientSchemaMap = {
-  [featureKey: string]: {
-    [key: string]: ClientField[]
-  }
+  [featureKey: string]: SingleFeatureClientSchemaMap
 }
 
 export type LexicalRichTextFieldProps = {
-  admin: LexicalFieldAdminProps
+  admin?: LexicalFieldAdminClientProps
   // clientFeatures is added through the rsc field
   clientFeatures: {
     [featureKey: string]: {
@@ -97,11 +112,11 @@ export type LexicalRichTextFieldProps = {
   }
   featureClientSchemaMap: FeatureClientSchemaMap
   initialLexicalFormState: InitialLexicalFormState
-  lexicalEditorConfig: LexicalEditorConfig
+  lexicalEditorConfig: LexicalEditorConfig | undefined // Undefined if default lexical editor config should be used
 } & Pick<ServerFieldBase, 'permissions'> &
   RichTextFieldClientProps<SerializedEditorState, AdapterProps, object>
 
-export type LexicalRichTextCellProps = DefaultCellComponentProps<
+export type LexicalRichTextCellProps = DefaultServerCellComponentProps<
   RichTextFieldClient<SerializedEditorState, AdapterProps, object>,
   SerializedEditorState
 >

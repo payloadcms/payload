@@ -290,6 +290,25 @@ export default buildConfigWithDefaults({
           name: 'polymorphic',
           relationTo: ['movies'],
         },
+        {
+          type: 'relationship',
+          name: 'polymorphicLocalized',
+          relationTo: ['movies'],
+          localized: true,
+        },
+        {
+          type: 'relationship',
+          name: 'polymorphicMany',
+          hasMany: true,
+          relationTo: ['movies'],
+        },
+        {
+          type: 'relationship',
+          hasMany: true,
+          name: 'polymorphicManyLocalized',
+          localized: true,
+          relationTo: ['movies'],
+        },
       ],
     },
     {
@@ -365,6 +384,73 @@ export default buildConfigWithDefaults({
           relationTo: ['movies'],
           name: 'manyPoly',
           hasMany: true,
+        },
+      ],
+    },
+    {
+      slug: 'deep-nested',
+      fields: [
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              name: 'content',
+              fields: [
+                {
+                  type: 'blocks',
+                  name: 'blocks',
+                  blocks: [
+                    {
+                      slug: 'testBlock',
+                      fields: [
+                        {
+                          type: 'tabs',
+                          tabs: [
+                            {
+                              name: 'meta',
+                              fields: [
+                                {
+                                  type: 'relationship',
+                                  relationTo: 'movies',
+                                  name: 'movie',
+                                },
+                              ],
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      slug: 'relations',
+      fields: [
+        {
+          name: 'item',
+          type: 'relationship',
+          relationTo: ['items'],
+        },
+      ],
+    },
+    {
+      slug: 'items',
+      fields: [
+        {
+          type: 'select',
+          options: ['completed', 'failed', 'pending'],
+          name: 'status',
+        },
+        {
+          type: 'join',
+          on: 'item',
+          collection: 'relations',
+          name: 'relation',
         },
       ],
     },

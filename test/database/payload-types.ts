@@ -12,6 +12,7 @@ export interface Config {
   };
   collections: {
     posts: Post;
+    'error-on-unnamed-fields': ErrorOnUnnamedField;
     'default-values': DefaultValue;
     'relation-a': RelationA;
     'relation-b': RelationB;
@@ -20,6 +21,8 @@ export interface Config {
     places: Place;
     'fields-persistance': FieldsPersistance;
     'custom-ids': CustomId;
+    'fake-custom-ids': FakeCustomId;
+    'relationships-migration': RelationshipsMigration;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -28,6 +31,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
+    'error-on-unnamed-fields': ErrorOnUnnamedFieldsSelect<false> | ErrorOnUnnamedFieldsSelect<true>;
     'default-values': DefaultValuesSelect<false> | DefaultValuesSelect<true>;
     'relation-a': RelationASelect<false> | RelationASelect<true>;
     'relation-b': RelationBSelect<false> | RelationBSelect<true>;
@@ -36,6 +40,8 @@ export interface Config {
     places: PlacesSelect<false> | PlacesSelect<true>;
     'fields-persistance': FieldsPersistanceSelect<false> | FieldsPersistanceSelect<true>;
     'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
+    'fake-custom-ids': FakeCustomIdsSelect<false> | FakeCustomIdsSelect<true>;
+    'relationships-migration': RelationshipsMigrationSelect<false> | RelationshipsMigrationSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -46,17 +52,21 @@ export interface Config {
   };
   globals: {
     global: Global;
+    'global-2': Global2;
+    'global-3': Global3;
   };
   globalsSelect: {
     global: GlobalSelect<false> | GlobalSelect<true>;
+    'global-2': Global2Select<false> | Global2Select<true>;
+    'global-3': Global3Select<false> | Global3Select<true>;
   };
   locale: 'en' | 'es';
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -84,8 +94,41 @@ export interface UserAuthOperations {
 export interface Post {
   id: string;
   title: string;
+  D1?: {
+    D2?: {
+      D3?: {
+        D4?: string | null;
+      };
+    };
+  };
   hasTransaction?: boolean | null;
   throwAfterChange?: boolean | null;
+  arrayWithIDs?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocksWithIDs?:
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block';
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "error-on-unnamed-fields".
+ */
+export interface ErrorOnUnnamedField {
+  id: string;
+  groupWithinUnnamedTab: {
+    text: string;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -267,9 +310,40 @@ export interface FieldsPersistance {
  */
 export interface CustomId {
   id: string;
+  title?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fake-custom-ids".
+ */
+export interface FakeCustomId {
+  id: string;
+  title?: string | null;
+  group?: {
+    id?: string | null;
+  };
+  myTab?: {
+    id?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships-migration".
+ */
+export interface RelationshipsMigration {
+  id: string;
+  relationship?: (string | null) | DefaultValue;
+  relationship_2?: {
+    relationTo: 'default-values';
+    value: string | DefaultValue;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -298,6 +372,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'posts';
         value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'error-on-unnamed-fields';
+        value: string | ErrorOnUnnamedField;
       } | null)
     | ({
         relationTo: 'default-values';
@@ -330,6 +408,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'custom-ids';
         value: string | CustomId;
+      } | null)
+    | ({
+        relationTo: 'fake-custom-ids';
+        value: string | FakeCustomId;
+      } | null)
+    | ({
+        relationTo: 'relationships-migration';
+        value: string | RelationshipsMigration;
       } | null)
     | ({
         relationTo: 'users';
@@ -383,8 +469,51 @@ export interface PayloadMigration {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
+  D1?:
+    | T
+    | {
+        D2?:
+          | T
+          | {
+              D3?:
+                | T
+                | {
+                    D4?: T;
+                  };
+            };
+      };
   hasTransaction?: T;
   throwAfterChange?: T;
+  arrayWithIDs?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  blocksWithIDs?:
+    | T
+    | {
+        block?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "error-on-unnamed-fields_select".
+ */
+export interface ErrorOnUnnamedFieldsSelect<T extends boolean = true> {
+  groupWithinUnnamedTab?:
+    | T
+    | {
+        text?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -537,9 +666,39 @@ export interface FieldsPersistanceSelect<T extends boolean = true> {
  */
 export interface CustomIdsSelect<T extends boolean = true> {
   id?: T;
+  title?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fake-custom-ids_select".
+ */
+export interface FakeCustomIdsSelect<T extends boolean = true> {
+  title?: T;
+  group?:
+    | T
+    | {
+        id?: T;
+      };
+  myTab?:
+    | T
+    | {
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships-migration_select".
+ */
+export interface RelationshipsMigrationSelect<T extends boolean = true> {
+  relationship?: T;
+  relationship_2?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -600,9 +759,49 @@ export interface Global {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-2".
+ */
+export interface Global2 {
+  id: string;
+  text?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-3".
+ */
+export interface Global3 {
+  id: string;
+  text?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global_select".
  */
 export interface GlobalSelect<T extends boolean = true> {
+  text?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-2_select".
+ */
+export interface Global2Select<T extends boolean = true> {
+  text?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-3_select".
+ */
+export interface Global3Select<T extends boolean = true> {
   text?: T;
   updatedAt?: T;
   createdAt?: T;

@@ -98,7 +98,7 @@ export const Drawer: React.FC<Props> = ({
           <div
             className={`${baseClass}__content`}
             style={{
-              width: `calc(100% - (${drawerDepth} * var(--gutter-h))`,
+              width: `calc(100% - (${drawerDepth} * var(--gutter-h)))`,
             }}
           >
             <div className={`${baseClass}__blur-bg-content`} />

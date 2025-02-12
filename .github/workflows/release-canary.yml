@@ -2,8 +2,6 @@ name: release-canary
 
 on:
   workflow_dispatch:
-    branches:
-      - main
 
 env:
   NODE_VERSION: 22.6.0
@@ -13,9 +11,10 @@ env:
 
 jobs:
   release:
+    name: release-canary-${{ github.ref_name }}-${{ github.sha }}
     permissions:
       id-token: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,8 +28,7 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Canary release script
-        # dry run hard-coded to true for testing and no npm token provided
-        run: pnpm tsx ./scripts/publish-canary.ts
+        run: pnpm release:canary
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true

@@ -51,7 +51,7 @@ export const countGlobalVersionsOperation = async <TSlug extends GlobalSlug>(
 
     const fullWhere = combineQueries(where, accessResult)
 
-    const versionFields = buildVersionGlobalFields(payload.config, global)
+    const versionFields = buildVersionGlobalFields(payload.config, global, true)
 
     await validateQueryPaths({
       globalConfig: global,

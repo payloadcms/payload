@@ -13,6 +13,9 @@ export const i18n: Partial<GenericLanguages> = {
   cs: {
     label: 'Neuspořádaný seznam',
   },
+  da: {
+    label: 'Usorteret Liste',
+  },
   de: {
     label: 'Ungeordnete Liste',
   },
@@ -21,6 +24,9 @@ export const i18n: Partial<GenericLanguages> = {
   },
   es: {
     label: 'Lista desordenada',
+  },
+  et: {
+    label: 'Sorteerimata loend',
   },
   fa: {
     label: 'لیست بدون ترتیب',
@@ -65,16 +71,19 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Listă neordonată',
   },
   rs: {
-    label: 'Neporedani spisak',
+    label: 'Неуређена листа',
   },
   'rs-latin': {
-    label: 'Neuređena Lista',
+    label: 'Neuređena lista',
   },
   ru: {
     label: 'Несортированный список',
   },
   sk: {
     label: 'Neusporiadaný zoznam',
+  },
+  sl: {
+    label: 'Neurejen seznam',
   },
   sv: {
     label: 'Oordnad lista',

@@ -1,8 +1,8 @@
 'use client'
-import type { DefaultCellComponentProps, UploadFieldClient } from 'payload'
+import type { ClientCollectionConfig, DefaultCellComponentProps, UploadFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { fieldAffectsData } from 'payload/shared'
+import { fieldAffectsData, fieldIsID } from 'payload/shared'
 import React from 'react' // TODO: abstract this out to support all routers
 
 import { useConfig } from '../../../providers/Config/index.js'
@@ -16,7 +16,7 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
   const {
     cellData,
     className: classNameFromProps,
-    collectionConfig,
+    collectionSlug,
     field,
     field: { admin },
     link,
@@ -30,7 +30,10 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     config: {
       routes: { admin: adminRoute },
     },
+    getEntityConfig,
   } = useConfig()
+
+  const collectionConfig = getEntityConfig({ collectionSlug })
 
   const classNameFromConfigContext = admin && 'className' in admin ? admin.className : undefined
 
@@ -59,7 +62,7 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     wrapElementProps.href = collectionConfig?.slug
       ? formatAdminURL({
           adminRoute,
-          path: `/collections/${collectionConfig?.slug}/${rowData.id}`,
+          path: `/collections/${collectionConfig?.slug}/${encodeURIComponent(rowData.id)}`,
         })
       : ''
   }
@@ -76,12 +79,13 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     }
   }
 
-  if ('name' in field && field.name === 'id') {
+  if (fieldIsID(field)) {
     return (
       <WrapElement {...wrapElementProps}>
         <CodeCell
           cellData={`ID: ${cellData}`}
           collectionConfig={collectionConfig}
+          collectionSlug={collectionSlug}
           field={{
             ...field,
             type: 'code',

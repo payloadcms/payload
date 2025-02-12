@@ -1,4 +1,10 @@
-import type { CustomComponent, ServerProps, VisibleEntities } from 'payload'
+import type {
+  CustomComponent,
+  DocumentSubViewTypes,
+  ServerProps,
+  ViewTypes,
+  VisibleEntities,
+} from 'payload'
 
 import {
   ActionsProvider,
@@ -9,10 +15,12 @@ import {
   NavToggler,
 } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+
+import './index.scss'
+
 import React from 'react'
 
 import { DefaultNav } from '../../elements/Nav/index.js'
-import './index.scss'
 import { NavHamburger } from './NavHamburger/index.js'
 import { Wrapper } from './Wrapper/index.js'
 
@@ -21,13 +29,22 @@ const baseClass = 'template-default'
 export type DefaultTemplateProps = {
   children?: React.ReactNode
   className?: string
+  collectionSlug?: string
+  docID?: number | string
+  documentSubViewType?: DocumentSubViewTypes
+  globalSlug?: string
   viewActions?: CustomComponent[]
+  viewType?: ViewTypes
   visibleEntities: VisibleEntities
 } & ServerProps
 
 export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
   children,
   className,
+  collectionSlug,
+  docID,
+  documentSubViewType,
+  globalSlug,
   i18n,
   locale,
   params,
@@ -36,6 +53,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
   searchParams,
   user,
   viewActions,
+  viewType,
   visibleEntities,
 }) => {
   const {
@@ -49,6 +67,41 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     } = {},
   } = payload.config || {}
 
+  const clientProps = React.useMemo(() => {
+    return {
+      documentSubViewType,
+      viewType,
+      visibleEntities,
+    }
+  }, [documentSubViewType, viewType, visibleEntities])
+
+  const serverProps = React.useMemo<ServerProps>(
+    () => ({
+      collectionSlug,
+      docID,
+      globalSlug,
+      i18n,
+      locale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+    }),
+    [
+      i18n,
+      locale,
+      params,
+      payload,
+      permissions,
+      searchParams,
+      user,
+      globalSlug,
+      collectionSlug,
+      docID,
+    ],
+  )
+
   const { Actions } = React.useMemo<{
     Actions: Record<string, React.ReactNode>
   }>(() => {
@@ -57,13 +110,19 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
         ? viewActions.reduce((acc, action) => {
             if (action) {
               if (typeof action === 'object') {
-                acc[action.path] = (
-                  <RenderServerComponent Component={action} importMap={payload.importMap} />
-                )
+                acc[action.path] = RenderServerComponent({
+                  clientProps,
+                  Component: action,
+                  importMap: payload.importMap,
+                  serverProps,
+                })
               } else {
-                acc[action] = (
-                  <RenderServerComponent Component={action} importMap={payload.importMap} />
-                )
+                acc[action] = RenderServerComponent({
+                  clientProps,
+                  Component: action,
+                  importMap: payload.importMap,
+                  serverProps,
+                })
               }
             }
 
@@ -71,28 +130,27 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
           }, {})
         : undefined,
     }
-  }, [viewActions, payload])
+  }, [payload, serverProps, viewActions, clientProps])
+
+  const NavComponent = RenderServerComponent({
+    clientProps,
+    Component: CustomNav,
+    Fallback: DefaultNav,
+    importMap: payload.importMap,
+    serverProps,
+  })
 
   return (
     <EntityVisibilityProvider visibleEntities={visibleEntities}>
       <BulkUploadProvider>
         <ActionsProvider Actions={Actions}>
           <LoadingBar />
-          <RenderServerComponent
-            clientProps={{ clientProps: { visibleEntities } }}
-            Component={CustomHeader}
-            importMap={payload.importMap}
-            serverProps={{
-              i18n,
-              locale,
-              params,
-              payload,
-              permissions,
-              searchParams,
-              user,
-              visibleEntities,
-            }}
-          />
+          {RenderServerComponent({
+            clientProps,
+            Component: CustomHeader,
+            importMap: payload.importMap,
+            serverProps,
+          })}
           <div style={{ position: 'relative' }}>
             <div className={`${baseClass}__nav-toggler-wrapper`} id="nav-toggler">
               <div className={`${baseClass}__nav-toggler-container`} id="nav-toggler">
@@ -102,39 +160,26 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
               </div>
             </div>
             <Wrapper baseClass={baseClass} className={className}>
-              <RenderServerComponent
-                clientProps={{ clientProps: { visibleEntities } }}
-                Component={CustomNav}
-                Fallback={DefaultNav}
-                importMap={payload.importMap}
-                serverProps={{
-                  i18n,
-                  locale,
-                  params,
-                  payload,
-                  permissions,
-                  searchParams,
-                  user,
-                  visibleEntities,
-                }}
-              />
+              {NavComponent}
               <div className={`${baseClass}__wrap`}>
                 <AppHeader
                   CustomAvatar={
-                    avatar !== 'gravatar' && avatar !== 'default' ? (
-                      <RenderServerComponent
-                        Component={avatar.Component}
-                        importMap={payload.importMap}
-                      />
-                    ) : undefined
+                    avatar !== 'gravatar' && avatar !== 'default'
+                      ? RenderServerComponent({
+                          Component: avatar.Component,
+                          importMap: payload.importMap,
+                          serverProps,
+                        })
+                      : undefined
                   }
                   CustomIcon={
-                    components?.graphics?.Icon ? (
-                      <RenderServerComponent
-                        Component={components.graphics.Icon}
-                        importMap={payload.importMap}
-                      />
-                    ) : undefined
+                    components?.graphics?.Icon
+                      ? RenderServerComponent({
+                          Component: components.graphics.Icon,
+                          importMap: payload.importMap,
+                          serverProps,
+                        })
+                      : undefined
                   }
                 />
                 {children}

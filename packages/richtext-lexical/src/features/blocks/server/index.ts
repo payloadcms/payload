@@ -1,6 +1,6 @@
-import type { Block, BlocksField, Config, FieldSchemaMap } from 'payload'
+import type { Block, BlocksField, Config, FieldSchemaMap, FlattenedBlocksField } from 'payload'
 
-import { fieldsToJSONSchema, sanitizeFields } from 'payload'
+import { fieldsToJSONSchema, flattenAllFields, sanitizeFields } from 'payload'
 
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { createNode } from '../../typeUtilities.js'
@@ -50,33 +50,46 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
           config,
           currentSchema,
           field,
+          i18n,
           interfaceNameDefinitions,
         }) => {
           if (!props?.blocks?.length && !props?.inlineBlocks?.length) {
             return currentSchema
           }
 
-          const fields: BlocksField[] = []
+          const fields: FlattenedBlocksField[] = []
 
           if (props?.blocks?.length) {
             fields.push({
               name: field?.name + '_lexical_blocks',
               type: 'blocks',
-              blocks: props.blocks,
+              blocks: props.blocks.map((block) => ({
+                ...block,
+                flattenedFields: flattenAllFields({ fields: block.fields }),
+              })),
             })
           }
           if (props?.inlineBlocks?.length) {
             fields.push({
               name: field?.name + '_lexical_inline_blocks',
               type: 'blocks',
-              blocks: props.inlineBlocks,
+              blocks: props.inlineBlocks.map((block) => ({
+                ...block,
+                flattenedFields: flattenAllFields({ fields: block.fields }),
+              })),
             })
           }
 
           if (fields.length) {
             // This is only done so that interfaceNameDefinitions sets those block's interfaceNames.
             // we don't actually use the JSON Schema itself in the generated types yet.
-            fieldsToJSONSchema(collectionIDFieldTypes, fields, interfaceNameDefinitions, config)
+            fieldsToJSONSchema(
+              collectionIDFieldTypes,
+              fields,
+              interfaceNameDefinitions,
+              config,
+              i18n,
+            )
           }
 
           return currentSchema

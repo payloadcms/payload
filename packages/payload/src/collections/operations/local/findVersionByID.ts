@@ -21,7 +21,7 @@ export type Options<TSlug extends CollectionSlug> = {
   locale?: 'all' | TypedLocale
   overrideAccess?: boolean
   populate?: PopulateType
-  req?: PayloadRequest
+  req?: Partial<PayloadRequest>
   select?: SelectType
   showHiddenFields?: boolean
   user?: Document

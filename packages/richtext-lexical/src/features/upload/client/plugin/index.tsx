@@ -14,7 +14,7 @@ import {
 } from 'lexical'
 import React, { useEffect } from 'react'
 
-import type { PluginComponentWithAnchor } from '../../../typesClient.js'
+import type { PluginComponent } from '../../../typesClient.js'
 import type { UploadData } from '../../server/nodes/UploadNode.js'
 import type { UploadFeaturePropsClient } from '../feature.client.js'
 
@@ -26,9 +26,7 @@ export type InsertUploadPayload = Readonly<Omit<UploadData, 'id'> & Partial<Pick
 export const INSERT_UPLOAD_COMMAND: LexicalCommand<InsertUploadPayload> =
   createCommand('INSERT_UPLOAD_COMMAND')
 
-export const UploadPlugin: PluginComponentWithAnchor<UploadFeaturePropsClient> = ({
-  clientProps,
-}) => {
+export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = ({ clientProps }) => {
   const [editor] = useLexicalComposerContext()
   const {
     config: { collections },
@@ -61,15 +59,11 @@ export const UploadPlugin: PluginComponentWithAnchor<UploadFeaturePropsClient> =
               const { focus } = selection
               const focusNode = focus.getNode()
 
-              // First, delete currently selected node if it's an empty paragraph and if there are sufficient
-              // paragraph nodes (more than 1) left in the parent node, so that we don't "trap" the user
+              // Delete the node it it's an empty paragraph and it has at least one sibling, so that we don't "trap" the user
               if (
                 $isParagraphNode(focusNode) &&
-                focusNode.getTextContentSize() === 0 &&
-                focusNode
-                  .getParentOrThrow()
-                  .getChildren()
-                  .filter((node) => $isParagraphNode(node)).length > 1
+                !focusNode.__first &&
+                (focusNode.__prev || focusNode.__next)
               ) {
                 focusNode.remove()
               }

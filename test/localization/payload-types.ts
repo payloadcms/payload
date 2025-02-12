@@ -11,16 +11,18 @@ export interface Config {
     users: UserAuthOperations;
   };
   collections: {
+    richText: RichText;
     'blocks-fields': BlocksField;
     'nested-arrays': NestedArray;
     'nested-field-tables': NestedFieldTable;
     users: User;
     'localized-posts': LocalizedPost;
+    'no-localized-fields': NoLocalizedField;
     'array-fields': ArrayField;
     'localized-required': LocalizedRequired;
     'with-localized-relationship': WithLocalizedRelationship;
     'relationship-localized': RelationshipLocalized;
-    dummy: Dummy;
+    'cannot-create-default-locale': CannotCreateDefaultLocale;
     nested: Nested;
     groups: Group;
     tabs: Tab;
@@ -33,16 +35,18 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
+    richText: RichTextSelect<false> | RichTextSelect<true>;
     'blocks-fields': BlocksFieldsSelect<false> | BlocksFieldsSelect<true>;
     'nested-arrays': NestedArraysSelect<false> | NestedArraysSelect<true>;
     'nested-field-tables': NestedFieldTablesSelect<false> | NestedFieldTablesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
+    'no-localized-fields': NoLocalizedFieldsSelect<false> | NoLocalizedFieldsSelect<true>;
     'array-fields': ArrayFieldsSelect<false> | ArrayFieldsSelect<true>;
     'localized-required': LocalizedRequiredSelect<false> | LocalizedRequiredSelect<true>;
     'with-localized-relationship': WithLocalizedRelationshipSelect<false> | WithLocalizedRelationshipSelect<true>;
     'relationship-localized': RelationshipLocalizedSelect<false> | RelationshipLocalizedSelect<true>;
-    dummy: DummySelect<false> | DummySelect<true>;
+    'cannot-create-default-locale': CannotCreateDefaultLocaleSelect<false> | CannotCreateDefaultLocaleSelect<true>;
     nested: NestedSelect<false> | NestedSelect<true>;
     groups: GroupsSelect<false> | GroupsSelect<true>;
     tabs: TabsSelect<false> | TabsSelect<true>;
@@ -58,17 +62,19 @@ export interface Config {
   };
   globals: {
     'global-array': GlobalArray;
+    'global-text': GlobalText;
   };
   globalsSelect: {
     'global-array': GlobalArraySelect<false> | GlobalArraySelect<true>;
+    'global-text': GlobalTextSelect<false> | GlobalTextSelect<true>;
   };
   locale: 'en' | 'es' | 'pt' | 'ar' | 'hu';
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -88,6 +94,35 @@ export interface UserAuthOperations {
     email: string;
     password: string;
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "richText".
+ */
+export interface RichText {
+  id: string;
+  richText?:
+    | {
+        [k: string]: unknown;
+      }[]
+    | null;
+  lexical?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -246,6 +281,16 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-localized-fields".
+ */
+export interface NoLocalizedField {
+  id: string;
+  text?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "array-fields".
  */
 export interface ArrayField {
@@ -333,8 +378,8 @@ export interface WithLocalizedRelationship {
         value: string | LocalizedPost;
       } | null)
     | ({
-        relationTo: 'dummy';
-        value: string | Dummy;
+        relationTo: 'cannot-create-default-locale';
+        value: string | CannotCreateDefaultLocale;
       } | null);
   localizedRelationMultiRelationToHasMany?:
     | (
@@ -343,8 +388,8 @@ export interface WithLocalizedRelationship {
             value: string | LocalizedPost;
           }
         | {
-            relationTo: 'dummy';
-            value: string | Dummy;
+            relationTo: 'cannot-create-default-locale';
+            value: string | CannotCreateDefaultLocale;
           }
       )[]
     | null;
@@ -353,9 +398,9 @@ export interface WithLocalizedRelationship {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "dummy".
+ * via the `definition` "cannot-create-default-locale".
  */
-export interface Dummy {
+export interface CannotCreateDefaultLocale {
   id: string;
   name?: string | null;
   updatedAt: string;
@@ -375,8 +420,8 @@ export interface RelationshipLocalized {
         value: string | LocalizedPost;
       } | null)
     | ({
-        relationTo: 'dummy';
-        value: string | Dummy;
+        relationTo: 'cannot-create-default-locale';
+        value: string | CannotCreateDefaultLocale;
       } | null);
   relationMultiRelationToHasMany?:
     | (
@@ -385,8 +430,8 @@ export interface RelationshipLocalized {
             value: string | LocalizedPost;
           }
         | {
-            relationTo: 'dummy';
-            value: string | Dummy;
+            relationTo: 'cannot-create-default-locale';
+            value: string | CannotCreateDefaultLocale;
           }
       )[]
     | null;
@@ -417,6 +462,19 @@ export interface Nested {
         id?: string | null;
         blockName?: string | null;
         blockType: 'block';
+      }[]
+    | null;
+  topLevelArray?:
+    | {
+        localizedText?: string | null;
+        notLocalizedText?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  topLevelArrayLocalized?:
+    | {
+        text?: string | null;
+        id?: string | null;
       }[]
     | null;
   updatedAt: string;
@@ -464,6 +522,12 @@ export interface Tab {
   id: string;
   tabLocalized?: {
     title?: string | null;
+    array?:
+      | {
+          title?: string | null;
+          id?: string | null;
+        }[]
+      | null;
   };
   tab?: {
     title?: string | null;
@@ -560,6 +624,10 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
+        relationTo: 'richText';
+        value: string | RichText;
+      } | null)
+    | ({
         relationTo: 'blocks-fields';
         value: string | BlocksField;
       } | null)
@@ -580,6 +648,10 @@ export interface PayloadLockedDocument {
         value: string | LocalizedPost;
       } | null)
     | ({
+        relationTo: 'no-localized-fields';
+        value: string | NoLocalizedField;
+      } | null)
+    | ({
         relationTo: 'array-fields';
         value: string | ArrayField;
       } | null)
@@ -596,8 +668,8 @@ export interface PayloadLockedDocument {
         value: string | RelationshipLocalized;
       } | null)
     | ({
-        relationTo: 'dummy';
-        value: string | Dummy;
+        relationTo: 'cannot-create-default-locale';
+        value: string | CannotCreateDefaultLocale;
       } | null)
     | ({
         relationTo: 'nested';
@@ -664,6 +736,16 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "richText_select".
+ */
+export interface RichTextSelect<T extends boolean = true> {
+  richText?: T;
+  lexical?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -823,6 +905,15 @@ export interface LocalizedPostsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-localized-fields_select".
+ */
+export interface NoLocalizedFieldsSelect<T extends boolean = true> {
+  text?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "array-fields_select".
  */
 export interface ArrayFieldsSelect<T extends boolean = true> {
@@ -936,9 +1027,9 @@ export interface RelationshipLocalizedSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "dummy_select".
+ * via the `definition` "cannot-create-default-locale_select".
  */
-export interface DummySelect<T extends boolean = true> {
+export interface CannotCreateDefaultLocaleSelect<T extends boolean = true> {
   name?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -964,6 +1055,19 @@ export interface NestedSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+      };
+  topLevelArray?:
+    | T
+    | {
+        localizedText?: T;
+        notLocalizedText?: T;
+        id?: T;
+      };
+  topLevelArrayLocalized?:
+    | T
+    | {
+        text?: T;
+        id?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -1021,6 +1125,12 @@ export interface TabsSelect<T extends boolean = true> {
     | T
     | {
         title?: T;
+        array?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+            };
       };
   tab?:
     | T
@@ -1171,6 +1281,16 @@ export interface GlobalArray {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-text".
+ */
+export interface GlobalText {
+  id: string;
+  text?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global-array_select".
  */
 export interface GlobalArraySelect<T extends boolean = true> {
@@ -1180,6 +1300,16 @@ export interface GlobalArraySelect<T extends boolean = true> {
         text?: T;
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-text_select".
+ */
+export interface GlobalTextSelect<T extends boolean = true> {
+  text?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

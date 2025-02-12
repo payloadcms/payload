@@ -44,6 +44,7 @@ export async function handleTaskFailed({
   job,
   maxRetries,
   output,
+  parent,
   req,
   retriesConfig,
   runnerOutput,
@@ -60,6 +61,7 @@ export async function handleTaskFailed({
   job: BaseJob
   maxRetries: number
   output: object
+  parent?: TaskParent
   req: PayloadRequest
   retriesConfig: number | RetryConfig
   runnerOutput?: TaskHandlerResult<string>
@@ -70,7 +72,7 @@ export async function handleTaskFailed({
   taskStatus: null | SingleTaskStatus<string>
   updateJob: UpdateJobFunction
 }): Promise<never> {
-  req.payload.logger.error({ err: error, job, msg: 'Error running task', taskSlug })
+  req.payload.logger.error({ err: error, job, msg: `Error running task ${taskID}`, taskSlug })
 
   if (taskConfig?.onFail) {
     await taskConfig.onFail()
@@ -79,12 +81,21 @@ export async function handleTaskFailed({
   if (!job.log) {
     job.log = []
   }
+  const errorJSON = error
+    ? {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      }
+    : runnerOutput.state
+
   job.log.push({
     completedAt: new Date().toISOString(),
-    error: error ?? runnerOutput.state,
+    error: errorJSON,
     executedAt: executedAt.toISOString(),
     input,
     output,
+    parent: req?.payload?.config?.jobs?.addParentToTaskLog ? parent : undefined,
     state: 'failed',
     taskID,
     taskSlug,
@@ -99,7 +110,7 @@ export async function handleTaskFailed({
     }
   }
 
-  if (taskStatus && !taskStatus.complete && taskStatus.totalTried >= maxRetries) {
+  if (!taskStatus?.complete && (taskStatus?.totalTried ?? 0) >= maxRetries) {
     state.reachedMaxRetries = true
 
     await updateJob({
@@ -134,6 +145,11 @@ export async function handleTaskFailed({
   }
 }
 
+export type TaskParent = {
+  taskID: string
+  taskSlug: string
+}
+
 export const getRunTaskFunction = <TIsInline extends boolean>(
   state: RunTaskFunctionState,
   job: BaseJob,
@@ -141,6 +157,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
   req: PayloadRequest,
   isInline: TIsInline,
   updateJob: UpdateJobFunction,
+  parent?: TaskParent,
 ): TIsInline extends true ? RunInlineTaskFunction : RunTaskFunctions => {
   const runTask: <TTaskSlug extends string>(
     taskSlug: TTaskSlug,
@@ -162,27 +179,47 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         inlineRunner = task
       }
 
-      let retriesConfig: number | RetryConfig = retries
       let taskConfig: TaskConfig<string>
       if (!isInline) {
         taskConfig = req.payload.config.jobs.tasks.find((t) => t.slug === taskSlug)
-        if (!retriesConfig) {
-          retriesConfig = taskConfig.retries
-        }
 
         if (!taskConfig) {
           throw new Error(`Task ${taskSlug} not found in workflow ${job.workflowSlug}`)
         }
       }
-      const maxRetries: number =
-        typeof retriesConfig === 'object' ? retriesConfig?.attempts : retriesConfig
+
+      const retriesConfigFromPropsNormalized =
+        retries == undefined || retries == null
+          ? {}
+          : typeof retries === 'number'
+            ? { attempts: retries }
+            : retries
+      const retriesConfigFromTaskConfigNormalized = taskConfig
+        ? typeof taskConfig.retries === 'number'
+          ? { attempts: taskConfig.retries }
+          : taskConfig.retries
+        : {}
+
+      const finalRetriesConfig: RetryConfig = {
+        ...retriesConfigFromTaskConfigNormalized,
+        ...retriesConfigFromPropsNormalized, // Retry config from props takes precedence
+      }
 
       const taskStatus: null | SingleTaskStatus<string> = job?.taskStatus?.[taskSlug]
         ? job.taskStatus[taskSlug][taskID]
         : null
 
+      // Handle restoration of task if it succeeded in a previous run
       if (taskStatus && taskStatus.complete === true) {
-        return taskStatus.output
+        let shouldRestore = true
+        if (finalRetriesConfig?.shouldRestore === false) {
+          shouldRestore = false
+        } else if (typeof finalRetriesConfig?.shouldRestore === 'function') {
+          shouldRestore = await finalRetriesConfig.shouldRestore({ input, job, req, taskStatus })
+        }
+        if (shouldRestore) {
+          return taskStatus.output
+        }
       }
 
       let runner: TaskHandler<TaskType>
@@ -212,6 +249,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
               completedAt: new Date().toISOString(),
               error: errorMessage,
               executedAt: executedAt.toISOString(),
+              parent: req?.payload?.config?.jobs?.addParentToTaskLog ? parent : undefined,
               state: 'failed',
               taskID,
               taskSlug,
@@ -223,13 +261,35 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         return
       }
 
-      let output: object
+      let output: object = {}
+
+      let maxRetries: number | undefined = finalRetriesConfig?.attempts
+
+      if (maxRetries === undefined || maxRetries === null) {
+        // Inherit retries from workflow config, if they are undefined and the workflow config has retries configured
+        if (workflowConfig.retries !== undefined && workflowConfig.retries !== null) {
+          maxRetries =
+            typeof workflowConfig.retries === 'object'
+              ? workflowConfig.retries.attempts
+              : workflowConfig.retries
+        } else {
+          maxRetries = 0
+        }
+      }
 
       try {
         const runnerOutput = await runner({
+          inlineTask: getRunTaskFunction(state, job, workflowConfig, req, true, updateJob, {
+            taskID,
+            taskSlug,
+          }),
           input,
           job: job as unknown as RunningJob<WorkflowTypes>, // TODO: Type this better
           req,
+          tasks: getRunTaskFunction(state, job, workflowConfig, req, false, updateJob, {
+            taskID,
+            taskSlug,
+          }),
         })
 
         if (runnerOutput.state === 'failed') {
@@ -239,8 +299,9 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
             job,
             maxRetries,
             output,
+            parent,
             req,
-            retriesConfig,
+            retriesConfig: finalRetriesConfig,
             runnerOutput,
             state,
             taskConfig,
@@ -261,8 +322,9 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           job,
           maxRetries,
           output,
+          parent,
           req,
-          retriesConfig,
+          retriesConfig: finalRetriesConfig,
           state,
           taskConfig,
           taskID,
@@ -285,6 +347,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         executedAt: executedAt.toISOString(),
         input,
         output,
+        parent: req?.payload?.config?.jobs?.addParentToTaskLog ? parent : undefined,
         state: 'succeeded',
         taskID,
         taskSlug,

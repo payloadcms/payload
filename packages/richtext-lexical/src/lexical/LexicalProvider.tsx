@@ -1,9 +1,9 @@
 'use client'
 import type { InitialConfigType } from '@lexical/react/LexicalComposer.js'
 import type { EditorState, LexicalEditor, SerializedEditorState } from 'lexical'
-import type { ClientField } from 'payload'
 
 import { LexicalComposer } from '@lexical/react/LexicalComposer.js'
+import { useEditDepth } from '@payloadcms/ui'
 import * as React from 'react'
 import { useMemo } from 'react'
 
@@ -21,12 +21,20 @@ export type LexicalProviderProps = {
   composerKey: string
   editorConfig: SanitizedClientEditorConfig
   fieldProps: LexicalRichTextFieldProps
+  isSmallWidthViewport: boolean
   onChange: (editorState: EditorState, editor: LexicalEditor, tags: Set<string>) => void
   readOnly: boolean
   value: SerializedEditorState
 }
 
-const NestProviders = ({ children, providers }) => {
+const NestProviders = ({
+  children,
+  providers,
+}: {
+  children: React.ReactNode
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  providers: any[]
+}) => {
   if (!providers?.length) {
     return children
   }
@@ -42,9 +50,12 @@ const NestProviders = ({ children, providers }) => {
 }
 
 export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
-  const { composerKey, editorConfig, fieldProps, onChange, readOnly, value } = props
+  const { composerKey, editorConfig, fieldProps, isSmallWidthViewport, onChange, readOnly, value } =
+    props
 
   const parentContext = useEditorConfigContext()
+
+  const editDepth = useEditDepth()
 
   const editorContainerRef = React.useRef<HTMLDivElement>(null)
 
@@ -59,13 +70,13 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
 
     if (value && Array.isArray(value) && !('root' in value)) {
       throw new Error(
-        'You have tried to pass in data from the old Slate editor to the new Lexical editor. The data structure is different, thus you will have to migrate your data. We offer a one-line migration script which migrates all your rich text fields: https://payloadcms.com/docs/beta/lexical/migration#migration-via-migration-script-recommended',
+        'You have tried to pass in data from the old Slate editor to the new Lexical editor. The data structure is different, thus you will have to migrate your data. We offer a one-line migration script which migrates all your rich text fields: https://payloadcms.com/docs/lexical/migration#migration-via-migration-script-recommended',
       )
     }
 
     if (value && 'jsonContent' in value) {
       throw new Error(
-        'You have tried to pass in data from payload-plugin-lexical. The data structure is different, thus you will have to migrate your data. Migration guide: https://payloadcms.com/docs/beta/lexical/migration#migrating-from-payload-plugin-lexical',
+        'You have tried to pass in data from payload-plugin-lexical. The data structure is different, thus you will have to migrate your data. Migration guide: https://payloadcms.com/docs/lexical/migration#migrating-from-payload-plugin-lexical',
       )
     }
 
@@ -95,12 +106,16 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
         editorConfig={editorConfig}
         editorContainerRef={editorContainerRef}
         fieldProps={fieldProps}
-        parentContext={parentContext}
+        /**
+         * Parent editor is not truly the parent editor, if the current editor is part of a drawer and the parent editor is the main editor.
+         */
+        parentContext={parentContext?.editDepth === editDepth ? parentContext : undefined}
       >
         <NestProviders providers={editorConfig.features.providers}>
           <LexicalEditorComponent
             editorConfig={editorConfig}
             editorContainerRef={editorContainerRef}
+            isSmallWidthViewport={isSmallWidthViewport}
             onChange={onChange}
           />
         </NestProviders>

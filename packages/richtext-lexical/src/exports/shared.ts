@@ -7,3 +7,4 @@ export {
   objectToFrontmatter,
   propsToJSXString,
 } from '../utilities/jsx/jsx.js'
+export { hasText } from '../validate/hasText.js'

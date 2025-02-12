@@ -4,12 +4,12 @@ import type { ImportMap, SanitizedConfig } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { formatAdminURL } from '@payloadcms/ui/shared'
+import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { notFound, redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
 import { DefaultTemplate } from '../../templates/Default/index.js'
 import { MinimalTemplate } from '../../templates/Minimal/index.js'
-import { getClientConfig } from '../../utilities/getClientConfig.js'
 import { initPage } from '../../utilities/initPage/index.js'
 import { getViewFromConfig } from './getViewFromConfig.js'
 
@@ -48,6 +48,7 @@ export const RootPage = async ({
   } = config
 
   const params = await paramsPromise
+
   const currentRoute = formatAdminURL({
     adminRoute,
     path: `${Array.isArray(params.segments) ? `/${params.segments.join('/')}` : ''}`,
@@ -59,11 +60,12 @@ export const RootPage = async ({
 
   const {
     DefaultView,
+    documentSubViewType,
     initPageOptions,
     serverProps,
     templateClassName,
     templateType,
-    viewActions,
+    viewType,
   } = getViewFromConfig({
     adminRoute,
     config,
@@ -121,30 +123,29 @@ export const RootPage = async ({
     redirect(adminRoute)
   }
 
-  const clientConfig = await getClientConfig({
+  const clientConfig = getClientConfig({
     config,
     i18n: initPageResult?.req.i18n,
     importMap,
   })
 
-  const RenderedView = (
-    <RenderServerComponent
-      clientProps={{ clientConfig }}
-      Component={DefaultView.payloadComponent}
-      Fallback={DefaultView.Component}
-      importMap={importMap}
-      serverProps={{
-        ...serverProps,
-        clientConfig,
-        i18n: initPageResult?.req.i18n,
-        importMap,
-        initPageResult,
-        params,
-        payload: initPageResult?.req.payload,
-        searchParams,
-      }}
-    />
-  )
+  const RenderedView = RenderServerComponent({
+    clientProps: { clientConfig, documentSubViewType, viewType },
+    Component: DefaultView.payloadComponent,
+    Fallback: DefaultView.Component,
+    importMap,
+    serverProps: {
+      ...serverProps,
+      clientConfig,
+      docID: initPageResult?.docID,
+      i18n: initPageResult?.req.i18n,
+      importMap,
+      initPageResult,
+      params,
+      payload: initPageResult?.req.payload,
+      searchParams,
+    },
+  })
 
   return (
     <Fragment>
@@ -154,6 +155,10 @@ export const RootPage = async ({
       )}
       {templateType === 'default' && (
         <DefaultTemplate
+          collectionSlug={initPageResult?.collectionConfig?.slug}
+          docID={initPageResult?.docID}
+          documentSubViewType={documentSubViewType}
+          globalSlug={initPageResult?.globalConfig?.slug}
           i18n={initPageResult?.req.i18n}
           locale={initPageResult?.locale}
           params={params}
@@ -161,7 +166,8 @@ export const RootPage = async ({
           permissions={initPageResult?.permissions}
           searchParams={searchParams}
           user={initPageResult?.req.user}
-          viewActions={viewActions}
+          viewActions={serverProps.viewActions}
+          viewType={viewType}
           visibleEntities={{
             // The reason we are not passing in initPageResult.visibleEntities directly is due to a "Cannot assign to read only property of object '#<Object>" error introduced in React 19
             // which this caused as soon as initPageResult.visibleEntities is passed in

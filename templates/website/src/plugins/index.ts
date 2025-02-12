@@ -12,22 +12,23 @@ import { searchFields } from '@/search/fieldOverrides'
 import { beforeSyncWithSearch } from '@/search/beforeSync'
 
 import { Page, Post } from '@/payload-types'
+import { getServerSideURL } from '@/utilities/getURL'
 
 const generateTitle: GenerateTitle<Post | Page> = ({ doc }) => {
   return doc?.title ? `${doc.title} | Payload Website Template` : 'Payload Website Template'
 }
 
 const generateURL: GenerateURL<Post | Page> = ({ doc }) => {
-  return doc?.slug
-    ? `${process.env.NEXT_PUBLIC_SERVER_URL!}/${doc.slug}`
-    : process.env.NEXT_PUBLIC_SERVER_URL!
+  const url = getServerSideURL()
+
+  return doc?.slug ? `${url}/${doc.slug}` : url
 }
 
 export const plugins: Plugin[] = [
   redirectsPlugin({
     collections: ['pages', 'posts'],
     overrides: {
-      // @ts-expect-error
+      // @ts-expect-error - This is a valid override, mapped fields don't resolve to the same type
       fields: ({ defaultFields }) => {
         return defaultFields.map((field) => {
           if ('name' in field && field.name === 'from') {
@@ -48,6 +49,7 @@ export const plugins: Plugin[] = [
   }),
   nestedDocsPlugin({
     collections: ['categories'],
+    generateURL: (docs) => docs.reduce((url, doc) => `${url}/${doc.slug}`, ''),
   }),
   seoPlugin({
     generateTitle,

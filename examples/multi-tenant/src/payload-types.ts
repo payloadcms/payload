@@ -18,13 +18,27 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
+  collectionsJoins: {};
+  collectionsSelect: {
+    pages: PagesSelect<false> | PagesSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
+    tenants: TenantsSelect<false> | TenantsSelect<true>;
+    'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
+    'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
+    'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+  };
   db: {
     defaultIDType: string;
   };
   globals: {};
+  globalsSelect: {};
   locale: null;
   user: User & {
     collection: 'users';
+  };
+  jobs: {
+    tasks: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -51,9 +65,9 @@ export interface UserAuthOperations {
  */
 export interface Page {
   id: string;
+  tenant?: (string | null) | Tenant;
   title?: string | null;
   slug?: string | null;
-  tenant: string | Tenant;
   updatedAt: string;
   createdAt: string;
 }
@@ -64,8 +78,18 @@ export interface Page {
 export interface Tenant {
   id: string;
   name: string;
+  /**
+   * Used for domain-based tenant handling
+   */
+  domain?: string | null;
+  /**
+   * Used for url paths, example: /tenant-slug/page-slug
+   */
   slug: string;
-  public?: boolean | null;
+  /**
+   * If checked, logging in is not required to read. Useful for building public pages.
+   */
+  allowPublicRead?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -76,6 +100,7 @@ export interface Tenant {
 export interface User {
   id: string;
   roles?: ('super-admin' | 'user')[] | null;
+  username?: string | null;
   tenants?:
     | {
         tenant: string | Tenant;
@@ -83,7 +108,6 @@ export interface User {
         id?: string | null;
       }[]
     | null;
-  username?: string | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -155,6 +179,85 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  tenant?: T;
+  title?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  roles?: T;
+  username?: T;
+  tenants?:
+    | T
+    | {
+        tenant?: T;
+        roles?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tenants_select".
+ */
+export interface TenantsSelect<T extends boolean = true> {
+  name?: T;
+  domain?: T;
+  slug?: T;
+  allowPublicRead?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_select".
+ */
+export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
+  document?: T;
+  globalSlug?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_select".
+ */
+export interface PayloadPreferencesSelect<T extends boolean = true> {
+  user?: T;
+  key?: T;
+  value?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_select".
+ */
+export interface PayloadMigrationsSelect<T extends boolean = true> {
+  name?: T;
+  batch?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

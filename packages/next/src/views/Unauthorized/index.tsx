@@ -15,6 +15,7 @@ export const UnauthorizedView: PayloadServerReactComponent<AdminViewComponent> =
   initPageResult,
 }) => {
   const {
+    permissions,
     req: {
       i18n,
       payload: {
@@ -25,6 +26,7 @@ export const UnauthorizedView: PayloadServerReactComponent<AdminViewComponent> =
           routes: { admin: adminRoute },
         },
       },
+      user,
     },
   } = initPageResult
 
@@ -32,9 +34,10 @@ export const UnauthorizedView: PayloadServerReactComponent<AdminViewComponent> =
     <div className={baseClass}>
       <FormHeader
         description={i18n.t('error:notAllowedToAccessPage')}
-        heading={i18n.t('error:unauthorized')}
+        heading={i18n.t(
+          user && !permissions.canAccessAdmin ? 'error:unauthorizedAdmin' : 'error:unauthorized',
+        )}
       />
-
       <Button
         className={`${baseClass}__button`}
         el="link"

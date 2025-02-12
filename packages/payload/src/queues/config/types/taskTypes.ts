@@ -1,5 +1,5 @@
 import type { Field, PayloadRequest, StringKeyOf, TypedJobs } from '../../../index.js'
-import type { RunningJob, RunningJobSimple } from './workflowTypes.js'
+import type { BaseJob, RunningJob, RunningJobSimple, SingleTaskStatus } from './workflowTypes.js'
 
 export type TaskInputOutput = {
   input: object
@@ -20,6 +20,10 @@ export type TaskHandlerArgs<
   TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput,
   TWorkflowSlug extends keyof TypedJobs['workflows'] = string,
 > = {
+  /**
+   * Use this function to run a sub-task from within another task.
+   */
+  inlineTask: RunInlineTaskFunction
   input: TTaskSlugOrInputOutput extends keyof TypedJobs['tasks']
     ? TypedJobs['tasks'][TTaskSlugOrInputOutput]['input']
     : TTaskSlugOrInputOutput extends TaskInputOutput // Check if it's actually TaskInputOutput type
@@ -27,6 +31,7 @@ export type TaskHandlerArgs<
       : never
   job: RunningJob<TWorkflowSlug>
   req: PayloadRequest
+  tasks: RunTaskFunctions
 }
 
 /**
@@ -60,7 +65,14 @@ export type TaskHandlerResults = {
 // Helper type to create correct argument type for the function corresponding to each task.
 export type RunTaskFunctionArgs<TTaskSlug extends keyof TypedJobs['tasks']> = {
   input?: TaskInput<TTaskSlug>
-  retries?: number | RetryConfig
+  /**
+   * Specify the number of times that this task should be retried if it fails for any reason.
+   * If this is undefined, the task will either inherit the retries from the workflow or have no retries.
+   * If this is 0, the task will not be retried.
+   *
+   * @default By default, tasks are not retried and `retries` is `undefined`.
+   */
+  retries?: number | RetryConfig | undefined
 }
 
 export type RunTaskFunction<TTaskSlug extends keyof TypedJobs['tasks']> = (
@@ -76,9 +88,22 @@ export type RunInlineTaskFunction = <TTaskInput extends object, TTaskOutput exte
   taskID: string,
   taskArgs: {
     input?: TTaskInput
-    retries?: number | RetryConfig
+    /**
+     * Specify the number of times that this task should be retried if it fails for any reason.
+     * If this is undefined, the task will either inherit the retries from the workflow or have no retries.
+     * If this is 0, the task will not be retried.
+     *
+     * @default By default, tasks are not retried and `retries` is `undefined`.
+     */
+    retries?: number | RetryConfig | undefined
     // This is the same as TaskHandler, but typed out explicitly in order to improve type inference
-    task: (args: { input: TTaskInput; job: RunningJob<any>; req: PayloadRequest }) =>
+    task: (args: {
+      inlineTask: RunInlineTaskFunction
+      input: TTaskInput
+      job: RunningJob<any>
+      req: PayloadRequest
+      tasks: RunTaskFunctions
+    }) =>
       | {
           output: TTaskOutput
           state?: 'failed' | 'succeeded'
@@ -87,8 +112,23 @@ export type RunInlineTaskFunction = <TTaskInput extends object, TTaskOutput exte
   },
 ) => Promise<TTaskOutput>
 
+export type ShouldRestoreFn = (args: {
+  /**
+   * Input data passed to the task
+   */
+  input: object
+  job: BaseJob
+  req: PayloadRequest
+  taskStatus: SingleTaskStatus<string>
+}) => boolean | Promise<boolean>
+
 export type RetryConfig = {
-  attempts: number
+  /**
+   * This controls how many times the task should be retried if it fails.
+   *
+   * @default undefined - attempts are either inherited from the workflow retry config or set to 0.
+   */
+  attempts?: number
   /**
    * The backoff strategy to use when retrying the task. This determines how long to wait before retrying the task.
    *
@@ -123,6 +163,19 @@ export type RetryConfig = {
      */
     type: 'exponential' | 'fixed'
   }
+  /**
+   * This controls whether the task output should be restored if the task previously succeeded and the workflow is being retried.
+   *
+   * If this is set to false, the task will be re-run even if it previously succeeded, ignoring the maximum number of retries.
+   *
+   * If this is set to true, the task will only be re-run if it previously failed.
+   *
+   * If this is a function, the return value of the function will determine whether the task should be re-run. This can be used for more complex restore logic,
+   * e.g you may want to re-run a task up until a certain point and then restore it, or only re-run a task if the input has changed.
+   *
+   * @default true - the task output will be restored if the task previously succeeded.
+   */
+  shouldRestore?: boolean | ShouldRestoreFn
 }
 
 export type TaskConfig<
@@ -133,7 +186,8 @@ export type TaskConfig<
    * You can either pass a string-based path to the job function file, or the job function itself.
    *
    * If you are using large dependencies within your job, you might prefer to pass the string path
-   * because that will avoid bundling large dependencies in your Next.js app.
+   * because that will avoid bundling large dependencies in your Next.js app. Passing a string path is an advanced feature
+   * that may require a sophisticated build pipeline in order to work.
    */
   handler: string | TaskHandler<TTaskSlugOrInputOutput>
   /**
@@ -162,8 +216,12 @@ export type TaskConfig<
   outputSchema?: Field[]
   /**
    * Specify the number of times that this step should be retried if it fails.
+   * If this is undefined, the task will either inherit the retries from the workflow or have no retries.
+   * If this is 0, the task will not be retried.
+   *
+   * @default By default, tasks are not retried and `retries` is `undefined`.
    */
-  retries?: number | RetryConfig
+  retries?: number | RetryConfig | undefined
   /**
    * Define a slug-based name for this job. This slug needs to be unique among both tasks and workflows.
    */

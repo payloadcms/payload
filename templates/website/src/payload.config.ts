@@ -3,7 +3,7 @@ import { mongooseAdapter } from '@payloadcms/db-mongodb' // database-adapter-imp
 
 import sharp from 'sharp' // sharp-import
 import path from 'path'
-import { buildConfig } from 'payload'
+import { buildConfig, PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { Categories } from './collections/Categories'
@@ -11,11 +11,11 @@ import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
 import { Users } from './collections/Users'
-import { seedHandler } from './endpoints/seedHandler'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
+import { getServerSideURL } from './utilities/getURL'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -65,16 +65,7 @@ export default buildConfig({
   }),
   // database-adapter-config-end
   collections: [Pages, Posts, Media, Categories, Users],
-  cors: [process.env.NEXT_PUBLIC_SERVER_URL || ''].filter(Boolean),
-  endpoints: [
-    // The seed endpoint is used to populate the database with some example data
-    // You should delete this endpoint before deploying your site to production
-    {
-      handler: seedHandler,
-      method: 'get',
-      path: '/seed',
-    },
-  ],
+  cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
   plugins: [
     ...plugins,
@@ -84,5 +75,20 @@ export default buildConfig({
   sharp,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
+  },
+  jobs: {
+    access: {
+      run: ({ req }: { req: PayloadRequest }): boolean => {
+        // Allow logged in users to execute this endpoint (default)
+        if (req.user) return true
+
+        // If there is no logged in user, then check
+        // for the Vercel Cron secret to be present as an
+        // Authorization header:
+        const authHeader = req.headers.get('authorization')
+        return authHeader === `Bearer ${process.env.CRON_SECRET}`
+      },
+    },
+    tasks: [],
   },
 })

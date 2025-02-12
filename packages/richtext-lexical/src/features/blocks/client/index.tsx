@@ -1,5 +1,6 @@
 'use client'
 
+import type { I18nClient } from '@payloadcms/translations'
 import type { BlocksFieldClient, ClientBlock } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -13,16 +14,20 @@ import type { ToolbarGroup, ToolbarGroupItem } from '../../toolbars/types.js'
 import { BlockIcon } from '../../../lexical/ui/icons/Block/index.js'
 import { InlineBlocksIcon } from '../../../lexical/ui/icons/InlineBlocks/index.js'
 import { createClientFeature } from '../../../utilities/createClientFeature.js'
+import { getBlockImageComponent } from './getBlockImageComponent.js'
 import { BlockNode } from './nodes/BlocksNode.js'
 import { InlineBlockNode } from './nodes/InlineBlocksNode.js'
 import { INSERT_BLOCK_COMMAND, INSERT_INLINE_BLOCK_COMMAND } from './plugin/commands.js'
 import { BlocksPlugin } from './plugin/index.js'
-
 export const BlocksFeatureClient = createClientFeature(
   ({ featureClientSchemaMap, props, schemaPath }) => {
     const schemaMapRenderedBlockPathPrefix = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks`
     const schemaMapRenderedInlineBlockPathPrefix = `${schemaPath}.lexical_internal_feature.blocks.lexical_inline_blocks`
     const clientSchema = featureClientSchemaMap['blocks']
+
+    if (!clientSchema) {
+      return {}
+    }
 
     const blocksFields: BlocksFieldClient[] = Object.entries(clientSchema)
       .filter(
@@ -30,7 +35,7 @@ export const BlocksFeatureClient = createClientFeature(
           key.startsWith(schemaMapRenderedBlockPathPrefix + '.') &&
           !key.replace(schemaMapRenderedBlockPathPrefix + '.', '').includes('.'),
       )
-      .map(([key, value]) => value[0] as BlocksFieldClient)
+      .map(([, value]) => value[0] as BlocksFieldClient)
 
     const inlineBlocksFields: BlocksFieldClient[] = Object.entries(clientSchema)
       .filter(
@@ -38,15 +43,19 @@ export const BlocksFeatureClient = createClientFeature(
           key.startsWith(schemaMapRenderedInlineBlockPathPrefix + '.') &&
           !key.replace(schemaMapRenderedInlineBlockPathPrefix + '.', '').includes('.'),
       )
-      .map(([key, value]) => value[0] as BlocksFieldClient)
+      .map(([, value]) => value[0] as BlocksFieldClient)
 
-    const clientBlocks: ClientBlock[] = blocksFields.map((field) => {
-      return field.blocks[0]
-    })
+    const clientBlocks: ClientBlock[] = blocksFields
+      .map((field) => {
+        return field.blocks[0]
+      })
+      .filter((block) => block !== undefined)
 
-    const clientInlineBlocks: ClientBlock[] = inlineBlocksFields.map((field) => {
-      return field.blocks[0]
-    })
+    const clientInlineBlocks: ClientBlock[] = inlineBlocksFields
+      .map((field) => {
+        return field.blocks[0]
+      })
+      .filter((block) => block !== undefined)
 
     return {
       nodes: [BlockNode, InlineBlockNode],
@@ -63,7 +72,7 @@ export const BlocksFeatureClient = createClientFeature(
             ? {
                 items: clientBlocks.map((block) => {
                   return {
-                    Icon: BlockIcon,
+                    Icon: getBlockImageComponent(block.imageURL, block.imageAltText),
                     key: 'block-' + block.slug,
                     keywords: ['block', 'blocks', block.slug],
                     label: ({ i18n }) => {
@@ -82,7 +91,7 @@ export const BlocksFeatureClient = createClientFeature(
                   } as SlashMenuItem
                 }),
                 key: 'blocks',
-                label: ({ i18n }) => {
+                label: ({ i18n }: { i18n: I18nClient<object, 'lexical:blocks:label'> }) => {
                   return i18n.t('lexical:blocks:label')
                 },
               }
@@ -110,7 +119,11 @@ export const BlocksFeatureClient = createClientFeature(
                   } as SlashMenuItem
                 }),
                 key: 'inlineBlocks',
-                label: ({ i18n }) => {
+                label: ({
+                  i18n,
+                }: {
+                  i18n: I18nClient<object, 'lexical:blocks:inlineBlocks:label'>
+                }) => {
                   return i18n.t('lexical:blocks:inlineBlocks:label')
                 },
               }
@@ -125,7 +138,7 @@ export const BlocksFeatureClient = createClientFeature(
                 ChildComponent: BlockIcon,
                 items: clientBlocks.map((block, index) => {
                   return {
-                    ChildComponent: BlockIcon,
+                    ChildComponent: getBlockImageComponent(block.imageURL, block.imageAltText),
                     isActive: undefined, // At this point, we would be inside a sub-richtext-editor. And at this point this will be run against the focused sub-editor, not the parent editor which has the actual block. Thus, no point in running this
                     key: 'block-' + block.slug,
                     label: ({ i18n }) => {
@@ -154,7 +167,9 @@ export const BlocksFeatureClient = createClientFeature(
                 ChildComponent: InlineBlocksIcon,
                 items: clientInlineBlocks.map((inlineBlock, index) => {
                   return {
-                    ChildComponent: InlineBlocksIcon,
+                    ChildComponent: inlineBlock.imageURL
+                      ? getBlockImageComponent(inlineBlock.imageURL, inlineBlock.imageAltText)
+                      : InlineBlocksIcon,
                     isActive: undefined,
                     key: 'inlineBlock-' + inlineBlock.slug,
                     label: ({ i18n }) => {

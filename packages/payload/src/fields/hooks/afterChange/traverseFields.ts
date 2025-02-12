@@ -7,6 +7,10 @@ import type { Field, TabAsField } from '../../config/types.js'
 import { promise } from './promise.js'
 
 type Args = {
+  /**
+   * Data of the nearest parent block. If no parent block exists, this will be the `undefined`
+   */
+  blockData?: JsonObject
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   data: JsonObject
@@ -14,16 +18,19 @@ type Args = {
   fields: (Field | TabAsField)[]
   global: null | SanitizedGlobalConfig
   operation: 'create' | 'update'
-  path: (number | string)[]
+  parentIndexPath: string
+  parentPath: string
+  parentSchemaPath: string
   previousDoc: JsonObject
   previousSiblingDoc: JsonObject
   req: PayloadRequest
-  schemaPath: string[]
   siblingData: JsonObject
   siblingDoc: JsonObject
+  siblingFields?: (Field | TabAsField)[]
 }
 
 export const traverseFields = async ({
+  blockData,
   collection,
   context,
   data,
@@ -31,19 +38,22 @@ export const traverseFields = async ({
   fields,
   global,
   operation,
-  path,
+  parentIndexPath,
+  parentPath,
+  parentSchemaPath,
   previousDoc,
   previousSiblingDoc,
   req,
-  schemaPath,
   siblingData,
   siblingDoc,
+  siblingFields,
 }: Args): Promise<void> => {
   const promises = []
 
   fields.forEach((field, fieldIndex) => {
     promises.push(
       promise({
+        blockData,
         collection,
         context,
         data,
@@ -52,13 +62,15 @@ export const traverseFields = async ({
         fieldIndex,
         global,
         operation,
-        parentPath: path,
-        parentSchemaPath: schemaPath,
+        parentIndexPath,
+        parentPath,
+        parentSchemaPath,
         previousDoc,
         previousSiblingDoc,
         req,
         siblingData,
         siblingDoc,
+        siblingFields,
       }),
     )
   })

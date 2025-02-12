@@ -11,6 +11,7 @@ import { blocksDoc } from './collections/Blocks/shared.js'
 import { codeDoc } from './collections/Code/shared.js'
 import { collapsibleDoc } from './collections/Collapsible/shared.js'
 import { conditionalLogicDoc } from './collections/ConditionalLogic/shared.js'
+import { customRowID, customTabID, nonStandardID } from './collections/CustomID/shared.js'
 import { dateDoc } from './collections/Date/shared.js'
 import { anotherEmailDoc, emailDoc } from './collections/Email/shared.js'
 import { groupDoc } from './collections/Group/shared.js'
@@ -30,10 +31,14 @@ import { uploadsDoc } from './collections/Upload/shared.js'
 import {
   arrayFieldsSlug,
   blockFieldsSlug,
+  checkboxFieldsSlug,
   codeFieldsSlug,
   collapsibleFieldsSlug,
   collectionSlugs,
   conditionalLogicSlug,
+  customIDSlug,
+  customRowIDSlug,
+  customTabIDSlug,
   dateFieldsSlug,
   emailFieldsSlug,
   groupFieldsSlug,
@@ -305,6 +310,24 @@ export const seed = async (_payload: Payload) => {
   })
 
   await _payload.create({
+    collection: checkboxFieldsSlug,
+    data: {
+      checkbox: true,
+    },
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  await _payload.create({
+    collection: checkboxFieldsSlug,
+    data: {
+      checkbox: false,
+    },
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  await _payload.create({
     collection: codeFieldsSlug,
     data: codeDoc,
     depth: 0,
@@ -367,7 +390,7 @@ export const seed = async (_payload: Payload) => {
     collection: lexicalLocalizedFieldsSlug,
     data: {
       title: 'Localized Lexical en',
-      lexicalBlocksLocalized: textToLexicalJSON({ text: 'English text' }) as any,
+      lexicalBlocksLocalized: textToLexicalJSON({ text: 'English text' }),
       lexicalBlocksSubLocalized: generateLexicalLocalizedRichText(
         'Shared text',
         'English text in block',
@@ -381,7 +404,7 @@ export const seed = async (_payload: Payload) => {
   await _payload.create({
     collection: lexicalRelationshipFieldsSlug,
     data: {
-      richText: textToLexicalJSON({ text: 'English text' }) as any,
+      richText: textToLexicalJSON({ text: 'English text' }),
     },
     depth: 0,
     overrideAccess: true,
@@ -392,7 +415,7 @@ export const seed = async (_payload: Payload) => {
     id: lexicalLocalizedDoc1.id,
     data: {
       title: 'Localized Lexical es',
-      lexicalBlocksLocalized: textToLexicalJSON({ text: 'Spanish text' }) as any,
+      lexicalBlocksLocalized: textToLexicalJSON({ text: 'Spanish text' }),
       lexicalBlocksSubLocalized: generateLexicalLocalizedRichText(
         'Shared text',
         'Spanish text in block',
@@ -408,10 +431,7 @@ export const seed = async (_payload: Payload) => {
     collection: lexicalLocalizedFieldsSlug,
     data: {
       title: 'Localized Lexical en 2',
-      lexicalSimple: textToLexicalJSON({
-        text: 'English text 2',
-        lexicalLocalizedRelID: lexicalLocalizedDoc1.id,
-      }),
+
       lexicalBlocksLocalized: textToLexicalJSON({
         text: 'English text 2',
         lexicalLocalizedRelID: lexicalLocalizedDoc1.id,
@@ -431,10 +451,7 @@ export const seed = async (_payload: Payload) => {
     id: lexicalLocalizedDoc2.id,
     data: {
       title: 'Localized Lexical es 2',
-      lexicalSimple: textToLexicalJSON({
-        text: 'Spanish text 2',
-        lexicalLocalizedRelID: lexicalLocalizedDoc1.id,
-      }),
+
       lexicalBlocksLocalized: textToLexicalJSON({
         text: 'Spanish text 2',
         lexicalLocalizedRelID: lexicalLocalizedDoc1.id,
@@ -478,7 +495,82 @@ export const seed = async (_payload: Payload) => {
     data: {
       text: 'text',
     },
+    depth: 0,
   })
+
+  await _payload.create({
+    collection: 'LexicalInBlock',
+    depth: 0,
+    data: {
+      content: {
+        root: {
+          children: [
+            {
+              format: '',
+              type: 'block',
+              version: 2,
+              fields: {
+                id: '6773773284be8978db7a498d',
+                lexicalInBlock: textToLexicalJSON({ text: 'text' }),
+                blockName: '',
+                blockType: 'blockInLexical',
+              },
+            },
+          ],
+          direction: null,
+          format: '',
+          indent: 0,
+          type: 'root',
+          version: 1,
+        },
+      },
+      blocks: [
+        {
+          blockType: 'lexicalInBlock2',
+          blockName: '1',
+          lexical: textToLexicalJSON({ text: '1' }),
+        },
+        {
+          blockType: 'lexicalInBlock2',
+          blockName: '2',
+          lexical: textToLexicalJSON({ text: '2' }),
+        },
+      ],
+    },
+  })
+
+  await _payload.create({
+    collection: 'lexical-access-control',
+    data: {
+      richText: textToLexicalJSON({ text: 'text' }),
+      title: 'title',
+    },
+    depth: 0,
+  })
+
+  await Promise.all([
+    _payload.create({
+      collection: customIDSlug,
+      data: {
+        id: nonStandardID,
+      },
+      depth: 0,
+    }),
+    _payload.create({
+      collection: customTabIDSlug,
+      data: {
+        id: customTabID,
+      },
+      depth: 0,
+    }),
+    _payload.create({
+      collection: customRowIDSlug,
+      data: {
+        id: customRowID,
+      },
+      depth: 0,
+    }),
+  ])
 }
 
 export async function clearAndSeedEverything(_payload: Payload) {

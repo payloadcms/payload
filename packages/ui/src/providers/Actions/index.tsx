@@ -25,7 +25,15 @@ export const ActionsProvider: React.FC<{
   const [viewActions, setViewActions] = useState(Actions)
 
   return (
-    <ActionsContext.Provider value={{ Actions: viewActions, setViewActions }}>
+    <ActionsContext.Provider
+      value={{
+        Actions: {
+          ...viewActions,
+          ...Actions,
+        },
+        setViewActions,
+      }}
+    >
       {children}
     </ActionsContext.Provider>
   )

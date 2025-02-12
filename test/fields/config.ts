@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -12,12 +13,17 @@ import CheckboxFields from './collections/Checkbox/index.js'
 import CodeFields from './collections/Code/index.js'
 import CollapsibleFields from './collections/Collapsible/index.js'
 import ConditionalLogic from './collections/ConditionalLogic/index.js'
+import { CustomRowID } from './collections/CustomID/CustomRowID.js'
+import { CustomTabID } from './collections/CustomID/CustomTabID.js'
+import { CustomID } from './collections/CustomID/index.js'
 import DateFields from './collections/Date/index.js'
 import EmailFields from './collections/Email/index.js'
 import GroupFields from './collections/Group/index.js'
 import IndexedFields from './collections/Indexed/index.js'
 import JSONFields from './collections/JSON/index.js'
 import { LexicalFields } from './collections/Lexical/index.js'
+import { LexicalAccessControl } from './collections/LexicalAccessControl/index.js'
+import { LexicalInBlock } from './collections/LexicalInBlock/index.js'
 import { LexicalLocalizedFields } from './collections/LexicalLocalized/index.js'
 import { LexicalMigrateFields } from './collections/LexicalMigrate/index.js'
 import { LexicalObjectReferenceBugCollection } from './collections/LexicalObjectReferenceBug/index.js'
@@ -29,6 +35,7 @@ import RelationshipFields from './collections/Relationship/index.js'
 import RichTextFields from './collections/RichText/index.js'
 import RowFields from './collections/Row/index.js'
 import SelectFields from './collections/Select/index.js'
+import SelectVersionsFields from './collections/SelectVersions/index.js'
 import TabsFields from './collections/Tabs/index.js'
 import { TabsFields2 } from './collections/Tabs2/index.js'
 import TextFields from './collections/Text/index.js'
@@ -62,12 +69,18 @@ export const collectionSlugs: CollectionConfig[] = [
       },
     ],
   },
+  LexicalInBlock,
+  LexicalAccessControl,
+  SelectVersionsFields,
   ArrayFields,
   BlockFields,
   CheckboxFields,
   CodeFields,
   CollapsibleFields,
   ConditionalLogic,
+  CustomID,
+  CustomTabID,
+  CustomRowID,
   DateFields,
   EmailFields,
   RadioFields,
@@ -116,6 +129,13 @@ export default buildConfigWithDefaults({
       client: {
         'new-value': 'client available',
       },
+    },
+    timezones: {
+      supportedTimezones: ({ defaultTimezones }) => [
+        ...defaultTimezones,
+        { label: '(GMT-6) Monterrey, Nuevo Leon', value: 'America/Monterrey' },
+      ],
+      defaultTimezone: 'America/Monterrey',
     },
   },
   localization: {

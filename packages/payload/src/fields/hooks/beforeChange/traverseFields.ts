@@ -8,6 +8,10 @@ import type { Field, TabAsField } from '../../config/types.js'
 import { promise } from './promise.js'
 
 type Args = {
+  /**
+   * Data of the nearest parent block. If no parent block exists, this will be the `undefined`
+   */
+  blockData?: JsonObject
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   data: JsonObject
@@ -25,9 +29,10 @@ type Args = {
   id?: number | string
   mergeLocaleActions: (() => Promise<void>)[]
   operation: Operation
-  path: (number | string)[]
+  parentIndexPath: string
+  parentPath: string
+  parentSchemaPath: string
   req: PayloadRequest
-  schemaPath: string[]
   siblingData: JsonObject
   /**
    * The original siblingData (not modified by any hooks)
@@ -50,6 +55,7 @@ type Args = {
  */
 export const traverseFields = async ({
   id,
+  blockData,
   collection,
   context,
   data,
@@ -60,9 +66,10 @@ export const traverseFields = async ({
   global,
   mergeLocaleActions,
   operation,
-  path,
+  parentIndexPath,
+  parentPath,
+  parentSchemaPath,
   req,
-  schemaPath,
   siblingData,
   siblingDoc,
   siblingDocWithLocales,
@@ -74,6 +81,7 @@ export const traverseFields = async ({
     promises.push(
       promise({
         id,
+        blockData,
         collection,
         context,
         data,
@@ -85,12 +93,14 @@ export const traverseFields = async ({
         global,
         mergeLocaleActions,
         operation,
-        parentPath: path,
-        parentSchemaPath: schemaPath,
+        parentIndexPath,
+        parentPath,
+        parentSchemaPath,
         req,
         siblingData,
         siblingDoc,
         siblingDocWithLocales,
+        siblingFields: fields,
         skipValidation,
       }),
     )

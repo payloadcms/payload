@@ -13,6 +13,7 @@ export const uploadValidation = (
     validation: {
       options: {
         id,
+        data,
         operation,
         preferences,
         req,
@@ -45,9 +46,12 @@ export const uploadValidation = (
     const result = await fieldSchemasToFormState({
       id,
       collectionSlug: node.relationTo,
+
       data: node?.fields ?? {},
+      documentData: data,
       fields: collection.fields,
       fieldSchemaMap: undefined,
+      initialBlockData: node?.fields ?? {},
       operation: operation === 'create' || operation === 'update' ? operation : 'update',
       permissions: {},
       preferences,
@@ -56,12 +60,15 @@ export const uploadValidation = (
       schemaPath: '',
     })
 
-    let errorPaths: string[] = []
+    const errorPathsSet = new Set<string>()
     for (const fieldKey in result) {
-      if (result[fieldKey].errorPaths) {
-        errorPaths = errorPaths.concat(result[fieldKey].errorPaths)
+      if (result[fieldKey].errorPaths?.length) {
+        for (const errorPath of result[fieldKey].errorPaths) {
+          errorPathsSet.add(errorPath)
+        }
       }
     }
+    const errorPaths = Array.from(errorPathsSet)
 
     if (errorPaths.length) {
       return 'The following fields are invalid: ' + errorPaths.join(', ')

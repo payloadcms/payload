@@ -1,10 +1,10 @@
 'use client'
-export function debounce(func: (...args: any[]) => void, wait: number) {
-  let timeout
-  return function (...args: any[]) {
+export function debounce(func: (...args: undefined[]) => void, wait: number) {
+  let timeout: number | string | undefined
+  return function (...args: undefined[]) {
     const later = () => {
       clearTimeout(timeout)
-      timeout = null
+      timeout = undefined
       func(...args)
     }
 

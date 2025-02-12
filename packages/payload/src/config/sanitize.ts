@@ -3,22 +3,26 @@ import type { AcceptedLanguages } from '@payloadcms/translations'
 import { en } from '@payloadcms/translations/languages/en'
 import { deepMergeSimple } from '@payloadcms/translations/utilities'
 
+import type { CollectionSlug, GlobalSlug } from '../index.js'
 import type {
   Config,
   LocalizationConfigWithLabels,
   LocalizationConfigWithNoLabels,
   SanitizedConfig,
+  Timezone,
 } from './types.js'
 
 import { defaultUserCollection } from '../auth/defaultUser.js'
+import { authRootEndpoints } from '../auth/endpoints/index.js'
 import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
-import { InvalidConfiguration } from '../errors/index.js'
-import { sanitizeGlobals } from '../globals/config/sanitize.js'
+import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
+import { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones.js'
+import { sanitizeGlobal } from '../globals/config/sanitize.js'
 import { getLockedDocumentsCollection } from '../lockedDocuments/lockedDocumentsCollection.js'
 import getPreferencesCollection from '../preferences/preferencesCollection.js'
 import { getDefaultJobsCollection } from '../queues/config/jobsCollection.js'
-import checkDuplicateCollections from '../utilities/checkDuplicateCollections.js'
+import { getSchedulePublishTask } from '../versions/schedule/job.js'
 import { defaults } from './defaults.js'
 
 const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig> => {
@@ -53,6 +57,32 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
       `${sanitizedConfig.admin.user} is not a valid admin user collection`,
     )
   }
+
+  if (sanitizedConfig?.admin?.timezones) {
+    if (typeof sanitizedConfig?.admin?.timezones?.supportedTimezones === 'function') {
+      sanitizedConfig.admin.timezones.supportedTimezones =
+        sanitizedConfig.admin.timezones.supportedTimezones({ defaultTimezones })
+    }
+
+    if (!sanitizedConfig?.admin?.timezones?.supportedTimezones) {
+      sanitizedConfig.admin.timezones.supportedTimezones = defaultTimezones
+    }
+  } else {
+    sanitizedConfig.admin.timezones = {
+      supportedTimezones: defaultTimezones,
+    }
+  }
+  // Timezones supported by the Intl API
+  const _internalSupportedTimezones = Intl.supportedValuesOf('timeZone')
+
+  // We're casting here because it's already been sanitised above but TS still thinks it could be a function
+  ;(sanitizedConfig.admin.timezones.supportedTimezones as Timezone[]).forEach((timezone) => {
+    if (!_internalSupportedTimezones.includes(timezone.value)) {
+      throw new InvalidConfiguration(
+        `Timezone ${timezone.value} is not supported by the current runtime via the Intl API.`,
+      )
+    }
+  })
 
   return sanitizedConfig as unknown as Partial<SanitizedConfig>
 }
@@ -109,6 +139,14 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   }
 
   const config: Partial<SanitizedConfig> = sanitizeAdminConfig(configWithDefaults)
+
+  if (!config.endpoints) {
+    config.endpoints = []
+  }
+
+  for (const endpoint of authRootEndpoints) {
+    config.endpoints.push(endpoint)
+  }
 
   if (config.localization && config.localization.locales?.length > 0) {
     // clone localization config so to not break everything
@@ -171,8 +209,69 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   config.i18n = i18nConfig
 
+  const richTextSanitizationPromises: Array<(config: SanitizedConfig) => Promise<void>> = []
+
+  const schedulePublishCollections: CollectionSlug[] = []
+  const schedulePublishGlobals: GlobalSlug[] = []
+
+  const collectionSlugs = new Set<CollectionSlug>()
+
+  for (let i = 0; i < config.collections.length; i++) {
+    if (collectionSlugs.has(config.collections[i].slug)) {
+      throw new DuplicateCollection('slug', config.collections[i].slug)
+    }
+
+    collectionSlugs.add(config.collections[i].slug)
+
+    const draftsConfig = config.collections[i]?.versions?.drafts
+
+    if (typeof draftsConfig === 'object' && draftsConfig.schedulePublish) {
+      schedulePublishCollections.push(config.collections[i].slug)
+    }
+
+    config.collections[i] = await sanitizeCollection(
+      config as unknown as Config,
+      config.collections[i],
+      richTextSanitizationPromises,
+    )
+  }
+
+  if (config.globals.length > 0) {
+    for (let i = 0; i < config.globals.length; i++) {
+      const draftsConfig = config.globals[i]?.versions?.drafts
+
+      if (typeof draftsConfig === 'object' && draftsConfig.schedulePublish) {
+        schedulePublishGlobals.push(config.globals[i].slug)
+      }
+
+      config.globals[i] = await sanitizeGlobal(
+        config as unknown as Config,
+        config.globals[i],
+        richTextSanitizationPromises,
+      )
+    }
+  }
+
+  if (schedulePublishCollections.length > 0 || schedulePublishGlobals.length > 0) {
+    if (!Array.isArray(configWithDefaults.jobs?.tasks)) {
+      configWithDefaults.jobs.tasks = []
+    }
+
+    configWithDefaults.jobs.tasks.push(
+      getSchedulePublishTask({
+        adminUserSlug: config.admin.user,
+        collections: schedulePublishCollections,
+        globals: schedulePublishGlobals,
+      }),
+    )
+  }
+
   // Need to add default jobs collection before locked documents collections
-  if (Array.isArray(configWithDefaults.jobs?.tasks) && configWithDefaults.jobs.tasks.length > 0) {
+  if (
+    (Array.isArray(configWithDefaults.jobs?.tasks) && configWithDefaults.jobs?.tasks?.length) ||
+    (Array.isArray(configWithDefaults.jobs?.workflows) &&
+      configWithDefaults.jobs?.workflows?.length)
+  ) {
     let defaultJobsCollection = getDefaultJobsCollection(config as unknown as Config)
 
     if (typeof configWithDefaults.jobs.jobsCollectionOverrides === 'function') {
@@ -181,30 +280,36 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       })
     }
 
-    configWithDefaults.collections.push(defaultJobsCollection)
-  }
-
-  configWithDefaults.collections.push(getLockedDocumentsCollection(config as unknown as Config))
-  configWithDefaults.collections.push(getPreferencesCollection(config as unknown as Config))
-  configWithDefaults.collections.push(migrationsCollection)
-
-  const richTextSanitizationPromises: Array<(config: SanitizedConfig) => Promise<void>> = []
-  for (let i = 0; i < config.collections.length; i++) {
-    config.collections[i] = await sanitizeCollection(
+    const sanitizedJobsCollection = await sanitizeCollection(
       config as unknown as Config,
-      config.collections[i],
+      defaultJobsCollection,
       richTextSanitizationPromises,
     )
+
+    configWithDefaults.collections.push(sanitizedJobsCollection)
   }
 
-  checkDuplicateCollections(config.collections)
-
-  if (config.globals.length > 0) {
-    config.globals = await sanitizeGlobals(
+  configWithDefaults.collections.push(
+    await sanitizeCollection(
       config as unknown as Config,
+      getLockedDocumentsCollection(config as unknown as Config),
       richTextSanitizationPromises,
-    )
-  }
+    ),
+  )
+  configWithDefaults.collections.push(
+    await sanitizeCollection(
+      config as unknown as Config,
+      getPreferencesCollection(config as unknown as Config),
+      richTextSanitizationPromises,
+    ),
+  )
+  configWithDefaults.collections.push(
+    await sanitizeCollection(
+      config as unknown as Config,
+      migrationsCollection,
+      richTextSanitizationPromises,
+    ),
+  )
 
   if (config.serverURL !== '') {
     config.csrf.push(config.serverURL)
@@ -214,6 +319,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   if (!config.upload) {
     config.upload = { adapters: [] }
   }
+
   config.upload.adapters = Array.from(
     new Set(config.collections.map((c) => c.upload?.adapter).filter(Boolean)),
   )

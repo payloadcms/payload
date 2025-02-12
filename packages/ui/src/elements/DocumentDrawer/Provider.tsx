@@ -1,4 +1,4 @@
-import type { ClientCollectionConfig, Data, TypeWithID } from 'payload'
+import type { ClientCollectionConfig, Data, FormState, TypeWithID } from 'payload'
 
 import { createContext, useContext } from 'react'
 
@@ -19,7 +19,7 @@ export type DocumentDrawerContextProps = {
     doc: TypeWithID
     operation: 'create' | 'update'
     result: Data
-  }) => Promise<void> | void
+  }) => Promise<FormState | void> | void
 }
 
 export type DocumentDrawerContextType = DocumentDrawerContextProps

@@ -174,6 +174,83 @@ export default buildConfigWithDefaults({
         },
       } as TaskConfig<'CreateSimple'>,
       {
+        slug: 'CreateSimpleRetriesUndefined',
+        inputSchema: [
+          {
+            name: 'message',
+            type: 'text',
+            required: true,
+          },
+          {
+            name: 'shouldFail',
+            type: 'checkbox',
+          },
+        ],
+        outputSchema: [
+          {
+            name: 'simpleID',
+            type: 'text',
+            required: true,
+          },
+        ],
+        handler: async ({ input, req }) => {
+          if (input.shouldFail) {
+            throw new Error('Failed on purpose')
+          }
+          const newSimple = await req.payload.create({
+            collection: 'simple',
+            req,
+            data: {
+              title: input.message,
+            },
+          })
+          return {
+            output: {
+              simpleID: newSimple.id,
+            },
+          }
+        },
+      } as TaskConfig<'CreateSimpleRetriesUndefined'>,
+      {
+        slug: 'CreateSimpleRetries0',
+        retries: 0,
+        inputSchema: [
+          {
+            name: 'message',
+            type: 'text',
+            required: true,
+          },
+          {
+            name: 'shouldFail',
+            type: 'checkbox',
+          },
+        ],
+        outputSchema: [
+          {
+            name: 'simpleID',
+            type: 'text',
+            required: true,
+          },
+        ],
+        handler: async ({ input, req }) => {
+          if (input.shouldFail) {
+            throw new Error('Failed on purpose')
+          }
+          const newSimple = await req.payload.create({
+            collection: 'simple',
+            req,
+            data: {
+              title: input.message,
+            },
+          })
+          return {
+            output: {
+              simpleID: newSimple.id,
+            },
+          }
+        },
+      } as TaskConfig<'CreateSimpleRetries0'>,
+      {
         retries: 2,
         slug: 'CreateSimpleWithDuplicateMessage',
         inputSchema: [
@@ -446,6 +523,209 @@ export default buildConfigWithDefaults({
         },
       } as WorkflowConfig<'retriesWorkflowLevelTest'>,
       {
+        slug: 'workflowNoRetriesSet',
+        inputSchema: [
+          {
+            name: 'message',
+            type: 'text',
+            required: true,
+          },
+        ],
+        handler: async ({ job, tasks, req }) => {
+          await req.payload.update({
+            collection: 'payload-jobs',
+            data: {
+              input: {
+                ...job.input,
+                amountRetried:
+                  // @ts-expect-error amountRetried is new arbitrary data and not in the type
+                  job.input.amountRetried !== undefined ? job.input.amountRetried + 1 : 0,
+              },
+            },
+            id: job.id,
+          })
+
+          await tasks.CreateSimple('1', {
+            input: {
+              message: job.input.message,
+            },
+          })
+
+          // At this point there should always be one post created.
+          // job.input.amountRetried will go up to 2 as CreatePost has 2 retries
+          await tasks.CreateSimple('2', {
+            input: {
+              message: job.input.message,
+              shouldFail: true,
+            },
+          })
+          // This will never be reached
+        },
+      } as WorkflowConfig<'workflowNoRetriesSet'>,
+      {
+        slug: 'workflowRetries0',
+        inputSchema: [
+          {
+            name: 'message',
+            type: 'text',
+            required: true,
+          },
+        ],
+        retries: 0,
+        handler: async ({ job, tasks, req }) => {
+          await req.payload.update({
+            collection: 'payload-jobs',
+            data: {
+              input: {
+                ...job.input,
+                amountRetried:
+                  // @ts-expect-error amountRetried is new arbitrary data and not in the type
+                  job.input.amountRetried !== undefined ? job.input.amountRetried + 1 : 0,
+              },
+            },
+            id: job.id,
+          })
+
+          await tasks.CreateSimple('1', {
+            input: {
+              message: job.input.message,
+            },
+          })
+
+          // At this point there should always be one post created.
+          // job.input.amountRetried will go up to 2 as CreatePost has 2 retries
+          await tasks.CreateSimple('2', {
+            input: {
+              message: job.input.message,
+              shouldFail: true,
+            },
+          })
+          // This will never be reached
+        },
+      } as WorkflowConfig<'workflowRetries0'>,
+      {
+        slug: 'workflowAndTasksRetriesUndefined',
+        inputSchema: [
+          {
+            name: 'message',
+            type: 'text',
+            required: true,
+          },
+        ],
+        handler: async ({ job, tasks, req }) => {
+          await req.payload.update({
+            collection: 'payload-jobs',
+            data: {
+              input: {
+                ...job.input,
+                amountRetried:
+                  // @ts-expect-error amountRetried is new arbitrary data and not in the type
+                  job.input.amountRetried !== undefined ? job.input.amountRetried + 1 : 0,
+              },
+            },
+            id: job.id,
+          })
+
+          await tasks.CreateSimpleRetriesUndefined('1', {
+            input: {
+              message: job.input.message,
+            },
+          })
+
+          // At this point there should always be one post created.
+          // job.input.amountRetried will go up to 2 as CreatePost has 2 retries
+          await tasks.CreateSimpleRetriesUndefined('2', {
+            input: {
+              message: job.input.message,
+              shouldFail: true,
+            },
+          })
+          // This will never be reached
+        },
+      } as WorkflowConfig<'workflowAndTasksRetriesUndefined'>,
+      {
+        slug: 'workflowRetries2TasksRetriesUndefined',
+        retries: 2,
+        inputSchema: [
+          {
+            name: 'message',
+            type: 'text',
+            required: true,
+          },
+        ],
+        handler: async ({ job, tasks, req }) => {
+          await req.payload.update({
+            collection: 'payload-jobs',
+            data: {
+              input: {
+                ...job.input,
+                amountRetried:
+                  // @ts-expect-error amountRetried is new arbitrary data and not in the type
+                  job.input.amountRetried !== undefined ? job.input.amountRetried + 1 : 0,
+              },
+            },
+            id: job.id,
+          })
+
+          await tasks.CreateSimpleRetriesUndefined('1', {
+            input: {
+              message: job.input.message,
+            },
+          })
+
+          // At this point there should always be one post created.
+          // job.input.amountRetried will go up to 2 as CreatePost has 2 retries
+          await tasks.CreateSimpleRetriesUndefined('2', {
+            input: {
+              message: job.input.message,
+              shouldFail: true,
+            },
+          })
+          // This will never be reached
+        },
+      } as WorkflowConfig<'workflowRetries2TasksRetriesUndefined'>,
+      {
+        slug: 'workflowRetries2TasksRetries0',
+        retries: 2,
+        inputSchema: [
+          {
+            name: 'message',
+            type: 'text',
+            required: true,
+          },
+        ],
+        handler: async ({ job, tasks, req }) => {
+          await req.payload.update({
+            collection: 'payload-jobs',
+            data: {
+              input: {
+                ...job.input,
+                amountRetried:
+                  // @ts-expect-error amountRetried is new arbitrary data and not in the type
+                  job.input.amountRetried !== undefined ? job.input.amountRetried + 1 : 0,
+              },
+            },
+            id: job.id,
+          })
+
+          await tasks.CreateSimpleRetries0('1', {
+            input: {
+              message: job.input.message,
+            },
+          })
+
+          // At this point there should always be one post created.
+          // job.input.amountRetried will go up to 2 as CreatePost has 2 retries
+          await tasks.CreateSimpleRetries0('2', {
+            input: {
+              message: job.input.message,
+              shouldFail: true,
+            },
+          })
+          // This will never be reached
+        },
+      } as WorkflowConfig<'workflowRetries2TasksRetries0'>,
+      {
         slug: 'inlineTaskTest',
         inputSchema: [
           {
@@ -566,6 +846,142 @@ export default buildConfigWithDefaults({
           })
         },
       } as WorkflowConfig<'retriesBackoffTest'>,
+      {
+        slug: 'subTask',
+        inputSchema: [
+          {
+            name: 'message',
+            type: 'text',
+            required: true,
+          },
+        ],
+        handler: async ({ job, inlineTask }) => {
+          await inlineTask('create two docs', {
+            task: async ({ input, inlineTask }) => {
+              const { newSimple } = await inlineTask('create doc 1', {
+                task: async ({ req }) => {
+                  const newSimple = await req.payload.create({
+                    collection: 'simple',
+                    req,
+                    data: {
+                      title: input.message,
+                    },
+                  })
+                  return {
+                    output: {
+                      newSimple,
+                    },
+                  }
+                },
+              })
+
+              const { newSimple2 } = await inlineTask('create doc 2', {
+                task: async ({ req }) => {
+                  const newSimple2 = await req.payload.create({
+                    collection: 'simple',
+                    req,
+                    data: {
+                      title: input.message,
+                    },
+                  })
+                  return {
+                    output: {
+                      newSimple2,
+                    },
+                  }
+                },
+              })
+              return {
+                output: {
+                  simpleID1: newSimple.id,
+                  simpleID2: newSimple2.id,
+                },
+              }
+            },
+            input: {
+              message: job.input.message,
+            },
+          })
+        },
+      } as WorkflowConfig<'subTask'>,
+      {
+        slug: 'subTaskFails',
+        inputSchema: [
+          {
+            name: 'message',
+            type: 'text',
+            required: true,
+          },
+        ],
+        retries: 3,
+        handler: async ({ job, inlineTask }) => {
+          await inlineTask('create two docs', {
+            task: async ({ input, inlineTask }) => {
+              const { newSimple } = await inlineTask('create doc 1 - succeeds', {
+                task: async ({ req }) => {
+                  const newSimple = await req.payload.create({
+                    collection: 'simple',
+                    req,
+                    data: {
+                      title: input.message,
+                    },
+                  })
+
+                  await req.payload.update({
+                    collection: 'payload-jobs',
+                    data: {
+                      input: {
+                        ...job.input,
+                        amountTask1Retried:
+                          // @ts-expect-error amountRetried is new arbitrary data and not in the type
+                          job.input.amountTask1Retried !== undefined
+                            ? // @ts-expect-error
+                              job.input.amountTask1Retried + 1
+                            : 0,
+                      },
+                    },
+                    id: job.id,
+                  })
+                  return {
+                    output: {
+                      newSimple,
+                    },
+                  }
+                },
+              })
+
+              await inlineTask('create doc 2 - fails', {
+                task: async ({ req }) => {
+                  await req.payload.update({
+                    collection: 'payload-jobs',
+                    data: {
+                      input: {
+                        ...job.input,
+                        amountTask2Retried:
+                          // @ts-expect-error amountRetried is new arbitrary data and not in the type
+                          job.input.amountTask2Retried !== undefined
+                            ? // @ts-expect-error
+                              job.input.amountTask2Retried + 1
+                            : 0,
+                      },
+                    },
+                    id: job.id,
+                  })
+                  throw new Error('Failed on purpose')
+                },
+              })
+              return {
+                output: {
+                  simpleID1: newSimple.id,
+                },
+              }
+            },
+            input: {
+              message: job.input.message,
+            },
+          })
+        },
+      } as WorkflowConfig<'subTaskFails'>,
     ],
   },
   editor: lexicalEditor(),

@@ -6,6 +6,7 @@ import type { ClientBlock, ClientField, Field } from '../../fields/config/types.
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { Operation, Payload, PayloadRequest } from '../../types/index.js'
 import type {
+  ClientFieldSchemaMap,
   ClientTab,
   Data,
   FieldSchemaMap,
@@ -17,9 +18,10 @@ import type {
 export type ClientFieldWithOptionalType = MarkOptional<ClientField, 'type'>
 
 export type ClientComponentProps = {
-  customComponents: FormField['customComponents']
+  customComponents?: FormField['customComponents']
   field: ClientBlock | ClientField | ClientTab
   forceRender?: boolean
+  permissions?: SanitizedFieldPermissions
   readOnly?: boolean
   renderedBlocks?: RenderedField[]
   /**
@@ -67,6 +69,7 @@ export type FieldPaths = {
 
 export type ServerComponentProps = {
   clientField: ClientFieldWithOptionalType
+  clientFieldSchemaMap: ClientFieldSchemaMap
   collectionSlug: string
   data: Data
   field: Field

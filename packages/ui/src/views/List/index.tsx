@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientCollectionConfig } from 'payload'
+import type { ListPreferences, ResolvedFilterOptions } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
@@ -8,7 +8,6 @@ import { formatFilesize, isNumber } from 'payload/shared'
 import React, { Fragment, useEffect, useState } from 'react'
 
 import type { Column } from '../../elements/Table/index.js'
-import type { ListPreferences } from './types.js'
 
 import { useBulkUpload } from '../../elements/BulkUpload/index.js'
 import { Button } from '../../elements/Button/index.js'
@@ -24,6 +23,7 @@ import { Pagination } from '../../elements/Pagination/index.js'
 import { PerPage } from '../../elements/PerPage/index.js'
 import { PublishMany } from '../../elements/PublishMany/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { SelectMany } from '../../elements/SelectMany/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
 import { TableColumnsProvider } from '../../elements/TableColumns/index.js'
@@ -35,9 +35,9 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { SelectionProvider } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import './index.scss'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
 import { ListHeader } from './ListHeader/index.js'
+import './index.scss'
 
 const baseClass = 'collection-list'
 
@@ -62,6 +62,7 @@ export type ListViewClientProps = {
   newDocumentURL: string
   preferenceKey?: string
   renderedFilters?: Map<string, React.ReactNode>
+  resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
 } & ListViewSlots
 
 export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
@@ -82,12 +83,13 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
     newDocumentURL,
     preferenceKey,
     renderedFilters,
+    resolvedFilterOptions,
     Table: InitialTable,
   } = props
 
   const [Table, setTable] = useState(InitialTable)
 
-  const { createNewDrawerSlug, drawerSlug: listDrawerSlug } = useListDrawerContext()
+  const { createNewDrawerSlug, drawerSlug: listDrawerSlug, onBulkSelect } = useListDrawerContext()
 
   useEffect(() => {
     if (InitialTable) {
@@ -107,11 +109,12 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
     handlePerPageChange,
     query,
   } = useListQuery()
+
   const { openModal } = useModal()
-  const { setCollectionSlug, setOnSuccess } = useBulkUpload()
+  const { setCollectionSlug, setCurrentActivePath, setOnSuccess } = useBulkUpload()
   const { drawerSlug: bulkUploadDrawerSlug } = useBulkUpload()
 
-  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
+  const collectionConfig = getEntityConfig({ collectionSlug })
 
   const { labels, upload } = collectionConfig
 
@@ -146,12 +149,21 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
 
   const openBulkUpload = React.useCallback(() => {
     setCollectionSlug(collectionSlug)
+    setCurrentActivePath(collectionSlug)
     openModal(bulkUploadDrawerSlug)
-    setOnSuccess(() => router.refresh())
-  }, [router, collectionSlug, bulkUploadDrawerSlug, openModal, setCollectionSlug, setOnSuccess])
+    setOnSuccess(collectionSlug, () => router.refresh())
+  }, [
+    router,
+    collectionSlug,
+    bulkUploadDrawerSlug,
+    openModal,
+    setCollectionSlug,
+    setCurrentActivePath,
+    setOnSuccess,
+  ])
 
   useEffect(() => {
-    if (drawerDepth <= 1) {
+    if (!drawerDepth) {
       setStepNav([
         {
           label: labels?.plural,
@@ -196,12 +208,19 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                 t={t}
               />
               <ListControls
-                beforeActions={beforeActions}
+                beforeActions={
+                  enableRowSelections && typeof onBulkSelect === 'function'
+                    ? beforeActions
+                      ? [...beforeActions, <SelectMany key="select-many" onClick={onBulkSelect} />]
+                      : [<SelectMany key="select-many" onClick={onBulkSelect} />]
+                    : beforeActions
+                }
                 collectionConfig={collectionConfig}
                 collectionSlug={collectionSlug}
                 disableBulkDelete={disableBulkDelete}
                 disableBulkEdit={disableBulkEdit}
                 renderedFilters={renderedFilters}
+                resolvedFilterOptions={resolvedFilterOptions}
               />
               {BeforeListTable}
               {docs.length > 0 && <RelationshipProvider>{Table}</RelationshipProvider>}
@@ -264,7 +283,14 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                             label={getTranslation(collectionConfig.labels.plural, i18n)}
                           />
                           <div className={`${baseClass}__list-selection-actions`}>
-                            {beforeActions && beforeActions}
+                            {enableRowSelections && typeof onBulkSelect === 'function'
+                              ? beforeActions
+                                ? [
+                                    ...beforeActions,
+                                    <SelectMany key="select-many" onClick={onBulkSelect} />,
+                                  ]
+                                : [<SelectMany key="select-many" onClick={onBulkSelect} />]
+                              : beforeActions}
                             {!disableBulkEdit && (
                               <Fragment>
                                 <EditMany collection={collectionConfig} />

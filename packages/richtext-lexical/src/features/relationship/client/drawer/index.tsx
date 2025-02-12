@@ -68,7 +68,7 @@ const RelationshipDrawerComponent: React.FC<Props> = ({ enabledCollectionSlugs }
   }, [editor, openListDrawer])
 
   const onSelect = useCallback(
-    ({ collectionSlug, docID }) => {
+    ({ collectionSlug, docID }: { collectionSlug: string; docID: number | string }) => {
       insertRelationship({
         editor,
         relationTo: collectionSlug,
@@ -79,12 +79,6 @@ const RelationshipDrawerComponent: React.FC<Props> = ({ enabledCollectionSlugs }
     },
     [editor, closeListDrawer, replaceNodeKey],
   )
-
-  useEffect(() => {
-    // always reset back to first option
-    // TODO: this is not working, see the ListDrawer component
-    setSelectedCollectionSlug(enabledCollectionSlugs?.[0])
-  }, [isListDrawerOpen, enabledCollectionSlugs])
 
   return <ListDrawer onSelect={onSelect} />
 }

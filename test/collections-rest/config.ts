@@ -34,7 +34,7 @@ const collectionWithName = (collectionSlug: string): CollectionConfig => {
   }
 }
 
-export const slug = 'posts'
+export const postsSlug = 'posts'
 export const relationSlug = 'relation'
 export const pointSlug = 'point'
 export const customIdSlug = 'custom-id'
@@ -51,7 +51,7 @@ export default buildConfigWithDefaults({
   },
   collections: [
     {
-      slug,
+      slug: postsSlug,
       access: openAccess,
       fields: [
         {
@@ -273,8 +273,8 @@ export default buildConfigWithDefaults({
   ],
   endpoints: [
     {
-      handler: async ({ req }) => {
-        await req.payload.sendEmail({
+      handler: async ({ payload }) => {
+        await payload.sendEmail({
           from: 'dev@payloadcms.com',
           html: 'This is a test email.',
           subject: 'Test Email',
@@ -346,14 +346,14 @@ export default buildConfigWithDefaults({
 
     // Relation - hasMany
     await payload.create({
-      collection: slug,
+      collection: postsSlug,
       data: {
         relationHasManyField: rel1.id,
         title: 'rel to hasMany',
       },
     })
     await payload.create({
-      collection: slug,
+      collection: postsSlug,
       data: {
         relationHasManyField: rel2.id,
         title: 'rel to hasMany 2',
@@ -362,7 +362,7 @@ export default buildConfigWithDefaults({
 
     // Relation - relationTo multi
     await payload.create({
-      collection: slug,
+      collection: postsSlug,
       data: {
         relationMultiRelationTo: {
           relationTo: relationSlug,
@@ -374,7 +374,7 @@ export default buildConfigWithDefaults({
 
     // Relation - relationTo multi hasMany
     await payload.create({
-      collection: slug,
+      collection: postsSlug,
       data: {
         relationMultiRelationToHasMany: [
           {

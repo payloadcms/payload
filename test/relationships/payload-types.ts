@@ -28,12 +28,19 @@ export interface Config {
     'rels-to-pages': RelsToPage;
     'rels-to-pages-and-custom-text-ids': RelsToPagesAndCustomTextId;
     'object-writes': ObjectWrite;
+    'deep-nested': DeepNested;
+    relations: Relation1;
+    items: Item;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    items: {
+      relation: 'relations';
+    };
+  };
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     postsLocalized: PostsLocalizedSelect<false> | PostsLocalizedSelect<true>;
@@ -52,6 +59,9 @@ export interface Config {
     'rels-to-pages': RelsToPagesSelect<false> | RelsToPagesSelect<true>;
     'rels-to-pages-and-custom-text-ids': RelsToPagesAndCustomTextIdsSelect<false> | RelsToPagesAndCustomTextIdsSelect<true>;
     'object-writes': ObjectWritesSelect<false> | ObjectWritesSelect<true>;
+    'deep-nested': DeepNestedSelect<false> | DeepNestedSelect<true>;
+    relations: RelationsSelect<false> | RelationsSelect<true>;
+    items: ItemsSelect<false> | ItemsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -66,9 +76,9 @@ export interface Config {
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -252,6 +262,22 @@ export interface PolymorphicRelationship {
     relationTo: 'movies';
     value: string | Movie;
   } | null;
+  polymorphicLocalized?: {
+    relationTo: 'movies';
+    value: string | Movie;
+  } | null;
+  polymorphicMany?:
+    | {
+        relationTo: 'movies';
+        value: string | Movie;
+      }[]
+    | null;
+  polymorphicManyLocalized?:
+    | {
+        relationTo: 'movies';
+        value: string | Movie;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -336,6 +362,54 @@ export interface ObjectWrite {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "deep-nested".
+ */
+export interface DeepNested {
+  id: string;
+  content?: {
+    blocks?:
+      | {
+          meta?: {
+            movie?: (string | null) | Movie;
+          };
+          id?: string | null;
+          blockName?: string | null;
+          blockType: 'testBlock';
+        }[]
+      | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relations".
+ */
+export interface Relation1 {
+  id: string;
+  item?: {
+    relationTo: 'items';
+    value: string | Item;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "items".
+ */
+export interface Item {
+  id: string;
+  status?: ('completed' | 'failed' | 'pending') | null;
+  relation?: {
+    docs?: (string | Relation1)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -408,6 +482,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'object-writes';
         value: string | ObjectWrite;
+      } | null)
+    | ({
+        relationTo: 'deep-nested';
+        value: string | DeepNested;
+      } | null)
+    | ({
+        relationTo: 'relations';
+        value: string | Relation1;
+      } | null)
+    | ({
+        relationTo: 'items';
+        value: string | Item;
       } | null)
     | ({
         relationTo: 'users';
@@ -591,6 +677,9 @@ export interface MovieReviewsSelect<T extends boolean = true> {
  */
 export interface PolymorphicRelationshipsSelect<T extends boolean = true> {
   polymorphic?: T;
+  polymorphicLocalized?: T;
+  polymorphicMany?: T;
+  polymorphicManyLocalized?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -645,6 +734,52 @@ export interface ObjectWritesSelect<T extends boolean = true> {
   many?: T;
   onePoly?: T;
   manyPoly?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "deep-nested_select".
+ */
+export interface DeepNestedSelect<T extends boolean = true> {
+  content?:
+    | T
+    | {
+        blocks?:
+          | T
+          | {
+              testBlock?:
+                | T
+                | {
+                    meta?:
+                      | T
+                      | {
+                          movie?: T;
+                        };
+                    id?: T;
+                    blockName?: T;
+                  };
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relations_select".
+ */
+export interface RelationsSelect<T extends boolean = true> {
+  item?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "items_select".
+ */
+export interface ItemsSelect<T extends boolean = true> {
+  status?: T;
+  relation?: T;
   updatedAt?: T;
   createdAt?: T;
 }

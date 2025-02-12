@@ -2,15 +2,18 @@
 import type { ClientBlock, ClientField, Labels, Row, SanitizedFieldPermissions } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React from 'react'
+import React, { Fragment } from 'react'
 
 import type { UseDraggableSortableReturn } from '../../elements/DraggableSortable/useDraggableSortable/types.js'
+import type { RenderFieldsProps } from '../../forms/RenderFields/types.js'
 
 import { Collapsible } from '../../elements/Collapsible/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { Pill } from '../../elements/Pill/index.js'
+import { ShimmerEffect } from '../../elements/ShimmerEffect/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
+import { useThrottledValue } from '../../hooks/useThrottledValue.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { RowActions } from './RowActions.js'
 import { SectionTitle } from './SectionTitle/index.js'
@@ -25,6 +28,7 @@ type BlocksFieldProps = {
   errorCount: number
   fields: ClientField[]
   hasMaxRows?: boolean
+  isLoading?: boolean
   isSortable?: boolean
   Label?: React.ReactNode
   labels: Labels
@@ -50,6 +54,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   errorCount,
   fields,
   hasMaxRows,
+  isLoading: isLoadingFromProps,
   isSortable,
   Label,
   labels,
@@ -68,6 +73,8 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   setNodeRef,
   transform,
 }) => {
+  const isLoading = useThrottledValue(isLoadingFromProps, 500)
+
   const { i18n } = useTranslation()
   const hasSubmitted = useFormSubmitted()
 
@@ -79,6 +86,19 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   ]
     .filter(Boolean)
     .join(' ')
+
+  let blockPermissions: RenderFieldsProps['permissions'] = undefined
+
+  if (permissions === true) {
+    blockPermissions = true
+  } else {
+    const permissionsBlockSpecific = permissions?.blocks?.[block.slug]
+    if (permissionsBlockSpecific === true) {
+      blockPermissions = true
+    } else {
+      blockPermissions = permissionsBlockSpecific?.fields
+    }
+  }
 
   return (
     <div
@@ -120,19 +140,25 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
             : undefined
         }
         header={
-          Label || (
+          isLoading ? (
+            <ShimmerEffect height="1rem" width="8rem" />
+          ) : (
             <div className={`${baseClass}__block-header`}>
-              <span className={`${baseClass}__block-number`}>
-                {String(rowIndex + 1).padStart(2, '0')}
-              </span>
-              <Pill
-                className={`${baseClass}__block-pill ${baseClass}__block-pill-${row.blockType}`}
-                pillStyle="white"
-              >
-                {getTranslation(block.labels.singular, i18n)}
-              </Pill>
-              <SectionTitle path={`${path}.blockName`} readOnly={readOnly} />
-              {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
+              {Label || (
+                <Fragment>
+                  <span className={`${baseClass}__block-number`}>
+                    {String(rowIndex + 1).padStart(2, '0')}
+                  </span>
+                  <Pill
+                    className={`${baseClass}__block-pill ${baseClass}__block-pill-${row.blockType}`}
+                    pillStyle="white"
+                  >
+                    {getTranslation(block.labels.singular, i18n)}
+                  </Pill>
+                  <SectionTitle path={`${path}.blockName`} readOnly={readOnly} />
+                  {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
+                </Fragment>
+              )}
             </div>
           )
         }
@@ -140,18 +166,20 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
         key={row.id}
         onToggle={(collapsed) => setCollapse(row.id, collapsed)}
       >
-        <RenderFields
-          className={`${baseClass}__fields`}
-          fields={fields}
-          margins="small"
-          parentIndexPath=""
-          parentPath={path}
-          parentSchemaPath={schemaPath}
-          permissions={
-            permissions === true ? permissions : permissions?.blocks?.[block.slug]?.fields
-          }
-          readOnly={readOnly}
-        />
+        {isLoading ? (
+          <ShimmerEffect />
+        ) : (
+          <RenderFields
+            className={`${baseClass}__fields`}
+            fields={fields}
+            margins="small"
+            parentIndexPath=""
+            parentPath={path}
+            parentSchemaPath={schemaPath}
+            permissions={blockPermissions}
+            readOnly={readOnly}
+          />
+        )}
       </Collapsible>
     </div>
   )

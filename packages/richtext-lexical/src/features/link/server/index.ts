@@ -9,7 +9,6 @@ import type {
 
 import escapeHTML from 'escape-html'
 import { sanitizeFields } from 'payload'
-import { deepCopyObject } from 'payload/shared'
 
 import type { ClientProps } from '../client/index.js'
 
@@ -78,7 +77,7 @@ export const LinkFeature = createServerFeature<
     const validRelationships = _config.collections.map((c) => c.slug) || []
 
     const _transformedFields = transformExtraFields(
-      props.fields ? deepCopyObject(props.fields) : null,
+      props.fields ? props.fields : null,
       _config,
       props.enabledCollections,
       props.disabledCollections,
@@ -97,16 +96,43 @@ export const LinkFeature = createServerFeature<
     // the text field is not included in the node data.
     // Thus, for tasks like validation, we do not want to pass it a text field in the schema which will never have data.
     // Otherwise, it will cause a validation error (field is required).
-    const sanitizedFieldsWithoutText = deepCopyObject(sanitizedFields).filter(
+    const sanitizedFieldsWithoutText = sanitizedFields.filter(
       (field) => !('name' in field) || field.name !== 'text',
     )
+
+    let linkTypeField: Field | null = null
+    let linkURLField: Field | null = null
+
+    for (const field of sanitizedFields) {
+      if ('name' in field && field.name === 'linkType') {
+        linkTypeField = field
+      }
+
+      if ('name' in field && field.name === 'url') {
+        linkURLField = field
+      }
+    }
+
+    const defaultLinkType = linkTypeField
+      ? 'defaultValue' in linkTypeField && typeof linkTypeField.defaultValue === 'string'
+        ? linkTypeField.defaultValue
+        : 'custom'
+      : undefined
+
+    const defaultLinkURL = linkURLField
+      ? 'defaultValue' in linkURLField && typeof linkURLField.defaultValue === 'string'
+        ? linkURLField.defaultValue
+        : 'https://'
+      : undefined
 
     return {
       ClientFeature: '@payloadcms/richtext-lexical/client#LinkFeatureClient',
       clientFeatureProps: {
+        defaultLinkType,
+        defaultLinkURL,
         disabledCollections: props.disabledCollections,
         enabledCollections: props.enabledCollections,
-      } as ExclusiveLinkCollectionsProps,
+      } as ClientProps,
       generateSchemaMap: () => {
         if (!sanitizedFields || !Array.isArray(sanitizedFields) || sanitizedFields.length === 0) {
           return null
@@ -154,7 +180,7 @@ export const LinkFeature = createServerFeature<
                 const rel: string = node.fields.newTab ? ' rel="noopener noreferrer"' : ''
                 const target: string = node.fields.newTab ? ' target="_blank"' : ''
 
-                let href: string = node.fields.url
+                let href: string = node.fields.url ?? ''
                 if (node.fields.linkType === 'internal') {
                   href =
                     typeof node.fields.doc?.value !== 'object'

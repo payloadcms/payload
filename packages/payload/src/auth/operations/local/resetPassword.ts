@@ -14,7 +14,7 @@ export type Options<T extends CollectionSlug> = {
     token: string
   }
   overrideAccess: boolean
-  req?: PayloadRequest
+  req?: Partial<PayloadRequest>
 }
 
 async function localResetPassword<T extends CollectionSlug>(
@@ -47,4 +47,4 @@ async function localResetPassword<T extends CollectionSlug>(
   return result
 }
 
-export default localResetPassword
+export const resetPassword = localResetPassword

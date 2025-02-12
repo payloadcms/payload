@@ -95,7 +95,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   )
 
   const {
-    customComponents: { Description, Error, Label } = {},
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label, RowLabels } = {},
     errorPaths,
     rows = [],
     showError,
@@ -116,13 +116,11 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         schemaPath,
       })
 
-      setModified(true)
-
       setTimeout(() => {
         scrollToID(`${path}-row-${rowIndex + 1}`)
       }, 0)
     },
-    [addFieldRow, path, schemaPath, setModified],
+    [addFieldRow, path, schemaPath],
   )
 
   const duplicateRow = useCallback(
@@ -252,6 +250,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
           Fallback={<FieldDescription description={description} path={path} />}
         />
       </header>
+      {BeforeInput}
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
       {(rows.length > 0 || (!valid && (showRequired || showMinRows))) && (
         <DraggableSortable
@@ -260,7 +259,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
           onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
         >
           {rows.map((row, i) => {
-            const { blockType } = row
+            const { blockType, isLoading } = row
             const blockConfig = blocks.find((block) => block.slug === blockType)
 
             if (blockConfig) {
@@ -282,8 +281,9 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                       errorCount={rowErrorCount}
                       fields={blockConfig.fields}
                       hasMaxRows={hasMaxRows}
+                      isLoading={isLoading}
                       isSortable={isSortable}
-                      Label={Label}
+                      Label={RowLabels?.[i]}
                       labels={labels}
                       moveRow={moveRow}
                       parentPath={path}
@@ -327,7 +327,11 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       )}
       {!hasMaxRows && (
         <Fragment>
-          <DrawerToggler className={`${baseClass}__drawer-toggler`} slug={drawerSlug}>
+          <DrawerToggler
+            className={`${baseClass}__drawer-toggler`}
+            disabled={readOnly}
+            slug={drawerSlug}
+          >
             <Button
               buttonStyle="icon-label"
               disabled={readOnly}
@@ -348,6 +352,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
           />
         </Fragment>
       )}
+      {AfterInput}
     </div>
   )
 }

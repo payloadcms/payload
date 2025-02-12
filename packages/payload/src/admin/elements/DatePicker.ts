@@ -1,8 +1,8 @@
-import type { ReactDatePickerProps } from 'react-datepicker'
+import type { DatePickerProps } from 'react-datepicker'
 
 export type SharedProps = {
   displayFormat?: string
-  overrides?: ReactDatePickerProps
+  overrides?: DatePickerProps
   pickerAppearance?: 'dayAndTime' | 'dayOnly' | 'default' | 'monthOnly' | 'timeOnly'
 }
 

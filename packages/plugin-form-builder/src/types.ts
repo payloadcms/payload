@@ -166,7 +166,7 @@ export interface CheckboxField {
 export interface MessageField {
   blockName?: string
   blockType: 'message'
-  message: unknown
+  message: object
 }
 
 export type FormFieldBlock =

@@ -1,7 +1,5 @@
-import type { ElementTransformer, Transformer } from '@lexical/markdown'
 import type { LexicalNode } from 'lexical'
 
-import { $convertFromMarkdownString, $convertToMarkdownString } from '@lexical/markdown'
 import {
   $createTableCellNode,
   $createTableNode,
@@ -15,6 +13,13 @@ import {
   TableRowNode,
 } from '@lexical/table'
 import { $isParagraphNode, $isTextNode } from 'lexical'
+
+import {
+  $convertFromMarkdownString,
+  $convertToMarkdownString,
+  type ElementTransformer,
+  type Transformer,
+} from '../../packages/@lexical/markdown/index.js'
 
 // Very primitive table setup
 const TABLE_ROW_REG_EXP = /^\|(.+)\|\s?$/
@@ -60,8 +65,12 @@ export const TableMarkdownTransformer: (props: {
   },
   regExp: TABLE_ROW_REG_EXP,
   replace: (parentNode, _1, match) => {
+    const match0 = match[0]
+    if (!match0) {
+      return
+    }
     // Header row
-    if (TABLE_ROW_DIVIDER_REG_EXP.test(match[0])) {
+    if (TABLE_ROW_DIVIDER_REG_EXP.test(match0)) {
       const table = parentNode.getPreviousSibling()
       if (!table || !$isTableNode(table)) {
         return
@@ -86,7 +95,7 @@ export const TableMarkdownTransformer: (props: {
       return
     }
 
-    const matchCells = mapToTableCells(match[0], allTransformers)
+    const matchCells = mapToTableCells(match0, allTransformers)
 
     if (matchCells == null) {
       return
@@ -131,7 +140,7 @@ export const TableMarkdownTransformer: (props: {
       table.append(tableRow)
 
       for (let i = 0; i < maxCells; i++) {
-        tableRow.append(i < cells.length ? cells[i] : $createTableCell('', allTransformers))
+        tableRow.append(i < cells.length ? cells[i]! : $createTableCell('', allTransformers))
       }
     }
 

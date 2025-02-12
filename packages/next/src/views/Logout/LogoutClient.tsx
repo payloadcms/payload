@@ -16,8 +16,11 @@ export const LogoutClient: React.FC<{
   const { adminRoute, inactivity, redirect } = props
 
   const { logOut, user } = useAuth()
+
   const [isLoggedOut, setIsLoggedOut] = React.useState<boolean>(!user)
+
   const logOutSuccessRef = React.useRef(false)
+
   const [loginRoute] = React.useState(() =>
     formatAdminURL({
       adminRoute,
@@ -46,8 +49,10 @@ export const LogoutClient: React.FC<{
   useEffect(() => {
     if (!isLoggedOut) {
       void handleLogOut()
+    } else {
+      router.push(loginRoute)
     }
-  }, [handleLogOut, isLoggedOut])
+  }, [handleLogOut, isLoggedOut, loginRoute, router])
 
   if (isLoggedOut && inactivity) {
     return (

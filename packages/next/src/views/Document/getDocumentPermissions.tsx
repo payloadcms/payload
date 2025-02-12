@@ -1,6 +1,5 @@
 import type {
   Data,
-  DocumentPermissions,
   PayloadRequest,
   SanitizedCollectionConfig,
   SanitizedDocumentPermissions,
@@ -11,7 +10,7 @@ import {
   hasSavePermission as getHasSavePermission,
   isEditing as getIsEditing,
 } from '@payloadcms/ui/shared'
-import { docAccessOperation, docAccessOperationGlobal, sanitizePermissions } from 'payload'
+import { docAccessOperation, docAccessOperationGlobal, logError } from 'payload'
 
 export const getDocumentPermissions = async (args: {
   collectionConfig?: SanitizedCollectionConfig
@@ -26,13 +25,13 @@ export const getDocumentPermissions = async (args: {
 }> => {
   const { id, collectionConfig, data = {}, globalConfig, req } = args
 
-  let docPermissions: DocumentPermissions
+  let docPermissions: SanitizedDocumentPermissions
   let hasPublishPermission = false
 
   if (collectionConfig) {
     try {
       docPermissions = await docAccessOperation({
-        id: id?.toString(),
+        id,
         collection: {
           config: collectionConfig,
         },
@@ -47,7 +46,7 @@ export const getDocumentPermissions = async (args: {
 
       if (collectionConfig.versions?.drafts) {
         hasPublishPermission = await docAccessOperation({
-          id: id?.toString(),
+          id,
           collection: {
             config: collectionConfig,
           },
@@ -58,10 +57,10 @@ export const getDocumentPermissions = async (args: {
               _status: 'published',
             },
           },
-        }).then(({ update }) => update?.permission)
+        }).then((permissions) => permissions.update)
       }
-    } catch (error) {
-      req.payload.logger.error(error)
+    } catch (err) {
+      logError({ err, payload: req.payload })
     }
   }
 
@@ -85,20 +84,16 @@ export const getDocumentPermissions = async (args: {
               _status: 'published',
             },
           },
-        }).then(({ update }) => update?.permission)
+        }).then((permissions) => permissions.update)
       }
-    } catch (error) {
-      req.payload.logger.error(error)
+    } catch (err) {
+      logError({ err, payload: req.payload })
     }
   }
 
-  // TODO: do this in a better way. Only doing this bc this is how the fn was written (mutates the original object)
-  const sanitizedDocPermissions = { ...docPermissions } as any as SanitizedDocumentPermissions
-  sanitizePermissions(sanitizedDocPermissions)
-
   const hasSavePermission = getHasSavePermission({
     collectionSlug: collectionConfig?.slug,
-    docPermissions: sanitizedDocPermissions,
+    docPermissions,
     globalSlug: globalConfig?.slug,
     isEditing: getIsEditing({
       id,
@@ -108,7 +103,7 @@ export const getDocumentPermissions = async (args: {
   })
 
   return {
-    docPermissions: sanitizedDocPermissions,
+    docPermissions,
     hasPublishPermission,
     hasSavePermission,
   }

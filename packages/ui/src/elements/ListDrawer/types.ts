@@ -10,6 +10,7 @@ export type ListDrawerProps = {
   readonly drawerSlug?: string
   readonly enableRowSelections?: boolean
   readonly filterOptions?: FilterOptionsResult
+  readonly overrideEntityVisibility?: boolean
   readonly selectedCollection?: string
 } & ListDrawerContextProps
 
@@ -23,6 +24,7 @@ export type ListTogglerProps = {
 export type UseListDrawer = (args: {
   collectionSlugs?: SanitizedCollectionConfig['slug'][]
   filterOptions?: FilterOptionsResult
+  overrideEntityVisibility?: boolean
   selectedCollection?: SanitizedCollectionConfig['slug']
   uploads?: boolean // finds all collections with upload: true
 }) => [

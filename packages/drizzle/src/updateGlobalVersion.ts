@@ -1,5 +1,4 @@
 import type {
-  PayloadRequest,
   SanitizedGlobalConfig,
   TypeWithID,
   TypeWithVersion,
@@ -13,20 +12,13 @@ import type { DrizzleAdapter } from './types.js'
 
 import buildQuery from './queries/buildQuery.js'
 import { upsertRow } from './upsertRow/index.js'
+import { getTransaction } from './utilities/getTransaction.js'
 
 export async function updateGlobalVersion<T extends TypeWithID>(
   this: DrizzleAdapter,
-  {
-    id,
-    global,
-    locale,
-    req = {} as PayloadRequest,
-    select,
-    versionData,
-    where: whereArg,
-  }: UpdateGlobalVersionArgs<T>,
+  { id, global, locale, req, select, versionData, where: whereArg }: UpdateGlobalVersionArgs<T>,
 ) {
-  const db = this.sessions[await req?.transactionID]?.db || this.drizzle
+  const db = await getTransaction(this, req)
   const globalConfig: SanitizedGlobalConfig = this.payload.globals.config.find(
     ({ slug }) => slug === global,
   )
@@ -36,7 +28,7 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     `_${toSnakeCase(globalConfig.slug)}${this.versionsSuffix}`,
   )
 
-  const fields = buildVersionGlobalFields(this.payload.config, globalConfig)
+  const fields = buildVersionGlobalFields(this.payload.config, globalConfig, true)
 
   const { where } = buildQuery({
     adapter: this,

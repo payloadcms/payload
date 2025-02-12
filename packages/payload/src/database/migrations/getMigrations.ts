@@ -12,7 +12,7 @@ export async function getMigrations({
   const migrationQuery = await payload.find({
     collection: 'payload-migrations',
     limit: 0,
-    sort: '-name',
+    sort: ['-batch', '-name'],
     where: {
       batch: {
         not_equals: -1,

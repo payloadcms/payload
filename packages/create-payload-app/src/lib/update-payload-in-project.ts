@@ -39,7 +39,7 @@ export async function updatePayloadInProject(
   // Fetch latest Payload version from npm
   const { exitCode: getLatestVersionExitCode, stdout: latestPayloadVersion } = await execa('npm', [
     'show',
-    'payload@beta',
+    'payload',
     'version',
   ])
   if (getLatestVersionExitCode !== 0) {
@@ -87,6 +87,7 @@ export async function updatePayloadInProject(
   copyRecursiveSync(
     templateSrcDir,
     path.resolve(projectDir, appDetails.isSrcDir ? 'src/app' : 'app', '(payload)'),
+    ['custom.scss$'], // Do not overwrite user's custom.scss
   )
 
   return { message: 'Payload updated successfully.', success: true }

@@ -29,10 +29,10 @@ export const hoistQueryParamsToAnd = (currentWhere: Where, incomingWhere: Where)
 type Args = {
   collectionConfig: ClientCollectionConfig | SanitizedCollectionConfig
   search: string
-  where: Where
+  where?: Where
 }
 
-export const mergeListSearchAndWhere = ({ collectionConfig, search, where }: Args): Where => {
+export const mergeListSearchAndWhere = ({ collectionConfig, search, where = {} }: Args): Where => {
   if (search) {
     let copyOfWhere = { ...(where || {}) }
 

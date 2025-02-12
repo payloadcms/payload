@@ -9,9 +9,11 @@ import { fieldAffectsData } from '../../fields/config/types.js'
 import mergeBaseFields from '../../fields/mergeBaseFields.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { deepMergeWithReactComponents } from '../../utilities/deepMerge.js'
+import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
 import baseVersionFields from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
+import { defaultCollectionEndpoints } from '../endpoints/index.js'
 import { authDefaults, defaults, loginWithUsernameDefaults } from './defaults.js'
 import { sanitizeAuthFields, sanitizeUploadFields } from './reservedFieldNames.js'
 import { validateUseAsTitle } from './useAsTitle.js'
@@ -35,7 +37,13 @@ export const sanitizeCollection = async (
   // Sanitize fields
   // /////////////////////////////////
 
-  const validRelationships = config.collections.map((c) => c.slug) || []
+  const validRelationships = (config.collections || []).reduce(
+    (acc, c) => {
+      acc.push(c.slug)
+      return acc
+    },
+    [collection.slug],
+  )
   const joins: SanitizedJoins = {}
   sanitized.fields = await sanitizeFields({
     collectionConfig: sanitized,
@@ -48,10 +56,20 @@ export const sanitizeCollection = async (
     validRelationships,
   })
 
+  if (sanitized.endpoints !== false) {
+    if (!sanitized.endpoints) {
+      sanitized.endpoints = []
+    }
+
+    for (const endpoint of defaultCollectionEndpoints) {
+      sanitized.endpoints.push(endpoint)
+    }
+  }
+
   if (sanitized.timestamps !== false) {
     // add default timestamps fields only as needed
-    let hasUpdatedAt = null
-    let hasCreatedAt = null
+    let hasUpdatedAt: boolean | null = null
+    let hasCreatedAt: boolean | null = null
     sanitized.fields.some((field) => {
       if (fieldAffectsData(field)) {
         if (field.name === 'updatedAt') {
@@ -134,10 +152,11 @@ export const sanitizeCollection = async (
     // sanitize fields for reserved names
     sanitizeUploadFields(sanitized.fields, sanitized)
 
+    sanitized.upload.cacheTags = sanitized.upload?.cacheTags ?? true
     sanitized.upload.bulkUpload = sanitized.upload?.bulkUpload ?? true
     sanitized.upload.staticDir = sanitized.upload.staticDir || sanitized.slug
     sanitized.admin.useAsTitle =
-      sanitized.admin.useAsTitle && sanitized.admin.useAsTitle !== 'id'
+      sanitized.admin?.useAsTitle && sanitized.admin.useAsTitle !== 'id'
         ? sanitized.admin.useAsTitle
         : 'filename'
 
@@ -188,6 +207,10 @@ export const sanitizeCollection = async (
       sanitized.auth.loginWithUsername = false
     }
 
+    if (!collection?.admin?.useAsTitle) {
+      sanitized.admin.useAsTitle = sanitized.auth.loginWithUsername ? 'username' : 'email'
+    }
+
     sanitized.fields = mergeBaseFields(sanitized.fields, getBaseAuthFields(sanitized.auth))
   }
 
@@ -200,6 +223,8 @@ export const sanitizeCollection = async (
   const sanitizedConfig = sanitized as SanitizedCollectionConfig
 
   sanitizedConfig.joins = joins
+
+  sanitizedConfig.flattenedFields = flattenAllFields({ fields: sanitizedConfig.fields })
 
   return sanitizedConfig
 }

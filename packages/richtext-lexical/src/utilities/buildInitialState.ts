@@ -1,5 +1,6 @@
 import type { SerializedLexicalNode } from 'lexical'
 import type {
+  ClientFieldSchemaMap,
   DocumentPreferences,
   FieldSchemaMap,
   FormState,
@@ -22,7 +23,9 @@ export type InitialLexicalFormState = {
 
 type Props = {
   context: {
+    clientFieldSchemaMap: ClientFieldSchemaMap
     collectionSlug: string
+    documentData?: any
     field: RichTextField
     fieldSchemaMap: FieldSchemaMap
     id?: number | string
@@ -68,10 +71,13 @@ export async function buildInitialState({
 
       const formStateResult = await fieldSchemasToFormState({
         id: context.id,
+        clientFieldSchemaMap: context.clientFieldSchemaMap,
         collectionSlug: context.collectionSlug,
         data: blockNode.fields,
+        documentData: context.documentData,
         fields: (context.fieldSchemaMap.get(schemaFieldsPath) as any)?.fields,
         fieldSchemaMap: context.fieldSchemaMap,
+        initialBlockData: blockNode.fields,
         operation: context.operation as any, // TODO: Type
         permissions: true,
         preferences: context.preferences,
@@ -88,7 +94,7 @@ export async function buildInitialState({
       initialState[id].formState = formStateResult
 
       if (node.type === 'block') {
-        const currentFieldPreferences = context.preferences?.fields[context.field.name]
+        const currentFieldPreferences = context.preferences?.fields?.[context.field.name]
         const collapsedArray = currentFieldPreferences?.collapsed
         if (collapsedArray && collapsedArray.includes(id)) {
           initialState[id].collapsed = true

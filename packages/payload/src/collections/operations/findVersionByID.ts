@@ -1,4 +1,4 @@
-import httpStatus from 'http-status'
+import { status as httpStatus } from 'http-status'
 
 import type { PayloadRequest, PopulateType, SelectType } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
@@ -89,6 +89,11 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
       }
 
       return null
+    }
+
+    if (!result.version) {
+      // Fallback if not selected
+      ;(result as any).version = {}
     }
 
     // /////////////////////////////////////

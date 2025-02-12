@@ -1,4 +1,5 @@
 import type {
+  ClientFieldSchemaMap,
   Data,
   DocumentPreferences,
   Field as FieldSchema,
@@ -6,8 +7,10 @@ import type {
   FormState,
   FormStateWithoutComponents,
   PayloadRequest,
-  SanitizedFieldPermissions,
+  SanitizedFieldsPermissions,
 } from 'payload'
+
+import { getFieldPaths } from 'payload/shared'
 
 import type { AddFieldStatePromiseArgs } from './addFieldStatePromise.js'
 import type { RenderFieldMethod } from './types.js'
@@ -20,6 +23,11 @@ type Args = {
    * if any parents is localized, then the field is localized. @default false
    */
   anyParentLocalized?: boolean
+  /**
+   * Data of the nearest parent block, or undefined
+   */
+  blockData: Data | undefined
+  clientFieldSchemaMap?: ClientFieldSchemaMap
   collectionSlug?: string
   data: Data
   fields: FieldSchema[]
@@ -47,12 +55,7 @@ type Args = {
   parentPassesCondition?: boolean
   parentPath: string
   parentSchemaPath: string
-  permissions:
-    | {
-        [fieldName: string]: SanitizedFieldPermissions
-      }
-    | null
-    | SanitizedFieldPermissions
+  permissions: SanitizedFieldsPermissions
   preferences?: DocumentPreferences
   previousFormState: FormState
   renderAllFields: boolean
@@ -76,6 +79,8 @@ export const iterateFields = async ({
   id,
   addErrorPathToParent: addErrorPathToParentArg,
   anyParentLocalized = false,
+  blockData,
+  clientFieldSchemaMap,
   collectionSlug,
   data,
   fields,
@@ -104,12 +109,32 @@ export const iterateFields = async ({
 
   fields.forEach((field, fieldIndex) => {
     let passesCondition = true
+
+    const { indexPath, path, schemaPath } = getFieldPaths({
+      field,
+      index: fieldIndex,
+      parentIndexPath: 'name' in field ? '' : parentIndexPath,
+      parentPath,
+      parentSchemaPath,
+    })
+
     if (!skipConditionChecks) {
-      passesCondition = Boolean(
-        (field?.admin?.condition
-          ? Boolean(field.admin.condition(fullData || {}, data || {}, { user: req.user }))
-          : true) && parentPassesCondition,
-      )
+      try {
+        passesCondition = Boolean(
+          (field?.admin?.condition
+            ? Boolean(
+                field.admin.condition(fullData || {}, data || {}, { blockData, user: req.user }),
+              )
+            : true) && parentPassesCondition,
+        )
+      } catch (err) {
+        passesCondition = false
+
+        req.payload.logger.error({
+          err,
+          msg: `Error evaluating field condition at path: ${path}`,
+        })
+      }
     }
 
     promises.push(
@@ -117,6 +142,8 @@ export const iterateFields = async ({
         id,
         addErrorPathToParent: addErrorPathToParentArg,
         anyParentLocalized,
+        blockData,
+        clientFieldSchemaMap,
         collectionSlug,
         data,
         field,
@@ -126,18 +153,21 @@ export const iterateFields = async ({
         forceFullValue,
         fullData,
         includeSchema,
+        indexPath,
         omitParents,
         operation,
         parentIndexPath,
         parentPath,
+        parentPermissions: permissions,
         parentSchemaPath,
         passesCondition,
-        permissions,
+        path,
         preferences,
         previousFormState,
         renderAllFields,
         renderFieldFn,
         req,
+        schemaPath,
         skipConditionChecks,
         skipValidation,
         state,

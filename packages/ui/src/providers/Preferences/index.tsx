@@ -99,7 +99,9 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
         typeof newValue === 'object'
       ) {
         // merge the value with any existing preference for the key
-        newValue = deepMergeSimple(currentPreference, newValue)
+        if (currentPreference) {
+          newValue = deepMergeSimple(currentPreference, newValue)
+        }
 
         if (dequal(newValue, currentPreference)) {
           return
@@ -114,6 +116,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
         if (newValue === currentPreference) {
           return
         }
+
         pendingUpdate.current[key] = newValue
       }
 

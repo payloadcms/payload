@@ -49,11 +49,11 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
   return (
     <div className={baseClass}>
       <Gutter className={`${baseClass}__wrap`}>
-        {beforeDashboard && (
-          <RenderServerComponent
-            Component={beforeDashboard}
-            importMap={payload.importMap}
-            serverProps={{
+        {beforeDashboard &&
+          RenderServerComponent({
+            Component: beforeDashboard,
+            importMap: payload.importMap,
+            serverProps: {
               i18n,
               locale,
               params,
@@ -61,9 +61,9 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
               permissions,
               searchParams,
               user,
-            }}
-          />
-        )}
+            },
+          })}
+
         <Fragment>
           {!navGroups || navGroups?.length === 0 ? (
             <p>no nav groups....</p>
@@ -168,11 +168,11 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
             })
           )}
         </Fragment>
-        {afterDashboard && (
-          <RenderServerComponent
-            Component={afterDashboard}
-            importMap={payload.importMap}
-            serverProps={{
+        {afterDashboard &&
+          RenderServerComponent({
+            Component: afterDashboard,
+            importMap: payload.importMap,
+            serverProps: {
               i18n,
               locale,
               params,
@@ -180,9 +180,8 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
               permissions,
               searchParams,
               user,
-            }}
-          />
-        )}
+            },
+          })}
       </Gutter>
     </div>
   )

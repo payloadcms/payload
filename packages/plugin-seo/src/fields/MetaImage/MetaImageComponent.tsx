@@ -31,14 +31,15 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
     field: { label, localized, relationTo, required },
     hasGenerateImageFn,
     path,
+    readOnly,
   } = props || {}
 
   const {
     config: {
-      collections,
       routes: { api },
       serverURL,
     },
+    getEntityConfig,
   } = useConfig()
 
   const field: FieldType<string> = useField({ ...props, path } as Options)
@@ -108,7 +109,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
 
   const hasImage = Boolean(value)
 
-  const collection = collections?.find((coll) => coll.slug === relationTo) || undefined
+  const collection = getEntityConfig({ collectionSlug: relationTo })
 
   return (
     <div
@@ -133,6 +134,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
               <button
+                disabled={readOnly}
                 onClick={() => {
                   void regenerateImage()
                 }}
@@ -186,6 +188,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
             }
           }}
           path={path}
+          readOnly={readOnly}
           relationTo={relationTo}
           required={required}
           serverURL={serverURL}

@@ -15,6 +15,12 @@ export const Versions: CollectionConfig = {
       relationTo: 'categories-versions',
       type: 'relationship',
     },
+    {
+      name: 'categoryVersions',
+      relationTo: 'categories-versions',
+      type: 'relationship',
+      hasMany: true,
+    },
   ],
   versions: {
     drafts: true,

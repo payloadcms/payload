@@ -245,7 +245,10 @@ export function buildObjectType({
             type: graphqlResult.collections[field.collection].graphQL.whereInputType,
           },
         },
-        extensions: { complexity: 10 },
+        extensions: {
+          complexity:
+            typeof field?.graphQL?.complexity === 'number' ? field.graphQL.complexity : 10,
+        },
         async resolve(parent, args, context: Context) {
           const { collection } = field
           const { limit, sort, where } = args
@@ -255,18 +258,17 @@ export function buildObjectType({
             [field.on]: { equals: parent._id ?? parent.id },
           })
 
-          const results = await req.payload.find({
+          return await req.payload.find({
             collection,
             depth: 0,
             fallbackLocale: req.fallbackLocale,
             limit,
             locale: req.locale,
+            overrideAccess: false,
             req,
             sort,
             where: fullWhere,
           })
-
-          return results
         },
       }
 
@@ -417,7 +419,10 @@ export function buildObjectType({
           forceNullable,
         ),
         args: relationshipArgs,
-        extensions: { complexity: 10 },
+        extensions: {
+          complexity:
+            typeof field?.graphQL?.complexity === 'number' ? field.graphQL.complexity : 10,
+        },
         async resolve(parent, args, context: Context) {
           const value = parent[field.name]
           const locale = args.locale || context.req.locale
@@ -432,8 +437,11 @@ export function buildObjectType({
             const createPopulationPromise = async (relatedDoc, i) => {
               let id = relatedDoc
               let collectionSlug = field.relationTo
+              const isValidGraphQLCollection = isRelatedToManyCollections
+                ? graphQLCollections.some((collection) => collectionSlug.includes(collection.slug))
+                : graphQLCollections.some((collection) => collectionSlug === collection.slug)
 
-              if (graphQLCollections.some((collection) => collection.slug === collectionSlug)) {
+              if (isValidGraphQLCollection) {
                 if (isRelatedToManyCollections) {
                   collectionSlug = relatedDoc.relationTo
                   id = relatedDoc.value
@@ -766,7 +774,10 @@ export function buildObjectType({
           forceNullable,
         ),
         args: relationshipArgs,
-        extensions: { complexity: 10 },
+        extensions: {
+          complexity:
+            typeof field?.graphQL?.complexity === 'number' ? field.graphQL.complexity : 10,
+        },
         async resolve(parent, args, context: Context) {
           const value = parent[field.name]
           const locale = args.locale || context.req.locale

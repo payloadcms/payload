@@ -74,7 +74,7 @@ export const buildJoinAggregation = async ({
 
       const sort = buildSortParam({
         config: adapter.payload.config,
-        fields: adapter.payload.collections[slug].config.fields,
+        fields: adapter.payload.collections[slug].config.flattenedFields,
         locale,
         sort: sortJoin,
         timestamps: true,
@@ -101,6 +101,11 @@ export const buildJoinAggregation = async ({
         })
       }
 
+      let polymorphicSuffix = ''
+      if (Array.isArray(join.targetField.relationTo)) {
+        polymorphicSuffix = '.value'
+      }
+
       if (adapter.payload.config.localization && locale === 'all') {
         adapter.payload.config.localization.localeCodes.forEach((code) => {
           const as = `${versions ? `version.${join.joinPath}` : join.joinPath}${code}`
@@ -109,7 +114,7 @@ export const buildJoinAggregation = async ({
             {
               $lookup: {
                 as: `${as}.docs`,
-                foreignField: `${join.field.on}${code}`,
+                foreignField: `${join.field.on}${code}${polymorphicSuffix}`,
                 from: adapter.collections[slug].collection.name,
                 localField: versions ? 'parent' : '_id',
                 pipeline,
@@ -146,11 +151,19 @@ export const buildJoinAggregation = async ({
           join.field.localized && adapter.payload.config.localization && locale ? `.${locale}` : ''
         const as = `${versions ? `version.${join.joinPath}` : join.joinPath}${localeSuffix}`
 
+        let foreignField: string
+
+        if (join.getForeignPath) {
+          foreignField = `${join.getForeignPath({ locale })}${polymorphicSuffix}`
+        } else {
+          foreignField = `${join.field.on}${polymorphicSuffix}`
+        }
+
         aggregate.push(
           {
             $lookup: {
               as: `${as}.docs`,
-              foreignField: `${join.field.on}${localeSuffix}`,
+              foreignField,
               from: adapter.collections[slug].collection.name,
               localField: versions ? 'parent' : '_id',
               pipeline,

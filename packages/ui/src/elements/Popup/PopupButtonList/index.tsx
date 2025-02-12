@@ -1,11 +1,10 @@
 'use client'
-// TODO: abstract the `next/link` dependency out from this component
 import type { LinkProps } from 'next/link.js'
 
-import * as React from 'react' // TODO: abstract this out to support all routers
+import * as React from 'react'
 
-import './index.scss'
 import { Link } from '../../LinkTransition/index.js'
+import './index.scss'
 
 const baseClass = 'popup-button-list'
 
@@ -30,6 +29,7 @@ type MenuButtonProps = {
   active?: boolean
   children: React.ReactNode
   className?: string
+  disabled?: boolean
   href?: LinkProps['href']
   id?: string
   onClick?: (e?: React.MouseEvent) => void
@@ -40,6 +40,7 @@ export const Button: React.FC<MenuButtonProps> = ({
   active,
   children,
   className,
+  disabled,
   href,
   onClick,
 }) => {
@@ -47,39 +48,41 @@ export const Button: React.FC<MenuButtonProps> = ({
     .filter(Boolean)
     .join(' ')
 
-  if (href) {
-    return (
-      <Link
-        className={classes}
-        href={href}
-        id={id}
-        onClick={(e) => {
-          if (onClick) {
-            onClick(e)
-          }
-        }}
-        prefetch={false}
-      >
-        {children}
-      </Link>
-    )
-  }
+  if (!disabled) {
+    if (href) {
+      return (
+        <Link
+          className={classes}
+          href={href}
+          id={id}
+          onClick={(e) => {
+            if (onClick) {
+              onClick(e)
+            }
+          }}
+          prefetch={false}
+        >
+          {children}
+        </Link>
+      )
+    }
 
-  if (onClick) {
-    return (
-      <button
-        className={classes}
-        id={id}
-        onClick={(e) => {
-          if (onClick) {
-            onClick(e)
-          }
-        }}
-        type="button"
-      >
-        {children}
-      </button>
-    )
+    if (onClick) {
+      return (
+        <button
+          className={classes}
+          id={id}
+          onClick={(e) => {
+            if (onClick) {
+              onClick(e)
+            }
+          }}
+          type="button"
+        >
+          {children}
+        </button>
+      )
+    }
   }
 
   return (

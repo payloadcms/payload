@@ -28,7 +28,7 @@ const ToolbarItem = ({
   enabled?: boolean
   item: ToolbarGroupItem
 }) => {
-  const { i18n } = useTranslation()
+  const { i18n } = useTranslation<{}, string>()
   const {
     fieldProps: { featureClientSchemaMap, schemaPath },
   } = useEditorConfigContext()
@@ -173,19 +173,20 @@ export const ToolbarDropdown = ({
       key={groupKey}
       label={label}
     >
-      {items.length &&
-        items.map((item) => {
-          return (
-            <ToolbarItem
-              active={activeItemKeys.includes(item.key)}
-              anchorElem={anchorElem}
-              editor={editor}
-              enabled={enabledItemKeys.includes(item.key)}
-              item={item}
-              key={item.key}
-            />
-          )
-        })}
+      {items.length
+        ? items.map((item) => {
+            return (
+              <ToolbarItem
+                active={activeItemKeys.includes(item.key)}
+                anchorElem={anchorElem}
+                editor={editor}
+                enabled={enabledItemKeys.includes(item.key)}
+                item={item}
+                key={item.key}
+              />
+            )
+          })
+        : null}
     </DropDown>
   )
 }

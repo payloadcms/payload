@@ -47,6 +47,8 @@ const TabsFields: CollectionConfig = {
               type: 'array',
               required: true,
               fields: [
+                // path: 'array.n.text'
+                // schemaPath: '_index-1-0.array.text'
                 {
                   name: 'text',
                   type: 'text',
@@ -113,6 +115,7 @@ const TabsFields: CollectionConfig = {
         {
           name: 'tab',
           label: 'Tab with Name',
+          interfaceName: 'TabWithName',
           description: 'This tab has a name, which should namespace the contained fields.',
           fields: [
             {

@@ -4,7 +4,7 @@ export type Props = {
   onChange?: (val: Date) => void
   placeholder?: string
   readOnly?: boolean
-  value?: Date
+  value?: Date | string
 } & DayPickerProps &
   SharedProps &
   TimePickerProps

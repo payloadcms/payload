@@ -1,13 +1,11 @@
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
-import type { Field, FieldAffectingData } from '../../fields/config/types.js'
+import type { FlattenedField } from '../../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { Operator, PayloadRequest, Where, WhereField } from '../../types/index.js'
 import type { EntityPolicies } from './types.js'
 
 import { QueryError } from '../../errors/QueryError.js'
-import { validOperators } from '../../types/constants.js'
-import { deepCopyObject } from '../../utilities/deepCopyObject.js'
-import flattenFields from '../../utilities/flattenTopLevelFields.js'
+import { validOperatorSet } from '../../types/constants.js'
 import { validateSearchParam } from './validateSearchParams.js'
 
 type Args = {
@@ -15,7 +13,7 @@ type Args = {
   overrideAccess: boolean
   policies?: EntityPolicies
   req: PayloadRequest
-  versionFields?: Field[]
+  versionFields?: FlattenedField[]
   where: Where
 } & (
   | {
@@ -28,18 +26,21 @@ type Args = {
     }
 )
 
-const flattenWhere = (query: Where): WhereField[] =>
-  Object.entries(query).reduce((flattenedConstraints, [key, val]) => {
-    if ((key === 'and' || key === 'or') && Array.isArray(val)) {
-      const subWhereConstraints: Where[] = val.reduce((acc, subVal) => {
-        const subWhere = flattenWhere(subVal)
-        return [...acc, ...subWhere]
-      }, [])
-      return [...flattenedConstraints, ...subWhereConstraints]
-    }
+const flattenWhere = (query: Where): WhereField[] => {
+  const flattenedConstraints: WhereField[] = []
 
-    return [...flattenedConstraints, { [key]: val }]
-  }, [])
+  for (const [key, val] of Object.entries(query)) {
+    if ((key === 'and' || key === 'or') && Array.isArray(val)) {
+      for (const subVal of val) {
+        flattenedConstraints.push(...flattenWhere(subVal))
+      }
+    } else {
+      flattenedConstraints.push({ [key]: val })
+    }
+  }
+
+  return flattenedConstraints
+}
 
 export async function validateQueryPaths({
   collectionConfig,
@@ -54,23 +55,23 @@ export async function validateQueryPaths({
   versionFields,
   where,
 }: Args): Promise<void> {
-  const fields = flattenFields(
-    versionFields || (globalConfig || collectionConfig).fields,
-  ) as FieldAffectingData[]
+  const fields = versionFields || (globalConfig || collectionConfig).flattenedFields
+
   if (typeof where === 'object') {
     const whereFields = flattenWhere(where)
     // We need to determine if the whereKey is an AND, OR, or a schema path
     const promises = []
-    void whereFields.map((constraint) => {
-      void Object.keys(constraint).map((path) => {
-        void Object.entries(constraint[path]).map(([operator, val]) => {
-          if (validOperators.includes(operator as Operator)) {
+    for (const constraint of whereFields) {
+      for (const path in constraint) {
+        for (const operator in constraint[path]) {
+          const val = constraint[path][operator]
+          if (validOperatorSet.has(operator as Operator)) {
             promises.push(
               validateSearchParam({
-                collectionConfig: deepCopyObject(collectionConfig),
+                collectionConfig,
                 errors,
-                fields: fields as Field[],
-                globalConfig: deepCopyObject(globalConfig),
+                fields,
+                globalConfig,
                 operator,
                 overrideAccess,
                 path,
@@ -81,9 +82,10 @@ export async function validateQueryPaths({
               }),
             )
           }
-        })
-      })
-    })
+        }
+      }
+    }
+
     await Promise.all(promises)
     if (errors.length > 0) {
       throw new QueryError(errors)

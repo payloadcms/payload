@@ -1,9 +1,9 @@
 'use client'
 import type { SanitizedConfig } from 'payload'
 
-import { Link, useSearchParams } from '@payloadcms/ui'
+import { Link } from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
-import { useParams, usePathname } from 'next/navigation.js'
+import { useParams, usePathname, useSearchParams } from 'next/navigation.js'
 import React from 'react'
 
 export const DocumentTabLink: React.FC<{
@@ -27,12 +27,9 @@ export const DocumentTabLink: React.FC<{
   const pathname = usePathname()
   const params = useParams()
 
-  const { searchParams } = useSearchParams()
+  const searchParams = useSearchParams()
 
-  const locale =
-    'locale' in searchParams && typeof searchParams.locale === 'string'
-      ? searchParams.locale
-      : undefined
+  const locale = searchParams.get('locale')
 
   const [entityType, entitySlug, segmentThree, segmentFour, ...rest] = params.segments || []
   const isCollection = entityType === 'collections'

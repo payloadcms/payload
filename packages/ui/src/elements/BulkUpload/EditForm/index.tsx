@@ -1,7 +1,5 @@
 'use client'
 
-import type { ClientCollectionConfig } from 'payload'
-
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import React, { useCallback, useEffect } from 'react'
 
@@ -17,7 +15,7 @@ import { useEditDepth } from '../../../providers/EditDepth/index.js'
 import { OperationProvider } from '../../../providers/Operation/index.js'
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { useUploadEdits } from '../../../providers/UploadEdits/index.js'
-import { abortAndIgnore } from '../../../utilities/abortAndIgnore.js'
+import { abortAndIgnore, handleAbortRef } from '../../../utilities/abortAndIgnore.js'
 import { formatAdminURL } from '../../../utilities/formatAdminURL.js'
 import { useDocumentDrawerContext } from '../../DocumentDrawer/Provider.js'
 import { DocumentFields } from '../../DocumentFields/index.js'
@@ -56,9 +54,9 @@ export function EditForm({ submitted }: EditFormProps) {
     getEntityConfig,
   } = useConfig()
 
-  const formStateAbortControllerRef = React.useRef<AbortController>(null)
+  const abortOnChangeRef = React.useRef<AbortController>(null)
 
-  const collectionConfig = getEntityConfig({ collectionSlug: docSlug }) as ClientCollectionConfig
+  const collectionConfig = getEntityConfig({ collectionSlug: docSlug })
   const router = useRouter()
   const depth = useEditDepth()
   const params = useSearchParams()
@@ -110,13 +108,11 @@ export function EditForm({ submitted }: EditFormProps) {
   )
 
   const onChange: NonNullable<FormProps['onChange']>[0] = useCallback(
-    async ({ formState: prevFormState }) => {
-      abortAndIgnore(formStateAbortControllerRef.current)
-
-      const controller = new AbortController()
-      formStateAbortControllerRef.current = controller
+    async ({ formState: prevFormState, submitted }) => {
+      const controller = handleAbortRef(abortOnChangeRef)
 
       const docPreferences = await getDocPreferences()
+
       const { state: newFormState } = await getFormState({
         collectionSlug,
         docPermissions,
@@ -125,7 +121,10 @@ export function EditForm({ submitted }: EditFormProps) {
         operation: 'create',
         schemaPath,
         signal: controller.signal,
+        skipValidation: !submitted,
       })
+
+      abortOnChangeRef.current = null
 
       return newFormState
     },
@@ -133,8 +132,10 @@ export function EditForm({ submitted }: EditFormProps) {
   )
 
   useEffect(() => {
+    const abortOnChange = abortOnChangeRef.current
+
     return () => {
-      abortAndIgnore(formStateAbortControllerRef.current)
+      abortAndIgnore(abortOnChange)
     }
   }, [])
 

@@ -16,6 +16,10 @@ export const importDateFNSLocale = async (locale: string): Promise<Locale> => {
       result = (await import('date-fns/locale/bg')).bg
 
       break
+    case 'ca':
+      result = (await import('date-fns/locale/ca')).ca
+
+      break
     case 'cs':
       result = (await import('date-fns/locale/cs')).cs
 
@@ -34,6 +38,10 @@ export const importDateFNSLocale = async (locale: string): Promise<Locale> => {
       break
     case 'es':
       result = (await import('date-fns/locale/es')).es
+
+      break
+    case 'et':
+      result = (await import('date-fns/locale/et')).et
 
       break
     case 'fa-IR':
@@ -88,6 +96,14 @@ export const importDateFNSLocale = async (locale: string): Promise<Locale> => {
       result = (await import('date-fns/locale/ro')).ro
 
       break
+    case 'rs':
+      result = (await import('date-fns/locale/sr')).sr
+
+      break
+    case 'rs-Latin':
+      result = (await import('date-fns/locale/sr-Latn')).srLatn
+
+      break
     case 'ru':
       result = (await import('date-fns/locale/ru')).ru
 
@@ -96,7 +112,7 @@ export const importDateFNSLocale = async (locale: string): Promise<Locale> => {
       result = (await import('date-fns/locale/sk')).sk
 
       break
-    case 'sl':
+    case 'sl-SI':
       result = (await import('date-fns/locale/sl')).sl
 
       break

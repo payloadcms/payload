@@ -1,19 +1,16 @@
 'use client'
-import type { ClientCollectionConfig, Where } from 'payload'
+import type { ClientCollectionConfig, ResolvedFilterOptions, Where } from 'payload'
 
 import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useEffect, useRef, useState } from 'react'
-import AnimateHeightImport from 'react-animate-height'
-
-const AnimateHeight = (AnimateHeightImport.default ||
-  AnimateHeightImport) as typeof AnimateHeightImport.default
 
 import { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { SearchIcon } from '../../icons/Search/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { AnimateHeight } from '../AnimateHeight/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
 import { DeleteMany } from '../DeleteMany/index.js'
 import { EditMany } from '../EditMany/index.js'
@@ -40,6 +37,7 @@ export type ListControlsProps = {
   readonly handleSortChange?: (sort: string) => void
   readonly handleWhereChange?: (where: Where) => void
   readonly renderedFilters?: Map<string, React.ReactNode>
+  readonly resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
 }
 
 /**
@@ -57,6 +55,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     enableColumns = true,
     enableSort = false,
     renderedFilters,
+    resolvedFilterOptions,
   } = props
 
   const { handleSearchChange, query } = useListQuery()
@@ -96,7 +95,6 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
 
   useEffect(() => {
     if (hasWhereParam.current && !query?.where) {
-      setVisibleDrawer(undefined)
       hasWhereParam.current = false
     } else if (query?.where) {
       hasWhereParam.current = true
@@ -217,8 +215,8 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
           collectionPluralLabel={collectionConfig?.labels?.plural}
           collectionSlug={collectionConfig.slug}
           fields={collectionConfig?.fields}
-          key={String(hasWhereParam.current && !query?.where)}
           renderedFilters={renderedFilters}
+          resolvedFilterOptions={resolvedFilterOptions}
         />
       </AnimateHeight>
       {enableSort && (

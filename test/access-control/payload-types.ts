@@ -9,11 +9,11 @@
 export interface Config {
   auth: {
     users: UserAuthOperations;
-    'non-admin-user': NonAdminUserAuthOperations;
+    'public-users': PublicUserAuthOperations;
   };
   collections: {
     users: User;
-    'non-admin-user': NonAdminUser;
+    'public-users': PublicUser;
     posts: Post;
     unrestricted: Unrestricted;
     'relation-restricted': RelationRestricted;
@@ -28,8 +28,11 @@ export interface Config {
     'hidden-fields': HiddenField;
     'hidden-access': HiddenAccess;
     'hidden-access-count': HiddenAccessCount;
+    'fields-and-top-access': FieldsAndTopAccess;
     disabled: Disabled;
     'rich-text': RichText;
+    regression1: Regression1;
+    regression2: Regression2;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -37,7 +40,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
-    'non-admin-user': NonAdminUserSelect<false> | NonAdminUserSelect<true>;
+    'public-users': PublicUsersSelect<false> | PublicUsersSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     unrestricted: UnrestrictedSelect<false> | UnrestrictedSelect<true>;
     'relation-restricted': RelationRestrictedSelect<false> | RelationRestrictedSelect<true>;
@@ -52,8 +55,11 @@ export interface Config {
     'hidden-fields': HiddenFieldsSelect<false> | HiddenFieldsSelect<true>;
     'hidden-access': HiddenAccessSelect<false> | HiddenAccessSelect<true>;
     'hidden-access-count': HiddenAccessCountSelect<false> | HiddenAccessCountSelect<true>;
+    'fields-and-top-access': FieldsAndTopAccessSelect<false> | FieldsAndTopAccessSelect<true>;
     disabled: DisabledSelect<false> | DisabledSelect<true>;
     'rich-text': RichTextSelect<false> | RichTextSelect<true>;
+    regression1: Regression1Select<false> | Regression1Select<true>;
+    regression2: Regression2Select<false> | Regression2Select<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -80,12 +86,12 @@ export interface Config {
     | (User & {
         collection: 'users';
       })
-    | (NonAdminUser & {
-        collection: 'non-admin-user';
+    | (PublicUser & {
+        collection: 'public-users';
       });
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -106,7 +112,7 @@ export interface UserAuthOperations {
     password: string;
   };
 }
-export interface NonAdminUserAuthOperations {
+export interface PublicUserAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -144,9 +150,9 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "non-admin-user".
+ * via the `definition` "public-users".
  */
-export interface NonAdminUser {
+export interface PublicUser {
   id: string;
   updatedAt: string;
   createdAt: string;
@@ -332,6 +338,17 @@ export interface HiddenAccessCount {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fields-and-top-access".
+ */
+export interface FieldsAndTopAccess {
+  id: string;
+  secret?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "disabled".
  */
 export interface Disabled {
@@ -385,6 +402,218 @@ export interface RichText {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "regression1".
+ */
+export interface Regression1 {
+  id: string;
+  group1?: {
+    richText1?: {
+      root: {
+        type: string;
+        children: {
+          type: string;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    text?: string | null;
+  };
+  tab1?: {
+    richText2?: {
+      root: {
+        type: string;
+        children: {
+          type: string;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    blocks2?:
+      | {
+          richText3?: {
+            root: {
+              type: string;
+              children: {
+                type: string;
+                version: number;
+                [k: string]: unknown;
+              }[];
+              direction: ('ltr' | 'rtl') | null;
+              format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+              indent: number;
+              version: number;
+            };
+            [k: string]: unknown;
+          } | null;
+          id?: string | null;
+          blockName?: string | null;
+          blockType: 'myBlock';
+        }[]
+      | null;
+  };
+  richText4?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  blocks3?:
+    | {
+        richText5?: {
+          root: {
+            type: string;
+            children: {
+              type: string;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'myBlock2';
+      }[]
+    | null;
+  array?:
+    | {
+        art?: {
+          root: {
+            type: string;
+            children: {
+              type: string;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        id?: string | null;
+      }[]
+    | null;
+  arrayWithAccessFalse?:
+    | {
+        richText6?: {
+          root: {
+            type: string;
+            children: {
+              type: string;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocks?:
+    | {
+        richText7?: {
+          root: {
+            type: string;
+            children: {
+              type: string;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'myBlock3';
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "regression2".
+ */
+export interface Regression2 {
+  id: string;
+  group?: {
+    richText1?: {
+      root: {
+        type: string;
+        children: {
+          type: string;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+    text?: string | null;
+  };
+  array?:
+    | {
+        richText2?: {
+          root: {
+            type: string;
+            children: {
+              type: string;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -395,8 +624,8 @@ export interface PayloadLockedDocument {
         value: string | User;
       } | null)
     | ({
-        relationTo: 'non-admin-user';
-        value: string | NonAdminUser;
+        relationTo: 'public-users';
+        value: string | PublicUser;
       } | null)
     | ({
         relationTo: 'posts';
@@ -455,12 +684,24 @@ export interface PayloadLockedDocument {
         value: string | HiddenAccessCount;
       } | null)
     | ({
+        relationTo: 'fields-and-top-access';
+        value: string | FieldsAndTopAccess;
+      } | null)
+    | ({
         relationTo: 'disabled';
         value: string | Disabled;
       } | null)
     | ({
         relationTo: 'rich-text';
         value: string | RichText;
+      } | null)
+    | ({
+        relationTo: 'regression1';
+        value: string | Regression1;
+      } | null)
+    | ({
+        relationTo: 'regression2';
+        value: string | Regression2;
       } | null);
   globalSlug?: string | null;
   user:
@@ -469,8 +710,8 @@ export interface PayloadLockedDocument {
         value: string | User;
       }
     | {
-        relationTo: 'non-admin-user';
-        value: string | NonAdminUser;
+        relationTo: 'public-users';
+        value: string | PublicUser;
       };
   updatedAt: string;
   createdAt: string;
@@ -487,8 +728,8 @@ export interface PayloadPreference {
         value: string | User;
       }
     | {
-        relationTo: 'non-admin-user';
-        value: string | NonAdminUser;
+        relationTo: 'public-users';
+        value: string | PublicUser;
       };
   key?: string | null;
   value?:
@@ -532,9 +773,9 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "non-admin-user_select".
+ * via the `definition` "public-users_select".
  */
-export interface NonAdminUserSelect<T extends boolean = true> {
+export interface PublicUsersSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -708,6 +949,16 @@ export interface HiddenAccessCountSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fields-and-top-access_select".
+ */
+export interface FieldsAndTopAccessSelect<T extends boolean = true> {
+  secret?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "disabled_select".
  */
 export interface DisabledSelect<T extends boolean = true> {
@@ -746,6 +997,91 @@ export interface RichTextSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "regression1_select".
+ */
+export interface Regression1Select<T extends boolean = true> {
+  group1?:
+    | T
+    | {
+        richText1?: T;
+        text?: T;
+      };
+  tab1?:
+    | T
+    | {
+        richText2?: T;
+        blocks2?:
+          | T
+          | {
+              myBlock?:
+                | T
+                | {
+                    richText3?: T;
+                    id?: T;
+                    blockName?: T;
+                  };
+            };
+      };
+  richText4?: T;
+  blocks3?:
+    | T
+    | {
+        myBlock2?:
+          | T
+          | {
+              richText5?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  array?:
+    | T
+    | {
+        art?: T;
+        id?: T;
+      };
+  arrayWithAccessFalse?:
+    | T
+    | {
+        richText6?: T;
+        id?: T;
+      };
+  blocks?:
+    | T
+    | {
+        myBlock3?:
+          | T
+          | {
+              richText7?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "regression2_select".
+ */
+export interface Regression2Select<T extends boolean = true> {
+  group?:
+    | T
+    | {
+        richText1?: T;
+        text?: T;
+      };
+  array?:
+    | T
+    | {
+        richText2?: T;
+        id?: T;
       };
   updatedAt?: T;
   createdAt?: T;

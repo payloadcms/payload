@@ -5,7 +5,13 @@ import React from 'react'
 
 export const CustomSelectFieldLabelServer: SelectFieldLabelServerComponent = ({
   clientField,
-  label,
+  path,
 }) => {
-  return <FieldLabel field={clientField} label={label} />
+  return (
+    <FieldLabel
+      label={clientField?.label || clientField?.name}
+      path={path}
+      required={clientField?.required}
+    />
+  )
 }

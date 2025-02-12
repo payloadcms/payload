@@ -6,8 +6,17 @@ import type {
   TypedUser,
 } from 'payload'
 
+import { sanitizeID } from '@payloadcms/ui/shared'
+
 type Args = {
   collectionConfig?: SanitizedCollectionConfig
+  /**
+   * Optional - performance optimization.
+   * If a document has been fetched before fetching versions, pass it here.
+   * If this document is set to published, we can skip the query to find out if a published document exists,
+   * as the passed in document is proof of its existence.
+   */
+  doc?: Record<string, any>
   docPermissions: SanitizedDocumentPermissions
   globalConfig?: SanitizedGlobalConfig
   id?: number | string
@@ -25,16 +34,19 @@ type Result = Promise<{
 
 // TODO: in the future, we can parallelize some of these queries
 // this will speed up the API by ~30-100ms or so
+// Note from the future: I have attempted parallelizing these queries, but it made this function almost 2x slower.
 export const getVersions = async ({
-  id,
+  id: idArg,
   collectionConfig,
+  doc,
   docPermissions,
   globalConfig,
   locale,
   payload,
   user,
 }: Args): Result => {
-  let publishedQuery
+  const id = sanitizeID(idArg)
+  let publishedDoc
   let hasPublishedDoc = false
   let mostRecentVersionIsAutosaved = false
   let unpublishedVersionCount = 0
@@ -67,37 +79,49 @@ export const getVersions = async ({
     }
 
     if (versionsConfig?.drafts) {
-      publishedQuery = await payload.find({
-        collection: collectionConfig.slug,
-        depth: 0,
-        locale: locale || undefined,
-        user,
-        where: {
-          and: [
-            {
-              or: [
+      // Find out if a published document exists
+      if (doc?._status === 'published') {
+        publishedDoc = doc
+      } else {
+        publishedDoc = (
+          await payload.find({
+            collection: collectionConfig.slug,
+            depth: 0,
+            limit: 1,
+            locale: locale || undefined,
+            pagination: false,
+            select: {
+              updatedAt: true,
+            },
+            user,
+            where: {
+              and: [
                 {
-                  _status: {
-                    equals: 'published',
-                  },
+                  or: [
+                    {
+                      _status: {
+                        equals: 'published',
+                      },
+                    },
+                    {
+                      _status: {
+                        exists: false,
+                      },
+                    },
+                  ],
                 },
                 {
-                  _status: {
-                    exists: false,
+                  id: {
+                    equals: id,
                   },
                 },
               ],
             },
-            {
-              id: {
-                equals: id,
-              },
-            },
-          ],
-        },
-      })
+          })
+        )?.docs?.[0]
+      }
 
-      if (publishedQuery.docs?.[0]) {
+      if (publishedDoc) {
         hasPublishedDoc = true
       }
 
@@ -106,6 +130,9 @@ export const getVersions = async ({
           collection: collectionConfig.slug,
           depth: 0,
           limit: 1,
+          select: {
+            autosave: true,
+          },
           user,
           where: {
             and: [
@@ -127,7 +154,7 @@ export const getVersions = async ({
         }
       }
 
-      if (publishedQuery.docs?.[0]?.updatedAt) {
+      if (publishedDoc?.updatedAt) {
         ;({ totalDocs: unpublishedVersionCount } = await payload.countVersions({
           collection: collectionConfig.slug,
           user,
@@ -145,7 +172,7 @@ export const getVersions = async ({
               },
               {
                 updatedAt: {
-                  greater_than: publishedQuery.docs[0].updatedAt,
+                  greater_than: publishedDoc.updatedAt,
                 },
               },
             ],
@@ -156,6 +183,7 @@ export const getVersions = async ({
 
     ;({ totalDocs: versionCount } = await payload.countVersions({
       collection: collectionConfig.slug,
+      depth: 0,
       user,
       where: {
         and: [
@@ -170,15 +198,23 @@ export const getVersions = async ({
   }
 
   if (globalConfig) {
+    // Find out if a published document exists
     if (versionsConfig?.drafts) {
-      publishedQuery = await payload.findGlobal({
-        slug: globalConfig.slug,
-        depth: 0,
-        locale,
-        user,
-      })
+      if (doc?._status === 'published') {
+        publishedDoc = doc
+      } else {
+        publishedDoc = await payload.findGlobal({
+          slug: globalConfig.slug,
+          depth: 0,
+          locale,
+          select: {
+            updatedAt: true,
+          },
+          user,
+        })
+      }
 
-      if (publishedQuery?._status === 'published') {
+      if (publishedDoc?._status === 'published') {
         hasPublishedDoc = true
       }
 
@@ -201,7 +237,7 @@ export const getVersions = async ({
         }
       }
 
-      if (publishedQuery?.updatedAt) {
+      if (publishedDoc?.updatedAt) {
         ;({ totalDocs: unpublishedVersionCount } = await payload.countGlobalVersions({
           depth: 0,
           global: globalConfig.slug,
@@ -215,7 +251,7 @@ export const getVersions = async ({
               },
               {
                 updatedAt: {
-                  greater_than: publishedQuery.updatedAt,
+                  greater_than: publishedDoc.updatedAt,
                 },
               },
             ],

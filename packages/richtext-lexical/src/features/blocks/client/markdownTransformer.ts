@@ -1,10 +1,15 @@
-import type { MultilineElementTransformer, Transformer } from '@lexical/markdown'
 import type { Klass, LexicalNode, LexicalNodeReplacement, SerializedEditorState } from 'lexical'
 import type { ClientBlock } from 'payload'
 
 import { createHeadlessEditor } from '@lexical/headless'
-import { $convertFromMarkdownString, $convertToMarkdownString } from '@lexical/markdown'
 
+import type { Transformer } from '../../../packages/@lexical/markdown/index.js'
+import type { MultilineElementTransformer } from '../../../packages/@lexical/markdown/MarkdownTransformers.js'
+
+import {
+  $convertFromMarkdownString,
+  $convertToMarkdownString,
+} from '../../../packages/@lexical/markdown/index.js'
 import { extractPropsFromJSXPropsString } from '../../../utilities/jsx/extractPropsFromJSXPropsString.js'
 import { propsToJSXString } from '../../../utilities/jsx/jsx.js'
 import { $createBlockNode, $isBlockNode, BlockNode } from './nodes/BlocksNode.js'
@@ -87,7 +92,7 @@ export const getBlockMarkdownTransformers = ({
 
           const childrenString = linesInBetween.join('\n').trim()
 
-          const propsString: null | string = openMatch?.length > 2 ? openMatch[2]?.trim() : null
+          const propsString = openMatch[2]?.trim()
 
           const markdownToLexical = getMarkdownToLexical(allNodes, allTransformers)
 

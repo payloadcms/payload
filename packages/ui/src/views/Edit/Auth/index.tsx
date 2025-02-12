@@ -30,7 +30,6 @@ export const Auth: React.FC<Props> = (props) => {
     operation,
     readOnly,
     requirePassword,
-    setSchemaPathSegments,
     setValidateBeforeSubmit,
     useAPIKey,
     username,
@@ -40,11 +39,10 @@ export const Auth: React.FC<Props> = (props) => {
   const { permissions } = useAuth()
   const [changingPassword, setChangingPassword] = useState(requirePassword)
   const enableAPIKey = useFormFields(([fields]) => (fields && fields?.enableAPIKey) || null)
-  const forceOpenChangePassword = useFormFields(([fields]) => (fields && fields?.password) || null)
   const dispatchFields = useFormFields((reducer) => reducer[1])
   const modified = useFormModified()
   const { i18n, t } = useTranslation()
-  const { docPermissions, isInitializing } = useDocumentInfo()
+  const { docPermissions, isEditing, isInitializing } = useDocumentInfo()
 
   const {
     config: {
@@ -81,13 +79,14 @@ export const Auth: React.FC<Props> = (props) => {
     (showPasswordFields: boolean) => {
       if (showPasswordFields) {
         setValidateBeforeSubmit(true)
-        setSchemaPathSegments([`_${collectionSlug}`, 'auth'])
+
         dispatchFields({
           type: 'UPDATE',
           errorMessage: t('validation:required'),
           path: 'password',
           valid: false,
         })
+
         dispatchFields({
           type: 'UPDATE',
           errorMessage: t('validation:required'),
@@ -96,14 +95,13 @@ export const Auth: React.FC<Props> = (props) => {
         })
       } else {
         setValidateBeforeSubmit(false)
-        setSchemaPathSegments([collectionSlug])
         dispatchFields({ type: 'REMOVE', path: 'password' })
         dispatchFields({ type: 'REMOVE', path: 'confirm-password' })
       }
 
       setChangingPassword(showPasswordFields)
     },
-    [dispatchFields, t, collectionSlug, setSchemaPathSegments, setValidateBeforeSubmit],
+    [dispatchFields, t, setValidateBeforeSubmit],
   )
 
   const unlock = useCallback(async () => {
@@ -138,8 +136,6 @@ export const Auth: React.FC<Props> = (props) => {
 
   const disabled = readOnly || isInitializing
 
-  const showPasswordFields = changingPassword || forceOpenChangePassword
-
   return (
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
       {!disableLocalStrategy && (
@@ -151,15 +147,12 @@ export const Auth: React.FC<Props> = (props) => {
             readOnly={readOnly}
             t={t}
           />
-          {(showPasswordFields || requirePassword) && (
+          {(changingPassword || requirePassword) && (
             <div className={`${baseClass}__changing-password`}>
               <PasswordField
                 autoComplete="new-password"
                 field={{
                   name: 'password',
-                  admin: {
-                    disabled,
-                  },
                   label: t('authentication:newPassword'),
                   required: true,
                 }}
@@ -173,7 +166,7 @@ export const Auth: React.FC<Props> = (props) => {
             </div>
           )}
           <div className={`${baseClass}__controls`}>
-            {showPasswordFields && !requirePassword && (
+            {changingPassword && !requirePassword && (
               <Button
                 buttonStyle="secondary"
                 disabled={disabled}
@@ -183,7 +176,7 @@ export const Auth: React.FC<Props> = (props) => {
                 {t('general:cancel')}
               </Button>
             )}
-            {!showPasswordFields && !requirePassword && (
+            {!changingPassword && !requirePassword && (
               <Button
                 buttonStyle="secondary"
                 disabled={disabled}
@@ -223,7 +216,7 @@ export const Auth: React.FC<Props> = (props) => {
           {canReadApiKey && <APIKey enabled={!!enableAPIKey?.value} readOnly={apiKeyReadOnly} />}
         </div>
       )}
-      {verify && (
+      {verify && isEditing && (
         <CheckboxField
           field={{
             name: '_verified',

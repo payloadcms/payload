@@ -14,10 +14,12 @@ import {
 import { formatLabels, toWords } from '../../utilities/formatLabels.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'
+import { baseTimezoneField } from '../baseFields/timezone/baseField.js'
+import { defaultTimezones } from '../baseFields/timezone/defaultTimezones.js'
 import { setDefaultBeforeDuplicate } from '../setDefaultBeforeDuplicate.js'
-import validations from '../validations.js'
+import { validations } from '../validations.js'
 import { sanitizeJoinField } from './sanitizeJoinField.js'
-import { fieldAffectsData, tabHasName } from './types.js'
+import { fieldAffectsData, fieldIsLocalized, tabHasName } from './types.js'
 
 type Args = {
   collectionConfig?: CollectionConfig
@@ -120,14 +122,14 @@ export const sanitizeFields = async ({
         console.warn(
           `(payload): The "min" property is deprecated for the Relationship field "${field.name}" and will be removed in a future version. Please use "minRows" instead.`,
         )
+        field.minRows = field.min
       }
       if (field.max && !field.maxRows) {
         console.warn(
           `(payload): The "max" property is deprecated for the Relationship field "${field.name}" and will be removed in a future version. Please use "maxRows" instead.`,
         )
+        field.maxRows = field.max
       }
-      field.minRows = field.minRows || field.min
-      field.maxRows = field.maxRows || field.max
     }
 
     if (field.type === 'upload') {
@@ -173,10 +175,6 @@ export const sanitizeFields = async ({
         } else {
           field.validate = (): true => true
         }
-      }
-
-      if (typeof field.virtual === 'undefined') {
-        field.virtual = false
       }
 
       if (!field.hooks) {
@@ -253,7 +251,7 @@ export const sanitizeFields = async ({
           ? `${joinPath ? joinPath + '.' : ''}${field.name}`
           : joinPath,
         joins,
-        parentIsLocalized: parentIsLocalized || field.localized,
+        parentIsLocalized: parentIsLocalized || fieldIsLocalized(field),
         requireFieldLevelRichTextEditor,
         richTextSanitizationPromises,
         validRelationships,
@@ -291,6 +289,30 @@ export const sanitizeFields = async ({
     }
 
     fields[i] = field
+
+    // Insert our field after assignment
+    if (field.type === 'date' && field.timezone) {
+      const name = field.name + '_tz'
+      const defaultTimezone = config.admin.timezones.defaultTimezone
+
+      const supportedTimezones = config.admin.timezones.supportedTimezones
+
+      const options =
+        typeof supportedTimezones === 'function'
+          ? supportedTimezones({ defaultTimezones })
+          : supportedTimezones
+
+      // Need to set the options here manually so that any database enums are generated correctly
+      // The UI component will import the options from the config
+      const timezoneField = baseTimezoneField({
+        name,
+        defaultValue: defaultTimezone,
+        options,
+        required: field.required,
+      })
+
+      fields.splice(++i, 0, timezoneField)
+    }
   }
 
   return fields

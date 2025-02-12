@@ -28,7 +28,7 @@ Your Payload Cloud project comes with a MongoDB serverless Atlas DB instance or 
 
 Payload Cloud gives you S3 file storage backed by Cloudflare as a CDN, and this plugin extends Payload so that all of your media will be stored in S3 rather than locally.
 
-AWS Cognito is used for authentication to your S3 bucket. The [Payload Cloud Plugin](https://github.com/payloadcms/plugin-cloud) will automatically pick up these values. These values are only if you'd like to access your files directly, outside of Payload Cloud.
+AWS Cognito is used for authentication to your S3 bucket. The [Payload Cloud Plugin](https://github.com/payloadcms/payload/tree/main/packages/payload-cloud) will automatically pick up these values. These values are only if you'd like to access your files directly, outside of Payload Cloud.
 
 ### Accessing Files Outside of Payload Cloud
 
@@ -98,7 +98,7 @@ From there, you are ready to make updates to your project. When you are ready to
 
 Projects generated from a template will come pre-configured with the official Cloud Plugin, but if you are using your own repository you will need to add this into your project. To do so, add the plugin to your Payload Config:
 
-`yarn add @payloadcms/payload-cloud`
+`pnpm add @payloadcms/payload-cloud`
 
 ```js
 import { payloadCloudPlugin } from '@payloadcms/payload-cloud'

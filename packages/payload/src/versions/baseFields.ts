@@ -1,4 +1,4 @@
-import type { Field } from '../fields/config/types.js'
+import type { CheckboxField, Field } from '../fields/config/types.js'
 
 export const statuses = [
   {
@@ -33,7 +33,7 @@ const baseVersionFields: Field[] = [
 // "snapshot" to retain all existing draft data.
 // This field will be used to exclude any snapshot versions
 // from the admin Versions list
-export const versionSnapshotField: Field = {
+export const versionSnapshotField: CheckboxField = {
   name: 'snapshot',
   type: 'checkbox',
   admin: {

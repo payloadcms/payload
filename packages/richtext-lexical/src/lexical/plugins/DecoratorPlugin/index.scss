@@ -1,0 +1,13 @@
+@import '../../../scss/styles';
+
+@layer payload-default {
+  [data-lexical-decorator='true'] {
+    width: fit-content;
+    border-radius: $style-radius-m;
+  }
+
+  .decorator-selected {
+    box-shadow: $focus-box-shadow;
+    outline: none;
+  }
+}

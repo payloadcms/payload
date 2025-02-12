@@ -9,12 +9,7 @@ import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
-import type {
-  Config,
-  NonAdminUser,
-  ReadOnlyCollection,
-  RestrictedVersion,
-} from './payload-types.js'
+import type { Config, ReadOnlyCollection, RestrictedVersion } from './payload-types.js'
 
 import {
   closeNav,
@@ -34,9 +29,9 @@ import {
   disabledSlug,
   docLevelAccessSlug,
   fullyRestrictedSlug,
-  noAdminAccessEmail,
-  nonAdminUserEmail,
-  nonAdminUserSlug,
+  nonAdminEmail,
+  publicUserEmail,
+  publicUsersSlug,
   readNotUpdateGlobalSlug,
   readOnlyGlobalSlug,
   readOnlySlug,
@@ -59,7 +54,7 @@ const dirname = path.dirname(filename)
 
 const { beforeAll, describe } = test
 let payload: PayloadTestSDK<Config>
-describe('access control', () => {
+describe('Access Control', () => {
   let page: Page
   let url: AdminUrlUtil
   let restrictedUrl: AdminUrlUtil
@@ -168,6 +163,132 @@ describe('access control', () => {
           hasText: exactText(typedText),
         }),
       ).toHaveCount(1)
+    })
+
+    const ensureRegression1FieldsHaveCorrectAccess = async () => {
+      await expect(
+        page.locator('#field-group1 .rich-text-lexical .ContentEditable__root'),
+      ).toBeVisible()
+      // Wait until the contenteditable is editable
+      await expect(
+        page.locator('#field-group1 .rich-text-lexical .ContentEditable__root'),
+      ).toBeEditable()
+
+      await expect(async () => {
+        const isAttached = page.locator('#field-group1 .rich-text-lexical--read-only')
+        await expect(isAttached).toBeHidden()
+      }).toPass({ timeout: 10000, intervals: [100] })
+      await expect(page.locator('#field-group1 #field-group1__text')).toBeEnabled()
+
+      // Click on button with text Tab1
+      await page.locator('.tabs-field__tab-button').getByText('Tab1').click()
+
+      await expect(
+        page.locator('.tabs-field__tab .rich-text-lexical .ContentEditable__root').first(),
+      ).toBeVisible()
+      await expect(
+        page.locator('.tabs-field__tab .rich-text-lexical--read-only').first(),
+      ).not.toBeAttached()
+
+      await expect(
+        page.locator(
+          '.tabs-field__tab #field-tab1__blocks2 .rich-text-lexical .ContentEditable__root',
+        ),
+      ).toBeVisible()
+      await expect(
+        page.locator('.tabs-field__tab #field-tab1__blocks2 .rich-text-lexical--read-only'),
+      ).not.toBeAttached()
+
+      await expect(
+        page.locator('#field-array #array-row-0 .rich-text-lexical .ContentEditable__root'),
+      ).toBeVisible()
+      await expect(
+        page.locator('#field-array #array-row-0 .rich-text-lexical--read-only'),
+      ).not.toBeAttached()
+
+      await expect(
+        page.locator(
+          '#field-arrayWithAccessFalse #arrayWithAccessFalse-row-0 .rich-text-lexical .ContentEditable__root',
+        ),
+      ).toBeVisible()
+      await expect(
+        page.locator(
+          '#field-arrayWithAccessFalse #arrayWithAccessFalse-row-0 .rich-text-lexical--read-only',
+        ),
+      ).toBeVisible()
+
+      await expect(
+        page.locator('#field-blocks .rich-text-lexical .ContentEditable__root'),
+      ).toBeVisible()
+      await expect(page.locator('#field-blocks.rich-text-lexical--read-only')).not.toBeAttached()
+    }
+    /**
+     * This reproduces a bug where certain fields were incorrectly marked as read-only
+     */
+    // eslint-disable-next-line playwright/expect-expect
+    test('ensure complex collection config fields show up in correct read-only state', async () => {
+      const regression1URL = new AdminUrlUtil(serverURL, 'regression1')
+      await page.goto(regression1URL.list)
+      // Click on first card
+      await page.locator('.cell-id a').first().click()
+      // wait for url
+      await page.waitForURL(`**/collections/regression1/**`)
+
+      await ensureRegression1FieldsHaveCorrectAccess()
+
+      // Edit any field
+      await page.locator('#field-group1__text').fill('test!')
+      // Save the doc
+      await saveDocAndAssert(page)
+      await wait(1000)
+      // Ensure fields still have the correct readOnly state. When saving the document, permissions are re-evaluated
+      await ensureRegression1FieldsHaveCorrectAccess()
+    })
+
+    const ensureRegression2FieldsHaveCorrectAccess = async () => {
+      await expect(
+        page.locator('#field-group .rich-text-lexical .ContentEditable__root'),
+      ).toBeVisible()
+      // Wait until the contenteditable is editable
+      await expect(
+        page.locator('#field-group .rich-text-lexical .ContentEditable__root'),
+      ).toBeEditable()
+
+      await expect(async () => {
+        const isAttached = page.locator('#field-group .rich-text-lexical--read-only')
+        await expect(isAttached).toBeHidden()
+      }).toPass({ timeout: 10000, intervals: [100] })
+      await expect(page.locator('#field-group #field-group__text')).toBeEnabled()
+
+      await expect(
+        page.locator('#field-array #array-row-0 .rich-text-lexical .ContentEditable__root'),
+      ).toBeVisible()
+      await expect(
+        page.locator('#field-array #array-row-0 .rich-text-lexical--read-only'),
+      ).toBeVisible() // => is read-only
+    }
+
+    /**
+     * This reproduces a bug where certain fields were incorrectly marked as read-only
+     */
+    // eslint-disable-next-line playwright/expect-expect
+    test('ensure complex collection config fields show up in correct read-only state 2', async () => {
+      const regression2URL = new AdminUrlUtil(serverURL, 'regression2')
+      await page.goto(regression2URL.list)
+      // Click on first card
+      await page.locator('.cell-id a').first().click()
+      // wait for url
+      await page.waitForURL(`**/collections/regression2/**`)
+
+      await ensureRegression2FieldsHaveCorrectAccess()
+
+      // Edit any field
+      await page.locator('#field-group__text').fill('test!')
+      // Save the doc
+      await saveDocAndAssert(page)
+      await wait(1000)
+      // Ensure fields still have the correct readOnly state. When saving the document, permissions are re-evaluated
+      await ensureRegression2FieldsHaveCorrectAccess()
     })
   })
 
@@ -484,56 +605,56 @@ describe('access control', () => {
   })
 
   describe('admin access', () => {
-    test('should block admin access to admin user', async () => {
-      const adminURL = `${serverURL}/admin`
-      await page.goto(adminURL)
-      await page.waitForURL(adminURL)
+    test('unauthenticated users should not have access to the admin panel', async () => {
+      await page.goto(url.logout)
+      await page.waitForURL(url.logout)
 
-      await expect(page.locator('.dashboard')).toBeVisible()
+      await expect(page.locator('.payload-toast-container')).toContainText(
+        'You have been logged out successfully.',
+      )
 
-      await page.goto(logoutURL)
-      await page.waitForURL(logoutURL)
+      await expect(page.locator('form.login__form')).toBeVisible()
+
+      await page.goto(url.admin)
+      await page.waitForURL(url.login)
+      expect(page.url()).toEqual(url.login)
+    })
+
+    test('non-admin users should not have access to the admin panel', async () => {
+      await page.goto(url.logout)
+      await page.waitForURL(url.logout)
 
       await login({
         data: {
-          email: noAdminAccessEmail,
+          email: nonAdminEmail,
           password: 'test',
         },
         page,
         serverURL,
       })
 
-      await expect(page.locator('.unauthorized')).toBeVisible()
+      await expect(page.locator('.unauthorized .form-header h1')).toHaveText(
+        'Unauthorized, this user does not have access to the admin panel.',
+      )
 
-      // Log back in for the next test
-      await page.goto(logoutURL)
-      await login({
-        data: {
-          email: devUser.email,
-          password: devUser.password,
-        },
-        page,
-        serverURL,
-      })
+      await page.goto(url.logout)
+      await page.waitForURL(url.logout)
+
+      await expect(page.locator('.payload-toast-container')).toContainText(
+        'You have been logged out successfully.',
+      )
+
+      await expect(page.locator('form.login__form')).toBeVisible()
     })
 
-    test('should block admin access to non-admin user', async () => {
-      const adminURL = `${serverURL}/admin`
-      const unauthorizedURL = `${serverURL}/admin/unauthorized`
-      await page.goto(adminURL)
-      await page.waitForURL(adminURL)
+    test('public users should not have access to access admin', async () => {
+      await page.goto(url.logout)
+      await page.waitForURL(url.logout)
 
-      await expect(page.locator('.dashboard')).toBeVisible()
-
-      await page.goto(logoutURL)
-      await page.waitForURL(logoutURL)
-
-      const nonAdminUser: {
-        token?: string
-      } & NonAdminUser = await payload.login({
-        collection: nonAdminUserSlug,
+      const user = await payload.login({
+        collection: publicUsersSlug,
         data: {
-          email: nonAdminUserEmail,
+          email: publicUserEmail,
           password: devUser.password,
         },
       })
@@ -541,20 +662,36 @@ describe('access control', () => {
       await context.addCookies([
         {
           name: 'payload-token',
-          url: serverURL,
-          value: nonAdminUser.token,
+          value: user.token,
+          domain: 'localhost',
+          path: '/',
+          httpOnly: true,
+          secure: true,
         },
       ])
 
-      await page.goto(adminURL)
-      await page.waitForURL(unauthorizedURL)
+      await page.reload()
 
-      await expect(page.locator('.unauthorized')).toBeVisible()
+      await page.goto(url.admin)
+      await page.waitForURL(/unauthorized$/)
 
-      // Log back in for the next test
-      await context.clearCookies()
-      await page.goto(logoutURL)
-      await page.waitForURL(logoutURL)
+      await expect(page.locator('.unauthorized .form-header h1')).toHaveText(
+        'Unauthorized, this user does not have access to the admin panel.',
+      )
+
+      await page.goto(url.logout)
+      await page.waitForURL(url.logout)
+
+      await expect(page.locator('.payload-toast-container')).toContainText(
+        'You have been logged out successfully.',
+      )
+
+      await expect(page.locator('form.login__form')).toBeVisible()
+    })
+  })
+
+  describe('read-only from access control', () => {
+    beforeAll(async () => {
       await login({
         data: {
           email: devUser.email,
@@ -564,9 +701,7 @@ describe('access control', () => {
         serverURL,
       })
     })
-  })
 
-  describe('read-only from access control', () => {
     test('should be read-only when update returns false', async () => {
       await page.goto(disabledFields.create)
 

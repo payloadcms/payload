@@ -1,9 +1,7 @@
 import type { ServerEditorConfig } from '@payloadcms/richtext-lexical'
-import type { SerializedEditorState } from 'lexical'
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import type { CollectionConfig } from 'payload'
 
-import { createHeadlessEditor } from '@lexical/headless'
-import { $convertToMarkdownString } from '@lexical/markdown'
 import {
   BlocksFeature,
   defaultEditorFeatures,
@@ -17,11 +15,15 @@ import {
   TreeViewFeature,
   UploadFeature,
 } from '@payloadcms/richtext-lexical'
+import { createHeadlessEditor } from '@payloadcms/richtext-lexical/lexical/headless'
+import { $convertToMarkdownString } from '@payloadcms/richtext-lexical/lexical/markdown'
 
 import { lexicalFieldsSlug } from '../../slugs.js'
 import {
+  AsyncHooksBlock,
   CodeBlock,
   ConditionalLayoutBlock,
+  FilterOptionsBlock,
   RadioButtonsBlock,
   RelationshipBlock,
   RelationshipHasManyBlock,
@@ -31,7 +33,9 @@ import {
   TabBlock,
   TextBlock,
   UploadAndRichTextBlock,
+  ValidationBlock,
 } from './blocks.js'
+import { ModifyInlineBlockFeature } from './ModifyInlineBlockFeature/feature.server.js'
 
 const editorConfig: ServerEditorConfig = {
   features: [
@@ -69,8 +73,12 @@ const editorConfig: ServerEditorConfig = {
         },
       },
     }),
+    ModifyInlineBlockFeature(),
     BlocksFeature({
       blocks: [
+        ValidationBlock,
+        FilterOptionsBlock,
+        AsyncHooksBlock,
         RichTextBlock,
         TextBlock,
         UploadAndRichTextBlock,
@@ -135,6 +143,25 @@ const editorConfig: ServerEditorConfig = {
           ],
         },
         {
+          slug: 'BlockRSC',
+
+          admin: {
+            components: {
+              Block: '/collections/Lexical/blockComponents/BlockComponentRSC.js#BlockComponentRSC',
+            },
+          },
+          fields: [
+            {
+              name: 'key',
+              label: () => {
+                return 'Key'
+              },
+              type: 'select',
+              options: ['value1', 'value2', 'value3'],
+            },
+          ],
+        },
+        {
           slug: 'myBlockWithBlockAndLabel',
           admin: {
             components: {
@@ -155,6 +182,25 @@ const editorConfig: ServerEditorConfig = {
         },
       ],
       inlineBlocks: [
+        {
+          slug: 'AvatarGroup',
+          interfaceName: 'AvatarGroupBlock',
+          fields: [
+            {
+              name: 'avatars',
+              type: 'array',
+              minRows: 1,
+              maxRows: 6,
+              fields: [
+                {
+                  name: 'image',
+                  type: 'upload',
+                  relationTo: 'uploads',
+                },
+              ],
+            },
+          ],
+        },
         {
           slug: 'myInlineBlock',
           admin: {
@@ -276,6 +322,20 @@ export const LexicalFields: CollectionConfig = {
       }),
     },
     {
+      type: 'ui',
+      name: 'clearLexicalState',
+      admin: {
+        components: {
+          Field: {
+            path: '/collections/Lexical/components/ClearState.js#ClearState',
+            clientProps: {
+              fieldName: 'lexicalSimple',
+            },
+          },
+        },
+      },
+    },
+    {
       name: 'lexicalWithBlocks',
       type: 'richText',
       editor: lexicalEditor({
@@ -286,6 +346,15 @@ export const LexicalFields: CollectionConfig = {
       }),
       required: true,
     },
+    //{
+    //  name: 'rendered',
+    //  type: 'ui',
+    //  admin: {
+    //    components: {
+    //      Field: './collections/Lexical/LexicalRendered.js#LexicalRendered',
+    //    },
+    //  },
+    //},
     {
       name: 'lexicalWithBlocks_markdown',
       type: 'textarea',
@@ -316,7 +385,7 @@ export const LexicalFields: CollectionConfig = {
             }
 
             // Export to markdown
-            let markdown: string
+            let markdown: string = ''
             headlessEditor.getEditorState().read(() => {
               markdown = $convertToMarkdownString(
                 yourSanitizedEditorConfig?.features?.markdownTransformers,

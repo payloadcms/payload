@@ -4,7 +4,10 @@ import type {
   SerializedRelationshipNode,
   SerializedUploadNode,
 } from '@payloadcms/richtext-lexical'
-import type { SerializedEditorState, SerializedParagraphNode } from 'lexical'
+import type {
+  SerializedEditorState,
+  SerializedParagraphNode,
+} from '@payloadcms/richtext-lexical/lexical'
 import type { PaginatedDocs, Payload } from 'payload'
 
 import path from 'path'

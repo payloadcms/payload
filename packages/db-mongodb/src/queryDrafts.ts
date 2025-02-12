@@ -1,5 +1,5 @@
-import type { PaginateOptions } from 'mongoose'
-import type { PayloadRequest, QueryDrafts } from 'payload'
+import type { PaginateOptions, QueryOptions } from 'mongoose'
+import type { QueryDrafts } from 'payload'
 
 import { buildVersionCollectionFields, combineQueries, flattenWhereToOperators } from 'payload'
 
@@ -8,27 +8,18 @@ import type { MongooseAdapter } from './index.js'
 import { buildSortParam } from './queries/buildSortParam.js'
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { getSession } from './utilities/getSession.js'
 import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
-import { withSession } from './withSession.js'
 
 export const queryDrafts: QueryDrafts = async function queryDrafts(
   this: MongooseAdapter,
-  {
-    collection,
-    joins,
-    limit,
-    locale,
-    page,
-    pagination,
-    req = {} as PayloadRequest,
-    select,
-    sort: sortArg,
-    where,
-  },
+  { collection, joins, limit, locale, page, pagination, req, select, sort: sortArg, where },
 ) {
   const VersionModel = this.versions[collection]
   const collectionConfig = this.payload.collections[collection].config
-  const options = await withSession(this, req)
+  const options: QueryOptions = {
+    session: await getSession(this, req),
+  }
 
   let hasNearConstraint
   let sort
@@ -41,7 +32,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   if (!hasNearConstraint) {
     sort = buildSortParam({
       config: this.payload.config,
-      fields: collectionConfig.fields,
+      fields: collectionConfig.flattenedFields,
       locale,
       sort: sortArg || collectionConfig.defaultSort,
       timestamps: true,
@@ -58,7 +49,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
 
   const projection = buildProjectionFromSelect({
     adapter: this,
-    fields: buildVersionCollectionFields(this.payload.config, collectionConfig),
+    fields: buildVersionCollectionFields(this.payload.config, collectionConfig, true),
     select,
   })
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.

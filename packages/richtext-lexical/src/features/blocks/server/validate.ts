@@ -3,8 +3,8 @@ import type { Block } from 'payload'
 import { fieldSchemasToFormState } from '@payloadcms/ui/forms/fieldSchemasToFormState'
 
 import type { NodeValidation } from '../../typesServer.js'
-import type { SerializedInlineBlockNode } from '../client/nodes/InlineBlocksNode.js'
 import type { BlockFields, SerializedBlockNode } from './nodes/BlocksNode.js'
+import type { SerializedInlineBlockNode } from './nodes/InlineBlocksNode.js'
 
 export const blockValidationHOC = (
   blocks: Block[],
@@ -13,7 +13,7 @@ export const blockValidationHOC = (
     const blockFieldData = node.fields ?? ({} as BlockFields)
 
     const {
-      options: { id, collectionSlug, operation, preferences, req },
+      options: { id, collectionSlug, data, operation, preferences, req },
     } = validation
 
     // find block
@@ -21,7 +21,7 @@ export const blockValidationHOC = (
 
     // validate block
     if (!block) {
-      return 'Block not found'
+      return `Block ${blockFieldData.blockType} not found`
     }
 
     /**
@@ -32,8 +32,10 @@ export const blockValidationHOC = (
       id,
       collectionSlug,
       data: blockFieldData,
+      documentData: data,
       fields: block.fields,
       fieldSchemaMap: undefined,
+      initialBlockData: blockFieldData,
       operation: operation === 'create' || operation === 'update' ? operation : 'update',
       permissions: {},
       preferences,
@@ -42,12 +44,15 @@ export const blockValidationHOC = (
       schemaPath: '',
     })
 
-    let errorPaths: string[] = []
+    const errorPathsSet = new Set<string>()
     for (const fieldKey in result) {
-      if (result[fieldKey].errorPaths) {
-        errorPaths = errorPaths.concat(result[fieldKey].errorPaths)
+      if (result[fieldKey].errorPaths?.length) {
+        for (const errorPath of result[fieldKey].errorPaths) {
+          errorPathsSet.add(errorPath)
+        }
       }
     }
+    const errorPaths = Array.from(errorPathsSet)
 
     if (errorPaths.length) {
       return 'The following fields are invalid: ' + errorPaths.join(', ')

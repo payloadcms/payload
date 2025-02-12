@@ -1,31 +1,46 @@
-import type { SQLiteColumnBuilder } from 'drizzle-orm/sqlite-core'
+import type { SetColumnID } from '@payloadcms/drizzle/types'
 
-import { integer, numeric, text } from 'drizzle-orm/sqlite-core'
-import { type Field, flattenTopLevelFields } from 'payload'
-import { fieldAffectsData } from 'payload/shared'
+import type { SQLiteAdapter } from '../types.js'
 
-import type { IDType } from '../types.js'
-
-type Args = {
-  columns: Record<string, SQLiteColumnBuilder>
-  fields: Field[]
-}
-export const setColumnID = ({ columns, fields }: Args): IDType => {
-  const idField = flattenTopLevelFields(fields).find(
-    (field) => fieldAffectsData(field) && field.name === 'id',
-  )
+export const setColumnID: SetColumnID = ({ adapter, columns, fields }) => {
+  const idField = fields.find((field) => field.name === 'id')
   if (idField) {
     if (idField.type === 'number') {
-      columns.id = numeric('id').primaryKey()
+      columns.id = {
+        name: 'id',
+        type: 'numeric',
+        primaryKey: true,
+      }
       return 'numeric'
     }
 
     if (idField.type === 'text') {
-      columns.id = text('id').primaryKey()
+      columns.id = {
+        name: 'id',
+        type: 'text',
+        primaryKey: true,
+      }
       return 'text'
     }
   }
 
-  columns.id = integer('id').primaryKey()
+  if (adapter.idType === 'uuid') {
+    columns.id = {
+      name: 'id',
+      type: 'uuid',
+      defaultRandom: true,
+      primaryKey: true,
+    }
+
+    return 'uuid'
+  }
+
+  columns.id = {
+    name: 'id',
+    type: 'integer',
+    autoIncrement: (adapter as unknown as SQLiteAdapter).autoIncrement,
+    primaryKey: true,
+  }
+
   return 'integer'
 }

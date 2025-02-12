@@ -6,12 +6,20 @@ import { fileURLToPath } from 'url'
 
 import { devUser } from '../credentials.js'
 import { seedDB } from '../helpers/seed.js'
-import { categoriesSlug, collectionSlugs, postsSlug, uploadsSlug } from './shared.js'
+import {
+  categoriesJoinRestrictedSlug,
+  categoriesSlug,
+  collectionRestrictedSlug,
+  collectionSlugs,
+  hiddenPostsSlug,
+  postsSlug,
+  uploadsSlug,
+} from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-export const seed = async (_payload) => {
+export const seed = async (_payload: Payload) => {
   await _payload.create({
     collection: 'users',
     data: {
@@ -25,6 +33,14 @@ export const seed = async (_payload) => {
     data: {
       name: 'example',
       group: {},
+    },
+  })
+
+  await _payload.create({
+    collection: hiddenPostsSlug,
+    data: {
+      category: category.id,
+      title: 'Test Post 1',
     },
   })
 
@@ -74,7 +90,30 @@ export const seed = async (_payload) => {
   await _payload.create({
     collection: postsSlug,
     data: {
-      upload: uploadedImage.id,
+      upload: uploadedImage,
+    },
+  })
+
+  const restrictedCategory = await _payload.create({
+    collection: categoriesJoinRestrictedSlug,
+    data: {
+      name: 'categoryJoinRestricted',
+    },
+  })
+  await _payload.create({
+    collection: collectionRestrictedSlug,
+    data: {
+      title: 'should not allow read',
+      canRead: false,
+      category: restrictedCategory.id,
+    },
+  })
+  await _payload.create({
+    collection: collectionRestrictedSlug,
+    data: {
+      title: 'should allow read',
+      canRead: true,
+      category: restrictedCategory.id,
     },
   })
 }
@@ -84,6 +123,6 @@ export async function clearAndSeedEverything(_payload: Payload) {
     _payload,
     collectionSlugs,
     seedFunction: seed,
-    snapshotKey: 'adminTest',
+    snapshotKey: 'joinsTest',
   })
 }
