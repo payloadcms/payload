@@ -961,13 +961,16 @@ describe('lexicalBlocks', () => {
       await page.keyboard.type('text123')
       await expect(newContentTextArea).toHaveText('text123')
 
+      await wait(1000)
+
       await saveDocAndAssert(page)
 
       await assertLexicalDoc({
         fn: async ({ lexicalWithBlocks }) => {
           const blockNode: SerializedBlockNode = lexicalWithBlocks.root
             .children[5] as SerializedBlockNode
-          const subBlocks = blockNode.fields.subBlocks
+
+          const subBlocks = blockNode.fields.subBlocksLexical
 
           expect(subBlocks).toHaveLength(2)
 
