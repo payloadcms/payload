@@ -1,5 +1,6 @@
 'use client'
-import { Button, Gutter, Link, useConfig, useStepNav, useTranslation } from '@payloadcms/ui'
+import { Button, Gutter, useConfig, useStepNav, useTranslation } from '@payloadcms/ui'
+import { Link } from '@payloadcms/ui/shared'
 import React, { useEffect } from 'react'
 
 import './index.scss'

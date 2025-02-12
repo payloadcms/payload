@@ -1,6 +1,6 @@
 'use client'
-import { Link, useConfig, useTranslation } from '@payloadcms/ui'
-import { formatAdminURL, formatDate } from '@payloadcms/ui/shared'
+import { useConfig, useTranslation } from '@payloadcms/ui'
+import { formatAdminURL, formatDate, Link } from '@payloadcms/ui/shared'
 import React from 'react'
 
 type CreatedAtCellProps = {

@@ -5,8 +5,7 @@ import type { NavPreferences } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { NavGroup, useConfig, useTranslation } from '@payloadcms/ui'
-import { EntityType, formatAdminURL } from '@payloadcms/ui/shared'
-import LinkWithDefault from 'next/link.js'
+import { EntityType, formatAdminURL, Link } from '@payloadcms/ui/shared'
 import { usePathname } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
@@ -44,9 +43,6 @@ export const DefaultNavClient: React.FC<{
                 href = formatAdminURL({ adminRoute, path: `/globals/${slug}` })
                 id = `nav-global-${slug}`
               }
-
-              const Link = (LinkWithDefault.default ||
-                LinkWithDefault) as typeof LinkWithDefault.default
 
               const LinkElement = Link || 'a'
               const activeCollection =

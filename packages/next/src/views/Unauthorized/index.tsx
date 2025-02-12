@@ -1,7 +1,7 @@
 import type { AdminViewComponent, PayloadServerReactComponent } from 'payload'
 
-import { Button, Link } from '@payloadcms/ui'
-import { formatAdminURL } from '@payloadcms/ui/shared'
+import { Button } from '@payloadcms/ui'
+import { formatAdminURL, Link } from '@payloadcms/ui/shared'
 import React from 'react'
 
 import { FormHeader } from '../../elements/FormHeader/index.js'
