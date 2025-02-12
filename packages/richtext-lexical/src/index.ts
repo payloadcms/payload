@@ -563,7 +563,6 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                 const nodePreviousSiblingDoc =
                   subFieldDataFn({ node: previousNodeIDMap[id], req }) ?? {}
 
-                console.log('Error before', errors)
                 if (subFields?.length) {
                   await beforeChangeTraverseFields({
                     id,
@@ -588,7 +587,6 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     skipValidation,
                   })
                 }
-                console.log('Error after', errors)
               }
             }
 
