@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
@@ -31,6 +32,7 @@ type Args = {
   req: PayloadRequest
   siblingData: JsonObject
   siblingDoc: JsonObject
+  siblingFields?: (Field | TabAsField)[]
 }
 
 // This function is responsible for the following actions, in order:
@@ -54,6 +56,7 @@ export const promise = async ({
   req,
   siblingData,
   siblingDoc,
+  siblingFields,
 }: Args): Promise<void> => {
   const { indexPath, path, schemaPath } = getFieldPaths({
     field,
@@ -90,6 +93,7 @@ export const promise = async ({
           req,
           schemaPath: schemaPathSegments,
           siblingData,
+          siblingFields,
           value: siblingDoc[field.name],
         })
 

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
 import type { Request as graphQLRequest, OperationArgs } from 'graphql-http'
 import type { Logger } from 'pino'
@@ -729,9 +730,20 @@ export class BasePayload {
         typeof this.config.jobs.autoRun === 'function'
           ? await this.config.jobs.autoRun(this)
           : this.config.jobs.autoRun
+
       await Promise.all(
         cronJobs.map((cronConfig) => {
-          new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
+          const job = new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
+            if (typeof this.config.jobs.shouldAutoRun === 'function') {
+              const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
+
+              if (!shouldAutoRun) {
+                job.stop()
+
+                return false
+              }
+            }
+
             await this.jobs.run({
               limit: cronConfig.limit ?? DEFAULT_LIMIT,
               queue: cronConfig.queue,
@@ -905,6 +917,8 @@ export const getPayload = async (
     }
   } catch (e) {
     cached.promise = null
+    // add identifier to error object, so that our error logger in routeError.ts does not attempt to re-initialize getPayload
+    e.payloadInitError = true
     throw e
   }
 

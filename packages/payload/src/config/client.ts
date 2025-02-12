@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { I18nClient } from '@payloadcms/translations'
 import type { DeepPartial } from 'ts-essentials'
 
@@ -97,6 +98,7 @@ export const createClientConfig = ({
           meta: config.admin.meta,
           routes: config.admin.routes,
           theme: config.admin.theme,
+          timezones: config.admin.timezones,
           user: config.admin.user,
         }
         if (config.admin.livePreview) {

@@ -209,7 +209,6 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:loading',
   'general:locale',
   'general:menu',
-  'general:listControlMenu',
   'general:moveDown',
   'general:moveUp',
   'general:next',
@@ -266,6 +265,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:takeOver',
   'general:thisLanguage',
   'general:time',
+  'general:timezone',
   'general:titleDeleted',
   'general:true',
   'general:upcomingEvents',
@@ -341,6 +341,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'validation:requiresAtLeast',
   'validation:shorterThanMax',
   'validation:greaterThanMax',
+  'validation:timezoneRequired',
   'validation:username',
 
   'version:aboutToPublishSelection',

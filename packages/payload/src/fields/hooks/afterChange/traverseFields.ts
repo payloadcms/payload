@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
@@ -26,6 +27,7 @@ type Args = {
   req: PayloadRequest
   siblingData: JsonObject
   siblingDoc: JsonObject
+  siblingFields?: (Field | TabAsField)[]
 }
 
 export const traverseFields = async ({
@@ -45,6 +47,7 @@ export const traverseFields = async ({
   req,
   siblingData,
   siblingDoc,
+  siblingFields,
 }: Args): Promise<void> => {
   const promises = []
 
@@ -68,6 +71,7 @@ export const traverseFields = async ({
         req,
         siblingData,
         siblingDoc,
+        siblingFields,
       }),
     )
   })

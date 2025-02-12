@@ -264,7 +264,6 @@ export const ukTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'Все одно вийти',
     leaveWithoutSaving: 'Вийти без збереження',
     light: 'Світла',
-    listControlMenu: 'Меню контролю списку',
     livePreview: 'Попередній перегляд',
     loading: 'Завантаження',
     locale: 'Локаль',
@@ -329,6 +328,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     takeOver: 'Перейняти',
     thisLanguage: 'Українська',
     time: 'Час',
+    timezone: 'Часовий пояс',
     titleDeleted: '{{label}} "{{title}}" успішно видалено.',
     true: 'Правда',
     unauthorized: 'Немає доступу',
@@ -421,6 +421,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     requiresNoMoreThan: 'Це поле потребує не більше {{count}} {{label}}.',
     requiresTwoNumbers: 'У цьому полі потрібно ввести два числа.',
     shorterThanMax: 'Це значення має дорівнювати або бути коротшим, ніж {{maxLength}} символів.',
+    timezoneRequired: 'Потрібний часовий пояс.',
     trueOrFalse: 'Це поле може мати значення тільки true або false.',
     username:
       "Будь ласка, введіть дійсне ім'я користувача. Може містити літери, цифри, дефіси, крапки та підкреслення.",

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { EditorProps } from '@monaco-editor/react'
@@ -164,7 +165,8 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
   /**
    * Only available in `afterRead` hooks
    */
-  currentDepth?: number /**
+  currentDepth?: number
+  /**
    * Only available in `afterRead` hooks
    */
   /** The data passed to update the document within create and update operations, and the full document itself in the afterRead hook. */
@@ -212,6 +214,10 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
    * The original siblingData with locales (not modified by any hooks). Only available in `beforeChange` and `beforeDuplicate` field hooks.
    */
   siblingDocWithLocales?: Record<string, unknown>
+  /**
+   * The sibling fields of the field which the hook is running against.
+   */
+  siblingFields: (Field | TabAsField)[]
   /** The value of the field. */
   value?: TValue
 }
@@ -269,15 +275,15 @@ export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
 
 export type FilterOptionsProps<TData = any> = {
   /**
-   * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
+   * The data of the nearest parent block. Will be `undefined` if the field is not within a block or when called on a `Filter` component within the list view.
    */
   blockData: TData
   /**
-   * An object containing the full collection or global document currently being edited.
+   * An object containing the full collection or global document currently being edited. Will be an empty object when called on a `Filter` component within the list view.
    */
   data: TData
   /**
-   * The `id` of the current document being edited. `id` is undefined during the `create` operation.
+   * The `id` of the current document being edited. Will be undefined during the `create` operation or when called on a `Filter` component within the list view.
    */
   id: number | string
   /**
@@ -286,7 +292,7 @@ export type FilterOptionsProps<TData = any> = {
   relationTo: CollectionSlug
   req: PayloadRequest
   /**
-   * An object containing document data that is scoped to only fields within the same parent of this field.
+   * An object containing document data that is scoped to only fields within the same parent of this field. Will be an empty object when called on a `Filter` component within the list view.
    */
   siblingData: unknown
   /**
@@ -671,6 +677,10 @@ export type DateField = {
     date?: ConditionalDateProps
     placeholder?: Record<string, string> | string
   } & Admin
+  /**
+   * Enable timezone selection in the admin interface.
+   */
+  timezone?: true
   type: 'date'
   validate?: DateFieldValidation
 } & Omit<FieldBase, 'validate'>
@@ -678,7 +688,7 @@ export type DateField = {
 export type DateFieldClient = {
   admin?: AdminClient & Pick<DateField['admin'], 'date' | 'placeholder'>
 } & FieldBaseClient &
-  Pick<DateField, 'type'>
+  Pick<DateField, 'timezone' | 'type'>
 
 export type GroupField = {
   admin?: {

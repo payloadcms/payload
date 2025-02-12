@@ -1,9 +1,9 @@
-import type { FilterOptions, FilterOptionsProps, Where } from 'payload'
+import type { FilterOptions, FilterOptionsProps, ResolvedFilterOptions } from 'payload'
 
-export const getFilterOptionsQuery = async (
+export const resolveFilterOptions = async (
   filterOptions: FilterOptions,
   options: { relationTo: string | string[] } & Omit<FilterOptionsProps, 'relationTo'>,
-): Promise<{ [collection: string]: Where }> => {
+): Promise<ResolvedFilterOptions> => {
   const { relationTo } = options
 
   const relations = Array.isArray(relationTo) ? relationTo : [relationTo]

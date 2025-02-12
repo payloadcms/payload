@@ -265,7 +265,6 @@ export const hrTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'Svejedno napusti',
     leaveWithoutSaving: 'Napusti bez spremanja',
     light: 'Svijetlo',
-    listControlMenu: 'Izbornik za kontrolu popisa',
     livePreview: 'Pregled',
     loading: 'Učitavanje',
     locale: 'Jezik',
@@ -330,6 +329,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     takeOver: 'Preuzmi',
     thisLanguage: 'Hrvatski',
     time: 'Vrijeme',
+    timezone: 'Vremenska zona',
     titleDeleted: '{{label}} "{{title}}" uspješno izbrisano.',
     true: 'Istinito',
     unauthorized: 'Neovlašteno',
@@ -422,6 +422,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     requiresNoMoreThan: 'Ovo polje zahtjeva ne više od {{count}} {{label}}.',
     requiresTwoNumbers: 'Ovo polje zahtjeva dva broja.',
     shorterThanMax: 'Ova vrijednost mora biti kraća od maksimalne dužine od {{maxLength}} znakova',
+    timezoneRequired: 'Potrebna je vremenska zona.',
     trueOrFalse: 'Ovo polje može biti samo točno ili netočno',
     username:
       'Unesite važeće korisničko ime. Može sadržavati slova, brojeve, crtice, točke i donje crte.',

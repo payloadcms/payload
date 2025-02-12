@@ -30,6 +30,7 @@ const description = 'Description'
 
 let payload: PayloadTestSDK<Config>
 
+import { addListFilter } from 'helpers/e2e/addListFilter.js'
 import { goToFirstCell } from 'helpers/e2e/navigateToDoc.js'
 import { openListColumns } from 'helpers/e2e/openListColumns.js'
 import { openListFilters } from 'helpers/e2e/openListFilters.js'
@@ -43,7 +44,6 @@ import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
 import { reorderColumns } from '../../../helpers/e2e/reorderColumns.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
-import { addListFilter } from 'helpers/e2e/addListFilter.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -112,7 +112,7 @@ describe('List View', () => {
     test('should render static collection descriptions', async () => {
       await page.goto(postsUrl.list)
       await expect(
-        page.locator('.view-description', {
+        page.locator('.custom-view-description', {
           hasText: exactText('This is a custom collection description.'),
         }),
       ).toBeVisible()
@@ -121,7 +121,7 @@ describe('List View', () => {
     test('should render dynamic collection description components', async () => {
       await page.goto(customViewsUrl.list)
       await expect(
-        page.locator('.view-description', {
+        page.locator('.custom-view-description', {
           hasText: exactText('This is a custom view description component.'),
         }),
       ).toBeVisible()
@@ -136,7 +136,7 @@ describe('List View', () => {
 
       await expect(linkCell).toHaveAttribute(
         'href',
-        `${adminRoutes.routes.admin}/collections/posts/${id}`,
+        `${adminRoutes.routes?.admin}/collections/posts/${id}`,
       )
 
       await page.locator('.list-controls__toggle-columns').click()
@@ -153,7 +153,7 @@ describe('List View', () => {
 
       await expect(linkCell).toHaveAttribute(
         'href',
-        `${adminRoutes.routes.admin}/collections/posts/${id}`,
+        `${adminRoutes.routes?.admin}/collections/posts/${id}`,
       )
     })
   })
@@ -194,19 +194,6 @@ describe('List View', () => {
       await expect(
         page.locator('.collection-list__wrap').locator('div', {
           hasText: exactText('AfterListTable custom component'),
-        }),
-      ).toBeVisible()
-    })
-
-    test('should render custom listControlsMenu component', async () => {
-      await page.goto(postsUrl.list)
-      const kebabMenu = page.locator('.list-controls__popup')
-      await expect(kebabMenu).toBeVisible()
-      await kebabMenu.click()
-
-      await expect(
-        page.locator('.popup-button-list__button').locator('div', {
-          hasText: 'ListControlsMenu',
         }),
       ).toBeVisible()
     })
@@ -296,6 +283,30 @@ describe('List View', () => {
   })
 
   describe('filters', () => {
+    test('should not close where builder when clearing final condition', async () => {
+      await page.goto(postsUrl.list)
+
+      await addListFilter({
+        page,
+        fieldLabel: 'Relationship',
+        operatorLabel: 'equals',
+        value: 'post1',
+      })
+
+      const encodedQueryString =
+        '&' + encodeURIComponent('where[or][0][and][0][relationship][equals]') + '='
+
+      await page.waitForURL(new RegExp(encodedQueryString + '[^&]*'))
+
+      await page.locator('.condition__actions .btn.condition__actions-remove').click()
+
+      await page.waitForURL(new RegExp(encodedQueryString))
+
+      await expect(
+        page.locator('.list-controls__where.rah-static.rah-static--height-auto'),
+      ).toBeVisible()
+    })
+
     test('should respect base list filters', async () => {
       await page.goto(baseListFiltersUrl.list)
       await page.waitForURL((url) => url.toString().startsWith(baseListFiltersUrl.list))
@@ -339,53 +350,91 @@ describe('List View', () => {
       const firstId = page.locator(tableRowLocator).first().locator('.cell-id')
       await expect(firstId).toHaveText(`ID: ${id}`)
 
-      // Remove filter
       await page.locator('.condition__actions-remove').click()
       await expect(page.locator(tableRowLocator)).toHaveCount(2)
     })
 
-    test('should reset filter value and operator on field update', async () => {
+    test('should reset filter value when a different field is selected', async () => {
       const id = (await page.locator('.cell-id').first().innerText()).replace('ID: ', '')
 
-      await addListFilter({
+      const whereBuilder = await addListFilter({
         page,
         fieldLabel: 'ID',
         operatorLabel: 'equals',
         value: id,
       })
 
-      const filterField = page.locator('.condition__field')
+      const filterField = whereBuilder.locator('.condition__field')
       await filterField.click()
 
       // select new filter field of Number
       const dropdownFieldOption = filterField.locator('.rs__option', {
         hasText: exactText('Status'),
       })
+
       await dropdownFieldOption.click()
       await expect(filterField).toContainText('Status')
 
-      // expect operator & value field to reset (be empty)
-      const operatorField = page.locator('.condition__operator')
-      await expect(operatorField.locator('.rs__placeholder')).toContainText('Select a value')
-      await expect(page.locator('.condition__value input')).toHaveValue('')
+      await expect(whereBuilder.locator('.condition__value input')).toHaveValue('')
     })
 
     test('should remove condition from URL when value is cleared', async () => {
       await page.goto(postsUrl.list)
 
-      await addListFilter({
+      const whereBuilder = await addListFilter({
         page,
         fieldLabel: 'Relationship',
         operatorLabel: 'equals',
         value: 'post1',
       })
 
-      await page.waitForURL(/&where/)
+      const encodedQueryString =
+        '&' + encodeURIComponent('where[or][0][and][0][relationship][equals]') + '='
 
-      const valueInput = page.locator('.condition__value')
-      const removeButton = valueInput.locator('.clear-indicator').click()
+      await page.waitForURL(new RegExp(encodedQueryString + '[^&]*'))
 
-      await page.waitForURL(/^(?!.*&where)/)
+      await whereBuilder.locator('.condition__value .clear-indicator').click()
+
+      await page.waitForURL(new RegExp(encodedQueryString))
+    })
+
+    test.skip('should remove condition from URL when a different field is selected', async () => {
+      // TODO: fix this bug and write this test
+    })
+
+    test('should refresh relationship values when a different field is selected', async () => {
+      await page.goto(postsUrl.list)
+
+      const whereBuilder = await addListFilter({
+        page,
+        fieldLabel: 'Relationship',
+        operatorLabel: 'equals',
+        value: 'post1',
+      })
+
+      const conditionField = whereBuilder.locator('.condition__field')
+      await conditionField.click()
+
+      await conditionField
+        .locator('.rs__option', {
+          hasText: exactText('Users'),
+        })
+        ?.click()
+
+      await expect(whereBuilder.locator('.condition__field')).toContainText('Users')
+
+      const operatorInput = whereBuilder.locator('.condition__operator')
+      await operatorInput.click()
+      const operatorOptions = operatorInput.locator('.rs__option')
+      await operatorOptions.locator(`text=equals`).click()
+
+      await whereBuilder.locator('.condition__value').click()
+
+      const valueOptions = await whereBuilder
+        .locator('.condition__value .rs__option')
+        .evaluateAll((options) => options.map((option) => option.textContent))
+
+      expect(valueOptions).not.toContain('post1')
     })
 
     test('should accept where query from valid URL where parameter', async () => {
@@ -513,29 +562,18 @@ describe('List View', () => {
       await expect(page.locator('.collection-list__page-info')).toHaveText('1-3 of 3')
     })
 
-    test('should reset filter values for every additional filters', async () => {
+    test('should reset filter values for every additional filter', async () => {
       await page.goto(postsUrl.list)
-      await openListFilters(page, {})
 
-      await page.locator('.where-builder__add-first-filter').click()
-      const firstConditionField = page.locator('.condition__field')
-      const firstOperatorField = page.locator('.condition__operator')
-      const firstValueField = page.locator('.condition__value >> input')
+      const whereBuilder = await addListFilter({
+        page,
+        fieldLabel: 'Tab 1 > Title',
+        operatorLabel: 'equals',
+        value: 'Test',
+      })
 
-      await firstConditionField.click()
-      await firstConditionField
-        .locator('.rs__option', {
-          hasText: exactText('Tab 1 > Title'),
-        })
-        .click()
-
-      await expect(firstConditionField.locator('.rs__single-value')).toContainText('Tab 1 > Title')
-      await firstOperatorField.click()
-      await firstOperatorField.locator('.rs__option').locator('text=equals').click()
-      await firstValueField.fill('Test')
-      await expect(firstValueField).toHaveValue('Test')
-      await page.locator('.condition__actions-add').click()
-      const secondLi = page.locator('.where-builder__and-filters li:nth-child(2)')
+      await whereBuilder.locator('.condition__actions-add').click()
+      const secondLi = whereBuilder.locator('.where-builder__and-filters li:nth-child(2)')
       await expect(secondLi).toBeVisible()
 
       await expect(
@@ -549,14 +587,14 @@ describe('List View', () => {
     test('should not re-render page upon typing in a value in the filter value field', async () => {
       await page.goto(postsUrl.list)
 
-      await addListFilter({
+      const whereBuilder = await addListFilter({
         page,
         fieldLabel: 'Tab 1 > Title',
         operatorLabel: 'equals',
         skipValueInput: true,
       })
 
-      const valueInput = page.locator('.condition__value >> input')
+      const valueInput = whereBuilder.locator('.condition__value >> input')
 
       // Type into the input field instead of filling it
       await valueInput.click()
@@ -572,7 +610,7 @@ describe('List View', () => {
     test('should still show second filter if two filters exist and first filter is removed', async () => {
       await page.goto(postsUrl.list)
 
-      await addListFilter({
+      const whereBuilder = await addListFilter({
         page,
         fieldLabel: 'Tab 1 > Title',
         operatorLabel: 'equals',
@@ -581,9 +619,9 @@ describe('List View', () => {
 
       await wait(500)
 
-      await page.locator('.condition__actions-add').click()
+      await whereBuilder.locator('.condition__actions-add').click()
 
-      const secondLi = page.locator('.where-builder__and-filters li:nth-child(2)')
+      const secondLi = whereBuilder.locator('.where-builder__and-filters li:nth-child(2)')
       await expect(secondLi).toBeVisible()
       const secondConditionField = secondLi.locator('.condition__field')
       const secondOperatorField = secondLi.locator('.condition__operator')
@@ -662,34 +700,44 @@ describe('List View', () => {
         condition2?.locator('.rs__menu-list:has-text("Disable List Filter Text")'),
       ).toBeHidden()
     })
-  })
 
-  describe('WhereBuilder', () => {
-    test('should render where builder', async () => {
-      await page.goto(
-        `${with300DocumentsUrl.list}?limit=10&page=1&where%5Bor%5D%5B0%5D%5Band%5D%5B0%5D%5BselfRelation%5D%5Bequals%5D=null`,
-      )
-      const valueField = page.locator('.condition__value')
+    test('should properly paginate many documents', async () => {
+      await page.goto(with300DocumentsUrl.list)
+
+      const whereBuilder = await addListFilter({
+        page,
+        fieldLabel: 'Self Relation',
+        operatorLabel: 'equals',
+        skipValueInput: true,
+      })
+
+      const valueField = whereBuilder.locator('.condition__value')
       await valueField.click()
       await page.keyboard.type('4')
-      const options = page.getByRole('option')
-      expect(options).toHaveCount(10)
+
+      const options = whereBuilder.locator('.condition__value .rs__option')
+
+      await expect(options).toHaveCount(10)
+
       for (const option of await options.all()) {
-        expect(option).toHaveText('4')
+        expect(await option.innerText()).toContain('4')
       }
+
       await page.keyboard.press('Backspace')
       await page.keyboard.type('5')
-      expect(options).toHaveCount(10)
+      await expect(options).toHaveCount(10)
+
       for (const option of await options.all()) {
-        expect(option).toHaveText('5')
+        expect(await option.innerText()).toContain('5')
       }
-      // await options.last().scrollIntoViewIfNeeded()
+
       await options.first().hover()
+
       // three times because react-select is not very reliable
       await page.mouse.wheel(0, 50)
       await page.mouse.wheel(0, 50)
       await page.mouse.wheel(0, 50)
-      expect(options).toHaveCount(20)
+      await expect(options).toHaveCount(20)
     })
   })
 
@@ -985,7 +1033,7 @@ describe('List View', () => {
       await page.goto(postsUrl.list)
       await page.locator('.per-page .popup-button').click()
       await page.locator('.per-page .popup-button').click()
-      const options = await page.locator('.per-page button.per-page__button')
+      const options = page.locator('.per-page button.per-page__button')
       await expect(options).toHaveCount(3)
       await expect(options.nth(0)).toContainText('5')
       await expect(options.nth(1)).toContainText('10')

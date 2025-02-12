@@ -265,7 +265,6 @@ export const ptTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'Sair mesmo assim',
     leaveWithoutSaving: 'Sair sem salvar',
     light: 'Claro',
-    listControlMenu: 'Menu de controle de lista',
     livePreview: 'Pré-visualização',
     loading: 'Carregando',
     locale: 'Local',
@@ -331,6 +330,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     takeOver: 'Assumir',
     thisLanguage: 'Português',
     time: 'Tempo',
+    timezone: 'Fuso horário',
     titleDeleted: '{{label}} {{title}} excluído com sucesso.',
     true: 'Verdadeiro',
     unauthorized: 'Não autorizado',
@@ -423,6 +423,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     requiresNoMoreThan: 'Esse campo requer pelo menos {{count}} {{label}}.',
     requiresTwoNumbers: 'Esse campo requer dois números.',
     shorterThanMax: 'Esse valor deve ser menor do que o máximo de {{maxLength}} caracteres.',
+    timezoneRequired: 'É necessário um fuso horário.',
     trueOrFalse: 'Esse campo pode ser apenas verdadeiro (true) ou falso (false)',
     username:
       'Por favor, insira um nome de usuário válido. Pode conter letras, números, hifens, pontos e sublinhados.',

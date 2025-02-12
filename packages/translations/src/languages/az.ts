@@ -265,7 +265,6 @@ export const azTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'Heç olmasa çıx',
     leaveWithoutSaving: 'Saxlamadan çıx',
     light: 'Açıq',
-    listControlMenu: 'Siyahı nəzarət menyusu',
     livePreview: 'Öncədən baxış',
     loading: 'Yüklənir',
     locale: 'Lokal',
@@ -330,6 +329,7 @@ export const azTranslations: DefaultTranslationsObject = {
     takeOver: 'Əvvəl',
     thisLanguage: 'Azərbaycan dili',
     time: 'Vaxt',
+    timezone: 'Saat qurşağı',
     titleDeleted: '{{label}} "{{title}}" uğurla silindi.',
     true: 'Doğru',
     unauthorized: 'İcazəsiz',
@@ -424,6 +424,7 @@ export const azTranslations: DefaultTranslationsObject = {
     requiresNoMoreThan: 'Bu sahə {{count}} {{label}}-dan çox olmamalıdır.',
     requiresTwoNumbers: 'Bu sahə iki nömrə tələb edir.',
     shorterThanMax: 'Bu dəyər {{maxLength}} simvoldan qısa olmalıdır.',
+    timezoneRequired: 'Vaxt zonası tələb olunur.',
     trueOrFalse: 'Bu sahə yalnız doğru və ya yanlış ola bilər.',
     username:
       'Zəhmət olmasa, etibarlı bir istifadəçi adı daxil edin. Hərflər, rəqəmlər, tire, nöqtə və alt xəttlər ola bilər.',

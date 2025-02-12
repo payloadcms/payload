@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { ArrayField, BlocksField, Field, TabAsField } from '../fields/config/types.js'
 
 import { fieldHasSubFields } from '../fields/config/types.js'

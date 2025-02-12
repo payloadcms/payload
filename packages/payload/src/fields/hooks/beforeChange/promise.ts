@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { ValidationFieldError } from '../../../errors/index.js'
@@ -39,6 +40,7 @@ type Args = {
   siblingData: JsonObject
   siblingDoc: JsonObject
   siblingDocWithLocales?: JsonObject
+  siblingFields?: (Field | TabAsField)[]
   skipValidation: boolean
 }
 
@@ -71,6 +73,7 @@ export const promise = async ({
   siblingData,
   siblingDoc,
   siblingDocWithLocales,
+  siblingFields,
   skipValidation,
 }: Args): Promise<void> => {
   const { indexPath, path, schemaPath } = getFieldPaths({
@@ -123,6 +126,7 @@ export const promise = async ({
           schemaPath: schemaPathSegments,
           siblingData,
           siblingDocWithLocales,
+          siblingFields,
           value: siblingData[field.name],
         })
 
