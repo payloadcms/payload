@@ -1,5 +1,5 @@
 // IMPORTANT: the shared.ts file CANNOT contain any Server Components _that import client components_.
-export { Link } from '../../elements/LinkTransition/index.js'
+export { Link } from '../../elements/Link/index.js'
 export { filterFields } from '../../elements/TableColumns/filterFields.js'
 export { getInitialColumns } from '../../elements/TableColumns/getInitialColumns.js'
 export { Translation } from '../../elements/Translation/index.js'

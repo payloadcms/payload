@@ -3,7 +3,7 @@ import type { ElementType, HTMLAttributes } from 'react'
 
 import React from 'react' // TODO: abstract this out to support all routers
 
-import { Link } from '../LinkTransition/index.js'
+import { Link } from '../Link/index.js'
 
 export type PillProps = {
   alignIcon?: 'left' | 'right'

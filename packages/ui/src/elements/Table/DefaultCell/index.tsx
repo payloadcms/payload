@@ -8,7 +8,7 @@ import React from 'react' // TODO: abstract this out to support all routers
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { formatAdminURL } from '../../../utilities/formatAdminURL.js'
-import { Link } from '../../LinkTransition/index.js'
+import { Link } from '../../Link/index.js'
 import { CodeCell } from './fields/Code/index.js'
 import { cellComponents } from './fields/index.js'
 

@@ -3,7 +3,7 @@ import type { LinkProps } from 'next/link.js'
 
 import * as React from 'react'
 
-import { Link } from '../../LinkTransition/index.js'
+import { Link } from '../../Link/index.js'
 import './index.scss'
 
 const baseClass = 'popup-button-list'

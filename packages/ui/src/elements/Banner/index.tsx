@@ -4,7 +4,7 @@ import type { MouseEvent } from 'react'
 import React from 'react'
 
 import './index.scss'
-import { Link } from '../LinkTransition/index.js'
+import { Link } from '../Link/index.js'
 
 const baseClass = 'banner'
 
