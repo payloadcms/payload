@@ -276,7 +276,7 @@ describe('Block fields', () => {
     await expect(blocksDrawer).toBeVisible()
 
     const firstBlockSelector = blocksDrawer
-      .locator('.blocks-drawer__blocks .blocks-drawer__block')
+      .locator('.blocks-drawer__blocks .blocks-drawer__blockWithMinRows')
       .first()
 
     await firstBlockSelector.click()

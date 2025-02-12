@@ -53,7 +53,7 @@ export const getBlocksField = (prefix?: string): BlocksField => ({
               type: 'blocks',
               blocks: [
                 {
-                  slug: 'text',
+                  slug: 'textRequired',
                   fields: [
                     {
                       name: 'text',
@@ -64,6 +64,7 @@ export const getBlocksField = (prefix?: string): BlocksField => ({
                 },
                 {
                   slug: 'number',
+                  interfaceName: 'NumberBlock',
                   fields: [
                     {
                       name: 'number',
@@ -155,7 +156,7 @@ const BlockFields: CollectionConfig = {
       type: 'blocks',
       blocks: [
         {
-          slug: 'text',
+          slug: 'textInI18nBlock',
           fields: [
             {
               name: 'text',
@@ -313,7 +314,7 @@ const BlockFields: CollectionConfig = {
       type: 'blocks',
       blocks: [
         {
-          slug: 'block',
+          slug: 'blockWithMinRows',
           fields: [
             {
               name: 'blockTitle',
