@@ -97,12 +97,19 @@ describe('Localization', () => {
     // })
   })
 
-  describe('localizer', async () => {
+  describe('localizer', () => {
     test('should show localizer controls', async () => {
       await page.goto(url.create)
       await expect(page.locator('.localizer.app-header__localizer')).toBeVisible()
       await page.locator('.localizer >> button').first().click()
       await expect(page.locator('.localizer .popup.popup--active')).toBeVisible()
+    })
+
+    test('should filter locale with filterAvailableLocales', async () => {
+      await page.goto(url.create)
+      await expect(page.locator('.localizer.app-header__localizer')).toBeVisible()
+      await page.locator('.localizer >> button').first().click()
+      await expect(page.locator('.localizer .popup.popup--active')).not.toContainText('FILTERED')
     })
 
     test('should disable control for active locale', async () => {
@@ -472,7 +479,7 @@ describe('Localization', () => {
       await runCopy(page)
       await expect(page.locator('#field-title')).toHaveValue(title)
 
-      const regexPattern = new RegExp(`locale=es`)
+      const regexPattern = /locale=es/
       await expect(page).toHaveURL(regexPattern)
 
       await openCopyToLocaleDrawer(page)
