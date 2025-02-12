@@ -103,6 +103,7 @@ export const Condition: React.FC<Props> = (props) => {
 
   const handleOperatorChange = useCallback(
     (operator: Option<Operator>) => {
+      setInternalValue(undefined)
       updateCondition({
         andIndex,
         field: reducedField,
