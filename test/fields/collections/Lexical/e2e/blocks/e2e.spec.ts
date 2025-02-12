@@ -24,13 +24,13 @@ import {
   saveDocAndAssert,
 } from '../../../../../helpers.js'
 import { AdminUrlUtil } from '../../../../../helpers/adminUrlUtil.js'
+import { trackNetworkRequests } from '../../../../../helpers/e2e/trackNetworkRequests.js'
 import { initPayloadE2ENoConfig } from '../../../../../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../../../helpers/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../../../playwright.config.js'
 import { lexicalFieldsSlug } from '../../../../slugs.js'
 import { lexicalDocData } from '../../data.js'
-import { trackNetworkRequests } from '../../../../../helpers/e2e/trackNetworkRequests.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -570,7 +570,7 @@ describe('lexicalBlocks', () => {
       await expect(page.locator('.payload-toast-container')).toHaveText(
         'The following fields are invalid: Lexical With Blocks, LexicalWithBlocks > Group > Text Depends On Doc Data',
       )
-      await expect(page.locator('.payload-toast-container')).not.toBeVisible()
+      await expect(page.locator('.payload-toast-container')).toBeHidden()
 
       await trackNetworkRequests(
         page,
@@ -593,7 +593,7 @@ describe('lexicalBlocks', () => {
       await expect(page.locator('.payload-toast-container')).toHaveText(
         'The following fields are invalid: Lexical With Blocks, LexicalWithBlocks > Group > Text Depends On Sibling Data',
       )
-      await expect(page.locator('.payload-toast-container')).not.toBeVisible()
+      await expect(page.locator('.payload-toast-container')).toBeHidden()
 
       await trackNetworkRequests(
         page,
@@ -617,7 +617,7 @@ describe('lexicalBlocks', () => {
         'The following fields are invalid: Lexical With Blocks, LexicalWithBlocks > Group > Text Depends On Block Data',
       )
 
-      await expect(page.locator('.payload-toast-container')).not.toBeVisible()
+      await expect(page.locator('.payload-toast-container')).toBeHidden()
 
       await trackNetworkRequests(
         page,
@@ -1554,7 +1554,7 @@ describe('lexicalBlocks', () => {
           const inlineBlock: SerializedInlineBlockNode = firstParagraph
             .children[1] as SerializedInlineBlockNode
 
-          await expect(inlineBlock.fields.key).toBe('value2')
+          expect(inlineBlock.fields.key).toBe('value2')
         },
       })
     })
