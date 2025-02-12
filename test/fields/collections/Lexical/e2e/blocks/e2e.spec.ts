@@ -360,6 +360,8 @@ describe('lexicalBlocks', () => {
       const dependsOnSiblingData = newBlock.locator('#field-group__dependsOnSiblingData').first()
       const dependsOnBlockData = newBlock.locator('#field-group__dependsOnBlockData').first()
 
+      await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
+
       return {
         topLevelDocTextField,
         blockTextField,
@@ -549,6 +551,7 @@ describe('lexicalBlocks', () => {
         .locator('#field-group__textDependsOnSiblingData')
         .first()
       const dependsOnBlockData = newBlock.locator('#field-group__textDependsOnBlockData').first()
+      await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
 
       return {
         topLevelDocTextField,
@@ -570,7 +573,7 @@ describe('lexicalBlocks', () => {
       await expect(page.locator('.payload-toast-container')).toHaveText(
         'The following fields are invalid: Lexical With Blocks, LexicalWithBlocks > Group > Text Depends On Doc Data',
       )
-      await expect(page.locator('.payload-toast-container')).toBeHidden()
+      await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
 
       await trackNetworkRequests(
         page,
@@ -593,7 +596,7 @@ describe('lexicalBlocks', () => {
       await expect(page.locator('.payload-toast-container')).toHaveText(
         'The following fields are invalid: Lexical With Blocks, LexicalWithBlocks > Group > Text Depends On Sibling Data',
       )
-      await expect(page.locator('.payload-toast-container')).toBeHidden()
+      await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
 
       await trackNetworkRequests(
         page,
@@ -617,7 +620,7 @@ describe('lexicalBlocks', () => {
         'The following fields are invalid: Lexical With Blocks, LexicalWithBlocks > Group > Text Depends On Block Data',
       )
 
-      await expect(page.locator('.payload-toast-container')).toBeHidden()
+      await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
 
       await trackNetworkRequests(
         page,
