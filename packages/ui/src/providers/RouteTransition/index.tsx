@@ -1,3 +1,4 @@
+'use client'
 import React, { useCallback, useEffect, useOptimistic, useRef } from 'react'
 
 export const RouteTransition: React.FC<RouteTransitionProps> = ({ children }) => {

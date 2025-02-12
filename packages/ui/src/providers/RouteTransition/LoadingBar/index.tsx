@@ -1,3 +1,4 @@
+'use client'
 import { useRouteTransition } from '../index.js'
 import './index.scss'
 
