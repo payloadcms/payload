@@ -247,7 +247,7 @@ export type { UserWithToken } from '../../providers/Auth/index.js'
 export { ClientFunctionProvider, useClientFunctions } from '../../providers/ClientFunction/index.js'
 export { useAddClientFunction } from '../../providers/ClientFunction/index.js'
 
-export { LoadingBar } from '../../providers/RouteTransition/LoadingBar/index.js'
+export { ProgressBar as LoadingBar } from '../../providers/RouteTransition/ProgressBar/index.js'
 export {
   RouteTransitionProvider as RouteTransition,
   useRouteTransition,

@@ -11,7 +11,6 @@ import {
   AppHeader,
   BulkUploadProvider,
   EntityVisibilityProvider,
-  LoadingBar,
   NavToggler,
 } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
@@ -144,7 +143,6 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     <EntityVisibilityProvider visibleEntities={visibleEntities}>
       <BulkUploadProvider>
         <ActionsProvider Actions={Actions}>
-          <LoadingBar />
           {RenderServerComponent({
             clientProps,
             Component: CustomHeader,
