@@ -15,7 +15,6 @@ export default buildConfigWithDefaults({
   // ...extend config here
   collections: [PostsCollection, MediaCollection],
   admin: {
-    autoLogin: false,
     importMap: {
       baseDir: path.resolve(dirname),
     },
