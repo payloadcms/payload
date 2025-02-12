@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import type { SanitizedCollectionConfig } from '../collections/config/types.js'
+import type { SanitizedCollectionConfig, SanitizedJoin } from '../collections/config/types.js'
 import type { JoinQuery, PayloadRequest } from '../types/index.js'
 
 import executeAccess from '../auth/executeAccess.js'
