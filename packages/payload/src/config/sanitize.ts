@@ -20,7 +20,6 @@ import { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones
 import { sanitizeGlobal } from '../globals/config/sanitize.js'
 import {
   baseBlockFields,
-  type Block,
   type CollectionSlug,
   formatLabels,
   type GlobalSlug,
@@ -244,14 +243,16 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
         continue
       }
       sanitizedBlock._sanitized = true
+
       sanitizedBlock.fields = sanitizedBlock.fields.concat(baseBlockFields)
+
       sanitizedBlock.labels = !sanitizedBlock.labels
         ? formatLabels(sanitizedBlock.slug)
         : sanitizedBlock.labels
       sanitizedBlock.fields = await sanitizeFields({
         config: config as unknown as Config,
         existingFieldNames: new Set(),
-        fields: block.fields,
+        fields: sanitizedBlock.fields,
         parentIsLocalized: false,
         richTextSanitizationPromises,
         validRelationships,
