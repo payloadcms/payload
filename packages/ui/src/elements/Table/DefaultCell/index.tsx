@@ -34,7 +34,7 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     getEntityConfig,
   } = useConfig()
 
-  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
+  const collectionConfig = getEntityConfig({ collectionSlug })
 
   const classNameFromConfigContext = admin && 'className' in admin ? admin.className : undefined
 

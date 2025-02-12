@@ -9,13 +9,16 @@ import { useTranslation } from '../../../../../providers/Translation/index.js'
 
 export interface BlocksCellProps extends DefaultCellComponentProps<BlocksFieldClient> {}
 
-export const BlocksCell: React.FC<BlocksCellProps> = ({ cellData, field: { blocks, labels } }) => {
+export const BlocksCell: React.FC<BlocksCellProps> = ({
+  cellData,
+  field: { blockReferences, blocks, labels },
+}) => {
   const { i18n } = useTranslation()
   const { config } = useConfig()
 
   const selectedBlocks = Array.isArray(cellData) ? cellData.map(({ blockType }) => blockType) : []
 
-  const translatedBlockLabels = blocks?.map((b) => {
+  const translatedBlockLabels = (blockReferences ?? blocks)?.map((b) => {
     const block = typeof b === 'string' ? config.blocksMap[b] : b
     return {
       slug: block.slug,
