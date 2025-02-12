@@ -4,25 +4,33 @@ import { deepMergeSimple } from 'payload'
 
 import type { ImportExportPluginConfig } from './types.js'
 
-import { createCollectionExportTask } from './export/createExportCollectionTask.js'
+import { getCreateCollectionExportTask } from './export/getCreateExportCollectionTask.js'
 import { getExportCollection } from './getExportCollection.js'
 import { translations } from './translations/index.js'
 
 export const importExportPlugin =
   (pluginConfig: ImportExportPluginConfig) =>
   (config: Config): Config => {
-    const exportCollection = getExportCollection({ pluginConfig })
+    const exportCollection = getExportCollection({ config, pluginConfig })
     if (config.collections) {
       config.collections.push(exportCollection)
     } else {
       config.collections = [exportCollection]
     }
 
+    // inject custom import export provider
+    config.admin = config.admin || {}
+    config.admin.components = config.admin.components || {}
+    config.admin.components.providers = config.admin.components.providers || []
+    config.admin.components.providers.push(
+      '@payloadcms/plugin-import-export/rsc#ImportExportProvider',
+    )
+
     // inject the createExport job into the config
     config.jobs =
       config.jobs ||
       ({
-        tasks: [createCollectionExportTask],
+        tasks: [getCreateCollectionExportTask(config)],
       } as unknown as JobsConfig) // cannot type jobs config inside of plugins
 
     let collectionsToUpdate = config.collections
@@ -37,15 +45,15 @@ export const importExportPlugin =
 
     collectionsToUpdate.forEach((collection) => {
       if (!collection.admin) {
-        collection.admin = { components: { afterListControls: [] } }
+        collection.admin = { components: { listControlsMenu: [] } }
       }
       if (!collection.admin.components) {
-        collection.admin.components = { afterListControls: [] }
+        collection.admin.components = { listControlsMenu: [] }
       }
-      if (!collection.admin.components.afterListControls) {
-        collection.admin.components.afterListControls = []
+      if (!collection.admin.components.listControlsMenu) {
+        collection.admin.components.listControlsMenu = []
       }
-      collection.admin.components.afterListControls.push({
+      collection.admin.components.listControlsMenu.push({
         clientProps: {
           exportCollectionSlug: exportCollection.slug,
         },

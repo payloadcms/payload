@@ -44,7 +44,6 @@ const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.
 
 export type ListViewSlots = {
   AfterList?: React.ReactNode
-  AfterListControls?: React.ReactNode | React.ReactNode[]
   AfterListTable?: React.ReactNode
   BeforeList?: React.ReactNode
   BeforeListTable?: React.ReactNode
@@ -70,7 +69,6 @@ export type ListViewClientProps = {
 export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
   const {
     AfterList,
-    AfterListControls,
     AfterListTable,
     beforeActions,
     BeforeList,
@@ -211,7 +209,6 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                 t={t}
               />
               <ListControls
-                afterListControls={AfterListControls}
                 beforeActions={
                   enableRowSelections && typeof onBulkSelect === 'function'
                     ? beforeActions

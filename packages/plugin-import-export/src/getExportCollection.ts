@@ -2,16 +2,19 @@ import type {
   CollectionAfterChangeHook,
   CollectionBeforeOperationHook,
   CollectionConfig,
+  Config,
 } from 'payload'
 
 import type { CollectionOverride, ImportExportPluginConfig } from './types.js'
 
 import { createExport } from './export/createExport.js'
-import { fields } from './exportFields.js'
+import { getFields } from './export/getFields.js'
 
 export const getExportCollection = ({
+  config,
   pluginConfig,
 }: {
+  config: Config
   pluginConfig: ImportExportPluginConfig
 }): CollectionConfig => {
   const { overrideExportCollection } = pluginConfig
@@ -26,10 +29,10 @@ export const getExportCollection = ({
     },
     admin: {
       group: false,
-      useAsTitle: 'filename',
+      useAsTitle: 'name',
     },
     disableDuplicate: true,
-    fields,
+    fields: getFields(config),
     hooks: {
       afterChange,
       beforeOperation,
@@ -37,7 +40,8 @@ export const getExportCollection = ({
     upload: {
       filesRequiredOnCreate: false,
       // must be csv, json or zip
-      mimeTypes: ['application/json', 'text/csv', 'application/zip'],
+      // TODO: mimeTypes should not be required by validation when filesRequiredOnCreate is true
+      // mimeTypes: ['application/json', 'text/csv', 'application/zip'],
     },
   }
 
@@ -45,15 +49,29 @@ export const getExportCollection = ({
     collection = overrideExportCollection(collection)
   }
 
+  // TODO: this should not be needed, we have to fix the select inputs
+  // sanitize incoming data
+  beforeOperation.push(({ args, operation }) => {
+    if (operation === 'create') {
+      if (args.data.sort) {
+        args.data.sort = typeof args.data.sort === 'string' ? args.data.sort : args.data.sort.value
+      }
+      args.data.fields = args.data.fields.map(
+        (option: { label: string; value: string } | string) =>
+          typeof option === 'string' ? option : option.value,
+      )
+    }
+
+    return args
+  })
+
   if (pluginConfig.disableJobsQueue) {
     beforeOperation.push(async ({ args, operation, req }) => {
       if (operation !== 'create') {
         return
       }
       const { user } = req
-      if (args.data.collections.length === 1) {
-        await createExport({ input: { ...args.data, user }, req })
-      }
+      await createExport({ input: { ...args.data, user }, req })
     })
   } else {
     afterChange.push(async ({ doc, operation, req }) => {
@@ -61,19 +79,16 @@ export const getExportCollection = ({
         return
       }
 
-      if (doc.collections.length === 1) {
-        const input = {
-          ...doc,
-          exportsCollection: collection.slug,
-          user: req?.user?.id || req?.user?.user?.id,
-          userCollection: 'users',
-        }
-        const { id } = await req.payload.jobs.queue({
-          input,
-          task: 'createCollectionExport',
-        })
-        void req.payload.jobs.runByID({ id })
+      const input = {
+        ...doc,
+        exportsCollection: collection.slug,
+        user: req?.user?.id || req?.user?.user?.id,
+        userCollection: 'users',
       }
+      await req.payload.jobs.queue({
+        input,
+        task: 'createCollectionExport',
+      })
     })
   }
 

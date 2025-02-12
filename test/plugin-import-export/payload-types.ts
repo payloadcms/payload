@@ -13,7 +13,7 @@ export interface Config {
   collections: {
     users: User;
     pages: Page;
-    'exports-tasks': ExportsTask;
+    exports: Export;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -23,7 +23,7 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
-    'exports-tasks': ExportsTasksSelect<false> | ExportsTasksSelect<true>;
+    exports: ExportsSelect<false> | ExportsSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -149,31 +149,28 @@ export interface Page {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "exports-tasks".
+ * via the `definition` "exports".
  */
-export interface ExportsTask {
+export interface Export {
   id: string;
   name?: string | null;
-  format: 'json' | 'csv';
-  collections?:
+  format: 'csv' | 'json';
+  limit?: number | null;
+  sort?: string | null;
+  locale?: ('all' | 'en' | 'es' | 'de') | null;
+  drafts?: ('true' | 'false') | null;
+  selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
+  fields?: string[] | null;
+  collectionSlug: string;
+  where?:
     | {
-        slug: string;
-        fields?: string[] | null;
-        limit?: number | null;
-        sort?: string[] | null;
-        where?:
-          | {
-              [k: string]: unknown;
-            }
-          | unknown[]
-          | string
-          | number
-          | boolean
-          | null;
-        id?: string | null;
-      }[]
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
     | null;
-  locales?: string[] | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -294,8 +291,8 @@ export interface PayloadLockedDocument {
         value: string | Page;
       } | null)
     | ({
-        relationTo: 'exports-tasks';
-        value: string | ExportsTask;
+        relationTo: 'exports';
+        value: string | Export;
       } | null)
     | ({
         relationTo: 'payload-jobs';
@@ -412,22 +409,19 @@ export interface PagesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "exports-tasks_select".
+ * via the `definition` "exports_select".
  */
-export interface ExportsTasksSelect<T extends boolean = true> {
+export interface ExportsSelect<T extends boolean = true> {
   name?: T;
   format?: T;
-  collections?:
-    | T
-    | {
-        slug?: T;
-        fields?: T;
-        limit?: T;
-        sort?: T;
-        where?: T;
-        id?: T;
-      };
-  locales?: T;
+  limit?: T;
+  sort?: T;
+  locale?: T;
+  drafts?: T;
+  selectionToUse?: T;
+  fields?: T;
+  collectionSlug?: T;
+  where?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -510,27 +504,26 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 export interface TaskCreateCollectionExport {
   input: {
     name?: string | null;
-    format: 'json' | 'csv';
-    collections?:
+    format: 'csv' | 'json';
+    limit?: number | null;
+    sort?: string | null;
+    locale?: ('all' | 'en' | 'es' | 'de') | null;
+    drafts?: ('true' | 'false') | null;
+    selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
+    fields?: string[] | null;
+    collectionSlug: string;
+    where?:
       | {
-          slug: string;
-          fields?: string[] | null;
-          limit?: number | null;
-          sort?: string[] | null;
-          where?:
-            | {
-                [k: string]: unknown;
-              }
-            | unknown[]
-            | string
-            | number
-            | boolean
-            | null;
-        }[]
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
       | null;
-    locales?: string[] | null;
     user?: string | null;
     userCollection?: string | null;
+    exportsCollection?: string | null;
   };
   output: {
     success?: boolean | null;

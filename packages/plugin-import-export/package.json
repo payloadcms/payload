@@ -64,7 +64,8 @@
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "csv-parse": "^5.6.0",
-    "csv-stringify": "^6.5.2"
+    "csv-stringify": "^6.5.2",
+    "qs-esm": "7.0.2"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
