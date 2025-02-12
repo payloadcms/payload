@@ -96,7 +96,9 @@ export const NavProvider: React.FC<{
   // when the component unmounts, clear all body scroll locks
   useEffect(() => {
     return () => {
-      navRef.current.style.overscrollBehavior = 'auto'
+      if (navRef.current) {
+        navRef.current.style.overscrollBehavior = 'auto'
+      }
     }
   }, [])
 
