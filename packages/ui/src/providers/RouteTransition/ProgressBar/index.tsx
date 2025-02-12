@@ -1,16 +1,52 @@
 'use client'
+import React, { useEffect } from 'react'
+
 import { useRouteTransition } from '../index.js'
 import './index.scss'
 
+const transitionDuration = 200
+const baseClass = 'progress-bar'
+
 export const ProgressBar = () => {
   const { isTransitioning, transitionProgress } = useRouteTransition()
+  const [progressToShow, setProgressToShow] = React.useState<null | number>(null)
 
-  if (isTransitioning) {
+  useEffect(() => {
+    let clearTimerID: NodeJS.Timeout
+
+    if (isTransitioning) {
+      setProgressToShow(transitionProgress)
+    } else {
+      // Fast forward to 100% when the transition is complete
+      // Then fade out the progress bar directly after
+      setProgressToShow(1)
+
+      // Wait for CSS transition to finish before hiding the progress bar
+      // This includes both the fast-forward to 100% and the subsequent fade-out
+      clearTimerID = setTimeout(() => {
+        setProgressToShow(null)
+      }, transitionDuration * 2)
+    }
+
+    return () => clearTimeout(clearTimerID)
+  }, [isTransitioning, transitionProgress])
+
+  if (typeof progressToShow === 'number') {
     return (
-      <div className="progress-bar">
+      <div
+        className={[baseClass, progressToShow === 1 && `${baseClass}--fade-out`]
+          .filter(Boolean)
+          .join(' ')}
+        style={{
+          // @ts-expect-error - TS doesn't like custom CSS properties
+          '--transition-duration': `${transitionDuration}ms`,
+        }}
+      >
         <div
-          className="progress-bar__progress"
-          style={{ width: `${(transitionProgress || 0) * 100}%` }}
+          className={`${baseClass}__progress`}
+          style={{
+            width: `${(progressToShow || 0) * 100}%`,
+          }}
         />
       </div>
     )

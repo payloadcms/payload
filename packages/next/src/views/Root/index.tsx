@@ -2,7 +2,6 @@ import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
 import type { ImportMap, SanitizedConfig } from 'payload'
 
-import { LoadingBar } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
@@ -150,7 +149,6 @@ export const RootPage = async ({
 
   return (
     <Fragment>
-      <LoadingBar />
       {!templateType && <Fragment>{RenderedView}</Fragment>}
       {templateType === 'minimal' && (
         <MinimalTemplate className={templateClassName}>{RenderedView}</MinimalTemplate>
