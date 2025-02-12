@@ -4,12 +4,11 @@
   left: 0;
   width: 100%;
   height: 2px;
-  background-color: red;
   z-index: 9999;
-  transition: width 0.3s;
 
   &__progress {
     height: 100%;
-    background-color: #007bff;
+    background-color: var(--theme-elevation-1000);
+    transition: width ease-in-out 0.3s;
   }
 }

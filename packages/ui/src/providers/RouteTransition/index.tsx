@@ -1,54 +1,37 @@
-import React, { startTransition, useCallback, useEffect, useOptimistic, useRef } from 'react'
+import React, { useCallback, useEffect, useOptimistic, useRef } from 'react'
 
 export const RouteTransition: React.FC<RouteTransitionProps> = ({ children }) => {
   const [isTransitioning, setIsTransitioning] = useOptimistic(false)
   const [transitionProgress, setTransitionProgress] = React.useState(0)
 
+  const transitionProgressRef = useRef(transitionProgress)
+
   const timerID = useRef(null)
 
   const startRouteTransition = useCallback(() => {
+    setIsTransitioning(true)
     setTransitionProgress(0)
 
     // randomly update progress at random times, never reaching 100%
     timerID.current = setInterval(() => {
-      setTransitionProgress((prevProgress) => {
-        console.log('update')
-        const newProgress = prevProgress + Math.random() * 0.1
-        return newProgress > 1 ? 1 : newProgress
-      })
-    }, 500) // every n ms, update progress
+      const projectedProgress =
+        transitionProgressRef.current + Math.random() * 0.1 * (1 - transitionProgressRef.current)
 
-    setIsTransitioning(true)
+      const newProgress = projectedProgress >= 1 ? 1 : projectedProgress
+
+      setTransitionProgress(newProgress)
+      transitionProgressRef.current = newProgress
+    }, 250) // every n ms, update progress
   }, [setIsTransitioning])
 
   useEffect(() => {
-    let clearTimerID: NodeJS.Timeout
-    const transitionTimerID = timerID.current
-
-    if (isTransitioning && transitionTimerID) {
-      // let go for another n ms before to avoid flickering
-      clearTimerID = setTimeout(() => {
-        if (timerID.current) {
-          clearInterval(timerID.current)
-        }
-
-        // startTransition(() => {
-        // setIsTransitioning(false)
-        // })
-      }, 2000)
-
+    if (!isTransitioning) {
       setTransitionProgress(0)
-    }
+      transitionProgressRef.current = 0
 
-    return () => {
-      if (clearTimerID) {
-        clearTimeout(clearTimerID)
+      if (timerID.current) {
+        clearInterval(timerID.current)
       }
-
-      //   if (isTransitioning && transitionTimerID) {
-      //     console.log('CLEANUP')
-      //     clearInterval(transitionTimerID)
-      //   }
     }
   }, [isTransitioning, setIsTransitioning])
 

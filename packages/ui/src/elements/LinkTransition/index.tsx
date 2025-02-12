@@ -41,20 +41,19 @@ export const Link: React.FC<Parameters<typeof NextLink>[0]> = ({
         if (isModifiedEvent(e)) {
           return
         }
+
         e.preventDefault()
+
         startTransition(() => {
           startRouteTransition()
 
-          // artificially delay the transition to show the loading bar
-          setTimeout(() => {
-            const url = typeof href === 'string' ? href : formatUrl(href)
+          const url = typeof href === 'string' ? href : formatUrl(href)
 
-            if (replace) {
-              void router.replace(url, { scroll })
-            } else {
-              void router.push(url, { scroll })
-            }
-          }, 3000)
+          if (replace) {
+            void router.replace(url, { scroll })
+          } else {
+            void router.push(url, { scroll })
+          }
         })
       }}
       ref={ref}
