@@ -1,8 +1,8 @@
-import type { Payload } from 'payload';
+import type { Payload } from 'payload'
 
 import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublishHandler'
 import path from 'path'
-import { createLocalReq , ValidationError } from 'payload'
+import { createLocalReq, ValidationError } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
@@ -2765,6 +2765,39 @@ describe('Versions', () => {
         expect(latestVersion.title.es).toBeFalsy()
         expect(latestVersion.title.en).toStrictEqual('New eng')
       })
+    })
+  })
+
+  describe('Cascade publish', () => {
+    it('should cascade publish', async () => {
+      const relation = await payload.create({
+        collection: 'cascade-publish-relations',
+        draft: true,
+        data: { title: 'Relation 1' },
+      })
+      expect(relation._status).toBe('draft')
+      const doc = await payload.create({
+        collection: 'cascade-publish',
+        draft: true,
+        data: { relation: relation.id, title: 'Cascade Publish 1' },
+      })
+      expect(doc._status).toBe('draft')
+
+      const publishedDoc = await payload.update({
+        collection: 'cascade-publish',
+        id: doc.id,
+        depth: 0,
+        data: { _status: 'published', title: 'Cascade Publish - published' },
+      })
+
+      expect(publishedDoc._status).toBe('published')
+
+      const publishedRelation = await payload.findByID({
+        collection: 'cascade-publish-relations',
+        id: relation.id,
+      })
+      // And Here it fails..
+      expect(publishedRelation._status).toBe('published')
     })
   })
 })

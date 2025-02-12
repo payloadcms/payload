@@ -33,6 +33,7 @@ import { deleteAssociatedFiles } from '../../../uploads/deleteAssociatedFiles.js
 import { uploadFiles } from '../../../uploads/uploadFiles.js'
 import { checkDocumentLockStatus } from '../../../utilities/checkDocumentLockStatus.js'
 import { getLatestCollectionVersion } from '../../../versions/getLatestCollectionVersion.js'
+import { handleCascadePublish } from '../../../versions/handleCascadePublish.js'
 import { saveVersion } from '../../../versions/saveVersion.js'
 
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
@@ -261,6 +262,15 @@ export const updateDocument = async <
     ...beforeChangeArgs,
     docWithLocales: publishedDocWithLocales,
   })
+
+  if (
+    collectionConfig.versions.drafts &&
+    collectionConfig.versions.drafts.cascadePublish &&
+    !draftArg &&
+    data._status !== 'draft'
+  ) {
+    await handleCascadePublish({ collection: collectionConfig, doc: result, req })
+  }
 
   // /////////////////////////////////////
   // Handle potential password update

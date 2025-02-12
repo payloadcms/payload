@@ -4,6 +4,8 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import AutosavePosts from './collections/Autosave.js'
+import { CascadePublish } from './collections/CascadePublish.js'
+import { CascadePublishRelations } from './collections/CascadePublishRelations.js'
 import CustomIDs from './collections/CustomIDs.js'
 import { Diff } from './collections/Diff.js'
 import DisablePublish from './collections/DisablePublish.js'
@@ -39,6 +41,8 @@ export default buildConfigWithDefaults({
     CustomIDs,
     Diff,
     Media,
+    CascadePublish,
+    CascadePublishRelations,
   ],
   globals: [AutosaveGlobal, DraftGlobal, DraftWithMaxGlobal, DisablePublishGlobal, LocalizedGlobal],
   indexSortableFields: true,

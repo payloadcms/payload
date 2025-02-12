@@ -4,12 +4,14 @@ export type Autosave = {
 
 export type IncomingDrafts = {
   autosave?: Autosave | boolean
+  cascadePublish?: boolean
   schedulePublish?: boolean
   validate?: boolean
 }
 
 export type SanitizedDrafts = {
   autosave: Autosave | false
+  cascadePublish: boolean
   schedulePublish: boolean
   validate: boolean
 }
