@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { APIError } from '../errors/APIError.js'
 
 export const parseCookies = (headers: Request['headers']): Map<string, string> => {

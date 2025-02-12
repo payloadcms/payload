@@ -74,7 +74,7 @@
     "build": "rimraf .dist && rimraf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc && pnpm build:esbuild",
     "build:esbuild": "echo skipping esbuild",
     "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "build:types": "concurrently --group \"tsc --emitDeclarationOnly --outDir dist\" \"tsc-strict\"",
     "clean": "rimraf -g {dist,*.tsbuildinfo}",
     "clean:cache": "rimraf node_modules/.cache",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
@@ -124,13 +124,15 @@
     "@types/pluralize": "0.0.33",
     "@types/uuid": "10.0.0",
     "@types/ws": "^8.5.10",
+    "concurrently": "9.1.2",
     "copyfiles": "2.4.1",
     "cross-env": "7.0.3",
     "esbuild": "0.24.2",
     "graphql-http": "^1.22.0",
     "react-datepicker": "7.6.0",
     "rimraf": "6.0.1",
-    "sharp": "0.32.6"
+    "sharp": "0.32.6",
+    "typescript-strict-plugin": "2.4.4"
   },
   "peerDependencies": {
     "graphql": "^16.8.1"

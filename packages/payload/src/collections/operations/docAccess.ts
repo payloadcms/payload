@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { SanitizedCollectionPermission } from '../../auth/index.js'
 import type { AllOperations, PayloadRequest } from '../../types/index.js'
 import type { Collection } from '../config/types.js'
