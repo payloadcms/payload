@@ -163,8 +163,8 @@ async function createInlineBlock({
 }
 
 async function assertLexicalDoc({
-  fn,
   depth = 0,
+  fn,
 }: {
   depth?: number
   fn: (args: {
@@ -299,7 +299,7 @@ describe('lexicalBlocks', () => {
 
     // Check if the API result is correct
     await assertLexicalDoc({
-      fn: async ({ lexicalWithBlocks }) => {
+      fn: ({ lexicalWithBlocks }) => {
         const rscBlock: SerializedBlockNode = lexicalWithBlocks.root
           .children[14] as SerializedBlockNode
         const paragraphNode: SerializedParagraphNode = lexicalWithBlocks.root
@@ -363,12 +363,12 @@ describe('lexicalBlocks', () => {
       await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
 
       return {
-        topLevelDocTextField,
-        blockTextField,
         blockGroupTextField,
+        blockTextField,
         dependsOnDocData,
-        dependsOnSiblingData,
         dependsOnBlockData,
+        dependsOnSiblingData,
+        topLevelDocTextField,
         newBlock,
       }
     }
@@ -554,12 +554,12 @@ describe('lexicalBlocks', () => {
       await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
 
       return {
-        topLevelDocTextField,
-        blockTextField,
         blockGroupTextField,
+        blockTextField,
         dependsOnDocData,
         dependsOnSiblingData,
         dependsOnBlockData,
+        topLevelDocTextField,
         newBlock,
       }
     }
@@ -704,7 +704,7 @@ describe('lexicalBlocks', () => {
       await saveDocAndAssert(page)
 
       await assertLexicalDoc({
-        fn: async ({ lexicalWithBlocks }) => {
+        fn: ({ lexicalWithBlocks }) => {
           const blockNode: SerializedBlockNode = lexicalWithBlocks.root
             .children[4] as SerializedBlockNode
 
@@ -764,7 +764,7 @@ describe('lexicalBlocks', () => {
       await saveDocAndAssert(page)
 
       await assertLexicalDoc({
-        fn: async ({ lexicalWithBlocks }) => {
+        fn: ({ lexicalWithBlocks }) => {
           const blockNode: SerializedBlockNode = lexicalWithBlocks.root
             .children[4] as SerializedBlockNode
           const paragraphNodeInBlockNodeRichText = blockNode.fields.richTextField.root.children[1]
@@ -839,7 +839,7 @@ describe('lexicalBlocks', () => {
 
       // Make sure it's being returned from the API as well
       await assertLexicalDoc({
-        fn: async ({ lexicalWithBlocks }) => {
+        fn: ({ lexicalWithBlocks }) => {
           expect(
             (
               (lexicalWithBlocks.root.children[0] as SerializedParagraphNode)
@@ -966,7 +966,7 @@ describe('lexicalBlocks', () => {
       await saveDocAndAssert(page)
 
       await assertLexicalDoc({
-        fn: async ({ lexicalWithBlocks }) => {
+        fn: ({ lexicalWithBlocks }) => {
           const blockNode: SerializedBlockNode = lexicalWithBlocks.root
             .children[5] as SerializedBlockNode
 
@@ -1210,7 +1210,7 @@ describe('lexicalBlocks', () => {
       await saveDocAndAssert(page)
 
       await assertLexicalDoc({
-        fn: async ({ lexicalWithBlocks }) => {
+        fn: ({ lexicalWithBlocks }) => {
           const radio1: SerializedBlockNode = lexicalWithBlocks.root
             .children[8] as SerializedBlockNode
           const radio2: SerializedBlockNode = lexicalWithBlocks.root
@@ -1447,7 +1447,7 @@ describe('lexicalBlocks', () => {
       await expect(tab2Text1Field).toHaveValue('Some text2 changed')
 
       await assertLexicalDoc({
-        fn: async ({ lexicalWithBlocks }) => {
+        fn: ({ lexicalWithBlocks }) => {
           const tabBlockData: SerializedBlockNode = lexicalWithBlocks.root
             .children[13] as SerializedBlockNode
 
@@ -1504,8 +1504,8 @@ describe('lexicalBlocks', () => {
     test('ensure inline blocks can be created and its values can be mutated from outside their form', async () => {
       const { richTextField } = await navigateToLexicalFields()
       const { inlineBlockDrawer, saveDrawer } = await createInlineBlock({
-        richTextField,
         name: 'My Inline Block',
+        richTextField,
       })
 
       // Click on react select in drawer, select 'value1'
@@ -1520,7 +1520,7 @@ describe('lexicalBlocks', () => {
       await saveDocAndAssert(page)
       // Check if the API result is correct
       await assertLexicalDoc({
-        fn: async ({ lexicalWithBlocks }) => {
+        fn: ({ lexicalWithBlocks }) => {
           const firstParagraph: SerializedParagraphNode = lexicalWithBlocks.root
             .children[0] as SerializedParagraphNode
           const inlineBlock: SerializedInlineBlockNode = firstParagraph
@@ -1558,7 +1558,7 @@ describe('lexicalBlocks', () => {
       // Save and check api result
       await saveDocAndAssert(page)
       await assertLexicalDoc({
-        fn: async ({ lexicalWithBlocks }) => {
+        fn: ({ lexicalWithBlocks }) => {
           const firstParagraph: SerializedParagraphNode = lexicalWithBlocks.root
             .children[0] as SerializedParagraphNode
           const inlineBlock: SerializedInlineBlockNode = firstParagraph
@@ -1572,8 +1572,8 @@ describe('lexicalBlocks', () => {
     test('ensure upload fields within inline blocks store and populate correctly', async () => {
       const { richTextField } = await navigateToLexicalFields()
       const { inlineBlockDrawer, saveDrawer } = await createInlineBlock({
-        richTextField,
         name: 'Avatar Group',
+        richTextField,
       })
 
       // Click button that says Add Avatar
