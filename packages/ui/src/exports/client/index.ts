@@ -247,7 +247,10 @@ export { ClientFunctionProvider, useClientFunctions } from '../../providers/Clie
 export { useAddClientFunction } from '../../providers/ClientFunction/index.js'
 
 export { LoadingBar } from '../../providers/RouteTransition/LoadingBar/index.js'
-export { RouteTransition, useRouteTransition } from '../../providers/RouteTransition/index.js'
+export {
+  RouteTransitionProvider as RouteTransition,
+  useRouteTransition,
+} from '../../providers/RouteTransition/index.js'
 export { ConfigProvider, useConfig } from '../../providers/Config/index.js'
 export { DocumentEventsProvider, useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 export { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'

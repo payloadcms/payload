@@ -28,7 +28,7 @@ import { LocaleProvider } from '../Locale/index.js'
 import { ParamsProvider } from '../Params/index.js'
 import { PreferencesProvider } from '../Preferences/index.js'
 import { RouteCache } from '../RouteCache/index.js'
-import { RouteTransition } from '../RouteTransition/index.js'
+import { RouteTransitionProvider } from '../RouteTransition/index.js'
 import { SearchParamsProvider } from '../SearchParams/index.js'
 import { ServerFunctionsProvider } from '../ServerFunctions/index.js'
 import { ThemeProvider } from '../Theme/index.js'
@@ -74,7 +74,7 @@ export const RootProvider: React.FC<Props> = ({
   return (
     <Fragment>
       <ServerFunctionsProvider serverFunction={serverFunction}>
-        <RouteTransition>
+        <RouteTransitionProvider>
           <RouteCacheComponent>
             <ConfigProvider config={config}>
               <ClientFunctionProvider>
@@ -126,7 +126,7 @@ export const RootProvider: React.FC<Props> = ({
               </ClientFunctionProvider>
             </ConfigProvider>
           </RouteCacheComponent>
-        </RouteTransition>
+        </RouteTransitionProvider>
       </ServerFunctionsProvider>
       <ToastContainer />
     </Fragment>

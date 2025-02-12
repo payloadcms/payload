@@ -1,7 +1,7 @@
 'use client'
 import React, { useCallback, useEffect, useOptimistic, useRef } from 'react'
 
-export const RouteTransition: React.FC<RouteTransitionProps> = ({ children }) => {
+export const RouteTransitionProvider: React.FC<RouteTransitionProps> = ({ children }) => {
   const [isTransitioning, setIsTransitioning] = useOptimistic(false)
   const [transitionProgress, setTransitionProgress] = React.useState(0)
 
