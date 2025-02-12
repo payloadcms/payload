@@ -2,13 +2,16 @@
 import { useRouteTransition } from '../index.js'
 import './index.scss'
 
-export const LoadingBar = () => {
+export const ProgressBar = () => {
   const { isTransitioning, transitionProgress } = useRouteTransition()
 
   if (isTransitioning) {
     return (
-      <div className="loading-bar">
-        <div className="loading-bar__progress" style={{ width: `${transitionProgress * 100}%` }} />
+      <div className="progress-bar">
+        <div
+          className="progress-bar__progress"
+          style={{ width: `${(transitionProgress || 0) * 100}%` }}
+        />
       </div>
     )
   }
