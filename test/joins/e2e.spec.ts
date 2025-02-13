@@ -9,6 +9,7 @@ import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config } from './payload-types.js'
 
 import {
+  changeLocale,
   ensureCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
@@ -18,10 +19,10 @@ import {
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { navigateToDoc } from '../helpers/e2e/navigateToDoc.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { EXPECT_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { categoriesJoinRestrictedSlug, categoriesSlug, postsSlug, uploadsSlug } from './shared.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { RESTClient } from '../helpers/rest.js'
+import { EXPECT_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { categoriesJoinRestrictedSlug, categoriesSlug, postsSlug, uploadsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -37,7 +38,7 @@ describe('Join Field', () => {
   let categoriesURL: AdminUrlUtil
   let uploadsURL: AdminUrlUtil
   let categoriesJoinRestrictedURL: AdminUrlUtil
-  let categoryID: string | number
+  let categoryID: number | string
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -473,5 +474,21 @@ describe('Join Field', () => {
     const url = new AdminUrlUtil(serverURL, 'users')
     await page.goto(url.admin + '/create-first-user')
     await expect(page.locator('.field-type.join')).toBeHidden()
+  })
+
+  test('should render localized data in table when locale changes', async () => {
+    await page.goto(categoriesURL.edit(categoryID))
+    const joinField = page.locator('#field-relatedPosts.field-type.join')
+    await expect(joinField).toBeVisible()
+    await expect(joinField.locator('.relationship-table table')).toBeVisible()
+
+    const row = joinField.locator('.relationship-table tbody tr.row-1')
+    await expect(row).toBeVisible()
+    const localizedTextCell = row.locator('.cell-localizedText span')
+    await expect(localizedTextCell).toBeVisible()
+    await expect(localizedTextCell).toHaveText('Text in en')
+
+    await changeLocale(page, 'es')
+    await expect(localizedTextCell).toHaveText('Text in es')
   })
 })
