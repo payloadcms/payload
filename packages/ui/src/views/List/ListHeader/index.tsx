@@ -6,7 +6,6 @@ import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import { Button } from '../../../elements/Button/index.js'
-import { Link } from '../../../elements/Link/index.js'
 import { useListDrawerContext } from '../../../elements/ListDrawer/Provider.js'
 import { ListSelection } from '../../../elements/ListSelection/index.js'
 import { Pill } from '../../../elements/Pill/index.js'
@@ -55,7 +54,6 @@ const DefaultListHeader: React.FC<ListHeaderProps> = ({
             })}
             buttonStyle="pill"
             el={'link'}
-            Link={Link}
             size="small"
             to={newDocumentURL}
           >

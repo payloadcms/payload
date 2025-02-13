@@ -17,7 +17,12 @@ export type DashboardProps = {
     lockDuration?: number
     slug: string
   }>
-  Link: React.ComponentType<any>
+  /**
+   * @deprecated
+   * This prop is deprecated and will be removed in the next major version.
+   * Components now import their own `Link` directly from `next/link`.
+   */
+  Link?: React.ComponentType
   navGroups?: ReturnType<typeof groupNavItems>
   permissions: SanitizedPermissions
   visibleEntities: VisibleEntities
@@ -28,7 +33,6 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
     globalData,
     i18n,
     i18n: { t },
-    Link,
     locale,
     navGroups,
     params,
@@ -146,7 +150,6 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
                                   el="link"
                                   icon="plus"
                                   iconStyle="with-border"
-                                  Link={Link}
                                   round
                                   to={createHREF}
                                 />
@@ -155,7 +158,6 @@ export const DefaultDashboard: React.FC<DashboardProps> = (props) => {
                             buttonAriaLabel={buttonAriaLabel}
                             href={href}
                             id={`card-${slug}`}
-                            Link={Link}
                             title={getTranslation(label, i18n)}
                             titleAs="h3"
                           />

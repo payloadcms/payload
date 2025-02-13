@@ -5,8 +5,8 @@ import { formatAdminURL, Translation } from '@payloadcms/ui/shared'
 import React from 'react'
 
 import { FormHeader } from '../../elements/FormHeader/index.js'
-import './index.scss'
 import { ResetPasswordForm } from './ResetPasswordForm/index.js'
+import './index.scss'
 
 export const resetPasswordBaseClass = 'reset-password'
 
@@ -57,7 +57,7 @@ export const ResetPassword: React.FC<AdminViewProps> = ({ initPageResult, params
           }
           heading={i18n.t('authentication:alreadyLoggedIn')}
         />
-        <Button buttonStyle="secondary" el="link" Link={Link} size="large" to={adminRoute}>
+        <Button buttonStyle="secondary" el="link" size="large" to={adminRoute}>
           {i18n.t('general:backToDashboard')}
         </Button>
       </div>

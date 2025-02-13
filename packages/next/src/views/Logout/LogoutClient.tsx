@@ -1,7 +1,6 @@
 'use client'
 import {
   Button,
-  Link,
   LoadingOverlay,
   toast,
   useAuth,
@@ -69,7 +68,7 @@ export const LogoutClient: React.FC<{
     return (
       <div className={`${baseClass}__wrap`}>
         <h2>{t('authentication:loggedOutInactivity')}</h2>
-        <Button buttonStyle="secondary" el="link" Link={Link} size="large" url={loginRoute}>
+        <Button buttonStyle="secondary" el="link" size="large" url={loginRoute}>
           {t('authentication:logBackIn')}
         </Button>
       </div>

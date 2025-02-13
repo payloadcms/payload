@@ -1,7 +1,7 @@
 import type { EntityToGroup } from '@payloadcms/ui/shared'
 import type { ServerProps } from 'payload'
 
-import { Link, Logout } from '@payloadcms/ui'
+import { Logout } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
 import React from 'react'
@@ -73,7 +73,6 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
   const LogoutComponent = RenderServerComponent({
     clientProps: {
       documentSubViewType,
-      Link,
       viewType,
     },
     Component: logout?.Button,
