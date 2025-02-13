@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import nextEnvImport from '@next/env'
 
 import { findUpSync } from '../utilities/findUp.js'

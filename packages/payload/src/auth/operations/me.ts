@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { decodeJwt } from 'jose'
 
 import type { Collection } from '../../collections/config/types.js'

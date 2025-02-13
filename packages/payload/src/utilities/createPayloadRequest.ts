@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { initI18n } from '@payloadcms/translations'
 import * as qs from 'qs-esm'
 

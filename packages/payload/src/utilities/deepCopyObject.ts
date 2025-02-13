@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { JsonValue } from '../types/index.js'
 
 /*

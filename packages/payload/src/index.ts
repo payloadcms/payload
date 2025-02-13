@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
 import type { Request as graphQLRequest, OperationArgs } from 'graphql-http'
 import type { Logger } from 'pino'

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { Data, FormState } from '../admin/types.js'
 
 import { unflatten as flatleyUnflatten } from './unflatten.js'

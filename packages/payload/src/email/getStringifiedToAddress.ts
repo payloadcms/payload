@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { SendEmailOptions } from './types.js'
 
 export const getStringifiedToAddress = (message: SendEmailOptions): string | undefined => {

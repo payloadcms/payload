@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 export const getObjectDotNotation = <T>(
   obj: Record<string, unknown>,
   path: string,

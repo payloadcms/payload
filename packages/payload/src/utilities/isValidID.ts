@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import ObjectIdImport from 'bson-objectid'
 
 const ObjectId = (ObjectIdImport.default ||

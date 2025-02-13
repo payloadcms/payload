@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import url from 'url'
 
 import type { BeforeOperationHook, Collection } from '../../collections/config/types.js'

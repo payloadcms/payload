@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { AccessResult } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
 import type { CollectionSlug, JoinQuery } from '../../index.js'

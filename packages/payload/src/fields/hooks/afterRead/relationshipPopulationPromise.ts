@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { PayloadRequest, PopulateType } from '../../../types/index.js'
 import type { JoinField, RelationshipField, UploadField } from '../../config/types.js'
 

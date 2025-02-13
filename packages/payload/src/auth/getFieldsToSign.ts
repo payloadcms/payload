@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Field, TabAsField } from '../fields/config/types.js'
 import type { PayloadRequest } from '../types/index.js'

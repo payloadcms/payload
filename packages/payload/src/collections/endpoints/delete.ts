@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { getTranslation } from '@payloadcms/translations'
 import { status as httpStatus } from 'http-status'
 

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { Document, Payload, PayloadRequest, Where } from '../types/index.js'
 

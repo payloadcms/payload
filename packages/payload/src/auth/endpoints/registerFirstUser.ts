@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { status as httpStatus } from 'http-status'
 
 import type { PayloadHandler } from '../../config/types.js'

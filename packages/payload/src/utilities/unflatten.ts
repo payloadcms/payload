@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 /*
  * Copyright (c) 2014, Hugh Kennedy
  * All rights reserved.

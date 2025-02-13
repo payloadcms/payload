@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
