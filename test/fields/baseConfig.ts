@@ -20,7 +20,11 @@ import EmailFields from './collections/Email/index.js'
 import GroupFields from './collections/Group/index.js'
 import IndexedFields from './collections/Indexed/index.js'
 import JSONFields from './collections/JSON/index.js'
-import { LexicalFields } from './collections/Lexical/index.js'
+import {
+  getLexicalFieldsCollection,
+  lexicalBlocks,
+  lexicalInlineBlocks,
+} from './collections/Lexical/index.js'
 import { LexicalAccessControl } from './collections/LexicalAccessControl/index.js'
 import { LexicalInBlock } from './collections/LexicalInBlock/index.js'
 import { LexicalLocalizedFields } from './collections/LexicalLocalized/index.js'
@@ -50,7 +54,10 @@ import TabsWithRichText from './globals/TabsWithRichText.js'
 import { clearAndSeedEverything } from './seed.js'
 
 export const collectionSlugs: CollectionConfig[] = [
-  LexicalFields,
+  getLexicalFieldsCollection({
+    blocks: lexicalBlocks,
+    inlineBlocks: lexicalInlineBlocks,
+  }),
   LexicalMigrateFields,
   LexicalLocalizedFields,
   LexicalObjectReferenceBugCollection,

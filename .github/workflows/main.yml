@@ -294,6 +294,7 @@ jobs:
           - fields__collections__JSON
           - fields__collections__Lexical__e2e__main
           - fields__collections__Lexical__e2e__blocks
+          - fields__collections__Lexical__e2e__blocks#config.blockreferences.ts
           - fields__collections__Number
           - fields__collections__Point
           - fields__collections__Radio
