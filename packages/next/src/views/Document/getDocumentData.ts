@@ -1,5 +1,6 @@
 import { sanitizeID } from '@payloadcms/ui/shared'
 import {
+  captureError,
   type Locale,
   logError,
   type Payload,
@@ -66,7 +67,13 @@ export const getDocumentData = async ({
       })
     }
   } catch (err) {
-    logError({ err, payload })
+    let msg: string
+    if (globalSlug) {
+      msg = `Failed to retrieve global ${globalSlug} data `
+    } else {
+      msg = `Failed to retrieve collection ${collectionSlug} document with ID-${idArg} data`
+    }
+    await captureError({ err, msg, req })
   }
 
   return resolvedData

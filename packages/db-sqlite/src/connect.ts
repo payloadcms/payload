@@ -1,9 +1,9 @@
 import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
-import type { Connect } from 'payload'
 
 import { createClient } from '@libsql/client'
 import { pushDevSchema } from '@payloadcms/drizzle'
 import { drizzle } from 'drizzle-orm/libsql'
+import { captureError, type Connect } from 'payload'
 
 import type { SQLiteAdapter } from './types.js'
 
@@ -36,10 +36,14 @@ export const connect: Connect = async function connect(
       }
     }
   } catch (err) {
-    this.payload.logger.error({ err, msg: `Error: cannot connect to SQLite: ${err.message}` })
     if (typeof this.rejectInitializing === 'function') {
       this.rejectInitializing()
     }
+    await captureError({
+      err,
+      msg: `Error: cannot connect to SQLite: ${err.message}`,
+      payload: this.payload,
+    })
     process.exit(1)
   }
 

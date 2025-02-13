@@ -1,4 +1,5 @@
 import {
+  captureError,
   commitTransaction,
   createLocalReq,
   getMigrations,
@@ -63,9 +64,10 @@ export async function migrateDown(this: DrizzleAdapter): Promise<void> {
     } catch (err: unknown) {
       await killTransaction(req)
 
-      payload.logger.error({
+      await captureError({
         err,
         msg: parseError(err, `Error migrating down ${migrationFile.name}. Rolling back.`),
+        req,
       })
       process.exit(1)
     }

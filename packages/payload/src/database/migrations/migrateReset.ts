@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import type { BaseDatabaseAdapter } from '../types.js'
 
+import { captureError } from '../../utilities/captureError.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { createLocalReq } from '../../utilities/createLocalReq.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
@@ -47,7 +48,7 @@ export async function migrateReset(this: BaseDatabaseAdapter): Promise<void> {
         payload.logger.info({ msg: `Migrated down:  ${migration.name} (${Date.now() - start}ms)` })
       } catch (err: unknown) {
         await killTransaction(req)
-        payload.logger.error({ err, msg: `Error running migration ${migration.name}` })
+        await captureError({ err, msg: `Error running migration ${migration.name}`, req })
         throw err
       }
     }
@@ -64,6 +65,6 @@ export async function migrateReset(this: BaseDatabaseAdapter): Promise<void> {
       },
     })
   } catch (err: unknown) {
-    payload.logger.error({ err, msg: 'Error deleting dev migration' })
+    await captureError({ err, msg: 'Error deleting dev migration', req })
   }
 }

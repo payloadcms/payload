@@ -1,6 +1,6 @@
 import type { Data, Field, FlattenedBlock, PayloadRequest, TabAsField, User } from 'payload'
 
-import { getDefaultValue } from 'payload'
+import { captureError, getDefaultValue } from 'payload'
 import { fieldAffectsData, tabHasName } from 'payload/shared'
 
 import { iterateFields } from './iterateFields.js'
@@ -39,9 +39,10 @@ export const defaultValuePromise = async <T>({
           value: siblingData[field.name],
         })
       } catch (err) {
-        req.payload.logger.error({
+        await captureError({
           err,
           msg: `Error calculating default value for field: ${field.name}`,
+          req,
         })
       }
     }

@@ -80,7 +80,7 @@ export const runJSONJob = async ({
       }),
     )
   } catch (err) {
-    const errorResult = handleWorkflowError({
+    const errorResult = await handleWorkflowError({
       error: err,
       job,
       req,

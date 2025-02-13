@@ -1,6 +1,7 @@
 import type { Payload } from 'payload'
 
 import {
+  captureError,
   commitTransaction,
   createLocalReq,
   initTransaction,
@@ -106,10 +107,12 @@ async function runMigrationFile(payload: Payload, migration: Migration, batch: n
     await commitTransaction(req)
   } catch (err: unknown) {
     await killTransaction(req)
-    payload.logger.error({
+    await captureError({
       err,
       msg: parseError(err, `Error running migration ${migration.name}`),
+      req,
     })
+
     process.exit(1)
   }
 }

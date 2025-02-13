@@ -1,4 +1,5 @@
 import {
+  captureError,
   commitTransaction,
   createLocalReq,
   getMigrations,
@@ -69,9 +70,10 @@ export async function migrateRefresh(this: DrizzleAdapter) {
       await commitTransaction(req)
     } catch (err: unknown) {
       await killTransaction(req)
-      payload.logger.error({
+      await captureError({
         err,
         msg: parseError(err, `Error running migration ${migration.name}. Rolling back.`),
+        req,
       })
       process.exit(1)
     }
@@ -97,9 +99,10 @@ export async function migrateRefresh(this: DrizzleAdapter) {
       payload.logger.info({ msg: `Migrated:  ${migration.name} (${Date.now() - start}ms)` })
     } catch (err: unknown) {
       await killTransaction(req)
-      payload.logger.error({
+      await captureError({
         err,
         msg: parseError(err, `Error running migration ${migration.name}. Rolling back.`),
+        req,
       })
       process.exit(1)
     }

@@ -1,6 +1,6 @@
 import type { BuildFormStateArgs, ClientConfig, ClientUser, ErrorResult, FormState } from 'payload'
 
-import { formatErrors } from 'payload'
+import { captureError, formatErrors } from 'payload'
 import { reduceFieldsToValues } from 'payload/shared'
 
 import { fieldSchemasToFormState } from '../forms/fieldSchemasToFormState/index.js'
@@ -77,7 +77,7 @@ export const buildFormStateHandler = async (
     const res = await buildFormState(args)
     return res
   } catch (err) {
-    req.payload.logger.error({ err, msg: `There was an error building form state` })
+    await captureError({ err, msg: `There was an error building form state`, req })
 
     if (err.message === 'Could not find field schema for given path') {
       return {

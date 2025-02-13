@@ -713,6 +713,8 @@ export type AfterErrorHookArgs = {
   error: Error
   /** The GraphQL result object, available if the hook is executed within a GraphQL context. */
   graphqlResult?: GraphQLFormattedError
+  /** Extra message that provides additional context about where an error was occured. */
+  message?: string
   /** The Request object containing the currently authenticated user. */
   req: PayloadRequest
   /** The formatted error result object, available if the hook is executed from a REST context. */

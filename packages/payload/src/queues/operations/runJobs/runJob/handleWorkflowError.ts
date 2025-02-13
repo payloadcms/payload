@@ -3,13 +3,14 @@ import type { PayloadRequest } from '../../../../types/index.js'
 import type { BaseJob, WorkflowConfig, WorkflowTypes } from '../../../config/types/workflowTypes.js'
 import type { RunTaskFunctionState } from './getRunTaskFunction.js'
 
+import { captureError } from '../../../../utilities/captureError.js'
 import { calculateBackoffWaitUntil } from './calculateBackoffWaitUntil.js'
 
 /**
  * This is called if a workflow catches an error. It determines if it's a final error
  * or not and handles logging.
  */
-export function handleWorkflowError({
+export async function handleWorkflowError({
   error,
   job,
   req,
@@ -21,9 +22,9 @@ export function handleWorkflowError({
   req: PayloadRequest
   state: RunTaskFunctionState
   workflowConfig: WorkflowConfig<WorkflowTypes>
-}): {
+}): Promise<{
   hasFinalError: boolean
-} {
+}> {
   const jobLabel = job.workflowSlug || `Task: ${job.taskSlug}`
 
   let hasFinalError = state.reachedMaxRetries // If any TASK reached max retries, the job has an error
@@ -64,9 +65,10 @@ export function handleWorkflowError({
     }
   }
 
-  req.payload.logger.error({
+  await captureError({
     err: error,
     msg: `Error running job ${jobLabel} id: ${job.id} attempt ${job.totalTried + 1}${maxWorkflowRetries !== undefined ? '/' + (maxWorkflowRetries + 1) : ''}`,
+    req,
   })
 
   return {

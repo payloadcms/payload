@@ -4,7 +4,7 @@ import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { Payload } from '../index.js'
 import type { PayloadRequest, SelectType } from '../types/index.js'
 
-import { deepCopyObjectSimple } from '../index.js'
+import { captureError, deepCopyObjectSimple } from '../index.js'
 import sanitizeInternalFields from '../utilities/sanitizeInternalFields.js'
 import { getQueryDraftsSelect } from './drafts/getQueryDraftsSelect.js'
 import { enforceMaxVersions } from './enforceMaxVersions.js'
@@ -181,7 +181,8 @@ export const saveVersion = async ({
     if (global) {
       errorMessage = `There was an error while saving a version for the global ${typeof global.label === 'string' ? global.label : global.slug}.`
     }
-    payload.logger.error({ err, msg: errorMessage })
+    await captureError({ err, msg: errorMessage, req })
+
     return
   }
 

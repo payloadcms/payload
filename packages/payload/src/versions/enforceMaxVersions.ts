@@ -3,6 +3,8 @@ import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { Payload, PayloadRequest, Where } from '../types/index.js'
 
+import { captureError } from '../utilities/captureError.js'
+
 type Args = {
   collection?: SanitizedCollectionConfig
   global?: SanitizedGlobalConfig
@@ -77,8 +79,16 @@ export const enforceMaxVersions = async ({
       })
     }
   } catch (err) {
-    payload.logger.error(
-      `There was an error cleaning up old versions for the ${entityType} ${slug}`,
-    )
+    let msg: string
+    if (entityType === 'global') {
+      msg = `There was an error cleaning up old versions for the global ${slug}`
+    } else {
+      msg = `There was an error cleaning up old versions for the collection ${slug} document ID-${id}`
+    }
+    await captureError({
+      err,
+      msg,
+      req,
+    })
   }
 }

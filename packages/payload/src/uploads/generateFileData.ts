@@ -12,6 +12,7 @@ import type { PayloadRequest } from '../types/index.js'
 import type { FileData, FileToSave, ProbedImageSize, UploadEdits } from './types.js'
 
 import { FileRetrievalError, FileUploadError, MissingFile } from '../errors/index.js'
+import { captureError } from '../utilities/captureError.js'
 import { canResizeImage } from './canResizeImage.js'
 import { cropImage } from './cropImage.js'
 import { getExternalFile } from './getExternalFile.js'
@@ -343,7 +344,7 @@ export const generateFileData = async <T>({
       filesToSave.push(...sizesToSave)
     }
   } catch (err) {
-    req.payload.logger.error(err)
+    await captureError({ err, req })
     throw new FileUploadError(req.t)
   }
 

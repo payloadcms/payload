@@ -34,6 +34,7 @@ import type {
   ManyOptions as DeleteManyOptions,
   Options as DeleteOptions,
 } from './collections/operations/local/delete.js'
+export type { FieldState } from './admin/forms/Form.js'
 import type { Options as DuplicateOptions } from './collections/operations/local/duplicate.js'
 import type { Options as FindOptions } from './collections/operations/local/find.js'
 import type { Options as FindByIDOptions } from './collections/operations/local/findByID.js'
@@ -63,7 +64,7 @@ import type {
   TransformGlobalWithSelect,
 } from './types/index.js'
 import type { TraverseFieldsCallback } from './utilities/traverseFields.js'
-export type { FieldState } from './admin/forms/Form.js'
+export type * from './admin/types.js'
 import { Cron } from 'croner'
 
 import type { TypeWithVersion } from './versions/types.js'
@@ -83,8 +84,8 @@ import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 import { traverseFields } from './utilities/traverseFields.js'
 
-export type * from './admin/types.js'
 export { default as executeAccess } from './auth/executeAccess.js'
+export { executeAuthStrategies } from './auth/executeAuthStrategies.js'
 
 export interface GeneratedTypes {
   authUntyped: {
@@ -967,7 +968,6 @@ interface RequestContext {
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 export type { Payload, RequestContext }
-export { executeAuthStrategies } from './auth/executeAuthStrategies.js'
 export { getAccessResults } from './auth/getAccessResults.js'
 export { getFieldsToSign } from './auth/getFieldsToSign.js'
 export * from './auth/index.js'
@@ -1002,12 +1002,11 @@ export type {
   User,
   VerifyConfig,
 } from './auth/types.js'
-
 export { generateImportMap } from './bin/generateImportMap/index.js'
 
 export type { ImportMap } from './bin/generateImportMap/index.js'
-export { genImportMapIterateFields } from './bin/generateImportMap/iterateFields.js'
 
+export { genImportMapIterateFields } from './bin/generateImportMap/iterateFields.js'
 export {
   type ClientCollectionConfig,
   createClientCollectionConfig,
@@ -1054,6 +1053,7 @@ export type {
 } from './collections/config/types.js'
 
 export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
+
 export { countOperation } from './collections/operations/count.js'
 export { createOperation } from './collections/operations/create.js'
 export { deleteOperation } from './collections/operations/delete.js'
@@ -1076,8 +1076,8 @@ export {
   type UnsanitizedClientConfig,
 } from './config/client.js'
 export { defaults } from './config/defaults.js'
-
 export { sanitizeConfig } from './config/sanitize.js'
+
 export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
 export { createDatabaseAdapter } from './database/createDatabaseAdapter.js'
@@ -1187,8 +1187,8 @@ export {
 } from './errors/index.js'
 export type { ValidationFieldError } from './errors/index.js'
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
-
 export { baseIDField } from './fields/baseFields/baseIDField.js'
+
 export {
   createClientField,
   createClientFields,
@@ -1196,7 +1196,6 @@ export {
   type ServerOnlyFieldProperties,
 } from './fields/config/client.js'
 export { sanitizeFields } from './fields/config/sanitize.js'
-
 export type {
   AdminClient,
   ArrayField,
@@ -1299,16 +1298,16 @@ export type {
   ValidateOptions,
   ValueWithRelation,
 } from './fields/config/types.js'
-export { getDefaultValue } from './fields/getDefaultValue.js'
 
+export { getDefaultValue } from './fields/getDefaultValue.js'
 export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
+
 export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
 export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
 export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
 export { default as sortableFieldTypes } from './fields/sortableFieldTypes.js'
 export { validations } from './fields/validations.js'
-
 export type {
   ArrayFieldValidation,
   BlocksFieldValidation,
@@ -1340,6 +1339,7 @@ export type {
   UploadFieldValidation,
   UsernameFieldValidation,
 } from './fields/validations.js'
+
 export {
   type ClientGlobalConfig,
   createClientGlobalConfig,
@@ -1347,7 +1347,6 @@ export {
   type ServerOnlyGlobalAdminProperties,
   type ServerOnlyGlobalProperties,
 } from './globals/config/client.js'
-
 export type {
   AfterChangeHook as GlobalAfterChangeHook,
   AfterReadHook as GlobalAfterReadHook,
@@ -1363,6 +1362,7 @@ export type {
 export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
 
 export { findOneOperation } from './globals/operations/findOne.js'
+
 export { findVersionByIDOperation as findVersionByIDOperationGlobal } from './globals/operations/findVersionByID.js'
 export { findVersionsOperation as findVersionsOperationGlobal } from './globals/operations/findVersions.js'
 export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
@@ -1406,9 +1406,10 @@ export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
 export type * from './uploads/types.js'
-
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
+
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
+export { captureError } from './utilities/captureError.js'
 export { commitTransaction } from './utilities/commitTransaction.js'
 export {
   configToJSONSchema,

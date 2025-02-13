@@ -1,5 +1,4 @@
-import type { BeginTransaction } from 'payload'
-
+import { type BeginTransaction, captureError } from 'payload'
 import { v4 as uuid } from 'uuid'
 
 import type { DrizzleAdapter, DrizzleTransaction } from '../types.js'
@@ -58,7 +57,11 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
       resolve,
     }
   } catch (err) {
-    this.payload.logger.error({ err, msg: `Error: cannot begin transaction: ${err.message}` })
+    await captureError({
+      err,
+      msg: `Error: cannot begin transaction: ${err.message}`,
+      payload: this.payload,
+    })
     process.exit(1)
   }
 

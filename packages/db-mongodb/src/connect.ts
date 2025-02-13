@@ -2,7 +2,7 @@ import type { ConnectOptions } from 'mongoose'
 import type { Connect } from 'payload'
 
 import mongoose from 'mongoose'
-import { defaultBeginTransaction } from 'payload'
+import { captureError, defaultBeginTransaction } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -70,10 +70,12 @@ export const connect: Connect = async function connect(
       await this.migrate({ migrations: this.prodMigrations })
     }
   } catch (err) {
-    this.payload.logger.error({
+    await captureError({
       err,
       msg: `Error: cannot connect to MongoDB. Details: ${err.message}`,
+      payload: this.payload,
     })
+
     process.exit(1)
   }
 }

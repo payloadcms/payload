@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import type { Endpoint, SanitizedConfig } from '../config/types.js'
 
+import { captureError } from '../utilities/captureError.js'
 import { runJobs, type RunJobsArgs } from './operations/runJobs/index.js'
 
 const configHasJobs = (config: SanitizedConfig): boolean => {
@@ -64,10 +65,10 @@ export const runJobsEndpoint: Endpoint = {
       noJobsRemaining = result.noJobsRemaining
       remainingJobsFromQueried = result.remainingJobsFromQueried
     } catch (err) {
-      req.payload.logger.error({
+      await captureError({
         err,
-        msg: 'There was an error running jobs:',
-        queue: runJobsArgs.queue,
+        msg: `There was an error running jobs, queue: ${runJobsArgs.queue}`,
+        req,
       })
 
       return Response.json(

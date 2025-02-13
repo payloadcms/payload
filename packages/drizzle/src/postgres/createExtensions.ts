@@ -1,3 +1,5 @@
+import { captureError } from 'payload'
+
 import type { BasePostgresAdapter } from './types.js'
 
 export const createExtensions = async function (this: BasePostgresAdapter): Promise<void> {
@@ -6,7 +8,11 @@ export const createExtensions = async function (this: BasePostgresAdapter): Prom
       try {
         await this.drizzle.execute(`CREATE EXTENSION IF NOT EXISTS "${extension}"`)
       } catch (err) {
-        this.payload.logger.error({ err, msg: `Failed to create extension ${extension}` })
+        await captureError({
+          err,
+          msg: `Failed to create extension ${extension}`,
+          payload: this.payload,
+        })
       }
     }
   }

@@ -10,7 +10,7 @@ import type {
   Where,
 } from 'payload'
 
-import { APIError, formatErrors } from 'payload'
+import { APIError, captureError, formatErrors } from 'payload'
 import { isNumber } from 'payload/shared'
 
 import { getClientConfig } from './getClientConfig.js'
@@ -50,7 +50,7 @@ export const buildTableStateHandler = async (
     const res = await buildTableState(args)
     return res
   } catch (err) {
-    req.payload.logger.error({ err, msg: `There was an error building form state` })
+    await captureError({ err, msg: `There was an error building form state`, req })
 
     if (err.message === 'Could not find field schema for given path') {
       return {

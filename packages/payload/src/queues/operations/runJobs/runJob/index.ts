@@ -49,7 +49,7 @@ export const runJob = async ({
       tasks: getRunTaskFunction(state, job, workflowConfig, req, false, updateJob),
     })
   } catch (err) {
-    const { hasFinalError } = handleWorkflowError({
+    const { hasFinalError } = await handleWorkflowError({
       error: err,
       job,
       req,
