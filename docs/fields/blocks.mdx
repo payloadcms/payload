@@ -302,6 +302,9 @@ If you have multiple blocks that are used in multiple places, this can quickly b
 This can be optimized by defining your block **once** in your Payload Config, and just referencing the block slug whenever it's used, instead of passing the entire block config. To do this, the block can be defined in the `blocks` array of the Payload Config. The slug can then be passed to the `blockReferences` array in the Blocks Field - the `blocks` array has to be empty for compatibility reasons.
 
 ```ts
+import { buildConfig } from 'payload'
+import { lexicalEditor, BlocksFeature } from '@payloadcms/richtext-lexical'
+
 // Payload Config
 const config = buildConfig({
   // Define the block once
