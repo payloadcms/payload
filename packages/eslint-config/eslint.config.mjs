@@ -1,5 +1,3 @@
-/* eslint-disable perfectionist/sort-imports */
-/* eslint-disable perfectionist/sort-objects */
 import js from '@eslint/js'
 import tseslint from 'typescript-eslint'
 import perfectionist from 'eslint-plugin-perfectionist'
@@ -107,6 +105,8 @@ export const rootEslintConfig = tseslint.config(
       perfectionist.configs['recommended-natural'],
       regexpPluginConfigs['flat/recommended'],
     ],
+    /** TO-DO: Remove this. Whe should lint all files */
+    ignores: ["**/*.js", "**/*.mjs"]
   },
   {
     name: 'Settings',

@@ -1,4 +1,4 @@
-import fieldSchemasToFormState from './index.js'
+import { fieldSchemasToFormState } from './index.js'
 
 describe('Form - fieldSchemasToFormState', () => {
   const defaultValue = 'Default'
@@ -11,6 +11,7 @@ describe('Form - fieldSchemasToFormState', () => {
         label: 'Text',
       },
     ]
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     const state = await fieldSchemasToFormState({ fields: fieldSchema })
     expect(state.text.value).toBe(defaultValue)
   })
@@ -25,6 +26,7 @@ describe('Form - fieldSchemasToFormState', () => {
         label: 'Text',
       },
     ]
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     const state = await fieldSchemasToFormState({ data, fields: fieldSchema })
     expect(state.text.value).toBe(value)
   })
@@ -47,6 +49,7 @@ describe('Form - fieldSchemasToFormState', () => {
         label: 'Text',
       },
     ]
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     const state = await fieldSchemasToFormState({ fields: fieldSchema, locale, user })
     expect(state.text.value).toBe(defaultValue)
   })

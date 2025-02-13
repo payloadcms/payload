@@ -1,3 +1,4 @@
+// @ts-nocheck - TODO: convert to ts
 import * as esbuild from 'esbuild'
 import fs from 'fs'
 

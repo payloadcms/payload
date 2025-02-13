@@ -11,7 +11,7 @@ export const index = [
     languageOptions: {
       parserOptions: {
         ...rootParserOptions,
-        tsconfigRootDir: import.meta.dirname,
+        tsconfigRootDir: '../../tsconfig.json',
       },
     },
     settings: {

@@ -5,7 +5,7 @@
     "emitDeclarationOnly": false,
     "noEmit": true,
     "baseUrl": ".",
-
+    "rootDir": "${configDir}"
   },
   "references": [
     {
@@ -76,11 +76,15 @@
     },
     {
       "path": "./packages/ui"
-    },
+    }
   ],
   "include": [
-    "${configDir}/src",
-    ".next/types/**/*.ts",
-    "./scripts/**/*.ts",
+    "${configDir}/**/*.cjs",
+    "${configDir}/**/*.js",
+    "${configDir}/**/*.jsx",
+    "${configDir}/**/*.mjs",
+    "${configDir}/**/*.ts",
+    "${configDir}/**/*.tsx",
+    ".next/types/**/*.ts"
   ]
 }
