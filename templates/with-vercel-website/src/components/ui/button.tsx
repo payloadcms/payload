@@ -1,4 +1,4 @@
-import { cn } from 'src/utilities/cn'
+import { cn } from '@/utilities/ui'
 import { Slot } from '@radix-ui/react-slot'
 import { type VariantProps, cva } from 'class-variance-authority'
 import * as React from 'react'
@@ -34,9 +34,10 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean
+  ref?: React.Ref<HTMLButtonElement>
 }
 
-const Button: React.FC<ButtonProps & { ref?: React.Ref<HTMLButtonElement> }> = ({
+const Button: React.FC<ButtonProps> = ({
   asChild = false,
   className,
   size,

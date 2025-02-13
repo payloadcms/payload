@@ -12,6 +12,11 @@ export const getBlocksField = (prefix?: string): BlocksField => ({
     {
       slug: prefix ? `${prefix}Content` : 'content',
       interfaceName: prefix ? `${prefix}ContentBlock` : 'ContentBlock',
+      admin: {
+        components: {
+          Label: './collections/Blocks/components/CustomBlockLabel.tsx',
+        },
+      },
       fields: [
         {
           name: 'text',
@@ -363,6 +368,29 @@ const BlockFields: CollectionConfig = {
               name: 'relationship',
               type: 'relationship',
               relationTo: textFieldsSlug,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'blockWithLabels',
+      type: 'blocks',
+      labels: {
+        singular: ({ t }) => t('authentication:account'),
+        plural: ({ t }) => t('authentication:generate'),
+      },
+      blocks: [
+        {
+          labels: {
+            singular: ({ t }) => t('authentication:account'),
+            plural: ({ t }) => t('authentication:generate'),
+          },
+          slug: 'text',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
             },
           ],
         },

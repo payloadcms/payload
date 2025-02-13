@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { SanitizedCollectionPermission } from '../../auth/index.js'
 import type { AllOperations, PayloadRequest } from '../../types/index.js'
 import type { Collection } from '../config/types.js'
@@ -10,7 +11,7 @@ const allOperations: AllOperations[] = ['create', 'read', 'update', 'delete']
 
 type Arguments = {
   collection: Collection
-  id: string
+  id: number | string
   req: PayloadRequest
 }
 

@@ -1,23 +1,25 @@
-import type { FileData, FileSize, TypeWithID } from 'payload'
+import type { FileSizeImproved } from 'payload'
 
+import type { UploadDataImproved } from '../../../../../../features/upload/server/nodes/UploadNode.js'
 import type { SerializedUploadNode } from '../../../../../../nodeTypes.js'
 import type { JSXConverters } from '../types.js'
 
 export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
   upload: ({ node }) => {
-    const uploadDocument: {
-      value?: FileData & TypeWithID
-    } = node as any
-
-    const url = uploadDocument?.value?.url
+    // TO-DO (v4): SerializedUploadNode should use UploadData_P4
+    const uploadDocument = node as UploadDataImproved
+    if (typeof uploadDocument.value !== 'object') {
+      return null
+    }
+    const url = uploadDocument.value.url
 
     /**
      * If the upload is not an image, return a link to the upload
      */
-    if (!uploadDocument?.value?.mimeType?.startsWith('image')) {
+    if (!uploadDocument.value.mimeType.startsWith('image')) {
       return (
         <a href={url} rel="noopener noreferrer">
-          {uploadDocument.value?.filename}
+          {uploadDocument.value.filename}
         </a>
       )
     }
@@ -25,13 +27,13 @@ export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
     /**
      * If the upload is a simple image with no different sizes, return a simple img tag
      */
-    if (!uploadDocument?.value?.sizes || !Object.keys(uploadDocument?.value?.sizes).length) {
+    if (!Object.keys(uploadDocument.value.sizes).length) {
       return (
         <img
-          alt={uploadDocument?.value?.filename}
-          height={uploadDocument?.value?.height}
+          alt={uploadDocument.value.filename}
+          height={uploadDocument.value.height}
           src={url}
-          width={uploadDocument?.value?.width}
+          width={uploadDocument.value.width}
         />
       )
     }
@@ -42,13 +44,12 @@ export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
     const pictureJSX: React.ReactNode[] = []
 
     // Iterate through each size in the data.sizes object
-    for (const size in uploadDocument.value?.sizes) {
-      const imageSize: {
-        url?: string
-      } & FileSize = uploadDocument.value?.sizes[size]
+    for (const size in uploadDocument.value.sizes) {
+      const imageSize = uploadDocument.value.sizes[size] as FileSizeImproved
 
       // Skip if any property of the size object is null
       if (
+        !imageSize ||
         !imageSize.width ||
         !imageSize.height ||
         !imageSize.mimeType ||

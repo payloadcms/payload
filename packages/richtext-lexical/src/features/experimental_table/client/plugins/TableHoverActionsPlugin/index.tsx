@@ -6,12 +6,14 @@ import type { JSX } from 'react'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import {
+  $getTableAndElementByKey,
   $getTableColumnIndexFromTableCellNode,
   $getTableRowIndexFromTableCellNode,
   $insertTableColumn__EXPERIMENTAL,
   $insertTableRow__EXPERIMENTAL,
   $isTableCellNode,
   $isTableNode,
+  getTableElement,
   TableNode,
 } from '@lexical/table'
 import { $findMatchingParent, mergeRegister } from '@lexical/utils'
@@ -59,66 +61,76 @@ function TableHoverActionsContainer({
       let hoveredColumnNode: null | TableCellNode = null
       let tableDOMElement: HTMLElement | null = null
 
-      editor.update(() => {
-        const maybeTableCell = $getNearestNodeFromDOMNode(tableDOMNode)
+      editor.getEditorState().read(
+        () => {
+          const maybeTableCell = $getNearestNodeFromDOMNode(tableDOMNode)
 
-        if ($isTableCellNode(maybeTableCell)) {
-          const table = $findMatchingParent(maybeTableCell, (node) => $isTableNode(node))
-          if (!$isTableNode(table)) {
-            return
-          }
+          if ($isTableCellNode(maybeTableCell)) {
+            const table = $findMatchingParent(maybeTableCell, (node) => $isTableNode(node))
+            if (!$isTableNode(table)) {
+              return
+            }
 
-          tableDOMElement = editor.getElementByKey(table?.getKey())
+            tableDOMElement = getTableElement(table, editor.getElementByKey(table.getKey()))
 
-          if (tableDOMElement) {
-            const rowCount = table.getChildrenSize()
-            const colCount =
-              // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-              ((table as TableNode).getChildAtIndex(0) as TableRowNode)?.getChildrenSize()
+            if (tableDOMElement) {
+              const rowCount = table.getChildrenSize()
+              const colCount = (table.getChildAtIndex(0) as TableRowNode)?.getChildrenSize()
 
-            const rowIndex = $getTableRowIndexFromTableCellNode(maybeTableCell)
-            const colIndex = $getTableColumnIndexFromTableCellNode(maybeTableCell)
+              const rowIndex = $getTableRowIndexFromTableCellNode(maybeTableCell)
+              const colIndex = $getTableColumnIndexFromTableCellNode(maybeTableCell)
 
-            if (rowIndex === rowCount - 1) {
-              hoveredRowNode = maybeTableCell
-            } else if (colIndex === colCount - 1) {
-              hoveredColumnNode = maybeTableCell
+              if (rowIndex === rowCount - 1) {
+                hoveredRowNode = maybeTableCell
+              } else if (colIndex === colCount - 1) {
+                hoveredColumnNode = maybeTableCell
+              }
             }
           }
-        }
-      })
+        },
+        { editor },
+      )
 
-      if (tableDOMElement) {
-        const {
-          bottom: tableElemBottom,
-          height: tableElemHeight,
-          left: tableElemLeft,
-          right: tableElemRight,
+      if (!tableDOMElement) {
+        return
+      }
+
+      // this is the scrollable div container of the table (in case of overflow)
+      const tableContainerElement = (tableDOMElement as HTMLTableElement).parentElement
+
+      if (!tableContainerElement) {
+        return
+      }
+
+      const {
+        bottom: tableElemBottom,
+        height: tableElemHeight,
+        left: tableElemLeft,
+        right: tableElemRight,
+        width: tableElemWidth,
+        y: tableElemY,
+      } = tableContainerElement.getBoundingClientRect()
+
+      const { left: editorElemLeft, y: editorElemY } = anchorElem.getBoundingClientRect()
+
+      if (hoveredRowNode) {
+        setShownColumn(false)
+        setShownRow(true)
+        setPosition({
+          height: BUTTON_WIDTH_PX,
+          left: tableElemLeft - editorElemLeft,
+          top: tableElemBottom - editorElemY + 5,
           width: tableElemWidth,
-          y: tableElemY,
-        } = (tableDOMElement as HTMLTableElement).getBoundingClientRect()
-
-        const { left: editorElemLeft, y: editorElemY } = anchorElem.getBoundingClientRect()
-
-        if (hoveredRowNode) {
-          setShownColumn(false)
-          setShownRow(true)
-          setPosition({
-            height: BUTTON_WIDTH_PX,
-            left: tableElemLeft - editorElemLeft,
-            top: tableElemBottom - editorElemY + 5,
-            width: tableElemWidth,
-          })
-        } else if (hoveredColumnNode) {
-          setShownColumn(true)
-          setShownRow(false)
-          setPosition({
-            height: tableElemHeight,
-            left: tableElemRight - editorElemLeft + 5,
-            top: tableElemY - editorElemY,
-            width: BUTTON_WIDTH_PX,
-          })
-        }
+        })
+      } else if (hoveredColumnNode) {
+        setShownColumn(true)
+        setShownRow(false)
+        setPosition({
+          height: tableElemHeight,
+          left: tableElemRight - editorElemLeft + 5,
+          top: tableElemY - editorElemY,
+          width: BUTTON_WIDTH_PX,
+        })
       }
     },
     50,
@@ -154,37 +166,37 @@ function TableHoverActionsContainer({
       editor.registerMutationListener(
         TableNode,
         (mutations) => {
-          editor.getEditorState().read(() => {
-            for (const [key, type] of mutations) {
-              const tableDOMElement = editor.getElementByKey(key)
-
-              switch (type) {
-                case 'created':
-                  tableSetRef.current.add(key)
-                  setShouldListenMouseMove(tableSetRef.current.size > 0)
-                  if (tableDOMElement) {
-                    tableResizeObserver.observe(tableDOMElement)
+          editor.getEditorState().read(
+            () => {
+              let resetObserver = false
+              for (const [key, type] of mutations) {
+                switch (type) {
+                  case 'created': {
+                    tableSetRef.current.add(key)
+                    resetObserver = true
+                    break
                   }
-                  break
-
-                case 'destroyed':
-                  tableSetRef.current.delete(key)
-                  setShouldListenMouseMove(tableSetRef.current.size > 0)
-                  // Reset resize observers
-                  tableResizeObserver.disconnect()
-                  tableSetRef.current.forEach((tableKey: NodeKey) => {
-                    const tableElement = editor.getElementByKey(tableKey)
-                    if (tableElement) {
-                      tableResizeObserver.observe(tableElement)
-                    }
-                  })
-                  break
-
-                default:
-                  break
+                  case 'destroyed': {
+                    tableSetRef.current.delete(key)
+                    resetObserver = true
+                    break
+                  }
+                  default:
+                    break
+                }
               }
-            }
-          })
+              if (resetObserver) {
+                // Reset resize observers
+                tableResizeObserver.disconnect()
+                for (const tableKey of tableSetRef.current) {
+                  const { tableElement } = $getTableAndElementByKey(tableKey)
+                  tableResizeObserver.observe(tableElement)
+                }
+                setShouldListenMouseMove(tableSetRef.current.size > 0)
+              }
+            },
+            { editor },
+          )
         },
         { skipInitialization: false },
       ),
@@ -215,6 +227,7 @@ function TableHoverActionsContainer({
     <>
       {isShownRow && (
         <button
+          aria-label="Add Row"
           className={editorConfig.editorConfig.lexical.theme.tableAddRows}
           onClick={() => insertAction(true)}
           style={{ ...position }}
@@ -223,6 +236,7 @@ function TableHoverActionsContainer({
       )}
       {isShownColumn && (
         <button
+          aria-label="Add Column"
           className={editorConfig.editorConfig.lexical.theme.tableAddColumns}
           onClick={() => insertAction(false)}
           style={{ ...position }}

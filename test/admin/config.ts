@@ -16,9 +16,11 @@ import { CollectionGroup2B } from './collections/Group2B.js'
 import { CollectionHidden } from './collections/Hidden.js'
 import { CollectionNoApiView } from './collections/NoApiView.js'
 import { CollectionNotInView } from './collections/NotInView.js'
+import { Orders } from './collections/Orders.js'
 import { Posts } from './collections/Posts.js'
 import { UploadCollection } from './collections/Upload.js'
 import { Users } from './collections/Users.js'
+import { with300Documents } from './collections/With300Documents.js'
 import { CustomGlobalViews1 } from './globals/CustomViews1.js'
 import { CustomGlobalViews2 } from './globals/CustomViews2.js'
 import { Global } from './globals/Global.js'
@@ -155,6 +157,7 @@ export default buildConfigWithDefaults({
     Geo,
     DisableDuplicate,
     BaseListFilter,
+    with300Documents,
   ],
   globals: [
     GlobalHidden,
@@ -177,6 +180,7 @@ export default buildConfigWithDefaults({
     },
   },
   localization: {
+    defaultLocalePublishOption: 'active',
     defaultLocale: 'en',
     locales: [
       {

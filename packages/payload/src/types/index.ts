@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { I18n, TFunction } from '@payloadcms/translations'
 import type DataLoader from 'dataloader'
 import type { URL } from 'url'
@@ -18,7 +19,7 @@ import type {
   TypedLocale,
   TypedUser,
 } from '../index.js'
-import type { validOperators } from './constants.js'
+import type { Operator } from './constants.js'
 export type { Payload as Payload } from '../index.js'
 
 export type CustomPayloadRequestProperties = {
@@ -29,8 +30,11 @@ export type CustomPayloadRequestProperties = {
   /**
    * The requested locale if specified
    * Only available for localized collections
+   *
+   * Suppressing warning below as it is a valid use case - won't be an issue if generated types exist
    */
-  locale?: TypedLocale
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+  locale?: 'all' | TypedLocale
   /**
    * The payload object
    */
@@ -80,7 +84,7 @@ type PayloadRequestData = {
    * use either:
    *  1. `const data = await req.json()`
    *
-   *  2. import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
+   *  2. import { addDataAndFileToRequest } from 'payload'
    *    `await addDataAndFileToRequest(req)`
    * */
   data?: JsonObject
@@ -98,7 +102,7 @@ export type PayloadRequest = CustomPayloadRequestProperties &
   PayloadRequestData &
   Required<Pick<Request, 'headers'>>
 
-export type Operator = (typeof validOperators)[number]
+export type { Operator }
 
 // Makes it so things like passing new Date() will error
 export type JsonValue = JsonArray | JsonObject | unknown //Date | JsonArray | JsonObject | boolean | null | number | string // TODO: Evaluate proper, strong type for this
@@ -236,3 +240,5 @@ export type TransformGlobalWithSelect<
   : DataFromGlobalSlug<TSlug>
 
 export type PopulateType = Partial<TypedCollectionSelect>
+
+export type ResolvedFilterOptions = { [collection: string]: Where }

@@ -6,6 +6,10 @@
     flex-direction: column;
     gap: var(--base);
 
+    [role='banner'] {
+      display: none !important;
+    }
+
     &__field {
       overflow-wrap: anywhere;
       display: flex;

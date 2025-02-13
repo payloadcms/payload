@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Access, Config } from '../config/types.js'
 
@@ -6,7 +7,9 @@ import { findByIDHandler } from './requestHandlers/findOne.js'
 import { updateHandler } from './requestHandlers/update.js'
 
 const preferenceAccess: Access = ({ req }) => {
-  if (!req.user) return false
+  if (!req.user) {
+    return false
+  }
 
   return {
     'user.value': {
@@ -51,6 +54,7 @@ const getPreferencesCollection = (config: Config): CollectionConfig => ({
             if (!req?.user) {
               return null
             }
+
             return {
               relationTo: req?.user.collection,
               value: req?.user.id,
@@ -72,6 +76,17 @@ const getPreferencesCollection = (config: Config): CollectionConfig => ({
     {
       name: 'value',
       type: 'json',
+      validate: (value) => {
+        if (value) {
+          try {
+            JSON.parse(JSON.stringify(value))
+          } catch {
+            return 'Invalid JSON'
+          }
+        }
+
+        return true
+      },
     },
   ],
   lockDocuments: false,

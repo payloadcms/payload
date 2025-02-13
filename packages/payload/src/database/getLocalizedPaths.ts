@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { Field, FlattenedField } from '../fields/config/types.js'
 import type { Payload } from '../index.js'
 import type { PathToQuery } from './queryValidation/types.js'

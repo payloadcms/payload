@@ -11,12 +11,11 @@ import type { JSXConverters } from './converter/types.js'
 
 import { defaultJSXConverters } from './converter/defaultConverters.js'
 import { convertLexicalToJSX } from './converter/index.js'
-import './index.css'
 
 export type JSXConvertersFunction<
   T extends { [key: string]: any; type?: string } =
     | DefaultNodeTypes
-    | SerializedBlockNode<{ blockName?: null | string; blockType: string }>
+    | SerializedBlockNode<{ blockName?: null | string }>
     | SerializedInlineBlockNode<{ blockName?: null | string; blockType: string }>,
 > = (args: { defaultConverters: JSXConverters<DefaultNodeTypes> }) => JSXConverters<T>
 
@@ -34,6 +33,10 @@ type RichTextProps = {
    */
   data: SerializedEditorState
   /**
+   * If true, removes the container div wrapper.
+   */
+  disableContainer?: boolean
+  /**
    * If true, disables indentation globally. If an array, disables for specific node `type` values.
    */
   disableIndent?: boolean | string[]
@@ -47,6 +50,7 @@ export const RichText: React.FC<RichTextProps> = ({
   className,
   converters,
   data: editorState,
+  disableContainer,
   disableIndent,
   disableTextAlign,
 }) => {
@@ -65,18 +69,21 @@ export const RichText: React.FC<RichTextProps> = ({
     finalConverters = defaultJSXConverters
   }
 
-  return (
-    <div className={className ?? 'payload-richtext'}>
-      {editorState &&
-        !Array.isArray(editorState) &&
-        typeof editorState === 'object' &&
-        'root' in editorState &&
-        convertLexicalToJSX({
-          converters: finalConverters,
-          data: editorState,
-          disableIndent,
-          disableTextAlign,
-        })}
-    </div>
-  )
+  const content =
+    editorState &&
+    !Array.isArray(editorState) &&
+    typeof editorState === 'object' &&
+    'root' in editorState &&
+    convertLexicalToJSX({
+      converters: finalConverters,
+      data: editorState,
+      disableIndent,
+      disableTextAlign,
+    })
+
+  if (disableContainer) {
+    return <>{content}</>
+  }
+
+  return <div className={className ?? 'payload-richtext'}>{content}</div>
 }

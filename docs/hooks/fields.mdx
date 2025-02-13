@@ -27,7 +27,7 @@ All Field Hooks accept an array of synchronous or asynchronous functions. These 
 
 <Banner type="warning">
   **Important:**
-  Due to GraphQL's typed nature, changing the type of data that you return from a field will produce errors in the [GraphQL API](../graphql/overview). If you need to change the shape or type of data, consider [Collection Hooks](./collections) or [Global Hooks](./hooks) instead.
+  Due to GraphQL's typed nature, changing the type of data that you return from a field will produce errors in the [GraphQL API](../graphql/overview). If you need to change the shape or type of data, consider [Collection Hooks](./collections) or [Global Hooks](./globals) instead.
 </Banner>
 
 To add hooks to a Field, use the `hooks` property in your [Field Config](../fields/overview):
@@ -71,6 +71,8 @@ The following arguments are provided to all Field Hooks:
 | **`schemaPath`**         | The path of the [Field](../fields/overview) in the schema.                                                                                                                                                                                  |
 | **`siblingData`**        | The data of sibling fields adjacent to the field that the Hook is running against.        |
 | **`siblingDocWithLocales`**      | The sibling data of the Document with all [Locales](../configuration/localization).        |
+| **`siblingFields`**      | The sibling fields of the field which the hook is running against.
+       |
 | **`value`**              | The value of the [Field](../fields/overview).                                                                                                                                                                                               |
 
 <Banner type="success">
@@ -80,7 +82,13 @@ The following arguments are provided to all Field Hooks:
 
 ### beforeValidate
 
-Runs before the `update` operation. This hook allows you to pre-process or format field data before it undergoes validation.
+Runs during the `create` and `update` operations. This hook allows you to add or format data before the incoming data is validated server-side.
+
+Please do note that this does not run before client-side validation. If you render a custom field component in your front-end and provide it with a `validate` function, the order that validations will run in is:
+
+1. `validate` runs on the client
+2. if successful, `beforeValidate` runs on the server
+3. `validate` runs on the server
 
 ```ts
 import type { Field } from 'payload'

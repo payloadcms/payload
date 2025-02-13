@@ -43,7 +43,7 @@ describe('Text', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, serverURL } = await initPayloadE2ENoConfig({
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
       // prebuild,
     }))
@@ -65,7 +65,7 @@ describe('Text', () => {
     if (client) {
       await client.logout()
     }
-    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
+    client = new RESTClient({ defaultSlug: 'users', serverURL })
     await client.login()
 
     await ensureCompilationIsDone({ page, serverURL })
@@ -168,6 +168,7 @@ describe('Text', () => {
     await upsertPrefs<Config, GeneratedTypes<any>>({
       payload,
       user: client.user,
+      key: 'text-fields-list',
       value: {
         columns: [
           {
@@ -238,5 +239,45 @@ describe('Text', () => {
     await saveDocAndAssert(page)
     await expect(field.locator('.rs__value-container')).toContainText(input)
     await expect(field.locator('.rs__value-container')).toContainText(furtherInput)
+  })
+
+  test('should allow editing hasMany text field values by clicking', async () => {
+    const originalText = 'original'
+    const newText = 'new'
+
+    await page.goto(url.create)
+
+    // fill required field
+    const requiredField = page.locator('#field-text')
+    await requiredField.fill(String(originalText))
+
+    const field = page.locator('.field-hasMany')
+
+    // Add initial value
+    await field.click()
+    await page.keyboard.type(originalText)
+    await page.keyboard.press('Enter')
+
+    // Click to edit existing value
+    const value = field.locator('.multi-value-label__text')
+    await value.click()
+    await value.dblclick()
+    await page.keyboard.type(newText)
+    await page.keyboard.press('Enter')
+
+    await saveDocAndAssert(page)
+    await expect(field.locator('.rs__value-container')).toContainText(`${newText}`)
+  })
+
+  test('should not allow editing hasMany text field values when disabled', async () => {
+    await page.goto(url.create)
+    const field = page.locator('.field-readOnlyHasMany')
+
+    // Try to click to edit
+    const value = field.locator('.multi-value-label__text')
+    await value.click({ force: true })
+
+    // Verify it does not become editable
+    await expect(field.locator('.multi-value-label__text')).not.toHaveClass(/.*--editable/)
   })
 })

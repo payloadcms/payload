@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { AuthStrategyFunctionArgs, AuthStrategyResult } from './index.js'
 
 export const executeAuthStrategies = async (
@@ -7,6 +8,9 @@ export const executeAuthStrategies = async (
     async (accumulatorPromise, strategy) => {
       const result: AuthStrategyResult = await accumulatorPromise
       if (!result.user) {
+        // add the configured AuthStrategy `name` to the strategy function args
+        args.strategyName = strategy.name
+
         return strategy.authenticate(args)
       }
       return result

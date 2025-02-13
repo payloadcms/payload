@@ -54,6 +54,7 @@ const generateEnvContent = (
     .filter((line) => line.includes('=') && !line.startsWith('#'))
     .forEach((line) => {
       const [key, value] = line.split('=')
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       envVars[key] = value
     })
 
@@ -78,6 +79,8 @@ export async function manageEnvFiles(args: {
 }): Promise<void> {
   const { cliArgs, databaseType, databaseUri, payloadSecret, projectDir, template } = args
 
+  const debugFlag = cliArgs['--debug']
+
   if (cliArgs['--dry-run']) {
     debug(`DRY RUN: Environment files managed`)
     return
@@ -100,7 +103,10 @@ export async function manageEnvFiles(args: {
       updatedExampleContents = updateEnvExampleVariables(envExampleContents, databaseType)
 
       await fs.writeFile(envExamplePath, updatedExampleContents.trimEnd() + '\n')
-      debug(`.env.example file successfully updated`)
+
+      if (debugFlag) {
+        debug(`.env.example file successfully updated`)
+      }
     } else {
       updatedExampleContents = `# Added by Payload\nDATABASE_URI=your-connection-string-here\nPAYLOAD_SECRET=YOUR_SECRET_HERE\n`
       await fs.writeFile(envExamplePath, updatedExampleContents.trimEnd() + '\n')
@@ -116,7 +122,9 @@ export async function manageEnvFiles(args: {
     )
     await fs.writeFile(envPath, `# Added by Payload\n${envContent.trimEnd()}\n`)
 
-    debug(`.env file successfully created or updated`)
+    if (debugFlag) {
+      debug(`.env file successfully created or updated`)
+    }
   } catch (err: unknown) {
     error('Unable to manage environment files')
     if (err instanceof Error) {

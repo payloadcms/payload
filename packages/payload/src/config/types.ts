@@ -1,6 +1,8 @@
+// @ts-strict-ignore
 import type {
   DefaultTranslationKeys,
   DefaultTranslationsObject,
+  I18n,
   I18nClient,
   I18nOptions,
   TFunction,
@@ -18,7 +20,10 @@ import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type { DocumentTabConfig, RichTextAdapter } from '../admin/types.js'
 import type {
   AdminViewConfig,
+  DocumentSubViewTypes,
+  ServerPropsFromView,
   ServerSideEditViewProps,
+  ViewTypes,
   VisibleEntities,
 } from '../admin/views/types.js'
 import type { SanitizedPermissions } from '../auth/index.js'
@@ -400,6 +405,7 @@ type ClientProps = {
 }
 
 export type ServerProps = {
+  readonly documentSubViewType?: DocumentSubViewTypes
   readonly i18n: I18nClient
   readonly locale?: Locale
   readonly params?: { [key: string]: string | string[] | undefined }
@@ -407,6 +413,7 @@ export type ServerProps = {
   readonly permissions?: SanitizedPermissions
   readonly searchParams?: { [key: string]: string | string[] | undefined }
   readonly user?: TypedUser
+  readonly viewType?: ViewTypes
   readonly visibleEntities?: VisibleEntities
 } & ClientProps
 
@@ -419,6 +426,32 @@ export const serverProps: (keyof ServerProps)[] = [
   'searchParams',
   'permissions',
 ]
+
+export type Timezone = {
+  label: string
+  value: string
+}
+
+type SupportedTimezonesFn = (args: { defaultTimezones: Timezone[] }) => Timezone[]
+
+type TimezonesConfig = {
+  /**
+   * The default timezone to use for the admin panel.
+   */
+  defaultTimezone?: string
+  /**
+   * Provide your own list of supported timezones for the admin panel
+   *
+   * Values should be IANA timezone names, eg. `America/New_York`
+   *
+   * We use `@date-fns/tz` to handle timezones
+   */
+  supportedTimezones?: SupportedTimezonesFn | Timezone[]
+}
+
+type SanitizedTimezoneConfig = {
+  supportedTimezones: Timezone[]
+} & Omit<TimezonesConfig, 'supportedTimezones'>
 
 export type CustomComponent<TAdditionalProps extends object = Record<string, any>> =
   PayloadComponent<ServerProps & TAdditionalProps, TAdditionalProps>
@@ -450,12 +483,28 @@ export type BaseLocalizationConfig = {
    * @example `"en"`
    */
   defaultLocale: string
+  /**
+   * Change the locale used by the default Publish button.
+   * If set to `all`, all locales will be published.
+   * If set to `active`, only the locale currently being edited will be published.
+   * The non-default option will be available via the secondary button.
+   * @default 'all'
+   */
+  defaultLocalePublishOption?: 'active' | 'all'
   /** Set to `true` to let missing values in localised fields fall back to the values in `defaultLocale`
    *
    * If false, then no requests will fallback unless a fallbackLocale is specified in the request.
    * @default true
    */
   fallback?: boolean
+  /**
+   * Define a function to filter the locales made available in Payload admin UI
+   * based on user.
+   */
+  filterAvailableLocales?: (args: {
+    locales: Locale[]
+    req: PayloadRequest
+  }) => Locale[] | Promise<Locale[]>
 }
 
 export type LocalizationConfigWithNoLabels = Prettify<
@@ -789,7 +838,13 @@ export type Config = {
      * dependency is 'component'
      */
     dependencies?: AdminDependencies
-    /** If set to true, the entire Admin panel will be disabled. */
+    /**
+     * @deprecated
+     * This option is deprecated and will be removed in v4.
+     * To disable the admin panel itself, delete your `/app/(payload)/admin` directory.
+     * To disable all REST API and GraphQL endpoints, delete your `/app/(payload)/api` directory.
+     * Note: If you've modified the default paths via `admin.routes`, delete those directories instead.
+     */
     disable?: boolean
     importMap?: {
       /**
@@ -797,7 +852,6 @@ export type Config = {
        * @default true
        */
       autoGenerate?: boolean
-
       /** The base directory for component paths starting with /.
        *
        * By default, this is process.cwd()
@@ -853,6 +907,10 @@ export type Config = {
      * @default 'all' // The theme can be configured by users
      */
     theme?: 'all' | 'dark' | 'light'
+    /**
+     * Configure timezone related settings for the admin panel.
+     */
+    timezones?: TimezonesConfig
     /** The slug of a Collection that you want to be used to log in to the Admin dashboard. */
     user?: string
   }
@@ -1104,7 +1162,16 @@ export type Config = {
      * Allows you to modify the base JSON schema that is generated during generate:types. This JSON schema will be used
      * to generate the TypeScript interfaces.
      */
-    schema?: Array<(args: { jsonSchema: JSONSchema4 }) => JSONSchema4>
+    schema?: Array<
+      (args: {
+        collectionIDFieldTypes: {
+          [key: string]: 'number' | 'string'
+        }
+        config: SanitizedConfig
+        i18n: I18n
+        jsonSchema: JSONSchema4
+      }) => JSONSchema4
+    >
   }
   /**
    * Customize the handling of incoming file uploads for collections that have uploads enabled.
@@ -1113,6 +1180,9 @@ export type Config = {
 }
 
 export type SanitizedConfig = {
+  admin: {
+    timezones: SanitizedTimezoneConfig
+  } & DeepRequired<Config['admin']>
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */
   editor?: RichTextAdapter<any, any, any>
@@ -1137,7 +1207,7 @@ export type SanitizedConfig = {
   // E.g. in packages/ui/src/graphics/Account/index.tsx in getComponent, if avatar.Component is casted to what it's supposed to be,
   // the result type is different
   DeepRequired<Config>,
-  'collections' | 'editor' | 'endpoint' | 'globals' | 'i18n' | 'localization' | 'upload'
+  'admin' | 'collections' | 'editor' | 'endpoint' | 'globals' | 'i18n' | 'localization' | 'upload'
 >
 
 export type EditConfig = EditConfigWithoutRoot | EditConfigWithRoot
@@ -1185,3 +1255,5 @@ export type EntityDescriptionFunction = ({ t }: { t: TFunction }) => string
 export type EntityDescription = EntityDescriptionFunction | Record<string, string> | string
 
 export type { EmailAdapter, SendEmailOptions }
+
+export type { DocumentSubViewTypes, ServerPropsFromView, ViewTypes }

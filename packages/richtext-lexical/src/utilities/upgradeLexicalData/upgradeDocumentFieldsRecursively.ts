@@ -45,11 +45,11 @@ export const upgradeDocumentFieldsRecursively = ({
       })
     } else if (Array.isArray(data[field.name])) {
       if (field.type === 'blocks') {
-        ;(data[field.name] as Record<string, unknown>[]).forEach((row, i) => {
+        ;(data[field.name] as Record<string, unknown>[]).forEach((row) => {
           const block = field.blocks.find(({ slug }) => slug === row?.blockType)
           if (block) {
             found += upgradeDocumentFieldsRecursively({
-              data: (data[field.name] as Record<string, unknown>[])[i],
+              data: row,
               fields: block.fields,
               found,
             })
@@ -58,9 +58,9 @@ export const upgradeDocumentFieldsRecursively = ({
       }
 
       if (field.type === 'array') {
-        ;(data[field.name] as Record<string, unknown>[]).forEach((_, i) => {
+        ;(data[field.name] as Record<string, unknown>[]).forEach((row) => {
           found += upgradeDocumentFieldsRecursively({
-            data: (data[field.name] as Record<string, unknown>[])[i],
+            data: row,
             fields: field.fields,
             found,
           })

@@ -64,7 +64,7 @@ export const MyUploadField: Field = {
 | **`displayPreview`**   | Enable displaying preview of the uploaded file. Overrides related Collection's `displayPreview` option. [More](/docs/upload/overview#collection-upload-options).            |
 | **`localized`**        | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config.                                             |
 | **`required`**         | Require this field to have a value.                                                                                                                                         |
-| **`admin`**            | Admin-specific configuration. [Admin Options](../admin/fields#admin-options).                                                                                               |
+| **`admin`**            | Admin-specific configuration. [Admin Options](./overview#admin-options).                                                                                               |
 | **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                   |
 | **`typescriptSchema`** | Override field type generation with providing a JSON schema                                                                                                                 |
 | **`virtual`**          | Provide `true` to disable field in the database. See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges)            |
@@ -128,9 +128,9 @@ You can learn more about writing queries [here](/docs/queries/overview).
 <Banner type="warning">
   **Note:**
 
-  When an upload field has both **filterOptions** and a custom{' '}
-  **validate** function, the api will not validate **filterOptions**{' '}
-  unless you call the default upload field validation function imported from{' '}
+  When an upload field has both **filterOptions** and a custom
+  **validate** function, the api will not validate **filterOptions**
+  unless you call the default upload field validation function imported from
   **payload/shared** in your validate function.
 </Banner>
 

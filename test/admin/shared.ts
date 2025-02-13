@@ -44,6 +44,8 @@ export const customDefaultTabMetaTitle = 'Custom Default Tab Meta Title'
 
 export const customVersionsTabMetaTitle = 'Custom Versions Tab Meta Title'
 
+export const customTabAdminDescription = 'Custom Tab Admin Description'
+
 export const customViewMetaTitle = 'Custom Tab Meta Title'
 
 export const customNestedTabViewTitle = 'Custom Nested Tab View'

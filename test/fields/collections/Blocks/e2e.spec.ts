@@ -51,7 +51,7 @@ describe('Block fields', () => {
     if (client) {
       await client.logout()
     }
-    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
+    client = new RESTClient({ defaultSlug: 'users', serverURL })
     await client.login()
 
     await ensureCompilationIsDone({ page, serverURL })
@@ -81,7 +81,36 @@ describe('Block fields', () => {
     // ensure the block was appended to the rows
     const addedRow = page.locator('#field-blocks .blocks-field__row').last()
     await expect(addedRow).toBeVisible()
-    await expect(addedRow.locator('.blocks-field__block-pill-content')).toContainText('Content')
+    await expect(addedRow.locator('.blocks-field__block-header')).toHaveText(
+      'Custom Block Label: Content 04',
+    )
+  })
+
+  test('should reset search state in blocks drawer on re-open', async () => {
+    await page.goto(url.create)
+    const addButton = page.locator('#field-blocks > .blocks-field__drawer-toggler')
+    await expect(addButton).toContainText('Add Block')
+    await addButton.click()
+
+    const blocksDrawer = page.locator('[id^=drawer_1_blocks-drawer-]')
+    await expect(blocksDrawer).toBeVisible()
+
+    const searchInput = page.locator('.block-search__input')
+    await searchInput.fill('Number')
+
+    // select the first block in the drawer
+    const firstBlockSelector = blocksDrawer
+      .locator('.blocks-drawer__blocks .blocks-drawer__block')
+      .first()
+
+    await expect(firstBlockSelector).toContainText('Number')
+
+    await page.locator('.drawer__header__close').click()
+    await addButton.click()
+
+    await expect(blocksDrawer).toBeVisible()
+    await expect(searchInput).toHaveValue('')
+    await expect(firstBlockSelector).toContainText('Content')
   })
 
   test('should open blocks drawer from block row and add below', async () => {
@@ -108,7 +137,9 @@ describe('Block fields', () => {
     // ensure the block was inserted beneath the first in the rows
     const addedRow = page.locator('#field-blocks #blocks-row-1')
     await expect(addedRow).toBeVisible()
-    await expect(addedRow.locator('.blocks-field__block-pill-content')).toContainText('Content') // went from `Number` to `Content`
+    await expect(addedRow.locator('.blocks-field__block-header')).toHaveText(
+      'Custom Block Label: Content 02',
+    ) // went from `Number` to `Content`
   })
 
   test('should duplicate block', async () => {
@@ -166,6 +197,25 @@ describe('Block fields', () => {
     const firstRow = page.locator('#field-i18nBlocks .blocks-field__row').first()
     await expect(firstRow).toBeVisible()
     await expect(firstRow.locator('.blocks-field__block-pill-text')).toContainText('Text en')
+  })
+
+  test('should render custom block row label', async () => {
+    await page.goto(url.create)
+    const addButton = page.locator('#field-blocks > .blocks-field__drawer-toggler')
+    await addButton.click()
+    const blocksDrawer = page.locator('[id^=drawer_1_blocks-drawer-]')
+
+    await blocksDrawer
+      .locator('.blocks-drawer__block .thumbnail-card__label', {
+        hasText: 'Content',
+      })
+      .click()
+
+    await expect(
+      page.locator('#field-blocks .blocks-field__row .blocks-field__block-header', {
+        hasText: 'Custom Block Label',
+      }),
+    ).toBeVisible()
   })
 
   test('should add different blocks with similar field configs', async () => {
@@ -238,7 +288,17 @@ describe('Block fields', () => {
 
     await page.click('#action-save', { delay: 100 })
     await expect(page.locator('.payload-toast-container')).toContainText(
-      'The following field is invalid: blocksWithMinRows',
+      'The following field is invalid: Blocks With Min Rows',
+    )
+  })
+
+  test('ensure functions passed to blocks field labels property are respected', async () => {
+    await page.goto(url.create)
+
+    const blocksFieldWithLabels = page.locator('#field-blockWithLabels')
+
+    await expect(blocksFieldWithLabels.locator('.blocks-field__drawer-toggler')).toHaveText(
+      'Add Account',
     )
   })
 

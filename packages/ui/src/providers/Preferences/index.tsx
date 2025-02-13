@@ -116,6 +116,7 @@ export const PreferencesProvider: React.FC<{ children?: React.ReactNode }> = ({ 
         if (newValue === currentPreference) {
           return
         }
+
         pendingUpdate.current[key] = newValue
       }
 

@@ -4,9 +4,10 @@ import type {
   SerializedParagraphNode,
   SerializedTextNode,
 } from '@payloadcms/richtext-lexical/lexical'
-import type { BrowserContext, Page } from '@playwright/test'
+import type { BrowserContext, Locator, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { except } from 'drizzle-orm/mysql-core'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -46,13 +47,10 @@ let serverURL: string
  */
 async function navigateToLexicalFields(
   navigateToListView: boolean = true,
-  localized: boolean = false,
+  collectionSlug: string = 'lexical-fields',
 ) {
   if (navigateToListView) {
-    const url: AdminUrlUtil = new AdminUrlUtil(
-      serverURL,
-      localized ? 'lexical-localized-fields' : 'lexical-fields',
-    )
+    const url: AdminUrlUtil = new AdminUrlUtil(serverURL, collectionSlug)
     await page.goto(url.list)
   }
 
@@ -63,13 +61,21 @@ async function navigateToLexicalFields(
   await linkToDoc.click()
 
   await page.waitForURL(`**${linkDocHref}`)
+
+  if (collectionSlug === 'lexical-fields') {
+    const richTextField = page.locator('.rich-text-lexical').nth(2) // second
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+    // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
+    await expect(richTextField.locator('.lexical-block')).toHaveCount(10)
+  }
 }
 
 describe('lexicalMain', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, serverURL } = await initPayloadE2ENoConfig({ dirname }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -96,7 +102,7 @@ describe('lexicalMain', () => {
     if (client) {
       await client.logout()
     }
-    client = new RESTClient(null, { defaultSlug: 'rich-text-fields', serverURL })
+    client = new RESTClient({ defaultSlug: 'rich-text-fields', serverURL })
     await client.login()
   })
 
@@ -261,6 +267,40 @@ describe('lexicalMain', () => {
     }).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
+  })
+
+  test('should be able to externally mutate editor state', async () => {
+    await navigateToLexicalFields()
+    const richTextField = page.locator('.rich-text-lexical').nth(1).locator('.editor-scroller') // first
+    await expect(richTextField).toBeVisible()
+    await richTextField.click() // Use click, because focus does not work
+    await page.keyboard.type('some text')
+    const spanInEditor = richTextField.locator('span').first()
+    await expect(spanInEditor).toHaveText('some text')
+    await saveDocAndAssert(page)
+    await page.locator('#clear-lexical-lexicalSimple').click()
+    await expect(spanInEditor).not.toBeAttached()
+  })
+
+  // This test ensures that the second state clear change is respected too, even though
+  // initialValue is stale and equal to the previous state change result value-wise
+  test('should be able to externally mutate editor state twice', async () => {
+    await navigateToLexicalFields()
+    const richTextField = page.locator('.rich-text-lexical').nth(1).locator('.editor-scroller') // first
+    await expect(richTextField).toBeVisible()
+    await richTextField.click() // Use click, because focus does not work
+    await page.keyboard.type('some text')
+    const spanInEditor = richTextField.locator('span').first()
+    await expect(spanInEditor).toHaveText('some text')
+    await saveDocAndAssert(page)
+    await page.locator('#clear-lexical-lexicalSimple').click()
+    await expect(spanInEditor).not.toBeAttached()
+
+    await richTextField.click()
+    await page.keyboard.type('some text')
+    await expect(spanInEditor).toHaveText('some text')
+    await page.locator('#clear-lexical-lexicalSimple').click()
+    await expect(spanInEditor).not.toBeAttached()
   })
 
   test('should be able to bold text using floating select toolbar', async () => {
@@ -931,6 +971,170 @@ describe('lexicalMain', () => {
     })
   })
 
+  test('ensure internal links can be created', async () => {
+    await navigateToLexicalFields()
+    const richTextField = page.locator('.rich-text-lexical').first()
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+    // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
+    await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
+      10,
+    )
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+
+    const paragraph = richTextField.locator('.LexicalEditorTheme__paragraph').first()
+    await paragraph.scrollIntoViewIfNeeded()
+    await expect(paragraph).toBeVisible()
+    /**
+     * Type some text
+     */
+    await paragraph.click()
+    await page.keyboard.type('Link')
+
+    // Select "Link" by pressing shift + arrow left
+    for (let i = 0; i < 4; i++) {
+      await page.keyboard.press('Shift+ArrowLeft')
+    }
+    // Ensure inline toolbar appeared
+    const inlineToolbar = page.locator('.inline-toolbar-popup')
+    await expect(inlineToolbar).toBeVisible()
+
+    const linkButton = inlineToolbar.locator('.toolbar-popup__button-link')
+    await expect(linkButton).toBeVisible()
+    await linkButton.click()
+
+    /**
+     * Link Drawer
+     */
+    const linkDrawer = page.locator('dialog[id^=drawer_1_lexical-rich-text-link-]').first() // IDs starting with drawer_1_lexical-rich-text-link- (there's some other symbol after the underscore)
+    await expect(linkDrawer).toBeVisible()
+    await wait(500)
+
+    // Check if has text "Internal Link"
+    await expect(linkDrawer.locator('.radio-input').nth(1)).toContainText('Internal Link')
+
+    // Get radio button for internal link with text "Internal Link"
+    const radioInternalLink = linkDrawer
+      .locator('.radio-input')
+      .nth(1)
+      .locator('.radio-input__styled-radio')
+
+    await radioInternalLink.click()
+
+    const internalLinkSelect = linkDrawer
+      .locator('#field-doc .rs__control .value-container')
+      .first()
+    await internalLinkSelect.click()
+
+    await expect(linkDrawer.locator('.rs__option').nth(0)).toBeVisible()
+    await expect(linkDrawer.locator('.rs__option').nth(0)).toContainText('Rich Text') // Link to itself - that way we can also test if depth 0 works
+    await linkDrawer.locator('.rs__option').nth(0).click()
+    await expect(internalLinkSelect).toContainText('Rich Text')
+
+    await linkDrawer.locator('button').getByText('Save').first().click()
+    await expect(linkDrawer).toBeHidden()
+    await wait(1500)
+
+    await saveDocAndAssert(page)
+
+    // Check if the text is bold. It's a self-relationship, so no need to follow relationship
+    await expect(async () => {
+      const lexicalDoc: LexicalField = (
+        await payload.find({
+          collection: lexicalFieldsSlug,
+          depth: 0,
+          overrideAccess: true,
+          where: {
+            title: {
+              equals: lexicalDocData.title,
+            },
+          },
+        })
+      ).docs[0] as never
+
+      const lexicalField: SerializedEditorState =
+        lexicalDoc.lexicalRootEditor as SerializedEditorState
+
+      const firstParagraph: SerializedParagraphNode = lexicalField.root
+        .children[0] as SerializedParagraphNode
+
+      expect(firstParagraph.children).toHaveLength(1)
+
+      const linkNode = firstParagraph.children[0] as SerializedLinkNode
+      expect(linkNode?.fields?.doc?.relationTo).toBe('lexical-fields')
+      // Expect to be string
+      expect(typeof linkNode?.fields?.doc?.value).toBe('string')
+    }).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+
+    // Now check if depth 1 works
+    await expect(async () => {
+      const lexicalDoc: LexicalField = (
+        await payload.find({
+          collection: lexicalFieldsSlug,
+          depth: 1,
+          overrideAccess: true,
+          where: {
+            title: {
+              equals: lexicalDocData.title,
+            },
+          },
+        })
+      ).docs[0] as never
+
+      const lexicalField: SerializedEditorState =
+        lexicalDoc.lexicalRootEditor as SerializedEditorState
+
+      const firstParagraph: SerializedParagraphNode = lexicalField.root
+        .children[0] as SerializedParagraphNode
+
+      expect(firstParagraph.children).toHaveLength(1)
+
+      const linkNode = firstParagraph.children[0] as SerializedLinkNode
+      expect(linkNode?.fields?.doc?.relationTo).toBe('lexical-fields')
+      expect(typeof linkNode?.fields?.doc?.value).toBe('object')
+      expect(typeof (linkNode?.fields?.doc?.value as Record<string, unknown>)?.id).toBe('string')
+    }).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+  })
+
+  test('ensure link drawer displays fields if document does not have `create` permission', async () => {
+    await navigateToLexicalFields(true, 'lexical-access-control')
+    const richTextField = page.locator('.rich-text-lexical').first()
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+
+    const paragraph = richTextField.locator('.LexicalEditorTheme__paragraph').first()
+    await paragraph.scrollIntoViewIfNeeded()
+    await expect(paragraph).toBeVisible()
+    /**
+     * Type some text
+     */
+    await paragraph.click()
+    await page.keyboard.type('Text')
+
+    // Select text
+    for (let i = 0; i < 4; i++) {
+      await page.keyboard.press('Shift+ArrowLeft')
+    }
+    // Ensure inline toolbar appeared
+    const inlineToolbar = page.locator('.inline-toolbar-popup')
+    await expect(inlineToolbar).toBeVisible()
+
+    const linkButton = inlineToolbar.locator('.toolbar-popup__button-link')
+    await expect(linkButton).toBeVisible()
+    await linkButton.click()
+
+    const linkDrawer = page.locator('dialog[id^=drawer_1_lexical-rich-text-link-]').first() // IDs starting with drawer_1_lexical-rich-text-link- (there's some other symbol after the underscore)
+    await expect(linkDrawer).toBeVisible()
+
+    const urlInput = linkDrawer.locator('#field-url').first()
+
+    await expect(urlInput).toBeVisible()
+  })
+
   test('lexical cursor / selection should be preserved when swapping upload field and clicking within with its list drawer', async () => {
     await navigateToLexicalFields()
     const richTextField = page.locator('.rich-text-lexical').first()
@@ -1179,9 +1383,254 @@ describe('lexicalMain', () => {
     })
   })
 
+  test('make relationship fields update the collection when it is changed in the drawer dropdown', async () => {
+    await navigateToLexicalFields()
+    const richTextField = page.locator('.rich-text-lexical').first()
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+    // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
+    await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
+      10,
+    )
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+    await richTextField.locator('.ContentEditable__root').first().click()
+    const lastParagraph = richTextField.locator('p').first()
+    await lastParagraph.scrollIntoViewIfNeeded()
+    await expect(lastParagraph).toBeVisible()
+
+    await lastParagraph.click()
+    await page.keyboard.type('/Relationship')
+    const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
+    await expect(slashMenuPopover).toBeVisible()
+    await page.keyboard.press('Enter')
+
+    const relationshipInput = page.locator('.drawer__content .rs__input').first()
+    await expect(relationshipInput).toBeVisible()
+    page.getByRole('heading', { name: 'Lexical Fields' })
+    await relationshipInput.click()
+    const user = page.getByRole('option', { name: 'User' })
+    await user.click()
+
+    const userListDrawer = page
+      .locator('div')
+      .filter({ hasText: /^User$/ })
+      .first()
+    await expect(userListDrawer).toBeVisible()
+    page.getByRole('heading', { name: 'Users' })
+    const button = page.getByLabel('Add new User')
+    await button.click()
+    page.getByText('Creating new User')
+  })
+
+  test('ensure links can created from clipboard and deleted', async () => {
+    await navigateToLexicalFields()
+    const richTextField = page.locator('.rich-text-lexical').first()
+    await richTextField.scrollIntoViewIfNeeded()
+    await expect(richTextField).toBeVisible()
+    // Wait until there at least 10 blocks visible in that richtext field - thus wait for it to be fully loaded
+    await expect(page.locator('.rich-text-lexical').nth(2).locator('.lexical-block')).toHaveCount(
+      10,
+    )
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+    await richTextField.locator('.ContentEditable__root').first().click()
+    const lastParagraph = richTextField.locator('p').first()
+    await lastParagraph.scrollIntoViewIfNeeded()
+    await expect(lastParagraph).toBeVisible()
+
+    await lastParagraph.click()
+
+    await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+
+    // Paste in a link copied from a html page
+    const link = '<a href="https://www.google.com">Google</a>'
+    await page.evaluate(
+      async ([link]) => {
+        const blob = new Blob([link], { type: 'text/html' })
+        const clipboardItem = new ClipboardItem({ 'text/html': blob })
+        await navigator.clipboard.write([clipboardItem])
+      },
+      [link],
+    )
+
+    await page.keyboard.press('Meta+v')
+    await page.keyboard.press('Control+v')
+
+    const linkNode = richTextField.locator('a.LexicalEditorTheme__link').first()
+    await linkNode.scrollIntoViewIfNeeded()
+    await expect(linkNode).toBeVisible()
+
+    // Check link node text and attributes
+    await expect(linkNode).toHaveText('Google')
+    await expect(linkNode).toHaveAttribute('href', 'https://www.google.com/')
+
+    // Expect floating link editor link-input to be there
+    const linkInput = richTextField.locator('.link-input').first()
+    await expect(linkInput).toBeVisible()
+
+    const linkInInput = linkInput.locator('a').first()
+    await expect(linkInInput).toBeVisible()
+
+    await expect(linkInInput).toContainText('https://www.google.com/')
+    await expect(linkInInput).toHaveAttribute('href', 'https://www.google.com/')
+
+    // Click remove button
+    const removeButton = linkInput.locator('.link-trash').first()
+    await removeButton.click()
+
+    // Expect link to be removed
+    await expect(linkNode).toBeHidden()
+  })
+
   describe('localization', () => {
-    test.skip('ensure simple localized lexical field works', async () => {
-      await navigateToLexicalFields(true, true)
+    test('ensure lexical translations from other languages do not get sent to the client', async () => {
+      await navigateToLexicalFields()
+      // Now check if the html contains "Comience a escribir"
+
+      const htmlContent = await page.content()
+
+      // Check if the HTML contains "Comience a escribir"
+      expect(htmlContent).not.toContain('Comience a escribir')
+      expect(htmlContent).not.toContain('Beginne zu tippen oder')
+      expect(htmlContent).not.toContain('Cargando...')
+      expect(htmlContent).toContain('Start typing, or press')
     })
+    test.skip('ensure simple localized lexical field works', async () => {
+      await navigateToLexicalFields(true, 'lexical-localized-fields')
+    })
+  })
+
+  test('select decoratorNodes', async () => {
+    // utils
+    const decoratorLocator = page.locator('.decorator-selected') // [data-lexical-decorator="true"]
+    const expectInsideSelectedDecorator = async (innerLocator: Locator) => {
+      await expect(decoratorLocator).toBeVisible()
+      await expect(decoratorLocator.locator(innerLocator)).toBeVisible()
+    }
+
+    // test
+    await navigateToLexicalFields()
+    const bottomOfUploadNode = page
+      .locator('.lexical-upload div')
+      .filter({ hasText: /^payload\.jpg$/ })
+      .first()
+    await bottomOfUploadNode.click()
+    await expectInsideSelectedDecorator(bottomOfUploadNode)
+
+    const textNode = page.getByText('Upload Node:', { exact: true })
+    await textNode.click()
+    await expect(decoratorLocator).toBeHidden()
+
+    const closeTagInMultiSelect = page
+      .getByRole('button', { name: 'payload.jpg Edit payload.jpg' })
+      .getByLabel('Remove')
+    await closeTagInMultiSelect.click()
+    await expect(decoratorLocator).toBeHidden()
+
+    const labelInsideCollapsableBody = page.locator('label').getByText('Sub Blocks')
+    await labelInsideCollapsableBody.click()
+    await expectInsideSelectedDecorator(labelInsideCollapsableBody)
+
+    const textNodeInNestedEditor = page.getByText('Some text below relationship node 1')
+    await textNodeInNestedEditor.click()
+    await expect(decoratorLocator).toBeHidden()
+
+    await page.getByRole('button', { name: 'Tab2' }).click()
+    await expect(decoratorLocator).toBeHidden()
+
+    const labelInsideCollapsableBody2 = page.getByText('Text2')
+    await labelInsideCollapsableBody2.click()
+    await expectInsideSelectedDecorator(labelInsideCollapsableBody2)
+
+    // TEST DELETE!
+    await page.keyboard.press('Backspace')
+    await expect(labelInsideCollapsableBody2).toBeHidden()
+
+    const monacoLabel = page.locator('label').getByText('Code')
+    await monacoLabel.click()
+    await expectInsideSelectedDecorator(monacoLabel)
+
+    const monacoCode = page.getByText('Some code')
+    await monacoCode.click()
+    await expect(decoratorLocator).toBeHidden()
+  })
+
+  test('arrow keys', async () => {
+    // utils
+    const selectedDecorator = page.locator('.decorator-selected')
+    const topLevelDecorator = page.locator(
+      '[data-lexical-decorator="true"]:not([data-lexical-decorator="true"] [data-lexical-decorator="true"])',
+    )
+    const selectedNthDecorator = async (nth: number) => {
+      await expect(selectedDecorator).toBeVisible()
+      const areSame = await selectedDecorator.evaluateHandle(
+        (el1, el2) => el1 === el2,
+        await topLevelDecorator.nth(nth).elementHandle(),
+      )
+      await expect.poll(async () => await areSame.jsonValue()).toBe(true)
+    }
+
+    // test
+    await navigateToLexicalFields()
+
+    const textNode = page.getByText('Upload Node:', { exact: true })
+    await textNode.click()
+    await expect(selectedDecorator).toBeHidden()
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(0)
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(1)
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(2)
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(3)
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(4)
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(5)
+    await page.keyboard.press('ArrowDown')
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(6)
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(7)
+    await page.keyboard.press('ArrowDown')
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(8)
+    await page.keyboard.press('ArrowDown')
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(9)
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(10)
+    await page.keyboard.press('ArrowDown')
+    await selectedNthDecorator(10)
+
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(9)
+    await page.keyboard.press('ArrowUp')
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(8)
+    await page.keyboard.press('ArrowUp')
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(7)
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(6)
+    await page.keyboard.press('ArrowUp')
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(5)
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(4)
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(3)
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(2)
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(1)
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(0)
+    await page.keyboard.press('ArrowUp')
+    await selectedNthDecorator(0)
+
+    // TODO: It would be nice to add tests with lists and nested lists
+    // before and after decoratorNodes and paragraphs. Tested manually,
+    // but these are complex cases.
   })
 })

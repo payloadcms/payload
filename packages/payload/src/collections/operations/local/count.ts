@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
 import type { Document, PayloadRequest, Where } from '../../../types/index.js'
 

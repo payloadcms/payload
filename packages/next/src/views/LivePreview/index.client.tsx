@@ -7,6 +7,7 @@ import type {
   ClientGlobalConfig,
   ClientUser,
   Data,
+  DocumentSlots,
   FormState,
   LivePreviewConfig,
 } from 'payload'
@@ -58,13 +59,26 @@ type Props = {
   readonly globalConfig?: ClientGlobalConfig
   readonly schemaPath: string
   readonly serverURL: string
+} & DocumentSlots
+
+const getAbsoluteUrl = (url) => {
+  try {
+    return new URL(url, window.location.origin).href
+  } catch {
+    return url
+  }
 }
 
 const PreviewView: React.FC<Props> = ({
   collectionConfig,
   config,
+  Description,
   fields,
   globalConfig,
+  PreviewButton,
+  PublishButton,
+  SaveButton,
+  SaveDraftButton,
   schemaPath,
 }) => {
   const {
@@ -219,6 +233,7 @@ const PreviewView: React.FC<Props> = ({
           returnLockStatus: false,
           schemaPath: entitySlug,
           signal: controller.signal,
+          skipValidation: true,
         })
 
         // Unlock the document after save
@@ -261,7 +276,7 @@ const PreviewView: React.FC<Props> = ({
   )
 
   const onChange: FormProps['onChange'][0] = useCallback(
-    async ({ formState: prevFormState }) => {
+    async ({ formState: prevFormState, submitted }) => {
       const controller = handleAbortRef(abortOnChangeRef)
 
       const currentTime = Date.now()
@@ -286,6 +301,7 @@ const PreviewView: React.FC<Props> = ({
         returnLockStatus: isLockingEnabled ? true : false,
         schemaPath,
         signal: controller.signal,
+        skipValidation: !submitted,
         updateLastEdited,
       })
 
@@ -474,6 +490,12 @@ const PreviewView: React.FC<Props> = ({
         />
         <DocumentControls
           apiURL={apiURL}
+          customComponents={{
+            PreviewButton,
+            PublishButton,
+            SaveButton,
+            SaveDraftButton,
+          }}
           data={initialData}
           disableActions={disableActions}
           hasPublishPermission={hasPublishPermission}
@@ -515,6 +537,7 @@ const PreviewView: React.FC<Props> = ({
             <DocumentFields
               AfterFields={AfterFields}
               BeforeFields={BeforeFields}
+              Description={Description}
               docPermissions={docPermissions}
               fields={fields}
               forceSidebarWrap
@@ -530,12 +553,14 @@ const PreviewView: React.FC<Props> = ({
   )
 }
 
-export const LivePreviewClient: React.FC<{
-  readonly breakpoints: LivePreviewConfig['breakpoints']
-  readonly initialData: Data
-  readonly url: string
-}> = (props) => {
-  const { breakpoints, url } = props
+export const LivePreviewClient: React.FC<
+  {
+    readonly breakpoints: LivePreviewConfig['breakpoints']
+    readonly initialData: Data
+    readonly url: string
+  } & DocumentSlots
+> = (props) => {
+  const { breakpoints, url: incomingUrl } = props
   const { collectionSlug, globalSlug } = useDocumentInfo()
 
   const {
@@ -547,14 +572,19 @@ export const LivePreviewClient: React.FC<{
     getEntityConfig,
   } = useConfig()
 
+  const url =
+    incomingUrl.startsWith('http://') || incomingUrl.startsWith('https://')
+      ? incomingUrl
+      : getAbsoluteUrl(incomingUrl)
+
   const { isPopupOpen, openPopupWindow, popupRef } = usePopupWindow({
     eventType: 'payload-live-preview',
     url,
   })
 
-  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
+  const collectionConfig = getEntityConfig({ collectionSlug })
 
-  const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
+  const globalConfig = getEntityConfig({ globalSlug })
 
   const schemaPath = collectionSlug || globalSlug
 
@@ -572,10 +602,16 @@ export const LivePreviewClient: React.FC<{
           apiRoute={apiRoute}
           collectionConfig={collectionConfig}
           config={config}
+          Description={props.Description}
           fields={(collectionConfig || globalConfig)?.fields}
           globalConfig={globalConfig}
+          PreviewButton={props.PreviewButton}
+          PublishButton={props.PublishButton}
+          SaveButton={props.SaveButton}
+          SaveDraftButton={props.SaveDraftButton}
           schemaPath={schemaPath}
           serverURL={serverURL}
+          Upload={props.Upload}
         />
       </LivePreviewProvider>
     </Fragment>

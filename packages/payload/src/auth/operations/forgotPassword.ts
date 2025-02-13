@@ -1,5 +1,6 @@
+// @ts-strict-ignore
 import crypto from 'crypto'
-import httpStatus from 'http-status'
+import { status as httpStatus } from 'http-status'
 import { URL } from 'url'
 
 import type {

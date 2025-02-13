@@ -1,23 +1,28 @@
-import { getTranslation, type I18nClient } from '@payloadcms/translations'
-import {
-  type ClientCollectionConfig,
-  type CollectionConfig,
-  type Field,
-  type ImportMap,
-  type PaginatedDocs,
-  type Payload,
-  type SanitizedCollectionConfig,
+import type {
+  ClientCollectionConfig,
+  CollectionConfig,
+  Field,
+  FilterOptionsProps,
+  ImportMap,
+  ListPreferences,
+  PaginatedDocs,
+  Payload,
+  SanitizedCollectionConfig,
+  Where,
 } from 'payload'
+import type { MarkOptional } from 'ts-essentials'
+
+import { getTranslation, type I18nClient } from '@payloadcms/translations'
 import { fieldIsHiddenOrDisabled, flattenTopLevelFields } from 'payload/shared'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import type { Column } from '../exports/client/index.js'
-import type { ColumnPreferences } from '../providers/ListQuery/index.js'
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import { buildColumnState } from '../elements/TableColumns/buildColumnState.js'
 import { filterFields } from '../elements/TableColumns/filterFields.js'
 import { getInitialColumns } from '../elements/TableColumns/getInitialColumns.js'
+
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import { Pill, SelectAll, SelectRow, Table } from '../exports/client/index.js'
 
@@ -46,6 +51,50 @@ export const renderFilters = (
     new Map() as Map<string, React.ReactNode>,
   )
 
+// export const resolveFilterOptions = async ({
+//   fields,
+//   relationTo,
+//   req,
+//   user,
+// }: { fields: Field[] } & MarkOptional<
+//   FilterOptionsProps,
+//   'blockData' | 'data' | 'id' | 'siblingData'
+// >): Promise<Map<string, Where>> => {
+//   const acc = new Map<string, Where>()
+
+//   for (const field of fields) {
+//     if (fieldIsHiddenOrDisabled(field)) {
+//       continue
+//     }
+
+//     if ('name' in field && 'filterOptions' in field && field.filterOptions) {
+//       let resolvedFilterOption = {} as Where
+
+//       if (typeof field.filterOptions === 'function') {
+//         const result = await field.filterOptions({
+//           id: undefined,
+//           blockData: undefined,
+//           data: {}, // use empty object to prevent breaking queries when accessing properties of data
+//           relationTo,
+//           req,
+//           siblingData: {}, // use empty object to prevent breaking queries when accessing properties of siblingData
+//           user,
+//         })
+
+//         if (result && typeof result === 'object') {
+//           resolvedFilterOption = result
+//         }
+//       } else {
+//         resolvedFilterOption = field.filterOptions
+//       }
+
+//       acc.set(field.name, resolvedFilterOption)
+//     }
+//   }
+
+//   return acc
+// }
+
 export const renderTable = ({
   clientCollectionConfig,
   collectionConfig,
@@ -62,8 +111,8 @@ export const renderTable = ({
 }: {
   clientCollectionConfig: ClientCollectionConfig
   collectionConfig: SanitizedCollectionConfig
-  columnPreferences: ColumnPreferences
-  columns?: ColumnPreferences
+  columnPreferences: ListPreferences['columns']
+  columns?: ListPreferences['columns']
   customCellProps?: Record<string, any>
   docs: PaginatedDocs['docs']
   drawerSlug?: string

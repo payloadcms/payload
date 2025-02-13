@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -21,6 +22,7 @@ import GroupFields from './collections/Group/index.js'
 import IndexedFields from './collections/Indexed/index.js'
 import JSONFields from './collections/JSON/index.js'
 import { LexicalFields } from './collections/Lexical/index.js'
+import { LexicalAccessControl } from './collections/LexicalAccessControl/index.js'
 import { LexicalInBlock } from './collections/LexicalInBlock/index.js'
 import { LexicalLocalizedFields } from './collections/LexicalLocalized/index.js'
 import { LexicalMigrateFields } from './collections/LexicalMigrate/index.js'
@@ -33,6 +35,7 @@ import RelationshipFields from './collections/Relationship/index.js'
 import RichTextFields from './collections/RichText/index.js'
 import RowFields from './collections/Row/index.js'
 import SelectFields from './collections/Select/index.js'
+import SelectVersionsFields from './collections/SelectVersions/index.js'
 import TabsFields from './collections/Tabs/index.js'
 import { TabsFields2 } from './collections/Tabs2/index.js'
 import TextFields from './collections/Text/index.js'
@@ -67,7 +70,8 @@ export const collectionSlugs: CollectionConfig[] = [
     ],
   },
   LexicalInBlock,
-
+  LexicalAccessControl,
+  SelectVersionsFields,
   ArrayFields,
   BlockFields,
   CheckboxFields,
@@ -125,6 +129,13 @@ export default buildConfigWithDefaults({
       client: {
         'new-value': 'client available',
       },
+    },
+    timezones: {
+      supportedTimezones: ({ defaultTimezones }) => [
+        ...defaultTimezones,
+        { label: '(GMT-6) Monterrey, Nuevo Leon', value: 'America/Monterrey' },
+      ],
+      defaultTimezone: 'America/Monterrey',
     },
   },
   localization: {

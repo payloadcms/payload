@@ -63,7 +63,7 @@ Each test directory is split up in this way specifically to reduce friction when
 
 The following command will start Payload with your config: `pnpm dev my-test-dir`. Example: `pnpm dev fields` for the test/`fields` test suite. This command will start up Payload using your config and refresh a test database on every restart. If you're using VS Code, the most common run configs are automatically added to your editor - you should be able to find them in your VS Code launch tab.
 
-By default, payload will [automatically log you in](https://payloadcms.com/docs/authentication/overview#admin-autologin) with the default credentials. To disable that, you can either pass in the --no-auto-login flag (example: `pnpm dev my-test-dir --no-auto-login`) or set the `PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN` environment variable to `false`.
+By default, payload will [automatically log you in](https://payloadcms.com/docs/authentication/overview#auto-login) with the default credentials. To disable that, you can either pass in the --no-auto-login flag (example: `pnpm dev my-test-dir --no-auto-login`) or set the `PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN` environment variable to `false`.
 
 The default credentials are `dev@payloadcms.com` as E-Mail and `test` as password. These are used in the auto-login.
 

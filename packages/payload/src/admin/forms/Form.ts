@@ -45,14 +45,13 @@ export type FieldState = {
    */
   fieldSchema?: Field
   filterOptions?: FilterOptionsResult
-  initialValue: unknown
-  isSidebar?: boolean
+  initialValue?: unknown
   passesCondition?: boolean
   requiresRender?: boolean
   rows?: Row[]
-  valid: boolean
+  valid?: boolean
   validate?: Validate
-  value: unknown
+  value?: unknown
 }
 
 export type FieldStateWithoutComponents = Omit<FieldState, 'customComponents'>
@@ -69,9 +68,16 @@ export type BuildFormStateArgs = {
   data?: Data
   docPermissions: SanitizedDocumentPermissions | undefined
   docPreferences: DocumentPreferences
+  /**
+   * In case `formState` is not the top-level, document form state, this can be passed to
+   * provide the top-level form state.
+   */
+  documentFormState?: FormState
   fallbackLocale?: false | TypedLocale
   formState?: FormState
   id?: number | string
+  initialBlockData?: Data
+  initialBlockFormState?: FormState
   /*
     If not i18n was passed, the language can be passed to init i18n
   */
@@ -85,6 +91,7 @@ export type BuildFormStateArgs = {
   req: PayloadRequest
   returnLockStatus?: boolean
   schemaPath: string
+  skipValidation?: boolean
   updateLastEdited?: boolean
 } & (
   | {

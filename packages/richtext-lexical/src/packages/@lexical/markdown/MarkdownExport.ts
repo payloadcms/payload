@@ -33,16 +33,26 @@ export function createMarkdownExport(
 
   // Export only uses text formats that are responsible for single format
   // e.g. it will filter out *** (bold, italic) and instead use separate ** and *
-  const textFormatTransformers = byType.textFormat.filter(
-    (transformer) => transformer.format.length === 1,
-  )
+  const textFormatTransformers = byType.textFormat
+    .filter((transformer) => transformer.format.length === 1)
+    // Make sure all text transformers that contain 'code' in their format are at the end of the array. Otherwise, formatted code like
+    // <strong><code>code</code></strong> will be exported as `**Bold Code**`, as the code format will be applied first, and the bold format
+    // will be applied second and thus skipped entirely, as the code format will prevent any further formatting.
+    .sort((a, b) => {
+      if (a.format.includes('code') && !b.format.includes('code')) {
+        return 1
+      } else if (!a.format.includes('code') && b.format.includes('code')) {
+        return -1
+      } else {
+        return 0
+      }
+    })
 
   return (node) => {
-    const output = []
+    const output: string[] = []
     const children = (node || $getRoot()).getChildren()
 
-    for (let i = 0; i < children.length; i++) {
-      const child = children[i]
+    children.forEach((child, i) => {
       const result = exportTopLevelElements(
         child,
         elementTransformers,
@@ -56,12 +66,12 @@ export function createMarkdownExport(
           isNewlineDelimited &&
             i > 0 &&
             !isEmptyParagraph(child) &&
-            !isEmptyParagraph(children[i - 1])
+            !isEmptyParagraph(children[i - 1]!)
             ? '\n'.concat(result)
             : result,
         )
       }
-    }
+    })
     // Ensure consecutive groups of texts are at least \n\n apart while each empty paragraph render as a newline.
     // Eg. ["hello", "", "", "hi", "\nworld"] -> "hello\n\n\nhi\n\nworld"
     return output.join('\n')
@@ -207,7 +217,7 @@ function exportTextFormat(
   const applied = new Set()
 
   for (const transformer of textTransformers) {
-    const format = transformer.format[0]
+    const format = transformer.format[0]!
     const tag = transformer.tag
 
     // dedup applied formats
@@ -226,8 +236,9 @@ function exportTextFormat(
 
   // close any tags in the same order they were applied, if necessary
   for (let i = 0; i < unclosedTags.length; i++) {
-    const nodeHasFormat = hasFormat(node, unclosedTags[i].format)
-    const nextNodeHasFormat = hasFormat(nextNode, unclosedTags[i].format)
+    const unclosedTag = unclosedTags[i]!
+    const nodeHasFormat = hasFormat(node, unclosedTag.format)
+    const nextNodeHasFormat = hasFormat(nextNode, unclosedTag.format)
 
     // prevent adding closing tag if next sibling will do it
     if (nodeHasFormat && nextNodeHasFormat) {

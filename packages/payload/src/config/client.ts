@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { I18nClient } from '@payloadcms/translations'
 import type { DeepPartial } from 'ts-essentials'
 
@@ -26,6 +27,7 @@ export type ServerOnlyRootProperties = keyof Pick<
   | 'endpoints'
   | 'graphQL'
   | 'hooks'
+  | 'i18n'
   | 'jobs'
   | 'logger'
   | 'onInit'
@@ -44,7 +46,6 @@ export type ClientConfig = {
   collections: ClientCollectionConfig[]
   custom?: Record<string, any>
   globals: ClientGlobalConfig[]
-  i18n?: Omit<SanitizedConfig['i18n'], 'supportedLanguages'>
 } & Omit<SanitizedConfig, 'admin' | 'collections' | 'globals' | 'i18n' | ServerOnlyRootProperties>
 
 export const serverOnlyAdminConfigProperties: readonly Partial<ServerOnlyRootAdminProperties>[] = []
@@ -59,6 +60,7 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   'secret',
   'hooks',
   'bin',
+  'i18n',
   'typescript',
   'cors',
   'csrf',
@@ -92,11 +94,11 @@ export const createClientConfig = ({
           avatar: config.admin.avatar,
           custom: config.admin.custom,
           dateFormat: config.admin.dateFormat,
-          disable: config.admin.disable,
           importMap: config.admin.importMap,
           meta: config.admin.meta,
           routes: config.admin.routes,
           theme: config.admin.theme,
+          timezones: config.admin.timezones,
           user: config.admin.user,
         }
         if (config.admin.livePreview) {
@@ -123,17 +125,15 @@ export const createClientConfig = ({
           importMap,
         })
         break
-      case 'i18n':
-        clientConfig.i18n = {
-          fallbackLanguage: config.i18n.fallbackLanguage,
-          translations: config.i18n.translations,
-        }
-        break
       case 'localization':
         if (typeof config.localization === 'object' && config.localization) {
           clientConfig.localization = {}
           if (config.localization.defaultLocale) {
             clientConfig.localization.defaultLocale = config.localization.defaultLocale
+          }
+          if (config.localization.defaultLocalePublishOption) {
+            clientConfig.localization.defaultLocalePublishOption =
+              config.localization.defaultLocalePublishOption
           }
           if (config.localization.fallback) {
             clientConfig.localization.fallback = config.localization.fallback
