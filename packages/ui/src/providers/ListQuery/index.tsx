@@ -90,7 +90,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       }
 
       if (modifySearchParams) {
-        // router.replace(`${qs.stringify(newQuery, { addQueryPrefix: true })}`)
+        router.replace(`${qs.stringify(newQuery, { addQueryPrefix: true })}`)
       } else if (
         typeof onQueryChange === 'function' ||
         typeof onQueryChangeFromProps === 'function'
