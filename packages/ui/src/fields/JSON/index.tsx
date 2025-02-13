@@ -91,7 +91,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
       if (urlExistsButSchemaDiffers) {
         // eslint-disable-next-line no-console
         console.warn(
-          `[JSON Schema Warning]: Field ${label} - Generating a schema URI. A schema with the URI ${jsonSchema.uri} already exists yet it's properties differ from exisiting JSON schemas.`,
+          `[JSON Schema Warning]: Field ${label} - Generating a schema URI. A schema with the URI ${jsonSchema.uri} already exists yet its properties differ from exisiting JSON schemas.`,
         )
 
         // Override json schema with a new schema with a generated url to avoid conflicts
