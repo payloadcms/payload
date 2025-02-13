@@ -32,6 +32,7 @@ export type { CustomPreviewButton } from './elements/PreviewButton.js'
 export type { CustomPublishButton } from './elements/PublishButton.js'
 export type { CustomSaveButton } from './elements/SaveButton.js'
 export type { CustomSaveDraftButton } from './elements/SaveDraftButton.js'
+export type { CustomStatus } from './elements/Status.js'
 export type {
   DocumentTabComponent,
   DocumentTabCondition,
@@ -532,6 +533,7 @@ export type DocumentSlots = {
   PublishButton?: React.ReactNode
   SaveButton?: React.ReactNode
   SaveDraftButton?: React.ReactNode
+  Status?: React.ReactNode
   Upload?: React.ReactNode
 }
 

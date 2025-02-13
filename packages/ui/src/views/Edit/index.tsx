@@ -46,6 +46,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   PublishButton,
   SaveButton,
   SaveDraftButton,
+  Status,
   Upload: CustomUpload,
 }) => {
   const {
@@ -508,6 +509,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
               PublishButton,
               SaveButton,
               SaveDraftButton,
+              Status,
             }}
             data={savedDocumentData}
             disableActions={disableActions}

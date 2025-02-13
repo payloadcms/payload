@@ -6,6 +6,7 @@ import type {
   CustomPublishButton,
   CustomSaveButton,
   CustomSaveDraftButton,
+  CustomStatus,
   CustomUpload,
 } from '../../admin/types.js'
 import type { Arguments as MeArguments } from '../../auth/operations/me.js'
@@ -304,6 +305,10 @@ export type CollectionAdminOptions = {
        * + autosave must be disabled
        */
       SaveDraftButton?: CustomSaveDraftButton
+      /**
+       * Replaces the "Status" section
+       */
+      Status?: CustomStatus
       /**
        * Replaces the "Upload" section
        * + upload must be enabled
