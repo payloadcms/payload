@@ -10,6 +10,7 @@ interface Args {
   bucket: string
   collection: CollectionConfig
   getStorageClient: () => AWS.S3
+  getResponseHeaders?: (defaultHeaders: HeadersInit) => Headers
 }
 
 // Type guard for NodeJS.Readable streams
@@ -34,7 +35,12 @@ const streamToBuffer = async (readableStream: any) => {
   return Buffer.concat(chunks)
 }
 
-export const getHandler = ({ bucket, collection, getStorageClient }: Args): StaticHandler => {
+export const getHandler = ({
+    bucket,
+    collection,
+    getStorageClient,
+    getResponseHeaders,
+  }: Args): StaticHandler => {
   return async (req, { params: { filename } }) => {
     try {
       const prefix = await getFilePrefix({ collection, filename, req })
@@ -53,14 +59,20 @@ export const getHandler = ({ bucket, collection, getStorageClient }: Args): Stat
       const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
       const objectEtag = object.ETag
 
+      const defaultHeaders: HeadersInit = {
+        'Accept-Ranges': String(object.AcceptRanges),
+        'Content-Length': String(object.ContentLength),
+        'Content-Type': String(object.ContentType),
+        ETag: String(object.ETag),
+      }
+
+      const headers = getResponseHeaders
+        ? getResponseHeaders(defaultHeaders)
+        : new Headers(defaultHeaders)
+
       if (etagFromHeaders && etagFromHeaders === objectEtag) {
         const response = new Response(null, {
-          headers: new Headers({
-            'Accept-Ranges': String(object.AcceptRanges),
-            'Content-Length': String(object.ContentLength),
-            'Content-Type': String(object.ContentType),
-            ETag: String(object.ETag),
-          }),
+          headers,
           status: 304,
         })
 
@@ -88,12 +100,7 @@ export const getHandler = ({ bucket, collection, getStorageClient }: Args): Stat
       const bodyBuffer = await streamToBuffer(object.Body)
 
       return new Response(bodyBuffer, {
-        headers: new Headers({
-          'Accept-Ranges': String(object.AcceptRanges),
-          'Content-Length': String(object.ContentLength),
-          'Content-Type': String(object.ContentType),
-          ETag: String(object.ETag),
-        }),
+        headers,
         status: 200,
       })
     } catch (err) {
