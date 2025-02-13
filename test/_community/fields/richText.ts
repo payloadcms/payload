@@ -1,8 +1,5 @@
 import type { FieldBase, RichTextField, RowField } from 'payload'
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { lexicalHTML } from '@payloadcms/richtext-lexical'
-
 const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1)
 
 const isEmpty = (node?: { root: any }) => {
@@ -35,9 +32,9 @@ export const richTextField = (
     label,
     ...rest
   }: {
-      lexicalConfig?: 'simple'
-    } &
-    Partial<RichTextField> & Pick<FieldBase, 'label' | 'name'> = {
+    lexicalConfig?: 'simple'
+  } & Partial<RichTextField> &
+    Pick<FieldBase, 'label' | 'name'> = {
     name: 'content',
     label: 'Content',
     lexicalConfig: undefined,
@@ -70,7 +67,6 @@ export const richTextField = (
           ],
         },
       },
-      lexicalHTML(name, { name: name + '_html' }),
     ],
   }
 }
