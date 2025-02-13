@@ -6,7 +6,7 @@ import './index.scss'
 
 const transitionDuration = 200
 const baseClass = 'progress-bar'
-const initialDelay = 100
+const initialDelay = 150
 
 /**
  * Renders a progress bar that shows the progress of a route transition.
