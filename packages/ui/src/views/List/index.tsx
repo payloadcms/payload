@@ -3,7 +3,6 @@
 import type { ListPreferences, ResolvedFilterOptions } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import LinkImport from 'next/link.js'
 import { useRouter } from 'next/navigation.js'
 import { formatFilesize, isNumber } from 'payload/shared'
 import React, { Fragment, useEffect, useState } from 'react'
@@ -15,6 +14,7 @@ import { Button } from '../../elements/Button/index.js'
 import { DeleteMany } from '../../elements/DeleteMany/index.js'
 import { EditMany } from '../../elements/EditMany/index.js'
 import { Gutter } from '../../elements/Gutter/index.js'
+import { Link } from '../../elements/Link/index.js'
 import { ListControls } from '../../elements/ListControls/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { ListSelection } from '../../elements/ListSelection/index.js'
@@ -40,7 +40,6 @@ import { ListHeader } from './ListHeader/index.js'
 import './index.scss'
 
 const baseClass = 'collection-list'
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export type ListViewSlots = {
   AfterList?: React.ReactNode

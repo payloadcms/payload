@@ -1,13 +1,12 @@
 import type { I18nClient, TFunction } from '@payloadcms/translations'
 import type { ClientCollectionConfig } from 'payload'
 
-import { getTranslation } from '@payloadcms/translations'
-import LinkImport from 'next/link.js'
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 import { useModal } from '@faceless-ui/modal'
+import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import { Button } from '../../../elements/Button/index.js'
+import { Link } from '../../../elements/Link/index.js'
 import { useListDrawerContext } from '../../../elements/ListDrawer/Provider.js'
 import { ListSelection } from '../../../elements/ListSelection/index.js'
 import { Pill } from '../../../elements/Pill/index.js'

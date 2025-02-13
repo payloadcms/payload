@@ -1,5 +1,4 @@
 'use client'
-import LinkWithDefault from 'next/link.js'
 import React, { useEffect, useRef, useState } from 'react'
 
 import { Account } from '../../graphics/Account/index.js'
@@ -8,13 +7,14 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { Hamburger } from '../Hamburger/index.js'
+import { Link } from '../Link/index.js'
 import { Localizer } from '../Localizer/index.js'
 import { LocalizerLabel } from '../Localizer/LocalizerLabel/index.js'
 import { useNav } from '../Nav/context.js'
 import { NavToggler } from '../Nav/NavToggler/index.js'
 import { RenderCustomComponent } from '../RenderCustomComponent/index.js'
-import { StepNav } from '../StepNav/index.js'
 import './index.scss'
+import { StepNav } from '../StepNav/index.js'
 
 const baseClass = 'app-header'
 
@@ -58,8 +58,6 @@ export function AppHeader({ CustomAvatar, CustomIcon }: Props) {
       window.removeEventListener('resize', checkIsScrollable)
     }
   }, [Actions])
-
-  const Link = LinkWithDefault.default
 
   const LinkElement = Link || 'a'
 

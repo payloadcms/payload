@@ -23,6 +23,7 @@ import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { OperationProvider } from '../../providers/Operation/index.js'
+import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
@@ -113,6 +114,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   const { reportUpdate } = useDocumentEvents()
   const { resetUploadEdits } = useUploadEdits()
   const { getFormState } = useServerFunctions()
+  const { startRouteTransition } = useRouteTransition()
 
   const abortOnChangeRef = useRef<AbortController>(null)
   const abortOnSaveRef = useRef<AbortController>(null)
@@ -258,7 +260,8 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
           adminRoute,
           path: `/collections/${collectionSlug}/${document?.id}${locale ? `?locale=${locale}` : ''}`,
         })
-        router.push(redirectRoute)
+
+        startRouteTransition(() => router.push(redirectRoute))
       } else {
         resetUploadEdits()
       }

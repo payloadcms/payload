@@ -1,15 +1,20 @@
 'use client'
-import { Button, LoadingOverlay, toast, useAuth, useTranslation } from '@payloadcms/ui'
+import {
+  Button,
+  Link,
+  LoadingOverlay,
+  toast,
+  useAuth,
+  useRouteTransition,
+  useTranslation,
+} from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
-import LinkImport from 'next/link.js'
 import { useRouter } from 'next/navigation.js'
 import React, { useEffect } from 'react'
 
 import './index.scss'
 
 const baseClass = 'logout'
-
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export const LogoutClient: React.FC<{
   adminRoute: string
@@ -19,6 +24,8 @@ export const LogoutClient: React.FC<{
   const { adminRoute, inactivity, redirect } = props
 
   const { logOut, user } = useAuth()
+
+  const { startRouteTransition } = useRouteTransition()
 
   const [isLoggedOut, setIsLoggedOut] = React.useState<boolean>(!user)
 
@@ -41,21 +48,22 @@ export const LogoutClient: React.FC<{
   const handleLogOut = React.useCallback(async () => {
     const loggedOut = await logOut()
     setIsLoggedOut(loggedOut)
+
     if (!inactivity && loggedOut && !logOutSuccessRef.current) {
       toast.success(t('authentication:loggedOutSuccessfully'))
       logOutSuccessRef.current = true
-      router.push(loginRoute)
+      startRouteTransition(() => router.push(loginRoute))
       return
     }
-  }, [inactivity, logOut, loginRoute, router, t])
+  }, [inactivity, logOut, loginRoute, router, startRouteTransition, t])
 
   useEffect(() => {
     if (!isLoggedOut) {
       void handleLogOut()
     } else {
-      router.push(loginRoute)
+      startRouteTransition(() => router.push(loginRoute))
     }
-  }, [handleLogOut, isLoggedOut, loginRoute, router])
+  }, [handleLogOut, isLoggedOut, loginRoute, router, startRouteTransition])
 
   if (isLoggedOut && inactivity) {
     return (

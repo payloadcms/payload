@@ -1,8 +1,7 @@
 import type { AdminViewProps } from 'payload'
 
-import { Button } from '@payloadcms/ui'
+import { Button, Link } from '@payloadcms/ui'
 import { formatAdminURL, Translation } from '@payloadcms/ui/shared'
-import LinkImport from 'next/link.js'
 import React from 'react'
 
 import { FormHeader } from '../../elements/FormHeader/index.js'
@@ -10,8 +9,6 @@ import './index.scss'
 import { ResetPasswordForm } from './ResetPasswordForm/index.js'
 
 export const resetPasswordBaseClass = 'reset-password'
-
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export { generateResetPasswordMetadata } from './meta.js'
 
