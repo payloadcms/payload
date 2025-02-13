@@ -1,4 +1,3 @@
-import type { TypeWithID } from '../collections/config/types.js'
 import type { FlattenedField, RelationshipField } from '../fields/config/types.js'
 import type { CollectionSlug } from '../index.js'
 import type { JsonObject, Payload, PayloadRequest } from '../types/index.js'
@@ -201,6 +200,72 @@ const collectRelationsToPublish = ({
       case 'relationship':
         collectRelationField({ addRelation, field, fieldData, payload })
         break
+
+      case 'richText':
+        if (typeof field.editor === 'function') {
+          throw new Error('Attempted to access unsanitized rich text editor.')
+        }
+
+        if (!field.editor?.traverseData) {
+          break
+        }
+
+        if (!fieldData || typeof fieldData !== 'object') {
+          break
+        }
+
+        if (field.localized && payload.config.localization) {
+          for (const locale in fieldData) {
+            const localeData = (fieldData as any)[locale]
+            if (!localeData || typeof localeData !== 'object') {
+              continue
+            }
+
+            field.editor.traverseData({
+              data: localeData,
+              field,
+              onFields: ({ data, fields }) => {
+                collectRelationsToPublish({ addRelation, data, fields, payload })
+              },
+              onRelationship: ({ id, collectionSlug }) => {
+                collectRelationField({
+                  addRelation,
+                  field: {
+                    name: 'relation',
+                    type: 'relationship',
+                    relationTo: collectionSlug,
+                  },
+                  fieldData: id,
+                  payload,
+                })
+              },
+            })
+          }
+
+          break
+        }
+
+        field.editor.traverseData({
+          data: fieldData,
+          field,
+          onFields: ({ data, fields }) => {
+            collectRelationsToPublish({ addRelation, data, fields, payload })
+          },
+          onRelationship: ({ id, collectionSlug }) => {
+            collectRelationField({
+              addRelation,
+              field: {
+                name: 'relation',
+                type: 'relationship',
+                relationTo: collectionSlug,
+              },
+              fieldData: id,
+              payload,
+            })
+          },
+        })
+
+        break
     }
   }
 }
@@ -249,28 +314,36 @@ export const handleCascadePublish = async ({
   }
 
   for (const collectionSlug in relationsToPublish) {
-    await req.payload.update({
-      collection: collectionSlug,
-      data: {
-        _status: 'published',
-      },
-      depth: 0,
-      publishSpecificLocale,
-      req,
-      where: {
-        and: [
-          {
-            id: {
-              in: relationsToPublish[collectionSlug],
+    try {
+      await req.payload.update({
+        collection: collectionSlug,
+        data: {
+          _status: 'published',
+        },
+        depth: 0,
+        publishSpecificLocale,
+        req,
+        where: {
+          and: [
+            {
+              id: {
+                in: relationsToPublish[collectionSlug],
+              },
             },
-          },
-          {
-            _status: {
-              equals: 'draft',
+            {
+              _status: {
+                equals: 'draft',
+              },
             },
-          },
-        ],
-      },
-    })
+          ],
+        },
+      })
+    } catch (err) {
+      // Eat the error
+      req.payload.logger.error({
+        err,
+        msg: `Error publishing cascade of collection ${collectionSlug}, ids - ${JSON.stringify(relationsToPublish[collectionSlug])}`,
+      })
+    }
   }
 }

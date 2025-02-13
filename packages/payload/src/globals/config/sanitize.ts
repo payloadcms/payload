@@ -94,6 +94,8 @@ export const sanitizeGlobal = async (
       if (global.versions.drafts === true) {
         global.versions.drafts = {
           autosave: false,
+          cascadePublish: false,
+          schedulePublish: false,
           validate: false,
         }
       }

@@ -9,6 +9,7 @@ import { i18n } from './i18n.js'
 import { getBlockMarkdownTransformers } from './markdownTransformer.js'
 import { ServerBlockNode } from './nodes/BlocksNode.js'
 import { ServerInlineBlockNode } from './nodes/InlineBlocksNode.js'
+import { traverseNodeDataHOC } from './traverseNodeData.js'
 import { blockValidationHOC } from './validate.js'
 
 export type BlocksFeatureProps = {
@@ -169,6 +170,7 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
 
       nodes: [
         createNode({
+          traverseNodeData: traverseNodeDataHOC(props.blocks),
           // @ts-expect-error - TODO: fix this
           getSubFields: ({ node }) => {
             if (!node) {

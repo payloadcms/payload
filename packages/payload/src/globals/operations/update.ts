@@ -242,7 +242,7 @@ export const updateOperation = async <
     })
 
     if (
-      globalConfig.versions.drafts &&
+      globalConfig.versions?.drafts &&
       globalConfig.versions.drafts.cascadePublish &&
       !draftArg &&
       data._status !== 'draft'

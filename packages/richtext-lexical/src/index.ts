@@ -25,6 +25,7 @@ import { defaultEditorConfig, defaultEditorFeatures } from './lexical/config/ser
 import { loadFeatures } from './lexical/config/server/loader.js'
 import { sanitizeServerFeatures } from './lexical/config/server/sanitize.js'
 import { populateLexicalPopulationPromises } from './populateGraphQL/populateLexicalPopulationPromises.js'
+import { recurseNodes } from './utilities/forEachNodeRecursively.js'
 import { getGenerateImportMap } from './utilities/generateImportMap.js'
 import { getGenerateSchemaMap } from './utilities/generateSchemaMap.js'
 import { recurseNodeTree } from './utilities/recurseNodeTree.js'
@@ -864,6 +865,26 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
         }
 
         return outputSchema
+      },
+      traverseData: ({ data, onFields, onRelationship }) => {
+        recurseNodes({
+          callback: (node) => {
+            const traverseNodeData = finalSanitizedEditorConfig.features.traverseNodeData?.get(
+              node.type,
+            )
+
+            if (!traverseNodeData) {
+              return
+            }
+
+            traverseNodeData({
+              node,
+              onFields,
+              onRelationship,
+            })
+          },
+          nodes: data.root.children,
+        })
       },
       validate: richTextValidateHOC({
         editorConfig: finalSanitizedEditorConfig,

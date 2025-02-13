@@ -382,6 +382,21 @@ export interface CascadePublish {
   id: string;
   title?: string | null;
   relation?: (string | null) | CascadePublishRelation;
+  lexical?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -809,6 +824,7 @@ export interface MediaSelect<T extends boolean = true> {
 export interface CascadePublishSelect<T extends boolean = true> {
   title?: T;
   relation?: T;
+  lexical?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
