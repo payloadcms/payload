@@ -1,18 +1,18 @@
 'use client'
 import type { JSONFieldClientComponent } from 'payload'
 
+import { dequal } from 'dequal/lite'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { CodeEditor } from '../../elements/CodeEditor/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-import { deepEqualObject } from '../../utilities/deepEqualObject.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
-import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import './index.scss'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
 
 const baseClass = 'json-field'
@@ -64,7 +64,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
 
       const existingSchemas = monaco.languages.json.jsonDefaults.diagnosticsOptions.schemas || []
       const schemaExists = existingSchemas.some((schema) => {
-        return schema.uri === jsonSchema.uri && deepEqualObject(schema.schema, jsonSchema.schema)
+        return schema.uri === jsonSchema.uri && dequal(schema.schema, jsonSchema.schema)
       })
 
       if (schemaExists) {
@@ -76,8 +76,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
       }
 
       const urlExistsButSchemaDiffers = existingSchemas.some(
-        (schema) =>
-          schema.uri === jsonSchema.uri && !deepEqualObject(schema.schema, jsonSchema.schema),
+        (schema) => schema.uri === jsonSchema.uri && !dequal(schema.schema, jsonSchema.schema),
       )
       let jsonSchemaOverride
       if (urlExistsButSchemaDiffers) {
