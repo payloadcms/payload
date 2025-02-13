@@ -11,7 +11,7 @@ const traverseArrayOrBlocksField = ({
   data,
   field,
   fillEmpty,
-  leafsFirst,
+  leavesFirst,
   parentRef,
 }: {
   callback: TraverseFieldsCallback
@@ -20,7 +20,7 @@ const traverseArrayOrBlocksField = ({
   data: Record<string, unknown>[]
   field: ArrayField | BlocksField
   fillEmpty: boolean
-  leafsFirst: boolean
+  leavesFirst: boolean
   parentRef?: unknown
 }) => {
   if (fillEmpty) {
@@ -31,7 +31,7 @@ const traverseArrayOrBlocksField = ({
         config,
         fields: field.fields,
         isTopLevel: false,
-        leafsFirst,
+        leavesFirst,
         parentRef,
       })
     }
@@ -46,7 +46,7 @@ const traverseArrayOrBlocksField = ({
           config,
           fields: block.fields,
           isTopLevel: false,
-          leafsFirst,
+          leavesFirst,
           parentRef,
         })
       }
@@ -77,7 +77,7 @@ const traverseArrayOrBlocksField = ({
         fields,
         fillEmpty,
         isTopLevel: false,
-        leafsFirst,
+        leavesFirst,
         parentRef,
         ref,
       })
@@ -117,7 +117,7 @@ type TraverseFieldsArgs = {
    * if this is `true`, the callback functions of the leaf fields will be called before the parent fields.
    * The return value of the callback function will be ignored.
    */
-  leafsFirst?: boolean
+  leavesFirst?: boolean
   parentRef?: Record<string, unknown> | unknown
   ref?: Record<string, unknown> | unknown
 }
@@ -138,7 +138,7 @@ export const traverseFields = ({
   fields,
   fillEmpty = true,
   isTopLevel = true,
-  leafsFirst = false,
+  leavesFirst = false,
   parentRef = {},
   ref = {},
 }: TraverseFieldsArgs): void => {
@@ -156,9 +156,9 @@ export const traverseFields = ({
       return
     }
 
-    if (!leafsFirst && callback && callback({ field, next, parentRef, ref })) {
+    if (!leavesFirst && callback && callback({ field, next, parentRef, ref })) {
       return true
-    } else if (leafsFirst) {
+    } else if (leavesFirst) {
       callbackStack.push(callback)
     }
 
@@ -193,7 +193,7 @@ export const traverseFields = ({
 
           if (
             callback &&
-            !leafsFirst &&
+            !leavesFirst &&
             callback({
               field: { ...tab, type: 'tab' },
               next,
@@ -202,7 +202,7 @@ export const traverseFields = ({
             })
           ) {
             return true
-          } else if (leafsFirst) {
+          } else if (leavesFirst) {
             callbackStack.push(callback)
           }
 
@@ -218,7 +218,7 @@ export const traverseFields = ({
                   fields: tab.fields,
                   fillEmpty,
                   isTopLevel: false,
-                  leafsFirst,
+                  leavesFirst,
                   parentRef: currentParentRef,
                   ref: tabRef[key],
                 })
@@ -228,7 +228,7 @@ export const traverseFields = ({
         } else {
           if (
             callback &&
-            !leafsFirst &&
+            !leavesFirst &&
             callback({
               field: { ...tab, type: 'tab' },
               next,
@@ -237,7 +237,7 @@ export const traverseFields = ({
             })
           ) {
             return true
-          } else if (leafsFirst) {
+          } else if (leavesFirst) {
             callbackStack.push(callback)
           }
         }
@@ -250,7 +250,7 @@ export const traverseFields = ({
             fields: tab.fields,
             fillEmpty,
             isTopLevel: false,
-            leafsFirst,
+            leavesFirst,
             parentRef: currentParentRef,
             ref: tabRef,
           })
@@ -308,7 +308,7 @@ export const traverseFields = ({
               fields: field.fields,
               fillEmpty,
               isTopLevel: false,
-              leafsFirst,
+              leavesFirst,
               parentRef: currentParentRef,
               ref: currentRef[key],
             })
@@ -340,7 +340,7 @@ export const traverseFields = ({
               data: localeData,
               field,
               fillEmpty,
-              leafsFirst,
+              leavesFirst,
               parentRef: currentParentRef,
             })
           }
@@ -352,7 +352,7 @@ export const traverseFields = ({
             data: currentRef as Record<string, unknown>[],
             field,
             fillEmpty,
-            leafsFirst,
+            leavesFirst,
             parentRef: currentParentRef,
           })
         }
@@ -364,7 +364,7 @@ export const traverseFields = ({
           fields: field.fields,
           fillEmpty,
           isTopLevel: false,
-          leafsFirst,
+          leavesFirst,
           parentRef: currentParentRef,
           ref: currentRef,
         })

@@ -14,7 +14,7 @@ export const autoDedupeBlocksPlugin =
 
     traverseFields({
       config,
-      leafsFirst: true,
+      leavesFirst: true,
       isTopLevel: true,
       fields: [
         ...(config.collections?.length

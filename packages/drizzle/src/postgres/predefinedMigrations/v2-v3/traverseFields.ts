@@ -42,7 +42,7 @@ export const traverseFields = (args: Args) => {
 
       case 'blocks': {
         return field.blocks.forEach((block) => {
-          // Can ignore string blocks, as those were arred in v3 and don't need to be migrated
+          // Can ignore string blocks, as those were added in v3 and don't need to be migrated
           if (typeof block === 'string') {
             return
           }

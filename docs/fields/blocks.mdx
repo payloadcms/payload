@@ -297,9 +297,9 @@ export const CustomBlocksFieldLabelClient: BlocksFieldLabelClientComponent = ({
 
 ## Block References
 
-If you have multiple blocks that are used in multiple places, this can quickly blow up the size of your Payload Config. This will incur a performance hit, as more data is sent to the client and processed on the server.
+If you have multiple blocks used in multiple places, your Payload Config can grow in size, potentially sending more data to the client and requiring more processing on the server. However, you can optimize performance by defining each block **once** in your Payload Config and then referencing its slug wherever it's used instead of passing the entire block config.
 
-This can be optimized by defining your block **once** in your Payload Config, and just referencing the block slug whenever it's used, instead of passing the entire block config. To do this, the block can be defined in the `blocks` array of the Payload Config. The slug can then be passed to the `blockReferences` array in the Blocks Field - the `blocks` array has to be empty for compatibility reasons.
+To do this, define the block in the `blocks` array of the Payload Config. Then, in the Blocks Field, pass the block slug to the `blockReferences` array - leaving the `blocks` array empty for compatibility reasons.
 
 ```ts
 import { buildConfig } from 'payload'
