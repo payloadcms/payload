@@ -16,6 +16,7 @@ import { CollectionGroup2B } from './collections/Group2B.js'
 import { CollectionHidden } from './collections/Hidden.js'
 import { CollectionNoApiView } from './collections/NoApiView.js'
 import { CollectionNotInView } from './collections/NotInView.js'
+import { Orders } from './collections/Orders.js'
 import { Posts } from './collections/Posts.js'
 import { UploadCollection } from './collections/Upload.js'
 import { Users } from './collections/Users.js'
@@ -179,6 +180,7 @@ export default buildConfigWithDefaults({
     },
   },
   localization: {
+    defaultLocalePublishOption: 'active',
     defaultLocale: 'en',
     locales: [
       {

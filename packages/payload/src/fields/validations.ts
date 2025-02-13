@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import Ajv from 'ajv'
 import ObjectIdImport from 'bson-objectid'
 
@@ -377,9 +378,25 @@ export const checkbox: CheckboxFieldValidation = (value, { req: { t }, required 
 
 export type DateFieldValidation = Validate<Date, unknown, unknown, DateField>
 
-export const date: DateFieldValidation = (value, { req: { t }, required }) => {
-  if (value && !isNaN(Date.parse(value.toString()))) {
+export const date: DateFieldValidation = (
+  value,
+  { name, req: { t }, required, siblingData, timezone },
+) => {
+  const validDate = value && !isNaN(Date.parse(value.toString()))
+
+  // We need to also check for the timezone data based on this field's config
+  // We cannot do this inside the timezone field validation as it's visually hidden
+  const hasRequiredTimezone = timezone && required
+  const selectedTimezone: string = siblingData?.[`${name}_tz`]
+  // Always resolve to true if the field is not required, as timezone may be optional too then
+  const validTimezone = hasRequiredTimezone ? Boolean(selectedTimezone) : true
+
+  if (validDate && validTimezone) {
     return true
+  }
+
+  if (validDate && !validTimezone) {
+    return t('validation:timezoneRequired')
   }
 
   if (value) {
@@ -510,7 +527,7 @@ const validateFilterOptions: Validate<
   RelationshipField | UploadField
 > = async (
   value,
-  { id, data, filterOptions, relationTo, req, req: { payload, t, user }, siblingData },
+  { id, blockData, data, filterOptions, relationTo, req, req: { payload, t, user }, siblingData },
 ) => {
   if (typeof filterOptions !== 'undefined' && value) {
     const options: {
@@ -527,6 +544,7 @@ const validateFilterOptions: Validate<
           typeof filterOptions === 'function'
             ? await filterOptions({
                 id,
+                blockData,
                 data,
                 relationTo: collection,
                 req,
@@ -644,6 +662,7 @@ export type UploadFieldSingleValidation = Validate<unknown, unknown, unknown, Up
 
 export const upload: UploadFieldValidation = async (value, options) => {
   const {
+    event,
     maxRows,
     minRows,
     relationTo,
@@ -714,6 +733,10 @@ export const upload: UploadFieldValidation = async (value, options) => {
         })
         .join(', ')}`
     }
+  }
+
+  if (event === 'onChange') {
+    return true
   }
 
   return validateFilterOptions(value, options)
@@ -742,6 +765,7 @@ export type RelationshipFieldSingleValidation = Validate<
 
 export const relationship: RelationshipFieldValidation = async (value, options) => {
   const {
+    event,
     maxRows,
     minRows,
     relationTo,
@@ -812,6 +836,10 @@ export const relationship: RelationshipFieldValidation = async (value, options) 
         })
         .join(', ')}`
     }
+  }
+
+  if (event === 'onChange') {
+    return true
   }
 
   return validateFilterOptions(value, options)

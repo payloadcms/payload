@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { PayloadRequest } from '../types/index.js'
 import type { File, FileData, UploadConfig } from './types.js'
 

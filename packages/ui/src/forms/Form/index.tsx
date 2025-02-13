@@ -21,18 +21,21 @@ import type {
   SubmitOptions,
 } from './types.js'
 
-import { useIgnoredEffectDebounced } from '../../hooks/useIgnoredEffect.js'
+import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
+import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
+import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 import { requests } from '../../utilities/api.js'
 import {
+  DocumentFormContext,
   FormContext,
   FormFieldsContext,
   FormWatchContext,
@@ -40,6 +43,7 @@ import {
   ModifiedContext,
   ProcessingContext,
   SubmittedContext,
+  useDocumentForm,
 } from './context.js'
 import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
@@ -62,6 +66,7 @@ export const Form: React.FC<FormProps> = (props) => {
     // fields: fieldsFromProps = collection?.fields || global?.fields,
     handleResponse,
     initialState, // fully formed initial field state
+    isDocumentForm,
     isInitializing: initializingFromProps,
     onChange,
     onSubmit,
@@ -76,12 +81,15 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const router = useRouter()
 
+  const documentForm = useDocumentForm()
+
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
   const { refreshCookie, user } = useAuth()
   const operation = useOperation()
 
   const { getFormState } = useServerFunctions()
+  const { startRouteTransition } = useRouteTransition()
 
   const { config } = useConfig()
 
@@ -109,8 +117,7 @@ export const Form: React.FC<FormProps> = (props) => {
     const validatedFieldState = {}
     let isValid = true
 
-    const dataFromContext = contextRef.current.getData()
-    const data = dataFromContext
+    const data = contextRef.current.getData()
 
     const validationPromises = Object.entries(contextRef.current.fields).map(
       async ([path, field]) => {
@@ -130,7 +137,10 @@ export const Form: React.FC<FormProps> = (props) => {
               ...field,
               id,
               collectionSlug,
-              data,
+              // If there is a parent document form, we can get the data from that form
+              blockData: undefined, // Will be expensive to get - not worth to pass to client-side validation, as this can be obtained by the user using `useFormFields()`
+              data: documentForm?.getData ? documentForm.getData() : data,
+              event: 'submit',
               operation,
               preferences: {} as any,
               req: {
@@ -168,7 +178,7 @@ export const Form: React.FC<FormProps> = (props) => {
     }
 
     return isValid
-  }, [collectionSlug, config, dispatchFields, id, operation, t, user])
+  }, [collectionSlug, config, dispatchFields, id, operation, t, user, documentForm])
 
   const submit = useCallback(
     async (options: SubmitOptions = {}, e): Promise<void> => {
@@ -355,7 +365,7 @@ export const Form: React.FC<FormProps> = (props) => {
           setProcessing(false)
 
           if (redirect) {
-            router.push(redirect)
+            startRouteTransition(() => router.push(redirect))
           } else if (!disableSuccessStatus) {
             successToast(json.message || t('general:submissionSuccessful'))
           }
@@ -504,6 +514,7 @@ export const Form: React.FC<FormProps> = (props) => {
         renderAllFields: true,
         schemaPath: collectionSlug ? collectionSlug : globalSlug,
         signal: controller.signal,
+        skipValidation: true,
       })
 
       contextRef.current = { ...initContextState } as FormContextType
@@ -635,7 +646,12 @@ export const Form: React.FC<FormProps> = (props) => {
   useEffect(() => {
     if (initialState) {
       contextRef.current = { ...initContextState } as FormContextType
-      dispatchFields({ type: 'REPLACE_STATE', optimize: false, state: initialState })
+      dispatchFields({
+        type: 'REPLACE_STATE',
+        optimize: false,
+        sanitize: true,
+        state: initialState,
+      })
     }
   }, [initialState, dispatchFields])
 
@@ -654,41 +670,50 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const classes = [className, baseClass].filter(Boolean).join(' ')
 
-  useIgnoredEffectDebounced(
+  const executeOnChange = useEffectEvent(async (submitted: boolean) => {
+    if (Array.isArray(onChange)) {
+      let revalidatedFormState: FormState = contextRef.current.fields
+
+      for (const onChangeFn of onChange) {
+        // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
+        revalidatedFormState = await onChangeFn({
+          formState: deepCopyObjectSimpleWithoutReactComponents(contextRef.current.fields),
+          submitted,
+        })
+      }
+
+      if (!revalidatedFormState) {
+        return
+      }
+
+      const { changed, newState } = mergeServerFormState({
+        existingState: contextRef.current.fields || {},
+        incomingState: revalidatedFormState,
+      })
+
+      if (changed) {
+        dispatchFields({
+          type: 'REPLACE_STATE',
+          optimize: false,
+          state: newState,
+        })
+      }
+    }
+  })
+
+  const prevFields = useRef(contextRef.current.fields)
+  const isFirstRenderRef = useRef(true)
+
+  useDebouncedEffect(
     () => {
-      const executeOnChange = async () => {
-        if (Array.isArray(onChange)) {
-          let revalidatedFormState: FormState = contextRef.current.fields
-
-          for (const onChangeFn of onChange) {
-            // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
-            revalidatedFormState = await onChangeFn({
-              formState: deepCopyObjectSimpleWithoutReactComponents(contextRef.current.fields),
-            })
-          }
-
-          if (!revalidatedFormState) {
-            return
-          }
-
-          const { changed, newState } = mergeServerFormState({
-            existingState: contextRef.current.fields || {},
-            incomingState: revalidatedFormState,
-          })
-
-          if (changed) {
-            dispatchFields({
-              type: 'REPLACE_STATE',
-              optimize: false,
-              state: newState,
-            })
-          }
+      if (isFirstRenderRef.current || !dequal(contextRef.current.fields, prevFields.current)) {
+        if (modified) {
+          void executeOnChange(submitted)
         }
       }
 
-      if (modified) {
-        void executeOnChange()
-      }
+      isFirstRenderRef.current = false
+      prevFields.current = contextRef.current.fields
     },
     /*
       Make sure we trigger this whenever modified changes (not just when `fields` changes),
@@ -698,12 +723,19 @@ export const Form: React.FC<FormProps> = (props) => {
         `fields` updates before `modified`, because setModified is in a setTimeout.
         So on the first change, modified is false, so we don't trigger the effect even though we should.
     **/
-    [contextRef.current.fields, modified],
-    [dispatchFields, onChange],
-    {
-      delay: 250,
-    },
+    [modified, submitted, contextRef.current.fields],
+    250,
   )
+
+  const DocumentFormContextComponent: React.FC<any> = isDocumentForm
+    ? DocumentFormContext.Provider
+    : React.Fragment
+
+  const documentFormContextProps = isDocumentForm
+    ? {
+        value: contextRef.current,
+      }
+    : {}
 
   return (
     <form
@@ -714,31 +746,34 @@ export const Form: React.FC<FormProps> = (props) => {
       onSubmit={(e) => void contextRef.current.submit({}, e)}
       ref={formRef}
     >
-      <FormContext.Provider value={contextRef.current}>
-        <FormWatchContext.Provider
-          value={{
-            fields,
-            ...contextRef.current,
-          }}
-        >
-          <SubmittedContext.Provider value={submitted}>
-            <InitializingContext.Provider value={!isMounted || (isMounted && initializing)}>
-              <ProcessingContext.Provider value={processing}>
-                <ModifiedContext.Provider value={modified}>
-                  <FormFieldsContext.Provider value={fieldsReducer}>
-                    {children}
-                  </FormFieldsContext.Provider>
-                </ModifiedContext.Provider>
-              </ProcessingContext.Provider>
-            </InitializingContext.Provider>
-          </SubmittedContext.Provider>
-        </FormWatchContext.Provider>
-      </FormContext.Provider>
+      <DocumentFormContextComponent {...documentFormContextProps}>
+        <FormContext.Provider value={contextRef.current}>
+          <FormWatchContext.Provider
+            value={{
+              fields,
+              ...contextRef.current,
+            }}
+          >
+            <SubmittedContext.Provider value={submitted}>
+              <InitializingContext.Provider value={!isMounted || (isMounted && initializing)}>
+                <ProcessingContext.Provider value={processing}>
+                  <ModifiedContext.Provider value={modified}>
+                    <FormFieldsContext.Provider value={fieldsReducer}>
+                      {children}
+                    </FormFieldsContext.Provider>
+                  </ModifiedContext.Provider>
+                </ProcessingContext.Provider>
+              </InitializingContext.Provider>
+            </SubmittedContext.Provider>
+          </FormWatchContext.Provider>
+        </FormContext.Provider>
+      </DocumentFormContextComponent>
     </form>
   )
 }
 
 export {
+  DocumentFormContext,
   FormContext,
   FormFieldsContext,
   FormWatchContext,
@@ -746,6 +781,7 @@ export {
   ProcessingContext,
   SubmittedContext,
   useAllFormFields,
+  useDocumentForm,
   useForm,
   useFormFields,
   useFormModified,

@@ -36,7 +36,7 @@ import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { upsertPrefs } from 'helpers/e2e/upsertPrefs.js'
 import { RESTClient } from 'helpers/rest.js'
 import { GeneratedTypes } from 'helpers/sdk/types.js'
-import { wait } from 'payload/shared'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -49,7 +49,7 @@ const dirname = path.dirname(filename)
  * Repeat above for Globals
  */
 
-const { beforeAll, beforeEach, describe, afterEach } = test
+const { beforeAll, beforeEach, describe } = test
 let url: AdminUrlUtil
 let urlWithRequiredLocalizedFields: AdminUrlUtil
 let urlRelationshipLocalized: AdminUrlUtil
@@ -83,7 +83,7 @@ describe('Localization', () => {
 
     initPageConsoleErrorCatch(page)
 
-    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
+    client = new RESTClient({ defaultSlug: 'users', serverURL })
     await client.login()
 
     await ensureCompilationIsDone({ page, serverURL })
@@ -97,12 +97,19 @@ describe('Localization', () => {
     // })
   })
 
-  describe('localizer', async () => {
+  describe('localizer', () => {
     test('should show localizer controls', async () => {
       await page.goto(url.create)
       await expect(page.locator('.localizer.app-header__localizer')).toBeVisible()
       await page.locator('.localizer >> button').first().click()
       await expect(page.locator('.localizer .popup.popup--active')).toBeVisible()
+    })
+
+    test('should filter locale with filterAvailableLocales', async () => {
+      await page.goto(url.create)
+      await expect(page.locator('.localizer.app-header__localizer')).toBeVisible()
+      await page.locator('.localizer >> button').first().click()
+      await expect(page.locator('.localizer .popup.popup--active')).not.toContainText('FILTERED')
     })
 
     test('should disable control for active locale', async () => {
@@ -472,7 +479,7 @@ describe('Localization', () => {
       await runCopy(page)
       await expect(page.locator('#field-title')).toHaveValue(title)
 
-      const regexPattern = new RegExp(`locale=es`)
+      const regexPattern = /locale=es/
       await expect(page).toHaveURL(regexPattern)
 
       await openCopyToLocaleDrawer(page)

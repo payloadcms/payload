@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { JoinQuery } from '../types/index.js'
 
 import { isNumber } from './isNumber.js'

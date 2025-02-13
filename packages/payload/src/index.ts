@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
 import type { Request as graphQLRequest, OperationArgs } from 'graphql-http'
 import type { Logger } from 'pino'
@@ -729,9 +730,20 @@ export class BasePayload {
         typeof this.config.jobs.autoRun === 'function'
           ? await this.config.jobs.autoRun(this)
           : this.config.jobs.autoRun
+
       await Promise.all(
         cronJobs.map((cronConfig) => {
-          new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
+          const job = new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
+            if (typeof this.config.jobs.shouldAutoRun === 'function') {
+              const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
+
+              if (!shouldAutoRun) {
+                job.stop()
+
+                return false
+              }
+            }
+
             await this.jobs.run({
               limit: cronConfig.limit ?? DEFAULT_LIMIT,
               queue: cronConfig.queue,
@@ -905,6 +917,8 @@ export const getPayload = async (
     }
   } catch (e) {
     cached.promise = null
+    // add identifier to error object, so that our error logger in routeError.ts does not attempt to re-initialize getPayload
+    e.payloadInitError = true
     throw e
   }
 
@@ -1152,6 +1166,7 @@ export {
   type ServerOnlyFieldProperties,
 } from './fields/config/client.js'
 export { sanitizeFields } from './fields/config/sanitize.js'
+
 export type {
   AdminClient,
   ArrayField,
@@ -1404,7 +1419,7 @@ export { getCollectionIDFieldTypes } from './utilities/getCollectionIDFieldTypes
 export { getObjectDotNotation } from './utilities/getObjectDotNotation.js'
 export { getRequestLanguage } from './utilities/getRequestLanguage.js'
 export { handleEndpoints } from './utilities/handleEndpoints.js'
-export { headersWithCors_public as headersWithCors } from './utilities/headersWithCors.js'
+export { headersWithCors } from './utilities/headersWithCors.js'
 export { initTransaction } from './utilities/initTransaction.js'
 export { isEntityHidden } from './utilities/isEntityHidden.js'
 export { default as isolateObjectProperty } from './utilities/isolateObjectProperty.js'
@@ -1428,7 +1443,6 @@ export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
 export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
-
 export { saveVersion } from './versions/saveVersion.js'
 export type { SchedulePublishTaskInput } from './versions/schedule/types.js'
 export type { TypeWithVersion } from './versions/types.js'

@@ -1,9 +1,11 @@
+// @ts-strict-ignore
 import { status as httpStatus } from 'http-status'
 
 import type { PayloadHandler } from '../../config/types.js'
 
 import { restoreVersionOperationGlobal, sanitizePopulateParam } from '../../index.js'
 import { getRequestGlobal } from '../../utilities/getRequestEntity.js'
+import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { isNumber } from '../../utilities/isNumber.js'
 
 export const restoreVersionHandler: PayloadHandler = async (req) => {
@@ -27,6 +29,10 @@ export const restoreVersionHandler: PayloadHandler = async (req) => {
       message: req.t('version:restoredSuccessfully'),
     },
     {
+      headers: headersWithCors({
+        headers: new Headers(),
+        req,
+      }),
       status: httpStatus.OK,
     },
   )

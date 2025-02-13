@@ -68,7 +68,7 @@ export interface Config {
     'global-array': GlobalArraySelect<false> | GlobalArraySelect<true>;
     'global-text': GlobalTextSelect<false> | GlobalTextSelect<true>;
   };
-  locale: 'en' | 'es' | 'pt' | 'ar' | 'hu';
+  locale: 'xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu';
   user: User & {
     collection: 'users';
   };

@@ -10,6 +10,7 @@ import type {
   PayloadRequest,
   SanitizedFieldPermissions,
   SanitizedFieldsPermissions,
+  Validate,
 } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
@@ -26,7 +27,7 @@ import {
 
 import type { RenderFieldMethod } from './types.js'
 
-import { getFilterOptionsQuery } from './getFilterOptionsQuery.js'
+import { resolveFilterOptions } from '../../utilities/resolveFilterOptions.js'
 import { iterateFields } from './iterateFields.js'
 
 const ObjectId = (ObjectIdImport.default ||
@@ -38,6 +39,10 @@ export type AddFieldStatePromiseArgs = {
    * if all parents are localized, then the field is localized
    */
   anyParentLocalized?: boolean
+  /**
+   * Data of the nearest parent block, or undefined
+   */
+  blockData: Data | undefined
   clientFieldSchemaMap?: ClientFieldSchemaMap
   collectionSlug?: string
   data: Data
@@ -100,6 +105,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     id,
     addErrorPathToParent: addErrorPathToParentArg,
     anyParentLocalized = false,
+    blockData,
     clientFieldSchemaMap,
     collectionSlug,
     data,
@@ -158,7 +164,13 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       fieldPermissions === true || deepCopyObjectSimple(fieldPermissions?.read)
 
     if (typeof field?.access?.read === 'function') {
-      hasPermission = await field.access.read({ id, data: fullData, req, siblingData: data })
+      hasPermission = await field.access.read({
+        id,
+        blockData,
+        data: fullData,
+        req,
+        siblingData: data,
+      })
     } else {
       hasPermission = true
     }
@@ -167,7 +179,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       return
     }
 
-    const validate = field.validate
+    const validate: Validate = field.validate
 
     let validationResult: string | true = true
 
@@ -183,20 +195,22 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       }
 
       try {
-        validationResult = await validate(
-          data?.[field.name] as never,
-          {
-            ...field,
-            id,
-            collectionSlug,
-            data: fullData,
-            jsonError,
-            operation,
-            preferences,
-            req,
-            siblingData: data,
-          } as any,
-        )
+        validationResult = await validate(data?.[field.name], {
+          ...field,
+          id,
+          blockData,
+          collectionSlug,
+          data: fullData,
+          event: 'onChange',
+          // @AlessioGr added `jsonError` in https://github.com/payloadcms/payload/commit/c7ea62a39473408c3ea912c4fbf73e11be4b538d
+          // @ts-expect-error-next-line
+          jsonError,
+          operation,
+          preferences,
+          previousValue: previousFormState?.[path]?.initialValue,
+          req,
+          siblingData: data,
+        })
       } catch (err) {
         validationResult = `Error validating field at path: ${path}`
 
@@ -255,6 +269,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 id,
                 addErrorPathToParent,
                 anyParentLocalized: field.localized || anyParentLocalized,
+                blockData,
                 clientFieldSchemaMap,
                 collectionSlug,
                 data: row,
@@ -297,8 +312,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             const collapsed = (() => {
               // First, check if `previousFormState` has a matching row
               const previousRow = previousRows.find((prevRow) => prevRow.id === row.id)
-              if (previousRow?.collapsed !== undefined) {
-                return previousRow.collapsed
+              if (previousRow) {
+                return previousRow.collapsed ?? false
               }
 
               // If previousFormState is undefined, check preferences
@@ -364,7 +379,6 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             }
 
             const parentPath = path + '.' + i
-            const rowSchemaPath = schemaPath + '.' + block.slug
 
             if (block) {
               row.id = row?.id || new ObjectId().toHexString()
@@ -420,6 +434,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   id,
                   addErrorPathToParent,
                   anyParentLocalized: field.localized || anyParentLocalized,
+                  blockData: row,
                   clientFieldSchemaMap,
                   collectionSlug,
                   data: row,
@@ -434,7 +449,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   parentIndexPath: '',
                   parentPassesCondition: passesCondition,
                   parentPath,
-                  parentSchemaPath: rowSchemaPath,
+                  parentSchemaPath: schemaPath + '.' + block.slug,
                   permissions:
                     fieldPermissions === true
                       ? fieldPermissions
@@ -516,6 +531,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           id,
           addErrorPathToParent,
           anyParentLocalized: field.localized || anyParentLocalized,
+          blockData,
           clientFieldSchemaMap,
           collectionSlug,
           data: data?.[field.name] || {},
@@ -562,8 +578,9 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           }
 
           if (typeof field.filterOptions === 'function') {
-            const query = await getFilterOptionsQuery(field.filterOptions, {
+            const query = await resolveFilterOptions(field.filterOptions, {
               id,
+              blockData,
               data: fullData,
               relationTo: field.relationTo,
               req,
@@ -664,6 +681,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       // passthrough parent functionality
       addErrorPathToParent: addErrorPathToParentArg,
       anyParentLocalized: fieldIsLocalized(field) || anyParentLocalized,
+      blockData,
       clientFieldSchemaMap,
       collectionSlug,
       data,
@@ -729,6 +747,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         id,
         addErrorPathToParent: addErrorPathToParentArg,
         anyParentLocalized: tab.localized || anyParentLocalized,
+        blockData,
         clientFieldSchemaMap,
         collectionSlug,
         data: isNamedTab ? data?.[tab.name] || {} : data,
@@ -740,10 +759,10 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         includeSchema,
         omitParents,
         operation,
-        parentIndexPath: tabHasName(tab) ? '' : tabIndexPath,
+        parentIndexPath: isNamedTab ? '' : tabIndexPath,
         parentPassesCondition: passesCondition,
-        parentPath: tabHasName(tab) ? tabPath : parentPath,
-        parentSchemaPath: tabHasName(tab) ? tabSchemaPath : parentSchemaPath,
+        parentPath: isNamedTab ? tabPath : parentPath,
+        parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
         permissions: childPermissions,
         preferences,
         previousFormState,

@@ -2,7 +2,7 @@ import type { CollectionAfterChangeHook } from 'payload'
 
 import { revalidatePath } from 'next/cache'
 
-import type { Page } from '../../../payload-types'
+import type { Page } from '@payload-types'
 
 export const revalidatePage: CollectionAfterChangeHook<Page> = ({ doc, previousDoc, req }) => {
   if (req.context.skipRevalidate) {

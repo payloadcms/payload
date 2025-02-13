@@ -11,6 +11,8 @@ import type {
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
+  FieldDiffClientComponent,
+  FieldDiffServerComponent,
   FieldErrorClientComponent,
   FieldErrorServerComponent,
   FieldLabelClientComponent,
@@ -56,3 +58,7 @@ export type RowFieldErrorServerComponent = FieldErrorServerComponent<
 >
 
 export type RowFieldErrorClientComponent = FieldErrorClientComponent<RowFieldClientWithoutType>
+
+export type RowFieldDiffServerComponent = FieldDiffServerComponent<RowField, RowFieldClient>
+
+export type RowFieldDiffClientComponent = FieldDiffClientComponent<RowFieldClient>

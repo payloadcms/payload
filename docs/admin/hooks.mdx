@@ -1,12 +1,12 @@
 ---
 title: React Hooks
 label: React Hooks
-order: 70
+order: 40
 desc: Make use of all of the powerful React hooks that Payload provides.
 keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Payload provides a variety of powerful [React Hooks](https://react.dev/reference/react-dom/hooks) that can be used within your own [Custom Components](./components), such as [Custom Fields](./fields). With them, you can interface with Payload itself to build just about any type of complex customization you can think of.
+Payload provides a variety of powerful [React Hooks](https://react.dev/reference/react-dom/hooks) that can be used within your own [Custom Components](./components), such as [Custom Fields](../fields/overview#custom-components). With them, you can interface with Payload itself to build just about any type of complex customization you can think of.
 
 <Banner type="warning">
   **Reminder:**
@@ -15,7 +15,7 @@ Payload provides a variety of powerful [React Hooks](https://react.dev/reference
 
 ## useField
 
-The `useField` hook is used internally within all field components. It manages sending and receiving a field's state from its parent form. When you build a [Custom Field Component](./fields), you will be responsible for sending and receiving the field's `value` to and from the form yourself.
+The `useField` hook is used internally within all field components. It manages sending and receiving a field's state from its parent form. When you build a [Custom Field Component](../fields/overview#custom-components), you will be responsible for sending and receiving the field's `value` to and from the form yourself.
 
 To do so, import the `useField` hook as follows:
 
@@ -654,6 +654,26 @@ const ExampleCollection = {
   ]}
 />
 
+## useDocumentForm
+
+The `useDocumentForm` hook works the same way as the [useForm](#useform) hook, but it always gives you access to the top-level `Form` of a document. This is useful if you need to access the document's `Form` context from within a child  `Form`.
+
+An example where this could happen would be custom components within lexical blocks, as lexical blocks initialize their own child `Form`.
+
+```tsx
+'use client'
+
+import { useDocumentForm } from '@payloadcms/ui'
+
+const MyComponent: React.FC = () => {
+  const { fields: parentDocumentFields } = useDocumentForm()
+
+  return (
+    <p>The document's Form has ${Object.keys(parentDocumentFields).length} fields</p>
+  )
+}
+```
+
 ## useCollapsible
 
 The `useCollapsible` hook allows you to control parent collapsibles:
@@ -1014,5 +1034,119 @@ export const MySetStepNavComponent: React.FC<{
   }, [setStepNav, nav])
 
   return null
+}
+```
+
+## usePayloadAPI
+
+The `usePayloadAPI` hook is a useful tool for making REST API requests to your Payload instance and handling responses reactively. It allows you to fetch and interact with data while automatically updating when parameters change.
+
+This hook returns an array with two elements:
+
+1. An object containing the API response.
+2. A set of methods to modify request parameters.
+
+**Example:**
+
+```tsx
+'use client'
+import { usePayloadAPI } from '@payloadcms/ui'
+
+const MyComponent: React.FC = () => {
+  // Fetch data from a collection item using its ID
+  const [{ data, error, isLoading }, { setParams }] = usePayloadAPI(
+    '/api/posts/123',
+    { initialParams: { depth: 1 } }
+  )
+
+  if (isLoading) return <p>Loading...</p>
+  if (error) return <p>Error: {error.message}</p>
+
+  return (
+    <div>
+      <h1>{data?.title}</h1>
+      <button onClick={() => setParams({ cacheBust: Date.now() })}>
+        Refresh Data
+      </button>
+    </div>
+  )
+}
+```
+
+**Arguments:**
+
+| Property      | Description                                                                                     |
+| ------------- | ----------------------------------------------------------------------------------------------- |
+| **`url`**     | The API endpoint to fetch data from. Relative URLs will be prefixed with the Payload API route. |
+| **`options`** | An object containing initial request parameters and initial state configuration.                |
+
+The `options` argument accepts the following properties:
+
+| Property            | Description                                                                                         |
+| ------------------- | --------------------------------------------------------------------------------------------------- |
+| **`initialData`**   | Uses this data instead of making an initial request. If not provided, the request runs immediately. |
+| **`initialParams`** | Defines the initial parameters to use in the request. Defaults to an empty object `{}`.             |
+
+**Returned Value:**
+
+The first item in the returned array is an object containing the following properties:
+
+| Property        | Description                                              |
+| --------------- | -------------------------------------------------------- |
+| **`data`**      | The API response data.                                   |
+| **`error`**     | If an error occurs, this contains the error object.      |
+| **`isLoading`** | A boolean indicating whether the request is in progress. |
+
+The second item is an object with the following methods:
+
+| Property        | Description                                                 |
+| --------------- | ----------------------------------------------------------- |
+| **`setParams`** | Updates request parameters, triggering a refetch if needed. |
+
+#### Updating Data
+
+The `setParams` function can be used to update the request and trigger a refetch:
+
+```tsx
+setParams({ depth: 2 })
+```
+
+This is useful for scenarios where you need to trigger another fetch regardless of the `url` argument changing.
+
+## useRouteTransition
+
+Route transitions are useful in showing immediate visual feedback to the user when navigating between pages. This is especially useful on slow networks when navigating to data heavy or process intensive pages.
+
+By default, any instances of `Link` from `@payloadcms/ui` will trigger route transitions dy default.
+
+```tsx
+import { Link } from '@payloadcms/ui'
+
+const MyComponent = () => {
+  return (
+    <Link href="/somewhere">
+      Go Somewhere
+    </Link>
+  )
+}
+```
+
+You can also trigger route transitions programmatically, such as when using `router.push` from `next/router`. To do this, wrap your function calls with the `startRouteTransition` method provided by the `useRouteTransition` hook.
+
+```ts
+'use client'
+import React, { useCallback } from 'react'
+import { useTransition } from '@payloadcms/ui'
+import { useRouter } from 'next/navigation'
+
+const MyComponent: React.FC = () => {
+  const router = useRouter()
+  const { startRouteTransition } = useRouteTransition()
+
+  const redirectSomewhere = useCallback(() => {
+    startRouteTransition(() => router.push('/somewhere'))
+  }, [startRouteTransition, router])
+
+  // ...
 }
 ```

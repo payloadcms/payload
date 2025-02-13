@@ -36,7 +36,7 @@ export function AddingFilesView() {
   const { user } = useAuth()
   const { openModal } = useModal()
 
-  const collection = getEntityConfig({ collectionSlug })
+  const collectionConfig = getEntityConfig({ collectionSlug })
 
   return (
     <div className={baseClass}>
@@ -45,7 +45,7 @@ export function AddingFilesView() {
       <div className={`${baseClass}__editView`}>
         <DrawerHeader
           onClose={() => openModal(discardBulkUploadModalSlug)}
-          title={getTranslation(collection.labels.singular, i18n)}
+          title={getTranslation(collectionConfig.labels.singular, i18n)}
         />
         {activeForm ? (
           <DocumentInfoProvider
@@ -66,7 +66,7 @@ export function AddingFilesView() {
             Upload={documentSlots.Upload}
             versionCount={0}
           >
-            <ActionsBar />
+            <ActionsBar collectionConfig={collectionConfig} />
             <EditForm submitted={hasSubmitted} />
           </DocumentInfoProvider>
         ) : null}

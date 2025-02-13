@@ -1,7 +1,5 @@
 'use client'
 
-import type { ClientCollectionConfig } from 'payload'
-
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import React, { useCallback, useEffect } from 'react'
 
@@ -15,6 +13,7 @@ import { useDocumentEvents } from '../../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../../providers/EditDepth/index.js'
 import { OperationProvider } from '../../../providers/Operation/index.js'
+import { useRouteTransition } from '../../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { useUploadEdits } from '../../../providers/UploadEdits/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../../utilities/abortAndIgnore.js'
@@ -64,6 +63,7 @@ export function EditForm({ submitted }: EditFormProps) {
   const params = useSearchParams()
   const { reportUpdate } = useDocumentEvents()
   const { resetUploadEdits } = useUploadEdits()
+  const { startRouteTransition } = useRouteTransition()
 
   const locale = params.get('locale')
 
@@ -91,7 +91,8 @@ export function EditForm({ submitted }: EditFormProps) {
           adminRoute,
           path: `/collections/${collectionSlug}/${json?.doc?.id}${locale ? `?locale=${locale}` : ''}`,
         })
-        router.push(redirectRoute)
+
+        startRouteTransition(() => router.push(redirectRoute))
       } else {
         resetUploadEdits()
       }
@@ -106,11 +107,12 @@ export function EditForm({ submitted }: EditFormProps) {
       reportUpdate,
       resetUploadEdits,
       router,
+      startRouteTransition,
     ],
   )
 
   const onChange: NonNullable<FormProps['onChange']>[0] = useCallback(
-    async ({ formState: prevFormState }) => {
+    async ({ formState: prevFormState, submitted }) => {
       const controller = handleAbortRef(abortOnChangeRef)
 
       const docPreferences = await getDocPreferences()
@@ -123,6 +125,7 @@ export function EditForm({ submitted }: EditFormProps) {
         operation: 'create',
         schemaPath,
         signal: controller.signal,
+        skipValidation: !submitted,
       })
 
       abortOnChangeRef.current = null

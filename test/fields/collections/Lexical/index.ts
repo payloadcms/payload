@@ -20,8 +20,10 @@ import { $convertToMarkdownString } from '@payloadcms/richtext-lexical/lexical/m
 
 import { lexicalFieldsSlug } from '../../slugs.js'
 import {
+  AsyncHooksBlock,
   CodeBlock,
   ConditionalLayoutBlock,
+  FilterOptionsBlock,
   RadioButtonsBlock,
   RelationshipBlock,
   RelationshipHasManyBlock,
@@ -31,6 +33,7 @@ import {
   TabBlock,
   TextBlock,
   UploadAndRichTextBlock,
+  ValidationBlock,
 } from './blocks.js'
 import { ModifyInlineBlockFeature } from './ModifyInlineBlockFeature/feature.server.js'
 
@@ -73,6 +76,9 @@ const editorConfig: ServerEditorConfig = {
     ModifyInlineBlockFeature(),
     BlocksFeature({
       blocks: [
+        ValidationBlock,
+        FilterOptionsBlock,
+        AsyncHooksBlock,
         RichTextBlock,
         TextBlock,
         UploadAndRichTextBlock,
@@ -316,6 +322,20 @@ export const LexicalFields: CollectionConfig = {
       }),
     },
     {
+      type: 'ui',
+      name: 'clearLexicalState',
+      admin: {
+        components: {
+          Field: {
+            path: '/collections/Lexical/components/ClearState.js#ClearState',
+            clientProps: {
+              fieldName: 'lexicalSimple',
+            },
+          },
+        },
+      },
+    },
+    {
       name: 'lexicalWithBlocks',
       type: 'richText',
       editor: lexicalEditor({
@@ -365,7 +385,7 @@ export const LexicalFields: CollectionConfig = {
             }
 
             // Export to markdown
-            let markdown: string
+            let markdown: string = ''
             headlessEditor.getEditorState().read(() => {
               markdown = $convertToMarkdownString(
                 yourSanitizedEditorConfig?.features?.markdownTransformers,

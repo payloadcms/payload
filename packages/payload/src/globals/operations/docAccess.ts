@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { SanitizedGlobalPermission } from '../../auth/index.js'
 import type { AllOperations, PayloadRequest } from '../../types/index.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'

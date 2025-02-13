@@ -4,7 +4,7 @@ import type {
   Field,
   FieldSchemaMap,
   FileData,
-  FileSize,
+  FileSizeImproved,
   Payload,
   TypeWithID,
 } from 'payload'
@@ -59,18 +59,19 @@ export const UploadFeature = createServerFeature<
     if (props.collections) {
       for (const collection in props.collections) {
         clientProps.collections[collection] = {
-          hasExtraFields: props.collections[collection].fields.length >= 1,
+          hasExtraFields: props.collections[collection]!.fields.length >= 1,
         }
       }
     }
 
     const validRelationships = _config.collections.map((c) => c.slug) || []
 
-    for (const collection in props.collections) {
-      if (props.collections[collection].fields?.length) {
-        props.collections[collection].fields = await sanitizeFields({
+    for (const collectionKey in props.collections) {
+      const collection = props.collections[collectionKey]!
+      if (collection.fields?.length) {
+        collection.fields = await sanitizeFields({
           config: _config as unknown as Config,
-          fields: props.collections[collection].fields,
+          fields: collection.fields,
           parentIsLocalized,
           requireFieldLevelRichTextEditor: isRoot,
           validRelationships,
@@ -88,10 +89,11 @@ export const UploadFeature = createServerFeature<
 
         const schemaMap: FieldSchemaMap = new Map()
 
-        for (const collection in props.collections) {
-          if (props.collections[collection].fields?.length) {
-            schemaMap.set(collection, {
-              fields: props.collections[collection].fields,
+        for (const collectionKey in props.collections) {
+          const collection = props.collections[collectionKey]!
+          if (collection.fields?.length) {
+            schemaMap.set(collectionKey, {
+              fields: collection.fields,
             })
           }
         }
@@ -170,9 +172,7 @@ export const UploadFeature = createServerFeature<
 
                   // Iterate through each size in the data.sizes object
                   for (const size in uploadDocument.value?.sizes) {
-                    const imageSize: {
-                      url?: string
-                    } & FileSize = uploadDocument.value?.sizes[size]
+                    const imageSize = uploadDocument.value.sizes[size] as FileSizeImproved
 
                     // Skip if any property of the size object is null
                     if (
@@ -205,7 +205,8 @@ export const UploadFeature = createServerFeature<
             if (!node) {
               let allSubFields: Field[] = []
               for (const collection in props?.collections) {
-                allSubFields = allSubFields.concat(props?.collections?.[collection]?.fields)
+                const collectionFields = props.collections[collection]!.fields
+                allSubFields = allSubFields.concat(collectionFields)
               }
               return allSubFields
             }
@@ -248,7 +249,7 @@ export const UploadFeature = createServerFeature<
                 if (!collection) {
                   return node
                 }
-                // @ts-expect-error
+                // @ts-expect-error - Fix in Payload v4
                 const id = node?.value?.id || node?.value // for backwards-compatibility
 
                 const populateDepth =

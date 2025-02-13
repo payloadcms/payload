@@ -4,7 +4,7 @@ import { BlockCollapsible } from '@payloadcms/richtext-lexical/client'
 import React from 'react'
 
 export const BlockComponentRSC: BlocksFieldServerComponent = (props) => {
-  const { data } = props
+  const { siblingData } = props
 
-  return <BlockCollapsible>Data: {data?.key ?? ''}</BlockCollapsible>
+  return <BlockCollapsible>Data: {siblingData?.key ?? ''}</BlockCollapsible>
 }

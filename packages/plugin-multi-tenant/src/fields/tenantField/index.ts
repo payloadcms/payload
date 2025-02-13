@@ -1,6 +1,8 @@
 import { type RelationshipField } from 'payload'
 import { APIError } from 'payload'
 
+import { defaults } from '../../defaults.js'
+import { getCollectionIDType } from '../../utilities/getCollectionIDType.js'
 import { getTenantFromCookie } from '../../utilities/getTenantFromCookie.js'
 
 type Args = {
@@ -11,10 +13,10 @@ type Args = {
   unique: boolean
 }
 export const tenantField = ({
-  name,
+  name = defaults.tenantFieldName,
   access = undefined,
   debug,
-  tenantsCollectionSlug,
+  tenantsCollectionSlug = defaults.tenantCollectionSlug,
   unique,
 }: Args): RelationshipField => ({
   name,
@@ -39,13 +41,19 @@ export const tenantField = ({
   hooks: {
     beforeChange: [
       ({ req, value }) => {
+        const idType = getCollectionIDType({
+          collectionSlug: tenantsCollectionSlug,
+          payload: req.payload,
+        })
         if (!value) {
-          const tenantFromCookie = getTenantFromCookie(req.headers, req.payload.db.defaultIDType)
+          const tenantFromCookie = getTenantFromCookie(req.headers, idType)
           if (tenantFromCookie) {
             return tenantFromCookie
           }
           throw new APIError('You must select a tenant', 400, null, true)
         }
+
+        return idType === 'number' ? parseFloat(value) : value
       },
     ],
   },

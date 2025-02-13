@@ -20,6 +20,11 @@ All Payload API routes are mounted and prefixed to your config's `routes.api` UR
 - [fallback-locale](/docs/configuration/localization#retrieving-localized-docs) - specifies a fallback locale if no locale value exists
 - [select](../queries/select) - specifies which fields to include to the result
 - [populate](../queries/select#populate) - specifies which fields to include to the result from populated documents
+- [limit](../queries/pagination#pagination-controls) - limits the number of documents returned
+- [page](../queries/pagination#pagination-controls) - specifies which page to get documents from when used with a limit
+- [sort](../queries/sort#rest-api) - specifies the field(s) to use to sort the returned documents by
+- [where](../queries/overview) - specifies advanced filters to use to query documents
+- [joins](/docs/fields/join#rest-api) - specifies the custom request for each join field by name of the field
 
 ## Collections
 
@@ -573,7 +578,7 @@ Each endpoint object needs to have:
 | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`path`**    | A string for the endpoint route after the collection or globals slug                                                                                                                                                                                       |
 | **`method`**  | The lowercase HTTP verb to use: 'get', 'head', 'post', 'put', 'delete', 'connect' or 'options'                                                                                                                                                             |
-| **`handler`** | A function or array of functions to be called with **req**, **res** and **next** arguments. [Next.js](https://nextjs.org/docs/app/building-your-application/routing/route-handlers)                                                                                          |
+| **`handler`** | A function that accepts **req** - `PayloadRequest` object which contains [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) properties, currently authenticated `user` and the Local API instance `payload`.                          |
 | **`root`**    | When `true`, defines the endpoint on the root Next.js app, bypassing Payload handlers and the `routes.api` subpath. Note: this only applies to top-level endpoints of your Payload Config, endpoints defined on `collections` or `globals` cannot be root. |
 | **`custom`**  | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                  |
 
@@ -658,7 +663,7 @@ Data is not automatically appended to the request. You can read the body data by
 Or you could use our helper function that mutates the request and appends data and file if found.
 
 ```ts
-import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
+import { addDataAndFileToRequest } from 'payload'
 
 // custom endpoint example
 {
@@ -684,7 +689,7 @@ import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
 The locale and the fallback locale are not automatically appended to custom endpoint requests. If you would like to add them you can use this helper function.
 
 ```ts
-import { addLocalesToRequestFromData } from '@payloadcms/next/utilities'
+import { addLocalesToRequestFromData } from 'payload'
 
 // custom endpoint example
 {

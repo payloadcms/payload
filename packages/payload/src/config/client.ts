@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { I18nClient } from '@payloadcms/translations'
 import type { DeepPartial } from 'ts-essentials'
 
@@ -97,6 +98,7 @@ export const createClientConfig = ({
           meta: config.admin.meta,
           routes: config.admin.routes,
           theme: config.admin.theme,
+          timezones: config.admin.timezones,
           user: config.admin.user,
         }
         if (config.admin.livePreview) {
@@ -128,6 +130,10 @@ export const createClientConfig = ({
           clientConfig.localization = {}
           if (config.localization.defaultLocale) {
             clientConfig.localization.defaultLocale = config.localization.defaultLocale
+          }
+          if (config.localization.defaultLocalePublishOption) {
+            clientConfig.localization.defaultLocalePublishOption =
+              config.localization.defaultLocalePublishOption
           }
           if (config.localization.fallback) {
             clientConfig.localization.fallback = config.localization.fallback

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { EditorProps } from '@monaco-editor/react'
@@ -45,14 +46,18 @@ import type {
   DateFieldErrorServerComponent,
   DateFieldLabelClientComponent,
   DateFieldLabelServerComponent,
+  DefaultCellComponentProps,
+  DefaultServerCellComponentProps,
   Description,
   EmailFieldClientProps,
   EmailFieldErrorClientComponent,
   EmailFieldErrorServerComponent,
   EmailFieldLabelClientComponent,
   EmailFieldLabelServerComponent,
-  FieldDescriptionClientComponent,
-  FieldDescriptionServerComponent,
+  FieldDescriptionClientProps,
+  FieldDescriptionServerProps,
+  FieldDiffClientComponent,
+  FieldDiffServerProps,
   GroupFieldClientProps,
   GroupFieldLabelClientComponent,
   GroupFieldLabelServerComponent,
@@ -129,7 +134,13 @@ import type {
   TextareaFieldValidation,
 } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
-import type { DefaultValue, Operation, PayloadRequest, Where } from '../../types/index.js'
+import type {
+  DefaultValue,
+  JsonObject,
+  Operation,
+  PayloadRequest,
+  Where,
+} from '../../types/index.js'
 import type {
   NumberFieldManyValidation,
   NumberFieldSingleValidation,
@@ -144,13 +155,18 @@ import type {
 } from '../validations.js'
 
 export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSiblingData = any> = {
+  /**
+   * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
+   */
+  blockData: JsonObject | undefined
   /** The collection which the field belongs to. If the field belongs to a global, this will be null. */
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   /**
    * Only available in `afterRead` hooks
    */
-  currentDepth?: number /**
+  currentDepth?: number
+  /**
    * Only available in `afterRead` hooks
    */
   /** The data passed to update the document within create and update operations, and the full document itself in the afterRead hook. */
@@ -166,6 +182,7 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
   findMany?: boolean
   /** The global which the field belongs to. If the field belongs to a collection, this will be null. */
   global: null | SanitizedGlobalConfig
+  indexPath: number[]
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
   operation?: 'create' | 'delete' | 'read' | 'update'
   /** The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. */
@@ -197,6 +214,10 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
    * The original siblingData with locales (not modified by any hooks). Only available in `beforeChange` and `beforeDuplicate` field hooks.
    */
   siblingDocWithLocales?: Record<string, unknown>
+  /**
+   * The sibling fields of the field which the hook is running against.
+   */
+  siblingFields: (Field | TabAsField)[]
   /** The value of the field. */
   value?: TValue
 }
@@ -207,7 +228,11 @@ export type FieldHook<TData extends TypeWithID = any, TValue = any, TSiblingData
 
 export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (args: {
   /**
-   * The incoming data used to `create` or `update` the document with. `data` is undefined during the `read` operation.
+   * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
+   */
+  blockData?: JsonObject | undefined
+  /**
+   * The incoming, top-level document data used to `create` or `update` the document with.
    */
   data?: Partial<TData>
   /**
@@ -226,19 +251,39 @@ export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (a
   siblingData?: Partial<TSiblingData>
 }) => boolean | Promise<boolean>
 
+//TODO: In 4.0, we should replace the three parameters of the condition function with a single, named parameter object
 export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
+  /**
+   * The top-level document data
+   */
   data: Partial<TData>,
+  /**
+   * Immediately adjacent data to this field. For example, if this is a `group` field, then `siblingData` will be the other fields within the group.
+   */
   siblingData: Partial<TSiblingData>,
-  { user }: { user: PayloadRequest['user'] },
+  {
+    blockData,
+    user,
+  }: {
+    /**
+     * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
+     */
+    blockData: Partial<TData>
+    user: PayloadRequest['user']
+  },
 ) => boolean
 
 export type FilterOptionsProps<TData = any> = {
   /**
-   * An object containing the full collection or global document currently being edited.
+   * The data of the nearest parent block. Will be `undefined` if the field is not within a block or when called on a `Filter` component within the list view.
+   */
+  blockData: TData
+  /**
+   * An object containing the full collection or global document currently being edited. Will be an empty object when called on a `Filter` component within the list view.
    */
   data: TData
   /**
-   * The `id` of the current document being edited. `id` is undefined during the `create` operation.
+   * The `id` of the current document being edited. Will be undefined during the `create` operation or when called on a `Filter` component within the list view.
    */
   id: number | string
   /**
@@ -247,7 +292,7 @@ export type FilterOptionsProps<TData = any> = {
   relationTo: CollectionSlug
   req: PayloadRequest
   /**
-   * An object containing document data that is scoped to only fields within the same parent of this field.
+   * An object containing document data that is scoped to only fields within the same parent of this field. Will be an empty object when called on a `Filter` component within the list view.
    */
   siblingData: unknown
   /**
@@ -268,9 +313,10 @@ export type FilterOptions<TData = any> =
 type Admin = {
   className?: string
   components?: {
-    Cell?: CustomComponent
-    Description?: CustomComponent<FieldDescriptionClientComponent | FieldDescriptionServerComponent>
-    Field?: CustomComponent<FieldClientComponent | FieldServerComponent>
+    Cell?: PayloadComponent<DefaultServerCellComponentProps, DefaultCellComponentProps>
+    Description?: PayloadComponent<FieldDescriptionServerProps, FieldDescriptionClientProps>
+    Diff?: PayloadComponent<FieldDiffServerProps, FieldDiffClientComponent>
+    Field?: PayloadComponent<FieldClientComponent | FieldServerComponent>
     /**
      * The Filter component has to be a client component
      */
@@ -342,8 +388,14 @@ export type LabelsClient = {
 }
 
 export type BaseValidateOptions<TData, TSiblingData, TValue> = {
+  /**
+  /**
+   * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
+   */
+  blockData: Partial<TData>
   collectionSlug?: string
   data: Partial<TData>
+  event?: 'onChange' | 'submit'
   id?: number | string
   operation?: Operation
   preferences: DocumentPreferences
@@ -625,6 +677,10 @@ export type DateField = {
     date?: ConditionalDateProps
     placeholder?: Record<string, string> | string
   } & Admin
+  /**
+   * Enable timezone selection in the admin interface.
+   */
+  timezone?: true
   type: 'date'
   validate?: DateFieldValidation
 } & Omit<FieldBase, 'validate'>
@@ -632,7 +688,7 @@ export type DateField = {
 export type DateFieldClient = {
   admin?: AdminClient & Pick<DateField['admin'], 'date' | 'placeholder'>
 } & FieldBaseClient &
-  Pick<DateField, 'type'>
+  Pick<DateField, 'timezone' | 'type'>
 
 export type GroupField = {
   admin?: {
@@ -716,6 +772,10 @@ export type CollapsibleFieldClient = {
   Pick<CollapsibleField, 'type'>
 
 type TabBase = {
+  /**
+   * @deprecated
+   * Use `admin.description` instead. This will be removed in a future major version.
+   */
   description?: LabelFunction | StaticDescription
   fields: Field[]
   interfaceName?: string

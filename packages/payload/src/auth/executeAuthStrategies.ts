@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { AuthStrategyFunctionArgs, AuthStrategyResult } from './index.js'
 
 export const executeAuthStrategies = async (
