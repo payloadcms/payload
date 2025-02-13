@@ -269,7 +269,13 @@ export const updateDocument = async <
     !draftArg &&
     data._status !== 'draft'
   ) {
-    await handleCascadePublish({ collection: collectionConfig, doc: result, req })
+    await handleCascadePublish({
+      collectionSlug: collectionConfig.slug,
+      doc: result,
+      fields: collectionConfig.flattenedFields,
+      publishSpecificLocale,
+      req,
+    })
   }
 
   // /////////////////////////////////////

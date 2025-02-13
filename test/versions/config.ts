@@ -16,6 +16,7 @@ import { Media } from './collections/Media.js'
 import Posts from './collections/Posts.js'
 import VersionPosts from './collections/Versions.js'
 import AutosaveGlobal from './globals/Autosave.js'
+import { CascadePublishGlobal } from './globals/CascadePublishGlobal.js'
 import DisablePublishGlobal from './globals/DisablePublish.js'
 import DraftGlobal from './globals/Draft.js'
 import DraftWithMaxGlobal from './globals/DraftWithMax.js'
@@ -44,7 +45,14 @@ export default buildConfigWithDefaults({
     CascadePublish,
     CascadePublishRelations,
   ],
-  globals: [AutosaveGlobal, DraftGlobal, DraftWithMaxGlobal, DisablePublishGlobal, LocalizedGlobal],
+  globals: [
+    AutosaveGlobal,
+    DraftGlobal,
+    DraftWithMaxGlobal,
+    DisablePublishGlobal,
+    LocalizedGlobal,
+    CascadePublishGlobal,
+  ],
   indexSortableFields: true,
   localization: {
     defaultLocale: 'en',

@@ -1,7 +1,7 @@
-import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
+import type { TypeWithID } from '../collections/config/types.js'
 import type { FlattenedField, RelationshipField } from '../fields/config/types.js'
-import type { CollectionSlug, SanitizedConfig } from '../index.js'
-import type { Payload, PayloadRequest } from '../types/index.js'
+import type { CollectionSlug } from '../index.js'
+import type { JsonObject, Payload, PayloadRequest } from '../types/index.js'
 
 const extractID = (value: unknown): number | string => {
   if (value && typeof value === 'object' && 'id' in value) {
@@ -206,19 +206,23 @@ const collectRelationsToPublish = ({
 }
 
 export const handleCascadePublish = async ({
-  collection,
+  collectionSlug,
   doc,
+  fields,
+  publishSpecificLocale,
   req,
 }: {
-  collection: SanitizedCollectionConfig
-  doc: Record<string, any> & TypeWithID
+  collectionSlug?: string
+  doc: JsonObject
+  fields: FlattenedField[]
+  publishSpecificLocale?: string
   req: PayloadRequest
 }) => {
   const relationsToPublish: Record<CollectionSlug, (number | string)[]> = {}
 
   const addRelation = (relation: Relation) => {
     // Skip cascade itself
-    if (relation.collectionSlug === collection.slug && relation.id === doc.id) {
+    if (collectionSlug && relation.collectionSlug === collectionSlug && relation.id === doc.id) {
       return
     }
 
@@ -236,7 +240,7 @@ export const handleCascadePublish = async ({
   collectRelationsToPublish({
     addRelation,
     data: doc,
-    fields: collection.flattenedFields,
+    fields,
     payload: req.payload,
   })
 
@@ -245,46 +249,28 @@ export const handleCascadePublish = async ({
   }
 
   for (const collectionSlug in relationsToPublish) {
-    const ids = relationsToPublish[collectionSlug]
-
-    const { docs } = await req.payload.find({
+    await req.payload.update({
       collection: collectionSlug,
+      data: {
+        _status: 'published',
+      },
       depth: 0,
-      draft: true,
-      joins: false,
-      pagination: false,
+      publishSpecificLocale,
       req,
-      select: {},
       where: {
         and: [
+          {
+            id: {
+              in: relationsToPublish[collectionSlug],
+            },
+          },
           {
             _status: {
               equals: 'draft',
             },
           },
-          {
-            id: {
-              in: ids,
-            },
-          },
         ],
       },
     })
-
-    if (docs.length) {
-      await req.payload.update({
-        collection: collectionSlug,
-        data: {
-          _status: 'published',
-        },
-        depth: 0,
-        req,
-        where: {
-          id: {
-            in: docs.map((doc) => doc.id),
-          },
-        },
-      })
-    }
   }
 }

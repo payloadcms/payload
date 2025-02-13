@@ -2769,7 +2769,7 @@ describe('Versions', () => {
   })
 
   describe('Cascade publish', () => {
-    it('should cascade publish', async () => {
+    it('should cascade publish collection', async () => {
       const relation = await payload.create({
         collection: 'cascade-publish-relations',
         draft: true,
@@ -2798,6 +2798,36 @@ describe('Versions', () => {
       })
       // And Here it fails..
       expect(publishedRelation._status).toBe('published')
+    })
+
+    it('should cascade publish global', async () => {
+      const relation = await payload.create({
+        collection: 'cascade-publish-relations',
+        draft: true,
+        data: { title: 'Relation to global', _status: 'draft' },
+      })
+      expect(relation._status).toBe('draft')
+      const globalDoc = await payload.updateGlobal({
+        slug: 'cascade-publish-global',
+        draft: true,
+        depth: 0,
+        data: { _status: 'draft', title: 'Some title 1', relation: relation.id },
+      })
+      expect(globalDoc._status).toBe('draft')
+
+      const publishedGlobalDoc = await payload.updateGlobal({
+        slug: 'cascade-publish-global',
+        draft: false,
+        depth: 0,
+        data: { _status: 'published' },
+      })
+      expect(publishedGlobalDoc._status).toBe('published')
+
+      const relationDoc = await payload.findByID({
+        collection: 'cascade-publish-relations',
+        id: relation.id,
+      })
+      expect(relationDoc._status).toBe('published')
     })
   })
 })

@@ -112,6 +112,7 @@ export interface Config {
     'draft-with-max-global': DraftWithMaxGlobal;
     'disable-publish-global': DisablePublishGlobal;
     'localized-global': LocalizedGlobal;
+    'cascade-publish-global': CascadePublishGlobal;
   };
   globalsSelect: {
     'autosave-global': AutosaveGlobalSelect<false> | AutosaveGlobalSelect<true>;
@@ -119,6 +120,7 @@ export interface Config {
     'draft-with-max-global': DraftWithMaxGlobalSelect<false> | DraftWithMaxGlobalSelect<true>;
     'disable-publish-global': DisablePublishGlobalSelect<false> | DisablePublishGlobalSelect<true>;
     'localized-global': LocalizedGlobalSelect<false> | LocalizedGlobalSelect<true>;
+    'cascade-publish-global': CascadePublishGlobalSelect<false> | CascadePublishGlobalSelect<true>;
   };
   locale: 'en' | 'es' | 'de';
   user: User & {
@@ -957,6 +959,18 @@ export interface LocalizedGlobal {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cascade-publish-global".
+ */
+export interface CascadePublishGlobal {
+  id: string;
+  title?: string | null;
+  relation?: (string | null) | CascadePublishRelation;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "autosave-global_select".
  */
 export interface AutosaveGlobalSelect<T extends boolean = true> {
@@ -1006,6 +1020,18 @@ export interface DisablePublishGlobalSelect<T extends boolean = true> {
 export interface LocalizedGlobalSelect<T extends boolean = true> {
   title?: T;
   content?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cascade-publish-global_select".
+ */
+export interface CascadePublishGlobalSelect<T extends boolean = true> {
+  title?: T;
+  relation?: T;
   _status?: T;
   updatedAt?: T;
   createdAt?: T;

@@ -28,6 +28,7 @@ import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
+import { handleCascadePublish } from '../../versions/handleCascadePublish.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 
 type Args<TSlug extends GlobalSlug> = {
@@ -239,6 +240,20 @@ export const updateOperation = async <
       ...beforeChangeArgs,
       docWithLocales: publishedDocWithLocales,
     })
+
+    if (
+      globalConfig.versions.drafts &&
+      globalConfig.versions.drafts.cascadePublish &&
+      !draftArg &&
+      data._status !== 'draft'
+    ) {
+      await handleCascadePublish({
+        doc: result,
+        fields: globalConfig.flattenedFields,
+        publishSpecificLocale,
+        req,
+      })
+    }
 
     // /////////////////////////////////////
     // Update
