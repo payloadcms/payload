@@ -99,8 +99,6 @@ export const TableColumnsProvider: React.FC<Props> = ({
         tableAppearance,
       })
 
-      console.log(result)
-
       if (result) {
         setTableColumns(result.state)
         setTable(result.Table)
@@ -163,8 +161,6 @@ export const TableColumnsProvider: React.FC<Props> = ({
         signal: controller.signal,
         tableAppearance,
       })
-
-      console.log(result)
 
       if (result) {
         setTableColumns(result.state)
