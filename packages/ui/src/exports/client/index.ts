@@ -249,7 +249,7 @@ export { useAddClientFunction } from '../../providers/ClientFunction/index.js'
 
 export { ProgressBar } from '../../providers/RouteTransition/ProgressBar/index.js'
 export {
-  RouteTransitionProvider as RouteTransition,
+  RouteTransitionProvider,
   useRouteTransition,
 } from '../../providers/RouteTransition/index.js'
 export { ConfigProvider, useConfig } from '../../providers/Config/index.js'
