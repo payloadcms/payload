@@ -69,12 +69,19 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
         return schema.uri === jsonSchema.uri && dequal(schema.schema, jsonSchema.schema)
       })
 
+      const generatedUrl = `a://b/${crypto.randomUUID()}.json`
       if (schemaExists) {
         // eslint-disable-next-line no-console
-        console.error(
-          `[JSON Schema Error]: Field ${label} - JSON Schema not applied because Schema URI must be unique. A schema with the same URI ${jsonSchema.uri} and the same properties already exists.`,
+        console.warn(
+          `[JSON Schema Error]: Field ${label} - Generating a schema URI. A schema with the same URI ${jsonSchema.uri} and the same properties already exists.`,
         )
-        return
+
+        // Override json schema with a new schema with a generated url to avoid conflicts
+        jsonSchemaOverride = {
+          ...jsonSchema,
+          fileMatch: [generatedUrl],
+          uri: generatedUrl,
+        }
       }
 
       const urlExistsButSchemaDiffers = existingSchemas.some(
@@ -88,7 +95,6 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
         )
 
         // Override json schema with a new schema with a generated url to avoid conflicts
-        const generatedUrl = `a://b/${crypto.randomUUID()}.json`
         jsonSchemaOverride = {
           ...jsonSchema,
           fileMatch: [generatedUrl],
