@@ -170,7 +170,7 @@ export const Categories: CollectionConfig = {
       hooks: {
         beforeValidate: [
           ({ data }) => {
-            if (data.enableErrorOnJoin) {
+            if (data?.enableErrorOnJoin) {
               throw new ValidationError({
                 collection: 'categories',
                 errors: [
