@@ -8,6 +8,7 @@ import {
   customViews1CollectionSlug,
   customViews2CollectionSlug,
   geoCollectionSlug,
+  localizedCollectionSlug,
   noApiViewCollectionSlug,
   postsCollectionSlug,
   usersCollectionSlug,
@@ -121,6 +122,15 @@ export const seed = async (_payload: Payload) => {
         _payload.create({
           collection: noApiViewCollectionSlug,
           data: {},
+          depth: 0,
+          overrideAccess: true,
+        }),
+      () =>
+        _payload.create({
+          collection: localizedCollectionSlug,
+          data: {
+            title: 'Localized Doc',
+          },
           depth: 0,
           overrideAccess: true,
         }),

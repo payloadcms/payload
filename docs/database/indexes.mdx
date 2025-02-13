@@ -15,7 +15,7 @@ To index a field, set the `index` option to `true` in your field's config:
 ```ts
 import type { CollectionConfig } from 'payload'
 
-export MyCollection: CollectionConfig = {
+export const MyCollection: CollectionConfig = {
   // ...
   fields: [
     // ...
@@ -26,7 +26,7 @@ export MyCollection: CollectionConfig = {
       index: true,
       // highlight-end
     },
-  ]
+  ],
 }
 ```
 
@@ -63,22 +63,9 @@ export const MyCollection: CollectionConfig = {
   ],
 }
 ```
+
 ## Localized fields and MongoDB indexes
 
 When you set `index: true` or `unique: true` on a localized field, MongoDB creates one index **per locale path** (e.g., `slug.en`, `slug.da-dk`, etc.). With many locales and indexed fields, this can quickly approach MongoDB's per-collection index limit.
 
-If you know you'll query specifically by a locale, index only those locale paths using the collection-level `indexes` option instead of setting `index: true` on the localized field. This approach gives you more control and helps avoid unnecessary indexes.
-
-```ts
-import type { CollectionConfig } from 'payload'
-
-export const Pages: CollectionConfig = {
-  fields: [{ name: 'slug', type: 'text', localized: true }],
-  indexes: [
-    // Index English slug only (rather than all locales)
-    { fields: ['slug.en'] },
-    // You could also make it unique:
-    // { fields: ['slug.en'], unique: true },
-  ],
-}
-```
+If you know you'll query specifically by a locale, you can insert a custom MongoDB index for the locale path manually or with a migration script.

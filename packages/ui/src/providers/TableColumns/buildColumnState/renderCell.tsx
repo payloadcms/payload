@@ -6,10 +6,12 @@ import type {
   Document,
   Field,
   Payload,
+  PayloadRequest,
   ViewTypes,
 } from 'payload'
 
 import { MissingEditorProp } from 'payload'
+import { formatAdminURL } from 'payload/shared'
 
 import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
 import { RenderServerComponent } from '../../../elements/RenderServerComponent/index.js'
@@ -31,6 +33,7 @@ type RenderCellArgs = {
   readonly i18n: I18nClient
   readonly isLinkedColumn: boolean
   readonly payload: Payload
+  readonly req?: PayloadRequest
   readonly rowIndex: number
   readonly serverField: Field
   readonly viewType?: ViewTypes
@@ -45,6 +48,7 @@ export function renderCell({
   i18n,
   isLinkedColumn,
   payload,
+  req,
   rowIndex,
   serverField,
   viewType,
@@ -62,10 +66,79 @@ export function renderCell({
     ('accessor' in clientField ? (clientField.accessor as string) : undefined) ??
     ('name' in clientField ? clientField.name : undefined)
 
+  // Check if there's a custom formatDocURL function for this linked column
+  let shouldLink = isLinkedColumn
+  let customLinkURL: string | undefined
+
+  if (isLinkedColumn && req) {
+    const collectionConfig = payload.collections[collectionSlug]?.config
+    const formatDocURL = collectionConfig?.admin?.formatDocURL
+
+    if (typeof formatDocURL === 'function') {
+      // Generate the default URL that would normally be used
+      const adminRoute = req.payload.config.routes?.admin || '/admin'
+      const defaultURL = formatAdminURL({
+        adminRoute,
+        path: `/collections/${collectionSlug}${viewType === 'trash' ? '/trash' : ''}/${encodeURIComponent(String(doc.id))}`,
+      })
+
+      const customURL = formatDocURL({
+        collectionSlug,
+        defaultURL,
+        doc,
+        req,
+        viewType,
+      })
+
+      if (customURL === null) {
+        // formatDocURL returned null = disable linking entirely
+        shouldLink = false
+      } else if (typeof customURL === 'string') {
+        // formatDocURL returned a string = use custom URL
+        shouldLink = true
+        customLinkURL = customURL
+      } else {
+        // formatDocURL returned unexpected type = disable linking for safety
+        shouldLink = false
+      }
+    }
+  }
+
+  // For _status field, use _displayStatus if available (for showing "changed" status in list view)
+  const cellData =
+    'name' in clientField && accessor === '_status' && '_displayStatus' in doc
+      ? doc._displayStatus
+      : 'name' in clientField
+        ? findValueFromPath(doc, accessor)
+        : undefined
+
+  // For _status field, add 'changed' option for display purposes
+  // The 'changed' status is computed at runtime
+  let enrichedClientField = clientField
+  if ('name' in clientField && accessor === '_status' && clientField.type === 'select') {
+    const hasChangedOption = clientField.options?.some(
+      (opt) => (typeof opt === 'object' ? opt.value : opt) === 'changed',
+    )
+    if (!hasChangedOption) {
+      enrichedClientField = {
+        ...clientField,
+        options: [
+          ...(clientField.options || []),
+          {
+            label: i18n.t('version:draftHasPublishedVersion'),
+            value: 'changed',
+          },
+        ],
+      }
+    }
+  }
+
   const cellClientProps: DefaultCellComponentProps = {
     ...baseCellClientProps,
-    cellData: 'name' in clientField ? findValueFromPath(doc, accessor) : undefined,
-    link: isLinkedColumn,
+    cellData,
+    field: enrichedClientField,
+    link: shouldLink,
+    linkURL: customLinkURL,
     rowData: doc,
   }
 
@@ -78,7 +151,8 @@ export function renderCell({
     customCellProps: baseCellClientProps.customCellProps,
     field: serverField,
     i18n,
-    link: cellClientProps.link,
+    link: shouldLink,
+    linkURL: customLinkURL,
     onClick: baseCellClientProps.onClick,
     payload,
     rowData: doc,

@@ -8,12 +8,10 @@ export function encrypt(text: string): string {
   const secret = this.secret
   const cipher = crypto.createCipheriv(algorithm, secret, iv)
 
-  const encrypted = Buffer.concat([cipher.update(text), cipher.final()])
-
+  const encrypted = cipher.update(text, 'utf8', 'hex') + cipher.final('hex')
   const ivString = iv.toString('hex')
-  const encryptedString = encrypted.toString('hex')
 
-  return `${ivString}${encryptedString}`
+  return `${ivString}${encrypted}`
 }
 
 export function decrypt(hash: string): string {
@@ -24,7 +22,5 @@ export function decrypt(hash: string): string {
   const secret = this.secret
   const decipher = crypto.createDecipheriv(algorithm, secret, Buffer.from(iv, 'hex'))
 
-  const decrypted = Buffer.concat([decipher.update(Buffer.from(content, 'hex')), decipher.final()])
-
-  return decrypted.toString()
+  return decipher.update(content, 'hex', 'utf8') + decipher.final('utf8')
 }

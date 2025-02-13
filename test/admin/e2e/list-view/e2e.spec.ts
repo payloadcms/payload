@@ -19,6 +19,7 @@ import { customAdminRoutes } from '../../shared.js'
 import {
   arrayCollectionSlug,
   customViews1CollectionSlug,
+  formatDocURLCollectionSlug,
   geoCollectionSlug,
   listDrawerSlug,
   placeholderCollectionSlug,
@@ -35,8 +36,8 @@ const description = 'Description'
 let payload: PayloadTestSDK<Config>
 
 import { listViewSelectAPISlug } from 'admin/collections/ListViewSelectAPI/index.js'
+import { noTimestampsSlug } from 'admin/collections/NoTimestamps.js'
 import { devUser } from 'credentials.js'
-import { getRowByCellValueAndAssert } from 'helpers/e2e/getRowByCellValueAndAssert.js'
 import {
   openListColumns,
   reorderColumns,
@@ -45,6 +46,7 @@ import {
   waitForColumnInURL,
 } from 'helpers/e2e/columns/index.js'
 import { addListFilter, openListFilters } from 'helpers/e2e/filters/index.js'
+import { getRowByCellValueAndAssert } from 'helpers/e2e/getRowByCellValueAndAssert.js'
 import { goToNextPage, goToPreviousPage } from 'helpers/e2e/goToNextPage.js'
 import { goToFirstCell } from 'helpers/e2e/navigateToDoc.js'
 import { deletePreferences } from 'helpers/e2e/preferences.js'
@@ -74,8 +76,10 @@ describe('List View', () => {
   let withListViewUrl: AdminUrlUtil
   let placeholderUrl: AdminUrlUtil
   let disableBulkEditUrl: AdminUrlUtil
+  let formatDocURLUrl: AdminUrlUtil
   let user: any
   let virtualsUrl: AdminUrlUtil
+  let noTimestampsUrl: AdminUrlUtil
 
   let serverURL: string
   let adminRoutes: ReturnType<typeof getRoutes>
@@ -100,7 +104,9 @@ describe('List View', () => {
     withListViewUrl = new AdminUrlUtil(serverURL, listDrawerSlug)
     placeholderUrl = new AdminUrlUtil(serverURL, placeholderCollectionSlug)
     disableBulkEditUrl = new AdminUrlUtil(serverURL, 'disable-bulk-edit')
+    formatDocURLUrl = new AdminUrlUtil(serverURL, formatDocURLCollectionSlug)
     virtualsUrl = new AdminUrlUtil(serverURL, virtualsSlug)
+    noTimestampsUrl = new AdminUrlUtil(serverURL, noTimestampsSlug)
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
@@ -736,6 +742,33 @@ describe('List View', () => {
       await expect(valueInput).toHaveValue('Test')
     })
 
+    test('should show all documents when equals filter value is cleared', async () => {
+      await page.goto(postsUrl.list)
+
+      await expect(page.locator(tableRowLocator)).toHaveCount(2)
+
+      const { whereBuilder } = await addListFilter({
+        page,
+        fieldLabel: 'Title',
+        operatorLabel: 'equals',
+        value: 'post1',
+      })
+
+      // Wait for filter to be applied
+      await page.waitForTimeout(500)
+
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+
+      const valueInput = whereBuilder.locator('.condition__value >> input')
+      await valueInput.clear()
+
+      // Wait for debounce
+      await page.waitForTimeout(500)
+
+      // Should now show all 2 posts again (not 0 posts)
+      await expect(page.locator(tableRowLocator)).toHaveCount(2)
+    })
+
     test('should still show second filter if two filters exist and first filter is removed', async () => {
       await page.goto(postsUrl.list)
 
@@ -828,27 +861,6 @@ describe('List View', () => {
       await expect(
         condition2?.locator('.rs__menu-list:has-text("Disable List Filter Text")'),
       ).toBeHidden()
-    })
-
-    test('should show no results when queryin on a field a user cannot read', async () => {
-      await payload.create({
-        collection: postsCollectionSlug,
-        data: {
-          noReadAccessField: 'test',
-        },
-      })
-
-      await page.goto(postsUrl.list)
-
-      const { whereBuilder } = await addListFilter({
-        page,
-        fieldLabel: 'No Read Access Field',
-        operatorLabel: 'equals',
-        value: 'test',
-      })
-
-      await expect(whereBuilder.locator('.condition__value input')).toBeVisible()
-      await expect(page.locator('.collection-list__no-results')).toBeVisible()
     })
 
     test('should properly paginate many documents', async () => {
@@ -1470,12 +1482,12 @@ describe('List View', () => {
       // select one row
       await page.locator('.row-1 .cell-_select input').check()
 
-      // delete button should be present
-      await expect(page.locator('#confirm-delete-many-docs #confirm-action')).toHaveCount(1)
+      const deleteBtn = page.locator('.delete-documents__toggle')
+      await expect(deleteBtn).toBeVisible()
 
       await page.locator('.row-2 .cell-_select input').check()
 
-      await page.locator('.delete-documents__toggle').click()
+      await deleteBtn.click()
       await page.locator('#confirm-delete-many-docs #confirm-action').click()
       await expect(page.locator('.cell-_select')).toHaveCount(1)
     })
@@ -1568,6 +1580,24 @@ describe('List View', () => {
       await expect(page.locator('.per-page')).toContainText('Per Page: 15') // ensure this hasn't changed
       await expect(page.locator('.page-controls__page-info')).toHaveText('16-16 of 16')
     })
+
+    test('should paginate when timestamps are disabled', async () => {
+      await mapAsync([...Array(6)], async () => {
+        await createNoTimestampPost()
+      })
+
+      await page.goto(noTimestampsUrl.list)
+
+      await page.locator('.per-page .popup-button').click()
+      await page.getByRole('button', { name: '5', exact: true }).click()
+      await page.waitForURL(/limit=5/)
+
+      const firstPageIds = await page.locator('.cell-id').allInnerTexts()
+      await goToNextPage(page)
+      const secondPageIds = await page.locator('.cell-id').allInnerTexts()
+
+      expect(firstPageIds).not.toContain(secondPageIds[0])
+    })
   })
 
   // TODO: Troubleshoot flaky suite
@@ -1586,12 +1616,12 @@ describe('List View', () => {
     test('should sort', async () => {
       await page.reload()
 
-      await sortColumn(page, { fieldPath: 'number', fieldLabel: 'Number', targetState: 'asc' })
+      await sortColumn(page, { fieldPath: 'number', targetState: 'asc' })
 
       await expect(page.locator('.row-1 .cell-number')).toHaveText('1')
       await expect(page.locator('.row-2 .cell-number')).toHaveText('2')
 
-      await sortColumn(page, { fieldPath: 'number', fieldLabel: 'Number', targetState: 'desc' })
+      await sortColumn(page, { fieldPath: 'number', targetState: 'desc' })
 
       await expect(page.locator('.row-1 .cell-number')).toHaveText('2')
       await expect(page.locator('.row-2 .cell-number')).toHaveText('1')
@@ -1608,7 +1638,6 @@ describe('List View', () => {
 
       await sortColumn(page, {
         fieldPath: 'namedGroup.someTextField',
-        fieldLabel: 'Named Group > Some Text Field',
         targetState: 'asc',
       })
 
@@ -1622,7 +1651,6 @@ describe('List View', () => {
 
       await sortColumn(page, {
         fieldPath: 'namedGroup.someTextField',
-        fieldLabel: 'Named Group > Some Text Field',
         targetState: 'desc',
       })
 
@@ -1646,7 +1674,6 @@ describe('List View', () => {
 
       await sortColumn(page, {
         fieldPath: 'namedTab.nestedTextFieldInNamedTab',
-        fieldLabel: 'Named Tab > Nested Text Field In Named Tab',
         targetState: 'asc',
       })
 
@@ -1660,7 +1687,6 @@ describe('List View', () => {
 
       await sortColumn(page, {
         fieldPath: 'namedTab.nestedTextFieldInNamedTab',
-        fieldLabel: 'Named Tab > Nested Text Field In Named Tab',
         targetState: 'desc',
       })
 
@@ -1891,6 +1917,148 @@ describe('List View', () => {
 
     await expect(drawer.locator('.table > table > tbody > tr')).toHaveCount(2)
   })
+
+  describe('formatDocURL', () => {
+    beforeEach(async () => {
+      // Clean up any existing formatDocURL documents
+      await payload.delete({
+        collection: formatDocURLCollectionSlug,
+        where: { id: { exists: true } },
+      })
+    })
+
+    test('should disable linking for documents with title "no-link"', async () => {
+      // Create test documents
+      await payload.create({
+        collection: formatDocURLCollectionSlug,
+        data: { title: 'no-link', description: 'This should not be linkable' },
+      })
+
+      const normalDoc = await payload.create({
+        collection: formatDocURLCollectionSlug,
+        data: { title: 'normal', description: 'This should be linkable normally' },
+      })
+
+      await page.goto(formatDocURLUrl.list)
+      await expect(page.locator(tableRowLocator)).toHaveCount(2)
+
+      // Find the row with "no-link" title - it should NOT have a link
+      const noLinkRow = page.locator(tableRowLocator).filter({ hasText: 'no-link' })
+      const noLinkTitleCell = noLinkRow.locator('td').nth(1)
+      await expect(noLinkTitleCell.locator('a')).toHaveCount(0)
+
+      // Find the row with "normal" title - it should have a link with admin=true query param
+      // (because we're logged in as dev@payloadcms.com)
+      const normalRow = page.locator(tableRowLocator).filter({ hasText: 'normal' })
+      const normalTitleCell = normalRow.locator('td').nth(1)
+      const normalLink = normalTitleCell.locator('a')
+      await expect(normalLink).toHaveCount(1)
+      await expect(normalLink).toHaveAttribute(
+        'href',
+        `${adminRoutes.routes?.admin}/collections/${formatDocURLCollectionSlug}/${normalDoc.id}?admin=true`,
+      )
+    })
+
+    test('should use custom destination for documents with title "custom-link"', async () => {
+      await payload.create({
+        collection: formatDocURLCollectionSlug,
+        data: { title: 'custom-link', description: 'This should link to custom destination' },
+      })
+
+      await page.goto(formatDocURLUrl.list)
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+
+      // Find the row with "custom-link" title - it should link to custom destination
+      const customLinkRow = page.locator(tableRowLocator).filter({ hasText: 'custom-link' })
+      const customLinkTitleCell = customLinkRow.locator('td').nth(1)
+      const customLink = customLinkTitleCell.locator('a')
+      await expect(customLink).toHaveCount(1)
+      await expect(customLink).toHaveAttribute('href', '/custom-destination')
+    })
+
+    test('should add admin query param for dev@payloadcms.com user', async () => {
+      // This test verifies the user-based URL modification
+      const adminDoc = await payload.create({
+        collection: formatDocURLCollectionSlug,
+        data: { title: 'admin-test', description: 'This should have admin query param' },
+      })
+
+      await page.goto(formatDocURLUrl.list)
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+
+      // Since we're logged in as dev@payloadcms.com, links should have ?admin=true
+      const adminRow = page.locator(tableRowLocator).filter({ hasText: 'admin-test' })
+      const adminTitleCell = adminRow.locator('td').nth(1)
+      const adminLink = adminTitleCell.locator('a')
+      await expect(adminLink).toHaveCount(1)
+      await expect(adminLink).toHaveAttribute(
+        'href',
+        new RegExp(
+          `${adminRoutes.routes?.admin}/collections/${formatDocURLCollectionSlug}/${adminDoc.id}\\?admin=true`,
+        ),
+      )
+    })
+
+    test('should use different URL for trash view', async () => {
+      // Create a document and then move it to trash
+      const trashDoc = await payload.create({
+        collection: formatDocURLCollectionSlug,
+        data: { title: 'trash-test', description: 'This should show trash URL' },
+      })
+
+      // Move the document to trash by setting deletedAt (not delete)
+      await payload.update({
+        collection: formatDocURLCollectionSlug,
+        id: trashDoc.id,
+        data: {
+          deletedAt: new Date().toISOString(),
+        },
+      })
+
+      // Go to trash view
+      await page.goto(`${formatDocURLUrl.list}/trash`)
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+
+      // In trash view, the formatDocURL should add ?from=trash
+      const trashRow = page.locator(tableRowLocator).filter({ hasText: 'trash-test' })
+      const trashTitleCell = trashRow.locator('td').nth(1)
+      const trashLink = trashTitleCell.locator('a')
+      await expect(trashLink).toHaveCount(1)
+      await expect(trashLink).toHaveAttribute(
+        'href',
+        new RegExp(
+          `${adminRoutes.routes?.admin}/collections/${formatDocURLCollectionSlug}/trash/${trashDoc.id}\\?from=trash`,
+        ),
+      )
+    })
+
+    test('should add published query param for published documents', async () => {
+      // Create a published document
+      const publishedDoc = await payload.create({
+        collection: formatDocURLCollectionSlug,
+        data: {
+          title: 'published-test',
+          description: 'This is a published document',
+          _status: 'published',
+        },
+      })
+
+      await page.goto(formatDocURLUrl.list)
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+
+      // Published documents should have ?published=true added
+      const publishedRow = page.locator(tableRowLocator).filter({ hasText: 'published-test' })
+      const publishedTitleCell = publishedRow.locator('td').nth(1)
+      const publishedLink = publishedTitleCell.locator('a')
+      await expect(publishedLink).toHaveCount(1)
+      await expect(publishedLink).toHaveAttribute(
+        'href',
+        new RegExp(
+          `${adminRoutes.routes?.admin}/collections/${formatDocURLCollectionSlug}/${publishedDoc.id}\\?published=true`,
+        ),
+      )
+    })
+  })
 })
 
 async function createPost(overrides?: Partial<Post>): Promise<Post> {
@@ -1916,6 +2084,16 @@ async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
       ...overrides,
     },
   }) as unknown as Promise<Geo>
+}
+
+async function createNoTimestampPost(overrides?: Partial<Post>): Promise<Post> {
+  return payload.create({
+    collection: noTimestampsSlug,
+    data: {
+      title,
+      ...overrides,
+    },
+  }) as unknown as Promise<Post>
 }
 
 async function createArray() {

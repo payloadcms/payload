@@ -6,7 +6,7 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { Fragment, useCallback } from 'react'
+import React, { Fragment, useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 
 import type { ClipboardPasteData } from '../../elements/ClipboardAction/types.js'
@@ -36,6 +36,7 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { scrollToID } from '../../utilities/scrollToID.js'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { ArrayRow } from './ArrayRow.js'
 import './index.scss'
@@ -44,6 +45,7 @@ const baseClass = 'array-field'
 
 export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   const {
+    field,
     field: {
       name,
       type,
@@ -65,7 +67,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   const schemaPath = schemaPathFromProps ?? name
 
-  const minRows = (minRowsProp ?? required) ? 1 : 0
+  const minRows = minRowsProp ?? (required ? 1 : 0)
 
   const { setDocFieldPreferences } = useDocumentInfo()
   const {
@@ -299,6 +301,8 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   const showRequired = (readOnly || disabled) && rows.length === 0
   const showMinRows = (rows.length && rows.length < minRows) || (required && rows.length === 0)
 
+  const styles = useMemo(() => mergeFieldStyles(field), [field])
+
   return (
     <div
       className={[
@@ -310,6 +314,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         .filter(Boolean)
         .join(' ')}
       id={`field-${path.replace(/\./g, '__')}`}
+      style={styles}
     >
       {showError && (
         <RenderCustomComponent

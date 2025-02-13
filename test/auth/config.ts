@@ -21,9 +21,17 @@ export default buildConfigWithDefaults({
       password: devUser.password,
       prefillOnly: true,
     },
+    autoRefresh: true,
     components: {
       beforeDashboard: ['./BeforeDashboard.js#BeforeDashboard'],
       beforeLogin: ['./BeforeLogin.js#BeforeLogin'],
+      views: {
+        'create-first-user': {
+          Component: './CreateFirstUser.js#CreateFirstUser',
+          path: '/create-first-user',
+          exact: true,
+        },
+      },
     },
     importMap: {
       baseDir: path.resolve(dirname),

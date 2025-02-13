@@ -1,4 +1,4 @@
-import type { RelationshipFieldSingleValidation, SingleRelationshipField } from 'payload'
+import type { RelationshipFieldValidation, SingleRelationshipField } from 'payload'
 
 import type { RootTenantFieldConfigOverrides } from '../../types.js'
 
@@ -8,7 +8,7 @@ import { getTenantFromCookie } from '../../utilities/getTenantFromCookie.js'
 import { getUserTenantIDs } from '../../utilities/getUserTenantIDs.js'
 
 const fieldValidation =
-  (validateFunction?: RelationshipFieldSingleValidation): RelationshipFieldSingleValidation =>
+  (validateFunction?: RelationshipFieldValidation): RelationshipFieldValidation =>
   (value, options) => {
     if (validateFunction) {
       const result = validateFunction(value, options)
@@ -17,8 +17,14 @@ const fieldValidation =
       }
     }
 
-    if (!value) {
-      return options.req.t('validation:required')
+    if (options.hasMany) {
+      if (!value || (Array.isArray(value) && value.length === 0)) {
+        return options.req.t('validation:required')
+      }
+    } else {
+      if (!value) {
+        return options.req.t('validation:required')
+      }
     }
 
     return true
@@ -26,6 +32,7 @@ const fieldValidation =
 
 type Args = {
   debug?: boolean
+  isDraftsEnabled?: boolean
   name: string
   overrides?: RootTenantFieldConfigOverrides
   tenantsArrayFieldName: string
@@ -36,13 +43,14 @@ type Args = {
 export const tenantField = ({
   name = defaults.tenantFieldName,
   debug,
+  isDraftsEnabled,
   overrides: _overrides = {},
   tenantsArrayFieldName = defaults.tenantsArrayFieldName,
   tenantsArrayTenantFieldName = defaults.tenantsArrayTenantFieldName,
   tenantsCollectionSlug = defaults.tenantCollectionSlug,
   unique,
 }: Args): SingleRelationshipField => {
-  const { validate, ...overrides } = _overrides || {}
+  const { hasMany = false, validate, ...overrides } = _overrides || {}
   return {
     ...(overrides || {}),
     name,
@@ -51,6 +59,7 @@ export const tenantField = ({
     admin: {
       allowCreate: false,
       allowEdit: false,
+      disableGroupBy: true,
       disableListColumn: true,
       disableListFilter: true,
       position: 'sidebar',
@@ -89,11 +98,20 @@ export const tenantField = ({
             user: req.user,
             where: {
               id: {
-                equals: tenantFromCookie,
+                in: [tenantFromCookie],
               },
             },
           })
           return isValidTenant ? tenantFromCookie : null
+        }
+        if (req.user && isDraftsEnabled) {
+          const userTenants = getUserTenantIDs(req.user, {
+            tenantsArrayFieldName,
+            tenantsArrayTenantFieldName,
+          })
+          if (userTenants.length > 0) {
+            return userTenants[0]
+          }
         }
         return null
       }),
@@ -114,12 +132,20 @@ export const tenantField = ({
 
         return true
       }),
-    hasMany: false,
     index: true,
     relationTo: tenantsCollectionSlug,
     unique,
-    // TODO: V4 - replace validation with required: true
-    validate: fieldValidation(validate as RelationshipFieldSingleValidation),
+    ...(hasMany
+      ? {
+          hasMany: true,
+          // TODO: V4 - replace validation with required: true
+          validate: fieldValidation(validate as RelationshipFieldValidation),
+        }
+      : {
+          hasMany: false,
+          // TODO: V4 - replace validation with required: true
+          validate: fieldValidation(validate as RelationshipFieldValidation),
+        }),
     // @ts-expect-error translations are not typed for this plugin
     label: overrides.label || (({ t }) => t('plugin-multi-tenant:field-assignedTenant-label')),
   }

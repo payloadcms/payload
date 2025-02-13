@@ -20,7 +20,6 @@ import {
   findDistinct,
   findGlobal,
   findGlobalVersions,
-  findMigrationDir,
   findOne,
   findVersions,
   migrate,
@@ -55,7 +54,7 @@ import {
   requireDrizzleKit,
 } from '@payloadcms/drizzle/postgres'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
-import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
+import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
 import pgDependency from 'pg'
 import { fileURLToPath } from 'url'
 
@@ -180,10 +179,9 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       find,
       findGlobal,
       findGlobalVersions,
-      updateJobs,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       findOne,
       findVersions,
+      foreignKeys: new Set(),
       indexes: new Set<string>(),
       init,
       insert,
@@ -199,6 +197,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       queryDrafts,
       rawRelations: {},
       rawTables: {},
+      updateJobs,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       rejectInitializing,
       requireDrizzleKit,

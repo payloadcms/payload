@@ -63,12 +63,14 @@ export const handleEndpoints = async ({
   basePath = '',
   config: incomingConfig,
   path,
+  payloadInstanceCacheKey,
   request,
 }: {
   basePath?: string
   config: Promise<SanitizedConfig> | SanitizedConfig
   /** Override path from the request */
   path?: string
+  payloadInstanceCacheKey?: string
   request: Request
 }): Promise<Response> => {
   let handler!: PayloadHandler
@@ -77,7 +79,7 @@ export const handleEndpoints = async ({
 
   // This can be used against GET request search params size limit.
   // Instead you can do POST request with a text body as search params.
-  // We use this interally for relationships querying on the frontend
+  // We use this internally for relationships querying on the frontend
   // packages/ui/src/fields/Relationship/index.tsx
   if (
     request.method.toLowerCase() === 'post' &&
@@ -86,6 +88,7 @@ export const handleEndpoints = async ({
   ) {
     let url = request.url
     let data: any = undefined
+
     if (request.headers.get('Content-Type') === 'application/x-www-form-urlencoded') {
       const search = await request.text()
       url = `${request.url}?${search}`
@@ -121,6 +124,7 @@ export const handleEndpoints = async ({
       basePath,
       config: incomingConfig,
       path,
+      payloadInstanceCacheKey,
       request: req,
     })
 
@@ -128,7 +132,12 @@ export const handleEndpoints = async ({
   }
 
   try {
-    req = await createPayloadRequest({ canSetHeaders: true, config: incomingConfig, request })
+    req = await createPayloadRequest({
+      canSetHeaders: true,
+      config: incomingConfig,
+      payloadInstanceCacheKey,
+      request,
+    })
 
     if (req.method?.toLowerCase() === 'options') {
       return Response.json(

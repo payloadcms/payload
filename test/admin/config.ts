@@ -13,6 +13,7 @@ import { DisableBulkEdit } from './collections/DisableBulkEdit.js'
 import { DisableCopyToLocale } from './collections/DisableCopyToLocale.js'
 import { DisableDuplicate } from './collections/DisableDuplicate.js'
 import { EditMenuItems } from './collections/editMenuItems.js'
+import { FormatDocURL } from './collections/FormatDocURL/index.js'
 import { Geo } from './collections/Geo.js'
 import { CollectionGroup1A } from './collections/Group1A.js'
 import { CollectionGroup1B } from './collections/Group1B.js'
@@ -21,7 +22,9 @@ import { CollectionGroup2B } from './collections/Group2B.js'
 import { CollectionHidden } from './collections/Hidden.js'
 import { ListDrawer } from './collections/ListDrawer.js'
 import { ListViewSelectAPI } from './collections/ListViewSelectAPI/index.js'
+import { Localized } from './collections/Localized.js'
 import { CollectionNoApiView } from './collections/NoApiView.js'
+import { NoTimestampsCollection } from './collections/NoTimestamps.js'
 import { CollectionNotInView } from './collections/NotInView.js'
 import { Placeholder } from './collections/Placeholder.js'
 import { Posts } from './collections/Posts.js'
@@ -81,6 +84,10 @@ export default buildConfigWithDefaults({
       logout: {
         Button: '/components/Logout/index.js#Logout',
       },
+      settingsMenu: [
+        '/components/SettingsMenuItems/Item1.tsx#SettingsMenuItem1',
+        '/components/SettingsMenuItems/Item2.tsx#SettingsMenuItem2',
+      ],
       providers: [
         '/components/CustomProviderServer/index.js#CustomProviderServer',
         '/components/CustomProvider/index.js#CustomProvider',
@@ -185,6 +192,7 @@ export default buildConfigWithDefaults({
     DisableDuplicate,
     DisableCopyToLocale,
     EditMenuItems,
+    FormatDocURL,
     BaseListFilter,
     with300Documents,
     ListDrawer,
@@ -194,6 +202,8 @@ export default buildConfigWithDefaults({
     CustomListDrawer,
     ListViewSelectAPI,
     Virtuals,
+    NoTimestampsCollection,
+    Localized,
   ],
   globals: [
     GlobalHidden,

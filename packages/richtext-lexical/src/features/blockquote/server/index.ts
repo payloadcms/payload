@@ -1,7 +1,9 @@
 import type { SerializedQuoteNode as _SerializedQuoteNode } from '@lexical/rich-text'
-import type { Spread } from 'lexical'
+import type { SerializedLexicalNode } from 'lexical'
 
 import { QuoteNode } from '@lexical/rich-text'
+
+import type { StronglyTypedElementNode } from '../../../nodeTypes.js'
 
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { convertLexicalNodesToHTML } from '../../converters/lexicalToHtml_deprecated/converter/index.js'
@@ -9,12 +11,8 @@ import { createNode } from '../../typeUtilities.js'
 import { MarkdownTransformer } from '../markdownTransformer.js'
 import { i18n } from './i18n.js'
 
-export type SerializedQuoteNode = Spread<
-  {
-    type: 'quote'
-  },
-  _SerializedQuoteNode
->
+export type SerializedQuoteNode<T extends SerializedLexicalNode = SerializedLexicalNode> =
+  StronglyTypedElementNode<_SerializedQuoteNode, 'quote', T>
 
 export const BlockquoteFeature = createServerFeature({
   feature: {

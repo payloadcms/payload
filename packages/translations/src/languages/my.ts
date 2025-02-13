@@ -174,6 +174,7 @@ export const myTranslations: DefaultTranslationsObject = {
     removeUpload: 'အပ်လုဒ်ကို ဖယ်ရှားပါ။',
     saveChanges: 'သိမ်းဆည်းမည်။',
     searchForBlock: 'ဘလောက်တစ်ခုရှာမည်။',
+    searchForLanguage: 'Cari bahasa',
     selectExistingLabel: 'ရှိပြီးသား {{label}} ကို ရွေးပါ',
     selectFieldsToEdit: 'တည်းဖြတ်ရန် အကွက်များကို ရွေးပါ။',
     showAll: 'အကုန် ကြည့်မည်။',
@@ -339,6 +340,7 @@ export const myTranslations: DefaultTranslationsObject = {
     loading: 'ဖွင့်နေသည်',
     locale: 'ဒေသ',
     locales: 'Locales',
+    lock: 'Kunci',
     menu: 'မီနူး',
     moreOptions: 'ပိုမိုများစွာရွေးချယ်ခွင့်',
     move: 'ရွှေ့ပြောင်းပါ',
@@ -419,7 +421,7 @@ export const myTranslations: DefaultTranslationsObject = {
     successfullyCreated: '{{label}} အောင်မြင်စွာဖန်တီးခဲ့သည်။',
     successfullyDuplicated: '{{label}} အောင်မြင်စွာ ပုံတူပွားခဲ့သည်။',
     successfullyReindexed:
-      '{{collections}} စုစည်းမှုများမှ စာရွက်စာတမ်း {{total}} ခုအနက် {{count}} ခုကို အောင်မြင်စွာ ပြန်လည်အညွှန်းပြုလုပ်ခဲ့ပါသည်။',
+      '{{collections}} မှ စုစုပေါင်း {{total}} စာတမ်းထဲမှ {{count}} စာတမ်းကိုအောင်မြင်စွာပြန်လည်ညွှန်းကောက်ခဲ့ပြီး {{skips}} အကြမ်းဖျဉ်ချုပ်ကိုလွဲချခဲ့သည်။',
     takeOver: 'တာဝန်ယူပါ',
     thisLanguage: 'မြန်မာစာ',
     time: 'Masa',
@@ -431,6 +433,7 @@ export const myTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} သို့ ဖယ်ရှားလိုက်သည်။',
     true: 'အမှန်',
     unauthorized: 'အခွင့်မရှိပါ။',
+    unlock: 'ဖွင့်',
     unsavedChanges:
       'Anda mempunyai perubahan yang belum disimpan. Simpan atau buang sebelum meneruskan.',
     unsavedChangesDuplicate:
@@ -461,7 +464,9 @@ export const myTranslations: DefaultTranslationsObject = {
     copyTo: 'Salin ke',
     copyToLocale: 'Salin ke tempat setempat',
     localeToPublish: 'Untuk menerbitkan di lokasi',
+    selectedLocales: 'Pilihan Locale',
     selectLocaleToCopy: 'Pilih tempatan untuk menyalin',
+    selectLocaleToDuplicate: 'Pilih bahasa untuk dipadankan',
   },
   operators: {
     contains: 'ပါဝင်သည်',
@@ -518,14 +523,18 @@ export const myTranslations: DefaultTranslationsObject = {
     fieldHasNo: 'ဤအကွက်တွင် {{label}} မရှိပါ။',
     greaterThanMax:
       '{{value}} သည် {{max}} ထက် ပိုမိုကြီးသည်။ ဤသည်ဖြင့် {{label}} အများဆုံးခွင့်ပြုထားသော တန်ဖိုးထက် ကြီးသည်။',
+    invalidBlock: '"{{block}}" သည် မခွင့်ပြုပါ။',
+    invalidBlocks: 'Bidang ini mengandungi blok yang tidak lagi dibenarkan: {{blocks}}.',
     invalidInput: 'ဤအကွက်တွင် မမှန်ကန်သော ထည့်သွင်းမှုတစ်ခုရှိသည်။',
     invalidSelection: 'ဤအကွက်တွင် မမှန်ကန်သော ရွေးချယ်မှုတစ်ခုရှိသည်။',
     invalidSelections: 'ဤအကွက်တွင် အောက်ပါ မမှန်ကန်သော ရွေးချယ်မှုများ ရှိသည်',
+    latitudeOutOfBounds: 'Lintang mesti berada di antara -90 dan 90.',
     lessThanMin:
       '{{value}} သည် {{min}} ထက် ပိုမိုနိမ့်သည်။ ဤသည်ဖြင့် {{label}} အနည်းဆုံးခွင့်ပြုထားသော တန်ဖိုးထက် နိမ့်သည်။',
     limitReached:
       'Had yang dibenarkan telah dicapai, hanya {{max}} item sahaja yang boleh ditambah.',
     longerThanMin: 'ဤတန်ဖိုးသည် အနိမ့်ဆုံးအရှည် {{minLength}} စာလုံးထက် ပိုရှည်ရမည်။',
+    longitudeOutOfBounds: 'Longitude mesti berada di antara -180 dan 180.',
     notValidDate: '"{{value}}" သည် တရားဝင်ရက်စွဲမဟုတ်ပါ။',
     required: 'ဤအကွက်ကို လိုအပ်သည်။',
     requiresAtLeast: 'ဤအကွက်သည် အနည်းဆုံး {{count}} {{label}} လိုအပ်သည်',
@@ -570,6 +579,7 @@ export const myTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Sedang melihat sekarang',
     currentPublishedVersion: 'လက်ရှိထုတ်ဝေထားသောဗားရှင်း',
     draft: 'မူကြမ်း',
+    draftHasPublishedVersion: 'Draf (mempunyai versi yang diterbitkan)',
     draftSavedSuccessfully: 'မူကြမ်းကို အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ။',
     lastSavedAgo: 'နောက်ဆုံး သိမ်းချက် {{distance}} ကြာပြီး',
     modifiedOnly: 'Hanya diubah',

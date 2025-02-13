@@ -57,6 +57,10 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Hivatkozás',
     loadingWithEllipsis: 'Betöltés...',
   },
+  is: {
+    label: 'Hlekkur',
+    loadingWithEllipsis: 'Hleð...',
+  },
   it: {
     label: 'Collegamento',
     loadingWithEllipsis: 'Caricamento...',
@@ -116,6 +120,10 @@ export const i18n: Partial<GenericLanguages> = {
   sv: {
     label: 'Länk',
     loadingWithEllipsis: 'Laddar...',
+  },
+  ta: {
+    label: 'இணைப்பு',
+    loadingWithEllipsis: 'போர்த்துவருகிறது...',
   },
   th: {
     label: 'ลิงค์',

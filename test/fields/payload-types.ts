@@ -60,7 +60,8 @@ export type SupportedTimezones =
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
   | 'Pacific/Fiji'
-  | 'America/Monterrey';
+  | 'America/Monterrey'
+  | 'UTC';
 
 export interface Config {
   auth: {
@@ -94,9 +95,11 @@ export interface Config {
     'point-fields': PointField;
     'relationship-fields': RelationshipField;
     'select-fields': SelectField;
+    'slug-fields': SlugField;
     'tabs-fields-2': TabsFields2;
     'tabs-fields': TabsField;
     'text-fields': TextField;
+    'textarea-fields': TextareaField;
     uploads: Upload;
     uploads2: Uploads2;
     uploads3: Uploads3;
@@ -105,6 +108,7 @@ export interface Config {
     'uploads-multi-poly': UploadsMultiPoly;
     'uploads-restricted': UploadsRestricted;
     'ui-fields': UiField;
+    'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -133,9 +137,11 @@ export interface Config {
     'point-fields': PointFieldsSelect<false> | PointFieldsSelect<true>;
     'relationship-fields': RelationshipFieldsSelect<false> | RelationshipFieldsSelect<true>;
     'select-fields': SelectFieldsSelect<false> | SelectFieldsSelect<true>;
+    'slug-fields': SlugFieldsSelect<false> | SlugFieldsSelect<true>;
     'tabs-fields-2': TabsFields2Select<false> | TabsFields2Select<true>;
     'tabs-fields': TabsFieldsSelect<false> | TabsFieldsSelect<true>;
     'text-fields': TextFieldsSelect<false> | TextFieldsSelect<true>;
+    'textarea-fields': TextareaFieldsSelect<false> | TextareaFieldsSelect<true>;
     uploads: UploadsSelect<false> | UploadsSelect<true>;
     uploads2: Uploads2Select<false> | Uploads2Select<true>;
     uploads3: Uploads3Select<false> | Uploads3Select<true>;
@@ -144,6 +150,7 @@ export interface Config {
     'uploads-multi-poly': UploadsMultiPolySelect<false> | UploadsMultiPolySelect<true>;
     'uploads-restricted': UploadsRestrictedSelect<false> | UploadsRestrictedSelect<true>;
     'ui-fields': UiFieldsSelect<false> | UiFieldsSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -151,6 +158,7 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es') | ('en' | 'es')[];
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'es';
@@ -300,9 +308,15 @@ export interface ArrayField {
   potentiallyEmptyArray?:
     | {
         text?: string | null;
-        groupInRow?: {
-          textInGroupInRow?: string | null;
+        group?: {
+          text?: string | null;
         };
+        array?:
+          | {
+              text?: string | null;
+              id?: string | null;
+            }[]
+          | null;
         id?: string | null;
       }[]
     | null;
@@ -557,6 +571,54 @@ export interface BlockField {
         blockType: 'readOnlyBlock';
       }[]
     | null;
+  /**
+   * Change the value of this field to change the enabled blocks of the blocksWithDynamicFilterOptions field. If it's empty, all blocks are enabled.
+   */
+  enabledBlocks?: string | null;
+  blocksWithDynamicFilterOptions?:
+    | (
+        | {
+            block1Text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockOne';
+          }
+        | {
+            block2Text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockTwo';
+          }
+        | {
+            block3Text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockThree';
+          }
+      )[]
+    | null;
+  blocksWithFilterOptions?:
+    | (
+        | {
+            block1Text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockFour';
+          }
+        | {
+            block2Text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockFive';
+          }
+        | {
+            block3Text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockSix';
+          }
+      )[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -721,6 +783,7 @@ export interface TextField {
   fieldWithDefaultValue?: string | null;
   dependentOnFieldWithDefaultValue?: string | null;
   hasMany?: string[] | null;
+  hasManySecond?: string[] | null;
   readOnlyHasMany?: string[] | null;
   validatesHasMany?: string[] | null;
   localizedHasMany?: string[] | null;
@@ -822,7 +885,7 @@ export interface ConditionalLogic {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -937,6 +1000,12 @@ export interface DateField {
    */
   dayAndTimeWithTimezone: string;
   dayAndTimeWithTimezone_tz: SupportedTimezones;
+  dayAndTimeWithTimezoneFixed?: string | null;
+  dayAndTimeWithTimezoneFixed_tz?: SupportedTimezones;
+  dayAndTimeWithTimezoneRequired?: string | null;
+  dayAndTimeWithTimezoneRequired_tz: SupportedTimezones;
+  dayAndTimeWithTimezoneReadOnly?: string | null;
+  dayAndTimeWithTimezoneReadOnly_tz?: SupportedTimezones;
   timezoneBlocks?:
     | {
         dayAndTime?: string | null;
@@ -953,6 +1022,10 @@ export interface DateField {
         id?: string | null;
       }[]
     | null;
+  timezoneGroup?: {
+    dayAndTime?: string | null;
+    dayAndTime_tz?: SupportedTimezones;
+  };
   array?:
     | {
         date?: string | null;
@@ -1144,6 +1217,18 @@ export interface RowField {
         id?: string | null;
         blockName?: string | null;
         blockType: 'rightTextBlock';
+      }[]
+    | null;
+  arrayLeftColumn?:
+    | {
+        leftArrayChild?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  arrayRightColumn?:
+    | {
+        rightArrayChild?: string | null;
+        id?: string | null;
       }[]
     | null;
   updatedAt: string;
@@ -1433,6 +1518,32 @@ export interface SelectField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-fields".
+ */
+export interface SlugField {
+  id: string;
+  title: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  localizedTitle?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateCustomSlug?: boolean | null;
+  customSlugify: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateLocalizedSlug?: boolean | null;
+  localizedSlug?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tabs-fields-2".
  */
 export interface TabsFields2 {
@@ -1550,6 +1661,38 @@ export interface TabWithName {
         id?: string | null;
       }[]
     | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "textarea-fields".
+ */
+export interface TextareaField {
+  id: string;
+  text: string;
+  hiddenTextField?: string | null;
+  /**
+   * This field should be hidden
+   */
+  adminHiddenTextField?: string | null;
+  /**
+   * This field should be disabled
+   */
+  disabledTextField?: string | null;
+  localizedText?: string | null;
+  /**
+   * en description
+   */
+  i18nText?: string | null;
+  defaultString?: string | null;
+  defaultEmptyString?: string | null;
+  defaultFunction?: string | null;
+  defaultAsync?: string | null;
+  overrideLength?: string | null;
+  fieldWithDefaultValue?: string | null;
+  dependentOnFieldWithDefaultValue?: string | null;
+  defaultValueFromReq?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1687,6 +1830,23 @@ export interface UiField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -1781,6 +1941,10 @@ export interface PayloadLockedDocument {
         value: string | SelectField;
       } | null)
     | ({
+        relationTo: 'slug-fields';
+        value: string | SlugField;
+      } | null)
+    | ({
         relationTo: 'tabs-fields-2';
         value: string | TabsFields2;
       } | null)
@@ -1791,6 +1955,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'text-fields';
         value: string | TextField;
+      } | null)
+    | ({
+        relationTo: 'textarea-fields';
+        value: string | TextareaField;
       } | null)
     | ({
         relationTo: 'uploads';
@@ -1960,10 +2128,16 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
     | T
     | {
         text?: T;
-        groupInRow?:
+        group?:
           | T
           | {
-              textInGroupInRow?: T;
+              text?: T;
+            };
+        array?:
+          | T
+          | {
+              text?: T;
+              id?: T;
             };
         id?: T;
       };
@@ -2259,6 +2433,57 @@ export interface BlockFieldsSelect<T extends boolean = true> {
           | T
           | {
               title?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  enabledBlocks?: T;
+  blocksWithDynamicFilterOptions?:
+    | T
+    | {
+        blockOne?:
+          | T
+          | {
+              block1Text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        blockTwo?:
+          | T
+          | {
+              block2Text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        blockThree?:
+          | T
+          | {
+              block3Text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  blocksWithFilterOptions?:
+    | T
+    | {
+        blockFour?:
+          | T
+          | {
+              block1Text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        blockFive?:
+          | T
+          | {
+              block2Text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        blockSix?:
+          | T
+          | {
+              block3Text?: T;
               id?: T;
               blockName?: T;
             };
@@ -2564,6 +2789,12 @@ export interface DateFieldsSelect<T extends boolean = true> {
   defaultWithTimezone_tz?: T;
   dayAndTimeWithTimezone?: T;
   dayAndTimeWithTimezone_tz?: T;
+  dayAndTimeWithTimezoneFixed?: T;
+  dayAndTimeWithTimezoneFixed_tz?: T;
+  dayAndTimeWithTimezoneRequired?: T;
+  dayAndTimeWithTimezoneRequired_tz?: T;
+  dayAndTimeWithTimezoneReadOnly?: T;
+  dayAndTimeWithTimezoneReadOnly_tz?: T;
   timezoneBlocks?:
     | T
     | {
@@ -2582,6 +2813,12 @@ export interface DateFieldsSelect<T extends boolean = true> {
         dayAndTime?: T;
         dayAndTime_tz?: T;
         id?: T;
+      };
+  timezoneGroup?:
+    | T
+    | {
+        dayAndTime?: T;
+        dayAndTime_tz?: T;
       };
   array?:
     | T
@@ -2805,6 +3042,18 @@ export interface RowFieldsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  arrayLeftColumn?:
+    | T
+    | {
+        leftArrayChild?: T;
+        id?: T;
+      };
+  arrayRightColumn?:
+    | T
+    | {
+        rightArrayChild?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2983,6 +3232,22 @@ export interface SelectFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-fields_select".
+ */
+export interface SlugFieldsSelect<T extends boolean = true> {
+  title?: T;
+  generateSlug?: T;
+  slug?: T;
+  localizedTitle?: T;
+  generateCustomSlug?: T;
+  customSlugify?: T;
+  generateLocalizedSlug?: T;
+  localizedSlug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tabs-fields-2_select".
  */
 export interface TabsFields2Select<T extends boolean = true> {
@@ -3133,6 +3398,7 @@ export interface TextFieldsSelect<T extends boolean = true> {
   fieldWithDefaultValue?: T;
   dependentOnFieldWithDefaultValue?: T;
   hasMany?: T;
+  hasManySecond?: T;
   readOnlyHasMany?: T;
   validatesHasMany?: T;
   localizedHasMany?: T;
@@ -3156,6 +3422,28 @@ export interface TextFieldsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "textarea-fields_select".
+ */
+export interface TextareaFieldsSelect<T extends boolean = true> {
+  text?: T;
+  hiddenTextField?: T;
+  adminHiddenTextField?: T;
+  disabledTextField?: T;
+  localizedText?: T;
+  i18nText?: T;
+  defaultString?: T;
+  defaultEmptyString?: T;
+  defaultFunction?: T;
+  defaultAsync?: T;
+  overrideLength?: T;
+  fieldWithDefaultValue?: T;
+  dependentOnFieldWithDefaultValue?: T;
+  defaultValueFromReq?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3265,6 +3553,14 @@ export interface UiFieldsSelect<T extends boolean = true> {
   text?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

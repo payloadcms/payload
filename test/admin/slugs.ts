@@ -5,6 +5,8 @@ export const reorderTabsSlug = 'reorder-tabs'
 export const geoCollectionSlug = 'geo'
 export const arrayCollectionSlug = 'array'
 export const postsCollectionSlug = 'posts'
+
+export const localizedCollectionSlug = 'localized'
 export const group1Collection1Slug = 'group-one-collection-ones'
 export const group1Collection2Slug = 'group-one-collection-twos'
 export const group2Collection1Slug = 'group-two-collection-ones'
@@ -25,6 +27,7 @@ export const customFieldsSlug = 'custom-fields'
 
 export const listDrawerSlug = 'with-list-drawer'
 export const virtualsSlug = 'virtuals'
+export const formatDocURLCollectionSlug = 'format-doc-url'
 export const collectionSlugs = [
   usersCollectionSlug,
   customViews1CollectionSlug,
@@ -43,6 +46,8 @@ export const collectionSlugs = [
   disableDuplicateSlug,
   listDrawerSlug,
   virtualsSlug,
+  formatDocURLCollectionSlug,
+  localizedCollectionSlug,
 ]
 
 export const customGlobalDocumentControlsSlug = 'custom-global-document-controls'

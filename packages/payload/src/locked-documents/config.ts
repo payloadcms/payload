@@ -22,7 +22,11 @@ export const getLockedDocumentsCollection = (config: Config): CollectionConfig =
       type: 'relationship',
       index: true,
       maxDepth: 0,
-      relationTo: [...config.collections!.map((collectionConfig) => collectionConfig.slug)],
+      relationTo: [
+        ...config
+          .collections!.filter((collectionConfig) => collectionConfig.lockDocuments !== false)
+          .map((collectionConfig) => collectionConfig.slug),
+      ],
     },
     {
       name: 'globalSlug',

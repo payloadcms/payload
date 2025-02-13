@@ -1,29 +1,29 @@
 @import '~@payloadcms/ui/scss';
 
 @layer payload-default {
-  .inline-block-container {
+  .LexicalEditorTheme__inlineBlock {
+    @extend %body;
+    @include shadow-sm;
     display: inline-block;
     margin-right: base(0.2);
     margin-left: base(0.2);
-  }
-
-  .inline-block.inline-block-not-found {
-    max-width: calc(var(--base) * 20);
-    color: var(--theme-error-500);
-  }
-
-  .inline-block {
-    @extend %body;
-    @include shadow-sm;
     padding: base(0.1);
     padding-inline-start: base(0.4);
-    display: flex;
-    align-items: center;
     background: var(--theme-input-bg);
     outline: 1px solid var(--theme-elevation-100);
     border-radius: $style-radius-s;
     max-width: calc(var(--base) * 15);
     font-family: var(--font-body);
+
+    &__container {
+      display: flex;
+      align-items: center;
+    }
+
+    &-not-found {
+      max-width: calc(var(--base) * 20);
+      color: var(--theme-error-500);
+    }
 
     &::selection {
       background: transparent;

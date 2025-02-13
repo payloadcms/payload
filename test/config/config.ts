@@ -14,6 +14,10 @@ export default buildConfigWithDefaults({
   collections: [
     {
       slug: 'pages',
+      labels: {
+        // Purposefully exclude `singular` to test default inheritance
+        plural: 'Pages',
+      },
       access: {
         create: () => true,
         delete: () => true,

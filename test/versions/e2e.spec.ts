@@ -26,6 +26,8 @@ import type { BrowserContext, Dialog, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { postsCollectionSlug } from 'admin/slugs.js'
+import { checkFocusIndicators } from 'helpers/e2e/checkFocusIndicators.js'
+import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
 import mongoose from 'mongoose'
 import path from 'path'
 import { wait } from 'payload/shared'
@@ -132,6 +134,43 @@ describe('Versions', () => {
       customIDURL = new AdminUrlUtil(serverURL, customIDSlug)
       postURL = new AdminUrlUtil(serverURL, postCollectionSlug)
       errorOnUnpublishURL = new AdminUrlUtil(serverURL, errorOnUnpublishSlug)
+    })
+
+    test('collection — should show "has published version" status in list view when draft is saved after publish', async () => {
+      // Create a published document
+      const publishedDoc = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          _status: 'published',
+          title: 'Published Document',
+          description: 'This is published',
+        },
+      })
+
+      // Navigate to the document
+      await page.goto(url.edit(publishedDoc.id))
+
+      // Verify status shows "Published"
+      const status = page.locator('.status__value')
+      await expect(status).toContainText('Published')
+
+      // Modify the document and save as draft
+      await page.locator('#field-description').fill('Modified description')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      // Verify status shows "Changed" in the document view
+      await expect(status).toContainText('Changed')
+
+      // Go back to list view
+      await page.goto(url.list)
+
+      // Find the row for our document
+      const documentRow = page.locator(`tbody tr:has(.cell-title a:has-text("Published Document"))`)
+      await expect(documentRow).toBeVisible()
+
+      // Verify the status column shows "Changed" and not "Draft"
+      const statusCell = documentRow.locator('.cell-_status')
+      await expect(statusCell).toContainText('Draft (has published version)')
     })
 
     test('collection — has versions tab', async () => {
@@ -269,6 +308,7 @@ describe('Versions', () => {
 
       await expect(page.locator('#field-title')).toHaveValue('v2')
       await page.goto(`${savedDocURL}/api`)
+      await page.locator('#field-draft').check()
       const values = page.locator('.query-inspector__value')
       const count = await values.count()
 
@@ -452,7 +492,7 @@ describe('Versions', () => {
       await assertNetworkRequests(
         page,
         // Important: assert that depth is 0 in this request
-        `${serverURL}/api/autosave-posts/${docID}?depth=0&draft=true&autosave=true&locale=en`,
+        `${serverURL}/api/autosave-posts/${docID}?depth=0&draft=true&autosave=true&locale=en&fallback-locale=null`,
         async () => {
           await page.locator('#field-title').fill('changed title')
         },
@@ -817,6 +857,86 @@ describe('Versions', () => {
 
       expect(versionsTabUpdated).toBeTruthy()
     })
+
+    describe('A11y', () => {
+      test('Versions list view should have no accessibility violations', async ({}, testInfo) => {
+        await page.goto(url.list)
+        await page.locator('tbody tr .cell-title a').first().click()
+        await page.waitForSelector('.doc-header__title', { state: 'visible' })
+        await page.goto(`${page.url()}/versions`)
+        await expect(() => {
+          expect(page.url()).toMatch(/\/versions/)
+        }).toPass({ timeout: 10000, intervals: [100] })
+
+        const scanResults = await runAxeScan({
+          page,
+          testInfo,
+          include: ['.versions'],
+        })
+
+        expect(scanResults.violations.length).toBe(0)
+      })
+
+      test('Versions list view elements have focus indicators', async ({}, testInfo) => {
+        await page.goto(url.list)
+        await page.locator('tbody tr .cell-title a').first().click()
+        await page.waitForSelector('.doc-header__title', { state: 'visible' })
+        await page.goto(`${page.url()}/versions`)
+        await expect(() => {
+          expect(page.url()).toMatch(/\/versions/)
+        }).toPass({ timeout: 10000, intervals: [100] })
+
+        const scanResults = await checkFocusIndicators({
+          page,
+          testInfo,
+          selector: '.versions',
+        })
+
+        expect(scanResults.totalFocusableElements).toBeGreaterThan(0)
+        expect(scanResults.elementsWithoutIndicators).toBe(0)
+      })
+
+      test.fixme('Version view should have no accessibility violations', async ({}, testInfo) => {
+        await page.goto(url.list)
+        await page.locator('tbody tr .cell-title a').first().click()
+        await page.waitForSelector('.doc-header__title', { state: 'visible' })
+        await page.goto(`${page.url()}/versions`)
+        await expect(() => {
+          expect(page.url()).toMatch(/\/versions/)
+        }).toPass({ timeout: 10000, intervals: [100] })
+
+        await page.locator('.cell-updatedAt a').first().click()
+
+        await page.locator('.view-version').waitFor()
+
+        const scanResults = await runAxeScan({
+          page,
+          testInfo,
+          include: ['.view-version'],
+        })
+
+        expect(scanResults.violations.length).toBe(0)
+      })
+
+      test('Version view elements have focus indicators', async ({}, testInfo) => {
+        await page.goto(url.list)
+        await page.locator('tbody tr .cell-title a').first().click()
+        await page.waitForSelector('.doc-header__title', { state: 'visible' })
+        await page.goto(`${page.url()}/versions`)
+        await expect(() => {
+          expect(page.url()).toMatch(/\/versions/)
+        }).toPass({ timeout: 10000, intervals: [100] })
+
+        const scanResults = await checkFocusIndicators({
+          page,
+          testInfo,
+          selector: '.versions',
+        })
+
+        expect(scanResults.totalFocusableElements).toBeGreaterThan(0)
+        expect(scanResults.elementsWithoutIndicators).toBe(0)
+      })
+    })
   })
 
   describe('draft globals', () => {
@@ -1097,7 +1217,7 @@ describe('Versions', () => {
 
       await textField.fill('spanish draft')
       await saveDocAndAssert(page, '#action-save-draft')
-      await expect(status).toContainText('Draft')
+      await expect(status).toContainText('Changed')
 
       await changeLocale(page, 'en')
       await textField.fill('english published')
@@ -1130,7 +1250,7 @@ describe('Versions', () => {
 
       const publishedDoc = data.docs[0]
 
-      expect(publishedDoc?.text).toStrictEqual({
+      expect(publishedDoc.text).toStrictEqual({
         en: 'english published',
         es: 'spanish published',
       })

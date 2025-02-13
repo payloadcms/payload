@@ -19,6 +19,11 @@ export default buildConfigWithDefaults({
           name: 'text',
         },
         {
+          type: 'richText',
+          name: 'richText',
+          required: true,
+        },
+        {
           type: 'text',
           name: 'title',
         },
@@ -72,6 +77,15 @@ export default buildConfigWithDefaults({
               label: 'Option 2',
               value: 'option-2',
             },
+          ],
+        },
+        {
+          name: 'externalType',
+          type: 'text',
+          typescriptSchema: [
+            () => ({
+              $ref: './test/types/schemas/custom-type.json',
+            }),
           ],
         },
       ],

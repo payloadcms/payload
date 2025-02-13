@@ -43,6 +43,9 @@ export const i18n: Partial<GenericLanguages> = {
   hu: {
     label: 'Vízszintes vonal',
   },
+  is: {
+    label: 'Lárétt lína',
+  },
   it: {
     label: 'Regola Orizzontale',
   },
@@ -87,6 +90,9 @@ export const i18n: Partial<GenericLanguages> = {
   },
   sv: {
     label: 'Horisontell linje',
+  },
+  ta: {
+    label: 'குறுக்கு வரி',
   },
   th: {
     label: 'เส้นขอบแนวนอน',

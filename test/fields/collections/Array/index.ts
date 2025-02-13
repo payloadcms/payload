@@ -136,14 +136,24 @@ const ArrayFields: CollectionConfig = {
           type: 'text',
         },
         {
-          name: 'groupInRow',
+          name: 'group',
           fields: [
             {
-              name: 'textInGroupInRow',
+              name: 'text',
               type: 'text',
             },
           ],
           type: 'group',
+        },
+        {
+          name: 'array',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+          type: 'array',
         },
       ],
       type: 'array',
@@ -276,6 +286,15 @@ const ArrayFields: CollectionConfig = {
           type: 'text',
         },
       ],
+    },
+    {
+      name: 'getDataByPathTest',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '/collections/Array/GetDataByPathTest.js',
+        },
+      },
     },
   ],
   slug: arrayFieldsSlug,

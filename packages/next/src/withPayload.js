@@ -1,12 +1,12 @@
 /**
  * @param {import('next').NextConfig} nextConfig
  * @param {Object} [options] - Optional configuration options
- * @param {boolean} [options.devBundleServerPackages] - Whether to bundle server packages in development mode. @default true
+ * @param {boolean} [options.devBundleServerPackages] - Whether to bundle server packages in development mode. @default false
  *
  * @returns {import('next').NextConfig}
  * */
 export const withPayload = (nextConfig = {}, options = {}) => {
-  const env = nextConfig?.env || {}
+  const env = nextConfig.env || {}
 
   if (nextConfig.experimental?.staleTimes?.dynamic) {
     console.warn(
@@ -16,8 +16,13 @@ export const withPayload = (nextConfig = {}, options = {}) => {
   }
 
   if (process.env.PAYLOAD_PATCH_TURBOPACK_WARNINGS !== 'false') {
+    // TODO: This warning is thrown because we cannot externalize the entry-point package for client-s3, so we patch the warning to not show it.
+    // We can remove this once Next.js implements https://github.com/vercel/next.js/discussions/76991
     const turbopackWarningText =
       'Packages that should be external need to be installed in the project directory, so they can be resolved from the output files.\nTry to install it into the project directory by running'
+
+    // TODO 4.0: Remove this once we drop support for Next.js 15.2.x
+    const turbopackConfigWarningText = "Unrecognized key(s) in object: 'turbopack'"
 
     const consoleWarn = console.warn
     console.warn = (...args) => {
@@ -29,8 +34,32 @@ export const withPayload = (nextConfig = {}, options = {}) => {
         return
       }
 
+      // Add Payload-specific message after turbopack config warning in Next.js 15.2.x or lower.
+      // TODO 4.0: Remove this once we drop support for Next.js 15.2.x
+      const hasTurbopackConfigWarning =
+        (typeof args[1] === 'string' && args[1].includes(turbopackConfigWarningText)) ||
+        (typeof args[0] === 'string' && args[0].includes(turbopackConfigWarningText))
+
+      if (hasTurbopackConfigWarning) {
+        consoleWarn(...args)
+        consoleWarn(
+          'Payload: You can safely ignore the "Invalid next.config" warning above. This only occurs on Next.js 15.2.x or lower. We recommend upgrading to Next.js 15.4.7 to resolve this warning.',
+        )
+        return
+      }
+
       consoleWarn(...args)
     }
+  }
+
+  const isBuild = process.env.NODE_ENV === 'production'
+  const isTurbopackNextjs15 = process.env.TURBOPACK === '1'
+  const isTurbopackNextjs16 = process.env.TURBOPACK === 'auto'
+
+  if (isBuild && (isTurbopackNextjs15 || isTurbopackNextjs16)) {
+    throw new Error(
+      'Payload does not support using Turbopack for production builds. If you are using Next.js 16, please use `next build --webpack` instead.',
+    )
   }
 
   const poweredByHeader = {
@@ -44,20 +73,23 @@ export const withPayload = (nextConfig = {}, options = {}) => {
   const toReturn = {
     ...nextConfig,
     env,
+    turbopack: {
+      ...(nextConfig.turbopack || {}),
+    },
     outputFileTracingExcludes: {
-      ...(nextConfig?.outputFileTracingExcludes || {}),
+      ...(nextConfig.outputFileTracingExcludes || {}),
       '**/*': [
-        ...(nextConfig?.outputFileTracingExcludes?.['**/*'] || []),
+        ...(nextConfig.outputFileTracingExcludes?.['**/*'] || []),
         'drizzle-kit',
         'drizzle-kit/api',
       ],
     },
     outputFileTracingIncludes: {
-      ...(nextConfig?.outputFileTracingIncludes || {}),
-      '**/*': [...(nextConfig?.outputFileTracingIncludes?.['**/*'] || []), '@libsql/client'],
+      ...(nextConfig.outputFileTracingIncludes || {}),
+      '**/*': [...(nextConfig.outputFileTracingIncludes?.['**/*'] || []), '@libsql/client'],
     },
     // We disable the poweredByHeader here because we add it manually in the headers function below
-    ...(nextConfig?.poweredByHeader !== false ? { poweredByHeader: false } : {}),
+    ...(nextConfig.poweredByHeader !== false ? { poweredByHeader: false } : {}),
     headers: async () => {
       const headersFromConfig = 'headers' in nextConfig ? await nextConfig.headers() : []
 
@@ -78,27 +110,60 @@ export const withPayload = (nextConfig = {}, options = {}) => {
               key: 'Critical-CH',
               value: 'Sec-CH-Prefers-Color-Scheme',
             },
-            ...(nextConfig?.poweredByHeader !== false ? [poweredByHeader] : []),
+            ...(nextConfig.poweredByHeader !== false ? [poweredByHeader] : []),
           ],
         },
       ]
     },
     serverExternalPackages: [
-      ...(nextConfig?.serverExternalPackages || []),
-      'drizzle-kit',
-      'drizzle-kit/api',
-      'pino',
-      'libsql',
-      'pino-pretty',
+      // serverExternalPackages = webpack.externals, but with turbopack support and an additional check
+      // for whether the package is resolvable from the project root
+      ...(nextConfig.serverExternalPackages || []),
+      // Can be externalized, because we require users to install graphql themselves - we only rely on it as a peer dependency => resolvable from the project root.
+      //
+      // WHY: without externalizing graphql, a graphql version error will be thrown
+      // during runtime ("Ensure that there is only one instance of \"graphql\" in the node_modules\ndirectory.")
       'graphql',
-      // Do not bundle server-only packages during dev to improve compile speed
-      ...(process.env.NODE_ENV === 'development' && options.devBundleServerPackages === false
-        ? [
+      // External, because it installs import-in-the-middle and require-in-the-middle - both in the default serverExternalPackages list.
+      '@sentry/nextjs',
+      ...(process.env.NODE_ENV === 'development' && options.devBundleServerPackages !== true
+        ? /**
+           * Unless explicitly disabled by the user, by passing `devBundleServerPackages: true` to withPayload, we
+           * do not bundle server-only packages during dev for two reasons:
+           *
+           * 1. Performance: Fewer files to compile means faster compilation speeds.
+           * 2. Turbopack support: Webpack's externals are not supported by Turbopack.
+           *
+           * Regarding Turbopack support: Unlike webpack.externals, we cannot use serverExternalPackages to
+           * externalized packages that are not resolvable from the project root. So including a package like
+           * "drizzle-kit" in here would do nothing - Next.js will ignore the rule and still bundle the package -
+           * because it detects that the package is not resolvable from the project root (= not directly installed
+           * by the user in their own package.json).
+           *
+           * Instead, we can use serverExternalPackages for the entry-point packages that *are* installed directly
+           * by the user (e.g. db-postgres, which then installs drizzle-kit as a dependency).
+           *
+           *
+           *
+           * We should only do this during development, not build, because externalizing these packages can hurt
+           * the bundle size. Not only does it disable tree-shaking, it also risks installing duplicate copies of the
+           * same package.
+           *
+           * Example:
+           * - @payloadcms/richtext-lexical (in bundle) -> installs qs-esm (bundled because of importer)
+           * - payload (not in bundle, external) -> installs qs-esm (external because of importer)
+           * Result: we have two copies of qs-esm installed - one in the bundle, and one in node_modules.
+           *
+           * During development, these bundle size difference do not matter much, and development speed /
+           * turbopack support are more important.
+           */
+          [
             'payload',
             '@payloadcms/db-mongodb',
             '@payloadcms/db-postgres',
             '@payloadcms/db-sqlite',
             '@payloadcms/db-vercel-postgres',
+            '@payloadcms/db-d1-sqlite',
             '@payloadcms/drizzle',
             '@payloadcms/email-nodemailer',
             '@payloadcms/email-resend',
@@ -106,6 +171,7 @@ export const withPayload = (nextConfig = {}, options = {}) => {
             '@payloadcms/payload-cloud',
             '@payloadcms/plugin-redirects',
             // TODO: Add the following packages, excluding their /client subpath exports, once Next.js supports it
+            // see: https://github.com/vercel/next.js/discussions/76991
             //'@payloadcms/plugin-cloud-storage',
             //'@payloadcms/plugin-sentry',
             //'@payloadcms/plugin-stripe',
@@ -128,25 +194,19 @@ export const withPayload = (nextConfig = {}, options = {}) => {
         ...incomingWebpackConfig,
         externals: [
           ...(incomingWebpackConfig?.externals || []),
+          /**
+           * See the explanation in the serverExternalPackages section above.
+           * We need to force Webpack to emit require() calls for these packages, even though they are not
+           * resolvable from the project root. You would expect this to error during runtime, but Next.js seems to be able to require these just fine.
+           *
+           * This is the only way to get Webpack Build to work, without the bundle size caveats of externalizing the
+           * entry point packages, as explained in the serverExternalPackages section above.
+           */
           'drizzle-kit',
           'drizzle-kit/api',
           'sharp',
           'libsql',
           'require-in-the-middle',
-        ],
-        ignoreWarnings: [
-          ...(incomingWebpackConfig?.ignoreWarnings || []),
-          { module: /node_modules\/mongodb\/lib\/utils\.js/ },
-          { file: /node_modules\/mongodb\/lib\/utils\.js/ },
-          { module: /node_modules\/mongodb\/lib\/bson\.js/ },
-          { file: /node_modules\/mongodb\/lib\/bson\.js/ },
-        ],
-        plugins: [
-          ...(incomingWebpackConfig?.plugins || []),
-          // Fix cloudflare:sockets error: https://github.com/vercel/next.js/discussions/50177
-          new webpackOptions.webpack.IgnorePlugin({
-            resourceRegExp: /^pg-native$|^cloudflare:sockets$/,
-          }),
         ],
         resolve: {
           ...(incomingWebpackConfig?.resolve || {}),
@@ -155,16 +215,35 @@ export const withPayload = (nextConfig = {}, options = {}) => {
           },
           fallback: {
             ...(incomingWebpackConfig?.resolve?.fallback || {}),
-            '@aws-sdk/credential-providers': false,
-            '@mongodb-js/zstd': false,
+            /*
+             * This fixes the following warning when running next build with webpack (tested on Next.js 16.0.3 with Payload 3.64.0):
+             *
+             * ⚠ Compiled with warnings in 8.7s
+             *
+             * ./node_modules/.pnpm/mongodb@6.16.0/node_modules/mongodb/lib/deps.js
+             * Module not found: Can't resolve 'aws4' in '/Users/alessio/Documents/temp/next16p/node_modules/.pnpm/mongodb@6.16.0/node_modules/mongodb/lib'
+             *
+             * Import trace for requested module:
+             * ./node_modules/.pnpm/mongodb@6.16.0/node_modules/mongodb/lib/deps.js
+             * ./node_modules/.pnpm/mongodb@6.16.0/node_modules/mongodb/lib/client-side-encryption/client_encryption.js
+             * ./node_modules/.pnpm/mongodb@6.16.0/node_modules/mongodb/lib/index.js
+             * ./node_modules/.pnpm/mongoose@8.15.1/node_modules/mongoose/lib/index.js
+             * ./node_modules/.pnpm/mongoose@8.15.1/node_modules/mongoose/index.js
+             * ./node_modules/.pnpm/@payloadcms+db-mongodb@3.64.0_payload@3.64.0_graphql@16.12.0_typescript@5.7.3_/node_modules/@payloadcms/db-mongodb/dist/index.js
+             * ./src/payload.config.ts
+             * ./src/app/my-route/route.ts
+             *
+             **/
             aws4: false,
-            kerberos: false,
-            'mongodb-client-encryption': false,
-            snappy: false,
-            'supports-color': false,
-            'yocto-queue': false,
           },
         },
+        plugins: [
+          ...(incomingWebpackConfig?.plugins || []),
+          // Fix cloudflare:sockets error: https://github.com/vercel/next.js/discussions/50177
+          new webpackOptions.webpack.IgnorePlugin({
+            resourceRegExp: /^pg-native$|^cloudflare:sockets$/,
+          }),
+        ],
       }
     },
   }

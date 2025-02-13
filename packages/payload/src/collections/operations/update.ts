@@ -23,6 +23,7 @@ import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
+import { isErrorPublic } from '../../utilities/isErrorPublic.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
@@ -33,6 +34,7 @@ import { updateDocument } from './utilities/update.js'
 import { buildAfterOperation } from './utils.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
+  autosave?: boolean
   collection: Collection
   data: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
   depth?: number
@@ -91,6 +93,7 @@ export const updateOperation = async <
     }
 
     const {
+      autosave = false,
       collection: { config: collectionConfig },
       collection,
       depth,
@@ -223,7 +226,7 @@ export const updateOperation = async <
       throwOnMissingFile: false,
     })
 
-    const errors: { id: number | string; message: string }[] = []
+    const errors: BulkOperationResult<TSlug, TSelect>['errors'] = []
 
     const promises = docs.map(async (docWithLocales) => {
       const { id } = docWithLocales
@@ -241,7 +244,7 @@ export const updateOperation = async <
         const updatedDoc = await updateDocument({
           id,
           accessResults: accessResult,
-          autosave: false,
+          autosave,
           collectionConfig,
           config,
           data: deepCopyObjectSimple(data),
@@ -263,8 +266,11 @@ export const updateOperation = async <
 
         return updatedDoc
       } catch (error) {
+        const isPublic = error instanceof Error ? isErrorPublic(error, config) : false
+
         errors.push({
           id,
+          isPublic,
           message: error instanceof Error ? error.message : 'Unknown error',
         })
       }

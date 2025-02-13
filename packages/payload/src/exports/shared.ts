@@ -13,6 +13,8 @@ export { defaults as collectionDefaults } from '../collections/config/defaults.j
 
 export { serverProps } from '../config/types.js'
 
+export { type Slugify } from '../fields/baseFields/slug/index.js'
+
 export { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones.js'
 
 export {
@@ -58,6 +60,8 @@ export { validOperators, validOperatorSet } from '../types/constants.js'
 export { formatFilesize } from '../uploads/formatFilesize.js'
 
 export { isImage } from '../uploads/isImage.js'
+export { appendUploadSelectFields } from '../utilities/appendUploadSelectFields.js'
+export { applyLocaleFiltering } from '../utilities/applyLocaleFiltering.js'
 export { combineWhereConstraints } from '../utilities/combineWhereConstraints.js'
 
 export {
@@ -78,11 +82,12 @@ export { extractID } from '../utilities/extractID.js'
 export { flattenAllFields } from '../utilities/flattenAllFields.js'
 export { flattenTopLevelFields } from '../utilities/flattenTopLevelFields.js'
 export { formatAdminURL } from '../utilities/formatAdminURL.js'
-
 export { formatLabels, toWords } from '../utilities/formatLabels.js'
+
 export { getBestFitFromSizes } from '../utilities/getBestFitFromSizes.js'
 export { getDataByPath } from '../utilities/getDataByPath.js'
 export { getFieldPermissions } from '../utilities/getFieldPermissions.js'
+export { getObjectDotNotation } from '../utilities/getObjectDotNotation.js'
 
 export { getSafeRedirect } from '../utilities/getSafeRedirect.js'
 
@@ -114,6 +119,8 @@ export { reduceFieldsToValues } from '../utilities/reduceFieldsToValues.js'
 export { sanitizeUserDataForEmail } from '../utilities/sanitizeUserDataForEmail.js'
 
 export { setsAreEqual } from '../utilities/setsAreEqual.js'
+
+export { slugify } from '../utilities/slugify.js'
 
 export { toKebabCase } from '../utilities/toKebabCase.js'
 

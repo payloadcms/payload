@@ -1,3 +1,4 @@
+import type { TypedFallbackLocale } from '../../../index.js'
 import type { PayloadRequest, PopulateType } from '../../../types/index.js'
 import type { JoinField, RelationshipField, UploadField } from '../../config/types.js'
 
@@ -10,7 +11,7 @@ type PopulateArgs = {
   dataReference: Record<string, any>
   depth: number
   draft: boolean
-  fallbackLocale: null | string
+  fallbackLocale: TypedFallbackLocale
   field: JoinField | RelationshipField | UploadField
   index?: number
   key?: string
@@ -135,7 +136,7 @@ type PromiseArgs = {
   currentDepth: number
   depth: number
   draft: boolean
-  fallbackLocale: null | string
+  fallbackLocale: TypedFallbackLocale
   field: JoinField | RelationshipField | UploadField
   locale: null | string
   overrideAccess: boolean

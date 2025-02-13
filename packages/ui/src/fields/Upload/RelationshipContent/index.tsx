@@ -2,16 +2,19 @@
 
 import type { TypeWithID } from 'payload'
 
-import { formatFilesize, isImage } from 'payload/shared'
+import { getTranslation } from '@payloadcms/translations'
+import { formatFilesize } from 'payload/shared'
 import React from 'react'
 
 import type { ReloadDoc } from '../types.js'
 
 import { Button } from '../../../elements/Button/index.js'
 import { useDocumentDrawer } from '../../../elements/DocumentDrawer/index.js'
+import { Pill } from '../../../elements/Pill/index.js'
 import { ThumbnailComponent } from '../../../elements/Thumbnail/index.js'
-import { useConfig } from '../../../providers/Config/index.js'
 import './index.scss'
+import { useConfig } from '../../../providers/Config/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
 
 const baseClass = 'upload-relationship-details'
 
@@ -28,6 +31,7 @@ type Props = {
   readonly mimeType: string
   readonly onRemove: () => void
   readonly reloadDoc: ReloadDoc
+  readonly showCollectionSlug?: boolean
   readonly src: string
   readonly thumbnailSrc: string
   readonly withMeta?: boolean
@@ -48,6 +52,7 @@ export function RelationshipContent(props: Props) {
     mimeType,
     onRemove,
     reloadDoc,
+    showCollectionSlug = false,
     src,
     thumbnailSrc,
     withMeta = true,
@@ -56,6 +61,7 @@ export function RelationshipContent(props: Props) {
   } = props
 
   const { config } = useConfig()
+  const { i18n } = useTranslation()
   const collectionConfig =
     'collections' in config
       ? config.collections.find((collection) => collection.slug === collectionSlug)
@@ -89,7 +95,7 @@ export function RelationshipContent(props: Props) {
   }
 
   const metaText = withMeta ? generateMetaText(mimeType, byteSize) : ''
-  const previewAllowed = displayPreview ?? collectionConfig.upload?.displayPreview ?? true
+  const previewAllowed = displayPreview ?? collectionConfig?.upload?.displayPreview ?? true
 
   return (
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
@@ -103,6 +109,9 @@ export function RelationshipContent(props: Props) {
             size="small"
           />
         )}
+        {showCollectionSlug && collectionConfig ? (
+          <Pill size="small">{getTranslation(collectionConfig.labels.singular, i18n)}</Pill>
+        ) : null}
         <div className={`${baseClass}__details`}>
           <p className={`${baseClass}__filename`}>
             {src ? (

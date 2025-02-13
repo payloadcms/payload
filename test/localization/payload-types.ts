@@ -73,6 +73,7 @@ export interface Config {
     'nested-field-tables': NestedFieldTable;
     'localized-drafts': LocalizedDraft;
     'localized-date-fields': LocalizedDateField;
+    'all-fields-localized': AllFieldsLocalized;
     users: User;
     'localized-posts': LocalizedPost;
     'no-localized-fields': NoLocalizedField;
@@ -88,6 +89,7 @@ export interface Config {
     'blocks-same-name': BlocksSameName;
     'localized-within-localized': LocalizedWithinLocalized;
     'array-with-fallback-fields': ArrayWithFallbackField;
+    'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -100,6 +102,7 @@ export interface Config {
     'nested-field-tables': NestedFieldTablesSelect<false> | NestedFieldTablesSelect<true>;
     'localized-drafts': LocalizedDraftsSelect<false> | LocalizedDraftsSelect<true>;
     'localized-date-fields': LocalizedDateFieldsSelect<false> | LocalizedDateFieldsSelect<true>;
+    'all-fields-localized': AllFieldsLocalizedSelect<false> | AllFieldsLocalizedSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
     'no-localized-fields': NoLocalizedFieldsSelect<false> | NoLocalizedFieldsSelect<true>;
@@ -115,6 +118,7 @@ export interface Config {
     'blocks-same-name': BlocksSameNameSelect<false> | BlocksSameNameSelect<true>;
     'localized-within-localized': LocalizedWithinLocalizedSelect<false> | LocalizedWithinLocalizedSelect<true>;
     'array-with-fallback-fields': ArrayWithFallbackFieldsSelect<false> | ArrayWithFallbackFieldsSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -122,6 +126,12 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale:
+    | ('false' | 'none' | 'null')
+    | false
+    | null
+    | ('xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu')
+    | ('xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu')[];
   globals: {
     'global-array': GlobalArray;
     'global-text': GlobalText;
@@ -172,7 +182,7 @@ export interface RichText {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -192,6 +202,7 @@ export interface RichText {
  */
 export interface BlocksField {
   id: string;
+  title?: string | null;
   tabContent?:
     | {
         text?: string | null;
@@ -202,6 +213,7 @@ export interface BlocksField {
     | null;
   content?:
     | {
+        text?: string | null;
         content?:
           | {
               text?: string | null;
@@ -357,6 +369,98 @@ export interface LocalizedDateField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "all-fields-localized".
+ */
+export interface AllFieldsLocalized {
+  id: string;
+  text?: string | null;
+  textarea?: string | null;
+  number?: number | null;
+  email?: string | null;
+  code?: string | null;
+  json?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  select?: ('option1' | 'option2' | 'option3') | null;
+  radio?: ('radio1' | 'radio2') | null;
+  checkbox?: boolean | null;
+  date?: string | null;
+  localizedGroup?: {
+    title?: string | null;
+    description?: string | null;
+  };
+  nonLocalizedGroup?: {
+    localizedText?: string | null;
+    nonLocalizedText?: string | null;
+  };
+  localizedArray?:
+    | {
+        item?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  nonLocalizedArray?:
+    | {
+        localizedItem?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  localizedBlocks?:
+    | (
+        | {
+            text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'localizedTextBlock';
+          }
+        | {
+            nestedArray?:
+              | {
+                  item?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'nestedBlock';
+          }
+      )[]
+    | null;
+  localizedTab?: {
+    tabText?: string | null;
+  };
+  nonLocalizedTab?: {
+    localizedInNonLocalizedTab?: string | null;
+  };
+  unnamedTabLocalizedText?: string | null;
+  t1?: {
+    t2?: {
+      text?: string | null;
+    };
+  };
+  g1?: {
+    g2?: {
+      g2a1?:
+        | {
+            text?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+    };
+  };
+  selfRelation?: (string | null) | AllFieldsLocalized;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -388,8 +492,14 @@ export interface User {
 export interface NoLocalizedField {
   id: string;
   text?: string | null;
+  group?: {
+    en?: {
+      text?: string | null;
+    };
+  };
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -740,6 +850,23 @@ export interface ArrayWithFallbackField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -768,6 +895,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'localized-date-fields';
         value: string | LocalizedDateField;
+      } | null)
+    | ({
+        relationTo: 'all-fields-localized';
+        value: string | AllFieldsLocalized;
       } | null)
     | ({
         relationTo: 'users';
@@ -828,6 +959,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'array-with-fallback-fields';
         value: string | ArrayWithFallbackField;
+      } | null)
+    | ({
+        relationTo: 'payload-kv';
+        value: string | PayloadKv;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -886,6 +1021,7 @@ export interface RichTextSelect<T extends boolean = true> {
  * via the `definition` "blocks-fields_select".
  */
 export interface BlocksFieldsSelect<T extends boolean = true> {
+  title?: T;
   tabContent?:
     | T
     | {
@@ -903,6 +1039,7 @@ export interface BlocksFieldsSelect<T extends boolean = true> {
         blockInsideBlock?:
           | T
           | {
+              text?: T;
               content?:
                 | T
                 | {
@@ -1037,6 +1174,107 @@ export interface LocalizedDateFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "all-fields-localized_select".
+ */
+export interface AllFieldsLocalizedSelect<T extends boolean = true> {
+  text?: T;
+  textarea?: T;
+  number?: T;
+  email?: T;
+  code?: T;
+  json?: T;
+  select?: T;
+  radio?: T;
+  checkbox?: T;
+  date?: T;
+  localizedGroup?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  nonLocalizedGroup?:
+    | T
+    | {
+        localizedText?: T;
+        nonLocalizedText?: T;
+      };
+  localizedArray?:
+    | T
+    | {
+        item?: T;
+        id?: T;
+      };
+  nonLocalizedArray?:
+    | T
+    | {
+        localizedItem?: T;
+        id?: T;
+      };
+  localizedBlocks?:
+    | T
+    | {
+        localizedTextBlock?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        nestedBlock?:
+          | T
+          | {
+              nestedArray?:
+                | T
+                | {
+                    item?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
+  localizedTab?:
+    | T
+    | {
+        tabText?: T;
+      };
+  nonLocalizedTab?:
+    | T
+    | {
+        localizedInNonLocalizedTab?: T;
+      };
+  unnamedTabLocalizedText?: T;
+  t1?:
+    | T
+    | {
+        t2?:
+          | T
+          | {
+              text?: T;
+            };
+      };
+  g1?:
+    | T
+    | {
+        g2?:
+          | T
+          | {
+              g2a1?:
+                | T
+                | {
+                    text?: T;
+                    id?: T;
+                  };
+            };
+      };
+  selfRelation?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -1084,8 +1322,18 @@ export interface LocalizedPostsSelect<T extends boolean = true> {
  */
 export interface NoLocalizedFieldsSelect<T extends boolean = true> {
   text?: T;
+  group?:
+    | T
+    | {
+        en?:
+          | T
+          | {
+              text?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1430,6 +1678,14 @@ export interface ArrayWithFallbackFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents_select".
  */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
@@ -1520,6 +1776,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

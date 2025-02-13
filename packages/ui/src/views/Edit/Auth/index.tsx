@@ -14,7 +14,6 @@ import { CheckboxField } from '../../../fields/Checkbox/index.js'
 import { ConfirmPasswordField } from '../../../fields/ConfirmPassword/index.js'
 import { PasswordField } from '../../../fields/Password/index.js'
 import { useFormFields, useFormModified } from '../../../forms/Form/context.js'
-import { useAuth } from '../../../providers/Auth/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
@@ -39,7 +38,6 @@ export const Auth: React.FC<Props> = (props) => {
     verify,
   } = props
 
-  const { permissions } = useAuth()
   const [changingPassword, setChangingPassword] = useState(requirePassword)
   const enableAPIKey = useFormFields(([fields]) => (fields && fields?.enableAPIKey) || null)
   const dispatchFields = useFormFields((reducer) => reducer[1])
@@ -131,14 +129,12 @@ export const Auth: React.FC<Props> = (props) => {
   const canReadApiKey = apiKeyPermissions === true || apiKeyPermissions?.read
 
   const hasPermissionToUnlock: boolean = useMemo(() => {
-    const collection = permissions?.collections?.[collectionSlug]
-
-    if (collection) {
-      return Boolean('unlock' in collection ? collection.unlock : undefined)
+    if (docPermissions) {
+      return Boolean('unlock' in docPermissions ? docPermissions.unlock : undefined)
     }
 
     return false
-  }, [permissions, collectionSlug])
+  }, [docPermissions])
 
   const handleChangePassword = useCallback(
     (changingPassword: boolean) => {
@@ -237,6 +233,7 @@ export const Auth: React.FC<Props> = (props) => {
               <Button
                 buttonStyle="secondary"
                 disabled={disabled}
+                id="cancel-change-password"
                 onClick={() => handleChangePassword(false)}
                 size="medium"
               >
@@ -257,10 +254,11 @@ export const Auth: React.FC<Props> = (props) => {
                   {t('authentication:changePassword')}
                 </Button>
               )}
-            {operation === 'update' && hasPermissionToUnlock && (
+            {!changingPassword && operation === 'update' && hasPermissionToUnlock && (
               <Button
                 buttonStyle="secondary"
                 disabled={disabled || !showUnlock}
+                id="force-unlock"
                 onClick={() => void unlock()}
                 size="medium"
               >

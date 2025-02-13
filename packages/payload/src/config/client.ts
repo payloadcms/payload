@@ -2,7 +2,7 @@ import type { I18nClient } from '@payloadcms/translations'
 import type { DeepPartial } from 'ts-essentials'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
-import type { ClientBlock, ClientField, Field } from '../fields/config/types.js'
+import type { ClientBlock } from '../fields/config/types.js'
 import type { BlockSlug, TypedUser } from '../index.js'
 import type {
   RootLivePreviewConfig,
@@ -31,6 +31,7 @@ export type ServerOnlyRootProperties = keyof Pick<
   | 'hooks'
   | 'i18n'
   | 'jobs'
+  | 'kv'
   | 'logger'
   | 'onInit'
   | 'plugins'
@@ -92,6 +93,7 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   'graphQL',
   'jobs',
   'logger',
+  'kv',
   'queryPresets',
   // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
 ]
@@ -161,6 +163,7 @@ export const createClientConfig = ({
       case 'admin':
         clientConfig.admin = {
           autoLogin: config.admin.autoLogin,
+          autoRefresh: config.admin.autoRefresh,
           avatar: config.admin.avatar,
           custom: config.admin.custom,
           dateFormat: config.admin.dateFormat,
@@ -220,16 +223,6 @@ export const createClientConfig = ({
           i18n,
           importMap,
         })
-
-        break
-
-      case 'experimental':
-        if (config.experimental) {
-          clientConfig.experimental = {}
-          if (config.experimental?.localizeStatus) {
-            clientConfig.experimental.localizeStatus = config.experimental.localizeStatus
-          }
-        }
 
         break
 

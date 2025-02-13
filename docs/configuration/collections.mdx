@@ -136,6 +136,7 @@ The following options are available:
 | `enableRichTextLink`         | The [Rich Text](../fields/rich-text) field features a `Link` element which allows for users to automatically reference related documents within their rich text. Set to `true` by default.                                   |
 | `enableRichTextRelationship` | The [Rich Text](../fields/rich-text) field features a `Relationship` element which allows for users to automatically reference related documents within their rich text. Set to `true` by default.                           |
 | `folders`                    | A boolean to enable folders for a given collection. Defaults to `false`. [More details](../folders/overview).                                                                                                                |
+| `formatDocURL`               | Function to customize document links in the List View. Return `null` to disable linking, or a string for custom URLs. [More details](#format-document-urls).                                                                 |
 | `meta`                       | Page metadata overrides to apply to this Collection within the Admin Panel. [More details](../admin/metadata).                                                                                                               |
 | `preview`                    | Function to generate preview URLs within the Admin Panel that can point to your app. [More details](../admin/preview).                                                                                                       |
 | `livePreview`                | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).                                                                                                |
@@ -331,6 +332,76 @@ export const Posts: CollectionConfig = {
   forceSelect: {
     title: true,
   },
+}
+```
+
+### Format Document URLs
+
+The `formatDocURL` function allows you to customize how document links are generated in the List View. This is useful for disabling links for certain documents, redirecting to custom destinations, or modifying URLs based on user context or document state.
+
+To define a custom document URL formatter, use the `admin.formatDocURL` property in your Collection Config:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Posts: CollectionConfig = {
+  // ...
+  admin: {
+    formatDocURL: ({ doc, defaultURL, req, collectionSlug, viewType }) => {
+      // Disable linking for documents with specific status
+      if (doc.status === 'private') {
+        return null
+      }
+
+      // Custom destination for featured posts
+      if (doc.featured) {
+        return '/admin/featured-posts'
+      }
+
+      // Add query parameters based on user role
+      if (req.user?.role === 'admin') {
+        return defaultURL + '?admin=true'
+      }
+
+      // Use default URL for all other cases
+      return defaultURL
+    },
+  },
+}
+```
+
+The `formatDocURL` function receives the following arguments:
+
+| Argument         | Description                                                                                                                            |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `doc`            | The document data for the current row                                                                                                  |
+| `defaultURL`     | The default URL that Payload would normally generate for this document. You can return this as-is, modify it, or replace it entirely.  |
+| `req`            | The full [PayloadRequest](../types/payload-request) object, providing access to user context, payload instance, and other request data |
+| `collectionSlug` | The slug of the current collection                                                                                                     |
+| `viewType`       | The current view context (`'list'`, `'trash'`, etc.) where the link is being generated                                                 |
+
+The function should return:
+
+- `null` to disable the link entirely (no link will be rendered)
+- A `string` containing the custom URL to use for the link
+- The `defaultURL` parameter to use Payload's default linking behavior
+
+<Banner type="success">
+  **Tip:** The `defaultURL` parameter saves you from having to reconstruct URLs
+  manually. You can modify it by appending query parameters or use it as a
+  fallback for your custom logic.
+</Banner>
+
+#### Examples
+
+**Disable linking for certain users:**
+
+```ts
+formatDocURL: ({ defaultURL, req }) => {
+  if (req.user?.role === 'editor') {
+    return null // No link rendered
+  }
+  return defaultURL
 }
 ```
 

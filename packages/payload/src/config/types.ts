@@ -11,7 +11,7 @@ import type GraphQL from 'graphql'
 import type { GraphQLFormattedError } from 'graphql'
 import type { JSONSchema4 } from 'json-schema'
 import type { Metadata } from 'next'
-import type { DestinationStream, Level, pino } from 'pino'
+import type { DestinationStream, Level, LoggerOptions } from 'pino'
 import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
@@ -43,8 +43,10 @@ import type { RootFoldersConfiguration } from '../folders/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
 import type {
   Block,
+  DefaultDocumentIDType,
   FlattenedBlock,
   JobsConfig,
+  KVAdapterResult,
   Payload,
   RequestContext,
   SelectField,
@@ -138,6 +140,8 @@ type Prettify<T> = {
 
 export type Plugin = (config: Config) => Config | Promise<Config>
 
+export type LivePreviewURLType = null | string | undefined
+
 export type LivePreviewConfig = {
   /**
    Device breakpoints to use for the `iframe` of the Live Preview window.
@@ -151,10 +155,16 @@ export type LivePreviewConfig = {
     width: number | string
   }[]
   /**
-   The URL of the frontend application. This will be rendered within an `iframe` as its `src`.
-   Payload will send a `window.postMessage()` to this URL with the document data in real-time.
-   The frontend application is responsible for receiving the message and updating the UI accordingly.
-   Use the `useLivePreview` hook to get started in React applications.
+   * The URL of the frontend application. This will be rendered within an `iframe` as its `src`.
+   * Payload will send a `window.postMessage()` to this URL with the document data in real-time.
+   * The frontend application is responsible for receiving the message and updating the UI accordingly.
+   * @see https://payloadcms.com/docs/live-preview/frontend
+   *
+   * To conditionally render Live Preview, use a function that returns `undefined` or `null`.
+   *
+   * Note: this function may run often if autosave is enabled with a small interval.
+   * For performance, avoid long-running tasks or expensive operations within this function,
+   * or if you need to do something more complex, cache your function as needed.
    */
   url?:
     | ((args: {
@@ -168,8 +178,8 @@ export type LivePreviewConfig = {
          */
         payload: Payload
         req: PayloadRequest
-      }) => Promise<string> | string)
-    | string
+      }) => LivePreviewURLType | Promise<LivePreviewURLType>)
+    | LivePreviewURLType
 }
 
 export type RootLivePreviewConfig = {
@@ -305,7 +315,7 @@ export type AccessArgs<TData = any> = {
    */
   data?: TData
   /** ID of the resource being accessed */
-  id?: number | string
+  id?: DefaultDocumentIDType
   /** If true, the request is for a static file */
   isReadingStaticFile?: boolean
   /** The original request that requires an access check */
@@ -336,7 +346,7 @@ export type Endpoint = {
    * Compatible with Web Request/Response Model
    */
   handler: PayloadHandler
-  /** HTTP method (or "all") */
+  /** HTTP method */
   method: 'connect' | 'delete' | 'get' | 'head' | 'options' | 'patch' | 'post' | 'put'
   /**
    * Pattern that should match the path of the incoming request
@@ -431,7 +441,7 @@ export type Timezone = {
 
 type SupportedTimezonesFn = (args: { defaultTimezones: Timezone[] }) => Timezone[]
 
-type TimezonesConfig = {
+export type TimezonesConfig = {
   /**
    * The default timezone to use for the admin panel.
    */
@@ -462,7 +472,7 @@ export type Locale = {
   /**
    * Code of another locale to use when reading documents with fallback, if not specified defaultLocale is used
    */
-  fallbackLocale?: string
+  fallbackLocale?: string | string[]
   /**
    * label of supported locale
    * @example "English"
@@ -722,14 +732,6 @@ export type ImportMapGenerators = Array<
   }) => void
 >
 
-/**
- * Experimental features.
- * These may be unstable and may change or be removed in future releases.
- */
-export type ExperimentalConfig = {
-  localizeStatus?: boolean
-}
-
 export type AfterErrorHook = (
   args: AfterErrorHookArgs,
 ) => AfterErrorResult | Promise<AfterErrorResult>
@@ -834,6 +836,11 @@ export type Config = {
        */
       providers?: PayloadComponent<{ children?: React.ReactNode }, { children?: React.ReactNode }>[]
       /**
+       * Add custom menu items to the navigation menu accessible via the gear icon.
+       * These components will be rendered in a popup menu above the logout button.
+       */
+      settingsMenu?: CustomComponent[]
+      /**
        * Replace or modify top-level admin routes, or add new ones:
        * + `Account` - `/admin/account`
        * + `Dashboard` - `/admin`
@@ -888,6 +895,11 @@ export type Config = {
        */
       importMapFile?: string
     }
+    /**
+     * Live Preview options.
+     *
+     * @see https://payloadcms.com/docs/live-preview/overview
+     */
     livePreview?: RootLivePreviewConfig
     /** Base meta data to use for the Admin Panel. Included properties are titleSuffix, ogImage, and favicon. */
     meta?: MetaConfig
@@ -958,7 +970,7 @@ export type Config = {
      * Configure toast message behavior and appearance in the admin panel.
      * Currently using [Sonner](https://sonner.emilkowal.ski) for toast notifications.
      *
-     * @experimental This property is experimental and may change in future releases. Use at your own discretion.
+     * @experimental This property is experimental and may change in future releases. Use at your own risk.
      */
     toast?: {
       /**
@@ -977,6 +989,17 @@ export type Config = {
        * @default 5
        */
       limit?: number
+      /**
+       * The position of the toast on the screen.
+       * @default 'bottom-right'
+       */
+      position?:
+        | 'bottom-center'
+        | 'bottom-left'
+        | 'bottom-right'
+        | 'top-center'
+        | 'top-left'
+        | 'top-right'
     }
     /** The slug of a Collection that you want to be used to log in to the Admin dashboard. */
     user?: string
@@ -1001,7 +1024,7 @@ export type Config = {
    * For example, you may want to increase the `limits` imposed by the parser.
    * Currently using @link {https://www.npmjs.com/package/busboy|busboy} under the hood.
    *
-   * @experimental This property is experimental and may change in future releases. Use at your own discretion.
+   * @experimental This property is experimental and may change in future releases. Use at your own risk.
    */
   bodyParser?: Partial<BusboyConfig>
   /**
@@ -1065,12 +1088,6 @@ export type Config = {
   email?: EmailAdapter | Promise<EmailAdapter>
   /** Custom REST endpoints */
   endpoints?: Endpoint[]
-  /**
-   * Configure experimental features for Payload.
-   *
-   * These features may be unstable and may change or be removed in future releases.
-   */
-  experimental?: ExperimentalConfig
   /**
    * Options for folder view within the admin panel
    *
@@ -1144,6 +1161,15 @@ export type Config = {
    */
   jobs?: JobsConfig
   /**
+   * Pass in a KV adapter for use on this project.
+   * @default `DatabaseKVAdapter` from:
+   * ```ts
+   * import { createDatabaseKVAdapter } from 'payload'
+   * createDatabaseKVAdapter()
+   * ```
+   */
+  kv?: KVAdapterResult
+  /**
    * Translate your content to different languages/locales.
    *
    * @default false // disable localization
@@ -1173,7 +1199,7 @@ export type Config = {
    *
    * ```
    */
-  logger?: 'sync' | { destination?: DestinationStream; options: pino.LoggerOptions } | PayloadLogger
+  logger?: 'sync' | { destination?: DestinationStream; options: LoggerOptions } | PayloadLogger
 
   /**
    * Override the log level of errors for Payload's error handler or disable logging with `false`.
@@ -1340,7 +1366,6 @@ export type SanitizedConfig = {
   /** Default richtext editor to use for richText fields */
   editor?: RichTextAdapter<any, any, any>
   endpoints: Endpoint[]
-  experimental?: ExperimentalConfig
   globals: SanitizedGlobalConfig[]
   i18n: Required<I18nOptions>
   jobs: SanitizedJobsConfig

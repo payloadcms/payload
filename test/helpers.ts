@@ -7,15 +7,12 @@ import type {
 } from '@playwright/test'
 import type { Config } from 'payload'
 
-import { formatAdminURL } from '@payloadcms/ui/shared'
 import { expect } from '@playwright/test'
 import { defaults } from 'payload'
 import { wait } from 'payload/shared'
 import shelljs from 'shelljs'
 import { setTimeout } from 'timers/promises'
 
-import { devUser } from './credentials.js'
-import { openNav } from './helpers/e2e/toggleNav.js'
 import { POLL_TOPASS_TIMEOUT } from './playwright.config.js'
 
 export type AdminRoutes = NonNullable<Config['admin']>['routes']
@@ -220,14 +217,6 @@ export async function openCreateDocDrawer(page: Page, fieldSelector: string): Pr
   await wait(500) // wait for drawer form state to initialize
 }
 
-export async function closeNav(page: Page): Promise<void> {
-  if (!(await page.locator('.template-default.template-default--nav-open').isVisible())) {
-    return
-  }
-  await page.locator('.nav-toggler >> visible=true').click()
-  await expect(page.locator('.template-default.template-default--nav-open')).toBeHidden()
-}
-
 export async function openLocaleSelector(page: Page): Promise<void> {
   const button = page.locator('.localizer button.popup-button')
   const popup = page.locator('.localizer .popup.popup--active')
@@ -260,10 +249,13 @@ export async function changeLocale(page: Page, newLocale: string) {
     const localeToSelect = page
       .locator('.localizer .popup.popup--active .popup-button-list__button')
       .locator('.localizer__locale-code', {
-        hasText: `(${newLocale})`,
+        hasText: `${newLocale}`,
       })
 
-    await expect(localeToSelect).toBeEnabled()
+    await expect(async () => await expect(localeToSelect).toBeEnabled()).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
+
     await localeToSelect.click()
 
     const regexPattern = new RegExp(`locale=${newLocale}`)
