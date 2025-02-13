@@ -2,13 +2,10 @@ import type { AdminViewComponent, PayloadServerReactComponent } from 'payload'
 
 import { Button } from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
-import LinkImport from 'next/link.js'
 import React from 'react'
 
 import { FormHeader } from '../../elements/FormHeader/index.js'
 import './index.scss'
-
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export { generateUnauthorizedMetadata } from './meta.js'
 
@@ -44,7 +41,6 @@ export const UnauthorizedView: PayloadServerReactComponent<AdminViewComponent> =
       <Button
         className={`${baseClass}__button`}
         el="link"
-        Link={Link}
         size="large"
         to={formatAdminURL({
           adminRoute,

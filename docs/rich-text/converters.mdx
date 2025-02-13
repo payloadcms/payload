@@ -51,6 +51,10 @@ const jsxConverters: JSXConvertersFunction = ({ defaultConverters }) => ({
     // myTextBlock is the slug of the block
     myTextBlock: ({ node }) => <div style={{ backgroundColor: 'red' }}>{node.fields.text}</div>,
   },
+  inlineBlocks: {
+    // myInlineBlock is the slug of the block
+    myInlineBlock: ({ node }) => <span>{node.fields.text}</span>,
+  },
 })
 
 export const MyComponent = ({ lexicalData }) => {

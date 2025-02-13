@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 
@@ -64,6 +64,7 @@ const dirname = path.resolve(currentFolder, '../../')
 describe('General', () => {
   let page: Page
   let postsUrl: AdminUrlUtil
+  let context: BrowserContext
   let geoUrl: AdminUrlUtil
   let notInViewUrl: AdminUrlUtil
   let globalURL: AdminUrlUtil
@@ -89,7 +90,7 @@ describe('General', () => {
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
     disableDuplicateURL = new AdminUrlUtil(serverURL, disableDuplicateSlug)
 
-    const context = await browser.newContext()
+    context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
 
@@ -936,6 +937,14 @@ describe('General', () => {
       await confirmButton.click()
       const toast = page.locator('li.payload-toast-item.toast-success')
       await expect(toast).toBeVisible()
+    })
+  })
+
+  describe('progress bar', () => {
+    test('should show progress bar on page navigation', async () => {
+      await page.goto(postsUrl.admin)
+      await page.locator('.dashboard__card-list .card').first().click()
+      await expect(page.locator('.progress-bar')).toBeVisible()
     })
   })
 })
