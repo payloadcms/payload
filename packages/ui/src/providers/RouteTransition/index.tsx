@@ -27,17 +27,19 @@ export const RouteTransitionProvider: React.FC<RouteTransitionProps> = ({ childr
 
   const initiateProgress = useCallback(() => {
     timerID.current = setInterval(() => {
-      // randomly update progress, never fully reaching completion
-      // use a decay to slow the rate of progress exponentially
-      const maxProgress = 0.9
-      const growthFactor = 1.5 // adjust to control acceleration
-      const slowdownFactor = 2 // adjust to control deceleration
+      // randomly update progress using an exponential curve
+      // cap the progress to ensure it never fully reaches completion
+      // accelerate quickly then decelerate slowly
+      const maxProgress = 0.93
+      const jumpFactor = 0.3 // lower to reduce jumps in progress
+      const growthFactor = 0.75 // adjust to control acceleration
+      const slowdownFactor = 0.75 // adjust to control deceleration
 
       const newProgress =
         transitionProgressRef.current +
         (maxProgress - transitionProgressRef.current) *
           Math.random() *
-          0.4 * // Lower the multiplier to reduce extreme jumps
+          jumpFactor *
           Math.pow(Math.log(1 + (1 - transitionProgressRef.current) * growthFactor), slowdownFactor)
 
       setTransitionProgress(newProgress)
