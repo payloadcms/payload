@@ -1,11 +1,12 @@
 'use client'
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 
 import { useRouteTransition } from '../index.js'
 import './index.scss'
 
 const transitionDuration = 200
 const baseClass = 'progress-bar'
+const initialDelay = 150
 
 /**
  * Renders a progress bar that shows the progress of a route transition.
@@ -23,13 +24,24 @@ const baseClass = 'progress-bar'
 export const ProgressBar = () => {
   const { isTransitioning, transitionProgress } = useRouteTransition()
   const [progressToShow, setProgressToShow] = React.useState<null | number>(null)
+  const shouldDelayProgress = useRef(true)
 
   useEffect(() => {
     let clearTimerID: NodeJS.Timeout
+    let delayTimerID: NodeJS.Timeout
 
     if (isTransitioning) {
-      setProgressToShow(transitionProgress)
+      if (shouldDelayProgress.current) {
+        delayTimerID = setTimeout(() => {
+          setProgressToShow(transitionProgress)
+          shouldDelayProgress.current = false
+        }, initialDelay)
+      } else {
+        setProgressToShow(transitionProgress)
+      }
     } else {
+      shouldDelayProgress.current = true
+
       // Fast forward to 100% when the transition is complete
       // Then fade out the progress bar directly after
       setProgressToShow(1)
@@ -41,7 +53,10 @@ export const ProgressBar = () => {
       }, transitionDuration * 2)
     }
 
-    return () => clearTimeout(clearTimerID)
+    return () => {
+      clearTimeout(clearTimerID)
+      clearTimeout(delayTimerID)
+    }
   }, [isTransitioning, transitionProgress])
 
   if (typeof progressToShow === 'number') {
@@ -64,4 +79,6 @@ export const ProgressBar = () => {
       </div>
     )
   }
+
+  return null
 }
