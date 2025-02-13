@@ -24,23 +24,23 @@ const initialDelay = 100
 export const ProgressBar = () => {
   const { isTransitioning, transitionProgress } = useRouteTransition()
   const [progressToShow, setProgressToShow] = React.useState<null | number>(null)
-  const delayProgress = useRef(true)
+  const shouldDelayProgress = useRef(true)
 
   useEffect(() => {
     let clearTimerID: NodeJS.Timeout
     let delayTimerID: NodeJS.Timeout
 
     if (isTransitioning) {
-      if (delayProgress.current) {
+      if (shouldDelayProgress.current) {
         delayTimerID = setTimeout(() => {
           setProgressToShow(transitionProgress)
-          delayProgress.current = false
+          shouldDelayProgress.current = false
         }, initialDelay)
       } else {
         setProgressToShow(transitionProgress)
       }
     } else {
-      delayProgress.current = true
+      shouldDelayProgress.current = true
 
       // Fast forward to 100% when the transition is complete
       // Then fade out the progress bar directly after
