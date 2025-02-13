@@ -14,7 +14,6 @@ import { Button } from '../../elements/Button/index.js'
 import { DeleteMany } from '../../elements/DeleteMany/index.js'
 import { EditMany } from '../../elements/EditMany/index.js'
 import { Gutter } from '../../elements/Gutter/index.js'
-import { Link } from '../../elements/Link/index.js'
 import { ListControls } from '../../elements/ListControls/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { ListSelection } from '../../elements/ListSelection/index.js'
@@ -238,7 +237,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                           })}
                         </Button>
                       ) : (
-                        <Button el="link" Link={Link} to={newDocumentURL}>
+                        <Button el="link" to={newDocumentURL}>
                           {i18n.t('general:createNewLabel', {
                             label: getTranslation(labels?.singular, i18n),
                           })}

@@ -13,8 +13,8 @@ import { LocalizerLabel } from '../Localizer/LocalizerLabel/index.js'
 import { useNav } from '../Nav/context.js'
 import { NavToggler } from '../Nav/NavToggler/index.js'
 import { RenderCustomComponent } from '../RenderCustomComponent/index.js'
-import './index.scss'
 import { StepNav } from '../StepNav/index.js'
+import './index.scss'
 
 const baseClass = 'app-header'
 
@@ -73,7 +73,7 @@ export function AppHeader({ CustomAvatar, CustomIcon }: Props) {
           </NavToggler>
           <div className={`${baseClass}__controls-wrapper`}>
             <div className={`${baseClass}__step-nav-wrapper`}>
-              <StepNav className={`${baseClass}__step-nav`} CustomIcon={CustomIcon} Link={Link} />
+              <StepNav className={`${baseClass}__step-nav`} CustomIcon={CustomIcon} />
             </div>
             <div className={`${baseClass}__actions-wrapper`}>
               <div className={`${baseClass}__actions`} ref={customControlsRef}>
