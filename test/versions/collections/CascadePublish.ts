@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { BlocksFeature, lexicalEditor, LinkFeature } from '@payloadcms/richtext-lexical'
+import { slateEditor } from '@payloadcms/richtext-slate'
 
 import { cascadePublishSlug } from '../slugs.js'
 
@@ -44,6 +45,11 @@ export const CascadePublish: CollectionConfig = {
           ]
         },
       }),
+    },
+    {
+      name: 'slate',
+      type: 'richText',
+      editor: slateEditor({}),
     },
   ],
   versions: {

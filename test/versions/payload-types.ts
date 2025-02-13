@@ -397,6 +397,11 @@ export interface CascadePublish {
     };
     [k: string]: unknown;
   } | null;
+  slate?:
+    | {
+        [k: string]: unknown;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -825,6 +830,7 @@ export interface CascadePublishSelect<T extends boolean = true> {
   title?: T;
   relation?: T;
   lexical?: T;
+  slate?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

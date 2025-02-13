@@ -2913,6 +2913,65 @@ describe('Versions', () => {
       expect(publishedRelation_3._status).toBe('published')
     })
 
+    it('should cascade publish collection with relationship data within Slate', async () => {
+      const relation_1 = await payload.create({
+        collection: 'cascade-publish-relations',
+        draft: true,
+        data: { title: 'Relation 1', _status: 'draft' },
+      })
+      const relation_2 = await payload.create({
+        collection: 'cascade-publish-relations',
+        draft: true,
+        data: { title: 'Relation 2', _status: 'draft' },
+      })
+
+      const doc = await payload.create({
+        collection: 'cascade-publish',
+        draft: true,
+        depth: 0,
+        data: {
+          _status: 'draft',
+          title: 'Cascade Publish 1',
+          slate: [
+            {
+              type: 'relationship',
+              relationTo: cascadePublishRelationsSlug,
+              value: { id: relation_1.id },
+            },
+            {
+              type: 'link',
+              linkType: 'internal',
+              doc: {
+                relationTo: cascadePublishRelationsSlug,
+                value: relation_2.id,
+              },
+            },
+          ],
+        },
+      })
+
+      const publishedDoc = await payload.update({
+        collection: 'cascade-publish',
+        id: doc.id,
+        depth: 0,
+        draft: false,
+        data: { _status: 'published', title: 'Cascade Publish - published' },
+      })
+      expect(publishedDoc._status).toBe('published')
+
+      const publishedRelation_1 = await payload.findByID({
+        collection: 'cascade-publish-relations',
+        id: relation_1.id,
+      })
+      expect(publishedRelation_1._status).toBe('published')
+
+      const publishedRelation_2 = await payload.findByID({
+        collection: 'cascade-publish-relations',
+        id: relation_2.id,
+      })
+      expect(publishedRelation_2._status).toBe('published')
+    })
+
     it('should cascade publish global', async () => {
       const relation = await payload.create({
         collection: 'cascade-publish-relations',
