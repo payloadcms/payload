@@ -31,7 +31,7 @@ export const RouteTransitionProvider: React.FC<RouteTransitionProps> = ({ childr
       // cap the progress to ensure it never fully reaches completion
       // accelerate quickly then decelerate slowly
       const maxProgress = 0.93
-      const jumpFactor = 0.3 // lower to reduce jumps in progress
+      const jumpFactor = 0.2 // lower to reduce jumps in progress
       const growthFactor = 0.75 // adjust to control acceleration
       const slowdownFactor = 0.75 // adjust to control deceleration
 
