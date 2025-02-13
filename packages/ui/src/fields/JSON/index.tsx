@@ -2,7 +2,6 @@
 import type { JSONFieldClientComponent } from 'payload'
 
 import { type OnMount } from '@monaco-editor/react'
-import { dequal } from 'dequal/lite'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { CodeEditor } from '../../elements/CodeEditor/index.js'
@@ -57,63 +56,31 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
     validate: memoizedValidate,
   })
 
-  const handleMount: OnMount = useCallback(
+  const handleMount = useCallback<OnMount>(
     (editor, monaco) => {
       if (!jsonSchema) {
         return
       }
 
-      let jsonSchemaOverride
-      const existingSchemas = monaco.languages.json.jsonDefaults.diagnosticsOptions.schemas || []
-      const schemaExists = existingSchemas.some((schema) => {
-        return schema.uri === jsonSchema.uri && dequal(schema.schema, jsonSchema.schema)
-      })
-
-      const generatedUrl = `a://b/${crypto.randomUUID()}.json`
-      if (schemaExists) {
-        // eslint-disable-next-line no-console
-        console.warn(
-          `[JSON Schema Error]: Field ${label} - Generating a schema URI. A schema with the same URI ${jsonSchema.uri} and the same properties already exists.`,
-        )
-
-        // Override json schema with a new schema with a generated url to avoid conflicts
-        jsonSchemaOverride = {
-          ...jsonSchema,
-          fileMatch: [generatedUrl],
-          uri: generatedUrl,
-        }
-      }
-
-      const urlExistsButSchemaDiffers = existingSchemas.some(
-        (schema) => schema.uri === jsonSchema.uri && !dequal(schema.schema, jsonSchema.schema),
-      )
-
-      if (urlExistsButSchemaDiffers) {
-        // eslint-disable-next-line no-console
-        console.warn(
-          `[JSON Schema Warning]: Field ${label} - Generating a schema URI. A schema with the URI ${jsonSchema.uri} already exists yet its properties differ from exisiting JSON schemas.`,
-        )
-
-        // Override json schema with a new schema with a generated url to avoid conflicts
-        jsonSchemaOverride = {
-          ...jsonSchema,
-          fileMatch: [generatedUrl],
-          uri: generatedUrl,
-        }
-      }
-
-      const schemas = [...existingSchemas, jsonSchemaOverride ? jsonSchemaOverride : jsonSchema]
-      const modelUri = monaco.Uri.parse((jsonSchemaOverride || jsonSchema).uri)
-      const model = monaco.editor.createModel(JSON.stringify(value, null, 2), 'json', modelUri)
       monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
         enableSchemaRequest: true,
-        schemas,
+        schemas: [
+          ...(monaco.languages.json.jsonDefaults.diagnosticsOptions.schemas || []),
+          jsonSchema,
+        ],
         validate: true,
       })
 
-      editor.setModel(model)
+      const uri = jsonSchema.uri
+      const newUri = uri.includes('?')
+        ? `${uri}&${crypto.randomUUID()}`
+        : `${uri}?${crypto.randomUUID()}`
+
+      editor.setModel(
+        monaco.editor.createModel(JSON.stringify(value, null, 2), 'json', monaco.Uri.parse(newUri)),
+      )
     },
-    [jsonSchema, value, label],
+    [jsonSchema, value],
   )
 
   const handleChange = useCallback(
