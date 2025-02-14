@@ -9,6 +9,7 @@ import {
   PopupList,
   useConfig,
   useModal,
+  useRouteTransition,
   useTranslation,
 } from '@payloadcms/ui'
 import { formatAdminURL, requests } from '@payloadcms/ui/shared'
@@ -35,19 +36,20 @@ const Restore: React.FC<Props> = ({
 }) => {
   const {
     config: {
-      collections,
       routes: { admin: adminRoute, api: apiRoute },
       serverURL,
     },
+    getEntityConfig,
   } = useConfig()
 
-  const collectionConfig = collections.find((collection) => collection.slug === collectionSlug)
+  const collectionConfig = getEntityConfig({ collectionSlug })
 
   const { toggleModal } = useModal()
   const [processing, setProcessing] = useState(false)
   const router = useRouter()
   const { i18n, t } = useTranslation()
   const [draft, setDraft] = useState(false)
+  const { startRouteTransition } = useRouteTransition()
 
   const restoreMessage = t('version:aboutToRestoreGlobal', {
     label: getTranslation(label, i18n),
@@ -87,11 +89,12 @@ const Restore: React.FC<Props> = ({
     if (res.status === 200) {
       const json = await res.json()
       toast.success(json.message)
-      router.push(redirectURL)
+      startRouteTransition(() => router.push(redirectURL))
     } else {
       toast.error(t('version:problemRestoringVersion'))
     }
-  }, [fetchURL, redirectURL, t, i18n, router])
+  }, [fetchURL, redirectURL, t, i18n, router, startRouteTransition])
+
   return (
     <Fragment>
       <div className={[baseClass, className].filter(Boolean).join(' ')}>
@@ -100,14 +103,16 @@ const Restore: React.FC<Props> = ({
           className={[canRestoreAsDraft && `${baseClass}__button`].filter(Boolean).join(' ')}
           onClick={() => toggleModal(modalSlug)}
           size="small"
-          SubMenuPopupContent={() =>
-            canRestoreAsDraft && (
-              <PopupList.ButtonGroup>
-                <PopupList.Button onClick={() => [setDraft(true), toggleModal(modalSlug)]}>
-                  {t('version:restoreAsDraft')}
-                </PopupList.Button>
-              </PopupList.ButtonGroup>
-            )
+          SubMenuPopupContent={
+            canRestoreAsDraft
+              ? () => (
+                  <PopupList.ButtonGroup>
+                    <PopupList.Button onClick={() => [setDraft(true), toggleModal(modalSlug)]}>
+                      {t('version:restoreAsDraft')}
+                    </PopupList.Button>
+                  </PopupList.ButtonGroup>
+                )
+              : null
           }
         >
           {t('version:restoreThisVersion')}

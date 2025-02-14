@@ -28,6 +28,7 @@ import {
   useDocumentEvents,
   useDocumentInfo,
   useEditDepth,
+  useRouteTransition,
   useServerFunctions,
   useTranslation,
   useUploadEdits,
@@ -60,6 +61,14 @@ type Props = {
   readonly schemaPath: string
   readonly serverURL: string
 } & DocumentSlots
+
+const getAbsoluteUrl = (url) => {
+  try {
+    return new URL(url, window.location.origin).href
+  } catch {
+    return url
+  }
+}
 
 const PreviewView: React.FC<Props> = ({
   collectionConfig,
@@ -123,6 +132,7 @@ const PreviewView: React.FC<Props> = ({
   const { reportUpdate } = useDocumentEvents()
   const { resetUploadEdits } = useUploadEdits()
   const { getFormState } = useServerFunctions()
+  const { startRouteTransition } = useRouteTransition()
 
   const docConfig = collectionConfig || globalConfig
 
@@ -203,7 +213,8 @@ const PreviewView: React.FC<Props> = ({
           adminRoute,
           path: `/collections/${collectionSlug}/${json?.doc?.id}${locale ? `?locale=${locale}` : ''}`,
         })
-        router.push(redirectRoute)
+
+        startRouteTransition(() => router.push(redirectRoute))
       } else {
         resetUploadEdits()
       }
@@ -225,6 +236,7 @@ const PreviewView: React.FC<Props> = ({
           returnLockStatus: false,
           schemaPath: entitySlug,
           signal: controller.signal,
+          skipValidation: true,
         })
 
         // Unlock the document after save
@@ -260,6 +272,7 @@ const PreviewView: React.FC<Props> = ({
       router,
       setDocumentIsLocked,
       updateSavedDocumentData,
+      startRouteTransition,
       user,
       userSlug,
       autosaveEnabled,
@@ -267,7 +280,7 @@ const PreviewView: React.FC<Props> = ({
   )
 
   const onChange: FormProps['onChange'][0] = useCallback(
-    async ({ formState: prevFormState }) => {
+    async ({ formState: prevFormState, submitted }) => {
       const controller = handleAbortRef(abortOnChangeRef)
 
       const currentTime = Date.now()
@@ -292,6 +305,7 @@ const PreviewView: React.FC<Props> = ({
         returnLockStatus: isLockingEnabled ? true : false,
         schemaPath,
         signal: controller.signal,
+        skipValidation: !submitted,
         updateLastEdited,
       })
 
@@ -550,7 +564,7 @@ export const LivePreviewClient: React.FC<
     readonly url: string
   } & DocumentSlots
 > = (props) => {
-  const { breakpoints, url } = props
+  const { breakpoints, url: incomingUrl } = props
   const { collectionSlug, globalSlug } = useDocumentInfo()
 
   const {
@@ -562,14 +576,19 @@ export const LivePreviewClient: React.FC<
     getEntityConfig,
   } = useConfig()
 
+  const url =
+    incomingUrl.startsWith('http://') || incomingUrl.startsWith('https://')
+      ? incomingUrl
+      : getAbsoluteUrl(incomingUrl)
+
   const { isPopupOpen, openPopupWindow, popupRef } = usePopupWindow({
     eventType: 'payload-live-preview',
     url,
   })
 
-  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
+  const collectionConfig = getEntityConfig({ collectionSlug })
 
-  const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
+  const globalConfig = getEntityConfig({ globalSlug })
 
   const schemaPath = collectionSlug || globalSlug
 

@@ -31,14 +31,10 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   redirectAfterDelete,
   redirectAfterDuplicate,
 }) => {
-  const {
-    config: { collections },
-  } = useConfig()
+  const { getEntityConfig } = useConfig()
   const locale = useLocale()
 
-  const [collectionConfig] = useState(() =>
-    collections.find((collection) => collection.slug === collectionSlug),
-  )
+  const [collectionConfig] = useState(() => getEntityConfig({ collectionSlug }))
 
   const abortGetDocumentViewRef = React.useRef<AbortController>(null)
 

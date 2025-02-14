@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { AccessResult } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
 import type { CollectionSlug, JoinQuery } from '../../index.js'
@@ -46,6 +47,8 @@ export type Arguments = {
   sort?: Sort
   where?: Where
 }
+
+const lockDurationDefault = 300 // Default 5 minutes in seconds
 
 export const findOperation = async <
   TSlug extends CollectionSlug,
@@ -189,10 +192,11 @@ export const findOperation = async <
       try {
         const lockDocumentsProp = collectionConfig?.lockDocuments
 
-        const lockDurationDefault = 300 // Default 5 minutes in seconds
         const lockDuration =
           typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
         const lockDurationInMilliseconds = lockDuration * 1000
+
+        const now = new Date().getTime()
 
         const lockedDocuments = await payload.find({
           collection: 'payload-locked-documents',
@@ -216,14 +220,13 @@ export const findOperation = async <
               // Query where the lock is newer than the current time minus lock time
               {
                 updatedAt: {
-                  greater_than: new Date(new Date().getTime() - lockDurationInMilliseconds),
+                  greater_than: new Date(now - lockDurationInMilliseconds),
                 },
               },
             ],
           },
         })
 
-        const now = new Date().getTime()
         const lockedDocs = Array.isArray(lockedDocuments?.docs) ? lockedDocuments.docs : []
 
         // Filter out stale locks
@@ -232,20 +235,16 @@ export const findOperation = async <
           return lastEditedAt + lockDurationInMilliseconds > now
         })
 
-        result.docs = result.docs.map((doc) => {
+        for (const doc of result.docs) {
           const lockedDoc = validLockedDocs.find((lock) => lock?.document?.value === doc.id)
-          return {
-            ...doc,
-            _isLocked: !!lockedDoc,
-            _userEditing: lockedDoc ? lockedDoc?.user?.value : null,
-          }
-        })
-      } catch (error) {
-        result.docs = result.docs.map((doc) => ({
-          ...doc,
-          _isLocked: false,
-          _userEditing: null,
-        }))
+          doc._isLocked = !!lockedDoc
+          doc._userEditing = lockedDoc ? lockedDoc?.user?.value : null
+        }
+      } catch (_err) {
+        for (const doc of result.docs) {
+          doc._isLocked = false
+          doc._userEditing = null
+        }
       }
     }
 
@@ -253,9 +252,8 @@ export const findOperation = async <
     // beforeRead - Collection
     // /////////////////////////////////////
 
-    result = {
-      ...result,
-      docs: await Promise.all(
+    if (collectionConfig?.hooks?.beforeRead?.length) {
+      result.docs = await Promise.all(
         result.docs.map(async (doc) => {
           let docRef = doc
 
@@ -274,45 +272,41 @@ export const findOperation = async <
 
           return docRef
         }),
-      ),
+      )
     }
 
     // /////////////////////////////////////
     // afterRead - Fields
     // /////////////////////////////////////
 
-    result = {
-      ...result,
-      docs: await Promise.all(
-        result.docs.map(async (doc) =>
-          afterRead<DataFromCollectionSlug<TSlug>>({
-            collection: collectionConfig,
-            context: req.context,
-            currentDepth,
-            depth,
-            doc,
-            draft: draftsEnabled,
-            fallbackLocale,
-            findMany: true,
-            global: null,
-            locale,
-            overrideAccess,
-            populate,
-            req,
-            select,
-            showHiddenFields,
-          }),
-        ),
+    result.docs = await Promise.all(
+      result.docs.map(async (doc) =>
+        afterRead<DataFromCollectionSlug<TSlug>>({
+          collection: collectionConfig,
+          context: req.context,
+          currentDepth,
+          depth,
+          doc,
+          draft: draftsEnabled,
+          fallbackLocale,
+          findMany: true,
+          global: null,
+          locale,
+          overrideAccess,
+          populate,
+          req,
+          select,
+          showHiddenFields,
+        }),
       ),
-    }
+    )
 
     // /////////////////////////////////////
     // afterRead - Collection
     // /////////////////////////////////////
 
-    result = {
-      ...result,
-      docs: await Promise.all(
+    if (collectionConfig?.hooks?.afterRead?.length) {
+      result.docs = await Promise.all(
         result.docs.map(async (doc) => {
           let docRef = doc
 
@@ -332,7 +326,7 @@ export const findOperation = async <
 
           return docRef
         }),
-      ),
+      )
     }
 
     // /////////////////////////////////////

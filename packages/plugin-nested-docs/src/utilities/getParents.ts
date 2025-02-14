@@ -1,9 +1,9 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, PayloadRequest } from 'payload'
 
 import type { NestedDocsPluginConfig } from '../types.js'
 
 export const getParents = async (
-  req: any,
+  req: PayloadRequest,
   pluginConfig: NestedDocsPluginConfig,
   collection: CollectionConfig,
   doc: Record<string, unknown>,

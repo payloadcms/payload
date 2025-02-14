@@ -15,3 +15,7 @@ export const validOperators = [
   'intersects',
   'near',
 ] as const
+
+export type Operator = (typeof validOperators)[number]
+
+export const validOperatorSet = new Set<Operator>(validOperators)

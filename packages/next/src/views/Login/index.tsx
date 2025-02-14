@@ -5,8 +5,8 @@ import { redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
 import { Logo } from '../../elements/Logo/index.js'
-import './index.scss'
 import { LoginForm } from './LoginForm/index.js'
+import './index.scss'
 
 export { generateLoginMetadata } from './meta.js'
 
@@ -32,7 +32,7 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
     redirect((searchParams.redirect as string) || admin)
   }
 
-  const collectionConfig = collections.find(({ slug }) => slug === userSlug)
+  const collectionConfig = payload?.collections?.[userSlug]?.config
 
   const prefillAutoLogin =
     typeof config.admin?.autoLogin === 'object' && config.admin?.autoLogin.prefillOnly

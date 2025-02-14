@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { initI18n } from '@payloadcms/translations'
 import * as qs from 'qs-esm'
 
@@ -78,11 +79,6 @@ export const createPayloadRequest = async ({
     })
 
     locale = locales.locale
-
-    // Override if query params are present, in order to respect HTTP method override
-    if (query.locale) {
-      locale = query.locale as string
-    }
   }
 
   const customRequest: CustomPayloadRequestProperties = {

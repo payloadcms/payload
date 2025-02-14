@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 // eslint-disable-next-line regexp/no-super-linear-backtracking, regexp/no-obscure-range
 const ACCEPTABLE_CONTENT_TYPE = /multipart\/['"()+-_]+(?:; ?['"()+-_]*)+$/i
 const UNACCEPTABLE_METHODS = new Set(['CONNECT', 'DELETE', 'GET', 'HEAD', 'OPTIONS', 'TRACE'])

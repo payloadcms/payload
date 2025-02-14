@@ -1,10 +1,11 @@
 import type {
   AdminViewComponent,
   AdminViewProps,
-  CustomComponent,
-  EditConfig,
+  DocumentSubViewTypes,
   ImportMap,
   SanitizedConfig,
+  ServerPropsFromView,
+  ViewTypes,
 } from 'payload'
 import type React from 'react'
 
@@ -23,7 +24,9 @@ import { LogoutInactivity, LogoutView } from '../Logout/index.js'
 import { ResetPassword, resetPasswordBaseClass } from '../ResetPassword/index.js'
 import { UnauthorizedView } from '../Unauthorized/index.js'
 import { Verify, verifyBaseClass } from '../Verify/index.js'
+import { attachViewActions, getViewActions } from './attachViewActions.js'
 import { getCustomViewByRoute } from './getCustomViewByRoute.js'
+import { getDocumentViewInfo } from './getDocumentViewInfo.js'
 import { isPathMatchingRoute } from './isPathMatchingRoute.js'
 
 const baseClasses = {
@@ -53,26 +56,6 @@ const oneSegmentViews: OneSegmentViews = {
   unauthorized: UnauthorizedView,
 }
 
-function getViewActions({
-  editConfig,
-  viewKey,
-}: {
-  editConfig: EditConfig
-  viewKey: keyof EditConfig
-}): CustomComponent[] | undefined {
-  if (editConfig && viewKey in editConfig && 'actions' in editConfig[viewKey]) {
-    return editConfig[viewKey].actions
-  }
-
-  return undefined
-}
-
-type ServerPropsFromView = {
-  collectionConfig?: SanitizedConfig['collections'][number]
-  globalConfig?: SanitizedConfig['globals'][number]
-  viewActions: CustomComponent[]
-}
-
 type GetViewFromConfigArgs = {
   adminRoute: string
   config: SanitizedConfig
@@ -86,10 +69,12 @@ type GetViewFromConfigArgs = {
 
 type GetViewFromConfigResult = {
   DefaultView: ViewFromConfig
+  documentSubViewType?: DocumentSubViewTypes
   initPageOptions: Parameters<typeof initPage>[0]
   serverProps: ServerPropsFromView
   templateClassName: string
   templateType: 'default' | 'minimal'
+  viewType?: ViewTypes
 }
 
 export const getViewFromConfig = ({
@@ -103,6 +88,8 @@ export const getViewFromConfig = ({
   let ViewToRender: ViewFromConfig = null
   let templateClassName: string
   let templateType: 'default' | 'minimal' | undefined
+  let documentSubViewType: DocumentSubViewTypes
+  let viewType: ViewTypes
 
   const initPageOptions: Parameters<typeof initPage>[0] = {
     config,
@@ -140,6 +127,7 @@ export const getViewFromConfig = ({
         }
         templateClassName = 'dashboard'
         templateType = 'default'
+        viewType = 'dashboard'
       }
       break
     }
@@ -180,6 +168,7 @@ export const getViewFromConfig = ({
 
         if (viewKey === 'account') {
           templateType = 'default'
+          viewType = 'account'
         }
       }
       break
@@ -192,6 +181,7 @@ export const getViewFromConfig = ({
         }
         templateClassName = baseClasses[segmentTwo]
         templateType = 'minimal'
+        viewType = 'reset'
       }
 
       if (isCollection && matchedCollection) {
@@ -203,6 +193,7 @@ export const getViewFromConfig = ({
 
         templateClassName = `${segmentTwo}-list`
         templateType = 'default'
+        viewType = 'list'
         serverProps.viewActions = serverProps.viewActions.concat(
           matchedCollection.admin.components?.views?.list?.actions,
         )
@@ -215,6 +206,7 @@ export const getViewFromConfig = ({
 
         templateClassName = 'global-edit'
         templateType = 'default'
+        viewType = 'document'
 
         // add default view actions
         serverProps.viewActions = serverProps.viewActions.concat(
@@ -235,6 +227,7 @@ export const getViewFromConfig = ({
 
         templateClassName = 'verify'
         templateType = 'minimal'
+        viewType = 'verify'
       } else if (isCollection && matchedCollection) {
         // Custom Views
         // --> /collections/:collectionSlug/:id
@@ -250,63 +243,15 @@ export const getViewFromConfig = ({
         templateClassName = `collection-default-edit`
         templateType = 'default'
 
-        // Adds view actions to the current collection view
-        if (matchedCollection.admin?.components?.views?.edit) {
-          if ('root' in matchedCollection.admin.components.views.edit) {
-            serverProps.viewActions = serverProps.viewActions.concat(
-              getViewActions({
-                editConfig: matchedCollection.admin?.components?.views?.edit,
-                viewKey: 'root',
-              }),
-            )
-          } else {
-            if (segmentFive) {
-              if (segmentFour === 'versions') {
-                // add version view actions
-                serverProps.viewActions = serverProps.viewActions.concat(
-                  getViewActions({
-                    editConfig: matchedCollection.admin?.components?.views?.edit,
-                    viewKey: 'version',
-                  }),
-                )
-              }
-            } else if (segmentFour) {
-              if (segmentFour === 'versions') {
-                // add versions view actions
-                serverProps.viewActions = serverProps.viewActions.concat(
-                  getViewActions({
-                    editConfig: matchedCollection.admin?.components?.views.edit,
-                    viewKey: 'versions',
-                  }),
-                )
-              } else if (segmentFour === 'preview') {
-                // add livePreview view actions
-                serverProps.viewActions = serverProps.viewActions.concat(
-                  getViewActions({
-                    editConfig: matchedCollection.admin?.components?.views.edit,
-                    viewKey: 'livePreview',
-                  }),
-                )
-              } else if (segmentFour === 'api') {
-                // add api view actions
-                serverProps.viewActions = serverProps.viewActions.concat(
-                  getViewActions({
-                    editConfig: matchedCollection.admin?.components?.views.edit,
-                    viewKey: 'api',
-                  }),
-                )
-              }
-            } else if (segmentThree) {
-              // add default view actions
-              serverProps.viewActions = serverProps.viewActions.concat(
-                getViewActions({
-                  editConfig: matchedCollection.admin?.components?.views.edit,
-                  viewKey: 'default',
-                }),
-              )
-            }
-          }
-        }
+        const viewInfo = getDocumentViewInfo([segmentFour, segmentFive])
+        viewType = viewInfo.viewType
+        documentSubViewType = viewInfo.documentSubViewType
+
+        attachViewActions({
+          collectionOrGlobal: matchedCollection,
+          serverProps,
+          viewKeyArg: documentSubViewType,
+        })
       } else if (isGlobal && matchedGlobal) {
         // Custom Views
         // --> /globals/:globalSlug/versions
@@ -321,55 +266,15 @@ export const getViewFromConfig = ({
         templateClassName = `global-edit`
         templateType = 'default'
 
-        // Adds view actions to the current global view
-        if (matchedGlobal.admin?.components?.views?.edit) {
-          if ('root' in matchedGlobal.admin.components.views.edit) {
-            serverProps.viewActions = serverProps.viewActions.concat(
-              getViewActions({
-                editConfig: matchedGlobal.admin.components?.views?.edit,
-                viewKey: 'root',
-              }),
-            )
-          } else {
-            if (segmentFour) {
-              if (segmentThree === 'versions') {
-                // add version view actions
-                serverProps.viewActions = serverProps.viewActions.concat(
-                  getViewActions({
-                    editConfig: matchedGlobal.admin?.components?.views?.edit,
-                    viewKey: 'version',
-                  }),
-                )
-              }
-            } else if (segmentThree) {
-              if (segmentThree === 'versions') {
-                // add versions view actions
-                serverProps.viewActions = serverProps.viewActions.concat(
-                  getViewActions({
-                    editConfig: matchedGlobal.admin?.components?.views?.edit,
-                    viewKey: 'versions',
-                  }),
-                )
-              } else if (segmentThree === 'preview') {
-                // add livePreview view actions
-                serverProps.viewActions = serverProps.viewActions.concat(
-                  getViewActions({
-                    editConfig: matchedGlobal.admin?.components?.views?.edit,
-                    viewKey: 'livePreview',
-                  }),
-                )
-              } else if (segmentThree === 'api') {
-                // add api view actions
-                serverProps.viewActions = serverProps.viewActions.concat(
-                  getViewActions({
-                    editConfig: matchedGlobal.admin?.components?.views?.edit,
-                    viewKey: 'api',
-                  }),
-                )
-              }
-            }
-          }
-        }
+        const viewInfo = getDocumentViewInfo([segmentThree, segmentFour])
+        viewType = viewInfo.viewType
+        documentSubViewType = viewInfo.documentSubViewType
+
+        attachViewActions({
+          collectionOrGlobal: matchedGlobal,
+          serverProps,
+          viewKeyArg: documentSubViewType,
+        })
       }
       break
   }
@@ -382,9 +287,11 @@ export const getViewFromConfig = ({
 
   return {
     DefaultView: ViewToRender,
+    documentSubViewType,
     initPageOptions,
     serverProps,
     templateClassName,
     templateType,
+    viewType,
   }
 }

@@ -2,6 +2,8 @@
 
 @layer payload-default {
   .payload-toast-container {
+    --offset: calc(var(--gutter-h) / 2);
+
     padding: 0;
     margin: 0;
 

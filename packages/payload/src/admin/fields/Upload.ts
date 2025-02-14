@@ -13,6 +13,8 @@ import type {
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
+  FieldDiffClientComponent,
+  FieldDiffServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
 } from '../types.js'
@@ -66,3 +68,10 @@ export type UploadFieldErrorServerComponent = FieldErrorServerComponent<
 
 export type UploadFieldErrorClientComponent =
   FieldErrorClientComponent<UploadFieldClientWithoutType>
+
+export type UploadFieldDiffServerComponent = FieldDiffServerComponent<
+  UploadField,
+  UploadFieldClient
+>
+
+export type UploadFieldDiffClientComponent = FieldDiffClientComponent<UploadFieldClient>

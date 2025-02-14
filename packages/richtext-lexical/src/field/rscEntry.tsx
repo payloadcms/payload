@@ -56,6 +56,7 @@ export const RscEntryLexicalField: React.FC<
         id: args.id,
         clientFieldSchemaMap: args.clientFieldSchemaMap,
         collectionSlug: args.collectionSlug,
+        documentData: args.data,
         field,
         fieldSchemaMap: args.fieldSchemaMap,
         lexicalFieldSchemaPath: schemaPath,
@@ -80,6 +81,9 @@ export const RscEntryLexicalField: React.FC<
   }
   if (args.admin?.hideGutter) {
     admin.hideGutter = true
+  }
+  if (args.admin?.hideInsertParagraphAtEnd) {
+    admin.hideInsertParagraphAtEnd = true
   }
 
   const props: LexicalRichTextFieldProps = {

@@ -1,4 +1,10 @@
-import type { ClientComponentProps, ClientField, FieldPaths, ServerComponentProps } from 'payload'
+import type {
+  ClientComponentProps,
+  ClientField,
+  FieldPaths,
+  FlattenedBlock,
+  ServerComponentProps,
+} from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { createClientField, MissingEditorProp } from 'payload'
@@ -106,8 +112,8 @@ export const renderField: RenderFieldMethod = ({
       fieldState.customComponents = {}
     }
   }
+
   switch (fieldConfig.type) {
-    // TODO: handle block row labels as well in a similar fashion
     case 'array': {
       fieldState?.rows?.forEach((row, rowIndex) => {
         if (fieldConfig.admin?.components && 'RowLabel' in fieldConfig.admin.components) {
@@ -122,6 +128,43 @@ export const renderField: RenderFieldMethod = ({
             serverProps: {
               ...serverProps,
               rowLabel: `${getTranslation(fieldConfig.labels.singular, req.i18n)} ${String(
+                rowIndex + 1,
+              ).padStart(2, '0')}`,
+              rowNumber: rowIndex + 1,
+            },
+          })
+        }
+      })
+
+      break
+    }
+
+    case 'blocks': {
+      fieldState?.rows?.forEach((row, rowIndex) => {
+        const blockTypeToMatch: string = row.blockType
+        const blockConfig =
+          req.payload.blocks[blockTypeToMatch] ??
+          ((fieldConfig.blockReferences ?? fieldConfig.blocks).find(
+            (block) => typeof block !== 'string' && block.slug === blockTypeToMatch,
+          ) as FlattenedBlock | undefined)
+
+        if (blockConfig.admin?.components && 'Label' in blockConfig.admin.components) {
+          if (!fieldState.customComponents) {
+            fieldState.customComponents = {}
+          }
+
+          if (!fieldState.customComponents.RowLabels) {
+            fieldState.customComponents.RowLabels = []
+          }
+
+          fieldState.customComponents.RowLabels[rowIndex] = RenderServerComponent({
+            clientProps,
+            Component: blockConfig.admin.components.Label,
+            importMap: req.payload.importMap,
+            serverProps: {
+              ...serverProps,
+              blockType: row.blockType,
+              rowLabel: `${getTranslation(blockConfig.labels.singular, req.i18n)} ${String(
                 rowIndex + 1,
               ).padStart(2, '0')}`,
               rowNumber: rowIndex + 1,

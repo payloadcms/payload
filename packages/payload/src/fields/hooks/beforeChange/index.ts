@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { ValidationFieldError } from '../../../errors/index.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
@@ -28,6 +29,7 @@ export type Args<T extends JsonObject> = {
  * - Transform data for storage
  * - Unflatten locales. The input `data` is the normal document for one locale. The output result will become the document with locales.
  */
+
 export const beforeChange = async <T extends JsonObject>({
   id,
   collection,
@@ -56,9 +58,10 @@ export const beforeChange = async <T extends JsonObject>({
     global,
     mergeLocaleActions,
     operation,
-    path: [],
+    parentIndexPath: '',
+    parentPath: '',
+    parentSchemaPath: '',
     req,
-    schemaPath: [],
     siblingData: data,
     siblingDoc: doc,
     siblingDocWithLocales: docWithLocales,

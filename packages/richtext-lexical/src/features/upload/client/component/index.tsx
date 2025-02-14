@@ -2,8 +2,6 @@
 import type { ClientCollectionConfig, Data, FormState, JsonObject } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
-import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection.js'
-import { mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
@@ -14,16 +12,8 @@ import {
   usePayloadAPI,
   useTranslation,
 } from '@payloadcms/ui'
-import {
-  $getNodeByKey,
-  $getSelection,
-  $isNodeSelection,
-  CLICK_COMMAND,
-  COMMAND_PRIORITY_LOW,
-  KEY_BACKSPACE_COMMAND,
-  KEY_DELETE_COMMAND,
-} from 'lexical'
-import React, { useCallback, useEffect, useId, useReducer, useRef, useState } from 'react'
+import { $getNodeByKey } from 'lexical'
+import React, { useCallback, useId, useReducer, useRef, useState } from 'react'
 
 import type { BaseClientFeatureProps } from '../../../typesClient.js'
 import type { UploadData } from '../../server/nodes/UploadNode.js'
@@ -36,7 +26,6 @@ import { useLexicalDocumentDrawer } from '../../../../utilities/fieldsDrawer/use
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
 import { EnabledRelationshipsCondition } from '../../../relationship/client/utils/EnabledRelationshipsCondition.js'
 import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from '../drawer/commands.js'
-import { $isUploadNode } from '../nodes/UploadNode.js'
 import './index.scss'
 
 const baseClass = 'lexical-upload'
@@ -64,16 +53,15 @@ const Component: React.FC<ElementProps> = (props) => {
 
   const {
     config: {
-      collections,
       routes: { api },
       serverURL,
     },
+    getEntityConfig,
   } = useConfig()
   const uploadRef = useRef<HTMLDivElement | null>(null)
   const { uuid } = useEditorConfigContext()
   const editDepth = useEditDepth()
   const [editor] = useLexicalComposerContext()
-  const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey)
 
   const {
     editorConfig,
@@ -82,8 +70,8 @@ const Component: React.FC<ElementProps> = (props) => {
 
   const { i18n, t } = useTranslation()
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0)
-  const [relatedCollection] = useState<ClientCollectionConfig>(
-    () => collections.find((coll) => coll.slug === relationTo)!,
+  const [relatedCollection] = useState<ClientCollectionConfig>(() =>
+    getEntityConfig({ collectionSlug: relationTo }),
   )
 
   const componentID = useId()
@@ -128,55 +116,6 @@ const Component: React.FC<ElementProps> = (props) => {
     [setParams, cacheBust, closeDocumentDrawer],
   )
 
-  const $onDelete = useCallback(
-    (event: KeyboardEvent) => {
-      const deleteSelection = $getSelection()
-      if (isSelected && $isNodeSelection(deleteSelection)) {
-        event.preventDefault()
-        editor.update(() => {
-          deleteSelection.getNodes().forEach((node) => {
-            if ($isUploadNode(node)) {
-              node.remove()
-            }
-          })
-        })
-      }
-      return false
-    },
-    [editor, isSelected],
-  )
-
-  useEffect(() => {
-    return mergeRegister(
-      editor.registerCommand<MouseEvent>(
-        CLICK_COMMAND,
-        (event: MouseEvent) => {
-          // Check if uploadRef.target or anything WITHIN uploadRef.target was clicked
-          if (
-            event.target === uploadRef.current ||
-            uploadRef.current?.contains(event.target as Node)
-          ) {
-            if (event.shiftKey) {
-              setSelected(!isSelected)
-            } else {
-              if (!isSelected) {
-                clearSelection()
-                setSelected(true)
-              }
-            }
-            return true
-          }
-
-          return false
-        },
-        COMMAND_PRIORITY_LOW,
-      ),
-
-      editor.registerCommand(KEY_DELETE_COMMAND, $onDelete, COMMAND_PRIORITY_LOW),
-      editor.registerCommand(KEY_BACKSPACE_COMMAND, $onDelete, COMMAND_PRIORITY_LOW),
-    )
-  }, [clearSelection, editor, isSelected, nodeKey, $onDelete, setSelected])
-
   const hasExtraFields = (
     editorConfig?.resolvedFeatureMap?.get('upload')
       ?.sanitizedClientFeatureProps as BaseClientFeatureProps<UploadFeaturePropsClient>
@@ -200,11 +139,7 @@ const Component: React.FC<ElementProps> = (props) => {
   )
 
   return (
-    <div
-      className={[baseClass, isSelected && `${baseClass}--selected`].filter(Boolean).join(' ')}
-      contentEditable={false}
-      ref={uploadRef}
-    >
+    <div className={baseClass} contentEditable={false} ref={uploadRef}>
       <div className={`${baseClass}__card`}>
         <div className={`${baseClass}__topRow`}>
           {/* TODO: migrate to use @payloadcms/ui/elements/Thumbnail component */}

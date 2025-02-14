@@ -1,8 +1,8 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
-import type { ImportMap, SanitizedConfig, ServerFunctionClient } from 'payload'
+import type { ImportMap, LanguageOptions, SanitizedConfig, ServerFunctionClient } from 'payload'
 
 import { rtlLanguages } from '@payloadcms/translations'
-import { RootProvider } from '@payloadcms/ui'
+import { ProgressBar, RootProvider } from '@payloadcms/ui'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { headers as getHeaders, cookies as nextCookies } from 'next/headers.js'
 import { getPayload, getRequestLanguage, parseCookies } from 'payload'
@@ -60,19 +60,18 @@ export const RootLayout = async ({
     ? 'RTL'
     : 'LTR'
 
-  const languageOptions = Object.entries(config.i18n.supportedLanguages || {}).reduce(
-    (acc, [language, languageConfig]) => {
-      if (Object.keys(config.i18n.supportedLanguages).includes(language)) {
-        acc.push({
-          label: languageConfig.translations.general.thisLanguage,
-          value: language,
-        })
-      }
+  const languageOptions: LanguageOptions = Object.entries(
+    config.i18n.supportedLanguages || {},
+  ).reduce((acc, [language, languageConfig]) => {
+    if (Object.keys(config.i18n.supportedLanguages).includes(language)) {
+      acc.push({
+        label: languageConfig.translations.general.thisLanguage,
+        value: language,
+      })
+    }
 
-      return acc
-    },
-    [],
-  )
+    return acc
+  }, [])
 
   async function switchLanguageServerAction(lang: string): Promise<void> {
     'use server'
@@ -91,6 +90,20 @@ export const RootLayout = async ({
     i18n: req.i18n,
     importMap,
   })
+
+  if (
+    clientConfig.localization &&
+    config.localization &&
+    typeof config.localization.filterAvailableLocales === 'function'
+  ) {
+    clientConfig.localization.locales = (
+      await config.localization.filterAvailableLocales({
+        locales: config.localization.locales,
+        req,
+      })
+    ).map(({ toString, ...rest }) => rest)
+    clientConfig.localization.localeCodes = config.localization.locales.map(({ code }) => code)
+  }
 
   const locale = await getRequestLocale({
     req,
@@ -122,6 +135,7 @@ export const RootLayout = async ({
           translations={req.i18n.translations}
           user={req.user}
         >
+          <ProgressBar />
           {Array.isArray(config.admin?.components?.providers) &&
           config.admin?.components?.providers.length > 0 ? (
             <NestProviders

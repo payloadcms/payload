@@ -1,4 +1,4 @@
-import type { Field, PayloadRequest, PopulateType } from 'payload'
+import type { Field, FlattenedBlock, PayloadRequest, PopulateType } from 'payload'
 
 import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType, tabHasName } from 'payload/shared'
 
@@ -172,7 +172,11 @@ export const recurseNestedFields = ({
     } else if (Array.isArray(data[field.name])) {
       if (field.type === 'blocks') {
         data[field.name].forEach((row, i) => {
-          const block = field.blocks.find(({ slug }) => slug === row?.blockType)
+          const block =
+            req.payload.blocks[row?.blockType] ??
+            ((field.blockReferences ?? field.blocks).find(
+              (block) => typeof block !== 'string' && block.slug === row?.blockType,
+            ) as FlattenedBlock | undefined)
           if (block) {
             recurseNestedFields({
               currentDepth,

@@ -4,7 +4,6 @@ import type { AdminViewProps } from 'payload'
 import { HydrateAuthProvider, SetStepNav } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
-import LinkImport from 'next/link.js'
 import { getFolderData } from 'payload/shared'
 import React, { Fragment } from 'react'
 
@@ -12,8 +11,6 @@ import { DefaultDashboard } from './Default/index.js'
 import { FolderDashboard } from './Folders/index.js'
 
 export { generateDashboardMetadata } from './meta.js'
-
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export const Dashboard: React.FC<AdminViewProps> = async ({
   initPageResult,
@@ -120,7 +117,6 @@ export const Dashboard: React.FC<AdminViewProps> = async ({
           breadcrumbs,
           folderID: breadcrumbs[breadcrumbs.length - 1]?.id,
           items,
-          Link,
           locale,
         },
         Component: config.admin?.components?.views?.dashboard?.Component,
@@ -130,7 +126,6 @@ export const Dashboard: React.FC<AdminViewProps> = async ({
         serverProps: {
           globalData,
           i18n,
-          Link,
           locale,
           navGroups,
           params,

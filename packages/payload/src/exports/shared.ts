@@ -12,6 +12,8 @@ export { defaults as collectionDefaults } from '../collections/config/defaults.j
 
 export { serverProps } from '../config/types.js'
 
+export { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones.js'
+
 export {
   fieldAffectsData,
   fieldHasMaxDepth,
@@ -49,7 +51,7 @@ export { getFolderData } from '../folders/utils/getFolderData.js'
 export { getFolderDocuments } from '../folders/utils/getFolderDocuments.js'
 export { getFolderSubfolders } from '../folders/utils/getFolderSubfolders.js'
 
-export { validOperators } from '../types/constants.js'
+export { validOperators, validOperatorSet } from '../types/constants.js'
 
 export { formatFilesize } from '../uploads/formatFilesize.js'
 

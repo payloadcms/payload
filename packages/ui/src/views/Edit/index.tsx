@@ -1,12 +1,6 @@
 'use client'
 
-import type {
-  ClientCollectionConfig,
-  ClientGlobalConfig,
-  ClientSideEditViewProps,
-  ClientUser,
-  FormState,
-} from 'payload'
+import type { ClientSideEditViewProps, ClientUser, FormState } from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -29,6 +23,7 @@ import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { OperationProvider } from '../../providers/Operation/index.js'
+import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
@@ -110,8 +105,8 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
     getEntityConfig,
   } = useConfig()
 
-  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
-  const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
+  const collectionConfig = getEntityConfig({ collectionSlug })
+  const globalConfig = getEntityConfig({ globalSlug })
 
   const depth = useEditDepth()
 
@@ -120,6 +115,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   const { reportUpdate } = useDocumentEvents()
   const { resetUploadEdits } = useUploadEdits()
   const { getFormState } = useServerFunctions()
+  const { startRouteTransition } = useRouteTransition()
 
   const abortOnChangeRef = useRef<AbortController>(null)
   const abortOnSaveRef = useRef<AbortController>(null)
@@ -265,7 +261,8 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
           adminRoute,
           path: `/collections/${collectionSlug}/${document?.id}${locale ? `?locale=${locale}` : ''}`,
         })
-        router.push(redirectRoute)
+
+        startRouteTransition(() => router.push(redirectRoute))
       } else {
         resetUploadEdits()
       }
@@ -287,6 +284,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
           returnLockStatus: false,
           schemaPath: schemaPathSegments.join('.'),
           signal: controller.signal,
+          skipValidation: true,
         })
 
         // Unlock the document after save
@@ -331,7 +329,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
   )
 
   const onChange: FormProps['onChange'][0] = useCallback(
-    async ({ formState: prevFormState }) => {
+    async ({ formState: prevFormState, submitted }) => {
       const controller = handleAbortRef(abortOnChangeRef)
 
       const currentTime = Date.now()
@@ -353,6 +351,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
         formState: prevFormState,
         globalSlug,
         operation,
+        skipValidation: !submitted,
         // Performance optimization: Setting it to false ensure that only fields that have explicit requireRender set in the form state will be rendered (e.g. new array rows).
         // We only want to render ALL fields on initial render, not in onChange.
         renderAllFields: false,
@@ -451,6 +450,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
           disabled={isReadOnlyForIncomingUser || isInitializing || !hasSavePermission}
           disableValidationOnSubmit={!validateBeforeSubmit}
           initialState={!isInitializing && initialState}
+          isDocumentForm={true}
           isInitializing={isInitializing}
           method={id ? 'PATCH' : 'POST'}
           onChange={[onChange]}

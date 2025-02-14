@@ -6,7 +6,7 @@ desc: The Blocks Field is a great layout build and can be used to construct any 
 keywords: blocks, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-The Blocks Field is **incredibly powerful** storing an array of objects based on the fields that your define, where each item in the array is a "block" with its own unique schema.
+The Blocks Field is **incredibly powerful**, storing an array of objects based on the fields that you define, where each item in the array is a "block" with its own unique schema.
 
 Blocks are a great way to create a flexible content model that can be used to build a wide variety of content types, including:
 
@@ -64,7 +64,7 @@ _* An asterisk denotes that a property is required._
 
 ## Admin Options
 
-The customize the appearance and behavior of the Blocks Field in the [Admin Panel](../admin/overview), you can use the `admin` option:
+To customize the appearance and behavior of the Blocks Field in the [Admin Panel](../admin/overview), you can use the `admin` option:
 
 ```ts
 import type { Field } from 'payload'
@@ -77,7 +77,7 @@ export const MyBlocksField: Field = {
 }
 ```
 
-The Blocks Field inherits all of the default options from the base [Field Admin Config](../admin/fields#admin-options), plus the following additional options:
+The Blocks Field inherits all of the default options from the base [Field Admin Config](./overview#admin-options), plus the following additional options:
 
 | Option              | Description                        |
 | ------------------- | ---------------------------------- |
@@ -208,6 +208,156 @@ export const ExampleCollection: CollectionConfig = {
   ],
 }
 ```
+
+## Custom Components
+
+### Field
+
+#### Server Component
+
+```tsx
+import type React from 'react'
+import { BlocksField } from '@payloadcms/ui'
+import type { BlocksFieldServerComponent } from 'payload'
+
+export const CustomBlocksFieldServer: BlocksFieldServerComponent = ({
+  clientField,
+  path,
+  schemaPath,
+  permissions
+}) => {
+  return (
+    <BlocksField field={clientField}
+      path={path}
+      schemaPath={schemaPath}
+      permissions={permissions}
+    />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { BlocksField } from '@payloadcms/ui'
+import type { BlocksFieldClientComponent } from 'payload'
+
+export const CustomBlocksFieldClient: BlocksFieldClientComponent = (props) => {
+  return <BlocksField {...props} />
+}
+```
+
+### Label
+
+#### Server Component
+
+```tsx
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { BlocksFieldLabelServerComponent } from 'payload'
+
+export const CustomBlocksFieldLabelServer: BlocksFieldLabelServerComponent = ({
+  clientField,
+  path,
+}) => {
+  return (
+    <FieldLabel
+      label={clientField?.label || clientField?.name}
+      path={path}
+      required={clientField?.required}
+    />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { BlocksFieldLabelClientComponent } from 'payload'
+
+export const CustomBlocksFieldLabelClient: BlocksFieldLabelClientComponent = ({
+  label,
+  path,
+  required,
+}) => {
+  return (
+    <FieldLabel
+      label={field?.label || field?.name}
+      path={path}
+      required={field?.required}
+    />
+  )
+}
+```
+
+## Block References
+
+If you have multiple blocks used in multiple places, your Payload Config can grow in size, potentially sending more data to the client and requiring more processing on the server. However, you can optimize performance by defining each block **once** in your Payload Config and then referencing its slug wherever it's used instead of passing the entire block config.
+
+To do this, define the block in the `blocks` array of the Payload Config. Then, in the Blocks Field, pass the block slug to the `blockReferences` array - leaving the `blocks` array empty for compatibility reasons.
+
+```ts
+import { buildConfig } from 'payload'
+import { lexicalEditor, BlocksFeature } from '@payloadcms/richtext-lexical'
+
+// Payload Config
+const config = buildConfig({
+  // Define the block once
+  blocks: [
+    {
+      slug: 'TextBlock',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
+  ],
+  collections: [
+    {
+      slug: 'collection1',
+      fields: [
+        {
+          name: 'content',
+          type: 'blocks',
+          // Reference the block by slug
+          blockReferences: ['TextBlock'],
+          blocks: [], // Required to be empty, for compatibility reasons
+        },
+      ],
+    },
+     {
+      slug: 'collection2',
+      fields: [
+        {
+          name: 'editor',
+          type: 'richText',
+          editor: lexicalEditor({
+            BlocksFeature({
+              // Same reference can be reused anywhere, even in the lexical editor, without incurred performance hit
+              blocks: ['TextBlock'],
+            })
+          })
+        },
+      ],
+    },
+  ],
+})
+```
+
+<Banner type="warning">
+  **Reminder:**
+  Blocks referenced in the `blockReferences` array are treated as isolated from the collection / global config. This has the following implications:
+
+  1. The block config cannot be modified or extended in the collection config. It will be identical everywhere it's referenced.
+  2. Access control for blocks referenced in the `blockReferences` are run only once - data from the collection will not be available in the block's access control.
+</Banner>
 
 ## TypeScript
 

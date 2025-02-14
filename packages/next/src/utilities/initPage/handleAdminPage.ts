@@ -44,7 +44,7 @@ export function getRouteInfo({
     let idType = defaultIDType
 
     if (collectionSlug) {
-      collectionConfig = config.collections.find((collection) => collection.slug === collectionSlug)
+      collectionConfig = payload.collections?.[collectionSlug]?.config
     }
 
     if (globalSlug) {

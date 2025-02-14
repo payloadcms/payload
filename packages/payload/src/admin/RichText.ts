@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { GenericLanguages, I18n } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 
@@ -116,7 +117,7 @@ export type BaseRichTextHookArgs<
   field: FieldAffectingData
   /** The global which the field belongs to. If the field belongs to a collection, this will be null. */
   global: null | SanitizedGlobalConfig
-
+  indexPath: number[]
   /** The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. */
   originalDoc?: TData
   /**

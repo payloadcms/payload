@@ -115,7 +115,7 @@ export const renderDocumentSlots: (args: {
     }
   }
 
-  if (collectionConfig.upload && collectionConfig?.admin?.components?.edit?.Upload) {
+  if (collectionConfig?.upload && collectionConfig?.admin?.components?.edit?.Upload) {
     components.Upload = RenderServerComponent({
       Component: collectionConfig.admin.components.edit.Upload,
       importMap: req.payload.importMap,

@@ -34,11 +34,6 @@ export const buildCollectionSchema = (
     schema.index(indexDefinition, { unique: true })
   }
 
-  if (payload.config.indexSortableFields && collection.timestamps !== false) {
-    schema.index({ updatedAt: 1 })
-    schema.index({ createdAt: 1 })
-  }
-
   schema
     .plugin<any, PaginateOptions>(paginate, { useEstimatedCount: true })
     .plugin(getBuildQueryPlugin({ collectionSlug: collection.slug }))

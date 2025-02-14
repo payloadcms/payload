@@ -6,12 +6,22 @@ export const Posts: CollectionConfig = {
   slug: postsSlug,
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'category', 'updatedAt', 'createdAt'],
+    defaultColumns: ['title', 'localizedText', 'category', 'updatedAt', 'createdAt'],
   },
   fields: [
     {
       name: 'title',
       type: 'text',
+    },
+    {
+      name: 'localizedText',
+      type: 'text',
+      localized: true,
+    },
+    {
+      name: 'author',
+      type: 'relationship',
+      relationTo: 'users',
     },
     {
       name: 'isFiltered',
@@ -96,6 +106,18 @@ export const Posts: CollectionConfig = {
     {
       name: 'array',
       type: 'array',
+      fields: [
+        {
+          name: 'category',
+          type: 'relationship',
+          relationTo: categoriesSlug,
+        },
+      ],
+    },
+    {
+      name: 'localizedArray',
+      type: 'array',
+      localized: true,
       fields: [
         {
           name: 'category',

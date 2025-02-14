@@ -37,9 +37,16 @@ export type FormProps = {
     errorToast: (value: string) => void,
   ) => void
   initialState?: FormState
+  /**
+   * Determines if this Form is the main, top-level Form of a document. If set to true, the
+   * Form's children will be wrapped in a DocumentFormContext, which lets you access this document
+   * Form's data and fields from any child component - even if that child component is wrapped in a child
+   * Form (e.g. a lexical block).
+   */
+  isDocumentForm?: boolean
   isInitializing?: boolean
   log?: boolean
-  onChange?: ((args: { formState: FormState }) => Promise<FormState>)[]
+  onChange?: ((args: { formState: FormState; submitted?: boolean }) => Promise<FormState>)[]
   onSubmit?: (fields: FormState, data: Data) => void
   onSuccess?: (json: unknown) => Promise<FormState | void> | void
   redirect?: string
@@ -91,6 +98,11 @@ export type Reset = (data: unknown) => Promise<void>
 
 export type REPLACE_STATE = {
   optimize?: boolean
+  /**
+   * If `sanitize` is true, default values will be set for form field properties that are not present in the incoming state.
+   * For example, `valid` will be set to true if it is not present in the incoming state.
+   */
+  sanitize?: boolean
   state: FormState
   type: 'REPLACE_STATE'
 }

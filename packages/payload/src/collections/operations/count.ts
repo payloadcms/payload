@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { AccessResult } from '../../config/types.js'
 import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'

@@ -1,14 +1,15 @@
+// @ts-strict-ignore
 import type { AcceptedLanguages } from '@payloadcms/translations'
 
 import { en } from '@payloadcms/translations/languages/en'
 import { deepMergeSimple } from '@payloadcms/translations/utilities'
 
-import type { CollectionSlug, GlobalSlug } from '../index.js'
 import type {
   Config,
   LocalizationConfigWithLabels,
   LocalizationConfigWithNoLabels,
   SanitizedConfig,
+  Timezone,
 } from './types.js'
 
 import { defaultUserCollection } from '../auth/defaultUser.js'
@@ -16,11 +17,20 @@ import { authRootEndpoints } from '../auth/endpoints/index.js'
 import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
+import { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones.js'
 import { addFolderCollections } from '../folders/addFolderCollections.js'
 import { sanitizeGlobal } from '../globals/config/sanitize.js'
+import {
+  baseBlockFields,
+  type CollectionSlug,
+  formatLabels,
+  type GlobalSlug,
+  sanitizeFields,
+} from '../index.js'
 import { getLockedDocumentsCollection } from '../lockedDocuments/lockedDocumentsCollection.js'
 import getPreferencesCollection from '../preferences/preferencesCollection.js'
 import { getDefaultJobsCollection } from '../queues/config/jobsCollection.js'
+import { flattenBlock } from '../utilities/flattenAllFields.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
 import { defaults } from './defaults.js'
 
@@ -56,6 +66,32 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
       `${sanitizedConfig.admin.user} is not a valid admin user collection`,
     )
   }
+
+  if (sanitizedConfig?.admin?.timezones) {
+    if (typeof sanitizedConfig?.admin?.timezones?.supportedTimezones === 'function') {
+      sanitizedConfig.admin.timezones.supportedTimezones =
+        sanitizedConfig.admin.timezones.supportedTimezones({ defaultTimezones })
+    }
+
+    if (!sanitizedConfig?.admin?.timezones?.supportedTimezones) {
+      sanitizedConfig.admin.timezones.supportedTimezones = defaultTimezones
+    }
+  } else {
+    sanitizedConfig.admin.timezones = {
+      supportedTimezones: defaultTimezones,
+    }
+  }
+  // Timezones supported by the Intl API
+  const _internalSupportedTimezones = Intl.supportedValuesOf('timeZone')
+
+  // We're casting here because it's already been sanitised above but TS still thinks it could be a function
+  ;(sanitizedConfig.admin.timezones.supportedTimezones as Timezone[]).forEach((timezone) => {
+    if (!_internalSupportedTimezones.includes(timezone.value)) {
+      throw new InvalidConfiguration(
+        `Timezone ${timezone.value} is not supported by the current runtime via the Intl API.`,
+      )
+    }
+  })
 
   return sanitizedConfig as unknown as Partial<SanitizedConfig>
 }
@@ -191,6 +227,47 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   addFolderCollections(configWithDefaults)
 
+  const validRelationships = [
+    ...(config.collections.map((c) => c.slug) ?? []),
+    'payload-jobs',
+    'payload-locked-documents',
+    'payload-preferences',
+  ]
+
+  /**
+   * Blocks sanitization needs to happen before collections, as collection/global join field sanitization needs config.blocks
+   * to be populated with the sanitized blocks
+   */
+  config.blocks = []
+  if (incomingConfig.blocks?.length) {
+    for (const block of incomingConfig.blocks) {
+      const sanitizedBlock = block
+
+      if (sanitizedBlock._sanitized === true) {
+        continue
+      }
+      sanitizedBlock._sanitized = true
+
+      sanitizedBlock.fields = sanitizedBlock.fields.concat(baseBlockFields)
+
+      sanitizedBlock.labels = !sanitizedBlock.labels
+        ? formatLabels(sanitizedBlock.slug)
+        : sanitizedBlock.labels
+      sanitizedBlock.fields = await sanitizeFields({
+        config: config as unknown as Config,
+        existingFieldNames: new Set(),
+        fields: sanitizedBlock.fields,
+        parentIsLocalized: false,
+        richTextSanitizationPromises,
+        validRelationships,
+      })
+
+      const flattenedSanitizedBlock = flattenBlock({ block })
+
+      config.blocks.push(flattenedSanitizedBlock)
+    }
+  }
+
   for (let i = 0; i < config.collections.length; i++) {
     if (collectionSlugs.has(config.collections[i].slug)) {
       throw new DuplicateCollection('slug', config.collections[i].slug)
@@ -208,6 +285,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       config as unknown as Config,
       config.collections[i],
       richTextSanitizationPromises,
+      validRelationships,
     )
   }
 
@@ -223,6 +301,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
         config as unknown as Config,
         config.globals[i],
         richTextSanitizationPromises,
+        validRelationships,
       )
     }
   }
@@ -259,6 +338,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       config as unknown as Config,
       defaultJobsCollection,
       richTextSanitizationPromises,
+      validRelationships,
     )
 
     configWithDefaults.collections.push(sanitizedJobsCollection)
@@ -269,6 +349,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       config as unknown as Config,
       getLockedDocumentsCollection(config as unknown as Config),
       richTextSanitizationPromises,
+      validRelationships,
     ),
   )
   configWithDefaults.collections.push(
@@ -276,6 +357,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       config as unknown as Config,
       getPreferencesCollection(config as unknown as Config),
       richTextSanitizationPromises,
+      validRelationships,
     ),
   )
   configWithDefaults.collections.push(
@@ -283,6 +365,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       config as unknown as Config,
       migrationsCollection,
       richTextSanitizationPromises,
+      validRelationships,
     ),
   )
 

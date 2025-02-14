@@ -15,6 +15,7 @@ import { formatFilesize, isNumber } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { renderListViewSlots } from './renderListViewSlots.js'
+import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
 
 export { generateListMetadata } from './meta.js'
 
@@ -68,8 +69,6 @@ export const renderListView = async (
   }
 
   const query = queryFromArgs || queryFromReq
-
-  const preferenceKey = `${collectionSlug}-list`
 
   const listPreferences = await upsertPreferences<ListPreferences>({
     key: `${collectionSlug}-list`,
@@ -158,6 +157,11 @@ export const renderListView = async (
 
     const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
 
+    const resolvedFilterOptions = await resolveAllFilterOptions({
+      collectionConfig,
+      req,
+    })
+
     const staticDescription =
       typeof collectionConfig.admin.description === 'function'
         ? collectionConfig.admin.description({ t: i18n.t })
@@ -201,6 +205,7 @@ export const renderListView = async (
       enableRowSelections,
       listPreferences,
       renderedFilters,
+      resolvedFilterOptions,
       Table,
     }
 
@@ -211,12 +216,10 @@ export const renderListView = async (
         <Fragment>
           <HydrateAuthProvider permissions={permissions} />
           <ListQueryProvider
-            collectionSlug={collectionSlug}
             data={data}
             defaultLimit={limit}
             defaultSort={sort}
             modifySearchParams={!isInDrawer}
-            preferenceKey={preferenceKey}
           >
             {RenderServerComponent({
               clientProps,

@@ -49,15 +49,15 @@ export type SerializedUploadNode = {
 } & Spread<UploadData, SerializedDecoratorBlockNode>
 
 export class UploadNode extends UploadServerNode {
-  static clone(node: UploadServerNode): UploadServerNode {
+  static override clone(node: UploadServerNode): UploadServerNode {
     return super.clone(node)
   }
 
-  static getType(): string {
+  static override getType(): string {
     return super.getType()
   }
 
-  static importDOM(): DOMConversionMap<HTMLImageElement> {
+  static override importDOM(): DOMConversionMap<HTMLImageElement> {
     return {
       img: (node) => ({
         conversion: $convertUploadElement,
@@ -66,7 +66,7 @@ export class UploadNode extends UploadServerNode {
     }
   }
 
-  static importJSON(serializedNode: SerializedUploadNode): UploadNode {
+  static override importJSON(serializedNode: SerializedUploadNode): UploadNode {
     if (serializedNode.version === 1 && (serializedNode?.value as unknown as { id: string })?.id) {
       serializedNode.value = (serializedNode.value as unknown as { id: string }).id
     }
@@ -88,11 +88,11 @@ export class UploadNode extends UploadServerNode {
     return node
   }
 
-  decorate(): JSX.Element {
+  override decorate(): JSX.Element {
     return <RawUploadComponent data={this.__data} nodeKey={this.getKey()} />
   }
 
-  exportJSON(): SerializedUploadNode {
+  override exportJSON(): SerializedUploadNode {
     return super.exportJSON()
   }
 }

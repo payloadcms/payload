@@ -29,8 +29,21 @@ export default buildConfigWithDefaults({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    user: 'users',
   },
   collections: [
+    {
+      slug: 'users',
+      auth: true,
+      fields: [
+        {
+          type: 'join',
+          collection: 'posts',
+          on: 'author',
+          name: 'posts',
+        },
+      ],
+    },
     Posts,
     Categories,
     HiddenPosts,
@@ -209,7 +222,10 @@ export default buildConfigWithDefaults({
     },
   ],
   localization: {
-    locales: ['en', 'es'],
+    locales: [
+      { label: '(en)', code: 'en' },
+      { label: '(es)', code: 'es' },
+    ],
     defaultLocale: 'en',
   },
   onInit: async (payload) => {
