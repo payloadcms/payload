@@ -196,7 +196,9 @@ describe('Block fields', () => {
     // ensure the block was appended to the rows
     const firstRow = page.locator('#field-i18nBlocks .blocks-field__row').first()
     await expect(firstRow).toBeVisible()
-    await expect(firstRow.locator('.blocks-field__block-pill-text')).toContainText('Text en')
+    await expect(firstRow.locator('.blocks-field__block-pill-textInI18nBlock')).toContainText(
+      'Text en',
+    )
   })
 
   test('should render custom block row label', async () => {

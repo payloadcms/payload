@@ -75,7 +75,7 @@ import { generateImportMap, type ImportMap } from './bin/generateImportMap/index
 import { checkPayloadDependencies } from './checkPayloadDependencies.js'
 import localOperations from './collections/operations/local/index.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
-import { fieldAffectsData } from './fields/config/types.js'
+import { fieldAffectsData, type FlattenedBlock } from './fields/config/types.js'
 import localGlobalOperations from './globals/operations/local/index.js'
 import { getJobsLocalAPI } from './queues/localAPI.js'
 import { isNextBuild } from './utilities/isNextBuild.js'
@@ -106,6 +106,9 @@ export interface GeneratedTypes {
     }
   }
 
+  blocksUntyped: {
+    [slug: string]: JsonObject
+  }
   collectionsJoinsUntyped: {
     [slug: string]: {
       [schemaPath: string]: CollectionSlug
@@ -151,6 +154,11 @@ type ResolveCollectionType<T> = 'collections' extends keyof T
   : // @ts-expect-error
     T['collectionsUntyped']
 
+type ResolveBlockType<T> = 'blocks' extends keyof T
+  ? T['blocks']
+  : // @ts-expect-error
+    T['blocksUntyped']
+
 type ResolveCollectionSelectType<T> = 'collectionsSelect' extends keyof T
   ? T['collectionsSelect']
   : // @ts-expect-error
@@ -173,6 +181,8 @@ type ResolveGlobalSelectType<T> = 'globalsSelect' extends keyof T
 
 // Applying helper types to GeneratedTypes
 export type TypedCollection = ResolveCollectionType<GeneratedTypes>
+
+export type TypedBlock = ResolveBlockType<GeneratedTypes>
 
 export type TypedUploadCollection = NonNever<{
   [K in keyof TypedCollection]:
@@ -197,6 +207,8 @@ export type StringKeyOf<T> = Extract<keyof T, string>
 
 // Define the types for slugs using the appropriate collections and globals
 export type CollectionSlug = StringKeyOf<TypedCollection>
+
+export type BlockSlug = StringKeyOf<TypedBlock>
 
 export type UploadCollectionSlug = StringKeyOf<TypedUploadCollection>
 
@@ -246,6 +258,8 @@ export class BasePayload {
   }
 
   authStrategies: AuthStrategy[]
+
+  blocks: Record<BlockSlug, FlattenedBlock> = {}
 
   collections: Record<CollectionSlug, Collection> = {}
 
@@ -602,13 +616,18 @@ export class BasePayload {
         }
       }
 
-      traverseFields({ callback: findCustomID, fields: collection.fields })
+      traverseFields({ callback: findCustomID, config: this.config, fields: collection.fields })
 
       this.collections[collection.slug] = {
         config: collection,
         customIDType,
       }
     }
+
+    this.blocks = this.config.blocks.reduce((blocks, block) => {
+      blocks[block.slug] = block
+      return blocks
+    }, {})
 
     // Generate types on startup
     if (process.env.NODE_ENV !== 'production' && this.config.typescript.autoGenerate !== false) {
@@ -809,6 +828,11 @@ export const reload = async (
       customIDType: payload.collections[collection.slug]?.customIDType,
     }
     return collections
+  }, {})
+
+  payload.blocks = config.blocks.reduce((blocks, block) => {
+    blocks[block.slug] = block
+    return blocks
   }, {})
 
   payload.globals = {
@@ -1044,6 +1068,7 @@ export {
   createClientConfig,
   serverOnlyAdminConfigProperties,
   serverOnlyConfigProperties,
+  type UnsanitizedClientConfig,
 } from './config/client.js'
 export { defaults } from './config/defaults.js'
 

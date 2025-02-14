@@ -1,6 +1,7 @@
 import type { I18n } from '@payloadcms/translations'
 
 import {
+  type ClientBlock,
   type ClientConfig,
   type ClientField,
   type ClientFieldSchemaMap,
@@ -60,7 +61,14 @@ export const traverseFields = ({
         break
 
       case 'blocks':
-        field.blocks.map((block) => {
+        ;(field.blockReferences ?? field.blocks).map((_block) => {
+          const block =
+            typeof _block === 'string'
+              ? config.blocksMap
+                ? config.blocksMap[_block]
+                : config.blocks.find((block) => typeof block !== 'string' && block.slug === _block)
+              : _block
+
           const blockSchemaPath = `${schemaPath}.${block.slug}`
 
           clientSchemaMap.set(blockSchemaPath, block)

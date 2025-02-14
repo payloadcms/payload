@@ -10,7 +10,7 @@ import type {
   SelectMode,
   SelectType,
 } from '../../../types/index.js'
-import type { Field, TabAsField } from '../../config/types.js'
+import type { Block, Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
@@ -453,9 +453,13 @@ export const promise = async ({
 
       if (Array.isArray(rows)) {
         rows.forEach((row, rowIndex) => {
-          const block = field.blocks.find(
-            (blockType) => blockType.slug === (row as JsonObject).blockType,
-          )
+          const blockTypeToMatch = (row as JsonObject).blockType
+
+          const block: Block | undefined =
+            req.payload.blocks[blockTypeToMatch] ??
+            ((field.blockReferences ?? field.blocks).find(
+              (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
+            ) as Block | undefined)
 
           let blockSelectMode = selectMode
 
@@ -525,9 +529,13 @@ export const promise = async ({
         Object.values(rows).forEach((localeRows) => {
           if (Array.isArray(localeRows)) {
             localeRows.forEach((row, rowIndex) => {
-              const block = field.blocks.find(
-                (blockType) => blockType.slug === (row as JsonObject).blockType,
-              )
+              const blockTypeToMatch = row.blockType
+
+              const block: Block | undefined =
+                req.payload.blocks[blockTypeToMatch] ??
+                ((field.blockReferences ?? field.blocks).find(
+                  (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
+                ) as Block | undefined)
 
               if (block) {
                 traverseFields({
