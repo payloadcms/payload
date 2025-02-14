@@ -236,6 +236,7 @@ export interface User {
 export interface Post {
   id: string;
   title?: string | null;
+  localizedText?: string | null;
   author?: (string | null) | User;
   /**
    * Hides posts for the `filtered` join field in categories
@@ -866,6 +867,7 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
+  localizedText?: T;
   author?: T;
   isFiltered?: T;
   restrictedField?: T;

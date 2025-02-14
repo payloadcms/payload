@@ -336,7 +336,10 @@ export default buildConfigWithDefaults({
     },
   ],
   localization: {
-    locales: ['en', 'es'],
+    locales: [
+      { label: '(en)', code: 'en' },
+      { label: '(es)', code: 'es' },
+    ],
     defaultLocale: 'en',
   },
   onInit: async (payload) => {
