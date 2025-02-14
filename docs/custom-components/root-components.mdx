@@ -6,11 +6,11 @@ desc:
 keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Root Components are those that affect the [Admin Panel](../admin/overview) generally, such as the logo or the main nav. You can swap out these components with your own [Custom Components](./overview) to create a completely custom look and feel.
+Root Components are those that affect the [Admin Panel](../admin/overview) at a high-level, such as the logo or the main nav. You can swap out these components with your own [Custom Components](./overview) to create a completely custom look and feel.
 
 When combined with [Custom CSS](../admin/customizing-css), you can create a truly unique experience for your users, such as white-labeling the Admin Panel to match your brand.
 
-To override Root Components, use the `admin.components` property in your [Payload Config](../configuration/overview):
+To override Root Components, use the `admin.components` property at the root of your [Payload Config](../configuration/overview):
 
 ```ts
 import { buildConfig } from 'payload'
@@ -33,18 +33,18 @@ The following options are available:
 
 | Path                  | Description                                                                                                                                                                                                         |
 |-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `actions`         | An array of Custom Components to be rendered _within_ the header of the Admin Panel, providing additional interactivity and functionality.                                                                  |
-| `afterDashboard`  | An array of Custom Components to inject into the built-in Dashboard, _after_ the default dashboard contents.                                                                                                        |
-| `afterLogin`      | An array of Custom Components to inject into the built-in Login, _after_ the default login form.                                                                                                                    |
-| `afterNavLinks`   | An array of Custom Components to inject into the built-in Nav, _after_ the links.                                                                                                                                   |
-| `beforeDashboard` | An array of Custom Components to inject into the built-in Dashboard, _before_ the default dashboard contents.                                                                                                       |
-| `beforeLogin`     | An array of Custom Components to inject into the built-in Login, _before_ the default login form.                                                                                                                   |
-| `beforeNavLinks`  | An array of Custom Components to inject into the built-in Nav, _before_ the links themselves.                                                                                                                       |
-| `graphics.Icon`   | The simplified logo used in contexts like the the `Nav` component.                                                                                                                                                  |
-| `graphics.Logo`   | The full logo used in contexts like the `Login` view.                                                                                                                                                               |
-| `header`          | An array of Custom Components to be injected above the Payload header.                                                   |
-| `logout.Button`   | The button displayed in the sidebar that logs the user out.                                                                                                                                                         |
-| `Nav`             | Contains the sidebar / mobile menu in its entirety.                                                                                                                                                                 |
+| `actions`         | An array of Custom Components to be rendered _within_ the header of the Admin Panel, providing additional interactivity and functionality. [More details](#actions).                                                |
+| `afterDashboard`  | An array of Custom Components to inject into the built-in Dashboard, _after_ the default dashboard contents. [More details](#afterdashboard).                                                                        |
+| `afterLogin`      | An array of Custom Components to inject into the built-in Login, _after_ the default login form. [More details](#afterlogin).                                                                                       |
+| `afterNavLinks`   | An array of Custom Components to inject into the built-in Nav, _after_ the links. [More details](#afternavlinks).                                                                                                  |
+| `beforeDashboard` | An array of Custom Components to inject into the built-in Dashboard, _before_ the default dashboard contents. [More details](#beforedashboard).                                                                      |
+| `beforeLogin`     | An array of Custom Components to inject into the built-in Login, _before_ the default login form. [More details](#beforelogin).                                                                                     |
+| `beforeNavLinks`  | An array of Custom Components to inject into the built-in Nav, _before_ the links themselves. [More details](#beforenavlinks).                                                                                      |
+| `graphics.Icon`   | The simplified logo used in contexts like the the `Nav` component. [More details](#graphicsicon).                                                                                                                  |
+| `graphics.Logo`   | The full logo used in contexts like the `Login` view. [More details](#graphicslogo).                                                                                                                               |
+| `header`          | An array of Custom Components to be injected above the Payload header. [More details](#header).                                                                                                                    |
+| `logout.Button`   | The button displayed in the sidebar that logs the user out. [More details](#logoutbutton).                                                                                                                         |
+| `Nav`             | Contains the sidebar / mobile menu in its entirety. [More details](#nav).                                                                                                                                         |
 | `providers`       | Custom [React Context](https://react.dev/learn/scaling-up-with-reducer-and-context) providers that will wrap the entire Admin Panel. [More details](./custom-providers).                                       |
 | `views`           | Override or create new views within the Admin Panel. [More details](./custom-views).                                                                                                                                 |
 
@@ -57,7 +57,7 @@ _For details on how to build Custom Components, see [Building Custom Components]
 
 ### actions
 
-Actions are rendered within a dropdown in the header of the Admin Panel. Actions are typically used to display buttons that add additional interactivity and functionality, although these can be anything you'd like.
+Actions are rendered within the header of the Admin Panel. Actions are typically used to display buttons that add additional interactivity and functionality, although they can be anything you'd like.
 
 To add an action, use the `actions` property in your `admin.components` config:
 
@@ -92,7 +92,7 @@ export default function MyCustomAction() {
 
 <Banner type="success">
   **Note:**
-  You can also use set Actions on the [Edit View](./edit-view) and [List View](./list-view) in their respective configs.
+  You can also use add Actions to the [Edit View](./edit-view) and [List View](./list-view) in their respective configs.
 </Banner>
 
 ### beforeDashboard
@@ -163,7 +163,7 @@ export default function MyAfterDashboardComponent() {
 
 ### beforeLogin
 
-The `beforeLogin` property allows you to inject Custom Components into the built-in Login view, before the default login form.
+The `beforeLogin` property allows you to inject Custom Components into the built-in Login view, _before_ the default login form.
 
 To add `beforeLogin` components, use the `admin.components.beforeLogin` property in your Payload Config:
 
@@ -229,7 +229,7 @@ export default function MyAfterLoginComponent() {
 
 ### beforeNavLinks
 
-The `beforeNavLinks` property allows you to inject Custom Components into the built-in [Nav Component](#nav), _before_ the links themselves.
+The `beforeNavLinks` property allows you to inject Custom Components into the built-in [Nav Component](#nav), _before_ the nav links themselves.
 
 To add `beforeNavLinks` components, use the `admin.components.beforeNavLinks` property in your Payload Config:
 
@@ -262,7 +262,7 @@ export default function MyBeforeNavLinksComponent() {
 
 ### afterNavLinks
 
-Similar to `beforeNavLinks`, the `afterNavLinks` property allows you to inject Custom Components into the built-in Nav, _after_ the links themselves.
+Similar to `beforeNavLinks`, the `afterNavLinks` property allows you to inject Custom Components into the built-in Nav, _after_ the nav links.
 
 To add `afterNavLinks` components, use the `admin.components.afterNavLinks` property in your Payload Config:
 
@@ -295,7 +295,7 @@ export default function MyAfterNavLinksComponent() {
 
 ### Nav
 
-The `Nav` property contains the sidebar / mobile menu in its entirety. This is useful for completely replacing the built-in Nav with your own custom navigation.
+The `Nav` property contains the sidebar / mobile menu in its entirety. Use this property to completely replace the built-in Nav with your own custom navigation.
 
 To add a custom nav, use the `admin.components.Nav` property in your Payload Config:
 
@@ -402,11 +402,11 @@ export default function MyCustomLogo() {
 
 ### Header
 
-The `header` property allows you to inject Custom Components above the Payload header.
+The `Header` property allows you to inject Custom Components above the Payload header.
 
 Examples of a custom header components might include an announcements banner, a notifications bar, or anything else you'd like to display at the top of the Admin Panel in a prominent location.
 
-To add `header` components, use the `admin.components.header` property in your Payload Config:
+To add `Header` components, use the `admin.components.header` property in your Payload Config:
 
 ```ts
 import { buildConfig } from 'payload'
@@ -416,14 +416,14 @@ export default buildConfig({
   admin: {
     // highlight-start
     components: {
-      header: ['/path/to/your/component'],
+      Header: ['/path/to/your/component'],
     },
     // highlight-end
   },
 })
 ```
 
-Here is an example of a simple `header` component:
+Here is an example of a simple `Header` component:
 
 ```tsx
 export default function MyCustomHeader() {
@@ -437,7 +437,7 @@ export default function MyCustomHeader() {
 
 ### logout.Button
 
-The `logout.Button` property is the button displayed in the sidebar that logs the user out. This is typically a simple button that logs the user out when clicked.
+The `logout.Button` property is the button displayed in the sidebar that should log the user out when clicked.
 
 To add a custom logout button, use the `admin.components.logout.Button` property in your Payload Config:
 

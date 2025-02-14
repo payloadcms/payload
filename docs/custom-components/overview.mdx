@@ -1,6 +1,6 @@
 ---
 title: Swap in your own React components
-label: Custom Components
+label: Overview
 order: 10
 desc: Fully customize your Admin Panel by swapping in your own React components. Add fields, remove views, update routes and change functions to sculpt your perfect Dashboard.
 keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
@@ -12,7 +12,7 @@ All Custom Components in Payload are [React Server Components](https://react.dev
 
 <Banner type="success">
   **Note:**
-  Client Components continue to be fully supported. To use Client Components in your app, simply include the `use client` directive. Payload will automatically detect and remove all default, [non-serializable props](https://react.dev/reference/rsc/use-client#serializable-types) before rendering your component. [More details](#client-components).
+  Client Components continue to be fully supported. To use Client Components in your app, simply include the `'use client'` directive. Payload will automatically detect and remove all [non-serializable](https://react.dev/reference/rsc/use-client#serializable-types) default props before rendering your component. [More details](#client-components).
 </Banner>
 
 There are four main types of Custom Components in Payload:
@@ -22,11 +22,11 @@ There are four main types of Custom Components in Payload:
 - [Global Components](../configuration/globals#custom-components)
 - [Field Components](../fields/overview#custom-components)
 
-To swap in your own Custom Component, first consult the list of available components, determine the scope that corresponds to what you are trying to accomplish, then [author your React component(s)](#building-custom-components) accordingly.
+To swap in your own Custom Component, first determine the scope that corresponds to what you are trying to accomplish, consult the list of available components, then [author your React component(s)](#building-custom-components) accordingly.
 
 ## Defining Custom Components
 
-As Payload compiles the Admin Panel, it checks your config for Custom Components. When detected, Payload either replaces its own default component with yours, or if none exists by default, renders yours outright. While are many places where Custom Components are supported in Payload, each is defined in the same way using [Component Paths](#component-paths).
+As Payload compiles the Admin Panel, it checks your config for Custom Components. When detected, Payload either replaces its own default component with yours, or if none exists by default, renders yours outright. While there are many places where Custom Components are supported in Payload, each is defined in the same way using [Component Paths](#component-paths).
 
 To add a Custom Component, point to its file path in your Payload Config:
 
@@ -47,7 +47,7 @@ const config = buildConfig({
 
 <Banner type="success">
   **Note:**
-  All Custom Components can be either Server Components or Client Components, depending on the presence of the `use client` directive at the top of the file.
+  All Custom Components can be either Server Components or Client Components, depending on the presence of the `'use client'` directive at the top of the file.
 </Banner>
 
 ### Component Paths
@@ -110,12 +110,12 @@ The following options are available:
 
 | Property      | Description                                                                                                                   |
 |---------------|-------------------------------------------------------------------------------------------------------------------------------|
-| **`clientProps`** | Props to be passed to the Custom Components if it's a Client Component. [More details](#custom-props).                         |
-| **`exportName`**  | Instead of declaring named exports using `#` in the component path, you can also omit them from `path` and pass them in here. |
-| **`path`**        | File path to the Custom Component. Named exports can be appended to the end of the path, separated by a `#`.                         |
-| **`serverProps`** | Props to be passed to the Custom Component if it's a Server Component. [More details](#custom-props).                         |
+| `clientProps` | Props to be passed to the Custom Components if it's a Client Component. [More details](#custom-props).                         |
+| `exportName`  | Instead of declaring named exports using `#` in the component path, you can also omit them from `path` and pass them in here. |
+| `path`        | File path to the Custom Component. Named exports can be appended to the end of the path, separated by a `#`.                         |
+| `serverProps` | Props to be passed to the Custom Component if it's a Server Component. [More details](#custom-props).                         |
 
-For more details on how to build Custom Components, see [Building Custom Components](#building-custom-components).
+For details on how to build Custom Components, see [Building Custom Components](#building-custom-components).
 
 ### Import Map
 
@@ -185,12 +185,12 @@ Each Custom Component receives the following props by default:
 
 <Banner type="warning">
   **Reminder:**
-  All Custom Components also receive various other props that are specific component being rendered. See [Root Components](#root-components), [Collection Components](../configuration/collections#custom-components), [Global Components](../configuration/globals#custom-components), or [Field Components](../fields/overview#custom-components) for a complete list of all default props per component.
+  All Custom Components also receive various other props that are specific to the component being rendered. See [Root Components](#root-components), [Collection Components](../configuration/collections#custom-components), [Global Components](../configuration/globals#custom-components), or [Field Components](../fields/overview#custom-components) for a complete list of all default props per component.
 </Banner>
 
 ### Custom Props
 
-To pass in custom props from the config, you can use either the `clientProps` or `serverProps` properties depending on whether your prop is [serializable](https://react.dev/reference/rsc/use-client#serializable-types), and whether your component is a Server or Client Component.
+It is also possible to pass custom props to your Custom Components. To do this, you can use either the `clientProps` or `serverProps` properties depending on whether your prop is [serializable](https://react.dev/reference/rsc/use-client#serializable-types), and whether your component is a Server or Client Component.
 
 ```ts
 import { buildConfig } from 'payload'
@@ -212,20 +212,22 @@ const config = buildConfig({
 })
 ```
 
-```tsx
-'use client'
-import React from 'react'
+Here is how your component might receive this prop:
 
-export const MyComponent = ({ myCustomProp }: { myCustomProp: string }) => {
+```tsx
+import React from 'react'
+import { Link } from '@payloadcms/ui'
+
+export function MyComponent({ myCustomProp }: { myCustomProp: string }) {
   return (
-    <button>{myCustomProp}</button>
+    <Link href="/admin/logout">{myCustomProp}</Link>
   )
 }
 ```
 
 ### Client Components
 
-When [Building Custom Components](#building-custom-components), it's still possible to use client-side code such as `useState` or the `window` object. To do this, simply add the `use client` directive at the top of your file. Payload will automatically detect and remove all default, [non-serializable props](https://react.dev/reference/rsc/use-client#serializable-types) before rendering your component.
+All Custom Components in Payload are [React Server Components](https://react.dev/reference/rsc/server-components) by default, however, it is possible to use [Client Components](https://react.dev/reference/rsc/use-client) by simply adding the `'use client'` directive at the top of your file. Payload will automatically detect and remove all [non-serializable](https://react.dev/reference/rsc/use-client#serializable-types) default props before rendering your component.
 
 ```tsx
 'use client' // highlight-line
@@ -267,7 +269,7 @@ export default async function MyServerComponent({
 }
 ```
 
-But, the Payload Config is [non-serializable](https://react.dev/reference/rsc/use-client#serializable-types) by design. It is full of custom validation functions, React components, etc. This means that the Payload Config, in its entirety, cannot be passed directly to Client Components.
+But, the Payload Config is [non-serializable](https://react.dev/reference/rsc/use-client#serializable-types) by design. It is full of custom validation functions and more. This means that the Payload Config, in its entirety, cannot be passed directly to Client Components.
 
 For this reason, Payload creates a Client Config and passes it into the Config Provider. This is a serializable version of the Payload Config that can be accessed from any Client Component via the [`useConfig`](../admin/hooks#useconfig) hook:
 
@@ -291,7 +293,9 @@ export const MyClientComponent: React.FC = () => {
   See [Using Hooks](#using-hooks) for more details.
 </Banner>
 
-All [Field Components](../fields/overview#custom-components) automatically receive their respective Field Config through props.
+Similarly, all [Field Components](../fields/overview#custom-components) automatically receive their respective Field Config through props.
+
+Within Server Components, this prop is named `field`:
 
 ```tsx
 import React from 'react'
@@ -306,11 +310,29 @@ export const MyClientFieldComponent: TextFieldServerComponent = ({ field: { name
 }
 ```
 
+Within Client Components, this prop is named `clientField` because its non-serializable props have been removed:
+
+```tsx
+'use client'
+import React from 'react'
+import type { TextFieldClientComponent } from 'payload'
+
+export const MyClientFieldComponent: TextFieldClientComponent = ({ clientField: { name } }) => {
+  return (
+    <p>
+      {`This field's name is ${name}`}
+    </p>
+  )
+}
+```
+
 ### Getting the Current Language
 
-All Custom Components can support multiple languages to be consistent with Payload's [Internationalization](../configuration/i18n). To do this, first add your translation resources to the [I18n Config](../configuration/i18n).
+All Custom Components can support language translations to be consistent with Payload's [I18n](../configuration/i18n). This will allow your Custom Components to display the correct language based on the user's preferences.
 
-From any Server Component, you can translate resources using the `getTranslation` function from `@payloadcms/translations`. All Server Components automatically receive the `i18n` object as a prop by default.
+To do this, first add your translation resources to the [I18n Config](../configuration/i18n). Then from any Server Component, you can translate resources using the `getTranslation` function from `@payloadcms/translations`.
+
+All Server Components automatically receive the `i18n` object as a prop by default:
 
 ```tsx
 import React from 'react'
@@ -351,7 +373,9 @@ export const MyClientComponent: React.FC = () => {
 
 ### Getting the Current Locale
 
-All [Custom Views](./custom-views) can support multiple locales to be consistent with Payload's [Localization](../configuration/localization). They automatically receive the `locale` object as a prop by default. This can be used to scope API requests, etc.:
+All [Custom Views](./custom-views) can support multiple locales to be consistent with Payload's [Localization](../configuration/localization) feature. This can be used to scope API requests, etc.
+
+All Server Components automatically receive the `locale` object as a prop by default:
 
 ```tsx
 import React from 'react'
@@ -396,7 +420,7 @@ const Greeting: React.FC = () => {
 
 ### Using Hooks
 
-To make it easier to [build your Custom Components](#building-custom-components), you can use [Payload's built-in React Hooks](../admin/hooks) in any Client Component. For example, you might want to interact with one of Payload's many React Contexts. To do this, you can one of the many hooks available depending on your needs.
+To make it easier to [build your Custom Components](#building-custom-components), you can use [Payload's built-in React Hooks](../admin/hooks) in any Client Component. For example, you might want to interact with one of Payload's many React Contexts. To do this, you can use one of the many hooks available depending on your needs.
 
 ```tsx
 'use client'
@@ -418,7 +442,7 @@ export const MyClientComponent: React.FC = () => {
 
 ### Adding Styles
 
-Payload has a robust [CSS Library](../admin/customizing-css) that you can use to style your Custom Components similarly to Payload's built-in styling. This will ensure that your Custom Components match the existing design system, and so that they automatically adapt to any theme changes that might occur.
+Payload has a robust [CSS Library](../admin/customizing-css) that you can use to style your Custom Components to match to Payload's built-in styling. This will ensure that your Custom Components integrate well into the existing design system. This will make it so they automatically adapt to any theme changes that might occur.
 
 To apply custom styles, simply import your own `.css` or `.scss` file into your Custom Component:
 
