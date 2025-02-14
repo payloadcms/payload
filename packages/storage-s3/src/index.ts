@@ -4,7 +4,7 @@ import type {
   CollectionOptions,
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
-import type { Config, Plugin, UploadCollectionSlug } from 'payload'
+import type { Config, PayloadRequest, Plugin, UploadCollectionSlug } from 'payload'
 
 import * as AWS from '@aws-sdk/client-s3'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
@@ -46,7 +46,7 @@ export type S3StorageOptions = {
    *
    * @default undefined
    */
-  getResponseHeaders?: (defaultHeaders: HeadersInit) => Headers
+  getResponseHeaders?: (args: { headers: HeadersInit, req: PayloadRequest }) => Headers | Promise<Headers>
 
   /**
    * Whether or not to disable local storage
