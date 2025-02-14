@@ -42,8 +42,9 @@ Here's are some examples of simple List View components. These can be either Ser
 
 ```tsx
 import React from 'react'
+import type { ListViewServerProps } from 'payload'
 
-const MyCustomServerListView: React.FC = () => {
+export function MyCustomServerListView(ListViewServerProps) {
   return (
     <div>
       <p>This is a custom List View.</p>
@@ -59,8 +60,9 @@ _For details on how to build Custom Views, including all available props, see [B
 ```tsx
 'use client'
 import React from 'react'
+import type { ListViewClientProps } from 'payload'
 
-const MyCustomClientListView: React.FC = () => {
+export function MyCustomClientListView(ListViewClientProps) {
   return (
     <div>
       <p>This is a custom List View.</p>
@@ -127,10 +129,29 @@ export const MyCollection: CollectionConfig = {
 
 Here's an example of a simple `beforeList` component:
 
+#### Server Component
+
 ```tsx
 import React from 'react'
+import type { BeforeListServerProps } from 'payload'
 
-const MyBeforeListComponent: React.FC = () => {
+export function MyBeforeListComponent(BeforeListServerProps) {
+  return (
+    <div>
+      <p>This is a custom component that appears before the list of documents.</p>
+    </div>
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import type { BeforeListClientProps } from 'payload'
+
+export function MyBeforeListComponent(BeforeListClientProps) {
   return (
     <div>
       <p>This is a custom component that appears before the list of documents.</p>
@@ -164,10 +185,29 @@ export const MyCollection: CollectionConfig = {
 
 Here's an example of a simple `beforeListTable` component:
 
+#### Server Component
+
 ```tsx
 import React from 'react'
+import type { BeforeListTableServerProps } from 'payload'
 
-const MyBeforeListTableComponent: React.FC = () => {
+export function MyBeforeListTableComponent(BeforeListTableServerProps) {
+  return (
+    <div>
+      <p>This is a custom component that appears before the table of documents.</p>
+    </div>
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import type { BeforeListTableClientProps } from 'payload'
+
+export function MyBeforeListTableComponent(BeforeListTableClientProps) {
   return (
     <div>
       <p>This is a custom component that appears before the table of documents.</p>
@@ -201,10 +241,29 @@ export const MyCollection: CollectionConfig = {
 
 Here's an example of a simple `afterList` component:
 
+#### Server Component
+
 ```tsx
 import React from 'react'
+import type { AfterListServerProps } from 'payload'
 
-const MyAfterListComponent: React.FC = () => {
+export function MyAfterListComponent(AfterListServerProps) {
+  return (
+    <div>
+      <p>This is a custom component that appears after the list of documents.</p>
+    </div>
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import type { AfterListClientProps } from 'payload'
+
+export function MyAfterListComponent(AfterListClientProps) {
   return (
     <div>
       <p>This is a custom component that appears after the list of documents.</p>
@@ -238,10 +297,29 @@ export const MyCollection: CollectionConfig = {
 
 Here's an example of a simple `afterListTable` component:
 
+#### Server Component
+
 ```tsx
 import React from 'react'
+import type { AfterListTableServerProps } from 'payload'
 
-const MyAfterListTableComponent: React.FC = () => {
+export function MyAfterListTableComponent(AfterListTableServerProps) {
+  return (
+    <div>
+      <p>This is a custom component that appears after the table of documents.</p>
+    </div>
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import type { AfterListTableClientProps } from 'payload'
+
+export function MyAfterListTableComponent(AfterListTableClientProps) {
   return (
     <div>
       <p>This is a custom component that appears after the table of documents.</p>
@@ -275,10 +353,29 @@ export const MyCollection: CollectionConfig = {
 
 Here's an example of a simple `Description` component:
 
+#### Server Component
+
 ```tsx
 import React from 'react'
+import type { ListDescriptionServerProps } from 'payload'
 
-const MyDescriptionComponent: React.FC = () => {
+export function MyDescriptionComponent(ListDescriptionServerProps) {
+  return (
+    <div>
+      <p>This is a custom description of the Collection.</p>
+    </div>
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import type { ListDescriptionClientProps } from 'payload'
+
+export function MyDescriptionComponent(ListDescriptionClientProps) {
   return (
     <div>
       <p>This is a custom description of the Collection.</p>
