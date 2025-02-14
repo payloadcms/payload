@@ -484,4 +484,20 @@ describe('Join Field', () => {
 
     await expect(page.locator('#field-joinWithError')).toContainText('enableErrorOnJoin is true')
   })
+
+  test('should render localized data in table when locale changes', async () => {
+    await page.goto(categoriesURL.edit(categoryID))
+    const joinField = page.locator('#field-relatedPosts.field-type.join')
+    await expect(joinField).toBeVisible()
+    await expect(joinField.locator('.relationship-table table')).toBeVisible()
+
+    const row = joinField.locator('.relationship-table tbody tr.row-1')
+    await expect(row).toBeVisible()
+    const localizedTextCell = row.locator('.cell-localizedText span')
+    await expect(localizedTextCell).toBeVisible()
+    await expect(localizedTextCell).toHaveText('Text in en')
+
+    await changeLocale(page, 'es')
+    await expect(localizedTextCell).toHaveText('Text in es')
+  })
 })
