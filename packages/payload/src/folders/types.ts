@@ -29,10 +29,10 @@ export type FolderEnabledColection = {
   slug: CollectionSlug
 } & SanitizedCollectionConfig
 
-export type GetFolderDataResult = {
+export type GetFolderDataResult<DocType = TypeWithID> = {
   breadcrumbs: FolderBreadcrumb[]
   items: {
     relationTo: string
-    value: number | string | TypeWithID
+    value: DocType | number | string
   }[]
 }

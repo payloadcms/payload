@@ -5,14 +5,14 @@ import type { FolderBreadcrumb, FolderInterface } from '../types.js'
 import { foldersSlug, parentFolderFieldName } from '../constants.js'
 type BuildFolderBreadcrumbsArgs = {
   breadcrumbs?: FolderBreadcrumb[]
-  folderID: number | string
+  folderID: null | number | string
   payload: Payload
 }
 export const buildFolderBreadcrumbs = async ({
   breadcrumbs = [],
   folderID,
   payload,
-}: BuildFolderBreadcrumbsArgs) => {
+}: BuildFolderBreadcrumbsArgs): Promise<FolderBreadcrumb[]> => {
   const folderQuery = (await payload.find({
     collection: foldersSlug,
     depth: 0,
@@ -47,7 +47,10 @@ export const buildFolderBreadcrumbs = async ({
     },
   })) as PaginatedDocs<FolderInterface>
 
-  const { folder, rootFolder } = folderQuery.docs.reduce(
+  const { folder, rootFolder } = folderQuery.docs.reduce<{
+    folder: FolderInterface | null
+    rootFolder: FolderInterface | null
+  }>(
     (acc, folder) => {
       if (folder.isRoot) {
         acc.rootFolder = folder

@@ -41,16 +41,16 @@ const SelectFolderWithContext = () => {
   )
 }
 
-export const SelectFolder = () => {
-  const { collectionSlug, docConfig } = useDocumentInfo()
+// export const SelectFolder = () => {
+//   const { collectionSlug, docConfig } = useDocumentInfo()
 
-  return (
-    <FolderProvider
-      collectionSlug={collectionSlug}
-      folderCollectionSlug={docConfig.admin.custom.folderCollectionSlug}
-      initialData={{}}
-    >
-      <SelectFolderWithContext />
-    </FolderProvider>
-  )
-}
+//   return (
+//     <FolderProvider
+//       collectionSlug={collectionSlug}
+//       folderCollectionSlug={docConfig.admin.custom.folderCollectionSlug}
+//       initialData={{}}
+//     >
+//       <SelectFolderWithContext />
+//     </FolderProvider>
+//   )
+// }

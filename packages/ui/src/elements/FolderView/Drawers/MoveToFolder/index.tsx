@@ -62,18 +62,21 @@ export const MoveToFolderDrawer = DrawerWithFolderContext<Props>((props) => {
           <FolderFileGrid>
             {subfolders.length
               ? subfolders.map((subfolder, index) => {
-                  if (hiddenFolderIDs.includes(subfolder.value.id)) {
+                  const folderID =
+                    typeof subfolder.value === 'object' ? subfolder.value.id : subfolder.value
+                  const title = typeof subfolder.value === 'object' ? subfolder.value.name : ''
+                  if (hiddenFolderIDs.includes(folderID)) {
                     return null
                   }
                   return (
                     <FolderFileCard
-                      id={subfolder.value.id}
-                      isSelected={selectedFolderID === subfolder.value.id}
+                      id={folderID}
+                      isSelected={selectedFolderID === folderID}
                       key={index}
                       onClick={async () => {
-                        await onFolderClick(subfolder.value.id)
+                        await onFolderClick(folderID)
                       }}
-                      title={subfolder.value.name}
+                      title={title}
                       type="folder"
                     />
                   )

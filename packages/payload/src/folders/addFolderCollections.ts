@@ -15,9 +15,13 @@ const isDebugEnabled = (collections: CollectionConfig[]) => {
   })
 }
 
-export function addFolderCollections(config: Config): void {
+export function addFolderCollections(config: NonNullable<Config>): void {
   let debug = null
   const enabledCollectionSlugs = []
+  if (!config.collections) {
+    return
+  }
+
   for (let i = 0; i < config.collections.length; i++) {
     const collection = config.collections[i]
     if (collection.admin?.enableFolders) {
@@ -34,13 +38,18 @@ export function addFolderCollections(config: Config): void {
   // add folder collection
   const folderCollection = createFolderCollection({
     collectionSlugs: enabledCollectionSlugs,
-    debug,
+    debug: Boolean(debug),
   })
 
-  if (!config.admin.components?.providers) {
+  if (!config.admin) {
+    config.admin = {}
+  }
+  if (!config.admin?.components) {
+    config.admin.components = {}
+  }
+  if (!config?.admin?.components?.providers) {
     config.admin.components.providers = []
   }
-  config.admin.components.providers.push('@payloadcms/ui#FolderListSettingsProvider')
 
   config.collections.push(folderCollection)
 }

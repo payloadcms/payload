@@ -107,7 +107,6 @@ export { SaveDraftButton } from '../../elements/SaveDraftButton/index.js'
 // folder elements
 export { FolderBreadcrumbs } from '../../elements/FolderView/Breadcrumbs/index.js'
 export { FolderProvider, useFolder } from '../../providers/Folders/index.js'
-export { UploadWithFolderSelection } from '../../elements/FolderView/UploadWithFolder/index.js'
 export { FolderAndDocuments } from '../../elements/FolderView/FolderAndDocuments/index.js'
 
 export { type Option as ReactSelectOption, ReactSelect } from '../../elements/ReactSelect/index.js'
@@ -274,10 +273,6 @@ export {
   useEntityVisibility,
 } from '../../providers/EntityVisibility/index.js'
 export { UploadEditsProvider, useUploadEdits } from '../../providers/UploadEdits/index.js'
-export {
-  FolderListSettingsProvider,
-  useFolderListSettings,
-} from '../../providers/FolderListSettings/index.js'
 export {
   ListDrawerContextProvider,
   useListDrawerContext,

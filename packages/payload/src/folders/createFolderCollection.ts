@@ -7,7 +7,7 @@ import { dissasociateAfterDelete } from './hooks/dissasociateAfterDelete.js'
 import { ensureParentFolder } from './hooks/ensureParentFolder.js'
 
 type CreateFolderCollectionArgs = {
-  collectionSlugs?: string[]
+  collectionSlugs: string[]
   debug?: boolean
 }
 export const createFolderCollection = ({

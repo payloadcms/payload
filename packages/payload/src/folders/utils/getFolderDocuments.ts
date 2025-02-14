@@ -1,11 +1,11 @@
-import type { CollectionSlug, FindArgs, Payload } from '../../index.js'
+import type { CollectionSlug, FindArgs, Payload, Where } from '../../index.js'
 
 import { combineWhereConstraints } from '../../utilities/combineWhereConstraints.js'
 import { parentFolderFieldName } from '../constants.js'
 
 type GetFolderDocumentsArgs = {
   depth?: number
-  folderID: number | string
+  folderID: null | number | string
   payload: Payload
   relationTo: CollectionSlug[]
 } & Omit<FindArgs, 'collection'>
@@ -24,28 +24,34 @@ export const getFolderDocuments = async ({
     value: any
   }[]
 > => {
-  const results = []
+  const results: {
+    relationTo: CollectionSlug
+    value: any
+  }[] = []
   for (const collection of relationTo) {
+    const constraints: Where[] = [
+      folderID
+        ? {
+            [parentFolderFieldName]: {
+              equals: folderID,
+            },
+          }
+        : {
+            [`${parentFolderFieldName}.isRoot`]: {
+              equals: true,
+            },
+          },
+    ]
+    if (where) {
+      constraints.push(where)
+    }
     const { docs } = await payload.find({
       collection,
       depth,
       limit,
       page,
       sort,
-      where: combineWhereConstraints([
-        where,
-        folderID
-          ? {
-              [parentFolderFieldName]: {
-                equals: folderID,
-              },
-            }
-          : {
-              [`${parentFolderFieldName}.isRoot`]: {
-                equals: true,
-              },
-            },
-      ]),
+      where: combineWhereConstraints(constraints),
     })
 
     docs.forEach((doc) => {

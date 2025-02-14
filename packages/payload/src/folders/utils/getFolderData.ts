@@ -7,7 +7,7 @@ import { getFolderDocuments } from './getFolderDocuments.js'
 import { getFolderSubfolders } from './getFolderSubfolders.js'
 
 type Args = {
-  folderID: string
+  folderID: null | string
   payload: Payload
 }
 

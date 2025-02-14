@@ -1227,9 +1227,7 @@ export type SanitizedConfig = {
   | 'upload'
 >
 
-export type EditConfig = {
-  actions?: CustomComponent[]
-} & (EditConfigWithoutRoot | EditConfigWithRoot)
+export type EditConfig = EditConfigWithoutRoot | EditConfigWithRoot
 
 export type EditConfigWithRoot = {
   api?: never

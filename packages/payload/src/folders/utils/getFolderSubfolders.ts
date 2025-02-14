@@ -4,7 +4,7 @@ import type { FolderInterface } from '../types.js'
 import { foldersSlug } from '../constants.js'
 
 type GetSubfoldersArgs = {
-  folderID?: number | string
+  folderID?: null | number | string
   payload: Payload
 }
 export const getFolderSubfolders = async ({

@@ -42,7 +42,7 @@ export type FolderContextValue = {
   setFolderID: (args: { folderID: number | string }) => Promise<void>
   setSelectedIndexes: React.Dispatch<React.SetStateAction<Set<number>>>
   setSubfolders: React.Dispatch<React.SetStateAction<GetFolderDataResult['items']>>
-  subfolders?: GetFolderDataResult['items']
+  subfolders?: GetFolderDataResult<FolderInterface>['items']
 }
 
 const Context = React.createContext<FolderContextValue>({
@@ -90,8 +90,9 @@ export function FolderProvider({ children, initialData }: Props) {
   const [folderBreadcrumbs, setFolderBreadcrumbs] = React.useState<
     FolderContextValue['breadcrumbs']
   >(initialData?.breadcrumbs || [])
-  const [subfolders, setSubfolders] = React.useState<GetFolderDataResult['items']>(
-    initialData?.items.filter((item) => item.relationTo === folderCollectionSlug) || [],
+  const [subfolders, setSubfolders] = React.useState<GetFolderDataResult<FolderInterface>['items']>(
+    (initialData?.items.filter((item) => item.relationTo === folderCollectionSlug) ||
+      []) as GetFolderDataResult<FolderInterface>['items'],
   )
   const [documents, setDocuments] = React.useState<GetFolderDataResult['items']>(
     initialData?.items.filter((item) => item.relationTo !== folderCollectionSlug) || [],
@@ -139,7 +140,9 @@ export function FolderProvider({ children, initialData }: Props) {
 
         if (folderDataRes.items) {
           setSubfolders(
-            folderDataRes.items.filter((item) => item.relationTo === folderCollectionSlug),
+            folderDataRes.items.filter(
+              (item) => item.relationTo === folderCollectionSlug,
+            ) as GetFolderDataResult<FolderInterface>['items'],
           )
           setDocuments(
             folderDataRes.items.filter((item) => item.relationTo !== folderCollectionSlug),
@@ -379,7 +382,8 @@ export function FolderProvider({ children, initialData }: Props) {
   React.useEffect(() => {
     if (initialData) {
       setSubfolders(
-        initialData?.items.filter((item) => item.relationTo === folderCollectionSlug) || [],
+        (initialData?.items.filter((item) => item.relationTo === folderCollectionSlug) ||
+          []) as GetFolderDataResult<FolderInterface>['items'],
       )
       setDocuments(
         initialData?.items.filter((item) => item.relationTo !== folderCollectionSlug) || [],

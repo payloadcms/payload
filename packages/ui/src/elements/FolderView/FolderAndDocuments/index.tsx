@@ -757,6 +757,7 @@ export const FolderAndDocuments = () => {
                     typeof value === 'object' ? value?.[useAsTitle] || subfolderID : subfolderID
                   return (
                     <FolderFileRow
+                      // @ts-expect-error
                       columns={[title, value?.createdAt, value?.updatedAt]}
                       id={subfolderID}
                       isDragging={isDragging}
@@ -788,6 +789,7 @@ export const FolderAndDocuments = () => {
                   const adjustedIndex = documentIndex + subfoldersLength
                   return (
                     <FolderFileRow
+                      // @ts-expect-error
                       columns={[title, value.createdAt, value.updatedAt]}
                       id={documentID}
                       isDragging={isDragging}
