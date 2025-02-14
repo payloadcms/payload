@@ -52,7 +52,6 @@ export const Condition: React.FC<Props> = (props) => {
   const reducedField = reducedFields.find((field) => field.value === fieldName)
 
   const [internalValue, setInternalValue] = useState<string>(value)
-  const [currentOperator, setCurrentOperator] = useState<Operator>(operator)
 
   const debouncedValue = useDebounce(internalValue, 300)
 
@@ -105,23 +104,23 @@ export const Condition: React.FC<Props> = (props) => {
 
   const handleOperatorChange = useCallback(
     (operator: Option<Operator>) => {
-      if (currentOperator !== operator.value) {
-        const currentValueType = operatorValueTypes[currentOperator] || 'any'
-        const newValueType = operatorValueTypes[operator.value] || 'any'
-        if (currentValueType !== newValueType) {
-          setInternalValue(undefined)
-        }
-        updateCondition({
-          andIndex,
-          field: reducedField,
-          operator: operator.value,
-          orIndex,
-          value,
-        })
-        setCurrentOperator(operator.value)
+      const validOperatorValue = operatorValueTypes[operator.value] || 'any'
+      const isValidValue = validOperatorValue === 'any' || typeof value === validOperatorValue
+      const newValue = isValidValue ? value : undefined
+
+      if (!isValidValue) {
+        setInternalValue(newValue)
       }
+
+      updateCondition({
+        andIndex,
+        field: reducedField,
+        operator: operator.value,
+        orIndex,
+        value,
+      })
     },
-    [andIndex, reducedField, orIndex, updateCondition, value, currentOperator],
+    [andIndex, reducedField, orIndex, updateCondition, value],
   )
 
   return (
