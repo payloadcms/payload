@@ -1,3 +1,5 @@
+import type { TypeWithID } from 'payload'
+
 export interface FolderInterface {
   createdAt: string
   id: string
@@ -7,11 +9,6 @@ export interface FolderInterface {
   updatedAt: string
 }
 
-export type Breadcrumb = {
-  id: number | string
-  name: string
-}
-
 export type Subfolder = {
   fileCount: number
   hasSubfolders: boolean
@@ -19,3 +16,10 @@ export type Subfolder = {
   name: string
   subfolderCount: number
 }
+
+export type PolymorphicRelationshipValue = {
+  relationTo: string
+  value: number | string | TypeWithID
+}
+
+export type MoveItemType = PolymorphicRelationshipValue

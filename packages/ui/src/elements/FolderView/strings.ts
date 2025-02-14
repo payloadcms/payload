@@ -6,6 +6,7 @@ export const strings = {
   move: 'Move',
   moveTo: 'Move To',
   newFolder: 'New Folder',
+  removeFromFolder: 'Remove from Folder',
   rename: 'Rename',
   renameFolder: 'Rename Folder',
   selectFile: 'Select File',

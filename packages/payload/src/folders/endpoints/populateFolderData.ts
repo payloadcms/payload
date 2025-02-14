@@ -1,14 +1,11 @@
 import httpStatus from 'http-status'
 
-import type { CollectionSlug, Endpoint } from '../../index.js'
-import type { FolderEnabledColection } from '../types.js'
+import type { Endpoint } from '../../index.js'
 
-import { getBreadcrumbsAndSubFolders } from '../utils/getBreadcrumbsAndSubFolders.js'
+import { foldersSlug } from '../constants.js'
+import { getFolderData } from '../utils/getFolderData.js'
 
-type PopulateBreadcrumbsArgs = {
-  mediaSlug: CollectionSlug
-}
-export const populateFolderDataEndpoint = ({ mediaSlug }: PopulateBreadcrumbsArgs): Endpoint => ({
+export const populateFolderDataEndpoint: Endpoint = {
   handler: async (req) => {
     if (!req?.user) {
       return Response.json(
@@ -21,13 +18,12 @@ export const populateFolderDataEndpoint = ({ mediaSlug }: PopulateBreadcrumbsArg
       )
     }
 
-    const folderEnabledCollectionConfig: FolderEnabledColection | undefined = req.payload
-      .collections?.[mediaSlug].config as FolderEnabledColection
+    const folderCollection = Boolean(req.payload.collections?.[foldersSlug])
 
-    if (!folderEnabledCollectionConfig) {
+    if (!folderCollection) {
       return Response.json(
         {
-          message: 'Folder collection not found.',
+          message: 'Folders are not configured',
         },
         {
           status: httpStatus.NOT_FOUND,
@@ -35,16 +31,13 @@ export const populateFolderDataEndpoint = ({ mediaSlug }: PopulateBreadcrumbsArg
       )
     }
 
-    const folderData = await getBreadcrumbsAndSubFolders({
-      collectionConfig: folderEnabledCollectionConfig,
+    const data = await getFolderData({
       folderID: req.searchParams.get('folderID'),
-      i18n: req.i18n,
       payload: req.payload,
-      user: req.user,
     })
 
-    return Response.json(folderData)
+    return Response.json(data)
   },
   method: 'get',
   path: '/populate-folder-data',
-})
+}

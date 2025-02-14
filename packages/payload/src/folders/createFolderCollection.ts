@@ -1,66 +1,76 @@
 import type { CollectionConfig } from '../collections/config/types.js'
-import type { CollectionSlug } from '../index.js'
 
+import { foldersSlug, parentFolderFieldName } from './constants.js'
 import { populateFolderDataEndpoint } from './endpoints/populateFolderData.js'
-import { deleteDependentDocs } from './hooks/deleteDependentDocs.js'
-import { generateFolderPrefix } from './hooks/generateFolderPrefix.js'
-import { updateDependentDocs } from './hooks/updateDependentDocs.js'
+import { deleteSubfoldersAfterDelete } from './hooks/deleteSubfoldersAfterDelete.js'
+import { dissasociateAfterDelete } from './hooks/dissasociateAfterDelete.js'
+import { ensureParentFolder } from './hooks/ensureParentFolder.js'
 
 type CreateFolderCollectionArgs = {
+  collectionSlugs?: string[]
   debug?: boolean
-  relatedCollectionSlug: CollectionSlug
 }
 export const createFolderCollection = ({
+  collectionSlugs,
   debug,
-  relatedCollectionSlug,
-}: CreateFolderCollectionArgs): CollectionConfig => {
-  const folderCollectionSlug = `${relatedCollectionSlug}-folders`
-
-  return {
-    slug: folderCollectionSlug,
-    admin: {
-      hidden: !debug,
-      useAsTitle: 'name',
+}: CreateFolderCollectionArgs): CollectionConfig => ({
+  slug: foldersSlug,
+  admin: {
+    hidden: !debug,
+    useAsTitle: 'name',
+  },
+  endpoints: [populateFolderDataEndpoint],
+  fields: [
+    {
+      name: 'name',
+      type: 'text',
+      index: true,
+      required: true,
     },
-    endpoints: [populateFolderDataEndpoint({ mediaSlug: relatedCollectionSlug })],
-    fields: [
-      {
-        name: 'name',
-        type: 'text',
-        index: true,
-        required: true,
+    {
+      name: parentFolderFieldName,
+      type: 'relationship',
+      admin: {
+        hidden: !debug,
       },
-      {
-        name: 'prefix',
-        type: 'text',
-        index: true,
+      index: true,
+      relationTo: foldersSlug,
+    },
+    {
+      name: 'isRoot',
+      type: 'checkbox',
+      admin: {
+        hidden: !debug,
       },
-      {
-        name: 'parentFolder',
-        type: 'relationship',
-        index: true,
-        relationTo: folderCollectionSlug,
+      defaultValue: false,
+      index: true,
+    },
+    {
+      name: 'documentsAndFolders',
+      type: 'join',
+      admin: {
+        hidden: !debug,
       },
+      collection: '_folders',
+      hasMany: true,
+      on: parentFolderFieldName,
+    },
+  ],
+  hooks: {
+    afterDelete: [
+      dissasociateAfterDelete({
+        collectionSlugs,
+        parentFolderFieldName,
+      }),
+      deleteSubfoldersAfterDelete({ parentFolderFieldName }),
     ],
-    hooks: {
-      afterChange: [async (args) => await updateDependentDocs({ ...args, relatedCollectionSlug })],
-      afterDelete: [async (args) => await deleteDependentDocs({ ...args, relatedCollectionSlug })],
-      beforeChange: [
-        async ({ data, req }) => {
-          if ('parentFolder' in data) {
-            data.prefix = await generateFolderPrefix({
-              folderCollectionSlug,
-              parentFolder: data.parentFolder,
-              payload: req.payload,
-            })
-          }
-
-          return data
-        },
-      ],
-    },
-    typescript: {
-      interface: 'FolderInterface',
-    },
-  }
-}
+    beforeChange: [ensureParentFolder],
+  },
+  labels: {
+    plural: 'Folders',
+    singular: 'Folder',
+  },
+  typescript: {
+    interface: 'FolderInterface',
+  },
+})

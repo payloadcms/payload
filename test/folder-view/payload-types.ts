@@ -11,20 +11,24 @@ export interface Config {
     users: UserAuthOperations;
   };
   collections: {
-    media: Media;
     posts: Post;
+    media: Media;
     users: User;
-    'media-folders': FolderInterface;
+    _folders: FolderInterface;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    _folders: {
+      documentsAndFolders: '_folders';
+    };
+  };
   collectionsSelect: {
-    media: MediaSelect<false> | MediaSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
-    'media-folders': MediaFoldersSelect<false> | MediaFoldersSelect<true>;
+    _folders: _FoldersSelect<false> | _FoldersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -63,12 +67,22 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: string;
+  title?: string | null;
+  heroImage?: (string | null) | Media;
+  _parentFolder?: (string | null) | FolderInterface;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
   id: string;
-  prefix?: string | null;
-  parentFolder?: (string | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -83,24 +97,17 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media-folders".
+ * via the `definition` "_folders".
  */
 export interface FolderInterface {
   id: string;
   name: string;
-  prefix?: string | null;
-  parentFolder?: (string | null) | FolderInterface;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
- */
-export interface Post {
-  id: string;
-  title?: string | null;
-  heroImage?: (string | null) | Media;
+  _parentFolder?: (string | null) | FolderInterface;
+  isRoot?: boolean | null;
+  documentsAndFolders?: {
+    docs?: (string | FolderInterface)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -129,19 +136,19 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
-        relationTo: 'media';
-        value: string | Media;
-      } | null)
-    | ({
         relationTo: 'posts';
         value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'media';
+        value: string | Media;
       } | null)
     | ({
         relationTo: 'users';
         value: string | User;
       } | null)
     | ({
-        relationTo: 'media-folders';
+        relationTo: '_folders';
         value: string | FolderInterface;
       } | null);
   globalSlug?: string | null;
@@ -188,11 +195,20 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  heroImage?: T;
+  _parentFolder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
-  prefix?: T;
-  parentFolder?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -204,16 +220,6 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts_select".
- */
-export interface PostsSelect<T extends boolean = true> {
-  title?: T;
-  heroImage?: T;
-  updatedAt?: T;
-  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -232,12 +238,13 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media-folders_select".
+ * via the `definition` "_folders_select".
  */
-export interface MediaFoldersSelect<T extends boolean = true> {
+export interface _FoldersSelect<T extends boolean = true> {
   name?: T;
-  prefix?: T;
-  parentFolder?: T;
+  _parentFolder?: T;
+  isRoot?: T;
+  documentsAndFolders?: T;
   updatedAt?: T;
   createdAt?: T;
 }

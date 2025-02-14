@@ -183,7 +183,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
       void renderTable(withNewOrUpdatedDoc)
     },
-    [data.docs, renderTable],
+    [data?.docs, renderTable],
   )
 
   const onDrawerCreate = useCallback<DocumentDrawerProps['onSave']>(
@@ -199,7 +199,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       const newDocs = data.docs.filter((doc) => doc.id !== args.id)
       void renderTable(newDocs)
     },
-    [data.docs, renderTable],
+    [data?.docs, renderTable],
   )
 
   const preferenceKey = `${relationTo}-list`
@@ -235,7 +235,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         <p>{t('general:loading')}</p>
       ) : (
         <Fragment>
-          {data.docs && data.docs.length === 0 && (
+          {data?.docs && data.docs.length === 0 && (
             <div className={`${baseClass}__no-results`}>
               <p>
                 {i18n.t('general:noResults', {
@@ -251,7 +251,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
               )}
             </div>
           )}
-          {data.docs && data.docs.length > 0 && (
+          {data?.docs && data.docs.length > 0 && (
             <RelationshipProvider>
               <ListQueryProvider
                 collectionSlug={relationTo}

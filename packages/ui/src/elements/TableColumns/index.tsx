@@ -2,7 +2,6 @@
 import type {
   ClientCollectionConfig,
   ListPreferences,
-  ListQuery,
   PaginatedDocs,
   SanitizedCollectionConfig,
 } from 'payload'
@@ -13,17 +12,13 @@ import type { SortColumnProps } from '../SortColumn/index.js'
 import type { Column } from '../Table/index.js'
 
 import { useConfig } from '../../providers/Config/index.js'
-import { type ColumnPreferences, useListQuery } from '../../providers/ListQuery/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
-import { useDrawerDepth } from '../Drawer/index.js'
-
 export interface ITableColumns {
   columns: Column[]
   LinkedCellOverride?: React.ReactNode
   moveColumn: (args: { fromIndex: number; toIndex: number }) => Promise<void>
-  rebuildTableState: (args?: { query: ListQuery }) => Promise<void>
   resetColumnsState: () => Promise<void>
   setActiveColumns: (columns: string[]) => Promise<void>
   Table?: React.ReactNode
@@ -84,9 +79,6 @@ export const TableColumnsProvider: React.FC<Props> = ({
 
   const prevCollection = React.useRef<SanitizedCollectionConfig['slug']>(collectionSlug)
   const { getPreference } = usePreferences()
-  const { refineListData } = useListQuery()
-  const drawerDepth = useDrawerDepth()
-  console.log({ drawerDepth })
 
   const [tableColumns, setTableColumns] = React.useState(columnState)
   const [Table, setInternalTable] = React.useState<React.ReactNode>(InitialTable)
@@ -257,37 +249,6 @@ export const TableColumnsProvider: React.FC<Props> = ({
     await setActiveColumns(defaultColumns)
   }, [defaultColumns, setActiveColumns])
 
-  const rebuildTableState = React.useCallback(
-    async ({ query }: { query: ListQuery }) => {
-      const result = await getTableState({
-        collectionSlug,
-        columns: sanitizeColumns(tableColumns),
-        docs,
-        enableRowSelections,
-        query,
-        renderRowTypes,
-        tableAppearance,
-      })
-      console.log({ result })
-      if (result) {
-        setTableColumns(result.state)
-        setTable(result.Table)
-        await refineListData(query)
-      }
-    },
-    [
-      collectionSlug,
-      docs,
-      enableRowSelections,
-      getTableState,
-      renderRowTypes,
-      tableAppearance,
-      tableColumns,
-      setTable,
-      refineListData,
-    ],
-  )
-
   // //////////////////////////////////////////////
   // Get preferences on collection change (drawers)
   // //////////////////////////////////////////////
@@ -349,7 +310,6 @@ export const TableColumnsProvider: React.FC<Props> = ({
         columns: tableColumns,
         LinkedCellOverride,
         moveColumn,
-        rebuildTableState,
         resetColumnsState,
         setActiveColumns,
         Table,

@@ -2,13 +2,13 @@ import type { TypeWithID } from '../collections/config/types.js'
 import type { CollectionSlug, SanitizedCollectionConfig } from '../index.js'
 
 export type FolderInterface = {
+  _parentFolder?: FolderInterface | (number | string | undefined)
+  isRoot?: boolean
   name: string
-  parentFolder?: FolderInterface | (null | string)
-  prefix?: string
 } & TypeWithID
 
-export type Breadcrumb = {
-  id?: number | string
+export type FolderBreadcrumb = {
+  id: number | string
   name: string
 }
 
@@ -29,7 +29,10 @@ export type FolderEnabledColection = {
   slug: CollectionSlug
 } & SanitizedCollectionConfig
 
-export type BreadcrumbsAndSubfolders = {
-  breadcrumbs: Breadcrumb[]
-  subfolders: Subfolder[]
+export type GetFolderDataResult = {
+  breadcrumbs: FolderBreadcrumb[]
+  items: {
+    relationTo: string
+    value: number | string | TypeWithID
+  }[]
 }

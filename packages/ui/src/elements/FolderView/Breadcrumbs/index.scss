@@ -8,6 +8,9 @@
     align-items: center;
     font-size: var(--base);
     font-weight: bold;
+    margin: 0;
+    line-height: normal;
+    font-family: inherit;
   }
 
   &__crumb-btn {

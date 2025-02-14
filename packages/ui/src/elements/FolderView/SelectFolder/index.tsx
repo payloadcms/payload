@@ -8,7 +8,6 @@ import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { FolderProvider, useFolder } from '../../../providers/Folders/index.js'
 import { strings } from '../../../strings.js'
 import { DrawerToggler } from '../../Drawer/index.js'
-import { FolderDrawer } from '../FolderDrawer/index.js'
 
 const drawerSlug = 'select-folder'
 
@@ -38,13 +37,6 @@ const SelectFolderWithContext = () => {
       >
         {strings.selectFolder}
       </DrawerToggler>
-      <FolderDrawer
-        drawerSlug={drawerSlug}
-        onSave={(folderID) => {
-          setValue(folderID || null)
-        }}
-        title={strings.selectFolder}
-      />
     </React.Fragment>
   )
 }

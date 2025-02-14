@@ -5,9 +5,11 @@ import { HydrateAuthProvider, SetStepNav } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
 import LinkImport from 'next/link.js'
+import { getFolderData } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { DefaultDashboard } from './Default/index.js'
+import { FolderDashboard } from './Folders/index.js'
 
 export { generateDashboardMetadata } from './meta.js'
 
@@ -104,17 +106,26 @@ export const Dashboard: React.FC<AdminViewProps> = async ({
     i18n,
   )
 
+  const { breadcrumbs, items } = await getFolderData({
+    folderID: searchParams?.folder as string,
+    payload,
+  })
+
   return (
     <Fragment>
       <HydrateAuthProvider permissions={permissions} />
       <SetStepNav nav={[]} />
       {RenderServerComponent({
         clientProps: {
+          breadcrumbs,
+          folderID: breadcrumbs[breadcrumbs.length - 1]?.id,
+          items,
           Link,
           locale,
         },
         Component: config.admin?.components?.views?.dashboard?.Component,
-        Fallback: DefaultDashboard,
+        Fallback: FolderDashboard,
+        // Fallback: DefaultDashboard,
         importMap: payload.importMap,
         serverProps: {
           globalData,

@@ -14,7 +14,7 @@ export type Props = {
   className?: string
   disabled?: boolean
   el?: 'anchor' | 'link' | ElementType
-  icon?: ['chevron' | 'edit' | 'plus' | 'x'] | React.ReactNode
+  icon?: ['chevron' | 'edit' | 'plus' | 'threeDots' | 'x'] | React.ReactNode
   iconPosition?: 'left' | 'right'
   iconStyle?: 'none' | 'with-border' | 'without-border'
   id?: string

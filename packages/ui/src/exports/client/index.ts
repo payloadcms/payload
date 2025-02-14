@@ -101,6 +101,12 @@ export { PublishButton } from '../../elements/PublishButton/index.js'
 export { SaveButton } from '../../elements/SaveButton/index.js'
 export { SaveDraftButton } from '../../elements/SaveDraftButton/index.js'
 
+// folder elements
+export { FolderBreadcrumbs } from '../../elements/FolderView/Breadcrumbs/index.js'
+export { FolderProvider, useFolder } from '../../providers/Folders/index.js'
+export { UploadWithFolderSelection } from '../../elements/FolderView/UploadWithFolder/index.js'
+export { FolderAndDocuments } from '../../elements/FolderView/FolderAndDocuments/index.js'
+
 export { type Option as ReactSelectOption, ReactSelect } from '../../elements/ReactSelect/index.js'
 export { ReactSelect as Select } from '../../elements/ReactSelect/index.js'
 export { RenderTitle } from '../../elements/RenderTitle/index.js'
@@ -261,13 +267,6 @@ export {
   FolderListSettingsProvider,
   useFolderListSettings,
 } from '../../providers/FolderListSettings/index.js'
-export { FolderProvider, useFolder } from '../../providers/Folders/index.js'
-export { UploadWithFolderSelection } from '../../elements/FolderView/UploadWithFolder/index.js'
-export { FolderList } from '../../elements/FolderView/List/index.js'
-export {
-  FolderAndDocumentSelectionsProvider,
-  useFolderAndDocumentSelections,
-} from '../../providers/FolderAndDocumentSelections/index.js'
 export {
   ListDrawerContextProvider,
   useListDrawerContext,

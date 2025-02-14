@@ -35,6 +35,7 @@ export const renderDocument = async ({
   initPageResult,
   overrideEntityVisibility,
   params,
+  redirectAfterCreate,
   redirectAfterDelete,
   redirectAfterDuplicate,
   searchParams,
@@ -339,6 +340,7 @@ export const renderDocument = async ({
         key={locale?.code}
         lastUpdateTime={lastUpdateTime}
         mostRecentVersionIsAutosaved={mostRecentVersionIsAutosaved}
+        redirectAfterCreate={redirectAfterCreate}
         redirectAfterDelete={redirectAfterDelete}
         redirectAfterDuplicate={redirectAfterDuplicate}
         unpublishedVersionCount={unpublishedVersionCount}

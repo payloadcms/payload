@@ -8,10 +8,11 @@ import { EditIcon } from '../../icons/Edit/index.js'
 import { LinkIcon } from '../../icons/Link/index.js'
 import { PlusIcon } from '../../icons/Plus/index.js'
 import { SwapIcon } from '../../icons/Swap/index.js'
+import { ThreeDotsIcon } from '../../icons/ThreeDots/index.js'
 import { XIcon } from '../../icons/X/index.js'
 import { Popup } from '../Popup/index.js'
-import { Tooltip } from '../Tooltip/index.js'
 import './index.scss'
+import { Tooltip } from '../Tooltip/index.js'
 
 const icons = {
   chevron: ChevronIcon,
@@ -19,6 +20,7 @@ const icons = {
   link: LinkIcon,
   plus: PlusIcon,
   swap: SwapIcon,
+  threeDots: ThreeDotsIcon,
   x: XIcon,
 }
 
@@ -168,7 +170,7 @@ export const Button: React.FC<Props> = (props) => {
       const Tag = el // eslint-disable-line no-case-declarations
 
       buttonElement = (
-        <Tag ref={ref} type="submit" {...buttonProps}>
+        <Tag ref={ref} {...buttonProps}>
           <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
             {children}
           </ButtonContents>
