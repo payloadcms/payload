@@ -536,16 +536,26 @@ export type { LanguageOptions } from './LanguageOptions.js'
 export type { RichTextAdapter, RichTextAdapterProvider, RichTextHooks } from './RichText.js'
 
 export type {
-  ClientSideEditViewProps,
   DocumentTabComponent,
   DocumentTabCondition,
   DocumentTabConfig,
   DocumentTabProps,
+  /**
+   * @deprecated
+   * The `ClientSideEditViewProps` type is deprecated and will be removed in the next major version.
+   * Use `EditViewClientProps` instead.
+   */
+  DocumentViewClientProps as ClientSideEditViewProps,
+  DocumentViewClientProps,
+  /**
+   * @deprecated
+   * The `ServerSideEditViewProps` is deprecated and will be removed in the next major version.
+   * Use `EditViewServerProps` instead.
+   */
+  DocumentViewServerProps as ServerSideEditViewProps,
+  DocumentViewServerProps,
   EditViewProps,
-  ServerSideEditViewProps,
 } from './views/document.js'
-
-export type { ListViewClientProps, ListViewSlots } from './views/list.js'
 
 export type {
   AdminViewComponent,
@@ -553,7 +563,30 @@ export type {
   AdminViewProps,
   InitPageResult,
   VisibleEntities,
-} from './views/types.js'
+} from './views/index.js'
+
+export type {
+  AfterListClientProps,
+  AfterListServerProps,
+  AfterListServerPropsOnly,
+  AfterListTableClientProps,
+  AfterListTableServerProps,
+  AfterListTableServerPropsOnly,
+  BeforeListClientProps,
+  BeforeListServerProps,
+  BeforeListServerPropsOnly,
+  BeforeListTableClientProps,
+  BeforeListTableServerProps,
+  BeforeListTableServerPropsOnly,
+  ListDescriptionClientProps,
+  ListDescriptionServerProps,
+  ListDescriptionServerPropsOnly,
+  ListViewClientProps,
+  ListViewServerProps,
+  ListViewServerPropsOnly,
+  ListViewSlotClientProps,
+  ListViewSlots,
+} from './views/list.js'
 
 type SchemaPath = {} & string
 export type FieldSchemaMap = Map<

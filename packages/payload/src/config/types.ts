@@ -17,14 +17,13 @@ import type { DeepRequired } from 'ts-essentials'
 
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type { DocumentTabConfig, RichTextAdapter } from '../admin/types.js'
+import type { DocumentSubViewTypes, DocumentViewServerProps } from '../admin/views/document.js'
 import type {
   AdminViewConfig,
-  DocumentSubViewTypes,
   ServerPropsFromView,
-  ServerSideEditViewProps,
   ViewTypes,
   VisibleEntities,
-} from '../admin/views/types.js'
+} from '../admin/views/index.js'
 import type { SanitizedPermissions } from '../auth/index.js'
 import type {
   AddToImportMap,
@@ -375,7 +374,7 @@ export type Endpoint = {
   root?: never
 }
 
-export type EditViewComponent = PayloadComponent<ServerSideEditViewProps>
+export type EditViewComponent = PayloadComponent<DocumentViewServerProps>
 
 export type EditViewConfig = {
   meta?: MetaConfig
@@ -399,22 +398,20 @@ export type EditViewConfig = {
     }
 )
 
-type ClientProps = {
-  readonly [key: string]: unknown
-}
+export type Params = { [key: string]: string | string[] | undefined }
 
 export type ServerProps = {
   readonly documentSubViewType?: DocumentSubViewTypes
   readonly i18n: I18nClient
   readonly locale?: Locale
-  readonly params?: { [key: string]: string | string[] | undefined }
+  readonly params?: Params
   readonly payload: Payload
   readonly permissions?: SanitizedPermissions
-  readonly searchParams?: { [key: string]: string | string[] | undefined }
+  readonly searchParams?: Params
   readonly user?: TypedUser
   readonly viewType?: ViewTypes
   readonly visibleEntities?: VisibleEntities
-} & ClientProps
+}
 
 export const serverProps: (keyof ServerProps)[] = [
   'payload',

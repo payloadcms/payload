@@ -1,9 +1,11 @@
 import type {
-  ListComponentClientProps,
-  ListComponentServerProps,
+  AdminViewProps,
   ListPreferences,
-} from '@payloadcms/ui'
-import type { AdminViewProps, ListQuery, ListViewClientProps, Where } from 'payload'
+  ListQuery,
+  ListViewClientProps,
+  ListViewServerPropsOnly,
+  Where,
+} from 'payload'
 
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
@@ -159,19 +161,20 @@ export const renderListView = async (
         ? collectionConfig.admin.description({ t: i18n.t })
         : collectionConfig.admin.description
 
-    const sharedClientProps: ListComponentClientProps = {
-      collectionSlug,
-      hasCreatePermission: permissions?.collections?.[collectionSlug]?.create,
-      newDocumentURL: formatAdminURL({
-        adminRoute,
-        path: `/collections/${collectionSlug}/create`,
-      }),
-    }
+    const newDocumentURL = formatAdminURL({
+      adminRoute,
+      path: `/collections/${collectionSlug}/create`,
+    })
 
-    const sharedServerProps: ListComponentServerProps = {
+    const hasCreatePermission = permissions?.collections?.[collectionSlug]?.create
+
+    const listViewServerProps: ListViewServerPropsOnly = {
       collectionConfig,
+      data,
       i18n,
       limit,
+      listPreferences,
+      listSearchableFields: collectionConfig.admin.listSearchableFields,
       locale: fullLocale,
       params,
       payload,
@@ -181,25 +184,16 @@ export const renderListView = async (
     }
 
     const listViewSlots = renderListViewSlots({
-      clientProps: sharedClientProps,
+      clientProps: {
+        collectionSlug,
+        hasCreatePermission,
+        newDocumentURL,
+      },
       collectionConfig,
       description: staticDescription,
       payload,
-      serverProps: sharedServerProps,
+      serverProps: listViewServerProps,
     })
-
-    const clientProps: ListViewClientProps = {
-      ...listViewSlots,
-      ...sharedClientProps,
-      columnState,
-      disableBulkDelete,
-      disableBulkEdit,
-      enableRowSelections,
-      listPreferences,
-      renderedFilters,
-      resolvedFilterOptions,
-      Table,
-    }
 
     const isInDrawer = Boolean(drawerSlug)
 
@@ -214,16 +208,24 @@ export const renderListView = async (
             modifySearchParams={!isInDrawer}
           >
             {RenderServerComponent({
-              clientProps,
+              clientProps: {
+                ...listViewSlots,
+                collectionSlug,
+                columnState,
+                disableBulkDelete,
+                disableBulkEdit,
+                enableRowSelections,
+                hasCreatePermission,
+                listPreferences,
+                newDocumentURL,
+                renderedFilters,
+                resolvedFilterOptions,
+                Table,
+              } satisfies ListViewClientProps,
               Component: collectionConfig?.admin?.components?.views?.list?.Component,
               Fallback: DefaultListView,
               importMap: payload.importMap,
-              serverProps: {
-                ...sharedServerProps,
-                data,
-                listPreferences,
-                listSearchableFields: collectionConfig.admin.listSearchableFields,
-              },
+              serverProps: listViewServerProps,
             })}
           </ListQueryProvider>
         </Fragment>

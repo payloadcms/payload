@@ -1,4 +1,10 @@
-import type { AdminViewProps, Data, PayloadComponent, ServerSideEditViewProps } from 'payload'
+import type {
+  AdminViewProps,
+  Data,
+  DocumentViewClientProps,
+  DocumentViewServerProps,
+  PayloadComponent,
+} from 'payload'
 
 import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
@@ -74,8 +80,8 @@ export const renderDocument = async ({
   let isEditing = getIsEditing({ id: idFromArgs, collectionSlug, globalSlug })
 
   let RootViewOverride: PayloadComponent
-  let CustomView: ViewFromConfig<ServerSideEditViewProps>
-  let DefaultView: ViewFromConfig<ServerSideEditViewProps>
+  let CustomView: ViewFromConfig<DocumentViewServerProps>
+  let DefaultView: ViewFromConfig<DocumentViewServerProps>
   let ErrorView: ViewFromConfig<AdminViewProps>
 
   let apiURL: string
@@ -161,7 +167,7 @@ export const renderDocument = async ({
     }),
   ])
 
-  const serverProps: ServerSideEditViewProps = {
+  const serverProps: DocumentViewServerProps = {
     doc,
     i18n,
     initPageResult,
@@ -319,7 +325,12 @@ export const renderDocument = async ({
     req,
   })
 
-  const clientProps = { formState, ...documentSlots, documentSubViewType, viewType }
+  const clientProps: DocumentViewClientProps = {
+    formState,
+    ...documentSlots,
+    documentSubViewType,
+    viewType,
+  }
 
   return {
     data: doc,

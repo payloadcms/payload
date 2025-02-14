@@ -774,6 +774,9 @@ importers:
       swc-plugin-transform-remove-imports:
         specifier: 3.1.0
         version: 3.1.0
+      ts-essentials:
+        specifier: 10.0.3
+        version: 10.0.3(typescript@5.7.3)
 
   packages/payload:
     dependencies:

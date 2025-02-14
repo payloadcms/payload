@@ -4,21 +4,21 @@ import type { PayloadComponent, SanitizedConfig, ServerProps } from '../../confi
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { Payload } from '../../index.js'
 import type { Data, DocumentSlots } from '../types.js'
-import type { InitPageResult } from './types.js'
+import type { InitPageResult } from './index.js'
 
 export type EditViewProps = {
   readonly collectionSlug?: string
   readonly globalSlug?: string
 }
 
-export type ServerSideEditViewProps = {
+export type DocumentViewServerProps = {
   readonly doc: Data
   readonly initPageResult: InitPageResult
   readonly routeSegments: string[]
-} & ClientSideEditViewProps &
+} & DocumentViewClientProps &
   ServerProps
 
-export type ClientSideEditViewProps = {} & DocumentSlots
+export type DocumentViewClientProps = {} & DocumentSlots
 
 export type DocumentSubViewTypes = 'api' | 'default' | 'livePreview' | 'version' | 'versions'
 
