@@ -409,6 +409,19 @@ const BlockFields: CollectionConfig = {
       blockReferences: ['ConfigBlockTest'],
       blocks: [],
     },
+    {
+      name: 'localizedReferencesLocalizedBlock',
+      type: 'blocks',
+      blockReferences: ['localizedTextReference'],
+      blocks: [],
+      localized: true,
+    },
+    {
+      name: 'localizedReferences',
+      type: 'blocks',
+      blockReferences: ['localizedTextReference'],
+      blocks: [],
+    },
   ],
 }
 
