@@ -118,7 +118,7 @@ export const Condition: React.FC<Props> = (props) => {
         field: reducedField,
         operator: operator.value,
         orIndex,
-        value,
+        value: isValidValue ? value : undefined,
       })
     },
     [andIndex, reducedField, orIndex, updateCondition, value],
