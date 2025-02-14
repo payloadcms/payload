@@ -1,6 +1,7 @@
 'use client'
 
 import type {
+  ClientConfig,
   ClientField,
   JoinFieldClient,
   JoinFieldClientComponent,
@@ -30,11 +31,13 @@ const ObjectId = (ObjectIdImport.default ||
  */
 const getInitialDrawerData = ({
   collectionSlug,
+  config,
   docID,
   fields,
   segments,
 }: {
   collectionSlug: string
+  config: ClientConfig
   docID: number | string
   fields: ClientField[]
   segments: string[]
@@ -68,6 +71,7 @@ const getInitialDrawerData = ({
     return {
       [field.name]: getInitialDrawerData({
         collectionSlug,
+        config,
         docID,
         fields: field.fields,
         segments: nextSegments,
@@ -78,6 +82,7 @@ const getInitialDrawerData = ({
   if (field.type === 'array') {
     const initialData = getInitialDrawerData({
       collectionSlug,
+      config,
       docID,
       fields: field.fields,
       segments: nextSegments,
@@ -91,9 +96,12 @@ const getInitialDrawerData = ({
   }
 
   if (field.type === 'blocks') {
-    for (const block of field.blocks) {
+    for (const _block of field.blockReferences ?? field.blocks) {
+      const block = typeof _block === 'string' ? config.blocksMap[_block] : _block
+
       const blockInitialData = getInitialDrawerData({
         collectionSlug,
+        config,
         docID,
         fields: block.fields,
         segments: nextSegments,
@@ -127,7 +135,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
 
   const { id: docID, docConfig } = useDocumentInfo()
 
-  const { getEntityConfig } = useConfig()
+  const { config, getEntityConfig } = useConfig()
 
   const { customComponents: { AfterInput, BeforeInput, Description, Label } = {}, value } =
     useField<PaginatedDocs>({
@@ -168,11 +176,12 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
 
     return getInitialDrawerData({
       collectionSlug: docConfig?.slug,
+      config,
       docID,
       fields: relatedCollection.fields,
       segments: field.on.split('.'),
     })
-  }, [getEntityConfig, field.collection, field.on, docConfig?.slug, docID])
+  }, [getEntityConfig, field.collection, field.on, docConfig?.slug, docID, config])
 
   if (!docConfig) {
     return null

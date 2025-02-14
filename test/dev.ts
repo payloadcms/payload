@@ -35,9 +35,17 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 const {
-  _: [testSuiteArg = '_community'],
+  _: [_testSuiteArg = '_community'],
   ...args
 } = minimist(process.argv.slice(2))
+
+let testSuiteArg: string | undefined
+let testSuiteConfigOverride: string | undefined
+if (_testSuiteArg.includes('#')) {
+  ;[testSuiteArg, testSuiteConfigOverride] = _testSuiteArg.split('#')
+} else {
+  testSuiteArg = _testSuiteArg
+}
 
 if (!testSuiteArg || !fs.existsSync(path.resolve(dirname, testSuiteArg))) {
   console.log(chalk.red(`ERROR: The test folder "${testSuiteArg}" does not exist`))
@@ -50,7 +58,7 @@ if (args.turbo === true) {
   process.env.TURBOPACK = '1'
 }
 
-const { beforeTest } = await createTestHooks(testSuiteArg)
+const { beforeTest } = await createTestHooks(testSuiteArg, testSuiteConfigOverride)
 await beforeTest()
 
 const { rootDir, adminRoute } = getNextRootDir(testSuiteArg)

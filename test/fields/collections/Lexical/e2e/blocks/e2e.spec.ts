@@ -24,13 +24,13 @@ import {
   saveDocAndAssert,
 } from '../../../../../helpers.js'
 import { AdminUrlUtil } from '../../../../../helpers/adminUrlUtil.js'
+import { trackNetworkRequests } from '../../../../../helpers/e2e/trackNetworkRequests.js'
 import { initPayloadE2ENoConfig } from '../../../../../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../../../helpers/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../../../playwright.config.js'
 import { lexicalFieldsSlug } from '../../../../slugs.js'
 import { lexicalDocData } from '../../data.js'
-import { trackNetworkRequests } from '../../../../../helpers/e2e/trackNetworkRequests.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -106,7 +106,7 @@ async function createInlineBlock({
    */
   await page.keyboard.press(' ')
   await page.keyboard.press('/')
-  await page.keyboard.type(name.includes(' ') ? name.split(' ')[0] : name)
+  await page.keyboard.type(name.includes(' ') ? (name.split(' ')?.[0] ?? name) : name)
 
   // Create Rich Text Block
   const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
@@ -163,8 +163,8 @@ async function createInlineBlock({
 }
 
 async function assertLexicalDoc({
-  fn,
   depth = 0,
+  fn,
 }: {
   depth?: number
   fn: (args: {
@@ -299,7 +299,7 @@ describe('lexicalBlocks', () => {
 
     // Check if the API result is correct
     await assertLexicalDoc({
-      fn: async ({ lexicalWithBlocks }) => {
+      fn: ({ lexicalWithBlocks }) => {
         const rscBlock: SerializedBlockNode = lexicalWithBlocks.root
           .children[14] as SerializedBlockNode
         const paragraphNode: SerializedParagraphNode = lexicalWithBlocks.root
@@ -360,13 +360,15 @@ describe('lexicalBlocks', () => {
       const dependsOnSiblingData = newBlock.locator('#field-group__dependsOnSiblingData').first()
       const dependsOnBlockData = newBlock.locator('#field-group__dependsOnBlockData').first()
 
+      await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
+
       return {
-        topLevelDocTextField,
-        blockTextField,
         blockGroupTextField,
+        blockTextField,
         dependsOnDocData,
-        dependsOnSiblingData,
         dependsOnBlockData,
+        dependsOnSiblingData,
+        topLevelDocTextField,
         newBlock,
       }
     }
@@ -549,14 +551,15 @@ describe('lexicalBlocks', () => {
         .locator('#field-group__textDependsOnSiblingData')
         .first()
       const dependsOnBlockData = newBlock.locator('#field-group__textDependsOnBlockData').first()
+      await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
 
       return {
-        topLevelDocTextField,
-        blockTextField,
         blockGroupTextField,
+        blockTextField,
         dependsOnDocData,
         dependsOnSiblingData,
         dependsOnBlockData,
+        topLevelDocTextField,
         newBlock,
       }
     }
@@ -570,7 +573,7 @@ describe('lexicalBlocks', () => {
       await expect(page.locator('.payload-toast-container')).toHaveText(
         'The following fields are invalid: Lexical With Blocks, LexicalWithBlocks > Group > Text Depends On Doc Data',
       )
-      await expect(page.locator('.payload-toast-container')).not.toBeVisible()
+      await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
 
       await trackNetworkRequests(
         page,
@@ -593,7 +596,7 @@ describe('lexicalBlocks', () => {
       await expect(page.locator('.payload-toast-container')).toHaveText(
         'The following fields are invalid: Lexical With Blocks, LexicalWithBlocks > Group > Text Depends On Sibling Data',
       )
-      await expect(page.locator('.payload-toast-container')).not.toBeVisible()
+      await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
 
       await trackNetworkRequests(
         page,
@@ -617,7 +620,7 @@ describe('lexicalBlocks', () => {
         'The following fields are invalid: Lexical With Blocks, LexicalWithBlocks > Group > Text Depends On Block Data',
       )
 
-      await expect(page.locator('.payload-toast-container')).not.toBeVisible()
+      await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
 
       await trackNetworkRequests(
         page,
@@ -701,7 +704,7 @@ describe('lexicalBlocks', () => {
       await saveDocAndAssert(page)
 
       await assertLexicalDoc({
-        fn: async ({ lexicalWithBlocks }) => {
+        fn: ({ lexicalWithBlocks }) => {
           const blockNode: SerializedBlockNode = lexicalWithBlocks.root
             .children[4] as SerializedBlockNode
 
@@ -761,7 +764,7 @@ describe('lexicalBlocks', () => {
       await saveDocAndAssert(page)
 
       await assertLexicalDoc({
-        fn: async ({ lexicalWithBlocks }) => {
+        fn: ({ lexicalWithBlocks }) => {
           const blockNode: SerializedBlockNode = lexicalWithBlocks.root
             .children[4] as SerializedBlockNode
           const paragraphNodeInBlockNodeRichText = blockNode.fields.richTextField.root.children[1]
@@ -836,7 +839,7 @@ describe('lexicalBlocks', () => {
 
       // Make sure it's being returned from the API as well
       await assertLexicalDoc({
-        fn: async ({ lexicalWithBlocks }) => {
+        fn: ({ lexicalWithBlocks }) => {
           expect(
             (
               (lexicalWithBlocks.root.children[0] as SerializedParagraphNode)
@@ -888,13 +891,17 @@ describe('lexicalBlocks', () => {
         .first()
       await expect(popoverHeading2Button).toBeVisible()
 
+      // scroll slash menu down
+      await popoverHeading2Button.hover()
+      await page.mouse.wheel(0, 250)
+
       await expect(async () => {
         // Make sure that, even though it's "visible", it's not actually covered by something else due to z-index issues
         const popoverHeading2ButtonBoundingBox = await popoverHeading2Button.boundingBox()
         expect(popoverHeading2ButtonBoundingBox).not.toBeNull()
         expect(popoverHeading2ButtonBoundingBox).not.toBeUndefined()
-        expect(popoverHeading2ButtonBoundingBox.height).toBeGreaterThan(0)
-        expect(popoverHeading2ButtonBoundingBox.width).toBeGreaterThan(0)
+        expect(popoverHeading2ButtonBoundingBox?.height).toBeGreaterThan(0)
+        expect(popoverHeading2ButtonBoundingBox?.width).toBeGreaterThan(0)
 
         // Now click the button to see if it actually works. Simulate an actual mouse click instead of using .click()
         // by using page.mouse and the correct coordinates
@@ -903,8 +910,8 @@ describe('lexicalBlocks', () => {
         // This is why we use page.mouse.click() here. It's the most effective way of detecting such a z-index issue
         // and usually the only method which works.
 
-        const x = popoverHeading2ButtonBoundingBox.x
-        const y = popoverHeading2ButtonBoundingBox.y
+        const x = popoverHeading2ButtonBoundingBox?.x ?? 0
+        const y = popoverHeading2ButtonBoundingBox?.y ?? 0
 
         await page.mouse.click(x, y, { button: 'left' })
 
@@ -954,13 +961,16 @@ describe('lexicalBlocks', () => {
       await page.keyboard.type('text123')
       await expect(newContentTextArea).toHaveText('text123')
 
+      await wait(1000)
+
       await saveDocAndAssert(page)
 
       await assertLexicalDoc({
-        fn: async ({ lexicalWithBlocks }) => {
+        fn: ({ lexicalWithBlocks }) => {
           const blockNode: SerializedBlockNode = lexicalWithBlocks.root
             .children[5] as SerializedBlockNode
-          const subBlocks = blockNode.fields.subBlocks
+
+          const subBlocks = blockNode.fields.subBlocksLexical
 
           expect(subBlocks).toHaveLength(2)
 
@@ -1200,7 +1210,7 @@ describe('lexicalBlocks', () => {
       await saveDocAndAssert(page)
 
       await assertLexicalDoc({
-        fn: async ({ lexicalWithBlocks }) => {
+        fn: ({ lexicalWithBlocks }) => {
           const radio1: SerializedBlockNode = lexicalWithBlocks.root
             .children[8] as SerializedBlockNode
           const radio2: SerializedBlockNode = lexicalWithBlocks.root
@@ -1437,7 +1447,7 @@ describe('lexicalBlocks', () => {
       await expect(tab2Text1Field).toHaveValue('Some text2 changed')
 
       await assertLexicalDoc({
-        fn: async ({ lexicalWithBlocks }) => {
+        fn: ({ lexicalWithBlocks }) => {
           const tabBlockData: SerializedBlockNode = lexicalWithBlocks.root
             .children[13] as SerializedBlockNode
 
@@ -1455,7 +1465,7 @@ describe('lexicalBlocks', () => {
       await codeEditor.scrollIntoViewIfNeeded()
       await expect(codeEditor).toBeVisible()
 
-      const height = (await codeEditor.boundingBox()).height
+      const height = (await codeEditor.boundingBox())?.height
 
       await expect(() => {
         expect(height).toBe(56)
@@ -1463,7 +1473,7 @@ describe('lexicalBlocks', () => {
       await codeEditor.click()
       await page.keyboard.press('Enter')
 
-      const height2 = (await codeEditor.boundingBox()).height
+      const height2 = (await codeEditor.boundingBox())?.height
       await expect(() => {
         expect(height2).toBe(74)
       }).toPass()
@@ -1494,8 +1504,8 @@ describe('lexicalBlocks', () => {
     test('ensure inline blocks can be created and its values can be mutated from outside their form', async () => {
       const { richTextField } = await navigateToLexicalFields()
       const { inlineBlockDrawer, saveDrawer } = await createInlineBlock({
-        richTextField,
         name: 'My Inline Block',
+        richTextField,
       })
 
       // Click on react select in drawer, select 'value1'
@@ -1510,7 +1520,7 @@ describe('lexicalBlocks', () => {
       await saveDocAndAssert(page)
       // Check if the API result is correct
       await assertLexicalDoc({
-        fn: async ({ lexicalWithBlocks }) => {
+        fn: ({ lexicalWithBlocks }) => {
           const firstParagraph: SerializedParagraphNode = lexicalWithBlocks.root
             .children[0] as SerializedParagraphNode
           const inlineBlock: SerializedInlineBlockNode = firstParagraph
@@ -1548,13 +1558,13 @@ describe('lexicalBlocks', () => {
       // Save and check api result
       await saveDocAndAssert(page)
       await assertLexicalDoc({
-        fn: async ({ lexicalWithBlocks }) => {
+        fn: ({ lexicalWithBlocks }) => {
           const firstParagraph: SerializedParagraphNode = lexicalWithBlocks.root
             .children[0] as SerializedParagraphNode
           const inlineBlock: SerializedInlineBlockNode = firstParagraph
             .children[1] as SerializedInlineBlockNode
 
-          await expect(inlineBlock.fields.key).toBe('value2')
+          expect(inlineBlock.fields.key).toBe('value2')
         },
       })
     })
@@ -1562,8 +1572,8 @@ describe('lexicalBlocks', () => {
     test('ensure upload fields within inline blocks store and populate correctly', async () => {
       const { richTextField } = await navigateToLexicalFields()
       const { inlineBlockDrawer, saveDrawer } = await createInlineBlock({
-        richTextField,
         name: 'Avatar Group',
+        richTextField,
       })
 
       // Click button that says Add Avatar

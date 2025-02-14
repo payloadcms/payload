@@ -1,5 +1,5 @@
 import type { SerializedEditorState } from 'lexical'
-import type { Field, FieldAffectingData, RichTextField } from 'payload'
+import type { Field, FieldAffectingData, PayloadRequest, RichTextField } from 'payload'
 
 import type { SanitizedServerEditorConfig } from '../../../../lexical/config/types.js'
 import type { AdapterProps, LexicalRichTextAdapter } from '../../../../types.js'
