@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
@@ -9,7 +10,7 @@ import type {
   SelectMode,
   SelectType,
 } from '../../../types/index.js'
-import type { Field, TabAsField } from '../../config/types.js'
+import type { Block, Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName } from '../../config/types.js'
@@ -19,6 +20,10 @@ import { relationshipPopulationPromise } from './relationshipPopulationPromise.j
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
+  /**
+   * Data of the nearest parent block. If no parent block exists, this will be the `undefined`
+   */
+  blockData?: JsonObject
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   currentDepth: number
@@ -47,6 +52,7 @@ type Args = {
   selectMode?: SelectMode
   showHiddenFields: boolean
   siblingDoc: JsonObject
+  siblingFields?: (Field | TabAsField)[]
   triggerAccessControl?: boolean
   triggerHooks?: boolean
 }
@@ -60,6 +66,7 @@ type Args = {
 // - Populate relationships
 
 export const promise = async ({
+  blockData,
   collection,
   context,
   currentDepth,
@@ -85,6 +92,7 @@ export const promise = async ({
   selectMode,
   showHiddenFields,
   siblingDoc,
+  siblingFields,
   triggerAccessControl = true,
   triggerHooks = true,
 }: Args): Promise<void> => {
@@ -236,6 +244,7 @@ export const promise = async ({
           const hookPromises = Object.entries(siblingDoc[field.name]).map(([locale, value]) =>
             (async () => {
               const hookedValue = await currentHook({
+                blockData,
                 collection,
                 context,
                 currentDepth,
@@ -254,6 +263,7 @@ export const promise = async ({
                 schemaPath: schemaPathSegments,
                 showHiddenFields,
                 siblingData: siblingDoc,
+                siblingFields,
                 value,
               })
 
@@ -266,6 +276,7 @@ export const promise = async ({
           await Promise.all(hookPromises)
         } else {
           const hookedValue = await currentHook({
+            blockData,
             collection,
             context,
             currentDepth,
@@ -284,6 +295,7 @@ export const promise = async ({
             schemaPath: schemaPathSegments,
             showHiddenFields,
             siblingData: siblingDoc,
+            siblingFields,
             value: siblingDoc[field.name],
           })
 
@@ -301,6 +313,7 @@ export const promise = async ({
         ? true
         : await field.access.read({
             id: doc.id as number | string,
+            blockData,
             data: doc,
             doc,
             req,
@@ -364,6 +377,7 @@ export const promise = async ({
       if (Array.isArray(rows)) {
         rows.forEach((row, rowIndex) => {
           traverseFields({
+            blockData,
             collection,
             context,
             currentDepth,
@@ -397,6 +411,7 @@ export const promise = async ({
           if (Array.isArray(localeRows)) {
             localeRows.forEach((row, rowIndex) => {
               traverseFields({
+                blockData,
                 collection,
                 context,
                 currentDepth,
@@ -438,9 +453,13 @@ export const promise = async ({
 
       if (Array.isArray(rows)) {
         rows.forEach((row, rowIndex) => {
-          const block = field.blocks.find(
-            (blockType) => blockType.slug === (row as JsonObject).blockType,
-          )
+          const blockTypeToMatch = (row as JsonObject).blockType
+
+          const block: Block | undefined =
+            req.payload.blocks[blockTypeToMatch] ??
+            ((field.blockReferences ?? field.blocks).find(
+              (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
+            ) as Block | undefined)
 
           let blockSelectMode = selectMode
 
@@ -476,6 +495,7 @@ export const promise = async ({
 
           if (block) {
             traverseFields({
+              blockData: row,
               collection,
               context,
               currentDepth,
@@ -509,12 +529,17 @@ export const promise = async ({
         Object.values(rows).forEach((localeRows) => {
           if (Array.isArray(localeRows)) {
             localeRows.forEach((row, rowIndex) => {
-              const block = field.blocks.find(
-                (blockType) => blockType.slug === (row as JsonObject).blockType,
-              )
+              const blockTypeToMatch = row.blockType
+
+              const block: Block | undefined =
+                req.payload.blocks[blockTypeToMatch] ??
+                ((field.blockReferences ?? field.blocks).find(
+                  (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
+                ) as Block | undefined)
 
               if (block) {
                 traverseFields({
+                  blockData: row,
                   collection,
                   context,
                   currentDepth,
@@ -554,6 +579,7 @@ export const promise = async ({
     case 'collapsible':
     case 'row': {
       traverseFields({
+        blockData,
         collection,
         context,
         currentDepth,
@@ -595,6 +621,7 @@ export const promise = async ({
       const groupSelect = select?.[field.name]
 
       traverseFields({
+        blockData,
         collection,
         context,
         currentDepth,
@@ -747,6 +774,7 @@ export const promise = async ({
       }
 
       traverseFields({
+        blockData,
         collection,
         context,
         currentDepth,
@@ -780,6 +808,7 @@ export const promise = async ({
 
     case 'tabs': {
       traverseFields({
+        blockData,
         collection,
         context,
         currentDepth,

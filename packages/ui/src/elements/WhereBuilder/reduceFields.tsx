@@ -5,13 +5,13 @@ import type { ClientField } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import { fieldIsHiddenOrDisabled, fieldIsID, tabHasName } from 'payload/shared'
 
-import type { FieldCondition } from './types.js'
+import type { ReducedField } from './types.js'
 
 import { createNestedClientFieldPath } from '../../forms/Form/createNestedClientFieldPath.js'
 import { combineLabel } from '../FieldSelect/index.js'
 import fieldTypes from './field-types.js'
 
-export type ReduceClientFieldsArgs = {
+type ReduceFieldOptionsArgs = {
   fields: ClientField[]
   i18n: I18nClient
   labelPrefix?: string
@@ -22,12 +22,12 @@ export type ReduceClientFieldsArgs = {
  * Reduces a field map to a flat array of fields with labels and values.
  * Used in the WhereBuilder component to render the fields in the dropdown.
  */
-export const reduceClientFields = ({
+export const reduceFields = ({
   fields,
   i18n,
   labelPrefix,
   pathPrefix,
-}: ReduceClientFieldsArgs): FieldCondition[] => {
+}: ReduceFieldOptionsArgs): ReducedField[] => {
   return fields.reduce((reduced, field) => {
     // Do not filter out `field.admin.disableListFilter` fields here, as these should still render as disabled if they appear in the URL query
     if (fieldIsHiddenOrDisabled(field) && !fieldIsID(field)) {
@@ -55,7 +55,7 @@ export const reduceClientFields = ({
 
           if (typeof localizedTabLabel === 'string') {
             reduced.push(
-              ...reduceClientFields({
+              ...reduceFields({
                 fields: tab.fields,
                 i18n,
                 labelPrefix: labelWithPrefix,
@@ -71,7 +71,7 @@ export const reduceClientFields = ({
     // Rows cant have labels, so we need to handle them differently
     if (field.type === 'row' && 'fields' in field) {
       reduced.push(
-        ...reduceClientFields({
+        ...reduceFields({
           fields: field.fields,
           i18n,
           labelPrefix,
@@ -89,7 +89,7 @@ export const reduceClientFields = ({
         : localizedTabLabel
 
       reduced.push(
-        ...reduceClientFields({
+        ...reduceFields({
           fields: field.fields,
           i18n,
           labelPrefix: labelWithPrefix,
@@ -116,18 +116,20 @@ export const reduceClientFields = ({
         : pathPrefix
 
       reduced.push(
-        ...reduceClientFields({
+        ...reduceFields({
           fields: field.fields,
           i18n,
           labelPrefix: labelWithPrefix,
           pathPrefix: pathWithPrefix,
         }),
       )
+
       return reduced
     }
 
     if (typeof fieldTypes[field.type] === 'object') {
       const operatorKeys = new Set()
+
       const operators = fieldTypes[field.type].operators.reduce((acc, operator) => {
         if (!operatorKeys.has(operator.value)) {
           operatorKeys.add(operator.value)
@@ -137,6 +139,7 @@ export const reduceClientFields = ({
             label: i18n.t(operatorKey),
           })
         }
+
         return acc
       }, [])
 
@@ -149,13 +152,11 @@ export const reduceClientFields = ({
           })
         : localizedLabel
 
-      const formattedValue = pathPrefix
-        ? createNestedClientFieldPath(pathPrefix, field)
-        : field.name
+      const fieldPath = pathPrefix ? createNestedClientFieldPath(pathPrefix, field) : field.name
 
-      const formattedField: FieldCondition = {
+      const formattedField: ReducedField = {
         label: formattedLabel,
-        value: formattedValue,
+        value: fieldPath,
         ...fieldTypes[field.type],
         field,
         operators,

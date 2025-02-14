@@ -268,7 +268,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     originalNode: originalNodeIDMap[id],
                     parentRichTextFieldPath: path,
                     parentRichTextFieldSchemaPath: schemaPath,
-                    previousNode: previousNodeIDMap[id],
+                    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+                    previousNode: previousNodeIDMap[id]!,
                     req,
                   })
                 }
@@ -281,12 +282,15 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               if (subFieldFn && subFieldDataFn) {
                 const subFields = subFieldFn({ node, req })
                 const nodeSiblingData = subFieldDataFn({ node, req }) ?? {}
-                const nodeSiblingDoc = subFieldDataFn({ node: originalNodeIDMap[id], req }) ?? {}
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+                const nodeSiblingDoc = subFieldDataFn({ node: originalNodeIDMap[id]!, req }) ?? {}
                 const nodePreviousSiblingDoc =
-                  subFieldDataFn({ node: previousNodeIDMap[id], req }) ?? {}
+                  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+                  subFieldDataFn({ node: previousNodeIDMap[id]!, req }) ?? {}
 
                 if (subFields?.length) {
                   await afterChangeTraverseFields({
+                    blockData: nodeSiblingData,
                     collection,
                     context,
                     data: data ?? {},
@@ -395,10 +399,11 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
               if (subFieldFn && subFieldDataFn) {
                 const subFields = subFieldFn({ node, req })
-                const nodeSliblingData = subFieldDataFn({ node, req }) ?? {}
+                const nodeSiblingData = subFieldDataFn({ node, req }) ?? {}
 
                 if (subFields?.length) {
                   afterReadTraverseFields({
+                    blockData: nodeSiblingData,
                     collection,
                     context,
                     currentDepth: currentDepth!,
@@ -420,7 +425,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     populationPromises: populationPromises!,
                     req,
                     showHiddenFields: showHiddenFields!,
-                    siblingDoc: nodeSliblingData,
+                    siblingDoc: nodeSiblingData,
                     triggerAccessControl,
                     triggerHooks,
                   })
@@ -538,7 +543,8 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     originalNodeWithLocales: originalNodeWithLocalesIDMap[id],
                     parentRichTextFieldPath: path,
                     parentRichTextFieldSchemaPath: schemaPath,
-                    previousNode: previousNodeIDMap[id],
+                    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+                    previousNode: previousNodeIDMap[id]!,
                     req,
                     skipValidation: skipValidation!,
                   })
@@ -555,15 +561,18 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                 const nodeSiblingData = subFieldDataFn({ node, req }) ?? {}
                 const nodeSiblingDocWithLocales =
                   subFieldDataFn({
-                    node: originalNodeWithLocalesIDMap[id],
+                    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+                    node: originalNodeWithLocalesIDMap[id]!,
                     req,
                   }) ?? {}
                 const nodePreviousSiblingDoc =
-                  subFieldDataFn({ node: previousNodeIDMap[id], req }) ?? {}
+                  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+                  subFieldDataFn({ node: previousNodeIDMap[id]!, req }) ?? {}
 
                 if (subFields?.length) {
                   await beforeChangeTraverseFields({
                     id,
+                    blockData: nodeSiblingData,
                     collection,
                     context,
                     data: data ?? {},
@@ -753,11 +762,13 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               if (subFieldFn && subFieldDataFn) {
                 const subFields = subFieldFn({ node, req })
                 const nodeSiblingData = subFieldDataFn({ node, req }) ?? {}
-                const nodeSiblingDoc = subFieldDataFn({ node: originalNodeIDMap[id], req }) ?? {}
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+                const nodeSiblingDoc = subFieldDataFn({ node: originalNodeIDMap[id]!, req }) ?? {}
 
                 if (subFields?.length) {
                   await beforeValidateTraverseFields({
                     id,
+                    blockData: nodeSiblingData,
                     collection,
                     context,
                     data,

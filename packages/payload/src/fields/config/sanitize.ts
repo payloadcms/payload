@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { deepMergeSimple } from '@payloadcms/translations/utilities'
 
 import type { CollectionConfig, SanitizedJoins } from '../../collections/config/types.js'
@@ -14,6 +15,8 @@ import {
 import { formatLabels, toWords } from '../../utilities/formatLabels.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'
+import { baseTimezoneField } from '../baseFields/timezone/baseField.js'
+import { defaultTimezones } from '../baseFields/timezone/defaultTimezones.js'
 import { setDefaultBeforeDuplicate } from '../setDefaultBeforeDuplicate.js'
 import { validations } from '../validations.js'
 import { sanitizeJoinField } from './sanitizeJoinField.js'
@@ -221,7 +224,14 @@ export const sanitizeFields = async ({
     }
 
     if (field.type === 'blocks' && field.blocks) {
-      for (const block of field.blocks) {
+      if (field.blockReferences && field.blocks?.length) {
+        throw new Error('You cannot have both blockReferences and blocks in the same blocks field')
+      }
+
+      for (const block of field.blockReferences ?? field.blocks) {
+        if (typeof block === 'string') {
+          continue
+        }
         if (block._sanitized === true) {
           continue
         }
@@ -287,6 +297,30 @@ export const sanitizeFields = async ({
     }
 
     fields[i] = field
+
+    // Insert our field after assignment
+    if (field.type === 'date' && field.timezone) {
+      const name = field.name + '_tz'
+      const defaultTimezone = config.admin.timezones.defaultTimezone
+
+      const supportedTimezones = config.admin.timezones.supportedTimezones
+
+      const options =
+        typeof supportedTimezones === 'function'
+          ? supportedTimezones({ defaultTimezones })
+          : supportedTimezones
+
+      // Need to set the options here manually so that any database enums are generated correctly
+      // The UI component will import the options from the config
+      const timezoneField = baseTimezoneField({
+        name,
+        defaultValue: defaultTimezone,
+        options,
+        required: field.required,
+      })
+
+      fields.splice(++i, 0, timezoneField)
+    }
   }
 
   return fields

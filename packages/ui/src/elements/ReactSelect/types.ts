@@ -8,8 +8,13 @@ type CustomSelectProps = {
   DocumentDrawerToggler?: ReturnType<UseDocumentDrawer>[1]
   draggableProps?: any
   droppableRef?: React.RefObject<HTMLDivElement | null>
+  editableProps?: (
+    data: Option<{ label: string; value: string }>,
+    className: string,
+    selectProps: ReactSelectStateManagerProps,
+  ) => any
   onDelete?: DocumentDrawerProps['onDelete']
-  onDocumentDrawerOpen: (args: {
+  onDocumentDrawerOpen?: (args: {
     collectionSlug: string
     hasReadPermission: boolean
     id: number | string
@@ -87,6 +92,7 @@ export type ReactSelectAdapterProps = {
   isOptionSelected?: any
   isSearchable?: boolean
   isSortable?: boolean
+  menuIsOpen?: boolean
   noOptionsMessage?: (obj: { inputValue: string }) => string
   numberOnly?: boolean
   onChange?: (value: Option | Option[]) => void

@@ -326,6 +326,7 @@ export const etTranslations: DefaultTranslationsObject = {
     takeOver: 'Võta üle',
     thisLanguage: 'Eesti',
     time: 'Aeg',
+    timezone: 'Ajavöönd',
     titleDeleted: '{{label}} "{{title}}" edukalt kustutatud.',
     true: 'Tõene',
     unauthorized: 'Volitamata',
@@ -417,6 +418,7 @@ export const etTranslations: DefaultTranslationsObject = {
     requiresNoMoreThan: 'See väli ei tohi sisaldada rohkem kui {{count}} {{label}}.',
     requiresTwoNumbers: 'See väli nõuab kahte numbrit.',
     shorterThanMax: 'See väärtus peab olema lühem kui maksimaalne pikkus {{maxLength}} tähemärki.',
+    timezoneRequired: 'Ajavöönd on vajalik.',
     trueOrFalse: 'See väli saab olla ainult tõene või väär.',
     username:
       'Palun sisesta kehtiv kasutajanimi. Võib sisaldada tähti, numbreid, sidekriipse, punkte ja alakriipse.',

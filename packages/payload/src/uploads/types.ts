@@ -12,6 +12,16 @@ export type FileSize = {
   width: null | number
 }
 
+// TODO: deprecate in Payload v4.
+/**
+ * FileSizeImproved is a more precise type, and will replace FileSize in Payload v4.
+ * This type is for internal use only as it will be deprecated in the future.
+ * @internal
+ */
+export type FileSizeImproved = {
+  url: null | string
+} & FileSize
+
 export type FileSizes = {
   [size: string]: FileSize
 }

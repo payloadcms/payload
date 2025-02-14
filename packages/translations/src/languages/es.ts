@@ -334,6 +334,7 @@ export const esTranslations: DefaultTranslationsObject = {
     takeOver: 'Tomar el control',
     thisLanguage: 'Español',
     time: 'Tiempo',
+    timezone: 'Zona horaria',
     titleDeleted: '{{label}} {{title}} eliminado correctamente.',
     true: 'Verdadero',
     unauthorized: 'No autorizado',
@@ -426,6 +427,7 @@ export const esTranslations: DefaultTranslationsObject = {
     requiresNoMoreThan: 'Este campo require no más de {{count}} {{label}}',
     requiresTwoNumbers: 'Este campo requiere dos números.',
     shorterThanMax: 'Este dato debe ser más corto que el máximo de {{maxLength}} caracteres.',
+    timezoneRequired: 'Se requiere una zona horaria.',
     trueOrFalse: 'Este campo solamente puede ser verdadero o falso.',
     username:
       'Por favor, introduzca un nombre de usuario válido. Puede contener letras, números, guiones, puntos y guiones bajos.',

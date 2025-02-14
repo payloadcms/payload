@@ -5,8 +5,8 @@ import { redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
 import { Logo } from '../../elements/Logo/index.js'
-import './index.scss'
 import { LoginForm } from './LoginForm/index.js'
+import './index.scss'
 
 export { generateLoginMetadata } from './meta.js'
 

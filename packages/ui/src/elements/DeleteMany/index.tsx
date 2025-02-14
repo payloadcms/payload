@@ -16,8 +16,8 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { mergeListSearchAndWhere } from '../../utilities/mergeListSearchAndWhere.js'
 import { Button } from '../Button/index.js'
-import './index.scss'
 import { Pill } from '../Pill/index.js'
+import './index.scss'
 
 const baseClass = 'delete-documents'
 

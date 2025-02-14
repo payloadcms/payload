@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { AllOperations, PayloadRequest } from '../types/index.js'
 import type { Permissions, SanitizedPermissions } from './types.js'
 
