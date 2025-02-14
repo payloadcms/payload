@@ -294,14 +294,22 @@ export function fieldsToJSONSchema(
             // Check for a case where no blocks are provided.
             // We need to generate an empty array for this case, note that JSON schema 4 doesn't support empty arrays
             // so the best we can get is `unknown[]`
-            const hasBlocks = Boolean(field.blocks.length)
+            const hasBlocks = Boolean(
+              field.blockReferences ? field.blockReferences.length : field.blocks.length,
+            )
 
             fieldSchema = {
               ...baseFieldSchema,
               type: withNullableJSONSchemaType('array', isRequired),
               items: hasBlocks
                 ? {
-                    oneOf: field.blocks.map((block) => {
+                    oneOf: (field.blockReferences ?? field.blocks).map((block) => {
+                      if (typeof block === 'string') {
+                        const resolvedBlock = config?.blocks?.find((b) => b.slug === block)
+                        return {
+                          $ref: `#/definitions/${resolvedBlock.interfaceName ?? resolvedBlock.slug}`,
+                        }
+                      }
                       const blockFieldSchemas = fieldsToJSONSchema(
                         collectionIDFieldTypes,
                         block.flattenedFields,
@@ -732,9 +740,11 @@ export function entityToJSONSchema(
 }
 
 export function fieldsToSelectJSONSchema({
+  config,
   fields,
   interfaceNameDefinitions,
 }: {
+  config: SanitizedConfig
   fields: FlattenedField[]
   interfaceNameDefinitions: Map<string, JSONSchema4>
 }): JSONSchema4 {
@@ -750,6 +760,7 @@ export function fieldsToSelectJSONSchema({
       case 'group':
       case 'tab': {
         let fieldSchema: JSONSchema4 = fieldsToSelectJSONSchema({
+          config,
           fields: field.flattenedFields,
           interfaceNameDefinitions,
         })
@@ -782,8 +793,13 @@ export function fieldsToSelectJSONSchema({
           properties: {},
         }
 
-        for (const block of field.blocks) {
+        for (const block of field.blockReferences ?? field.blocks) {
+          if (typeof block === 'string') {
+            continue // TODO
+          }
+
           let blockSchema = fieldsToSelectJSONSchema({
+            config,
             fields: block.flattenedFields,
             interfaceNameDefinitions,
           })
@@ -1038,6 +1054,7 @@ export function configToJSONSchema(
         i18n,
       )
       const select = fieldsToSelectJSONSchema({
+        config,
         fields: entity.flattenedFields,
         interfaceNameDefinitions,
       })
@@ -1081,6 +1098,42 @@ export function configToJSONSchema(
       )
     : {}
 
+  const blocksDefinition: JSONSchema4 = {
+    type: 'object',
+    additionalProperties: false,
+    properties: {},
+    required: [],
+  }
+  for (const block of config.blocks) {
+    const blockFieldSchemas = fieldsToJSONSchema(
+      collectionIDFieldTypes,
+      block.flattenedFields,
+      interfaceNameDefinitions,
+      config,
+      i18n,
+    )
+
+    const blockSchema: JSONSchema4 = {
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        ...blockFieldSchemas.properties,
+        blockType: {
+          const: block.slug,
+        },
+      },
+      required: ['blockType', ...blockFieldSchemas.required],
+    }
+
+    const interfaceName = block.interfaceName ?? block.slug
+    interfaceNameDefinitions.set(interfaceName, blockSchema)
+
+    blocksDefinition.properties[block.slug] = {
+      $ref: `#/definitions/${interfaceName}`,
+    }
+    ;(blocksDefinition.required as string[]).push(block.slug)
+  }
+
   let jsonSchema: JSONSchema4 = {
     additionalProperties: false,
     definitions: {
@@ -1093,6 +1146,7 @@ export function configToJSONSchema(
     type: 'object',
     properties: {
       auth: generateAuthOperationSchemas(config.collections),
+      blocks: blocksDefinition,
       collections: generateEntitySchemas(config.collections || []),
       collectionsJoins: generateCollectionJoinsSchemas(config.collections || []),
       collectionsSelect: generateEntitySelectSchemas(config.collections || []),
@@ -1113,6 +1167,7 @@ export function configToJSONSchema(
       'auth',
       'db',
       'jobs',
+      'blocks',
     ],
     title: 'Config',
   }

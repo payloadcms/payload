@@ -47,7 +47,7 @@ export function genImportMapIterateFields({
         addToImportMap,
         baseDir,
         config,
-        fields: field.blocks,
+        fields: field.blocks.filter((block) => typeof block !== 'string'),
         importMap,
         imports,
       })

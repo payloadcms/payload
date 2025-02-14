@@ -50,7 +50,7 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
    */
   if (fileSrc) {
     const queryChar = fileSrc?.includes('?') ? '&' : '?'
-    src = imageCacheTag ? `${fileSrc}${queryChar}${imageCacheTag}` : fileSrc
+    src = imageCacheTag ? `${fileSrc}${queryChar}${encodeURIComponent(imageCacheTag)}` : fileSrc
   }
 
   return (
@@ -100,7 +100,7 @@ export function ThumbnailComponent(props: ThumbnailComponentProps) {
    */
   if (fileSrc) {
     const queryChar = fileSrc?.includes('?') ? '&' : '?'
-    src = imageCacheTag ? `${fileSrc}${queryChar}${imageCacheTag}` : fileSrc
+    src = imageCacheTag ? `${fileSrc}${queryChar}${encodeURIComponent(imageCacheTag)}` : fileSrc
   }
 
   return (

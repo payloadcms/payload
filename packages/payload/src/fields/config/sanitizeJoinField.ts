@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 import type { SanitizedJoin, SanitizedJoins } from '../../collections/config/types.js'
-import type { Config } from '../../config/types.js'
+import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { FlattenedJoinField, JoinField, RelationshipField, UploadField } from './types.js'
 
 import { APIError } from '../../errors/index.js'
@@ -91,6 +91,7 @@ export const sanitizeJoinField = ({
         return
       }
     },
+    config: config as unknown as SanitizedConfig,
     fields: joinCollection.fields,
   })
 
