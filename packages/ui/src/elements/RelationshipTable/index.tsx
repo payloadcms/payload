@@ -317,7 +317,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
               )}
             </div>
           )}
-          {data.docs && data.docs.length > 0 && (
+          {data?.docs && data.docs.length > 0 && (
             <RelationshipProvider>
               <ListQueryProvider
                 data={data}

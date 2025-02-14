@@ -225,10 +225,10 @@ export const buildTableState = async (
 
   const { columnState, Table } = renderTable({
     clientCollectionConfig,
-    clientConfig,
     collectionConfig,
     collections: Array.isArray(collectionSlug) ? collectionSlug : undefined,
     columnPreferences: Array.isArray(collectionSlug) ? listPreferences?.columns : undefined, // TODO, might not be neededcolumns,
+    columns,
     docs,
     enableRowSelections,
     i18n: req.i18n,
