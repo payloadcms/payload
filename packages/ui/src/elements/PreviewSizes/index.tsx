@@ -95,7 +95,7 @@ export const PreviewSizes: React.FC<PreviewSizesProps> = ({ doc, imageCacheTag, 
       return null
     }
     if (doc.url) {
-      return `${doc.url}${imageCacheTag ? `?${imageCacheTag}` : ''}`
+      return `${doc.url}${imageCacheTag ? `?${encodeURIComponent(imageCacheTag)}` : ''}`
     }
   }
   useEffect(() => {

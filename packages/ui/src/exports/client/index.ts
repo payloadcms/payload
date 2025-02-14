@@ -23,6 +23,7 @@ export { useEffectEvent } from '../../hooks/useEffectEvent.js'
 export { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 
 // elements
+export { Link } from '../../elements/Link/index.js'
 export { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
 export { DocumentTakeOver } from '../../elements/DocumentTakeOver/index.js'
 export { DocumentLocked } from '../../elements/DocumentLocked/index.js'
@@ -246,6 +247,11 @@ export type { UserWithToken } from '../../providers/Auth/index.js'
 export { ClientFunctionProvider, useClientFunctions } from '../../providers/ClientFunction/index.js'
 export { useAddClientFunction } from '../../providers/ClientFunction/index.js'
 
+export { ProgressBar } from '../../providers/RouteTransition/ProgressBar/index.js'
+export {
+  RouteTransitionProvider,
+  useRouteTransition,
+} from '../../providers/RouteTransition/index.js'
 export { ConfigProvider, useConfig } from '../../providers/Config/index.js'
 export { DocumentEventsProvider, useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 export { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'

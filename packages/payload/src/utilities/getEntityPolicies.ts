@@ -172,13 +172,18 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
             })
           }
 
-          if ('blocks' in field && field.blocks) {
+          if (
+            ('blocks' in field && field.blocks) ||
+            ('blockReferences' in field && field.blockReferences)
+          ) {
             if (!mutablePolicies[field.name]?.blocks) {
               mutablePolicies[field.name].blocks = {}
             }
 
             await Promise.all(
-              field.blocks.map(async (block) => {
+              (field.blockReferences ?? field.blocks).map(async (_block) => {
+                const block = typeof _block === 'string' ? payload.blocks[_block] : _block // TODO: Skip over string blocks
+
                 if (!mutablePolicies[field.name].blocks?.[block.slug]) {
                   mutablePolicies[field.name].blocks[block.slug] = {
                     fields: {},

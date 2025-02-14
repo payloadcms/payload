@@ -1,6 +1,6 @@
 import type { SQL } from 'drizzle-orm'
 import type { SQLiteTableWithColumns } from 'drizzle-orm/sqlite-core'
-import type { FlattenedField, NumberField, TextField } from 'payload'
+import type { FlattenedBlock, FlattenedField, NumberField, TextField } from 'payload'
 
 import { and, eq, like, sql } from 'drizzle-orm'
 import { type PgTableWithColumns } from 'drizzle-orm/pg-core'
@@ -176,7 +176,12 @@ export const getTableColumnFromPath = ({
           // find the block config using the value
           const blockTypes = Array.isArray(value) ? value : [value]
           blockTypes.forEach((blockType) => {
-            const block = field.blocks.find((block) => block.slug === blockType)
+            const block =
+              adapter.payload.blocks[blockType] ??
+              ((field.blockReferences ?? field.blocks).find(
+                (block) => typeof block !== 'string' && block.slug === blockType,
+              ) as FlattenedBlock | undefined)
+
             newTableName = adapter.tableNameMap.get(
               `${tableName}_blocks_${toSnakeCase(block.slug)}`,
             )
@@ -201,11 +206,13 @@ export const getTableColumnFromPath = ({
           }
         }
 
-        const hasBlockField = field.blocks.some((block) => {
+        const hasBlockField = (field.blockReferences ?? field.blocks).some((_block) => {
+          const block = typeof _block === 'string' ? adapter.payload.blocks[_block] : _block
+
           newTableName = adapter.tableNameMap.get(`${tableName}_blocks_${toSnakeCase(block.slug)}`)
           constraintPath = `${constraintPath}${field.name}.%.`
 
-          let result
+          let result: TableColumn
           const blockConstraints = []
           const blockSelectFields = {}
           try {

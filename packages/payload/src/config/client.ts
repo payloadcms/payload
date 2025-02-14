@@ -3,6 +3,8 @@ import type { I18nClient } from '@payloadcms/translations'
 import type { DeepPartial } from 'ts-essentials'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
+import type { ClientBlock } from '../fields/config/types.js'
+import type { BlockSlug } from '../index.js'
 import type {
   LivePreviewConfig,
   SanitizedConfig,
@@ -13,8 +15,8 @@ import {
   type ClientCollectionConfig,
   createClientCollectionConfigs,
 } from '../collections/config/client.js'
+import { createClientBlocks } from '../fields/config/client.js'
 import { type ClientGlobalConfig, createClientGlobalConfigs } from '../globals/config/client.js'
-
 export type ServerOnlyRootProperties = keyof Pick<
   SanitizedConfig,
   | 'bin'
@@ -39,10 +41,22 @@ export type ServerOnlyRootProperties = keyof Pick<
 
 export type ServerOnlyRootAdminProperties = keyof Pick<SanitizedConfig['admin'], 'components'>
 
+export type UnsanitizedClientConfig = {
+  admin: {
+    livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
+  } & Omit<SanitizedConfig['admin'], 'components' | 'dependencies' | 'livePreview'>
+  blocks: ClientBlock[]
+  collections: ClientCollectionConfig[]
+  custom?: Record<string, any>
+  globals: ClientGlobalConfig[]
+} & Omit<SanitizedConfig, 'admin' | 'collections' | 'globals' | 'i18n' | ServerOnlyRootProperties>
+
 export type ClientConfig = {
   admin: {
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
   } & Omit<SanitizedConfig['admin'], 'components' | 'dependencies' | 'livePreview'>
+  blocks: ClientBlock[]
+  blocksMap: Record<BlockSlug, ClientBlock>
   collections: ClientCollectionConfig[]
   custom?: Record<string, any>
   globals: ClientGlobalConfig[]
@@ -109,6 +123,16 @@ export const createClientConfig = ({
           }
         }
         break
+      case 'blocks': {
+        ;(clientConfig.blocks as ClientBlock[]) = createClientBlocks({
+          blocks: config.blocks,
+          defaultIDType: config.db.defaultIDType,
+          i18n,
+          importMap,
+        }).filter((block) => typeof block !== 'string') as ClientBlock[]
+
+        break
+      }
       case 'collections':
         ;(clientConfig.collections as ClientCollectionConfig[]) = createClientCollectionConfigs({
           collections: config.collections,
@@ -125,6 +149,7 @@ export const createClientConfig = ({
           importMap,
         })
         break
+
       case 'localization':
         if (typeof config.localization === 'object' && config.localization) {
           clientConfig.localization = {}

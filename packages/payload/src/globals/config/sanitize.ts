@@ -20,6 +20,7 @@ export const sanitizeGlobal = async (
    * so that you can sanitize them together, after the config has been sanitized.
    */
   richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>,
+  _validRelationships?: string[],
 ): Promise<SanitizedGlobalConfig> => {
   const { collections } = config
 
@@ -64,7 +65,8 @@ export const sanitizeGlobal = async (
   }
 
   // Sanitize fields
-  const validRelationships = collections.map((c) => c.slug) || []
+  const validRelationships = _validRelationships ?? config.collections.map((c) => c.slug) ?? []
+
   global.fields = await sanitizeFields({
     config,
     fields: global.fields,

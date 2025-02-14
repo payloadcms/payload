@@ -13,6 +13,7 @@ import { useDocumentEvents } from '../../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../../providers/EditDepth/index.js'
 import { OperationProvider } from '../../../providers/Operation/index.js'
+import { useRouteTransition } from '../../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { useUploadEdits } from '../../../providers/UploadEdits/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../../utilities/abortAndIgnore.js'
@@ -62,6 +63,7 @@ export function EditForm({ submitted }: EditFormProps) {
   const params = useSearchParams()
   const { reportUpdate } = useDocumentEvents()
   const { resetUploadEdits } = useUploadEdits()
+  const { startRouteTransition } = useRouteTransition()
 
   const locale = params.get('locale')
 
@@ -89,7 +91,8 @@ export function EditForm({ submitted }: EditFormProps) {
           adminRoute,
           path: `/collections/${collectionSlug}/${json?.doc?.id}${locale ? `?locale=${locale}` : ''}`,
         })
-        router.push(redirectRoute)
+
+        startRouteTransition(() => router.push(redirectRoute))
       } else {
         resetUploadEdits()
       }
@@ -104,6 +107,7 @@ export function EditForm({ submitted }: EditFormProps) {
       reportUpdate,
       resetUploadEdits,
       router,
+      startRouteTransition,
     ],
   )
 
