@@ -13,7 +13,7 @@ There are four types of views within the Admin Panel:
 - [Root Views](#root-views)
 - [Collection Views](#collection-views)
 - [Global Views](#global-views)
-- [Document Views](#document-views)
+- [Document Views](./document-views)
 
 To swap in your own Custom View, first consult the list of available components, determine the scope that corresponds to what you are trying to accomplish, then [author your React component(s)](#building-custom-views) accordingly.
 
@@ -121,7 +121,7 @@ const config = buildConfig({
 })
 ```
 
-The above example shows how to add a new [Root View](#root-views), but the pattern is the same for [Collection Views](#collection-views), [Global Views](#global-views), and [Document Views](#document-views). For help on how to build your own Custom Views, see [Building Custom Views](#building-custom-views).
+The above example shows how to add a new [Root View](#root-views), but the pattern is the same for [Collection Views](#collection-views), [Global Views](#global-views), and [Document Views](./document-views). For help on how to build your own Custom Views, see [Building Custom Views](#building-custom-views).
 
 <Banner type="warning">
   **Note:**
@@ -176,14 +176,14 @@ _For details on how to build Custom Views, including all available props, see [B
 
 <Banner type="warning">
   **Note:**
-  The `root` property will replace the _entire_ [Edit View](./edit-view), including the title, tabs, etc., _as well as all nested [Document Views](#document-views)_, such as the API, Live Preview, and Version views. To replace only the Edit View precisely, use the `edit.default` key instead.
+  The `root` property will replace the _entire_ [Edit View](./edit-view), including the title, tabs, etc., _as well as all nested [Document Views](./document-views)_, such as the API, Live Preview, and Version views. To replace only the Edit View precisely, use the `edit.default` key instead.
 </Banner>
 
 The following options are available:
 
 | Property   | Description                                                                                                                                                    |
 | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `edit` | The Edit View is used to edit a single document for any given Collection. It is comprised of many different sub-views. [More details](#document-views).            |
+| `edit` | The Edit View is used to edit a single document for any given Collection. It is comprised of many different sub-views. [More details](./document-views).            |
 | `list` | The List View is used to show a list of documents for any given Collection. [More details](#list-view).                                                            |
 
 <Banner type="success">
@@ -227,103 +227,18 @@ _For details on how to build Custom Views, including all available props, see [B
 
 <Banner type="warning">
   **Note:**
-  The `root` property will replace the _entire_ Edit View, including the title, tabs, etc., _as well as all nested [Document Views](#document-views)_, such as the API, Live Preview, and Version views. To replace only the Edit View precisely, use the `edit.default` key instead.
+  The `root` property will replace the _entire_ Edit View, including the title, tabs, etc., _as well as all nested [Document Views](./document-views)_, such as the API, Live Preview, and Version views. To replace only the Edit View precisely, use the `edit.default` key instead.
 </Banner>
 
 The following options are available:
 
 | Property   | Description                                                                                                                                     |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `edit` | The Edit View is used to edit a single document for any given Global. It is comprised of many different sub-views. [More details](#document-views). |
+| `edit` | The Edit View is used to edit a single document for any given Global. It is comprised of many different sub-views. [More details](./document-views). |
 
 <Banner type="success">
   **Note:**
   You can also add _new_ Global Views to the config by adding a new key to the `views` object with at least a `path` and `Component` property. See [Adding New Views](#adding-new-views) for more information.
-</Banner>
-
-## Document Views
-
-Document Views are views that are scoped under the `/collections/:collectionSlug/:id` or the `/globals/:globalSlug` route, such as the Edit View or the API View. All Document Views keep their overall structure across navigation changes, such as their title and tabs, and replace only the content below.
-
-To swap out Document Views with your own, or to [create entirely new ones](#adding-new-views), use the `admin.components.views.edit[key]` property in your [Collection Config](../configuration/collections) or [Global Config](../configuration/globals):
-
-```ts
-import type { CollectionConfig } from 'payload'
-
-export const MyCollectionOrGlobalConfig: CollectionConfig = {
-  // ...
-  admin: {
-    components: {
-      views: {
-        edit: {
-          api: {
-            Component: '/path/to/MyCustomAPIViewComponent', // highlight-line
-          },
-        },
-      },
-    },
-  },
-}
-```
-
-_For details on how to build Custom Views, including all available props, see [Building Custom Views](#building-custom-views)._
-
-<Banner type="warning">
- **Note:**
- If you need to replace the _entire_ Edit View, including _all_ nested Document Views, use the `root` key. See [Custom Collection Views](#collection-views) or [Custom Global Views](#global-views) for more information.
-</Banner>
-
-The following options are available:
-
-| Property          | Description                                                                                                                                                     |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `root`        | The Root View overrides all other nested views and routes. No document controls or tabs are rendered when this key is set.                                      |
-| `default`     | The Default View is the primary view in which your document is edited. It is rendered within the "Edit" tab. [More details](./edit-view).                                                    |
-| `versions`    | The Versions View is used to navigate the version history of a single document. It is rendered within the "Versions" tab. [More details](../versions/overview). |
-| `version`     | The Version View is used to edit a single version of a document. It is rendered within the "Version" tab. [More details](../versions/overview).                 |
-| `api`         | The API View is used to display the REST API JSON response for a given document. It is rendered within the "API" tab.                                           |
-| `livePreview` | The LivePreview view is used to display the Live Preview interface. It is rendered within the "Live Preview" tab. [More details](../live-preview/overview).     |
-
-### Document Tabs
-
-Each Custom View can be given a new tab in the Edit View, if desired. Tabs are highly configurable, from as simple as changing the label to swapping out the entire component, they can be modified in any way. To add or customize tabs in the Edit View, use the `tab` key:
-
-```ts
-import type { CollectionConfig } from 'payload'
-
-export const MyCollection: CollectionConfig = {
-  slug: 'my-collection',
-  admin: {
-    components: {
-      views: {
-        edit: {
-          myCustomTab: {
-            Component: '/path/to/MyCustomTab',
-            path: '/my-custom-tab',
-            tab: {
-              Component: '/path/to/MyCustomTabComponent' // highlight-line
-            }
-          },
-          anotherCustomTab: {
-            Component: '/path/to/AnotherCustomView',
-            path: '/another-custom-view',
-            // highlight-start
-            tab: {
-              label: 'Another Custom View',
-              href: '/another-custom-view',
-            }
-            // highlight-end
-          },
-        },
-      },
-    },
-  },
-}
-```
-
-<Banner type="warning">
- **Note:**
- This applies to _both_ Collections _and_ Globals.
 </Banner>
 
 ## Building Custom Views
@@ -358,7 +273,7 @@ Your Custom Views will be provided with the following props:
 | `importMap`           | The import map object.                                                                                                             |
 | `params`              | An object containing the [Dynamic Route Parameters](https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes). |
 | `searchParams`        | An object containing the [Search Parameters](https://developer.mozilla.org/docs/Learn/Common_questions/What_is_a_URL#parameters).  |
-| `doc`                 | The document being edited. Only available in Document Views. [More details](#document-views).                                      |
+| `doc`                 | The document being edited. Only available in Document Views. [More details](./document-views).                                      |
 
 <Banner type="success">
   **Reminder:**
