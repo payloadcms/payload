@@ -596,9 +596,6 @@ importers:
       pluralize:
         specifier: 8.0.0
         version: 8.0.0
-      ts-essentials:
-        specifier: 10.0.3
-        version: 10.0.3(typescript@5.7.3)
       tsx:
         specifier: 4.19.2
         version: 4.19.2
@@ -615,6 +612,9 @@ importers:
       payload:
         specifier: workspace:*
         version: link:../payload
+      ts-essentials:
+        specifier: 10.0.3
+        version: 10.0.3(typescript@5.7.3)
 
   packages/live-preview:
     devDependencies:
@@ -858,9 +858,6 @@ importers:
       scmp:
         specifier: 2.1.0
         version: 2.1.0
-      ts-essentials:
-        specifier: 10.0.3
-        version: 10.0.3(typescript@5.7.3)
       tsx:
         specifier: 4.19.2
         version: 4.19.2
@@ -916,6 +913,9 @@ importers:
       sharp:
         specifier: 0.32.6
         version: 0.32.6
+      ts-essentials:
+        specifier: 10.0.3
+        version: 10.0.3(typescript@5.7.3)
 
   packages/payload-cloud:
     dependencies:
@@ -1251,9 +1251,6 @@ importers:
       react-error-boundary:
         specifier: 4.1.2
         version: 4.1.2(react@19.0.0)
-      ts-essentials:
-        specifier: 10.0.3
-        version: 10.0.3(typescript@5.7.3)
       uuid:
         specifier: 10.0.0
         version: 10.0.0
@@ -1315,6 +1312,9 @@ importers:
       swc-plugin-transform-remove-imports:
         specifier: 3.1.0
         version: 3.1.0
+      ts-essentials:
+        specifier: 10.0.3
+        version: 10.0.3(typescript@5.7.3)
 
   packages/richtext-slate:
     dependencies:
@@ -1535,9 +1535,6 @@ importers:
       sonner:
         specifier: ^1.7.2
         version: 1.7.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      ts-essentials:
-        specifier: 10.0.3
-        version: 10.0.3(typescript@5.7.3)
       use-context-selector:
         specifier: 2.0.0
         version: 2.0.0(react@19.0.0)(scheduler@0.25.0)
@@ -1590,6 +1587,9 @@ importers:
       payload:
         specifier: workspace:*
         version: link:../payload
+      ts-essentials:
+        specifier: 10.0.3
+        version: 10.0.3(typescript@5.7.3)
 
   test:
     devDependencies:

@@ -135,7 +135,6 @@
     "react-select": "5.9.0",
     "scheduler": "0.25.0",
     "sonner": "^1.7.2",
-    "ts-essentials": "10.0.3",
     "use-context-selector": "2.0.0",
     "uuid": "10.0.0"
   },
@@ -154,7 +153,8 @@
     "esbuild": "0.24.2",
     "esbuild-sass-plugin": "3.3.1",
     "eslint-plugin-react-compiler": "19.0.0-beta-714736e-20250131",
-    "payload": "workspace:*"
+    "payload": "workspace:*",
+    "ts-essentials": "10.0.3"
   },
   "peerDependencies": {
     "next": "^15.0.0",

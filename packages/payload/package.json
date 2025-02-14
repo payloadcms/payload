@@ -110,7 +110,6 @@
     "qs-esm": "7.0.2",
     "sanitize-filename": "1.6.3",
     "scmp": "2.1.0",
-    "ts-essentials": "10.0.3",
     "tsx": "4.19.2",
     "uuid": "10.0.0",
     "ws": "^8.16.0"
@@ -130,7 +129,8 @@
     "graphql-http": "^1.22.0",
     "react-datepicker": "7.6.0",
     "rimraf": "6.0.1",
-    "sharp": "0.32.6"
+    "sharp": "0.32.6",
+    "ts-essentials": "10.0.3"
   },
   "peerDependencies": {
     "graphql": "^16.8.1"
