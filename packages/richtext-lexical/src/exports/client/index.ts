@@ -6,6 +6,11 @@ export { slashMenuBasicGroupWithItems } from '../../features/shared/slashMenu/ba
 export { AlignFeatureClient } from '../../features/align/client/index.js'
 export { BlockquoteFeatureClient } from '../../features/blockquote/client/index.js'
 export { BlocksFeatureClient } from '../../features/blocks/client/index.js'
+export {
+  INSERT_BLOCK_COMMAND,
+  INSERT_INLINE_BLOCK_COMMAND,
+} from '../../features/blocks/client/plugin/commands.js'
+
 export { TestRecorderFeatureClient } from '../../features/debug/testRecorder/client/index.js'
 export { TreeViewFeatureClient } from '../../features/debug/treeView/client/index.js'
 export { BoldFeatureClient } from '../../features/format/bold/feature.client.js'
