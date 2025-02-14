@@ -18,10 +18,10 @@ import {
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { navigateToDoc } from '../helpers/e2e/navigateToDoc.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { EXPECT_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { categoriesJoinRestrictedSlug, categoriesSlug, postsSlug, uploadsSlug } from './shared.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { RESTClient } from '../helpers/rest.js'
+import { EXPECT_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { categoriesJoinRestrictedSlug, categoriesSlug, postsSlug, uploadsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -37,7 +37,7 @@ describe('Join Field', () => {
   let categoriesURL: AdminUrlUtil
   let uploadsURL: AdminUrlUtil
   let categoriesJoinRestrictedURL: AdminUrlUtil
-  let categoryID: string | number
+  let categoryID: number | string
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -473,5 +473,14 @@ describe('Join Field', () => {
     const url = new AdminUrlUtil(serverURL, 'users')
     await page.goto(url.admin + '/create-first-user')
     await expect(page.locator('.field-type.join')).toBeHidden()
+  })
+
+  test('should render error message when ValidationError is thrown', async () => {
+    await navigateToDoc(page, categoriesURL)
+
+    await page.locator('#field-enableErrorOnJoin').click()
+    await page.locator('#action-save').click()
+
+    await expect(page.locator('#field-joinWithError')).toContainText('enableErrorOnJoin is true')
   })
 })
