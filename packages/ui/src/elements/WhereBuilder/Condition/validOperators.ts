@@ -1,16 +1,16 @@
 import type { Operator } from 'payload'
 
-export const operatorValueTypes: Record<Operator, 'any' | 'boolean' | 'number' | 'string'> = {
+export const operatorValueTypes: Record<Operator, 'any' | 'boolean' | 'object' | 'string'> = {
   all: 'any',
   contains: 'string',
   equals: 'any',
   exists: 'boolean',
-  greater_than: 'number',
-  greater_than_equal: 'number',
+  greater_than: 'object',
+  greater_than_equal: 'object',
   in: 'any',
   intersects: 'any',
-  less_than: 'number',
-  less_than_equal: 'number',
+  less_than: 'object',
+  less_than_equal: 'object',
   like: 'string',
   near: 'any',
   not_equals: 'any',

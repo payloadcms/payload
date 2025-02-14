@@ -106,10 +106,11 @@ export const Condition: React.FC<Props> = (props) => {
     (operator: Option<Operator>) => {
       const validOperatorValue = operatorValueTypes[operator.value] || 'any'
       const isValidValue = validOperatorValue === 'any' || typeof value === validOperatorValue
-      const newValue = isValidValue ? value : undefined
 
       if (!isValidValue) {
-        setInternalValue(newValue)
+        // if the current value is not valid for the new operator
+        // reset the value before passing it to updateCondition
+        setInternalValue(undefined)
       }
 
       updateCondition({
