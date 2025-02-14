@@ -136,9 +136,13 @@ export const Auth: React.FC<Props> = (props) => {
 
   const disabled = readOnly || isInitializing
 
+  const showFields =
+    !disableLocalStrategy ||
+    (typeof disableLocalStrategy === 'object' && disableLocalStrategy.enableFields === true)
+
   return (
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
-      {!disableLocalStrategy && (
+      {showFields && (
         <React.Fragment>
           <EmailAndUsernameFields
             loginWithUsername={loginWithUsername}
