@@ -1,6 +1,6 @@
 import type * as AWS from '@aws-sdk/client-s3'
 import type { StaticHandler } from '@payloadcms/plugin-cloud-storage/types'
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, PayloadRequest } from 'payload'
 import type { Readable } from 'stream'
 
 import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
@@ -10,7 +10,7 @@ interface Args {
   bucket: string
   collection: CollectionConfig
   getStorageClient: () => AWS.S3
-  getResponseHeaders?: (defaultHeaders: HeadersInit) => Headers
+  getResponseHeaders?: (args: { headers: HeadersInit, req: PayloadRequest }) => Headers | Promise<Headers>
 }
 
 // Type guard for NodeJS.Readable streams
@@ -67,7 +67,7 @@ export const getHandler = ({
       }
 
       const headers = getResponseHeaders
-        ? getResponseHeaders(defaultHeaders)
+        ? await getResponseHeaders({ headers: defaultHeaders, req })
         : new Headers(defaultHeaders)
 
       if (etagFromHeaders && etagFromHeaders === objectEtag) {
