@@ -94,6 +94,7 @@ export const renderTable = ({
     const fields: ClientField[] = []
     for (const collection of collections) {
       const config = clientConfig.collections.find((each) => each.slug === collection)
+
       for (const field of filterFields(config.fields)) {
         if (fieldAffectsData(field)) {
           if (fields.some((each) => fieldAffectsData(each) && each.name === field.name)) {
@@ -107,7 +108,7 @@ export const renderTable = ({
 
     const columns = columnsFromArgs
       ? columnsFromArgs?.filter((column) =>
-          flattenTopLevelFields(clientCollectionConfig.fields, true)?.some(
+          flattenTopLevelFields(fields, true)?.some(
             (field) => 'name' in field && field.name === column.accessor,
           ),
         )
