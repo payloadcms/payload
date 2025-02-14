@@ -536,6 +536,32 @@ describe('Relationship Field', () => {
     await expect(page.locator(tableRowLocator)).toHaveCount(1)
   })
 
+  test('should hide edit button in main doc when relationship deleted', async () => {
+    const createdRelatedDoc = await payload.create({
+      collection: relationOneSlug,
+      data: {
+        name: 'relation-one to be deleted',
+      },
+    })
+    const doc = await payload.create({
+      collection: slug,
+      data: {
+        relationship: createdRelatedDoc.id,
+      },
+    })
+    await payload.delete({
+      collection: relationOneSlug,
+      id: createdRelatedDoc.id,
+    })
+
+    await page.goto(url.edit(doc.id))
+
+    const editBtn = page.locator(
+      '#field-relationship button.relationship--single-value__drawer-toggler',
+    )
+    await expect(editBtn).toHaveCount(0)
+  })
+
   describe('existing relationships', () => {
     test('should highlight existing relationship', async () => {
       await page.goto(url.edit(docWithExistingRelations.id))
