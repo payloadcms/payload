@@ -414,9 +414,16 @@ export default buildConfigWithDefaults({
     },
   ],
   localization: {
+    filterAvailableLocales: ({ locales }) => {
+      return locales.filter((locale) => locale.code !== 'xx')
+    },
     defaultLocale,
     fallback: true,
     locales: [
+      {
+        code: 'xx',
+        label: 'FILTERED',
+      },
       {
         code: defaultLocale,
         label: 'English',

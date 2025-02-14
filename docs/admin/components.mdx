@@ -54,7 +54,7 @@ const config = buildConfig({
 
 In order to ensure the Payload Config is fully Node.js compatible and as lightweight as possible, components are not directly imported into your config. Instead, they are identified by their file path for the Admin Panel to resolve on its own.
 
-Component Paths, by default, are relative to your project's base directory. This is either your current working directory, or the directory specified in `config.admin.baseDir`. To simplify Component Paths, you can also configure the base directory using the `admin.importMap.baseDir` property.
+Component Paths, by default, are relative to your project's base directory. This is either your current working directory, or the directory specified in `config.admin.importMap.baseDir`.
 
 Components using named exports are identified either by appending `#` followed by the export name, or using the `exportName` property. If the component is the default export, this can be omitted.
 

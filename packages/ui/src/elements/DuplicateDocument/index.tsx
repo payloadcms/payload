@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientCollectionConfig, SanitizedCollectionConfig } from 'payload'
+import type { SanitizedCollectionConfig } from 'payload'
 
 import { Modal, useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -14,13 +14,14 @@ import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
+import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { Button } from '../Button/index.js'
 import { drawerZBase } from '../Drawer/index.js'
-import { PopupList } from '../Popup/index.js'
 import './index.scss'
+import { PopupList } from '../Popup/index.js'
 
 const baseClass = 'duplicate'
 
@@ -44,6 +45,7 @@ export const DuplicateDocument: React.FC<Props> = ({
   const { toggleModal } = useModal()
   const locale = useLocale()
   const { setModified } = useForm()
+  const { startRouteTransition } = useRouteTransition()
 
   const {
     config: {
@@ -93,11 +95,13 @@ export const DuplicateDocument: React.FC<Props> = ({
             setModified(false)
 
             if (redirectAfterDuplicate) {
-              router.push(
-                formatAdminURL({
-                  adminRoute,
-                  path: `/collections/${slug}/${doc.id}${locale?.code ? `?locale=${locale.code}` : ''}`,
-                }),
+              return startRouteTransition(() =>
+                router.push(
+                  formatAdminURL({
+                    adminRoute,
+                    path: `/collections/${slug}/${doc.id}${locale?.code ? `?locale=${locale.code}` : ''}`,
+                  }),
+                ),
               )
             }
 
@@ -131,6 +135,7 @@ export const DuplicateDocument: React.FC<Props> = ({
       router,
       adminRoute,
       collectionConfig,
+      startRouteTransition,
     ],
   )
 

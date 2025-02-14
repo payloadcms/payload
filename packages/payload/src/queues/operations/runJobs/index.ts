@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { PaginatedDocs } from '../../../database/types.js'
 import type { PayloadRequest, Where } from '../../../types/index.js'
 import type { WorkflowJSON } from '../../config/types/workflowJSONTypes.js'

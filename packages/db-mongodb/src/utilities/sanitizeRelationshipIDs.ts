@@ -1,7 +1,7 @@
 import type { CollectionConfig, Field, SanitizedConfig, TraverseFieldsCallback } from 'payload'
 
 import { Types } from 'mongoose'
-import { APIError, traverseFields } from 'payload'
+import { traverseFields } from 'payload'
 import { fieldAffectsData } from 'payload/shared'
 
 type Args = {
@@ -150,7 +150,7 @@ export const sanitizeRelationshipIDs = ({
     }
   }
 
-  traverseFields({ callback: sanitize, fields, fillEmpty: false, ref: data })
+  traverseFields({ callback: sanitize, config, fields, fillEmpty: false, ref: data })
 
   return data
 }

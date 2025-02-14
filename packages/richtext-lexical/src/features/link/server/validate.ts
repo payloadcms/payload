@@ -38,8 +38,9 @@ export const linkValidation = (
 
     const errorPathsSet = new Set<string>()
     for (const fieldKey in result) {
-      if (result[fieldKey].errorPaths?.length) {
-        for (const errorPath of result[fieldKey].errorPaths) {
+      const fieldState = result[fieldKey]
+      if (fieldState?.errorPaths?.length) {
+        for (const errorPath of fieldState.errorPaths) {
           errorPathsSet.add(errorPath)
         }
       }

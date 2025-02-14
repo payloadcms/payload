@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 /* eslint-disable no-restricted-exports */
 import type {
   CollectionSlug,

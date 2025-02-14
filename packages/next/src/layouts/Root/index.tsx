@@ -2,7 +2,7 @@ import type { AcceptedLanguages } from '@payloadcms/translations'
 import type { ImportMap, LanguageOptions, SanitizedConfig, ServerFunctionClient } from 'payload'
 
 import { rtlLanguages } from '@payloadcms/translations'
-import { RootProvider } from '@payloadcms/ui'
+import { ProgressBar, RootProvider } from '@payloadcms/ui'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { headers as getHeaders, cookies as nextCookies } from 'next/headers.js'
 import { getPayload, getRequestLanguage, parseCookies } from 'payload'
@@ -135,6 +135,7 @@ export const RootLayout = async ({
           translations={req.i18n.translations}
           user={req.user}
         >
+          <ProgressBar />
           {Array.isArray(config.admin?.components?.providers) &&
           config.admin?.components?.providers.length > 0 ? (
             <NestProviders

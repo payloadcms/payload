@@ -3,7 +3,6 @@
 import type { ListViewClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import LinkImport from 'next/link.js'
 import { useRouter } from 'next/navigation.js'
 import { formatFilesize, isNumber } from 'payload/shared'
 import React, { Fragment, useEffect, useState } from 'react'
@@ -38,7 +37,6 @@ import { ListHeader } from './ListHeader/index.js'
 import './index.scss'
 
 const baseClass = 'collection-list'
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
   const {
@@ -213,7 +211,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                           })}
                         </Button>
                       ) : (
-                        <Button el="link" Link={Link} to={newDocumentURL}>
+                        <Button el="link" to={newDocumentURL}>
                           {i18n.t('general:createNewLabel', {
                             label: getTranslation(labels?.singular, i18n),
                           })}

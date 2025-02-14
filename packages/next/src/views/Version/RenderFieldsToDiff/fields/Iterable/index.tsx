@@ -3,7 +3,7 @@
 import type { FieldDiffClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useTranslation } from '@payloadcms/ui'
+import { useConfig, useTranslation } from '@payloadcms/ui'
 
 import './index.scss'
 
@@ -26,6 +26,7 @@ export const Iterable: React.FC<FieldDiffClientProps> = ({
 }) => {
   const { i18n } = useTranslation()
   const { selectedLocales } = useSelectedLocales()
+  const { config } = useConfig()
 
   const versionRowCount = Array.isArray(versionValue) ? versionValue.length : 0
   const comparisonRowCount = Array.isArray(comparisonValue) ? comparisonValue.length : 0
@@ -63,6 +64,7 @@ export const Iterable: React.FC<FieldDiffClientProps> = ({
               const { fields, versionFields } = getFieldsForRowComparison({
                 baseVersionField,
                 comparisonRow,
+                config,
                 field,
                 row: i,
                 versionRow,
