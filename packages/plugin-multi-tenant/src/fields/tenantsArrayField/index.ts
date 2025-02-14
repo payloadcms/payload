@@ -15,7 +15,7 @@ export const tenantsArrayField = ({
   rowFields,
   tenantFieldAccess,
   tenantsArrayFieldName = defaults.tenantsArrayFieldName,
-  tenantsArrayTenantFieldName = defaults.tenantsArrayFieldName,
+  tenantsArrayTenantFieldName = defaults.tenantsArrayTenantFieldName,
   tenantsCollectionSlug = defaults.tenantCollectionSlug,
 }: Args): ArrayField => ({
   name: tenantsArrayFieldName,
