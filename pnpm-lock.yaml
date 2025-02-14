@@ -877,9 +877,6 @@ importers:
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
-      '@payloadcms/ui':
-        specifier: workspace:*
-        version: link:../ui
       '@types/json-schema':
         specifier: 7.0.15
         version: 7.0.15
