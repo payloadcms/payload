@@ -7,6 +7,7 @@ import type {
   FieldDiffClientProps,
   FieldDiffServerProps,
   FieldTypes,
+  FlattenedBlock,
   PayloadComponent,
   PayloadRequest,
   SanitizedFieldPermissions,
@@ -332,14 +333,27 @@ const buildVersionField = ({
     for (let i = 0; i < blocksValue.length; i++) {
       const comparisonRow = comparisonValue?.[i] || {}
       const versionRow = blocksValue[i] || {}
-      const versionBlock = field.blocks.find((block) => block.slug === versionRow.blockType)
+
+      const blockSlugToMatch: string = versionRow.blockType
+      const versionBlock =
+        req.payload.blocks[blockSlugToMatch] ??
+        ((field.blockReferences ?? field.blocks).find(
+          (block) => typeof block !== 'string' && block.slug === blockSlugToMatch,
+        ) as FlattenedBlock | undefined)
 
       let fields = []
 
       if (versionRow.blockType === comparisonRow.blockType) {
         fields = versionBlock.fields
       } else {
-        const comparisonBlock = field.blocks.find((block) => block.slug === comparisonRow.blockType)
+        const comparisonBlockSlugToMatch: string = versionRow.blockType
+
+        const comparisonBlock =
+          req.payload.blocks[comparisonBlockSlugToMatch] ??
+          ((field.blockReferences ?? field.blocks).find(
+            (block) => typeof block !== 'string' && block.slug === comparisonBlockSlugToMatch,
+          ) as FlattenedBlock | undefined)
+
         if (comparisonBlock) {
           fields = getUniqueListBy<Field>(
             [...versionBlock.fields, ...comparisonBlock.fields],

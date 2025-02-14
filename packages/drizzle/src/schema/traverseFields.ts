@@ -343,7 +343,9 @@ export const traverseFields = ({
       case 'blocks': {
         const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
 
-        field.blocks.forEach((block) => {
+        ;(field.blockReferences ?? field.blocks).forEach((_block) => {
+          const block = typeof _block === 'string' ? adapter.payload.blocks[_block] : _block
+
           const blockTableName = createTableName({
             adapter,
             config: block,

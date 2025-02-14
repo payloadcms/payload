@@ -1,6 +1,6 @@
-import type { FlattenedField, JoinQuery, SanitizedConfig } from 'payload'
+import type { FlattenedBlock, FlattenedField, JoinQuery, SanitizedConfig } from 'payload'
 
-import { fieldAffectsData, fieldIsVirtual } from 'payload/shared'
+import { fieldIsVirtual } from 'payload/shared'
 
 import type { DrizzleAdapter } from '../../types.js'
 import type { BlocksMap } from '../../utilities/createBlocksMap.js'
@@ -216,7 +216,11 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
           Object.entries(result[field.name]).forEach(([locale, localizedBlocks]) => {
             result[field.name][locale] = localizedBlocks.map((row) => {
-              const block = field.blocks.find(({ slug }) => slug === row.blockType)
+              const block =
+                adapter.payload.blocks[row.blockType] ??
+                ((field.blockReferences ?? field.blocks).find(
+                  (block) => typeof block !== 'string' && block.slug === row.blockType,
+                ) as FlattenedBlock | undefined)
 
               if (block) {
                 const blockResult = traverseFields<T>({
@@ -265,7 +269,16 @@ export const traverseFields = <T extends Record<string, unknown>>({
               row.id = row._uuid
               delete row._uuid
             }
-            const block = field.blocks.find(({ slug }) => slug === row.blockType)
+
+            if (typeof row.blockType !== 'string') {
+              return acc
+            }
+
+            const block =
+              adapter.payload.blocks[row.blockType] ??
+              ((field.blockReferences ?? field.blocks).find(
+                (block) => typeof block !== 'string' && block.slug === row.blockType,
+              ) as FlattenedBlock | undefined)
 
             if (block) {
               if (

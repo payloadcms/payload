@@ -11,12 +11,12 @@
 /packages/live-preview*/src/ @jacobsfletch
 /packages/plugin-stripe/src/ @jacobsfletch
 /packages/plugin-multi-tenant/src/ @JarrodMFlesch
-/packages/richtext-*/src/ @AlessioGr @GermanJablo
+/packages/richtext-*/src/ @AlessioGr
 /packages/next/src/ @jmikrut @jacobsfletch @AlessioGr @JarrodMFlesch
 /packages/ui/src/ @jmikrut @jacobsfletch @AlessioGr @JarrodMFlesch
 /packages/storage-*/src/ @denolfe @jmikrut @DanRibbens
 /packages/create-payload-app/src/ @denolfe @jmikrut @DanRibbens
-/packages/eslint-*/ @denolfe @jmikrut @DanRibbens @AlessioGr @GermanJablo
+/packages/eslint-*/ @denolfe @jmikrut @DanRibbens @AlessioGr
 
 ### Templates
 
@@ -25,7 +25,7 @@
 
 ### Build Files
 
-**/tsconfig*.json @denolfe @jmikrut @DanRibbens @AlessioGr @GermanJablo
+**/tsconfig*.json @denolfe @jmikrut @DanRibbens @AlessioGr
 **/jest.config.js @denolfe @jmikrut @DanRibbens @AlessioGr
 
 ### Root

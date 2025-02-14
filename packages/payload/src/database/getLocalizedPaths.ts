@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import type { Field, FlattenedField } from '../fields/config/types.js'
+import type { Field, FlattenedBlock, FlattenedField } from '../fields/config/types.js'
 import type { Payload } from '../index.js'
 import type { PathToQuery } from './queryValidation/types.js'
 
@@ -55,7 +55,15 @@ export function getLocalizedPaths({
             type: 'text',
           }
         } else {
-          for (const block of lastIncompletePath.field.blocks) {
+          for (const _block of lastIncompletePath.field.blockReferences ??
+            lastIncompletePath.field.blocks) {
+            let block: FlattenedBlock
+            if (typeof _block === 'string') {
+              block = payload?.blocks[_block]
+            } else {
+              block = _block
+            }
+
             matchedField = block.flattenedFields.find((field) => field.name === segment)
             if (matchedField) {
               break

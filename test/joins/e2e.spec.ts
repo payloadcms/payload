@@ -517,4 +517,13 @@ describe('Join Field', () => {
     await page.goto(url.admin + '/create-first-user')
     await expect(page.locator('.field-type.join')).toBeHidden()
   })
+
+  test('should render error message when ValidationError is thrown', async () => {
+    await navigateToDoc(page, categoriesURL)
+
+    await page.locator('#field-enableErrorOnJoin').click()
+    await page.locator('#action-save').click()
+
+    await expect(page.locator('#field-joinWithError')).toContainText('enableErrorOnJoin is true')
+  })
 })

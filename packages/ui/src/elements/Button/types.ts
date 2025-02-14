@@ -22,6 +22,11 @@ export type Props = {
   iconPosition?: 'left' | 'right'
   iconStyle?: 'none' | 'with-border' | 'without-border'
   id?: string
+  /**
+   * @deprecated
+   * This prop is deprecated and will be removed in the next major version.
+   * Components now import their own `Link` directly from `next/link`.
+   */
   Link?: React.ElementType
   newTab?: boolean
   onClick?: (event: MouseEvent) => void

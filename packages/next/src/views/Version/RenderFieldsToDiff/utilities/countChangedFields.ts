@@ -1,10 +1,11 @@
-import type { ArrayFieldClient, BlocksFieldClient, ClientField } from 'payload'
+import type { ArrayFieldClient, BlocksFieldClient, ClientConfig, ClientField } from 'payload'
 
 import { fieldHasChanges } from './fieldHasChanges.js'
 import { getFieldsForRowComparison } from './getFieldsForRowComparison.js'
 
 type Args = {
   comparison: unknown
+  config: ClientConfig
   fields: ClientField[]
   locales: string[] | undefined
   version: unknown
@@ -14,7 +15,7 @@ type Args = {
  * Recursively counts the number of changed fields between comparison and
  * version data for a given set of fields.
  */
-export function countChangedFields({ comparison, fields, locales, version }: Args) {
+export function countChangedFields({ comparison, config, fields, locales, version }: Args) {
   let count = 0
 
   fields.forEach((field) => {
@@ -32,12 +33,18 @@ export function countChangedFields({ comparison, fields, locales, version }: Arg
           locales.forEach((locale) => {
             const comparisonRows = comparison?.[field.name]?.[locale] ?? []
             const versionRows = version?.[field.name]?.[locale] ?? []
-            count += countChangedFieldsInRows({ comparisonRows, field, locales, versionRows })
+            count += countChangedFieldsInRows({
+              comparisonRows,
+              config,
+              field,
+              locales,
+              versionRows,
+            })
           })
         } else {
           const comparisonRows = comparison?.[field.name] ?? []
           const versionRows = version?.[field.name] ?? []
-          count += countChangedFieldsInRows({ comparisonRows, field, locales, versionRows })
+          count += countChangedFieldsInRows({ comparisonRows, config, field, locales, versionRows })
         }
         break
       }
@@ -77,6 +84,7 @@ export function countChangedFields({ comparison, fields, locales, version }: Arg
       case 'row': {
         count += countChangedFields({
           comparison,
+          config,
           fields: field.fields,
           locales,
           version,
@@ -91,6 +99,7 @@ export function countChangedFields({ comparison, fields, locales, version }: Arg
           locales.forEach((locale) => {
             count += countChangedFields({
               comparison: comparison?.[field.name]?.[locale],
+              config,
               fields: field.fields,
               locales,
               version: version?.[field.name]?.[locale],
@@ -99,6 +108,7 @@ export function countChangedFields({ comparison, fields, locales, version }: Arg
         } else {
           count += countChangedFields({
             comparison: comparison?.[field.name],
+            config,
             fields: field.fields,
             locales,
             version: version?.[field.name],
@@ -116,6 +126,7 @@ export function countChangedFields({ comparison, fields, locales, version }: Arg
             locales.forEach((locale) => {
               count += countChangedFields({
                 comparison: comparison?.[tab.name]?.[locale],
+                config,
                 fields: tab.fields,
                 locales,
                 version: version?.[tab.name]?.[locale],
@@ -125,6 +136,7 @@ export function countChangedFields({ comparison, fields, locales, version }: Arg
             // Named tab
             count += countChangedFields({
               comparison: comparison?.[tab.name],
+              config,
               fields: tab.fields,
               locales,
               version: version?.[tab.name],
@@ -133,6 +145,7 @@ export function countChangedFields({ comparison, fields, locales, version }: Arg
             // Unnamed tab
             count += countChangedFields({
               comparison,
+              config,
               fields: tab.fields,
               locales,
               version,
@@ -160,6 +173,7 @@ export function countChangedFields({ comparison, fields, locales, version }: Arg
 
 type countChangedFieldsInRowsArgs = {
   comparisonRows: unknown[]
+  config: ClientConfig
   field: ArrayFieldClient | BlocksFieldClient
   locales: string[] | undefined
   versionRows: unknown[]
@@ -167,6 +181,7 @@ type countChangedFieldsInRowsArgs = {
 
 export function countChangedFieldsInRows({
   comparisonRows = [],
+  config,
   field,
   locales,
   versionRows = [],
@@ -181,6 +196,7 @@ export function countChangedFieldsInRows({
     const { fields: rowFields } = getFieldsForRowComparison({
       baseVersionField: { type: 'text', fields: [], path: '', schemaPath: '' }, // Doesn't matter, as we don't need the versionFields output here
       comparisonRow,
+      config,
       field,
       row: i,
       versionRow,
@@ -188,6 +204,7 @@ export function countChangedFieldsInRows({
 
     count += countChangedFields({
       comparison: comparisonRow,
+      config,
       fields: rowFields,
       locales,
       version: versionRow,

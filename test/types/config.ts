@@ -18,6 +18,39 @@ export default buildConfigWithDefaults({
           type: 'text',
           name: 'text',
         },
+        {
+          type: 'text',
+          name: 'title',
+        },
+      ],
+    },
+    {
+      slug: 'pages',
+      fields: [
+        {
+          type: 'text',
+          name: 'title',
+        },
+        {
+          type: 'relationship',
+          relationTo: 'pages-categories',
+          name: 'category',
+        },
+      ],
+    },
+    {
+      slug: 'pages-categories',
+      fields: [
+        {
+          type: 'text',
+          name: 'title',
+        },
+        {
+          type: 'join',
+          name: 'relatedPages',
+          collection: 'pages',
+          on: 'category',
+        },
       ],
     },
   ],

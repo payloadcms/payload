@@ -32,6 +32,7 @@ export const sanitizeCollection = async (
    * so that you can sanitize them together, after the config has been sanitized.
    */
   richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>,
+  _validRelationships?: string[],
 ): Promise<SanitizedCollectionConfig> => {
   // /////////////////////////////////
   // Make copy of collection config
@@ -43,13 +44,8 @@ export const sanitizeCollection = async (
   // Sanitize fields
   // /////////////////////////////////
 
-  const validRelationships = (config.collections || []).reduce(
-    (acc, c) => {
-      acc.push(c.slug)
-      return acc
-    },
-    [collection.slug],
-  )
+  const validRelationships = _validRelationships ?? config.collections.map((c) => c.slug) ?? []
+
   const joins: SanitizedJoins = {}
   const polymorphicJoins: SanitizedJoin[] = []
   sanitized.fields = await sanitizeFields({
