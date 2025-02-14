@@ -43,12 +43,49 @@ Here's are some examples of simple List View components. These can be either Ser
 ```tsx
 import React from 'react'
 import type { ListViewServerProps } from 'payload'
+import { DefaultListView } from '@payloadcms/ui'
 
-export function MyCustomServerListView(ListViewServerProps) {
+export function MyCustomServerListView({
+  AfterList,
+  AfterListTable,
+  BeforeList,
+  BeforeListTable,
+  Description,
+  Table,
+  beforeActions,
+  collectionSlug,
+  columnState,
+  disableBulkDelete,
+  disableBulkEdit,
+  enableRowSelections,
+  hasCreatePermission,
+  listPreferences,
+  newDocumentURL,
+  preferenceKey,
+  renderedFilters,
+  resolvedFilterOptions
+}: ListViewServerProps) {
   return (
-    <div>
-      <p>This is a custom List View.</p>
-    </div>
+    <DefaultListView
+      AfterList={AfterList}
+      AfterListTable={AfterListTable}
+      BeforeList={BeforeList}
+      BeforeListTable={BeforeListTable}
+      Description={Description}
+      Table={Table}
+      beforeActions={beforeActions}
+      collectionSlug={collectionSlug}
+      columnState={columnState}
+      disableBulkDelete={disableBulkDelete}
+      disableBulkEdit={disableBulkEdit}
+      enableRowSelections={enableRowSelections}
+      hasCreatePermission={hasCreatePermission}
+      listPreferences={listPreferences}
+      newDocumentURL={newDocumentURL}
+      preferenceKey={preferenceKey}
+      renderedFilters={renderedFilters}
+      resolvedFilterOptions={resolvedFilterOptions}
+    />
   )
 }
 ```
@@ -61,12 +98,11 @@ _For details on how to build Custom Views, including all available props, see [B
 'use client'
 import React from 'react'
 import type { ListViewClientProps } from 'payload'
+import { DefaultListView } from '@payloadcms/ui'
 
-export function MyCustomClientListView(ListViewClientProps) {
+export function MyCustomClientListView(props: ListViewClientProps) {
   return (
-    <div>
-      <p>This is a custom List View.</p>
-    </div>
+    <DefaultListView {...props} />
   )
 }
 ```
@@ -135,7 +171,7 @@ Here's an example of a simple `beforeList` component:
 import React from 'react'
 import type { BeforeListServerProps } from 'payload'
 
-export function MyBeforeListComponent(BeforeListServerProps) {
+export function MyBeforeListComponent(props: BeforeListServerProps) {
   return (
     <div>
       <p>This is a custom component that appears before the list of documents.</p>
@@ -151,7 +187,7 @@ export function MyBeforeListComponent(BeforeListServerProps) {
 import React from 'react'
 import type { BeforeListClientProps } from 'payload'
 
-export function MyBeforeListComponent(BeforeListClientProps) {
+export function MyBeforeListComponent(props: BeforeListClientProps) {
   return (
     <div>
       <p>This is a custom component that appears before the list of documents.</p>
@@ -191,7 +227,7 @@ Here's an example of a simple `beforeListTable` component:
 import React from 'react'
 import type { BeforeListTableServerProps } from 'payload'
 
-export function MyBeforeListTableComponent(BeforeListTableServerProps) {
+export function MyBeforeListTableComponent(props: BeforeListTableServerProps) {
   return (
     <div>
       <p>This is a custom component that appears before the table of documents.</p>
@@ -207,7 +243,7 @@ export function MyBeforeListTableComponent(BeforeListTableServerProps) {
 import React from 'react'
 import type { BeforeListTableClientProps } from 'payload'
 
-export function MyBeforeListTableComponent(BeforeListTableClientProps) {
+export function MyBeforeListTableComponent(props: BeforeListTableClientProps) {
   return (
     <div>
       <p>This is a custom component that appears before the table of documents.</p>
@@ -247,7 +283,7 @@ Here's an example of a simple `afterList` component:
 import React from 'react'
 import type { AfterListServerProps } from 'payload'
 
-export function MyAfterListComponent(AfterListServerProps) {
+export function MyAfterListComponent(props: AfterListServerProps) {
   return (
     <div>
       <p>This is a custom component that appears after the list of documents.</p>
@@ -263,7 +299,7 @@ export function MyAfterListComponent(AfterListServerProps) {
 import React from 'react'
 import type { AfterListClientProps } from 'payload'
 
-export function MyAfterListComponent(AfterListClientProps) {
+export function MyAfterListComponent(props: AfterListClientProps) {
   return (
     <div>
       <p>This is a custom component that appears after the list of documents.</p>
@@ -303,7 +339,7 @@ Here's an example of a simple `afterListTable` component:
 import React from 'react'
 import type { AfterListTableServerProps } from 'payload'
 
-export function MyAfterListTableComponent(AfterListTableServerProps) {
+export function MyAfterListTableComponent(props: AfterListTableServerProps) {
   return (
     <div>
       <p>This is a custom component that appears after the table of documents.</p>
@@ -319,7 +355,7 @@ export function MyAfterListTableComponent(AfterListTableServerProps) {
 import React from 'react'
 import type { AfterListTableClientProps } from 'payload'
 
-export function MyAfterListTableComponent(AfterListTableClientProps) {
+export function MyAfterListTableComponent(props: AfterListTableClientProps) {
   return (
     <div>
       <p>This is a custom component that appears after the table of documents.</p>
@@ -359,7 +395,7 @@ Here's an example of a simple `Description` component:
 import React from 'react'
 import type { ListDescriptionServerProps } from 'payload'
 
-export function MyDescriptionComponent(ListDescriptionServerProps) {
+export function MyDescriptionComponent(props: ListDescriptionServerProps) {
   return (
     <div>
       <p>This is a custom description of the Collection.</p>
@@ -375,7 +411,7 @@ export function MyDescriptionComponent(ListDescriptionServerProps) {
 import React from 'react'
 import type { ListDescriptionClientProps } from 'payload'
 
-export function MyDescriptionComponent(ListDescriptionClientProps) {
+export function MyDescriptionComponent(props: ListDescriptionClientProps) {
   return (
     <div>
       <p>This is a custom description of the Collection.</p>
