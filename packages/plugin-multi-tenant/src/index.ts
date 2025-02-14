@@ -161,6 +161,7 @@ export const multiTenantPlugin =
          * Modify enabled collections
          */
         addFilterOptionsToFields({
+          config: incomingConfig,
           fields: collection.fields,
           tenantEnabledCollectionSlugs: collectionSlugs,
           tenantEnabledGlobalSlugs: globalCollectionSlugs,

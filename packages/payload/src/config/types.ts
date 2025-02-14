@@ -14,7 +14,7 @@ import type { JSONSchema4 } from 'json-schema'
 import type { DestinationStream, Level, pino } from 'pino'
 import type React from 'react'
 import type { default as sharp } from 'sharp'
-import type { DeepRequired } from 'ts-essentials'
+import type { DeepRequired, MarkOptional } from 'ts-essentials'
 
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type { DocumentTabConfig, RichTextAdapter } from '../admin/types.js'
@@ -42,7 +42,14 @@ import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { ErrorName } from '../errors/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { JobsConfig, Payload, RequestContext, TypedUser } from '../index.js'
+import type {
+  Block,
+  FlattenedBlock,
+  JobsConfig,
+  Payload,
+  RequestContext,
+  TypedUser,
+} from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -916,6 +923,7 @@ export type Config = {
   }
   /** Custom Payload bin scripts can be injected via the config. */
   bin?: BinScriptConfig[]
+  blocks?: Block[]
   /**
    * Manage the datamodel of your application
    *
@@ -943,12 +951,12 @@ export type Config = {
   cookiePrefix?: string
   /** Either a whitelist array of URLS to allow CORS requests from, or a wildcard string ('*') to accept incoming requests from any domain. */
   cors?: '*' | CORSConfig | string[]
+
   /** A whitelist array of URLs to allow Payload cookies to be accepted from as a form of CSRF protection. */
   csrf?: string[]
 
   /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
-
   /** Pass in a database adapter for use on this project. */
   db: DatabaseAdapterResult
   /** Enable to expose more detailed error information. */
@@ -1183,6 +1191,7 @@ export type SanitizedConfig = {
   admin: {
     timezones: SanitizedTimezoneConfig
   } & DeepRequired<Config['admin']>
+  blocks?: FlattenedBlock[]
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */
   editor?: RichTextAdapter<any, any, any>
@@ -1207,7 +1216,15 @@ export type SanitizedConfig = {
   // E.g. in packages/ui/src/graphics/Account/index.tsx in getComponent, if avatar.Component is casted to what it's supposed to be,
   // the result type is different
   DeepRequired<Config>,
-  'admin' | 'collections' | 'editor' | 'endpoint' | 'globals' | 'i18n' | 'localization' | 'upload'
+  | 'admin'
+  | 'blocks'
+  | 'collections'
+  | 'editor'
+  | 'endpoint'
+  | 'globals'
+  | 'i18n'
+  | 'localization'
+  | 'upload'
 >
 
 export type EditConfig = EditConfigWithoutRoot | EditConfigWithRoot

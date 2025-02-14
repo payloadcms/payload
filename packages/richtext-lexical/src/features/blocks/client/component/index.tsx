@@ -12,6 +12,7 @@ import {
   Pill,
   RenderFields,
   SectionTitle,
+  useConfig,
   useDocumentForm,
   useDocumentInfo,
   useEditDepth,
@@ -28,7 +29,12 @@ const baseClass = 'lexical-block'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { getTranslation } from '@payloadcms/translations'
 import { $getNodeByKey } from 'lexical'
-import { type BlocksFieldClient, type CollapsedPreferences, type FormState } from 'payload'
+import {
+  type BlocksFieldClient,
+  type ClientBlock,
+  type CollapsedPreferences,
+  type FormState,
+} from 'payload'
 import { v4 as uuid } from 'uuid'
 
 import type { BlockFields } from '../../server/nodes/BlocksNode.js'
@@ -71,6 +77,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const onChangeAbortControllerRef = useRef(new AbortController())
   const editDepth = useEditDepth()
   const [errorCount, setErrorCount] = React.useState(0)
+
+  const { config } = useConfig()
 
   const drawerSlug = formatDrawerSlug({
     slug: `lexical-blocks-create-${uuidFromContext}-${formData.id}`,
@@ -212,7 +220,11 @@ export const BlockComponent: React.FC<Props> = (props) => {
     componentMapRenderedBlockPath
   ]?.[0] as BlocksFieldClient
 
-  const clientBlock = blocksField?.blocks?.[0]
+  const clientBlock: ClientBlock | undefined = blocksField.blockReferences
+    ? typeof blocksField?.blockReferences?.[0] === 'string'
+      ? config.blocksMap[blocksField?.blockReferences?.[0]]
+      : blocksField?.blockReferences?.[0]
+    : blocksField?.blocks?.[0]
 
   const { i18n, t } = useTranslation<object, string>()
 

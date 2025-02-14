@@ -224,7 +224,14 @@ export const sanitizeFields = async ({
     }
 
     if (field.type === 'blocks' && field.blocks) {
-      for (const block of field.blocks) {
+      if (field.blockReferences && field.blocks?.length) {
+        throw new Error('You cannot have both blockReferences and blocks in the same blocks field')
+      }
+
+      for (const block of field.blockReferences ?? field.blocks) {
+        if (typeof block === 'string') {
+          continue
+        }
         if (block._sanitized === true) {
           continue
         }

@@ -1,10 +1,11 @@
 // @ts-strict-ignore
-/* eslint-disable @typescript-eslint/no-unused-expressions */
+
 import type { AdminViewConfig } from '../../admin/views/types.js'
 import type { SanitizedConfig } from '../../config/types.js'
 import type { AddToImportMap, Imports, InternalImportMap } from './index.js'
 
 import { iterateCollections } from './iterateCollections.js'
+import { genImportMapIterateFields } from './iterateFields.js'
 import { iterateGlobals } from './iterateGlobals.js'
 
 export function iterateConfig({
@@ -37,6 +38,20 @@ export function iterateConfig({
     importMap,
     imports,
   })
+
+  if (config?.blocks) {
+    const blocks = Object.values(config.blocks)
+    if (blocks?.length) {
+      genImportMapIterateFields({
+        addToImportMap,
+        baseDir,
+        config,
+        fields: blocks,
+        importMap,
+        imports,
+      })
+    }
+  }
 
   if (typeof config.admin?.avatar === 'object') {
     addToImportMap(config.admin?.avatar?.Component)

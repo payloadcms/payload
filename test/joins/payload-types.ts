@@ -51,6 +51,7 @@ export interface Config {
       localizedPolymorphic: 'posts';
       localizedPolymorphics: 'posts';
       filtered: 'posts';
+      joinWithError: 'posts';
       hiddenPosts: 'hidden-posts';
       singulars: 'singular';
     };
@@ -337,6 +338,11 @@ export interface Category {
     docs?: (string | Post)[] | null;
     hasNextPage?: boolean | null;
   } | null;
+  joinWithError?: {
+    docs?: (string | Post)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  enableErrorOnJoin?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -732,6 +738,8 @@ export interface CategoriesSelect<T extends boolean = true> {
   localizedPolymorphics?: T;
   singulars?: T;
   filtered?: T;
+  joinWithError?: T;
+  enableErrorOnJoin?: T;
   updatedAt?: T;
   createdAt?: T;
 }

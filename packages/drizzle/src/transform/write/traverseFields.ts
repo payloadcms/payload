@@ -168,8 +168,8 @@ export const traverseFields = ({
     }
 
     if (field.type === 'blocks') {
-      field.blocks.forEach(({ slug }) => {
-        blocksToDelete.add(toSnakeCase(slug))
+      ;(field.blockReferences ?? field.blocks).forEach((block) => {
+        blocksToDelete.add(toSnakeCase(typeof block === 'string' ? block : block.slug))
       })
 
       if (field.localized) {
