@@ -3,6 +3,7 @@ import type {
   Data,
   DocumentViewClientProps,
   DocumentViewServerProps,
+  DocumentViewServerPropsOnly,
   PayloadComponent,
 } from 'payload'
 
@@ -167,7 +168,7 @@ export const renderDocument = async ({
     }),
   ])
 
-  const serverProps: DocumentViewServerProps = {
+  const documentViewServerProps: DocumentViewServerPropsOnly = {
     doc,
     i18n,
     initPageResult,
@@ -189,9 +190,11 @@ export const renderDocument = async ({
     }
 
     const params = new URLSearchParams()
+
     if (collectionConfig.versions?.drafts) {
       params.append('draft', 'true')
     }
+
     if (locale?.code) {
       params.append('locale', locale.code)
     }
@@ -325,7 +328,7 @@ export const renderDocument = async ({
     req,
   })
 
-  const clientProps: DocumentViewClientProps = {
+  const documentViewClientProps: DocumentViewClientProps = {
     formState,
     ...documentSlots,
     documentSubViewType,
@@ -371,20 +374,20 @@ export const renderDocument = async ({
         <EditDepthProvider>
           {ErrorView
             ? RenderServerComponent({
-                clientProps,
+                clientProps: documentViewClientProps,
                 Component: ErrorView.ComponentConfig || ErrorView.Component,
                 importMap,
-                serverProps,
+                serverProps: documentViewServerProps,
               })
             : RenderServerComponent({
-                clientProps,
+                clientProps: documentViewClientProps,
                 Component: RootViewOverride
                   ? RootViewOverride
                   : CustomView?.ComponentConfig || CustomView?.Component
                     ? CustomView?.ComponentConfig || CustomView?.Component
                     : DefaultView?.ComponentConfig || DefaultView?.Component,
                 importMap,
-                serverProps,
+                serverProps: documentViewServerProps,
               })}
         </EditDepthProvider>
       </DocumentInfoProvider>

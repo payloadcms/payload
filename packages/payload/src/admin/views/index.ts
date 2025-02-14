@@ -63,6 +63,9 @@ export type InitPageResult = {
   visibleEntities: VisibleEntities
 }
 
+/**
+ * @todo This should be renamed to `ViewType` (singular)
+ */
 export type ViewTypes =
   | 'account'
   | 'dashboard'

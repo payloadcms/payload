@@ -3,22 +3,27 @@ import type { SanitizedCollectionConfig } from '../../collections/config/types.j
 import type { PayloadComponent, SanitizedConfig, ServerProps } from '../../config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { Payload } from '../../index.js'
-import type { Data, DocumentSlots } from '../types.js'
-import type { InitPageResult } from './index.js'
+import type { Data, DocumentSlots, FormState } from '../types.js'
+import type { InitPageResult, ViewTypes } from './index.js'
 
 export type EditViewProps = {
   readonly collectionSlug?: string
   readonly globalSlug?: string
 }
 
-export type DocumentViewServerProps = {
+export type DocumentViewServerPropsOnly = {
   readonly doc: Data
   readonly initPageResult: InitPageResult
   readonly routeSegments: string[]
-} & DocumentViewClientProps &
-  ServerProps
+} & ServerProps
 
-export type DocumentViewClientProps = {} & DocumentSlots
+export type DocumentViewServerProps = DocumentViewClientProps & DocumentViewServerPropsOnly
+
+export type DocumentViewClientProps = {
+  documentSubViewType: DocumentSubViewTypes
+  formState: FormState
+  viewType: ViewTypes
+} & DocumentSlots
 
 export type DocumentSubViewTypes = 'api' | 'default' | 'livePreview' | 'version' | 'versions'
 

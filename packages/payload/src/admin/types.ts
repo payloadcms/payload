@@ -554,6 +554,7 @@ export type {
    */
   DocumentViewServerProps as ServerSideEditViewProps,
   DocumentViewServerProps,
+  DocumentViewServerPropsOnly,
   EditViewProps,
 } from './views/document.js'
 
