@@ -412,7 +412,9 @@ export const traverseFields = ({
           fields,
           joins,
           locale,
-          parentIsLocalized: withinLocalizedField || field.localized,
+          // Parent is never localized, as we're passing the `fields` of a **different** collection here. This means that the
+          // parent localization "boundary" is crossed, and we're now in the context of the joined collection.
+          parentIsLocalized: false,
           selectLocale: true,
           sort,
           tableName: joinCollectionTableName,

@@ -99,6 +99,7 @@ export type TraverseFieldsCallback = (args: {
    * Function that when called will skip the current field and continue to the next
    */
   next?: () => void
+  parentIsLocalized: boolean
   /**
    * The parent reference object
    */
@@ -163,7 +164,7 @@ export const traverseFields = ({
       return
     }
 
-    if (!leavesFirst && callback && callback({ field, next, parentRef, ref })) {
+    if (!leavesFirst && callback && callback({ field, next, parentIsLocalized, parentRef, ref })) {
       return true
     } else if (leavesFirst) {
       callbackStack.push(callback)
@@ -204,6 +205,7 @@ export const traverseFields = ({
             callback({
               field: { ...tab, type: 'tab' },
               next,
+              parentIsLocalized,
               parentRef: currentParentRef,
               ref: tabRef,
             })
@@ -240,6 +242,7 @@ export const traverseFields = ({
             callback({
               field: { ...tab, type: 'tab' },
               next,
+              parentIsLocalized,
               parentRef: currentParentRef,
               ref: tabRef,
             })
@@ -402,7 +405,7 @@ export const traverseFields = ({
 
     if (isTopLevel) {
       callbackStack.reverse().forEach((cb) => {
-        cb({ field, next, parentRef, ref })
+        cb({ field, next, parentIsLocalized, parentRef, ref })
       })
     }
   })

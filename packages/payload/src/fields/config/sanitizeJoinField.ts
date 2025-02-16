@@ -43,14 +43,19 @@ export const sanitizeJoinField = ({
   let localized = false
   // Traverse fields and match based on the schema path
   traverseFields({
-    callback: ({ field, next }) => {
+    callback: ({ field, next, parentIsLocalized }) => {
       if (!('name' in field) || !field.name) {
         return
       }
       const currentSegment = pathSegments[currentSegmentIndex]
       // match field on path segments
       if ('name' in field && field.name === currentSegment) {
-        if ('localized' in field && field.localized) {
+        if (
+          'localized' in field &&
+          field.localized &&
+          (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
+            !parentIsLocalized)
+        ) {
           localized = true
           const fieldIndex = currentSegmentIndex
 
