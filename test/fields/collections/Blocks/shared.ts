@@ -55,7 +55,7 @@ export const blocksDoc: Partial<BlockField> = {
   ],
   localizedReferences: [
     {
-      blockType: 'localizedTextReference',
+      blockType: 'localizedTextReference2',
       text: 'localized text',
     },
   ],
