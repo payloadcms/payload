@@ -31,7 +31,7 @@ import React, { createContext, useContext } from 'react'
 
 const MyCustomContext = React.createContext(myCustomValue)
 
-export const MyProvider: React.FC = ({ children }) => {
+export function MyProvider({ children }: { children: React.ReactNode }) {
   return (
     <MyCustomContext.Provider value={myCustomValue}>
       {children}

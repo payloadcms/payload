@@ -142,12 +142,12 @@ Your Custom Views will be provided with the following props:
 Here is an example of a Custom View component:
 
 ```tsx
-import type { AdminViewProps } from 'payload'
+import type { AdminViewServerProps } from 'payload'
 
 import { Gutter } from '@payloadcms/ui'
 import React from 'react'
 
-export function MyCustomView(props: AdminViewProps) {
+export function MyCustomView(props: AdminViewServerProps) {
   return (
     <Gutter>
       <h1>Custom Default Root View</h1>
@@ -169,7 +169,7 @@ Your Custom Root Views can optionally use one of the templates that Payload prov
 Here is an example of how to use the Default Template in your Custom View:
 
 ```tsx
-import type { AdminViewProps } from 'payload'
+import type { AdminViewServerProps } from 'payload'
 
 import { DefaultTemplate } from '@payloadcms/next/templates'
 import { Gutter } from '@payloadcms/ui'
@@ -179,7 +179,7 @@ export function MyCustomView({
   initPageResult,
   params,
   searchParams,
-}: AdminViewProps) {
+}: AdminViewServerProps) {
   return (
     <DefaultTemplate
       i18n={initPageResult.req.i18n}
@@ -207,14 +207,14 @@ All Custom Views are public by default. It's up to you to secure your custom vie
 Here is how you might secure a Custom View:
 
 ```tsx
-import type { AdminViewProps } from 'payload'
+import type { AdminViewServerProps } from 'payload'
 
 import { Gutter } from '@payloadcms/ui'
 import React from 'react'
 
 export function MyCustomView({
   initPageResult
-}: AdminViewProps) {
+}: AdminViewServerProps) {
   const {
     req: {
       user

@@ -81,7 +81,7 @@ import { usePreferences } from '@payloadcms/ui'
 
 const lastUsedColorsPreferenceKey = 'last-used-colors';
 
-const CustomComponent = (props) => {
+export function CustomComponent() {
   const { getPreference, setPreference } = usePreferences();
 
   // Store the last used colors in local state
@@ -154,8 +154,6 @@ const CustomComponent = (props) => {
         </Fragment>
       )}
     </div>
-  );
-};
-
-export default CustomComponent;
+  )
+}
 ```

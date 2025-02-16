@@ -198,3 +198,38 @@ export const MyCollection: CollectionConfig = {
  **Note:**
  This applies to _both_ Collections _and_ Globals.
 </Banner>
+
+Here is an example of how to scaffold a custom Document Tab:
+
+#### Server Component
+
+```tsx
+import React from 'react'
+import type { DocumentTabServerProps } from 'payload'
+import { Link } from '@payloadcms/ui'
+
+export function MyCustomTabComponent(props: DocumentTabServerProps) {
+  return (
+    <Link href="/my-custom-tab">
+      This is a custom Document Tab (Server)
+    </Link>
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import type { DocumentTabClientProps } from 'payload'
+import { Link } from '@payloadcms/ui'
+
+export function MyCustomTabComponent(props: DocumentTabClientProps) {
+  return (
+    <Link href="/my-custom-tab">
+      This is a custom Document Tab (Client)
+    </Link>
+  )
+}
+```

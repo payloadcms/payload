@@ -161,10 +161,13 @@ Here is an example:
 
 ```tsx
 import React from 'react'
+import type { Payload } from 'payload'
 
-const MyServerComponent = async ({
+async function MyServerComponent({
   payload // highlight-line
-}) => {
+}: {
+  payload: Payload
+}) {
   const page = await payload.findByID({
     collection: 'pages',
     id: '123',
@@ -230,10 +233,12 @@ export function MyComponent({ myCustomProp }: { myCustomProp: string }) {
 All Custom Components in Payload are [React Server Components](https://react.dev/reference/rsc/server-components) by default, however, it is possible to use [Client Components](https://react.dev/reference/rsc/use-client) by simply adding the `'use client'` directive at the top of your file. Payload will automatically detect and remove all [non-serializable](https://react.dev/reference/rsc/use-client#serializable-types) default props before rendering your component.
 
 ```tsx
-'use client' // highlight-line
+// highlight-start
+'use client'
+// highlight-end
 import React, { useState } from 'react'
 
-export const MyClientComponent: React.FC = () => {
+export function MyClientComponent() {
   const [count, setCount] = useState(0)
 
   return (
@@ -278,8 +283,10 @@ For this reason, Payload creates a Client Config and passes it into the Config P
 import React from 'react'
 import { useConfig } from '@payloadcms/ui'
 
-export const MyClientComponent: React.FC = () => {
-  const { config: { serverURL } } = useConfig() // highlight-line
+export function MyClientComponent() {
+  // highlight-start
+  const { config: { serverURL } } = useConfig()
+  // highlight-end
 
   return (
     <Link href={serverURL}>
@@ -354,7 +361,7 @@ The best way to do this within a Client Component is to import the `useTranslati
 import React from 'react'
 import { useTranslation } from '@payloadcms/ui'
 
-export const MyClientComponent: React.FC = () => {
+export function MyClientComponent() {
   const { t, i18n } = useTranslation() // highlight-line
 
   return (
@@ -400,7 +407,7 @@ The best way to do this within a Client Component is to import the `useLocale` h
 import React from 'react'
 import { useLocale } from '@payloadcms/ui'
 
-const Greeting: React.FC = () => {
+function Greeting() {
   const locale = useLocale() // highlight-line
 
   const trans = {
@@ -427,7 +434,7 @@ To make it easier to [build your Custom Components](#building-custom-components)
 import React from 'react'
 import { useDocumentInfo } from '@payloadcms/ui'
 
-export const MyClientComponent: React.FC = () => {
+export function MyClientComponent() {
   const { slug } = useDocumentInfo() // highlight-line
 
   return (
@@ -449,7 +456,7 @@ To apply custom styles, simply import your own `.css` or `.scss` file into your 
 ```tsx
 import './index.scss'
 
-export const MyComponent: React.FC = () => {
+export function MyComponent() {
   return (
     <div className="my-component">
       My Custom Component
