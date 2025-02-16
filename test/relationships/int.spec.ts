@@ -422,11 +422,21 @@ describe('Relationships', () => {
             data: {},
           })
 
+          const movie3 = await payload.create({
+            collection: 'movies',
+            data: { name: 'some-name' },
+          })
+
+          const movie4 = await payload.create({
+            collection: 'movies',
+            data: { name: 'some-name' },
+          })
+
           await payload.create({
             collection: 'directors',
             data: {
               name: 'Quentin Tarantino',
-              movies: [movie2.id, movie1.id],
+              movies: [movie2.id, movie1.id, movie3.id, movie4.id],
             },
           })
 
@@ -455,6 +465,22 @@ describe('Relationships', () => {
           })
 
           expect(res.totalDocs).toBe(1)
+
+          const res_2 = await payload.find({
+            collection: 'directors',
+            limit: 10,
+            where: {
+              or: [
+                {
+                  'movies.name': {
+                    equals: 'some-name',
+                  },
+                },
+              ],
+            },
+          })
+
+          expect(res_2.totalDocs).toBe(1)
         })
 
         it('should query using "contains" by hasMany relationship field', async () => {
