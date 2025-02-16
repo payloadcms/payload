@@ -43,6 +43,7 @@ export const createVersion: CreateVersion = async function createVersion(
       this.payload.config,
       this.payload.collections[collectionSlug].config,
     ),
+    parentIsLocalized: false,
   })
 
   const [doc] = await VersionModel.create([data], options, req)

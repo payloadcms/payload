@@ -93,6 +93,7 @@ export const sanitizeJoinField = ({
     },
     config: config as unknown as SanitizedConfig,
     fields: joinCollection.fields,
+    parentIsLocalized: false,
   })
 
   if (!joinRelationship) {

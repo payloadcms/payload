@@ -22,6 +22,7 @@ type Args<T> = {
   id?: number | string
   overrideAccess: boolean
   parentIndexPath: string
+  parentIsLocalized: boolean
   parentPath: string
   parentSchemaPath: string
   req: PayloadRequest
@@ -39,6 +40,7 @@ export const promise = async <T>({
   fieldIndex,
   overrideAccess,
   parentIndexPath,
+  parentIsLocalized,
   parentPath,
   parentSchemaPath,
   req,
@@ -61,7 +63,10 @@ export const promise = async <T>({
 
   if (fieldAffectsData(field)) {
     let fieldData = siblingDoc?.[field.name]
-    const fieldIsLocalized = field.localized && localization
+    const fieldIsLocalized =
+      field.localized &&
+      localization &&
+      (req.payload.config.compatibility?.allowLocalizedWithinLocalized || !parentIsLocalized)
 
     // Run field beforeDuplicate hooks
     if (Array.isArray(field.hooks?.beforeDuplicate)) {
@@ -162,6 +167,7 @@ export const promise = async <T>({
                       fields: field.fields,
                       overrideAccess,
                       parentIndexPath: '',
+                      parentIsLocalized: parentIsLocalized || field.localized,
                       parentPath: path + '.' + rowIndex,
                       parentSchemaPath: schemaPath,
                       req,
@@ -200,6 +206,7 @@ export const promise = async <T>({
                       fields: block.fields,
                       overrideAccess,
                       parentIndexPath: '',
+                      parentIsLocalized: parentIsLocalized || field.localized,
                       parentPath: path + '.' + rowIndex,
                       parentSchemaPath: schemaPath + '.' + block.slug,
                       req,
@@ -223,6 +230,7 @@ export const promise = async <T>({
                   fields: field.fields,
                   overrideAccess,
                   parentIndexPath: '',
+                  parentIsLocalized: parentIsLocalized || field.localized,
                   parentPath: path,
                   parentSchemaPath: schemaPath,
                   req,
@@ -259,6 +267,7 @@ export const promise = async <T>({
                   fields: field.fields,
                   overrideAccess,
                   parentIndexPath: '',
+                  parentIsLocalized: parentIsLocalized || field.localized,
                   parentPath: path + '.' + rowIndex,
                   parentSchemaPath: schemaPath,
                   req,
@@ -301,6 +310,7 @@ export const promise = async <T>({
                     fields: block.fields,
                     overrideAccess,
                     parentIndexPath: '',
+                    parentIsLocalized: parentIsLocalized || field.localized,
                     parentPath: path + '.' + rowIndex,
                     parentSchemaPath: schemaPath + '.' + block.slug,
                     req,
@@ -332,6 +342,7 @@ export const promise = async <T>({
             fields: field.fields,
             overrideAccess,
             parentIndexPath: '',
+            parentIsLocalized: parentIsLocalized || field.localized,
             parentPath: path,
             parentSchemaPath: schemaPath,
             req,
@@ -357,6 +368,7 @@ export const promise = async <T>({
             fields: field.fields,
             overrideAccess,
             parentIndexPath: '',
+            parentIsLocalized: parentIsLocalized || field.localized,
             parentPath: path,
             parentSchemaPath: schemaPath,
             req,
@@ -381,6 +393,7 @@ export const promise = async <T>({
           fields: field.fields,
           overrideAccess,
           parentIndexPath: indexPath,
+          parentIsLocalized,
           parentPath,
           parentSchemaPath: schemaPath,
           req,
@@ -403,6 +416,7 @@ export const promise = async <T>({
           fields: field.fields,
           overrideAccess,
           parentIndexPath: indexPath,
+          parentIsLocalized,
           parentPath,
           parentSchemaPath: schemaPath,
           req,
@@ -422,6 +436,7 @@ export const promise = async <T>({
           fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
           overrideAccess,
           parentIndexPath: indexPath,
+          parentIsLocalized,
           parentPath: path,
           parentSchemaPath: schemaPath,
           req,

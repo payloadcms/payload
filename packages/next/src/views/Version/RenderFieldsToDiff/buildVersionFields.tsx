@@ -39,6 +39,7 @@ export type BuildVersionFieldsArgs = {
   i18n: I18nClient
   modifiedOnly: boolean
   parentIndexPath: string
+  parentIsLocalized: boolean
   parentPath: string
   parentSchemaPath: string
   req: PayloadRequest
@@ -63,6 +64,7 @@ export const buildVersionFields = ({
   i18n,
   modifiedOnly,
   parentIndexPath,
+  parentIsLocalized,
   parentPath,
   parentSchemaPath,
   req,
@@ -103,7 +105,10 @@ export const buildVersionFields = ({
     }
 
     const versionField: VersionField = {}
-    const isLocalized = 'localized' in field && field.localized
+    const isLocalized =
+      'localized' in field &&
+      field.localized &&
+      (!parentIsLocalized || req.payload.config.compatibility?.allowLocalizedWithinLocalized)
     const fieldName: null | string = 'name' in field ? field.name : null
 
     const versionValue = fieldName ? versionSiblingData?.[fieldName] : versionSiblingData
@@ -126,6 +131,7 @@ export const buildVersionFields = ({
           indexPath,
           locale,
           modifiedOnly,
+          parentIsLocalized: true,
           parentPath,
           parentSchemaPath,
           path,
@@ -150,6 +156,7 @@ export const buildVersionFields = ({
         i18n,
         indexPath,
         modifiedOnly,
+        parentIsLocalized: parentIsLocalized || ('localized' in field && field.localized),
         parentPath,
         parentSchemaPath,
         path,
@@ -184,6 +191,7 @@ const buildVersionField = ({
   indexPath,
   locale,
   modifiedOnly,
+  parentIsLocalized,
   parentPath,
   parentSchemaPath,
   path,
@@ -198,6 +206,7 @@ const buildVersionField = ({
   indexPath: string
   locale?: string
   modifiedOnly?: boolean
+  parentIsLocalized: boolean
   path: string
   schemaPath: string
   versionValue: unknown
@@ -272,6 +281,7 @@ const buildVersionField = ({
           i18n,
           modifiedOnly,
           parentIndexPath: isNamedTab ? '' : tabIndexPath,
+          parentIsLocalized: parentIsLocalized || tab.localized,
           parentPath: tabPath,
           parentSchemaPath: tabSchemaPath,
           req,
@@ -300,6 +310,7 @@ const buildVersionField = ({
           i18n,
           modifiedOnly,
           parentIndexPath: 'name' in field ? '' : indexPath,
+          parentIsLocalized: parentIsLocalized || field.localized,
           parentPath: path + '.' + i,
           parentSchemaPath: schemaPath,
           req,
@@ -318,6 +329,7 @@ const buildVersionField = ({
         i18n,
         modifiedOnly,
         parentIndexPath: 'name' in field ? '' : indexPath,
+        parentIsLocalized: parentIsLocalized || ('localized' in field && field.localized),
         parentPath: path,
         parentSchemaPath: schemaPath,
         req,
@@ -374,6 +386,7 @@ const buildVersionField = ({
         i18n,
         modifiedOnly,
         parentIndexPath: 'name' in field ? '' : indexPath,
+        parentIsLocalized: parentIsLocalized || ('localized' in field && field.localized),
         parentPath: path + '.' + i,
         parentSchemaPath: schemaPath + '.' + versionBlock.slug,
         req,
@@ -392,6 +405,7 @@ const buildVersionField = ({
     diffMethod,
     field: clientField,
     fieldPermissions: subFieldPermissions,
+    parentIsLocalized,
     versionValue,
   }
 

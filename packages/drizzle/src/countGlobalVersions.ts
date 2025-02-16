@@ -28,6 +28,7 @@ export const countGlobalVersions: CountGlobalVersions = async function countGlob
     adapter: this,
     fields,
     locale,
+    parentIsLocalized: false,
     tableName,
     where: whereArg,
   })

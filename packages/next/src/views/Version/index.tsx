@@ -229,6 +229,7 @@ export const VersionView: PayloadServerReactComponent<EditViewComponent> = async
     i18n,
     modifiedOnly,
     parentIndexPath: '',
+    parentIsLocalized: false,
     parentPath: '',
     parentSchemaPath: '',
     req,

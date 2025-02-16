@@ -50,6 +50,7 @@ type Args = {
     [locale: string]: Record<string, unknown>
   }
   numbers: Record<string, unknown>[]
+  parentIsLocalized: boolean
   /**
    * This is the name of the parent table
    */
@@ -84,6 +85,7 @@ export const traverseFields = ({
   insideArrayOrBlock = false,
   locales,
   numbers,
+  parentIsLocalized,
   parentTableName,
   path,
   relationships,
@@ -110,6 +112,11 @@ export const traverseFields = ({
     fieldName = `${fieldPrefix || ''}${field.name}`
     fieldData = data[field.name]
 
+    const isLocalized =
+      field.localized &&
+      (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
+        !parentIsLocalized)
+
     if (field.type === 'array') {
       const arrayTableName = adapter.tableNameMap.get(`${parentTableName}_${columnName}`)
 
@@ -117,7 +124,7 @@ export const traverseFields = ({
         arrays[arrayTableName] = []
       }
 
-      if (field.localized) {
+      if (isLocalized) {
         if (typeof data[field.name] === 'object' && data[field.name] !== null) {
           Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
             if (Array.isArray(localeData)) {
@@ -131,6 +138,7 @@ export const traverseFields = ({
                 field,
                 locale: localeKey,
                 numbers,
+                parentIsLocalized: parentIsLocalized || field.localized,
                 path,
                 relationships,
                 relationshipsToDelete,
@@ -153,6 +161,7 @@ export const traverseFields = ({
           data: data[field.name],
           field,
           numbers,
+          parentIsLocalized: parentIsLocalized || field.localized,
           path,
           relationships,
           relationshipsToDelete,
@@ -172,7 +181,7 @@ export const traverseFields = ({
         blocksToDelete.add(toSnakeCase(typeof block === 'string' ? block : block.slug))
       })
 
-      if (field.localized) {
+      if (isLocalized) {
         if (typeof data[field.name] === 'object' && data[field.name] !== null) {
           Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
             if (Array.isArray(localeData)) {
@@ -185,6 +194,7 @@ export const traverseFields = ({
                 field,
                 locale: localeKey,
                 numbers,
+                parentIsLocalized: parentIsLocalized || field.localized,
                 path,
                 relationships,
                 relationshipsToDelete,
@@ -204,6 +214,7 @@ export const traverseFields = ({
           data: fieldData,
           field,
           numbers,
+          parentIsLocalized: parentIsLocalized || field.localized,
           path,
           relationships,
           relationshipsToDelete,
@@ -218,7 +229,7 @@ export const traverseFields = ({
 
     if (field.type === 'group' || field.type === 'tab') {
       if (typeof data[field.name] === 'object' && data[field.name] !== null) {
-        if (field.localized) {
+        if (isLocalized) {
           Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
             // preserve array ID if there is
             localeData._uuid = data.id || data._uuid
@@ -238,6 +249,7 @@ export const traverseFields = ({
               insideArrayOrBlock,
               locales,
               numbers,
+              parentIsLocalized: parentIsLocalized || field.localized,
               parentTableName,
               path: `${path || ''}${field.name}.`,
               relationships,
@@ -267,6 +279,7 @@ export const traverseFields = ({
             insideArrayOrBlock,
             locales,
             numbers,
+            parentIsLocalized: parentIsLocalized || field.localized,
             parentTableName,
             path: `${path || ''}${field.name}.`,
             relationships,
@@ -286,7 +299,7 @@ export const traverseFields = ({
       const relationshipPath = `${path || ''}${field.name}`
 
       if (
-        field.localized &&
+        isLocalized &&
         (Array.isArray(field.relationTo) || ('hasMany' in field && field.hasMany))
       ) {
         if (typeof fieldData === 'object') {
@@ -329,14 +342,14 @@ export const traverseFields = ({
         return
       } else {
         if (
-          !field.localized &&
+          !isLocalized &&
           fieldData &&
           typeof fieldData === 'object' &&
           'id' in fieldData &&
           fieldData?.id
         ) {
           fieldData = fieldData.id
-        } else if (field.localized) {
+        } else if (isLocalized) {
           if (typeof fieldData === 'object') {
             Object.entries(fieldData).forEach(([localeKey, localeData]) => {
               if (typeof localeData === 'object') {
@@ -355,7 +368,7 @@ export const traverseFields = ({
     if (field.type === 'text' && field.hasMany) {
       const textPath = `${path || ''}${field.name}`
 
-      if (field.localized) {
+      if (isLocalized) {
         if (typeof fieldData === 'object') {
           Object.entries(fieldData).forEach(([localeKey, localeData]) => {
             if (Array.isArray(localeData)) {
@@ -387,7 +400,7 @@ export const traverseFields = ({
     if (field.type === 'number' && field.hasMany) {
       const numberPath = `${path || ''}${field.name}`
 
-      if (field.localized) {
+      if (isLocalized) {
         if (typeof fieldData === 'object') {
           Object.entries(fieldData).forEach(([localeKey, localeData]) => {
             if (Array.isArray(localeData)) {
@@ -422,7 +435,7 @@ export const traverseFields = ({
         selects[selectTableName] = []
       }
 
-      if (field.localized) {
+      if (isLocalized) {
         if (typeof data[field.name] === 'object' && data[field.name] !== null) {
           Object.entries(data[field.name]).forEach(([localeKey, localeData]) => {
             if (Array.isArray(localeData)) {
@@ -451,7 +464,7 @@ export const traverseFields = ({
 
     const valuesToTransform: { localeKey?: string; ref: unknown; value: unknown }[] = []
 
-    if (field.localized) {
+    if (isLocalized) {
       if (typeof fieldData === 'object' && fieldData !== null) {
         Object.entries(fieldData).forEach(([localeKey, localeData]) => {
           if (!locales[localeKey]) {

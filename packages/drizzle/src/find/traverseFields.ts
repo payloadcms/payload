@@ -69,6 +69,11 @@ export const traverseFields = ({
       return
     }
 
+    const isFieldLocalized =
+      field.localized &&
+      (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
+        !withinLocalizedField)
+
     // handle simple relationship
     if (
       depth > 0 &&
@@ -76,7 +81,7 @@ export const traverseFields = ({
       !field.hasMany &&
       typeof field.relationTo === 'string'
     ) {
-      if (field.localized) {
+      if (isFieldLocalized) {
         _locales.with[`${path}${field.name}`] = true
       } else {
         currentArgs.with[`${path}${field.name}`] = true
@@ -407,6 +412,7 @@ export const traverseFields = ({
           fields,
           joins,
           locale,
+          parentIsLocalized: withinLocalizedField || field.localized,
           selectLocale: true,
           sort,
           tableName: joinCollectionTableName,
@@ -469,7 +475,7 @@ export const traverseFields = ({
           break
         }
 
-        const args = field.localized ? _locales : currentArgs
+        const args = isFieldLocalized ? _locales : currentArgs
         if (!args.columns) {
           args.columns = {}
         }
@@ -531,7 +537,7 @@ export const traverseFields = ({
         if (select || selectAllOnCurrentLevel) {
           const fieldPath = `${path}${field.name}`
 
-          if ((field.localized || withinLocalizedField) && _locales) {
+          if ((isFieldLocalized || withinLocalizedField) && _locales) {
             _locales.columns[fieldPath] = true
           } else if (adapter.tables[currentTableName]?.[fieldPath]) {
             currentArgs.columns[fieldPath] = true
@@ -553,7 +559,7 @@ export const traverseFields = ({
         ) {
           const fieldPath = `${path}${field.name}`
 
-          if ((field.localized || withinLocalizedField) && _locales) {
+          if ((isFieldLocalized || withinLocalizedField) && _locales) {
             _locales.columns[fieldPath] = true
           } else if (adapter.tables[currentTableName]?.[fieldPath]) {
             currentArgs.columns[fieldPath] = true

@@ -17,5 +17,6 @@ export type PathToQuery = {
   fields?: FlattenedField[]
   globalSlug?: string
   invalid?: boolean
+  parentIsLocalized: boolean
   path: string
 }

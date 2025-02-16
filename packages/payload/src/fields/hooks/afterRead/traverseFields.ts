@@ -35,6 +35,7 @@ type Args = {
   locale: null | string
   overrideAccess: boolean
   parentIndexPath: string
+  parentIsLocalized: boolean
   parentPath: string
   parentSchemaPath: string
   populate?: PopulateType
@@ -65,6 +66,7 @@ export const traverseFields = ({
   locale,
   overrideAccess,
   parentIndexPath,
+  parentIsLocalized,
   parentPath,
   parentSchemaPath,
   populate,
@@ -97,6 +99,7 @@ export const traverseFields = ({
         locale,
         overrideAccess,
         parentIndexPath,
+        parentIsLocalized,
         parentPath,
         parentSchemaPath,
         populate,

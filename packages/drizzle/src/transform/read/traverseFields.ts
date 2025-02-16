@@ -46,6 +46,7 @@ type TraverseFieldsArgs = {
    * All hasMany number fields, as returned by Drizzle, keyed on an object by field path
    */
   numbers: Record<string, Record<string, unknown>[]>
+  parentIsLocalized: boolean
   /**
    * The current field path (in dot notation), used to merge in relationships
    */
@@ -80,6 +81,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
   fields,
   joinQuery,
   numbers,
+  parentIsLocalized,
   path,
   relationships,
   table,
@@ -105,9 +107,14 @@ export const traverseFields = <T extends Record<string, unknown>>({
       deletions.push(() => delete table[fieldName])
     }
 
+    const isLocalized =
+      field.localized &&
+      (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
+        !parentIsLocalized)
+
     if (field.type === 'array') {
       if (Array.isArray(fieldData)) {
-        if (field.localized) {
+        if (isLocalized) {
           result[field.name] = fieldData.reduce((arrayResult, row) => {
             if (typeof row._locale === 'string') {
               if (!arrayResult[row._locale]) {
@@ -130,6 +137,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                 fieldPrefix: '',
                 fields: field.flattenedFields,
                 numbers,
+                parentIsLocalized: parentIsLocalized || field.localized,
                 path: `${sanitizedPath}${field.name}.${row._order - 1}`,
                 relationships,
                 table: row,
@@ -175,6 +183,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   fieldPrefix: '',
                   fields: field.flattenedFields,
                   numbers,
+                  parentIsLocalized: parentIsLocalized || field.localized,
                   path: `${sanitizedPath}${field.name}.${i}`,
                   relationships,
                   table: row,
@@ -197,7 +206,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
       const blocksByPath = blocks[blockFieldPath]
 
       if (Array.isArray(blocksByPath)) {
-        if (field.localized) {
+        if (isLocalized) {
           result[field.name] = {}
 
           blocksByPath.forEach((row) => {
@@ -232,6 +241,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                   fieldPrefix: '',
                   fields: block.flattenedFields,
                   numbers,
+                  parentIsLocalized: parentIsLocalized || field.localized,
                   path: `${blockFieldPath}.${row._order - 1}`,
                   relationships,
                   table: row,
@@ -303,6 +313,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
                     fieldPrefix: '',
                     fields: block.flattenedFields,
                     numbers,
+                    parentIsLocalized: parentIsLocalized || field.localized,
                     path: `${blockFieldPath}.${i}`,
                     relationships,
                     table: row,
@@ -328,7 +339,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
     if (field.type === 'relationship' || field.type === 'upload') {
       if (typeof field.relationTo === 'string' && !('hasMany' in field && field.hasMany)) {
         if (
-          field.localized &&
+          isLocalized &&
           config.localization &&
           config.localization.locales &&
           Array.isArray(table?._locales)
@@ -344,7 +355,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
         if (!relationPathMatch) {
           if ('hasMany' in field && field.hasMany) {
-            if (field.localized && config.localization && config.localization.locales) {
+            if (isLocalized && config.localization && config.localization.locales) {
               result[field.name] = {
                 [config.localization.defaultLocale]: [],
               }
@@ -356,7 +367,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
           return result
         }
 
-        if (field.localized) {
+        if (isLocalized) {
           result[field.name] = {}
           const relationsByLocale: Record<string, Record<string, unknown>[]> = {}
 
@@ -402,7 +413,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
         | { docs: unknown[]; hasNextPage: boolean }
         | Record<string, { docs: unknown[]; hasNextPage: boolean }>
       if (Array.isArray(fieldData)) {
-        if (field.localized && adapter.payload.config.localization) {
+        if (isLocalized && adapter.payload.config.localization) {
           fieldResult = fieldData.reduce(
             (joinResult, row) => {
               if (typeof row.locale === 'string') {
@@ -446,7 +457,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
         return result
       }
 
-      if (field.localized) {
+      if (isLocalized) {
         result[field.name] = {}
         const textsByLocale: Record<string, Record<string, unknown>[]> = {}
 
@@ -485,7 +496,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
         return result
       }
 
-      if (field.localized) {
+      if (isLocalized) {
         result[field.name] = {}
         const numbersByLocale: Record<string, Record<string, unknown>[]> = {}
 
@@ -520,7 +531,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
     if (field.type === 'select' && field.hasMany) {
       if (Array.isArray(fieldData)) {
-        if (field.localized) {
+        if (isLocalized) {
           result[field.name] = fieldData.reduce((selectResult, row) => {
             if (typeof row.locale === 'string') {
               if (!selectResult[row.locale]) {
@@ -542,7 +553,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
       return result
     }
 
-    if (field.localized && Array.isArray(table._locales)) {
+    if (isLocalized && Array.isArray(table._locales)) {
       if (!table._locales.length && adapter.payload.config.localization) {
         adapter.payload.config.localization.localeCodes.forEach((_locale) =>
           (table._locales as unknown[]).push({ _locale }),
@@ -581,9 +592,9 @@ export const traverseFields = <T extends Record<string, unknown>>({
           const groupFieldPrefix = `${fieldPrefix || ''}${field.name}_`
           const groupData = {}
           const locale = table._locale as string
-          const refKey = field.localized && locale ? locale : field.name
+          const refKey = isLocalized && locale ? locale : field.name
 
-          if (field.localized && locale) {
+          if (isLocalized && locale) {
             delete table._locale
           }
           ref[refKey] = traverseFields<Record<string, unknown>>({
@@ -595,6 +606,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
             fieldPrefix: groupFieldPrefix,
             fields: field.flattenedFields,
             numbers,
+            parentIsLocalized: parentIsLocalized || field.localized,
             path: `${sanitizedPath}${field.name}`,
             relationships,
             table,

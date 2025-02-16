@@ -10,6 +10,7 @@ export function getLocalizedPaths({
   incomingPath,
   locale,
   overrideAccess = false,
+  parentIsLocalized,
   payload,
 }: {
   collectionSlug?: string
@@ -18,6 +19,7 @@ export function getLocalizedPaths({
   incomingPath: string
   locale?: string
   overrideAccess?: boolean
+  parentIsLocalized: boolean
   payload: Payload
 }): PathToQuery[] {
   const pathSegments = incomingPath.split('.')
@@ -31,6 +33,7 @@ export function getLocalizedPaths({
       fields,
       globalSlug,
       invalid: false,
+      parentIsLocalized,
       path: '',
     },
   ]
@@ -45,6 +48,7 @@ export function getLocalizedPaths({
       let currentPath = path ? `${path}.${segment}` : segment
 
       let fieldsToSearch: FlattenedField[]
+      let _parentIsLocalized = parentIsLocalized
 
       let matchedField: FlattenedField
 
@@ -76,6 +80,7 @@ export function getLocalizedPaths({
         } else {
           fieldsToSearch = lastIncompletePath.fields
         }
+        _parentIsLocalized = parentIsLocalized || lastIncompletePath.field?.localized
 
         matchedField = fieldsToSearch.find((field) => field.name === segment)
       }
@@ -117,7 +122,12 @@ export function getLocalizedPaths({
           // Skip the next iteration, because it's a locale
           i += 1
           currentPath = `${currentPath}.${nextSegment}`
-        } else if (localizationConfig && 'localized' in matchedField && matchedField.localized) {
+        } else if (
+          localizationConfig &&
+          'localized' in matchedField &&
+          matchedField.localized &&
+          (payload.config.compatibility?.allowLocalizedWithinLocalized || !_parentIsLocalized)
+        ) {
           currentPath = `${currentPath}.${locale}`
         }
 
@@ -167,6 +177,7 @@ export function getLocalizedPaths({
                   globalSlug,
                   incomingPath: nestedPathToQuery,
                   locale,
+                  parentIsLocalized: false,
                   payload,
                 })
 

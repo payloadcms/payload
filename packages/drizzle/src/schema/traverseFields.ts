@@ -37,6 +37,7 @@ type Args = {
   localesColumns: Record<string, RawColumn>
   localesIndexes: Record<string, RawIndex>
   newTableName: string
+  parentIsLocalized: boolean
   parentTableName: string
   relationships: Set<string>
   relationsToBuild: RelationMap
@@ -76,6 +77,7 @@ export const traverseFields = ({
   localesColumns,
   localesIndexes,
   newTableName,
+  parentIsLocalized,
   parentTableName,
   relationships,
   relationsToBuild,
@@ -119,11 +121,16 @@ export const traverseFields = ({
     )}`
     const fieldName = `${fieldPrefix?.replace('.', '_') || ''}${field.name}`
 
+    const isFieldLocalized =
+      field.localized &&
+      (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
+        !parentIsLocalized)
+
     // If field is localized,
     // add the column to the locale table instead of main table
     if (
       adapter.payload.config.localization &&
-      (field.localized || forceLocalized) &&
+      (isFieldLocalized || forceLocalized) &&
       field.type !== 'array' &&
       field.type !== 'blocks' &&
       (('hasMany' in field && field.hasMany !== true) || !('hasMany' in field))
@@ -152,7 +159,7 @@ export const traverseFields = ({
 
       targetIndexes[indexName] = {
         name: indexName,
-        on: field.localized ? [fieldName, '_locale'] : fieldName,
+        on: isFieldLocalized ? [fieldName, '_locale'] : fieldName,
         unique,
       }
     }
@@ -209,7 +216,7 @@ export const traverseFields = ({
         }
 
         const isLocalized =
-          Boolean(field.localized && adapter.payload.config.localization) ||
+          Boolean(isFieldLocalized && adapter.payload.config.localization) ||
           withinLocalizedArrayOrBlock ||
           forceLocalized
 
@@ -243,6 +250,7 @@ export const traverseFields = ({
           disableRelsTableUnique: true,
           disableUnique,
           fields: disableUnique ? idToUUID(field.flattenedFields) : field.flattenedFields,
+          parentIsLocalized: parentIsLocalized || field.localized,
           rootRelationships: relationships,
           rootRelationsToBuild,
           rootTableIDColType,
@@ -299,7 +307,12 @@ export const traverseFields = ({
           },
         }
 
-        if (hasLocalesTable(field.fields)) {
+        if (
+          hasLocalesTable({
+            fields: field.fields,
+            parentIsLocalized: parentIsLocalized || field.localized,
+          })
+        ) {
           arrayRelations._locales = {
             type: 'many',
             relationName: '_locales',
@@ -403,7 +416,7 @@ export const traverseFields = ({
             }
 
             const isLocalized =
-              Boolean(field.localized && adapter.payload.config.localization) ||
+              Boolean(isFieldLocalized && adapter.payload.config.localization) ||
               withinLocalizedArrayOrBlock ||
               forceLocalized
 
@@ -437,6 +450,7 @@ export const traverseFields = ({
               disableRelsTableUnique: true,
               disableUnique,
               fields: disableUnique ? idToUUID(block.flattenedFields) : block.flattenedFields,
+              parentIsLocalized: parentIsLocalized || field.localized,
               rootRelationships: relationships,
               rootRelationsToBuild,
               rootTableIDColType,
@@ -487,7 +501,12 @@ export const traverseFields = ({
               },
             }
 
-            if (hasLocalesTable(block.fields)) {
+            if (
+              hasLocalesTable({
+                fields: block.fields,
+                parentIsLocalized: parentIsLocalized || field.localized,
+              })
+            ) {
               blockRelations._locales = {
                 type: 'many',
                 relationName: '_locales',
@@ -528,7 +547,8 @@ export const traverseFields = ({
           } else if (process.env.NODE_ENV !== 'production' && !versions) {
             validateExistingBlockIsIdentical({
               block,
-              localized: field.localized,
+              localized: isFieldLocalized,
+              parentIsLocalized: parentIsLocalized || field.localized,
               rootTableName,
               table: adapter.rawTables[blockTableName],
               tableLocales: adapter.rawTables[`${blockTableName}${adapter.localesSuffix}`],
@@ -605,11 +625,12 @@ export const traverseFields = ({
           disableUnique,
           fieldPrefix: `${fieldName}.`,
           fields: field.flattenedFields,
-          forceLocalized: field.localized,
+          forceLocalized: isFieldLocalized,
           indexes,
           localesColumns,
           localesIndexes,
           newTableName: `${parentTableName}_${columnName}`,
+          parentIsLocalized: parentIsLocalized || field.localized,
           parentTableName,
           relationships,
           relationsToBuild,
@@ -619,7 +640,7 @@ export const traverseFields = ({
           setColumnID,
           uniqueRelationships,
           versions,
-          withinLocalizedArrayOrBlock: withinLocalizedArrayOrBlock || field.localized,
+          withinLocalizedArrayOrBlock: withinLocalizedArrayOrBlock || isFieldLocalized,
         })
 
         if (groupHasLocalizedField) {
@@ -659,7 +680,7 @@ export const traverseFields = ({
       case 'number': {
         if (field.hasMany) {
           const isLocalized =
-            Boolean(field.localized && adapter.payload.config.localization) ||
+            Boolean(isFieldLocalized && adapter.payload.config.localization) ||
             withinLocalizedArrayOrBlock ||
             forceLocalized
 
@@ -784,7 +805,7 @@ export const traverseFields = ({
           }
 
           const isLocalized =
-            Boolean(field.localized && adapter.payload.config.localization) ||
+            Boolean(isFieldLocalized && adapter.payload.config.localization) ||
             withinLocalizedArrayOrBlock ||
             forceLocalized
 
@@ -817,6 +838,7 @@ export const traverseFields = ({
             disableNotNull,
             disableUnique,
             fields: [],
+            parentIsLocalized: parentIsLocalized || field.localized,
             rootTableName,
             setColumnID,
             tableName: selectTableName,
@@ -904,7 +926,7 @@ export const traverseFields = ({
           // add relationship to table
           relationsToBuild.set(fieldName, {
             type: 'one',
-            localized: adapter.payload.config.localization && (field.localized || forceLocalized),
+            localized: adapter.payload.config.localization && (isFieldLocalized || forceLocalized),
             target: tableName,
           })
 
@@ -916,7 +938,7 @@ export const traverseFields = ({
         }
 
         if (
-          Boolean(field.localized && adapter.payload.config.localization) ||
+          Boolean(isFieldLocalized && adapter.payload.config.localization) ||
           withinLocalizedArrayOrBlock
         ) {
           hasLocalizedRelationshipField = true
@@ -927,7 +949,7 @@ export const traverseFields = ({
       case 'text': {
         if (field.hasMany) {
           const isLocalized =
-            Boolean(field.localized && adapter.payload.config.localization) ||
+            Boolean(isFieldLocalized && adapter.payload.config.localization) ||
             withinLocalizedArrayOrBlock ||
             forceLocalized
 

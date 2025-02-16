@@ -34,6 +34,7 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     adapter: this,
     fields,
     locale,
+    parentIsLocalized: false,
     tableName,
     where: whereToUse,
   })

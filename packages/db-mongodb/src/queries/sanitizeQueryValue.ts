@@ -14,6 +14,7 @@ type SanitizeQueryValueArgs = {
   hasCustomID: boolean
   locale?: string
   operator: string
+  parentIsLocalized: boolean
   path: string
   payload: Payload
   val: any
@@ -87,6 +88,7 @@ export const sanitizeQueryValue = ({
   hasCustomID,
   locale,
   operator,
+  parentIsLocalized,
   path,
   payload,
   val,
@@ -219,7 +221,13 @@ export const sanitizeQueryValue = ({
 
       let localizedPath = path
 
-      if (field.localized && payload.config.localization && locale) {
+      if (
+        field.localized &&
+        (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
+          !parentIsLocalized) &&
+        payload.config.localization &&
+        locale
+      ) {
         localizedPath = `${path}.${locale}`
       }
 

@@ -36,6 +36,7 @@ export const findVersions: FindVersions = async function findVersions(
       config: this.payload.config,
       fields: collectionConfig.flattenedFields,
       locale,
+      parentIsLocalized: false,
       sort: sortArg || '-updatedAt',
       timestamps: true,
     })

@@ -91,7 +91,11 @@ const traverseFields = ({
     if (fieldAffectsData(field)) {
       fieldDatabaseSchemaPath = `${databaseSchemaPath}${field.name}.`
 
-      if (field.localized) {
+      if (
+        field.localized &&
+        (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
+          !withinLocalizedField)
+      ) {
         fieldDatabaseSchemaPath = `${fieldDatabaseSchemaPath}<locale>.`
         fieldWithinLocalizedField = true
       }

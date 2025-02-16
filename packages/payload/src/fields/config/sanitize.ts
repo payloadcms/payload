@@ -185,7 +185,7 @@ export const sanitizeFields = async ({
         field.access = {}
       }
 
-      setDefaultBeforeDuplicate(field)
+      setDefaultBeforeDuplicate(field, parentIsLocalized)
     }
 
     if (!field.admin) {

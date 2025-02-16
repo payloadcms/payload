@@ -18,6 +18,7 @@ type Args = {
   field: FlattenedArrayField
   locale?: string
   numbers: Record<string, unknown>[]
+  parentIsLocalized: boolean
   path: string
   relationships: Record<string, unknown>[]
   relationshipsToDelete: RelationshipToDelete[]
@@ -42,6 +43,7 @@ export const transformArray = ({
   field,
   locale,
   numbers,
+  parentIsLocalized,
   path,
   relationships,
   relationshipsToDelete,
@@ -79,7 +81,12 @@ export const transformArray = ({
         }
       }
 
-      if (field.localized) {
+      if (
+        field.localized &&
+        (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
+          !parentIsLocalized) &&
+        locale
+      ) {
         newRow.row._locale = locale
       }
 
@@ -100,6 +107,7 @@ export const transformArray = ({
         insideArrayOrBlock: true,
         locales: newRow.locales,
         numbers,
+        parentIsLocalized: parentIsLocalized || field.localized,
         parentTableName: arrayTableName,
         path: `${path || ''}${field.name}.${i}.`,
         relationships,

@@ -40,6 +40,7 @@ export const updateOne: UpdateOne = async function updateOne(
     config: this.payload.config,
     data,
     fields,
+    parentIsLocalized: false,
   })
 
   try {

@@ -9,16 +9,31 @@ const uniqueRequired: FieldHook = ({ value }) => `${value} - Copy`
 const localizedUniqueRequired: FieldHook = ({ req, value }) =>
   `${value} - ${req?.t('general:copy') ?? 'Copy'}`
 
-export const setDefaultBeforeDuplicate = (field: FieldAffectingData) => {
+export const setDefaultBeforeDuplicate = (
+  field: FieldAffectingData,
+  parentIsLocalized: boolean,
+) => {
   if (
     (('required' in field && field.required) || field.unique) &&
     (!field.hooks?.beforeDuplicate ||
       (Array.isArray(field.hooks.beforeDuplicate) && field.hooks.beforeDuplicate.length === 0))
   ) {
     if ((field.type === 'text' || field.type === 'textarea') && field.required && field.unique) {
-      field.hooks.beforeDuplicate = [field.localized ? localizedUniqueRequired : uniqueRequired]
+      field.hooks.beforeDuplicate = [
+        field.localized &&
+        (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
+          !parentIsLocalized)
+          ? localizedUniqueRequired
+          : uniqueRequired,
+      ]
     } else if (field.unique) {
-      field.hooks.beforeDuplicate = [field.localized ? localizedUnique : unique]
+      field.hooks.beforeDuplicate = [
+        field.localized &&
+        (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
+          !parentIsLocalized)
+          ? localizedUnique
+          : unique,
+      ]
     }
   }
 }

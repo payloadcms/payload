@@ -24,6 +24,7 @@ export const updateOne: UpdateOne = async function updateOne(
     adapter: this,
     fields: collection.flattenedFields,
     locale,
+    parentIsLocalized: false,
     tableName,
     where: whereToUse,
   })

@@ -115,6 +115,7 @@ type PromiseArgs = {
   field: JoinField | RelationshipField | UploadField
   locale: null | string
   overrideAccess: boolean
+  parentIsLocalized: boolean
   populate?: PopulateType
   req: PayloadRequest
   showHiddenFields: boolean
@@ -129,6 +130,7 @@ export const relationshipPopulationPromise = async ({
   field,
   locale,
   overrideAccess,
+  parentIsLocalized,
   populate: populateArg,
   req,
   showHiddenFields,
@@ -141,6 +143,7 @@ export const relationshipPopulationPromise = async ({
   if (field.type === 'join' || (fieldSupportsMany(field) && field.hasMany)) {
     if (
       field.localized &&
+      (req.payload.config.compatibility?.allowLocalizedWithinLocalized || !parentIsLocalized) &&
       locale === 'all' &&
       typeof siblingDoc[field.name] === 'object' &&
       siblingDoc[field.name] !== null

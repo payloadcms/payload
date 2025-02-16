@@ -6,6 +6,7 @@ type Args = {
   config: SanitizedConfig
   fields: FlattenedField[]
   locale: string
+  parentIsLocalized: boolean
   result?: string
   segments: string[]
 }
@@ -14,6 +15,7 @@ export const getLocalizedSortProperty = ({
   config,
   fields,
   locale,
+  parentIsLocalized,
   result: incomingResult,
   segments: incomingSegments,
 }: Args): string => {
@@ -35,10 +37,15 @@ export const getLocalizedSortProperty = ({
 
   if (matchedField && !fieldIsPresentationalOnly(matchedField)) {
     let nextFields: FlattenedField[]
+    let nextParentIsLocalized = parentIsLocalized
     const remainingSegments = [...segments]
     let localizedSegment = matchedField.name
 
-    if (matchedField.localized) {
+    if (
+      matchedField.localized &&
+      (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
+        !parentIsLocalized)
+    ) {
       // Check to see if next segment is a locale
       if (segments.length > 0) {
         const nextSegmentIsLocale = config.localization.localeCodes.includes(remainingSegments[0])
@@ -62,6 +69,9 @@ export const getLocalizedSortProperty = ({
       matchedField.type === 'array'
     ) {
       nextFields = matchedField.flattenedFields
+      if (!nextParentIsLocalized) {
+        nextParentIsLocalized = matchedField.localized
+      }
     }
 
     if (matchedField.type === 'blocks') {
@@ -92,6 +102,7 @@ export const getLocalizedSortProperty = ({
         config,
         fields: nextFields,
         locale,
+        parentIsLocalized: nextParentIsLocalized,
         result,
         segments: remainingSegments,
       })

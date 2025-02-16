@@ -42,6 +42,7 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
       this.payload.config,
       this.payload.config.globals.find((global) => global.slug === globalSlug),
     ),
+    parentIsLocalized: false,
   })
 
   const [doc] = await VersionModel.create([data], options, req)

@@ -76,6 +76,7 @@ export const buildJoinAggregation = async ({
         config: adapter.payload.config,
         fields: adapter.payload.collections[slug].config.flattenedFields,
         locale,
+        parentIsLocalized: false,
         sort: sortJoin,
         timestamps: true,
       })
@@ -148,6 +149,7 @@ export const buildJoinAggregation = async ({
         })
       } else {
         const localeSuffix =
+          // TODO: @DanRibbens can this be within a localized parent?
           join.field.localized && adapter.payload.config.localization && locale ? `.${locale}` : ''
         const as = `${versions ? `version.${join.joinPath}` : join.joinPath}${localeSuffix}`
 

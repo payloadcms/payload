@@ -26,6 +26,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
     adapter: this,
     fields: collection.flattenedFields,
     locale: req?.locale,
+    parentIsLocalized: false,
     tableName,
     where: whereArg,
   })
@@ -65,6 +66,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
     data: docToDelete,
     fields: collection.flattenedFields,
     joinQuery: false,
+    parentIsLocalized: false,
   })
 
   await this.deleteWhere({

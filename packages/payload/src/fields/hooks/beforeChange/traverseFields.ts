@@ -31,6 +31,7 @@ type Args = {
   mergeLocaleActions: (() => Promise<void>)[]
   operation: Operation
   parentIndexPath: string
+  parentIsLocalized: boolean
   parentPath: string
   parentSchemaPath: string
   req: PayloadRequest
@@ -68,6 +69,7 @@ export const traverseFields = async ({
   mergeLocaleActions,
   operation,
   parentIndexPath,
+  parentIsLocalized,
   parentPath,
   parentSchemaPath,
   req,
@@ -95,6 +97,7 @@ export const traverseFields = async ({
         mergeLocaleActions,
         operation,
         parentIndexPath,
+        parentIsLocalized,
         parentPath,
         parentSchemaPath,
         req,

@@ -26,6 +26,7 @@ export const countVersions: CountVersions = async function countVersions(
     adapter: this,
     fields,
     locale,
+    parentIsLocalized: false,
     tableName,
     where: whereArg,
   })

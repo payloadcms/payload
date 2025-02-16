@@ -45,6 +45,7 @@ export const find: Find = async function find(
       config: this.payload.config,
       fields: collectionConfig.flattenedFields,
       locale,
+      parentIsLocalized: false,
       sort: sortArg || collectionConfig.defaultSort,
       timestamps: true,
     })

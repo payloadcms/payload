@@ -75,6 +75,7 @@ export async function validateQueryPaths({
                 globalConfig,
                 operator,
                 overrideAccess,
+                parentIsLocalized: false,
                 path,
                 policies,
                 req,

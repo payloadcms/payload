@@ -4,6 +4,7 @@ import type { I18nClient } from '@payloadcms/translations'
 
 import type { ClientField, Field, FieldTypes, Tab } from '../../fields/config/types.js'
 import type {
+  ClientConfig,
   ClientFieldWithOptionalType,
   PayloadRequest,
   SanitizedFieldPermissions,
@@ -61,6 +62,7 @@ export type FieldDiffClientProps<TClientField extends ClientFieldWithOptionalTyp
    * If this field is localized, this will be the locale of the field
    */
   locale?: string
+  parentIsLocalized: boolean
   /**
    * Field value from the current version
    */
