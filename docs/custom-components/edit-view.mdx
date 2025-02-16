@@ -1,23 +1,23 @@
 ---
-title: Swap in your own React components
+title: Edit View
 label: Edit View
 order: 60
 desc:
 keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-The Edit View is where users interact with individual [Collection](../collections/overview) and [Global](../globals/overview) Documents within the [Admin Panel](../admin/overview). This is where they can view, edit, and save their content.
+The Edit View is where users interact with individual [Collection](../collections/overview) and [Global](../globals/overview) Documents within the [Admin Panel](../admin/overview). This is where they can view, edit, and save their content. You can either swap out the entire Edit View for your own, or override individual components.
 
-The Edit View contains the form in which submits the data to the server. It also contains buttons for saving, publishing, and previewing the document, all of which can be customized.
+The Edit View contains the actual form in which submits the data to the server. It contains controls for saving, publishing, and previewing the document, all of which can be customized to a high degree.
 
-<Banner type="info">
+<Banner type="warning">
   **Note:**
   The Edit View is one of many [Document Views](./document-views) in the Payload Admin Panel. Each Document View is responsible for a different aspect of the interacting with Documents. The Edit View is specifically designed for editing and saving Document data.
 </Banner>
 
 ## Custom Edit View
 
-To swap out the entire Edit View with a [Custom View](./custom-views), use the `admin.components.views.edit` property in your [Payload Config](../configuration/overview):
+To swap out the entire Edit View with a [Custom View](./custom-views), use the `views.edit.default` property in your [Collection Config](../configuration/collections) or [Global Config](../configuration/globals):
 
 ```tsx
 import { buildConfig } from 'payload'
@@ -27,47 +27,32 @@ const config = buildConfig({
   admin: {
     components: {
       views: {
-        // highlight-start
-        edit: '/path/to/MyCustomEditView',
-        // highlight-end
+        edit: {
+          // highlight-start
+          default: {
+            Component: '/path/to/MyCustomEditViewComponent',
+          },
+          // highlight-end
+        }
       },
     },
   },
 })
 ```
 
-Here's are some examples of simple Edit View components. These can be either Server or Client components, depending on your needs. Keep in mind that the props and types for these components are different depending on its type.
+Here are some examples of how to scaffold a custom Edit View. These can be either Server or Client components, depending on your needs. Keep in mind that the props and types for these components are different depending on its type.
 
 #### Server Component
 
 ```tsx
 import React from 'react'
 import type { DocumentViewServerProps } from 'payload'
-import { DefaultEditView } from '@payloadcms/ui'
 
-export function MyCustomServerEditView({
-  Description,
-  PreviewButton,
-  PublishButton,
-  SaveButton,
-  SaveDraftButton,
-  Upload,
-  documentSubViewType,
-  formState,
-  viewType,
-}: DocumentViewServerProps) {
+export function MyCustomServerEditView(props: DocumentViewServerProps) {
   return (
-    <DefaultEditView
-      Description={Description}
-      PreviewButton={PreviewButton}
-      PublishButton={PublishButton}
-      SaveButton={SaveButton}
-      SaveDraftButton={SaveDraftButton}
-      Upload={Upload}
-      documentSubViewType={documentSubViewType}
-      formState={formState}
-      viewType={viewType}
-    />
+    <div>
+      This is a custom Edit View (Server)
+    </div>
   )
 }
 ```
@@ -80,27 +65,28 @@ _For details on how to build Custom Views, including all available props, see [B
 'use client'
 import React from 'react'
 import type { DocumentViewClientProps } from 'payload'
-import { DefaultEditView } from '@payloadcms/ui'
 
 export function MyCustomClientEditView(props: DocumentViewClientProps) {
   return (
-    <DefaultEditView {...props} />
+    <div>
+      This is a custom Edit View (Client)
+    </div>
   )
 }
 ```
 
 _For details on how to build Custom Views, including all available props, see [Building Custom Views](./custom-views#building-custom-views)._
 
-## Custom Components
+## Component Options
 
-In addition to swapping out the entire Edit View with a [Custom View](./custom-views), you can also override individual components. This allows you to customize specific parts of the Edit View without swapping out the entire view for your own.
+In addition to swapping out the entire Edit View with a [Custom View](./custom-views), you can also override individual components. This allows you to customize specific parts of the Edit View without swapping out the entire view.
 
 <Banner type="warning">
-  **Note:**
-  Collection and Globals are keyed to a different property in the `admin.components` object have slightly different options. Be sure to use the correct key for the type of document you are working with.
+  **Important:**
+  Collection and Globals are keyed to a different property in the `admin.components` object have slightly different options. Be sure to use the correct key for the entity you are working with.
 </Banner>
 
-#### Collections
+### Collections
 
 To override Edit View components for a Collection, use the `admin.components.edit` property in your [Collection Config](../configuration/collections):
 
@@ -110,13 +96,13 @@ import type { CollectionConfig } from 'payload'
 export const MyCollection: CollectionConfig = {
   // ...
   admin: {
+    // highlight-start
     components: {
-      // highlight-start
       edit: {
         // ...
       },
-      // highlight-end
     },
+    // highlight-end
   },
 }
 ```
@@ -131,21 +117,23 @@ The following options are available:
 | `PreviewButton`      | A button that previews the current document. [More details](#PreviewButton).                                                                                                                                  |
 | `Upload`             | A file upload component. [More details](#Upload).                                                                                                                                  |
 
-#### Globals
+### Globals
 
 To override Edit View components for Globals, use the `admin.components.elements` property in your [Global Config](../configuration/globals):
 
 ```ts
-import type { CollectionConfig } from 'payload'
+import type { GlobalConfig } from 'payload'
 
-export const MyCollection: CollectionConfig = {
+export const MyGlobal: GlobalConfig = {
   // ...
   admin: {
+    // highlight-start
     components: {
-      elements: { // highlight-line
+      elements: {
         // ...
       },
     },
+    // highlight-end
   },
 }
 ```
@@ -159,6 +147,8 @@ The following options are available:
 | `PublishButton`      | A button that publishes the current document. [More details](#PublishButton).                                                                                                                                  |
 | `PreviewButton`      | A button that previews the current document. [More details](#PreviewButton).                                                                                                                                  |
 
+## Custom Components
+
 ### SaveButton
 
 ```ts
@@ -168,11 +158,11 @@ export const MyCollection: CollectionConfig = {
   // ...
   admin: {
     components: {
-      // highlight-start
-      afterListTable: [
-        '/path/to/MySaveButtonComponent',
-      ],
-      // highlight-end
+      edit: {
+        // highlight-start
+        SaveButton: '/path/to/MySaveButton',
+        // highlight-end
+      }
     },
   },
 }
@@ -180,11 +170,29 @@ export const MyCollection: CollectionConfig = {
 
 Here's an example of a simple `SaveButton` component:
 
+#### Server Component
+
 ```tsx
 import React from 'react'
 import { SaveButton } from '@payloadcms/ui'
+import type { SaveButtonServerProps } from 'payload'
 
-export function MySaveButtonComponent() {
+export function MySaveButton(props: SaveButtonServerProps) {
+  return (
+    <SaveButton label="Save" />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { SaveButton } from '@payloadcms/ui'
+import type { SaveButtonClientProps } from 'payload'
+
+export function MySaveButton(props: SaveButtonClientProps) {
   return (
     <SaveButton label="Save" />
   )
@@ -200,11 +208,11 @@ export const MyCollection: CollectionConfig = {
   // ...
   admin: {
     components: {
-      // highlight-start
-      afterListTable: [
-        '/path/to/MySaveDraftComponent',
-      ],
-      // highlight-end
+      edit: {
+        // highlight-start
+        SaveDraftButton: '/path/to/MySaveDraftButton',
+        // highlight-end
+      }
     },
   },
 }
@@ -212,11 +220,29 @@ export const MyCollection: CollectionConfig = {
 
 Here's an example of a simple `SaveDraftButton` component:
 
+#### Server Component
+
 ```tsx
 import React from 'react'
 import { SaveDraftButton } from '@payloadcms/ui'
+import type { SaveDraftButtonServerProps } from 'payload'
 
-export function MySaveDraftComponent() {
+export function MySaveDraftButton(props: SaveDraftButtonServerProps) {
+  return (
+    <SaveDraftButton />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { SaveDraftButton } from '@payloadcms/ui'
+import type { SaveDraftButtonClientProps } from 'payload'
+
+export function MySaveDraftButton(props: SaveDraftButtonClientProps) {
   return (
     <SaveDraftButton />
   )
@@ -232,11 +258,11 @@ export const MyCollection: CollectionConfig = {
   // ...
   admin: {
     components: {
-      // highlight-start
-      afterListTable: [
-        '/path/to/MyPublishButtonComponent',
-      ],
-      // highlight-end
+      edit: {
+        // highlight-start
+        PublishButton: '/path/to/MyPublishButton',
+        // highlight-end
+      }
     },
   },
 }
@@ -244,11 +270,29 @@ export const MyCollection: CollectionConfig = {
 
 Here's an example of a simple `PublishButton` component:
 
+#### Server Component
+
 ```tsx
 import React from 'react'
 import { PublishButton } from '@payloadcms/ui'
+import type { PublishButtonClientProps } from 'payload'
 
-export function MyPublishButtonComponent() {
+export function MyPublishButton(props: PublishButtonServerProps) {
+  return (
+    <PublishButton label="Publish" />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { PublishButton } from '@payloadcms/ui'
+import type { PublishButtonClientProps } from 'payload'
+
+export function MyPublishButton(props: PublishButtonClientProps) {
   return (
     <PublishButton label="Publish" />
   )
@@ -264,11 +308,11 @@ export const MyCollection: CollectionConfig = {
   // ...
   admin: {
     components: {
-      // highlight-start
-      afterListTable: [
-        '/path/to/MyPreviewComponent',
-      ],
-      // highlight-end
+      edit: {
+        // highlight-start
+        PreviewButton: '/path/to/MyPreviewButton',
+        // highlight-end
+      }
     },
   },
 }
@@ -276,11 +320,29 @@ export const MyCollection: CollectionConfig = {
 
 Here's an example of a simple `PreviewButton` component:
 
+#### Server Component
+
 ```tsx
 import React from 'react'
 import { PreviewButton } from '@payloadcms/ui'
+import type { PreviewButtonServerProps } from 'payload'
 
-export function MyPreviewComponent() {
+export function MyPreviewButton(props: PreviewButtonServerProps) {
+  return (
+    <PreviewButton />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { PreviewButton } from '@payloadcms/ui'
+import type { PreviewButtonClientProps } from 'payload'
+
+export function MyPreviewButton(props: PreviewButtonClientProps) {
   return (
     <PreviewButton />
   )
@@ -301,17 +363,31 @@ export const MyCollection: CollectionConfig = {
   // ...
   admin: {
     components: {
-      // highlight-start
-      afterListTable: [
-        '/path/to/MyUploadComponent',
-      ],
-      // highlight-end
+      edit: {
+        // highlight-start
+        Upload: '/path/to/MyUploadComponent',
+        // highlight-end
+      }
     },
   },
 }
 ```
 
 Here's an example of a simple `Upload` component:
+
+#### Server Component
+
+```tsx
+import React from 'react'
+
+export function MyUploadComponent() {
+  return (
+    <input type="file" />
+  )
+}
+```
+
+#### Client Component
 
 ```tsx
 import React from 'react'

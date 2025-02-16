@@ -1,5 +1,5 @@
 ---
-title: Swap in your own React components
+title: List View
 label: List View
 order: 70
 desc:
@@ -38,78 +38,43 @@ const config = buildConfig({
 
 Here's are some examples of simple List View components. These can be either Server or Client components, depending on your needs. Keep in mind that the props and types for these components are different depending on its type.
 
-### Server Component
+#### Server Component
 
 ```tsx
 import React from 'react'
 import type { ListViewServerProps } from 'payload'
 import { DefaultListView } from '@payloadcms/ui'
 
-export function MyCustomServerListView({
-  AfterList,
-  AfterListTable,
-  BeforeList,
-  BeforeListTable,
-  Description,
-  Table,
-  beforeActions,
-  collectionSlug,
-  columnState,
-  disableBulkDelete,
-  disableBulkEdit,
-  enableRowSelections,
-  hasCreatePermission,
-  listPreferences,
-  newDocumentURL,
-  preferenceKey,
-  renderedFilters,
-  resolvedFilterOptions
-}: ListViewServerProps) {
+export function MyCustomServerListView(props: ListViewServerProps) {
   return (
-    <DefaultListView
-      AfterList={AfterList}
-      AfterListTable={AfterListTable}
-      BeforeList={BeforeList}
-      BeforeListTable={BeforeListTable}
-      Description={Description}
-      Table={Table}
-      beforeActions={beforeActions}
-      collectionSlug={collectionSlug}
-      columnState={columnState}
-      disableBulkDelete={disableBulkDelete}
-      disableBulkEdit={disableBulkEdit}
-      enableRowSelections={enableRowSelections}
-      hasCreatePermission={hasCreatePermission}
-      listPreferences={listPreferences}
-      newDocumentURL={newDocumentURL}
-      preferenceKey={preferenceKey}
-      renderedFilters={renderedFilters}
-      resolvedFilterOptions={resolvedFilterOptions}
-    />
+    <div>
+      This is a custom List View (Server)
+    </div>
   )
 }
 ```
 
 _For details on how to build Custom Views, including all available props, see [Building Custom Views](./custom-views#building-custom-views)._
 
-### Client Component
+#### Client Component
 
 ```tsx
 'use client'
 import React from 'react'
 import type { ListViewClientProps } from 'payload'
-import { DefaultListView } from '@payloadcms/ui'
 
 export function MyCustomClientListView(props: ListViewClientProps) {
   return (
-    <DefaultListView {...props} />
+    <div>
+      This is a custom List View (Client)
+    </div>
   )
 }
 ```
 
 _For details on how to build Custom Views, including all available props, see [Building Custom Views](./custom-views#building-custom-views)._
 
-## Custom Components
+## Component Options
 
 In addition to swapping out the entire List View with a [Custom View](./custom-views), you can also override individual components. This allows you to customize specific parts of the List View without swapping out the entire view for your own.
 
@@ -139,6 +104,8 @@ The following options are available:
 | `afterList`           | An array of custom components to inject after the list of documents in the List View. [More details](#afterList).            |
 | `afterListTable`      | An array of custom components to inject after the table of documents in the List View. [More details](#afterListTable).      |
 | `Description`         | A component to render a description of the Collection. [More details](#Description).                                         |
+
+## Custom Components
 
 ### beforeList
 
@@ -174,7 +141,7 @@ import type { BeforeListServerProps } from 'payload'
 export function MyBeforeListComponent(props: BeforeListServerProps) {
   return (
     <div>
-      <p>This is a custom component that appears before the list of documents.</p>
+      This is a custom component that appears before the list of documents (Server)
     </div>
   )
 }
@@ -190,7 +157,7 @@ import type { BeforeListClientProps } from 'payload'
 export function MyBeforeListComponent(props: BeforeListClientProps) {
   return (
     <div>
-      <p>This is a custom component that appears before the list of documents.</p>
+      This is a custom component that appears before the list of documents (Client)
     </div>
   )
 }
@@ -230,7 +197,7 @@ import type { BeforeListTableServerProps } from 'payload'
 export function MyBeforeListTableComponent(props: BeforeListTableServerProps) {
   return (
     <div>
-      <p>This is a custom component that appears before the table of documents.</p>
+      This is a custom component that appears before the table of documents (Server)
     </div>
   )
 }
@@ -246,7 +213,7 @@ import type { BeforeListTableClientProps } from 'payload'
 export function MyBeforeListTableComponent(props: BeforeListTableClientProps) {
   return (
     <div>
-      <p>This is a custom component that appears before the table of documents.</p>
+      This is a custom component that appears before the table of documents (Client)
     </div>
   )
 }
@@ -286,7 +253,7 @@ import type { AfterListServerProps } from 'payload'
 export function MyAfterListComponent(props: AfterListServerProps) {
   return (
     <div>
-      <p>This is a custom component that appears after the list of documents.</p>
+      This is a custom component that appears after the list of documents (Server)
     </div>
   )
 }
@@ -302,7 +269,7 @@ import type { AfterListClientProps } from 'payload'
 export function MyAfterListComponent(props: AfterListClientProps) {
   return (
     <div>
-      <p>This is a custom component that appears after the list of documents.</p>
+      This is a custom component that appears after the list of documents (Client)
     </div>
   )
 }
@@ -342,7 +309,7 @@ import type { AfterListTableServerProps } from 'payload'
 export function MyAfterListTableComponent(props: AfterListTableServerProps) {
   return (
     <div>
-      <p>This is a custom component that appears after the table of documents.</p>
+      This is a custom component that appears after the table of documents (Server)
     </div>
   )
 }
@@ -358,7 +325,7 @@ import type { AfterListTableClientProps } from 'payload'
 export function MyAfterListTableComponent(props: AfterListTableClientProps) {
   return (
     <div>
-      <p>This is a custom component that appears after the table of documents.</p>
+      This is a custom component that appears after the table of documents (Client)
     </div>
   )
 }
@@ -378,9 +345,7 @@ export const MyCollection: CollectionConfig = {
   admin: {
     components: {
       // highlight-start
-      Description: [
-        '/path/to/MyDescriptionComponent',
-      ],
+      Description: '/path/to/MyDescriptionComponent',
       // highlight-end
     },
   },
@@ -398,7 +363,7 @@ import type { ListDescriptionServerProps } from 'payload'
 export function MyDescriptionComponent(props: ListDescriptionServerProps) {
   return (
     <div>
-      <p>This is a custom description of the Collection.</p>
+      This is a custom description of the Collection (Server)
     </div>
   )
 }
@@ -414,7 +379,7 @@ import type { ListDescriptionClientProps } from 'payload'
 export function MyDescriptionComponent(props: ListDescriptionClientProps) {
   return (
     <div>
-      <p>This is a custom description of the Collection.</p>
+      This is a custom description of the Collection (Client)
     </div>
   )
 }

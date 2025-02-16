@@ -1,5 +1,5 @@
 ---
-title: Swap in your own React components
+title: Root Components
 label: Root Components
 order: 20
 desc:
@@ -54,6 +54,8 @@ _For details on how to build Custom Components, see [Building Custom Components]
   **Note:**
   You can also use set [Collection Components](../configuration/collections#custom-components) and [Global Components](../configuration/globals#custom-components) in their respective configs.
 </Banner>
+
+## Components
 
 ### actions
 
@@ -123,7 +125,9 @@ Here is an example of a simple `beforeDashboard` component:
 ```tsx
 export default function MyBeforeDashboardComponent() {
   return (
-    <p>This is a custom component injected before the Dashboard.</p>
+    <div>
+      This is a custom component injected before the Dashboard.
+    </div>
   )
 }
 ```
@@ -156,7 +160,9 @@ Here is an example of a simple `afterDashboard` component:
 ```tsx
 export default function MyAfterDashboardComponent() {
   return (
-    <p>This is a custom component injected after the Dashboard.</p>
+    <div>
+      This is a custom component injected after the Dashboard.
+    </div>
   )
 }
 ```
@@ -189,7 +195,9 @@ Here is an example of a simple `beforeLogin` component:
 ```tsx
 export default function MyBeforeLoginComponent() {
   return (
-    <p>This is a custom component injected before the Login form.</p>
+    <div>
+      This is a custom component injected before the Login form.
+    </div>
   )
 }
 ```
@@ -222,7 +230,9 @@ Here is an example of a simple `afterLogin` component:
 ```tsx
 export default function MyAfterLoginComponent() {
   return (
-    <p>This is a custom component injected after the Login form.</p>
+    <div>
+      This is a custom component injected after the Login form.
+    </div>
   )
 }
 ```
@@ -255,7 +265,9 @@ Here is an example of a simple `beforeNavLinks` component:
 ```tsx
 export default function MyBeforeNavLinksComponent() {
   return (
-    <p>This is a custom component injected before the Nav links.</p>
+    <div>
+      This is a custom component injected before the Nav links.
+    </div>
   )
 }
 ```
@@ -416,7 +428,9 @@ export default buildConfig({
   admin: {
     // highlight-start
     components: {
-      Header: ['/path/to/your/component'],
+      Header: [
+        '/path/to/your/component'
+      ],
     },
     // highlight-end
   },
