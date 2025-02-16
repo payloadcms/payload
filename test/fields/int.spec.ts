@@ -2571,7 +2571,7 @@ describe('Fields', () => {
 
       const doc: BlockField = blockFields.docs[0] as BlockField
 
-      expect(doc?.localizedReferences?.[0]?.blockType).toEqual('localizedTextReference')
+      expect(doc?.localizedReferences?.[0]?.blockType).toEqual('localizedTextReference2')
       expect(doc?.localizedReferences?.[0]?.text).toEqual({ en: 'localized text' })
     })
 
