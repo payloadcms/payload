@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, Where } from 'payload'
+import type { ClientCollectionConfig, ResolvedFilterOptions, Where } from 'payload'
 
 import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
@@ -20,8 +20,8 @@ import { SearchFilter } from '../SearchFilter/index.js'
 import { UnpublishMany } from '../UnpublishMany/index.js'
 import { WhereBuilder } from '../WhereBuilder/index.js'
 import validateWhereQuery from '../WhereBuilder/validateWhereQuery.js'
-import './index.scss'
 import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched.js'
+import './index.scss'
 
 const baseClass = 'list-controls'
 
@@ -37,6 +37,7 @@ export type ListControlsProps = {
   readonly handleSortChange?: (sort: string) => void
   readonly handleWhereChange?: (where: Where) => void
   readonly renderedFilters?: Map<string, React.ReactNode>
+  readonly resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
 }
 
 /**
@@ -54,6 +55,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     enableColumns = true,
     enableSort = false,
     renderedFilters,
+    resolvedFilterOptions,
   } = props
 
   const { handleSearchChange, query } = useListQuery()
@@ -214,6 +216,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
           collectionSlug={collectionConfig.slug}
           fields={collectionConfig?.fields}
           renderedFilters={renderedFilters}
+          resolvedFilterOptions={resolvedFilterOptions}
         />
       </AnimateHeight>
       {enableSort && (

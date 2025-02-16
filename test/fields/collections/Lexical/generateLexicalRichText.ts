@@ -165,8 +165,8 @@ export function generateLexicalRichText(): TypedEditorState<
           fields: {
             id: '65298b2bdb4ef8c744a7faac',
             blockName: 'Block Node, with Blocks Field, With RichText Field, With Relationship Node',
-            blockType: 'subBlock',
-            subBlocks: [
+            blockType: 'subBlockLexical',
+            subBlocksLexical: [
               {
                 id: '65298b2edb4ef8c744a7faad',
                 richText: {

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { status as httpStatus } from 'http-status'
 
 import type { PayloadRequest, PopulateType, SelectType } from '../../types/index.js'

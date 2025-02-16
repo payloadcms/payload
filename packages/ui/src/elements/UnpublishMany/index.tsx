@@ -82,11 +82,13 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
                 label: getTranslation(successLabel, i18n),
               }),
             )
+
             if (json?.errors.length > 0) {
               toast.error(json.message, {
                 description: json.errors.map((error) => error.message).join('\n'),
               })
             }
+
             router.replace(
               qs.stringify(
                 {
@@ -96,6 +98,7 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
                 { addQueryPrefix: true },
               ),
             )
+
             clearRouteCache() // Use clearRouteCache instead of router.refresh, as we only need to clear the cache if the user has route caching enabled - clearRouteCache checks for this
             return null
           }
