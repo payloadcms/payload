@@ -276,7 +276,7 @@ describe('Localization', () => {
           expect(localized.title.es).toEqual(spanishTitle)
         })
 
-        it('REST all locales with all', async () => {
+        it('rest all locales with all', async () => {
           const response = await restClient.GET(`/${collection}/${localizedPost.id}`, {
             query: {
               locale: 'all',
@@ -290,7 +290,7 @@ describe('Localization', () => {
           expect(localized.title.es).toEqual(spanishTitle)
         })
 
-        it('REST all locales with asterisk', async () => {
+        it('rest all locales with asterisk', async () => {
           const response = await restClient.GET(`/${collection}/${localizedPost.id}`, {
             query: {
               locale: '*',
@@ -1869,7 +1869,9 @@ describe('Localization', () => {
       })
     })
 
-    describe('nested localized field sanitization', () => {
+    // Disabled, as nested localized fields do no longer have their localized property stripped in
+    // this monorepo, as this is handled at runtime.
+    describe.skip('nested localized field sanitization', () => {
       it('should sanitize nested localized fields', () => {
         const collection = payload.collections['localized-within-localized'].config
 
