@@ -481,6 +481,25 @@ describe('Relationships', () => {
           })
 
           expect(res_2.totalDocs).toBe(1)
+
+          const dir_1 = await payload.create({ collection: 'directors', data: { name: 'dir' } })
+          const dir_2 = await payload.create({ collection: 'directors', data: { name: 'dir' } })
+
+          const dir_3 = await payload.create({
+            collection: 'directors',
+            data: { directors: [dir_1.id, dir_2.id] },
+          })
+
+          const result = await payload.find({
+            collection: 'directors',
+            where: {
+              'directors.name': { equals: 'dir' },
+            },
+          })
+
+          expect(result.totalDocs).toBe(1)
+          expect(result.docs).toHaveLength(1)
+          expect(result.docs[0]?.id).toBe(dir_3.id)
         })
 
         it('should query using "contains" by hasMany relationship field', async () => {
