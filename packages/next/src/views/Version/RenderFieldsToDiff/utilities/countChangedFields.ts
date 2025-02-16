@@ -40,7 +40,8 @@ export function countChangedFields({
         if (
           locales &&
           field.localized &&
-          (config.compatibility?.allowLocalizedWithinLocalized || !parentIsLocalized)
+          (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
+            !parentIsLocalized)
         ) {
           locales.forEach((locale) => {
             const comparisonRows = comparison?.[field.name]?.[locale] ?? []
@@ -89,7 +90,8 @@ export function countChangedFields({
         if (
           locales &&
           field.localized &&
-          (config.compatibility?.allowLocalizedWithinLocalized || !parentIsLocalized)
+          (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
+            !parentIsLocalized)
         ) {
           locales.forEach((locale) => {
             if (
@@ -123,7 +125,8 @@ export function countChangedFields({
         if (
           locales &&
           field.localized &&
-          (config.compatibility?.allowLocalizedWithinLocalized || !parentIsLocalized)
+          (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
+            !parentIsLocalized)
         ) {
           locales.forEach((locale) => {
             count += countChangedFields({

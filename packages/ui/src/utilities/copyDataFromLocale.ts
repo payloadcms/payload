@@ -51,7 +51,8 @@ function iterateFields(
                 // Generate new IDs if the field is localized to prevent errors with relational DBs.
                 if (
                   field.localized &&
-                  (req.payload.config.compatibility?.allowLocalizedWithinLocalized ||
+                  (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized ===
+                    'true' ||
                     !parentIsLocalized)
                 ) {
                   toLocaleData[field.name][index].id = new ObjectId().toHexString()
@@ -93,7 +94,8 @@ function iterateFields(
               // Generate new IDs if the field is localized to prevent errors with relational DBs.
               if (
                 field.localized &&
-                (req.payload.config.compatibility?.allowLocalizedWithinLocalized ||
+                (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized ===
+                  'true' ||
                   !parentIsLocalized)
               ) {
                 toLocaleData[field.name][index].id = new ObjectId().toHexString()

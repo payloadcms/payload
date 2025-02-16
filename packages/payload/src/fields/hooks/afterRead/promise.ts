@@ -142,7 +142,8 @@ export const promise = async ({
     typeof siblingDoc[field.name] === 'object' &&
     siblingDoc[field.name] !== null &&
     field.localized &&
-    (req.payload.config.compatibility?.allowLocalizedWithinLocalized || !parentIsLocalized) &&
+    (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
+      !parentIsLocalized) &&
     locale !== 'all' &&
     req.payload.config.localization
 
@@ -240,7 +241,8 @@ export const promise = async ({
 
         const shouldRunHookOnAllLocales =
           field.localized &&
-          (req.payload.config.compatibility?.allowLocalizedWithinLocalized || !parentIsLocalized) &&
+          (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
+            !parentIsLocalized) &&
           (locale === 'all' || !flattenLocales) &&
           typeof siblingDoc[field.name] === 'object'
 
@@ -681,7 +683,8 @@ export const promise = async ({
 
           const shouldRunHookOnAllLocales =
             field.localized &&
-            (req.payload.config.compatibility?.allowLocalizedWithinLocalized ||
+            (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized ===
+              'true' ||
               !parentIsLocalized) &&
             (locale === 'all' || !flattenLocales) &&
             typeof siblingDoc[field.name] === 'object'

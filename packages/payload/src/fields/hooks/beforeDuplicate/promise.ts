@@ -66,7 +66,8 @@ export const promise = async <T>({
     const fieldIsLocalized =
       field.localized &&
       localization &&
-      (req.payload.config.compatibility?.allowLocalizedWithinLocalized || !parentIsLocalized)
+      (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
+        !parentIsLocalized)
 
     // Run field beforeDuplicate hooks
     if (Array.isArray(field.hooks?.beforeDuplicate)) {

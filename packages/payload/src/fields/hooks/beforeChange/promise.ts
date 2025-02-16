@@ -102,7 +102,8 @@ export const promise = async ({
     // skip validation if the field is localized and the incoming data is null
     if (
       field.localized &&
-      (req.payload.config.compatibility?.allowLocalizedWithinLocalized || !parentIsLocalized) &&
+      (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
+        !parentIsLocalized) &&
       operationLocale !== defaultLocale
     ) {
       if (['array', 'blocks'].includes(field.type) && siblingData[field.name] === null) {
@@ -198,7 +199,8 @@ export const promise = async ({
     if (
       localization &&
       field.localized &&
-      (req.payload.config.compatibility?.allowLocalizedWithinLocalized || !parentIsLocalized)
+      (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
+        !parentIsLocalized)
     ) {
       mergeLocaleActions.push(async () => {
         const localeData = await localization.localeCodes.reduce(

@@ -126,7 +126,8 @@ export function getLocalizedPaths({
           localizationConfig &&
           'localized' in matchedField &&
           matchedField.localized &&
-          (payload.config.compatibility?.allowLocalizedWithinLocalized || !_parentIsLocalized)
+          (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
+            !_parentIsLocalized)
         ) {
           currentPath = `${currentPath}.${locale}`
         }

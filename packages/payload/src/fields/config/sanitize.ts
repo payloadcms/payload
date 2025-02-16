@@ -160,7 +160,10 @@ export const sanitizeFields = async ({
       if (typeof field.localized !== 'undefined') {
         let shouldDisableLocalized = !config.localization
 
-        if (!config.compatibility?.allowLocalizedWithinLocalized && parentIsLocalized) {
+        if (
+          !process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' &&
+          parentIsLocalized
+        ) {
           shouldDisableLocalized = true
         }
 

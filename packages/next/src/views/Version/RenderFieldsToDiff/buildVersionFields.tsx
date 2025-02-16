@@ -108,7 +108,8 @@ export const buildVersionFields = ({
     const isLocalized =
       'localized' in field &&
       field.localized &&
-      (!parentIsLocalized || req.payload.config.compatibility?.allowLocalizedWithinLocalized)
+      (!parentIsLocalized ||
+        process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true')
     const fieldName: null | string = 'name' in field ? field.name : null
 
     const versionValue = fieldName ? versionSiblingData?.[fieldName] : versionSiblingData

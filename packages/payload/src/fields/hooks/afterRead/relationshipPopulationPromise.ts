@@ -143,7 +143,8 @@ export const relationshipPopulationPromise = async ({
   if (field.type === 'join' || (fieldSupportsMany(field) && field.hasMany)) {
     if (
       field.localized &&
-      (req.payload.config.compatibility?.allowLocalizedWithinLocalized || !parentIsLocalized) &&
+      (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
+        !parentIsLocalized) &&
       locale === 'all' &&
       typeof siblingDoc[field.name] === 'object' &&
       siblingDoc[field.name] !== null

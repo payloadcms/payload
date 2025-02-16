@@ -281,7 +281,9 @@ export const traverseFields = ({
             if (field.type === 'group') {
               if (
                 field.localized &&
-                (config.compatibility?.allowLocalizedWithinLocalized || !parentIsLocalized)
+                (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized ===
+                  'true' ||
+                  !parentIsLocalized)
               ) {
                 ref[field.name] = {
                   en: {},
@@ -292,7 +294,9 @@ export const traverseFields = ({
             } else if (field.type === 'array' || field.type === 'blocks') {
               if (
                 field.localized &&
-                (config.compatibility?.allowLocalizedWithinLocalized || !parentIsLocalized)
+                (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized ===
+                  'true' ||
+                  !parentIsLocalized)
               ) {
                 ref[field.name] = {
                   en: [],
@@ -311,7 +315,8 @@ export const traverseFields = ({
       if (
         field.type === 'group' &&
         field.localized &&
-        (config.compatibility?.allowLocalizedWithinLocalized || !parentIsLocalized) &&
+        (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
+          !parentIsLocalized) &&
         currentRef &&
         typeof currentRef === 'object'
       ) {
@@ -341,7 +346,8 @@ export const traverseFields = ({
       ) {
         if (
           field.localized &&
-          (config.compatibility?.allowLocalizedWithinLocalized || !parentIsLocalized)
+          (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
+            !parentIsLocalized)
         ) {
           if (Array.isArray(currentRef)) {
             return
