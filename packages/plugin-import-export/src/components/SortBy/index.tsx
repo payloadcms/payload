@@ -28,9 +28,12 @@ export const SortByFields: SelectFieldClientComponent = (props) => {
     }
   })
 
-  useEffect(() => {
-    setValue(options[0])
-  }, [options, setValue])
+  // TODO: this is causing the form to crash
+  // useEffect(() => {
+  //   if (options && options[0] && options[0].value !== value) {
+  //     setValue(options[0])
+  //   }
+  // }, [options, setValue, value])
 
   // TODO: after save the form crashes, returning null to avoid errors when the id is present
   if (id) {

@@ -30,11 +30,12 @@ export const FieldsToExport: SelectFieldClientComponent = (props) => {
     }
   })
 
+  // TODO: this is causing the form to crash
   // set all fields to be selected by default
-  useEffect(() => {
-    setValue(fieldOptions)
-    setColumnsToExport(fieldOptions as any)
-  }, [])
+  // useEffect(() => {
+  //   setValue(fieldOptions)
+  //   setColumnsToExport(fieldOptions as any)
+  // }, [fieldOptions, setColumnsToExport, setValue])
 
   const onChange = (value: any) => {
     setValue(value)
@@ -50,6 +51,7 @@ export const FieldsToExport: SelectFieldClientComponent = (props) => {
     <React.Fragment>
       <FieldLabel label="Columns to Export" />
       <ReactSelect
+        className={baseClass}
         disabled={props.readOnly}
         isClearable={true}
         isMulti={true}

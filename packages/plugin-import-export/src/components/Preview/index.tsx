@@ -76,7 +76,7 @@ export const Preview = () => {
     }
 
     void fetchData()
-  }, [collectionSlug, whereIncoming])
+  }, [collectionSlug, whereIncoming, whereQuery])
 
   return (
     <div className={baseClass}>
