@@ -16,7 +16,7 @@ const traverseArrayOrBlocksField = ({
   parentRef,
 }: {
   callback: TraverseFieldsCallback
-  callbackStack: TraverseFieldsCallback[]
+  callbackStack: (() => ReturnType<TraverseFieldsCallback>)[]
   config: Config | SanitizedConfig
   data: Record<string, unknown>[]
   field: ArrayField | BlocksField
@@ -112,7 +112,7 @@ export type TraverseFieldsCallback = (args: {
 
 type TraverseFieldsArgs = {
   callback: TraverseFieldsCallback
-  callbackStack?: TraverseFieldsCallback[]
+  callbackStack?: (() => ReturnType<TraverseFieldsCallback>)[]
   config: Config | SanitizedConfig
   fields: (Field | TabAsField)[]
   fillEmpty?: boolean
@@ -151,7 +151,7 @@ export const traverseFields = ({
   ref = {},
 }: TraverseFieldsArgs): void => {
   fields.some((field) => {
-    let callbackStack: TraverseFieldsCallback[] = []
+    let callbackStack: (() => ReturnType<TraverseFieldsCallback>)[] = []
     if (!isTopLevel) {
       callbackStack = _callbackStack
     }
@@ -167,7 +167,7 @@ export const traverseFields = ({
     if (!leavesFirst && callback && callback({ field, next, parentIsLocalized, parentRef, ref })) {
       return true
     } else if (leavesFirst) {
-      callbackStack.push(callback)
+      callbackStack.push(() => callback({ field, next, parentIsLocalized, parentRef, ref }))
     }
 
     if (skip) {
@@ -212,7 +212,15 @@ export const traverseFields = ({
           ) {
             return true
           } else if (leavesFirst) {
-            callbackStack.push(callback)
+            callbackStack.push(() =>
+              callback({
+                field: { ...tab, type: 'tab' },
+                next,
+                parentIsLocalized,
+                parentRef: currentParentRef,
+                ref: tabRef,
+              }),
+            )
           }
 
           tabRef = tabRef[tab.name]
@@ -249,7 +257,15 @@ export const traverseFields = ({
           ) {
             return true
           } else if (leavesFirst) {
-            callbackStack.push(callback)
+            callbackStack.push(() =>
+              callback({
+                field: { ...tab, type: 'tab' },
+                next,
+                parentIsLocalized,
+                parentRef: currentParentRef,
+                ref: tabRef,
+              }),
+            )
           }
         }
 
@@ -405,7 +421,7 @@ export const traverseFields = ({
 
     if (isTopLevel) {
       callbackStack.reverse().forEach((cb) => {
-        cb({ field, next, parentIsLocalized, parentRef, ref })
+        cb()
       })
     }
   })
