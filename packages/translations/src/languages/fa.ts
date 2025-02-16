@@ -263,6 +263,7 @@ export const faTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'به هر حال ترک کن',
     leaveWithoutSaving: 'ترک کردن بدون ذخیره',
     light: 'روشن',
+    listControlMenu: 'منوی کنترل لیست',
     livePreview: 'پیش‌نمایش',
     loading: 'در حال بارگذاری',
     locale: 'زبان',

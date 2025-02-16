@@ -266,6 +266,7 @@ export const skTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'Presto odísť',
     leaveWithoutSaving: 'Odísť bez uloženia',
     light: 'Svetlý',
+    listControlMenu: 'Menu ovládania zoznamu',
     livePreview: 'Náhľad',
     loading: 'Načítavanie',
     locale: 'Jazyk',

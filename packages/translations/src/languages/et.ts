@@ -262,6 +262,7 @@ export const etTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'Lahku ikkagi',
     leaveWithoutSaving: 'Lahku ilma salvestamata',
     light: 'Hele',
+    listControlMenu: 'Loendikontrolli menüü',
     livePreview: 'Reaalajas eelvaade',
     loading: 'Laadimine',
     locale: 'Keel',

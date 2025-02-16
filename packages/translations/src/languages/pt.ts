@@ -265,6 +265,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'Sair mesmo assim',
     leaveWithoutSaving: 'Sair sem salvar',
     light: 'Claro',
+    listControlMenu: 'Menu de controle de lista',
     livePreview: 'Pré-visualização',
     loading: 'Carregando',
     locale: 'Local',

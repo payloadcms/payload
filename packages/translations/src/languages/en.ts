@@ -265,6 +265,7 @@ export const enTranslations = {
     leaveAnyway: 'Leave anyway',
     leaveWithoutSaving: 'Leave without saving',
     light: 'Light',
+    listControlMenu: 'List control menu',
     livePreview: 'Live Preview',
     loading: 'Loading',
     locale: 'Locale',

@@ -265,6 +265,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'Forlat likevel',
     leaveWithoutSaving: 'Forlat uten å lagre',
     light: 'Lys',
+    listControlMenu: 'Kontrollmeny for liste',
     livePreview: 'Forhåndsvisning',
     loading: 'Laster',
     locale: 'Lokalitet',

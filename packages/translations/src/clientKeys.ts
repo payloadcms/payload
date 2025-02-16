@@ -209,6 +209,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:loading',
   'general:locale',
   'general:menu',
+  'general:listControlMenu',
   'general:moveDown',
   'general:moveUp',
   'general:next',

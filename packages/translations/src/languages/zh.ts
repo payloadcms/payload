@@ -255,6 +255,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     leaveAnyway: '无论如何都要离开',
     leaveWithoutSaving: '离开而不保存',
     light: '亮色',
+    listControlMenu: '列表控制菜单',
     livePreview: '预览',
     loading: '加载中...',
     locale: '语言环境',

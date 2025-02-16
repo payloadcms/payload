@@ -265,6 +265,7 @@ export const azTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'Heç olmasa çıx',
     leaveWithoutSaving: 'Saxlamadan çıx',
     light: 'Açıq',
+    listControlMenu: 'Siyahı nəzarət menyusu',
     livePreview: 'Öncədən baxış',
     loading: 'Yüklənir',
     locale: 'Lokal',

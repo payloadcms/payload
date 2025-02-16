@@ -6,8 +6,10 @@ import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useEffect, useRef, useState } from 'react'
 
+import { Popup, PopupList } from '../../elements/Popup/index.js'
 import { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
+import { Dots } from '../../icons/Dots/index.js'
 import { SearchIcon } from '../../icons/Search/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -20,9 +22,9 @@ import { PublishMany } from '../PublishMany/index.js'
 import { SearchFilter } from '../SearchFilter/index.js'
 import { UnpublishMany } from '../UnpublishMany/index.js'
 import { WhereBuilder } from '../WhereBuilder/index.js'
+import './index.scss'
 import validateWhereQuery from '../WhereBuilder/validateWhereQuery.js'
 import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched.js'
-import './index.scss'
 
 const baseClass = 'list-controls'
 
@@ -37,6 +39,7 @@ export type ListControlsProps = {
   readonly handleSearchChange?: (search: string) => void
   readonly handleSortChange?: (sort: string) => void
   readonly handleWhereChange?: (where: Where) => void
+  readonly listControlsMenu?: React.ReactNode | React.ReactNode[]
   readonly renderedFilters?: Map<string, React.ReactNode>
   readonly resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
 }
@@ -55,6 +58,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     disableBulkEdit,
     enableColumns = true,
     enableSort = false,
+    listControlsMenu,
     renderedFilters,
     resolvedFilterOptions,
   } = props
@@ -198,6 +202,21 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               >
                 {t('general:sort')}
               </Pill>
+            )}
+            {listControlsMenu && Array.isArray(listControlsMenu) && (
+              <Popup
+                button={<Dots ariaLabel={t('general:listControlMenu')} />}
+                className={`${baseClass}__popup`}
+                horizontalAlign="right"
+                size="large"
+                verticalAlign="bottom"
+              >
+                <PopupList.ButtonGroup>
+                  {listControlsMenu.map((control, index) => (
+                    <PopupList.Button key={index}>{control}</PopupList.Button>
+                  ))}
+                </PopupList.ButtonGroup>
+              </Popup>
             )}
           </div>
         </div>
