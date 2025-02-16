@@ -20,6 +20,7 @@ import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
+import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../index.js'
 
@@ -137,10 +138,13 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
 
   const { config, getEntityConfig } = useConfig()
 
-  const { customComponents: { AfterInput, BeforeInput, Description, Label } = {}, value } =
-    useField<PaginatedDocs>({
-      path,
-    })
+  const {
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    showError,
+    value,
+  } = useField<PaginatedDocs>({
+    path,
+  })
 
   const filterOptions: null | Where = useMemo(() => {
     if (!docID) {
@@ -189,9 +193,13 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
 
   return (
     <div
-      className={[fieldBaseClass, 'join'].filter(Boolean).join(' ')}
+      className={[fieldBaseClass, showError && 'error', 'join'].filter(Boolean).join(' ')}
       id={`field-${path?.replace(/\./g, '__')}`}
     >
+      <RenderCustomComponent
+        CustomComponent={Error}
+        Fallback={<FieldError path={path} showError={showError} />}
+      />
       <RelationshipTable
         AfterInput={AfterInput}
         allowCreate={typeof docID !== 'undefined' && allowCreate}

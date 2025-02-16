@@ -159,7 +159,12 @@ export const DeleteMany: React.FC<Props> = (props) => {
         <div className={`${baseClass}__wrapper`}>
           <div className={`${baseClass}__content`}>
             <h1>{t('general:confirmDeletion')}</h1>
-            <p>{t('general:aboutToDeleteCount', { count, label: getTranslation(plural, i18n) })}</p>
+            <p>
+              {t('general:aboutToDeleteCount', {
+                count,
+                label: getTranslation(count > 1 ? plural : singular, i18n),
+              })}
+            </p>
           </div>
           <div className={`${baseClass}__controls`}>
             <Button
