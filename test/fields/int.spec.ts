@@ -2583,8 +2583,6 @@ describe('Fields', () => {
 
       const doc: any = blockFields.docs[0]
 
-      console.log(doc.localizedReferencesLocalizedBlock)
-
       expect(doc?.localizedReferencesLocalizedBlock?.en?.[0]?.blockType).toEqual(
         'localizedTextReference',
       )
