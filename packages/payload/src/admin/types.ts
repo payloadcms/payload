@@ -24,14 +24,56 @@ import type {
   Row,
 } from './forms/Form.js'
 
+export type {
+  /**
+   * @deprecated
+   * The `CustomPreviewButton` type is deprecated and will be removed in the next major version.
+   * This type is only used for the Payload Config. Use `PreviewButtonClientProps` instead.
+   */
+  CustomComponent as CustomPreviewButton,
+  /**
+   * @deprecated
+   * The `CustomPublishButton` type is deprecated and will be removed in the next major version.
+   * This type is only used for the Payload Config. Use `PreviewButtonClientProps` instead.
+   */
+  CustomComponent as CustomPublishButton,
+  /**
+   * @deprecated
+   * The `CustomSaveButton` type is deprecated and will be removed in the next major version.
+   * This type is only used for the Payload Config. Use `PreviewButtonClientProps` instead.
+   */
+  CustomComponent as CustomSaveButton,
+  /**
+   * @deprecated
+   * The `CustomSaveDraftButton` type is deprecated and will be removed in the next major version.
+   * This type is only used for the Payload Config. Use `PreviewButtonClientProps` instead.
+   */
+  CustomComponent as CustomSaveDraftButton,
+} from '../config/types.js'
 export type { DefaultCellComponentProps, DefaultServerCellComponentProps } from './elements/Cell.js'
 export type { ConditionalDateProps } from './elements/DatePicker.js'
 export type { DayPickerProps, SharedProps, TimePickerProps } from './elements/DatePicker.js'
 export type { NavGroupPreferences, NavPreferences } from './elements/Nav.js'
-export type { CustomPreviewButton } from './elements/PreviewButton.js'
-export type { CustomPublishButton } from './elements/PublishButton.js'
-export type { CustomSaveButton } from './elements/SaveButton.js'
-export type { CustomSaveDraftButton } from './elements/SaveDraftButton.js'
+export type {
+  PreviewButtonClientProps,
+  PreviewButtonServerProps,
+  PreviewButtonServerPropsOnly,
+} from './elements/PreviewButton.js'
+export type {
+  PublishButtonClientProps,
+  PublishButtonServerProps,
+  PublishButtonServerPropsOnly,
+} from './elements/PublishButton.js'
+export type {
+  SaveButtonClientProps,
+  SaveButtonServerProps,
+  SaveButtonServerPropsOnly,
+} from './elements/SaveButton.js'
+export type {
+  SaveDraftButtonClientProps,
+  SaveDraftButtonServerProps,
+  SaveDraftButtonServerPropsOnly,
+} from './elements/SaveDraftButton.js'
 
 export type { Column } from './elements/Table.js'
 
