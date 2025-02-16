@@ -578,21 +578,29 @@ export type { LanguageOptions } from './LanguageOptions.js'
 export type { RichTextAdapter, RichTextAdapterProvider, RichTextHooks } from './RichText.js'
 
 export type {
+  DocumentTabClientProps,
   DocumentTabComponent,
   DocumentTabCondition,
   DocumentTabConfig,
-  DocumentTabProps,
+  /**
+   * @deprecated
+   * The `DocumentTabProps` type is deprecated and will be removed in the next major version.
+   * Use `DocumentTabServerProps` instead.
+   */
+  DocumentTabServerProps as DocumentTabProps,
+  DocumentTabServerProps,
+  DocumentTabServerPropsOnly,
   /**
    * @deprecated
    * The `ClientSideEditViewProps` type is deprecated and will be removed in the next major version.
-   * Use `EditViewClientProps` instead.
+   * Use `DocumentViewClientProps` instead.
    */
   DocumentViewClientProps as ClientSideEditViewProps,
   DocumentViewClientProps,
   /**
    * @deprecated
    * The `ServerSideEditViewProps` is deprecated and will be removed in the next major version.
-   * Use `EditViewServerProps` instead.
+   * Use `DocumentViewServerProps` instead.
    */
   DocumentViewServerProps as ServerSideEditViewProps,
   DocumentViewServerProps,
@@ -601,9 +609,20 @@ export type {
 } from './views/document.js'
 
 export type {
+  /**
+   * @deprecated
+   * The `AdminViewComponent` type is deprecated and will be removed in the next major version.
+   * Type your component props directly instead.
+   */
   AdminViewComponent,
   AdminViewConfig,
-  AdminViewProps,
+  /**
+   * @deprecated
+   * The `AdminViewProps` type is deprecated and will be removed in the next major version.
+   * Use `AdminViewServerProps` instead.
+   */
+  AdminViewServerProps as AdminViewProps,
+  AdminViewServerProps,
   InitPageResult,
   VisibleEntities,
 } from './views/index.js'

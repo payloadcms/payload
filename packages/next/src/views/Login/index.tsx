@@ -1,4 +1,4 @@
-import type { AdminViewProps } from 'payload'
+import type { AdminViewServerProps, ServerProps } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { redirect } from 'next/navigation.js'
@@ -12,7 +12,7 @@ export { generateLoginMetadata } from './meta.js'
 
 export const loginBaseClass = 'login'
 
-export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, searchParams }) => {
+export function LoginView({ initPageResult, params, searchParams }: AdminViewServerProps) {
   const { locale, permissions, req } = initPageResult
 
   const {
@@ -76,9 +76,8 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
           permissions,
           searchParams,
           user,
-        },
+        } satisfies ServerProps,
       })}
-
       {!collectionConfig?.auth?.disableLocalStrategy && (
         <LoginForm
           prefillEmail={prefillEmail}
@@ -98,7 +97,7 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
           permissions,
           searchParams,
           user,
-        },
+        } satisfies ServerProps,
       })}
     </Fragment>
   )

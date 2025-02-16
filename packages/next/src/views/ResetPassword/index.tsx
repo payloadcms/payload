@@ -1,4 +1,4 @@
-import type { AdminViewProps } from 'payload'
+import type { AdminViewServerProps } from 'payload'
 
 import { Button, Link } from '@payloadcms/ui'
 import { formatAdminURL, Translation } from '@payloadcms/ui/shared'
@@ -12,7 +12,7 @@ export const resetPasswordBaseClass = 'reset-password'
 
 export { generateResetPasswordMetadata } from './meta.js'
 
-export const ResetPassword: React.FC<AdminViewProps> = ({ initPageResult, params }) => {
+export function ResetPassword({ initPageResult, params }: AdminViewServerProps) {
   const { req } = initPageResult
 
   const {

@@ -10,6 +10,7 @@ import type {
   MetaConfig,
   PayloadComponent,
   SanitizedConfig,
+  ServerProps,
 } from '../../config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
@@ -18,7 +19,7 @@ import type { Data } from '../types.js'
 import type { DocumentSubViewTypes } from './document.js'
 
 export type AdminViewConfig = {
-  Component: AdminViewComponent
+  Component: PayloadComponent
   /** Whether the path should be matched exactly or as a prefix */
   exact?: boolean
   meta?: MetaConfig
@@ -27,7 +28,7 @@ export type AdminViewConfig = {
   strict?: boolean
 }
 
-export type AdminViewProps = {
+export type AdminViewServerProps = {
   readonly clientConfig: ClientConfig
   readonly disableActions?: boolean
   readonly documentSubViewType?: DocumentSubViewTypes
@@ -42,7 +43,10 @@ export type AdminViewProps = {
   readonly viewType: ViewTypes
 }
 
-export type AdminViewComponent = PayloadComponent<AdminViewProps>
+/**
+ * @deprecated This should be removed in favor of direct props
+ */
+export type AdminViewComponent = PayloadComponent<AdminViewServerProps>
 
 export type VisibleEntities = {
   collections: SanitizedCollectionConfig['slug'][]

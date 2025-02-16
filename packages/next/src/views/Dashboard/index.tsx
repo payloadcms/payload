@@ -1,5 +1,5 @@
 import type { EntityToGroup } from '@payloadcms/ui/shared'
-import type { AdminViewProps } from 'payload'
+import type { AdminViewServerProps } from 'payload'
 
 import { HydrateAuthProvider, SetStepNav } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
@@ -10,11 +10,7 @@ import { DefaultDashboard } from './Default/index.js'
 
 export { generateDashboardMetadata } from './meta.js'
 
-export const Dashboard: React.FC<AdminViewProps> = async ({
-  initPageResult,
-  params,
-  searchParams,
-}) => {
+export async function Dashboard({ initPageResult, params, searchParams }: AdminViewServerProps) {
   const {
     locale,
     permissions,

@@ -1,5 +1,5 @@
 import type {
-  AdminViewProps,
+  AdminViewServerProps,
   Data,
   DocumentViewClientProps,
   DocumentViewServerProps,
@@ -49,7 +49,7 @@ export const renderDocument = async ({
   viewType,
 }: {
   overrideEntityVisibility?: boolean
-} & AdminViewProps): Promise<{
+} & AdminViewServerProps): Promise<{
   data: Data
   Document: React.ReactNode
 }> => {
@@ -83,7 +83,7 @@ export const renderDocument = async ({
   let RootViewOverride: PayloadComponent
   let CustomView: ViewFromConfig<DocumentViewServerProps>
   let DefaultView: ViewFromConfig<DocumentViewServerProps>
-  let ErrorView: ViewFromConfig<AdminViewProps>
+  let ErrorView: ViewFromConfig<AdminViewServerProps>
 
   let apiURL: string
 
@@ -395,16 +395,16 @@ export const renderDocument = async ({
   }
 }
 
-export const Document: React.FC<AdminViewProps> = async (args) => {
+export async function Document(props: AdminViewServerProps) {
   try {
-    const { Document: RenderedDocument } = await renderDocument(args)
+    const { Document: RenderedDocument } = await renderDocument(props)
     return RenderedDocument
   } catch (error) {
     if (error?.message === 'NEXT_REDIRECT') {
       throw error
     }
 
-    logError({ err: error, payload: args.initPageResult.req.payload })
+    logError({ err: error, payload: props.initPageResult.req.payload })
 
     if (error.message === 'not-found') {
       notFound()

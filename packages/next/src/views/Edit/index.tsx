@@ -1,10 +1,10 @@
 'use client'
 
-import type { DocumentViewServerProps } from 'payload'
+import type { DocumentViewClientProps } from 'payload'
 
 import { DefaultEditView } from '@payloadcms/ui'
 import React from 'react'
 
-export const EditView: React.FC<DocumentViewServerProps> = (props) => {
+export const EditView: React.FC<DocumentViewClientProps> = (props) => {
   return <DefaultEditView {...props} />
 }

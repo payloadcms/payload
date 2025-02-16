@@ -2,7 +2,6 @@ import type { SanitizedPermissions } from '../../auth/types.js'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { PayloadComponent, SanitizedConfig, ServerProps } from '../../config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { Payload } from '../../index.js'
 import type { Data, DocumentSlots, FormState } from '../types.js'
 import type { InitPageResult, ViewTypes } from './index.js'
 
@@ -27,15 +26,17 @@ export type DocumentViewClientProps = {
 
 export type DocumentSubViewTypes = 'api' | 'default' | 'livePreview' | 'version' | 'versions'
 
-import type { I18n } from '@payloadcms/translations'
-
-export type DocumentTabProps = {
+export type DocumentTabServerPropsOnly = {
   readonly apiURL?: string
   readonly collectionConfig?: SanitizedCollectionConfig
   readonly globalConfig?: SanitizedGlobalConfig
-  readonly i18n: I18n
-  readonly payload: Payload
   readonly permissions: SanitizedPermissions
+} & ServerProps
+
+export type DocumentTabServerProps = DocumentTabClientProps & DocumentTabServerPropsOnly
+
+export type DocumentTabClientProps = {
+  path: string
 }
 
 export type DocumentTabCondition = (args: {
@@ -65,6 +66,7 @@ export type DocumentTabConfig = {
   readonly Pill?: PayloadComponent
 }
 
+// TODO: remove this type, prefer typing props directly
 export type DocumentTabComponent = PayloadComponent<{
   path: string
 }>

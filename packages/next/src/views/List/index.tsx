@@ -1,5 +1,5 @@
 import type {
-  AdminViewProps,
+  AdminViewServerProps,
   ListPreferences,
   ListQuery,
   ListViewClientProps,
@@ -27,7 +27,7 @@ type RenderListViewArgs = {
   enableRowSelections: boolean
   overrideEntityVisibility?: boolean
   query: ListQuery
-} & AdminViewProps
+} & AdminViewServerProps
 
 export const renderListView = async (
   args: RenderListViewArgs,
