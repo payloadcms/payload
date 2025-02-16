@@ -162,7 +162,9 @@ export const sanitizeFields = async ({
 
         if (
           process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized !== 'true' &&
-          parentIsLocalized
+          parentIsLocalized &&
+          // @todo PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY=true will be the default in 4.0
+          process.env.PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY !== 'true'
         ) {
           shouldDisableLocalized = true
         }
