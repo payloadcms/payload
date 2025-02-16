@@ -16,6 +16,9 @@ import { runInit } from './runInit.js'
 import { child } from './safelyRunScript.js'
 import { createTestHooks } from './testHooks.js'
 
+// @todo remove in 4.0 - will behave like this by default in 4.0
+process.env.PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY = 'true'
+
 const prod = process.argv.includes('--prod')
 if (prod) {
   process.argv = process.argv.filter((arg) => arg !== '--prod')
