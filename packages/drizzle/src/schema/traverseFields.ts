@@ -547,7 +547,7 @@ export const traverseFields = ({
           } else if (process.env.NODE_ENV !== 'production' && !versions) {
             validateExistingBlockIsIdentical({
               block,
-              localized: isFieldLocalized,
+              localized: field.localized,
               parentIsLocalized: parentIsLocalized || field.localized,
               rootTableName,
               table: adapter.rawTables[blockTableName],
