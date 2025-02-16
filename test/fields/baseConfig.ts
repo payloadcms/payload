@@ -136,6 +136,16 @@ export const baseConfig: Partial<Config> = {
         },
       ],
     },
+    {
+      slug: 'localizedTextReference2',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+          localized: true,
+        },
+      ],
+    },
   ],
   custom: {
     client: {

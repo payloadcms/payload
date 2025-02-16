@@ -84,6 +84,7 @@ export interface Config {
   blocks: {
     ConfigBlockTest: ConfigBlockTest;
     localizedTextReference: LocalizedTextReference;
+    localizedTextReference2: LocalizedTextReference2;
   };
   collections: {
     'lexical-fields': LexicalField;
@@ -233,6 +234,16 @@ export interface LocalizedTextReference {
   id?: string | null;
   blockName?: string | null;
   blockType: 'localizedTextReference';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localizedTextReference2".
+ */
+export interface LocalizedTextReference2 {
+  text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'localizedTextReference2';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -688,136 +699,16 @@ export interface ArrayField {
  */
 export interface BlockField {
   id: string;
-  blocks: (
-    | ContentBlock
-    | NumberBlock
-    | SubBlocksBlock
-    | TabsBlock
-    | {
-        richText?: {
-          root: {
-            type: string;
-            children: {
-              type: string;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        } | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'localizedText';
-      }
-  )[];
-  duplicate: (
-    | ContentBlock
-    | NumberBlock
-    | SubBlocksBlock
-    | TabsBlock
-    | {
-        richText?: {
-          root: {
-            type: string;
-            children: {
-              type: string;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        } | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'localizedText';
-      }
-  )[];
+  blocks: (ContentBlock | NumberBlock | SubBlocksBlock | TabsBlock)[];
+  duplicate: (ContentBlock | NumberBlock | SubBlocksBlock | TabsBlock)[];
   collapsedByDefaultBlocks: (
     | LocalizedContentBlock
     | LocalizedNumberBlock
     | LocalizedSubBlocksBlock
     | LocalizedTabsBlock
-    | {
-        richText?: {
-          root: {
-            type: string;
-            children: {
-              type: string;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        } | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'localizedText';
-      }
   )[];
-  disableSort: (
-    | LocalizedContentBlock
-    | LocalizedNumberBlock
-    | LocalizedSubBlocksBlock
-    | LocalizedTabsBlock
-    | {
-        richText?: {
-          root: {
-            type: string;
-            children: {
-              type: string;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        } | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'localizedText';
-      }
-  )[];
-  localizedBlocks: (
-    | LocalizedContentBlock
-    | LocalizedNumberBlock
-    | LocalizedSubBlocksBlock
-    | LocalizedTabsBlock
-    | {
-        richText?: {
-          root: {
-            type: string;
-            children: {
-              type: string;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        } | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'localizedText';
-      }
-  )[];
+  disableSort: (LocalizedContentBlock | LocalizedNumberBlock | LocalizedSubBlocksBlock | LocalizedTabsBlock)[];
+  localizedBlocks: (LocalizedContentBlock | LocalizedNumberBlock | LocalizedSubBlocksBlock | LocalizedTabsBlock)[];
   i18nBlocks?:
     | {
         text?: string | null;
@@ -942,7 +833,7 @@ export interface BlockField {
   deduplicatedBlocks?: ConfigBlockTest[] | null;
   deduplicatedBlocks2?: ConfigBlockTest[] | null;
   localizedReferencesLocalizedBlock?: LocalizedTextReference[] | null;
-  localizedReferences?: LocalizedTextReference[] | null;
+  localizedReferences?: LocalizedTextReference2[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1852,32 +1743,7 @@ export interface TabsField {
     text: string;
     id?: string | null;
   }[];
-  blocks: (
-    | ContentBlock
-    | NumberBlock
-    | SubBlocksBlock
-    | TabsBlock
-    | {
-        richText?: {
-          root: {
-            type: string;
-            children: {
-              type: string;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        } | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'localizedText';
-      }
-  )[];
+  blocks: (ContentBlock | NumberBlock | SubBlocksBlock | TabsBlock)[];
   group: {
     number: number;
   };
@@ -2540,13 +2406,6 @@ export interface BlockFieldsSelect<T extends boolean = true> {
         number?: T | NumberBlockSelect<T>;
         subBlocks?: T | SubBlocksBlockSelect<T>;
         tabs?: T | TabsBlockSelect<T>;
-        localizedText?:
-          | T
-          | {
-              richText?: T;
-              id?: T;
-              blockName?: T;
-            };
       };
   duplicate?:
     | T
@@ -2555,13 +2414,6 @@ export interface BlockFieldsSelect<T extends boolean = true> {
         number?: T | NumberBlockSelect<T>;
         subBlocks?: T | SubBlocksBlockSelect<T>;
         tabs?: T | TabsBlockSelect<T>;
-        localizedText?:
-          | T
-          | {
-              richText?: T;
-              id?: T;
-              blockName?: T;
-            };
       };
   collapsedByDefaultBlocks?:
     | T
@@ -2570,13 +2422,6 @@ export interface BlockFieldsSelect<T extends boolean = true> {
         localizedNumber?: T | LocalizedNumberBlockSelect<T>;
         localizedSubBlocks?: T | LocalizedSubBlocksBlockSelect<T>;
         localizedTabs?: T | LocalizedTabsBlockSelect<T>;
-        localizedText?:
-          | T
-          | {
-              richText?: T;
-              id?: T;
-              blockName?: T;
-            };
       };
   disableSort?:
     | T
@@ -2585,13 +2430,6 @@ export interface BlockFieldsSelect<T extends boolean = true> {
         localizedNumber?: T | LocalizedNumberBlockSelect<T>;
         localizedSubBlocks?: T | LocalizedSubBlocksBlockSelect<T>;
         localizedTabs?: T | LocalizedTabsBlockSelect<T>;
-        localizedText?:
-          | T
-          | {
-              richText?: T;
-              id?: T;
-              blockName?: T;
-            };
       };
   localizedBlocks?:
     | T
@@ -2600,13 +2438,6 @@ export interface BlockFieldsSelect<T extends boolean = true> {
         localizedNumber?: T | LocalizedNumberBlockSelect<T>;
         localizedSubBlocks?: T | LocalizedSubBlocksBlockSelect<T>;
         localizedTabs?: T | LocalizedTabsBlockSelect<T>;
-        localizedText?:
-          | T
-          | {
-              richText?: T;
-              id?: T;
-              blockName?: T;
-            };
       };
   i18nBlocks?:
     | T
@@ -3467,13 +3298,6 @@ export interface TabsFieldsSelect<T extends boolean = true> {
         number?: T | NumberBlockSelect<T>;
         subBlocks?: T | SubBlocksBlockSelect<T>;
         tabs?: T | TabsBlockSelect<T>;
-        localizedText?:
-          | T
-          | {
-              richText?: T;
-              id?: T;
-              blockName?: T;
-            };
       };
   group?:
     | T
