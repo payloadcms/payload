@@ -67,7 +67,7 @@ type GetViewFromConfigArgs = {
   segments: string[]
 }
 
-type GetViewFromConfigResult = {
+export type GetViewFromConfigResult = {
   DefaultView: ViewFromConfig
   documentSubViewType?: DocumentSubViewTypes
   initPageOptions: Parameters<typeof initPage>[0]
