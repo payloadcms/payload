@@ -26,6 +26,7 @@ type TraverseFieldArgs = {
   joinQuery: JoinQuery
   joins?: BuildQueryJoinAliases
   locale?: string
+  parentIsLocalized?: boolean
   path: string
   select?: SelectType
   selectAllOnCurrentLevel?: boolean
@@ -34,7 +35,6 @@ type TraverseFieldArgs = {
   topLevelArgs: Record<string, unknown>
   topLevelTableName: string
   versions?: boolean
-  withinLocalizedField?: boolean
   withTabledFields: {
     numbers?: boolean
     rels?: boolean
@@ -53,6 +53,7 @@ export const traverseFields = ({
   joinQuery = {},
   joins,
   locale,
+  parentIsLocalized = false,
   path,
   select,
   selectAllOnCurrentLevel = false,
@@ -61,7 +62,6 @@ export const traverseFields = ({
   topLevelArgs,
   topLevelTableName,
   versions,
-  withinLocalizedField = false,
   withTabledFields,
 }: TraverseFieldArgs) => {
   fields.forEach((field) => {
@@ -71,7 +71,7 @@ export const traverseFields = ({
 
     const isFieldLocalized = fieldShouldBeLocalized({
       field,
-      parentIsLocalized: withinLocalizedField,
+      parentIsLocalized,
     })
 
     // handle simple relationship
@@ -157,13 +157,13 @@ export const traverseFields = ({
           fields: field.flattenedFields,
           joinQuery,
           locale,
+          parentIsLocalized: parentIsLocalized || field.localized,
           path: '',
           select: typeof arraySelect === 'object' ? arraySelect : undefined,
           selectMode,
           tablePath: '',
           topLevelArgs,
           topLevelTableName,
-          withinLocalizedField: withinLocalizedField || field.localized,
           withTabledFields,
         })
 
@@ -268,13 +268,13 @@ export const traverseFields = ({
               fields: block.flattenedFields,
               joinQuery,
               locale,
+              parentIsLocalized: parentIsLocalized || field.localized,
               path: '',
               select: typeof blockSelect === 'object' ? blockSelect : undefined,
               selectMode: blockSelectMode,
               tablePath: '',
               topLevelArgs,
               topLevelTableName,
-              withinLocalizedField: withinLocalizedField || field.localized,
               withTabledFields,
             })
 
@@ -310,6 +310,7 @@ export const traverseFields = ({
           joinQuery,
           joins,
           locale,
+          parentIsLocalized: parentIsLocalized || field.localized,
           path: `${path}${field.name}_`,
           select: typeof fieldSelect === 'object' ? fieldSelect : undefined,
           selectAllOnCurrentLevel:
@@ -321,7 +322,6 @@ export const traverseFields = ({
           topLevelArgs,
           topLevelTableName,
           versions,
-          withinLocalizedField: withinLocalizedField || field.localized,
           withTabledFields,
         })
 
@@ -539,7 +539,7 @@ export const traverseFields = ({
         if (select || selectAllOnCurrentLevel) {
           const fieldPath = `${path}${field.name}`
 
-          if ((isFieldLocalized || withinLocalizedField) && _locales) {
+          if ((isFieldLocalized || parentIsLocalized) && _locales) {
             _locales.columns[fieldPath] = true
           } else if (adapter.tables[currentTableName]?.[fieldPath]) {
             currentArgs.columns[fieldPath] = true
@@ -561,7 +561,7 @@ export const traverseFields = ({
         ) {
           const fieldPath = `${path}${field.name}`
 
-          if ((isFieldLocalized || withinLocalizedField) && _locales) {
+          if ((isFieldLocalized || parentIsLocalized) && _locales) {
             _locales.columns[fieldPath] = true
           } else if (adapter.tables[currentTableName]?.[fieldPath]) {
             currentArgs.columns[fieldPath] = true
