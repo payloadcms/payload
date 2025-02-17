@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { jwtVerify } from 'jose'
 
 import type { Payload, Where } from '../../types/index.js'

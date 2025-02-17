@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { Where } from '../types/index.js'
 
 import { hasWhereAccessResult } from '../auth/index.js'
