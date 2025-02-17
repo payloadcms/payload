@@ -93,17 +93,16 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
       const existingValue = selected.get(id)
       const isSelected = typeof existingValue === 'boolean' ? !existingValue : true
 
-      let newMap = new Map()
+      const newMap = new Map(selected.set(id, isSelected))
 
-      if (isSelected) {
-        newMap = new Map(selected.set(id, isSelected))
-      } else {
-        newMap = new Map(selected.set(id, false))
+      // If previously selected all and now deselecting, adjust status
+      if (selectAll === SelectAllStatus.AllAvailable && !isSelected) {
+        setSelectAll(SelectAllStatus.Some)
       }
 
       setSelected(newMap)
     },
-    [selected, docs, user?.id],
+    [selected, docs, selectAll, user?.id],
   )
 
   const getQueryParams = useCallback(
@@ -150,6 +149,9 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
   )
 
   useEffect(() => {
+    if (selectAll === SelectAllStatus.AllAvailable) {
+      return
+    }
     let some = false
     let all = true
 
@@ -163,12 +165,7 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
       }
     }
 
-    if (selectAll === SelectAllStatus.AllAvailable) {
-      // If selections no longer match all docs, adjust
-      if (!all || selected.size !== totalDocs) {
-        setSelectAll(some ? SelectAllStatus.Some : SelectAllStatus.None)
-      }
-    } else if (all && selected.size === docs.length) {
+    if (all && selected.size === docs.length) {
       setSelectAll(SelectAllStatus.AllInPage)
     } else if (some) {
       setSelectAll(SelectAllStatus.Some)
