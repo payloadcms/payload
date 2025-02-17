@@ -1035,6 +1035,12 @@ importers:
         specifier: workspace:*
         version: link:../payload
 
+  packages/plugin-realtime:
+    devDependencies:
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+
   packages/plugin-redirects:
     devDependencies:
       '@payloadcms/eslint-config':
@@ -1662,6 +1668,9 @@ importers:
       '@payloadcms/plugin-nested-docs':
         specifier: workspace:*
         version: link:../packages/plugin-nested-docs
+      '@payloadcms/plugin-realtime':
+        specifier: workspace:*
+        version: link:../packages/plugin-realtime
       '@payloadcms/plugin-redirects':
         specifier: workspace:*
         version: link:../packages/plugin-redirects
