@@ -14,17 +14,16 @@ import type { JSONSchema4 } from 'json-schema'
 import type { DestinationStream, Level, pino } from 'pino'
 import type React from 'react'
 import type { default as sharp } from 'sharp'
-import type { DeepRequired, MarkOptional } from 'ts-essentials'
+import type { DeepRequired } from 'ts-essentials'
 
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
-import type { DocumentTabConfig, RichTextAdapter } from '../admin/types.js'
-import type { DocumentSubViewTypes, DocumentViewServerProps } from '../admin/views/document.js'
 import type {
-  AdminViewConfig,
-  ServerPropsFromView,
-  ViewTypes,
-  VisibleEntities,
-} from '../admin/views/index.js'
+  DocumentSubViewTypes,
+  DocumentTabConfig,
+  DocumentViewServerProps,
+  RichTextAdapter,
+} from '../admin/types.js'
+import type { AdminViewConfig, ViewTypes, VisibleEntities } from '../admin/views/index.js'
 import type { SanitizedPermissions } from '../auth/index.js'
 import type {
   AddToImportMap,
@@ -1269,5 +1268,3 @@ export type EntityDescriptionFunction = ({ t }: { t: TFunction }) => string
 export type EntityDescription = EntityDescriptionFunction | Record<string, string> | string
 
 export type { EmailAdapter, SendEmailOptions }
-
-export type { DocumentSubViewTypes, ServerPropsFromView, ViewTypes }

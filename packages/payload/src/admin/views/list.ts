@@ -48,28 +48,28 @@ export type ListViewClientProps = {
   resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
 } & ListViewSlots
 
-export type ListViewSlotClientProps = {
+export type ListViewSlotSharedClientProps = {
   collectionSlug: SanitizedCollectionConfig['slug']
   hasCreatePermission: boolean
   newDocumentURL: string
 }
 
 // BeforeList
-export type BeforeListClientProps = ListViewSlotClientProps
+export type BeforeListClientProps = ListViewSlotSharedClientProps
 export type BeforeListServerPropsOnly = {} & ListViewServerPropsOnly
 export type BeforeListServerProps = BeforeListClientProps & BeforeListServerPropsOnly
 
 // BeforeListTable
-export type BeforeListTableClientProps = ListViewSlotClientProps
+export type BeforeListTableClientProps = ListViewSlotSharedClientProps
 export type BeforeListTableServerPropsOnly = {} & ListViewServerPropsOnly
 export type BeforeListTableServerProps = BeforeListTableClientProps & BeforeListTableServerPropsOnly
 
 // AfterList
-export type AfterListClientProps = ListViewSlotClientProps
+export type AfterListClientProps = ListViewSlotSharedClientProps
 export type AfterListServerPropsOnly = {} & ListViewServerPropsOnly
 export type AfterListServerProps = AfterListClientProps & AfterListServerPropsOnly
 
 // AfterListTable
-export type AfterListTableClientProps = ListViewSlotClientProps
+export type AfterListTableClientProps = ListViewSlotSharedClientProps
 export type AfterListTableServerPropsOnly = {} & ListViewServerPropsOnly
 export type AfterListTableServerProps = AfterListTableClientProps & AfterListTableServerPropsOnly

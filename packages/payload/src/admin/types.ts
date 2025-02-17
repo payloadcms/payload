@@ -578,6 +578,7 @@ export type { LanguageOptions } from './LanguageOptions.js'
 export type { RichTextAdapter, RichTextAdapterProvider, RichTextHooks } from './RichText.js'
 
 export type {
+  DocumentSubViewTypes,
   DocumentTabClientProps,
   DocumentTabComponent,
   DocumentTabCondition,
@@ -609,6 +610,7 @@ export type {
 } from './views/document.js'
 
 export type {
+  AdminViewClientProps,
   /**
    * @deprecated
    * The `AdminViewComponent` type is deprecated and will be removed in the next major version.
@@ -623,10 +625,13 @@ export type {
    */
   AdminViewServerProps as AdminViewProps,
   AdminViewServerProps,
+  AdminViewServerPropsOnly,
   InitPageResult,
+  ServerPropsFromView,
   ViewDescriptionClientProps,
   ViewDescriptionServerProps,
   ViewDescriptionServerPropsOnly,
+  ViewTypes,
   VisibleEntities,
 } from './views/index.js'
 
@@ -646,8 +651,8 @@ export type {
   ListViewClientProps,
   ListViewServerProps,
   ListViewServerPropsOnly,
-  ListViewSlotClientProps,
   ListViewSlots,
+  ListViewSlotSharedClientProps,
 } from './views/list.js'
 
 type SchemaPath = {} & string

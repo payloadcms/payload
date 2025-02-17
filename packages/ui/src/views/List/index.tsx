@@ -167,7 +167,10 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                     <RenderCustomComponent
                       CustomComponent={Description}
                       Fallback={
-                        <ViewDescription description={collectionConfig?.admin?.description} />
+                        <ViewDescription
+                          collectionSlug={collectionSlug}
+                          description={collectionConfig?.admin?.description}
+                        />
                       }
                     />
                   </div>

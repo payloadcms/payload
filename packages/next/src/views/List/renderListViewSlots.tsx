@@ -7,8 +7,8 @@ import type {
   BeforeListTableClientProps,
   BeforeListTableServerPropsOnly,
   ListViewServerPropsOnly,
-  ListViewSlotClientProps,
   ListViewSlots,
+  ListViewSlotSharedClientProps,
   Payload,
   SanitizedCollectionConfig,
   StaticDescription,
@@ -19,7 +19,7 @@ import type {
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 
 type Args = {
-  clientProps: ListViewSlotClientProps
+  clientProps: ListViewSlotSharedClientProps
   collectionConfig: SanitizedCollectionConfig
   description?: StaticDescription
   payload: Payload
@@ -74,6 +74,7 @@ export const renderListViewSlots = ({
   if (collectionConfig.admin.components?.Description) {
     result.Description = RenderServerComponent({
       clientProps: {
+        collectionSlug: collectionConfig.slug,
         description,
       } satisfies ViewDescriptionClientProps,
       Component: collectionConfig.admin.components.Description,

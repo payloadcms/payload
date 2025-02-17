@@ -70,7 +70,10 @@ export const renderDocumentSlots: (args: {
 
   if (hasDescription) {
     components.Description = RenderServerComponent({
-      clientProps: { description: staticDescription } satisfies ViewDescriptionClientProps,
+      clientProps: {
+        collectionSlug: collectionConfig?.slug,
+        description: staticDescription,
+      } satisfies ViewDescriptionClientProps,
       Component: CustomDescription,
       Fallback: ViewDescription,
       importMap: req.payload.importMap,

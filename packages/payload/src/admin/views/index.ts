@@ -8,6 +8,7 @@ import type {
   CustomComponent,
   Locale,
   MetaConfig,
+  Params,
   PayloadComponent,
   SanitizedConfig,
   ServerProps,
@@ -28,19 +29,26 @@ export type AdminViewConfig = {
   strict?: boolean
 }
 
-export type AdminViewServerProps = {
+export type AdminViewClientProps = {
+  clientConfig: ClientConfig
+  documentSubViewType?: DocumentSubViewTypes
+  viewType: ViewTypes
+}
+
+export type AdminViewServerPropsOnly = {
   readonly clientConfig: ClientConfig
   readonly disableActions?: boolean
-  readonly documentSubViewType?: DocumentSubViewTypes
   readonly drawerSlug?: string
   readonly importMap: ImportMap
   readonly initialData?: Data
   readonly initPageResult: InitPageResult
+  readonly params?: Params
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
   readonly searchParams: { [key: string]: string | string[] | undefined }
-  readonly viewType: ViewTypes
-} & ServerProps
+}
+
+export type AdminViewServerProps = AdminViewClientProps & AdminViewServerPropsOnly
 
 /**
  * @deprecated This should be removed in favor of direct props
@@ -86,6 +94,7 @@ export type ServerPropsFromView = {
 
 // Description
 export type ViewDescriptionClientProps = {
+  collectionSlug?: SanitizedCollectionConfig['slug']
   description: StaticDescription
 }
 

@@ -24,6 +24,9 @@ export type DocumentViewClientProps = {
   viewType: ViewTypes
 } & DocumentSlots
 
+/**
+ * @todo: This should be renamed to `DocumentSubViewType` (singular)
+ */
 export type DocumentSubViewTypes = 'api' | 'default' | 'livePreview' | 'version' | 'versions'
 
 export type DocumentTabServerPropsOnly = {
