@@ -200,7 +200,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                 }
                 hasCreatePermission={hasCreatePermission}
                 i18n={i18n}
-                isBulkUploadEnabled={isBulkUploadEnabled}
+                isBulkUploadEnabled={isBulkUploadEnabled && !upload.hideFileInputOnCreate}
                 newDocumentURL={newDocumentURL}
                 openBulkUpload={openBulkUpload}
                 smallBreak={smallBreak}
