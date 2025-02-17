@@ -81,6 +81,11 @@ export interface Config {
   auth: {
     users: UserAuthOperations;
   };
+  blocks: {
+    ConfigBlockTest: ConfigBlockTest;
+    localizedTextReference: LocalizedTextReference;
+    localizedTextReference2: LocalizedTextReference2;
+  };
   collections: {
     'lexical-fields': LexicalField;
     'lexical-migrate-fields': LexicalMigrateField;
@@ -209,6 +214,36 @@ export interface UserAuthOperations {
     email: string;
     password: string;
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ConfigBlockTest".
+ */
+export interface ConfigBlockTest {
+  deduplicatedText?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'ConfigBlockTest';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localizedTextReference".
+ */
+export interface LocalizedTextReference {
+  text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'localizedTextReference';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localizedTextReference2".
+ */
+export interface LocalizedTextReference2 {
+  text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'localizedTextReference2';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -795,10 +830,10 @@ export interface BlockField {
         blockType: 'text';
       }[]
     | null;
-  deduplicatedBlocks?: unknown[] | null;
-  deduplicatedBlocks2?: unknown[] | null;
-  localizedReferencesLocalizedBlock?: unknown[] | null;
-  localizedReferences?: unknown[] | null;
+  deduplicatedBlocks?: ConfigBlockTest[] | null;
+  deduplicatedBlocks2?: ConfigBlockTest[] | null;
+  localizedReferencesLocalizedBlock?: LocalizedTextReference[] | null;
+  localizedReferences?: LocalizedTextReference2[] | null;
   /**
    * The purpose of this field is to test Block groups.
    */
