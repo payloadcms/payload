@@ -210,6 +210,9 @@ jobs:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
 
+      - name: Install dependencies for Playwright
+        run: sudo apt-get update && sudo apt-get install -y libasound2t64
+
       - name: E2E Tests
         uses: nick-fields/retry@v2
         with:
