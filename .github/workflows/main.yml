@@ -211,7 +211,19 @@ jobs:
           key: ${{ github.sha }}-${{ github.run_number }}
 
       - name: Install dependencies for Playwright
-        run: sudo apt-get update && sudo apt-get install -y libasound2t64
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libasound2t64 \
+            libnss3 \
+            libxcomposite1 \
+            libxrandr2 \
+            libxdamage1 \
+            libx11-xcb1 \
+            libgbm1 \
+            libatk-bridge2.0-0 \
+            libgtk-3-0 \
+            libxshmfence1
 
       - name: E2E Tests
         uses: nick-fields/retry@v2
