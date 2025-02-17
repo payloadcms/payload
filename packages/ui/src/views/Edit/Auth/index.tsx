@@ -135,7 +135,7 @@ export const Auth: React.FC<Props> = (props) => {
     }
   }, [modified])
 
-  if (disableLocalStrategy === true && !useAPIKey) {
+  if (disableLocalStrategy && !enableFields && !useAPIKey) {
     return null
   }
 
