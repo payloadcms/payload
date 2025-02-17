@@ -38,7 +38,6 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     adapter,
     data,
     fields,
-    parentIsLocalized: false,
     path,
     tableName,
   })
@@ -460,7 +459,6 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     data: doc,
     fields,
     joinQuery: false,
-    parentIsLocalized: false,
   })
 
   return result

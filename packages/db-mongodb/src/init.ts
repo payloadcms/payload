@@ -38,7 +38,6 @@ export const init: Init = function init(this: MongooseAdapter) {
           ...schemaOptions,
         },
         configFields: versionCollectionFields,
-        parentIsLocalized: false,
         payload: this.payload,
       })
 
@@ -93,7 +92,6 @@ export const init: Init = function init(this: MongooseAdapter) {
           },
         },
         configFields: versionGlobalFields,
-        parentIsLocalized: false,
         payload: this.payload,
       })
 

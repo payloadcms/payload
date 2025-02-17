@@ -25,7 +25,6 @@ export const buildCollectionSchema = (
       },
     },
     configFields: collection.fields,
-    parentIsLocalized: false,
     payload,
   })
 

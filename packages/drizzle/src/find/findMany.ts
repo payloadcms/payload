@@ -165,7 +165,6 @@ export const findMany = async function find({
       data,
       fields,
       joinQuery,
-      parentIsLocalized: false,
     })
   })
 

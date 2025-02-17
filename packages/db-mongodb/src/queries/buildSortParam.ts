@@ -7,7 +7,7 @@ type Args = {
   config: SanitizedConfig
   fields: FlattenedField[]
   locale: string
-  parentIsLocalized: boolean
+  parentIsLocalized?: boolean
   sort: Sort
   timestamps: boolean
 }

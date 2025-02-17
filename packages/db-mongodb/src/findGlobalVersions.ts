@@ -41,7 +41,6 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
       config: this.payload.config,
       fields: versionFields,
       locale,
-      parentIsLocalized: false,
       sort: sortArg || '-updatedAt',
       timestamps: true,
     })

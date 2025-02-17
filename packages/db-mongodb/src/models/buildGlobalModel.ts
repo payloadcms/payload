@@ -26,7 +26,6 @@ export const buildGlobalModel = (payload: Payload): GlobalModel | null => {
           },
         },
         configFields: globalConfig.fields,
-        parentIsLocalized: false,
         payload,
       })
       Globals.discriminator(globalConfig.slug, globalSchema)

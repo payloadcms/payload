@@ -9,7 +9,7 @@ type Args = {
   adapter: DrizzleAdapter
   data: Record<string, unknown>
   fields: FlattenedField[]
-  parentIsLocalized: boolean
+  parentIsLocalized?: boolean
   path?: string
   tableName: string
 }

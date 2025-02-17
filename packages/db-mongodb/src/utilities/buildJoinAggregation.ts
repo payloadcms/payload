@@ -78,7 +78,6 @@ export const buildJoinAggregation = async ({
         config: adapter.payload.config,
         fields: adapter.payload.collections[slug].config.flattenedFields,
         locale,
-        parentIsLocalized: false,
         sort: sortJoin,
         timestamps: true,
       })

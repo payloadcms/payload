@@ -14,7 +14,7 @@ type TransformArgs = {
   fields: FlattenedField[]
   joinQuery?: JoinQuery
   locale?: string
-  parentIsLocalized: boolean
+  parentIsLocalized?: boolean
 }
 
 // This is the entry point to transform Drizzle output data
