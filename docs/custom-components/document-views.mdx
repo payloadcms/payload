@@ -6,7 +6,7 @@ desc:
 keywords:
 ---
 
-Document Views consist of multiple, individual views that together represent any single [Collection](../configuration/collections) or [Global](../configuration/globals) Document and are scoped under the `/collections/:collectionSlug/:id` or the `/globals/:globalSlug` route, respectively.
+Document Views consist of multiple, individual views that together represent any single [Collection](../configuration/collections) or [Global](../configuration/globals) Document. All Document Views and are scoped under the `/collections/:collectionSlug/:id` or the `/globals/:globalSlug` route, respectively.
 
 There are a number of default Document Views, such as the [Edit View](./edit-view) and API View, but you can also create [entirely new views](./custom-views#adding-new-views) as needed. All Document Views share a layout and can be given their own tab-based navigation, if desired.
 
@@ -59,7 +59,7 @@ _For details on how to build Custom Views, including all available props, see [B
 
 ### Document Root
 
-The Document Root is mounted on the top-level route for a Document. Setting this property will completely take over the entire Document View layout, including the title, [Document Tabs](#ocument-tabs). _and all other nested Document Views_ including the [Edit View](./edit-view), API View, etc.
+The Document Root is mounted on the top-level route for a Document. Setting this property will completely take over the entire Document View layout, including the title, [Document Tabs](#ocument-tabs), _and all other nested Document Views_ including the [Edit View](./edit-view), API View, etc.
 
 When setting a Document Root, you are responsible for rendering all necessary components and controls, as no document controls or tabs would be rendered. To replace only the Edit View precisely, use the `edit.default` key instead.
 
@@ -88,70 +88,9 @@ export const MyCollection: CollectionConfig = {
 
 ### Edit View
 
-The Edit View is where users interact with individual Collection and Global Documents. This is where they can view, edit, and save their content. For more information on customizing the Edit View, see the [Edit View](./edit-view) documentation.
+The Edit View is where users interact with individual Collection and Global Documents. This is where they can view, edit, and save their content. the Edit View is keyed under the `default` property in the `views.edit` object.
 
-### Adding New Views
-
-To add a _new_ view to the Document, simply add your own key to the `views` object. This is true for all view scopes. This will maintain the existing layout and controls, but will render your custom component in the main content area with an optional tab for navigation.
-
-New views require at least the `Component` and `path` properties:
-
-```ts
-import type { CollectionConfig } from 'payload'
-
-export const MyCollection: CollectionConfig = {
-  slug: 'my-collection',
-  admin: {
-    components: {
-      views: {
-        // highlight-start
-        myCustomView: {
-          Component: '/path/to/MyCustomDocumentView',
-          path: '/my-custom-view',
-        },
-        // highlight-end
-      },
-    },
-  },
-}
-```
-
-Here are some examples of how to scaffold a custom Document View. These can be either Server or Client components, depending on your needs. Keep in mind that the props and types for these components are different depending on its type.
-
-#### Server Component
-
-```tsx
-import React from 'react'
-import type { DocumentViewServerProps } from 'payload'
-
-export function MyCustomDocumentView(props: DocumentViewServerProps) {
-  return (
-    <div>
-      This is a custom Document View (Server)
-    </div>
-  )
-}
-```
-
-_For details on how to build Custom Views, including all available props, see [Building Custom Views](./custom-views#building-custom-views)._
-
-#### Client Component
-
-```tsx
-'use client'
-import React from 'react'
-import type { DocumentViewClientProps } from 'payload'
-
-export function MyCustomDocumentView(props: DocumentViewClientProps) {
-  return (
-    <div>
-      This is a custom Document View (Client)
-    </div>
-  )
-}
-```
-
-_For details on how to build Custom Views, including all available props, see [Building Custom Views](./custom-views#building-custom-views)._
+For more information on customizing the Edit View, see the [Edit View](./edit-view) documentation.
 
 ## Document Tabs
 
@@ -198,6 +137,18 @@ export const MyCollection: CollectionConfig = {
  **Note:**
  This applies to _both_ Collections _and_ Globals.
 </Banner>
+
+The following options are available for tabs:
+
+| Property    | Description                                                                                           |
+| ----------- | ----------------------------------------------------------------------------------------------------- |
+| `label`     | The label to display in the tab.                                                                      |
+| `href`      | The URL to navigate to when the tab is clicked. This is optional and defaults to the tab's `path`.    |
+| `Component` | The component to render in the tab. This can be a Server or Client component. [More details](#tab-components) |
+
+### Tab Components
+
+If changing the label or href is not enough, you can also replace the entire tab component with your own custom component. This can be done by setting the `tab.Component` property to the path of your custom component.
 
 Here is an example of how to scaffold a custom Document Tab:
 

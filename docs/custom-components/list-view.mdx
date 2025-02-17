@@ -6,13 +6,13 @@ desc:
 keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-The List View is where users interact with a list of [Collection](../collections/overview) Documents within the [Admin Panel](../admin/overview). This is where they can view, sort, filter, and paginate their documents to find exactly what they're looking for. This is also where users can perform bulk operations on multiple documents at once, such as deleting, editing, or publishing them.
+The List View is where users interact with a list of [Collection](../collections/overview) Documents within the [Admin Panel](../admin/overview). This is where they can view, sort, filter, and paginate their documents to find exactly what they're looking for. This is also where users can perform bulk operations on multiple documents at once, such as deleting, editing, or publishing many.
 
-The List View can be injected with a number of [Custom Components](./overview) to add additional functionality or presentational elements, or it can be swapped out in its entirety for a [Custom View](./custom-views).
+The List View can be swapped out in its entirety for a Custom View, or it can be injected with a number of Custom Components to add additional functionality or presentational elements without replacing the entire view.
 
 <Banner type="info">
   **Note:**
-  The List View only applies to Collections. Globals do not have a List View as they are treated as singletons.
+  Only [Collections](../collections/overview) have a List View. [Globals](../globals/overview) do not have a List View as they are single documents.
 </Banner>
 
 ## Custom List View
@@ -36,7 +36,7 @@ const config = buildConfig({
 })
 ```
 
-Here's are some examples of simple List View components. These can be either Server or Client components, depending on your needs. Keep in mind that the props and types for these components are different depending on its type.
+Here is an example of a custom List View:
 
 #### Server Component
 
@@ -53,8 +53,6 @@ export function MyCustomServerListView(props: ListViewServerProps) {
   )
 }
 ```
-
-_For details on how to build Custom Views, including all available props, see [Building Custom Views](./custom-views#building-custom-views)._
 
 #### Client Component
 
@@ -74,7 +72,7 @@ export function MyCustomClientListView(props: ListViewClientProps) {
 
 _For details on how to build Custom Views, including all available props, see [Building Custom Views](./custom-views#building-custom-views)._
 
-## Component Options
+## Custom Components
 
 In addition to swapping out the entire List View with a [Custom View](./custom-views), you can also override individual components. This allows you to customize specific parts of the List View without swapping out the entire view for your own.
 
@@ -105,13 +103,11 @@ The following options are available:
 | `afterListTable`      | An array of custom components to inject after the table of documents in the List View. [More details](#afterListTable).      |
 | `Description`         | A component to render a description of the Collection. [More details](#Description).                                         |
 
-## Custom Components
-
 ### beforeList
 
 The `beforeList` property allows you to inject custom components before the list of documents in the List View.
 
-To add `beforeList` components, use the `components.beforeList` property in your Collection Config:
+To add `beforeList` components, use the `components.beforeList` property in your [Collection Config](../configuration/collections):
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -130,7 +126,7 @@ export const MyCollection: CollectionConfig = {
 }
 ```
 
-Here's an example of a simple `beforeList` component:
+Here's an example of a custom `beforeList` component:
 
 #### Server Component
 
@@ -167,7 +163,7 @@ export function MyBeforeListComponent(props: BeforeListClientProps) {
 
 The `beforeListTable` property allows you to inject custom components before the table of documents in the List View.
 
-To add `beforeListTable` components, use the `components.beforeListTable` property in your Collection Config:
+To add `beforeListTable` components, use the `components.beforeListTable` property in your [Collection Config](../configuration/collections):
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -186,7 +182,7 @@ export const MyCollection: CollectionConfig = {
 }
 ```
 
-Here's an example of a simple `beforeListTable` component:
+Here's an example of a custom `beforeListTable` component:
 
 #### Server Component
 
@@ -223,7 +219,7 @@ export function MyBeforeListTableComponent(props: BeforeListTableClientProps) {
 
 The `afterList` property allows you to inject custom components after the list of documents in the List View.
 
-To add `afterList` components, use the `components.afterList` property in your Collection Config:
+To add `afterList` components, use the `components.afterList` property in your [Collection Config](../configuration/collections):
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -242,7 +238,7 @@ export const MyCollection: CollectionConfig = {
 }
 ```
 
-Here's an example of a simple `afterList` component:
+Here's an example of a custom `afterList` component:
 
 #### Server Component
 
@@ -279,7 +275,7 @@ export function MyAfterListComponent(props: AfterListClientProps) {
 
 The `afterListTable` property allows you to inject custom components after the table of documents in the List View.
 
-To add `afterListTable` components, use the `components.afterListTable` property in your Collection Config:
+To add `afterListTable` components, use the `components.afterListTable` property in your [Collection Config](../configuration/collections):
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -298,7 +294,7 @@ export const MyCollection: CollectionConfig = {
 }
 ```
 
-Here's an example of a simple `afterListTable` component:
+Here's an example of a custom `afterListTable` component:
 
 #### Server Component
 
@@ -335,7 +331,7 @@ export function MyAfterListTableComponent(props: AfterListTableClientProps) {
 
 The `Description` property allows you to render a custom description of the Collection in the List View.
 
-To add a `Description` component, use the `components.Description` property in your Collection Config:
+To add a `Description` component, use the `components.Description` property in your [Collection Config](../configuration/collections):
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -352,15 +348,20 @@ export const MyCollection: CollectionConfig = {
 }
 ```
 
-Here's an example of a simple `Description` component:
+<Banner type="warning">
+  **Note:**
+  The `Description` component is shared between the List View and the [Edit View](./edit-view).
+</Banner>
+
+Here's an example of a custom `Description` component:
 
 #### Server Component
 
 ```tsx
 import React from 'react'
-import type { ListDescriptionServerProps } from 'payload'
+import type { ViewDescriptionServerProps } from 'payload'
 
-export function MyDescriptionComponent(props: ListDescriptionServerProps) {
+export function MyDescriptionComponent(props: ViewDescriptionServerProps) {
   return (
     <div>
       This is a custom Collection description component (Server)
@@ -374,9 +375,9 @@ export function MyDescriptionComponent(props: ListDescriptionServerProps) {
 ```tsx
 'use client'
 import React from 'react'
-import type { ListDescriptionClientProps } from 'payload'
+import type { ViewDescriptionClientProps } from 'payload'
 
-export function MyDescriptionComponent(props: ListDescriptionClientProps) {
+export function MyDescriptionComponent(props: ViewDescriptionClientProps) {
   return (
     <div>
       This is a custom Collection description component (Client)
