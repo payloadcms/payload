@@ -1,6 +1,11 @@
 import type { FieldAffectingData, FlattenedField, SelectMode, SelectType } from 'payload'
 
-import { deepCopyObjectSimple, fieldAffectsData, getSelectMode } from 'payload/shared'
+import {
+  deepCopyObjectSimple,
+  fieldAffectsData,
+  fieldShouldBeLocalized,
+  getSelectMode,
+} from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
 
@@ -91,11 +96,7 @@ const traverseFields = ({
     if (fieldAffectsData(field)) {
       fieldDatabaseSchemaPath = `${databaseSchemaPath}${field.name}.`
 
-      if (
-        field.localized &&
-        (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-          !withinLocalizedField)
-      ) {
+      if (fieldShouldBeLocalized({ field, parentIsLocalized: withinLocalizedField })) {
         fieldDatabaseSchemaPath = `${fieldDatabaseSchemaPath}<locale>.`
         fieldWithinLocalizedField = true
       }

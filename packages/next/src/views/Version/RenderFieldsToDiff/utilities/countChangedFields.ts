@@ -1,5 +1,7 @@
 import type { ArrayFieldClient, BlocksFieldClient, ClientConfig, ClientField } from 'payload'
 
+import { fieldShouldBeLocalized } from 'payload/shared'
+
 import { fieldHasChanges } from './fieldHasChanges.js'
 import { getFieldsForRowComparison } from './getFieldsForRowComparison.js'
 
@@ -37,12 +39,7 @@ export function countChangedFields({
       // count the number of changed fields in each.
       case 'array':
       case 'blocks': {
-        if (
-          locales &&
-          field.localized &&
-          (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-            !parentIsLocalized)
-        ) {
+        if (locales && fieldShouldBeLocalized({ field, parentIsLocalized })) {
           locales.forEach((locale) => {
             const comparisonRows = comparison?.[field.name]?.[locale] ?? []
             const versionRows = version?.[field.name]?.[locale] ?? []
@@ -87,12 +84,7 @@ export function countChangedFields({
       case 'textarea':
       case 'upload': {
         // Fields that have a name and contain data. We can just check if the data has changed.
-        if (
-          locales &&
-          field.localized &&
-          (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-            !parentIsLocalized)
-        ) {
+        if (locales && fieldShouldBeLocalized({ field, parentIsLocalized })) {
           locales.forEach((locale) => {
             if (
               fieldHasChanges(version?.[field.name]?.[locale], comparison?.[field.name]?.[locale])
@@ -122,12 +114,7 @@ export function countChangedFields({
 
       // Fields that have nested fields and nest their fields' data.
       case 'group': {
-        if (
-          locales &&
-          field.localized &&
-          (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-            !parentIsLocalized)
-        ) {
+        if (locales && fieldShouldBeLocalized({ field, parentIsLocalized })) {
           locales.forEach((locale) => {
             count += countChangedFields({
               comparison: comparison?.[field.name]?.[locale],

@@ -2,7 +2,7 @@
 import type { Config, SanitizedConfig } from '../config/types.js'
 import type { ArrayField, Block, BlocksField, Field, TabAsField } from '../fields/config/types.js'
 
-import { fieldHasSubFields } from '../fields/config/types.js'
+import { fieldHasSubFields, fieldShouldBeLocalized } from '../fields/config/types.js'
 
 const traverseArrayOrBlocksField = ({
   callback,
@@ -300,12 +300,7 @@ export const traverseFields = ({
         if (!ref[field.name]) {
           if (fillEmpty) {
             if (field.type === 'group') {
-              if (
-                field.localized &&
-                (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized ===
-                  'true' ||
-                  !parentIsLocalized)
-              ) {
+              if (fieldShouldBeLocalized({ field, parentIsLocalized })) {
                 ref[field.name] = {
                   en: {},
                 }
@@ -313,12 +308,7 @@ export const traverseFields = ({
                 ref[field.name] = {}
               }
             } else if (field.type === 'array' || field.type === 'blocks') {
-              if (
-                field.localized &&
-                (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized ===
-                  'true' ||
-                  !parentIsLocalized)
-              ) {
+              if (fieldShouldBeLocalized({ field, parentIsLocalized })) {
                 ref[field.name] = {
                   en: [],
                 }
@@ -335,9 +325,7 @@ export const traverseFields = ({
 
       if (
         field.type === 'group' &&
-        field.localized &&
-        (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-          !parentIsLocalized) &&
+        fieldShouldBeLocalized({ field, parentIsLocalized }) &&
         currentRef &&
         typeof currentRef === 'object'
       ) {
@@ -365,11 +353,7 @@ export const traverseFields = ({
         currentRef &&
         typeof currentRef === 'object'
       ) {
-        if (
-          field.localized &&
-          (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-            !parentIsLocalized)
-        ) {
+        if (fieldShouldBeLocalized({ field, parentIsLocalized })) {
           if (Array.isArray(currentRef)) {
             return
           }

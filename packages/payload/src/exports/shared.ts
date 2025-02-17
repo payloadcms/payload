@@ -27,6 +27,7 @@ export {
   fieldIsPresentationalOnly,
   fieldIsSidebar,
   fieldIsVirtual,
+  fieldShouldBeLocalized,
   fieldSupportsMany,
   optionIsObject,
   optionIsValue,

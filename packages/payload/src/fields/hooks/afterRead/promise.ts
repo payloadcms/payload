@@ -13,7 +13,7 @@ import type {
 import type { Block, Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
-import { fieldAffectsData, tabHasName } from '../../config/types.js'
+import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../../config/types.js'
 import { getDefaultValue } from '../../getDefaultValue.js'
 import { getFieldPathsModified as getFieldPaths } from '../../getFieldPaths.js'
 import { relationshipPopulationPromise } from './relationshipPopulationPromise.js'
@@ -141,9 +141,7 @@ export const promise = async ({
     fieldAffectsData(field) &&
     typeof siblingDoc[field.name] === 'object' &&
     siblingDoc[field.name] !== null &&
-    field.localized &&
-    (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-      !parentIsLocalized) &&
+    fieldShouldBeLocalized({ field, parentIsLocalized }) &&
     locale !== 'all' &&
     req.payload.config.localization
 
@@ -240,9 +238,7 @@ export const promise = async ({
         await priorHook
 
         const shouldRunHookOnAllLocales =
-          field.localized &&
-          (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-            !parentIsLocalized) &&
+          fieldShouldBeLocalized({ field, parentIsLocalized }) &&
           (locale === 'all' || !flattenLocales) &&
           typeof siblingDoc[field.name] === 'object'
 
@@ -682,10 +678,7 @@ export const promise = async ({
           await priorHook
 
           const shouldRunHookOnAllLocales =
-            field.localized &&
-            (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized ===
-              'true' ||
-              !parentIsLocalized) &&
+            fieldShouldBeLocalized({ field, parentIsLocalized }) &&
             (locale === 'all' || !flattenLocales) &&
             typeof siblingDoc[field.name] === 'object'
 

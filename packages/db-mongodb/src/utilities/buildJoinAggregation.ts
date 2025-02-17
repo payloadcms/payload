@@ -1,6 +1,8 @@
 import type { PipelineStage } from 'mongoose'
 import type { CollectionSlug, JoinQuery, SanitizedCollectionConfig, Where } from 'payload'
 
+import { fieldShouldBeLocalized } from 'payload/shared'
+
 import type { MongooseAdapter } from '../index.js'
 
 import { buildSortParam } from '../queries/buildSortParam.js'
@@ -149,9 +151,10 @@ export const buildJoinAggregation = async ({
         })
       } else {
         const localeSuffix =
-          join.field.localized &&
-          (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-            !join.parentIsLocalized) &&
+          fieldShouldBeLocalized({
+            field: join.field,
+            parentIsLocalized: join.parentIsLocalized,
+          }) &&
           adapter.payload.config.localization &&
           locale
             ? `.${locale}`

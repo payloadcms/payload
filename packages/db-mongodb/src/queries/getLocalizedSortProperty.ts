@@ -1,6 +1,6 @@
 import type { FlattenedField, SanitizedConfig } from 'payload'
 
-import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
+import { fieldAffectsData, fieldIsPresentationalOnly, fieldShouldBeLocalized } from 'payload/shared'
 
 type Args = {
   config: SanitizedConfig
@@ -41,11 +41,7 @@ export const getLocalizedSortProperty = ({
     const remainingSegments = [...segments]
     let localizedSegment = matchedField.name
 
-    if (
-      matchedField.localized &&
-      (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-        !parentIsLocalized)
-    ) {
+    if (fieldShouldBeLocalized({ field: matchedField, parentIsLocalized })) {
       // Check to see if next segment is a locale
       if (segments.length > 0) {
         const nextSegmentIsLocale = config.localization.localeCodes.includes(remainingSegments[0])

@@ -3,7 +3,7 @@ import type { PayloadRequest, PopulateType } from '../../../types/index.js'
 import type { JoinField, RelationshipField, UploadField } from '../../config/types.js'
 
 import { createDataloaderCacheKey } from '../../../collections/dataloader.js'
-import { fieldHasMaxDepth, fieldSupportsMany } from '../../config/types.js'
+import { fieldHasMaxDepth, fieldShouldBeLocalized, fieldSupportsMany } from '../../config/types.js'
 
 type PopulateArgs = {
   currentDepth: number
@@ -142,9 +142,7 @@ export const relationshipPopulationPromise = async ({
 
   if (field.type === 'join' || (fieldSupportsMany(field) && field.hasMany)) {
     if (
-      field.localized &&
-      (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-        !parentIsLocalized) &&
+      fieldShouldBeLocalized({ field, parentIsLocalized }) &&
       locale === 'all' &&
       typeof siblingDoc[field.name] === 'object' &&
       siblingDoc[field.name] !== null

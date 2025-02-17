@@ -31,9 +31,9 @@ import {
 } from 'payload'
 import {
   fieldAffectsData,
-  fieldIsLocalized,
   fieldIsPresentationalOnly,
   fieldIsVirtual,
+  fieldShouldBeLocalized,
   tabHasName,
 } from 'payload/shared'
 
@@ -81,9 +81,7 @@ const formatBaseSchema = ({
 
   if (
     schema.unique &&
-    ((field.localized &&
-      (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-        !parentIsLocalized)) ||
+    (fieldShouldBeLocalized({ field, parentIsLocalized }) ||
       draftsEnabled ||
       (fieldAffectsData(field) &&
         field.type !== 'group' &&
@@ -107,9 +105,7 @@ const localizeSchema = (
   parentIsLocalized: boolean,
 ) => {
   if (
-    fieldIsLocalized(entity) &&
-    (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-      !parentIsLocalized) &&
+    fieldShouldBeLocalized({ field: entity, parentIsLocalized }) &&
     localization &&
     Array.isArray(localization.locales)
   ) {
@@ -235,12 +231,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
         }
       })
 
-      if (
-        field.localized &&
-        (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-          !parentIsLocalized) &&
-        payload.config.localization
-      ) {
+      if (fieldShouldBeLocalized({ field, parentIsLocalized }) && payload.config.localization) {
         payload.config.localization.localeCodes.forEach((localeCode) => {
           // @ts-expect-error Possible incorrect typing in mongoose types, this works
           schema.path(`${field.name}.${localeCode}`).discriminator(block.slug, blockSchema)
@@ -421,9 +412,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
     if (
       buildSchemaOptions.disableUnique &&
       field.unique &&
-      field.localized &&
-      (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-        !parentIsLocalized)
+      fieldShouldBeLocalized({ field, parentIsLocalized })
     ) {
       baseSchema.coordinates.sparse = true
     }
@@ -443,12 +432,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
         indexOptions.sparse = true
         indexOptions.unique = true
       }
-      if (
-        field.localized &&
-        (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-          !parentIsLocalized) &&
-        payload.config.localization
-      ) {
+      if (fieldShouldBeLocalized({ field, parentIsLocalized }) && payload.config.localization) {
         payload.config.localization.locales.forEach((locale) => {
           schema.index({ [`${field.name}.${locale.code}`]: '2dsphere' }, indexOptions)
         })
@@ -490,12 +474,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
 
     const valueType = getRelationshipValueType(field, payload)
 
-    if (
-      field.localized &&
-      (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-        !parentIsLocalized) &&
-      payload.config.localization
-    ) {
+    if (fieldShouldBeLocalized({ field, parentIsLocalized }) && payload.config.localization) {
       schemaToReturn = {
         type: payload.config.localization.localeCodes.reduce((locales, locale) => {
           let localeSchema: { [key: string]: any } = {}
@@ -717,12 +696,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
 
     const valueType = getRelationshipValueType(field, payload)
 
-    if (
-      field.localized &&
-      (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-        !parentIsLocalized) &&
-      payload.config.localization
-    ) {
+    if (fieldShouldBeLocalized({ field, parentIsLocalized }) && payload.config.localization) {
       schemaToReturn = {
         type: payload.config.localization.localeCodes.reduce((locales, locale) => {
           let localeSchema: { [key: string]: any } = {}

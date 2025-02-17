@@ -1856,15 +1856,31 @@ export function tabHasName<TField extends ClientTab | Tab>(tab: TField): tab is 
 
 /**
  * Check if a field has localized: true set. This does not check if a field *should*
- * be localized. To check if a field should be localized, you need to make sure there is no parent
- * that is localized or that config.compatibility.allowLocalizedWithinLocalized is true, and that
- * config.localization is set.
+ * be localized. To check if a field should be localized, use `fieldShouldBeLocalized`.
  *
  * @deprecated this will be removed or modified in v4.0, as `fieldIsLocalized` can easily lead to bugs due to
  * parent field localization not being taken into account.
  */
 export function fieldIsLocalized(field: Field | Tab): boolean {
   return 'localized' in field && field.localized
+}
+
+/**
+ * Similar to `fieldIsLocalized`, but returns `false` if any parent field is localized.
+ */
+export function fieldShouldBeLocalized({
+  field,
+  parentIsLocalized,
+}: {
+  field: ClientField | ClientTab | Field | Tab
+  parentIsLocalized: boolean
+}): boolean {
+  return (
+    'localized' in field &&
+    field.localized &&
+    (!parentIsLocalized ||
+      process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true')
+  )
 }
 
 export function fieldIsVirtual(field: Field | Tab): boolean {

@@ -11,7 +11,7 @@ import { MissingEditorProp } from '../../../errors/index.js'
 import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
 import { getLabelFromPath } from '../../../utilities/getLabelFromPath.js'
 import { getTranslatedLabel } from '../../../utilities/getTranslatedLabel.js'
-import { fieldAffectsData, tabHasName } from '../../config/types.js'
+import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../../config/types.js'
 import { getFieldPathsModified as getFieldPaths } from '../../getFieldPaths.js'
 import { getExistingRowDoc } from './getExistingRowDoc.js'
 import { traverseFields } from './traverseFields.js'
@@ -100,12 +100,7 @@ export const promise = async ({
 
   if (fieldAffectsData(field)) {
     // skip validation if the field is localized and the incoming data is null
-    if (
-      field.localized &&
-      (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-        !parentIsLocalized) &&
-      operationLocale !== defaultLocale
-    ) {
+    if (fieldShouldBeLocalized({ field, parentIsLocalized }) && operationLocale !== defaultLocale) {
       if (['array', 'blocks'].includes(field.type) && siblingData[field.name] === null) {
         skipValidationFromHere = true
       }
@@ -196,12 +191,7 @@ export const promise = async ({
     }
 
     // Push merge locale action if applicable
-    if (
-      localization &&
-      field.localized &&
-      (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-        !parentIsLocalized)
-    ) {
+    if (localization && fieldShouldBeLocalized({ field, parentIsLocalized })) {
       mergeLocaleActions.push(async () => {
         const localeData = await localization.localeCodes.reduce(
           async (localizedValuesPromise: Promise<JsonObject>, locale) => {

@@ -2,7 +2,7 @@ import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { FlattenedField, JoinQuery, SelectMode, SelectType, Where } from 'payload'
 
 import { sql } from 'drizzle-orm'
-import { fieldIsVirtual } from 'payload/shared'
+import { fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { BuildQueryJoinAliases, ChainedMethods, DrizzleAdapter } from '../types.js'
@@ -69,10 +69,10 @@ export const traverseFields = ({
       return
     }
 
-    const isFieldLocalized =
-      field.localized &&
-      (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-        !withinLocalizedField)
+    const isFieldLocalized = fieldShouldBeLocalized({
+      field,
+      parentIsLocalized: withinLocalizedField,
+    })
 
     // handle simple relationship
     if (

@@ -1,5 +1,7 @@
 import type { FlattenedArrayField } from 'payload'
 
+import { fieldShouldBeLocalized } from 'payload/shared'
+
 import type { DrizzleAdapter } from '../../types.js'
 import type { ArrayRowToInsert, BlockRowToInsert, RelationshipToDelete } from './types.js'
 
@@ -81,12 +83,7 @@ export const transformArray = ({
         }
       }
 
-      if (
-        field.localized &&
-        (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-          !parentIsLocalized) &&
-        locale
-      ) {
+      if (fieldShouldBeLocalized({ field, parentIsLocalized }) && locale) {
         newRow.row._locale = locale
       }
 

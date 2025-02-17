@@ -5,7 +5,7 @@ import type { FlattenedBlock, FlattenedField, NumberField, TextField } from 'pay
 import { and, eq, like, sql } from 'drizzle-orm'
 import { type PgTableWithColumns } from 'drizzle-orm/pg-core'
 import { APIError } from 'payload'
-import { tabHasName } from 'payload/shared'
+import { fieldShouldBeLocalized, tabHasName } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 import { validate as uuidValidate } from 'uuid'
 
@@ -109,10 +109,7 @@ export const getTableColumnFromPath = ({
   if (field) {
     const pathSegments = [...incomingSegments]
 
-    const isFieldLocalized =
-      field.localized &&
-      (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-        !parentIsLocalized)
+    const isFieldLocalized = fieldShouldBeLocalized({ field, parentIsLocalized })
 
     // If next segment is a locale,
     // we need to take it out and use it as the locale from this point on

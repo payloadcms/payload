@@ -17,7 +17,7 @@ import type { DiffMethod } from 'react-diff-viewer-continued'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { dequal } from 'dequal/lite'
-import { fieldIsID, getUniqueListBy, tabHasName } from 'payload/shared'
+import { fieldIsID, fieldShouldBeLocalized, getUniqueListBy, tabHasName } from 'payload/shared'
 
 import { diffMethods } from './fields/diffMethods.js'
 import { diffComponents } from './fields/index.js'
@@ -105,11 +105,8 @@ export const buildVersionFields = ({
     }
 
     const versionField: VersionField = {}
-    const isLocalized =
-      'localized' in field &&
-      field.localized &&
-      (!parentIsLocalized ||
-        process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true')
+    const isLocalized = fieldShouldBeLocalized({ field, parentIsLocalized })
+
     const fieldName: null | string = 'name' in field ? field.name : null
 
     const versionValue = fieldName ? versionSiblingData?.[fieldName] : versionSiblingData

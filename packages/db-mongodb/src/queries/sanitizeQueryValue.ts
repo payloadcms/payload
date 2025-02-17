@@ -8,6 +8,7 @@ import type {
 
 import { Types } from 'mongoose'
 import { createArrayFromCommaDelineated } from 'payload'
+import { fieldShouldBeLocalized } from 'payload/shared'
 
 type SanitizeQueryValueArgs = {
   field: FlattenedField
@@ -222,9 +223,7 @@ export const sanitizeQueryValue = ({
       let localizedPath = path
 
       if (
-        field.localized &&
-        (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-          !parentIsLocalized) &&
+        fieldShouldBeLocalized({ field, parentIsLocalized }) &&
         payload.config.localization &&
         locale
       ) {

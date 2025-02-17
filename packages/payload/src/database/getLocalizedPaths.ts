@@ -1,7 +1,13 @@
-// @ts-strict-ignore
-import type { Field, FlattenedBlock, FlattenedField } from '../fields/config/types.js'
 import type { Payload } from '../index.js'
 import type { PathToQuery } from './queryValidation/types.js'
+
+// @ts-strict-ignore
+import {
+  type Field,
+  fieldShouldBeLocalized,
+  type FlattenedBlock,
+  type FlattenedField,
+} from '../fields/config/types.js'
 
 export function getLocalizedPaths({
   collectionSlug,
@@ -124,10 +130,7 @@ export function getLocalizedPaths({
           currentPath = `${currentPath}.${nextSegment}`
         } else if (
           localizationConfig &&
-          'localized' in matchedField &&
-          matchedField.localized &&
-          (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-            !_parentIsLocalized)
+          fieldShouldBeLocalized({ field: matchedField, parentIsLocalized: _parentIsLocalized })
         ) {
           currentPath = `${currentPath}.${locale}`
         }

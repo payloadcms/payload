@@ -1,7 +1,12 @@
 import type { Block, Field } from 'payload'
 
 import { InvalidConfiguration } from 'payload'
-import { fieldAffectsData, fieldHasSubFields, tabHasName } from 'payload/shared'
+import {
+  fieldAffectsData,
+  fieldHasSubFields,
+  fieldShouldBeLocalized,
+  tabHasName,
+} from 'payload/shared'
 
 import type { RawTable } from '../types.js'
 
@@ -66,11 +71,7 @@ const getFlattenedFieldNames = (args: {
         ...fieldsToUse,
         {
           name: `${fieldPrefix}${field.name}`,
-          localized:
-            field.localized &&
-            (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized ===
-              'true' ||
-              !parentIsLocalized),
+          localized: fieldShouldBeLocalized({ field, parentIsLocalized }),
         },
       ]
     }

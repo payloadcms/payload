@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 // default beforeDuplicate hook for required and unique fields
-import type { FieldAffectingData, FieldHook } from './config/types.js'
+import { type FieldAffectingData, type FieldHook, fieldShouldBeLocalized } from './config/types.js'
 
 const unique: FieldHook = ({ value }) => (typeof value === 'string' ? `${value} - Copy` : undefined)
 const localizedUnique: FieldHook = ({ req, value }) =>
@@ -20,19 +20,13 @@ export const setDefaultBeforeDuplicate = (
   ) {
     if ((field.type === 'text' || field.type === 'textarea') && field.required && field.unique) {
       field.hooks.beforeDuplicate = [
-        field.localized &&
-        (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-          !parentIsLocalized)
+        fieldShouldBeLocalized({ field, parentIsLocalized })
           ? localizedUniqueRequired
           : uniqueRequired,
       ]
     } else if (field.unique) {
       field.hooks.beforeDuplicate = [
-        field.localized &&
-        (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-          !parentIsLocalized)
-          ? localizedUnique
-          : unique,
+        fieldShouldBeLocalized({ field, parentIsLocalized }) ? localizedUnique : unique,
       ]
     }
   }

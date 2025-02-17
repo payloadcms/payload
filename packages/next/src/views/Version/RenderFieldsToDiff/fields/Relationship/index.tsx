@@ -8,7 +8,7 @@ import type {
 
 import { getTranslation } from '@payloadcms/translations'
 import { useConfig, useTranslation } from '@payloadcms/ui'
-import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
+import { fieldAffectsData, fieldIsPresentationalOnly, fieldShouldBeLocalized } from 'payload/shared'
 import React from 'react'
 import ReactDiffViewer from 'react-diff-viewer-continued'
 
@@ -68,10 +68,7 @@ const generateLabelFromValue = (
     let titleFieldIsLocalized = false
 
     if (useAsTitleField && fieldAffectsData(useAsTitleField)) {
-      titleFieldIsLocalized =
-        useAsTitleField.localized &&
-        (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-          !parentIsLocalized)
+      titleFieldIsLocalized = fieldShouldBeLocalized({ field: useAsTitleField, parentIsLocalized })
     }
 
     if (typeof relatedDoc?.[useAsTitle] !== 'undefined') {

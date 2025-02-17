@@ -7,7 +7,7 @@ import {
   formatErrors,
   type PayloadRequest,
 } from 'payload'
-import { fieldAffectsData, tabHasName } from 'payload/shared'
+import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from 'payload/shared'
 
 const ObjectId = (ObjectIdImport.default ||
   ObjectIdImport) as unknown as typeof ObjectIdImport.default
@@ -49,12 +49,7 @@ function iterateFields(
             toLocaleData[field.name].map((item: Data, index: number) => {
               if (fromLocaleData[field.name]?.[index]) {
                 // Generate new IDs if the field is localized to prevent errors with relational DBs.
-                if (
-                  field.localized &&
-                  (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized ===
-                    'true' ||
-                    !parentIsLocalized)
-                ) {
+                if (fieldShouldBeLocalized({ field, parentIsLocalized })) {
                   toLocaleData[field.name][index].id = new ObjectId().toHexString()
                 }
 
@@ -92,12 +87,7 @@ function iterateFields(
                 ) as FlattenedBlock | undefined)
 
               // Generate new IDs if the field is localized to prevent errors with relational DBs.
-              if (
-                field.localized &&
-                (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized ===
-                  'true' ||
-                  !parentIsLocalized)
-              ) {
+              if (fieldShouldBeLocalized({ field, parentIsLocalized })) {
                 toLocaleData[field.name][index].id = new ObjectId().toHexString()
               }
 

@@ -1,6 +1,6 @@
 import type { FlattenedBlock, FlattenedField, JoinQuery, SanitizedConfig } from 'payload'
 
-import { fieldIsVirtual } from 'payload/shared'
+import { fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
 
 import type { DrizzleAdapter } from '../../types.js'
 import type { BlocksMap } from '../../utilities/createBlocksMap.js'
@@ -107,10 +107,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
       deletions.push(() => delete table[fieldName])
     }
 
-    const isLocalized =
-      field.localized &&
-      (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-        !parentIsLocalized)
+    const isLocalized = fieldShouldBeLocalized({ field, parentIsLocalized })
 
     if (field.type === 'array') {
       if (Array.isArray(fieldData)) {

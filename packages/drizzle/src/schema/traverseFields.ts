@@ -1,7 +1,12 @@
 import type { FlattenedField } from 'payload'
 
 import { InvalidConfiguration } from 'payload'
-import { fieldAffectsData, fieldIsVirtual, optionIsObject } from 'payload/shared'
+import {
+  fieldAffectsData,
+  fieldIsVirtual,
+  fieldShouldBeLocalized,
+  optionIsObject,
+} from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type {
@@ -121,10 +126,7 @@ export const traverseFields = ({
     )}`
     const fieldName = `${fieldPrefix?.replace('.', '_') || ''}${field.name}`
 
-    const isFieldLocalized =
-      field.localized &&
-      (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-        !parentIsLocalized)
+    const isFieldLocalized = fieldShouldBeLocalized({ field, parentIsLocalized })
 
     // If field is localized,
     // add the column to the locale table instead of main table

@@ -1,11 +1,17 @@
 // @ts-strict-ignore
 import type { SanitizedJoin, SanitizedJoins } from '../../collections/config/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
-import type { FlattenedJoinField, JoinField, RelationshipField, UploadField } from './types.js'
 
 import { APIError } from '../../errors/index.js'
 import { InvalidFieldJoin } from '../../errors/InvalidFieldJoin.js'
 import { traverseFields } from '../../utilities/traverseFields.js'
+import {
+  fieldShouldBeLocalized,
+  type FlattenedJoinField,
+  type JoinField,
+  type RelationshipField,
+  type UploadField,
+} from './types.js'
 export const sanitizeJoinField = ({
   config,
   field,
@@ -53,12 +59,7 @@ export const sanitizeJoinField = ({
       const currentSegment = pathSegments[currentSegmentIndex]
       // match field on path segments
       if ('name' in field && field.name === currentSegment) {
-        if (
-          'localized' in field &&
-          field.localized &&
-          (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-            !parentIsLocalized)
-        ) {
+        if (fieldShouldBeLocalized({ field, parentIsLocalized })) {
           localized = true
           const fieldIndex = currentSegmentIndex
 

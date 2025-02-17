@@ -4,7 +4,7 @@ import type { RequestContext } from '../../../index.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
 import type { Block, Field, FieldHookArgs, TabAsField } from '../../config/types.js'
 
-import { fieldAffectsData } from '../../config/types.js'
+import { fieldAffectsData, fieldShouldBeLocalized } from '../../config/types.js'
 import { getFieldPathsModified as getFieldPaths } from '../../getFieldPaths.js'
 import { runBeforeDuplicateHooks } from './runHook.js'
 import { traverseFields } from './traverseFields.js'
@@ -63,11 +63,7 @@ export const promise = async <T>({
 
   if (fieldAffectsData(field)) {
     let fieldData = siblingDoc?.[field.name]
-    const fieldIsLocalized =
-      field.localized &&
-      localization &&
-      (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-        !parentIsLocalized)
+    const fieldIsLocalized = localization && fieldShouldBeLocalized({ field, parentIsLocalized })
 
     // Run field beforeDuplicate hooks
     if (Array.isArray(field.hooks?.beforeDuplicate)) {

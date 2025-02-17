@@ -2,7 +2,7 @@ import type { CollectionConfig, Field, SanitizedConfig, TraverseFieldsCallback }
 
 import { Types } from 'mongoose'
 import { traverseFields } from 'payload'
-import { fieldAffectsData } from 'payload/shared'
+import { fieldAffectsData, fieldShouldBeLocalized } from 'payload/shared'
 
 type Args = {
   config: SanitizedConfig
@@ -126,12 +126,7 @@ export const sanitizeRelationshipIDs = ({
       }
 
       // handle localized relationships
-      if (
-        config.localization &&
-        field.localized &&
-        (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-          !parentIsLocalized)
-      ) {
+      if (config.localization && fieldShouldBeLocalized({ field, parentIsLocalized })) {
         const locales = config.localization.locales
         const fieldRef = ref[field.name]
         if (typeof fieldRef !== 'object') {

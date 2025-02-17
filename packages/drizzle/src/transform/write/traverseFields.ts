@@ -1,7 +1,7 @@
 import type { FlattenedField } from 'payload'
 
 import { sql } from 'drizzle-orm'
-import { fieldIsVirtual } from 'payload/shared'
+import { fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from '../../types.js'
@@ -112,10 +112,7 @@ export const traverseFields = ({
     fieldName = `${fieldPrefix || ''}${field.name}`
     fieldData = data[field.name]
 
-    const isLocalized =
-      field.localized &&
-      (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-        !parentIsLocalized)
+    const isLocalized = fieldShouldBeLocalized({ field, parentIsLocalized })
 
     if (field.type === 'array') {
       const arrayTableName = adapter.tableNameMap.get(`${parentTableName}_${columnName}`)

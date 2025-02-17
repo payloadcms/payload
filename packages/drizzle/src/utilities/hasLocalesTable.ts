@@ -1,6 +1,6 @@
 import type { Field } from 'payload'
 
-import { fieldAffectsData, fieldHasSubFields } from 'payload/shared'
+import { fieldAffectsData, fieldHasSubFields, fieldShouldBeLocalized } from 'payload/shared'
 
 export const hasLocalesTable = ({
   fields,
@@ -14,12 +14,7 @@ export const hasLocalesTable = ({
     if (field.type === 'array') {
       return false
     }
-    if (
-      fieldAffectsData(field) &&
-      field.localized &&
-      (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-        !parentIsLocalized)
-    ) {
+    if (fieldAffectsData(field) && fieldShouldBeLocalized({ field, parentIsLocalized })) {
       return true
     }
     if (fieldHasSubFields(field)) {

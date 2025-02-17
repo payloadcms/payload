@@ -1,5 +1,6 @@
 import type { FlattenedBlock, FlattenedBlocksField } from 'payload'
 
+import { fieldShouldBeLocalized } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from '../../types.js'
@@ -78,12 +79,7 @@ export const transformBlocks = ({
       },
     }
 
-    if (
-      field.localized &&
-      (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
-        !parentIsLocalized) &&
-      locale
-    ) {
+    if (fieldShouldBeLocalized({ field, parentIsLocalized }) && locale) {
       newRow.row._locale = locale
     }
     if (withinArrayOrBlockLocale) {
