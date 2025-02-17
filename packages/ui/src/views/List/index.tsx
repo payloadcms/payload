@@ -46,7 +46,7 @@ export type ListViewSlots = {
   BeforeList?: React.ReactNode
   BeforeListTable?: React.ReactNode
   Description?: React.ReactNode
-  ListControlsMenu?: React.ReactNode | React.ReactNode[]
+  listMenuItems?: React.ReactNode[]
   Table: React.ReactNode
 }
 
@@ -79,7 +79,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
     disableBulkEdit,
     enableRowSelections,
     hasCreatePermission,
-    ListControlsMenu,
+    listMenuItems,
     listPreferences,
     newDocumentURL,
     preferenceKey,
@@ -220,7 +220,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                 collectionSlug={collectionSlug}
                 disableBulkDelete={disableBulkDelete}
                 disableBulkEdit={disableBulkEdit}
-                listControlsMenu={ListControlsMenu}
+                listMenuItems={listMenuItems}
                 renderedFilters={renderedFilters}
                 resolvedFilterOptions={resolvedFilterOptions}
               />

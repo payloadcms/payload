@@ -33,13 +33,16 @@ export const renderListViewSlots = ({
     })
   }
 
-  if (collectionConfig.admin.components?.listControlsMenu) {
-    result.ListControlsMenu = RenderServerComponent({
-      clientProps,
-      Component: collectionConfig.admin.components.listControlsMenu,
-      importMap: payload.importMap,
-      serverProps,
-    })
+  const listMenuItems = collectionConfig.admin.components?.listMenuItems
+  if (Array.isArray(listMenuItems)) {
+    result.listMenuItems = [
+      RenderServerComponent({
+        clientProps,
+        Component: listMenuItems,
+        importMap: payload.importMap,
+        serverProps,
+      }),
+    ]
   }
 
   if (collectionConfig.admin.components?.afterListTable) {

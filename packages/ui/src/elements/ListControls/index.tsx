@@ -38,7 +38,7 @@ export type ListControlsProps = {
   readonly handleSearchChange?: (search: string) => void
   readonly handleSortChange?: (sort: string) => void
   readonly handleWhereChange?: (where: Where) => void
-  readonly listControlsMenu?: React.ReactNode | React.ReactNode[]
+  readonly listMenuItems?: React.ReactNode[]
   readonly renderedFilters?: Map<string, React.ReactNode>
   readonly resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
 }
@@ -57,11 +57,10 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     disableBulkEdit,
     enableColumns = true,
     enableSort = false,
-    listControlsMenu,
+    listMenuItems,
     renderedFilters,
     resolvedFilterOptions,
   } = props
-
   const { handleSearchChange, query } = useListQuery()
   const titleField = useUseTitleField(collectionConfig)
   const { i18n, t } = useTranslation()
@@ -198,7 +197,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                 {t('general:sort')}
               </Pill>
             )}
-            {listControlsMenu && Array.isArray(listControlsMenu) && (
+            {listMenuItems && (
               <Popup
                 button={<Dots ariaLabel={t('general:listControlMenu')} />}
                 className={`${baseClass}__popup`}
@@ -206,13 +205,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                 size="large"
                 verticalAlign="bottom"
               >
-                <PopupList.ButtonGroup>
-                  {listControlsMenu.map((control, index) => (
-                    <PopupList.Button className={`${baseClass}__custom-control`} key={index}>
-                      {control}
-                    </PopupList.Button>
-                  ))}
-                </PopupList.ButtonGroup>
+                <PopupList.ButtonGroup>{listMenuItems.map((item) => item)}</PopupList.ButtonGroup>
               </Popup>
             )}
           </div>
