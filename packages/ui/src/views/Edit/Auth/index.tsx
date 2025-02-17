@@ -43,7 +43,6 @@ export const Auth: React.FC<Props> = (props) => {
   const modified = useFormModified()
   const { i18n, t } = useTranslation()
   const { docPermissions, isEditing, isInitializing } = useDocumentInfo()
-
   const {
     config: {
       routes: { api },
@@ -51,15 +50,11 @@ export const Auth: React.FC<Props> = (props) => {
     },
   } = useConfig()
 
-  const hasPermissionToUnlock: boolean = useMemo(() => {
-    const collection = permissions?.collections?.[collectionSlug]
+  const enableFields =
+    !disableLocalStrategy ||
+    (typeof disableLocalStrategy === 'object' && disableLocalStrategy.enableFields === true)
 
-    if (collection) {
-      return Boolean('unlock' in collection ? collection.unlock : undefined)
-    }
-
-    return false
-  }, [permissions, collectionSlug])
+  const disabled = readOnly || isInitializing
 
   const apiKeyPermissions =
     docPermissions?.fields === true ? true : docPermissions?.fields?.enableAPIKey
@@ -74,6 +69,16 @@ export const Auth: React.FC<Props> = (props) => {
 
   const canReadApiKey = apiKeyPermissions === true || apiKeyPermissions?.read
   const canReadEnableAPIKey = apiKeyPermissions === true || apiKeyPermissions?.read
+
+  const hasPermissionToUnlock: boolean = useMemo(() => {
+    const collection = permissions?.collections?.[collectionSlug]
+
+    if (collection) {
+      return Boolean('unlock' in collection ? collection.unlock : undefined)
+    }
+
+    return false
+  }, [permissions, collectionSlug])
 
   const handleChangePassword = useCallback(
     (showPasswordFields: boolean) => {
@@ -130,19 +135,13 @@ export const Auth: React.FC<Props> = (props) => {
     }
   }, [modified])
 
-  if (disableLocalStrategy && !useAPIKey) {
+  if (disableLocalStrategy === true && !useAPIKey) {
     return null
   }
 
-  const disabled = readOnly || isInitializing
-
-  const showFields =
-    !disableLocalStrategy ||
-    (typeof disableLocalStrategy === 'object' && disableLocalStrategy.enableFields === true)
-
   return (
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
-      {showFields && (
+      {enableFields && (
         <React.Fragment>
           <EmailAndUsernameFields
             loginWithUsername={loginWithUsername}
@@ -151,7 +150,7 @@ export const Auth: React.FC<Props> = (props) => {
             readOnly={readOnly}
             t={t}
           />
-          {(changingPassword || requirePassword) && (
+          {(changingPassword || requirePassword) && (!disableLocalStrategy || !enableFields) && (
             <div className={`${baseClass}__changing-password`}>
               <PasswordField
                 autoComplete="new-password"
@@ -180,7 +179,7 @@ export const Auth: React.FC<Props> = (props) => {
                 {t('general:cancel')}
               </Button>
             )}
-            {!changingPassword && !requirePassword && (
+            {!changingPassword && !requirePassword && !disableLocalStrategy && (
               <Button
                 buttonStyle="secondary"
                 disabled={disabled}
