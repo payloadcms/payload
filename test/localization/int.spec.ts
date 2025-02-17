@@ -1869,16 +1869,16 @@ describe('Localization', () => {
       })
     })
 
-    // Disabled, as nested localized fields do no longer have their localized property stripped in
+    // Nested localized fields do no longer have their localized property stripped in
     // this monorepo, as this is handled at runtime.
-    describe.skip('nested localized field sanitization', () => {
-      it('should sanitize nested localized fields', () => {
+    describe('nested localized field sanitization', () => {
+      it('ensure nested localized fields keep localized property in monorepo', () => {
         const collection = payload.collections['localized-within-localized'].config
 
-        expect(collection.fields[0].tabs[0].fields[0].localized).toBeUndefined()
-        expect(collection.fields[1].fields[0].localized).toBeUndefined()
-        expect(collection.fields[2].blocks[0].fields[0].localized).toBeUndefined()
-        expect(collection.fields[3].fields[0].localized).toBeUndefined()
+        expect(collection.fields[0].tabs[0].fields[0].localized).toBeDefined()
+        expect(collection.fields[1].fields[0].localized).toBeDefined()
+        expect(collection.fields[2].blocks[0].fields[0].localized).toBeDefined()
+        expect(collection.fields[3].fields[0].localized).toBeDefined()
       })
     })
 
