@@ -72,6 +72,7 @@ const populate = async ({
           fallbackLocale,
           locale,
           overrideAccess,
+          populate: populateArg,
           select:
             populateArg?.[relatedCollection.config.slug] ??
             relatedCollection.config.defaultPopulate,

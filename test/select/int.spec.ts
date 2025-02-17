@@ -2230,6 +2230,33 @@ describe('Select', () => {
       expect(richTextLexicalRel.value).toMatchObject(expectedHomePageOverride)
       expect(richTextSlateRel.value).toMatchObject(expectedHomePageOverride)
     })
+
+    it('should apply populate on depth 2', async () => {
+      const page_1 = await payload.create({
+        collection: 'pages',
+        data: { relatedPage: null, blocks: [{ blockType: 'some' }], slug: 'page-1' },
+      })
+      const page_2 = await payload.create({
+        collection: 'pages',
+        data: { relatedPage: page_1.id, slug: 'page-2' },
+      })
+      const page_3 = await payload.create({
+        collection: 'pages',
+        data: { relatedPage: page_2.id, slug: 'page-3' },
+      })
+      const result = await payload.findByID({
+        collection: 'pages',
+        id: page_3.id,
+        depth: 3,
+        populate: { pages: { slug: true, relatedPage: true } },
+      })
+      expect(result.relatedPage.id).toBe(page_2.id)
+      expect(result.relatedPage.relatedPage as Page).toStrictEqual({
+        id: page_1.id,
+        slug: page_1.slug,
+        relatedPage: null,
+      })
+    })
   })
 })
 
