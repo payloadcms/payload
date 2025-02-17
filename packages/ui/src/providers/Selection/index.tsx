@@ -150,9 +150,6 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
   )
 
   useEffect(() => {
-    if (selectAll === SelectAllStatus.AllAvailable) {
-      return
-    }
     let some = false
     let all = true
 
@@ -166,7 +163,12 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
       }
     }
 
-    if (all && selected.size === docs.length) {
+    if (selectAll === SelectAllStatus.AllAvailable) {
+      // If selections no longer match all docs, adjust
+      if (!all || selected.size !== totalDocs) {
+        setSelectAll(some ? SelectAllStatus.Some : SelectAllStatus.None)
+      }
+    } else if (all && selected.size === docs.length) {
       setSelectAll(SelectAllStatus.AllInPage)
     } else if (some) {
       setSelectAll(SelectAllStatus.Some)

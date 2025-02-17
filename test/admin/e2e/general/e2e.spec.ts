@@ -868,6 +868,20 @@ describe('General', () => {
       await expect(page.locator('.row-1 .cell-title')).toContainText(updatedPostTitle)
     })
 
+    test('should update selection state after deselecting item following select all', async () => {
+      await deleteAllPosts()
+      await createPost({ title: 'Post 1' })
+      await page.goto(postsUrl.list)
+      await page.locator('input#select-all').check()
+      await page.locator('button.list-selection__button').click()
+
+      // Deselect the first row
+      await page.locator('.row-1 input').click()
+
+      // eslint-disable-next-line jest-dom/prefer-checked
+      await expect(page.locator('input#select-all')).not.toHaveAttribute('checked', '')
+    })
+
     test('should save globals', async () => {
       await page.goto(postsUrl.global(globalSlug))
 
