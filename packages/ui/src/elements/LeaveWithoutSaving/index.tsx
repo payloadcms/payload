@@ -1,7 +1,7 @@
 'use client'
 import React, { useCallback, useEffect } from 'react'
 
-import { useFormModified } from '../../forms/Form/index.js'
+import { useForm, useFormModified } from '../../forms/Form/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
@@ -59,11 +59,12 @@ const Component: React.FC<{
 export const LeaveWithoutSaving: React.FC = () => {
   const { closeModal } = useModal()
   const modified = useFormModified()
+  const { isValid } = useForm()
   const { user } = useAuth()
   const [show, setShow] = React.useState(false)
   const [hasAccepted, setHasAccepted] = React.useState(false)
 
-  const prevent = Boolean(modified && user)
+  const prevent = Boolean((modified || !isValid) && user)
 
   const onPrevent = useCallback(() => {
     setShow(true)

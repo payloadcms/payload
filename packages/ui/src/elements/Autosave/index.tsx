@@ -55,16 +55,18 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   const isProcessingRef = useRef(false)
 
   const { reportUpdate } = useDocumentEvents()
-  const { dispatchFields, setSubmitted } = useForm()
-  const submitted = useFormSubmitted()
-  const versionsConfig = docConfig?.versions
+  const { dispatchFields, isValid, setIsValid, setSubmitted } = useForm()
 
   const [fields] = useAllFormFields()
   const modified = useFormModified()
+  const submitted = useFormSubmitted()
+
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
 
+  const versionsConfig = docConfig?.versions
   let interval = versionDefaults.autosaveInterval
+
   if (versionsConfig.drafts && versionsConfig.drafts.autosave) {
     interval = versionsConfig.drafts.autosave.interval
   }
@@ -74,6 +76,11 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   const fieldRef = useRef(fields)
   const modifiedRef = useRef(modified)
   const localeRef = useRef(locale)
+  /**
+   * Track the validation internally so Autosave can determine when to run queue processing again
+   * Helps us prevent infinite loops when the queue is processing and the form is invalid
+   */
+  const isValidRef = useRef(isValid)
   const debouncedRef = useRef(debouncedFields)
 
   debouncedRef.current = debouncedFields
@@ -94,6 +101,14 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
   const processQueue = React.useCallback(async () => {
     if (isProcessingRef.current || queueRef.current.length === 0) {
+      return
+    }
+
+    if (!isValidRef.current) {
+      // Clear queue so we don't end up in an infinite loop
+      queueRef.current = []
+      // Reset internal validation state so queue processing can run again
+      isValidRef.current = true
       return
     }
 
@@ -149,7 +164,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
             const skipSubmission =
               submitted && !valid && versionsConfig?.drafts && versionsConfig?.drafts?.validate
 
-            if (!skipSubmission) {
+            if (!skipSubmission && isValidRef.current) {
               await fetch(url, {
                 body: JSON.stringify(data),
                 credentials: 'include',
@@ -222,6 +237,9 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
                         toast.error(err.message || i18n.t('error:unknown'))
                       })
 
+                      // Set valid to false internally so the queue doesn't process
+                      isValidRef.current = false
+                      setIsValid(false)
                       setSubmitted(true)
                       setSaving(false)
                       return
@@ -232,6 +250,13 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
                     // Manually update the data since this function doesn't fire the `submit` function from useForm
                     if (document) {
+                      // Only reset the form state if it's different
+                      if (!isValid) {
+                        setIsValid(true)
+                      }
+
+                      // Reset internal state allowing the queue to process
+                      isValidRef.current = true
                       updateSavedDocumentData(document)
                     }
                   }
