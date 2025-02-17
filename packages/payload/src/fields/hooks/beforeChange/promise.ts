@@ -1,10 +1,11 @@
+// @ts-strict-ignore
 import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { ValidationFieldError } from '../../../errors/index.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, Operation, PayloadRequest } from '../../../types/index.js'
-import type { Field, TabAsField, Validate } from '../../config/types.js'
+import type { Block, Field, TabAsField, Validate } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
@@ -39,6 +40,7 @@ type Args = {
   siblingData: JsonObject
   siblingDoc: JsonObject
   siblingDocWithLocales?: JsonObject
+  siblingFields?: (Field | TabAsField)[]
   skipValidation: boolean
 }
 
@@ -71,6 +73,7 @@ export const promise = async ({
   siblingData,
   siblingDoc,
   siblingDocWithLocales,
+  siblingFields,
   skipValidation,
 }: Args): Promise<void> => {
   const { indexPath, path, schemaPath } = getFieldPaths({
@@ -123,6 +126,7 @@ export const promise = async ({
           schemaPath: schemaPathSegments,
           siblingData,
           siblingDocWithLocales,
+          siblingFields,
           value: siblingData[field.name],
         })
 
@@ -274,7 +278,12 @@ export const promise = async ({
           )
 
           const blockTypeToMatch = (row as JsonObject).blockType || rowSiblingDoc.blockType
-          const block = field.blocks.find((blockType) => blockType.slug === blockTypeToMatch)
+
+          const block: Block | undefined =
+            req.payload.blocks[blockTypeToMatch] ??
+            ((field.blockReferences ?? field.blocks).find(
+              (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
+            ) as Block | undefined)
 
           if (block) {
             promises.push(

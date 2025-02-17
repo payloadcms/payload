@@ -4,6 +4,14 @@
     /* TODO: remove the following lines */
     "strict": false,
     "noUncheckedIndexedAccess": false,
+    "plugins": [
+      {
+        "name": "typescript-strict-plugin"
+      },
+      {
+        "name": "tsc-strict"
+      }
+    ],
   },
   "references": [{ "path": "../translations" }]
 }

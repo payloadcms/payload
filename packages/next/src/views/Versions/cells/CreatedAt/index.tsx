@@ -1,10 +1,7 @@
 'use client'
-import { useConfig, useTranslation } from '@payloadcms/ui'
+import { Link, useConfig, useTranslation } from '@payloadcms/ui'
 import { formatAdminURL, formatDate } from '@payloadcms/ui/shared'
-import LinkImport from 'next/link.js'
 import React from 'react'
-
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 type CreatedAtCellProps = {
   collectionSlug?: string

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { User } from '../auth/types.js'
 import type { Payload, RequestContext, TypedLocale } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'

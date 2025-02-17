@@ -21,8 +21,8 @@ export const uploadValidation = (
       },
     },
   }) => {
-    const idType = payload.collections[node.relationTo].customIDType || payload.db.defaultIDType
-    // @ts-expect-error
+    const idType = payload.collections[node.relationTo]?.customIDType || payload.db.defaultIDType
+    // @ts-expect-error - Fix in Payload v4
     const nodeID = node?.value?.id || node?.value // for backwards-compatibility
 
     if (!isValidID(nodeID, idType)) {
@@ -62,8 +62,9 @@ export const uploadValidation = (
 
     const errorPathsSet = new Set<string>()
     for (const fieldKey in result) {
-      if (result[fieldKey].errorPaths?.length) {
-        for (const errorPath of result[fieldKey].errorPaths) {
+      const fieldState = result[fieldKey]
+      if (fieldState?.errorPaths?.length) {
+        for (const errorPath of fieldState.errorPaths) {
           errorPathsSet.add(errorPath)
         }
       }

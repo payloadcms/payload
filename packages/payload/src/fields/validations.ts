@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import Ajv from 'ajv'
 import ObjectIdImport from 'bson-objectid'
 

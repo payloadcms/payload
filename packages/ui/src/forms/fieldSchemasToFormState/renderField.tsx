@@ -1,4 +1,10 @@
-import type { ClientComponentProps, ClientField, FieldPaths, ServerComponentProps } from 'payload'
+import type {
+  ClientComponentProps,
+  ClientField,
+  FieldPaths,
+  FlattenedBlock,
+  ServerComponentProps,
+} from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { createClientField, MissingEditorProp } from 'payload'
@@ -135,7 +141,12 @@ export const renderField: RenderFieldMethod = ({
 
     case 'blocks': {
       fieldState?.rows?.forEach((row, rowIndex) => {
-        const blockConfig = fieldConfig.blocks.find((block) => block.slug === row.blockType)
+        const blockTypeToMatch: string = row.blockType
+        const blockConfig =
+          req.payload.blocks[blockTypeToMatch] ??
+          ((fieldConfig.blockReferences ?? fieldConfig.blocks).find(
+            (block) => typeof block !== 'string' && block.slug === blockTypeToMatch,
+          ) as FlattenedBlock | undefined)
 
         if (blockConfig.admin?.components && 'Label' in blockConfig.admin.components) {
           if (!fieldState.customComponents) {

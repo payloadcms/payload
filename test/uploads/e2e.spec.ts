@@ -22,20 +22,20 @@ import { RESTClient } from '../helpers/rest.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   adminThumbnailFunctionSlug,
-  adminThumbnailWithSearchQueries,
-  mediaWithoutCacheTagsSlug,
   adminThumbnailSizeSlug,
+  adminThumbnailWithSearchQueries,
   animatedTypeMedia,
   audioSlug,
   customFileNameMediaSlug,
+  customUploadFieldSlug,
   focalOnlySlug,
   mediaSlug,
+  mediaWithoutCacheTagsSlug,
   relationPreviewSlug,
   relationSlug,
   withMetadataSlug,
   withOnlyJPEGMetadataSlug,
   withoutMetadataSlug,
-  customUploadFieldSlug,
 } from './shared.js'
 import { startMockCorsServer } from './startMockCorsServer.js'
 const filename = fileURLToPath(import.meta.url)
@@ -500,9 +500,9 @@ describe('Uploads', () => {
     /**
      * Regex matcher for date cache tags.
      *
-     * @example it will match `?2022-01-01T00:00:00.000Z`
+     * @example it will match `?2022-01-01T00%3A00%3A00.000Z` (`?2022-01-01T00:00:00.000Z` encoded)
      */
-    const cacheTagPattern = /\?\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/
+    const cacheTagPattern = /\?\d{4}-\d{2}-\d{2}T\d{2}%3A\d{2}%3A\d{2}\.\d{3}Z/
 
     expect(src).not.toMatch(cacheTagPattern)
   })
@@ -530,9 +530,9 @@ describe('Uploads', () => {
     /**
      * Regex matcher for date cache tags.
      *
-     * @example it will match `?2022-01-01T00:00:00.000Z`
+     * @example it will match `?2022-01-01T00%3A00%3A00.000Z` (`?2022-01-01T00:00:00.000Z` encoded)
      */
-    const cacheTagPattern = /\?\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/
+    const cacheTagPattern = /\?\d{4}-\d{2}-\d{2}T\d{2}%3A\d{2}%3A\d{2}\.\d{3}Z/
 
     expect(src).toMatch(cacheTagPattern)
   })
@@ -857,7 +857,7 @@ describe('Uploads', () => {
   })
 
   describe('remote url fetching', () => {
-    beforeAll(async () => {
+    beforeAll(() => {
       mockCorsServer = startMockCorsServer()
     })
 

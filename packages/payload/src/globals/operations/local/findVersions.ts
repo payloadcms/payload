@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 /* eslint-disable no-restricted-exports */
 import type { PaginatedDocs } from '../../../database/types.js'
 import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'

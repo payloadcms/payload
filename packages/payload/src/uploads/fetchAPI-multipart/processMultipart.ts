@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { Readable } from 'stream'
 
 import Busboy from 'busboy'

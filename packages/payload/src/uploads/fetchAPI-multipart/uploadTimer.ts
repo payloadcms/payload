@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 type CreateUploadTimer = (
   timeout?: number,
   callback?: () => void,

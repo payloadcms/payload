@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 /* eslint-disable no-console */
 import { Cron } from 'croner'
 import minimist from 'minimist'

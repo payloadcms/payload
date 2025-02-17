@@ -295,6 +295,70 @@ export const CustomBlocksFieldLabelClient: BlocksFieldLabelClientComponent = ({
 }
 ```
 
+## Block References
+
+If you have multiple blocks used in multiple places, your Payload Config can grow in size, potentially sending more data to the client and requiring more processing on the server. However, you can optimize performance by defining each block **once** in your Payload Config and then referencing its slug wherever it's used instead of passing the entire block config.
+
+To do this, define the block in the `blocks` array of the Payload Config. Then, in the Blocks Field, pass the block slug to the `blockReferences` array - leaving the `blocks` array empty for compatibility reasons.
+
+```ts
+import { buildConfig } from 'payload'
+import { lexicalEditor, BlocksFeature } from '@payloadcms/richtext-lexical'
+
+// Payload Config
+const config = buildConfig({
+  // Define the block once
+  blocks: [
+    {
+      slug: 'TextBlock',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
+  ],
+  collections: [
+    {
+      slug: 'collection1',
+      fields: [
+        {
+          name: 'content',
+          type: 'blocks',
+          // Reference the block by slug
+          blockReferences: ['TextBlock'],
+          blocks: [], // Required to be empty, for compatibility reasons
+        },
+      ],
+    },
+     {
+      slug: 'collection2',
+      fields: [
+        {
+          name: 'editor',
+          type: 'richText',
+          editor: lexicalEditor({
+            BlocksFeature({
+              // Same reference can be reused anywhere, even in the lexical editor, without incurred performance hit
+              blocks: ['TextBlock'],
+            })
+          })
+        },
+      ],
+    },
+  ],
+})
+```
+
+<Banner type="warning">
+  **Reminder:**
+  Blocks referenced in the `blockReferences` array are treated as isolated from the collection / global config. This has the following implications:
+
+  1. The block config cannot be modified or extended in the collection config. It will be identical everywhere it's referenced.
+  2. Access control for blocks referenced in the `blockReferences` are run only once - data from the collection will not be available in the block's access control.
+</Banner>
+
 ## TypeScript
 
 As you build your own Block configs, you might want to store them in separate files but retain typing accordingly. To do so, you can import and use Payload's `Block` type:

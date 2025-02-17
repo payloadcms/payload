@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { EditorProps } from '@monaco-editor/react'
@@ -120,6 +121,7 @@ import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type {
   ArrayFieldValidation,
   BlocksFieldValidation,
+  BlockSlug,
   CheckboxFieldValidation,
   CodeFieldValidation,
   CollectionSlug,
@@ -164,7 +166,8 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
   /**
    * Only available in `afterRead` hooks
    */
-  currentDepth?: number /**
+  currentDepth?: number
+  /**
    * Only available in `afterRead` hooks
    */
   /** The data passed to update the document within create and update operations, and the full document itself in the afterRead hook. */
@@ -212,6 +215,10 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
    * The original siblingData with locales (not modified by any hooks). Only available in `beforeChange` and `beforeDuplicate` field hooks.
    */
   siblingDocWithLocales?: Record<string, unknown>
+  /**
+   * The sibling fields of the field which the hook is running against.
+   */
+  siblingFields: (Field | TabAsField)[]
   /** The value of the field. */
   value?: TValue
 }
@@ -1399,6 +1406,12 @@ export type BlocksField = {
      */
     isSortable?: boolean
   } & Admin
+  /**
+   * Like `blocks`, but allows you to also pass strings that are slugs of blocks defined in `config.blocks`.
+   *
+   * @todo `blockReferences` will be merged with `blocks` in 4.0
+   */
+  blockReferences?: (Block | BlockSlug)[]
   blocks: Block[]
   defaultValue?: DefaultValue
   labels?: Labels
@@ -1410,6 +1423,12 @@ export type BlocksField = {
 
 export type BlocksFieldClient = {
   admin?: AdminClient & Pick<BlocksField['admin'], 'initCollapsed' | 'isSortable'>
+  /**
+   * Like `blocks`, but allows you to also pass strings that are slugs of blocks defined in `config.blocks`.
+   *
+   * @todo `blockReferences` will be merged with `blocks` in 4.0
+   */
+  blockReferences?: (ClientBlock | string)[]
   blocks: ClientBlock[]
   labels?: LabelsClient
 } & FieldBaseClient &
@@ -1505,8 +1524,14 @@ export type FlattenedBlock = {
 } & Block
 
 export type FlattenedBlocksField = {
+  /**
+   * Like `blocks`, but allows you to also pass strings that are slugs of blocks defined in `config.blocks`.
+   *
+   * @todo `blockReferences` will be merged with `blocks` in 4.0
+   */
+  blockReferences?: (FlattenedBlock | string)[]
   blocks: FlattenedBlock[]
-} & BlocksField
+} & Omit<BlocksField, 'blockReferences' | 'blocks'>
 
 export type FlattenedGroupField = {
   flattenedFields: FlattenedField[]

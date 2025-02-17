@@ -5,6 +5,7 @@ import type {
   Field,
   FieldSchemaMap,
   FieldState,
+  FlattenedBlock,
   FormState,
   FormStateWithoutComponents,
   PayloadRequest,
@@ -371,7 +372,13 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
         const { promises, rowMetadata } = blocksValue.reduce(
           (acc, row, i: number) => {
-            const block = field.blocks.find((blockType) => blockType.slug === row.blockType)
+            const blockTypeToMatch: string = row.blockType
+            const block =
+              req.payload.blocks[blockTypeToMatch] ??
+              ((field.blockReferences ?? field.blocks).find(
+                (blockType) => typeof blockType !== 'string' && blockType.slug === blockTypeToMatch,
+              ) as FlattenedBlock | undefined)
+
             if (!block) {
               throw new Error(
                 `Block with type "${row.blockType}" was found in block data, but no block with that type is defined in the config for field with schema path ${schemaPath}.`,

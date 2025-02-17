@@ -1,4 +1,4 @@
-import type { FlattenedBlocksField } from 'payload'
+import type { FlattenedBlock, FlattenedBlocksField } from 'payload'
 
 import toSnakeCase from 'to-snake-case'
 
@@ -51,7 +51,13 @@ export const transformBlocks = ({
     if (typeof blockRow.blockType !== 'string') {
       return
     }
-    const matchedBlock = field.blocks.find(({ slug }) => slug === blockRow.blockType)
+
+    const matchedBlock =
+      adapter.payload.blocks[blockRow.blockType] ??
+      ((field.blockReferences ?? field.blocks).find(
+        (block) => typeof block !== 'string' && block.slug === blockRow.blockType,
+      ) as FlattenedBlock | undefined)
+
     if (!matchedBlock) {
       return
     }
