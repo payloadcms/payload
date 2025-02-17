@@ -81,11 +81,6 @@ export interface Config {
   auth: {
     users: UserAuthOperations;
   };
-  blocks: {
-    ConfigBlockTest: ConfigBlockTest;
-    localizedTextReference: LocalizedTextReference;
-    localizedTextReference2: LocalizedTextReference2;
-  };
   collections: {
     'lexical-fields': LexicalField;
     'lexical-migrate-fields': LexicalMigrateField;
@@ -214,36 +209,6 @@ export interface UserAuthOperations {
     email: string;
     password: string;
   };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ConfigBlockTest".
- */
-export interface ConfigBlockTest {
-  deduplicatedText?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'ConfigBlockTest';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "localizedTextReference".
- */
-export interface LocalizedTextReference {
-  text?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'localizedTextReference';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "localizedTextReference2".
- */
-export interface LocalizedTextReference2 {
-  text?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'localizedTextReference2';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -830,10 +795,41 @@ export interface BlockField {
         blockType: 'text';
       }[]
     | null;
-  deduplicatedBlocks?: ConfigBlockTest[] | null;
-  deduplicatedBlocks2?: ConfigBlockTest[] | null;
-  localizedReferencesLocalizedBlock?: LocalizedTextReference[] | null;
-  localizedReferences?: LocalizedTextReference2[] | null;
+  deduplicatedBlocks?: unknown[] | null;
+  deduplicatedBlocks2?: unknown[] | null;
+  localizedReferencesLocalizedBlock?: unknown[] | null;
+  localizedReferences?: unknown[] | null;
+  /**
+   * The purpose of this field is to test Block groups.
+   */
+  groupedBlocks?:
+    | (
+        | {
+            text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockWithGroupOne';
+          }
+        | {
+            text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockWithGroupTwo';
+          }
+        | {
+            text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockWithLocalizedGroup';
+          }
+        | {
+            text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockWithoutGroup';
+          }
+      )[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2587,6 +2583,38 @@ export interface BlockFieldsSelect<T extends boolean = true> {
   deduplicatedBlocks2?: T | {};
   localizedReferencesLocalizedBlock?: T | {};
   localizedReferences?: T | {};
+  groupedBlocks?:
+    | T
+    | {
+        blockWithGroupOne?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        blockWithGroupTwo?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        blockWithLocalizedGroup?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        blockWithoutGroup?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
