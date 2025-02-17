@@ -208,7 +208,9 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               >
                 <PopupList.ButtonGroup>
                   {listControlsMenu.map((control, index) => (
-                    <PopupList.Button key={index}>{control}</PopupList.Button>
+                    <PopupList.Button className={`${baseClass}__custom-control`} key={index}>
+                      {control}
+                    </PopupList.Button>
                   ))}
                 </PopupList.ButtonGroup>
               </Popup>
