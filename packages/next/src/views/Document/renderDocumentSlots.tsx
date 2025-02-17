@@ -72,6 +72,20 @@ export const renderDocumentSlots: (args: {
     })
   }
 
+  if (collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts) {
+    const CustomStatus =
+      collectionConfig?.admin?.components?.edit?.Status ||
+      globalConfig?.admin?.components?.elements?.Status
+
+    if (CustomStatus) {
+      components.Status = RenderServerComponent({
+        Component: CustomStatus,
+        importMap: req.payload.importMap,
+        serverProps,
+      })
+    }
+  }
+
   if (hasSavePermission) {
     if (collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts) {
       const CustomPublishButton =

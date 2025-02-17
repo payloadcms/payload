@@ -44,6 +44,7 @@ export const DocumentControls: React.FC<{
     readonly PublishButton?: React.ReactNode
     readonly SaveButton?: React.ReactNode
     readonly SaveDraftButton?: React.ReactNode
+    readonly Status?: React.ReactNode
   }
   readonly data?: any
   readonly disableActions?: boolean
@@ -74,6 +75,7 @@ export const DocumentControls: React.FC<{
       PublishButton: CustomPublishButton,
       SaveButton: CustomSaveButton,
       SaveDraftButton: CustomSaveDraftButton,
+      Status: CustomStatus,
     } = {},
     data,
     disableActions,
@@ -167,7 +169,7 @@ export const DocumentControls: React.FC<{
                       .filter(Boolean)
                       .join(' ')}
                   >
-                    <Status />
+                    <RenderCustomComponent CustomComponent={CustomStatus} Fallback={<Status />} />
                   </li>
                 )}
                 {hasSavePermission && autosaveEnabled && !unsavedDraftWithValidations && (
