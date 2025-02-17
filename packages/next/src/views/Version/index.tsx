@@ -1,8 +1,7 @@
 import type {
   Document,
-  EditViewComponent,
+  DocumentViewServerProps,
   OptionObject,
-  PayloadServerReactComponent,
   SanitizedCollectionPermission,
   SanitizedGlobalPermission,
 } from 'payload'
@@ -17,7 +16,7 @@ import { getLatestVersion } from '../Versions/getLatestVersion.js'
 import { DefaultVersionView } from './Default/index.js'
 import { RenderDiff } from './RenderFieldsToDiff/index.js'
 
-export const VersionView: PayloadServerReactComponent<EditViewComponent> = async (props) => {
+export async function VersionView(props: DocumentViewServerProps) {
   const { i18n, initPageResult, routeSegments, searchParams } = props
 
   const {

@@ -8,12 +8,12 @@ keywords: admin, components, custom, customize, documentation, Content Managemen
 
 Payload dynamically generates a beautiful, [fully type-safe](../typescript/overview) Admin Panel to manage your users and data. It is highly performant, even with 100+ fields, and is translated in over 30 languages. Within the Admin Panel you can manage content, [render your site](../live-preview/overview), [preview drafts](./preview), [diff versions](../versions/overview), and so much more.
 
-The Admin Panel is designed to [white-label your brand](https://payloadcms.com/blog/white-label-admin-ui). You can endlessly customize and extend the Admin UI by swapping in your own [Custom Components](./components)—everything from simple field labels to entire views can be modified or replaced to perfectly tailor the interface for your editors.
+The Admin Panel is designed to [white-label your brand](https://payloadcms.com/blog/white-label-admin-ui). You can endlessly customize and extend the Admin UI by swapping in your own [Custom Components](../custom-components/overview)—everything from simple field labels to entire views can be modified or replaced to perfectly tailor the interface for your editors.
 
 The Admin Panel is written in [TypeScript](https://www.typescriptlang.org) and built with [React](https://react.dev) using the [Next.js App Router](https://nextjs.org/docs/app). It supports [React Server Components](https://react.dev/reference/rsc/server-components), enabling the use of the [Local API](/docs/local-api/overview) on the front-end. You can install Payload into any [existing Next.js app in just one line](../getting-started/installation) and [deploy it anywhere](../production/deployment).
 
 <Banner type="success">
-  The Payload Admin Panel is designed to be as minimal and straightforward as possible to allow easy customization and control. [Learn more](./components).
+  The Payload Admin Panel is designed to be as minimal and straightforward as possible to allow easy customization and control. [Learn more](../custom-components/overview).
 </Banner>
 
 <LightDarkImage
@@ -91,7 +91,7 @@ The following options are available:
 | **`avatar`**                   | Set account profile picture. Options: `gravatar`, `default` or a custom React component.                                                                              |
 | **`autoLogin`**                | Used to automate log-in for dev and demonstration convenience. [More details](../authentication/overview).                                                            |
 | **`buildPath`**                | Specify an absolute path for where to store the built Admin bundle used in production. Defaults to `path.resolve(process.cwd(), 'build')`.                            |
-| **`components`**               | Component overrides that affect the entirety of the Admin Panel. [More details](./components).                                                                        |
+| **`components`**               | Component overrides that affect the entirety of the Admin Panel. [More details](../custom-components/overview).                                                                        |
 | **`custom`**                   | Any custom properties you wish to pass to the Admin Panel.                                                                                                            |
 | **`dateFormat`**               | The date format that will be used for all dates within the Admin Panel. Any valid [date-fns](https://date-fns.org/) format pattern can be used.                       |
 | **`livePreview`**              | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).                                         |
@@ -178,7 +178,7 @@ The following options are available:
 
 <Banner type="success">
   **Tip:**
-  You can easily add _new_ routes to the Admin Panel through [Custom Endpoints](../rest-api/overview#custom-endpoints) and [Custom Views](./views).
+  You can easily add _new_ routes to the Admin Panel through [Custom Endpoints](../rest-api/overview#custom-endpoints) and [Custom Views](../custom-components/custom-views).
 </Banner>
 
 #### Customizing Root-level Routes
@@ -233,7 +233,7 @@ The following options are available:
 
 <Banner type="success">
   **Note:**
-  You can also swap out entire _views_ out for your own, using the `admin.views` property of the Payload Config. See [Custom Views](./views) for more information.
+  You can also swap out entire _views_ out for your own, using the `admin.views` property of the Payload Config. See [Custom Views](../custom-components/custom-views) for more information.
 </Banner>
 
 ## I18n

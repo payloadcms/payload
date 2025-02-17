@@ -59,25 +59,25 @@ The following options are available:
 
 | Option                 | Description                                                                                                                                                                                                          |
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`admin`**            | The configuration options for the Admin Panel. [More details](#admin-options).                                                                                                                                 |
-| **`access`**           | Provide Access Control functions to define exactly who should be able to do what with Documents in this Collection. [More details](../access-control/collections).                                                   |
-| **`auth`**             | Specify options if you would like this Collection to feature authentication. [More details](../authentication/overview).                                                                                             |
-| **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                            |
-| **`disableDuplicate`** | When true, do not show the "Duplicate" button while editing documents within this Collection and prevent `duplicate` from all APIs.                                                                                  |
-| **`defaultSort`**      | Pass a top-level field to sort by default in the Collection List View. Prefix the name of the field with a minus symbol ("-") to sort in descending order. Multiple fields can be specified by using a string array. |
-| **`dbName`**           | Custom table or Collection name depending on the Database Adapter. Auto-generated from slug if not defined.                                                                                                          |
-| **`endpoints`**        | Add custom routes to the REST API. Set to `false` to disable routes. [More details](../rest-api/overview#custom-endpoints).                                                                                          |
-| **`fields`** *        | Array of field types that will determine the structure and functionality of the data stored within this Collection. [More details](../fields/overview).                                                              |
-| **`graphQL`**          | Manage GraphQL-related properties for this collection. [More](#graphql)                                                                                                                                              |
-| **`hooks`**            | Entry point for Hooks. [More details](../hooks/overview#collection-hooks).                                                                                                                                           |
-| **`labels`**           | Singular and plural labels for use in identifying this Collection throughout Payload. Auto-generated from slug if not defined.                                                                                       |
-| **`lockDocuments`**    | Enables or disables document locking. By default, document locking is enabled. Set to an object to configure, or set to `false` to disable locking. [More details](../admin/locked-documents).                       |
-| **`slug`** *          | Unique, URL-friendly string that will act as an identifier for this Collection.                                                                                                                                      |
-| **`timestamps`**       | Set to false to disable documents' automatically generated `createdAt` and `updatedAt` timestamps.                                                                                                                   |
-| **`typescript`**       | An object with property `interface` as the text used in schema generation. Auto-generated from slug if not defined.                                                                                                  |
-| **`upload`**           | Specify options if you would like this Collection to support file uploads. For more, consult the [Uploads](../upload/overview) documentation.                                                                        |
-| **`versions`**         | Set to true to enable default options, or configure with object properties. [More details](../versions/overview#collection-config).                                                                                  |
-| **`defaultPopulate`**  | Specify which fields to select when this Collection is populated from another document. [More Details](../queries/select#defaultpopulate-collection-config-property).                                                |
+| `admin`            | The configuration options for the Admin Panel. [More details](#admin-options).                                                                                                                                 |
+| `access`           | Provide Access Control functions to define exactly who should be able to do what with Documents in this Collection. [More details](../access-control/collections).                                                   |
+| `auth`             | Specify options if you would like this Collection to feature authentication. [More details](../authentication/overview).                                                                                             |
+| `custom`           | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                            |
+| `disableDuplicate` | When true, do not show the "Duplicate" button while editing documents within this Collection and prevent `duplicate` from all APIs.                                                                                  |
+| `defaultSort`      | Pass a top-level field to sort by default in the Collection List View. Prefix the name of the field with a minus symbol ("-") to sort in descending order. Multiple fields can be specified by using a string array. |
+| `dbName`           | Custom table or Collection name depending on the Database Adapter. Auto-generated from slug if not defined.                                                                                                          |
+| `endpoints`        | Add custom routes to the REST API. Set to `false` to disable routes. [More details](../rest-api/overview#custom-endpoints).                                                                                          |
+| `fields` *        | Array of field types that will determine the structure and functionality of the data stored within this Collection. [More details](../fields/overview).                                                              |
+| `graphQL`          | Manage GraphQL-related properties for this collection. [More](#graphql)                                                                                                                                              |
+| `hooks`            | Entry point for Hooks. [More details](../hooks/overview#collection-hooks).                                                                                                                                           |
+| `labels`           | Singular and plural labels for use in identifying this Collection throughout Payload. Auto-generated from slug if not defined.                                                                                       |
+| `lockDocuments`    | Enables or disables document locking. By default, document locking is enabled. Set to an object to configure, or set to `false` to disable locking. [More details](../admin/locked-documents).                       |
+| `slug` *          | Unique, URL-friendly string that will act as an identifier for this Collection.                                                                                                                                      |
+| `timestamps`       | Set to false to disable documents' automatically generated `createdAt` and `updatedAt` timestamps.                                                                                                                   |
+| `typescript`       | An object with property `interface` as the text used in schema generation. Auto-generated from slug if not defined.                                                                                                  |
+| `upload`           | Specify options if you would like this Collection to support file uploads. For more, consult the [Uploads](../upload/overview) documentation.                                                                        |
+| `versions`         | Set to true to enable default options, or configure with object properties. [More details](../versions/overview#collection-config).                                                                                  |
+| `defaultPopulate`  | Specify which fields to select when this Collection is populated from another document. [More Details](../queries/select#defaultpopulate-collection-config-property).                                                |
 
 _* An asterisk denotes that a property is required._
 
@@ -95,7 +95,7 @@ Fields define the schema of the Documents within a Collection. To learn more, go
 
 ## Admin Options
 
-The behavior of Collections within the [Admin Panel](../admin/overview) can be fully customized to fit the needs of your application. This includes grouping or hiding their navigation links, adding [Custom Components](../admin/components), selecting which fields to display in the List View, and more.
+The behavior of Collections within the [Admin Panel](../admin/overview) can be fully customized to fit the needs of your application. This includes grouping or hiding their navigation links, adding [Custom Components](../custom-components/overview), selecting which fields to display in the List View, and more.
 
 To configure Admin Options for Collections, use the `admin` property in your Collection Config:
 
@@ -114,33 +114,33 @@ The following options are available:
 
 | Option                           | Description                                                                                                                                                                                                                  |
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`group`**                      | Text or localization object used to group Collection and Global links in the admin navigation. Set to `false` to hide the link from the navigation while keeping its routes accessible.                                      |
-| **`hidden`**                     | Set to true or a function, called with the current user, returning true to exclude this Collection from navigation and admin routing.                                                                                        |
-| **`hooks`**                      | Admin-specific hooks for this Collection. [More details](../hooks/collections).                                                                                                                                              |
-| **`useAsTitle`**                 | Specify a top-level field to use for a document title throughout the Admin Panel. If no field is defined, the ID of the document is used as the title. A field with `virtual: true` cannot be used as the title.             |
-| **`description`**                | Text to display below the Collection label in the List View to give editors more information. Alternatively, you can use the `admin.components.Description` to render a React component. [More details](#custom-components). |
-| **`defaultColumns`**             | Array of field names that correspond to which columns to show by default in this Collection's List View.                                                                                                                     |
-| **`hideAPIURL`**                 | Hides the "API URL" meta field while editing documents within this Collection.                                                                                                                                               |
-| **`enableRichTextLink`**         | The [Rich Text](../fields/rich-text) field features a `Link` element which allows for users to automatically reference related documents within their rich text. Set to `true` by default.                                   |
-| **`enableRichTextRelationship`** | The [Rich Text](../fields/rich-text) field features a `Relationship` element which allows for users to automatically reference related documents within their rich text. Set to `true` by default.                           |
-| **`meta`**                       | Page metadata overrides to apply to this Collection within the Admin Panel. [More details](../admin/metadata).                                                                                                                      |
-| **`preview`**                    | Function to generate preview URLs within the Admin Panel that can point to your app. [More details](../admin/preview).                                                                                                               |
-| **`livePreview`**                | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).                                                                                                |
-| **`components`**                 | Swap in your own React components to be used within this Collection. [More details](#custom-components).                                                                                                                     |
-| **`listSearchableFields`**       | Specify which fields should be searched in the List search view. [More details](#list-searchable-fields).                                                                                                                    |
-| **`pagination`**                 | Set pagination-specific options for this Collection. [More details](#pagination).                                                                                                                                            |
-| **`baseListFilter`**             | You can define a default base filter for this collection's List view, which will be merged into any filters that the user performs.                                                                                          |
+| `group`                      | Text or localization object used to group Collection and Global links in the admin navigation. Set to `false` to hide the link from the navigation while keeping its routes accessible.                                      |
+| `hidden`                     | Set to true or a function, called with the current user, returning true to exclude this Collection from navigation and admin routing.                                                                                        |
+| `hooks`                      | Admin-specific hooks for this Collection. [More details](../hooks/collections).                                                                                                                                              |
+| `useAsTitle`                 | Specify a top-level field to use for a document title throughout the Admin Panel. If no field is defined, the ID of the document is used as the title. A field with `virtual: true` cannot be used as the title.             |
+| `description`                | Text to display below the Collection label in the List View to give editors more information. Alternatively, you can use the `admin.components.Description` to render a React component. [More details](#custom-components). |
+| `defaultColumns`             | Array of field names that correspond to which columns to show by default in this Collection's List View.                                                                                                                     |
+| `hideAPIURL`                 | Hides the "API URL" meta field while editing documents within this Collection.                                                                                                                                               |
+| `enableRichTextLink`         | The [Rich Text](../fields/rich-text) field features a `Link` element which allows for users to automatically reference related documents within their rich text. Set to `true` by default.                                   |
+| `enableRichTextRelationship` | The [Rich Text](../fields/rich-text) field features a `Relationship` element which allows for users to automatically reference related documents within their rich text. Set to `true` by default.                           |
+| `meta`                       | Page metadata overrides to apply to this Collection within the Admin Panel. [More details](../admin/metadata).                                                                                                                      |
+| `preview`                    | Function to generate preview URLs within the Admin Panel that can point to your app. [More details](../admin/preview).                                                                                                               |
+| `livePreview`                | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).                                                                                                |
+| `components`                 | Swap in your own React components to be used within this Collection. [More details](#custom-components).                                                                                                                     |
+| `listSearchableFields`       | Specify which fields should be searched in the List search view. [More details](#list-searchable-fields).                                                                                                                    |
+| `pagination`                 | Set pagination-specific options for this Collection. [More details](#pagination).                                                                                                                                            |
+| `baseListFilter`             | You can define a default base filter for this collection's List view, which will be merged into any filters that the user performs.                                                                                          |
 
 ### Custom Components
 
-Collections can set their own [Custom Components](../admin/components) which only apply to Collection-specific UI within the [Admin Panel](../admin/overview). This includes elements such as the Save Button, or entire layouts such as the Edit View.
+Collections can set their own [Custom Components](../custom-components/overview) which only apply to Collection-specific UI within the [Admin Panel](../admin/overview). This includes elements such as the Save Button, or entire layouts such as the Edit View.
 
 To override Collection Components, use the `admin.components` property in your Collection Config:
 
 ```ts
-import type { SanitizedCollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
-export const MyCollection: SanitizedCollectionConfig = {
+export const MyCollection: CollectionConfig = {
   // ...
   admin: {
     components: { // highlight-line
@@ -152,23 +152,46 @@ export const MyCollection: SanitizedCollectionConfig = {
 
 The following options are available:
 
-| Path                       | Description                                                                                                                                |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| **`beforeList`**           | An array of components to inject _before_ the built-in List View                                                                           |
-| **`beforeListTable`**      | An array of components to inject _before_ the built-in List View's table                                                                   |
-| **`afterList`**            | An array of components to inject _after_ the built-in List View                                                                            |
-| **`afterListTable`**       | An array of components to inject _after_ the built-in List View's table                                                                    |
-| **`Description`**          | A component to render below the Collection label in the List View. An alternative to the `admin.description` property.                     |
-| **`edit.SaveButton`**      | Replace the default Save Button with a Custom Component. [Drafts](../versions/drafts) must be disabled.                                    |
-| **`edit.SaveDraftButton`** | Replace the default Save Draft Button with a Custom Component. [Drafts](../versions/drafts) must be enabled and autosave must be disabled. |
-| **`edit.PublishButton`**   | Replace the default Publish Button with a Custom Component. [Drafts](../versions/drafts) must be enabled.                                  |
-| **`edit.PreviewButton`**   | Replace the default Preview Button with a Custom Component. [Preview](../admin/preview) must be enabled.                                           |
-| **`edit.Upload`**          | Replace the default Upload component with a Custom Component. [Upload](../upload/overview) must be enabled.                                |
-| **`views`**                | Override or create new views within the Admin Panel. [More details](../admin/views).                                                              |
+| Option                 | Description                                                                                                                                                                        |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `afterList`            | An array of components to inject _after_ the built-in List View. [More details](../custom-components/list-view#afterlist).                                                         |
+| `afterListTable`       | An array of components to inject _after_ the built-in List View's table. [More details](../custom-components/list-view#afterlisttable).                                            |
+| `beforeList`           | An array of components to inject _before_ the built-in List View. [More details](../custom-components/list-view#beforelist).                                                       |
+| `beforeListTable`      | An array of components to inject _before_ the built-in List View's table. [More details](../custom-components/list-view#beforelisttable).                                          |
+| `Description`          | A component to render below the Collection label in the List View. An alternative to the `admin.description` property. [More details](../custom-components/list-view#description). |
+| `edit`                 | Override specific components within the Edit View. [More details](#edit-view-options).                                                                                             |
+| `views`                | Override or create new views within the Admin Panel. [More details](../custom-components/custom-views).                                                                            |
+
+#### Edit View Options
+
+```ts
+import type { CollectionCOnfig } from 'payload'
+
+export const MyCollection: CollectionCOnfig = {
+  // ...
+  admin: {
+    components: {
+      edit: { // highlight-line
+        // ...
+      },
+    },
+  },
+}
+```
+
+The following options are available:
+
+| Option                 | Description                                                                                                                                |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `SaveButton`      | Replace the default Save Button within the Edit View. [Drafts](../versions/drafts) must be disabled. [More details](../custom-components/edit-view#save-button). |
+| `SaveDraftButton` | Replace the default Save Draft Button within the Edit View. [Drafts](../versions/drafts) must be enabled and autosave must be disabled. [More details](../custom-components/edit-view#save-draft-button). |
+| `PublishButton`   | Replace the default Publish Button within the Edit View. [Drafts](../versions/drafts) must be enabled. [More details](../custom-components/edit-view#publish-button). |
+| `PreviewButton`   | Replace the default Preview Button within the Edit View. [Preview](../admin/preview) must be enabled. [More details](../custom-components/edit-view#preview-button). |
+| `Upload`          | Replace the default Upload component within the Edit View. [Upload](../upload/overview) must be enabled. [More details](../custom-components/edit-view#upload). |
 
 <Banner type="success">
   **Note:**
-  For details on how to build Custom Components, see [Building Custom Components](../admin/components#building-custom-components).
+  For details on how to build Custom Components, see [Building Custom Components](../custom-components/overview#building-custom-components).
 </Banner>
 
 ### Pagination
@@ -232,10 +255,10 @@ You can also pass an object to the collection's `graphQL` property, which allows
 
 | Option                 | Description                                                                         |
 | ---------------------- | ----------------------------------------------------------------------------------- |
-| **`singularName`**     | Override the "singular" name that will be used in GraphQL schema generation.        |
-| **`pluralName`**       | Override the "plural" name that will be used in GraphQL schema generation.          |
-| **`disableQueries`**   | Disable all GraphQL queries that correspond to this collection by passing `true`.   |
-| **`disableMutations`** | Disable all GraphQL mutations that correspond to this collection by passing `true`. |
+| `singularName`     | Override the "singular" name that will be used in GraphQL schema generation.        |
+| `pluralName`       | Override the "plural" name that will be used in GraphQL schema generation.          |
+| `disableQueries`   | Disable all GraphQL queries that correspond to this collection by passing `true`.   |
+| `disableMutations` | Disable all GraphQL mutations that correspond to this collection by passing `true`. |
 
 ## TypeScript
 
