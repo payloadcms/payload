@@ -210,26 +210,27 @@ jobs:
           path: ./*
           key: ${{ github.sha }}-${{ github.run_number }}
 
-      - name: Install Playwright Dependencies
+      - name: Store Playwright's Version
         run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libasound2t64 \
-            libnss3 \
-            libxcomposite1 \
-            libxrandr2 \
-            libxdamage1 \
-            libx11-xcb1 \
-            libgbm1 \
-            libatk-bridge2.0-0 \
-            libgtk-3-0 \
-            libxshmfence1
+          # Extract the version number using a more targeted regex pattern with awk
+          PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test --depth=0 | awk '/@playwright\/test/ {print $2}')
+          echo "Playwright's Version: $PLAYWRIGHT_VERSION"
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
 
-      - name: Install Playwright Dependencies Only
+      - name: Cache Playwright Browsers for Playwright's Version
+        id: cache-playwright-browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ env.PLAYWRIGHT_VERSION }}
+
+      - name: Setup Playwright - Browsers and Dependencies
+        if: steps.cache-playwright-browsers.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Setup Playwright - Dependencies-only
+        if: steps.cache-playwright-browsers.outputs.cache-hit == 'true'
         run: pnpm exec playwright install-deps chromium
-
-      - name: Install Playwright Browsers
-        run: pnpm exec playwright install chromium
 
       - name: E2E Tests
         uses: nick-fields/retry@v2
