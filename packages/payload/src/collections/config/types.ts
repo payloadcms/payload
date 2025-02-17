@@ -516,6 +516,11 @@ export type SanitizedJoin = {
    * The path of the join field in dot notation
    */
   joinPath: string
+  /**
+   * `parentIsLocalized` is true if any parent field of the
+   * field configuration defining the join is localized
+   */
+  parentIsLocalized: boolean
   targetField: RelationshipField | UploadField
 }
 

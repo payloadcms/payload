@@ -936,6 +936,8 @@ export type Config = {
      * to `true` only if you have an existing Payload database from pre-3.0
      * that you would like to maintain without migrating. This is only
      * relevant for MongoDB databases.
+     *
+     * @todo Remove in v4
      */
     allowLocalizedWithinLocalized: true
   }

@@ -18,6 +18,7 @@ type Args = {
   globalConfig?: SanitizedGlobalConfig
   operator: string
   overrideAccess: boolean
+  parentIsLocalized?: boolean
   path: string
   policies: EntityPolicies
   req: PayloadRequest
@@ -35,6 +36,7 @@ export async function validateSearchParam({
   globalConfig,
   operator,
   overrideAccess,
+  parentIsLocalized,
   path: incomingPath,
   policies,
   req,
@@ -68,6 +70,7 @@ export async function validateSearchParam({
       incomingPath: sanitizedPath,
       locale: req.locale,
       overrideAccess,
+      parentIsLocalized,
       payload: req.payload,
     })
   }

@@ -37,6 +37,7 @@ type Args = {
   disableRelsTableUnique?: boolean
   disableUnique: boolean
   fields: FlattenedField[]
+  parentIsLocalized: boolean
   rootRelationships?: Set<string>
   rootRelationsToBuild?: RelationMap
   rootTableIDColType?: IDType
@@ -71,6 +72,7 @@ export const buildTable = ({
   disableRelsTableUnique = false,
   disableUnique = false,
   fields,
+  parentIsLocalized,
   rootRelationships,
   rootRelationsToBuild,
   rootTableIDColType,
@@ -124,6 +126,7 @@ export const buildTable = ({
     localesColumns,
     localesIndexes,
     newTableName: tableName,
+    parentIsLocalized,
     parentTableName: tableName,
     relationships,
     relationsToBuild,

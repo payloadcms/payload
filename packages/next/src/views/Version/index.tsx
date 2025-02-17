@@ -228,6 +228,7 @@ export async function VersionView(props: DocumentViewServerProps) {
     i18n,
     modifiedOnly,
     parentIndexPath: '',
+    parentIsLocalized: false,
     parentPath: '',
     parentSchemaPath: '',
     req,

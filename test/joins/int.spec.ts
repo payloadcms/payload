@@ -213,6 +213,7 @@ describe('Joins Field', () => {
     })
 
     expect(categoryWithPosts.arrayPosts.docs).toBeDefined()
+    expect(categoryWithPosts.arrayPosts.docs).toHaveLength(10)
   })
 
   it('should populate joins with localized array relationships', async () => {

@@ -11,7 +11,7 @@ import { MissingEditorProp } from '../../../errors/index.js'
 import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
 import { getLabelFromPath } from '../../../utilities/getLabelFromPath.js'
 import { getTranslatedLabel } from '../../../utilities/getTranslatedLabel.js'
-import { fieldAffectsData, tabHasName } from '../../config/types.js'
+import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../../config/types.js'
 import { getFieldPathsModified as getFieldPaths } from '../../getFieldPaths.js'
 import { getExistingRowDoc } from './getExistingRowDoc.js'
 import { traverseFields } from './traverseFields.js'
@@ -34,6 +34,7 @@ type Args = {
   mergeLocaleActions: (() => Promise<void>)[]
   operation: Operation
   parentIndexPath: string
+  parentIsLocalized: boolean
   parentPath: string
   parentSchemaPath: string
   req: PayloadRequest
@@ -67,6 +68,7 @@ export const promise = async ({
   mergeLocaleActions,
   operation,
   parentIndexPath,
+  parentIsLocalized,
   parentPath,
   parentSchemaPath,
   req,
@@ -98,7 +100,7 @@ export const promise = async ({
 
   if (fieldAffectsData(field)) {
     // skip validation if the field is localized and the incoming data is null
-    if (field.localized && operationLocale !== defaultLocale) {
+    if (fieldShouldBeLocalized({ field, parentIsLocalized }) && operationLocale !== defaultLocale) {
       if (['array', 'blocks'].includes(field.type) && siblingData[field.name] === null) {
         skipValidationFromHere = true
       }
@@ -189,7 +191,7 @@ export const promise = async ({
     }
 
     // Push merge locale action if applicable
-    if (localization && field.localized) {
+    if (localization && fieldShouldBeLocalized({ field, parentIsLocalized })) {
       mergeLocaleActions.push(async () => {
         const localeData = await localization.localeCodes.reduce(
           async (localizedValuesPromise: Promise<JsonObject>, locale) => {
@@ -244,6 +246,7 @@ export const promise = async ({
               mergeLocaleActions,
               operation,
               parentIndexPath: '',
+              parentIsLocalized: parentIsLocalized || field.localized,
               parentPath: path + '.' + rowIndex,
               parentSchemaPath: schemaPath,
               req,
@@ -301,6 +304,7 @@ export const promise = async ({
                 mergeLocaleActions,
                 operation,
                 parentIndexPath: '',
+                parentIsLocalized: parentIsLocalized || field.localized,
                 parentPath: path + '.' + rowIndex,
                 parentSchemaPath: schemaPath + '.' + block.slug,
                 req,
@@ -335,6 +339,7 @@ export const promise = async ({
         mergeLocaleActions,
         operation,
         parentIndexPath: indexPath,
+        parentIsLocalized,
         parentPath,
         parentSchemaPath: schemaPath,
         req,
@@ -374,6 +379,7 @@ export const promise = async ({
         mergeLocaleActions,
         operation,
         parentIndexPath: '',
+        parentIsLocalized: parentIsLocalized || field.localized,
         parentPath: path,
         parentSchemaPath: schemaPath,
         req,
@@ -432,6 +438,7 @@ export const promise = async ({
             mergeLocaleActions,
             operation,
             originalDoc: doc,
+            parentIsLocalized,
             path: pathSegments,
             previousSiblingDoc: siblingDoc,
             previousValue: siblingDoc[field.name],
@@ -491,6 +498,7 @@ export const promise = async ({
         mergeLocaleActions,
         operation,
         parentIndexPath: isNamedTab ? '' : indexPath,
+        parentIsLocalized: parentIsLocalized || field.localized,
         parentPath: isNamedTab ? path : parentPath,
         parentSchemaPath: schemaPath,
         req,
@@ -518,6 +526,7 @@ export const promise = async ({
         mergeLocaleActions,
         operation,
         parentIndexPath: indexPath,
+        parentIsLocalized,
         parentPath: path,
         parentSchemaPath: schemaPath,
         req,
