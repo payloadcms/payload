@@ -44,17 +44,17 @@ const config = buildConfig({
 Your Custom Root Views can optionally use one of the templates that Payload provides. The most common of these is the Default Template which provides the basic layout and navigation. Here is an example of what that might look like:
 
 ```tsx
-import type { AdminViewServerProps } from 'payload'
+import type { AdminViewProps } from 'payload'
 
 import { DefaultTemplate } from '@payloadcms/next/templates'
 import { Gutter } from '@payloadcms/ui'
 import React from 'react'
 
-export function MyCustomView({
+export const MyCustomView: React.FC<AdminViewProps> = ({
   initPageResult,
   params,
   searchParams,
-}: AdminViewServerProps) {
+}) => {
   return (
     <DefaultTemplate
       i18n={initPageResult.req.i18n}
@@ -68,6 +68,7 @@ export function MyCustomView({
     >
       <Gutter>
         <h1>Custom Default Root View</h1>
+
         <p>This view uses the Default Template.</p>
       </Gutter>
     </DefaultTemplate>

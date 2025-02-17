@@ -149,10 +149,7 @@ export const RootPage = async ({
       params,
       payload: initPageResult?.req.payload,
       searchParams,
-      /**
-       * @todo remove `docID` here as it is already contained in `initPageResult`
-       */
-    } satisfies { docID: number | string } & AdminViewServerPropsOnly,
+    } satisfies AdminViewServerPropsOnly,
   })
 
   return (

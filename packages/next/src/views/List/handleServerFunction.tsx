@@ -137,6 +137,7 @@ export const renderListHandler = async (args: {
     disableBulkEdit,
     drawerSlug,
     enableRowSelections,
+    i18n,
     importMap: payload.importMap,
     initPageResult: {
       collectionConfig: payload?.collections?.[collectionSlug]?.config,
@@ -152,6 +153,7 @@ export const renderListHandler = async (args: {
     params: {
       segments: ['collections', collectionSlug],
     },
+    payload,
     query,
     redirectAfterDelete,
     redirectAfterDuplicate,

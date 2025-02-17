@@ -1,4 +1,4 @@
-import type { ClientTranslationsObject } from '@payloadcms/translations'
+import type { ClientTranslationsObject, I18n } from '@payloadcms/translations'
 
 import type { SanitizedPermissions } from '../../auth/index.js'
 import type { ImportMap } from '../../bin/generateImportMap/index.js'
@@ -14,7 +14,7 @@ import type {
   ServerProps,
 } from '../../config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { PayloadRequest } from '../../types/index.js'
+import type { Payload, PayloadRequest } from '../../types/index.js'
 import type { LanguageOptions } from '../LanguageOptions.js'
 import type { Data, StaticDescription } from '../types.js'
 import type { DocumentSubViewTypes } from './document.js'
@@ -38,15 +38,16 @@ export type AdminViewClientProps = {
 export type AdminViewServerPropsOnly = {
   readonly clientConfig: ClientConfig
   readonly disableActions?: boolean
-  readonly drawerSlug?: string
+  /**
+   * @todo remove `docID` here as it is already contained in `initPageResult`
+   */
+  readonly docID?: number | string
   readonly importMap: ImportMap
   readonly initialData?: Data
   readonly initPageResult: InitPageResult
-  readonly params?: Params
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
-  readonly searchParams: { [key: string]: string | string[] | undefined }
-}
+} & ServerProps
 
 export type AdminViewServerProps = AdminViewClientProps & AdminViewServerPropsOnly
 

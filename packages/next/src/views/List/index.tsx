@@ -24,6 +24,7 @@ type RenderListViewArgs = {
   customCellProps?: Record<string, any>
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
+  drawerSlug?: string
   enableRowSelections: boolean
   overrideEntityVisibility?: boolean
   query: ListQuery

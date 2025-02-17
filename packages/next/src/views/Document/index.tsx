@@ -48,6 +48,7 @@ export const renderDocument = async ({
   searchParams,
   viewType,
 }: {
+  drawerSlug?: string
   overrideEntityVisibility?: boolean
 } & AdminViewServerProps): Promise<{
   data: Data
