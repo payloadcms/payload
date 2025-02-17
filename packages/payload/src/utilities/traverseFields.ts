@@ -16,7 +16,7 @@ const traverseArrayOrBlocksField = ({
 }: {
   callback: TraverseFieldsCallback
   callbackStack: (() => ReturnType<TraverseFieldsCallback>)[]
-  config: Config | SanitizedConfig
+  config?: Config | SanitizedConfig
   data: Record<string, unknown>[]
   field: ArrayField | BlocksField
   fillEmpty: boolean
