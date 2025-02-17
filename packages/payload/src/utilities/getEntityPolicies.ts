@@ -241,8 +241,6 @@ const executeFieldPolicies = async ({
                   }
                   return
                 } else {
-                  // immediately set blockPolicies[_block] to a promise that resolves to the block policies, so that a second
-                  // parallel access won't try to set the same block policies
                   // We have not seen this block slug yet. Immediately create a promise
                   // so that any parallel calls will just await this same promise
                   // instead of re-running executeFieldPolicies.
@@ -269,11 +267,9 @@ const executeFieldPolicies = async ({
                       policiesObj: mutablePolicies[field.name].blocks[block.slug],
                     })
 
-                    // The final resolved value of the promise:
                     return mutablePolicies[field.name].blocks[block.slug]
                   })()
 
-                  // Now simply wait for that promise to resolve, and place it into our policies
                   mutablePolicies[field.name].blocks[block.slug] = await blockPolicies[_block]
                   blockPolicies[_block] = mutablePolicies[field.name].blocks[block.slug]
                   return
