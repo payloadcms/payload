@@ -4,12 +4,14 @@ import type { SanitizedCollectionConfig, TypeWithID } from '../collections/confi
 import type { Access } from '../config/types.js'
 import type { Field, FieldAccess } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
+import type { BlockSlug } from '../index.js'
 import type { AllOperations, JsonObject, Payload, PayloadRequest, Where } from '../types/index.js'
 
 import { combineQueries } from '../database/combineQueries.js'
 import { tabHasName } from '../fields/config/types.js'
 
 type Args = {
+  blockPolicies: Record<BlockSlug, FieldsPermissions>
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
   id?: number | string
   operations: AllOperations[]
@@ -35,7 +37,7 @@ type EntityDoc = JsonObject | TypeWithID
  * Build up permissions object for an entity (collection or global)
  */
 export async function getEntityPolicies<T extends Args>(args: T): Promise<ReturnType<T>> {
-  const { id, type, entity, operations, req } = args
+  const { id, type, blockPolicies, entity, operations, req } = args
   const { data, locale, payload, user } = req
   const isLoggedIn = !!user
 
@@ -138,6 +140,7 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
     }
 
     await executeFieldPolicies({
+      blockPolicies,
       createAccessPromise,
       entityPermission: policies[operation].permission as boolean,
       fields: entity.fields,
@@ -154,6 +157,7 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
  * Build up permissions object and run access functions for each field of an entity
  */
 const executeFieldPolicies = async ({
+  blockPolicies,
   createAccessPromise,
   entityPermission,
   fields,
@@ -161,6 +165,7 @@ const executeFieldPolicies = async ({
   payload,
   policiesObj,
 }: {
+  blockPolicies: Record<BlockSlug, FieldsPermissions>
   createAccessPromise: CreateAccessPromise
   entityPermission: boolean
   fields: Field[]
@@ -202,6 +207,7 @@ const executeFieldPolicies = async ({
           }
 
           await executeFieldPolicies({
+            blockPolicies,
             createAccessPromise,
             entityPermission,
             fields: field.fields,
@@ -221,7 +227,17 @@ const executeFieldPolicies = async ({
 
           await Promise.all(
             (field.blockReferences ?? field.blocks).map(async (_block) => {
+              if (typeof _block === 'string') {
+                return // TODO: Temporary
+              }
               const block = typeof _block === 'string' ? payload.blocks[_block] : _block // TODO: Skip over string blocks
+
+              if (typeof _block === 'string') {
+                if (blockPolicies[_block]) {
+                  mutablePolicies[field.name].blocks[block.slug] = blockPolicies[_block]
+                  return
+                }
+              }
 
               if (!mutablePolicies[field.name].blocks?.[block.slug]) {
                 mutablePolicies[field.name].blocks[block.slug] = {
@@ -235,6 +251,7 @@ const executeFieldPolicies = async ({
               }
 
               await executeFieldPolicies({
+                blockPolicies,
                 createAccessPromise,
                 entityPermission,
                 fields: block.fields,
@@ -242,11 +259,16 @@ const executeFieldPolicies = async ({
                 payload,
                 policiesObj: mutablePolicies[field.name].blocks[block.slug],
               })
+
+              if (typeof _block === 'string') {
+                blockPolicies[_block] = mutablePolicies[field.name].blocks[block.slug]
+              }
             }),
           )
         }
       } else if ('fields' in field && field.fields) {
         await executeFieldPolicies({
+          blockPolicies,
           createAccessPromise,
           entityPermission,
           fields: field.fields,
@@ -267,6 +289,7 @@ const executeFieldPolicies = async ({
                 mutablePolicies[tab.name][operation] = { permission: entityPermission }
               }
               await executeFieldPolicies({
+                blockPolicies,
                 createAccessPromise,
                 entityPermission,
                 fields: tab.fields,
@@ -276,6 +299,7 @@ const executeFieldPolicies = async ({
               })
             } else {
               await executeFieldPolicies({
+                blockPolicies,
                 createAccessPromise,
                 entityPermission,
                 fields: tab.fields,
