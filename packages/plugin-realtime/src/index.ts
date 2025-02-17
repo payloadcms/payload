@@ -1,113 +1,71 @@
-import type { CollectionSlug, Config } from 'payload'
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, Config } from 'payload'
 
-export type MyPluginConfig = {
-  /**
-   * List of collections to add a custom field
-   */
-  collections?: Partial<Record<CollectionSlug, true>>
-  disabled?: boolean
-}
+// export type MyPluginConfig = {
+//   /**
+//    * List of collections to add a custom field
+//    */
+// }
 
 export const realtimePlugin =
-  (pluginOptions: MyPluginConfig) =>
+  (/**pluginOptions: MyPluginConfig */) =>
   (config: Config): Config => {
-    if (!config.collections) {
-      config.collections = []
+    const myAfterChangeHook: CollectionAfterChangeHook = (args) => {
+      console.log('myAfterChangeHook', args)
+      return args
     }
 
-    config.collections.push({
-      slug: 'plugin-collection',
-      fields: [
-        {
-          name: 'id',
-          type: 'text',
-        },
-      ],
-    })
+    const myAfterDeleteHook: CollectionAfterDeleteHook = (args) => {
+      console.log('myAfterDeleteHook', args)
+      return args
+    }
 
-    if (pluginOptions.collections) {
-      for (const collectionSlug in pluginOptions.collections) {
-        const collection = config.collections.find(
-          (collection) => collection.slug === collectionSlug,
-        )
-
-        if (collection) {
-          collection.fields.push({
-            name: 'addedByPlugin',
-            type: 'text',
-            admin: {
-              position: 'sidebar',
-            },
-          })
+    return {
+      ...config,
+      collections: config.collections?.map((collection) => {
+        return {
+          ...collection,
+          hooks: {
+            ...collection.hooks,
+            afterChange: [...(collection.hooks?.afterChange || []), myAfterChangeHook],
+            afterDelete: [...(collection.hooks?.afterDelete || []), myAfterDeleteHook],
+          },
         }
-      }
+      }),
     }
-
-    /**
-     * If the plugin is disabled, we still want to keep added collections/fields so the database schema is consistent which is important for migrations.
-     * If your plugin heavily modifies the database schema, you may want to remove this property.
-     */
-    if (pluginOptions.disabled) {
-      return config
-    }
-
-    if (!config.endpoints) {
-      config.endpoints = []
-    }
-
-    if (!config.admin) {
-      config.admin = {}
-    }
-
-    if (!config.admin.components) {
-      config.admin.components = {}
-    }
-
-    if (!config.admin.components.beforeDashboard) {
-      config.admin.components.beforeDashboard = []
-    }
-
-    config.admin.components.beforeDashboard.push(
-      `plugin-package-name-placeholder/client#BeforeDashboardClient`,
-    )
-    config.admin.components.beforeDashboard.push(
-      `plugin-package-name-placeholder/rsc#BeforeDashboardServer`,
-    )
-
-    config.endpoints.push({
-      handler: () => {
-        return Response.json({ message: 'Hello from custom endpoint' })
-      },
-      method: 'get',
-      path: '/my-plugin-endpoint',
-    })
-
-    const incomingOnInit = config.onInit
-
-    config.onInit = async (payload) => {
-      // Ensure we are executing any existing onInit functions before running our own.
-      if (incomingOnInit) {
-        await incomingOnInit(payload)
-      }
-
-      const { totalDocs } = await payload.count({
-        collection: 'plugin-collection',
-        where: {
-          id: {
-            equals: 'seeded-by-plugin',
-          },
-        },
-      })
-
-      if (totalDocs === 0) {
-        await payload.create({
-          collection: 'plugin-collection',
-          data: {
-            id: 'seeded-by-plugin',
-          },
-        })
-      }
-    }
-
-    return config
   }
+
+type OnChange<T> = ({ onChange }: { onChange: (value: T) => void }) => T
+
+// type PayloadReactiveType = {
+//   count: (
+//     ...args: [...Parameters<Payload['count']>, OnChange<ReturnType<Payload['count']>>]
+//   ) => ReturnType<Payload['count']>
+//   find: (
+//     ...args: [...Parameters<Payload['find']>, OnChange<ReturnType<Payload['find']>>]
+//   ) => ReturnType<Payload['find']>
+//   findByID: (
+//     ...args: [...Parameters<Payload['findByID']>, OnChange<ReturnType<Payload['findByID']>>]
+//   ) => ReturnType<Payload['findByID']>
+// }
+
+// export const payloadReactive: PayloadReactiveType = {
+//   count: (options, onChange) => {
+//     return payload.count(options, onChange)
+//   },
+//   find: (...args) => {
+//     // Extract or handle the extra parameter, then use the original payload.find as needed.
+//     const onChange = args.pop() as OnChange<ReturnType<Payload['find']>>
+//     const originalArgs = args as Parameters<Payload['find']>
+//     // return payload.find(...originalArgs)
+//     return {} as ReturnType<Payload['find']>
+//   },
+//   findByID: (...args) => {
+//     const onChange = args.pop() as OnChange<ReturnType<Payload['findByID']>>
+//     const originalArgs = args as Parameters<Payload['findByID']>
+//     // return payload.findByID(...originalArgs)
+//     return {} as ReturnType<Payload['findByID']>
+//   },
+// }
+
+// // usePayloadQuery
