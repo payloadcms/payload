@@ -14,7 +14,7 @@ export function isComponent(description: Description): description is ViewDescri
   return React.isValidElement(description)
 }
 
-export const ViewDescription: React.FC<ViewDescriptionClientProps> = (props) => {
+export function ViewDescription(props: ViewDescriptionClientProps) {
   const { i18n } = useTranslation()
   const { description } = props
 

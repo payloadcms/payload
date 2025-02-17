@@ -329,7 +329,7 @@ export const renderDocument = async ({
     req,
   })
 
-  const documentViewClientProps: DocumentViewClientProps = {
+  const clientProps: DocumentViewClientProps = {
     formState,
     ...documentSlots,
     documentSubViewType,
@@ -375,13 +375,13 @@ export const renderDocument = async ({
         <EditDepthProvider>
           {ErrorView
             ? RenderServerComponent({
-                clientProps: documentViewClientProps,
+                clientProps,
                 Component: ErrorView.ComponentConfig || ErrorView.Component,
                 importMap,
                 serverProps: documentViewServerProps,
               })
             : RenderServerComponent({
-                clientProps: documentViewClientProps,
+                clientProps,
                 Component: RootViewOverride
                   ? RootViewOverride
                   : CustomView?.ComponentConfig || CustomView?.Component

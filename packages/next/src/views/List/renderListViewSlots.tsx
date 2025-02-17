@@ -27,7 +27,7 @@ type Args = {
 }
 
 export const renderListViewSlots = ({
-  clientProps: slotClientProps,
+  clientProps,
   collectionConfig,
   description,
   payload,
@@ -37,7 +37,7 @@ export const renderListViewSlots = ({
 
   if (collectionConfig.admin.components?.afterList) {
     result.AfterList = RenderServerComponent({
-      clientProps: slotClientProps satisfies AfterListClientProps,
+      clientProps: clientProps satisfies AfterListClientProps,
       Component: collectionConfig.admin.components.afterList,
       importMap: payload.importMap,
       serverProps: serverProps satisfies AfterListTableServerPropsOnly,
@@ -46,7 +46,7 @@ export const renderListViewSlots = ({
 
   if (collectionConfig.admin.components?.afterListTable) {
     result.AfterListTable = RenderServerComponent({
-      clientProps: slotClientProps satisfies AfterListTableClientProps,
+      clientProps: clientProps satisfies AfterListTableClientProps,
       Component: collectionConfig.admin.components.afterListTable,
       importMap: payload.importMap,
       serverProps: serverProps satisfies AfterListTableServerPropsOnly,
@@ -55,7 +55,7 @@ export const renderListViewSlots = ({
 
   if (collectionConfig.admin.components?.beforeList) {
     result.BeforeList = RenderServerComponent({
-      clientProps: slotClientProps satisfies BeforeListClientProps,
+      clientProps: clientProps satisfies BeforeListClientProps,
       Component: collectionConfig.admin.components.beforeList,
       importMap: payload.importMap,
       serverProps: serverProps satisfies BeforeListServerPropsOnly,
@@ -64,7 +64,7 @@ export const renderListViewSlots = ({
 
   if (collectionConfig.admin.components?.beforeListTable) {
     result.BeforeListTable = RenderServerComponent({
-      clientProps: slotClientProps satisfies BeforeListTableClientProps,
+      clientProps: clientProps satisfies BeforeListTableClientProps,
       Component: collectionConfig.admin.components.beforeListTable,
       importMap: payload.importMap,
       serverProps: serverProps satisfies BeforeListTableServerPropsOnly,

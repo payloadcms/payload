@@ -69,7 +69,9 @@ export type DocumentTabConfig = {
   readonly Pill?: PayloadComponent
 }
 
-// TODO: remove this type, prefer typing props directly
+/**
+ * @todo: Remove this type as it's only used internally for the config (above)
+ */
 export type DocumentTabComponent = PayloadComponent<{
   path: string
 }>

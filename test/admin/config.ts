@@ -46,7 +46,7 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
     components: {
-      actions: ['/components/admin/AdminButton/index.js#AdminButton'],
+      actions: ['/components/actions/AdminButton/index.js#AdminButton'],
       afterDashboard: [
         '/components/AfterDashboard/index.js#AfterDashboard',
         '/components/AfterDashboardClient/index.js#AfterDashboardClient',

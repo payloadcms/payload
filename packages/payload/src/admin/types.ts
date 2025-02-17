@@ -580,6 +580,11 @@ export type { RichTextAdapter, RichTextAdapterProvider, RichTextHooks } from './
 export type {
   DocumentSubViewTypes,
   DocumentTabClientProps,
+  /**
+   * @deprecated
+   * The `DocumentTabComponent` type is deprecated and will be removed in the next major version.
+   * Use `DocumentTabServerProps`or `DocumentTabClientProps` instead.
+   */
   DocumentTabComponent,
   DocumentTabCondition,
   DocumentTabConfig,

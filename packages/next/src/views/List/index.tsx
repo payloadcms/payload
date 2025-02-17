@@ -169,7 +169,7 @@ export const renderListView = async (
 
     const hasCreatePermission = permissions?.collections?.[collectionSlug]?.create
 
-    const listViewServerProps: ListViewServerPropsOnly = {
+    const serverProps: ListViewServerPropsOnly = {
       collectionConfig,
       data,
       i18n,
@@ -193,7 +193,7 @@ export const renderListView = async (
       collectionConfig,
       description: staticDescription,
       payload,
-      serverProps: listViewServerProps,
+      serverProps,
     })
 
     const isInDrawer = Boolean(drawerSlug)
@@ -226,7 +226,7 @@ export const renderListView = async (
               Component: collectionConfig?.admin?.components?.views?.list?.Component,
               Fallback: DefaultListView,
               importMap: payload.importMap,
-              serverProps: listViewServerProps,
+              serverProps,
             })}
           </ListQueryProvider>
         </Fragment>
