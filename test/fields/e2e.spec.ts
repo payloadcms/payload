@@ -612,6 +612,20 @@ describe('fields', () => {
       )
       await expect(customCollapsibleLabel).toHaveCSS('text-transform', 'uppercase')
     })
+
+    test('should not render collapsible label in bulk update field select', async () => {
+      await page.goto(url.list)
+
+      await page.locator('input#select-all').check()
+      await page.locator('.edit-many__toggle').click()
+      await page.locator('.field-select .rs__control').click()
+
+      const firstCollapsibleOption = page.locator('.rs__option', {
+        hasText: exactText('Text'),
+      })
+
+      await expect(firstCollapsibleOption).toBeVisible()
+    })
   })
 
   describe('blocks', () => {
