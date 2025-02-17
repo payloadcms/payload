@@ -1,11 +1,10 @@
 'use client'
-import type { JoinFieldClient, ListQuery, PaginatedDocs, Where } from 'payload'
+import type { Column, JoinFieldClient, ListQuery, PaginatedDocs, Where } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
-import type { Column } from '../Table/index.js'
 
 import { Button } from '../../elements/Button/index.js'
 import { Pill } from '../../elements/Pill/index.js'

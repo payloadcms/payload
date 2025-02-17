@@ -1,4 +1,4 @@
-import type { ClientTranslationsObject } from '@payloadcms/translations'
+import type { ClientTranslationsObject, I18n } from '@payloadcms/translations'
 
 import type { SanitizedPermissions } from '../../auth/index.js'
 import type { ImportMap } from '../../bin/generateImportMap/index.js'
@@ -8,17 +8,19 @@ import type {
   CustomComponent,
   Locale,
   MetaConfig,
+  Params,
   PayloadComponent,
   SanitizedConfig,
   ServerProps,
 } from '../../config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { PayloadRequest } from '../../types/index.js'
+import type { Payload, PayloadRequest } from '../../types/index.js'
 import type { LanguageOptions } from '../LanguageOptions.js'
-import type { Data, DocumentSlots } from '../types.js'
+import type { Data, StaticDescription } from '../types.js'
+import type { DocumentSubViewTypes } from './document.js'
 
 export type AdminViewConfig = {
-  Component: AdminViewComponent
+  Component: PayloadComponent
   /** Whether the path should be matched exactly or as a prefix */
   exact?: boolean
   meta?: MetaConfig
@@ -27,27 +29,32 @@ export type AdminViewConfig = {
   strict?: boolean
 }
 
-export type AdminViewProps = {
+export type AdminViewClientProps = {
+  clientConfig: ClientConfig
+  documentSubViewType?: DocumentSubViewTypes
+  viewType: ViewTypes
+}
+
+export type AdminViewServerPropsOnly = {
   readonly clientConfig: ClientConfig
   readonly disableActions?: boolean
-  readonly documentSubViewType?: DocumentSubViewTypes
-  readonly drawerSlug?: string
+  /**
+   * @todo remove `docID` here as it is already contained in `initPageResult`
+   */
+  readonly docID?: number | string
   readonly importMap: ImportMap
   readonly initialData?: Data
   readonly initPageResult: InitPageResult
-  readonly params?: { [key: string]: string | string[] | undefined }
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
-  readonly searchParams: { [key: string]: string | string[] | undefined }
-  readonly viewType: ViewTypes
-}
+} & ServerProps
 
-export type AdminViewComponent = PayloadComponent<AdminViewProps>
+export type AdminViewServerProps = AdminViewClientProps & AdminViewServerPropsOnly
 
-export type EditViewProps = {
-  readonly collectionSlug?: string
-  readonly globalSlug?: string
-}
+/**
+ * @deprecated This should be removed in favor of direct props
+ */
+export type AdminViewComponent = PayloadComponent<AdminViewServerProps>
 
 export type VisibleEntities = {
   collections: SanitizedCollectionConfig['slug'][]
@@ -68,15 +75,9 @@ export type InitPageResult = {
   visibleEntities: VisibleEntities
 }
 
-export type ServerSideEditViewProps = {
-  readonly doc: Data
-  readonly initPageResult: InitPageResult
-  readonly routeSegments: string[]
-} & ClientSideEditViewProps &
-  ServerProps
-
-export type ClientSideEditViewProps = {} & DocumentSlots
-
+/**
+ * @todo This should be renamed to `ViewType` (singular)
+ */
 export type ViewTypes =
   | 'account'
   | 'dashboard'
@@ -85,10 +86,19 @@ export type ViewTypes =
   | 'reset'
   | 'verify'
   | 'version'
-export type DocumentSubViewTypes = 'api' | 'default' | 'livePreview' | 'version' | 'versions'
 
 export type ServerPropsFromView = {
   collectionConfig?: SanitizedConfig['collections'][number]
   globalConfig?: SanitizedConfig['globals'][number]
   viewActions: CustomComponent[]
 }
+
+// Description
+export type ViewDescriptionClientProps = {
+  collectionSlug?: SanitizedCollectionConfig['slug']
+  description: StaticDescription
+}
+
+export type ViewDescriptionServerPropsOnly = {} & ServerProps
+
+export type ViewDescriptionServerProps = ViewDescriptionClientProps & ViewDescriptionServerPropsOnly

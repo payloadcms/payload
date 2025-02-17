@@ -1,12 +1,12 @@
 import type {
-  AdminViewProps,
+  AdminViewServerProps,
+  DocumentViewServerProps,
   PayloadComponent,
   SanitizedCollectionConfig,
   SanitizedCollectionPermission,
   SanitizedConfig,
   SanitizedGlobalConfig,
   SanitizedGlobalPermission,
-  ServerSideEditViewProps,
 } from 'payload'
 import type React from 'react'
 
@@ -46,18 +46,18 @@ export const getViewsFromConfig = ({
       overrideDocPermissions: true
     }
 )): {
-  CustomView: ViewFromConfig<ServerSideEditViewProps>
-  DefaultView: ViewFromConfig<ServerSideEditViewProps>
+  CustomView: ViewFromConfig<DocumentViewServerProps>
+  DefaultView: ViewFromConfig<DocumentViewServerProps>
   /**
    * The error view to display if CustomView or DefaultView do not exist (could be either due to not found, or unauthorized). Can be null
    */
-  ErrorView: ViewFromConfig<AdminViewProps>
+  ErrorView: ViewFromConfig<AdminViewServerProps>
   viewKey: string
 } | null => {
   // Conditionally import and lazy load the default view
-  let DefaultView: ViewFromConfig<ServerSideEditViewProps> = null
-  let CustomView: ViewFromConfig<ServerSideEditViewProps> = null
-  let ErrorView: ViewFromConfig<AdminViewProps> = null
+  let DefaultView: ViewFromConfig<DocumentViewServerProps> = null
+  let CustomView: ViewFromConfig<DocumentViewServerProps> = null
+  let ErrorView: ViewFromConfig<AdminViewServerProps> = null
   let viewKey: string
 
   const {
