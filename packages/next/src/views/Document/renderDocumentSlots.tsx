@@ -11,6 +11,8 @@ import type {
   SaveDraftButtonServerPropsOnly,
   ServerProps,
   StaticDescription,
+  ViewDescriptionClientProps,
+  ViewDescriptionServerPropsOnly,
 } from 'payload'
 
 import { ViewDescription } from '@payloadcms/ui'
@@ -68,11 +70,11 @@ export const renderDocumentSlots: (args: {
 
   if (hasDescription) {
     components.Description = RenderServerComponent({
-      clientProps: { description: staticDescription },
+      clientProps: { description: staticDescription } satisfies ViewDescriptionClientProps,
       Component: CustomDescription,
       Fallback: ViewDescription,
       importMap: req.payload.importMap,
-      serverProps,
+      serverProps: serverProps satisfies ViewDescriptionServerPropsOnly,
     })
   }
 

@@ -15,7 +15,7 @@ import type {
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 import type { LanguageOptions } from '../LanguageOptions.js'
-import type { Data } from '../types.js'
+import type { Data, StaticDescription } from '../types.js'
 import type { DocumentSubViewTypes } from './document.js'
 
 export type AdminViewConfig = {
@@ -36,12 +36,11 @@ export type AdminViewServerProps = {
   readonly importMap: ImportMap
   readonly initialData?: Data
   readonly initPageResult: InitPageResult
-  readonly params?: { [key: string]: string | string[] | undefined }
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
   readonly searchParams: { [key: string]: string | string[] | undefined }
   readonly viewType: ViewTypes
-}
+} & ServerProps
 
 /**
  * @deprecated This should be removed in favor of direct props
@@ -84,3 +83,12 @@ export type ServerPropsFromView = {
   globalConfig?: SanitizedConfig['globals'][number]
   viewActions: CustomComponent[]
 }
+
+// Description
+export type ViewDescriptionClientProps = {
+  description: StaticDescription
+}
+
+export type ViewDescriptionServerPropsOnly = {} & ServerProps
+
+export type ViewDescriptionServerProps = ViewDescriptionClientProps & ViewDescriptionServerPropsOnly

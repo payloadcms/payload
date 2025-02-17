@@ -6,7 +6,7 @@ import type { ServerProps } from '../../config/types.js'
 import type { ListPreferences } from '../../preferences/types.js'
 import type { ResolvedFilterOptions } from '../../types/index.js'
 import type { Column } from '../elements/Table.js'
-import type { Data, StaticDescription } from '../types.js'
+import type { Data } from '../types.js'
 
 export type ListViewSlots = {
   AfterList?: React.ReactNode
@@ -73,10 +73,3 @@ export type AfterListServerProps = AfterListClientProps & AfterListServerPropsOn
 export type AfterListTableClientProps = ListViewSlotClientProps
 export type AfterListTableServerPropsOnly = {} & ListViewServerPropsOnly
 export type AfterListTableServerProps = AfterListTableClientProps & AfterListTableServerPropsOnly
-
-// Description
-export type ListDescriptionClientProps = {
-  description: StaticDescription
-} & ListViewSlotClientProps
-export type ListDescriptionServerPropsOnly = {} & ListViewServerPropsOnly
-export type ListDescriptionServerProps = ListDescriptionClientProps & ListDescriptionServerPropsOnly

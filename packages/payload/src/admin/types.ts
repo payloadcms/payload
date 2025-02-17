@@ -624,6 +624,9 @@ export type {
   AdminViewServerProps as AdminViewProps,
   AdminViewServerProps,
   InitPageResult,
+  ViewDescriptionClientProps,
+  ViewDescriptionServerProps,
+  ViewDescriptionServerPropsOnly,
   VisibleEntities,
 } from './views/index.js'
 
@@ -640,9 +643,6 @@ export type {
   BeforeListTableClientProps,
   BeforeListTableServerProps,
   BeforeListTableServerPropsOnly,
-  ListDescriptionClientProps,
-  ListDescriptionServerProps,
-  ListDescriptionServerPropsOnly,
   ListViewClientProps,
   ListViewServerProps,
   ListViewServerPropsOnly,
