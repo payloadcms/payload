@@ -64,6 +64,7 @@ export interface Config {
   auth: {
     users: UserAuthOperations;
   };
+  blocks: {};
   collections: {
     'fields-relationship': FieldsRelationship;
     'relation-filter-false': RelationFilterFalse;
