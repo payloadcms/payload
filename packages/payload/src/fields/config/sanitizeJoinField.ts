@@ -11,11 +11,13 @@ export const sanitizeJoinField = ({
   field,
   joinPath,
   joins,
+  parentIsLocalized,
 }: {
   config: Config
   field: FlattenedJoinField | JoinField
   joinPath?: string
   joins?: SanitizedJoins
+  parentIsLocalized: boolean
 }) => {
   // the `joins` arg is not passed for globals or when recursing on fields that do not allow a join field
   if (typeof joins === 'undefined') {
@@ -27,6 +29,7 @@ export const sanitizeJoinField = ({
   const join: SanitizedJoin = {
     field,
     joinPath: `${joinPath ? joinPath + '.' : ''}${field.name}`,
+    parentIsLocalized,
     targetField: undefined,
   }
   const joinCollection = config.collections.find(

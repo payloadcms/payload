@@ -149,8 +149,13 @@ export const buildJoinAggregation = async ({
         })
       } else {
         const localeSuffix =
-          // TODO: @DanRibbens can this be within a localized parent?
-          join.field.localized && adapter.payload.config.localization && locale ? `.${locale}` : ''
+          join.field.localized &&
+          (process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true' ||
+            !join.parentIsLocalized) &&
+          adapter.payload.config.localization &&
+          locale
+            ? `.${locale}`
+            : ''
         const as = `${versions ? `version.${join.joinPath}` : join.joinPath}${localeSuffix}`
 
         let foreignField: string
