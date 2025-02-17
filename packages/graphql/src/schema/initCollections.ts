@@ -115,7 +115,6 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
       fields,
       forceNullable: forceNullableObjectType,
       graphqlResult,
-      parentIsLocalized: false,
       parentName: singularName,
     })
 
@@ -329,7 +328,6 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
         fields: versionCollectionFields,
         forceNullable: forceNullableObjectType,
         graphqlResult,
-        parentIsLocalized: false,
         parentName: `${singularName}Version`,
       })
 
@@ -414,7 +412,6 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
           },
         ],
         graphqlResult,
-        parentIsLocalized: false,
         parentName: formatName(`${slug}JWT`),
       })
 

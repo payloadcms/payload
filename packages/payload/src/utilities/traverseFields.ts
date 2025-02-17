@@ -126,7 +126,7 @@ type TraverseFieldsArgs = {
    * The return value of the callback function will be ignored.
    */
   leavesFirst?: boolean
-  parentIsLocalized: boolean
+  parentIsLocalized?: boolean
   parentRef?: Record<string, unknown> | unknown
   ref?: Record<string, unknown> | unknown
 }

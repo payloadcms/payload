@@ -8,7 +8,7 @@ type Args = {
   config: SanitizedConfig
   data: Record<string, unknown>
   fields: Field[]
-  parentIsLocalized: boolean
+  parentIsLocalized?: boolean
 }
 
 interface RelationObject {

@@ -22,7 +22,6 @@ export const create: Create = async function create(
     config: this.payload.config,
     data,
     fields: this.payload.collections[collection].config.fields,
-    parentIsLocalized: false,
   })
 
   if (this.payload.collections[collection].customIDType) {

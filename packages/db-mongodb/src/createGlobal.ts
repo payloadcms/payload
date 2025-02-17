@@ -20,7 +20,6 @@ export const createGlobal: CreateGlobal = async function createGlobal(
       ...data,
     },
     fields: this.payload.config.globals.find((globalConfig) => globalConfig.slug === slug).fields,
-    parentIsLocalized: false,
   })
 
   const options: CreateOptions = {

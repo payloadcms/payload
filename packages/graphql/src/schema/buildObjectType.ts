@@ -62,9 +62,6 @@ type Args = {
   forceNullable?: boolean
   graphqlResult: GraphQLInfo
   name: string
-  /**
-   * @todo make required in 4.0
-   */
   parentIsLocalized?: boolean
   parentName: string
 }

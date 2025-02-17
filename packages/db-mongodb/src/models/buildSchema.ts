@@ -128,7 +128,7 @@ const localizeSchema = (
 export const buildSchema = (args: {
   buildSchemaOptions: BuildSchemaOptions
   configFields: Field[]
-  parentIsLocalized: boolean
+  parentIsLocalized?: boolean
   payload: Payload
 }): Schema => {
   const { buildSchemaOptions = {}, configFields, parentIsLocalized, payload } = args

@@ -31,7 +31,10 @@ type Args = {
   mergeLocaleActions: (() => Promise<void>)[]
   operation: Operation
   parentIndexPath: string
-  parentIsLocalized: boolean
+  /**
+   * @todo make required in v4.0
+   */
+  parentIsLocalized?: boolean
   parentPath: string
   parentSchemaPath: string
   req: PayloadRequest

@@ -33,7 +33,6 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(
     config: this.payload.config,
     data,
     fields,
-    parentIsLocalized: false,
   })
 
   result = await Model.findOneAndUpdate({ globalType: slug }, sanitizedData, options)

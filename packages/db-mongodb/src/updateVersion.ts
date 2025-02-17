@@ -45,7 +45,6 @@ export const updateVersion: UpdateVersion = async function updateVersion(
     config: this.payload.config,
     data: versionData,
     fields,
-    parentIsLocalized: false,
   })
 
   const doc = await VersionModel.findOneAndUpdate(query, sanitizedData, options)

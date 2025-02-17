@@ -31,7 +31,6 @@ export async function updateVersion<T extends TypeWithID>(
     adapter: this,
     fields,
     locale,
-    parentIsLocalized: false,
     tableName,
     where: whereToUse,
   })

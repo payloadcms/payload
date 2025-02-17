@@ -171,7 +171,6 @@ export async function migrateRelationshipsV2_V3({
           config,
           data: doc,
           fields: global.fields,
-          parentIsLocalized: false,
         })
 
         await GlobalsModel.collection.updateOne(

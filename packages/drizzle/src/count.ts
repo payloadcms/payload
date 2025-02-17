@@ -21,7 +21,6 @@ export const count: Count = async function count(
     adapter: this,
     fields: collectionConfig.flattenedFields,
     locale,
-    parentIsLocalized: false,
     tableName,
     where: whereArg,
   })

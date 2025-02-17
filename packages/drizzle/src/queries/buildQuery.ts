@@ -20,7 +20,7 @@ type BuildQueryArgs = {
   fields: FlattenedField[]
   joins?: BuildQueryJoinAliases
   locale?: string
-  parentIsLocalized: boolean
+  parentIsLocalized?: boolean
   selectLocale?: boolean
   sort?: Sort
   tableName: string

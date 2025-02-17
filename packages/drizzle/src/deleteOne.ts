@@ -26,7 +26,6 @@ export const deleteOne: DeleteOne = async function deleteOne(
     adapter: this,
     fields: collection.flattenedFields,
     locale: req?.locale,
-    parentIsLocalized: false,
     tableName,
     where: whereArg,
   })

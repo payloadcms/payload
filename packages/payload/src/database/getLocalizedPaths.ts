@@ -25,7 +25,10 @@ export function getLocalizedPaths({
   incomingPath: string
   locale?: string
   overrideAccess?: boolean
-  parentIsLocalized: boolean
+  /**
+   * @todo make required in v4.0. Usually, you'd wanna pass this through
+   */
+  parentIsLocalized?: boolean
   payload: Payload
 }): PathToQuery[] {
   const pathSegments = incomingPath.split('.')

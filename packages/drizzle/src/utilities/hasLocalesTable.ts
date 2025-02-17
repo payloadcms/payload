@@ -7,7 +7,10 @@ export const hasLocalesTable = ({
   parentIsLocalized,
 }: {
   fields: Field[]
-  parentIsLocalized: boolean
+  /**
+   * @todo make required in v4.0. Usually you'd wanna pass this in
+   */
+  parentIsLocalized?: boolean
 }): boolean => {
   return fields.some((field) => {
     // arrays always get a separate table

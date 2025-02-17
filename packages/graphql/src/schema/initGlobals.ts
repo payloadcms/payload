@@ -55,7 +55,6 @@ export function initGlobals({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
         fields,
         forceNullable: forceNullableObjectType,
         graphqlResult,
-        parentIsLocalized: false,
         parentName: formattedName,
       }),
       mutationInputType: updateMutationInputType
@@ -137,7 +136,6 @@ export function initGlobals({ config, graphqlResult }: InitGlobalsGraphQLArgs): 
         fields: versionGlobalFields,
         forceNullable: forceNullableObjectType,
         graphqlResult,
-        parentIsLocalized: false,
         parentName: `${formattedName}Version`,
       })
 

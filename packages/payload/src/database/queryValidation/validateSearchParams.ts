@@ -18,7 +18,7 @@ type Args = {
   globalConfig?: SanitizedGlobalConfig
   operator: string
   overrideAccess: boolean
-  parentIsLocalized: boolean
+  parentIsLocalized?: boolean
   path: string
   policies: EntityPolicies
   req: PayloadRequest
