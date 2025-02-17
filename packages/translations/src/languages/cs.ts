@@ -328,6 +328,7 @@ export const csTranslations: DefaultTranslationsObject = {
     takeOver: 'Převzít',
     thisLanguage: 'Čeština',
     time: 'Čas',
+    timezone: 'Časové pásmo',
     titleDeleted: '{{label}} "{{title}}" úspěšně smazáno.',
     true: 'Pravda',
     unauthorized: 'Neoprávněný',
@@ -420,6 +421,7 @@ export const csTranslations: DefaultTranslationsObject = {
     requiresNoMoreThan: 'Toto pole vyžaduje ne více než {{count}} {{label}}.',
     requiresTwoNumbers: 'Toto pole vyžaduje dvě čísla.',
     shorterThanMax: 'Tato hodnota musí být kratší než maximální délka {{maxLength}} znaků.',
+    timezoneRequired: 'Je vyžadováno časové pásmo.',
     trueOrFalse: 'Toto pole může být rovno pouze true nebo false.',
     username:
       'Prosím, zadejte platné uživatelské jméno. Může obsahovat písmena, čísla, pomlčky, tečky a podtržítka.',

@@ -135,7 +135,7 @@ export const EditManyDrawerContent: React.FC<
   } & EditManyProps
 > = (props) => {
   const {
-    collection: { slug, fields, labels: { plural } } = {},
+    collection: { slug, fields, labels: { plural, singular } } = {},
     collection,
     drawerSlug,
     selected: selectedFromProps,
@@ -270,7 +270,10 @@ export const EditManyDrawerContent: React.FC<
         <div className={`${baseClass}__main`}>
           <div className={`${baseClass}__header`}>
             <h2 className={`${baseClass}__header__title`}>
-              {t('general:editingLabel', { count, label: getTranslation(plural, i18n) })}
+              {t('general:editingLabel', {
+                count,
+                label: getTranslation(count > 1 ? plural : singular, i18n),
+              })}
             </h2>
             <button
               aria-label={t('general:close')}

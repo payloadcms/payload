@@ -56,7 +56,7 @@ export function createMarkdownImport(
     root.clear()
 
     for (let i = 0; i < linesLength; i++) {
-      const lineText = lines[i]
+      const lineText = lines[i]!
 
       const [imported, shiftedIndex] = $importMultiline(lines, i, byType.multilineElement, root)
 
@@ -101,7 +101,7 @@ function $importMultiline(
   for (const transformer of multilineElementTransformers) {
     const { handleImportAfterStartMatch, regExpEnd, regExpStart, replace } = transformer
 
-    const startMatch = lines[startLineIndex].match(regExpStart)
+    const startMatch = lines[startLineIndex]?.match(regExpStart)
     if (!startMatch) {
       continue // Try next transformer
     }
@@ -134,7 +134,7 @@ function $importMultiline(
 
     // check every single line for the closing match. It could also be on the same line as the opening match.
     while (endLineIndex < linesLength) {
-      const endMatch = regexpEndRegex ? lines[endLineIndex].match(regexpEndRegex) : null
+      const endMatch = regexpEndRegex ? lines[endLineIndex]?.match(regexpEndRegex) : null
       if (!endMatch) {
         if (
           !isEndOptional ||
@@ -157,22 +157,23 @@ function $importMultiline(
       const linesInBetween: string[] = []
 
       if (endMatch && startLineIndex === endLineIndex) {
-        linesInBetween.push(lines[startLineIndex].slice(startMatch[0].length, -endMatch[0].length))
+        linesInBetween.push(lines[startLineIndex]!.slice(startMatch[0].length, -endMatch[0].length))
       } else {
         for (let i = startLineIndex; i <= endLineIndex; i++) {
+          const line = lines[i]!
           if (i === startLineIndex) {
-            const text = lines[i].slice(startMatch[0].length)
+            const text = line.slice(startMatch[0].length)
             linesInBetween.push(text) // Also include empty text
           } else if (i === endLineIndex && endMatch) {
-            const text = lines[i].slice(0, -endMatch[0].length)
+            const text = line.slice(0, -endMatch[0].length)
             linesInBetween.push(text) // Also include empty text
           } else {
-            linesInBetween.push(lines[i])
+            linesInBetween.push(line)
           }
         }
       }
 
-      if (replace(rootNode, null, startMatch, endMatch, linesInBetween, true) !== false) {
+      if (replace(rootNode, null, startMatch, endMatch!, linesInBetween, true) !== false) {
         // Return here. This $importMultiline function is run line by line and should only process a single multiline element at a time.
         return [true, endLineIndex]
       }

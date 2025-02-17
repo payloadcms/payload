@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { Payload } from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
 

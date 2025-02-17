@@ -1,12 +1,12 @@
 'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
-// TODO: abstract the `next/navigation` dependency out from this component
 import { useRouter } from 'next/navigation.js'
 import React from 'react'
 
 import { Button } from '../../elements/Button/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import './index.scss'
@@ -28,8 +28,9 @@ export const StayLoggedInModal: React.FC = () => {
     routes: { admin: adminRoute },
   } = config
 
-  const { toggleModal } = useModal()
+  const { closeModal } = useModal()
   const { t } = useTranslation()
+  const { startRouteTransition } = useRouteTransition()
 
   return (
     <Modal className={baseClass} slug={stayLoggedInModalSlug}>
@@ -42,12 +43,15 @@ export const StayLoggedInModal: React.FC = () => {
           <Button
             buttonStyle="secondary"
             onClick={() => {
-              toggleModal(stayLoggedInModalSlug)
-              router.push(
-                formatAdminURL({
-                  adminRoute,
-                  path: logoutRoute,
-                }),
+              closeModal(stayLoggedInModalSlug)
+
+              startRouteTransition(() =>
+                router.push(
+                  formatAdminURL({
+                    adminRoute,
+                    path: logoutRoute,
+                  }),
+                ),
               )
             }}
             size="large"
@@ -57,7 +61,7 @@ export const StayLoggedInModal: React.FC = () => {
           <Button
             onClick={() => {
               refreshCookie()
-              toggleModal(stayLoggedInModalSlug)
+              closeModal(stayLoggedInModalSlug)
             }}
             size="large"
           >

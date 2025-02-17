@@ -27,7 +27,7 @@ export const getBlocksFieldSeedData = (prefix?: string): any => [
       },
       {
         blockName: 'Second sub block',
-        blockType: 'text',
+        blockType: 'textRequired',
         text: 'second sub block',
       },
     ],
@@ -40,11 +40,11 @@ export const blocksDoc: Partial<BlockField> = {
   blocksWithMinRows: [
     {
       blockTitle: 'first row',
-      blockType: 'block',
+      blockType: 'blockWithMinRows',
     },
     {
       blockTitle: 'second row',
-      blockType: 'block',
+      blockType: 'blockWithMinRows',
     },
   ],
 }

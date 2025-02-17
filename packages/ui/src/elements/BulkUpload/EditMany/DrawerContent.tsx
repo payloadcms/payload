@@ -28,7 +28,11 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
     forms: State['forms']
   } & EditManyBulkUploadsProps
 > = (props) => {
-  const { collection: { slug, fields, labels: { plural } } = {}, drawerSlug, forms } = props
+  const {
+    collection: { slug, fields, labels: { plural, singular } } = {},
+    drawerSlug,
+    forms,
+  } = props
 
   const { permissions } = useAuth()
   const { i18n, t } = useTranslation()
@@ -60,7 +64,7 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
         <h2 className={`${baseClass}__header__title`}>
           {t('general:editingLabel', {
             count: forms.length,
-            label: getTranslation(plural, i18n),
+            label: getTranslation(forms.length > 1 ? plural : singular, i18n),
           })}
         </h2>
         <button

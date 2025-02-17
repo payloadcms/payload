@@ -1,6 +1,7 @@
+'use client'
 import type { ClientField } from 'payload'
 
-import { ChevronIcon, Pill, useTranslation } from '@payloadcms/ui'
+import { ChevronIcon, Pill, useConfig, useTranslation } from '@payloadcms/ui'
 import { fieldIsArrayType, fieldIsBlockType } from 'payload/shared'
 import React, { useState } from 'react'
 
@@ -49,6 +50,7 @@ export const DiffCollapser: React.FC<Props> = ({
 }) => {
   const { t } = useTranslation()
   const [isCollapsed, setIsCollapsed] = useState(initCollapsed)
+  const { config } = useConfig()
 
   let changeCount = 0
 
@@ -69,6 +71,7 @@ export const DiffCollapser: React.FC<Props> = ({
 
     changeCount = countChangedFieldsInRows({
       comparisonRows,
+      config,
       field,
       locales,
       versionRows,
@@ -76,6 +79,7 @@ export const DiffCollapser: React.FC<Props> = ({
   } else {
     changeCount = countChangedFields({
       comparison,
+      config,
       fields,
       locales,
       version,

@@ -1,4 +1,4 @@
-import type { Field, SanitizedConfig } from 'payload'
+import { flattenAllFields, type Field, type SanitizedConfig } from 'payload'
 
 import { Types } from 'mongoose'
 
@@ -74,7 +74,28 @@ const relsFields: Field[] = [
   },
 ]
 
+const referenceBlockFields: Field[] = [
+  ...relsFields,
+  {
+    name: 'group',
+    type: 'group',
+    fields: relsFields,
+  },
+  {
+    name: 'array',
+    type: 'array',
+    fields: relsFields,
+  },
+]
+
 const config = {
+  blocks: [
+    {
+      slug: 'reference-block',
+      fields: referenceBlockFields,
+      flattenedFields: flattenAllFields({ fields: referenceBlockFields }),
+    },
+  ],
   collections: [
     {
       slug: 'docs',
@@ -136,6 +157,11 @@ const config = {
               ],
             },
           ],
+        },
+        {
+          name: 'blockReferences',
+          type: 'blocks',
+          blockReferences: ['reference-block'],
         },
         {
           name: 'group',
@@ -319,6 +345,14 @@ describe('sanitizeRelationshipIDs', () => {
           ...relsData,
           array: [{ ...relsData }],
           group: { ...relsData },
+        },
+      ],
+      blockReferences: [
+        {
+          blockType: 'reference-block',
+          array: [{ ...relsData }],
+          group: { ...relsData },
+          ...relsData,
         },
       ],
       group: {

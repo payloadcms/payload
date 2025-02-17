@@ -19,7 +19,7 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-export const seed = async (_payload) => {
+export const seed = async (_payload: Payload) => {
   await _payload.create({
     collection: 'users',
     data: {
@@ -44,7 +44,7 @@ export const seed = async (_payload) => {
     },
   })
 
-  await _payload.create({
+  const post1 = await _payload.create({
     collection: postsSlug,
     data: {
       category: category.id,
@@ -52,10 +52,11 @@ export const seed = async (_payload) => {
         category: category.id,
       },
       title: 'Test Post 1',
+      localizedText: 'Text in en',
     },
   })
 
-  await _payload.create({
+  const post2 = await _payload.create({
     collection: postsSlug,
     data: {
       category: category.id,
@@ -63,10 +64,11 @@ export const seed = async (_payload) => {
         category: category.id,
       },
       title: 'Test Post 2',
+      localizedText: 'Text in en',
     },
   })
 
-  await _payload.create({
+  const post3 = await _payload.create({
     collection: postsSlug,
     data: {
       category: category.id,
@@ -74,7 +76,35 @@ export const seed = async (_payload) => {
         category: category.id,
       },
       title: 'Test Post 3',
+      localizedText: 'Text in en',
     },
+  })
+
+  await _payload.update({
+    collection: postsSlug,
+    id: post1.id,
+    data: {
+      localizedText: 'Text in es',
+    },
+    locale: 'es',
+  })
+
+  await _payload.update({
+    collection: postsSlug,
+    id: post2.id,
+    data: {
+      localizedText: 'Text in es',
+    },
+    locale: 'es',
+  })
+
+  await _payload.update({
+    collection: postsSlug,
+    id: post3.id,
+    data: {
+      localizedText: 'Text in es',
+    },
+    locale: 'es',
   })
 
   // create an upload with image.png
@@ -90,7 +120,7 @@ export const seed = async (_payload) => {
   await _payload.create({
     collection: postsSlug,
     data: {
-      upload: uploadedImage.id,
+      upload: uploadedImage,
     },
   })
 
@@ -123,6 +153,6 @@ export async function clearAndSeedEverything(_payload: Payload) {
     _payload,
     collectionSlugs,
     seedFunction: seed,
-    snapshotKey: 'adminTest',
+    snapshotKey: 'joinsTest',
   })
 }

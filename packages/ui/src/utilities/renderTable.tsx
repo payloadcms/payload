@@ -19,6 +19,7 @@ import { RenderServerComponent } from '../elements/RenderServerComponent/index.j
 import { buildColumnState } from '../elements/TableColumns/buildColumnState.js'
 import { filterFields } from '../elements/TableColumns/filterFields.js'
 import { getInitialColumns } from '../elements/TableColumns/getInitialColumns.js'
+
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import { Pill, SelectAll, SelectRow, Table } from '../exports/client/index.js'
 

@@ -334,6 +334,7 @@ export const trTranslations: DefaultTranslationsObject = {
     takeOver: 'Devralmak',
     thisLanguage: 'Türkçe',
     time: 'Zaman',
+    timezone: 'Saat dilimi',
     titleDeleted: '{{label}} {{title}} başarıyla silindi.',
     true: 'Doğru',
     unauthorized: 'Yetkisiz',
@@ -427,6 +428,7 @@ export const trTranslations: DefaultTranslationsObject = {
     requiresNoMoreThan: 'Bu alana {{count}} adetten fazla {{label}} girilemez.',
     requiresTwoNumbers: 'Bu alana en az iki rakam girilmesi zorunludur.',
     shorterThanMax: 'Bu alan {{maxLength}} karakterden daha kısa olmalıdır.',
+    timezoneRequired: 'Bir zaman dilimi gereklidir.',
     trueOrFalse: 'Bu alan yalnızca doğru ve yanlış olabilir.',
     username:
       'Lütfen geçerli bir kullanıcı adı girin. Harfler, numaralar, kısa çizgiler, noktalar ve alt çizgiler içerebilir.',

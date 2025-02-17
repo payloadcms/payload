@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, Where } from 'payload'
+import type { ClientCollectionConfig, ResolvedFilterOptions, Where } from 'payload'
 
 import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
@@ -21,9 +21,9 @@ import { PublishMany } from '../PublishMany/index.js'
 import { SearchFilter } from '../SearchFilter/index.js'
 import { UnpublishMany } from '../UnpublishMany/index.js'
 import { WhereBuilder } from '../WhereBuilder/index.js'
-import './index.scss'
 import validateWhereQuery from '../WhereBuilder/validateWhereQuery.js'
 import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched.js'
+import './index.scss'
 
 const baseClass = 'list-controls'
 
@@ -40,6 +40,7 @@ export type ListControlsProps = {
   readonly handleWhereChange?: (where: Where) => void
   readonly listControlsMenu?: React.ReactNode | React.ReactNode[]
   readonly renderedFilters?: Map<string, React.ReactNode>
+  readonly resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
 }
 
 /**
@@ -58,6 +59,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     enableSort = false,
     listControlsMenu,
     renderedFilters,
+    resolvedFilterOptions,
   } = props
 
   const { handleSearchChange, query } = useListQuery()
@@ -97,7 +99,6 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
 
   useEffect(() => {
     if (hasWhereParam.current && !query?.where) {
-      setVisibleDrawer(undefined)
       hasWhereParam.current = false
     } else if (query?.where) {
       hasWhereParam.current = true
@@ -233,8 +234,8 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
           collectionPluralLabel={collectionConfig?.labels?.plural}
           collectionSlug={collectionConfig.slug}
           fields={collectionConfig?.fields}
-          key={String(hasWhereParam.current && !query?.where)}
           renderedFilters={renderedFilters}
+          resolvedFilterOptions={resolvedFilterOptions}
         />
       </AnimateHeight>
       {enableSort && (

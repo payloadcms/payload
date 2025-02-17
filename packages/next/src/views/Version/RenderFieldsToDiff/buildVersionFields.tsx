@@ -7,6 +7,7 @@ import type {
   FieldDiffClientProps,
   FieldDiffServerProps,
   FieldTypes,
+  FlattenedBlock,
   PayloadComponent,
   PayloadRequest,
   SanitizedFieldPermissions,
@@ -113,7 +114,7 @@ export const buildVersionFields = ({
       versionField.fieldByLocale = {}
 
       for (const locale of selectedLocales) {
-        versionField.fieldByLocale[locale] = buildVersionField({
+        const localizedVersionField = buildVersionField({
           clientField: clientField as ClientField,
           clientSchemaMap,
           comparisonValue: comparisonValue?.[locale],
@@ -133,12 +134,12 @@ export const buildVersionFields = ({
           selectedLocales,
           versionValue: versionValue?.[locale],
         })
-        if (!versionField.fieldByLocale[locale]) {
-          continue
+        if (localizedVersionField) {
+          versionField.fieldByLocale[locale] = localizedVersionField
         }
       }
     } else {
-      versionField.field = buildVersionField({
+      const baseVersionField = buildVersionField({
         clientField: clientField as ClientField,
         clientSchemaMap,
         comparisonValue,
@@ -158,8 +159,8 @@ export const buildVersionFields = ({
         versionValue,
       })
 
-      if (!versionField.field) {
-        continue
+      if (baseVersionField) {
+        versionField.field = baseVersionField
       }
     }
 
@@ -332,14 +333,27 @@ const buildVersionField = ({
     for (let i = 0; i < blocksValue.length; i++) {
       const comparisonRow = comparisonValue?.[i] || {}
       const versionRow = blocksValue[i] || {}
-      const versionBlock = field.blocks.find((block) => block.slug === versionRow.blockType)
+
+      const blockSlugToMatch: string = versionRow.blockType
+      const versionBlock =
+        req.payload.blocks[blockSlugToMatch] ??
+        ((field.blockReferences ?? field.blocks).find(
+          (block) => typeof block !== 'string' && block.slug === blockSlugToMatch,
+        ) as FlattenedBlock | undefined)
 
       let fields = []
 
       if (versionRow.blockType === comparisonRow.blockType) {
         fields = versionBlock.fields
       } else {
-        const comparisonBlock = field.blocks.find((block) => block.slug === comparisonRow.blockType)
+        const comparisonBlockSlugToMatch: string = versionRow.blockType
+
+        const comparisonBlock =
+          req.payload.blocks[comparisonBlockSlugToMatch] ??
+          ((field.blockReferences ?? field.blocks).find(
+            (block) => typeof block !== 'string' && block.slug === comparisonBlockSlugToMatch,
+          ) as FlattenedBlock | undefined)
+
         if (comparisonBlock) {
           fields = getUniqueListBy<Field>(
             [...versionBlock.fields, ...comparisonBlock.fields],
