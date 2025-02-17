@@ -86,5 +86,8 @@
     "ts-essentials": "10.0.3",
     "typescript": "5.7.3",
     "uuid": "10.0.0"
+  },
+  "dependencies": {
+    "dequal": "2.0.3"
   }
 }
