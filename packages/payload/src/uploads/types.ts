@@ -181,6 +181,14 @@ export type UploadConfig = {
       params: { collection: string; filename: string }
     },
   ) => Promise<Response> | Promise<void> | Response | void)[]
+  /**
+   * Set to `true` to prevent the admin UI from showing file inputs during document creation, useful for programmatic file generation.
+   */
+  hideFileInputOnCreate?: boolean
+  /**
+   * Set to `true` to prevent the admin UI having a way to remove an existing file while editing.
+   */
+  hideRemoveFile?: boolean
   imageSizes?: ImageSize[]
   /**
    * Restrict mimeTypes in the file picker. Array of valid mime types or mimetype wildcards
