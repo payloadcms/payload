@@ -38,7 +38,7 @@ import './index.scss'
 
 const baseClass = 'collection-list'
 
-export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
+export function DefaultListView(props: ListViewClientProps) {
   const {
     AfterList,
     AfterListTable,

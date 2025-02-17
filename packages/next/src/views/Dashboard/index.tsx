@@ -6,6 +6,8 @@ import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerCompo
 import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
 import React, { Fragment } from 'react'
 
+import type { DashboardViewClientProps, DashboardViewServerPropsOnly } from './Default/index.js'
+
 import { DefaultDashboard } from './Default/index.js'
 
 export { generateDashboardMetadata } from './meta.js'
@@ -104,7 +106,7 @@ export async function Dashboard({ initPageResult, params, searchParams }: AdminV
       {RenderServerComponent({
         clientProps: {
           locale,
-        },
+        } satisfies DashboardViewClientProps,
         Component: config.admin?.components?.views?.dashboard?.Component,
         Fallback: DefaultDashboard,
         importMap: payload.importMap,
@@ -119,7 +121,7 @@ export async function Dashboard({ initPageResult, params, searchParams }: AdminV
           searchParams,
           user,
           visibleEntities,
-        },
+        } satisfies DashboardViewServerPropsOnly,
       })}
     </Fragment>
   )

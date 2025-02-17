@@ -41,14 +41,14 @@ const baseClass = 'collection-edit'
 // This component receives props only on _pages_
 // When rendered within a drawer, props are empty
 // This is solely to support custom edit views which get server-rendered
-export const DefaultEditView: React.FC<DocumentViewClientProps> = ({
+export function DefaultEditView({
   Description,
   PreviewButton,
   PublishButton,
   SaveButton,
   SaveDraftButton,
   Upload: CustomUpload,
-}) => {
+}: DocumentViewClientProps) {
   const {
     id,
     action,

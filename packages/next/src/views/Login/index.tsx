@@ -24,7 +24,6 @@ export function LoginView({ initPageResult, params, searchParams }: AdminViewSer
 
   const {
     admin: { components: { afterLogin, beforeLogin } = {}, user: userSlug },
-    collections,
     routes: { admin },
   } = config
 
