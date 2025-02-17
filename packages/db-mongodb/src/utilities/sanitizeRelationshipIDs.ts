@@ -2,12 +2,13 @@ import type { CollectionConfig, Field, SanitizedConfig, TraverseFieldsCallback }
 
 import { Types } from 'mongoose'
 import { traverseFields } from 'payload'
-import { fieldAffectsData } from 'payload/shared'
+import { fieldAffectsData, fieldShouldBeLocalized } from 'payload/shared'
 
 type Args = {
   config: SanitizedConfig
   data: Record<string, unknown>
   fields: Field[]
+  parentIsLocalized?: boolean
 }
 
 interface RelationObject {
@@ -112,6 +113,7 @@ export const sanitizeRelationshipIDs = ({
   config,
   data,
   fields,
+  parentIsLocalized,
 }: Args): Record<string, unknown> => {
   const sanitize: TraverseFieldsCallback = ({ field, ref }) => {
     if (!ref || typeof ref !== 'object') {
@@ -124,7 +126,7 @@ export const sanitizeRelationshipIDs = ({
       }
 
       // handle localized relationships
-      if (config.localization && field.localized) {
+      if (config.localization && fieldShouldBeLocalized({ field, parentIsLocalized })) {
         const locales = config.localization.locales
         const fieldRef = ref[field.name]
         if (typeof fieldRef !== 'object') {
@@ -150,7 +152,14 @@ export const sanitizeRelationshipIDs = ({
     }
   }
 
-  traverseFields({ callback: sanitize, config, fields, fillEmpty: false, ref: data })
+  traverseFields({
+    callback: sanitize,
+    config,
+    fields,
+    fillEmpty: false,
+    parentIsLocalized,
+    ref: data,
+  })
 
   return data
 }

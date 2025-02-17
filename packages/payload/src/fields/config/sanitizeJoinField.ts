@@ -1,21 +1,29 @@
 // @ts-strict-ignore
 import type { SanitizedJoin, SanitizedJoins } from '../../collections/config/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
-import type { FlattenedJoinField, JoinField, RelationshipField, UploadField } from './types.js'
 
 import { APIError } from '../../errors/index.js'
 import { InvalidFieldJoin } from '../../errors/InvalidFieldJoin.js'
 import { traverseFields } from '../../utilities/traverseFields.js'
+import {
+  fieldShouldBeLocalized,
+  type FlattenedJoinField,
+  type JoinField,
+  type RelationshipField,
+  type UploadField,
+} from './types.js'
 export const sanitizeJoinField = ({
   config,
   field,
   joinPath,
   joins,
+  parentIsLocalized,
 }: {
   config: Config
   field: FlattenedJoinField | JoinField
   joinPath?: string
   joins?: SanitizedJoins
+  parentIsLocalized: boolean
 }) => {
   // the `joins` arg is not passed for globals or when recursing on fields that do not allow a join field
   if (typeof joins === 'undefined') {
@@ -27,6 +35,7 @@ export const sanitizeJoinField = ({
   const join: SanitizedJoin = {
     field,
     joinPath: `${joinPath ? joinPath + '.' : ''}${field.name}`,
+    parentIsLocalized,
     targetField: undefined,
   }
   const joinCollection = config.collections.find(
@@ -43,14 +52,14 @@ export const sanitizeJoinField = ({
   let localized = false
   // Traverse fields and match based on the schema path
   traverseFields({
-    callback: ({ field, next }) => {
+    callback: ({ field, next, parentIsLocalized }) => {
       if (!('name' in field) || !field.name) {
         return
       }
       const currentSegment = pathSegments[currentSegmentIndex]
       // match field on path segments
       if ('name' in field && field.name === currentSegment) {
-        if ('localized' in field && field.localized) {
+        if (fieldShouldBeLocalized({ field, parentIsLocalized })) {
           localized = true
           const fieldIndex = currentSegmentIndex
 
@@ -93,6 +102,7 @@ export const sanitizeJoinField = ({
     },
     config: config as unknown as SanitizedConfig,
     fields: joinCollection.fields,
+    parentIsLocalized: false,
   })
 
   if (!joinRelationship) {

@@ -120,11 +120,12 @@ export type BaseRichTextHookArgs<
   indexPath: number[]
   /** The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. */
   originalDoc?: TData
+  parentIsLocalized: boolean
+
   /**
    * The path of the field, e.g. ["group", "myArray", 1, "textField"]. The path is the schemaPath but with indexes and would be used in the context of field data, not field schemas.
    */
   path: (number | string)[]
-
   /** The Express request object. It is mocked for Local API operations. */
   req: PayloadRequest
   /**
@@ -208,6 +209,7 @@ type RichTextAdapterBase<
     findMany: boolean
     flattenLocales: boolean
     overrideAccess?: boolean
+    parentIsLocalized: boolean
     populateArg?: PopulateType
     populationPromises: Promise<void>[]
     req: PayloadRequest

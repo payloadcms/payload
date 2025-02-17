@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 'use client'
 
-import type { Where } from 'payload'
+import type { Column, Where } from 'payload'
 
 import { TZDateMini as TZDate } from '@date-fns/tz/date/mini'
 import { useModal } from '@faceless-ui/modal'
@@ -11,7 +11,6 @@ import * as qs from 'qs-esm'
 import React, { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 
-import type { Column } from '../../Table/index.js'
 import type { PublishType, UpcomingEvent } from './types.js'
 
 import { FieldLabel } from '../../../fields/FieldLabel/index.js'

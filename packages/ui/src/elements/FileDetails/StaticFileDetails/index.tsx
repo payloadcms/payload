@@ -19,6 +19,7 @@ export type StaticFileDetailsProps = {
   enableAdjustments?: boolean
   handleRemove?: () => void
   hasImageSizes?: boolean
+  hideRemoveFile?: boolean
   imageCacheTag?: string
   uploadConfig: SanitizedCollectionConfig['upload']
 }
@@ -30,6 +31,7 @@ export const StaticFileDetails: React.FC<StaticFileDetailsProps> = (props) => {
     enableAdjustments,
     handleRemove,
     hasImageSizes,
+    hideRemoveFile,
     imageCacheTag,
     uploadConfig,
   } = props
@@ -66,7 +68,7 @@ export const StaticFileDetails: React.FC<StaticFileDetailsProps> = (props) => {
             />
           )}
         </div>
-        {handleRemove && (
+        {!hideRemoveFile && handleRemove && (
           <Button
             buttonStyle="icon-label"
             className={`${baseClass}__remove`}

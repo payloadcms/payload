@@ -3,11 +3,13 @@ import type { LoginWithUsernameOptions } from '../../auth/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { CollectionConfig, SanitizedCollectionConfig, SanitizedJoins } from './types.js'
 
+import { authCollectionEndpoints } from '../../auth/endpoints/index.js'
 import { getBaseAuthFields } from '../../auth/getAuthFields.js'
 import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import mergeBaseFields from '../../fields/mergeBaseFields.js'
+import { uploadCollectionEndpoints } from '../../uploads/endpoints/index.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { deepMergeWithReactComponents } from '../../utilities/deepMerge.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
@@ -56,6 +58,18 @@ export const sanitizeCollection = async (
   if (sanitized.endpoints !== false) {
     if (!sanitized.endpoints) {
       sanitized.endpoints = []
+    }
+
+    if (sanitized.auth) {
+      for (const endpoint of authCollectionEndpoints) {
+        sanitized.endpoints.push(endpoint)
+      }
+    }
+
+    if (sanitized.upload) {
+      for (const endpoint of uploadCollectionEndpoints) {
+        sanitized.endpoints.push(endpoint)
+      }
     }
 
     for (const endpoint of defaultCollectionEndpoints) {

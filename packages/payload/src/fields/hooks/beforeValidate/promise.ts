@@ -33,6 +33,7 @@ type Args<T> = {
   operation: 'create' | 'update'
   overrideAccess: boolean
   parentIndexPath: string
+  parentIsLocalized: boolean
   parentPath: string
   parentSchemaPath: string
   req: PayloadRequest
@@ -64,6 +65,7 @@ export const promise = async <T>({
   operation,
   overrideAccess,
   parentIndexPath,
+  parentIsLocalized,
   parentPath,
   parentSchemaPath,
   req,
@@ -355,6 +357,7 @@ export const promise = async <T>({
               operation,
               overrideAccess,
               parentIndexPath: '',
+              parentIsLocalized: parentIsLocalized || field.localized,
               parentPath: path + '.' + rowIndex,
               parentSchemaPath: schemaPath,
               req,
@@ -401,6 +404,7 @@ export const promise = async <T>({
                 operation,
                 overrideAccess,
                 parentIndexPath: '',
+                parentIsLocalized: parentIsLocalized || field.localized,
                 parentPath: path + '.' + rowIndex,
                 parentSchemaPath: schemaPath + '.' + block.slug,
                 req,
@@ -431,6 +435,7 @@ export const promise = async <T>({
         operation,
         overrideAccess,
         parentIndexPath: indexPath,
+        parentIsLocalized,
         parentPath,
         parentSchemaPath: schemaPath,
         req,
@@ -465,6 +470,7 @@ export const promise = async <T>({
         operation,
         overrideAccess,
         parentIndexPath: '',
+        parentIsLocalized: parentIsLocalized || field.localized,
         parentPath: path,
         parentSchemaPath: schemaPath,
         req,
@@ -500,6 +506,7 @@ export const promise = async <T>({
             operation,
             originalDoc: doc,
             overrideAccess,
+            parentIsLocalized,
             path: pathSegments,
             previousSiblingDoc: siblingDoc,
             previousValue: siblingData[field.name],
@@ -551,6 +558,7 @@ export const promise = async <T>({
         operation,
         overrideAccess,
         parentIndexPath: isNamedTab ? '' : indexPath,
+        parentIsLocalized: parentIsLocalized || field.localized,
         parentPath: isNamedTab ? path : parentPath,
         parentSchemaPath: schemaPath,
         req,
@@ -574,6 +582,7 @@ export const promise = async <T>({
         operation,
         overrideAccess,
         parentIndexPath: indexPath,
+        parentIsLocalized,
         parentPath: path,
         parentSchemaPath: schemaPath,
         req,

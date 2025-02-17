@@ -58,6 +58,7 @@ export type UploadInputProps = {
   readonly Error?: React.ReactNode
   readonly filterOptions?: FilterOptionsResult
   readonly hasMany?: boolean
+  readonly hideRemoveFile?: boolean
   readonly isSortable?: boolean
   readonly Label?: React.ReactNode
   readonly label?: StaticLabel
