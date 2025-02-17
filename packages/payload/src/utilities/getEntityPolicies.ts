@@ -10,8 +10,9 @@ import type { AllOperations, JsonObject, Payload, PayloadRequest, Where } from '
 import { combineQueries } from '../database/combineQueries.js'
 import { tabHasName } from '../fields/config/types.js'
 
+export type BlockPolicies = Record<BlockSlug, FieldsPermissions | Promise<FieldsPermissions>>
 type Args = {
-  blockPolicies: Record<BlockSlug, FieldsPermissions>
+  blockPolicies: BlockPolicies
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
   id?: number | string
   operations: AllOperations[]
@@ -165,7 +166,7 @@ const executeFieldPolicies = async ({
   payload,
   policiesObj,
 }: {
-  blockPolicies: Record<BlockSlug, FieldsPermissions>
+  blockPolicies: BlockPolicies
   createAccessPromise: CreateAccessPromise
   entityPermission: boolean
   fields: Field[]
@@ -227,14 +228,54 @@ const executeFieldPolicies = async ({
 
           await Promise.all(
             (field.blockReferences ?? field.blocks).map(async (_block) => {
-              if (typeof _block === 'string') {
-                return // TODO: Temporary
-              }
-              const block = typeof _block === 'string' ? payload.blocks[_block] : _block // TODO: Skip over string blocks
+              const block = typeof _block === 'string' ? payload.blocks[_block] : _block
 
               if (typeof _block === 'string') {
                 if (blockPolicies[_block]) {
-                  mutablePolicies[field.name].blocks[block.slug] = blockPolicies[_block]
+                  if (typeof blockPolicies[_block].then === 'function') {
+                    // Earlier access to this block is still pending, so await it instead of re-running executeFieldPolicies
+                    mutablePolicies[field.name].blocks[block.slug] = await blockPolicies[_block]
+                  } else {
+                    // It's already a resolved policy object
+                    mutablePolicies[field.name].blocks[block.slug] = blockPolicies[_block]
+                  }
+                  return
+                } else {
+                  // immediately set blockPolicies[_block] to a promise that resolves to the block policies, so that a second
+                  // parallel access won't try to set the same block policies
+                  // We have not seen this block slug yet. Immediately create a promise
+                  // so that any parallel calls will just await this same promise
+                  // instead of re-running executeFieldPolicies.
+                  blockPolicies[_block] = (async () => {
+                    // If the block doesn’t exist yet in our mutablePolicies, initialize it
+                    if (!mutablePolicies[field.name].blocks?.[block.slug]) {
+                      mutablePolicies[field.name].blocks[block.slug] = {
+                        fields: {},
+                        [operation]: { permission: entityPermission },
+                      }
+                    } else if (!mutablePolicies[field.name].blocks[block.slug][operation]) {
+                      mutablePolicies[field.name].blocks[block.slug][operation] = {
+                        permission: entityPermission,
+                      }
+                    }
+
+                    await executeFieldPolicies({
+                      blockPolicies,
+                      createAccessPromise,
+                      entityPermission,
+                      fields: block.fields,
+                      operation,
+                      payload,
+                      policiesObj: mutablePolicies[field.name].blocks[block.slug],
+                    })
+
+                    // The final resolved value of the promise:
+                    return mutablePolicies[field.name].blocks[block.slug]
+                  })()
+
+                  // Now simply wait for that promise to resolve, and place it into our policies
+                  mutablePolicies[field.name].blocks[block.slug] = await blockPolicies[_block]
+                  blockPolicies[_block] = mutablePolicies[field.name].blocks[block.slug]
                   return
                 }
               }
@@ -259,10 +300,6 @@ const executeFieldPolicies = async ({
                 payload,
                 policiesObj: mutablePolicies[field.name].blocks[block.slug],
               })
-
-              if (typeof _block === 'string') {
-                blockPolicies[_block] = mutablePolicies[field.name].blocks[block.slug]
-              }
             }),
           )
         }
