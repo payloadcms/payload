@@ -66,7 +66,7 @@ export const DocumentTabs: React.FC<{
                   return (
                     <DocumentTab
                       key={`tab-${index}`}
-                      path={'path' in viewConfig ? viewConfig.path : ''}
+                      path={viewConfig && 'path' in viewConfig ? viewConfig.path : ''}
                       {...{
                         ...props,
                         ...(tab || {}),
