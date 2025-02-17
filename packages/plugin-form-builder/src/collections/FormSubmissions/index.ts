@@ -18,9 +18,6 @@ export const generateSubmissionCollection = (
     {
       name: 'form',
       type: 'relationship',
-      admin: {
-        readOnly: true,
-      },
       relationTo: formSlug,
       required: true,
       validate: async (value, { req: { payload }, req }) => {
@@ -49,9 +46,6 @@ export const generateSubmissionCollection = (
     {
       name: 'submissionData',
       type: 'array',
-      admin: {
-        readOnly: true,
-      },
       fields: [
         {
           name: 'field',
