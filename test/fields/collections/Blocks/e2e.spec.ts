@@ -1,6 +1,8 @@
-import type { Page } from '@playwright/test'
+import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { addBlock } from 'helpers/e2e/addBlock.js'
+import { openBlockDrawer } from 'helpers/e2e/openBlockDrawer.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -24,6 +26,8 @@ const { beforeAll, beforeEach, describe } = test
 let client: RESTClient
 let page: Page
 let serverURL: string
+let context: BrowserContext
+
 // If we want to make this run in parallel: test.describe.configure({ mode: 'parallel' })
 
 describe('Block fields', () => {
@@ -35,7 +39,7 @@ describe('Block fields', () => {
       dirname,
     }))
 
-    const context = await browser.newContext()
+    context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
 
@@ -64,19 +68,13 @@ describe('Block fields', () => {
 
   test('should open blocks drawer and select first block', async () => {
     await page.goto(url.create)
-    const addButton = page.locator('#field-blocks > .blocks-field__drawer-toggler')
-    await expect(addButton).toContainText('Add Block')
-    await addButton.click()
 
-    const blocksDrawer = page.locator('[id^=drawer_1_blocks-drawer-]')
-    await expect(blocksDrawer).toBeVisible()
-
-    // select the first block in the drawer
-    const firstBlockSelector = blocksDrawer
-      .locator('.blocks-drawer__blocks .blocks-drawer__block')
-      .first()
-    await expect(firstBlockSelector).toContainText('Content')
-    await firstBlockSelector.click()
+    await addBlock({
+      page,
+      fieldName: 'blocks',
+      fieldLabelSingular: 'Blocks',
+      blockLabelSingular: 'Content',
+    })
 
     // ensure the block was appended to the rows
     const addedRow = page.locator('#field-blocks .blocks-field__row').last()
@@ -88,17 +86,18 @@ describe('Block fields', () => {
 
   test('should reset search state in blocks drawer on re-open', async () => {
     await page.goto(url.create)
-    const addButton = page.locator('#field-blocks > .blocks-field__drawer-toggler')
-    await expect(addButton).toContainText('Add Block')
-    await addButton.click()
 
-    const blocksDrawer = page.locator('[id^=drawer_1_blocks-drawer-]')
-    await expect(blocksDrawer).toBeVisible()
+    const blocksDrawer = await openBlockDrawer({
+      page,
+      fieldName: 'blocks',
+      fieldLabelSingular: 'Blocks',
+    })
 
     const searchInput = page.locator('.block-search__input')
     await searchInput.fill('Number')
 
     // select the first block in the drawer
+
     const firstBlockSelector = blocksDrawer
       .locator('.blocks-drawer__blocks .blocks-drawer__block')
       .first()
@@ -106,6 +105,7 @@ describe('Block fields', () => {
     await expect(firstBlockSelector).toContainText('Number')
 
     await page.locator('.drawer__header__close').click()
+    const addButton = page.locator('#field-blocks > .blocks-field__drawer-toggler')
     await addButton.click()
 
     await expect(blocksDrawer).toBeVisible()
@@ -131,6 +131,7 @@ describe('Block fields', () => {
     const firstBlockSelector = blocksDrawer
       .locator('.blocks-drawer__blocks .blocks-drawer__block')
       .first()
+
     await expect(firstBlockSelector).toContainText('Content')
     await firstBlockSelector.click()
 
@@ -179,19 +180,12 @@ describe('Block fields', () => {
     await page.goto(url.create)
     await expect(page.locator('#field-i18nBlocks .blocks-field__header')).toContainText('Block en')
 
-    const addButton = page.locator('#field-i18nBlocks > .blocks-field__drawer-toggler')
-    await expect(addButton).toContainText('Add Block en')
-    await addButton.click()
-
-    const blocksDrawer = page.locator('[id^=drawer_1_blocks-drawer-]')
-    await expect(blocksDrawer).toBeVisible()
-
-    // select the first block in the drawer
-    const firstBlockSelector = blocksDrawer
-      .locator('.blocks-drawer__blocks .blocks-drawer__block')
-      .first()
-    await expect(firstBlockSelector).toContainText('Text en')
-    await firstBlockSelector.click()
+    await addBlock({
+      page,
+      fieldName: 'i18nBlocks',
+      fieldLabelSingular: 'I18n Blocks',
+      blockLabelSingular: 'Text en',
+    })
 
     // ensure the block was appended to the rows
     const firstRow = page.locator('#field-i18nBlocks .blocks-field__row').first()
@@ -201,15 +195,13 @@ describe('Block fields', () => {
 
   test('should render custom block row label', async () => {
     await page.goto(url.create)
-    const addButton = page.locator('#field-blocks > .blocks-field__drawer-toggler')
-    await addButton.click()
-    const blocksDrawer = page.locator('[id^=drawer_1_blocks-drawer-]')
 
-    await blocksDrawer
-      .locator('.blocks-drawer__block .thumbnail-card__label', {
-        hasText: 'Content',
-      })
-      .click()
+    await addBlock({
+      page,
+      fieldName: 'blocks',
+      fieldLabelSingular: 'Blocks',
+      blockLabelSingular: 'Content',
+    })
 
     await expect(
       page.locator('#field-blocks .blocks-field__row .blocks-field__block-header', {
@@ -221,20 +213,18 @@ describe('Block fields', () => {
   test('should add different blocks with similar field configs', async () => {
     await page.goto(url.create)
 
-    async function addBlock(name: 'Block A' | 'Block B') {
-      await page
-        .locator('#field-blocksWithSimilarConfigs')
-        .getByRole('button', { name: 'Add Blocks With Similar Config' })
-        .click()
-      await page.getByRole('button', { name }).click()
-    }
-
-    await addBlock('Block A')
+    await addBlock({
+      page,
+      fieldName: 'blocksWithSimilarConfigs',
+      fieldLabelSingular: 'Blocks With Similar Config',
+      blockLabelSingular: 'Block A',
+    })
 
     await page
       .locator('#blocksWithSimilarConfigs-row-0')
       .getByRole('button', { name: 'Add Item' })
       .click()
+
     await page
       .locator('input[name="blocksWithSimilarConfigs.0.items.0.title"]')
       .fill('items>0>title')
@@ -243,12 +233,18 @@ describe('Block fields', () => {
       page.locator('input[name="blocksWithSimilarConfigs.0.items.0.title"]'),
     ).toHaveValue('items>0>title')
 
-    await addBlock('Block B')
+    await addBlock({
+      page,
+      fieldName: 'blocksWithSimilarConfigs',
+      fieldLabelSingular: 'Blocks With Similar Config',
+      blockLabelSingular: 'Block B',
+    })
 
     await page
       .locator('#blocksWithSimilarConfigs-row-1')
       .getByRole('button', { name: 'Add Item' })
       .click()
+
     await page
       .locator('input[name="blocksWithSimilarConfigs.1.items.0.title2"]')
       .fill('items>1>title')
@@ -267,19 +263,12 @@ describe('Block fields', () => {
   test('should fail min rows validation when rows are present', async () => {
     await page.goto(url.create)
 
-    await page
-      .locator('#field-blocksWithMinRows')
-      .getByRole('button', { name: 'Add Blocks With Min Row' })
-      .click()
-
-    const blocksDrawer = page.locator('[id^=drawer_1_blocks-drawer-]')
-    await expect(blocksDrawer).toBeVisible()
-
-    const firstBlockSelector = blocksDrawer
-      .locator('.blocks-drawer__blocks .blocks-drawer__block')
-      .first()
-
-    await firstBlockSelector.click()
+    await addBlock({
+      page,
+      fieldName: 'blocksWithMinRows',
+      fieldLabelSingular: 'Blocks With Min Rows',
+      blockLabelSingular: 'Block',
+    })
 
     const firstRow = page.locator('input[name="blocksWithMinRows.0.blockTitle"]')
     await expect(firstRow).toBeVisible()
@@ -326,6 +315,7 @@ describe('Block fields', () => {
           .locator('.custom-blocks-field-management')
           .getByRole('button', { name: 'Add Block 2' })
           .click()
+
         await expect(
           page.locator('#field-customBlocks input[name="customBlocks.1.block2Title"]'),
         ).toHaveValue('Block 2: Prefilled Title')
@@ -334,6 +324,7 @@ describe('Block fields', () => {
           .locator('.custom-blocks-field-management')
           .getByRole('button', { name: 'Replace Block 2' })
           .click()
+
         await expect(
           page.locator('#field-customBlocks input[name="customBlocks.1.block1Title"]'),
         ).toHaveValue('REPLACED BLOCK')
@@ -342,13 +333,13 @@ describe('Block fields', () => {
   })
 
   describe('sortable blocks', () => {
-    test('should have disabled admin sorting', async () => {
+    test('should not render sort controls when sorting is disabled', async () => {
       await page.goto(url.create)
       const field = page.locator('#field-disableSort > div > div > .array-actions__action-chevron')
       expect(await field.count()).toEqual(0)
     })
 
-    test('the drag handle should be hidden', async () => {
+    test('should not render drag handle when sorting is disabled', async () => {
       await page.goto(url.create)
       const field = page.locator(
         '#field-disableSort > .blocks-field__rows > div > div > .collapsible__drag',
