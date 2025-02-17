@@ -120,6 +120,7 @@ import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type {
   ArrayFieldValidation,
   BlocksFieldValidation,
+  BlockSlug,
   CheckboxFieldValidation,
   CodeFieldValidation,
   CollectionSlug,
@@ -1404,6 +1405,12 @@ export type BlocksField = {
      */
     isSortable?: boolean
   } & Admin
+  /**
+   * Like `blocks`, but allows you to also pass strings that are slugs of blocks defined in `config.blocks`.
+   *
+   * @todo `blockReferences` will be merged with `blocks` in 4.0
+   */
+  blockReferences?: (Block | BlockSlug)[]
   blocks: Block[]
   defaultValue?: DefaultValue
   labels?: Labels
@@ -1415,6 +1422,12 @@ export type BlocksField = {
 
 export type BlocksFieldClient = {
   admin?: AdminClient & Pick<BlocksField['admin'], 'initCollapsed' | 'isSortable'>
+  /**
+   * Like `blocks`, but allows you to also pass strings that are slugs of blocks defined in `config.blocks`.
+   *
+   * @todo `blockReferences` will be merged with `blocks` in 4.0
+   */
+  blockReferences?: (ClientBlock | string)[]
   blocks: ClientBlock[]
   labels?: LabelsClient
 } & FieldBaseClient &
@@ -1510,8 +1523,14 @@ export type FlattenedBlock = {
 } & Block
 
 export type FlattenedBlocksField = {
+  /**
+   * Like `blocks`, but allows you to also pass strings that are slugs of blocks defined in `config.blocks`.
+   *
+   * @todo `blockReferences` will be merged with `blocks` in 4.0
+   */
+  blockReferences?: (FlattenedBlock | string)[]
   blocks: FlattenedBlock[]
-} & BlocksField
+} & Omit<BlocksField, 'blockReferences' | 'blocks'>
 
 export type FlattenedGroupField = {
   flattenedFields: FlattenedField[]

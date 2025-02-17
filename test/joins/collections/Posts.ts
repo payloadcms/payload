@@ -6,12 +6,17 @@ export const Posts: CollectionConfig = {
   slug: postsSlug,
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'category', 'updatedAt', 'createdAt'],
+    defaultColumns: ['title', 'localizedText', 'category', 'updatedAt', 'createdAt'],
   },
   fields: [
     {
       name: 'title',
       type: 'text',
+    },
+    {
+      name: 'localizedText',
+      type: 'text',
+      localized: true,
     },
     {
       name: 'author',

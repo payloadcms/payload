@@ -185,6 +185,35 @@ describe('relationship', () => {
     await expect(locator1).toHaveCount(0)
   })
 
+  test('should hide edit button in main doc when relationship deleted', async () => {
+    const createdRelatedDoc = await payload.create({
+      collection: textFieldsSlug,
+      data: {
+        text: 'doc to be deleted',
+      },
+    })
+    const doc = await payload.create({
+      collection: relationshipFieldsSlug,
+      data: {
+        relationship: {
+          value: createdRelatedDoc.id,
+          relationTo: textFieldsSlug,
+        },
+      },
+    })
+    await payload.delete({
+      collection: textFieldsSlug,
+      id: createdRelatedDoc.id,
+    })
+
+    await page.goto(url.edit(doc.id))
+
+    const editBtn = page.locator(
+      '#field-relationship button.relationship--single-value__drawer-toggler',
+    )
+    await expect(editBtn).toHaveCount(0)
+  })
+
   // TODO: Flaky test in CI - fix this. https://github.com/payloadcms/payload/actions/runs/8910825395/job/24470963991
   test.skip('should clear relationship values', async () => {
     await page.goto(url.create)

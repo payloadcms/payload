@@ -123,7 +123,8 @@ const traverseFields = ({
       case 'blocks': {
         const blocksSelect = select[field.name] as SelectType
 
-        for (const block of field.blocks) {
+        for (const _block of field.blockReferences ?? field.blocks) {
+          const block = typeof _block === 'string' ? adapter.payload.blocks[_block] : _block
           if (
             (selectMode === 'include' && blocksSelect[block.slug] === true) ||
             (selectMode === 'exclude' && typeof blocksSelect[block.slug] === 'undefined')

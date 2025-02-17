@@ -108,8 +108,15 @@ export function buildObjectType({
       }
     },
     blocks: (objectTypeConfig: ObjectTypeConfig, field: BlocksField) => {
-      const blockTypes: GraphQLObjectType<any, any>[] = field.blocks.reduce((acc, block) => {
-        if (!graphqlResult.types.blockTypes[block.slug]) {
+      const blockTypes: GraphQLObjectType<any, any>[] = (
+        field.blockReferences ?? field.blocks
+      ).reduce((acc, _block) => {
+        const blockSlug = typeof _block === 'string' ? _block : _block.slug
+        if (!graphqlResult.types.blockTypes[blockSlug]) {
+          // TODO: iterate over blocks mapped to block slug in v4, or pass through payload.blocks
+          const block =
+            typeof _block === 'string' ? config.blocks.find((b) => b.slug === _block) : _block
+
           const interfaceName =
             block?.interfaceName || block?.graphQL?.singularName || toWords(block.slug, true)
 
@@ -133,8 +140,8 @@ export function buildObjectType({
           }
         }
 
-        if (graphqlResult.types.blockTypes[block.slug]) {
-          acc.push(graphqlResult.types.blockTypes[block.slug])
+        if (graphqlResult.types.blockTypes[blockSlug]) {
+          acc.push(graphqlResult.types.blockTypes[blockSlug])
         }
 
         return acc

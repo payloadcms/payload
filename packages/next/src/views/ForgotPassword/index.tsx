@@ -1,8 +1,7 @@
 import type { AdminViewProps } from 'payload'
 
-import { Button } from '@payloadcms/ui'
+import { Button, Link } from '@payloadcms/ui'
 import { formatAdminURL, Translation } from '@payloadcms/ui/shared'
-import LinkImport from 'next/link.js'
 import React, { Fragment } from 'react'
 
 import { FormHeader } from '../../elements/FormHeader/index.js'
@@ -10,7 +9,6 @@ import { ForgotPasswordForm } from './ForgotPasswordForm/index.js'
 
 export { generateForgotPasswordMetadata } from './meta.js'
 
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 export const forgotPasswordBaseClass = 'forgot-password'
 
 export const ForgotPasswordView: React.FC<AdminViewProps> = ({ initPageResult }) => {
@@ -54,7 +52,7 @@ export const ForgotPasswordView: React.FC<AdminViewProps> = ({ initPageResult })
           }
           heading={i18n.t('authentication:alreadyLoggedIn')}
         />
-        <Button buttonStyle="secondary" el="link" Link={Link} size="large" to={adminRoute}>
+        <Button buttonStyle="secondary" el="link" size="large" to={adminRoute}>
           {i18n.t('general:backToDashboard')}
         </Button>
       </Fragment>

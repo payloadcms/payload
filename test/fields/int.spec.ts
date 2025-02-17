@@ -258,7 +258,7 @@ describe('Fields', () => {
           text: 'required',
           blocks: [
             {
-              blockType: 'block',
+              blockType: 'blockWithText',
               texts: ['text_1', 'text_2'],
             },
           ],
@@ -271,7 +271,7 @@ describe('Fields', () => {
           text: 'required',
           blocks: [
             {
-              blockType: 'block',
+              blockType: 'blockWithText',
               texts: ['text_other', 'text_2'],
             },
           ],
@@ -703,7 +703,7 @@ describe('Fields', () => {
       expect(block.blocks[0]?.hasManyBlocks).toStrictEqual(['a', 'b'])
     })
 
-    it('should work with autosave ', async () => {
+    it('should work with autosave', async () => {
       let data = await payload.create({
         collection: 'select-versions-fields',
         data: { hasMany: ['a', 'b', 'c'] },
@@ -975,7 +975,7 @@ describe('Fields', () => {
       data: {
         blocks: [
           {
-            blockType: 'block',
+            blockType: 'blockWithNumber',
             numbers: [10, 30],
           },
         ],
@@ -987,7 +987,7 @@ describe('Fields', () => {
       data: {
         blocks: [
           {
-            blockType: 'block',
+            blockType: 'blockWithNumber',
             numbers: [10, 40],
           },
         ],

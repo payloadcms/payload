@@ -84,7 +84,6 @@
     "pretest": "pnpm build"
   },
   "dependencies": {
-    "@monaco-editor/react": "4.6.0",
     "@next/env": "^15.1.5",
     "@payloadcms/translations": "workspace:*",
     "@types/busboy": "1.5.4",
@@ -117,6 +116,7 @@
   },
   "devDependencies": {
     "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
+    "@monaco-editor/react": "4.7.0",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/json-schema": "7.0.15",
     "@types/minimist": "1.2.2",

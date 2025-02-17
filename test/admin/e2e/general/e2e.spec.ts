@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 
@@ -64,6 +64,7 @@ const dirname = path.resolve(currentFolder, '../../')
 describe('General', () => {
   let page: Page
   let postsUrl: AdminUrlUtil
+  let context: BrowserContext
   let geoUrl: AdminUrlUtil
   let notInViewUrl: AdminUrlUtil
   let globalURL: AdminUrlUtil
@@ -89,7 +90,7 @@ describe('General', () => {
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
     disableDuplicateURL = new AdminUrlUtil(serverURL, disableDuplicateSlug)
 
-    const context = await browser.newContext()
+    context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
 
@@ -226,7 +227,6 @@ describe('General', () => {
     describe('document meta', () => {
       test('should render custom meta title from collection config', async () => {
         await page.goto(customViewsURL.list)
-        await page.waitForURL(customViewsURL.list)
         const pattern = new RegExp(`^${customCollectionMetaTitle}`)
         await expect(page.title()).resolves.toMatch(pattern)
       })
@@ -241,7 +241,6 @@ describe('General', () => {
         await navigateToDoc(page, customViewsURL)
         const versionsURL = `${page.url()}/versions`
         await page.goto(versionsURL)
-        await page.waitForURL(versionsURL)
         const pattern = new RegExp(`^${customVersionsTabMetaTitle}`)
         await expect(page.title()).resolves.toMatch(pattern)
       })
@@ -250,7 +249,6 @@ describe('General', () => {
         await navigateToDoc(page, customViewsURL)
         const customTabURL = `${page.url()}/custom-tab-view`
         await page.goto(customTabURL)
-        await page.waitForURL(customTabURL)
         const pattern = new RegExp(`^${customViewMetaTitle}`)
         await expect(page.title()).resolves.toMatch(pattern)
       })
@@ -259,7 +257,6 @@ describe('General', () => {
         await navigateToDoc(page, customViewsURL)
         const customTabURL = `${page.url()}${customTabViewPath}`
         await page.goto(customTabURL)
-        await page.waitForURL(customTabURL)
         const pattern = new RegExp(`^${customCollectionMetaTitle}`)
         await expect(page.title()).resolves.toMatch(pattern)
       })
@@ -269,10 +266,8 @@ describe('General', () => {
   describe('theme', () => {
     test('should render light theme by default', async () => {
       await page.goto(postsUrl.admin)
-      await page.waitForURL(postsUrl.admin)
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
       await page.goto(`${postsUrl.admin}/account`)
-      await page.waitForURL(`${postsUrl.admin}/account`)
       await expect(page.locator('#field-theme-auto')).toBeChecked()
       await expect(page.locator('#field-theme-light')).not.toBeChecked()
       await expect(page.locator('#field-theme-dark')).not.toBeChecked()
@@ -280,7 +275,6 @@ describe('General', () => {
 
     test('should explicitly change to light theme', async () => {
       await page.goto(`${postsUrl.admin}/account`)
-      await page.waitForURL(`${postsUrl.admin}/account`)
       await page.locator('label[for="field-theme-light"]').click()
       await expect(page.locator('#field-theme-auto')).not.toBeChecked()
       await expect(page.locator('#field-theme-light')).toBeChecked()
@@ -293,7 +287,6 @@ describe('General', () => {
 
       // go back to auto theme
       await page.goto(`${postsUrl.admin}/account`)
-      await page.waitForURL(`${postsUrl.admin}/account`)
       await page.locator('label[for="field-theme-auto"]').click()
       await expect(page.locator('#field-theme-auto')).toBeChecked()
       await expect(page.locator('#field-theme-light')).not.toBeChecked()
@@ -303,7 +296,6 @@ describe('General', () => {
 
     test('should explicitly change to dark theme', async () => {
       await page.goto(`${postsUrl.admin}/account`)
-      await page.waitForURL(`${postsUrl.admin}/account`)
       await page.locator('label[for="field-theme-dark"]').click()
       await expect(page.locator('#field-theme-auto')).not.toBeChecked()
       await expect(page.locator('#field-theme-light')).not.toBeChecked()
@@ -316,7 +308,6 @@ describe('General', () => {
 
       // go back to auto theme
       await page.goto(`${postsUrl.admin}/account`)
-      await page.waitForURL(`${postsUrl.admin}/account`)
       await page.locator('label[for="field-theme-auto"]').click()
       await expect(page.locator('#field-theme-auto')).toBeChecked()
       await expect(page.locator('#field-theme-light')).not.toBeChecked()
@@ -350,7 +341,6 @@ describe('General', () => {
   describe('navigation', () => {
     test('nav — should navigate to collection', async () => {
       await page.goto(postsUrl.admin)
-      await page.waitForURL(postsUrl.admin)
       await openNav(page)
       const anchor = page.locator(`#nav-${postsCollectionSlug}`)
       const anchorHref = await anchor.getAttribute('href')
@@ -360,7 +350,6 @@ describe('General', () => {
 
     test('nav — should navigate to a global', async () => {
       await page.goto(postsUrl.admin)
-      await page.waitForURL(postsUrl.admin)
       await openNav(page)
       const anchor = page.locator(`#nav-global-${globalSlug}`)
       const anchorHref = await anchor.getAttribute('href')
@@ -370,7 +359,6 @@ describe('General', () => {
 
     test('dashboard — should navigate to collection', async () => {
       await page.goto(postsUrl.admin)
-      await page.waitForURL(postsUrl.admin)
       const anchor = page.locator(`#card-${postsCollectionSlug} a.card__click`)
       const anchorHref = await anchor.getAttribute('href')
       await anchor.click()
@@ -379,7 +367,6 @@ describe('General', () => {
 
     test('nav — should collapse and expand collection groups', async () => {
       await page.goto(postsUrl.admin)
-      await page.waitForURL(postsUrl.admin)
       await openNav(page)
       const navGroup = page.locator('#nav-group-One .nav-group__toggle')
       await expect(navGroup).toContainText('One')
@@ -406,7 +393,6 @@ describe('General', () => {
 
     test('nav — should save group collapse preferences', async () => {
       await page.goto(postsUrl.admin)
-      await page.waitForURL(postsUrl.admin)
       await openNav(page)
       await page.locator('#nav-group-One .nav-group__toggle').click()
       const link = page.locator('#nav-group-one-collection-ones')
@@ -429,25 +415,33 @@ describe('General', () => {
       await expect(collectionBreadcrumb).toHaveText(slugPluralLabel)
       expect(page.url()).toContain(postsUrl.list)
     })
+
+    test('should replace history when adding query params to the URL and not push a new entry', async () => {
+      await page.goto(postsUrl.admin)
+      await page.locator('.dashboard__card-list .card').first().click()
+      // wait for the search params to get injected into the URL
+      const escapedAdminURL = postsUrl.admin.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const pattern = new RegExp(`${escapedAdminURL}/collections/[^?]+\\?limit=[^&]+`)
+      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toMatch(pattern)
+      await page.goBack()
+      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toMatch(postsUrl.admin)
+    })
   })
 
   describe('hidden entities', () => {
     test('nav — should not show hidden collections and globals', async () => {
       await page.goto(postsUrl.admin)
-      // nav menu
       await expect(page.locator('#nav-hidden-collection')).toBeHidden()
       await expect(page.locator('#nav-hidden-global')).toBeHidden()
     })
 
     test('dashboard — should not show hidden collections and globals', async () => {
       await page.goto(postsUrl.admin)
-      // dashboard
       await expect(page.locator('#card-hidden-collection')).toBeHidden()
       await expect(page.locator('#card-hidden-global')).toBeHidden()
     })
 
     test('routing — should 404 on hidden collections and globals', async () => {
-      // routing
       await page.goto(postsUrl.collection('hidden-collection'))
       await expect(page.locator('.not-found')).toContainText('Nothing found')
       await page.goto(postsUrl.global('hidden-global'))
@@ -456,20 +450,17 @@ describe('General', () => {
 
     test('nav — should not show group: false collections and globals', async () => {
       await page.goto(notInViewUrl.admin)
-      // nav menu
       await expect(page.locator('#nav-not-in-view-collection')).toBeHidden()
       await expect(page.locator('#nav-global-not-in-view-global')).toBeHidden()
     })
 
     test('dashboard — should not show group: false collections and globals', async () => {
       await page.goto(notInViewUrl.admin)
-      // dashboard
       await expect(page.locator('#card-not-in-view-collection')).toBeHidden()
       await expect(page.locator('#card-not-in-view-global')).toBeHidden()
     })
 
     test('routing — should not 404 on group: false collections and globals', async () => {
-      // routing
       await page.goto(notInViewUrl.collection('not-in-view-collection'))
       await expect(page.locator('.list-header h1')).toContainText('Not In View Collections')
       await page.goto(notInViewUrl.global('not-in-view-global'))
@@ -480,7 +471,6 @@ describe('General', () => {
   describe('custom CSS', () => {
     test('should see custom css in admin UI', async () => {
       await page.goto(postsUrl.admin)
-      await page.waitForURL(postsUrl.admin)
       await openNav(page)
       const navControls = page.locator('#custom-css')
       await expect(navControls).toHaveCSS('font-family', 'monospace')
@@ -506,7 +496,6 @@ describe('General', () => {
   describe('custom root views', () => {
     test('should render custom view', async () => {
       await page.goto(`${serverURL}${adminRoutes.routes.admin}${customViewPath}`)
-      await page.waitForURL(`**${adminRoutes.routes.admin}${customViewPath}`)
       await expect(page.locator('h1#custom-view-title')).toContainText(customViewTitle)
     })
 
@@ -520,7 +509,6 @@ describe('General', () => {
 
     test('should render public custom view', async () => {
       await page.goto(`${serverURL}${adminRoutes.routes.admin}${publicCustomViewPath}`)
-      await page.waitForURL(`**${adminRoutes.routes.admin}${publicCustomViewPath}`)
       await expect(page.locator('h1#custom-view-title')).toContainText(customViewTitle)
     })
 
@@ -538,7 +526,6 @@ describe('General', () => {
       await saveDocAndAssert(page)
 
       await page.goto(`${serverURL}${adminRoutes.routes.admin}${protectedCustomNestedViewPath}`)
-      await page.waitForURL(`**${adminRoutes.routes.admin}${protectedCustomNestedViewPath}`)
       await expect(page.locator('h1#custom-view-title')).toContainText(customNestedViewTitle)
     })
   })
@@ -936,6 +923,14 @@ describe('General', () => {
       await confirmButton.click()
       const toast = page.locator('li.payload-toast-item.toast-success')
       await expect(toast).toBeVisible()
+    })
+  })
+
+  describe('progress bar', () => {
+    test('should show progress bar on page navigation', async () => {
+      await page.goto(postsUrl.admin)
+      await page.locator('.dashboard__card-list .card').first().click()
+      await expect(page.locator('.progress-bar')).toBeVisible()
     })
   })
 })

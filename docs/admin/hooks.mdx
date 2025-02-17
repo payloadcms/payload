@@ -1113,5 +1113,40 @@ setParams({ depth: 2 })
 
 This is useful for scenarios where you need to trigger another fetch regardless of the `url` argument changing.
 
+## useRouteTransition
 
+Route transitions are useful in showing immediate visual feedback to the user when navigating between pages. This is especially useful on slow networks when navigating to data heavy or process intensive pages.
 
+By default, any instances of `Link` from `@payloadcms/ui` will trigger route transitions dy default.
+
+```tsx
+import { Link } from '@payloadcms/ui'
+
+const MyComponent = () => {
+  return (
+    <Link href="/somewhere">
+      Go Somewhere
+    </Link>
+  )
+}
+```
+
+You can also trigger route transitions programmatically, such as when using `router.push` from `next/router`. To do this, wrap your function calls with the `startRouteTransition` method provided by the `useRouteTransition` hook.
+
+```ts
+'use client'
+import React, { useCallback } from 'react'
+import { useTransition } from '@payloadcms/ui'
+import { useRouter } from 'next/navigation'
+
+const MyComponent: React.FC = () => {
+  const router = useRouter()
+  const { startRouteTransition } = useRouteTransition()
+
+  const redirectSomewhere = useCallback(() => {
+    startRouteTransition(() => router.push('/somewhere'))
+  }, [startRouteTransition, router])
+
+  // ...
+}
+```

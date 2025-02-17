@@ -248,6 +248,12 @@ export default buildConfigWithDefaults({
           relationTo: 'movies',
           hasMany: true,
         },
+        {
+          name: 'directors',
+          type: 'relationship',
+          relationTo: 'directors',
+          hasMany: true,
+        },
       ],
     },
     {

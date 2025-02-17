@@ -10,7 +10,7 @@ import {
   reduceFieldsToValues,
   wait,
 } from 'payload/shared'
-import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import type {
@@ -29,6 +29,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
+import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
@@ -88,6 +89,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const operation = useOperation()
 
   const { getFormState } = useServerFunctions()
+  const { startRouteTransition } = useRouteTransition()
 
   const { config } = useConfig()
 
@@ -363,7 +365,7 @@ export const Form: React.FC<FormProps> = (props) => {
           setProcessing(false)
 
           if (redirect) {
-            router.push(redirect)
+            startRouteTransition(() => router.push(redirect))
           } else if (!disableSuccessStatus) {
             successToast(json.message || t('general:submissionSuccessful'))
           }

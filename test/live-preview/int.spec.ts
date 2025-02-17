@@ -15,12 +15,13 @@ import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Media, Page, Post, Tenant } from './payload-types.js'
 
 import { Pages } from './collections/Pages.js'
+import config from './config.js'
 import { postsSlug, tenantsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const schemaJSON = fieldSchemaToJSON(Pages.fields)
+const schemaJSON = fieldSchemaToJSON(Pages.fields, config)
 
 let payload: Payload
 let restClient: NextRESTClient

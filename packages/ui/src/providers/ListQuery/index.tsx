@@ -153,6 +153,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   )
 
   // If `defaultLimit` or `defaultSort` are updated externally, update the query
+  // I.e. when HMR runs, these properties may be different
   useEffect(() => {
     if (modifySearchParams) {
       let shouldUpdateQueryString = false
@@ -173,7 +174,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       if (shouldUpdateQueryString) {
         setCurrentQuery(newQuery)
         // Do not use router.replace here to avoid re-rendering on initial load
-        window.history.pushState(null, '', `?${qs.stringify(newQuery)}`)
+        window.history.replaceState(null, '', `?${qs.stringify(newQuery)}`)
       }
     }
   }, [defaultSort, defaultLimit, router, modifySearchParams])

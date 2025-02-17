@@ -1,10 +1,8 @@
 import type { I18nClient, TFunction } from '@payloadcms/translations'
 import type { ClientCollectionConfig } from 'payload'
 
-import { getTranslation } from '@payloadcms/translations'
-import LinkImport from 'next/link.js'
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 import { useModal } from '@faceless-ui/modal'
+import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import { Button } from '../../../elements/Button/index.js'
@@ -56,7 +54,6 @@ const DefaultListHeader: React.FC<ListHeaderProps> = ({
             })}
             buttonStyle="pill"
             el={'link'}
-            Link={Link}
             size="small"
             to={newDocumentURL}
           >

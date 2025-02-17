@@ -777,9 +777,6 @@ importers:
 
   packages/payload:
     dependencies:
-      '@monaco-editor/react':
-        specifier: 4.6.0
-        version: 4.6.0(monaco-editor@0.52.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@next/env':
         specifier: ^15.1.5
         version: 15.1.5
@@ -874,6 +871,9 @@ importers:
       '@hyrious/esbuild-plugin-commonjs':
         specifier: ^0.2.4
         version: 0.2.4(cjs-module-lexer@1.4.1)(esbuild@0.24.2)
+      '@monaco-editor/react':
+        specifier: 4.7.0
+        version: 4.7.0(monaco-editor@0.52.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
@@ -1488,8 +1488,8 @@ importers:
         specifier: 3.0.1
         version: 3.0.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@monaco-editor/react':
-        specifier: 4.6.0
-        version: 4.6.0(monaco-editor@0.52.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+        specifier: 4.7.0
+        version: 4.7.0(monaco-editor@0.52.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@payloadcms/translations':
         specifier: workspace:*
         version: link:../translations
@@ -1722,6 +1722,9 @@ importers:
       create-payload-app:
         specifier: workspace:*
         version: link:../packages/create-payload-app
+      dequal:
+        specifier: 2.0.3
+        version: 2.0.3
       dotenv:
         specifier: 16.4.7
         version: 16.4.7
@@ -3971,13 +3974,11 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@monaco-editor/loader@1.4.0':
-    resolution: {integrity: sha512-00ioBig0x642hytVspPl7DbQyaSWRaolYie/UFNjoTdvoKPzo6xrXLhTk9ixgIKcLH5b5vDOjVNiGyY+uDCUlg==}
-    peerDependencies:
-      monaco-editor: '>= 0.21.0 < 1'
+  '@monaco-editor/loader@1.5.0':
+    resolution: {integrity: sha512-hKoGSM+7aAc7eRTRjpqAZucPmoNOC4UUbknb/VNoTkEIkCPhqV8LfbsgM1webRM7S/z21eHEx9Fkwx8Z/C/+Xw==}
 
-  '@monaco-editor/react@4.6.0':
-    resolution: {integrity: sha512-RFkU9/i7cN2bsq/iTkurMWOEErmYcY6JiQI3Jn+WeR/FGISH8JbHERjpS9oRuSOPvDMJI0Z8nJeKkbOs9sBYQw==}
+  '@monaco-editor/react@4.7.0':
+    resolution: {integrity: sha512-cyzXQCtO47ydzxpQtCGSQGOC8Gk3ZUeBXFAxD+CWXYFo5OqZyZUonFl0DwUlTyAfRHntBfw2p3w4s9R6oe1eCA==}
     peerDependencies:
       monaco-editor: '>= 0.25.0 < 1'
       react: 19.0.0
@@ -12921,14 +12922,13 @@ snapshots:
   '@libsql/win32-x64-msvc@0.4.7':
     optional: true
 
-  '@monaco-editor/loader@1.4.0(monaco-editor@0.52.0)':
+  '@monaco-editor/loader@1.5.0':
     dependencies:
-      monaco-editor: 0.52.0
       state-local: 1.0.7
 
-  '@monaco-editor/react@4.6.0(monaco-editor@0.52.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
+  '@monaco-editor/react@4.7.0(monaco-editor@0.52.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
     dependencies:
-      '@monaco-editor/loader': 1.4.0(monaco-editor@0.52.0)
+      '@monaco-editor/loader': 1.5.0
       monaco-editor: 0.52.0
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)

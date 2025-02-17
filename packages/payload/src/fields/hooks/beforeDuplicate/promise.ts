@@ -1,7 +1,7 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
-import type { Field, FieldHookArgs, TabAsField } from '../../config/types.js'
+import type { Block, Field, FieldHookArgs, TabAsField } from '../../config/types.js'
 
 import { fieldAffectsData } from '../../config/types.js'
 import { getFieldPathsModified as getFieldPaths } from '../../getFieldPaths.js'
@@ -182,9 +182,12 @@ export const promise = async <T>({
                 rows.forEach((row, rowIndex) => {
                   const blockTypeToMatch = row.blockType
 
-                  const block = field.blocks.find(
-                    (blockType) => blockType.slug === blockTypeToMatch,
-                  )
+                  const block: Block | undefined =
+                    req.payload.blocks[blockTypeToMatch] ??
+                    ((field.blockReferences ?? field.blocks).find(
+                      (curBlock) =>
+                        typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
+                    ) as Block | undefined)
 
                   promises.push(
                     traverseFields({
@@ -277,7 +280,12 @@ export const promise = async <T>({
 
             rows.forEach((row, rowIndex) => {
               const blockTypeToMatch = row.blockType
-              const block = field.blocks.find((blockType) => blockType.slug === blockTypeToMatch)
+
+              const block: Block | undefined =
+                req.payload.blocks[blockTypeToMatch] ??
+                ((field.blockReferences ?? field.blocks).find(
+                  (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
+                ) as Block | undefined)
 
               if (block) {
                 ;(row as JsonObject).blockType = blockTypeToMatch
