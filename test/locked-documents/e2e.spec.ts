@@ -1,5 +1,4 @@
 import type { Page } from '@playwright/test'
-import type { TypeWithID } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import * as path from 'path'
@@ -8,7 +7,14 @@ import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
-import type { Config } from './payload-types.js'
+import type {
+  Config,
+  Page as PageType,
+  PayloadLockedDocument,
+  Post,
+  Test,
+  User,
+} from './payload-types.js'
 
 import {
   ensureCompilationIsDone,
@@ -19,7 +25,6 @@ import {
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { postsSlug } from './collections/Posts/index.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -80,12 +85,12 @@ describe('Locked Documents', () => {
   })
 
   describe('list view - collections', () => {
-    let postDoc
-    let anotherPostDoc
-    let user2
-    let lockedDoc
-    let testDoc
-    let testLockedDoc
+    let postDoc: Post
+    let anotherPostDoc: Post
+    let user2: User
+    let lockedDoc: PayloadLockedDocument
+    let testDoc: Test
+    let testLockedDoc: PayloadLockedDocument
 
     beforeAll(async () => {
       postDoc = await createPostDoc({
@@ -326,14 +331,14 @@ describe('Locked Documents', () => {
   })
 
   describe('document locking / unlocking - one user', () => {
-    let postDoc
-    let postDocTwo
-    let expiredDocOne
-    let expiredLockedDocOne
-    let expiredDocTwo
-    let expiredLockedDocTwo
-    let testDoc
-    let user2
+    let postDoc: Post
+    let postDocTwo: Post
+    let expiredDocOne: Test
+    let expiredLockedDocOne: PayloadLockedDocument
+    let expiredDocTwo: Test
+    let expiredLockedDocTwo: PayloadLockedDocument
+    let testDoc: Test
+    let user2: User
 
     beforeAll(async () => {
       postDoc = await createPostDoc({
@@ -636,11 +641,11 @@ describe('Locked Documents', () => {
   })
 
   describe('document locking - incoming user', () => {
-    let postDoc
-    let user2
-    let lockedDoc
-    let expiredTestDoc
-    let expiredTestLockedDoc
+    let postDoc: Post
+    let user2: User
+    let lockedDoc: PayloadLockedDocument
+    let expiredTestDoc: Test
+    let expiredTestLockedDoc: PayloadLockedDocument
 
     beforeAll(async () => {
       postDoc = await createPostDoc({
@@ -775,9 +780,9 @@ describe('Locked Documents', () => {
   })
 
   describe('document take over - modal - incoming user', () => {
-    let postDoc
-    let user2
-    let lockedDoc
+    let postDoc: Post
+    let user2: User
+    let lockedDoc: PayloadLockedDocument
 
     beforeAll(async () => {
       postDoc = await createPostDoc({
@@ -855,7 +860,7 @@ describe('Locked Documents', () => {
 
       const userEmail =
         // eslint-disable-next-line playwright/no-conditional-in-test
-        lockedDoc.docs[0].user.value &&
+        lockedDoc.docs[0]?.user.value &&
         typeof lockedDoc.docs[0].user.value === 'object' &&
         'email' in lockedDoc.docs[0].user.value &&
         lockedDoc.docs[0].user.value.email
@@ -865,9 +870,9 @@ describe('Locked Documents', () => {
   })
 
   describe('document take over - doc - incoming user', () => {
-    let postDoc
-    let user2
-    let lockedDoc
+    let postDoc: Post
+    let user2: User
+    let lockedDoc: PayloadLockedDocument
 
     beforeAll(async () => {
       postDoc = await createPostDoc({
@@ -947,7 +952,7 @@ describe('Locked Documents', () => {
 
       const userEmail =
         // eslint-disable-next-line playwright/no-conditional-in-test
-        lockedDoc.docs[0].user.value &&
+        lockedDoc.docs[0]?.user.value &&
         typeof lockedDoc.docs[0].user.value === 'object' &&
         'email' in lockedDoc.docs[0].user.value &&
         lockedDoc.docs[0].user.value.email
@@ -957,8 +962,8 @@ describe('Locked Documents', () => {
   })
 
   describe('document locking - previous user', () => {
-    let postDoc
-    let user2
+    let postDoc: Post
+    let user2: User
 
     beforeAll(async () => {
       postDoc = await createPostDoc({
@@ -1011,7 +1016,7 @@ describe('Locked Documents', () => {
 
       // Update payload-locks collection document with different user
       await payload.update({
-        id: lockedDoc.docs[0].id,
+        id: lockedDoc.docs[0]?.id as number | string,
         collection: lockedDocumentCollection,
         data: {
           user: {
@@ -1033,7 +1038,7 @@ describe('Locked Documents', () => {
 
       await payload.delete({
         collection: lockedDocumentCollection,
-        id: lockedDoc.docs[0].id,
+        id: lockedDoc.docs[0]?.id,
       })
     })
 
@@ -1062,7 +1067,7 @@ describe('Locked Documents', () => {
 
       // Update payload-locks collection document with different user
       await payload.update({
-        id: lockedDoc.docs[0].id,
+        id: lockedDoc.docs[0]?.id as number | string,
         collection: lockedDocumentCollection,
         data: {
           user: {
@@ -1089,7 +1094,7 @@ describe('Locked Documents', () => {
 
       await payload.delete({
         collection: lockedDocumentCollection,
-        id: lockedDoc.docs[0].id,
+        id: lockedDoc.docs[0]?.id,
       })
     })
 
@@ -1118,7 +1123,7 @@ describe('Locked Documents', () => {
 
       // Update payload-locks collection document with different user
       await payload.update({
-        id: lockedDoc.docs[0].id,
+        id: lockedDoc.docs[0]?.id as number | string,
         collection: lockedDocumentCollection,
         data: {
           user: {
@@ -1151,9 +1156,9 @@ describe('Locked Documents', () => {
   })
 
   describe('dashboard - globals', () => {
-    let user2
-    let lockedMenuGlobal
-    let lockedAdminGlobal
+    let user2: User
+    let lockedMenuGlobal: PayloadLockedDocument
+    let lockedAdminGlobal: PayloadLockedDocument
 
     beforeAll(async () => {
       user2 = await payload.create({
@@ -1298,27 +1303,23 @@ describe('Locked Documents', () => {
   })
 })
 
-async function createPageDoc(data: any): Promise<Record<string, unknown> & TypeWithID> {
+async function createPageDoc(data: Partial<PageType>): Promise<PageType> {
   return payload.create({
     collection: 'pages',
     data,
-  }) as unknown as Promise<Record<string, unknown> & TypeWithID>
+  }) as unknown as Promise<PageType>
 }
 
-async function createPostDoc(data: any): Promise<Record<string, unknown> & TypeWithID> {
+async function createPostDoc(data: Partial<Post>): Promise<Post> {
   return payload.create({
     collection: 'posts',
     data,
-  }) as unknown as Promise<Record<string, unknown> & TypeWithID>
+  }) as unknown as Promise<Post>
 }
 
-async function createTestDoc(data: any): Promise<Record<string, unknown> & TypeWithID> {
+async function createTestDoc(data: Partial<Test>): Promise<Test> {
   return payload.create({
     collection: 'tests',
     data,
-  }) as unknown as Promise<Record<string, unknown> & TypeWithID>
-}
-
-async function deleteAllPosts() {
-  await payload.delete({ collection: postsSlug, where: { id: { exists: true } } })
+  }) as unknown as Promise<Test>
 }
