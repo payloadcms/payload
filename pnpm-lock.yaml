@@ -1598,6 +1598,10 @@ importers:
         version: link:../payload
 
   test:
+    dependencies:
+      dequal:
+        specifier: 2.0.3
+        version: 2.0.3
     devDependencies:
       '@aws-sdk/client-s3':
         specifier: ^3.614.0
