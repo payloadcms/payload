@@ -1,3 +1,4 @@
+import { dequal } from 'dequal/lite'
 import { type Block, type BlockSlug, type Config, traverseFields } from 'payload'
 
 export const autoDedupeBlocksPlugin =
@@ -68,7 +69,9 @@ export const deduplicateBlock = ({
         // Check if the fields are the same
         const jsonExistingBlock = JSON.stringify(existingBlock, null, 2)
         const jsonBlockToDeduplicate = JSON.stringify(dedupedBlock, null, 2)
-        if (jsonExistingBlock !== jsonBlockToDeduplicate) {
+        // dequal check of blocks with functions removed (through JSON.stringify+JSON.parse). We cannot check the strings,
+        // as the order of keys in the object is not guaranteed, yet it doesn't matter for the block fields.
+        if (!dequal(JSON.parse(jsonExistingBlock), JSON.parse(jsonBlockToDeduplicate))) {
           console.error('Block with the same slug but different fields found', {
             slug: dedupedBlock.slug,
             existingBlock: jsonExistingBlock,
