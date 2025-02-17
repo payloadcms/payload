@@ -15,8 +15,8 @@ const traverseArrayOrBlocksField = ({
   parentRef,
 }: {
   callback: TraverseFieldsCallback
-  callbackStack: TraverseFieldsCallback[]
-  config: Config | SanitizedConfig
+  callbackStack: (() => ReturnType<TraverseFieldsCallback>)[]
+  config?: Config | SanitizedConfig
   data: Record<string, unknown>[]
   field: ArrayField | BlocksField
   fillEmpty: boolean
@@ -39,16 +39,18 @@ const traverseArrayOrBlocksField = ({
       for (const _block of field.blockReferences ?? field.blocks) {
         // TODO: iterate over blocks mapped to block slug in v4, or pass through payload.blocks
         const block =
-          typeof _block === 'string' ? config.blocks.find((b) => b.slug === _block) : _block
-        traverseFields({
-          callback,
-          callbackStack,
-          config,
-          fields: block.fields,
-          isTopLevel: false,
-          leavesFirst,
-          parentRef,
-        })
+          typeof _block === 'string' ? config?.blocks?.find((b) => b.slug === _block) : _block
+        if (block) {
+          traverseFields({
+            callback,
+            callbackStack,
+            config,
+            fields: block.fields,
+            isTopLevel: false,
+            leavesFirst,
+            parentRef,
+          })
+        }
       }
     }
     return
@@ -58,7 +60,7 @@ const traverseArrayOrBlocksField = ({
     if (field.type === 'blocks' && typeof ref?.blockType === 'string') {
       // TODO: iterate over blocks mapped to block slug in v4, or pass through payload.blocks
       const block = field.blockReferences
-        ? ((config.blocks.find((b) => b.slug === ref.blockType) ??
+        ? ((config?.blocks?.find((b) => b.slug === ref.blockType) ??
             field.blockReferences.find(
               (b) => typeof b !== 'string' && b.slug === ref.blockType,
             )) as Block)
@@ -106,8 +108,8 @@ export type TraverseFieldsCallback = (args: {
 
 type TraverseFieldsArgs = {
   callback: TraverseFieldsCallback
-  callbackStack?: TraverseFieldsCallback[]
-  config: Config | SanitizedConfig
+  callbackStack?: (() => ReturnType<TraverseFieldsCallback>)[]
+  config?: Config | SanitizedConfig
   fields: (Field | TabAsField)[]
   fillEmpty?: boolean
   isTopLevel?: boolean
@@ -143,7 +145,7 @@ export const traverseFields = ({
   ref = {},
 }: TraverseFieldsArgs): void => {
   fields.some((field) => {
-    let callbackStack: TraverseFieldsCallback[] = []
+    let callbackStack: (() => ReturnType<TraverseFieldsCallback>)[] = []
     if (!isTopLevel) {
       callbackStack = _callbackStack
     }
@@ -159,7 +161,7 @@ export const traverseFields = ({
     if (!leavesFirst && callback && callback({ field, next, parentRef, ref })) {
       return true
     } else if (leavesFirst) {
-      callbackStack.push(callback)
+      callbackStack.push(() => callback({ field, next, parentRef, ref }))
     }
 
     if (skip) {
@@ -203,7 +205,14 @@ export const traverseFields = ({
           ) {
             return true
           } else if (leavesFirst) {
-            callbackStack.push(callback)
+            callbackStack.push(() =>
+              callback({
+                field: { ...tab, type: 'tab' },
+                next,
+                parentRef: currentParentRef,
+                ref: tabRef,
+              }),
+            )
           }
 
           tabRef = tabRef[tab.name]
@@ -238,7 +247,14 @@ export const traverseFields = ({
           ) {
             return true
           } else if (leavesFirst) {
-            callbackStack.push(callback)
+            callbackStack.push(() =>
+              callback({
+                field: { ...tab, type: 'tab' },
+                next,
+                parentRef: currentParentRef,
+                ref: tabRef,
+              }),
+            )
           }
         }
 
@@ -373,7 +389,7 @@ export const traverseFields = ({
 
     if (isTopLevel) {
       callbackStack.reverse().forEach((cb) => {
-        cb({ field, next, parentRef, ref })
+        cb()
       })
     }
   })
