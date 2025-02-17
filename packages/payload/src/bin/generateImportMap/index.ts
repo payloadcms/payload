@@ -85,7 +85,7 @@ export function addPayloadComponentToImportMap({
   importMap[componentPath + '#' + exportName] = importIdentifier
 }
 
-export type AddToImportMap = (payloadComponent: PayloadComponent | PayloadComponent[]) => void
+export type AddToImportMap = (payloadComponent?: PayloadComponent | PayloadComponent[]) => void
 
 export async function generateImportMap(
   config: SanitizedConfig,

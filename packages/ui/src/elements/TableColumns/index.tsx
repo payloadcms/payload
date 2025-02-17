@@ -1,5 +1,10 @@
 'use client'
-import type { ClientCollectionConfig, ListPreferences, SanitizedCollectionConfig } from 'payload'
+import type {
+  ClientCollectionConfig,
+  ListPreferences,
+  PaginatedDocs,
+  SanitizedCollectionConfig,
+} from 'payload'
 
 import React, { createContext, useCallback, useContext, useEffect } from 'react'
 
@@ -10,13 +15,13 @@ import { useConfig } from '../../providers/Config/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
-
 export interface ITableColumns {
   columns: Column[]
   LinkedCellOverride?: React.ReactNode
   moveColumn: (args: { fromIndex: number; toIndex: number }) => Promise<void>
   resetColumnsState: () => Promise<void>
   setActiveColumns: (columns: string[]) => Promise<void>
+  Table?: React.ReactNode
   toggleColumn: (column: string) => Promise<void>
 }
 
@@ -28,8 +33,10 @@ type Props = {
   readonly children: React.ReactNode
   readonly collectionSlug: string
   readonly columnState: Column[]
+  readonly data?: PaginatedDocs
   readonly docs: any[]
   readonly enableRowSelections?: boolean
+  readonly InitialTable?: React.ReactNode
   readonly LinkedCellOverride?: React.ReactNode
   readonly listPreferences?: ListPreferences
   readonly preferenceKey: string
@@ -53,11 +60,12 @@ export const TableColumnsProvider: React.FC<Props> = ({
   columnState,
   docs,
   enableRowSelections,
+  InitialTable,
   LinkedCellOverride,
   listPreferences,
   preferenceKey,
   renderRowTypes,
-  setTable,
+  setTable: setExternalTable,
   sortColumnProps,
   tableAppearance,
 }) => {
@@ -73,8 +81,20 @@ export const TableColumnsProvider: React.FC<Props> = ({
   const { getPreference } = usePreferences()
 
   const [tableColumns, setTableColumns] = React.useState(columnState)
+  const [Table, setInternalTable] = React.useState<React.ReactNode>(InitialTable)
+
   const abortTableStateRef = React.useRef<AbortController>(null)
   const abortToggleColumnRef = React.useRef<AbortController>(null)
+
+  const setTable = useCallback(
+    (Table: React.ReactNode) => {
+      setInternalTable(Table)
+      if (typeof setExternalTable === 'function') {
+        setExternalTable(Table)
+      }
+    },
+    [setExternalTable],
+  )
 
   const moveColumn = useCallback(
     async (args: { fromIndex: number; toIndex: number }) => {
@@ -199,7 +219,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
           return indexOfFirst > indexOfSecond ? 1 : -1
         })
 
-      const { state: columnState, Table } = await getTableState({
+      const result = await getTableState({
         collectionSlug,
         columns: activeColumns,
         docs,
@@ -208,8 +228,10 @@ export const TableColumnsProvider: React.FC<Props> = ({
         tableAppearance,
       })
 
-      setTableColumns(columnState)
-      setTable(Table)
+      if (result) {
+        setTableColumns(result.state)
+        setTable(result.Table)
+      }
     },
     [
       tableColumns,
@@ -290,6 +312,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
         moveColumn,
         resetColumnsState,
         setActiveColumns,
+        Table,
         toggleColumn,
       }}
     >

@@ -73,6 +73,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
     isEditing,
     isInitializing,
     lastUpdateTime,
+    redirectAfterCreate = true,
     redirectAfterDelete,
     redirectAfterDuplicate,
     savedDocumentData,
@@ -254,7 +255,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
         })
       }
 
-      if (!isEditing && depth < 2) {
+      if (!isEditing && depth < 2 && redirectAfterCreate) {
         // Redirect to the same locale if it's been set
         const redirectRoute = formatAdminURL({
           adminRoute,
@@ -306,6 +307,7 @@ export const DefaultEditView: React.FC<ClientSideEditViewProps> = ({
       incrementVersionCount,
       updateSavedDocumentData,
       onSaveFromContext,
+      redirectAfterCreate,
       isEditing,
       depth,
       getDocPermissions,
