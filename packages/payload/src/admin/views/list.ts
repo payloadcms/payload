@@ -14,6 +14,7 @@ export type ListViewSlots = {
   BeforeList?: React.ReactNode
   BeforeListTable?: React.ReactNode
   Description?: React.ReactNode
+  listMenuItems?: React.ReactNode[]
   Table: React.ReactNode
 }
 
@@ -41,7 +42,6 @@ export type ListViewClientProps = {
   disableBulkEdit?: boolean
   enableRowSelections?: boolean
   hasCreatePermission: boolean
-  listMenuItems?: React.ReactNode[]
   listPreferences?: ListPreferences
   newDocumentURL: string
   preferenceKey?: string
