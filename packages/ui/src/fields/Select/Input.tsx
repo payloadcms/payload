@@ -83,8 +83,8 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
       label: matchingOption ? getTranslation(matchingOption.label, i18n) : value,
       value: matchingOption?.value ?? value,
     }
+  } else {
     // If value is not present then render nothing, allowing select fields to reset to their initial 'Select an option' state
-  } else if (!value) {
     valueToRender = null
   }
 
