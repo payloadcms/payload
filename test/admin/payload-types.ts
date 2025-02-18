@@ -334,6 +334,7 @@ export interface CustomField {
   descriptionAsFunction?: string | null;
   descriptionAsComponent?: string | null;
   customSelectField?: string | null;
+  customSelectInput?: string | null;
   relationshipFieldWithBeforeAfterInputs?: (string | null) | Post;
   arrayFieldWithBeforeAfterInputs?:
     | {
@@ -717,6 +718,7 @@ export interface CustomFieldsSelect<T extends boolean = true> {
   descriptionAsFunction?: T;
   descriptionAsComponent?: T;
   customSelectField?: T;
+  customSelectInput?: T;
   relationshipFieldWithBeforeAfterInputs?: T;
   arrayFieldWithBeforeAfterInputs?:
     | T
