@@ -279,7 +279,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     noDateSelected: 'Pasirinktos datos nėra',
     noFiltersSet: 'Nenustatyti jokie filtrai',
     noLabel: '<Ne {{label}}>',
-    none: '[SKIPPED]',
+    none: 'Jokios',
     noOptions: 'Jokių variantų',
     noResults:
       'Nerasta jokių {{label}}. Arba dar nėra sukurtų {{label}}, arba jie neatitinka nurodytų filtrų aukščiau.',
@@ -329,7 +329,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Sėkmingai perindeksuota {{count}} iš {{total}} dokumentų iš {{collections}}',
     takeOver: 'Perimti',
-    thisLanguage: 'Anglų',
+    thisLanguage: 'Lietuvių',
     time: 'Laikas',
     timezone: 'Laiko juosta',
     titleDeleted: '{{label}} "{{title}}" sėkmingai ištrinta.',
@@ -337,7 +337,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     unauthorized: 'Neleistinas',
     unsavedChanges: 'Turite neišsaugotų pakeitimų. Išsaugokite arba atmestkite prieš tęsdami.',
     unsavedChangesDuplicate: 'Jūs turite neišsaugotų pakeitimų. Ar norėtumėte tęsti dubliavimą?',
-    untitled: '[SKIPPED]',
+    untitled: 'Neužpavadinamas',
     upcomingEvents: 'Artimieji renginiai',
     updatedAt: 'Atnaujinta',
     updatedCountSuccessfully: '{{count}} {{label}} sėkmingai atnaujinta.',
