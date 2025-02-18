@@ -67,7 +67,9 @@ export interface SanitizedCollectionVersions extends Omit<IncomingCollectionVers
   drafts: false | SanitizedDrafts
   /**
    * Use this setting to control how many versions to keep on a document by document basis.
-   * Must be an integer. Defaults to 100, use 0 to save all versions.
+   * Must be an integer. Use 0 to save all versions.
+   *
+   * @default 100
    */
   maxPerDoc: number
 }
