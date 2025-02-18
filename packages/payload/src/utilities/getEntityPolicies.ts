@@ -80,20 +80,16 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
           req,
           where: combineQueries(where, { id: { equals: id } }),
         }
-        if (operation === 'readVersions') {
-          if (version) {
-            const paginatedRes = await payload.findVersions(options)
-            return paginatedRes?.docs?.[0] || undefined
-          }
-
-          return undefined
-        } else {
-          const paginatedRes = await payload.find({
-            ...options,
-            pagination: false,
-          })
+        if (version && operation === 'readVersions') {
+          const paginatedRes = await payload.findVersions(options)
           return paginatedRes?.docs?.[0] || undefined
         }
+
+        const paginatedRes = await payload.find({
+          ...options,
+          pagination: false,
+        })
+        return paginatedRes?.docs?.[0] || undefined
       }
 
       return payload.findByID({
