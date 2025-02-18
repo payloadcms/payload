@@ -25,7 +25,7 @@ export const useTableColumns = (): ITableColumns => useContext(TableColumnContex
 
 type Props = {
   readonly children: React.ReactNode
-  readonly collectionSlug: string
+  readonly collectionSlug: string | string[]
   readonly columnState: Column[]
   readonly docs: any[]
   readonly enableRowSelections?: boolean
@@ -68,7 +68,9 @@ export const TableColumnsProvider: React.FC<Props> = ({
     collectionSlug,
   })
 
-  const prevCollection = React.useRef<SanitizedCollectionConfig['slug']>(collectionSlug)
+  const prevCollection = React.useRef<SanitizedCollectionConfig['slug']>(
+    Array.isArray(collectionSlug) ? collectionSlug[0] : collectionSlug,
+  )
   const { getPreference } = usePreferences()
 
   const [tableColumns, setTableColumns] = React.useState(columnState)
@@ -232,14 +234,15 @@ export const TableColumnsProvider: React.FC<Props> = ({
 
   React.useEffect(() => {
     const sync = async () => {
-      const collectionHasChanged = prevCollection.current !== collectionSlug
+      const defaultCollection = Array.isArray(collectionSlug) ? collectionSlug[0] : collectionSlug
+      const collectionHasChanged = prevCollection.current !== defaultCollection
 
       if (collectionHasChanged || !listPreferences) {
         const currentPreferences = await getPreference<{
           columns: ListPreferences['columns']
         }>(preferenceKey)
 
-        prevCollection.current = collectionSlug
+        prevCollection.current = defaultCollection
 
         if (currentPreferences?.columns) {
           // setTableColumns()

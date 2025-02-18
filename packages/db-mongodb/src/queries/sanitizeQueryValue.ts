@@ -100,7 +100,6 @@ export const sanitizeQueryValue = ({
 } => {
   let formattedValue = val
   let formattedOperator = operator
-
   if (['array', 'blocks', 'group', 'tab'].includes(field.type) && path.includes('.')) {
     const segments = path.split('.')
     segments.shift()

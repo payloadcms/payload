@@ -5,6 +5,7 @@ import { buildVersionCollectionFields, flattenWhereToOperators } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildQuery } from './queries/buildQuery.js'
 import { buildSortParam } from './queries/buildSortParam.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { getSession } from './utilities/getSession.js'
@@ -41,9 +42,12 @@ export const findVersions: FindVersions = async function findVersions(
     })
   }
 
-  const query = await Model.buildQuery({
+  const fields = buildVersionCollectionFields(this.payload.config, collectionConfig, true)
+
+  const query = await buildQuery({
+    adapter: this,
+    fields,
     locale,
-    payload: this.payload,
     where,
   })
 
@@ -58,7 +62,7 @@ export const findVersions: FindVersions = async function findVersions(
     pagination,
     projection: buildProjectionFromSelect({
       adapter: this,
-      fields: buildVersionCollectionFields(this.payload.config, collectionConfig, true),
+      fields,
       select,
     }),
     sort,

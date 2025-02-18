@@ -107,6 +107,18 @@ export function getLocalizedPaths({
         return paths
       }
 
+      if (currentPath === 'relationTo') {
+        lastIncompletePath.path = currentPath
+        lastIncompletePath.complete = true
+        lastIncompletePath.field = {
+          name: 'relationTo',
+          type: 'select',
+          options: Object.keys(payload.collections),
+        }
+
+        return paths
+      }
+
       if (!matchedField && currentPath === 'id' && i === pathSegments.length - 1) {
         lastIncompletePath.path = currentPath
         const idField: Field = {

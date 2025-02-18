@@ -3,6 +3,7 @@ import type { UpdateOne } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildQuery } from './queries/buildQuery.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { getSession } from './utilities/getSession.js'
 import { handleError } from './utilities/handleError.js'
@@ -28,9 +29,11 @@ export const updateOne: UpdateOne = async function updateOne(
     session: await getSession(this, req),
   }
 
-  const query = await Model.buildQuery({
+  const query = await buildQuery({
+    adapter: this,
+    collectionSlug: collection,
+    fields: this.payload.collections[collection].config.flattenedFields,
     locale,
-    payload: this.payload,
     where,
   })
 

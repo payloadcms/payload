@@ -1153,6 +1153,123 @@ describe('Joins Field', () => {
 
     expect(joinedDoc2.id).toBe(depthJoin_3.id)
   })
+
+  describe('Array of collection', () => {
+    it('should join across multiple collections', async () => {
+      let parent = await payload.create({
+        collection: 'multiple-collections-parents',
+        depth: 0,
+        data: {},
+      })
+
+      const child_1 = await payload.create({
+        collection: 'multiple-collections-1',
+        depth: 0,
+        data: {
+          parent,
+          title: 'doc-1',
+        },
+      })
+
+      const child_2 = await payload.create({
+        collection: 'multiple-collections-2',
+        depth: 0,
+        data: {
+          parent,
+          title: 'doc-2',
+        },
+      })
+
+      parent = await payload.findByID({
+        collection: 'multiple-collections-parents',
+        id: parent.id,
+        depth: 0,
+      })
+
+      expect(parent.children.docs[0].value).toBe(child_2.id)
+      expect(parent.children.docs[0]?.relationTo).toBe('multiple-collections-2')
+      expect(parent.children.docs[1]?.value).toBe(child_1.id)
+      expect(parent.children.docs[1]?.relationTo).toBe('multiple-collections-1')
+
+      parent = await payload.findByID({
+        collection: 'multiple-collections-parents',
+        id: parent.id,
+        depth: 1,
+      })
+
+      expect(parent.children.docs[0].value.id).toBe(child_2.id)
+      expect(parent.children.docs[0]?.relationTo).toBe('multiple-collections-2')
+      expect(parent.children.docs[1]?.value.id).toBe(child_1.id)
+      expect(parent.children.docs[1]?.relationTo).toBe('multiple-collections-1')
+
+      // Sorting across collections
+      parent = await payload.findByID({
+        collection: 'multiple-collections-parents',
+        id: parent.id,
+        depth: 1,
+        joins: {
+          children: {
+            sort: 'title',
+          },
+        },
+      })
+
+      expect(parent.children.docs[0]?.value.title).toBe('doc-1')
+      expect(parent.children.docs[1]?.value.title).toBe('doc-2')
+
+      parent = await payload.findByID({
+        collection: 'multiple-collections-parents',
+        id: parent.id,
+        depth: 1,
+        joins: {
+          children: {
+            sort: '-title',
+          },
+        },
+      })
+
+      expect(parent.children.docs[0]?.value.title).toBe('doc-2')
+      expect(parent.children.docs[1]?.value.title).toBe('doc-1')
+
+      // WHERE across collections
+      parent = await payload.findByID({
+        collection: 'multiple-collections-parents',
+        id: parent.id,
+        depth: 1,
+        joins: {
+          children: {
+            where: {
+              title: {
+                equals: 'doc-1',
+              },
+            },
+          },
+        },
+      })
+
+      expect(parent.children?.docs).toHaveLength(1)
+      expect(parent.children.docs[0]?.value.title).toBe('doc-1')
+
+      // WHERE by _relationTo (join for specific collectionSlug)
+      parent = await payload.findByID({
+        collection: 'multiple-collections-parents',
+        id: parent.id,
+        depth: 1,
+        joins: {
+          children: {
+            where: {
+              relationTo: {
+                equals: 'multiple-collections-2',
+              },
+            },
+          },
+        },
+      })
+
+      expect(parent.children?.docs).toHaveLength(1)
+      expect(parent.children.docs[0]?.value.title).toBe('doc-2')
+    })
+  })
 })
 
 async function createPost(overrides?: Partial<Post>, locale?: Config['locale']) {

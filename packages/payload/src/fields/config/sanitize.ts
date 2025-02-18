@@ -1,7 +1,11 @@
 // @ts-strict-ignore
 import { deepMergeSimple } from '@payloadcms/translations/utilities'
 
-import type { CollectionConfig, SanitizedJoins } from '../../collections/config/types.js'
+import type {
+  CollectionConfig,
+  SanitizedJoin,
+  SanitizedJoins,
+} from '../../collections/config/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { Field } from './types.js'
 
@@ -33,6 +37,7 @@ type Args = {
    */
   joins?: SanitizedJoins
   parentIsLocalized: boolean
+  polymorphicJoins?: SanitizedJoin[]
 
   /**
    * If true, a richText field will require an editor property to be set, as the sanitizeFields function will not add it from the payload config if not present.
@@ -59,6 +64,7 @@ export const sanitizeFields = async ({
   joinPath = '',
   joins,
   parentIsLocalized,
+  polymorphicJoins,
   requireFieldLevelRichTextEditor = false,
   richTextSanitizationPromises,
   validRelationships,
@@ -104,7 +110,7 @@ export const sanitizeFields = async ({
     }
 
     if (field.type === 'join') {
-      sanitizeJoinField({ config, field, joinPath, joins, parentIsLocalized })
+      sanitizeJoinField({ config, field, joinPath, joins, parentIsLocalized, polymorphicJoins })
     }
 
     if (field.type === 'relationship' || field.type === 'upload') {
@@ -265,6 +271,7 @@ export const sanitizeFields = async ({
           : joinPath,
         joins,
         parentIsLocalized: parentIsLocalized || fieldIsLocalized(field),
+        polymorphicJoins,
         requireFieldLevelRichTextEditor,
         richTextSanitizationPromises,
         validRelationships,
@@ -285,6 +292,7 @@ export const sanitizeFields = async ({
           joinPath: tabHasName(tab) ? `${joinPath ? joinPath + '.' : ''}${tab.name}` : joinPath,
           joins,
           parentIsLocalized: parentIsLocalized || (tabHasName(tab) && tab.localized),
+          polymorphicJoins,
           requireFieldLevelRichTextEditor,
           richTextSanitizationPromises,
           validRelationships,

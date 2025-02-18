@@ -1478,7 +1478,7 @@ export type JoinField = {
   /**
    * The slug of the collection to relate with.
    */
-  collection: CollectionSlug
+  collection: CollectionSlug | CollectionSlug[]
   defaultLimit?: number
   defaultSort?: Sort
   defaultValue?: never
@@ -1504,6 +1504,7 @@ export type JoinField = {
    * A string for the field in the collection being joined to.
    */
   on: string
+  sanitizedMany?: JoinField[]
   type: 'join'
   validate?: never
   where?: Where

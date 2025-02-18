@@ -1,7 +1,8 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
+import type { SQLiteSelectBase } from 'drizzle-orm/sqlite-core'
 import type { FlattenedField, JoinQuery, SelectMode, SelectType, Where } from 'payload'
 
-import { sql } from 'drizzle-orm'
+import { and, asc, desc, eq, or, sql } from 'drizzle-orm'
 import { fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
@@ -10,10 +11,48 @@ import type { Result } from './buildFindManyArgs.js'
 
 import buildQuery from '../queries/buildQuery.js'
 import { getTableAlias } from '../queries/getTableAlias.js'
+import { operatorMap } from '../queries/operatorMap.js'
 import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { jsonAggBuildObject } from '../utilities/json.js'
 import { rawConstraint } from '../utilities/rawConstraint.js'
 import { chainMethods } from './chainMethods.js'
+
+const flattenAllWherePaths = (where: Where, paths: string[]) => {
+  for (const k in where) {
+    if (['AND', 'OR'].includes(k.toUpperCase())) {
+      if (Array.isArray(where[k])) {
+        for (const whereField of where[k]) {
+          flattenAllWherePaths(whereField, paths)
+        }
+      }
+    } else {
+      // TODO: explore how to support arrays/relationship querying.
+      paths.push(k.split('.').join('_'))
+    }
+  }
+}
+
+const buildSQLWhere = (where: Where, alias: string) => {
+  for (const k in where) {
+    if (['AND', 'OR'].includes(k.toUpperCase())) {
+      if (Array.isArray(where[k])) {
+        const op = 'AND' === k.toUpperCase() ? and : or
+        const accumulated = []
+        for (const whereField of where[k]) {
+          accumulated.push(buildSQLWhere(whereField, alias))
+        }
+        return op(...accumulated)
+      }
+    } else {
+      const payloadOperator = Object.keys(where[k])[0]
+      const value = where[k][payloadOperator]
+
+      return operatorMap[payloadOperator](sql.raw(`"${alias}"."${k.split('.').join('_')}"`), value)
+    }
+  }
+}
+
+type SQLSelect = SQLiteSelectBase<any, any, any, any>
 
 type TraverseFieldArgs = {
   _locales: Result
@@ -359,126 +398,230 @@ export const traverseFields = ({
           limit += 1
         }
 
-        const fields = adapter.payload.collections[field.collection].config.flattenedFields
-
-        const joinCollectionTableName = adapter.tableNameMap.get(toSnakeCase(field.collection))
-
-        const joins: BuildQueryJoinAliases = []
-
-        const currentIDColumn = versions
-          ? adapter.tables[currentTableName].parent
-          : adapter.tables[currentTableName].id
-
-        let joinQueryWhere: Where
-
-        if (Array.isArray(field.targetField.relationTo)) {
-          joinQueryWhere = {
-            [field.on]: {
-              equals: {
-                relationTo: collectionSlug,
-                value: rawConstraint(currentIDColumn),
-              },
-            },
-          }
-        } else {
-          joinQueryWhere = {
-            [field.on]: {
-              equals: rawConstraint(currentIDColumn),
-            },
-          }
-        }
-
-        if (where && Object.keys(where).length) {
-          joinQueryWhere = {
-            and: [joinQueryWhere, where],
-          }
-        }
-
         const columnName = `${path.replaceAll('.', '_')}${field.name}`
-
-        const subQueryAlias = `${columnName}_alias`
-
-        const { newAliasTable } = getTableAlias({
-          adapter,
-          tableName: joinCollectionTableName,
-        })
-
-        const {
-          orderBy,
-          selectFields,
-          where: subQueryWhere,
-        } = buildQuery({
-          adapter,
-          aliasTable: newAliasTable,
-          fields,
-          joins,
-          locale,
-          // Parent is never localized, as we're passing the `fields` of a **different** collection here. This means that the
-          // parent localization "boundary" is crossed, and we're now in the context of the joined collection.
-          parentIsLocalized: false,
-          selectLocale: true,
-          sort,
-          tableName: joinCollectionTableName,
-          where: joinQueryWhere,
-        })
-
-        const chainedMethods: ChainedMethods = []
-
-        joins.forEach(({ type, condition, table }) => {
-          chainedMethods.push({
-            args: [table, condition],
-            method: type ?? 'leftJoin',
-          })
-        })
-
-        if (limit !== 0) {
-          chainedMethods.push({
-            args: [limit],
-            method: 'limit',
-          })
-        }
-
-        if (page && limit !== 0) {
-          const offset = (page - 1) * limit - 1
-          if (offset > 0) {
-            chainedMethods.push({
-              args: [offset],
-              method: 'offset',
-            })
-          }
-        }
 
         const db = adapter.drizzle as LibSQLDatabase
 
-        for (let key in selectFields) {
-          const val = selectFields[key]
+        if (Array.isArray(field.collection)) {
+          let currentQuery: null | SQLSelect = null
+          const onPath = field.on.split('.').join('_')
 
-          if (val.table && getNameFromDrizzleTable(val.table) === joinCollectionTableName) {
-            delete selectFields[key]
-            key = key.split('.').pop()
-            selectFields[key] = newAliasTable[key]
+          if (Array.isArray(sort)) {
+            throw new Error('Not implemented')
           }
-        }
 
-        const subQuery = chainMethods({
-          methods: chainedMethods,
-          query: db
-            .select(selectFields as any)
-            .from(newAliasTable)
-            .where(subQueryWhere)
-            .orderBy(() => orderBy.map(({ column, order }) => order(column))),
-        }).as(subQueryAlias)
+          let sanitizedSort = sort
 
-        currentArgs.extras[columnName] = sql`${db
-          .select({
-            result: jsonAggBuildObject(adapter, {
-              id: sql.raw(`"${subQueryAlias}".id`),
-              ...(selectFields._locale && {
-                locale: sql.raw(`"${subQueryAlias}".${selectFields._locale.name}`),
+          if (!sanitizedSort) {
+            if (
+              field.collection.some((collection) =>
+                adapter.payload.collections[collection].config.fields.some(
+                  (f) => f.type === 'date' && f.name === 'createdAt',
+                ),
+              )
+            ) {
+              sanitizedSort = '-createdAt'
+            } else {
+              sanitizedSort = 'id'
+            }
+          }
+
+          const sortOrder = sanitizedSort.startsWith('-') ? desc : asc
+          sanitizedSort = sanitizedSort.replace('-', '')
+
+          const sortPath = sanitizedSort.split('.').join('_')
+
+          const wherePaths: string[] = []
+
+          if (where) {
+            flattenAllWherePaths(where, wherePaths)
+          }
+
+          for (const collection of field.collection) {
+            const joinCollectionTableName = adapter.tableNameMap.get(toSnakeCase(collection))
+
+            const table = adapter.tables[joinCollectionTableName]
+
+            const sortColumn = table[sortPath]
+
+            const selectFields = {
+              id: adapter.tables[joinCollectionTableName].id,
+              parent: sql`${adapter.tables[joinCollectionTableName][onPath]}`.as(onPath),
+              relationTo: sql`${collection}`.as('relationTo'),
+              sortPath: sql`${sortColumn ? sortColumn : null}`.as('sortPath'),
+            }
+
+            // Select for WHERE and Fallback NULL
+            for (const path of wherePaths) {
+              if (adapter.tables[joinCollectionTableName][path]) {
+                selectFields[path] = sql`${adapter.tables[joinCollectionTableName][path]}`.as(path)
+                // Allow to filter by collectionSlug
+              } else if (path !== 'relationTo') {
+                selectFields[path] = sql`null`.as(path)
+              }
+            }
+
+            const query = db.select(selectFields).from(adapter.tables[joinCollectionTableName])
+            if (currentQuery === null) {
+              currentQuery = query as unknown as SQLSelect
+            } else {
+              currentQuery = currentQuery.unionAll(query) as SQLSelect
+            }
+          }
+
+          const subQueryAlias = `${columnName}_subquery`
+
+          let sqlWhere = eq(
+            adapter.tables[currentTableName].id,
+            sql.raw(`"${subQueryAlias}"."${onPath}"`),
+          )
+
+          if (where && Object.keys(where).length > 0) {
+            sqlWhere = and(sqlWhere, buildSQLWhere(where, subQueryAlias))
+          }
+
+          currentQuery = currentQuery.orderBy(sortOrder(sql`"sortPath"`)) as SQLSelect
+
+          if (page && limit !== 0) {
+            const offset = (page - 1) * limit
+            if (offset > 0) {
+              currentQuery = currentQuery.offset(offset) as SQLSelect
+            }
+          }
+
+          if (limit) {
+            currentQuery = currentQuery.limit(limit) as SQLSelect
+          }
+
+          currentArgs.extras[columnName] = sql`${db
+            .select({
+              id: jsonAggBuildObject(adapter, {
+                id: sql.raw(`"${subQueryAlias}"."id"`),
+                relationTo: sql.raw(`"${subQueryAlias}"."relationTo"`),
               }),
-            }),
+            })
+            .from(sql`${currentQuery.as(subQueryAlias)}`)
+            .where(sqlWhere)}`.as(columnName)
+        } else {
+          const fields = adapter.payload.collections[field.collection].config.flattenedFields
+
+          const joinCollectionTableName = adapter.tableNameMap.get(toSnakeCase(field.collection))
+
+          const joins: BuildQueryJoinAliases = []
+
+          const currentIDColumn = versions
+            ? adapter.tables[currentTableName].parent
+            : adapter.tables[currentTableName].id
+
+          let joinQueryWhere: Where
+
+          if (Array.isArray(field.targetField.relationTo)) {
+            joinQueryWhere = {
+              [field.on]: {
+                equals: {
+                  relationTo: collectionSlug,
+                  value: rawConstraint(currentIDColumn),
+                },
+              },
+            }
+          } else {
+            joinQueryWhere = {
+              [field.on]: {
+                equals: rawConstraint(currentIDColumn),
+              },
+            }
+          }
+
+          if (where && Object.keys(where).length) {
+            joinQueryWhere = {
+              and: [joinQueryWhere, where],
+            }
+          }
+
+          const columnName = `${path.replaceAll('.', '_')}${field.name}`
+
+          const subQueryAlias = `${columnName}_alias`
+
+          const { newAliasTable } = getTableAlias({
+            adapter,
+            tableName: joinCollectionTableName,
           })
-          .from(sql`${subQuery}`)}`.as(subQueryAlias)
+
+          const {
+            orderBy,
+            selectFields,
+            where: subQueryWhere,
+          } = buildQuery({
+            adapter,
+            aliasTable: newAliasTable,
+            fields,
+            joins,
+            locale,
+            parentIsLocalized,
+            selectLocale: true,
+            sort,
+            tableName: joinCollectionTableName,
+            where: joinQueryWhere,
+          })
+
+          const chainedMethods: ChainedMethods = []
+
+          joins.forEach(({ type, condition, table }) => {
+            chainedMethods.push({
+              args: [table, condition],
+              method: type ?? 'leftJoin',
+            })
+          })
+
+          if (page && limit !== 0) {
+            const offset = (page - 1) * limit - 1
+            if (offset > 0) {
+              chainedMethods.push({
+                args: [offset],
+                method: 'offset',
+              })
+            }
+          }
+
+          if (limit !== 0) {
+            chainedMethods.push({
+              args: [limit],
+              method: 'limit',
+            })
+          }
+
+          const db = adapter.drizzle as LibSQLDatabase
+
+          for (let key in selectFields) {
+            const val = selectFields[key]
+
+            if (val.table && getNameFromDrizzleTable(val.table) === joinCollectionTableName) {
+              delete selectFields[key]
+              key = key.split('.').pop()
+              selectFields[key] = newAliasTable[key]
+            }
+          }
+
+          const subQuery = chainMethods({
+            methods: chainedMethods,
+            query: db
+              .select(selectFields as any)
+              .from(newAliasTable)
+              .where(subQueryWhere)
+              .orderBy(() => orderBy.map(({ column, order }) => order(column))),
+          }).as(subQueryAlias)
+
+          currentArgs.extras[columnName] = sql`${db
+            .select({
+              result: jsonAggBuildObject(adapter, {
+                id: sql.raw(`"${subQueryAlias}".id`),
+                ...(selectFields._locale && {
+                  locale: sql.raw(`"${subQueryAlias}".${selectFields._locale.name}`),
+                }),
+              }),
+            })
+            .from(sql`${subQuery}`)}`.as(subQueryAlias)
+        }
 
         break
       }

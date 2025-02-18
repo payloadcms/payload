@@ -4,7 +4,7 @@ import type { Payload, SanitizedCollectionConfig } from 'payload'
 import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2'
 import paginate from 'mongoose-paginate-v2'
 
-import { getBuildQueryPlugin } from '../queries/buildQuery.js'
+import { getBuildQueryPlugin } from '../queries/getBuildQueryPlugin.js'
 import { buildSchema } from './buildSchema.js'
 
 export const buildCollectionSchema = (
@@ -44,7 +44,10 @@ export const buildCollectionSchema = (
     .plugin<any, PaginateOptions>(paginate, { useEstimatedCount: true })
     .plugin(getBuildQueryPlugin({ collectionSlug: collection.slug }))
 
-  if (Object.keys(collection.joins).length > 0) {
+  if (
+    Object.keys(collection.joins).length > 0 ||
+    Object.keys(collection.polymorphicJoins).length > 0
+  ) {
     schema.plugin(mongooseAggregatePaginate)
   }
 
