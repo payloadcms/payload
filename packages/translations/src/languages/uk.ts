@@ -264,7 +264,6 @@ export const ukTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'Все одно вийти',
     leaveWithoutSaving: 'Вийти без збереження',
     light: 'Світла',
-    listControlMenu: 'Меню контролю списку',
     livePreview: 'Попередній перегляд',
     loading: 'Завантаження',
     locale: 'Локаль',

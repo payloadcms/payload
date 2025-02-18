@@ -261,7 +261,6 @@ export const thTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'ออกจากหน้านี้',
     leaveWithoutSaving: 'ออกโดยไม่บันทึก',
     light: 'สว่าง',
-    listControlMenu: 'เมนูควบคุมรายการ',
     livePreview: 'แสดงตัวอย่าง',
     loading: 'กำลังโหลด',
     locale: 'ตำแหน่งที่ตั้ง',

@@ -259,7 +259,6 @@ export const heTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'צא בכל זאת',
     leaveWithoutSaving: 'צא מבלי לשמור',
     light: 'בהיר',
-    listControlMenu: 'תפריט בקרת רשימה',
     livePreview: 'תצוגה מקדימה חיה',
     loading: 'טוען',
     locale: 'שפה',

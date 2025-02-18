@@ -265,7 +265,6 @@ export const rsTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'Свеједно напусти',
     leaveWithoutSaving: 'Напусти без чувања',
     light: 'Светло',
-    listControlMenu: 'Meni za kontrolu liste',
     livePreview: 'Преглед',
     loading: 'Учитавање',
     locale: 'Језик',

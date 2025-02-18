@@ -272,7 +272,6 @@ export const frTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'Quitter quand même',
     leaveWithoutSaving: 'Quitter sans sauvegarder',
     light: 'Clair',
-    listControlMenu: 'Menu de contrôle de liste',
     livePreview: 'Aperçu',
     loading: 'Chargement en cours',
     locale: 'Paramètres régionaux',

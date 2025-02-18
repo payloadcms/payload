@@ -268,7 +268,6 @@ export const itTranslations: DefaultTranslationsObject = {
     leaveAnyway: 'Esci comunque',
     leaveWithoutSaving: 'Esci senza salvare',
     light: 'Chiaro',
-    listControlMenu: 'Menu di controllo elenco',
     livePreview: 'Anteprima dal vivo',
     loading: 'Caricamento',
     locale: 'Locale',
