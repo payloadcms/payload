@@ -263,6 +263,9 @@ export function buildObjectType({
           limit: {
             type: GraphQLInt,
           },
+          page: {
+            type: GraphQLInt,
+          },
           sort: {
             type: GraphQLString,
           },
@@ -276,7 +279,7 @@ export function buildObjectType({
         },
         async resolve(parent, args, context: Context) {
           const { collection } = field
-          const { limit, sort, where } = args
+          const { limit, page, sort, where } = args
           const { req } = context
 
           const fullWhere = combineQueries(where, {
@@ -290,6 +293,7 @@ export function buildObjectType({
             limit,
             locale: req.locale,
             overrideAccess: false,
+            page,
             req,
             sort,
             where: fullWhere,

@@ -348,6 +348,7 @@ export const traverseFields = ({
 
         const {
           limit: limitArg = field.defaultLimit ?? 10,
+          page,
           sort = field.defaultSort,
           where,
         } = joinQuery[joinSchemaPath] || {}
@@ -435,6 +436,16 @@ export const traverseFields = ({
             args: [limit],
             method: 'limit',
           })
+        }
+
+        if (page && limit !== 0) {
+          const offset = (page - 1) * limit - 1
+          if (offset > 0) {
+            chainedMethods.push({
+              args: [offset],
+              method: 'offset',
+            })
+          }
         }
 
         const db = adapter.drizzle as LibSQLDatabase
