@@ -2,7 +2,6 @@ import type { FlattenedField, Payload, Where } from 'payload'
 
 import { QueryError } from 'payload'
 
-import { buildQuery } from './buildQuery.js'
 import { parseParams } from './parseParams.js'
 
 type GetBuildQueryPluginArgs = {
@@ -50,6 +49,7 @@ export const getBuildQueryPlugin = ({
         fields,
         globalSlug,
         locale,
+        parentIsLocalized: false,
         payload,
         where,
       })
