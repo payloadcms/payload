@@ -5,6 +5,7 @@ import type {
   Field,
   FieldSchemaMap,
   FieldState,
+  FlattenedBlock,
   FormState,
   FormStateWithoutComponents,
   PayloadRequest,
@@ -27,7 +28,7 @@ import {
 
 import type { RenderFieldMethod } from './types.js'
 
-import { getFilterOptionsQuery } from './getFilterOptionsQuery.js'
+import { resolveFilterOptions } from '../../utilities/resolveFilterOptions.js'
 import { iterateFields } from './iterateFields.js'
 
 const ObjectId = (ObjectIdImport.default ||
@@ -371,7 +372,13 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
         const { promises, rowMetadata } = blocksValue.reduce(
           (acc, row, i: number) => {
-            const block = field.blocks.find((blockType) => blockType.slug === row.blockType)
+            const blockTypeToMatch: string = row.blockType
+            const block =
+              req.payload.blocks[blockTypeToMatch] ??
+              ((field.blockReferences ?? field.blocks).find(
+                (blockType) => typeof blockType !== 'string' && blockType.slug === blockTypeToMatch,
+              ) as FlattenedBlock | undefined)
+
             if (!block) {
               throw new Error(
                 `Block with type "${row.blockType}" was found in block data, but no block with that type is defined in the config for field with schema path ${schemaPath}.`,
@@ -578,7 +585,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           }
 
           if (typeof field.filterOptions === 'function') {
-            const query = await getFilterOptionsQuery(field.filterOptions, {
+            const query = await resolveFilterOptions(field.filterOptions, {
               id,
               blockData,
               data: fullData,

@@ -9,14 +9,15 @@ import React, { useEffect, useState } from 'react'
 import { Drawer } from '../../../elements/Drawer/index.js'
 import { ThumbnailCard } from '../../../elements/ThumbnailCard/index.js'
 import { DefaultBlockImage } from '../../../graphics/DefaultBlockImage/index.js'
+import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { BlockSearch } from './BlockSearch/index.js'
 import './index.scss'
+import { BlockSearch } from './BlockSearch/index.js'
 
 export type Props = {
   readonly addRow: (index: number, blockType?: string) => Promise<void> | void
   readonly addRowIndex: number
-  readonly blocks: ClientBlock[]
+  readonly blocks: (ClientBlock | string)[]
   readonly drawerSlug: string
   readonly labels: Labels
 }
@@ -40,6 +41,7 @@ export const BlocksDrawer: React.FC<Props> = (props) => {
   const [filteredBlocks, setFilteredBlocks] = useState(blocks)
   const { closeModal, isModalOpen } = useModal()
   const { i18n, t } = useTranslation()
+  const { config } = useConfig()
 
   useEffect(() => {
     if (!isModalOpen(drawerSlug)) {
@@ -50,7 +52,8 @@ export const BlocksDrawer: React.FC<Props> = (props) => {
   useEffect(() => {
     const searchTermToUse = searchTerm.toLowerCase()
 
-    const matchingBlocks = blocks?.reduce((matchedBlocks, block) => {
+    const matchingBlocks = blocks?.reduce((matchedBlocks, _block) => {
+      const block = typeof _block === 'string' ? config.blocksMap[_block] : _block
       const blockLabel = getBlockLabel(block, i18n)
       if (blockLabel.includes(searchTermToUse)) {
         matchedBlocks.push(block)
@@ -59,7 +62,7 @@ export const BlocksDrawer: React.FC<Props> = (props) => {
     }, [])
 
     setFilteredBlocks(matchingBlocks)
-  }, [searchTerm, blocks, i18n])
+  }, [searchTerm, blocks, i18n, config.blocksMap])
 
   return (
     <Drawer
@@ -69,7 +72,9 @@ export const BlocksDrawer: React.FC<Props> = (props) => {
       <BlockSearch setSearchTerm={setSearchTerm} />
       <div className={`${baseClass}__blocks-wrapper`}>
         <ul className={`${baseClass}__blocks`}>
-          {filteredBlocks?.map((block, index) => {
+          {filteredBlocks?.map((_block, index) => {
+            const block = typeof _block === 'string' ? config.blocksMap[_block] : _block
+
             const { slug, imageAltText, imageURL, labels: blockLabels } = block
 
             return (

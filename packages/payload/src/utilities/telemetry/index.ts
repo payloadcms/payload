@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { execSync } from 'child_process'
 import ciInfo from 'ci-info'
 import { randomBytes } from 'crypto'

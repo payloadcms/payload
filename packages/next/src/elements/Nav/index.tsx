@@ -6,9 +6,9 @@ import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerCompo
 import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
 import React from 'react'
 
-import './index.scss'
 import { NavHamburger } from './NavHamburger/index.js'
 import { NavWrapper } from './NavWrapper/index.js'
+import './index.scss'
 
 const baseClass = 'nav'
 

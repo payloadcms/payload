@@ -53,7 +53,7 @@ export const getBlocksField = (prefix?: string): BlocksField => ({
               type: 'blocks',
               blocks: [
                 {
-                  slug: 'text',
+                  slug: 'textRequired',
                   fields: [
                     {
                       name: 'text',
@@ -64,6 +64,7 @@ export const getBlocksField = (prefix?: string): BlocksField => ({
                 },
                 {
                   slug: 'number',
+                  interfaceName: 'NumberBlock',
                   fields: [
                     {
                       name: 'number',
@@ -155,7 +156,7 @@ const BlockFields: CollectionConfig = {
       type: 'blocks',
       blocks: [
         {
-          slug: 'text',
+          slug: 'textInI18nBlock',
           fields: [
             {
               name: 'text',
@@ -313,7 +314,7 @@ const BlockFields: CollectionConfig = {
       type: 'blocks',
       blocks: [
         {
-          slug: 'block',
+          slug: 'blockWithMinRows',
           fields: [
             {
               name: 'blockTitle',
@@ -395,6 +396,33 @@ const BlockFields: CollectionConfig = {
           ],
         },
       ],
+    },
+    {
+      name: 'deduplicatedBlocks',
+      type: 'blocks',
+      blockReferences: ['ConfigBlockTest'],
+      blocks: [],
+    },
+    {
+      name: 'deduplicatedBlocks2',
+      type: 'blocks',
+      blockReferences: ['ConfigBlockTest'],
+      blocks: [],
+    },
+    {
+      name: 'localizedReferencesLocalizedBlock',
+      type: 'blocks',
+      blockReferences: ['localizedTextReference'],
+      blocks: [],
+      localized: true,
+    },
+    {
+      name: 'localizedReferences',
+      type: 'blocks',
+      // Needs to be a separate block - otherwise this will break in postgres. This is unrelated to block references
+      // and an issue with all blocks.
+      blockReferences: ['localizedTextReference2'],
+      blocks: [],
     },
   ],
 }

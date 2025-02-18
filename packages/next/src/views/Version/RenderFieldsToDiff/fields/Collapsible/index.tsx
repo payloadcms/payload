@@ -15,6 +15,7 @@ export const Collapsible: CollapsibleFieldDiffClientComponent = ({
   baseVersionField,
   comparisonValue,
   field,
+  parentIsLocalized,
   versionValue,
 }) => {
   const { i18n } = useTranslation()
@@ -35,6 +36,7 @@ export const Collapsible: CollapsibleFieldDiffClientComponent = ({
           typeof field.label !== 'function' && <span>{getTranslation(field.label, i18n)}</span>
         }
         locales={selectedLocales}
+        parentIsLocalized={parentIsLocalized || field.localized}
         version={versionValue}
       >
         <RenderVersionFieldsToDiff versionFields={baseVersionField.fields} />

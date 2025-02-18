@@ -1,10 +1,11 @@
 import type {
-  ListComponentClientProps,
-  ListComponentServerProps,
+  AdminViewServerProps,
   ListPreferences,
+  ListQuery,
   ListViewClientProps,
-} from '@payloadcms/ui'
-import type { AdminViewProps, ListQuery, Where } from 'payload'
+  ListViewServerPropsOnly,
+  Where,
+} from 'payload'
 
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
@@ -15,20 +16,22 @@ import { isNumber } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { renderListViewSlots } from './renderListViewSlots.js'
+import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
 
 export { generateListMetadata } from './meta.js'
 
-type ListViewArgs = {
+type RenderListViewArgs = {
   customCellProps?: Record<string, any>
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
+  drawerSlug?: string
   enableRowSelections: boolean
   overrideEntityVisibility?: boolean
   query: ListQuery
-} & AdminViewProps
+} & AdminViewServerProps
 
 export const renderListView = async (
-  args: ListViewArgs,
+  args: RenderListViewArgs,
 ): Promise<{
   List: React.ReactNode
 }> => {
@@ -149,24 +152,30 @@ export const renderListView = async (
 
     const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
 
+    const resolvedFilterOptions = await resolveAllFilterOptions({
+      collectionConfig,
+      req,
+    })
+
     const staticDescription =
       typeof collectionConfig.admin.description === 'function'
         ? collectionConfig.admin.description({ t: i18n.t })
         : collectionConfig.admin.description
 
-    const sharedClientProps: ListComponentClientProps = {
-      collectionSlug,
-      hasCreatePermission: permissions?.collections?.[collectionSlug]?.create,
-      newDocumentURL: formatAdminURL({
-        adminRoute,
-        path: `/collections/${collectionSlug}/create`,
-      }),
-    }
+    const newDocumentURL = formatAdminURL({
+      adminRoute,
+      path: `/collections/${collectionSlug}/create`,
+    })
 
-    const sharedServerProps: ListComponentServerProps = {
+    const hasCreatePermission = permissions?.collections?.[collectionSlug]?.create
+
+    const serverProps: ListViewServerPropsOnly = {
       collectionConfig,
+      data,
       i18n,
       limit,
+      listPreferences,
+      listSearchableFields: collectionConfig.admin.listSearchableFields,
       locale: fullLocale,
       params,
       payload,
@@ -176,24 +185,16 @@ export const renderListView = async (
     }
 
     const listViewSlots = renderListViewSlots({
-      clientProps: sharedClientProps,
+      clientProps: {
+        collectionSlug,
+        hasCreatePermission,
+        newDocumentURL,
+      },
       collectionConfig,
       description: staticDescription,
       payload,
-      serverProps: sharedServerProps,
+      serverProps,
     })
-
-    const clientProps: ListViewClientProps = {
-      ...listViewSlots,
-      ...sharedClientProps,
-      columnState,
-      disableBulkDelete,
-      disableBulkEdit,
-      enableRowSelections,
-      listPreferences,
-      renderedFilters,
-      Table,
-    }
 
     const isInDrawer = Boolean(drawerSlug)
 
@@ -208,16 +209,24 @@ export const renderListView = async (
             modifySearchParams={!isInDrawer}
           >
             {RenderServerComponent({
-              clientProps,
+              clientProps: {
+                ...listViewSlots,
+                collectionSlug,
+                columnState,
+                disableBulkDelete,
+                disableBulkEdit,
+                enableRowSelections,
+                hasCreatePermission,
+                listPreferences,
+                newDocumentURL,
+                renderedFilters,
+                resolvedFilterOptions,
+                Table,
+              } satisfies ListViewClientProps,
               Component: collectionConfig?.admin?.components?.views?.list?.Component,
               Fallback: DefaultListView,
               importMap: payload.importMap,
-              serverProps: {
-                ...sharedServerProps,
-                data,
-                listPreferences,
-                listSearchableFields: collectionConfig.admin.listSearchableFields,
-              },
+              serverProps,
             })}
           </ListQueryProvider>
         </Fragment>
@@ -228,7 +237,7 @@ export const renderListView = async (
   throw new Error('not-found')
 }
 
-export const ListView: React.FC<ListViewArgs> = async (args) => {
+export const ListView: React.FC<RenderListViewArgs> = async (args) => {
   try {
     const { List: RenderedList } = await renderListView({ ...args, enableRowSelections: true })
     return RenderedList

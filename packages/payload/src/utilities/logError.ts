@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type pino from 'pino'
 
 import type { Payload } from '../types/index.js'

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { EditorProps } from '@monaco-editor/react'
@@ -120,6 +121,7 @@ import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type {
   ArrayFieldValidation,
   BlocksFieldValidation,
+  BlockSlug,
   CheckboxFieldValidation,
   CodeFieldValidation,
   CollectionSlug,
@@ -164,7 +166,8 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
   /**
    * Only available in `afterRead` hooks
    */
-  currentDepth?: number /**
+  currentDepth?: number
+  /**
    * Only available in `afterRead` hooks
    */
   /** The data passed to update the document within create and update operations, and the full document itself in the afterRead hook. */
@@ -212,6 +215,10 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
    * The original siblingData with locales (not modified by any hooks). Only available in `beforeChange` and `beforeDuplicate` field hooks.
    */
   siblingDocWithLocales?: Record<string, unknown>
+  /**
+   * The sibling fields of the field which the hook is running against.
+   */
+  siblingFields: (Field | TabAsField)[]
   /** The value of the field. */
   value?: TValue
 }
@@ -269,15 +276,15 @@ export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
 
 export type FilterOptionsProps<TData = any> = {
   /**
-   * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
+   * The data of the nearest parent block. Will be `undefined` if the field is not within a block or when called on a `Filter` component within the list view.
    */
   blockData: TData
   /**
-   * An object containing the full collection or global document currently being edited.
+   * An object containing the full collection or global document currently being edited. Will be an empty object when called on a `Filter` component within the list view.
    */
   data: TData
   /**
-   * The `id` of the current document being edited. `id` is undefined during the `create` operation.
+   * The `id` of the current document being edited. Will be undefined during the `create` operation or when called on a `Filter` component within the list view.
    */
   id: number | string
   /**
@@ -286,7 +293,7 @@ export type FilterOptionsProps<TData = any> = {
   relationTo: CollectionSlug
   req: PayloadRequest
   /**
-   * An object containing document data that is scoped to only fields within the same parent of this field.
+   * An object containing document data that is scoped to only fields within the same parent of this field. Will be an empty object when called on a `Filter` component within the list view.
    */
   siblingData: unknown
   /**
@@ -1399,6 +1406,12 @@ export type BlocksField = {
      */
     isSortable?: boolean
   } & Admin
+  /**
+   * Like `blocks`, but allows you to also pass strings that are slugs of blocks defined in `config.blocks`.
+   *
+   * @todo `blockReferences` will be merged with `blocks` in 4.0
+   */
+  blockReferences?: (Block | BlockSlug)[]
   blocks: Block[]
   defaultValue?: DefaultValue
   labels?: Labels
@@ -1410,6 +1423,12 @@ export type BlocksField = {
 
 export type BlocksFieldClient = {
   admin?: AdminClient & Pick<BlocksField['admin'], 'initCollapsed' | 'isSortable'>
+  /**
+   * Like `blocks`, but allows you to also pass strings that are slugs of blocks defined in `config.blocks`.
+   *
+   * @todo `blockReferences` will be merged with `blocks` in 4.0
+   */
+  blockReferences?: (ClientBlock | string)[]
   blocks: ClientBlock[]
   labels?: LabelsClient
 } & FieldBaseClient &
@@ -1505,8 +1524,14 @@ export type FlattenedBlock = {
 } & Block
 
 export type FlattenedBlocksField = {
+  /**
+   * Like `blocks`, but allows you to also pass strings that are slugs of blocks defined in `config.blocks`.
+   *
+   * @todo `blockReferences` will be merged with `blocks` in 4.0
+   */
+  blockReferences?: (FlattenedBlock | string)[]
   blocks: FlattenedBlock[]
-} & BlocksField
+} & Omit<BlocksField, 'blockReferences' | 'blocks'>
 
 export type FlattenedGroupField = {
   flattenedFields: FlattenedField[]
@@ -1829,8 +1854,33 @@ export function tabHasName<TField extends ClientTab | Tab>(tab: TField): tab is 
   return 'name' in tab
 }
 
+/**
+ * Check if a field has localized: true set. This does not check if a field *should*
+ * be localized. To check if a field should be localized, use `fieldShouldBeLocalized`.
+ *
+ * @deprecated this will be removed or modified in v4.0, as `fieldIsLocalized` can easily lead to bugs due to
+ * parent field localization not being taken into account.
+ */
 export function fieldIsLocalized(field: Field | Tab): boolean {
   return 'localized' in field && field.localized
+}
+
+/**
+ * Similar to `fieldIsLocalized`, but returns `false` if any parent field is localized.
+ */
+export function fieldShouldBeLocalized({
+  field,
+  parentIsLocalized,
+}: {
+  field: ClientField | ClientTab | Field | Tab
+  parentIsLocalized: boolean
+}): boolean {
+  return (
+    'localized' in field &&
+    field.localized &&
+    (!parentIsLocalized ||
+      process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true')
+  )
 }
 
 export function fieldIsVirtual(field: Field | Tab): boolean {

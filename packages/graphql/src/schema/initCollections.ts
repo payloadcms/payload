@@ -150,6 +150,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
       config,
       fields: mutationInputFields,
       graphqlResult,
+      parentIsLocalized: false,
       parentName: singularName,
     })
     if (createMutationInputType) {
@@ -164,6 +165,7 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
       ),
       forceNullable: true,
       graphqlResult,
+      parentIsLocalized: false,
       parentName: `${singularName}Update`,
     })
     if (updateMutationInputType) {

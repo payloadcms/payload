@@ -2,11 +2,11 @@ import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { IndexDirection, IndexOptions } from 'mongoose'
 
 import path from 'path'
-import { type PaginatedDocs, type Payload, reload, ValidationError } from 'payload'
+import { type PaginatedDocs, type Payload, reload } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-import type { GroupField, RichTextField } from './payload-types.js'
+import type { BlockField, GroupField, RichTextField } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
@@ -258,7 +258,7 @@ describe('Fields', () => {
           text: 'required',
           blocks: [
             {
-              blockType: 'block',
+              blockType: 'blockWithText',
               texts: ['text_1', 'text_2'],
             },
           ],
@@ -271,7 +271,7 @@ describe('Fields', () => {
           text: 'required',
           blocks: [
             {
-              blockType: 'block',
+              blockType: 'blockWithText',
               texts: ['text_other', 'text_2'],
             },
           ],
@@ -703,7 +703,7 @@ describe('Fields', () => {
       expect(block.blocks[0]?.hasManyBlocks).toStrictEqual(['a', 'b'])
     })
 
-    it('should work with autosave ', async () => {
+    it('should work with autosave', async () => {
       let data = await payload.create({
         collection: 'select-versions-fields',
         data: { hasMany: ['a', 'b', 'c'] },
@@ -975,7 +975,7 @@ describe('Fields', () => {
       data: {
         blocks: [
           {
-            blockType: 'block',
+            blockType: 'blockWithNumber',
             numbers: [10, 30],
           },
         ],
@@ -987,7 +987,7 @@ describe('Fields', () => {
       data: {
         blocks: [
           {
-            blockType: 'block',
+            blockType: 'blockWithNumber',
             numbers: [10, 40],
           },
         ],
@@ -2561,6 +2561,32 @@ describe('Fields', () => {
       })
 
       expect(result.blocksWithLocalizedArray[0].array[0].text).toEqual('localized')
+    })
+
+    it('ensure localized field within block reference is saved correctly', async () => {
+      const blockFields = await payload.find({
+        collection: 'block-fields',
+        locale: 'all',
+      })
+
+      const doc: BlockField = blockFields.docs[0] as BlockField
+
+      expect(doc?.localizedReferences?.[0]?.blockType).toEqual('localizedTextReference2')
+      expect(doc?.localizedReferences?.[0]?.text).toEqual({ en: 'localized text' })
+    })
+
+    it('ensure localized property is stripped from localized field within localized block reference', async () => {
+      const blockFields = await payload.find({
+        collection: 'block-fields',
+        locale: 'all',
+      })
+
+      const doc: any = blockFields.docs[0]
+
+      expect(doc?.localizedReferencesLocalizedBlock?.en?.[0]?.blockType).toEqual(
+        'localizedTextReference',
+      )
+      expect(doc?.localizedReferencesLocalizedBlock?.en?.[0]?.text).toEqual('localized text')
     })
   })
 

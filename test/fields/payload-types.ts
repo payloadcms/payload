@@ -27,6 +27,11 @@ export interface Config {
   auth: {
     users: UserAuthOperations;
   };
+  blocks: {
+    ConfigBlockTest: ConfigBlockTest;
+    localizedTextReference: LocalizedTextReference;
+    localizedTextReference2: LocalizedTextReference2;
+  };
   collections: {
     'lexical-fields': LexicalField;
     'lexical-migrate-fields': LexicalMigrateField;
@@ -155,6 +160,36 @@ export interface UserAuthOperations {
     email: string;
     password: string;
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ConfigBlockTest".
+ */
+export interface ConfigBlockTest {
+  deduplicatedText?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'ConfigBlockTest';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localizedTextReference".
+ */
+export interface LocalizedTextReference {
+  text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'localizedTextReference';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localizedTextReference2".
+ */
+export interface LocalizedTextReference2 {
+  text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'localizedTextReference2';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -625,7 +660,7 @@ export interface BlockField {
         text?: string | null;
         id?: string | null;
         blockName?: string | null;
-        blockType: 'text';
+        blockType: 'textInI18nBlock';
       }[]
     | null;
   blocksWithLocalizedArray?:
@@ -706,7 +741,7 @@ export interface BlockField {
         blockTitle?: string | null;
         id?: string | null;
         blockName?: string | null;
-        blockType: 'block';
+        blockType: 'blockWithMinRows';
       }[]
     | null;
   customBlocks?:
@@ -741,6 +776,10 @@ export interface BlockField {
         blockType: 'text';
       }[]
     | null;
+  deduplicatedBlocks?: ConfigBlockTest[] | null;
+  deduplicatedBlocks2?: ConfigBlockTest[] | null;
+  localizedReferencesLocalizedBlock?: LocalizedTextReference[] | null;
+  localizedReferences?: LocalizedTextReference2[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -780,14 +819,9 @@ export interface SubBlocksBlock {
             text: string;
             id?: string | null;
             blockName?: string | null;
-            blockType: 'text';
+            blockType: 'textRequired';
           }
-        | {
-            number: number;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'number';
-          }
+        | NumberBlock
       )[]
     | null;
   id?: string | null;
@@ -841,14 +875,9 @@ export interface LocalizedSubBlocksBlock {
             text: string;
             id?: string | null;
             blockName?: string | null;
-            blockType: 'text';
+            blockType: 'textRequired';
           }
-        | {
-            number: number;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'number';
-          }
+        | NumberBlock
       )[]
     | null;
   id?: string | null;
@@ -912,7 +941,7 @@ export interface TextField {
         texts?: string[] | null;
         id?: string | null;
         blockName?: string | null;
-        blockType: 'block';
+        blockType: 'blockWithText';
       }[]
     | null;
   updatedAt: string;
@@ -1589,7 +1618,7 @@ export interface NumberField {
         numbers?: number[] | null;
         id?: string | null;
         blockName?: string | null;
-        blockType: 'block';
+        blockType: 'blockWithNumber';
       }[]
     | null;
   updatedAt: string;
@@ -1791,7 +1820,7 @@ export interface RichTextField {
               | null;
             id?: string | null;
             blockName?: string | null;
-            blockType: 'richTextBlock';
+            blockType: 'richTextBlockSlate';
           }
       )[]
     | null;
@@ -2556,7 +2585,7 @@ export interface BlockFieldsSelect<T extends boolean = true> {
   i18nBlocks?:
     | T
     | {
-        text?:
+        textInI18nBlock?:
           | T
           | {
               text?: T;
@@ -2649,7 +2678,7 @@ export interface BlockFieldsSelect<T extends boolean = true> {
   blocksWithMinRows?:
     | T
     | {
-        block?:
+        blockWithMinRows?:
           | T
           | {
               blockTitle?: T;
@@ -2697,6 +2726,10 @@ export interface BlockFieldsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  deduplicatedBlocks?: T | {};
+  deduplicatedBlocks2?: T | {};
+  localizedReferencesLocalizedBlock?: T | {};
+  localizedReferences?: T | {};
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2727,20 +2760,14 @@ export interface SubBlocksBlockSelect<T extends boolean = true> {
   subBlocks?:
     | T
     | {
-        text?:
+        textRequired?:
           | T
           | {
               text?: T;
               id?: T;
               blockName?: T;
             };
-        number?:
-          | T
-          | {
-              number?: T;
-              id?: T;
-              blockName?: T;
-            };
+        number?: T | NumberBlockSelect<T>;
       };
   id?: T;
   blockName?: T;
@@ -2782,20 +2809,14 @@ export interface LocalizedSubBlocksBlockSelect<T extends boolean = true> {
   subBlocks?:
     | T
     | {
-        text?:
+        textRequired?:
           | T
           | {
               text?: T;
               id?: T;
               blockName?: T;
             };
-        number?:
-          | T
-          | {
-              number?: T;
-              id?: T;
-              blockName?: T;
-            };
+        number?: T | NumberBlockSelect<T>;
       };
   id?: T;
   blockName?: T;
@@ -3253,7 +3274,7 @@ export interface NumberFieldsSelect<T extends boolean = true> {
   blocks?:
     | T
     | {
-        block?:
+        blockWithNumber?:
           | T
           | {
               numbers?: T;
@@ -3341,7 +3362,7 @@ export interface RichTextFieldsSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
-        richTextBlock?:
+        richTextBlockSlate?:
           | T
           | {
               text?: T;
@@ -3533,7 +3554,7 @@ export interface TextFieldsSelect<T extends boolean = true> {
   blocks?:
     | T
     | {
-        block?:
+        blockWithText?:
           | T
           | {
               texts?: T;

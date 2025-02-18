@@ -234,7 +234,7 @@ export const TextBlock: Block = {
       required: true,
     },
   ],
-  slug: 'text',
+  slug: 'textRequired',
 }
 
 export const RadioButtonsBlock: Block = {
@@ -371,10 +371,10 @@ export const SelectFieldBlock: Block = {
 }
 
 export const SubBlockBlock: Block = {
-  slug: 'subBlock',
+  slug: 'subBlockLexical',
   fields: [
     {
-      name: 'subBlocks',
+      name: 'subBlocksLexical',
       type: 'blocks',
       blocks: [
         {

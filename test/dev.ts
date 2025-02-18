@@ -16,6 +16,9 @@ import { runInit } from './runInit.js'
 import { child } from './safelyRunScript.js'
 import { createTestHooks } from './testHooks.js'
 
+// @todo remove in 4.0 - will behave like this by default in 4.0
+process.env.PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY = 'true'
+
 const prod = process.argv.includes('--prod')
 if (prod) {
   process.argv = process.argv.filter((arg) => arg !== '--prod')
@@ -35,9 +38,17 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 const {
-  _: [testSuiteArg = '_community'],
+  _: [_testSuiteArg = '_community'],
   ...args
 } = minimist(process.argv.slice(2))
+
+let testSuiteArg: string | undefined
+let testSuiteConfigOverride: string | undefined
+if (_testSuiteArg.includes('#')) {
+  ;[testSuiteArg, testSuiteConfigOverride] = _testSuiteArg.split('#')
+} else {
+  testSuiteArg = _testSuiteArg
+}
 
 if (!testSuiteArg || !fs.existsSync(path.resolve(dirname, testSuiteArg))) {
   console.log(chalk.red(`ERROR: The test folder "${testSuiteArg}" does not exist`))
@@ -50,7 +61,7 @@ if (args.turbo === true) {
   process.env.TURBOPACK = '1'
 }
 
-const { beforeTest } = await createTestHooks(testSuiteArg)
+const { beforeTest } = await createTestHooks(testSuiteArg, testSuiteConfigOverride)
 await beforeTest()
 
 const { rootDir, adminRoute } = getNextRootDir(testSuiteArg)

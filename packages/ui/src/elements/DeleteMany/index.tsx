@@ -16,8 +16,8 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { mergeListSearchAndWhere } from '../../utilities/mergeListSearchAndWhere.js'
 import { Button } from '../Button/index.js'
-import './index.scss'
 import { Pill } from '../Pill/index.js'
+import './index.scss'
 
 const baseClass = 'delete-documents'
 
@@ -159,7 +159,12 @@ export const DeleteMany: React.FC<Props> = (props) => {
         <div className={`${baseClass}__wrapper`}>
           <div className={`${baseClass}__content`}>
             <h1>{t('general:confirmDeletion')}</h1>
-            <p>{t('general:aboutToDeleteCount', { count, label: getTranslation(plural, i18n) })}</p>
+            <p>
+              {t('general:aboutToDeleteCount', {
+                count,
+                label: getTranslation(count > 1 ? plural : singular, i18n),
+              })}
+            </p>
           </div>
           <div className={`${baseClass}__controls`}>
             <Button

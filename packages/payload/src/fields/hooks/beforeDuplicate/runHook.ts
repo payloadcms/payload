@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { FieldHookArgs } from '../../config/types.js'
 
 export const runBeforeDuplicateHooks = async (args: FieldHookArgs) =>

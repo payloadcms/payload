@@ -1,6 +1,8 @@
 import type { PipelineStage } from 'mongoose'
 import type { CollectionSlug, JoinQuery, SanitizedCollectionConfig, Where } from 'payload'
 
+import { fieldShouldBeLocalized } from 'payload/shared'
+
 import type { MongooseAdapter } from '../index.js'
 
 import { buildSortParam } from '../queries/buildSortParam.js'
@@ -68,6 +70,7 @@ export const buildJoinAggregation = async ({
 
       const {
         limit: limitJoin = join.field.defaultLimit ?? 10,
+        page,
         sort: sortJoin = join.field.defaultSort || collectionConfig.defaultSort,
         where: whereJoin,
       } = joins?.[join.joinPath] || {}
@@ -94,6 +97,12 @@ export const buildJoinAggregation = async ({
           $sort: { [sortProperty]: sortDirection },
         },
       ]
+
+      if (page) {
+        pipeline.push({
+          $skip: (page - 1) * limitJoin,
+        })
+      }
 
       if (limitJoin > 0) {
         pipeline.push({
@@ -148,7 +157,14 @@ export const buildJoinAggregation = async ({
         })
       } else {
         const localeSuffix =
-          join.field.localized && adapter.payload.config.localization && locale ? `.${locale}` : ''
+          fieldShouldBeLocalized({
+            field: join.field,
+            parentIsLocalized: join.parentIsLocalized,
+          }) &&
+          adapter.payload.config.localization &&
+          locale
+            ? `.${locale}`
+            : ''
         const as = `${versions ? `version.${join.joinPath}` : join.joinPath}${localeSuffix}`
 
         let foreignField: string

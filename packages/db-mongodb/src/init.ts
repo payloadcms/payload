@@ -26,15 +26,19 @@ export const init: Init = function init(this: MongooseAdapter) {
 
       const versionCollectionFields = buildVersionCollectionFields(this.payload.config, collection)
 
-      const versionSchema = buildSchema(this.payload, versionCollectionFields, {
-        disableUnique: true,
-        draftsEnabled: true,
-        indexSortableFields: this.payload.config.indexSortableFields,
-        options: {
-          minimize: false,
-          timestamps: false,
+      const versionSchema = buildSchema({
+        buildSchemaOptions: {
+          disableUnique: true,
+          draftsEnabled: true,
+          indexSortableFields: this.payload.config.indexSortableFields,
+          options: {
+            minimize: false,
+            timestamps: false,
+          },
+          ...schemaOptions,
         },
-        ...schemaOptions,
+        configFields: versionCollectionFields,
+        payload: this.payload,
       })
 
       versionSchema.plugin<any, PaginateOptions>(paginate, { useEstimatedCount: true }).plugin(
@@ -77,14 +81,18 @@ export const init: Init = function init(this: MongooseAdapter) {
 
       const versionGlobalFields = buildVersionGlobalFields(this.payload.config, global)
 
-      const versionSchema = buildSchema(this.payload, versionGlobalFields, {
-        disableUnique: true,
-        draftsEnabled: true,
-        indexSortableFields: this.payload.config.indexSortableFields,
-        options: {
-          minimize: false,
-          timestamps: false,
+      const versionSchema = buildSchema({
+        buildSchemaOptions: {
+          disableUnique: true,
+          draftsEnabled: true,
+          indexSortableFields: this.payload.config.indexSortableFields,
+          options: {
+            minimize: false,
+            timestamps: false,
+          },
         },
+        configFields: versionGlobalFields,
+        payload: this.payload,
       })
 
       versionSchema.plugin<any, PaginateOptions>(paginate, { useEstimatedCount: true }).plugin(

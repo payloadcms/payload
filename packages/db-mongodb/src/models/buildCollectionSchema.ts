@@ -12,14 +12,20 @@ export const buildCollectionSchema = (
   payload: Payload,
   schemaOptions = {},
 ): Schema => {
-  const schema = buildSchema(payload, collection.fields, {
-    draftsEnabled: Boolean(typeof collection?.versions === 'object' && collection.versions.drafts),
-    indexSortableFields: payload.config.indexSortableFields,
-    options: {
-      minimize: false,
-      timestamps: collection.timestamps !== false,
-      ...schemaOptions,
+  const schema = buildSchema({
+    buildSchemaOptions: {
+      draftsEnabled: Boolean(
+        typeof collection?.versions === 'object' && collection.versions.drafts,
+      ),
+      indexSortableFields: payload.config.indexSortableFields,
+      options: {
+        minimize: false,
+        timestamps: collection.timestamps !== false,
+        ...schemaOptions,
+      },
     },
+    configFields: collection.fields,
+    payload,
   })
 
   if (Array.isArray(collection.upload.filenameCompoundIndex)) {
@@ -32,11 +38,6 @@ export const buildCollectionSchema = (
     )
 
     schema.index(indexDefinition, { unique: true })
-  }
-
-  if (payload.config.indexSortableFields && collection.timestamps !== false) {
-    schema.index({ updatedAt: 1 })
-    schema.index({ createdAt: 1 })
   }
 
   schema

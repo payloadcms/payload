@@ -260,6 +260,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     locale: '語言環境',
     locales: '語言環境',
     menu: '菜單',
+    moreOptions: '更多選項',
     moveDown: '向下移動',
     moveUp: '向上移動',
     newPassword: '新密碼',
