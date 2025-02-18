@@ -414,6 +414,15 @@ For more details, see the [Documentation](https://payloadcms.com/docs/getting-st
     ```
 1. The `./src/public` directory is now located directly at root level `./public` [see Next.js docs for details](https://nextjs.org/docs/pages/building-your-application/optimizing/static-assets)
 
+1.  Data structure changes for all fields with `localized: true`. All nested locale has a new, simplified data structure. You need to create your own migrations that work with your payload collections and fields.
+Mongodb example for a link in a page layout.
+
+    ```diff
+    - layout.columns.en.link.en.type.en
+    + layout.en.columns.link.type
+    ```
+
+
 ## Custom Components
 
 1. All Payload React components have been moved from the `payload` package to `@payloadcms/ui`. If you were previously importing components into your app from the `payload` package, for example to create Custom Components, you will need to change your import paths:
