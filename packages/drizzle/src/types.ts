@@ -279,6 +279,11 @@ export type IntegerRawColumn = {
   type: 'integer'
 } & BaseRawColumn
 
+export type VectorRawColumn = {
+  dimensions?: number
+  type: 'vector'
+} & BaseRawColumn
+
 export type RawColumn =
   | ({
       type: 'boolean' | 'geometry' | 'jsonb' | 'numeric' | 'serial' | 'text' | 'varchar'
@@ -287,6 +292,7 @@ export type RawColumn =
   | IntegerRawColumn
   | TimestampRawColumn
   | UUIDRawColumn
+  | VectorRawColumn
 
 export type IDType = 'integer' | 'numeric' | 'text' | 'uuid' | 'varchar'
 

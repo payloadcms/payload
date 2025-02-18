@@ -13,6 +13,7 @@ import {
   uniqueIndex,
   uuid,
   varchar,
+  vector,
 } from 'drizzle-orm/pg-core'
 
 import type { RawColumn, RawTable } from '../../types.js'
@@ -78,6 +79,13 @@ export const buildDrizzleTable = ({
         }
 
         columns[key] = builder
+        break
+      }
+
+      case 'vector': {
+        const builder = vector(column.name, { dimensions: column.dimensions })
+        columns[key] = builder
+
         break
       }
 
