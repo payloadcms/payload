@@ -270,6 +270,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     locale: 'Lokalitet',
     locales: 'Språk',
     menu: 'Meny',
+    moreOptions: 'Flere alternativer',
     moveDown: 'Flytt ned',
     moveUp: 'Flytt opp',
     newPassword: 'Nytt passord',

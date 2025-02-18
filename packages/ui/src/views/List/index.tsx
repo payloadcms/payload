@@ -52,6 +52,7 @@ export function DefaultListView(props: ListViewClientProps) {
     disableBulkEdit,
     enableRowSelections,
     hasCreatePermission,
+    listMenuItems,
     listPreferences,
     newDocumentURL,
     preferenceKey,
@@ -195,6 +196,7 @@ export function DefaultListView(props: ListViewClientProps) {
                 collectionSlug={collectionSlug}
                 disableBulkDelete={disableBulkDelete}
                 disableBulkEdit={disableBulkEdit}
+                listMenuItems={listMenuItems}
                 renderedFilters={renderedFilters}
                 resolvedFilterOptions={resolvedFilterOptions}
               />

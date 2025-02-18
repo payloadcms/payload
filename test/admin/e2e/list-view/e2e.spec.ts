@@ -198,6 +198,19 @@ describe('List View', () => {
       ).toBeVisible()
     })
 
+    test('should render custom listMenuItems component', async () => {
+      await page.goto(postsUrl.list)
+      const kebabMenu = page.locator('.list-controls__popup')
+      await expect(kebabMenu).toBeVisible()
+      await kebabMenu.click()
+
+      await expect(
+        page.locator('.popup-button-list').locator('div', {
+          hasText: 'listMenuItems',
+        }),
+      ).toBeVisible()
+    })
+
     test('should render custom afterListTable component', async () => {
       await page.goto(postsUrl.list)
       await expect(

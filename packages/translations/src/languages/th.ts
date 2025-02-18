@@ -266,6 +266,7 @@ export const thTranslations: DefaultTranslationsObject = {
     locale: 'ตำแหน่งที่ตั้ง',
     locales: 'ภาษา',
     menu: 'เมนู',
+    moreOptions: 'ตัวเลือกเพิ่มเติม',
     moveDown: 'ขยับขึ้น',
     moveUp: 'ขยับลง',
     newPassword: 'รหัสผ่านใหม่',

@@ -618,6 +618,46 @@ describe('Joins Field', () => {
       expect(unlimited.docs[0].relatedPosts.hasNextPage).toStrictEqual(false)
     })
 
+    it('should have simple paginate with page for joins', async () => {
+      const query = {
+        depth: 1,
+        where: {
+          name: { equals: 'paginate example' },
+        },
+        joins: {
+          relatedPosts: {
+            sort: 'createdAt',
+            limit: 2,
+            page: 1,
+          },
+        },
+      }
+      let pageWithLimit = await restClient.GET(`/categories`, { query }).then((res) => res.json())
+
+      query.joins.relatedPosts.limit = 0
+      const unlimited = await restClient.GET(`/categories`, { query }).then((res) => res.json())
+
+      expect(pageWithLimit.docs[0].relatedPosts.docs).toHaveLength(2)
+      expect(pageWithLimit.docs[0].relatedPosts.docs[0].id).toBe(
+        unlimited.docs[0].relatedPosts.docs[0].id,
+      )
+      expect(pageWithLimit.docs[0].relatedPosts.docs[1].id).toBe(
+        unlimited.docs[0].relatedPosts.docs[1].id,
+      )
+      query.joins.relatedPosts.limit = 2
+      query.joins.relatedPosts.page = 2
+
+      pageWithLimit = await restClient.GET(`/categories`, { query }).then((res) => res.json())
+
+      expect(pageWithLimit.docs[0].relatedPosts.docs).toHaveLength(2)
+      expect(pageWithLimit.docs[0].relatedPosts.docs[0].id).toBe(
+        unlimited.docs[0].relatedPosts.docs[2].id,
+      )
+      expect(pageWithLimit.docs[0].relatedPosts.docs[1].id).toBe(
+        unlimited.docs[0].relatedPosts.docs[3].id,
+      )
+    })
+
     it('should respect access control for join collections', async () => {
       const { docs } = await payload.find({
         collection: categoriesJoinRestrictedSlug,
@@ -748,6 +788,94 @@ describe('Joins Field', () => {
       expect(unlimited.data.Categories.docs[0].relatedPosts.docs).toHaveLength(15)
       expect(unlimited.data.Categories.docs[0].relatedPosts.docs[0].title).toStrictEqual('test 0')
       expect(unlimited.data.Categories.docs[0].relatedPosts.hasNextPage).toStrictEqual(false)
+    })
+
+    it('should have simple paginate with page for joins', async () => {
+      let queryWithLimit = `query {
+    Categories(where: {
+            name: { equals: "paginate example" }
+          }) {
+          docs {
+            relatedPosts(
+              sort: "createdAt",
+              limit: 2
+            ) {
+              docs {
+                title
+              }
+              hasNextPage
+            }
+          }
+        }
+      }`
+      let pageWithLimit = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryWithLimit }) })
+        .then((res) => res.json())
+
+      const queryUnlimited = `query {
+        Categories(
+          where: {
+            name: { equals: "paginate example" }
+          }
+        ) {
+          docs {
+            relatedPosts(
+              sort: "createdAt",
+              limit: 0
+            ) {
+              docs {
+                title
+                createdAt
+              }
+              hasNextPage
+            }
+          }
+        }
+      }`
+
+      const unlimited = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryUnlimited }) })
+        .then((res) => res.json())
+
+      expect(pageWithLimit.data.Categories.docs[0].relatedPosts.docs).toHaveLength(2)
+      expect(pageWithLimit.data.Categories.docs[0].relatedPosts.docs[0].id).toStrictEqual(
+        unlimited.data.Categories.docs[0].relatedPosts.docs[0].id,
+      )
+      expect(pageWithLimit.data.Categories.docs[0].relatedPosts.docs[1].id).toStrictEqual(
+        unlimited.data.Categories.docs[0].relatedPosts.docs[1].id,
+      )
+
+      expect(pageWithLimit.data.Categories.docs[0].relatedPosts.hasNextPage).toStrictEqual(true)
+
+      queryWithLimit = `query {
+        Categories(where: {
+                name: { equals: "paginate example" }
+              }) {
+              docs {
+                relatedPosts(
+                  sort: "createdAt",
+                  limit: 2,
+                  page: 2,
+                ) {
+                  docs {
+                    title
+                  }
+                  hasNextPage
+                }
+              }
+            }
+          }`
+
+      pageWithLimit = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryWithLimit }) })
+        .then((res) => res.json())
+
+      expect(pageWithLimit.data.Categories.docs[0].relatedPosts.docs[0].id).toStrictEqual(
+        unlimited.data.Categories.docs[0].relatedPosts.docs[2].id,
+      )
+      expect(pageWithLimit.data.Categories.docs[0].relatedPosts.docs[1].id).toStrictEqual(
+        unlimited.data.Categories.docs[0].relatedPosts.docs[3].id,
+      )
     })
 
     it('should have simple paginate for joins inside groups', async () => {
