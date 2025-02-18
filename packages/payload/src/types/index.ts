@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { I18n, TFunction } from '@payloadcms/translations'
 import type DataLoader from 'dataloader'
 import type { URL } from 'url'
@@ -145,6 +146,7 @@ export type JoinQuery<TSlug extends CollectionSlug = string> =
             [K in keyof TypedCollectionJoins[TSlug]]:
               | {
                   limit?: number
+                  page?: number
                   sort?: string
                   where?: Where
                 }
@@ -239,3 +241,5 @@ export type TransformGlobalWithSelect<
   : DataFromGlobalSlug<TSlug>
 
 export type PopulateType = Partial<TypedCollectionSelect>
+
+export type ResolvedFilterOptions = { [collection: string]: Where }

@@ -183,7 +183,7 @@ const TextFields: CollectionConfig = {
       type: 'blocks',
       blocks: [
         {
-          slug: 'block',
+          slug: 'blockWithText',
           fields: [
             {
               name: 'texts',

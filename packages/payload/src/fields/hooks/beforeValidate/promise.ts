@@ -1,9 +1,10 @@
+// @ts-strict-ignore
 import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, JsonValue, PayloadRequest } from '../../../types/index.js'
-import type { Field, TabAsField } from '../../config/types.js'
+import type { Block, Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName, valueIsValueWithRelation } from '../../config/types.js'
@@ -32,6 +33,7 @@ type Args<T> = {
   operation: 'create' | 'update'
   overrideAccess: boolean
   parentIndexPath: string
+  parentIsLocalized: boolean
   parentPath: string
   parentSchemaPath: string
   req: PayloadRequest
@@ -40,6 +42,7 @@ type Args<T> = {
    * The original siblingData (not modified by any hooks)
    */
   siblingDoc: JsonObject
+  siblingFields?: (Field | TabAsField)[]
 }
 
 // This function is responsible for the following actions, in order:
@@ -62,11 +65,13 @@ export const promise = async <T>({
   operation,
   overrideAccess,
   parentIndexPath,
+  parentIsLocalized,
   parentPath,
   parentSchemaPath,
   req,
   siblingData,
   siblingDoc,
+  siblingFields,
 }: Args<T>): Promise<void> => {
   const { indexPath, path, schemaPath } = getFieldPaths({
     field,
@@ -291,6 +296,7 @@ export const promise = async <T>({
           req,
           schemaPath: schemaPathSegments,
           siblingData,
+          siblingFields,
           value: siblingData[field.name],
         })
 
@@ -351,6 +357,7 @@ export const promise = async <T>({
               operation,
               overrideAccess,
               parentIndexPath: '',
+              parentIsLocalized: parentIsLocalized || field.localized,
               parentPath: path + '.' + rowIndex,
               parentSchemaPath: schemaPath,
               req,
@@ -374,7 +381,12 @@ export const promise = async <T>({
         rows.forEach((row, rowIndex) => {
           const rowSiblingDoc = getExistingRowDoc(row as JsonObject, siblingDoc[field.name])
           const blockTypeToMatch = (row as JsonObject).blockType || rowSiblingDoc.blockType
-          const block = field.blocks.find((blockType) => blockType.slug === blockTypeToMatch)
+
+          const block: Block | undefined =
+            req.payload.blocks[blockTypeToMatch] ??
+            ((field.blockReferences ?? field.blocks).find(
+              (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
+            ) as Block | undefined)
 
           if (block) {
             ;(row as JsonObject).blockType = blockTypeToMatch
@@ -392,6 +404,7 @@ export const promise = async <T>({
                 operation,
                 overrideAccess,
                 parentIndexPath: '',
+                parentIsLocalized: parentIsLocalized || field.localized,
                 parentPath: path + '.' + rowIndex,
                 parentSchemaPath: schemaPath + '.' + block.slug,
                 req,
@@ -422,6 +435,7 @@ export const promise = async <T>({
         operation,
         overrideAccess,
         parentIndexPath: indexPath,
+        parentIsLocalized,
         parentPath,
         parentSchemaPath: schemaPath,
         req,
@@ -456,6 +470,7 @@ export const promise = async <T>({
         operation,
         overrideAccess,
         parentIndexPath: '',
+        parentIsLocalized: parentIsLocalized || field.localized,
         parentPath: path,
         parentSchemaPath: schemaPath,
         req,
@@ -491,6 +506,7 @@ export const promise = async <T>({
             operation,
             originalDoc: doc,
             overrideAccess,
+            parentIsLocalized,
             path: pathSegments,
             previousSiblingDoc: siblingDoc,
             previousValue: siblingData[field.name],
@@ -542,6 +558,7 @@ export const promise = async <T>({
         operation,
         overrideAccess,
         parentIndexPath: isNamedTab ? '' : indexPath,
+        parentIsLocalized: parentIsLocalized || field.localized,
         parentPath: isNamedTab ? path : parentPath,
         parentSchemaPath: schemaPath,
         req,
@@ -565,6 +582,7 @@ export const promise = async <T>({
         operation,
         overrideAccess,
         parentIndexPath: indexPath,
+        parentIsLocalized,
         parentPath: path,
         parentSchemaPath: schemaPath,
         req,

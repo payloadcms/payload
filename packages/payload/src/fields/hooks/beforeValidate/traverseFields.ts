@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
@@ -24,6 +25,10 @@ type Args<T> = {
   operation: 'create' | 'update'
   overrideAccess: boolean
   parentIndexPath: string
+  /**
+   * @todo make required in v4.0
+   */
+  parentIsLocalized?: boolean
   parentPath: string
   parentSchemaPath: string
   req: PayloadRequest
@@ -46,6 +51,7 @@ export const traverseFields = async <T>({
   operation,
   overrideAccess,
   parentIndexPath,
+  parentIsLocalized,
   parentPath,
   parentSchemaPath,
   req,
@@ -69,11 +75,13 @@ export const traverseFields = async <T>({
         operation,
         overrideAccess,
         parentIndexPath,
+        parentIsLocalized,
         parentPath,
         parentSchemaPath,
         req,
         siblingData,
         siblingDoc,
+        siblingFields: fields,
       }),
     )
   })

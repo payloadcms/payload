@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { promises as fsPromises } from 'fs'
 import os from 'node:os'
 import path from 'node:path'

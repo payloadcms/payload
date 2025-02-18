@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { addListFilter } from 'helpers/e2e/addListFilter.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -12,8 +13,6 @@ import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../helpers/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { checkboxFieldsSlug } from '../../slugs.js'
-import { openListFilters } from 'helpers/e2e/openListFilters.js'
-import { addListFilter } from 'helpers/e2e/addListFilter.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -67,8 +66,6 @@ describe('Checkboxes', () => {
       operatorLabel: 'equals',
       value: 'True',
     })
-
-    await wait(1000)
 
     await expect(page.locator('table > tbody > tr')).toHaveCount(1)
   })

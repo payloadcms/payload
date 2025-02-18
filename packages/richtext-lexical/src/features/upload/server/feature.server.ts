@@ -4,7 +4,7 @@ import type {
   Field,
   FieldSchemaMap,
   FileData,
-  FileSize,
+  FileSizeImproved,
   Payload,
   TypeWithID,
 } from 'payload'
@@ -172,9 +172,7 @@ export const UploadFeature = createServerFeature<
 
                   // Iterate through each size in the data.sizes object
                   for (const size in uploadDocument.value?.sizes) {
-                    const imageSize: {
-                      url?: string
-                    } & FileSize = uploadDocument.value?.sizes[size]
+                    const imageSize = uploadDocument.value.sizes[size] as FileSizeImproved
 
                     // Skip if any property of the size object is null
                     if (
@@ -207,7 +205,8 @@ export const UploadFeature = createServerFeature<
             if (!node) {
               let allSubFields: Field[] = []
               for (const collection in props?.collections) {
-                allSubFields = allSubFields.concat(props?.collections?.[collection]?.fields)
+                const collectionFields = props.collections[collection]!.fields
+                allSubFields = allSubFields.concat(collectionFields)
               }
               return allSubFields
             }
@@ -250,7 +249,7 @@ export const UploadFeature = createServerFeature<
                 if (!collection) {
                   return node
                 }
-                // @ts-expect-error
+                // @ts-expect-error - Fix in Payload v4
                 const id = node?.value?.id || node?.value // for backwards-compatibility
 
                 const populateDepth =

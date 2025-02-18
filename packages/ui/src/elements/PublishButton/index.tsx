@@ -1,5 +1,7 @@
 'use client'
 
+import type { PublishButtonClientProps } from 'payload'
+
 import { useModal } from '@faceless-ui/modal'
 import * as qs from 'qs-esm'
 import React, { useCallback } from 'react'
@@ -16,7 +18,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { PopupList } from '../Popup/index.js'
 import { ScheduleDrawer } from './ScheduleDrawer/index.js'
 
-export const PublishButton: React.FC<{ label?: string }> = ({ label: labelProp }) => {
+export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
   const {
     id,
     collectionSlug,

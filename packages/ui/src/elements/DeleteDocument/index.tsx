@@ -1,5 +1,5 @@
 'use client'
-import type { ClientCollectionConfig, SanitizedCollectionConfig } from 'payload'
+import type { SanitizedCollectionConfig } from 'payload'
 
 import { Modal, useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -13,6 +13,7 @@ import { useForm } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
+import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
@@ -63,6 +64,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
   const { i18n, t } = useTranslation()
   const { title } = useDocumentInfo()
   const editDepth = useEditDepth()
+  const { startRouteTransition } = useRouteTransition()
 
   const titleToRender = titleFromProps || title || id
 
@@ -105,11 +107,13 @@ export const DeleteDocument: React.FC<Props> = (props) => {
               )
 
               if (redirectAfterDelete) {
-                return router.push(
-                  formatAdminURL({
-                    adminRoute,
-                    path: `/collections/${collectionSlug}`,
-                  }),
+                return startRouteTransition(() =>
+                  router.push(
+                    formatAdminURL({
+                      adminRoute,
+                      path: `/collections/${collectionSlug}`,
+                    }),
+                  ),
                 )
               }
 
@@ -155,6 +159,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
     redirectAfterDelete,
     onDelete,
     collectionConfig,
+    startRouteTransition,
   ])
 
   if (id) {

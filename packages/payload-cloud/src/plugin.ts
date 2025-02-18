@@ -69,6 +69,7 @@ export const payloadCloudPlugin =
                   getStaticHandler({
                     cachingOptions: pluginOptions?.uploadCaching,
                     collection,
+                    debug: pluginOptions?.debug,
                   }),
                 ],
               },

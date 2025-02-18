@@ -2,7 +2,7 @@ import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { addBlock } from 'helpers/e2e/addBlock.js'
-import { openBlockDrawer } from 'helpers/e2e/openBlockDrawer.js'
+import { openBlocksDrawer } from 'helpers/e2e/openBlocksDrawer.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -45,6 +45,7 @@ describe('Block fields', () => {
 
     await ensureCompilationIsDone({ page, serverURL })
   })
+
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
@@ -62,6 +63,7 @@ describe('Block fields', () => {
   })
 
   let url: AdminUrlUtil
+
   beforeAll(() => {
     url = new AdminUrlUtil(serverURL, 'block-fields')
   })
@@ -72,8 +74,7 @@ describe('Block fields', () => {
     await addBlock({
       page,
       fieldName: 'blocks',
-      fieldLabelSingular: 'Blocks',
-      blockLabelSingular: 'Content',
+      blockLabel: 'Content',
     })
 
     // ensure the block was appended to the rows
@@ -87,10 +88,9 @@ describe('Block fields', () => {
   test('should reset search state in blocks drawer on re-open', async () => {
     await page.goto(url.create)
 
-    const blocksDrawer = await openBlockDrawer({
+    const blocksDrawer = await openBlocksDrawer({
       page,
       fieldName: 'blocks',
-      fieldLabelSingular: 'Blocks',
     })
 
     const searchInput = page.locator('.block-search__input')
@@ -183,14 +183,15 @@ describe('Block fields', () => {
     await addBlock({
       page,
       fieldName: 'i18nBlocks',
-      fieldLabelSingular: 'I18n Blocks',
-      blockLabelSingular: 'Text en',
+      blockLabel: 'Text en',
     })
 
     // ensure the block was appended to the rows
     const firstRow = page.locator('#field-i18nBlocks .blocks-field__row').first()
     await expect(firstRow).toBeVisible()
-    await expect(firstRow.locator('.blocks-field__block-pill-text')).toContainText('Text en')
+    await expect(firstRow.locator('.blocks-field__block-pill-textInI18nBlock')).toContainText(
+      'Text en',
+    )
   })
 
   test('should render custom block row label', async () => {
@@ -199,8 +200,7 @@ describe('Block fields', () => {
     await addBlock({
       page,
       fieldName: 'blocks',
-      fieldLabelSingular: 'Blocks',
-      blockLabelSingular: 'Content',
+      blockLabel: 'Content',
     })
 
     await expect(
@@ -216,8 +216,7 @@ describe('Block fields', () => {
     await addBlock({
       page,
       fieldName: 'blocksWithSimilarConfigs',
-      fieldLabelSingular: 'Blocks With Similar Config',
-      blockLabelSingular: 'Block A',
+      blockLabel: 'Block A',
     })
 
     await page
@@ -236,8 +235,7 @@ describe('Block fields', () => {
     await addBlock({
       page,
       fieldName: 'blocksWithSimilarConfigs',
-      fieldLabelSingular: 'Blocks With Similar Config',
-      blockLabelSingular: 'Block B',
+      blockLabel: 'Block B',
     })
 
     await page
@@ -266,8 +264,7 @@ describe('Block fields', () => {
     await addBlock({
       page,
       fieldName: 'blocksWithMinRows',
-      fieldLabelSingular: 'Blocks With Min Rows',
-      blockLabelSingular: 'Block',
+      blockLabel: 'Block With Min Row',
     })
 
     const firstRow = page.locator('input[name="blocksWithMinRows.0.blockTitle"]')

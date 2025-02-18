@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { ValidationFieldError } from '../../../errors/index.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
@@ -30,6 +31,10 @@ type Args = {
   mergeLocaleActions: (() => Promise<void>)[]
   operation: Operation
   parentIndexPath: string
+  /**
+   * @todo make required in v4.0
+   */
+  parentIsLocalized?: boolean
   parentPath: string
   parentSchemaPath: string
   req: PayloadRequest
@@ -67,6 +72,7 @@ export const traverseFields = async ({
   mergeLocaleActions,
   operation,
   parentIndexPath,
+  parentIsLocalized,
   parentPath,
   parentSchemaPath,
   req,
@@ -94,12 +100,14 @@ export const traverseFields = async ({
         mergeLocaleActions,
         operation,
         parentIndexPath,
+        parentIsLocalized,
         parentPath,
         parentSchemaPath,
         req,
         siblingData,
         siblingDoc,
         siblingDocWithLocales,
+        siblingFields: fields,
         skipValidation,
       }),
     )

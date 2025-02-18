@@ -270,6 +270,10 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
   const imageCacheTag = uploadConfig?.cacheTags && savedDocumentData?.updatedAt
 
+  if (uploadConfig.hideFileInputOnCreate && !savedDocumentData?.filename) {
+    return null
+  }
+
   return (
     <div className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}>
       <FieldError message={errorMessage} showError={showError} />
@@ -281,11 +285,12 @@ export const Upload: React.FC<UploadProps> = (props) => {
           enableAdjustments={showCrop || showFocalPoint}
           handleRemove={canRemoveUpload ? handleFileRemoval : undefined}
           hasImageSizes={hasImageSizes}
+          hideRemoveFile={uploadConfig.hideRemoveFile}
           imageCacheTag={imageCacheTag}
           uploadConfig={uploadConfig}
         />
       )}
-      {(!savedDocumentData?.filename || removedFile) && (
+      {((!uploadConfig.hideFileInputOnCreate && !savedDocumentData?.filename) || removedFile) && (
         <div className={`${baseClass}__upload`}>
           {!value && !showUrlInput && (
             <Dropzone onChange={handleFileSelection}>

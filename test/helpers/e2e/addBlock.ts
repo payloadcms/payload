@@ -1,29 +1,28 @@
 import type { Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
+import { exactText } from 'helpers.js'
 
-import { openBlockDrawer } from './openBlockDrawer.js'
+import { openBlocksDrawer } from './openBlocksDrawer.js'
 
 export const addBlock = async ({
   page,
   fieldName = 'blocks',
-  blockLabelSingular = 'Block',
-  fieldLabelSingular = 'Blocks',
+  blockLabel = 'Block',
 }: {
-  blockLabelSingular: string
-  fieldLabelSingular: string
+  blockLabel: string
   fieldName: string
   page: Page
 }) => {
-  const blocksDrawer = await openBlockDrawer({ page, fieldName, fieldLabelSingular })
+  const blocksDrawer = await openBlocksDrawer({ page, fieldName })
 
   const blockCard = blocksDrawer.locator('.blocks-drawer__block .thumbnail-card__label', {
-    hasText: blockLabelSingular,
+    hasText: blockLabel,
   })
 
   await expect(blockCard).toBeVisible()
 
-  await page.getByRole('button', { name: blockLabelSingular }).click()
+  await blocksDrawer.getByRole('button', { name: exactText(blockLabel) }).click()
 
   // expect to see the block on the page
 }

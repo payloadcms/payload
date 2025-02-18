@@ -2,8 +2,6 @@ import type { Page } from '@playwright/test'
 
 import { wait } from 'payload/shared'
 
-import { exactText } from '../../helpers.js'
-
 export const reorderBlocks = async ({
   page,
   fromBlockIndex = 1,
@@ -35,7 +33,4 @@ export const reorderBlocks = async ({
   await wait(300)
   await page.mouse.move(toBoundingBox.x - 2, toBoundingBox.y - 2, { steps: 10 })
   await page.mouse.up()
-
-  // TODO: This wait makes sure the preferences are actually saved. Just waiting for the UI to update is not enough. We should replace this wait
-  await wait(1000)
 }

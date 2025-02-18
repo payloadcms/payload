@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { TypedCollection } from '../../index.js'
 import type { Where } from '../../types/index.js'
 import type { PreferenceRequest } from '../types.js'

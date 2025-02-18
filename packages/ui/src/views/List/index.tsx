@@ -1,14 +1,11 @@
 'use client'
 
-import type { ListPreferences } from 'payload'
+import type { ListViewClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import LinkImport from 'next/link.js'
 import { useRouter } from 'next/navigation.js'
 import { formatFilesize, isNumber } from 'payload/shared'
 import React, { Fragment, useEffect, useState } from 'react'
-
-import type { Column } from '../../elements/Table/index.js'
 
 import { useBulkUpload } from '../../elements/BulkUpload/index.js'
 import { Button } from '../../elements/Button/index.js'
@@ -40,32 +37,8 @@ import { ListHeader } from './ListHeader/index.js'
 import './index.scss'
 
 const baseClass = 'collection-list'
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
-export type ListViewSlots = {
-  AfterList?: React.ReactNode
-  AfterListTable?: React.ReactNode
-  BeforeList?: React.ReactNode
-  BeforeListTable?: React.ReactNode
-  Description?: React.ReactNode
-  Table: React.ReactNode
-}
-
-export type ListViewClientProps = {
-  beforeActions?: React.ReactNode[]
-  collectionSlug: string
-  columnState: Column[]
-  disableBulkDelete?: boolean
-  disableBulkEdit?: boolean
-  enableRowSelections?: boolean
-  hasCreatePermission: boolean
-  listPreferences?: ListPreferences
-  newDocumentURL: string
-  preferenceKey?: string
-  renderedFilters?: Map<string, React.ReactNode>
-} & ListViewSlots
-
-export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
+export function DefaultListView(props: ListViewClientProps) {
   const {
     AfterList,
     AfterListTable,
@@ -79,10 +52,12 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
     disableBulkEdit,
     enableRowSelections,
     hasCreatePermission,
+    listMenuItems,
     listPreferences,
     newDocumentURL,
     preferenceKey,
     renderedFilters,
+    resolvedFilterOptions,
     Table: InitialTable,
   } = props
 
@@ -193,14 +168,17 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                     <RenderCustomComponent
                       CustomComponent={Description}
                       Fallback={
-                        <ViewDescription description={collectionConfig?.admin?.description} />
+                        <ViewDescription
+                          collectionSlug={collectionSlug}
+                          description={collectionConfig?.admin?.description}
+                        />
                       }
                     />
                   </div>
                 }
                 hasCreatePermission={hasCreatePermission}
                 i18n={i18n}
-                isBulkUploadEnabled={isBulkUploadEnabled}
+                isBulkUploadEnabled={isBulkUploadEnabled && !upload.hideFileInputOnCreate}
                 newDocumentURL={newDocumentURL}
                 openBulkUpload={openBulkUpload}
                 smallBreak={smallBreak}
@@ -218,7 +196,9 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                 collectionSlug={collectionSlug}
                 disableBulkDelete={disableBulkDelete}
                 disableBulkEdit={disableBulkEdit}
+                listMenuItems={listMenuItems}
                 renderedFilters={renderedFilters}
+                resolvedFilterOptions={resolvedFilterOptions}
               />
               {BeforeListTable}
               {docs.length > 0 && <RelationshipProvider>{Table}</RelationshipProvider>}
@@ -236,7 +216,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                           })}
                         </Button>
                       ) : (
-                        <Button el="link" Link={Link} to={newDocumentURL}>
+                        <Button el="link" to={newDocumentURL}>
                           {i18n.t('general:createNewLabel', {
                             label: getTranslation(labels?.singular, i18n),
                           })}

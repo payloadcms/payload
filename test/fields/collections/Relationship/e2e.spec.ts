@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { addListFilter } from 'helpers/e2e/addListFilter.js'
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import { openListFilters } from 'helpers/e2e/openListFilters.js'
@@ -26,7 +27,6 @@ import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../helpers/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { relationshipFieldsSlug, textFieldsSlug } from '../../slugs.js'
-import { addListFilter } from 'helpers/e2e/addListFilter.js'
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../')
@@ -183,6 +183,35 @@ describe('relationship', () => {
     // The reason why I check for locator 1 again is that I've noticed that sometimes
     // the default value does not appear after the first locator is tested. IDK why.
     await expect(locator1).toHaveCount(0)
+  })
+
+  test('should hide edit button in main doc when relationship deleted', async () => {
+    const createdRelatedDoc = await payload.create({
+      collection: textFieldsSlug,
+      data: {
+        text: 'doc to be deleted',
+      },
+    })
+    const doc = await payload.create({
+      collection: relationshipFieldsSlug,
+      data: {
+        relationship: {
+          value: createdRelatedDoc.id,
+          relationTo: textFieldsSlug,
+        },
+      },
+    })
+    await payload.delete({
+      collection: textFieldsSlug,
+      id: createdRelatedDoc.id,
+    })
+
+    await page.goto(url.edit(doc.id))
+
+    const editBtn = page.locator(
+      '#field-relationship button.relationship--single-value__drawer-toggler',
+    )
+    await expect(editBtn).toHaveCount(0)
   })
 
   // TODO: Flaky test in CI - fix this. https://github.com/payloadcms/payload/actions/runs/8910825395/job/24470963991

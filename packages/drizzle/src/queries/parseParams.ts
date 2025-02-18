@@ -20,6 +20,7 @@ type Args = {
   fields: FlattenedField[]
   joins: BuildQueryJoinAliases
   locale: string
+  parentIsLocalized: boolean
   selectFields: Record<string, GenericColumn>
   selectLocale?: boolean
   tableName: string
@@ -32,6 +33,7 @@ export function parseParams({
   fields,
   joins,
   locale,
+  parentIsLocalized,
   selectFields,
   selectLocale,
   tableName,
@@ -58,6 +60,7 @@ export function parseParams({
             fields,
             joins,
             locale,
+            parentIsLocalized,
             selectFields,
             selectLocale,
             tableName,
@@ -92,6 +95,7 @@ export function parseParams({
                   fields,
                   joins,
                   locale,
+                  parentIsLocalized,
                   pathSegments: relationOrPath.replace(/__/g, '.').split('.'),
                   selectFields,
                   selectLocale,

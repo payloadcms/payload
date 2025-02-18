@@ -8,7 +8,7 @@ import playwright from 'eslint-plugin-playwright'
 export const testEslintConfig = [
   ...rootEslintConfig,
   {
-    ignores: [...defaultESLintIgnores, '**/payload-types.ts'],
+    ignores: [...defaultESLintIgnores, '**/payload-types.ts', 'jest.setup.js'],
   },
   {
     languageOptions: {
