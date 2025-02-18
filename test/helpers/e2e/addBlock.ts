@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
+import { exactText } from 'helpers.js'
 
 import { openBlocksDrawer } from './openBlocksDrawer.js'
 
@@ -21,7 +22,7 @@ export const addBlock = async ({
 
   await expect(blockCard).toBeVisible()
 
-  await page.getByRole('button', { name: blockLabel }).click()
+  await blocksDrawer.getByRole('button', { name: exactText(blockLabel) }).click()
 
   // expect to see the block on the page
 }

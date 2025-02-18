@@ -45,6 +45,7 @@ describe('Block fields', () => {
 
     await ensureCompilationIsDone({ page, serverURL })
   })
+
   beforeEach(async () => {
     await reInitializeDB({
       serverURL,
@@ -62,6 +63,7 @@ describe('Block fields', () => {
   })
 
   let url: AdminUrlUtil
+
   beforeAll(() => {
     url = new AdminUrlUtil(serverURL, 'block-fields')
   })
@@ -262,7 +264,7 @@ describe('Block fields', () => {
     await addBlock({
       page,
       fieldName: 'blocksWithMinRows',
-      blockLabel: 'Block',
+      blockLabel: 'Block With Min Row',
     })
 
     const firstRow = page.locator('input[name="blocksWithMinRows.0.blockTitle"]')
