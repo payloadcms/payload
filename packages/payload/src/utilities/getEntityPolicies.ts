@@ -76,7 +76,7 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
               return paginatedRes?.docs?.[0] || undefined
             }
 
-            return undefined
+            return true
           } else {
             const paginatedRes = await payload.find({
               ...options,

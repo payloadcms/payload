@@ -59,6 +59,7 @@ export const getDocumentPermissions = async (args: {
               _status: 'published',
             },
           },
+          version,
         }).then((permissions) => permissions.update)
       }
     } catch (err) {
@@ -74,6 +75,7 @@ export const getDocumentPermissions = async (args: {
           ...req,
           data,
         },
+        version,
       })
 
       if (globalConfig.versions?.drafts) {
@@ -86,6 +88,7 @@ export const getDocumentPermissions = async (args: {
               _status: 'published',
             },
           },
+          version,
         }).then((permissions) => permissions.update)
       }
     } catch (err) {

@@ -35,6 +35,7 @@ import {
   readNotUpdateGlobalSlug,
   readOnlyGlobalSlug,
   readOnlySlug,
+  restrictedVersionsAdminPanelSlug,
   restrictedVersionsSlug,
   slug,
   unrestrictedSlug,
@@ -63,6 +64,7 @@ describe('Access Control', () => {
   let richTextUrl: AdminUrlUtil
   let readOnlyGlobalUrl: AdminUrlUtil
   let restrictedVersionsUrl: AdminUrlUtil
+  let restrictedVersions2Url: AdminUrlUtil
   let userRestrictedCollectionURL: AdminUrlUtil
   let userRestrictedGlobalURL: AdminUrlUtil
   let disabledFields: AdminUrlUtil
@@ -81,6 +83,7 @@ describe('Access Control', () => {
     readOnlyCollectionUrl = new AdminUrlUtil(serverURL, readOnlySlug)
     readOnlyGlobalUrl = new AdminUrlUtil(serverURL, readOnlySlug)
     restrictedVersionsUrl = new AdminUrlUtil(serverURL, restrictedVersionsSlug)
+    restrictedVersions2Url = new AdminUrlUtil(serverURL, restrictedVersionsAdminPanelSlug)
     userRestrictedCollectionURL = new AdminUrlUtil(serverURL, userRestrictedCollectionSlug)
     userRestrictedGlobalURL = new AdminUrlUtil(serverURL, userRestrictedGlobalSlug)
     disabledFields = new AdminUrlUtil(serverURL, disabledSlug)
@@ -552,21 +555,31 @@ describe('Access Control', () => {
     })
   })
 
-  describe('collection — restricted versions', () => {
+  describe('collection — restricted versions 2', () => {
     let existingDoc: RestrictedVersion
 
     beforeAll(async () => {
       existingDoc = await payload.create({
-        collection: restrictedVersionsSlug,
+        collection: restrictedVersionsAdminPanelSlug,
         data: {
           name: 'name',
         },
       })
+
+      await payload.update({
+        collection: restrictedVersionsAdminPanelSlug,
+        id: existingDoc.id,
+        data: {
+          hidden: true,
+        },
+      })
     })
 
-    test('versions sidebar should not show', async () => {
-      await page.goto(restrictedVersionsUrl.edit(existingDoc.id))
-      await expect(page.locator('.versions-count')).toBeHidden()
+    test('versions tab should not show', async () => {
+      await page.goto(restrictedVersions2Url.edit(existingDoc.id))
+      await page.locator('.doc-tabs__tabs').getByLabel('Versions').click()
+      const rows = page.locator('.versions table tbody tr')
+      await expect(rows).toHaveCount(1)
     })
   })
 
