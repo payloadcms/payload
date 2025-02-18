@@ -18,12 +18,13 @@ export const getDocumentPermissions = async (args: {
   globalConfig?: SanitizedGlobalConfig
   id?: number | string
   req: PayloadRequest
+  version?: boolean
 }): Promise<{
   docPermissions: SanitizedDocumentPermissions
   hasPublishPermission: boolean
   hasSavePermission: boolean
 }> => {
-  const { id, collectionConfig, data = {}, globalConfig, req } = args
+  const { id, collectionConfig, data = {}, globalConfig, req, version = false } = args
 
   let docPermissions: SanitizedDocumentPermissions
   let hasPublishPermission = false
@@ -42,6 +43,7 @@ export const getDocumentPermissions = async (args: {
             _status: 'draft',
           },
         },
+        version,
       })
 
       if (collectionConfig.versions?.drafts) {

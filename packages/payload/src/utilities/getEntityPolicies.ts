@@ -15,6 +15,7 @@ type Args = {
   operations: AllOperations[]
   req: PayloadRequest
   type: 'collection' | 'global'
+  version?: boolean
 }
 
 type ReturnType<T extends Args> = T['type'] extends 'global'
@@ -32,7 +33,7 @@ type CreateAccessPromise = (args: {
 }) => Promise<void>
 
 export async function getEntityPolicies<T extends Args>(args: T): Promise<ReturnType<T>> {
-  const { id, type, entity, operations, req } = args
+  const { id, type, entity, operations, req, version } = args
   const { data, locale, payload, user } = req
   const isLoggedIn = !!user
 
@@ -42,7 +43,10 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
 
   let docBeingAccessed
 
-  async function getEntityDoc({ where }: { where?: Where } = {}): Promise<Document & TypeWithID> {
+  async function getEntityDoc({
+    operation,
+    where,
+  }: { operation?: AllOperations; where?: Where } = {}): Promise<Document & TypeWithID> {
     if (entity.slug) {
       if (type === 'global') {
         return payload.findGlobal({
@@ -56,19 +60,30 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
 
       if (type === 'collection' && id) {
         if (typeof where === 'object') {
-          const paginatedRes = await payload.find({
+          const options = {
             collection: entity.slug,
             depth: 0,
             fallbackLocale: null,
             limit: 1,
             locale,
             overrideAccess: true,
-            pagination: false,
             req,
             where: combineQueries(where, { id: { equals: id } }),
-          })
+          }
+          if (operation === 'readVersions') {
+            if (version) {
+              const paginatedRes = await payload.findVersions(options)
+              return paginatedRes?.docs?.[0] || undefined
+            }
 
-          return paginatedRes?.docs?.[0] || undefined
+            return undefined
+          } else {
+            const paginatedRes = await payload.find({
+              ...options,
+              pagination: false,
+            })
+            return paginatedRes?.docs?.[0] || undefined
+          }
         }
 
         return payload.findByID({
@@ -110,7 +125,9 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
     if (typeof accessResult === 'object' && !disableWhere) {
       mutablePolicies[operation] = {
         permission:
-          id || type === 'global' ? !!(await getEntityDoc({ where: accessResult })) : true,
+          id || (type === 'global' && operation)
+            ? !!(await getEntityDoc({ operation, where: accessResult }))
+            : true,
         where: accessResult,
       }
     } else if (mutablePolicies[operation]?.permission !== false) {

@@ -118,6 +118,7 @@ export const renderDocument = async ({
       data: doc,
       globalConfig,
       req,
+      version: viewType === 'version',
     }),
 
     // Fetch document lock state
