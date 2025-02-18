@@ -1,4 +1,5 @@
 export const autosaveCollectionSlug = 'autosave-posts'
+export const autosaveWithMultiSelectCollectionSlug = 'autosave-multi-select-posts'
 
 export const customIDSlug = 'custom-ids'
 
@@ -18,6 +19,7 @@ export const disablePublishGlobalSlug = 'disable-publish-global'
 
 export const collectionSlugs = [
   autosaveCollectionSlug,
+  autosaveWithMultiSelectCollectionSlug,
   draftCollectionSlug,
   postCollectionSlug,
   diffCollectionSlug,

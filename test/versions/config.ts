@@ -4,6 +4,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import AutosavePosts from './collections/Autosave.js'
+import AutosaveWithMultiSelectPosts from './collections/AutosaveWithMultiSelect.js'
 import CustomIDs from './collections/CustomIDs.js'
 import { Diff } from './collections/Diff.js'
 import DisablePublish from './collections/DisablePublish.js'
@@ -32,6 +33,7 @@ export default buildConfigWithDefaults({
     DisablePublish,
     Posts,
     AutosavePosts,
+    AutosaveWithMultiSelectPosts,
     DraftPosts,
     DraftWithMax,
     LocalizedPosts,
