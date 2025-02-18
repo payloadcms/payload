@@ -25,6 +25,7 @@ type Args = {
   global: null | SanitizedGlobalConfig
   operation: 'create' | 'update'
   parentIndexPath: string
+  parentIsLocalized: boolean
   parentPath: string
   parentSchemaPath: string
   previousDoc: JsonObject
@@ -49,6 +50,7 @@ export const promise = async ({
   global,
   operation,
   parentIndexPath,
+  parentIsLocalized,
   parentPath,
   parentSchemaPath,
   previousDoc,
@@ -123,6 +125,7 @@ export const promise = async ({
               global,
               operation,
               parentIndexPath: '',
+              parentIsLocalized: parentIsLocalized || field.localized,
               parentPath: path + '.' + rowIndex,
               parentSchemaPath: schemaPath,
               previousDoc,
@@ -166,6 +169,7 @@ export const promise = async ({
                 global,
                 operation,
                 parentIndexPath: '',
+                parentIsLocalized: parentIsLocalized || field.localized,
                 parentPath: path + '.' + rowIndex,
                 parentSchemaPath: schemaPath + '.' + block.slug,
                 previousDoc,
@@ -196,6 +200,7 @@ export const promise = async ({
         global,
         operation,
         parentIndexPath: indexPath,
+        parentIsLocalized,
         parentPath,
         parentSchemaPath: schemaPath,
         previousDoc,
@@ -219,6 +224,7 @@ export const promise = async ({
         global,
         operation,
         parentIndexPath: '',
+        parentIsLocalized: parentIsLocalized || field.localized,
         parentPath: path,
         parentSchemaPath: schemaPath,
         previousDoc,
@@ -255,6 +261,7 @@ export const promise = async ({
             indexPath: indexPathSegments,
             operation,
             originalDoc: doc,
+            parentIsLocalized,
             path: pathSegments,
             previousDoc,
             previousSiblingDoc,
@@ -296,6 +303,7 @@ export const promise = async ({
         global,
         operation,
         parentIndexPath: isNamedTab ? '' : indexPath,
+        parentIsLocalized: parentIsLocalized || field.localized,
         parentPath: isNamedTab ? path : parentPath,
         parentSchemaPath: schemaPath,
         previousDoc,
@@ -319,6 +327,7 @@ export const promise = async ({
         global,
         operation,
         parentIndexPath: indexPath,
+        parentIsLocalized,
         parentPath: path,
         parentSchemaPath: schemaPath,
         previousDoc,

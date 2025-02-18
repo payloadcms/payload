@@ -19,10 +19,14 @@ export const buildGlobalModel = (payload: Payload): GlobalModel | null => {
     const Globals = mongoose.model('globals', globalsSchema, 'globals') as unknown as GlobalModel
 
     Object.values(payload.config.globals).forEach((globalConfig) => {
-      const globalSchema = buildSchema(payload, globalConfig.fields, {
-        options: {
-          minimize: false,
+      const globalSchema = buildSchema({
+        buildSchemaOptions: {
+          options: {
+            minimize: false,
+          },
         },
+        configFields: globalConfig.fields,
+        payload,
       })
       Globals.discriminator(globalConfig.slug, globalSchema)
     })

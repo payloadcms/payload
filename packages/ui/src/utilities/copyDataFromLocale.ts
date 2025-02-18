@@ -7,7 +7,7 @@ import {
   formatErrors,
   type PayloadRequest,
 } from 'payload'
-import { fieldAffectsData, tabHasName } from 'payload/shared'
+import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from 'payload/shared'
 
 const ObjectId = (ObjectIdImport.default ||
   ObjectIdImport) as unknown as typeof ObjectIdImport.default
@@ -27,6 +27,7 @@ function iterateFields(
   fromLocaleData: Data,
   toLocaleData: Data,
   req: PayloadRequest,
+  parentIsLocalized: boolean,
 ): void {
   fields.map((field) => {
     if (fieldAffectsData(field)) {
@@ -48,11 +49,17 @@ function iterateFields(
             toLocaleData[field.name].map((item: Data, index: number) => {
               if (fromLocaleData[field.name]?.[index]) {
                 // Generate new IDs if the field is localized to prevent errors with relational DBs.
-                if (field.localized) {
+                if (fieldShouldBeLocalized({ field, parentIsLocalized })) {
                   toLocaleData[field.name][index].id = new ObjectId().toHexString()
                 }
 
-                iterateFields(field.fields, fromLocaleData[field.name][index], item, req)
+                iterateFields(
+                  field.fields,
+                  fromLocaleData[field.name][index],
+                  item,
+                  req,
+                  parentIsLocalized || field.localized,
+                )
               }
             })
           }
@@ -80,12 +87,18 @@ function iterateFields(
                 ) as FlattenedBlock | undefined)
 
               // Generate new IDs if the field is localized to prevent errors with relational DBs.
-              if (field.localized) {
+              if (fieldShouldBeLocalized({ field, parentIsLocalized })) {
                 toLocaleData[field.name][index].id = new ObjectId().toHexString()
               }
 
               if (block?.fields?.length) {
-                iterateFields(block?.fields, fromLocaleData[field.name][index], blockData, req)
+                iterateFields(
+                  block?.fields,
+                  fromLocaleData[field.name][index],
+                  blockData,
+                  req,
+                  parentIsLocalized || field.localized,
+                )
               }
             })
           }
@@ -118,7 +131,13 @@ function iterateFields(
 
         case 'group': {
           if (field.name in toLocaleData && fromLocaleData?.[field.name] !== undefined) {
-            iterateFields(field.fields, fromLocaleData[field.name], toLocaleData[field.name], req)
+            iterateFields(
+              field.fields,
+              fromLocaleData[field.name],
+              toLocaleData[field.name],
+              req,
+              parentIsLocalized || field.localized,
+            )
           }
           break
         }
@@ -127,17 +146,23 @@ function iterateFields(
       switch (field.type) {
         case 'collapsible':
         case 'row':
-          iterateFields(field.fields, fromLocaleData, toLocaleData, req)
+          iterateFields(field.fields, fromLocaleData, toLocaleData, req, parentIsLocalized)
           break
 
         case 'tabs':
           field.tabs.map((tab) => {
             if (tabHasName(tab)) {
               if (tab.name in toLocaleData && fromLocaleData?.[tab.name] !== undefined) {
-                iterateFields(tab.fields, fromLocaleData[tab.name], toLocaleData[tab.name], req)
+                iterateFields(
+                  tab.fields,
+                  fromLocaleData[tab.name],
+                  toLocaleData[tab.name],
+                  req,
+                  parentIsLocalized,
+                )
               }
             } else {
-              iterateFields(tab.fields, fromLocaleData, toLocaleData, req)
+              iterateFields(tab.fields, fromLocaleData, toLocaleData, req, parentIsLocalized)
             }
           })
           break
@@ -151,8 +176,9 @@ function mergeData(
   toLocaleData: Data,
   fields: Field[],
   req: PayloadRequest,
+  parentIsLocalized: boolean,
 ): Data {
-  iterateFields(fields, fromLocaleData, toLocaleData, req)
+  iterateFields(fields, fromLocaleData, toLocaleData, req, parentIsLocalized)
 
   return toLocaleData
 }
@@ -272,6 +298,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
               toLocaleData.value,
               globals[globalSlug].config.fields,
               req,
+              false,
             ),
         locale: toLocale,
         overrideAccess: false,
@@ -288,6 +315,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
               toLocaleData.value,
               collections[collectionSlug].config.fields,
               req,
+              false,
             ),
         locale: toLocale,
         overrideAccess: false,

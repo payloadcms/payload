@@ -22,6 +22,7 @@ export const Iterable: React.FC<FieldDiffClientProps> = ({
   comparisonValue,
   field,
   locale,
+  parentIsLocalized,
   versionValue,
 }) => {
   const { i18n } = useTranslation()
@@ -53,6 +54,7 @@ export const Iterable: React.FC<FieldDiffClientProps> = ({
           )
         }
         locales={selectedLocales}
+        parentIsLocalized={parentIsLocalized}
         version={versionValue}
       >
         {maxRows > 0 && (
@@ -80,6 +82,7 @@ export const Iterable: React.FC<FieldDiffClientProps> = ({
                     fields={fields}
                     label={rowLabel}
                     locales={selectedLocales}
+                    parentIsLocalized={parentIsLocalized || field.localized}
                     version={versionRow}
                   >
                     <RenderVersionFieldsToDiff versionFields={versionFields} />

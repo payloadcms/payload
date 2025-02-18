@@ -157,6 +157,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
         findMany,
         flattenLocales,
         overrideAccess,
+        parentIsLocalized,
         populationPromises,
         req,
         showHiddenFields,
@@ -175,6 +176,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
             findMany,
             flattenLocales,
             overrideAccess,
+            parentIsLocalized,
             populationPromises,
             req,
             showHiddenFields,
@@ -189,10 +191,12 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               collection,
               context: _context,
               data,
+              field,
               global,
               indexPath,
               operation,
               originalDoc,
+              parentIsLocalized,
               path,
               previousDoc,
               previousValue,
@@ -268,7 +272,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     originalNode: originalNodeIDMap[id],
                     parentRichTextFieldPath: path,
                     parentRichTextFieldSchemaPath: schemaPath,
-                    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+
                     previousNode: previousNodeIDMap[id]!,
                     req,
                   })
@@ -282,10 +286,9 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               if (subFieldFn && subFieldDataFn) {
                 const subFields = subFieldFn({ node, req })
                 const nodeSiblingData = subFieldDataFn({ node, req }) ?? {}
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+
                 const nodeSiblingDoc = subFieldDataFn({ node: originalNodeIDMap[id]!, req }) ?? {}
                 const nodePreviousSiblingDoc =
-                  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
                   subFieldDataFn({ node: previousNodeIDMap[id]!, req }) ?? {}
 
                 if (subFields?.length) {
@@ -299,6 +302,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     global,
                     operation,
                     parentIndexPath: indexPath.join('-'),
+                    parentIsLocalized: parentIsLocalized || field.localized || false,
                     parentPath: path.join('.'),
                     parentSchemaPath: schemaPath.join('.'),
                     previousDoc,
@@ -325,6 +329,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               depth,
               draft,
               fallbackLocale,
+              field,
               fieldPromises,
               findMany,
               flattenLocales,
@@ -333,6 +338,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               locale,
               originalDoc,
               overrideAccess,
+              parentIsLocalized,
               path,
               populate,
               populationPromises,
@@ -419,6 +425,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     locale: locale!,
                     overrideAccess: overrideAccess!,
                     parentIndexPath: indexPath.join('-'),
+                    parentIsLocalized: parentIsLocalized || field.localized || false,
                     parentPath: path.join('.'),
                     parentSchemaPath: schemaPath.join('.'),
                     populate,
@@ -450,6 +457,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               mergeLocaleActions,
               operation,
               originalDoc,
+              parentIsLocalized,
               path,
               previousValue,
               req,
@@ -543,7 +551,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     originalNodeWithLocales: originalNodeWithLocalesIDMap[id],
                     parentRichTextFieldPath: path,
                     parentRichTextFieldSchemaPath: schemaPath,
-                    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+
                     previousNode: previousNodeIDMap[id]!,
                     req,
                     skipValidation: skipValidation!,
@@ -561,12 +569,10 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                 const nodeSiblingData = subFieldDataFn({ node, req }) ?? {}
                 const nodeSiblingDocWithLocales =
                   subFieldDataFn({
-                    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
                     node: originalNodeWithLocalesIDMap[id]!,
                     req,
                   }) ?? {}
                 const nodePreviousSiblingDoc =
-                  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
                   subFieldDataFn({ node: previousNodeIDMap[id]!, req }) ?? {}
 
                 if (subFields?.length) {
@@ -584,6 +590,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     mergeLocaleActions: mergeLocaleActions!,
                     operation: operation!,
                     parentIndexPath: indexPath.join('-'),
+                    parentIsLocalized: parentIsLocalized || field.localized || false,
                     parentPath: path.join('.'),
                     parentSchemaPath: schemaPath.join('.'),
                     req,
@@ -637,11 +644,13 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               collection,
               context,
               data,
+              field,
               global,
               indexPath,
               operation,
               originalDoc,
               overrideAccess,
+              parentIsLocalized,
               path,
               previousValue,
               req,
@@ -762,7 +771,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
               if (subFieldFn && subFieldDataFn) {
                 const subFields = subFieldFn({ node, req })
                 const nodeSiblingData = subFieldDataFn({ node, req }) ?? {}
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+
                 const nodeSiblingDoc = subFieldDataFn({ node: originalNodeIDMap[id]!, req }) ?? {}
 
                 if (subFields?.length) {
@@ -778,6 +787,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
                     operation,
                     overrideAccess: overrideAccess!,
                     parentIndexPath: indexPath.join('-'),
+                    parentIsLocalized: parentIsLocalized || field.localized || false,
                     parentPath: path.join('.'),
                     parentSchemaPath: schemaPath.join('.'),
                     req,

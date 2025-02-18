@@ -270,6 +270,7 @@ export const enTranslations = {
     locale: 'Locale',
     locales: 'Locales',
     menu: 'Menu',
+    moreOptions: 'More options',
     moveDown: 'Move Down',
     moveUp: 'Move Up',
     newPassword: 'New Password',

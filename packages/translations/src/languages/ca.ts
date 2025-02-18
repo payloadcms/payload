@@ -270,6 +270,7 @@ export const caTranslations: DefaultTranslationsObject = {
     locale: 'Idioma',
     locales: 'Idiomes',
     menu: 'Menu',
+    moreOptions: 'Més opcions',
     moveDown: 'Mou avall',
     moveUp: 'Move amunt',
     newPassword: 'Nova contrasenya',

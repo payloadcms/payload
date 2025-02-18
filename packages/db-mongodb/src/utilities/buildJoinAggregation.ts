@@ -7,6 +7,8 @@ import type {
   Where,
 } from 'payload'
 
+import { fieldShouldBeLocalized } from 'payload/shared'
+
 import type { MongooseAdapter } from '../index.js'
 
 import { buildQuery } from '../queries/buildQuery.js'
@@ -314,7 +316,14 @@ export const buildJoinAggregation = async ({
         })
       } else {
         const localeSuffix =
-          join.field.localized && adapter.payload.config.localization && locale ? `.${locale}` : ''
+          fieldShouldBeLocalized({
+            field: join.field,
+            parentIsLocalized: join.parentIsLocalized,
+          }) &&
+          adapter.payload.config.localization &&
+          locale
+            ? `.${locale}`
+            : ''
         const as = `${versions ? `version.${join.joinPath}` : join.joinPath}${localeSuffix}`
 
         let foreignField: string

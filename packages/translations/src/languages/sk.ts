@@ -271,6 +271,7 @@ export const skTranslations: DefaultTranslationsObject = {
     locale: 'Jazyk',
     locales: 'Jazyky',
     menu: 'Menu',
+    moreOptions: 'Viac možností',
     moveDown: 'Presunúť dolu',
     moveUp: 'Presunúť hore',
     newPassword: 'Nové heslo',

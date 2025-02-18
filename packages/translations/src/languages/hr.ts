@@ -270,6 +270,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     locale: 'Jezik',
     locales: 'Prijevodi',
     menu: 'Izbornik',
+    moreOptions: 'Više opcija',
     moveDown: 'Pomakni dolje',
     moveUp: 'Pomakni gore',
     newPassword: 'Nova lozinka',

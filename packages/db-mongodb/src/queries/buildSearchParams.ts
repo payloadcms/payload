@@ -30,6 +30,7 @@ export async function buildSearchParam({
   incomingPath,
   locale,
   operator,
+  parentIsLocalized,
   payload,
   val,
 }: {
@@ -39,6 +40,7 @@ export async function buildSearchParam({
   incomingPath: string
   locale?: string
   operator: string
+  parentIsLocalized: boolean
   payload: Payload
   val: unknown
 }): Promise<SearchParam> {
@@ -69,6 +71,7 @@ export async function buildSearchParam({
         name: 'id',
         type: idFieldType,
       } as FlattenedField,
+      parentIsLocalized,
       path: '_id',
     })
   } else {
@@ -78,6 +81,7 @@ export async function buildSearchParam({
       globalSlug,
       incomingPath: sanitizedPath,
       locale,
+      parentIsLocalized,
       payload,
     })
   }
@@ -89,6 +93,7 @@ export async function buildSearchParam({
       hasCustomID,
       locale,
       operator,
+      parentIsLocalized,
       path,
       payload,
       val,

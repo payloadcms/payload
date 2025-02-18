@@ -9,6 +9,9 @@ import { fileURLToPath } from 'url'
 const __filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(__filename)
 
+// @todo remove in 4.0 - will behave like this by default in 4.0
+process.env.PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY = 'true'
+
 shelljs.env.DISABLE_LOGGING = 'true'
 
 const prod = process.argv.includes('--prod')
