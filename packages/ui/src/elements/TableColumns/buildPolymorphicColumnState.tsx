@@ -3,6 +3,7 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
   ClientField,
+  Column,
   DefaultCellComponentProps,
   DefaultServerCellComponentProps,
   Field,
@@ -23,7 +24,6 @@ import {
 import React from 'react'
 
 import type { SortColumnProps } from '../SortColumn/index.js'
-import type { Column } from '../Table/index.js'
 
 import {
   RenderCustomComponent,
