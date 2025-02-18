@@ -2,7 +2,7 @@ import type { Locator, Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 
-export const openBlockDrawer = async ({
+export const openBlocksDrawer = async ({
   page,
   fieldName = 'blocks',
   fieldLabelSingular = 'Block',

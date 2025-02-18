@@ -2,7 +2,7 @@ import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { addBlock } from 'helpers/e2e/addBlock.js'
-import { openBlockDrawer } from 'helpers/e2e/openBlockDrawer.js'
+import { openBlocksDrawer } from 'helpers/e2e/openBlocksDrawer.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -87,7 +87,7 @@ describe('Block fields', () => {
   test('should reset search state in blocks drawer on re-open', async () => {
     await page.goto(url.create)
 
-    const blocksDrawer = await openBlockDrawer({
+    const blocksDrawer = await openBlocksDrawer({
       page,
       fieldName: 'blocks',
       fieldLabelSingular: 'Blocks',

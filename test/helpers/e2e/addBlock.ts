@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 
-import { openBlockDrawer } from './openBlockDrawer.js'
+import { openBlocksDrawer } from './openBlocksDrawer.js'
 
 export const addBlock = async ({
   page,
@@ -15,7 +15,7 @@ export const addBlock = async ({
   fieldName: string
   page: Page
 }) => {
-  const blocksDrawer = await openBlockDrawer({ page, fieldName, fieldLabelSingular })
+  const blocksDrawer = await openBlocksDrawer({ page, fieldName, fieldLabelSingular })
 
   const blockCard = blocksDrawer.locator('.blocks-drawer__block .thumbnail-card__label', {
     hasText: blockLabelSingular,
