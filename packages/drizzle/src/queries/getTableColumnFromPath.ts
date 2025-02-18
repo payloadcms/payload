@@ -220,32 +220,7 @@ export const getTableColumnFromPath = ({
           let result: TableColumn
           const blockConstraints = []
           const blockSelectFields = {}
-          try {
-            result = getTableColumnFromPath({
-              adapter,
-              collectionPath,
-              constraintPath,
-              constraints: blockConstraints,
-              fields: block.flattenedFields,
-              joins,
-              locale,
-              parentIsLocalized: parentIsLocalized || field.localized,
-              pathSegments: pathSegments.slice(1),
-              rootTableName,
-              selectFields: blockSelectFields,
-              selectLocale,
-              tableName: newTableName,
-              value,
-            })
-          } catch (error) {
-            // this is fine, not every block will have the field
-          }
-          if (!result) {
-            return
-          }
-          blockTableColumn = result
-          constraints = constraints.concat(blockConstraints)
-          selectFields = { ...selectFields, ...blockSelectFields }
+
           if (isFieldLocalized && adapter.payload.config.localization) {
             const conditions = [
               eq(
@@ -271,6 +246,35 @@ export const getTableColumnFromPath = ({
               table: adapter.tables[newTableName],
             })
           }
+
+          try {
+            result = getTableColumnFromPath({
+              adapter,
+              collectionPath,
+              constraintPath,
+              constraints: blockConstraints,
+              fields: block.flattenedFields,
+              joins,
+              locale,
+              parentIsLocalized: parentIsLocalized || field.localized,
+              pathSegments: pathSegments.slice(1),
+              rootTableName,
+              selectFields: blockSelectFields,
+              selectLocale,
+              tableName: newTableName,
+              value,
+            })
+          } catch (error) {
+            // this is fine, not every block will have the field
+          }
+          if (!result) {
+            joins.pop()
+            return
+          }
+          blockTableColumn = result
+          constraints = constraints.concat(blockConstraints)
+          selectFields = { ...selectFields, ...blockSelectFields }
+
           return true
         })
         if (hasBlockField) {
