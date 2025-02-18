@@ -76,6 +76,10 @@ export const importDateFNSLocale = async (locale: string): Promise<Locale> => {
       result = (await import('date-fns/locale/ko')).ko
 
       break
+    case 'lt':
+      result = (await import('date-fns/locale/lt')).lt
+
+      break
     case 'nb':
       result = (await import('date-fns/locale/nb')).nb
 
