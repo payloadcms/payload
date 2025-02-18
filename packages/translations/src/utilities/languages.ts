@@ -52,7 +52,6 @@ export const acceptedLanguages = [
    * 'bn-BD',
    * 'bn-IN',
    * 'bs',
-   * 'ca',
    * 'ca-ES-valencia',
    * 'cy',
    * 'el',
