@@ -1,7 +1,7 @@
 ---
 title: Managing User Preferences
 label: Preferences
-order: 70
+order: 60
 desc: Store the preferences of your users as they interact with the Admin Panel.
 keywords: admin, preferences, custom, customize, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
@@ -81,7 +81,7 @@ import { usePreferences } from '@payloadcms/ui'
 
 const lastUsedColorsPreferenceKey = 'last-used-colors';
 
-const CustomComponent = (props) => {
+export function CustomComponent() {
   const { getPreference, setPreference } = usePreferences();
 
   // Store the last used colors in local state
@@ -154,8 +154,6 @@ const CustomComponent = (props) => {
         </Fragment>
       )}
     </div>
-  );
-};
-
-export default CustomComponent;
+  )
+}
 ```

@@ -270,6 +270,7 @@ export const slTranslations: DefaultTranslationsObject = {
     locale: 'Jezik',
     locales: 'Jeziki',
     menu: 'Meni',
+    moreOptions: 'Več možnosti',
     moveDown: 'Premakni dol',
     moveUp: 'Premakni gor',
     newPassword: 'Novo geslo',

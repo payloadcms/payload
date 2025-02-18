@@ -31,7 +31,7 @@
       }
     ],
     "paths": {
-      "@payload-config": ["./test/admin/config.ts"],
+      "@payload-config": ["./test/_community/config.ts"],
       "@payloadcms/live-preview": ["./packages/live-preview/src"],
       "@payloadcms/live-preview-react": ["./packages/live-preview-react/src/index.ts"],
       "@payloadcms/live-preview-vue": ["./packages/live-preview-vue/src/index.ts"],
@@ -42,9 +42,6 @@
       "@payloadcms/next/*": ["./packages/next/src/exports/*.ts"],
       "@payloadcms/richtext-lexical/client": [
         "./packages/richtext-lexical/src/exports/client/index.ts"
-      ],
-      "@payloadcms/plugin-import-export/rsc": [
-        "./packages/plugin-import-export/src/exports/rsc.ts"
       ],
       "@payloadcms/richtext-lexical/rsc": ["./packages/richtext-lexical/src/exports/server/rsc.ts"],
       "@payloadcms/richtext-slate/rsc": ["./packages/richtext-slate/src/exports/server/rsc.ts"],

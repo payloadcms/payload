@@ -104,7 +104,7 @@ Here are the available Virtual Fields:
 - [Join](../fields/join) - achieves two-way data binding between fields
 
 <Banner type="success">
-  **Tip:** Don't see a built-in field type that you need? Build it! Using a combination of [Field Validations](#validation) and [Custom Components](../admin/components), you can override the entirety of how a component functions within the [Admin Panel](../admin/overview) to effectively create your own field type.
+  **Tip:** Don't see a built-in field type that you need? Build it! Using a combination of [Field Validations](#validation) and [Custom Components](../custom-components/overview), you can override the entirety of how a component functions within the [Admin Panel](../admin/overview) to effectively create your own field type.
 </Banner>
 
 ## Field Options
@@ -429,7 +429,7 @@ The following options are available:
 |    Option                     |    Description                                                                                                                                                                                                                         |
 | --- | --- |
 |    **`condition`**            |    Programmatically show / hide fields based on other fields. [More details](#conditional-logic).                                                                                                                       |
-|    **`components`**           |    All Field Components can be swapped out for [Custom Components](../admin/components) that you define.                                                                                              |
+|    **`components`**           |    All Field Components can be swapped out for [Custom Components](../custom-components/overview) that you define.                                                                                              |
 |    **`description`**          |    Helper text to display alongside the field to provide more information for the editor. [More details](#description).                                                                                                 |
 |    **`position`**             |    Specify if the field should be rendered in the sidebar by defining `position: 'sidebar'`.                                                                                                                                           |
 |    **`width`**                |    Restrict the width of a field. You can pass any string-based value here, be it pixels, percentages, etc. This property is especially useful when fields are nested within a `Row` type where they can be organized horizontally.    |
@@ -455,9 +455,9 @@ A description can be configured in three ways:
 To add a Custom Description to a field, use the `admin.description` property in your Field Config:
 
 ```ts
-import type { SanitizedCollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
-export const MyCollectionConfig: SanitizedCollectionConfig = {
+export const MyCollectionConfig: CollectionConfig = {
   // ...
   fields: [
     // ...
@@ -473,7 +473,7 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
 ```
 
 <Banner type="warning">
-  **Reminder:** To replace the Field Description with a [Custom Component](../admin/components), use the `admin.components.Description` property. [More details](#description).
+  **Reminder:** To replace the Field Description with a [Custom Component](../custom-components/overview), use the `admin.components.Description` property. [More details](#description).
 </Banner>
 
 #### Description Functions
@@ -483,9 +483,9 @@ Custom Descriptions can also be defined as a function. Description Functions are
 To add a Description Function to a field, set the `admin.description` property to a *function* in your Field Config:
 
 ```ts
-import type { SanitizedCollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
-export const MyCollectionConfig: SanitizedCollectionConfig = {
+export const MyCollectionConfig: CollectionConfig = {
   // ...
   fields: [
     // ...
@@ -618,7 +618,7 @@ export const CollectionConfig: CollectionConfig = {
 }
 ```
 
-*For details on how to build Custom Components, see [Building Custom Components](../admin/components#building-custom-components).*
+*For details on how to build Custom Components, see [Building Custom Components](../custom-components/overview#building-custom-components).*
 
 <Banner type="warning">
   Instead of replacing the entire Field Component, you can alternately replace or slot-in only specific parts by using the [`Label`](#label), [`Error`](#error), [`beforeInput`](#afterinput-and-beforinput), and [`afterInput`](#afterinput-and-beforinput) properties.
@@ -677,7 +677,7 @@ export const CustomTextField: React.FC = () => {
 ```
 
 <Banner type="success">
-  For a complete list of all available React hooks, see the [Payload React Hooks](../admin/hooks) documentation. For additional help, see [Building Custom Components](../admin/components#building-custom-components).
+  For a complete list of all available React hooks, see the [Payload React Hooks](../admin/hooks) documentation. For additional help, see [Building Custom Components](../custom-components/overview#building-custom-components).
 </Banner>
 
 ##### TypeScript#field-component-types
@@ -723,7 +723,7 @@ All Cell Components receive the same [Default Field Component Props](#field), pl
 |    **`link`**    |    A boolean representing whether this cell should be wrapped in a link.    |
 |    **`onClick`**    |    A function that is called when the cell is clicked.    |
 
-For details on how to build Custom Components themselves, see [Building Custom Components](../admin/components#building-custom-components).
+For details on how to build Custom Components themselves, see [Building Custom Components](../custom-components/overview#building-custom-components).
 
 #### Filter
 
@@ -747,7 +747,7 @@ export const myField: Field = {
 
 All Custom Filter Components receive the same [Default Field Component Props](#field).
 
-For details on how to build Custom Components themselves, see [Building Custom Components](../admin/components#building-custom-components).
+For details on how to build Custom Components themselves, see [Building Custom Components](../custom-components/overview#building-custom-components).
 
 #### Label
 
@@ -771,7 +771,7 @@ export const myField: Field = {
 
 All Custom Label Components receive the same [Default Field Component Props](#field).
 
-For details on how to build Custom Components themselves, see [Building Custom Components](../admin/components#building-custom-components).
+For details on how to build Custom Components themselves, see [Building Custom Components](../custom-components/overview#building-custom-components).
 
 ##### TypeScript#label-component-types
 
@@ -787,14 +787,14 @@ import type {
 
 #### Description
 
-Alternatively to the [Description Property](#field-descriptions), you can also use a [Custom Component](../admin/components) as the Field Description. This can be useful when you need to provide more complex feedback to the user, such as rendering dynamic field values or other interactive elements.
+Alternatively to the [Description Property](#field-descriptions), you can also use a [Custom Component](../custom-components/overview) as the Field Description. This can be useful when you need to provide more complex feedback to the user, such as rendering dynamic field values or other interactive elements.
 
 To add a Description Component to a field, use the `admin.components.Description` property in your Field Config:
 
 ```ts
-import type { SanitizedCollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
-export const MyCollectionConfig: SanitizedCollectionConfig = {
+export const MyCollectionConfig: CollectionConfig = {
   // ...
   fields: [
     // ...
@@ -813,7 +813,7 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
 
 All Custom Description Components receive the same [Default Field Component Props](#field).
 
-For details on how to build a Custom Components themselves, see [Building Custom Components](../admin/components#building-custom-components).
+For details on how to build a Custom Components themselves, see [Building Custom Components](../custom-components/overview#building-custom-components).
 
 ##### TypeScript#description-component-types
 
@@ -849,7 +849,7 @@ export const myField: Field = {
 
 All Error Components receive the [Default Field Component Props](#field).
 
-For details on how to build Custom Components themselves, see [Building Custom Components](../admin/components#building-custom-components).
+For details on how to build Custom Components themselves, see [Building Custom Components](../custom-components/overview#building-custom-components).
 
 ##### TypeScript#error-component-types
 
@@ -885,7 +885,7 @@ export const myField: Field = {
 
 All Error Components receive the [Default Field Component Props](#field).
 
-For details on how to build Custom Components themselves, see [Building Custom Components](../admin/components#building-custom-components).
+For details on how to build Custom Components themselves, see [Building Custom Components](../custom-components/overview#building-custom-components).
 
 ##### TypeScript#diff-component-types
 
@@ -906,9 +906,9 @@ With these properties you can add multiple components *before* and *after* the i
 To add components before and after the input element, use the `admin.components.beforeInput` and `admin.components.afterInput` properties in your Field Config:
 
 ```ts
-import type { SanitizedCollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
-export const MyCollectionConfig: SanitizedCollectionConfig = {
+export const MyCollectionConfig: CollectionConfig = {
   // ...
   fields: [
     // ...
@@ -930,7 +930,7 @@ export const MyCollectionConfig: SanitizedCollectionConfig = {
 
 All `afterInput` and `beforeInput` Components receive the same [Default Field Component Props](#field).
 
-For details on how to build Custom Components, see [Building Custom Components](../admin/components#building-custom-components).
+For details on how to build Custom Components, see [Building Custom Components](../custom-components/overview#building-custom-components).
 
 ## TypeScript
 

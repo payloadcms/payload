@@ -2,6 +2,7 @@ import type {
   BuildTableStateArgs,
   ClientCollectionConfig,
   ClientConfig,
+  Column,
   ErrorResult,
   ListPreferences,
   PaginatedDocs,
@@ -10,8 +11,6 @@ import type {
 
 import { formatErrors } from 'payload'
 import { isNumber } from 'payload/shared'
-
-import type { Column } from '../elements/Table/index.js'
 
 import { getClientConfig } from './getClientConfig.js'
 import { renderFilters, renderTable } from './renderTable.js'
@@ -156,6 +155,7 @@ export const buildTableState = async (
       collection: collectionSlug,
       depth: 0,
       limit: query?.limit ? parseInt(query.limit, 10) : undefined,
+      locale: req.locale,
       overrideAccess: false,
       page: query?.page ? parseInt(query.page, 10) : undefined,
       sort: query?.sort,

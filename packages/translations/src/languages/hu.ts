@@ -273,6 +273,7 @@ export const huTranslations: DefaultTranslationsObject = {
     locale: 'Nyelv',
     locales: 'Nyelvek',
     menu: 'Menü',
+    moreOptions: 'Több opció',
     moveDown: 'Mozgatás lefelé',
     moveUp: 'Mozgatás felfelé',
     newPassword: 'Új jelszó',

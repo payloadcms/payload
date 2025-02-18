@@ -1,16 +1,16 @@
 ---
 title: React Hooks
 label: React Hooks
-order: 40
+order: 50
 desc: Make use of all of the powerful React hooks that Payload provides.
 keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Payload provides a variety of powerful [React Hooks](https://react.dev/reference/react-dom/hooks) that can be used within your own [Custom Components](./components), such as [Custom Fields](../fields/overview#custom-components). With them, you can interface with Payload itself to build just about any type of complex customization you can think of.
+Payload provides a variety of powerful [React Hooks](https://react.dev/reference/react-dom/hooks) that can be used within your own [Custom Components](../custom-components/overview), such as [Custom Fields](../fields/overview#custom-components). With them, you can interface with Payload itself to build just about any type of complex customization you can think of.
 
 <Banner type="warning">
   **Reminder:**
-  All Custom Components are [React Server Components](https://react.dev/reference/rsc/server-components) by default. Hooks, on the other hand, are only available in client-side environments. To use hooks, [ensure your component is a client component](./components#client-components).
+  All Custom Components are [React Server Components](https://react.dev/reference/rsc/server-components) by default. Hooks, on the other hand, are only available in client-side environments. To use hooks, [ensure your component is a client component](../custom-components/overview#client-components).
 </Banner>
 
 ## useField
@@ -875,7 +875,7 @@ const Greeting: React.FC = () => {
 
 ## useConfig
 
-Used to retrieve the Payload [Client Config](./components#accessing-the-payload-config).
+Used to retrieve the Payload [Client Config](../custom-components/overview#accessing-the-payload-config).
 
 ```tsx
 'use client'

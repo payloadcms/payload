@@ -275,6 +275,7 @@ export const roTranslations: DefaultTranslationsObject = {
     locale: 'Localitate',
     locales: 'Localuri',
     menu: 'Meniu',
+    moreOptions: 'Mai multe opțiuni',
     moveDown: 'Mutați în jos',
     moveUp: 'Mutați în sus',
     newPassword: 'Parolă nouă',

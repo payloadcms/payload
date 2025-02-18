@@ -274,6 +274,7 @@ export const trTranslations: DefaultTranslationsObject = {
     locale: 'Yerel ayar',
     locales: 'Diller',
     menu: 'Menü',
+    moreOptions: 'Daha fazla seçenek',
     moveDown: 'Aşağı taşı',
     moveUp: 'Yukarı taşı',
     newPassword: 'Yeni parola',

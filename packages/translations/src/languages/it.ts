@@ -274,6 +274,7 @@ export const itTranslations: DefaultTranslationsObject = {
     locale: 'Locale',
     locales: 'Localizzazioni',
     menu: 'Menù',
+    moreOptions: 'Più opzioni',
     moveDown: 'Sposta sotto',
     moveUp: 'Sposta sopra',
     newPassword: 'Nuova Password',

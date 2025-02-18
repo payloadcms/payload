@@ -1,13 +1,11 @@
 'use client'
 
-import type { ListPreferences, ResolvedFilterOptions } from 'payload'
+import type { ListViewClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import { formatFilesize, isNumber } from 'payload/shared'
 import React, { Fragment, useEffect, useState } from 'react'
-
-import type { Column } from '../../elements/Table/index.js'
 
 import { useBulkUpload } from '../../elements/BulkUpload/index.js'
 import { Button } from '../../elements/Button/index.js'
@@ -40,32 +38,7 @@ import './index.scss'
 
 const baseClass = 'collection-list'
 
-export type ListViewSlots = {
-  AfterList?: React.ReactNode
-  AfterListTable?: React.ReactNode
-  BeforeList?: React.ReactNode
-  BeforeListTable?: React.ReactNode
-  Description?: React.ReactNode
-  ListControlsMenu?: React.ReactNode | React.ReactNode[]
-  Table: React.ReactNode
-}
-
-export type ListViewClientProps = {
-  beforeActions?: React.ReactNode[]
-  collectionSlug: string
-  columnState: Column[]
-  disableBulkDelete?: boolean
-  disableBulkEdit?: boolean
-  enableRowSelections?: boolean
-  hasCreatePermission: boolean
-  listPreferences?: ListPreferences
-  newDocumentURL: string
-  preferenceKey?: string
-  renderedFilters?: Map<string, React.ReactNode>
-  resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
-} & ListViewSlots
-
-export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
+export function DefaultListView(props: ListViewClientProps) {
   const {
     AfterList,
     AfterListTable,
@@ -79,7 +52,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
     disableBulkEdit,
     enableRowSelections,
     hasCreatePermission,
-    ListControlsMenu,
+    listMenuItems,
     listPreferences,
     newDocumentURL,
     preferenceKey,
@@ -195,14 +168,17 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                     <RenderCustomComponent
                       CustomComponent={Description}
                       Fallback={
-                        <ViewDescription description={collectionConfig?.admin?.description} />
+                        <ViewDescription
+                          collectionSlug={collectionSlug}
+                          description={collectionConfig?.admin?.description}
+                        />
                       }
                     />
                   </div>
                 }
                 hasCreatePermission={hasCreatePermission}
                 i18n={i18n}
-                isBulkUploadEnabled={isBulkUploadEnabled}
+                isBulkUploadEnabled={isBulkUploadEnabled && !upload.hideFileInputOnCreate}
                 newDocumentURL={newDocumentURL}
                 openBulkUpload={openBulkUpload}
                 smallBreak={smallBreak}
@@ -220,7 +196,7 @@ export const DefaultListView: React.FC<ListViewClientProps> = (props) => {
                 collectionSlug={collectionSlug}
                 disableBulkDelete={disableBulkDelete}
                 disableBulkEdit={disableBulkEdit}
-                listControlsMenu={ListControlsMenu}
+                listMenuItems={listMenuItems}
                 renderedFilters={renderedFilters}
                 resolvedFilterOptions={resolvedFilterOptions}
               />

@@ -270,6 +270,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     locale: 'Локализация',
     locales: 'Локализации',
     menu: 'Меню',
+    moreOptions: 'Повече опции',
     moveDown: 'Надолу',
     moveUp: 'Нагоре',
     newPassword: 'Нова парола',

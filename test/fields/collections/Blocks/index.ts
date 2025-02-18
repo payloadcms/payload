@@ -409,6 +409,21 @@ const BlockFields: CollectionConfig = {
       blockReferences: ['ConfigBlockTest'],
       blocks: [],
     },
+    {
+      name: 'localizedReferencesLocalizedBlock',
+      type: 'blocks',
+      blockReferences: ['localizedTextReference'],
+      blocks: [],
+      localized: true,
+    },
+    {
+      name: 'localizedReferences',
+      type: 'blocks',
+      // Needs to be a separate block - otherwise this will break in postgres. This is unrelated to block references
+      // and an issue with all blocks.
+      blockReferences: ['localizedTextReference2'],
+      blocks: [],
+    },
   ],
 }
 

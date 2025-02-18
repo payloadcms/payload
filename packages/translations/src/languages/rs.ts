@@ -271,6 +271,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     locale: 'Језик',
     locales: 'Преводи',
     menu: 'Мени',
+    moreOptions: 'Više opcija',
     moveDown: 'Помери доле',
     moveUp: 'Помери горе',
     newPassword: 'Нова лозинка',

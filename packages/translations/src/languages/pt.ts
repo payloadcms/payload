@@ -271,6 +271,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     locale: 'Local',
     locales: 'Localizações',
     menu: 'Cardápio',
+    moreOptions: 'Mais opções',
     moveDown: 'Mover para Baixo',
     moveUp: 'Mover para Cima',
     newPassword: 'Nova Senha',

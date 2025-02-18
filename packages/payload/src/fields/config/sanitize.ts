@@ -104,7 +104,7 @@ export const sanitizeFields = async ({
     }
 
     if (field.type === 'join') {
-      sanitizeJoinField({ config, field, joinPath, joins })
+      sanitizeJoinField({ config, field, joinPath, joins, parentIsLocalized })
     }
 
     if (field.type === 'relationship' || field.type === 'upload') {
@@ -160,7 +160,12 @@ export const sanitizeFields = async ({
       if (typeof field.localized !== 'undefined') {
         let shouldDisableLocalized = !config.localization
 
-        if (!config.compatibility?.allowLocalizedWithinLocalized && parentIsLocalized) {
+        if (
+          process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized !== 'true' &&
+          parentIsLocalized &&
+          // @todo PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY=true will be the default in 4.0
+          process.env.PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY !== 'true'
+        ) {
           shouldDisableLocalized = true
         }
 
@@ -185,7 +190,7 @@ export const sanitizeFields = async ({
         field.access = {}
       }
 
-      setDefaultBeforeDuplicate(field)
+      setDefaultBeforeDuplicate(field, parentIsLocalized)
     }
 
     if (!field.admin) {

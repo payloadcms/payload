@@ -274,6 +274,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     locale: 'Taal',
     locales: 'Landinstellingen',
     menu: 'Menu',
+    moreOptions: 'Meer opties',
     moveDown: 'Verplaats naar beneden',
     moveUp: 'Verplaats naar boven',
     newPassword: 'Nieuw wachtwoord',

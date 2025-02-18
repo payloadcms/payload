@@ -7,22 +7,6 @@
  */
 
 /**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "BlockColumns".
- */
-export type BlockColumns =
-  | {
-      text?: string | null;
-      subArray?:
-        | {
-            requiredText: string;
-            id?: string | null;
-          }[]
-        | null;
-      id?: string | null;
-    }[]
-  | null;
-/**
  * Supported timezones in IANA format.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -76,6 +60,22 @@ export type SupportedTimezones =
   | 'Pacific/Auckland'
   | 'Pacific/Fiji'
   | 'America/Monterrey';
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockColumns".
+ */
+export type BlockColumns =
+  | {
+      text?: string | null;
+      subArray?:
+        | {
+            requiredText: string;
+            id?: string | null;
+          }[]
+        | null;
+      id?: string | null;
+    }[]
+  | null;
 
 export interface Config {
   auth: {
@@ -83,56 +83,8 @@ export interface Config {
   };
   blocks: {
     ConfigBlockTest: ConfigBlockTest;
-    validationBlock: ValidationBlock;
-    filterOptionsBlock: FilterOptionsBlock;
-    asyncHooksBlock: AsyncHooksBlock;
-    richTextBlock: RichTextBlock;
-    textRequired: TextRequired;
-    uploadAndRichText: UploadAndRichText;
-    select: Select;
-    relationshipBlock: RelationshipBlock;
-    relationshipHasManyBlock: RelationshipHasManyBlock;
-    subBlockLexical: SubBlockLexical;
-    radioButtons: LexicalBlocksRadioButtonsBlock;
-    conditionalLayout: ConditionalLayout;
-    tabBlock: TabBlock;
-    code: Code;
-    myBlock: MyBlock;
-    myBlockWithLabel: MyBlockWithLabel;
-    myBlockWithBlock: MyBlockWithBlock;
-    BlockRSC: BlockRSC;
-    myBlockWithBlockAndLabel: MyBlockWithBlockAndLabel;
-    AvatarGroup: AvatarGroupBlock;
-    myInlineBlock: MyInlineBlock;
-    myInlineBlockWithLabel: MyInlineBlockWithLabel;
-    myInlineBlockWithBlock: MyInlineBlockWithBlock;
-    myInlineBlockWithBlockAndLabel: MyInlineBlockWithBlockAndLabel;
-    lexicalInBlock2: LexicalInBlock2;
-    block: Block;
-    content: ContentBlock;
-    number: NumberBlock;
-    subBlocks: SubBlocksBlock;
-    tabs: TabsBlock;
-    localizedContent: LocalizedContentBlock;
-    localizedNumber: LocalizedNumberBlock;
-    localizedSubBlocks: LocalizedSubBlocksBlock;
-    localizedTabs: LocalizedTabsBlock;
-    textInI18nBlock: TextInI18NBlock;
-    localizedArray: LocalizedArray;
-    'block-a': BlockA;
-    'block-b': BlockB;
-    'group-block': GroupBlock;
-    blockWithMinRows: BlockWithMinRows;
-    'block-1': Block1;
-    'block-2': Block2;
-    relationships: Relationships;
-    text: Text;
-    blockWithConditionalField: BlockWithConditionalField;
-    dateBlock: DateBlock;
-    blockWithNumber: BlockWithNumber;
-    textBlock: TextBlock;
-    richTextBlockSlate: RichTextBlockSlate;
-    blockWithText: BlockWithText;
+    localizedTextReference: LocalizedTextReference;
+    localizedTextReference2: LocalizedTextReference2;
   };
   collections: {
     'lexical-fields': LexicalField;
@@ -275,736 +227,23 @@ export interface ConfigBlockTest {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "validationBlock".
+ * via the `definition` "localizedTextReference".
  */
-export interface ValidationBlock {
-  text?: string | null;
-  group?: {
-    groupText?: string | null;
-    textDependsOnDocData?: string | null;
-    textDependsOnSiblingData?: string | null;
-    textDependsOnBlockData?: string | null;
-  };
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'validationBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "filterOptionsBlock".
- */
-export interface FilterOptionsBlock {
-  text?: string | null;
-  group?: {
-    groupText?: string | null;
-    dependsOnDocData?: (string | null) | TextField;
-    dependsOnSiblingData?: (string | null) | TextField;
-    dependsOnBlockData?: (string | null) | TextField;
-  };
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'filterOptionsBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "text-fields".
- */
-export interface TextField {
-  id: string;
-  text: string;
-  hiddenTextField?: string | null;
-  /**
-   * This field should be hidden
-   */
-  adminHiddenTextField?: string | null;
-  /**
-   * This field should be disabled
-   */
-  disabledTextField?: string | null;
-  localizedText?: string | null;
-  /**
-   * en description
-   */
-  i18nText?: string | null;
-  defaultString?: string | null;
-  defaultEmptyString?: string | null;
-  defaultFunction?: string | null;
-  defaultAsync?: string | null;
-  overrideLength?: string | null;
-  fieldWithDefaultValue?: string | null;
-  dependentOnFieldWithDefaultValue?: string | null;
-  hasMany?: string[] | null;
-  readOnlyHasMany?: string[] | null;
-  validatesHasMany?: string[] | null;
-  localizedHasMany?: string[] | null;
-  withMinRows?: string[] | null;
-  withMaxRows?: string[] | null;
-  defaultValueFromReq?: string | null;
-  array?:
-    | {
-        texts?: string[] | null;
-        id?: string | null;
-      }[]
-    | null;
-  blocks?: BlockWithText[] | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "blockWithText".
- */
-export interface BlockWithText {
-  texts?: string[] | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'blockWithText';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "asyncHooksBlock".
- */
-export interface AsyncHooksBlock {
-  test1?: string | null;
-  test2?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'asyncHooksBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "richTextBlock".
- */
-export interface RichTextBlock {
-  richTextField?: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'richTextBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "textRequired".
- */
-export interface TextRequired {
-  text: string;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'textRequired';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "uploadAndRichText".
- */
-export interface UploadAndRichText {
-  upload: string | Upload;
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'uploadAndRichText';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "uploads".
- */
-export interface Upload {
-  id: string;
-  text?: string | null;
-  media?: (string | null) | Upload;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "select".
- */
-export interface Select {
-  select?: ('option1' | 'option2' | 'option3' | 'option4' | 'option5') | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'select';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relationshipBlock".
- */
-export interface RelationshipBlock {
-  rel: string | Upload;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'relationshipBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relationshipHasManyBlock".
- */
-export interface RelationshipHasManyBlock {
-  rel: (
-    | {
-        relationTo: 'text-fields';
-        value: string | TextField;
-      }
-    | {
-        relationTo: 'uploads';
-        value: string | Upload;
-      }
-  )[];
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'relationshipHasManyBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "subBlockLexical".
- */
-export interface SubBlockLexical {
-  subBlocksLexical?:
-    | (
-        | {
-            richText: {
-              root: {
-                type: string;
-                children: {
-                  type: string;
-                  version: number;
-                  [k: string]: unknown;
-                }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                indent: number;
-                version: number;
-              };
-              [k: string]: unknown;
-            };
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'contentBlock';
-          }
-        | {
-            content: string;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'textArea';
-          }
-        | {
-            select?: ('option1' | 'option2' | 'option3' | 'option4' | 'option5') | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'select';
-          }
-      )[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'subBlockLexical';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalBlocksRadioButtonsBlock".
- */
-export interface LexicalBlocksRadioButtonsBlock {
-  radioButtons?: ('option1' | 'option2' | 'option3') | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'radioButtons';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "conditionalLayout".
- */
-export interface ConditionalLayout {
-  layout: '1' | '2' | '3';
-  columns?: BlockColumns;
-  columns2?: BlockColumns;
-  columns3?: BlockColumns;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'conditionalLayout';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tabBlock".
- */
-export interface TabBlock {
-  tab1?: {
-    text1?: string | null;
-  };
-  tab2?: {
-    text2?: string | null;
-  };
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'tabBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "code".
- */
-export interface Code {
-  code?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'code';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "myBlock".
- */
-export interface MyBlock {
-  key?: ('value1' | 'value2' | 'value3') | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'myBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "myBlockWithLabel".
- */
-export interface MyBlockWithLabel {
-  key?: ('value1' | 'value2' | 'value3') | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'myBlockWithLabel';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "myBlockWithBlock".
- */
-export interface MyBlockWithBlock {
-  key?: ('value1' | 'value2' | 'value3') | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'myBlockWithBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "BlockRSC".
- */
-export interface BlockRSC {
-  key?: ('value1' | 'value2' | 'value3') | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'BlockRSC';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "myBlockWithBlockAndLabel".
- */
-export interface MyBlockWithBlockAndLabel {
-  key?: ('value1' | 'value2' | 'value3') | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'myBlockWithBlockAndLabel';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "AvatarGroupBlock".
- */
-export interface AvatarGroupBlock {
-  avatars?:
-    | {
-        image?: (string | null) | Upload;
-        id?: string | null;
-      }[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'AvatarGroup';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "myInlineBlock".
- */
-export interface MyInlineBlock {
-  key?: ('value1' | 'value2' | 'value3') | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'myInlineBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "myInlineBlockWithLabel".
- */
-export interface MyInlineBlockWithLabel {
-  key?: ('value1' | 'value2' | 'value3') | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'myInlineBlockWithLabel';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "myInlineBlockWithBlock".
- */
-export interface MyInlineBlockWithBlock {
-  key?: ('value1' | 'value2' | 'value3') | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'myInlineBlockWithBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "myInlineBlockWithBlockAndLabel".
- */
-export interface MyInlineBlockWithBlockAndLabel {
-  key?: ('value1' | 'value2' | 'value3') | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'myInlineBlockWithBlockAndLabel';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "lexicalInBlock2".
- */
-export interface LexicalInBlock2 {
-  lexical?: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'lexicalInBlock2';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block".
- */
-export interface Block {
-  hasManyBlocks?: ('a' | 'b' | 'c')[] | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'block';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ContentBlock".
- */
-export interface ContentBlock {
-  text: string;
-  richText?:
-    | {
-        [k: string]: unknown;
-      }[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'content';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "NumberBlock".
- */
-export interface NumberBlock {
-  number: number;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'number';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "SubBlocksBlock".
- */
-export interface SubBlocksBlock {
-  subBlocks?:
-    | (
-        | {
-            text: string;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'textRequired';
-          }
-        | NumberBlock
-      )[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'subBlocks';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TabsBlock".
- */
-export interface TabsBlock {
-  textInCollapsible?: string | null;
-  textInRow?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'tabs';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "localizedContentBlock".
- */
-export interface LocalizedContentBlock {
-  text: string;
-  richText?:
-    | {
-        [k: string]: unknown;
-      }[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'localizedContent';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "localizedNumberBlock".
- */
-export interface LocalizedNumberBlock {
-  number: number;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'localizedNumber';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "localizedSubBlocksBlock".
- */
-export interface LocalizedSubBlocksBlock {
-  subBlocks?:
-    | (
-        | {
-            text: string;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'textRequired';
-          }
-        | NumberBlock
-      )[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'localizedSubBlocks';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "localizedTabsBlock".
- */
-export interface LocalizedTabsBlock {
-  textInCollapsible?: string | null;
-  textInRow?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'localizedTabs';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "textInI18nBlock".
- */
-export interface TextInI18NBlock {
+export interface LocalizedTextReference {
   text?: string | null;
   id?: string | null;
   blockName?: string | null;
-  blockType: 'textInI18nBlock';
+  blockType: 'localizedTextReference';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "localizedArray".
+ * via the `definition` "localizedTextReference2".
  */
-export interface LocalizedArray {
-  array?:
-    | {
-        text?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'localizedArray';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block-a".
- */
-export interface BlockA {
-  items?:
-    | {
-        title: string;
-        id?: string | null;
-      }[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'block-a';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block-b".
- */
-export interface BlockB {
-  items?:
-    | {
-        title2: string;
-        id?: string | null;
-      }[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'block-b';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "group-block".
- */
-export interface GroupBlock {
-  group?: {
-    text?: string | null;
-  };
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'group-block';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "blockWithMinRows".
- */
-export interface BlockWithMinRows {
-  blockTitle?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'blockWithMinRows';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block-1".
- */
-export interface Block1 {
-  block1Title?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'block-1';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "block-2".
- */
-export interface Block2 {
-  block2Title?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'block-2';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relationships".
- */
-export interface Relationships {
-  relationship?: (string | null) | TextField;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'relationships';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "text".
- */
-export interface Text {
+export interface LocalizedTextReference2 {
   text?: string | null;
   id?: string | null;
   blockName?: string | null;
-  blockType: 'text';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "blockWithConditionalField".
- */
-export interface BlockWithConditionalField {
-  text?: string | null;
-  textWithCondition?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'blockWithConditionalField';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "dateBlock".
- */
-export interface DateBlock {
-  dayAndTime?: string | null;
-  dayAndTime_tz?: SupportedTimezones;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'dateBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "blockWithNumber".
- */
-export interface BlockWithNumber {
-  numbers?: number[] | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'blockWithNumber';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "textBlock".
- */
-export interface TextBlock {
-  text?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'textBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "richTextBlockSlate".
- */
-export interface RichTextBlockSlate {
-  text?:
-    | {
-        [k: string]: unknown;
-      }[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'richTextBlockSlate';
+  blockType: 'localizedTextReference2';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1281,7 +520,28 @@ export interface LexicalInBlock {
     };
     [k: string]: unknown;
   } | null;
-  blocks?: LexicalInBlock2[] | null;
+  blocks?:
+    | {
+        lexical?: {
+          root: {
+            type: string;
+            children: {
+              type: string;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'lexicalInBlock2';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1323,7 +583,14 @@ export interface SelectVersionsField {
         id?: string | null;
       }[]
     | null;
-  blocks?: Block[] | null;
+  blocks?:
+    | {
+        hasManyBlocks?: ('a' | 'b' | 'c')[] | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -1442,19 +709,295 @@ export interface BlockField {
   )[];
   disableSort: (LocalizedContentBlock | LocalizedNumberBlock | LocalizedSubBlocksBlock | LocalizedTabsBlock)[];
   localizedBlocks: (LocalizedContentBlock | LocalizedNumberBlock | LocalizedSubBlocksBlock | LocalizedTabsBlock)[];
-  i18nBlocks?: TextInI18NBlock[] | null;
-  blocksWithLocalizedArray?: LocalizedArray[] | null;
-  blocksWithSimilarConfigs?: (BlockA | BlockB | GroupBlock)[] | null;
+  i18nBlocks?:
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'textInI18nBlock';
+      }[]
+    | null;
+  blocksWithLocalizedArray?:
+    | {
+        array?:
+          | {
+              text?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'localizedArray';
+      }[]
+    | null;
+  blocksWithSimilarConfigs?:
+    | (
+        | {
+            items?:
+              | {
+                  title: string;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'block-a';
+          }
+        | {
+            items?:
+              | {
+                  title2: string;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'block-b';
+          }
+        | {
+            group?: {
+              text?: string | null;
+            };
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'group-block';
+          }
+      )[]
+    | null;
   /**
    * The purpose of this field is to test validateExistingBlockIsIdentical works with similar blocks with group fields
    */
-  blocksWithSimilarGroup?: (GroupBlock | BlockB)[] | null;
-  blocksWithMinRows?: BlockWithMinRows[] | null;
-  customBlocks?: (Block1 | Block2)[] | null;
-  relationshipBlocks?: Relationships[] | null;
-  blockWithLabels?: Text[] | null;
+  blocksWithSimilarGroup?:
+    | (
+        | {
+            group?: {
+              text?: string | null;
+            };
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'group-block';
+          }
+        | {
+            items?:
+              | {
+                  title2: string;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'block-b';
+          }
+      )[]
+    | null;
+  blocksWithMinRows?:
+    | {
+        blockTitle?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'blockWithMinRows';
+      }[]
+    | null;
+  customBlocks?:
+    | (
+        | {
+            block1Title?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'block-1';
+          }
+        | {
+            block2Title?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'block-2';
+          }
+      )[]
+    | null;
+  relationshipBlocks?:
+    | {
+        relationship?: (string | null) | TextField;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'relationships';
+      }[]
+    | null;
+  blockWithLabels?:
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'text';
+      }[]
+    | null;
   deduplicatedBlocks?: ConfigBlockTest[] | null;
   deduplicatedBlocks2?: ConfigBlockTest[] | null;
+  localizedReferencesLocalizedBlock?: LocalizedTextReference[] | null;
+  localizedReferences?: LocalizedTextReference2[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContentBlock".
+ */
+export interface ContentBlock {
+  text: string;
+  richText?:
+    | {
+        [k: string]: unknown;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'content';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "NumberBlock".
+ */
+export interface NumberBlock {
+  number: number;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'number';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SubBlocksBlock".
+ */
+export interface SubBlocksBlock {
+  subBlocks?:
+    | (
+        | {
+            text: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'textRequired';
+          }
+        | NumberBlock
+      )[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'subBlocks';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TabsBlock".
+ */
+export interface TabsBlock {
+  textInCollapsible?: string | null;
+  textInRow?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'tabs';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localizedContentBlock".
+ */
+export interface LocalizedContentBlock {
+  text: string;
+  richText?:
+    | {
+        [k: string]: unknown;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'localizedContent';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localizedNumberBlock".
+ */
+export interface LocalizedNumberBlock {
+  number: number;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'localizedNumber';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localizedSubBlocksBlock".
+ */
+export interface LocalizedSubBlocksBlock {
+  subBlocks?:
+    | (
+        | {
+            text: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'textRequired';
+          }
+        | NumberBlock
+      )[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'localizedSubBlocks';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localizedTabsBlock".
+ */
+export interface LocalizedTabsBlock {
+  textInCollapsible?: string | null;
+  textInRow?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'localizedTabs';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "text-fields".
+ */
+export interface TextField {
+  id: string;
+  text: string;
+  hiddenTextField?: string | null;
+  /**
+   * This field should be hidden
+   */
+  adminHiddenTextField?: string | null;
+  /**
+   * This field should be disabled
+   */
+  disabledTextField?: string | null;
+  localizedText?: string | null;
+  /**
+   * en description
+   */
+  i18nText?: string | null;
+  defaultString?: string | null;
+  defaultEmptyString?: string | null;
+  defaultFunction?: string | null;
+  defaultAsync?: string | null;
+  overrideLength?: string | null;
+  fieldWithDefaultValue?: string | null;
+  dependentOnFieldWithDefaultValue?: string | null;
+  hasMany?: string[] | null;
+  readOnlyHasMany?: string[] | null;
+  validatesHasMany?: string[] | null;
+  localizedHasMany?: string[] | null;
+  withMinRows?: string[] | null;
+  withMaxRows?: string[] | null;
+  defaultValueFromReq?: string | null;
+  array?:
+    | {
+        texts?: string[] | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocks?:
+    | {
+        texts?: string[] | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'blockWithText';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1570,7 +1113,15 @@ export interface ConditionalLogic {
         id?: string | null;
       }[]
     | null;
-  blocksWithConditionalField?: BlockWithConditionalField[] | null;
+  blocksWithConditionalField?:
+    | {
+        text?: string | null;
+        textWithCondition?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'blockWithConditionalField';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1620,7 +1171,15 @@ export interface DateField {
    */
   dayAndTimeWithTimezone: string;
   dayAndTimeWithTimezone_tz: SupportedTimezones;
-  timezoneBlocks?: DateBlock[] | null;
+  timezoneBlocks?:
+    | {
+        dayAndTime?: string | null;
+        dayAndTime_tz?: SupportedTimezones;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'dateBlock';
+      }[]
+    | null;
   timezoneArray?:
     | {
         dayAndTime?: string | null;
@@ -1911,7 +1470,14 @@ export interface NumberField {
         id?: string | null;
       }[]
     | null;
-  blocks?: BlockWithNumber[] | null;
+  blocks?:
+    | {
+        numbers?: number[] | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'blockWithNumber';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2095,7 +1661,26 @@ export interface RichTextField {
         [k: string]: unknown;
       }[]
     | null;
-  blocks?: (TextBlock | RichTextBlockSlate)[] | null;
+  blocks?:
+    | (
+        | {
+            text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'textBlock';
+          }
+        | {
+            text?:
+              | {
+                  [k: string]: unknown;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'richTextBlockSlate';
+          }
+      )[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2228,6 +1813,26 @@ export interface TabWithName {
         id?: string | null;
       }[]
     | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads".
+ */
+export interface Upload {
+  id: string;
+  text?: string | null;
+  media?: (string | null) | Upload;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2638,7 +2243,17 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface LexicalInBlockSelect<T extends boolean = true> {
   content?: T;
-  blocks?: T | {};
+  blocks?:
+    | T
+    | {
+        lexicalInBlock2?:
+          | T
+          | {
+              lexical?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2664,7 +2279,17 @@ export interface SelectVersionsFieldsSelect<T extends boolean = true> {
         hasManyArr?: T;
         id?: T;
       };
-  blocks?: T | {};
+  blocks?:
+    | T
+    | {
+        block?:
+          | T
+          | {
+              hasManyBlocks?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -2774,9 +2399,30 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
  * via the `definition` "block-fields_select".
  */
 export interface BlockFieldsSelect<T extends boolean = true> {
-  blocks?: T | {};
-  duplicate?: T | {};
-  collapsedByDefaultBlocks?: T | {};
+  blocks?:
+    | T
+    | {
+        content?: T | ContentBlockSelect<T>;
+        number?: T | NumberBlockSelect<T>;
+        subBlocks?: T | SubBlocksBlockSelect<T>;
+        tabs?: T | TabsBlockSelect<T>;
+      };
+  duplicate?:
+    | T
+    | {
+        content?: T | ContentBlockSelect<T>;
+        number?: T | NumberBlockSelect<T>;
+        subBlocks?: T | SubBlocksBlockSelect<T>;
+        tabs?: T | TabsBlockSelect<T>;
+      };
+  collapsedByDefaultBlocks?:
+    | T
+    | {
+        localizedContent?: T | LocalizedContentBlockSelect<T>;
+        localizedNumber?: T | LocalizedNumberBlockSelect<T>;
+        localizedSubBlocks?: T | LocalizedSubBlocksBlockSelect<T>;
+        localizedTabs?: T | LocalizedTabsBlockSelect<T>;
+      };
   disableSort?:
     | T
     | {
@@ -2785,19 +2431,213 @@ export interface BlockFieldsSelect<T extends boolean = true> {
         localizedSubBlocks?: T | LocalizedSubBlocksBlockSelect<T>;
         localizedTabs?: T | LocalizedTabsBlockSelect<T>;
       };
-  localizedBlocks?: T | {};
-  i18nBlocks?: T | {};
-  blocksWithLocalizedArray?: T | {};
-  blocksWithSimilarConfigs?: T | {};
-  blocksWithSimilarGroup?: T | {};
-  blocksWithMinRows?: T | {};
-  customBlocks?: T | {};
-  relationshipBlocks?: T | {};
-  blockWithLabels?: T | {};
+  localizedBlocks?:
+    | T
+    | {
+        localizedContent?: T | LocalizedContentBlockSelect<T>;
+        localizedNumber?: T | LocalizedNumberBlockSelect<T>;
+        localizedSubBlocks?: T | LocalizedSubBlocksBlockSelect<T>;
+        localizedTabs?: T | LocalizedTabsBlockSelect<T>;
+      };
+  i18nBlocks?:
+    | T
+    | {
+        textInI18nBlock?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  blocksWithLocalizedArray?:
+    | T
+    | {
+        localizedArray?:
+          | T
+          | {
+              array?:
+                | T
+                | {
+                    text?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
+  blocksWithSimilarConfigs?:
+    | T
+    | {
+        'block-a'?:
+          | T
+          | {
+              items?:
+                | T
+                | {
+                    title?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        'block-b'?:
+          | T
+          | {
+              items?:
+                | T
+                | {
+                    title2?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        'group-block'?:
+          | T
+          | {
+              group?:
+                | T
+                | {
+                    text?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
+  blocksWithSimilarGroup?:
+    | T
+    | {
+        'group-block'?:
+          | T
+          | {
+              group?:
+                | T
+                | {
+                    text?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        'block-b'?:
+          | T
+          | {
+              items?:
+                | T
+                | {
+                    title2?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
+  blocksWithMinRows?:
+    | T
+    | {
+        blockWithMinRows?:
+          | T
+          | {
+              blockTitle?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  customBlocks?:
+    | T
+    | {
+        'block-1'?:
+          | T
+          | {
+              block1Title?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'block-2'?:
+          | T
+          | {
+              block2Title?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  relationshipBlocks?:
+    | T
+    | {
+        relationships?:
+          | T
+          | {
+              relationship?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  blockWithLabels?:
+    | T
+    | {
+        text?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   deduplicatedBlocks?: T | {};
   deduplicatedBlocks2?: T | {};
+  localizedReferencesLocalizedBlock?: T | {};
+  localizedReferences?: T | {};
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContentBlock_select".
+ */
+export interface ContentBlockSelect<T extends boolean = true> {
+  text?: T;
+  richText?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "NumberBlock_select".
+ */
+export interface NumberBlockSelect<T extends boolean = true> {
+  number?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SubBlocksBlock_select".
+ */
+export interface SubBlocksBlockSelect<T extends boolean = true> {
+  subBlocks?:
+    | T
+    | {
+        textRequired?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        number?: T | NumberBlockSelect<T>;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TabsBlock_select".
+ */
+export interface TabsBlockSelect<T extends boolean = true> {
+  textInCollapsible?: T;
+  textInRow?: T;
+  id?: T;
+  blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2835,15 +2675,6 @@ export interface LocalizedSubBlocksBlockSelect<T extends boolean = true> {
             };
         number?: T | NumberBlockSelect<T>;
       };
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "NumberBlock_select".
- */
-export interface NumberBlockSelect<T extends boolean = true> {
-  number?: T;
   id?: T;
   blockName?: T;
 }
@@ -2959,7 +2790,18 @@ export interface ConditionalLogicSelect<T extends boolean = true> {
         textWithCondition?: T;
         id?: T;
       };
-  blocksWithConditionalField?: T | {};
+  blocksWithConditionalField?:
+    | T
+    | {
+        blockWithConditionalField?:
+          | T
+          | {
+              text?: T;
+              textWithCondition?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3005,7 +2847,18 @@ export interface DateFieldsSelect<T extends boolean = true> {
   defaultWithTimezone_tz?: T;
   dayAndTimeWithTimezone?: T;
   dayAndTimeWithTimezone_tz?: T;
-  timezoneBlocks?: T | {};
+  timezoneBlocks?:
+    | T
+    | {
+        dateBlock?:
+          | T
+          | {
+              dayAndTime?: T;
+              dayAndTime_tz?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   timezoneArray?:
     | T
     | {
@@ -3275,7 +3128,17 @@ export interface NumberFieldsSelect<T extends boolean = true> {
         numbers?: T;
         id?: T;
       };
-  blocks?: T | {};
+  blocks?:
+    | T
+    | {
+        blockWithNumber?:
+          | T
+          | {
+              numbers?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3346,7 +3209,24 @@ export interface RichTextFieldsSelect<T extends boolean = true> {
   richText?: T;
   richTextCustomFields?: T;
   richTextReadOnly?: T;
-  blocks?: T | {};
+  blocks?:
+    | T
+    | {
+        textBlock?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        richTextBlockSlate?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3479,46 +3359,6 @@ export interface TabsFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ContentBlock_select".
- */
-export interface ContentBlockSelect<T extends boolean = true> {
-  text?: T;
-  richText?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "SubBlocksBlock_select".
- */
-export interface SubBlocksBlockSelect<T extends boolean = true> {
-  subBlocks?:
-    | T
-    | {
-        textRequired?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-              blockName?: T;
-            };
-        number?: T | NumberBlockSelect<T>;
-      };
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TabsBlock_select".
- */
-export interface TabsBlockSelect<T extends boolean = true> {
-  textInCollapsible?: T;
-  textInRow?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "TabWithName_select".
  */
 export interface TabWithNameSelect<T extends boolean = true> {
@@ -3568,7 +3408,17 @@ export interface TextFieldsSelect<T extends boolean = true> {
         texts?: T;
         id?: T;
       };
-  blocks?: T | {};
+  blocks?:
+    | T
+    | {
+        blockWithText?:
+          | T
+          | {
+              texts?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3772,6 +3622,31 @@ export interface TabsWithRichTextSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalBlocksRadioButtonsBlock".
+ */
+export interface LexicalBlocksRadioButtonsBlock {
+  radioButtons?: ('option1' | 'option2' | 'option3') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'radioButtons';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "AvatarGroupBlock".
+ */
+export interface AvatarGroupBlock {
+  avatars?:
+    | {
+        image?: (string | null) | Upload;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'AvatarGroup';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

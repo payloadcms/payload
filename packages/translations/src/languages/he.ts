@@ -265,6 +265,7 @@ export const heTranslations: DefaultTranslationsObject = {
     locale: 'שפה',
     locales: 'שפות',
     menu: 'תפריט',
+    moreOptions: 'אפשרויות נוספות',
     moveDown: 'הזז למטה',
     moveUp: 'הזז למעלה',
     newPassword: 'סיסמה חדשה',
