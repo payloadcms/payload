@@ -304,6 +304,7 @@ export type CollectionAdminOptions = {
        */
       Upload?: CustomUpload
     }
+    listMenuItems?: CustomComponent[]
     views?: {
       /**
        * Set to a React component to replace the entire Edit View, including all nested routes.

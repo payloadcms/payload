@@ -260,6 +260,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     locale: '语言环境',
     locales: '语言环境',
     menu: '菜单',
+    moreOptions: '更多选项',
     moveDown: '向下移动',
     moveUp: '向上移动',
     newPassword: '新密码',
