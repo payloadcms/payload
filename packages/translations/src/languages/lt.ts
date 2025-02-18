@@ -272,6 +272,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     locale: 'Lokalė',
     locales: 'Lokalės',
     menu: 'Meniu',
+    moreOptions: 'Daugiau parinkčių',
     moveDown: 'Perkelti žemyn',
     moveUp: 'Pakilti',
     newPassword: 'Naujas slaptažodis',
