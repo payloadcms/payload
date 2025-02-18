@@ -282,7 +282,7 @@ export const getTableColumnFromPath = ({
           joins.push(blockJoin)
           // Append new joins AFTER the block join to prevent errors with missing FROM clause.
           if (newJoins.length > previousLength) {
-            for (let i = newJoins.length - 1; i < newJoins.length; i++) {
+            for (let i = previousLength; i < newJoins.length; i++) {
               joins.push(newJoins[i])
             }
           }
