@@ -34,3 +34,7 @@ export const globalSlugs = [autoSaveGlobalSlug, draftGlobalSlug]
 export const localizedCollectionSlug = 'localized-posts'
 
 export const localizedGlobalSlug = 'localized-global'
+
+export const cascadePublishSlug = 'cascade-publish'
+export const cascadePublishGlobalSlug = 'cascade-publish-global'
+export const cascadePublishRelationsSlug = 'cascade-publish-relations'
