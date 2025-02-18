@@ -227,6 +227,11 @@ export type Context = {
   getFields: GetFields
   getSiblingData: GetSiblingData
   initializing: boolean
+  /**
+   * Tracks wether the form state passes validation.
+   * For example the state could be submitted but invalid as field errors have been returned.
+   */
+  isValid: boolean
   removeFieldRow: ({ path, rowIndex }: { path: string; rowIndex: number }) => void
   replaceFieldRow: ({
     blockType,
@@ -244,6 +249,7 @@ export type Context = {
   replaceState: (state: FormState) => void
   reset: Reset
   setDisabled: (disabled: boolean) => void
+  setIsValid: (processing: boolean) => void
   setModified: SetModified
   setProcessing: SetProcessing
   setSubmitted: SetSubmitted
