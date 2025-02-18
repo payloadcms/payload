@@ -256,18 +256,14 @@ If you are using relationships or uploads in your front-end application, and you
   // ...
   // If your site is running on a different domain than your Payload server,
   // This will allows requests to be made between the two domains
-  cors: {
-    [
-      'http://localhost:3001' // Your front-end application
-    ],
-  },
+  cors: [
+    'http://localhost:3001' // Your front-end application
+  ],
   // If you are protecting resources behind user authentication,
   // This will allow cookies to be sent between the two domains
-  csrf: {
-    [
-      'http://localhost:3001' // Your front-end application
-    ],
-  },
+  csrf: [
+    'http://localhost:3001' // Your front-end application
+  ],
 }
 ```
 
