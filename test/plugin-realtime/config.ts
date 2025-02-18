@@ -17,13 +17,7 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  plugins: [
-    realtimePlugin({
-      collections: {
-        [postsSlug]: true,
-      },
-    }),
-  ],
+  plugins: [realtimePlugin()],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',

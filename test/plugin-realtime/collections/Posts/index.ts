@@ -8,6 +8,9 @@ export const PostsCollection: CollectionConfig = {
   slug: postsSlug,
   admin: {
     useAsTitle: 'title',
+    components: {
+      beforeList: ['./components/PostCount#PostCount'],
+    },
   },
   fields: [
     {
