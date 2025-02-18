@@ -1728,6 +1728,9 @@ importers:
       create-payload-app:
         specifier: workspace:*
         version: link:../packages/create-payload-app
+      dequal:
+        specifier: 2.0.3
+        version: 2.0.3
       dotenv:
         specifier: 16.4.7
         version: 16.4.7

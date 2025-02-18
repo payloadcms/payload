@@ -311,7 +311,7 @@ export const createClientField = ({
       const field = clientField as JoinFieldClient
 
       field.targetField = {
-        relationTo: field.targetField.relationTo,
+        relationTo: field.targetField?.relationTo,
       }
 
       break

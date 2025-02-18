@@ -270,6 +270,7 @@ export const azTranslations: DefaultTranslationsObject = {
     locale: 'Lokal',
     locales: 'Dillər',
     menu: 'Menyu',
+    moreOptions: 'Daha çox seçimlər',
     moveDown: 'Aşağı hərəkət et',
     moveUp: 'Yuxarı hərəkət et',
     newPassword: 'Yeni şifrə',

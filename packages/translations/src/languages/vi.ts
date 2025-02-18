@@ -269,6 +269,7 @@ export const viTranslations: DefaultTranslationsObject = {
     locale: 'Ngôn ngữ',
     locales: 'Khu vực',
     menu: 'Thực đơn',
+    moreOptions: 'Nhiều lựa chọn hơn',
     moveDown: 'Di chuyển xuống',
     moveUp: 'Di chuyển lên',
     newPassword: 'Mật khảu mới',

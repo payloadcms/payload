@@ -96,6 +96,11 @@ export const Form: React.FC<FormProps> = (props) => {
   const [disabled, setDisabled] = useState(disabledFromProps || false)
   const [isMounted, setIsMounted] = useState(false)
   const [modified, setModified] = useState(false)
+  /**
+   * Tracks wether the form state passes validation.
+   * For example the state could be submitted but invalid as field errors have been returned.
+   */
+  const [isValid, setIsValid] = useState(true)
   const [initializing, setInitializing] = useState(initializingFromProps)
   const [processing, setProcessing] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -177,6 +182,8 @@ export const Form: React.FC<FormProps> = (props) => {
       dispatchFields({ type: 'REPLACE_STATE', state: validatedFieldState })
     }
 
+    setIsValid(isValid)
+
     return isValid
   }, [collectionSlug, config, dispatchFields, id, operation, t, user, documentForm])
 
@@ -257,6 +264,8 @@ export const Form: React.FC<FormProps> = (props) => {
           ([, field]) => field.valid !== false,
         )
 
+        setIsValid(isValid)
+
         if (!isValid) {
           setProcessing(false)
           setSubmitted(true)
@@ -268,6 +277,7 @@ export const Form: React.FC<FormProps> = (props) => {
       const isValid =
         skipValidation || disableValidationOnSubmit ? true : await contextRef.current.validateForm()
 
+      setIsValid(isValid)
       // If not valid, prevent submission
       if (!isValid) {
         errorToast(t('error:correctInvalidFields'))
@@ -407,6 +417,8 @@ export const Form: React.FC<FormProps> = (props) => {
               },
               [[], []],
             )
+
+            setIsValid(false)
 
             dispatchFields({
               type: 'ADD_SERVER_ERRORS',
@@ -615,6 +627,7 @@ export const Form: React.FC<FormProps> = (props) => {
   contextRef.current.setModified = setModified
   contextRef.current.setProcessing = setProcessing
   contextRef.current.setSubmitted = setSubmitted
+  contextRef.current.setIsValid = setIsValid
   contextRef.current.disabled = disabled
   contextRef.current.setDisabled = setDisabled
   contextRef.current.formRef = formRef
@@ -626,6 +639,7 @@ export const Form: React.FC<FormProps> = (props) => {
   contextRef.current.replaceFieldRow = replaceFieldRow
   contextRef.current.uuid = uuid
   contextRef.current.initializing = initializing
+  contextRef.current.isValid = isValid
 
   useEffect(() => {
     setIsMounted(true)

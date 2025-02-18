@@ -29,6 +29,7 @@ import {
   customFileNameMediaSlug,
   customUploadFieldSlug,
   focalOnlySlug,
+  hideFileInputOnCreateSlug,
   mediaSlug,
   mediaWithoutCacheTagsSlug,
   relationPreviewSlug,
@@ -63,6 +64,7 @@ let customFileNameURL: AdminUrlUtil
 let uploadsOne: AdminUrlUtil
 let uploadsTwo: AdminUrlUtil
 let customUploadFieldURL: AdminUrlUtil
+let hideFileInputOnCreateURL: AdminUrlUtil
 
 describe('Uploads', () => {
   let page: Page
@@ -92,6 +94,7 @@ describe('Uploads', () => {
     uploadsOne = new AdminUrlUtil(serverURL, 'uploads-1')
     uploadsTwo = new AdminUrlUtil(serverURL, 'uploads-2')
     customUploadFieldURL = new AdminUrlUtil(serverURL, customUploadFieldSlug)
+    hideFileInputOnCreateURL = new AdminUrlUtil(serverURL, hideFileInputOnCreateSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -366,10 +369,10 @@ describe('Uploads', () => {
     await page.locator('.doc-drawer__header-close').click()
 
     // remove the selected versioned image
-    await page.locator('.field-type:nth-of-type(2) .icon--x').click()
+    await page.locator('#field-versionedImage .icon--x').click()
 
     // choose from existing
-    await openDocDrawer(page, '.upload__listToggler')
+    await openDocDrawer(page, '#field-versionedImage .upload__listToggler')
 
     await expect(page.locator('.row-3 .cell-title')).toContainText('draft')
   })
@@ -456,7 +459,6 @@ describe('Uploads', () => {
 
   test('should render adminThumbnail when using a function', async () => {
     await page.goto(adminThumbnailFunctionURL.list)
-    await page.waitForURL(adminThumbnailFunctionURL.list)
 
     // Ensure sure false or null shows generic file svg
     const genericUploadImage = page.locator('tr.row-1 .thumbnail img')
@@ -468,7 +470,6 @@ describe('Uploads', () => {
 
   test('should render adminThumbnail when using a custom thumbnail URL with additional queries', async () => {
     await page.goto(adminThumbnailWithSearchQueriesURL.list)
-    await page.waitForURL(adminThumbnailWithSearchQueriesURL.list)
 
     const genericUploadImage = page.locator('tr.row-1 .thumbnail img')
     // Match the URL with the regex pattern
@@ -539,7 +540,6 @@ describe('Uploads', () => {
 
   test('should render adminThumbnail when using a specific size', async () => {
     await page.goto(adminThumbnailSizeURL.list)
-    await page.waitForURL(adminThumbnailSizeURL.list)
 
     // Ensure sure false or null shows generic file svg
     const genericUploadImage = page.locator('tr.row-1 .thumbnail img')
@@ -747,7 +747,6 @@ describe('Uploads', () => {
     test('should apply field value to all bulk upload files after edit many', async () => {
       // Navigate to the upload creation page
       await page.goto(uploadsOne.create)
-      await page.waitForURL(uploadsOne.create)
 
       // Upload single file
       await page.setInputFiles(
@@ -1119,5 +1118,30 @@ describe('Uploads', () => {
     // collection's displayPreview: false, field's displayPreview: false
     const relationPreview6 = page.locator('.cell-imageWithoutPreview3 img')
     await expect(relationPreview6).toBeHidden()
+  })
+
+  test('should hide file input when disableCreateFileInput is true on collection create', async () => {
+    await page.goto(hideFileInputOnCreateURL.create)
+    await page.waitForURL(hideFileInputOnCreateURL.create)
+
+    await expect(page.locator('.file-field__upload')).toBeHidden()
+  })
+
+  test('should hide bulk upload from list view when disableCreateFileInput is true', async () => {
+    await page.goto(hideFileInputOnCreateURL.list)
+
+    await expect(page.locator('.list-header')).not.toContainText('Bulk Upload')
+  })
+
+  test('should hide remove button in file input when hideRemove is true', async () => {
+    const doc = await payload.create({
+      collection: hideFileInputOnCreateSlug,
+      data: {
+        title: 'test',
+      },
+    })
+    await page.goto(hideFileInputOnCreateURL.edit(doc.id))
+
+    await expect(page.locator('.file-field .file-details__remove')).toBeHidden()
   })
 })

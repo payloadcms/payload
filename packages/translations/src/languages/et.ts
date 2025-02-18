@@ -267,6 +267,7 @@ export const etTranslations: DefaultTranslationsObject = {
     locale: 'Keel',
     locales: 'Keeled',
     menu: 'Menüü',
+    moreOptions: 'Rohkem valikuid',
     moveDown: 'Liiguta alla',
     moveUp: 'Liiguta üles',
     newPassword: 'Uus parool',

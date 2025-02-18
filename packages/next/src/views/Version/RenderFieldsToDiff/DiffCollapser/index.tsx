@@ -22,6 +22,7 @@ type Props =
       isIterable?: false
       label: React.ReactNode
       locales: string[] | undefined
+      parentIsLocalized: boolean
       version: unknown
     }
   | {
@@ -34,6 +35,7 @@ type Props =
       isIterable: true
       label: React.ReactNode
       locales: string[] | undefined
+      parentIsLocalized: boolean
       version: unknown
     }
 
@@ -46,6 +48,7 @@ export const DiffCollapser: React.FC<Props> = ({
   isIterable = false,
   label,
   locales,
+  parentIsLocalized,
   version,
 }) => {
   const { t } = useTranslation()
@@ -74,6 +77,7 @@ export const DiffCollapser: React.FC<Props> = ({
       config,
       field,
       locales,
+      parentIsLocalized,
       versionRows,
     })
   } else {
@@ -82,6 +86,7 @@ export const DiffCollapser: React.FC<Props> = ({
       config,
       fields,
       locales,
+      parentIsLocalized,
       version,
     })
   }

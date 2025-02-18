@@ -616,7 +616,12 @@ export class BasePayload {
         }
       }
 
-      traverseFields({ callback: findCustomID, config: this.config, fields: collection.fields })
+      traverseFields({
+        callback: findCustomID,
+        config: this.config,
+        fields: collection.fields,
+        parentIsLocalized: false,
+      })
 
       this.collections[collection.slug] = {
         config: collection,
@@ -1242,6 +1247,7 @@ export type {
   FlattenedBlocksField,
   FlattenedField,
   FlattenedGroupField,
+  FlattenedJoinField,
   FlattenedTabAsField,
   GroupField,
   GroupFieldClient,

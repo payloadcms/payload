@@ -1,5 +1,6 @@
 import type { FlattenedBlock, FlattenedBlocksField } from 'payload'
 
+import { fieldShouldBeLocalized } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from '../../types.js'
@@ -18,6 +19,7 @@ type Args = {
   field: FlattenedBlocksField
   locale?: string
   numbers: Record<string, unknown>[]
+  parentIsLocalized: boolean
   path: string
   relationships: Record<string, unknown>[]
   relationshipsToDelete: RelationshipToDelete[]
@@ -40,6 +42,7 @@ export const transformBlocks = ({
   field,
   locale,
   numbers,
+  parentIsLocalized,
   path,
   relationships,
   relationshipsToDelete,
@@ -76,7 +79,7 @@ export const transformBlocks = ({
       },
     }
 
-    if (field.localized && locale) {
+    if (fieldShouldBeLocalized({ field, parentIsLocalized }) && locale) {
       newRow.row._locale = locale
     }
     if (withinArrayOrBlockLocale) {
@@ -110,6 +113,7 @@ export const transformBlocks = ({
       insideArrayOrBlock: true,
       locales: newRow.locales,
       numbers,
+      parentIsLocalized: parentIsLocalized || field.localized,
       parentTableName: blockTableName,
       path: `${path || ''}${field.name}.${i}.`,
       relationships,

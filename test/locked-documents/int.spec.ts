@@ -1,4 +1,4 @@
-import type { Payload, SanitizedCollectionConfig } from 'payload'
+import type { Payload, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
 
 import path from 'path'
 import { Locked, NotFound } from 'payload'
@@ -6,7 +6,7 @@ import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-import type { Menu, Page, Post } from './payload-types.js'
+import type { Menu, Page, Post, User } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
@@ -32,9 +32,12 @@ describe('Locked documents', () => {
   let postConfig: SanitizedCollectionConfig
 
   beforeAll(async () => {
+    // @ts-expect-error: initPayloadInt does not have a proper type definition
     ;({ payload, restClient } = await initPayloadInt(dirname))
 
-    postConfig = payload.config.collections.find(({ slug }) => slug === postsSlug)
+    postConfig = payload.config.collections.find(
+      ({ slug }) => slug === postsSlug,
+    ) as SanitizedCollectionConfig
 
     const loginResult = await payload.login({
       collection: 'users',
@@ -45,7 +48,8 @@ describe('Locked documents', () => {
     })
 
     user = loginResult.user
-    token = loginResult.token
+
+    token = loginResult.token as string
 
     user2 = await payload.create({
       collection: 'users',
@@ -198,7 +202,9 @@ describe('Locked documents', () => {
 
   it('should allow update of stale locked document - global', async () => {
     // Set lock duration to 1 second for testing purposes
-    const globalConfig = payload.config.globals.find(({ slug }) => slug === menuSlug)
+    const globalConfig = payload.config.globals.find(
+      ({ slug }) => slug === menuSlug,
+    ) as SanitizedGlobalConfig
     globalConfig.lockDocuments = { duration: 1 }
     // Give locking ownership to another user
     const lockedGlobalInstance = await payload.create({
@@ -266,7 +272,6 @@ describe('Locked documents', () => {
           relationTo: 'posts',
           value: newPost.id,
         },
-        editedAt: new Date().toISOString(),
         globalSlug: undefined,
         user: {
           relationTo: 'users',
@@ -284,7 +289,7 @@ describe('Locked documents', () => {
         overrideLock: false, // necessary to trigger the lock check
         id: newPost.id,
       })
-    } catch (error) {
+    } catch (error: any) {
       expect(error).toBeInstanceOf(Locked)
       expect(error.message).toMatch(/currently locked by another user and cannot be updated/)
     }
@@ -304,7 +309,6 @@ describe('Locked documents', () => {
       collection: lockedDocumentCollection,
       data: {
         document: undefined,
-        editedAt: new Date().toISOString(),
         globalSlug: menuSlug,
         user: {
           relationTo: 'users',
@@ -321,7 +325,7 @@ describe('Locked documents', () => {
         overrideLock: false, // necessary to trigger the lock check
         slug: menuSlug,
       })
-    } catch (error) {
+    } catch (error: any) {
       expect(error).toBeInstanceOf(Locked)
       expect(error.message).toMatch(/currently locked by another user and cannot be updated/)
     }
@@ -351,7 +355,6 @@ describe('Locked documents', () => {
           relationTo: 'posts',
           value: newPost3.id,
         },
-        editedAt: new Date().toISOString(),
         globalSlug: undefined,
         user: {
           relationTo: 'users',
@@ -366,7 +369,7 @@ describe('Locked documents', () => {
         id: newPost3.id,
         overrideLock: false, // necessary to trigger the lock check
       })
-    } catch (error) {
+    } catch (error: any) {
       expect(error).toBeInstanceOf(Locked)
       expect(error.message).toMatch(/currently locked and cannot be deleted/)
     }
@@ -457,7 +460,6 @@ describe('Locked documents', () => {
     const lockedDocInstance = await payload.create({
       collection: lockedDocumentCollection,
       data: {
-        editedAt: new Date().toISOString(),
         user: {
           relationTo: 'users',
           value: user2.id,
@@ -509,7 +511,6 @@ describe('Locked documents', () => {
     const lockedGlobalInstance = await payload.create({
       collection: lockedDocumentCollection,
       data: {
-        editedAt: new Date().toISOString(),
         globalSlug: menuSlug,
         user: {
           relationTo: 'users',
@@ -564,7 +565,6 @@ describe('Locked documents', () => {
     const lockedDocInstance = await payload.create({
       collection: lockedDocumentCollection,
       data: {
-        editedAt: new Date().toISOString(),
         user: {
           relationTo: 'users',
           value: user2.id,
@@ -623,7 +623,6 @@ describe('Locked documents', () => {
     const lockedDocInstance = await payload.create({
       collection: lockedDocumentCollection,
       data: {
-        editedAt: new Date().toISOString(),
         user: {
           relationTo: 'users',
           value: user2.id,
@@ -653,6 +652,6 @@ describe('Locked documents', () => {
     })
 
     expect(docsFromLocksCollection.docs).toHaveLength(1)
-    expect(docsFromLocksCollection.docs[0].user.value?.id).toEqual(user.id)
+    expect((docsFromLocksCollection.docs[0]?.user.value as User)?.id).toEqual(user.id)
   })
 })

@@ -3,6 +3,7 @@ import type { DeleteOne, Document } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildQuery } from './queries/buildQuery.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { getSession } from './utilities/getSession.js'
 import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
@@ -21,8 +22,10 @@ export const deleteOne: DeleteOne = async function deleteOne(
     session: await getSession(this, req),
   }
 
-  const query = await Model.buildQuery({
-    payload: this.payload,
+  const query = await buildQuery({
+    adapter: this,
+    collectionSlug: collection,
+    fields: this.payload.collections[collection].config.flattenedFields,
     where,
   })
 

@@ -270,6 +270,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     locale: 'Jezik',
     locales: 'Prevodi',
     menu: 'Meni',
+    moreOptions: 'Više opcija',
     moveDown: 'Pomeri dole',
     moveUp: 'Pomeri gore',
     newPassword: 'Nova lozinka',

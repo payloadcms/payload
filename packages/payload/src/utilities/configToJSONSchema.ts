@@ -88,7 +88,7 @@ function generateEntitySelectSchemas(
 
 function generateCollectionJoinsSchemas(collections: SanitizedCollectionConfig[]): JSONSchema4 {
   const properties = [...collections].reduce<Record<string, JSONSchema4>>(
-    (acc, { slug, joins }) => {
+    (acc, { slug, joins, polymorphicJoins }) => {
       const schema = {
         type: 'object',
         additionalProperties: false,
@@ -104,6 +104,14 @@ function generateCollectionJoinsSchemas(collections: SanitizedCollectionConfig[]
           }
           schema.required.push(join.joinPath)
         }
+      }
+
+      for (const join of polymorphicJoins) {
+        schema.properties[join.joinPath] = {
+          type: 'string',
+          enum: join.field.collection,
+        }
+        schema.required.push(join.joinPath)
       }
 
       if (Object.keys(schema.properties).length > 0) {
@@ -387,6 +395,44 @@ export function fieldsToJSONSchema(
           }
 
           case 'join': {
+            let items: JSONSchema4
+
+            if (Array.isArray(field.collection)) {
+              items = {
+                oneOf: field.collection.map((collection) => ({
+                  type: 'object',
+                  additionalProperties: false,
+                  properties: {
+                    relationTo: {
+                      const: collection,
+                    },
+                    value: {
+                      oneOf: [
+                        {
+                          type: collectionIDFieldTypes[collection],
+                        },
+                        {
+                          $ref: `#/definitions/${collection}`,
+                        },
+                      ],
+                    },
+                  },
+                  required: ['collectionSlug', 'value'],
+                })),
+              }
+            } else {
+              items = {
+                oneOf: [
+                  {
+                    type: collectionIDFieldTypes[field.collection],
+                  },
+                  {
+                    $ref: `#/definitions/${field.collection}`,
+                  },
+                ],
+              }
+            }
+
             fieldSchema = {
               ...baseFieldSchema,
               type: withNullableJSONSchemaType('object', false),
@@ -394,16 +440,7 @@ export function fieldsToJSONSchema(
               properties: {
                 docs: {
                   type: withNullableJSONSchemaType('array', false),
-                  items: {
-                    oneOf: [
-                      {
-                        type: collectionIDFieldTypes[field.collection],
-                      },
-                      {
-                        $ref: `#/definitions/${field.collection}`,
-                      },
-                    ],
-                  },
+                  items,
                 },
                 hasNextPage: { type: withNullableJSONSchemaType('boolean', false) },
               },

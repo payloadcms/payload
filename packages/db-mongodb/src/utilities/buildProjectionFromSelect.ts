@@ -1,6 +1,11 @@
 import type { FieldAffectingData, FlattenedField, SelectMode, SelectType } from 'payload'
 
-import { deepCopyObjectSimple, fieldAffectsData, getSelectMode } from 'payload/shared'
+import {
+  deepCopyObjectSimple,
+  fieldAffectsData,
+  fieldShouldBeLocalized,
+  getSelectMode,
+} from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
 
@@ -8,18 +13,18 @@ const addFieldToProjection = ({
   adapter,
   databaseSchemaPath,
   field,
+  parentIsLocalized,
   projection,
-  withinLocalizedField,
 }: {
   adapter: MongooseAdapter
   databaseSchemaPath: string
   field: FieldAffectingData
+  parentIsLocalized: boolean
   projection: Record<string, true>
-  withinLocalizedField: boolean
 }) => {
   const { config } = adapter.payload
 
-  if (withinLocalizedField && config.localization) {
+  if (parentIsLocalized && config.localization) {
     for (const locale of config.localization.localeCodes) {
       const localeDatabaseSchemaPath = databaseSchemaPath.replace('<locale>', locale)
       projection[`${localeDatabaseSchemaPath}${field.name}`] = true
@@ -33,20 +38,20 @@ const traverseFields = ({
   adapter,
   databaseSchemaPath = '',
   fields,
+  parentIsLocalized = false,
   projection,
   select,
   selectAllOnCurrentLevel = false,
   selectMode,
-  withinLocalizedField = false,
 }: {
   adapter: MongooseAdapter
   databaseSchemaPath?: string
   fields: FlattenedField[]
+  parentIsLocalized?: boolean
   projection: Record<string, true>
   select: SelectType
   selectAllOnCurrentLevel?: boolean
   selectMode: SelectMode
-  withinLocalizedField?: boolean
 }) => {
   for (const field of fields) {
     if (fieldAffectsData(field)) {
@@ -56,8 +61,8 @@ const traverseFields = ({
             adapter,
             databaseSchemaPath,
             field,
+            parentIsLocalized,
             projection,
-            withinLocalizedField,
           })
           continue
         }
@@ -73,8 +78,8 @@ const traverseFields = ({
             adapter,
             databaseSchemaPath,
             field,
+            parentIsLocalized,
             projection,
-            withinLocalizedField,
           })
           continue
         }
@@ -86,14 +91,12 @@ const traverseFields = ({
     }
 
     let fieldDatabaseSchemaPath = databaseSchemaPath
-    let fieldWithinLocalizedField = withinLocalizedField
 
     if (fieldAffectsData(field)) {
       fieldDatabaseSchemaPath = `${databaseSchemaPath}${field.name}.`
 
-      if (field.localized) {
+      if (fieldShouldBeLocalized({ field, parentIsLocalized })) {
         fieldDatabaseSchemaPath = `${fieldDatabaseSchemaPath}<locale>.`
-        fieldWithinLocalizedField = true
       }
     }
 
@@ -111,10 +114,10 @@ const traverseFields = ({
           adapter,
           databaseSchemaPath: fieldDatabaseSchemaPath,
           fields: field.flattenedFields,
+          parentIsLocalized: parentIsLocalized || field.localized,
           projection,
           select: fieldSelect,
           selectMode,
-          withinLocalizedField: fieldWithinLocalizedField,
         })
 
         break
@@ -133,11 +136,11 @@ const traverseFields = ({
               adapter,
               databaseSchemaPath: fieldDatabaseSchemaPath,
               fields: block.flattenedFields,
+              parentIsLocalized: parentIsLocalized || field.localized,
               projection,
               select: {},
               selectAllOnCurrentLevel: true,
               selectMode: 'include',
-              withinLocalizedField: fieldWithinLocalizedField,
             })
             continue
           }
@@ -161,10 +164,10 @@ const traverseFields = ({
             adapter,
             databaseSchemaPath: fieldDatabaseSchemaPath,
             fields: block.flattenedFields,
+            parentIsLocalized: parentIsLocalized || field.localized,
             projection,
             select: blocksSelect[block.slug] as SelectType,
             selectMode: blockSelectMode,
-            withinLocalizedField: fieldWithinLocalizedField,
           })
         }
 
