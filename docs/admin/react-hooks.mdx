@@ -1054,7 +1054,7 @@ import { usePayloadAPI } from '@payloadcms/ui'
 
 const MyComponent: React.FC = () => {
   // Fetch data from a collection item using its ID
-  const [{ data, error, isLoading }, { setParams }] = usePayloadAPI(
+  const [{ data, isError, isLoading }, { setParams }] = usePayloadAPI(
     '/api/posts/123',
     { initialParams: { depth: 1 } }
   )
