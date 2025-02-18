@@ -4,6 +4,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import type { TextField } from 'payload'
 
+import { randomUUID } from 'node:crypto'
 import { v4 as uuid } from 'uuid'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
@@ -549,6 +550,30 @@ export default buildConfigWithDefaults({
         },
       ],
       versions: true,
+    },
+    {
+      slug: 'custom-column-names',
+      fields: [
+        {
+          name: 'id',
+          type: 'text',
+          dbColumnName: 'custom_id',
+          hooks: {
+            beforeChange: [
+              ({ value }) => {
+                if (!value) {
+                  return randomUUID()
+                }
+              },
+            ],
+          },
+        },
+        {
+          name: 'title',
+          type: 'text',
+          dbColumnName: 'custom_title',
+        },
+      ],
     },
   ],
   globals: [

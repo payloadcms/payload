@@ -78,6 +78,7 @@ export interface Config {
     'custom-ids': CustomId;
     'fake-custom-ids': FakeCustomId;
     'relationships-migration': RelationshipsMigration;
+    'custom-column-names': CustomColumnName;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -97,6 +98,7 @@ export interface Config {
     'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
     'fake-custom-ids': FakeCustomIdsSelect<false> | FakeCustomIdsSelect<true>;
     'relationships-migration': RelationshipsMigrationSelect<false> | RelationshipsMigrationSelect<true>;
+    'custom-column-names': CustomColumnNamesSelect<false> | CustomColumnNamesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -402,6 +404,16 @@ export interface RelationshipsMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-column-names".
+ */
+export interface CustomColumnName {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -471,6 +483,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'relationships-migration';
         value: string | RelationshipsMigration;
+      } | null)
+    | ({
+        relationTo: 'custom-column-names';
+        value: string | CustomColumnName;
       } | null)
     | ({
         relationTo: 'users';
@@ -752,6 +768,15 @@ export interface FakeCustomIdsSelect<T extends boolean = true> {
 export interface RelationshipsMigrationSelect<T extends boolean = true> {
   relationship?: T;
   relationship_2?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-column-names_select".
+ */
+export interface CustomColumnNamesSelect<T extends boolean = true> {
+  title?: T;
   updatedAt?: T;
   createdAt?: T;
 }
