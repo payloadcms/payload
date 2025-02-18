@@ -56,27 +56,6 @@ export const renderListViewSlots = ({
     ]
   }
 
-  if (collectionConfig.admin.components?.listControlsMenu) {
-    result.ListControlsMenu = RenderServerComponent({
-      clientProps,
-      Component: collectionConfig.admin.components.listControlsMenu,
-      importMap: payload.importMap,
-      serverProps: serverProps satisfies AfterListTableServerPropsOnly,
-    })
-  }
-
-  const listMenuItems = collectionConfig.admin.components?.listMenuItems
-  if (Array.isArray(listMenuItems)) {
-    result.listMenuItems = [
-      RenderServerComponent({
-        clientProps,
-        Component: listMenuItems,
-        importMap: payload.importMap,
-        serverProps,
-      }),
-    ]
-  }
-
   if (collectionConfig.admin.components?.afterListTable) {
     result.AfterListTable = RenderServerComponent({
       clientProps: clientProps satisfies AfterListTableClientProps,
