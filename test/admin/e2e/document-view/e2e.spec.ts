@@ -396,9 +396,9 @@ describe('Document View', () => {
       await page.waitForURL(postsUrl.create)
 
       const secondTab = page.locator('.tabs-field__tab-button').nth(1)
-      secondTab.click()
+      await secondTab.click()
 
-      wait(500)
+      await wait(500)
 
       const tabsContent = page.locator('.tabs-field__content-wrap')
       await expect(
