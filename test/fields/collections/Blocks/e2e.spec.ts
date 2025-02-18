@@ -72,8 +72,7 @@ describe('Block fields', () => {
     await addBlock({
       page,
       fieldName: 'blocks',
-      fieldLabelSingular: 'Blocks',
-      blockLabelSingular: 'Content',
+      blockLabel: 'Content',
     })
 
     // ensure the block was appended to the rows
@@ -90,7 +89,6 @@ describe('Block fields', () => {
     const blocksDrawer = await openBlocksDrawer({
       page,
       fieldName: 'blocks',
-      fieldLabelSingular: 'Blocks',
     })
 
     const searchInput = page.locator('.block-search__input')
@@ -183,8 +181,7 @@ describe('Block fields', () => {
     await addBlock({
       page,
       fieldName: 'i18nBlocks',
-      fieldLabelSingular: 'I18n Blocks',
-      blockLabelSingular: 'Text en',
+      blockLabel: 'Text en',
     })
 
     // ensure the block was appended to the rows
@@ -199,8 +196,7 @@ describe('Block fields', () => {
     await addBlock({
       page,
       fieldName: 'blocks',
-      fieldLabelSingular: 'Blocks',
-      blockLabelSingular: 'Content',
+      blockLabel: 'Content',
     })
 
     await expect(
@@ -216,8 +212,7 @@ describe('Block fields', () => {
     await addBlock({
       page,
       fieldName: 'blocksWithSimilarConfigs',
-      fieldLabelSingular: 'Blocks With Similar Config',
-      blockLabelSingular: 'Block A',
+      blockLabel: 'Block A',
     })
 
     await page
@@ -236,8 +231,7 @@ describe('Block fields', () => {
     await addBlock({
       page,
       fieldName: 'blocksWithSimilarConfigs',
-      fieldLabelSingular: 'Blocks With Similar Config',
-      blockLabelSingular: 'Block B',
+      blockLabel: 'Block B',
     })
 
     await page
@@ -266,8 +260,7 @@ describe('Block fields', () => {
     await addBlock({
       page,
       fieldName: 'blocksWithMinRows',
-      fieldLabelSingular: 'Blocks With Min Rows',
-      blockLabelSingular: 'Block',
+      blockLabel: 'Block',
     })
 
     const firstRow = page.locator('input[name="blocksWithMinRows.0.blockTitle"]')

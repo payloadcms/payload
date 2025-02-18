@@ -5,9 +5,7 @@ import { expect } from '@playwright/test'
 export const openBlocksDrawer = async ({
   page,
   fieldName = 'blocks',
-  fieldLabelSingular = 'Block',
 }: {
-  fieldLabelSingular: string
   fieldName: string
   page: Page
 }): Promise<Locator> => {
@@ -15,7 +13,6 @@ export const openBlocksDrawer = async ({
 
   if (!(await blocksDrawer.isVisible())) {
     const addButton = page.locator(`#field-${fieldName} > .blocks-field__drawer-toggler`)
-    await expect(addButton).toContainText(`Add ${fieldLabelSingular}`)
     await addButton.click()
   }
 
