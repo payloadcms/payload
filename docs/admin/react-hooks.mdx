@@ -1060,7 +1060,7 @@ const MyComponent: React.FC = () => {
   )
 
   if (isLoading) return <p>Loading...</p>
-  if (error) return <p>Error: {error.message}</p>
+  if (isError) return <p>Error</p>
 
   return (
     <div>
@@ -1094,7 +1094,7 @@ The first item in the returned array is an object containing the following prope
 | Property        | Description                                              |
 | --------------- | -------------------------------------------------------- |
 | **`data`**      | The API response data.                                   |
-| **`error`**     | If an error occurs, this contains the error object.      |
+| **`isError`**   | A boolean indicating whether the request failed.         |
 | **`isLoading`** | A boolean indicating whether the request is in progress. |
 
 The second item is an object with the following methods:
