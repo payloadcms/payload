@@ -22,7 +22,7 @@
  *  - specify locales to show
  */
 
-import type { BrowserContext, Page } from '@playwright/test'
+import type { BrowserContext, Dialog, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -51,6 +51,7 @@ import { titleToDelete } from './shared.js'
 import {
   autosaveCollectionSlug,
   autoSaveGlobalSlug,
+  autosaveWithValidateCollectionSlug,
   customIDSlug,
   diffCollectionSlug,
   disablePublishGlobalSlug,
@@ -59,6 +60,7 @@ import {
   draftGlobalSlug,
   draftWithMaxCollectionSlug,
   draftWithMaxGlobalSlug,
+  draftWithValidateCollectionSlug,
   localizedCollectionSlug,
   localizedGlobalSlug,
   postCollectionSlug,
@@ -79,6 +81,8 @@ describe('Versions', () => {
   let url: AdminUrlUtil
   let serverURL: string
   let autosaveURL: AdminUrlUtil
+  let autosaveWithValidateURL: AdminUrlUtil
+  let draftWithValidateURL: AdminUrlUtil
   let disablePublishURL: AdminUrlUtil
   let customIDURL: AdminUrlUtil
   let postURL: AdminUrlUtil
@@ -115,6 +119,7 @@ describe('Versions', () => {
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, draftCollectionSlug)
       autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
+      autosaveWithValidateURL = new AdminUrlUtil(serverURL, autosaveWithValidateCollectionSlug)
       disablePublishURL = new AdminUrlUtil(serverURL, disablePublishSlug)
       customIDURL = new AdminUrlUtil(serverURL, customIDSlug)
       postURL = new AdminUrlUtil(serverURL, postCollectionSlug)
@@ -809,6 +814,232 @@ describe('Versions', () => {
         en: 'english published',
         es: 'spanish published',
       })
+    })
+  })
+
+  describe('Collections with draft validation', () => {
+    beforeAll(() => {
+      autosaveWithValidateURL = new AdminUrlUtil(serverURL, autosaveWithValidateCollectionSlug)
+      draftWithValidateURL = new AdminUrlUtil(serverURL, draftWithValidateCollectionSlug)
+    })
+
+    test('- can save', async () => {
+      await page.goto(draftWithValidateURL.create)
+
+      const titleField = page.locator('#field-title')
+      await titleField.fill('Initial')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      await expect(titleField).toBeEnabled()
+      await titleField.fill('New title')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      await page.reload()
+
+      // Ensure its saved
+      await expect(page.locator('#field-title')).toHaveValue('New title')
+    })
+
+    test('- can safely trigger validation errors and then continue editing', async () => {
+      await page.goto(draftWithValidateURL.create)
+
+      const titleField = page.locator('#field-title')
+      await titleField.fill('Initial')
+      await saveDocAndAssert(page, '#action-save-draft')
+      await page.reload()
+
+      await expect(titleField).toBeEnabled()
+      await titleField.fill('')
+      await saveDocAndAssert(page, '#action-save-draft', 'error')
+
+      await titleField.fill('New title')
+
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      await page.reload()
+
+      // Ensure its saved
+      await expect(page.locator('#field-title')).toHaveValue('New title')
+    })
+
+    test('- shows a prevent leave alert when form is submitted but invalid', async () => {
+      await page.goto(draftWithValidateURL.create)
+
+      // Flag to check against if window alert has been displayed and dismissed since we can only check via events
+      let alertDisplayed = false
+
+      async function dismissAlert(dialog: Dialog) {
+        alertDisplayed = true
+
+        await dialog.dismiss()
+      }
+
+      async function acceptAlert(dialog: Dialog) {
+        await dialog.accept()
+      }
+
+      const titleField = page.locator('#field-title')
+      await titleField.fill('Initial')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      // Remove required data, then let autosave trigger
+      await expect(titleField).toBeEnabled()
+      await titleField.fill('')
+      await saveDocAndAssert(page, '#action-save-draft', 'error')
+
+      // Expect the prevent leave and then dismiss it
+      page.on('dialog', dismissAlert)
+      await expect(async () => {
+        await page.reload({ timeout: 500 }) // custom short timeout since we want this to fail
+      }).not.toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+
+      await expect(() => {
+        expect(alertDisplayed).toEqual(true)
+      }).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+
+      // Remove event listener and reset our flag
+      page.removeListener('dialog', dismissAlert)
+
+      await expect(page.locator('#field-title')).toHaveValue('')
+
+      // Now has updated data
+      await titleField.fill('New title')
+      await saveDocAndAssert(page, '#action-save-draft')
+      await expect(page.locator('#field-title')).toHaveValue('New title')
+
+      await page.reload()
+
+      page.on('dialog', acceptAlert)
+
+      // Ensure data is saved
+      await expect(page.locator('#field-title')).toHaveValue('New title')
+
+      // Fill with invalid data again, then reload and accept the warning, should contain previous data
+      await titleField.fill('')
+
+      await page.reload()
+
+      await expect(titleField).toBeEnabled()
+
+      // Contains previous data
+      await expect(page.locator('#field-title')).toHaveValue('New title')
+
+      // Remove listener
+      page.removeListener('dialog', acceptAlert)
+    })
+
+    test('- with autosave - can save', async () => {
+      await page.goto(autosaveWithValidateURL.create)
+
+      const titleField = page.locator('#field-title')
+      await titleField.fill('Initial')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      await expect(titleField).toBeEnabled()
+      await titleField.fill('New title')
+      await waitForAutoSaveToRunAndComplete(page)
+
+      await page.reload()
+
+      // Ensure its saved
+      await expect(page.locator('#field-title')).toHaveValue('New title')
+    })
+
+    test('- with autosave - can safely trigger validation errors and then continue editing', async () => {
+      // This test has to make sure we don't enter an infinite loop when draft.validate is on and we have autosave enabled
+      await page.goto(autosaveWithValidateURL.create)
+
+      const titleField = page.locator('#field-title')
+      await titleField.fill('Initial')
+      await saveDocAndAssert(page, '#action-save-draft')
+      await page.reload()
+
+      await expect(titleField).toBeEnabled()
+      await titleField.fill('')
+      await waitForAutoSaveToRunAndComplete(page, 'error')
+
+      await titleField.fill('New title')
+
+      await waitForAutoSaveToRunAndComplete(page)
+
+      await page.reload()
+
+      // Ensure its saved
+      await expect(page.locator('#field-title')).toHaveValue('New title')
+    })
+
+    test('- with autosave - shows a prevent leave alert when form is submitted but invalid', async () => {
+      await page.goto(autosaveWithValidateURL.create)
+
+      // Flag to check against if window alert has been displayed and dismissed since we can only check via events
+      let alertDisplayed = false
+
+      async function dismissAlert(dialog: Dialog) {
+        alertDisplayed = true
+
+        await dialog.dismiss()
+      }
+
+      async function acceptAlert(dialog: Dialog) {
+        await dialog.accept()
+      }
+
+      const titleField = page.locator('#field-title')
+      await titleField.fill('Initial')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      // Remove required data, then let autosave trigger
+      await expect(titleField).toBeEnabled()
+      await titleField.fill('')
+      await waitForAutoSaveToRunAndComplete(page, 'error')
+
+      // Expect the prevent leave and then dismiss it
+      page.on('dialog', dismissAlert)
+      await expect(async () => {
+        await page.reload({ timeout: 500 }) // custom short timeout since we want this to fail
+      }).not.toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+
+      await expect(() => {
+        expect(alertDisplayed).toEqual(true)
+      }).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+
+      // Remove event listener and reset our flag
+      page.removeListener('dialog', dismissAlert)
+
+      await expect(page.locator('#field-title')).toHaveValue('')
+
+      // Now has updated data
+      await titleField.fill('New title')
+      await waitForAutoSaveToRunAndComplete(page)
+      await expect(page.locator('#field-title')).toHaveValue('New title')
+
+      await page.reload()
+
+      page.on('dialog', acceptAlert)
+
+      // Ensure data is saved
+      await expect(page.locator('#field-title')).toHaveValue('New title')
+
+      // Fill with invalid data again, then reload and accept the warning, should contain previous data
+      await titleField.fill('')
+
+      await page.reload()
+
+      await expect(titleField).toBeEnabled()
+
+      // Contains previous data
+      await expect(page.locator('#field-title')).toHaveValue('New title')
+
+      // Remove listener
+      page.removeListener('dialog', acceptAlert)
     })
   })
 
