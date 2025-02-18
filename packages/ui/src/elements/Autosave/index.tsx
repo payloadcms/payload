@@ -22,6 +22,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 import { formatTimeToNow } from '../../utilities/formatDate.js'
 import { reduceFieldsToValuesWithValidation } from '../../utilities/reduceFieldsToValuesWithValidation.js'
+import { LeaveWithoutSaving } from '../LeaveWithoutSaving/index.js'
 
 const baseClass = 'autosave'
 // The minimum time the saving state should be shown
@@ -70,6 +71,10 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   if (versionsConfig.drafts && versionsConfig.drafts.autosave) {
     interval = versionsConfig.drafts.autosave.interval
   }
+
+  const validateOnDraft = Boolean(
+    docConfig?.versions?.drafts && docConfig?.versions?.drafts.validate,
+  )
 
   const [saving, setSaving] = useState(false)
   const debouncedFields = useDebounce(fields, interval)
@@ -241,7 +246,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
                       isValidRef.current = false
                       setIsValid(false)
                       setSubmitted(true)
-                      setSaving(false)
+
                       return
                     }
                   } else {
@@ -250,10 +255,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
                     // Manually update the data since this function doesn't fire the `submit` function from useForm
                     if (document) {
-                      // Only reset the form state if it's different
-                      if (!isValid) {
-                        setIsValid(true)
-                      }
+                      setIsValid(true)
 
                       // Reset internal state allowing the queue to process
                       isValidRef.current = true
@@ -261,7 +263,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
                     }
                   }
                 })
-                .then(() => {
+                .finally(() => {
                   // If request was faster than minimum animation time, animate the difference
                   if (endTimestamp - startTimestamp < minimumAnimationTime) {
                     autosaveTimeout = setTimeout(
@@ -307,6 +309,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
   return (
     <div className={baseClass}>
+      {validateOnDraft && !isValid && <LeaveWithoutSaving />}
       {saving && t('general:saving')}
       {!saving && Boolean(lastUpdateTime) && (
         <React.Fragment>
