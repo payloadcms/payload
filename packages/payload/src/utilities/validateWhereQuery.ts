@@ -1,10 +1,10 @@
-'use client'
-import type { Operator, Where } from 'payload'
+import type { Operator, Where } from '../types/index.js'
 
-import { validOperatorSet } from 'payload/shared'
+import { validOperatorSet } from '../types/constants.js'
 
-const validateWhereQuery = (whereQuery): whereQuery is Where => {
+export const validateWhereQuery = (whereQuery: Where): whereQuery is Where => {
   if (
+    whereQuery?.or &&
     whereQuery?.or?.length > 0 &&
     whereQuery?.or?.[0]?.and &&
     whereQuery?.or?.[0]?.and?.length > 0
@@ -44,5 +44,3 @@ const validateWhereQuery = (whereQuery): whereQuery is Where => {
 
   return false
 }
-
-export default validateWhereQuery

@@ -1,4 +1,6 @@
-import type { ClientCollectionConfig, SanitizedCollectionConfig, Where } from 'payload'
+import type { ClientCollectionConfig } from '../collections/config/client.js'
+import type { SanitizedCollectionConfig } from '../collections/config/types.js'
+import type { Where } from '../types/index.js'
 
 const isEmptyObject = (obj: object) => Object.keys(obj).length === 0
 
@@ -11,7 +13,7 @@ export const hoistQueryParamsToAnd = (currentWhere: Where, incomingWhere: Where)
     return incomingWhere
   }
 
-  if ('and' in currentWhere) {
+  if ('and' in currentWhere && currentWhere.and) {
     currentWhere.and.push(incomingWhere)
   } else if ('or' in currentWhere) {
     currentWhere = {

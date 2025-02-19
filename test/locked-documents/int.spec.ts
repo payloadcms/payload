@@ -10,9 +10,8 @@ import type { Menu, Page, Post, User } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { pagesSlug } from './collections/Pages/index.js'
-import { postsSlug } from './collections/Posts/index.js'
 import { menuSlug } from './globals/Menu/index.js'
+import { pagesSlug, postsSlug } from './slugs.js'
 
 const lockedDocumentCollection = 'payload-locked-documents'
 

@@ -18,7 +18,7 @@ const preferenceAccess: Access = ({ req }) => {
   }
 }
 
-const getPreferencesCollection = (config: Config): CollectionConfig => ({
+export const getPreferencesCollection = (config: Config): CollectionConfig => ({
   slug: 'payload-preferences',
   access: {
     delete: preferenceAccess,

@@ -4,15 +4,17 @@ import type {
   ListQuery,
   ListViewClientProps,
   ListViewServerPropsOnly,
+  PaginatedDocs,
+  SharedListFilter,
   Where,
 } from 'payload'
 
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
-import { formatAdminURL, mergeListSearchAndWhere } from '@payloadcms/ui/shared'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
-import { isNumber } from 'payload/shared'
+import { isNumber, mergeListSearchAndWhere } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { renderListViewSlots } from './renderListViewSlots.js'
@@ -119,6 +121,19 @@ export const renderListView = async (
       }
     }
 
+    const sharedListFilters = await payload.find({
+      collection: 'payload-list-filters',
+      depth: 0,
+      overrideAccess: false,
+      req,
+      user,
+      where: {
+        relatedCollection: {
+          equals: collectionSlug,
+        },
+      },
+    })
+
     const data = await payload.find({
       collection: collectionSlug,
       depth: 0,
@@ -221,6 +236,7 @@ export const renderListView = async (
                 newDocumentURL,
                 renderedFilters,
                 resolvedFilterOptions,
+                sharedListFilters: sharedListFilters as PaginatedDocs<SharedListFilter>,
                 Table,
               } satisfies ListViewClientProps,
               Component: collectionConfig?.admin?.components?.views?.list?.Component,

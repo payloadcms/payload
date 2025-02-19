@@ -2,6 +2,7 @@
 import type { ListQuery } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
+import { hoistQueryParamsToAnd } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { ListDrawerProps } from './types.js'
@@ -10,7 +11,6 @@ import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
-import { hoistQueryParamsToAnd } from '../../utilities/mergeListSearchAndWhere.js'
 import { ListDrawerContextProvider } from '../ListDrawer/Provider.js'
 import { LoadingOverlay } from '../Loading/index.js'
 import { type Option } from '../ReactSelect/index.js'

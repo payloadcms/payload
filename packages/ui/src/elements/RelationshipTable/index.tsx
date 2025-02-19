@@ -9,6 +9,7 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { hoistQueryParamsToAnd } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
@@ -23,7 +24,6 @@ import { useConfig } from '../../providers/Config/index.js'
 import { ListQueryProvider } from '../../providers/ListQuery/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { hoistQueryParamsToAnd } from '../../utilities/mergeListSearchAndWhere.js'
 import { AnimateHeight } from '../AnimateHeight/index.js'
 import './index.scss'
 import { ColumnSelector } from '../ColumnSelector/index.js'

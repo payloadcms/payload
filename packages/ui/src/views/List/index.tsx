@@ -21,6 +21,7 @@ import { PerPage } from '../../elements/PerPage/index.js'
 import { PublishMany } from '../../elements/PublishMany/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { SelectMany } from '../../elements/SelectMany/index.js'
+import { SharedListFilters } from '../../elements/SharedListFilters/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
 import { TableColumnsProvider } from '../../elements/TableColumns/index.js'
@@ -33,8 +34,8 @@ import { useListQuery } from '../../providers/ListQuery/index.js'
 import { SelectionProvider } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
-import { ListHeader } from './ListHeader/index.js'
 import './index.scss'
+import { ListHeader } from './ListHeader/index.js'
 
 const baseClass = 'collection-list'
 
@@ -58,6 +59,7 @@ export function DefaultListView(props: ListViewClientProps) {
     preferenceKey,
     renderedFilters,
     resolvedFilterOptions,
+    sharedListFilters,
     Table: InitialTable,
   } = props
 
@@ -184,6 +186,7 @@ export function DefaultListView(props: ListViewClientProps) {
                 smallBreak={smallBreak}
                 t={t}
               />
+              <SharedListFilters filters={sharedListFilters} />
               <ListControls
                 beforeActions={
                   enableRowSelections && typeof onBulkSelect === 'function'

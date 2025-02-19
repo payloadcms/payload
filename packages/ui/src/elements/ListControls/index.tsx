@@ -3,6 +3,7 @@ import type { ClientCollectionConfig, ResolvedFilterOptions, Where } from 'paylo
 
 import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
+import { validateWhereQuery } from 'payload/shared'
 import React, { Fragment, useEffect, useRef, useState } from 'react'
 
 import { Popup, PopupList } from '../../elements/Popup/index.js'
@@ -21,7 +22,6 @@ import { PublishMany } from '../PublishMany/index.js'
 import { SearchFilter } from '../SearchFilter/index.js'
 import { UnpublishMany } from '../UnpublishMany/index.js'
 import { WhereBuilder } from '../WhereBuilder/index.js'
-import validateWhereQuery from '../WhereBuilder/validateWhereQuery.js'
 import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched.js'
 import './index.scss'
 

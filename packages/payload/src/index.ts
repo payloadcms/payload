@@ -1367,6 +1367,7 @@ export { findVersionByIDOperation as findVersionByIDOperationGlobal } from './gl
 export { findVersionsOperation as findVersionsOperationGlobal } from './globals/operations/findVersions.js'
 export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
+export type { SharedListFilter } from './listFilters/types.js'
 export type {
   CollapsedPreferences,
   DocumentPreferences,

@@ -2,6 +2,7 @@
 import type { Operator, Where } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { validateWhereQuery } from 'payload/shared'
 import React, { useMemo } from 'react'
 
 import type { AddCondition, UpdateCondition, WhereBuilderProps } from './types.js'
@@ -13,7 +14,6 @@ import { Condition } from './Condition/index.js'
 import fieldTypes from './field-types.js'
 import { reduceFields } from './reduceFields.js'
 import { transformWhereQuery } from './transformWhereQuery.js'
-import validateWhereQuery from './validateWhereQuery.js'
 import './index.scss'
 
 const baseClass = 'where-builder'

@@ -2,12 +2,8 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { PagesCollection } from './collections/Pages/index.js'
-import { PostsCollection } from './collections/Posts/index.js'
-import { TestsCollection } from './collections/Tests/index.js'
+import { Pages } from './collections/Pages/index.js'
 import { Users } from './collections/Users/index.js'
-import { AdminGlobal } from './globals/Admin/index.js'
-import { MenuGlobal } from './globals/Menu/index.js'
 import { seed } from './seed.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -19,8 +15,7 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [PagesCollection, PostsCollection, TestsCollection, Users],
-  globals: [AdminGlobal, MenuGlobal],
+  collections: [Pages, Users],
   onInit: async (payload) => {
     if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
       await seed(payload)
