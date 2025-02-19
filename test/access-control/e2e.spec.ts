@@ -555,7 +555,7 @@ describe('Access Control', () => {
     })
   })
 
-  describe('collection — restricted versions 2', () => {
+  describe('collection — restricted versions', () => {
     let existingDoc: RestrictedVersion
 
     beforeAll(async () => {
