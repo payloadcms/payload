@@ -1,7 +1,6 @@
 'use client'
 import type { ClientCollectionConfig, ResolvedFilterOptions, Where } from 'payload'
 
-import { useModal } from '@faceless-ui/modal'
 import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useEffect, useRef, useState } from 'react'
@@ -22,9 +21,9 @@ import { PublishMany } from '../PublishMany/index.js'
 import { SearchFilter } from '../SearchFilter/index.js'
 import { UnpublishMany } from '../UnpublishMany/index.js'
 import { WhereBuilder } from '../WhereBuilder/index.js'
-import './index.scss'
 import validateWhereQuery from '../WhereBuilder/validateWhereQuery.js'
 import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched.js'
+import './index.scss'
 
 const baseClass = 'list-controls'
 
@@ -65,12 +64,9 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
   const { handleSearchChange, query } = useListQuery()
   const titleField = useUseTitleField(collectionConfig)
   const { i18n, t } = useTranslation()
-  const { toggleModal } = useModal()
   const {
     breakpoints: { s: smallBreak },
   } = useWindowInfo()
-
-  const exportDrawerSlug = `export-drawer-${collectionSlug}`
 
   const searchLabel =
     (titleField &&

@@ -300,7 +300,6 @@ export { EmailAndUsernameFields } from '../../elements/EmailAndUsername/index.js
 export { SelectAll } from '../../elements/SelectAll/index.js'
 export { SelectRow } from '../../elements/SelectRow/index.js'
 export { SelectMany } from '../../elements/SelectMany/index.js'
-export { FieldSelect } from '../../elements/FieldSelect/index.js'
 
 export { DefaultListView } from '../../views/List/index.js'
 
