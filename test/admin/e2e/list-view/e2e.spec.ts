@@ -566,7 +566,7 @@ describe('List View', () => {
 
       await addListFilter({
         page,
-        fieldLabel: 'Tab 1 > Title',
+        fieldLabel: 'Title',
         operatorLabel: 'equals',
         value: 'test',
       })
@@ -1223,7 +1223,7 @@ describe('List View', () => {
       await page.locator('.condition__field .rs__control').click()
       const options = page.locator('.rs__option')
 
-      await expect(options.locator('text=Tab 1 > Title')).toHaveText('Tab 1 > Title')
+      await expect(options.first()).toHaveText('Title')
 
       await expect(page.locator('#heading-title .sort-column__label')).toHaveText('Title')
       await expect(page.locator('.search-filter input')).toHaveAttribute('placeholder', /(Title)/)
