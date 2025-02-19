@@ -13,18 +13,17 @@ import { usePreventLeave } from './usePreventLeave.js'
 const modalSlug = 'leave-without-saving'
 
 export const LeaveWithoutSaving: React.FC = () => {
-  const { closeModal } = useModal()
+  const { closeModal, openModal } = useModal()
   const modified = useFormModified()
   const { isValid } = useForm()
   const { user } = useAuth()
   const [hasAccepted, setHasAccepted] = React.useState(false)
-  const [show, setShow] = React.useState(false)
   const { t } = useTranslation()
 
   const prevent = Boolean((modified || !isValid) && user)
 
   const onPrevent = useCallback(() => {
-    setShow(true)
+    openModal(modalSlug)
   }, [])
 
   const handleAccept = useCallback(() => {
@@ -34,26 +33,22 @@ export const LeaveWithoutSaving: React.FC = () => {
   usePreventLeave({ hasAccepted, onAccept: handleAccept, onPrevent, prevent })
 
   const onCancel: OnCancel = useCallback(() => {
-    setShow(false)
-  }, [])
+    closeModal(modalSlug)
+  }, [closeModal])
 
   const onConfirm: OnConfirm = useCallback(() => {
     setHasAccepted(true)
   }, [])
 
-  if (show) {
-    return (
-      <ConfirmationModal
-        body={t('general:changesNotSaved')}
-        cancelLabel={t('general:stayOnThisPage')}
-        confirmLabel={t('general:leaveAnyway')}
-        heading={t('general:leaveWithoutSaving')}
-        modalSlug={modalSlug}
-        onCancel={onCancel}
-        onConfirm={onConfirm}
-      />
-    )
-  }
-
-  return null
+  return (
+    <ConfirmationModal
+      body={t('general:changesNotSaved')}
+      cancelLabel={t('general:stayOnThisPage')}
+      confirmLabel={t('general:leaveAnyway')}
+      heading={t('general:leaveWithoutSaving')}
+      modalSlug={modalSlug}
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+    />
+  )
 }
