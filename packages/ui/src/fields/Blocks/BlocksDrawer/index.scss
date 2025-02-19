@@ -21,6 +21,32 @@
       padding-top: base(0.75);
     }
 
+    &__block-groups {
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: base(1.5);
+    }
+
+    &__block-group {
+      list-style: none;
+    }
+
+    &__block-group-label {
+      padding-bottom: base(0.5);
+    }
+
+    &__block-group-none {
+      order: 1;
+      padding-top: base(1.5);
+      border-top: 1px solid var(--theme-border-color);
+
+      &:only-child {
+        padding-top: 0;
+        border-top: 0;
+      }
+    }
+
     @include large-break {
       &__blocks {
         grid-template-columns: repeat(5, 1fr);
@@ -31,9 +57,18 @@
       &__blocks-wrapper {
         padding-top: base(1.75);
       }
+
       &__blocks {
         grid-template-columns: repeat(3, 1fr);
         gap: base(0.5);
+      }
+
+      &__block-groups {
+        gap: base(1.75);
+      }
+
+      &__block-group-none {
+        padding-top: base(1.75);
       }
     }
 
@@ -44,6 +79,14 @@
 
       &__blocks {
         grid-template-columns: repeat(2, 1fr);
+      }
+
+      &__block-groups {
+        gap: base(0.75);
+      }
+
+      &__block-group-none {
+        padding-top: base(0.75);
       }
     }
   }

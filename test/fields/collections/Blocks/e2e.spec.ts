@@ -344,4 +344,32 @@ describe('Block fields', () => {
       expect(await field.count()).toEqual(0)
     })
   })
+
+  describe('block groups', () => {
+    test('should render group labels', async () => {
+      await page.goto(url.create)
+      const addButton = page.locator('#field-groupedBlocks > .blocks-field__drawer-toggler')
+      await addButton.click()
+
+      const blocksDrawer = page.locator('[id^=drawer_1_blocks-drawer-]')
+      await expect(blocksDrawer).toBeVisible()
+
+      const groupLabel = blocksDrawer.locator('.blocks-drawer__block-group-label').first()
+      await expect(groupLabel).toBeVisible()
+      await expect(groupLabel).toHaveText('Group')
+    })
+
+    test('should render localized group labels', async () => {
+      await page.goto(url.create)
+      const addButton = page.locator('#field-groupedBlocks > .blocks-field__drawer-toggler')
+      await addButton.click()
+
+      const blocksDrawer = page.locator('[id^=drawer_1_blocks-drawer-]')
+      await expect(blocksDrawer).toBeVisible()
+
+      const groupLabel = blocksDrawer.locator('.blocks-drawer__block-group-label').nth(1)
+      await expect(groupLabel).toBeVisible()
+      await expect(groupLabel).toHaveText('Group in en')
+    })
+  })
 })

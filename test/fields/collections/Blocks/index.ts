@@ -424,6 +424,63 @@ const BlockFields: CollectionConfig = {
       blockReferences: ['localizedTextReference2'],
       blocks: [],
     },
+    {
+      name: 'groupedBlocks',
+      type: 'blocks',
+      admin: {
+        description: 'The purpose of this field is to test Block groups.',
+      },
+      blocks: [
+        {
+          slug: 'blockWithGroupOne',
+          admin: {
+            group: 'Group',
+          },
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          slug: 'blockWithGroupTwo',
+          admin: {
+            group: 'Group',
+          },
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          slug: 'blockWithLocalizedGroup',
+          admin: {
+            group: {
+              en: 'Group in en',
+              es: 'Group in es',
+            },
+          },
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          slug: 'blockWithoutGroup',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
   ],
 }
 
