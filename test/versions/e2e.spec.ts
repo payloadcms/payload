@@ -134,7 +134,7 @@ describe('Versions', () => {
 
       await rowToDelete.locator('.cell-_select input').check()
       await page.locator('.delete-documents__toggle').click()
-      await page.locator('#confirm-delete').click()
+      await page.locator('#delete-draft-posts #confirm-action').click()
 
       await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
         'Deleted 1 Draft Post successfully.',
@@ -152,7 +152,7 @@ describe('Versions', () => {
 
       // Bulk edit the selected rows
       await page.locator('.publish-many__toggle').click()
-      await page.locator('#confirm-publish').click()
+      await page.locator('#publish-draft-posts #confirm-action').click()
 
       // Check that the statuses for each row has been updated to `published`
       await expect(findTableCell(page, '_status', 'Published Title')).toContainText('Published')
@@ -176,7 +176,7 @@ describe('Versions', () => {
       await expect(findTableCell(page, '_status', title)).toContainText('Draft')
       await selectTableRow(page, title)
       await page.locator('.publish-many__toggle').click()
-      await page.locator('#confirm-publish').click()
+      await page.locator('#publish-autosave-posts #confirm-action').click()
       await expect(findTableCell(page, '_status', title)).toContainText('Published')
     })
 
@@ -189,7 +189,7 @@ describe('Versions', () => {
 
       // Bulk edit the selected rows
       await page.locator('.unpublish-many__toggle').click()
-      await page.locator('#confirm-unpublish').click()
+      await page.locator('#unpublish-draft-posts #confirm-action').click()
 
       // Check that the statuses for each row has been updated to `draft`
       await expect(findTableCell(page, '_status', 'Published Title')).toContainText('Draft')
@@ -565,7 +565,7 @@ describe('Versions', () => {
 
       // revert to last published version
       await page.locator('#action-revert-to-published').click()
-      await saveDocAndAssert(page, '#action-revert-to-published-confirm')
+      await saveDocAndAssert(page, '[id^=confirm-revert-] #confirm-action')
 
       // verify that spanish content is reverted correctly
       await expect(page.locator('#field-title')).toHaveValue(spanishTitle)

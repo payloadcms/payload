@@ -1,7 +1,9 @@
 'use client'
 
+import type { OnConfirm } from '@payloadcms/ui'
+
 import {
-  LoadingOverlay,
+  ConfirmationModal,
   Popup,
   PopupList,
   toast,
@@ -16,7 +18,6 @@ import React, { useCallback, useMemo, useState } from 'react'
 import type { ReindexButtonProps } from './types.js'
 
 import { ReindexButtonLabel } from './ReindexButtonLabel/index.js'
-import { ReindexConfirmModal } from './ReindexConfirmModal/index.js'
 
 const confirmReindexModalSlug = 'confirm-reindex-modal'
 
@@ -37,45 +38,49 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
   const router = useRouter()
 
   const [reindexCollections, setReindexCollections] = useState<string[]>([])
-  const [isLoading, setLoading] = useState<boolean>(false)
 
   const openConfirmModal = useCallback(() => openModal(confirmReindexModalSlug), [openModal])
-  const closeConfirmModal = useCallback(() => closeModal(confirmReindexModalSlug), [closeModal])
 
-  const handleReindexSubmit = useCallback(async () => {
-    if (isLoading || !reindexCollections.length) {
-      return
-    }
-
-    closeConfirmModal()
-    setLoading(true)
-
-    try {
-      const endpointRes = await fetch(
-        `${config.routes.api}/${searchSlug}/reindex?locale=${locale.code}`,
-        {
-          body: JSON.stringify({
-            collections: reindexCollections,
-          }),
-          method: 'POST',
-        },
-      )
-
-      const { message } = (await endpointRes.json()) as { message: string }
-
-      if (!endpointRes.ok) {
-        toast.error(message)
-      } else {
-        toast.success(message)
-        router.refresh()
+  const handleReindexSubmit: OnConfirm = useCallback(
+    async ({ closeConfirmationModal, setConfirming }) => {
+      if (!reindexCollections.length) {
+        setConfirming(false)
+        closeConfirmationModal()
+        return
       }
-    } catch (_err: unknown) {
-      // swallow error, toast shown above
-    } finally {
-      setReindexCollections([])
-      setLoading(false)
-    }
-  }, [closeConfirmModal, isLoading, reindexCollections, router, searchSlug, locale, config])
+
+      try {
+        const res = await fetch(
+          `${config.routes.api}/${searchSlug}/reindex?locale=${locale.code}`,
+          {
+            body: JSON.stringify({
+              collections: reindexCollections,
+            }),
+            method: 'POST',
+          },
+        )
+
+        setConfirming(false)
+        closeConfirmationModal()
+
+        const { message } = (await res.json()) as { message: string }
+
+        if (!res.ok) {
+          toast.error(message)
+        } else {
+          toast.success(message)
+          router.refresh()
+        }
+      } catch (_err: unknown) {
+        // swallow error, toast shown above
+      } finally {
+        setConfirming(false)
+        closeConfirmationModal()
+        setReindexCollections([])
+      }
+    },
+    [reindexCollections, router, searchSlug, locale, config],
+  )
 
   const handleShowConfirmModal = useCallback(
     (collections: string | string[] = searchCollections) => {
@@ -148,14 +153,12 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
         size="large"
         verticalAlign="bottom"
       />
-      <ReindexConfirmModal
-        description={modalDescription}
-        onCancel={closeConfirmModal}
+      <ConfirmationModal
+        body={modalDescription}
+        heading={modalTitle}
+        modalSlug={confirmReindexModalSlug}
         onConfirm={handleReindexSubmit}
-        slug={confirmReindexModalSlug}
-        title={modalTitle}
       />
-      {isLoading && <LoadingOverlay loadingText={loadingText} />}
     </div>
   )
 }

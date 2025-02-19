@@ -223,7 +223,7 @@ describe('Locked Documents', () => {
       await page.goto(postsUrl.list)
       await page.locator('input#select-all').check()
       await page.locator('.delete-documents__toggle').click()
-      await expect(page.locator('.delete-documents__content p')).toHaveText(
+      await expect(page.locator('#delete-posts .confirmation-modal__content p')).toHaveText(
         'You are about to delete 2 Posts',
       )
     })
@@ -243,7 +243,7 @@ describe('Locked Documents', () => {
       await page.locator('input#select-all').check()
       await page.locator('.list-selection .list-selection__button').click()
       await page.locator('.delete-documents__toggle').click()
-      await page.locator('#confirm-delete').click()
+      await page.locator('#delete-posts #confirm-action').click()
       await expect(page.locator('.cell-_select')).toHaveCount(1)
     })
 
@@ -257,12 +257,11 @@ describe('Locked Documents', () => {
       await page.reload()
 
       await page.goto(postsUrl.list)
-      await page.waitForURL(new RegExp(postsUrl.list))
 
       await page.locator('input#select-all').check()
       await page.locator('.list-selection .list-selection__button').click()
       await page.locator('.publish-many__toggle').click()
-      await page.locator('#confirm-publish').click()
+      await page.locator('#publish-posts #confirm-action').click()
 
       const paginator = page.locator('.paginator')
 
@@ -273,12 +272,11 @@ describe('Locked Documents', () => {
 
     test('should only allow bulk unpublish on unlocked documents on all pages', async () => {
       await page.goto(postsUrl.list)
-      await page.waitForURL(new RegExp(postsUrl.list))
 
       await page.locator('input#select-all').check()
       await page.locator('.list-selection .list-selection__button').click()
       await page.locator('.unpublish-many__toggle').click()
-      await page.locator('#confirm-unpublish').click()
+      await page.locator('#unpublish-posts #confirm-action').click()
       await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
         'Updated 10 Posts successfully.',
       )
@@ -568,7 +566,9 @@ describe('Locked Documents', () => {
       await expect(modalContainer).toBeVisible()
 
       // Click the "Leave anyway" button
-      await page.locator('.leave-without-saving__controls .btn--style-primary').click()
+      await page
+        .locator('#leave-without-saving .confirmation-modal__controls .btn--style-primary')
+        .click()
 
       // eslint-disable-next-line payload/no-wait-function
       await wait(500)
@@ -620,7 +620,9 @@ describe('Locked Documents', () => {
       await expect(modalContainer).toBeVisible()
 
       // Click the "Leave anyway" button
-      await page.locator('.leave-without-saving__controls .btn--style-primary').click()
+      await page
+        .locator('#leave-without-saving .confirmation-modal__controls .btn--style-primary')
+        .click()
 
       // eslint-disable-next-line payload/no-wait-function
       await wait(500)

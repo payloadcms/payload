@@ -1,11 +1,10 @@
 'use client'
+import type { OnConfirm } from '@payloadcms/ui'
+
 import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
-  ChevronIcon,
-  Modal,
-  Pill,
-  Popup,
+  ConfirmationModal,
   PopupList,
   useConfig,
   useModal,
@@ -45,7 +44,6 @@ const Restore: React.FC<Props> = ({
   const collectionConfig = getEntityConfig({ collectionSlug })
 
   const { toggleModal } = useModal()
-  const [processing, setProcessing] = useState(false)
   const router = useRouter()
   const { i18n, t } = useTranslation()
   const [draft, setDraft] = useState(false)
@@ -77,23 +75,27 @@ const Restore: React.FC<Props> = ({
     })
   }
 
-  const handleRestore = useCallback(async () => {
-    setProcessing(true)
+  const handleRestore: OnConfirm = useCallback(
+    async ({ closeConfirmationModal, setConfirming }) => {
+      const res = await requests.post(fetchURL, {
+        headers: {
+          'Accept-Language': i18n.language,
+        },
+      })
 
-    const res = await requests.post(fetchURL, {
-      headers: {
-        'Accept-Language': i18n.language,
-      },
-    })
+      setConfirming(false)
+      closeConfirmationModal()
 
-    if (res.status === 200) {
-      const json = await res.json()
-      toast.success(json.message)
-      startRouteTransition(() => router.push(redirectURL))
-    } else {
-      toast.error(t('version:problemRestoringVersion'))
-    }
-  }, [fetchURL, redirectURL, t, i18n, router, startRouteTransition])
+      if (res.status === 200) {
+        const json = await res.json()
+        toast.success(json.message)
+        startRouteTransition(() => router.push(redirectURL))
+      } else {
+        toast.error(t('version:problemRestoringVersion'))
+      }
+    },
+    [fetchURL, redirectURL, t, i18n, router, startRouteTransition],
+  )
 
   return (
     <Fragment>
@@ -118,27 +120,13 @@ const Restore: React.FC<Props> = ({
           {t('version:restoreThisVersion')}
         </Button>
       </div>
-      <Modal className={`${baseClass}__modal`} slug={modalSlug}>
-        <div className={`${baseClass}__wrapper`}>
-          <div className={`${baseClass}__content`}>
-            <h1>{t('version:confirmVersionRestoration')}</h1>
-            <p>{restoreMessage}</p>
-          </div>
-          <div className={`${baseClass}__controls`}>
-            <Button
-              buttonStyle="secondary"
-              onClick={processing ? undefined : () => toggleModal(modalSlug)}
-              size="large"
-              type="button"
-            >
-              {t('general:cancel')}
-            </Button>
-            <Button onClick={processing ? undefined : () => void handleRestore()}>
-              {processing ? t('version:restoring') : t('general:confirm')}
-            </Button>
-          </div>
-        </div>
-      </Modal>
+      <ConfirmationModal
+        body={restoreMessage}
+        confirmingLabel={t('version:restoring')}
+        heading={t('version:confirmVersionRestoration')}
+        modalSlug={modalSlug}
+        onConfirm={handleRestore}
+      />
     </Fragment>
   )
 }

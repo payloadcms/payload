@@ -357,7 +357,7 @@ describe('Join Field', () => {
     await deleteButton.click()
     const deleteConfirmModal = page.locator('dialog[id^="delete-"][open]')
     await expect(deleteConfirmModal).toBeVisible()
-    const confirmDeleteButton = deleteConfirmModal.locator('button#confirm-delete')
+    const confirmDeleteButton = deleteConfirmModal.locator('button#confirm-action')
     await expect(confirmDeleteButton).toBeVisible()
     await confirmDeleteButton.click()
     await expect(drawer).toBeHidden()
