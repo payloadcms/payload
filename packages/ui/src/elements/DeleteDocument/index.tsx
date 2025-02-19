@@ -70,7 +70,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
   }, [t, title])
 
   const handleDelete: OnConfirm = useCallback(
-    async ({ closeConfirmationModal, setPerformingConfirmationAction }) => {
+    async ({ closeConfirmationModal, setConfirming }) => {
       setModified(false)
 
       try {
@@ -84,7 +84,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
           .then(async (res) => {
             try {
               const json = await res.json()
-              setPerformingConfirmationAction(false)
+              setConfirming(false)
               closeConfirmationModal()
 
               if (res.status < 400) {
@@ -125,7 +125,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
             }
           })
       } catch (_err) {
-        setPerformingConfirmationAction(false)
+        setConfirming(false)
         closeConfirmationModal()
         return addDefaultError()
       }

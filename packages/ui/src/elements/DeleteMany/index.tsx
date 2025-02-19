@@ -55,7 +55,7 @@ export const DeleteMany: React.FC<Props> = (props) => {
   }, [t])
 
   const handleDelete: OnConfirm = useCallback(
-    async ({ closeConfirmationModal, setPerformingConfirmationAction }) => {
+    async ({ closeConfirmationModal, setConfirming }) => {
       const queryWithSearch = mergeListSearchAndWhere({
         collectionConfig: collection,
         search: searchParams.get('search'),
@@ -73,7 +73,7 @@ export const DeleteMany: React.FC<Props> = (props) => {
         .then(async (res) => {
           try {
             const json = await res.json()
-            setPerformingConfirmationAction(false)
+            setConfirming(false)
             closeConfirmationModal()
 
             const deletedDocs = json?.docs.length || 0
@@ -118,7 +118,7 @@ export const DeleteMany: React.FC<Props> = (props) => {
             }
             return false
           } catch (_err) {
-            setPerformingConfirmationAction(false)
+            setConfirming(false)
             closeConfirmationModal()
             return addDefaultError()
           }

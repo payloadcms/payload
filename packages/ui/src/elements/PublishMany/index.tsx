@@ -53,7 +53,7 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
   }, [t])
 
   const handlePublish: OnConfirm = useCallback(
-    async ({ closeConfirmationModal, setPerformingConfirmationAction }) => {
+    async ({ closeConfirmationModal, setConfirming }) => {
       await requests
         .patch(
           `${serverURL}${api}/${slug}${getQueryParams({ _status: { not_equals: 'published' } })}&draft=true`,
@@ -70,7 +70,7 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
         .then(async (res) => {
           try {
             const json = await res.json()
-            setPerformingConfirmationAction(false)
+            setConfirming(false)
             closeConfirmationModal()
 
             const deletedDocs = json?.docs.length || 0
@@ -111,7 +111,7 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
             }
             return false
           } catch (_err) {
-            setPerformingConfirmationAction(false)
+            setConfirming(false)
             closeConfirmationModal()
             return addDefaultError()
           }

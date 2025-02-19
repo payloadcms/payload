@@ -57,7 +57,7 @@ export const Status: React.FC = () => {
   const performAction = useCallback(
     async (
       action: 'revert' | 'unpublish',
-      { closeConfirmationModal, setPerformingConfirmationAction }: Parameters<OnConfirm>[0],
+      { closeConfirmationModal, setConfirming }: Parameters<OnConfirm>[0],
     ) => {
       let url
       let method
@@ -103,7 +103,7 @@ export const Status: React.FC = () => {
       if (res.status === 200) {
         let data
         const json = await res.json()
-        setPerformingConfirmationAction(false)
+        setConfirming(false)
         closeConfirmationModal()
 
         if (globalSlug) {

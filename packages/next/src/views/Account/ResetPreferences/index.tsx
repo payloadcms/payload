@@ -16,9 +16,9 @@ export const ResetPreferences: React.FC<{
   const { t } = useTranslation()
 
   const handleResetPreferences: OnConfirm = useCallback(
-    async ({ closeConfirmationModal, setPerformingConfirmationAction }) => {
+    async ({ closeConfirmationModal, setConfirming }) => {
       if (!user) {
-        setPerformingConfirmationAction(false)
+        setConfirming(false)
         closeConfirmationModal()
         return
       }
@@ -57,7 +57,7 @@ export const ResetPreferences: React.FC<{
       } catch (_err) {
         // swallow error
       } finally {
-        setPerformingConfirmationAction(false)
+        setConfirming(false)
         closeConfirmationModal()
       }
     },

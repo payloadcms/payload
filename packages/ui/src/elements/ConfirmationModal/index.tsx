@@ -12,7 +12,7 @@ const baseClass = 'confirmation-modal'
 
 export type OnConfirm = (args: {
   closeConfirmationModal: () => void
-  setPerformingConfirmationAction: (state: boolean) => void
+  setConfirming: (state: boolean) => void
 }) => Promise<void> | void
 
 export type OnCancel = () => void
@@ -42,7 +42,7 @@ export function ConfirmationModal(props: ConfirmationModalProps) {
 
   const editDepth = useEditDepth()
 
-  const [performingAction, setPerformingAction] = React.useState(false)
+  const [confirming, setConfirming] = React.useState(false)
 
   const { closeModal } = useModal()
   const { t } = useTranslation()
@@ -65,7 +65,7 @@ export function ConfirmationModal(props: ConfirmationModalProps) {
             buttonStyle="secondary"
             id="confirm-cancel"
             onClick={
-              performingAction
+              confirming
                 ? undefined
                 : () => {
                     closeModal(modalSlug)
@@ -82,19 +82,17 @@ export function ConfirmationModal(props: ConfirmationModalProps) {
           <Button
             id="confirm-action"
             onClick={() => {
-              if (!performingAction) {
-                setPerformingAction(true)
+              if (!confirming) {
+                setConfirming(true)
                 void onConfirm({
                   closeConfirmationModal: () => closeModal(modalSlug),
-                  setPerformingConfirmationAction: (state) => setPerformingAction(state),
+                  setConfirming: (state) => setConfirming(state),
                 })
               }
             }}
             size="large"
           >
-            {performingAction
-              ? confirmingLabel || confirmLabel
-              : confirmLabel || t('general:confirm')}
+            {confirming ? confirmingLabel || confirmLabel : confirmLabel || t('general:confirm')}
           </Button>
         </div>
       </div>
