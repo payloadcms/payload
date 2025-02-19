@@ -1,7 +1,9 @@
 'use client'
 import { useModal } from '@faceless-ui/modal'
-import React from 'react'
+import React, { useCallback } from 'react'
 import { toast } from 'sonner'
+
+import type { OnConfirm } from '../ConfirmationModal/index.js'
 
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -23,12 +25,16 @@ export function GenerateConfirmation(props: GenerateConfirmationProps) {
 
   const modalSlug = `generate-confirmation-${id}`
 
-  const handleGenerate = () => {
-    setKey()
-    toggleModal(modalSlug)
-    toast.success(t('authentication:newAPIKeyGenerated'))
-    highlightField(true)
-  }
+  const handleGenerate: OnConfirm = useCallback(
+    ({ closeConfirmationModal, setConfirming }) => {
+      setKey()
+      toast.success(t('authentication:newAPIKeyGenerated'))
+      highlightField(true)
+      setConfirming(false)
+      closeConfirmationModal()
+    },
+    [highlightField, setKey, t],
+  )
 
   return (
     <React.Fragment>

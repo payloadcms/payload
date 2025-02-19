@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 import type { Props } from './types.js'
@@ -73,7 +73,6 @@ export const Auth: React.FC<Props> = (props) => {
     readOnly || (apiKeyPermissions !== true && !apiKeyPermissions?.update)
 
   const canReadApiKey = apiKeyPermissions === true || apiKeyPermissions?.read
-  const canReadEnableAPIKey = apiKeyPermissions === true || apiKeyPermissions?.read
 
   const handleChangePassword = useCallback(
     (showPasswordFields: boolean) => {
@@ -202,18 +201,20 @@ export const Auth: React.FC<Props> = (props) => {
       )}
       {useAPIKey && (
         <div className={`${baseClass}__api-key`}>
-          {canReadEnableAPIKey && (
-            <CheckboxField
-              field={{
-                name: 'enableAPIKey',
-                admin: { disabled, readOnly: enableAPIKeyReadOnly },
-                label: t('authentication:enableAPIKey'),
-              }}
-              path="enableAPIKey"
-              schemaPath={`${collectionSlug}.enableAPIKey`}
-            />
+          {canReadApiKey && (
+            <Fragment>
+              <CheckboxField
+                field={{
+                  name: 'enableAPIKey',
+                  admin: { disabled, readOnly: enableAPIKeyReadOnly },
+                  label: t('authentication:enableAPIKey'),
+                }}
+                path="enableAPIKey"
+                schemaPath={`${collectionSlug}.enableAPIKey`}
+              />
+              <APIKey enabled={!!enableAPIKey?.value} readOnly={apiKeyReadOnly} />
+            </Fragment>
           )}
-          {canReadApiKey && <APIKey enabled={!!enableAPIKey?.value} readOnly={apiKeyReadOnly} />}
         </div>
       )}
       {verify && isEditing && (
