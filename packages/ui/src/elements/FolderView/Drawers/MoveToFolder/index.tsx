@@ -1,17 +1,17 @@
 'use client'
 
 import { useModal } from '@faceless-ui/modal'
+import { extractID } from 'payload/shared'
 import React from 'react'
 
 import { useFolder } from '../../../../providers/Folders/index.js'
 import { DrawerActionHeader } from '../../../DrawerActionHeader/index.js'
 import { DrawerContentContainer } from '../../../DrawerContentContainer/index.js'
 import { FolderBreadcrumbs } from '../../Breadcrumbs/index.js'
-import { FolderFileCard } from '../../FolderFileCard/index.js'
-import { FolderFileGrid } from '../../FolderFileGrid/index.js'
+import { DisplayItems } from '../../DisplayItems/index.js'
 import { strings } from '../../strings.js'
-import { DrawerWithFolderContext } from '../DrawerWithFolderContext.js'
 import './index.scss'
+import { DrawerWithFolderContext } from '../DrawerWithFolderContext.js'
 
 const baseClass = 'move-folder-drawer'
 
@@ -22,24 +22,11 @@ type Props = {
 }
 export const MoveToFolderDrawer = DrawerWithFolderContext<Props>((props) => {
   const { drawerSlug, hiddenFolderIDs, onMoveConfirm } = props
-  const { breadcrumbs, folderID, setFolderID, subfolders } = useFolder()
+  const folderContext = useFolder()
   const { closeModal } = useModal()
-  const [selectedFolderID, setSelectedFolderID] = React.useState<null | number | string>(folderID)
-  const lastClickTime = React.useRef(0)
 
-  const onFolderClick = React.useCallback(
-    async (id: number | string) => {
-      const now = Date.now()
-
-      // set folder on double click
-      if (now - lastClickTime.current < 400 && selectedFolderID === id) {
-        await setFolderID({ folderID: id })
-      } else {
-        setSelectedFolderID(selectedFolderID === id ? folderID : id)
-      }
-      lastClickTime.current = now
-    },
-    [setFolderID, selectedFolderID, folderID],
+  const subfoldersToShow = folderContext.subfolders.filter(
+    (subfolder) => !hiddenFolderIDs.includes(extractID(subfolder.value)),
   )
 
   return (
@@ -49,40 +36,38 @@ export const MoveToFolderDrawer = DrawerWithFolderContext<Props>((props) => {
           closeModal(drawerSlug)
         }}
         onSave={async () => {
-          await onMoveConfirm(selectedFolderID)
+          let folderToMoveTo = folderContext?.folderID || null
+          if (folderContext.selectedIndexes.size > 0) {
+            const index = Array.from(folderContext.selectedIndexes).pop()
+            if (typeof index === 'number') {
+              folderToMoveTo = extractID(subfoldersToShow[index].value)
+            }
+          }
+
+          await onMoveConfirm(folderToMoveTo)
         }}
         saveLabel={strings.selectFolder}
         title={strings.moveTo}
       />
 
       <DrawerContentContainer className={baseClass}>
-        <FolderBreadcrumbs breadcrumbs={breadcrumbs} />
+        <FolderBreadcrumbs breadcrumbs={folderContext.breadcrumbs} />
 
         <div>
-          <FolderFileGrid>
-            {subfolders.length
-              ? subfolders.map((subfolder, index) => {
-                  const folderID =
-                    typeof subfolder.value === 'object' ? subfolder.value.id : subfolder.value
-                  const title = typeof subfolder.value === 'object' ? subfolder.value.name : ''
-                  if (hiddenFolderIDs.includes(folderID)) {
-                    return null
-                  }
-                  return (
-                    <FolderFileCard
-                      id={folderID}
-                      isSelected={selectedFolderID === folderID}
-                      key={index}
-                      onClick={async () => {
-                        await onFolderClick(folderID)
-                      }}
-                      title={title}
-                      type="folder"
-                    />
-                  )
-                })
-              : null}
-          </FolderFileGrid>
+          <DisplayItems
+            allowMultiSelection={false}
+            collectionUseAsTitles={folderContext.collectionUseAsTitles}
+            folderCollectionSlug={folderContext.folderCollectionSlug}
+            isDragging={false}
+            lastSelectedIndex={folderContext.lastSelectedIndex}
+            selectedIndexes={folderContext.selectedIndexes}
+            setFolderID={folderContext.setFolderID}
+            setItemsToMove={folderContext.setItemsToMove}
+            setLastSelectedIndex={folderContext.setLastSelectedIndex}
+            setSelectedIndexes={folderContext.setSelectedIndexes}
+            subfolders={subfoldersToShow}
+            viewType="grid"
+          />
         </div>
       </DrawerContentContainer>
     </>

@@ -9,7 +9,8 @@ type Props = {
   readonly children?: React.ReactNode
   readonly className?: string
   readonly id: string
-  readonly onEvent: (e: React.KeyboardEvent | React.MouseEvent) => void
+  readonly onClick: (e: React.MouseEvent) => void
+  readonly onKeyDown?: (e: React.KeyboardEvent) => void
   readonly ref?: React.RefObject<HTMLDivElement>
   readonly thresholdPixels?: number
 }
@@ -18,7 +19,8 @@ export const DraggableWithClick = ({
   id,
   children,
   className,
-  onEvent,
+  onClick,
+  onKeyDown,
   ref,
   thresholdPixels = 3,
 }: Props) => {
@@ -37,7 +39,10 @@ export const DraggableWithClick = ({
       if (deltaX > thresholdPixels || deltaY > thresholdPixels) {
         isDragging.current = true
         listeners.onPointerDown(e)
-        onEvent(moveEvent)
+        // when the user starts dragging
+        // - call the click handler
+        // - remove the pointermove listener
+        onClick(moveEvent)
         window.removeEventListener('pointermove', handlePointerMove)
       }
     }
@@ -50,7 +55,9 @@ export const DraggableWithClick = ({
     const handlePointerUp = (upEvent) => {
       cleanup()
       if (!isDragging.current) {
-        onEvent(upEvent)
+        // if the user did not drag the element
+        // - call the click handler
+        onClick(upEvent)
       }
     }
 
@@ -64,7 +71,7 @@ export const DraggableWithClick = ({
       tabIndex={0}
       {...attributes}
       className={`${baseClass} ${className || ''}`.trim()}
-      onKeyDown={onEvent}
+      onKeyDown={onKeyDown}
       onPointerDown={handlePointerDown}
       ref={(node) => {
         setNodeRef(node)

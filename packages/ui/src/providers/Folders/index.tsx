@@ -27,10 +27,12 @@ export type FolderContextValue = {
   collectionUseAsTitles: Map<string, string>
   currentFolder?: FolderInterface
   deleteCurrentFolder: () => Promise<Response>
-  documents: GetFolderDataResult['items']
+  documents?: GetFolderDataResult['items']
   folderCollectionSlug: string
   folderID?: number | string
   isRootFolder?: boolean
+  itemsToMove: PolymorphicRelationshipValue[]
+  lastSelectedIndex?: number
   moveToFolder: (args: {
     itemsToMove: PolymorphicRelationshipValue[]
     toFolderID?: number | string
@@ -40,6 +42,8 @@ export type FolderContextValue = {
   selectedIndexes: Set<number>
   setBreadcrumbs: React.Dispatch<React.SetStateAction<FolderBreadcrumb[]>>
   setFolderID: (args: { folderID: number | string }) => Promise<void>
+  setItemsToMove: React.Dispatch<React.SetStateAction<PolymorphicRelationshipValue[]>>
+  setLastSelectedIndex: React.Dispatch<React.SetStateAction<null | number>>
   setSelectedIndexes: React.Dispatch<React.SetStateAction<Set<number>>>
   setSubfolders: React.Dispatch<React.SetStateAction<GetFolderDataResult['items']>>
   subfolders?: GetFolderDataResult<FolderInterface>['items']
@@ -54,12 +58,16 @@ const Context = React.createContext<FolderContextValue>({
   folderCollectionSlug: '',
   folderID: undefined,
   isRootFolder: undefined,
+  itemsToMove: [],
+  lastSelectedIndex: undefined,
   moveToFolder: () => Promise.resolve(undefined),
   populateFolderData: () => Promise.resolve(undefined),
   removeItems: () => Promise.resolve(undefined),
   selectedIndexes: new Set(),
   setBreadcrumbs: () => {},
   setFolderID: () => Promise.resolve(undefined),
+  setItemsToMove: () => [],
+  setLastSelectedIndex: () => {},
   setSelectedIndexes: () => {},
   setSubfolders: () => {},
   subfolders: [],
@@ -104,6 +112,8 @@ export function FolderProvider({ children, initialData }: Props) {
     }
     return useAsTitleMap
   })
+  const [itemsToMove, setItemsToMove] = React.useState<PolymorphicRelationshipValue[]>([])
+  const [lastSelectedIndex, setLastSelectedIndex] = React.useState<null | number>()
 
   const folderIDFromParams = searchParams.get('folderID') || ''
   const folderIDParamRef = React.useRef(folderIDFromParams || '')
@@ -410,12 +420,16 @@ export function FolderProvider({ children, initialData }: Props) {
         folderCollectionSlug,
         folderID: activeFolderID,
         isRootFolder,
+        itemsToMove,
+        lastSelectedIndex,
         moveToFolder,
         populateFolderData,
         removeItems,
         selectedIndexes,
         setBreadcrumbs: setFolderBreadcrumbs,
         setFolderID: setNewActiveFolderID,
+        setItemsToMove,
+        setLastSelectedIndex,
         setSelectedIndexes,
         setSubfolders,
         subfolders,

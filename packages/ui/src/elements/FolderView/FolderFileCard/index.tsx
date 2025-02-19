@@ -7,6 +7,7 @@ import { DocumentIcon } from '../../../icons/Document/index.js'
 import { FolderIcon } from '../../../icons/Folder/index.js'
 import { ThreeDotsIcon } from '../../../icons/ThreeDots/index.js'
 import { Popup } from '../../Popup/index.js'
+import { Thumbnail } from '../../Thumbnail/index.js'
 import { DraggableWithClick } from '../DraggableWithClick/index.js'
 import './index.scss'
 
@@ -22,7 +23,9 @@ type Props = {
   readonly isSelected?: boolean
   readonly isSelecting?: boolean
   readonly onClick?: (e: React.MouseEvent) => void
+  readonly onKeyDown?: (e: React.KeyboardEvent) => void
   readonly PopupActions?: React.ReactNode
+  readonly previewUrl?: string
   readonly title: string
   readonly type: 'file' | 'folder'
 }
@@ -37,7 +40,9 @@ export function FolderFileCard({
   isSelected = false,
   isSelecting = false,
   onClick,
+  onKeyDown,
   PopupActions,
+  previewUrl,
   title,
 }: Props) {
   const { isOver, setNodeRef } = useDroppable({
@@ -76,12 +81,13 @@ export function FolderFileCard({
         .filter(Boolean)
         .join(' ')}
     >
-      {onClick && (
+      {(onClick || onKeyDown) && (
         <DraggableWithClick
           className={`${baseClass}__drag-handle`}
           id={String(id)}
           key={id}
-          onEvent={onClick}
+          onClick={onClick}
+          onKeyDown={onKeyDown}
           ref={ref}
         />
       )}
@@ -89,7 +95,7 @@ export function FolderFileCard({
 
       {type === 'file' ? (
         <div className={`${baseClass}__preview-area`}>
-          <DocumentIcon />
+          {previewUrl ? <Thumbnail fileSrc={previewUrl} /> : <DocumentIcon />}
         </div>
       ) : null}
 

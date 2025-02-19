@@ -2,12 +2,13 @@
 
 import type { FolderBreadcrumb } from 'payload/shared'
 
+import { useDroppable } from '@dnd-kit/core'
 import React from 'react'
 
 import { ChevronIcon } from '../../../icons/Chevron/index.js'
 import { useFolder } from '../../../providers/Folders/index.js'
-import './index.scss'
 import { Button } from '../../Button/index.js'
+import './index.scss'
 
 const baseClass = 'folderBreadcrumbs'
 
@@ -16,8 +17,6 @@ type Props = {
   className?: string
 }
 export function FolderBreadcrumbs({ breadcrumbs, className }: Props) {
-  const { setFolderID } = useFolder()
-
   return (
     <div className={`${baseClass} ${className || ''}`.trim()}>
       {breadcrumbs?.map((crumb, index) => (
@@ -25,16 +24,7 @@ export function FolderBreadcrumbs({ breadcrumbs, className }: Props) {
           {index === breadcrumbs.length - 1 ? (
             crumb.name
           ) : (
-            <Button
-              buttonStyle="none"
-              className={`${baseClass}__crumb`}
-              el="button"
-              onClick={() => {
-                void setFolderID({ folderID: crumb.id })
-              }}
-            >
-              {crumb.name}
-            </Button>
+            <DroppableBreadcrumb id={crumb.id} name={crumb.name} />
           )}
           {breadcrumbs.length > 0 && index !== breadcrumbs.length - 1 && (
             <ChevronIcon className={`${baseClass}__crumb-chevron`} direction="right" />
@@ -42,5 +32,28 @@ export function FolderBreadcrumbs({ breadcrumbs, className }: Props) {
         </div>
       ))}
     </div>
+  )
+}
+
+function DroppableBreadcrumb({ id, name }: FolderBreadcrumb) {
+  const { isOver, setNodeRef } = useDroppable({
+    id: String(id),
+  })
+  const { setFolderID } = useFolder()
+
+  return (
+    <Button
+      buttonStyle="none"
+      className={[`${baseClass}__crumb-item`, isOver && `${baseClass}__crumb-item--over`]
+        .filter(Boolean)
+        .join(' ')}
+      el="button"
+      onClick={() => {
+        void setFolderID({ folderID: id })
+      }}
+      ref={setNodeRef as unknown as any}
+    >
+      {name}
+    </Button>
   )
 }

@@ -17,7 +17,8 @@ type Props = {
   readonly isFocused?: boolean
   readonly isSelected?: boolean
   readonly isSelecting?: boolean
-  readonly onEvent?: (e: React.MouseEvent) => void
+  readonly onClick?: (e: React.MouseEvent) => void
+  readonly onKeyDown?: (e: React.KeyboardEvent) => void
   readonly type: 'file' | 'folder'
 }
 export function FolderFileRow({
@@ -29,7 +30,8 @@ export function FolderFileRow({
   isFocused,
   isSelected,
   isSelecting,
-  onEvent,
+  onClick,
+  onKeyDown,
 }: Props) {
   const enableDroppable = isDroppable && !isSelected
   const { isOver, setNodeRef } = useDroppable({
@@ -77,12 +79,13 @@ export function FolderFileRow({
 
       <HiddenCell>
         {enableDroppable ? <div className={`${baseClass}__drop-area`} ref={setNodeRef} /> : null}
-        {onEvent ? (
+        {onClick || onKeyDown ? (
           <DraggableWithClick
             className={`${baseClass}__drag-handle`}
             id={String(id)}
             key={id}
-            onEvent={onEvent}
+            onClick={onClick}
+            onKeyDown={onKeyDown}
             ref={ref}
           />
         ) : null}
