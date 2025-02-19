@@ -64,7 +64,7 @@ describe('Access Control', () => {
   let richTextUrl: AdminUrlUtil
   let readOnlyGlobalUrl: AdminUrlUtil
   let restrictedVersionsUrl: AdminUrlUtil
-  let restrictedVersions2Url: AdminUrlUtil
+  let restrictedVersionsAdminPanelUrl: AdminUrlUtil
   let userRestrictedCollectionURL: AdminUrlUtil
   let userRestrictedGlobalURL: AdminUrlUtil
   let disabledFields: AdminUrlUtil
@@ -83,7 +83,7 @@ describe('Access Control', () => {
     readOnlyCollectionUrl = new AdminUrlUtil(serverURL, readOnlySlug)
     readOnlyGlobalUrl = new AdminUrlUtil(serverURL, readOnlySlug)
     restrictedVersionsUrl = new AdminUrlUtil(serverURL, restrictedVersionsSlug)
-    restrictedVersions2Url = new AdminUrlUtil(serverURL, restrictedVersionsAdminPanelSlug)
+    restrictedVersionsAdminPanelUrl = new AdminUrlUtil(serverURL, restrictedVersionsAdminPanelSlug)
     userRestrictedCollectionURL = new AdminUrlUtil(serverURL, userRestrictedCollectionSlug)
     userRestrictedGlobalURL = new AdminUrlUtil(serverURL, userRestrictedGlobalSlug)
     disabledFields = new AdminUrlUtil(serverURL, disabledSlug)
@@ -576,7 +576,7 @@ describe('Access Control', () => {
     })
 
     test('versions tab should not show', async () => {
-      await page.goto(restrictedVersions2Url.edit(existingDoc.id))
+      await page.goto(restrictedVersionsAdminPanelUrl.edit(existingDoc.id))
       await page.locator('.doc-tabs__tabs').getByLabel('Versions').click()
       const rows = page.locator('.versions table tbody tr')
       await expect(rows).toHaveCount(1)
