@@ -26,8 +26,44 @@ export const MyComponent = ({ data }: { data: SerializedEditorState }) => {
 
 The `RichText` component includes built-in serializers for common Lexical nodes but allows customization through the `converters` prop.
 
-In our website template [you have an example](https://github.com/payloadcms/payload/blob/main/templates/website/src/components/RichText/index.tsx) of how to use `converters` to render custom blocks.
+In our website template [you have an example](https://github.com/payloadcms/payload/blob/main/templates/website/src/components/RichText/index.tsx) of how to use `converters` to render custom blocks. For instance, if you want to modify how headings are rendered, you can create a new component like this:
 
+```tsx
+import type { SerializedHeadingNode } from '@payloadcms/richtext-lexical'
+import type { JSXConverters } from '@payloadcms/richtext-lexical/react'
+
+export const HeadingJSXConverter: JSXConverters<SerializedHeadingNode> = {
+  heading: ({ node, nodesToJSX }) => {
+    const children = nodesToJSX({
+      nodes: node.children,
+    })
+
+    const NodeTag = node.tag
+
+    const classes = {
+        h1: 'h1-aNewClassName',
+        h2: 'h2-aNewClassName',
+        h3: 'h3-aNewClassName',
+        h4: 'h4-aNewClassName',
+        h5: 'h5-aNewClassName',
+        h6: 'h6-aNewClassName'
+      }
+      
+      return <NodeTag className={classes[NodeTag] || 'default-class'}>{children}</NodeTag>
+  },
+}
+```
+
+Then insert it into `jsxConverters` using the spread operator:
+
+```tsx
+const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) => ({
+    ...defaultConverters,
+    ...HeadingJSXConverter,
+...
+})```
+
+Additional examples can be found [in our repo](https://github.com/payloadcms/payload/tree/main/packages/richtext-lexical/src/exports/react/components/RichText/converter/converters).
 
 <Banner type="default">
   The JSX converter expects the input data to be fully populated. When fetching data, ensure the `depth` setting is high enough, to ensure that lexical nodes such as uploads are populated.
