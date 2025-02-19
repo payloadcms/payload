@@ -1,3 +1,4 @@
+import type { Field } from '../fields/config/types.js'
 import type { ListPreferences } from '../preferences/types.js'
 import type { Where } from '../types/index.js'
 
@@ -8,3 +9,9 @@ export type SharedListFilter = {
   title: string
   where: Where
 }
+
+export type ListFilterAccessOptions = {
+  fields: Field[]
+  label: string
+  value: string
+}[]

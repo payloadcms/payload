@@ -22,7 +22,7 @@ let pagesUrl: AdminUrlUtil
 let payload: PayloadTestSDK<Config>
 let serverURL: string
 
-describe('List Filters', () => {
+describe('Shared Filters', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))

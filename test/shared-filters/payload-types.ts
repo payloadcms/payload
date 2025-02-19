@@ -132,7 +132,7 @@ export interface Page {
 export interface User {
   id: string;
   name?: string | null;
-  roles?: ('is_user' | 'is_admin')[] | null;
+  roles?: ('admin' | 'editor' | 'reader')[] | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -197,6 +197,14 @@ export interface PayloadPreference {
 export interface PayloadSharedFilter {
   id: string;
   title: string;
+  readAccess?: ('everyone' | 'onlyMe' | 'specificUsers' | 'specificRoles') | null;
+  readConstraints?: {
+    users?: (string | User)[] | null;
+  };
+  updateAccess?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
+  updateConstraints?: {
+    users?: (string | User)[] | null;
+  };
   where:
     | {
         [k: string]: unknown;
@@ -285,6 +293,18 @@ export interface PayloadPreferencesSelect<T extends boolean = true> {
  */
 export interface PayloadSharedFiltersSelect<T extends boolean = true> {
   title?: T;
+  readAccess?: T;
+  readConstraints?:
+    | T
+    | {
+        users?: T;
+      };
+  updateAccess?: T;
+  updateConstraints?:
+    | T
+    | {
+        users?: T;
+      };
   where?: T;
   columns?: T;
   relatedCollection?: T;

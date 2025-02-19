@@ -1,33 +1,39 @@
 import type { Payload } from 'payload'
 
-import { devUser, regularUser } from '../credentials.js'
+import { devUser as devCredentials, regularUser as regularCredentials } from '../credentials.js'
 import { executePromises } from '../helpers/executePromises.js'
 import { seedDB } from '../helpers/seed.js'
 import { collectionSlugs, pagesSlug, usersSlug } from './slugs.js'
 
 export const seed = async (_payload: Payload) => {
-  await executePromises(
+  const [devUser, regularUser] = await executePromises(
     [
       () =>
         _payload.create({
           collection: usersSlug,
           data: {
-            email: devUser.email,
-            password: devUser.password,
+            email: devCredentials.email,
+            password: devCredentials.password,
             name: 'Admin',
-            roles: ['is_admin', 'is_user'],
+            roles: ['admin'],
           },
         }),
       () =>
         _payload.create({
           collection: usersSlug,
           data: {
-            email: regularUser.email,
-            password: regularUser.password,
-            name: 'Dev',
-            roles: ['is_user'],
+            email: regularCredentials.email,
+            password: regularCredentials.password,
+            name: 'Editor',
+            roles: ['editor'],
           },
         }),
+    ],
+    false,
+  )
+
+  await executePromises(
+    [
       () =>
         _payload.create({
           collection: pagesSlug,
@@ -39,12 +45,36 @@ export const seed = async (_payload: Payload) => {
         _payload.create({
           collection: 'payload-shared-filters',
           data: {
-            title: 'Example Filter',
+            title: 'Specific Users',
             where: {
               text: {
                 equals: 'example page',
               },
             },
+            readAccess: 'specificUsers',
+            readConstraints: {
+              users: [devUser?.id || ''],
+            },
+            columns: [
+              {
+                accessor: 'text',
+                active: true,
+              },
+            ],
+            relatedCollection: pagesSlug,
+          },
+        }),
+      () =>
+        _payload.create({
+          collection: 'payload-shared-filters',
+          data: {
+            title: 'Everyone',
+            where: {
+              text: {
+                equals: 'example page',
+              },
+            },
+            readAccess: 'everyone',
             columns: [
               {
                 accessor: 'text',

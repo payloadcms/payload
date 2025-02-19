@@ -4,6 +4,7 @@ import path from 'path'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Pages } from './collections/Pages/index.js'
 import { Users } from './collections/Users/index.js'
+import { roles } from './fields/roles.js'
 import { seed } from './seed.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -13,6 +14,24 @@ export default buildConfigWithDefaults({
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
+    },
+    sharedListFilters: {
+      access: {
+        read: ({ req: { user } }) => {
+          if (!user) {
+            return false
+          }
+
+          return {
+            roles: {
+              in: user.roles,
+            },
+          }
+        },
+      },
+      accessOptions: {
+        read: [{ label: 'Specific Roles', value: 'specificRoles', fields: [roles] }],
+      },
     },
   },
   collections: [Pages, Users],

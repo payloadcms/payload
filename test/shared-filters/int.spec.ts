@@ -19,7 +19,7 @@ let restClient: NextRESTClient
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-describe('Locked documents', () => {
+describe('Shared Filters', () => {
   let page: Page
   let postConfig: SanitizedCollectionConfig
 
@@ -45,6 +45,10 @@ describe('Locked documents', () => {
         text: 'some page',
       },
     })
+  })
+
+  describe('access control', () => {
+    it.todo('should only allow read access to readers')
   })
 
   afterAll(async () => {

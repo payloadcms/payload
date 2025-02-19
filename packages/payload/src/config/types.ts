@@ -48,6 +48,7 @@ import type {
   RequestContext,
   TypedUser,
 } from '../index.js'
+import type { ListFilterAccessOptions } from '../sharedFilters/types.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -897,6 +898,20 @@ export type Config = {
       reset?: string
       /** The route for the unauthorized page. */
       unauthorized?: string
+    }
+    sharedListFilters?: {
+      access: {
+        create?: Access
+        delete?: Access
+        read?: Access
+        update?: Access
+      }
+      accessOptions: {
+        create?: ListFilterAccessOptions
+        delete?: ListFilterAccessOptions
+        read?: ListFilterAccessOptions
+        update?: ListFilterAccessOptions
+      }
     }
     /**
      * Suppresses React hydration mismatch warnings during the hydration of the root <html> tag.

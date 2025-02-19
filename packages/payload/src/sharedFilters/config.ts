@@ -1,6 +1,9 @@
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Config } from '../config/types.js'
 
+import { getReadAccessFields, readAccess } from './access/read.js'
+import { getUpdateAccessFields, updateAccess } from './access/update.js'
+
 // import { mergeListSearchAndWhere } from '../utilities/mergeListSearchAndWhere.js'
 // import { validateWhereQuery } from '../utilities/validateWhereQuery.js'
 
@@ -9,13 +12,8 @@ export const sharedFiltersCollectionSlug = 'payload-shared-filters'
 export const getSharedFiltersCollection = (config: Config): CollectionConfig => ({
   slug: sharedFiltersCollectionSlug,
   access: {
-    read: ({ req }) => Boolean(req.user),
-    // access is controlled on the document-level
-    // will need to wire in custom operations to handle this
-    // uncomment these when ready
-    // create: () => false,
-    // delete: () => false,
-    // update: () => false,
+    read: readAccess,
+    update: updateAccess,
   },
   admin: {
     // uncomment this when ready
@@ -28,6 +26,8 @@ export const getSharedFiltersCollection = (config: Config): CollectionConfig => 
       type: 'text',
       required: true,
     },
+    ...getReadAccessFields(config),
+    ...getUpdateAccessFields(config),
     {
       name: 'where',
       type: 'json',
