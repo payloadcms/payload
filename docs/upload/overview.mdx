@@ -347,6 +347,32 @@ fetch('api/:upload-slug', {
 })
 ```
 
+## Uploading Files stored locally
+
+If you want to upload a file stored on your machine directly using the `payload.create` method, for example, during a seed script,
+you can use the `filePath` property to specify the local path of the file.
+
+```ts
+const localFilePath = path.resolve(__dirname, filename)
+
+await payload.create({
+  collection: 'media',
+  data: {
+    alt,
+  },
+  filePath: localFilePath,
+})
+```
+
+The `data` property should still include all the required fields of your `media` collection.
+
+<Banner type="warning">
+  **Important:**
+
+  Remember that all custom hooks attached to the `media` collection will still trigger.
+  Ensure that files match the specified mimeTypes or sizes defined in the collection's `formatOptions` or custom `hooks`.
+</Banner>
+
 ## Uploading Files from Remote URLs
 
 The `pasteURL` option allows users to fetch files from remote URLs by pasting them into an Upload field. This option is **enabled by default** and can be configured to either **allow unrestricted client-side fetching** or **restrict server-side fetching** to specific trusted domains.
