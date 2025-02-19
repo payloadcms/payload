@@ -7,7 +7,6 @@ import { useRouter } from 'next/navigation.js'
 import React, { useCallback } from 'react'
 import { toast } from 'sonner'
 
-import type { OnConfirm } from '../ConfirmationModal/index.js'
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 
 import { useForm } from '../../forms/Form/context.js'
@@ -69,86 +68,79 @@ export const DeleteDocument: React.FC<Props> = (props) => {
     toast.error(t('error:deletingTitle', { title }))
   }, [t, title])
 
-  const handleDelete: OnConfirm = useCallback(
-    async ({ closeConfirmationModal, setConfirming }) => {
-      setModified(false)
+  const handleDelete = useCallback(async () => {
+    setModified(false)
 
-      try {
-        await requests
-          .delete(`${serverURL}${api}/${collectionSlug}/${id}`, {
-            headers: {
-              'Accept-Language': i18n.language,
-              'Content-Type': 'application/json',
-            },
-          })
-          .then(async (res) => {
-            try {
-              const json = await res.json()
-              setConfirming(false)
-              closeConfirmationModal()
+    try {
+      await requests
+        .delete(`${serverURL}${api}/${collectionSlug}/${id}`, {
+          headers: {
+            'Accept-Language': i18n.language,
+            'Content-Type': 'application/json',
+          },
+        })
+        .then(async (res) => {
+          try {
+            const json = await res.json()
 
-              if (res.status < 400) {
-                toast.success(
-                  t('general:titleDeleted', {
-                    label: getTranslation(singularLabel, i18n),
-                    title,
-                  }) || json.message,
+            if (res.status < 400) {
+              toast.success(
+                t('general:titleDeleted', {
+                  label: getTranslation(singularLabel, i18n),
+                  title,
+                }) || json.message,
+              )
+
+              if (redirectAfterDelete) {
+                return startRouteTransition(() =>
+                  router.push(
+                    formatAdminURL({
+                      adminRoute,
+                      path: `/collections/${collectionSlug}`,
+                    }),
+                  ),
                 )
-
-                if (redirectAfterDelete) {
-                  return startRouteTransition(() =>
-                    router.push(
-                      formatAdminURL({
-                        adminRoute,
-                        path: `/collections/${collectionSlug}`,
-                      }),
-                    ),
-                  )
-                }
-
-                if (typeof onDelete === 'function') {
-                  await onDelete({ id, collectionConfig })
-                }
-
-                return
               }
 
-              if (json.errors) {
-                json.errors.forEach((error) => toast.error(error.message))
-              } else {
-                addDefaultError()
+              if (typeof onDelete === 'function') {
+                await onDelete({ id, collectionConfig })
               }
 
-              return false
-            } catch (_err) {
-              return addDefaultError()
+              return
             }
-          })
-      } catch (_err) {
-        setConfirming(false)
-        closeConfirmationModal()
-        return addDefaultError()
-      }
-    },
-    [
-      setModified,
-      serverURL,
-      api,
-      collectionSlug,
-      id,
-      t,
-      singularLabel,
-      addDefaultError,
-      i18n,
-      title,
-      router,
-      adminRoute,
-      redirectAfterDelete,
-      onDelete,
-      collectionConfig,
-      startRouteTransition,
-    ],
-  )
+
+            if (json.errors) {
+              json.errors.forEach((error) => toast.error(error.message))
+            } else {
+              addDefaultError()
+            }
+
+            return false
+          } catch (_err) {
+            return addDefaultError()
+          }
+        })
+    } catch (_err) {
+      return addDefaultError()
+    }
+  }, [
+    setModified,
+    serverURL,
+    api,
+    collectionSlug,
+    id,
+    t,
+    singularLabel,
+    addDefaultError,
+    i18n,
+    title,
+    router,
+    adminRoute,
+    redirectAfterDelete,
+    onDelete,
+    collectionConfig,
+    startRouteTransition,
+  ])
 
   if (id) {
     return (

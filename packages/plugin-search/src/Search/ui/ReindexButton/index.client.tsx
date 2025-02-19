@@ -1,7 +1,5 @@
 'use client'
 
-import type { OnConfirm } from '@payloadcms/ui'
-
 import {
   ConfirmationModal,
   Popup,
@@ -26,7 +24,7 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
   searchCollections,
   searchSlug,
 }) => {
-  const { closeModal, openModal } = useModal()
+  const { openModal } = useModal()
 
   const { config } = useConfig()
 
@@ -41,46 +39,33 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
 
   const openConfirmModal = useCallback(() => openModal(confirmReindexModalSlug), [openModal])
 
-  const handleReindexSubmit: OnConfirm = useCallback(
-    async ({ closeConfirmationModal, setConfirming }) => {
-      if (!reindexCollections.length) {
-        setConfirming(false)
-        closeConfirmationModal()
-        return
+  const handleReindexSubmit = useCallback(async () => {
+    if (!reindexCollections.length) {
+      return
+    }
+
+    try {
+      const res = await fetch(`${config.routes.api}/${searchSlug}/reindex?locale=${locale.code}`, {
+        body: JSON.stringify({
+          collections: reindexCollections,
+        }),
+        method: 'POST',
+      })
+
+      const { message } = (await res.json()) as { message: string }
+
+      if (!res.ok) {
+        toast.error(message)
+      } else {
+        toast.success(message)
+        return router.refresh()
       }
-
-      try {
-        const res = await fetch(
-          `${config.routes.api}/${searchSlug}/reindex?locale=${locale.code}`,
-          {
-            body: JSON.stringify({
-              collections: reindexCollections,
-            }),
-            method: 'POST',
-          },
-        )
-
-        setConfirming(false)
-        closeConfirmationModal()
-
-        const { message } = (await res.json()) as { message: string }
-
-        if (!res.ok) {
-          toast.error(message)
-        } else {
-          toast.success(message)
-          router.refresh()
-        }
-      } catch (_err: unknown) {
-        // swallow error, toast shown above
-      } finally {
-        setConfirming(false)
-        closeConfirmationModal()
-        setReindexCollections([])
-      }
-    },
-    [reindexCollections, router, searchSlug, locale, config],
-  )
+    } catch (_err: unknown) {
+      // swallow error, toast shown above
+    } finally {
+      setReindexCollections([])
+    }
+  }, [reindexCollections, router, searchSlug, locale, config])
 
   const handleShowConfirmModal = useCallback(
     (collections: string | string[] = searchCollections) => {

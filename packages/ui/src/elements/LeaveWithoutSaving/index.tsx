@@ -1,7 +1,7 @@
 'use client'
 import React, { useCallback } from 'react'
 
-import type { OnCancel, OnConfirm } from '../ConfirmationModal/index.js'
+import type { OnCancel } from '../ConfirmationModal/index.js'
 
 import { useForm, useFormModified } from '../../forms/Form/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
@@ -36,10 +36,8 @@ export const LeaveWithoutSaving: React.FC = () => {
     closeModal(modalSlug)
   }, [closeModal])
 
-  const onConfirm: OnConfirm = useCallback(({ closeConfirmationModal, setConfirming }) => {
+  const onConfirm = useCallback(() => {
     setHasAccepted(true)
-    setConfirming(false)
-    closeConfirmationModal()
   }, [])
 
   return (

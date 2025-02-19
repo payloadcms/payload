@@ -10,11 +10,6 @@ import './index.scss'
 
 const baseClass = 'confirmation-modal'
 
-export type OnConfirm = (args: {
-  closeConfirmationModal: () => void
-  setConfirming: (state: boolean) => void
-}) => Promise<void> | void
-
 export type OnCancel = () => void
 
 export type ConfirmationModalProps = {
@@ -25,7 +20,7 @@ export type ConfirmationModalProps = {
   heading: React.ReactNode
   modalSlug: string
   onCancel?: OnCancel
-  onConfirm: OnConfirm
+  onConfirm: () => Promise<void> | void
 }
 
 export function ConfirmationModal(props: ConfirmationModalProps) {
@@ -82,13 +77,12 @@ export function ConfirmationModal(props: ConfirmationModalProps) {
           </Button>
           <Button
             id="confirm-action"
-            onClick={() => {
+            onClick={async () => {
               if (!confirming) {
                 setConfirming(true)
-                void onConfirm({
-                  closeConfirmationModal: () => closeModal(modalSlug),
-                  setConfirming: (state) => setConfirming(state),
-                })
+                await onConfirm()
+                setConfirming(false)
+                closeModal(modalSlug)
               }
             }}
             size="large"
