@@ -59,6 +59,9 @@
       "path": "./packages/plugin-seo"
     },
     {
+      "path": "./packages/plugin-import-export"
+    },
+    {
       "path": "./packages/plugin-stripe"
     },
     {
