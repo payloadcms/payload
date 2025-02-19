@@ -1,5 +1,6 @@
 import ObjectIdImport from 'bson-objectid'
 import {
+  captureError,
   type CollectionSlug,
   type Data,
   type Field,
@@ -189,9 +190,10 @@ export const copyDataFromLocaleHandler = async (args: CopyDataFromLocaleArgs) =>
   try {
     return await copyDataFromLocale(args)
   } catch (err) {
-    req.payload.logger.error({
+    await captureError({
       err,
       msg: `There was an error copying data from "${args.fromLocale}" to "${args.toLocale}"`,
+      req,
     })
 
     if (err.message === 'Unauthorized') {

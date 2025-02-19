@@ -1,11 +1,11 @@
 import type { PayloadRequest } from '../types/index.js'
 
-import { type Payload } from '../index.js'
+import { captureError, type Payload } from '../index.js'
 
 type Args = {
   id?: number | string
   payload: Payload
-  req?: PayloadRequest
+  req: PayloadRequest
   slug: string
 }
 
@@ -52,9 +52,10 @@ export const deleteScheduledPublishJobs = async ({
       },
     })
   } catch (err) {
-    payload.logger.error({
+    await captureError({
       err,
       msg: `There was an error deleting scheduled publish jobs from the queue for ${slug} document with ID ${id}.`,
+      req,
     })
   }
 }

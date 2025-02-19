@@ -10,7 +10,7 @@ import {
   hasSavePermission as getHasSavePermission,
   isEditing as getIsEditing,
 } from '@payloadcms/ui/shared'
-import { docAccessOperation, docAccessOperationGlobal, logError } from 'payload'
+import { captureError, docAccessOperation, docAccessOperationGlobal, logError } from 'payload'
 
 export const getDocumentPermissions = async (args: {
   collectionConfig?: SanitizedCollectionConfig
@@ -60,7 +60,11 @@ export const getDocumentPermissions = async (args: {
         }).then((permissions) => permissions.update)
       }
     } catch (err) {
-      logError({ err, payload: req.payload })
+      await captureError({
+        err,
+        msg: `Failed to retrieve collection ${collectionConfig.slug} document with ID-${id} permissions`,
+        req,
+      })
     }
   }
 
@@ -87,7 +91,11 @@ export const getDocumentPermissions = async (args: {
         }).then((permissions) => permissions.update)
       }
     } catch (err) {
-      logError({ err, payload: req.payload })
+      await captureError({
+        err,
+        msg: `Failed to retrieve global ${globalConfig.slug} permissions`,
+        req,
+      })
     }
   }
 

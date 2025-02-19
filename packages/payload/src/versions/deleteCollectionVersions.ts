@@ -1,6 +1,6 @@
 import type { PayloadRequest } from '../types/index.js'
 
-import { type Payload } from '../index.js'
+import { captureError, type Payload } from '../index.js'
 
 type Args = {
   id?: number | string
@@ -21,9 +21,11 @@ export const deleteCollectionVersions = async ({ id, slug, payload, req }: Args)
       },
     })
   } catch (err) {
-    payload.logger.error({
+    await captureError({
       err,
       msg: `There was an error removing versions for the deleted ${slug} document with ID ${id}.`,
+      payload,
+      req,
     })
   }
 }

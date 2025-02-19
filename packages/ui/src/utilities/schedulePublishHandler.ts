@@ -1,4 +1,4 @@
-import type { PayloadRequest, SchedulePublishTaskInput } from 'payload'
+import { captureError, type PayloadRequest, type SchedulePublishTaskInput } from 'payload'
 
 export type SchedulePublishHandlerArgs = {
   date?: Date
@@ -77,8 +77,7 @@ export const schedulePublishHandler = async ({
       }
     }
 
-    payload.logger.error(error)
-    payload.logger.error(err)
+    await captureError({ err, msg: error, req })
 
     return {
       error,

@@ -1,8 +1,8 @@
 import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
-import type { Connect, Payload } from 'payload'
 
 import { pushDevSchema } from '@payloadcms/drizzle'
 import { drizzle } from 'drizzle-orm/node-postgres'
+import { captureError, type Connect, type Payload } from 'payload'
 import pg from 'pg'
 
 import type { PostgresAdapter } from './types.js'
@@ -87,16 +87,18 @@ export const connect: Connect = async function connect(
         await this.connect(options)
         return
       }
-    } else {
-      this.payload.logger.error({
-        err,
-        msg: `Error: cannot connect to Postgres. Details: ${err.message}`,
-      })
     }
 
     if (typeof this.rejectInitializing === 'function') {
       this.rejectInitializing()
     }
+
+    await captureError({
+      err,
+      msg: `Error: cannot connect to Postgres. Details: ${err.message}`,
+      payload: this.payload,
+    })
+
     process.exit(1)
   }
 

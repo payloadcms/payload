@@ -1,5 +1,7 @@
 import type { ClientConfig } from 'pg'
 
+import { captureError } from 'payload'
+
 import type { BasePostgresAdapter } from './types.js'
 
 const setConnectionStringDatabase = ({
@@ -88,9 +90,10 @@ export const createDatabase = async function (this: BasePostgresAdapter, args: A
         await createdDatabaseClient.query(`CREATE SCHEMA ${schemaName}`)
         this.payload.logger.info(`Created schema "${dbName}.${schemaName}"`)
       } catch (err) {
-        this.payload.logger.error({
+        await captureError({
           err,
           msg: `Error: failed to create schema "${dbName}.${schemaName}". Details: ${err.message}`,
+          payload: this.payload,
         })
       } finally {
         await createdDatabaseClient.end()
@@ -99,9 +102,10 @@ export const createDatabase = async function (this: BasePostgresAdapter, args: A
 
     return true
   } catch (err) {
-    this.payload.logger.error({
+    await captureError({
       err,
       msg: `Error: failed to create database ${dbName}. Details: ${err.message}`,
+      payload: this.payload,
     })
 
     return false

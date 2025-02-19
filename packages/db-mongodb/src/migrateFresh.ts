@@ -1,6 +1,11 @@
-import type { PayloadRequest } from 'payload'
-
-import { commitTransaction, initTransaction, killTransaction, readMigrationFiles } from 'payload'
+import {
+  captureError,
+  commitTransaction,
+  createLocalReq,
+  initTransaction,
+  killTransaction,
+  readMigrationFiles,
+} from 'payload'
 import prompts from 'prompts'
 
 import type { MongooseAdapter } from './index.js'
@@ -45,7 +50,7 @@ export async function migrateFresh(
     msg: `Found ${migrationFiles.length} migration files.`,
   })
 
-  const req = { payload }
+  const req = await createLocalReq({}, payload)
 
   // Run all migrate up
   for (const migration of migrationFiles) {
@@ -68,10 +73,12 @@ export async function migrateFresh(
       payload.logger.info({ msg: `Migrated:  ${migration.name} (${Date.now() - start}ms)` })
     } catch (err: unknown) {
       await killTransaction(req)
-      payload.logger.error({
+      await captureError({
         err,
         msg: `Error running migration ${migration.name}. Rolling back.`,
+        req,
       })
+
       throw err
     }
   }

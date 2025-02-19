@@ -15,6 +15,7 @@ import type {
 } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
+import { captureError } from 'payload'
 import {
   deepCopyObjectSimple,
   fieldAffectsData,
@@ -214,11 +215,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         })
       } catch (err) {
         validationResult = `Error validating field at path: ${path}`
-
-        req.payload.logger.error({
-          err,
-          msg: validationResult,
-        })
+        await captureError({ err, msg: validationResult, req })
       }
     }
 

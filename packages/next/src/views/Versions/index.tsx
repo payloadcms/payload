@@ -1,6 +1,8 @@
+import type { DocumentViewServerProps, PaginatedDocs } from 'payload'
+
 import { Gutter, ListQueryProvider, SetDocumentStepNav } from '@payloadcms/ui'
 import { notFound } from 'next/navigation.js'
-import { type DocumentViewServerProps, logError, type PaginatedDocs } from 'payload'
+import { logError } from 'payload'
 import { isNumber } from 'payload/shared'
 import React from 'react'
 

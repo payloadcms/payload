@@ -1,8 +1,8 @@
-import type { Payload } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { FileToSave } from './types.js'
 
 import { FileUploadError } from '../errors/index.js'
+import { captureError, type Payload } from '../index.js'
 import saveBufferToFile from './saveBufferToFile.js'
 
 export const uploadFiles = async (
@@ -17,7 +17,7 @@ export const uploadFiles = async (
       }),
     )
   } catch (err) {
-    payload.logger.error(err)
+    await captureError({ err, req })
     throw new FileUploadError(req.t)
   }
 }

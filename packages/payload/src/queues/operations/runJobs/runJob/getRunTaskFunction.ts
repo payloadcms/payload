@@ -19,6 +19,7 @@ import type {
 } from '../../../config/types/workflowTypes.js'
 import type { UpdateJobFunction } from './getUpdateJobFunction.js'
 
+import { captureError } from '../../../../utilities/captureError.js'
 import { calculateBackoffWaitUntil } from './calculateBackoffWaitUntil.js'
 import { importHandlerPath } from './importHandlerPath.js'
 
@@ -73,7 +74,8 @@ export async function handleTaskFailed({
   taskStatus: null | SingleTaskStatus<string>
   updateJob: UpdateJobFunction
 }): Promise<never> {
-  req.payload.logger.error({ err: error, job, msg: `Error running task ${taskID}`, taskSlug })
+  await captureError({ err: error, msg: `Error running task ${taskID}`, req })
+  req.payload.logger.error({ job, taskSlug })
 
   if (taskConfig?.onFail) {
     await taskConfig.onFail()

@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import type { BaseDatabaseAdapter } from '../types.js'
 
+import { captureError } from '../../utilities/captureError.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { createLocalReq } from '../../utilities/createLocalReq.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
@@ -58,10 +59,9 @@ export async function migrateRefresh(this: BaseDatabaseAdapter) {
         if (err instanceof Error) {
           msg += ` ${err.message}`
         }
-        payload.logger.error({
-          err,
-          msg,
-        })
+
+        await captureError({ err, msg, req })
+
         process.exit(1)
       }
     }
@@ -93,10 +93,7 @@ export async function migrateRefresh(this: BaseDatabaseAdapter) {
       if (err instanceof Error) {
         msg += ` ${err.message}`
       }
-      payload.logger.error({
-        err,
-        msg,
-      })
+      await captureError({ err, msg, req })
       process.exit(1)
     }
   }

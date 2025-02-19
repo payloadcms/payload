@@ -11,6 +11,7 @@ import type {
 import type { RunJobResult } from './runJob/index.js'
 
 import { Forbidden } from '../../../errors/Forbidden.js'
+import { captureError } from '../../../utilities/captureError.js'
 import isolateObjectProperty from '../../../utilities/isolateObjectProperty.js'
 import { getUpdateJobFunction } from './runJob/getUpdateJobFunction.js'
 import { importHandlerPath } from './runJob/importHandlerPath.js'
@@ -203,7 +204,12 @@ export const runJobs = async ({
       if (!workflowHandler) {
         const jobLabel = job.workflowSlug || `Task: ${job.taskSlug}`
         const errorMessage = `Can't find runner while importing with the path ${workflowConfig.handler} in job type ${jobLabel}.`
-        req.payload.logger.error(errorMessage)
+        await captureError({
+          err: new Error(
+            `Can't find runner while importing with the path ${workflowConfig.handler} in job type ${jobLabel}.`,
+          ),
+          req,
+        })
 
         await updateJob({
           error: {
@@ -258,9 +264,10 @@ export const runJobs = async ({
         where: { id: { in: jobsToDelete } },
       })
     } catch (err) {
-      req.payload.logger.error({
+      await captureError({
         err,
         msg: `failed to delete jobs ${jobsToDelete.join(', ')} on complete`,
+        req,
       })
     }
   }

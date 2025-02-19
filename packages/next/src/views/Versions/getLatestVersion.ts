@@ -1,6 +1,6 @@
 import type { Payload, PayloadRequest, Where } from 'payload'
 
-import { logError } from 'payload'
+import { captureError, logError } from 'payload'
 
 type ReturnType = {
   id: string
@@ -69,7 +69,19 @@ export async function getLatestVersion(args: Args): Promise<ReturnType> {
       updatedAt: response.docs[0].updatedAt,
     }
   } catch (err) {
-    logError({ err, payload })
+    let msg: string
+    if (type === 'collection') {
+      msg = `Failed to retrieve latest version of collection ${args.slug}, ID-${args.parentID}`
+    } else {
+      msg = `Failed to retrieve latest version of global ${args.slug}`
+    }
+
+    await captureError({
+      collectionSlug: type === 'collection' ? args.slug : undefined,
+      err,
+      msg,
+      req,
+    })
 
     return null
   }

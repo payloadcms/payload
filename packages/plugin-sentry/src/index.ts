@@ -53,11 +53,12 @@ export const sentryPlugin =
         afterError: [
           ...(config.hooks?.afterError ?? []),
           async (args) => {
-            const status = (args.error as APIError).status ?? 500
+            const status = (args.error as APIError)?.status ?? 500
             if (status >= 500 || captureErrors.includes(status)) {
               let context: Partial<ScopeContext> = {
                 extra: {
                   errorCollectionSlug: args.collection?.slug,
+                  message: args.message,
                 },
                 ...(args.req.user && {
                   user: {

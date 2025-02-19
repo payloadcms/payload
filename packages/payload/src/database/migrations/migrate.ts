@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import type { BaseDatabaseAdapter } from '../types.js'
 
+import { captureError } from '../../utilities/captureError.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { createLocalReq } from '../../utilities/createLocalReq.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
@@ -50,7 +51,7 @@ export const migrate: BaseDatabaseAdapter['migrate'] = async function migrate(
       await commitTransaction(req)
     } catch (err: unknown) {
       await killTransaction(req)
-      payload.logger.error({ err, msg: `Error running migration ${migration.name}` })
+      await captureError({ err, msg: `Error running migration ${migration.name}`, req })
       throw err
     }
   }

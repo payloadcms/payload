@@ -12,7 +12,7 @@ import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerCompo
 import { formatAdminURL, isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { notFound, redirect } from 'next/navigation.js'
-import { logError } from 'payload'
+import { captureError, logError } from 'payload'
 import React from 'react'
 
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
@@ -405,7 +405,12 @@ export async function Document(props: AdminViewServerProps) {
       throw error
     }
 
-    logError({ err: error, payload: props.initPageResult.req.payload })
+    await captureError({
+      collectionSlug: props?.initPageResult?.collectionConfig?.slug,
+      err: error,
+      msg: `Failed to render document on - ${props.initPageResult.req?.url}`,
+      req: props.initPageResult.req,
+    })
 
     if (error.message === 'not-found') {
       notFound()

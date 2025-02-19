@@ -1,4 +1,5 @@
 import {
+  captureError,
   commitTransaction,
   createLocalReq,
   getMigrations,
@@ -63,10 +64,7 @@ export async function migrateReset(this: DrizzleAdapter): Promise<void> {
       }
 
       await killTransaction(req)
-      payload.logger.error({
-        err,
-        msg,
-      })
+      await captureError({ err, msg, req })
       process.exit(1)
     }
   }
@@ -85,7 +83,7 @@ export async function migrateReset(this: DrizzleAdapter): Promise<void> {
         },
       })
     } catch (err: unknown) {
-      payload.logger.error({ err, msg: 'Error deleting dev migration' })
+      await captureError({ err, msg: 'Error deleting dev migration', req })
     }
   }
 }
