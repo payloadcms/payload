@@ -1,9 +1,14 @@
 'use client'
-import { Modal, useModal } from '@faceless-ui/modal'
+import type { ClientCollectionConfig } from 'payload'
+
+import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import * as qs from 'qs-esm'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback } from 'react'
+import { toast } from 'sonner'
+
+import type { OnConfirm } from '../ConfirmationModal/index.js'
 
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -11,17 +16,9 @@ import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
-import { Button } from '../Button/index.js'
-import { Pill } from '../Pill/index.js'
-import './index.scss'
-
-const baseClass = 'unpublish-many'
-
-import type { ClientCollectionConfig } from 'payload'
-
-import { toast } from 'sonner'
-
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
+import { ConfirmationModal } from '../ConfirmationModal/index.js'
+import { Pill } from '../Pill/index.js'
 
 export type UnpublishManyProps = {
   collection: ClientCollectionConfig
@@ -42,7 +39,6 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
   const { i18n, t } = useTranslation()
   const searchParams = useSearchParams()
   const { getQueryParams, selectAll } = useSelection()
-  const [submitted, setSubmitted] = useState(false)
   const router = useRouter()
   const { clearRouteCache } = useRouteCache()
 
@@ -55,8 +51,7 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
     toast.error(t('error:unknown'))
   }, [t])
 
-  const handleUnpublish = useCallback(async () => {
-    setSubmitted(true)
+  const handleUnpublish: OnConfirm = useCallback(async () => {
     await requests
       .patch(`${serverURL}${api}/${slug}${getQueryParams({ _status: { not_equals: 'draft' } })}`, {
         body: JSON.stringify({
@@ -138,40 +133,19 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
   return (
     <React.Fragment>
       <Pill
-        className={`${baseClass}__toggle`}
         onClick={() => {
-          setSubmitted(false)
           toggleModal(modalSlug)
         }}
       >
         {t('version:unpublish')}
       </Pill>
-      <Modal className={baseClass} slug={modalSlug}>
-        <div className={`${baseClass}__wrapper`}>
-          <div className={`${baseClass}__content`}>
-            <h1>{t('version:confirmUnpublish')}</h1>
-            <p>{t('version:aboutToUnpublishSelection', { label: getTranslation(plural, i18n) })}</p>
-          </div>
-          <div className={`${baseClass}__controls`}>
-            <Button
-              buttonStyle="secondary"
-              id="confirm-cancel"
-              onClick={submitted ? undefined : () => toggleModal(modalSlug)}
-              size="large"
-              type="button"
-            >
-              {t('general:cancel')}
-            </Button>
-            <Button
-              id="confirm-unpublish"
-              onClick={submitted ? undefined : handleUnpublish}
-              size="large"
-            >
-              {submitted ? t('version:unpublishing') : t('general:confirm')}
-            </Button>
-          </div>
-        </div>
-      </Modal>
+      <ConfirmationModal
+        body={t('version:aboutToUnpublishSelection', { label: getTranslation(plural, i18n) })}
+        confirmingLabel={t('version:unpublishing')}
+        heading={t('version:confirmUnpublish')}
+        modalSlug={modalSlug}
+        onConfirm={handleUnpublish}
+      />
     </React.Fragment>
   )
 }

@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation.js'
 import React, { useCallback } from 'react'
 import { toast } from 'sonner'
 
-import type { HandleConfirmationAction } from '../ConfirmationModal/index.js'
+import type { OnConfirm } from '../ConfirmationModal/index.js'
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 
 import { useForm } from '../../forms/Form/context.js'
@@ -65,7 +65,11 @@ export const DeleteDocument: React.FC<Props> = (props) => {
 
   const modalSlug = `delete-${id}`
 
-  const handleDelete: HandleConfirmationAction = useCallback(
+  const addDefaultError = useCallback(() => {
+    toast.error(t('error:deletingTitle', { title }))
+  }, [t, title])
+
+  const handleDelete: OnConfirm = useCallback(
     async ({ closeConfirmationModal, setPerformingConfirmationAction }) => {
       setModified(false)
 
@@ -80,11 +84,10 @@ export const DeleteDocument: React.FC<Props> = (props) => {
           .then(async (res) => {
             try {
               const json = await res.json()
+              setPerformingConfirmationAction(false)
+              closeConfirmationModal()
 
               if (res.status < 400) {
-                setPerformingConfirmationAction(false)
-                closeConfirmationModal()
-
                 toast.success(
                   t('general:titleDeleted', {
                     label: getTranslation(singularLabel, i18n),
@@ -107,29 +110,23 @@ export const DeleteDocument: React.FC<Props> = (props) => {
                   await onDelete({ id, collectionConfig })
                 }
 
-                closeConfirmationModal()
-
                 return
               }
-
-              closeConfirmationModal()
 
               if (json.errors) {
                 json.errors.forEach((error) => toast.error(error.message))
               } else {
-                setPerformingConfirmationAction(false)
-                toast.error(t('error:deletingTitle', { title }))
+                addDefaultError()
               }
+
               return false
             } catch (_err) {
-              setPerformingConfirmationAction(false)
-              toast.error(t('error:deletingTitle', { title }))
-              return
+              return addDefaultError()
             }
           })
       } catch (_err) {
         setPerformingConfirmationAction(false)
-        toast.error(t('error:deletingTitle', { title }))
+        addDefaultError()
       }
     },
     [
@@ -140,6 +137,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
       id,
       t,
       singularLabel,
+      addDefaultError,
       i18n,
       title,
       router,
@@ -163,7 +161,6 @@ export const DeleteDocument: React.FC<Props> = (props) => {
           {t('general:delete')}
         </PopupList.Button>
         <ConfirmationModal
-          actionLabel={t('general:deleting')}
           body={
             <Translation
               elements={{
@@ -177,9 +174,10 @@ export const DeleteDocument: React.FC<Props> = (props) => {
               }}
             />
           }
-          handleAction={handleDelete}
+          confirmingLabel={t('general:deleting')}
           heading={t('general:confirmDeletion')}
           modalSlug={modalSlug}
+          onConfirm={handleDelete}
         />
       </React.Fragment>
     )

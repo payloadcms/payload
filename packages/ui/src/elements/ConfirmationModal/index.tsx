@@ -2,27 +2,46 @@
 import { Modal, useModal } from '@faceless-ui/modal'
 import React, { useEffect } from 'react'
 
+import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
+import { drawerZBase } from '../Drawer/index.js'
 import './index.scss'
 
 const baseClass = 'confirmation-modal'
 
-export type HandleConfirmationAction = (args: {
+export type OnConfirm = (args: {
   closeConfirmationModal: () => void
   setPerformingConfirmationAction: (state: boolean) => void
 }) => Promise<void> | void
 
+export type OnCancel = () => void
+
 export type ConfirmationModalProps = {
-  actionLabel: string
   body: React.ReactNode
-  handleAction: HandleConfirmationAction
+  cancelLabel?: string
+  confirmingLabel?: string
+  confirmLabel?: string
   heading: React.ReactNode
   modalSlug: string
+  onCancel?: OnCancel
+  onConfirm: OnConfirm
 }
 
-export const ConfirmationModal: React.FC<ConfirmationModalProps> = (props) => {
-  const { actionLabel, body, handleAction, heading, modalSlug } = props
+export function ConfirmationModal(props: ConfirmationModalProps) {
+  const {
+    body,
+    cancelLabel,
+    confirmingLabel,
+    confirmLabel,
+    heading,
+    modalSlug,
+    onCancel,
+    onConfirm,
+  } = props
+
+  const editDepth = useEditDepth()
+
   const [performingAction, setPerformingAction] = React.useState(false)
 
   const { closeModal } = useModal()
@@ -35,7 +54,13 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = (props) => {
   }, [closeModal, modalSlug])
 
   return (
-    <Modal className={baseClass} slug={modalSlug}>
+    <Modal
+      className={baseClass}
+      slug={modalSlug}
+      style={{
+        zIndex: drawerZBase + editDepth,
+      }}
+    >
       <div className={`${baseClass}__wrapper`}>
         <div className={`${baseClass}__content`}>
           <h1>{heading}</h1>
@@ -45,18 +70,27 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = (props) => {
           <Button
             buttonStyle="secondary"
             id="confirm-cancel"
-            onClick={performingAction ? undefined : () => closeModal(modalSlug)}
+            onClick={
+              performingAction
+                ? undefined
+                : () => {
+                    closeModal(modalSlug)
+                    if (typeof onCancel === 'function') {
+                      onCancel()
+                    }
+                  }
+            }
             size="large"
             type="button"
           >
-            {t('general:cancel')}
+            {cancelLabel || t('general:cancel')}
           </Button>
           <Button
             id="confirm-action"
             onClick={() => {
               if (!performingAction) {
                 setPerformingAction(true)
-                void handleAction({
+                void onConfirm({
                   closeConfirmationModal: () => closeModal(modalSlug),
                   setPerformingConfirmationAction: (state) => setPerformingAction(state),
                 })
@@ -64,7 +98,9 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = (props) => {
             }}
             size="large"
           >
-            {performingAction ? actionLabel : t('general:confirm')}
+            {performingAction
+              ? confirmingLabel || confirmLabel
+              : confirmLabel || t('general:confirm')}
           </Button>
         </div>
       </div>

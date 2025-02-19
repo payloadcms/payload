@@ -2,28 +2,23 @@
 
 import type { SanitizedCollectionConfig } from 'payload'
 
-import { Modal, useModal } from '@faceless-ui/modal'
+import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback } from 'react'
 import { toast } from 'sonner'
 
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
-import { Button } from '../Button/index.js'
-import { drawerZBase } from '../Drawer/index.js'
-import './index.scss'
+import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { PopupList } from '../Popup/index.js'
-
-const baseClass = 'duplicate'
 
 export type Props = {
   readonly id: string
@@ -57,21 +52,19 @@ export const DuplicateDocument: React.FC<Props> = ({
 
   const collectionConfig = getEntityConfig({ collectionSlug: slug })
 
-  const [hasClicked, setHasClicked] = useState<boolean>(false)
+  const [show, setShow] = React.useState(false)
   const { i18n, t } = useTranslation()
 
   const modalSlug = `duplicate-${id}`
 
-  const editDepth = useEditDepth()
-
   const handleClick = useCallback(
     async (override = false) => {
-      setHasClicked(true)
-
+      setShow(true)
       if (modified && !override) {
         toggleModal(modalSlug)
         return
       }
+
       await requests
         .post(
           `${serverURL}${apiRoute}/${slug}/${id}/duplicate${locale?.code ? `?locale=${locale.code}` : ''}`,
@@ -139,8 +132,8 @@ export const DuplicateDocument: React.FC<Props> = ({
     ],
   )
 
-  const confirm = useCallback(async () => {
-    setHasClicked(false)
+  const onConfirm = useCallback(async () => {
+    setShow(false)
     await handleClick(true)
   }, [handleClick])
 
@@ -149,35 +142,14 @@ export const DuplicateDocument: React.FC<Props> = ({
       <PopupList.Button id="action-duplicate" onClick={() => void handleClick(false)}>
         {t('general:duplicate')}
       </PopupList.Button>
-      {modified && hasClicked && (
-        <Modal
-          className={`${baseClass}__modal`}
-          slug={modalSlug}
-          style={{
-            zIndex: drawerZBase + editDepth,
-          }}
-        >
-          <div className={`${baseClass}__wrapper`}>
-            <div className={`${baseClass}__content`}>
-              <h1>{t('general:confirmDuplication')}</h1>
-              <p>{t('general:unsavedChangesDuplicate')}</p>
-            </div>
-            <div className={`${baseClass}__controls`}>
-              <Button
-                buttonStyle="secondary"
-                id="confirm-cancel"
-                onClick={() => toggleModal(modalSlug)}
-                size="large"
-                type="button"
-              >
-                {t('general:cancel')}
-              </Button>
-              <Button id="confirm-duplicate" onClick={() => void confirm()} size="large">
-                {t('general:duplicateWithoutSaving')}
-              </Button>
-            </div>
-          </div>
-        </Modal>
+      {show && (
+        <ConfirmationModal
+          body={t('general:unsavedChangesDuplicate')}
+          confirmLabel={t('general:duplicateWithoutSaving')}
+          heading={t('general:unsavedChanges')}
+          modalSlug={modalSlug}
+          onConfirm={onConfirm}
+        />
       )}
     </React.Fragment>
   )
