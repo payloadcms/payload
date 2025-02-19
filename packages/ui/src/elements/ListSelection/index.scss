@@ -11,6 +11,7 @@
       border: none;
       text-decoration: underline;
       cursor: pointer;
+      font-size: inherit;
     }
 
     @include small-break {

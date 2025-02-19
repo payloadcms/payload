@@ -4,8 +4,10 @@ import type { Config } from '../config/types.js'
 // import { mergeListSearchAndWhere } from '../utilities/mergeListSearchAndWhere.js'
 // import { validateWhereQuery } from '../utilities/validateWhereQuery.js'
 
-export const getListFiltersCollection = (config: Config): CollectionConfig => ({
-  slug: 'payload-list-filters',
+export const sharedFiltersCollectionSlug = 'payload-shared-filters'
+
+export const getSharedFiltersCollection = (config: Config): CollectionConfig => ({
+  slug: sharedFiltersCollectionSlug,
   access: {
     read: ({ req }) => Boolean(req.user),
     // access is controlled on the document-level
@@ -72,5 +74,3 @@ export const getListFiltersCollection = (config: Config): CollectionConfig => ({
   ],
   lockDocuments: false,
 })
-
-export default getListFiltersCollection

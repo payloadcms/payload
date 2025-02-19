@@ -3,10 +3,9 @@ import type { PaginatedDocs, SharedListFilter } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { Fragment, useCallback, useEffect, useState } from 'react'
+import { Fragment, useCallback, useState } from 'react'
 
-import type { OnConfirm } from '../ConfirmationModal/index.js'
-
+import { useListDrawer } from '../../elements/ListDrawer/index.js'
 import { Dots } from '../../icons/Dots/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
@@ -26,24 +25,20 @@ export function SharedListFilters({ filters }: { filters: PaginatedDocs<SharedLi
   const { i18n, t } = useTranslation()
   const { openModal } = useModal()
 
-  const [DocumentDrawer, , { openDrawer }] = useDocumentDrawer({
+  const [DocumentDrawer, , { openDrawer: openEditDrawer }] = useDocumentDrawer({
     id: currentlyOpenDrawer,
-    collectionSlug: 'payload-list-filters',
+    collectionSlug: 'payload-shared-filters',
   })
 
-  useEffect(() => {
-    if (currentlyOpenDrawer) {
-      openDrawer()
-    }
-  }, [currentlyOpenDrawer, openDrawer])
+  const [ListDrawer, , { openDrawer: openListDrawer }] = useListDrawer({
+    collectionSlugs: ['payload-shared-filters'],
+  })
 
-  const handleDelete: OnConfirm = useCallback(({ closeConfirmationModal, setConfirming }) => {
+  const handleDelete = useCallback(() => {
     // handle delete
-    setConfirming(false)
-    closeConfirmationModal()
   }, [])
 
-  if (!filters) {
+  if (!filters || !filters.docs.length) {
     return null
   }
 
@@ -55,7 +50,7 @@ export function SharedListFilters({ filters }: { filters: PaginatedDocs<SharedLi
             <Pill
               key={filter.id}
               onClick={() => setSelectedFilter(filter)}
-              pillStyle={selectedFilter.id === filter.id ? 'dark' : 'light'}
+              pillStyle={selectedFilter && selectedFilter?.id === filter.id ? 'dark' : 'white'}
             >
               {filter.title}
             </Pill>
@@ -77,19 +72,26 @@ export function SharedListFilters({ filters }: { filters: PaginatedDocs<SharedLi
           >
             <PopupList.ButtonGroup>
               {selectedFilter ? (
-                <Fragment>
-                  <PopupList.Button onClick={() => setCurrentlyOpenDrawer(selectedFilter.id)}>
-                    {t('general:edit')}
-                  </PopupList.Button>
-                  <PopupList.Button onClick={() => openModal(confirmDeleteModalSlug)}>
-                    {t('general:delete')}
-                  </PopupList.Button>
-                </Fragment>
+                <PopupList.Button
+                  onClick={() => {
+                    setCurrentlyOpenDrawer(selectedFilter.id)
+                    openEditDrawer()
+                  }}
+                >
+                  {t('general:edit')}
+                </PopupList.Button>
+              ) : null}
+              <PopupList.Button onClick={() => openListDrawer()}>Manage All</PopupList.Button>
+              {selectedFilter ? (
+                <PopupList.Button onClick={() => openModal(confirmDeleteModalSlug)}>
+                  {t('general:delete')}
+                </PopupList.Button>
               ) : null}
             </PopupList.ButtonGroup>
           </Popup>
         </div>
       </div>
+      <ListDrawer />
       <DocumentDrawer />
       <ConfirmationModal
         body={
@@ -100,7 +102,7 @@ export function SharedListFilters({ filters }: { filters: PaginatedDocs<SharedLi
             i18nKey="general:aboutToDelete"
             t={t}
             variables={{
-              label: getTranslation(selectedFilter.title, i18n),
+              label: getTranslation(selectedFilter?.title, i18n),
               title: selectedFilter?.title,
             }}
           />

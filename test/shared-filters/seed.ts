@@ -37,7 +37,7 @@ export const seed = async (_payload: Payload) => {
         }),
       () =>
         _payload.create({
-          collection: 'payload-list-filters',
+          collection: 'payload-shared-filters',
           data: {
             title: 'Example Filter',
             where: {

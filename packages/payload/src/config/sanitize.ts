@@ -26,10 +26,13 @@ import {
   type GlobalSlug,
   sanitizeFields,
 } from '../index.js'
-import { getListFiltersCollection } from '../listFilters/config.js'
-import { getLockedDocumentsCollection } from '../lockedDocuments/config.js'
-import { getPreferencesCollection } from '../preferences/config.js'
-import { getDefaultJobsCollection } from '../queues/config/jobsCollection.js'
+import {
+  getLockedDocumentsCollection,
+  lockedDocumentsCollectionSlug,
+} from '../lockedDocuments/config.js'
+import { getPreferencesCollection, preferencesCollectionSlug } from '../preferences/config.js'
+import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/jobsCollection.js'
+import { getSharedFiltersCollection, sharedFiltersCollectionSlug } from '../sharedFilters/config.js'
 import { flattenBlock } from '../utilities/flattenAllFields.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
 import { defaults } from './defaults.js'
@@ -232,10 +235,10 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   const validRelationships = [
     ...(config.collections.map((c) => c.slug) ?? []),
-    'payload-jobs',
-    'payload-locked-documents',
-    'payload-preferences',
-    'payload-list-filters',
+    jobsCollectionSlug,
+    lockedDocumentsCollectionSlug,
+    preferencesCollectionSlug,
+    sharedFiltersCollectionSlug,
   ]
 
   /**
@@ -371,7 +374,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   configWithDefaults.collections.push(
     await sanitizeCollection(
       config as unknown as Config,
-      getListFiltersCollection(config as unknown as Config),
+      getSharedFiltersCollection(config as unknown as Config),
       richTextSanitizationPromises,
       validRelationships,
     ),

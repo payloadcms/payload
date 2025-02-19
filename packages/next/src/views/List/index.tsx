@@ -122,7 +122,7 @@ export const renderListView = async (
     }
 
     const sharedListFilters = await payload.find({
-      collection: 'payload-list-filters',
+      collection: 'payload-shared-filters',
       depth: 0,
       overrideAccess: false,
       req,

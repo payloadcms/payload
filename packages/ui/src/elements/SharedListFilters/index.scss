@@ -18,6 +18,7 @@
   &__actions {
     display: flex;
     gap: 1rem;
+    align-items: center;
   }
 
   &__actions__reset {
@@ -28,6 +29,8 @@
     padding: 0;
     text-decoration: underline;
     cursor: pointer;
+    font-size: inherit;
+    color: var(--theme-elevation-500);
   }
 
   &__actions__save {
@@ -38,5 +41,7 @@
     padding: 0;
     text-decoration: underline;
     cursor: pointer;
+    font-size: inherit;
+    color: var(--theme-elevation-500);
   }
 }

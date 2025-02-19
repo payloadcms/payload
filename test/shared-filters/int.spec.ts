@@ -10,7 +10,7 @@ import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { pagesSlug } from './slugs.js'
 
-const listFiltersCollection = 'payload-list-filters'
+const listFiltersCollection = 'payload-shared-filters'
 
 let payload: Payload
 let token: string
