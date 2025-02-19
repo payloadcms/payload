@@ -8,7 +8,6 @@ import { useRouter } from 'next/navigation.js'
 import React, { useCallback } from 'react'
 import { toast } from 'sonner'
 
-import type { OnConfirm } from '../ConfirmationModal/index.js'
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
@@ -58,91 +57,77 @@ export const DuplicateDocument: React.FC<Props> = ({
 
   const modalSlug = `duplicate-${id}`
 
-  const duplicate = useCallback(
-    async ({ onResponse }: { onResponse?: () => void } = {}) => {
-      setRenderModal(true)
+  const duplicate = useCallback(async () => {
+    setRenderModal(true)
 
-      await requests
-        .post(
-          `${serverURL}${apiRoute}/${slug}/${id}/duplicate${locale?.code ? `?locale=${locale.code}` : ''}`,
-          {
-            body: JSON.stringify({}),
-            headers: {
-              'Accept-Language': i18n.language,
-              'Content-Type': 'application/json',
-              credentials: 'include',
-            },
+    await requests
+      .post(
+        `${serverURL}${apiRoute}/${slug}/${id}/duplicate${locale?.code ? `?locale=${locale.code}` : ''}`,
+        {
+          body: JSON.stringify({}),
+          headers: {
+            'Accept-Language': i18n.language,
+            'Content-Type': 'application/json',
+            credentials: 'include',
           },
-        )
-        .then(async (res) => {
-          const { doc, errors, message } = await res.json()
-          if (typeof onResponse === 'function') {
-            onResponse()
-          }
-
-          if (res.status < 400) {
-            toast.success(
-              message ||
-                t('general:successfullyDuplicated', { label: getTranslation(singularLabel, i18n) }),
-            )
-
-            setModified(false)
-
-            if (redirectAfterDuplicate) {
-              return startRouteTransition(() =>
-                router.push(
-                  formatAdminURL({
-                    adminRoute,
-                    path: `/collections/${slug}/${doc.id}${locale?.code ? `?locale=${locale.code}` : ''}`,
-                  }),
-                ),
-              )
-            }
-
-            if (typeof onDuplicate === 'function') {
-              void onDuplicate({ collectionConfig, doc })
-            }
-          } else {
-            toast.error(
-              errors?.[0].message ||
-                message ||
-                t('error:unspecific', { label: getTranslation(singularLabel, i18n) }),
-            )
-          }
-        })
-    },
-    [
-      locale,
-      serverURL,
-      apiRoute,
-      slug,
-      id,
-      i18n,
-      t,
-      singularLabel,
-      onDuplicate,
-      redirectAfterDuplicate,
-      setModified,
-      router,
-      adminRoute,
-      collectionConfig,
-      startRouteTransition,
-    ],
-  )
-
-  const onConfirm: OnConfirm = useCallback(
-    async ({ closeConfirmationModal, setConfirming }) => {
-      setRenderModal(false)
-
-      await duplicate({
-        onResponse: () => {
-          setConfirming(false)
-          closeConfirmationModal()
         },
+      )
+      .then(async (res) => {
+        const { doc, errors, message } = await res.json()
+
+        if (res.status < 400) {
+          toast.success(
+            message ||
+              t('general:successfullyDuplicated', { label: getTranslation(singularLabel, i18n) }),
+          )
+
+          setModified(false)
+
+          if (redirectAfterDuplicate) {
+            return startRouteTransition(() =>
+              router.push(
+                formatAdminURL({
+                  adminRoute,
+                  path: `/collections/${slug}/${doc.id}${locale?.code ? `?locale=${locale.code}` : ''}`,
+                }),
+              ),
+            )
+          }
+
+          if (typeof onDuplicate === 'function') {
+            void onDuplicate({ collectionConfig, doc })
+          }
+        } else {
+          toast.error(
+            errors?.[0].message ||
+              message ||
+              t('error:unspecific', { label: getTranslation(singularLabel, i18n) }),
+          )
+        }
       })
-    },
-    [duplicate],
-  )
+  }, [
+    locale,
+    serverURL,
+    apiRoute,
+    slug,
+    id,
+    i18n,
+    t,
+    singularLabel,
+    onDuplicate,
+    redirectAfterDuplicate,
+    setModified,
+    router,
+    adminRoute,
+    collectionConfig,
+    startRouteTransition,
+  ])
+
+  const onConfirm = useCallback(async () => {
+    setRenderModal(false)
+
+    await duplicate()
+  }, [duplicate])
 
   return (
     <React.Fragment>

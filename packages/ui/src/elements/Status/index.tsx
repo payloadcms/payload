@@ -3,8 +3,6 @@ import { useModal } from '@faceless-ui/modal'
 import React, { useCallback } from 'react'
 import { toast } from 'sonner'
 
-import type { OnConfirm } from '../ConfirmationModal/index.js'
-
 import { useForm } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -55,10 +53,7 @@ export const Status: React.FC = () => {
   }
 
   const performAction = useCallback(
-    async (
-      action: 'revert' | 'unpublish',
-      { closeConfirmationModal, setConfirming }: Parameters<OnConfirm>[0],
-    ) => {
+    async (action: 'revert' | 'unpublish') => {
       let url
       let method
       let body
@@ -99,9 +94,6 @@ export const Status: React.FC = () => {
           'Content-Type': 'application/json',
         },
       })
-
-      setConfirming(false)
-      closeConfirmationModal()
 
       if (res.status === 200) {
         let data
@@ -171,7 +163,7 @@ export const Status: React.FC = () => {
                 confirmingLabel={t('version:unpublishing')}
                 heading={t('version:confirmUnpublish')}
                 modalSlug={unPublishModalSlug}
-                onConfirm={(args) => performAction('unpublish', args)}
+                onConfirm={() => performAction('unpublish')}
               />
             </React.Fragment>
           )}
@@ -191,7 +183,7 @@ export const Status: React.FC = () => {
                 confirmingLabel={t('version:reverting')}
                 heading={t('version:confirmRevertToSaved')}
                 modalSlug={revertModalSlug}
-                onConfirm={(args) => performAction('revert', args)}
+                onConfirm={() => performAction('revert')}
               />
             </React.Fragment>
           )}

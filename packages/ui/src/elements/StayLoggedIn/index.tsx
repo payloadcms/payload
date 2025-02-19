@@ -2,7 +2,7 @@
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback } from 'react'
 
-import type { OnCancel, OnConfirm } from '../ConfirmationModal/index.js'
+import type { OnCancel } from '../ConfirmationModal/index.js'
 
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -29,22 +29,16 @@ export const StayLoggedInModal: React.FC = () => {
   const { t } = useTranslation()
   const { startRouteTransition } = useRouteTransition()
 
-  const onConfirm: OnConfirm = useCallback(
-    ({ closeConfirmationModal, setConfirming }) => {
-      setConfirming(false)
-      closeConfirmationModal()
-
-      startRouteTransition(() =>
-        router.push(
-          formatAdminURL({
-            adminRoute,
-            path: logoutRoute,
-          }),
-        ),
-      )
-    },
-    [router, startRouteTransition, adminRoute, logoutRoute],
-  )
+  const onConfirm = useCallback(() => {
+    return startRouteTransition(() =>
+      router.push(
+        formatAdminURL({
+          adminRoute,
+          path: logoutRoute,
+        }),
+      ),
+    )
+  }, [router, startRouteTransition, adminRoute, logoutRoute])
 
   const onCancel: OnCancel = useCallback(() => {
     refreshCookie()

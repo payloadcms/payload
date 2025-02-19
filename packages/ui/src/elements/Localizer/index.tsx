@@ -61,12 +61,17 @@ export const Localizer: React.FC<{
                       <Fragment>
                         {localeOptionLabel}
                         &nbsp;
-                        <span className={`${baseClass}__locale-code`}>
+                        <span
+                          className={`${baseClass}__locale-code`}
+                          data-locale={localeOption.code}
+                        >
                           {`(${localeOption.code})`}
                         </span>
                       </Fragment>
                     ) : (
-                      <span className={`${baseClass}__locale-code`}>{localeOptionLabel}</span>
+                      <span className={`${baseClass}__locale-code`} data-locale={localeOption.code}>
+                        {localeOptionLabel}
+                      </span>
                     )}
                   </PopupList.Button>
                 )

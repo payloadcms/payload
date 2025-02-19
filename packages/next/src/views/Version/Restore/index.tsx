@@ -1,11 +1,11 @@
 'use client'
-import type { OnConfirm } from '@payloadcms/ui'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
   ConfirmationModal,
   PopupList,
+  toast,
   useConfig,
   useModal,
   useRouteTransition,
@@ -14,7 +14,6 @@ import {
 import { formatAdminURL, requests } from '@payloadcms/ui/shared'
 import { useRouter } from 'next/navigation.js'
 import React, { Fragment, useCallback, useState } from 'react'
-import { toast } from 'sonner'
 
 import type { Props } from './types.js'
 
@@ -75,27 +74,21 @@ const Restore: React.FC<Props> = ({
     })
   }
 
-  const handleRestore: OnConfirm = useCallback(
-    async ({ closeConfirmationModal, setConfirming }) => {
-      const res = await requests.post(fetchURL, {
-        headers: {
-          'Accept-Language': i18n.language,
-        },
-      })
+  const handleRestore = useCallback(async () => {
+    const res = await requests.post(fetchURL, {
+      headers: {
+        'Accept-Language': i18n.language,
+      },
+    })
 
-      setConfirming(false)
-      closeConfirmationModal()
-
-      if (res.status === 200) {
-        const json = await res.json()
-        toast.success(json.message)
-        startRouteTransition(() => router.push(redirectURL))
-      } else {
-        toast.error(t('version:problemRestoringVersion'))
-      }
-    },
-    [fetchURL, redirectURL, t, i18n, router, startRouteTransition],
-  )
+    if (res.status === 200) {
+      const json = await res.json()
+      toast.success(json.message)
+      return startRouteTransition(() => router.push(redirectURL))
+    } else {
+      toast.error(t('version:problemRestoringVersion'))
+    }
+  }, [fetchURL, redirectURL, t, i18n, router, startRouteTransition])
 
   return (
     <Fragment>

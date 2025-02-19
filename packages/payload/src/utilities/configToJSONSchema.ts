@@ -496,6 +496,14 @@ export function fieldsToJSONSchema(
               enum: buildOptionEnums(field.options),
             }
 
+            if (field.interfaceName) {
+              interfaceNameDefinitions.set(field.interfaceName, fieldSchema)
+
+              fieldSchema = {
+                $ref: `#/definitions/${field.interfaceName}`,
+              }
+            }
+
             break
           }
 
@@ -657,6 +665,15 @@ export function fieldsToJSONSchema(
                   fieldSchema.enum = optionEnums
                 }
               }
+
+              if (field.interfaceName) {
+                interfaceNameDefinitions.set(field.interfaceName, fieldSchema)
+
+                fieldSchema = {
+                  $ref: `#/definitions/${field.interfaceName}`,
+                }
+              }
+              break
             }
 
             break

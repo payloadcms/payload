@@ -1,5 +1,4 @@
 'use client'
-import type { OnConfirm } from '@payloadcms/ui'
 import type { User } from 'payload'
 
 import { Button, ConfirmationModal, toast, useModal, useTranslation } from '@payloadcms/ui'
@@ -15,54 +14,46 @@ export const ResetPreferences: React.FC<{
   const { openModal } = useModal()
   const { t } = useTranslation()
 
-  const handleResetPreferences: OnConfirm = useCallback(
-    async ({ closeConfirmationModal, setConfirming }) => {
-      if (!user) {
-        setConfirming(false)
-        closeConfirmationModal()
-        return
-      }
+  const handleResetPreferences = useCallback(async () => {
+    if (!user) {
+      return
+    }
 
-      const stringifiedQuery = qs.stringify(
-        {
-          depth: 0,
-          where: {
-            user: {
-              id: {
-                equals: user.id,
-              },
+    const stringifiedQuery = qs.stringify(
+      {
+        depth: 0,
+        where: {
+          user: {
+            id: {
+              equals: user.id,
             },
           },
         },
-        { addQueryPrefix: true },
-      )
+      },
+      { addQueryPrefix: true },
+    )
 
-      try {
-        const res = await fetch(`${apiRoute}/payload-preferences${stringifiedQuery}`, {
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          method: 'DELETE',
-        })
+    try {
+      const res = await fetch(`${apiRoute}/payload-preferences${stringifiedQuery}`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'DELETE',
+      })
 
-        const json = await res.json()
-        const message = json.message
+      const json = await res.json()
+      const message = json.message
 
-        if (res.ok) {
-          toast.success(message)
-        } else {
-          toast.error(message)
-        }
-      } catch (_err) {
-        // swallow error
-      } finally {
-        setConfirming(false)
-        closeConfirmationModal()
+      if (res.ok) {
+        toast.success(message)
+      } else {
+        toast.error(message)
       }
-    },
-    [apiRoute, user],
-  )
+    } catch (_err) {
+      // swallow error
+    }
+  }, [apiRoute, user])
 
   return (
     <Fragment>
