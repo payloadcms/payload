@@ -616,7 +616,12 @@ export class BasePayload {
         }
       }
 
-      traverseFields({ callback: findCustomID, config: this.config, fields: collection.fields })
+      traverseFields({
+        callback: findCustomID,
+        config: this.config,
+        fields: collection.fields,
+        parentIsLocalized: false,
+      })
 
       this.collections[collection.slug] = {
         config: collection,
@@ -963,6 +968,7 @@ interface RequestContext {
 export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 export type { Payload, RequestContext }
 export { executeAuthStrategies } from './auth/executeAuthStrategies.js'
+export { extractAccessFromPermission } from './auth/extractAccessFromPermission.js'
 export { getAccessResults } from './auth/getAccessResults.js'
 export { getFieldsToSign } from './auth/getFieldsToSign.js'
 export * from './auth/index.js'
@@ -979,6 +985,7 @@ export { resetPasswordOperation } from './auth/operations/resetPassword.js'
 export { unlockOperation } from './auth/operations/unlock.js'
 export { verifyEmailOperation } from './auth/operations/verifyEmail.js'
 export { JWTAuthentication } from './auth/strategies/jwt.js'
+
 export type {
   AuthStrategyFunction,
   AuthStrategyFunctionArgs,
@@ -999,8 +1006,8 @@ export type {
 } from './auth/types.js'
 
 export { generateImportMap } from './bin/generateImportMap/index.js'
-
 export type { ImportMap } from './bin/generateImportMap/index.js'
+
 export { genImportMapIterateFields } from './bin/generateImportMap/iterateFields.js'
 
 export {
@@ -1047,7 +1054,6 @@ export type {
   TypeWithID,
   TypeWithTimestamps,
 } from './collections/config/types.js'
-
 export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
 export { countOperation } from './collections/operations/count.js'
 export { createOperation } from './collections/operations/create.js'
@@ -1070,8 +1076,8 @@ export {
   serverOnlyConfigProperties,
   type UnsanitizedClientConfig,
 } from './config/client.js'
-export { defaults } from './config/defaults.js'
 
+export { defaults } from './config/defaults.js'
 export { sanitizeConfig } from './config/sanitize.js'
 export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
@@ -1241,6 +1247,7 @@ export type {
   FlattenedBlocksField,
   FlattenedField,
   FlattenedGroupField,
+  FlattenedJoinField,
   FlattenedTabAsField,
   GroupField,
   GroupFieldClient,

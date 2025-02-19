@@ -1,11 +1,11 @@
 'use client'
 import type { ClientCollectionConfig } from 'payload'
 
-import { Modal, useModal } from '@faceless-ui/modal'
+import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import * as qs from 'qs-esm'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback } from 'react'
 import { toast } from 'sonner'
 
 import { useAuth } from '../../providers/Auth/index.js'
@@ -15,7 +15,7 @@ import { SelectAllStatus, useSelection } from '../../providers/Selection/index.j
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { mergeListSearchAndWhere } from '../../utilities/mergeListSearchAndWhere.js'
-import { Button } from '../Button/index.js'
+import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { Pill } from '../Pill/index.js'
 import './index.scss'
 
@@ -36,10 +36,9 @@ export const DeleteMany: React.FC<Props> = (props) => {
       serverURL,
     },
   } = useConfig()
-  const { toggleModal } = useModal()
+  const { openModal } = useModal()
   const { count, getQueryParams, selectAll, toggleAll } = useSelection()
   const { i18n, t } = useTranslation()
-  const [deleting, setDeleting] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
   const { clearRouteCache } = useRouteCache()
@@ -54,8 +53,6 @@ export const DeleteMany: React.FC<Props> = (props) => {
   }, [t])
 
   const handleDelete = useCallback(async () => {
-    setDeleting(true)
-
     const queryWithSearch = mergeListSearchAndWhere({
       collectionConfig: collection,
       search: searchParams.get('search'),
@@ -73,7 +70,6 @@ export const DeleteMany: React.FC<Props> = (props) => {
       .then(async (res) => {
         try {
           const json = await res.json()
-          toggleModal(modalSlug)
 
           const deletedDocs = json?.docs.length || 0
           const successLabel = deletedDocs > 1 ? plural : singular
@@ -113,7 +109,7 @@ export const DeleteMany: React.FC<Props> = (props) => {
               description: json.errors.map((error) => error.message).join('\n'),
             })
           } else {
-            addDefaultError()
+            return addDefaultError()
           }
           return false
         } catch (_err) {
@@ -126,7 +122,6 @@ export const DeleteMany: React.FC<Props> = (props) => {
     api,
     getQueryParams,
     i18n,
-    modalSlug,
     plural,
     router,
     selectAll,
@@ -135,7 +130,6 @@ export const DeleteMany: React.FC<Props> = (props) => {
     slug,
     t,
     toggleAll,
-    toggleModal,
     clearRouteCache,
     collection,
   ])
@@ -149,34 +143,21 @@ export const DeleteMany: React.FC<Props> = (props) => {
       <Pill
         className={`${baseClass}__toggle`}
         onClick={() => {
-          setDeleting(false)
-          toggleModal(modalSlug)
+          openModal(modalSlug)
         }}
       >
         {t('general:delete')}
       </Pill>
-      <Modal className={baseClass} slug={modalSlug}>
-        <div className={`${baseClass}__wrapper`}>
-          <div className={`${baseClass}__content`}>
-            <h1>{t('general:confirmDeletion')}</h1>
-            <p>{t('general:aboutToDeleteCount', { count, label: getTranslation(plural, i18n) })}</p>
-          </div>
-          <div className={`${baseClass}__controls`}>
-            <Button
-              buttonStyle="secondary"
-              id="confirm-cancel"
-              onClick={deleting ? undefined : () => toggleModal(modalSlug)}
-              size="large"
-              type="button"
-            >
-              {t('general:cancel')}
-            </Button>
-            <Button id="confirm-delete" onClick={deleting ? undefined : handleDelete} size="large">
-              {deleting ? t('general:deleting') : t('general:confirm')}
-            </Button>
-          </div>
-        </div>
-      </Modal>
+      <ConfirmationModal
+        body={t('general:aboutToDeleteCount', {
+          count,
+          label: getTranslation(count > 1 ? plural : singular, i18n),
+        })}
+        confirmingLabel={t('general:deleting')}
+        heading={t('general:confirmDeletion')}
+        modalSlug={modalSlug}
+        onConfirm={handleDelete}
+      />
     </React.Fragment>
   )
 }

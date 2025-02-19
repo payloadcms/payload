@@ -13,12 +13,14 @@ const migrateModelWithBatching = async ({
   config,
   fields,
   Model,
+  parentIsLocalized,
   session,
 }: {
   batchSize: number
   config: SanitizedConfig
   fields: Field[]
   Model: Model<any>
+  parentIsLocalized: boolean
   session: ClientSession
 }): Promise<void> => {
   let hasNext = true
@@ -47,7 +49,7 @@ const migrateModelWithBatching = async ({
     }
 
     for (const doc of docs) {
-      sanitizeRelationshipIDs({ config, data: doc, fields })
+      sanitizeRelationshipIDs({ config, data: doc, fields, parentIsLocalized })
     }
 
     await Model.collection.bulkWrite(
@@ -124,6 +126,7 @@ export async function migrateRelationshipsV2_V3({
         config,
         fields: collection.fields,
         Model: db.collections[collection.slug],
+        parentIsLocalized: false,
         session,
       })
 
@@ -138,6 +141,7 @@ export async function migrateRelationshipsV2_V3({
         config,
         fields: buildVersionCollectionFields(config, collection),
         Model: db.versions[collection.slug],
+        parentIsLocalized: false,
         session,
       })
 
@@ -163,7 +167,11 @@ export async function migrateRelationshipsV2_V3({
 
       // in case if the global doesn't exist in the database yet  (not saved)
       if (doc) {
-        sanitizeRelationshipIDs({ config, data: doc, fields: global.fields })
+        sanitizeRelationshipIDs({
+          config,
+          data: doc,
+          fields: global.fields,
+        })
 
         await GlobalsModel.collection.updateOne(
           {
@@ -185,6 +193,7 @@ export async function migrateRelationshipsV2_V3({
         config,
         fields: buildVersionGlobalFields(config, global),
         Model: db.versions[global.slug],
+        parentIsLocalized: false,
         session,
       })
 

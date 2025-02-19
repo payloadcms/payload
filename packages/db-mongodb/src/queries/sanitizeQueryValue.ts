@@ -8,12 +8,14 @@ import type {
 
 import { Types } from 'mongoose'
 import { createArrayFromCommaDelineated } from 'payload'
+import { fieldShouldBeLocalized } from 'payload/shared'
 
 type SanitizeQueryValueArgs = {
   field: FlattenedField
   hasCustomID: boolean
   locale?: string
   operator: string
+  parentIsLocalized: boolean
   path: string
   payload: Payload
   val: any
@@ -87,6 +89,7 @@ export const sanitizeQueryValue = ({
   hasCustomID,
   locale,
   operator,
+  parentIsLocalized,
   path,
   payload,
   val,
@@ -97,7 +100,6 @@ export const sanitizeQueryValue = ({
 } => {
   let formattedValue = val
   let formattedOperator = operator
-
   if (['array', 'blocks', 'group', 'tab'].includes(field.type) && path.includes('.')) {
     const segments = path.split('.')
     segments.shift()
@@ -219,7 +221,11 @@ export const sanitizeQueryValue = ({
 
       let localizedPath = path
 
-      if (field.localized && payload.config.localization && locale) {
+      if (
+        fieldShouldBeLocalized({ field, parentIsLocalized }) &&
+        payload.config.localization &&
+        locale
+      ) {
         localizedPath = `${path}.${locale}`
       }
 

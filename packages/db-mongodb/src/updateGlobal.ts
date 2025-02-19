@@ -37,6 +37,10 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(
 
   result = await Model.findOneAndUpdate({ globalType: slug }, sanitizedData, options)
 
+  if (!result) {
+    return null
+  }
+
   result = JSON.parse(JSON.stringify(result))
 
   // custom id type reset

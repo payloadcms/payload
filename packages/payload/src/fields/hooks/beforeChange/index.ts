@@ -59,6 +59,7 @@ export const beforeChange = async <T extends JsonObject>({
     mergeLocaleActions,
     operation,
     parentIndexPath: '',
+    parentIsLocalized: false,
     parentPath: '',
     parentSchemaPath: '',
     req,

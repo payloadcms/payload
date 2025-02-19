@@ -270,6 +270,7 @@ export const plTranslations: DefaultTranslationsObject = {
     locale: 'Ustawienia regionalne',
     locales: 'Ustawienia regionalne',
     menu: 'Menu',
+    moreOptions: 'Więcej opcji',
     moveDown: 'Przesuń niżej',
     moveUp: 'Przesuń wyżej',
     newPassword: 'Nowe hasło',

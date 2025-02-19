@@ -268,6 +268,7 @@ export const daTranslations: DefaultTranslationsObject = {
     locale: 'Lokalitet',
     locales: 'Lokaliteter',
     menu: 'Menu',
+    moreOptions: 'Flere muligheder',
     moveDown: 'Ryk ned',
     moveUp: 'Ryk op',
     newPassword: 'Ny adgangskode',

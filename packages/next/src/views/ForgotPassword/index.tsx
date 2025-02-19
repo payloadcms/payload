@@ -1,4 +1,4 @@
-import type { AdminViewProps } from 'payload'
+import type { AdminViewServerProps } from 'payload'
 
 import { Button, Link } from '@payloadcms/ui'
 import { formatAdminURL, Translation } from '@payloadcms/ui/shared'
@@ -11,7 +11,7 @@ export { generateForgotPasswordMetadata } from './meta.js'
 
 export const forgotPasswordBaseClass = 'forgot-password'
 
-export const ForgotPasswordView: React.FC<AdminViewProps> = ({ initPageResult }) => {
+export function ForgotPasswordView({ initPageResult }: AdminViewServerProps) {
   const {
     req: {
       i18n,

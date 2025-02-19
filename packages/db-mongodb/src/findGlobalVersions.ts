@@ -5,6 +5,7 @@ import { buildVersionGlobalFields, flattenWhereToOperators } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildQuery } from './queries/buildQuery.js'
 import { buildSortParam } from './queries/buildSortParam.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { getSession } from './utilities/getSession.js'
@@ -46,10 +47,10 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     })
   }
 
-  const query = await Model.buildQuery({
-    globalSlug: global,
+  const query = await buildQuery({
+    adapter: this,
+    fields: versionFields,
     locale,
-    payload: this.payload,
     where,
   })
 

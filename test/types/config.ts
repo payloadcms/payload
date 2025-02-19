@@ -22,6 +22,38 @@ export default buildConfigWithDefaults({
           type: 'text',
           name: 'title',
         },
+        {
+          name: 'selectField',
+          type: 'select',
+          required: true,
+          interfaceName: 'MySelectOptions',
+          options: [
+            {
+              label: 'Option 1',
+              value: 'option-1',
+            },
+            {
+              label: 'Option 2',
+              value: 'option-2',
+            },
+          ],
+        },
+        {
+          name: 'radioField',
+          type: 'radio',
+          required: true,
+          interfaceName: 'MyRadioOptions',
+          options: [
+            {
+              label: 'Option 1',
+              value: 'option-1',
+            },
+            {
+              label: 'Option 2',
+              value: 'option-2',
+            },
+          ],
+        },
       ],
     },
     {

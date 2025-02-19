@@ -62,6 +62,7 @@ type Args = {
   forceNullable?: boolean
   graphqlResult: GraphQLInfo
   name: string
+  parentIsLocalized?: boolean
   parentName: string
 }
 
@@ -72,6 +73,7 @@ export function buildObjectType({
   fields,
   forceNullable,
   graphqlResult,
+  parentIsLocalized,
   parentName,
 }: Args): GraphQLObjectType {
   const fieldToSchemaMap = {
@@ -84,8 +86,9 @@ export function buildObjectType({
           name: interfaceName,
           config,
           fields: field.fields,
-          forceNullable: isFieldNullable(field, forceNullable),
+          forceNullable: isFieldNullable({ field, forceNullable, parentIsLocalized }),
           graphqlResult,
+          parentIsLocalized: field.localized || parentIsLocalized,
           parentName: interfaceName,
         })
 
@@ -104,7 +107,7 @@ export function buildObjectType({
 
       return {
         ...objectTypeConfig,
-        [field.name]: { type: withNullableType(field, arrayType) },
+        [field.name]: { type: withNullableType({ type: arrayType, field, parentIsLocalized }) },
       }
     },
     blocks: (objectTypeConfig: ObjectTypeConfig, field: BlocksField) => {
@@ -132,6 +135,7 @@ export function buildObjectType({
             ],
             forceNullable,
             graphqlResult,
+            parentIsLocalized,
             parentName: interfaceName,
           })
 
@@ -165,16 +169,20 @@ export function buildObjectType({
 
       return {
         ...objectTypeConfig,
-        [field.name]: { type: withNullableType(field, type) },
+        [field.name]: { type: withNullableType({ type, field, parentIsLocalized }) },
       }
     },
     checkbox: (objectTypeConfig: ObjectTypeConfig, field: CheckboxField) => ({
       ...objectTypeConfig,
-      [field.name]: { type: withNullableType(field, GraphQLBoolean, forceNullable) },
+      [field.name]: {
+        type: withNullableType({ type: GraphQLBoolean, field, forceNullable, parentIsLocalized }),
+      },
     }),
     code: (objectTypeConfig: ObjectTypeConfig, field: CodeField) => ({
       ...objectTypeConfig,
-      [field.name]: { type: withNullableType(field, GraphQLString, forceNullable) },
+      [field.name]: {
+        type: withNullableType({ type: GraphQLString, field, forceNullable, parentIsLocalized }),
+      },
     }),
     collapsible: (objectTypeConfig: ObjectTypeConfig, field: CollapsibleField) =>
       field.fields.reduce((objectTypeConfigWithCollapsibleFields, subField) => {
@@ -186,11 +194,20 @@ export function buildObjectType({
       }, objectTypeConfig),
     date: (objectTypeConfig: ObjectTypeConfig, field: DateField) => ({
       ...objectTypeConfig,
-      [field.name]: { type: withNullableType(field, DateTimeResolver, forceNullable) },
+      [field.name]: {
+        type: withNullableType({ type: DateTimeResolver, field, forceNullable, parentIsLocalized }),
+      },
     }),
     email: (objectTypeConfig: ObjectTypeConfig, field: EmailField) => ({
       ...objectTypeConfig,
-      [field.name]: { type: withNullableType(field, EmailAddressResolver, forceNullable) },
+      [field.name]: {
+        type: withNullableType({
+          type: EmailAddressResolver,
+          field,
+          forceNullable,
+          parentIsLocalized,
+        }),
+      },
     }),
     group: (objectTypeConfig: ObjectTypeConfig, field: GroupField) => {
       const interfaceName =
@@ -201,8 +218,9 @@ export function buildObjectType({
           name: interfaceName,
           config,
           fields: field.fields,
-          forceNullable: isFieldNullable(field, forceNullable),
+          forceNullable: isFieldNullable({ field, forceNullable, parentIsLocalized }),
           graphqlResult,
+          parentIsLocalized: field.localized || parentIsLocalized,
           parentName: interfaceName,
         })
 
@@ -236,7 +254,9 @@ export function buildObjectType({
           name: joinName,
           fields: {
             docs: {
-              type: new GraphQLList(graphqlResult.collections[field.collection].graphQL.type),
+              type: Array.isArray(field.collection)
+                ? GraphQLJSON
+                : new GraphQLList(graphqlResult.collections[field.collection].graphQL.type),
             },
             hasNextPage: { type: GraphQLBoolean },
           },
@@ -245,11 +265,16 @@ export function buildObjectType({
           limit: {
             type: GraphQLInt,
           },
+          page: {
+            type: GraphQLInt,
+          },
           sort: {
             type: GraphQLString,
           },
           where: {
-            type: graphqlResult.collections[field.collection].graphQL.whereInputType,
+            type: Array.isArray(field.collection)
+              ? GraphQLJSON
+              : graphqlResult.collections[field.collection].graphQL.whereInputType,
           },
         },
         extensions: {
@@ -258,12 +283,16 @@ export function buildObjectType({
         },
         async resolve(parent, args, context: Context) {
           const { collection } = field
-          const { limit, sort, where } = args
+          const { limit, page, sort, where } = args
           const { req } = context
 
           const fullWhere = combineQueries(where, {
             [field.on]: { equals: parent._id ?? parent.id },
           })
+
+          if (Array.isArray(collection)) {
+            throw new Error('GraphQL with array of join.field.collection is not implemented')
+          }
 
           return await req.payload.find({
             collection,
@@ -272,6 +301,7 @@ export function buildObjectType({
             limit,
             locale: req.locale,
             overrideAccess: false,
+            page,
             req,
             sort,
             where: fullWhere,
@@ -286,42 +316,47 @@ export function buildObjectType({
     },
     json: (objectTypeConfig: ObjectTypeConfig, field: JSONField) => ({
       ...objectTypeConfig,
-      [field.name]: { type: withNullableType(field, GraphQLJSON, forceNullable) },
+      [field.name]: {
+        type: withNullableType({ type: GraphQLJSON, field, forceNullable, parentIsLocalized }),
+      },
     }),
     number: (objectTypeConfig: ObjectTypeConfig, field: NumberField) => {
       const type = field?.name === 'id' ? GraphQLInt : GraphQLFloat
       return {
         ...objectTypeConfig,
         [field.name]: {
-          type: withNullableType(
+          type: withNullableType({
+            type: field?.hasMany === true ? new GraphQLList(type) : type,
             field,
-            field?.hasMany === true ? new GraphQLList(type) : type,
             forceNullable,
-          ),
+            parentIsLocalized,
+          }),
         },
       }
     },
     point: (objectTypeConfig: ObjectTypeConfig, field: PointField) => ({
       ...objectTypeConfig,
       [field.name]: {
-        type: withNullableType(
+        type: withNullableType({
+          type: new GraphQLList(new GraphQLNonNull(GraphQLFloat)),
           field,
-          new GraphQLList(new GraphQLNonNull(GraphQLFloat)),
           forceNullable,
-        ),
+          parentIsLocalized,
+        }),
       },
     }),
     radio: (objectTypeConfig: ObjectTypeConfig, field: RadioField) => ({
       ...objectTypeConfig,
       [field.name]: {
-        type: withNullableType(
-          field,
-          new GraphQLEnumType({
+        type: withNullableType({
+          type: new GraphQLEnumType({
             name: combineParentName(parentName, field.name),
             values: formatOptions(field),
           }),
+          field,
           forceNullable,
-        ),
+          parentIsLocalized,
+        }),
       },
     }),
     relationship: (objectTypeConfig: ObjectTypeConfig, field: RelationshipField) => {
@@ -420,11 +455,12 @@ export function buildObjectType({
       }
 
       const relationship = {
-        type: withNullableType(
+        type: withNullableType({
+          type: hasManyValues ? new GraphQLList(new GraphQLNonNull(type)) : type,
           field,
-          hasManyValues ? new GraphQLList(new GraphQLNonNull(type)) : type,
           forceNullable,
-        ),
+          parentIsLocalized,
+        }),
         args: relationshipArgs,
         extensions: {
           complexity:
@@ -550,7 +586,7 @@ export function buildObjectType({
     richText: (objectTypeConfig: ObjectTypeConfig, field: RichTextField) => ({
       ...objectTypeConfig,
       [field.name]: {
-        type: withNullableType(field, GraphQLJSON, forceNullable),
+        type: withNullableType({ type: GraphQLJSON, field, forceNullable, parentIsLocalized }),
         args: {
           depth: {
             type: GraphQLInt,
@@ -591,6 +627,7 @@ export function buildObjectType({
               findMany: false,
               flattenLocales: false,
               overrideAccess: false,
+              parentIsLocalized,
               populationPromises,
               req: context.req,
               showHiddenFields: false,
@@ -621,7 +658,7 @@ export function buildObjectType({
       })
 
       type = field.hasMany ? new GraphQLList(new GraphQLNonNull(type)) : type
-      type = withNullableType(field, type, forceNullable)
+      type = withNullableType({ type, field, forceNullable, parentIsLocalized })
 
       return {
         ...objectTypeConfig,
@@ -641,6 +678,7 @@ export function buildObjectType({
               fields: tab.fields,
               forceNullable,
               graphqlResult,
+              parentIsLocalized: tab.localized || parentIsLocalized,
               parentName: interfaceName,
             })
 
@@ -681,16 +719,19 @@ export function buildObjectType({
     text: (objectTypeConfig: ObjectTypeConfig, field: TextField) => ({
       ...objectTypeConfig,
       [field.name]: {
-        type: withNullableType(
+        type: withNullableType({
+          type: field.hasMany === true ? new GraphQLList(GraphQLString) : GraphQLString,
           field,
-          field.hasMany === true ? new GraphQLList(GraphQLString) : GraphQLString,
           forceNullable,
-        ),
+          parentIsLocalized,
+        }),
       },
     }),
     textarea: (objectTypeConfig: ObjectTypeConfig, field: TextareaField) => ({
       ...objectTypeConfig,
-      [field.name]: { type: withNullableType(field, GraphQLString, forceNullable) },
+      [field.name]: {
+        type: withNullableType({ type: GraphQLString, field, forceNullable, parentIsLocalized }),
+      },
     }),
     upload: (objectTypeConfig: ObjectTypeConfig, field: UploadField) => {
       const { relationTo } = field
@@ -775,11 +816,12 @@ export function buildObjectType({
       }
 
       const relationship = {
-        type: withNullableType(
+        type: withNullableType({
+          type: hasManyValues ? new GraphQLList(new GraphQLNonNull(type)) : type,
           field,
-          hasManyValues ? new GraphQLList(new GraphQLNonNull(type)) : type,
           forceNullable,
-        ),
+          parentIsLocalized,
+        }),
         args: relationshipArgs,
         extensions: {
           complexity:

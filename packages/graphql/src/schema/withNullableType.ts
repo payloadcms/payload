@@ -3,11 +3,17 @@ import type { FieldAffectingData } from 'payload'
 
 import { GraphQLNonNull } from 'graphql'
 
-export const withNullableType = (
-  field: FieldAffectingData,
-  type: GraphQLType,
-  forceNullable = false,
-): GraphQLType => {
+export const withNullableType = ({
+  type,
+  field,
+  forceNullable,
+  parentIsLocalized,
+}: {
+  field: FieldAffectingData
+  forceNullable?: boolean
+  parentIsLocalized: boolean
+  type: GraphQLType
+}): GraphQLType => {
   const hasReadAccessControl = field.access && field.access.read
   const condition = field.admin && field.admin.condition
   const isTimestamp = field.name === 'createdAt' || field.name === 'updatedAt'
@@ -16,7 +22,7 @@ export const withNullableType = (
     !forceNullable &&
     'required' in field &&
     field.required &&
-    !field.localized &&
+    (!field.localized || parentIsLocalized) &&
     !condition &&
     !hasReadAccessControl &&
     !isTimestamp

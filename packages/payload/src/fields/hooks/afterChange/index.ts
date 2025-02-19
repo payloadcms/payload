@@ -46,6 +46,7 @@ export const afterChange = async <T extends JsonObject>({
     global,
     operation,
     parentIndexPath: '',
+    parentIsLocalized: false,
     parentPath: '',
     parentSchemaPath: '',
     previousDoc,
