@@ -152,7 +152,7 @@ describe('Versions', () => {
 
       // Bulk edit the selected rows
       await page.locator('.publish-many__toggle').click()
-      await page.locator('#delete-draft-posts #confirm-action').click()
+      await page.locator('#publish-draft-posts #confirm-action').click()
 
       // Check that the statuses for each row has been updated to `published`
       await expect(findTableCell(page, '_status', 'Published Title')).toContainText('Published')
@@ -176,7 +176,7 @@ describe('Versions', () => {
       await expect(findTableCell(page, '_status', title)).toContainText('Draft')
       await selectTableRow(page, title)
       await page.locator('.publish-many__toggle').click()
-      await page.locator('#delete-autosave-posts #confirm-action').click()
+      await page.locator('#publish-autosave-posts #confirm-action').click()
       await expect(findTableCell(page, '_status', title)).toContainText('Published')
     })
 
@@ -189,7 +189,7 @@ describe('Versions', () => {
 
       // Bulk edit the selected rows
       await page.locator('.unpublish-many__toggle').click()
-      await page.locator('#delete-posts #confirm-action').click()
+      await page.locator('#unpublish-posts #confirm-action').click()
 
       // Check that the statuses for each row has been updated to `draft`
       await expect(findTableCell(page, '_status', 'Published Title')).toContainText('Draft')

@@ -24,6 +24,8 @@ export type UnpublishManyProps = {
   collection: ClientCollectionConfig
 }
 
+const baseClass = 'unpublish-many'
+
 export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
   const { collection: { slug, labels: { plural, singular }, versions } = {} } = props
 
@@ -140,6 +142,7 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
   return (
     <React.Fragment>
       <Pill
+        className={`${baseClass}__toggle`}
         onClick={() => {
           toggleModal(modalSlug)
         }}

@@ -24,6 +24,8 @@ export type PublishManyProps = {
   collection: ClientCollectionConfig
 }
 
+const baseClass = 'publish-many'
+
 export const PublishMany: React.FC<PublishManyProps> = (props) => {
   const { clearRouteCache } = useRouteCache()
 
@@ -141,6 +143,7 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
   return (
     <React.Fragment>
       <Pill
+        className={`${baseClass}__toggle`}
         onClick={() => {
           openModal(modalSlug)
         }}
