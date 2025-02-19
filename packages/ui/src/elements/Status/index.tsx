@@ -57,7 +57,7 @@ export const Status: React.FC = () => {
   const performAction = useCallback(
     async (
       action: 'revert' | 'unpublish',
-      { setPerformingConfirmationAction }: Parameters<OnConfirm>[0],
+      { closeConfirmationModal, setPerformingConfirmationAction }: Parameters<OnConfirm>[0],
     ) => {
       let url
       let method
@@ -73,6 +73,7 @@ export const Status: React.FC = () => {
         url = `${serverURL}${api}/${collectionSlug}/${id}?locale=${locale}&fallback-locale=null&depth=0`
         method = 'patch'
       }
+
       if (globalSlug) {
         url = `${serverURL}${api}/globals/${globalSlug}?locale=${locale}&fallback-locale=null&depth=0`
         method = 'post'
@@ -102,6 +103,8 @@ export const Status: React.FC = () => {
       if (res.status === 200) {
         let data
         const json = await res.json()
+        setPerformingConfirmationAction(false)
+        closeConfirmationModal()
 
         if (globalSlug) {
           data = json.result
@@ -123,15 +126,6 @@ export const Status: React.FC = () => {
       } else {
         toast.error(t('error:unPublishingDocument'))
       }
-
-      setPerformingConfirmationAction(false)
-      if (action === 'revert') {
-        toggleModal(revertModalSlug)
-      }
-
-      if (action === 'unpublish') {
-        toggleModal(unPublishModalSlug)
-      }
     },
     [
       api,
@@ -146,9 +140,6 @@ export const Status: React.FC = () => {
       setUnpublishedVersionCount,
       setMostRecentVersionIsAutosaved,
       t,
-      toggleModal,
-      revertModalSlug,
-      unPublishModalSlug,
       setHasPublishedDoc,
     ],
   )

@@ -126,7 +126,8 @@ export const DeleteDocument: React.FC<Props> = (props) => {
           })
       } catch (_err) {
         setPerformingConfirmationAction(false)
-        addDefaultError()
+        closeConfirmationModal()
+        return addDefaultError()
       }
     },
     [

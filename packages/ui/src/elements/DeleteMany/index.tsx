@@ -119,6 +119,7 @@ export const DeleteMany: React.FC<Props> = (props) => {
             return false
           } catch (_err) {
             setPerformingConfirmationAction(false)
+            closeConfirmationModal()
             return addDefaultError()
           }
         })

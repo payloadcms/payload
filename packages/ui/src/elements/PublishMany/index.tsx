@@ -112,6 +112,7 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
             return false
           } catch (_err) {
             setPerformingConfirmationAction(false)
+            closeConfirmationModal()
             return addDefaultError()
           }
         })

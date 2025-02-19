@@ -1,16 +1,10 @@
 'use client'
+import type { OnConfirm } from '@payloadcms/ui'
 import type { User } from 'payload'
 
-import {
-  Button,
-  ConfirmationModal,
-  LoadingOverlay,
-  toast,
-  useModal,
-  useTranslation,
-} from '@payloadcms/ui'
+import { Button, ConfirmationModal, toast, useModal, useTranslation } from '@payloadcms/ui'
 import * as qs from 'qs-esm'
-import { Fragment, useCallback, useState } from 'react'
+import { Fragment, useCallback } from 'react'
 
 const confirmResetModalSlug = 'confirm-reset-modal'
 
@@ -21,51 +15,54 @@ export const ResetPreferences: React.FC<{
   const { openModal } = useModal()
   const { t } = useTranslation()
 
-  const [loading, setLoading] = useState(false)
+  const handleResetPreferences: OnConfirm = useCallback(
+    async ({ closeConfirmationModal, setPerformingConfirmationAction }) => {
+      if (!user) {
+        setPerformingConfirmationAction(false)
+        closeConfirmationModal()
+        return
+      }
 
-  const handleResetPreferences = useCallback(async () => {
-    if (!user || loading) {
-      return
-    }
-    setLoading(true)
-
-    const stringifiedQuery = qs.stringify(
-      {
-        depth: 0,
-        where: {
-          user: {
-            id: {
-              equals: user.id,
+      const stringifiedQuery = qs.stringify(
+        {
+          depth: 0,
+          where: {
+            user: {
+              id: {
+                equals: user.id,
+              },
             },
           },
         },
-      },
-      { addQueryPrefix: true },
-    )
+        { addQueryPrefix: true },
+      )
 
-    try {
-      const res = await fetch(`${apiRoute}/payload-preferences${stringifiedQuery}`, {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        method: 'DELETE',
-      })
+      try {
+        const res = await fetch(`${apiRoute}/payload-preferences${stringifiedQuery}`, {
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'DELETE',
+        })
 
-      const json = await res.json()
-      const message = json.message
+        const json = await res.json()
+        const message = json.message
 
-      if (res.ok) {
-        toast.success(message)
-      } else {
-        toast.error(message)
+        if (res.ok) {
+          toast.success(message)
+        } else {
+          toast.error(message)
+        }
+      } catch (_err) {
+        // swallow error
+      } finally {
+        setPerformingConfirmationAction(false)
+        closeConfirmationModal()
       }
-    } catch (e) {
-      // swallow error
-    } finally {
-      setLoading(false)
-    }
-  }, [apiRoute, loading, user])
+    },
+    [apiRoute, user],
+  )
 
   return (
     <Fragment>
@@ -76,11 +73,11 @@ export const ResetPreferences: React.FC<{
       </div>
       <ConfirmationModal
         body={t('general:resetPreferencesDescription')}
+        confirmingLabel={t('general:resettingPreferences')}
         heading={t('general:resetPreferences')}
         modalSlug={confirmResetModalSlug}
         onConfirm={handleResetPreferences}
       />
-      {loading && <LoadingOverlay loadingText={t('general:resettingPreferences')} />}
     </Fragment>
   )
 }
