@@ -96,7 +96,6 @@
     "qs-esm": "7.0.2",
     "react-diff-viewer-continued": "4.0.4",
     "sass": "1.77.4",
-    "sonner": "^1.7.0",
     "uuid": "10.0.0"
   },
   "devDependencies": {
