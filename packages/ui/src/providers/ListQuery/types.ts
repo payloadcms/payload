@@ -1,6 +1,6 @@
 import type { ListQuery, PaginatedDocs, Sort, Where } from 'payload'
 
-export type ListQueryProps = {
+export type ListQueryProviderProps = {
   readonly children: React.ReactNode
   readonly collectionSlug?: string
   readonly data: PaginatedDocs

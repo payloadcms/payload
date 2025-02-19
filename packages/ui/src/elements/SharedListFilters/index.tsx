@@ -7,14 +7,15 @@ import { Fragment, useCallback, useState } from 'react'
 
 import { useListDrawer } from '../../elements/ListDrawer/index.js'
 import { Dots } from '../../icons/Dots/index.js'
-import { useQueryModified } from '../../providers/ListQuery/context.js'
+import { useListQueryModified } from '../../providers/ListQuery/context.js'
+import { useColumnsModified } from '../../providers/TableColumns/context.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { Pill } from '../Pill/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
-import { Translation } from '../Translation/index.js'
 import './index.scss'
+import { Translation } from '../Translation/index.js'
 
 const baseClass = 'shared-list-filters'
 
@@ -25,7 +26,10 @@ export function SharedListFilters({ filters }: { filters: PaginatedDocs<SharedLi
   const [currentlyOpenDrawer, setCurrentlyOpenDrawer] = useState<number | string>(null)
   const { i18n, t } = useTranslation()
   const { openModal } = useModal()
-  const queryModified = useQueryModified()
+  const queryModified = useListQueryModified()
+  const columnsModified = useColumnsModified()
+
+  const hasModified = queryModified || columnsModified
 
   const [DocumentDrawer, , { openDrawer: openEditDrawer }] = useDocumentDrawer({
     id: currentlyOpenDrawer,
@@ -59,7 +63,7 @@ export function SharedListFilters({ filters }: { filters: PaginatedDocs<SharedLi
           ))}
         </div>
         <div className={`${baseClass}__actions`}>
-          {queryModified ? (
+          {hasModified ? (
             <button className={`${baseClass}__actions__reset`} onClick={() => {}} type="button">
               {t('general:reset')}
             </button>

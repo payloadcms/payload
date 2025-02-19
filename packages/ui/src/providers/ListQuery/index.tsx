@@ -1,12 +1,12 @@
 'use client'
-import type { ListQuery, PaginatedDocs, Sort, Where } from 'payload'
+import type { ListQuery, Where } from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import { isNumber } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
-import type { ListQueryProps } from './types.js'
+import type { ListQueryProviderProps } from './types.js'
 
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
@@ -14,7 +14,7 @@ import { ListQueryContext, ListQueryModifiedContext } from './context.js'
 
 export { useListQuery } from './context.js'
 
-export const ListQueryProvider: React.FC<ListQueryProps> = ({
+export const ListQueryProvider: React.FC<ListQueryProviderProps> = ({
   children,
   data,
   defaultLimit,

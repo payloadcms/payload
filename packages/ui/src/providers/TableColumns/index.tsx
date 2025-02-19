@@ -1,42 +1,17 @@
 'use client'
 import type { Column, ListPreferences, SanitizedCollectionConfig } from 'payload'
 
-import React, { createContext, useCallback, useContext, useEffect } from 'react'
+import React, { useCallback, useEffect } from 'react'
 
-import type { SortColumnProps } from '../SortColumn/index.js'
+import type { TableColumnsProviderProps } from './types.js'
 
 import { useConfig } from '../../providers/Config/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
+import { TableColumnContext, TableColumnsModifiedContext } from './context.js'
 
-export interface ITableColumns {
-  columns: Column[]
-  LinkedCellOverride?: React.ReactNode
-  moveColumn: (args: { fromIndex: number; toIndex: number }) => Promise<void>
-  resetColumnsState: () => Promise<void>
-  setActiveColumns: (columns: string[]) => Promise<void>
-  toggleColumn: (column: string) => Promise<void>
-}
-
-export const TableColumnContext = createContext<ITableColumns>({} as ITableColumns)
-
-export const useTableColumns = (): ITableColumns => useContext(TableColumnContext)
-
-type Props = {
-  readonly children: React.ReactNode
-  readonly collectionSlug: string | string[]
-  readonly columnState: Column[]
-  readonly docs: any[]
-  readonly enableRowSelections?: boolean
-  readonly LinkedCellOverride?: React.ReactNode
-  readonly listPreferences?: ListPreferences
-  readonly preferenceKey: string
-  readonly renderRowTypes?: boolean
-  readonly setTable: (Table: React.ReactNode) => void
-  readonly sortColumnProps?: Partial<SortColumnProps>
-  readonly tableAppearance?: 'condensed' | 'default'
-}
+export { useTableColumns } from './context.js'
 
 // strip out Heading, Label, and renderedCells properties, they cannot be sent to the server
 const sanitizeColumns = (columns: Column[]) => {
@@ -46,7 +21,7 @@ const sanitizeColumns = (columns: Column[]) => {
   }))
 }
 
-export const TableColumnsProvider: React.FC<Props> = ({
+export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
   children,
   collectionSlug,
   columnState,
@@ -64,6 +39,8 @@ export const TableColumnsProvider: React.FC<Props> = ({
 
   const { getTableState } = useServerFunctions()
 
+  const [modified, setModified] = React.useState(false)
+
   const { admin: { defaultColumns, useAsTitle } = {}, fields } = getEntityConfig({
     collectionSlug,
   })
@@ -79,6 +56,8 @@ export const TableColumnsProvider: React.FC<Props> = ({
 
   const moveColumn = useCallback(
     async (args: { fromIndex: number; toIndex: number }) => {
+      setModified(true)
+
       const controller = handleAbortRef(abortTableStateRef)
 
       const { fromIndex, toIndex } = args
@@ -119,6 +98,8 @@ export const TableColumnsProvider: React.FC<Props> = ({
 
   const toggleColumn = useCallback(
     async (column: string) => {
+      setModified(true)
+
       const controller = handleAbortRef(abortToggleColumnRef)
 
       const { newColumnState, toggledColumns } = tableColumns.reduce<{
@@ -181,7 +162,11 @@ export const TableColumnsProvider: React.FC<Props> = ({
   )
 
   const setActiveColumns = React.useCallback(
-    async (activeColumnAccessors: string[]) => {
+    async (activeColumnAccessors: string[], shouldSetModified?: boolean) => {
+      if (shouldSetModified !== false) {
+        setModified(true)
+      }
+
       const activeColumns: Pick<Column, 'accessor' | 'active'>[] = tableColumns
         .map((col) => {
           return {
@@ -225,7 +210,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
   )
 
   const resetColumnsState = React.useCallback(async () => {
-    await setActiveColumns(defaultColumns)
+    await setActiveColumns(defaultColumns, false)
   }, [defaultColumns, setActiveColumns])
 
   // //////////////////////////////////////////////
@@ -295,7 +280,9 @@ export const TableColumnsProvider: React.FC<Props> = ({
         toggleColumn,
       }}
     >
-      {children}
+      <TableColumnsModifiedContext.Provider value={modified}>
+        {children}
+      </TableColumnsModifiedContext.Provider>
     </TableColumnContext.Provider>
   )
 }

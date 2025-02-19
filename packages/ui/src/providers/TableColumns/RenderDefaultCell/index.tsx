@@ -4,9 +4,9 @@ import type { DefaultCellComponentProps } from 'payload'
 import React from 'react'
 
 import { useListDrawerContext } from '../../../elements/ListDrawer/Provider.js'
-import { DefaultCell } from '../../Table/DefaultCell/index.js'
-import './index.scss'
+import { DefaultCell } from '../../../elements/Table/DefaultCell/index.js'
 import { useTableColumns } from '../index.js'
+import './index.scss'
 
 const baseClass = 'default-cell'
 
