@@ -164,9 +164,8 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
         if (url) {
           if (modifiedRef.current) {
-            const { data, valid } = {
-              ...reduceFieldsToValuesWithValidation(fieldRef.current, true),
-            }
+            const { data, valid } = reduceFieldsToValuesWithValidation(fieldRef.current, true)
+
             data._status = 'draft'
 
             const skipSubmission =
@@ -293,10 +292,17 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   const previousDebouncedFields = useRef(debouncedFields)
   // When debounced fields change, autosave
   useEffect(() => {
+    /**
+     * Ensure autosave doesn't run on mount
+     */
     if (!didMount.current) {
       didMount.current = true
       return
     }
+
+    /**
+     * Ensure autosave only runs if the form data changes, not every time the entire form state changes
+     */
     if (
       dequal(
         reduceFieldsToValues(debouncedFields),
