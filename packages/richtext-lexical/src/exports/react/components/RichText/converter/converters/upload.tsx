@@ -8,18 +8,20 @@ export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
   upload: ({ node }) => {
     // TO-DO (v4): SerializedUploadNode should use UploadData_P4
     const uploadDocument = node as UploadDataImproved
-    if (typeof uploadDocument.value !== 'object') {
+    if (typeof uploadDocument?.value !== 'object') {
       return null
     }
-    const url = uploadDocument.value.url
+
+    const value = uploadDocument.value
+    const url = value.url
 
     /**
      * If the upload is not an image, return a link to the upload
      */
-    if (!uploadDocument.value.mimeType.startsWith('image')) {
+    if (!value.mimeType.startsWith('image')) {
       return (
         <a href={url} rel="noopener noreferrer">
-          {uploadDocument.value.filename}
+          {value.filename}
         </a>
       )
     }
@@ -27,15 +29,8 @@ export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
     /**
      * If the upload is a simple image with no different sizes, return a simple img tag
      */
-    if (!Object.keys(uploadDocument.value.sizes).length) {
-      return (
-        <img
-          alt={uploadDocument.value.filename}
-          height={uploadDocument.value.height}
-          src={url}
-          width={uploadDocument.value.width}
-        />
-      )
+    if (!Object.keys(value.sizes).length) {
+      return <img alt={value.filename} height={value.height} src={url} width={value.width} />
     }
 
     /**
@@ -44,8 +39,8 @@ export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
     const pictureJSX: React.ReactNode[] = []
 
     // Iterate through each size in the data.sizes object
-    for (const size in uploadDocument.value.sizes) {
-      const imageSize = uploadDocument.value.sizes[size] as FileSizeImproved
+    for (const size in value.sizes) {
+      const imageSize = value.sizes[size] as FileSizeImproved
 
       // Skip if any property of the size object is null
       if (
@@ -74,11 +69,11 @@ export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
     // Add the default img tag
     pictureJSX.push(
       <img
-        alt={uploadDocument.value?.filename}
-        height={uploadDocument.value?.height}
+        alt={value?.filename}
+        height={value?.height}
         key={'image'}
         src={url}
-        width={uploadDocument.value?.width}
+        width={value?.width}
       />,
     )
     return <picture>{pictureJSX}</picture>
