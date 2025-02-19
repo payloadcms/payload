@@ -1387,6 +1387,19 @@ importers:
         specifier: workspace:*
         version: link:../payload
 
+  packages/storage-cloudinary:
+    dependencies:
+      '@payloadcms/plugin-cloud-storage':
+        specifier: workspace:*
+        version: link:../plugin-cloud-storage
+      cloudinary:
+        specifier: ^2.5.1
+        version: 2.5.1
+    devDependencies:
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+
   packages/storage-gcs:
     dependencies:
       '@google-cloud/storage':
@@ -1683,6 +1696,9 @@ importers:
       '@payloadcms/storage-azure':
         specifier: workspace:*
         version: link:../packages/storage-azure
+      '@payloadcms/storage-cloudinary':
+        specifier: workspace:*
+        version: link:../packages/storage-cloudinary
       '@payloadcms/storage-gcs':
         specifier: workspace:*
         version: link:../packages/storage-gcs
@@ -6031,6 +6047,10 @@ packages:
     resolution: {integrity: sha512-JQHZ2QMW6l3aH/j6xCqQThY/9OH4D/9ls34cgkUBiEeocRTU04tHfKPBsUK1PqZCUQM7GiA0IIXJSuXHI64Kbg==}
     engines: {node: '>=0.8'}
 
+  cloudinary@2.5.1:
+    resolution: {integrity: sha512-CNg6uU53Hl4FEVynkTGpt5bQEAQWDHi3H+Sm62FzKf5uQHipSN2v7qVqS8GRVqeb0T1WNV+22+75DOJeRXYeSQ==}
+    engines: {node: '>=9'}
+
   clsx@2.1.1:
     resolution: {integrity: sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==}
     engines: {node: '>=6'}
@@ -8791,6 +8811,14 @@ packages:
 
   pure-rand@6.1.0:
     resolution: {integrity: sha512-bVWawvoZoBYpp6yIoQtQXHZjmz35RSVHnUOTefl8Vcjr8snTPY1wnpSPMWekcFwbxI6gtmT7rSYPFvz71ldiOA==}
+
+  q@1.5.1:
+    resolution: {integrity: sha512-kV/CThkXo6xyFEZUugw/+pIOywXcDbFYgSct5cT3gqlbkBE1SJdwy6UQoZvodiWF/ckQLZyDE/Bu1M6gVu5lVw==}
+    engines: {node: '>=0.6.0', teleport: '>=0.2.0'}
+    deprecated: |-
+      You or someone you depend on is using Q, the JavaScript Promise library that gave JavaScript developers strong feelings about promises. They can almost certainly migrate to the native JavaScript promise now. Thank you literally everyone for joining me in this bet against the odds. Be excellent to each other.
+
+      (For a CapTP with native promises, see @endo/eventual-send and @endo/captp)
 
   qs-esm@7.0.2:
     resolution: {integrity: sha512-D8NAthKSD7SGn748v+GLaaO6k08Mvpoqroa35PqIQC4gtUa8/Pb/k+r0m0NnGBVbHDP1gKZ2nVywqfMisRhV5A==}
@@ -15459,6 +15487,11 @@ snapshots:
 
   clone@1.0.4: {}
 
+  cloudinary@2.5.1:
+    dependencies:
+      lodash: 4.17.21
+      q: 1.5.1
+
   clsx@2.1.1: {}
 
   co@4.6.0: {}
@@ -18730,6 +18763,8 @@ snapshots:
   punycode@2.3.1: {}
 
   pure-rand@6.1.0: {}
+
+  q@1.5.1: {}
 
   qs-esm@7.0.2: {}
 
