@@ -87,9 +87,6 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
    * Helps us prevent infinite loops when the queue is processing and the form is invalid
    */
   const isValidRef = useRef(isValid)
-  const debouncedRef = useRef(debouncedFields)
-
-  debouncedRef.current = debouncedFields
 
   // Store fields in ref so the autosave func
   // can always retrieve the most to date copies
