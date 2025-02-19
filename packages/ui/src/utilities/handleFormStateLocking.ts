@@ -64,6 +64,7 @@ export const handleFormStateLocking = async ({
         limit: 1,
         overrideAccess: false,
         pagination: false,
+        user: req.user,
         where: lockedDocumentQuery,
       })
 
