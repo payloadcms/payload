@@ -105,11 +105,11 @@ export type TraverseFieldsCallback<T = unknown> = (args: {
   /**
    * The parent reference object
    */
-  parentRef: Record<string, T> | T
+  parentRef?: Record<string, unknown> | unknown
   /**
    * The current reference object
    */
-  ref: Record<string, T> | T
+  ref?: Record<string, unknown> | unknown
 }) => boolean | void
 
 type TraverseFieldsArgs = {
@@ -140,7 +140,7 @@ type TraverseFieldsArgs = {
  * @param ref the data or any artifacts assigned in the callback during field recursion
  * @param parentRef the data or any artifacts assigned in the callback during field recursion one level up
  */
-export const traverseFields = <T = unknown>({
+export const traverseFields = ({
   callback,
   callbackStack: _callbackStack = [],
   config,
@@ -151,7 +151,7 @@ export const traverseFields = <T = unknown>({
   parentIsLocalized,
   parentRef = {},
   ref = {},
-}: TraverseFieldsArgs<T>): void => {
+}: TraverseFieldsArgs): void => {
   fields.some((field) => {
     let callbackStack: (() => ReturnType<TraverseFieldsCallback>)[] = []
     if (!isTopLevel) {

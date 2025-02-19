@@ -38,7 +38,7 @@ export function linesFromStartToContentAndPropsString({
   let isSelfClosing = false
   let isWithinCodeBlockAmount = 0
 
-  const beforeStartLine = linesCopy[0].slice(0, startMatch.index)
+  const beforeStartLine = linesCopy[0]!.slice(0, startMatch.index)
   let endlineLastCharIndex = 0
 
   let endLineIndex = startLineIndex
@@ -159,7 +159,7 @@ export function linesFromStartToContentAndPropsString({
     }
   }
 
-  const afterEndLine = linesCopy[endLineIndex].trim().slice(endlineLastCharIndex)
+  const afterEndLine = linesCopy[endLineIndex]!.trim().slice(endlineLastCharIndex)
 
   return {
     afterEndLine,
