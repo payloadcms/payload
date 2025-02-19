@@ -173,6 +173,8 @@ In MongoDB, you'll only ever really need to run migrations for times where you c
 
 In this case, you can create a migration by running `pnpm payload migrate:create`, and then write the logic that you need to perform to migrate your documents to their new shape. You can then either run your migrations in CI before you build / deploy, or you can run them locally, against your production database, by using your production database connection string on your local computer and running the `pnpm payload migrate` command.
 
+You can find [here](/database/mongodb#common-migration-scripts) examples of common MongoDB migrations.
+
 #### Postgres
 
 In relational databases like Postgres, migrations are a bit more important, because each time you add a new field or a new collection, you'll need to update the shape of your database to match your Payload Config (otherwise you'll see errors upon trying to read / write your data).
