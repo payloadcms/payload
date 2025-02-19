@@ -7,6 +7,16 @@
  */
 
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MySelectOptions".
+ */
+export type MySelectOptions = 'option-1' | 'option-2';
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyRadioOptions".
+ */
+export type MyRadioOptions = 'option-1' | 'option-2';
+/**
  * Supported timezones in IANA format.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -132,6 +142,8 @@ export interface Post {
   id: string;
   text?: string | null;
   title?: string | null;
+  selectField: MySelectOptions;
+  radioField: MyRadioOptions;
   updatedAt: string;
   createdAt: string;
 }
@@ -249,6 +261,8 @@ export interface PayloadMigration {
 export interface PostsSelect<T extends boolean = true> {
   text?: T;
   title?: T;
+  selectField?: T;
+  radioField?: T;
   updatedAt?: T;
   createdAt?: T;
 }

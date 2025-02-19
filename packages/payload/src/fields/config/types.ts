@@ -1045,6 +1045,13 @@ export type SelectField = {
    */
   enumName?: DBIdentifierName
   hasMany?: boolean
+  /** Customize generated GraphQL and Typescript schema names.
+   * By default, it is bound to the collection.
+   *
+   * This is useful if you would like to generate a top level type to share amongst collections/fields.
+   * **Note**: Top level types can collide, ensure they are unique amongst collections, arrays, groups, blocks, tabs.
+   */
+  interfaceName?: string
   options: Option[]
   type: 'select'
 } & (
@@ -1062,7 +1069,7 @@ export type SelectField = {
 export type SelectFieldClient = {
   admin?: AdminClient & Pick<SelectField['admin'], 'isClearable' | 'isSortable'>
 } & FieldBaseClient &
-  Pick<SelectField, 'hasMany' | 'options' | 'type'>
+  Pick<SelectField, 'hasMany' | 'interfaceName' | 'options' | 'type'>
 
 type SharedRelationshipProperties = {
   filterOptions?: FilterOptions
@@ -1269,6 +1276,13 @@ export type RadioField = {
    * Customize the DB enum name
    */
   enumName?: DBIdentifierName
+  /** Customize generated GraphQL and Typescript schema names.
+   * By default, it is bound to the collection.
+   *
+   * This is useful if you would like to generate a top level type to share amongst collections/fields.
+   * **Note**: Top level types can collide, ensure they are unique amongst collections, arrays, groups, blocks, tabs.
+   */
+  interfaceName?: string
   options: Option[]
   type: 'radio'
   validate?: RadioFieldValidation
@@ -1277,7 +1291,7 @@ export type RadioField = {
 export type RadioFieldClient = {
   admin?: AdminClient & Pick<RadioField['admin'], 'layout'>
 } & FieldBaseClient &
-  Pick<RadioField, 'options' | 'type'>
+  Pick<RadioField, 'interfaceName' | 'options' | 'type'>
 
 type BlockFields = {
   [key: string]: any

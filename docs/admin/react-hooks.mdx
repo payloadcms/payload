@@ -1054,13 +1054,13 @@ import { usePayloadAPI } from '@payloadcms/ui'
 
 const MyComponent: React.FC = () => {
   // Fetch data from a collection item using its ID
-  const [{ data, error, isLoading }, { setParams }] = usePayloadAPI(
+  const [{ data, isError, isLoading }, { setParams }] = usePayloadAPI(
     '/api/posts/123',
     { initialParams: { depth: 1 } }
   )
 
   if (isLoading) return <p>Loading...</p>
-  if (error) return <p>Error: {error.message}</p>
+  if (isError) return <p>Error occurred while fetching data.</p>
 
   return (
     <div>
@@ -1094,7 +1094,7 @@ The first item in the returned array is an object containing the following prope
 | Property        | Description                                              |
 | --------------- | -------------------------------------------------------- |
 | **`data`**      | The API response data.                                   |
-| **`error`**     | If an error occurs, this contains the error object.      |
+| **`isError`**   | A boolean indicating whether the request failed.         |
 | **`isLoading`** | A boolean indicating whether the request is in progress. |
 
 The second item is an object with the following methods:
