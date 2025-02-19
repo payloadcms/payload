@@ -1,6 +1,6 @@
 import type { DocumentEvent, FieldSchemaJSON, PaginatedDocs } from 'payload'
 
-import type { PopulationsByCollection } from './types.js'
+import type { CollectionPopulationRequestHandler, PopulationsByCollection } from './types.js'
 
 import { traverseFields } from './traverseFields.js'
 
@@ -21,15 +21,7 @@ let prevLocale: string | undefined
 
 export const mergeData = async <T>(args: {
   apiRoute?: string
-  collectionPopulationRequestHandler?: ({
-    apiPath,
-    endpoint,
-    serverURL,
-  }: {
-    apiPath: string
-    endpoint: string
-    serverURL: string
-  }) => Promise<Response>
+  collectionPopulationRequestHandler?: CollectionPopulationRequestHandler
   depth?: number
   externallyUpdatedRelationship?: DocumentEvent
   fieldSchema: FieldSchemaJSON
