@@ -8,8 +8,6 @@ import * as qs from 'qs-esm'
 import React, { useCallback } from 'react'
 import { toast } from 'sonner'
 
-import type { OnConfirm } from '../ConfirmationModal/index.js'
-
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
@@ -53,87 +51,78 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
     toast.error(t('error:unknown'))
   }, [t])
 
-  const handleUnpublish: OnConfirm = useCallback(
-    async ({ closeConfirmationModal, setConfirming }) => {
-      await requests
-        .patch(
-          `${serverURL}${api}/${slug}${getQueryParams({ _status: { not_equals: 'draft' } })}`,
-          {
-            body: JSON.stringify({
-              _status: 'draft',
-            }),
-            headers: {
-              'Accept-Language': i18n.language,
-              'Content-Type': 'application/json',
-            },
-          },
-        )
-        .then(async (res) => {
-          try {
-            const json = await res.json()
-            setConfirming(false)
-            closeConfirmationModal()
+  const handleUnpublish = useCallback(async () => {
+    await requests
+      .patch(`${serverURL}${api}/${slug}${getQueryParams({ _status: { not_equals: 'draft' } })}`, {
+        body: JSON.stringify({
+          _status: 'draft',
+        }),
+        headers: {
+          'Accept-Language': i18n.language,
+          'Content-Type': 'application/json',
+        },
+      })
+      .then(async (res) => {
+        try {
+          const json = await res.json()
 
-            const deletedDocs = json?.docs.length || 0
-            const successLabel = deletedDocs > 1 ? plural : singular
+          const deletedDocs = json?.docs.length || 0
+          const successLabel = deletedDocs > 1 ? plural : singular
 
-            if (res.status < 400 || deletedDocs > 0) {
-              toast.success(
-                t('general:updatedCountSuccessfully', {
-                  count: deletedDocs,
-                  label: getTranslation(successLabel, i18n),
-                }),
-              )
+          if (res.status < 400 || deletedDocs > 0) {
+            toast.success(
+              t('general:updatedCountSuccessfully', {
+                count: deletedDocs,
+                label: getTranslation(successLabel, i18n),
+              }),
+            )
 
-              if (json?.errors.length > 0) {
-                toast.error(json.message, {
-                  description: json.errors.map((error) => error.message).join('\n'),
-                })
-              }
-
-              router.replace(
-                qs.stringify(
-                  {
-                    ...parseSearchParams(searchParams),
-                    page: selectAll ? '1' : undefined,
-                  },
-                  { addQueryPrefix: true },
-                ),
-              )
-
-              clearRouteCache() // Use clearRouteCache instead of router.refresh, as we only need to clear the cache if the user has route caching enabled - clearRouteCache checks for this
-              return null
+            if (json?.errors.length > 0) {
+              toast.error(json.message, {
+                description: json.errors.map((error) => error.message).join('\n'),
+              })
             }
 
-            if (json.errors) {
-              json.errors.forEach((error) => toast.error(error.message))
-            } else {
-              addDefaultError()
-            }
-            return false
-          } catch (_err) {
-            setConfirming(false)
-            closeConfirmationModal()
-            return addDefaultError()
+            router.replace(
+              qs.stringify(
+                {
+                  ...parseSearchParams(searchParams),
+                  page: selectAll ? '1' : undefined,
+                },
+                { addQueryPrefix: true },
+              ),
+            )
+
+            clearRouteCache() // Use clearRouteCache instead of router.refresh, as we only need to clear the cache if the user has route caching enabled - clearRouteCache checks for this
+
+            return null
           }
-        })
-    },
-    [
-      serverURL,
-      api,
-      slug,
-      getQueryParams,
-      i18n,
-      plural,
-      singular,
-      t,
-      router,
-      searchParams,
-      selectAll,
-      clearRouteCache,
-      addDefaultError,
-    ],
-  )
+
+          if (json.errors) {
+            json.errors.forEach((error) => toast.error(error.message))
+          } else {
+            addDefaultError()
+          }
+          return false
+        } catch (_err) {
+          return addDefaultError()
+        }
+      })
+  }, [
+    serverURL,
+    api,
+    slug,
+    getQueryParams,
+    i18n,
+    plural,
+    singular,
+    t,
+    router,
+    searchParams,
+    selectAll,
+    clearRouteCache,
+    addDefaultError,
+  ])
 
   if (!versions?.drafts || selectAll === SelectAllStatus.None || !hasPermission) {
     return null

@@ -8,8 +8,6 @@ import * as qs from 'qs-esm'
 import React, { useCallback } from 'react'
 import { toast } from 'sonner'
 
-import type { OnConfirm } from '../ConfirmationModal/index.js'
-
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
@@ -54,94 +52,87 @@ export const DeleteMany: React.FC<Props> = (props) => {
     toast.error(t('error:unknown'))
   }, [t])
 
-  const handleDelete: OnConfirm = useCallback(
-    async ({ closeConfirmationModal, setConfirming }) => {
-      const queryWithSearch = mergeListSearchAndWhere({
-        collectionConfig: collection,
-        search: searchParams.get('search'),
+  const handleDelete = useCallback(async () => {
+    const queryWithSearch = mergeListSearchAndWhere({
+      collectionConfig: collection,
+      search: searchParams.get('search'),
+    })
+
+    const queryString = getQueryParams(queryWithSearch)
+
+    await requests
+      .delete(`${serverURL}${api}/${slug}${queryString}`, {
+        headers: {
+          'Accept-Language': i18n.language,
+          'Content-Type': 'application/json',
+        },
       })
+      .then(async (res) => {
+        try {
+          const json = await res.json()
 
-      const queryString = getQueryParams(queryWithSearch)
+          const deletedDocs = json?.docs.length || 0
+          const successLabel = deletedDocs > 1 ? plural : singular
 
-      await requests
-        .delete(`${serverURL}${api}/${slug}${queryString}`, {
-          headers: {
-            'Accept-Language': i18n.language,
-            'Content-Type': 'application/json',
-          },
-        })
-        .then(async (res) => {
-          try {
-            const json = await res.json()
-            setConfirming(false)
-            closeConfirmationModal()
+          if (res.status < 400 || deletedDocs > 0) {
+            toast.success(
+              t('general:deletedCountSuccessfully', {
+                count: deletedDocs,
+                label: getTranslation(successLabel, i18n),
+              }),
+            )
 
-            const deletedDocs = json?.docs.length || 0
-            const successLabel = deletedDocs > 1 ? plural : singular
-
-            if (res.status < 400 || deletedDocs > 0) {
-              toast.success(
-                t('general:deletedCountSuccessfully', {
-                  count: deletedDocs,
-                  label: getTranslation(successLabel, i18n),
-                }),
-              )
-
-              if (json?.errors.length > 0) {
-                toast.error(json.message, {
-                  description: json.errors.map((error) => error.message).join('\n'),
-                })
-              }
-
-              toggleAll()
-
-              router.replace(
-                qs.stringify(
-                  {
-                    page: selectAll ? '1' : undefined,
-                  },
-                  { addQueryPrefix: true },
-                ),
-              )
-
-              clearRouteCache()
-
-              return null
-            }
-
-            if (json.errors) {
+            if (json?.errors.length > 0) {
               toast.error(json.message, {
                 description: json.errors.map((error) => error.message).join('\n'),
               })
-            } else {
-              return addDefaultError()
             }
-            return false
-          } catch (_err) {
-            setConfirming(false)
-            closeConfirmationModal()
+
+            toggleAll()
+
+            router.replace(
+              qs.stringify(
+                {
+                  page: selectAll ? '1' : undefined,
+                },
+                { addQueryPrefix: true },
+              ),
+            )
+
+            clearRouteCache()
+
+            return null
+          }
+
+          if (json.errors) {
+            toast.error(json.message, {
+              description: json.errors.map((error) => error.message).join('\n'),
+            })
+          } else {
             return addDefaultError()
           }
-        })
-    },
-    [
-      searchParams,
-      addDefaultError,
-      api,
-      getQueryParams,
-      i18n,
-      plural,
-      router,
-      selectAll,
-      serverURL,
-      singular,
-      slug,
-      t,
-      toggleAll,
-      clearRouteCache,
-      collection,
-    ],
-  )
+          return false
+        } catch (_err) {
+          return addDefaultError()
+        }
+      })
+  }, [
+    searchParams,
+    addDefaultError,
+    api,
+    getQueryParams,
+    i18n,
+    plural,
+    router,
+    selectAll,
+    serverURL,
+    singular,
+    slug,
+    t,
+    toggleAll,
+    clearRouteCache,
+    collection,
+  ])
 
   if (selectAll === SelectAllStatus.None || !hasDeletePermission) {
     return null

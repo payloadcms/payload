@@ -24,7 +24,7 @@ export { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 
 // elements
 export { ConfirmationModal } from '../../elements/ConfirmationModal/index.js'
-export type { OnCancel, OnConfirm } from '../../elements/ConfirmationModal/index.js'
+export type { OnCancel } from '../../elements/ConfirmationModal/index.js'
 export { Link } from '../../elements/Link/index.js'
 export { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
 export { DocumentTakeOver } from '../../elements/DocumentTakeOver/index.js'
