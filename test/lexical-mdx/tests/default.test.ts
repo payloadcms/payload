@@ -21,6 +21,23 @@ export const defaultTests: Test[] = [
     },
   },
   {
+    // Same test but with single quote property values
+    inputAfterConvertFromEditorJSON: `<PackageInstallOptions packageId="444" uniqueId="xxx" update/>`,
+    input: `
+<PackageInstallOptions
+  packageId='444'
+  uniqueId='xxx' update/>
+      `,
+    blockNode: {
+      fields: {
+        blockType: 'PackageInstallOptions',
+        packageId: '444',
+        update: true,
+        uniqueId: 'xxx',
+      },
+    },
+  },
+  {
     input: `
 <PackageInstallOptions packageId="444">
   ignored
