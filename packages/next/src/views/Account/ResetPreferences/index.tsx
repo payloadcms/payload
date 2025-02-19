@@ -1,11 +1,16 @@
 'use client'
 import type { User } from 'payload'
 
-import { Button, LoadingOverlay, toast, useModal, useTranslation } from '@payloadcms/ui'
+import {
+  Button,
+  ConfirmationModal,
+  LoadingOverlay,
+  toast,
+  useModal,
+  useTranslation,
+} from '@payloadcms/ui'
 import * as qs from 'qs-esm'
 import { Fragment, useCallback, useState } from 'react'
-
-import { ConfirmResetModal } from './ConfirmResetModal/index.js'
 
 const confirmResetModalSlug = 'confirm-reset-modal'
 
@@ -69,7 +74,12 @@ export const ResetPreferences: React.FC<{
           {t('general:resetPreferences')}
         </Button>
       </div>
-      <ConfirmResetModal onConfirm={handleResetPreferences} slug={confirmResetModalSlug} />
+      <ConfirmationModal
+        body={t('general:resetPreferencesDescription')}
+        heading={t('general:resetPreferences')}
+        modalSlug={confirmResetModalSlug}
+        onConfirm={handleResetPreferences}
+      />
       {loading && <LoadingOverlay loadingText={t('general:resettingPreferences')} />}
     </Fragment>
   )
