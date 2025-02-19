@@ -61,8 +61,6 @@ export const DeleteDocument: React.FC<Props> = (props) => {
   const { startRouteTransition } = useRouteTransition()
   const { openModal } = useModal()
 
-  const titleToRender = titleFromProps || title || id
-
   const modalSlug = `delete-${id}`
 
   const addDefaultError = useCallback(() => {
@@ -171,7 +169,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
               t={t}
               variables={{
                 label: getTranslation(singularLabel, i18n),
-                title: titleToRender,
+                title: titleFromProps || title || id,
               }}
             />
           }
