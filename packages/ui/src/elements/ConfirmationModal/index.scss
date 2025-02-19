@@ -1,7 +1,7 @@
 @import '../../scss/styles.scss';
 
 @layer payload-default {
-  .generate-confirmation {
+  .confirmation-modal {
     @include blur-bg;
     display: flex;
     align-items: center;
