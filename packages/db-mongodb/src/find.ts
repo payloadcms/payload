@@ -7,6 +7,7 @@ import type { MongooseAdapter } from './index.js'
 
 import { buildQuery } from './queries/buildQuery.js'
 import { buildSortParam } from './queries/buildSortParam.js'
+import { aggregatePaginate } from './utilities/aggregatePaginate.js'
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { getSession } from './utilities/getSession.js'
@@ -128,7 +129,20 @@ export const find: Find = async function find(
   })
   // build join aggregation
   if (aggregate) {
-    result = await Model.aggregatePaginate(Model.aggregate(aggregate), paginationOptions)
+    result = await aggregatePaginate({
+      adapter: this,
+      collation: paginationOptions.collation,
+      joinAggregation: aggregate,
+      limit: paginationOptions.limit,
+      Model,
+      page: paginationOptions.page,
+      pagination: paginationOptions.pagination,
+      projection: paginationOptions.projection,
+      query,
+      session: paginationOptions.options?.session,
+      sort: paginationOptions.sort as object,
+      useEstimatedCount: paginationOptions.useEstimatedCount,
+    })
   } else {
     result = await Model.paginate(query, paginationOptions)
   }
