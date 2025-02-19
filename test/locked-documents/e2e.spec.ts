@@ -566,7 +566,9 @@ describe('Locked Documents', () => {
       await expect(modalContainer).toBeVisible()
 
       // Click the "Leave anyway" button
-      await page.locator('.leave-without-saving__controls .btn--style-primary').click()
+      await page
+        .locator('#leave-without-saving .confirmation-modal__controls .btn--style-primary')
+        .click()
 
       // eslint-disable-next-line payload/no-wait-function
       await wait(500)
@@ -618,7 +620,9 @@ describe('Locked Documents', () => {
       await expect(modalContainer).toBeVisible()
 
       // Click the "Leave anyway" button
-      await page.locator('.leave-without-saving__controls .btn--style-primary').click()
+      await page
+        .locator('#leave-without-saving .confirmation-modal__controls .btn--style-primary')
+        .click()
 
       // eslint-disable-next-line payload/no-wait-function
       await wait(500)

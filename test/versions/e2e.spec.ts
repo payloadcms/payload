@@ -189,7 +189,7 @@ describe('Versions', () => {
 
       // Bulk edit the selected rows
       await page.locator('.unpublish-many__toggle').click()
-      await page.locator('#unpublish-posts #confirm-action').click()
+      await page.locator('#unpublish-draft-posts #confirm-action').click()
 
       // Check that the statuses for each row has been updated to `draft`
       await expect(findTableCell(page, '_status', 'Published Title')).toContainText('Draft')
@@ -565,7 +565,7 @@ describe('Versions', () => {
 
       // revert to last published version
       await page.locator('#action-revert-to-published').click()
-      await saveDocAndAssert(page, '#action-revert-to-published-confirm')
+      await saveDocAndAssert(page, '[id^=confirm-revert-] #confirm-action')
 
       // verify that spanish content is reverted correctly
       await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
