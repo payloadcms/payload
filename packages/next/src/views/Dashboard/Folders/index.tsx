@@ -1,4 +1,3 @@
-import type { groupNavItems } from '@payloadcms/ui/shared'
 import type {
   ClientUser,
   PaginatedDocs,
@@ -10,6 +9,7 @@ import type { GetFolderDataResult } from 'payload/shared'
 
 import { FolderAndDocuments, FolderProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { type groupNavItems, sanitizeID } from '@payloadcms/ui/shared'
 import React from 'react'
 
 import './index.scss'
@@ -31,16 +31,13 @@ export type FolderDashboardProps = {
 } & GetFolderDataResult &
   ServerProps
 
-export const FolderDashboard: React.FC<FolderDashboardProps> = (props) => {
+export const FolderDashboard: React.FC<FolderDashboardProps> = async (props) => {
   const {
     breadcrumbs,
-    documents,
     folderID,
-    globalData,
     i18n,
     i18n: { t },
     items,
-    Link,
     locale,
     params,
     payload: {
@@ -48,7 +45,6 @@ export const FolderDashboard: React.FC<FolderDashboardProps> = (props) => {
         admin: {
           components: { afterDashboard, beforeDashboard },
         },
-        routes: { admin: adminRoute },
       },
     },
     payload,
@@ -56,6 +52,31 @@ export const FolderDashboard: React.FC<FolderDashboardProps> = (props) => {
     searchParams,
     user,
   } = props
+
+  const displayTypePref = (await payload.find({
+    collection: 'payload-preferences',
+    depth: 0,
+    limit: 1,
+    where: {
+      and: [
+        {
+          key: {
+            equals: 'folder-view-display',
+          },
+        },
+        {
+          'user.relationTo': {
+            equals: user.collection,
+          },
+        },
+        {
+          'user.value': {
+            equals: sanitizeID(user.id),
+          },
+        },
+      ],
+    },
+  })) as unknown as { docs: { value: 'grid' | 'list' }[] }
 
   return (
     <FolderProvider
@@ -82,7 +103,7 @@ export const FolderDashboard: React.FC<FolderDashboardProps> = (props) => {
               },
             })}
 
-          <FolderAndDocuments />
+          <FolderAndDocuments initialDisplayType={displayTypePref?.docs[0]?.value} />
           {afterDashboard &&
             RenderServerComponent({
               Component: afterDashboard,

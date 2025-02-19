@@ -13,6 +13,7 @@ import { GridViewIcon } from '../../../icons/GridView/index.js'
 import { ListViewIcon } from '../../../icons/ListView/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useFolder } from '../../../providers/Folders/index.js'
+import { usePreferences } from '../../../providers/Preferences/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { DocumentDrawer } from '../../DocumentDrawer/index.js'
@@ -31,7 +32,11 @@ const renameFolderDrawerSlug = 'rename-folder'
 const moveToFolderDrawerSlug = 'move-to-folder'
 const newFolderSlug = 'new-folder'
 
-export const FolderAndDocuments = () => {
+type Props = {
+  initialDisplayType: 'grid' | 'list'
+}
+
+export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
   const {
     breadcrumbs,
     collectionUseAsTitles,
@@ -61,7 +66,8 @@ export const FolderAndDocuments = () => {
 
   const [folderToRename, setFolderToRename] = React.useState<FolderInterface>()
   const [isDragging, setIsDragging] = React.useState(false)
-  const [viewType, setViewType] = React.useState<'grid' | 'list'>('grid')
+  const { setPreference } = usePreferences()
+  const [viewType, setViewType] = React.useState<'grid' | 'list'>(initialDisplayType || 'grid')
   const [createCollectionSlug, setCreateCollectionSlug] = React.useState<string | undefined>()
   const dndContextID = React.useId()
   const renameFolderWasOpenRef = React.useRef(false)
@@ -75,6 +81,14 @@ export const FolderAndDocuments = () => {
         return acc
       }, []),
     [itemsToMove, folderCollectionSlug],
+  )
+
+  const onDisplayTypeChange = React.useCallback(
+    (newDisplayType: 'grid' | 'list') => {
+      setViewType(newDisplayType)
+      void setPreference('folder-view-display', newDisplayType)
+    },
+    [setPreference],
   )
 
   const onNewFolderCreate = React.useCallback(
@@ -301,7 +315,7 @@ export const FolderAndDocuments = () => {
                   buttonStyle="pill"
                   className={`${baseClass}__grid-toggle ${viewType === 'grid' ? 'active' : ''}`}
                   disabled={viewType === 'grid'}
-                  onClick={() => setViewType('grid')}
+                  onClick={() => onDisplayTypeChange('grid')}
                   size="small"
                 >
                   <GridViewIcon />
@@ -310,7 +324,7 @@ export const FolderAndDocuments = () => {
                   buttonStyle="pill"
                   className={`${baseClass}__list-toggle ${viewType === 'list' ? 'active' : ''}`}
                   disabled={viewType === 'list'}
-                  onClick={() => setViewType('list')}
+                  onClick={() => onDisplayTypeChange('list')}
                   size="small"
                 >
                   <ListViewIcon />
