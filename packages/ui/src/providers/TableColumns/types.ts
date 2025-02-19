@@ -20,8 +20,10 @@ export type TableColumnsProviderProps = {
 export interface ITableColumns {
   columns: Column[]
   LinkedCellOverride?: React.ReactNode
+  modified: boolean
   moveColumn: (args: { fromIndex: number; toIndex: number }) => Promise<void>
   resetColumnsState: () => Promise<void>
   setActiveColumns: (columns: string[]) => Promise<void>
+  setModified: (modified: boolean) => void
   toggleColumn: (column: string) => Promise<void>
 }

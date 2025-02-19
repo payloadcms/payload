@@ -7,15 +7,15 @@ import { Fragment, useCallback, useState } from 'react'
 
 import { useListDrawer } from '../../elements/ListDrawer/index.js'
 import { Dots } from '../../icons/Dots/index.js'
-import { useListQueryModified } from '../../providers/ListQuery/context.js'
-import { useColumnsModified } from '../../providers/TableColumns/context.js'
+import { useListQuery } from '../../providers/ListQuery/context.js'
+import { useTableColumns } from '../../providers/TableColumns/context.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { Pill } from '../Pill/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
-import './index.scss'
 import { Translation } from '../Translation/index.js'
+import './index.scss'
 
 const baseClass = 'shared-list-filters'
 
@@ -23,16 +23,16 @@ const confirmDeleteModalSlug = 'confirm-delete-filter'
 
 export function SharedListFilters({ filters }: { filters: PaginatedDocs<SharedListFilter> }) {
   const [selectedFilter, setSelectedFilter] = useState<SharedListFilter>()
-  const [currentlyOpenDrawer, setCurrentlyOpenDrawer] = useState<number | string>(null)
+  const [documentEditID, setDocumentEditID] = useState<number | string>(null)
   const { i18n, t } = useTranslation()
   const { openModal } = useModal()
-  const queryModified = useListQueryModified()
-  const columnsModified = useColumnsModified()
+  const { modified: listQueryModified, setModified: setQueryModified } = useListQuery()
+  const { modified: columnsModified, setModified: setColumnsModified } = useTableColumns()
 
-  const hasModified = queryModified || columnsModified
+  const hasModified = listQueryModified || columnsModified
 
   const [DocumentDrawer, , { openDrawer: openEditDrawer }] = useDocumentDrawer({
-    id: currentlyOpenDrawer,
+    id: documentEditID,
     collectionSlug: 'payload-shared-filters',
   })
 
@@ -55,7 +55,15 @@ export function SharedListFilters({ filters }: { filters: PaginatedDocs<SharedLi
           {filters?.docs.map((filter) => (
             <Pill
               key={filter.id}
-              onClick={() => setSelectedFilter(filter)}
+              onClick={() => {
+                const isCurrentSelection = selectedFilter && selectedFilter?.id === filter.id
+
+                if (isCurrentSelection) {
+                  setSelectedFilter(undefined)
+                } else {
+                  setSelectedFilter(filter)
+                }
+              }}
               pillStyle={selectedFilter && selectedFilter?.id === filter.id ? 'dark' : 'white'}
             >
               {filter.title}
@@ -63,14 +71,44 @@ export function SharedListFilters({ filters }: { filters: PaginatedDocs<SharedLi
           ))}
         </div>
         <div className={`${baseClass}__actions`}>
-          {hasModified ? (
-            <button className={`${baseClass}__actions__reset`} onClick={() => {}} type="button">
-              {t('general:reset')}
+          {!selectedFilter || (selectedFilter && hasModified) ? (
+            <button
+              className={`${baseClass}__actions__create`}
+              onClick={() => {
+                setDocumentEditID(undefined)
+                openEditDrawer()
+              }}
+              type="button"
+            >
+              {t('general:create')}
             </button>
           ) : null}
-          <button className={`${baseClass}__actions__save`} onClick={() => {}} type="button">
-            Save For Everyone
-          </button>
+          {selectedFilter && hasModified ? (
+            <Fragment>
+              <button
+                className={`${baseClass}__actions__reset`}
+                onClick={() => {
+                  // TODO: reset query and columns
+                  setQueryModified(false)
+                  setColumnsModified(false)
+                }}
+                type="button"
+              >
+                {t('general:reset')}
+              </button>
+              <button
+                className={`${baseClass}__actions__save`}
+                onClick={() => {
+                  // TODO: save query and columns
+                  setQueryModified(false)
+                  setColumnsModified(false)
+                }}
+                type="button"
+              >
+                Save For Everyone
+              </button>
+            </Fragment>
+          ) : null}
           <Popup
             button={<Dots ariaLabel={t('general:moreOptions')} />}
             className={`${baseClass}__popup`}
@@ -82,7 +120,7 @@ export function SharedListFilters({ filters }: { filters: PaginatedDocs<SharedLi
               {selectedFilter ? (
                 <PopupList.Button
                   onClick={() => {
-                    setCurrentlyOpenDrawer(selectedFilter.id)
+                    setDocumentEditID(selectedFilter.id)
                     openEditDrawer()
                   }}
                 >
@@ -100,7 +138,17 @@ export function SharedListFilters({ filters }: { filters: PaginatedDocs<SharedLi
         </div>
       </div>
       <ListDrawer />
-      <DocumentDrawer />
+      <DocumentDrawer
+        onDelete={() => {
+          setSelectedFilter(undefined)
+        }}
+        onDuplicate={(doc) => {
+          setSelectedFilter(doc)
+        }}
+        onSave={(doc) => {
+          setSelectedFilter(doc)
+        }}
+      />
       <ConfirmationModal
         body={
           <Translation

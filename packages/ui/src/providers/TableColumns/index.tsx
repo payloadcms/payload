@@ -1,9 +1,9 @@
 'use client'
 import type { Column, ListPreferences, SanitizedCollectionConfig } from 'payload'
 
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 
-import type { TableColumnsProviderProps } from './types.js'
+import type { ITableColumns, TableColumnsProviderProps } from './types.js'
 
 import { useConfig } from '../../providers/Config/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
@@ -40,6 +40,10 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
   const { getTableState } = useServerFunctions()
 
   const [modified, setModified] = React.useState(false)
+
+  const contextRef = useRef({} as ITableColumns)
+
+  contextRef.current.modified = modified
 
   const { admin: { defaultColumns, useAsTitle } = {}, fields } = getEntityConfig({
     collectionSlug,
@@ -277,7 +281,9 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
         moveColumn,
         resetColumnsState,
         setActiveColumns,
+        setModified,
         toggleColumn,
+        ...contextRef.current,
       }}
     >
       <TableColumnsModifiedContext.Provider value={modified}>

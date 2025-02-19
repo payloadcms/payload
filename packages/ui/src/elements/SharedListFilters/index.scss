@@ -21,7 +21,9 @@
     align-items: center;
   }
 
-  &__actions__reset {
+  &__actions__create,
+  &__actions__reset,
+  &__actions__save {
     margin: 0;
     background: transparent;
     appearance: none;
@@ -33,15 +35,9 @@
     color: var(--theme-elevation-500);
   }
 
+  &__actions__reset {
+  }
+
   &__actions__save {
-    margin: 0;
-    background: transparent;
-    appearance: none;
-    border: 0;
-    padding: 0;
-    text-decoration: underline;
-    cursor: pointer;
-    font-size: inherit;
-    color: var(--theme-elevation-500);
   }
 }

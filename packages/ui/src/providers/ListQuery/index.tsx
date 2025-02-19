@@ -4,7 +4,7 @@ import type { ListQuery, Where } from 'payload'
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import { isNumber } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { ListQueryProviderProps } from './types.js'
 
@@ -27,6 +27,9 @@ export const ListQueryProvider: React.FC<ListQueryProviderProps> = ({
   const rawSearchParams = useSearchParams()
   const searchParams = useMemo(() => parseSearchParams(rawSearchParams), [rawSearchParams])
   const [modified, setModified] = useState(false)
+  const contextRef = useRef({} as ListQueryContext)
+
+  contextRef.current.modified = modified
 
   const { onQueryChange } = useListDrawerContext()
 
@@ -167,6 +170,8 @@ export const ListQueryProvider: React.FC<ListQueryProviderProps> = ({
         handleWhereChange,
         query: currentQuery,
         refineListData,
+        setModified,
+        ...contextRef.current,
       }}
     >
       <ListQueryModifiedContext.Provider value={modified}>

@@ -23,6 +23,8 @@ export type ListQueryContext = {
   data: PaginatedDocs
   defaultLimit?: number
   defaultSort?: Sort
+  modified: boolean
   query: ListQuery
   refineListData: (args: ListQuery) => Promise<void>
+  setModified: (modified: boolean) => void
 } & ContextHandlers

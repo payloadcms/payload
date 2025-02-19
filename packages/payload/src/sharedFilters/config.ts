@@ -20,6 +20,7 @@ export const getSharedFiltersCollection = (config: Config): CollectionConfig => 
   admin: {
     // uncomment this when ready
     // hidden: true,
+    useAsTitle: 'title',
   },
   fields: [
     {
@@ -30,6 +31,8 @@ export const getSharedFiltersCollection = (config: Config): CollectionConfig => 
     {
       name: 'where',
       type: 'json',
+      // uncomment this when ready
+      // hidden: true,
       // TODO: wire this up properly
       // hooks: {
       //   beforeValidate: [
@@ -48,6 +51,8 @@ export const getSharedFiltersCollection = (config: Config): CollectionConfig => 
     {
       name: 'columns',
       type: 'json',
+      // uncomment this when ready
+      // hidden: true,
       validate: (value) => {
         if (value) {
           try {
