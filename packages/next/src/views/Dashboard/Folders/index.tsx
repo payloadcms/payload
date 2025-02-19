@@ -36,7 +36,6 @@ export const FolderDashboard: React.FC<FolderDashboardProps> = async (props) => 
     breadcrumbs,
     folderID,
     i18n,
-    i18n: { t },
     items,
     locale,
     params,

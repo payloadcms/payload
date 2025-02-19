@@ -2,7 +2,7 @@ import React from 'react'
 
 import './index.scss'
 
-export const FolderIcon = () => {
+export function FolderIcon() {
   return (
     <svg
       className="icon icon--folder"

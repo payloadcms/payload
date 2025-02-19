@@ -18,7 +18,7 @@ const baseClass = 'move-folder-drawer'
 type Props = {
   readonly drawerSlug: string
   readonly hiddenFolderIDs: (number | string)[]
-  readonly onMoveConfirm: (folderID: number | string) => Promise<void>
+  readonly onMoveConfirm: (folderID: number | string) => Promise<void> | void
 }
 export const MoveToFolderDrawer = DrawerWithFolderContext<Props>((props) => {
   const { drawerSlug, hiddenFolderIDs, onMoveConfirm } = props
