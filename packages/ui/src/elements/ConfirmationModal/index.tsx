@@ -63,6 +63,7 @@ export function ConfirmationModal(props: ConfirmationModalProps) {
         <div className={`${baseClass}__controls`}>
           <Button
             buttonStyle="secondary"
+            disabled={confirming}
             id="confirm-cancel"
             onClick={
               confirming
@@ -92,7 +93,9 @@ export function ConfirmationModal(props: ConfirmationModalProps) {
             }}
             size="large"
           >
-            {confirming ? confirmingLabel || confirmLabel : confirmLabel || t('general:confirm')}
+            {confirming
+              ? confirmingLabel || t('general:loading')
+              : confirmLabel || t('general:confirm')}
           </Button>
         </div>
       </div>
