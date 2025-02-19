@@ -18,7 +18,6 @@ type Args = {
   operations: AllOperations[]
   req: PayloadRequest
   type: 'collection' | 'global'
-  version?: boolean
 }
 
 type ReturnType<T extends Args> = T['type'] extends 'global'
@@ -39,7 +38,7 @@ type EntityDoc = JsonObject | TypeWithID
  * Build up permissions object for an entity (collection or global)
  */
 export async function getEntityPolicies<T extends Args>(args: T): Promise<ReturnType<T>> {
-  const { id, type, blockPolicies, entity, operations, req, version } = args
+  const { id, type, blockPolicies, entity, operations, req } = args
   const { data, locale, payload, user } = req
   const isLoggedIn = !!user
 
@@ -78,16 +77,19 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
           locale,
           overrideAccess: true,
           req,
-          where: combineQueries(where, { id: { equals: id } }),
         }
-        if (version && operation === 'readVersions') {
-          const paginatedRes = await payload.findVersions(options)
+        if (operation === 'readVersions') {
+          const paginatedRes = await payload.findVersions({
+            ...options,
+            where: combineQueries(where, { parent: { equals: id } }),
+          })
           return paginatedRes?.docs?.[0] || undefined
         }
 
         const paginatedRes = await payload.find({
           ...options,
           pagination: false,
+          where: combineQueries(where, { id: { equals: id } }),
         })
         return paginatedRes?.docs?.[0] || undefined
       }

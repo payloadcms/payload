@@ -13,7 +13,6 @@ type Arguments = {
   collection: Collection
   id: number | string
   req: PayloadRequest
-  version?: boolean
 }
 
 export async function docAccessOperation(args: Arguments): Promise<SanitizedCollectionPermission> {
@@ -21,7 +20,6 @@ export async function docAccessOperation(args: Arguments): Promise<SanitizedColl
     id,
     collection: { config },
     req,
-    version,
   } = args
 
   const collectionOperations = [...allOperations]
@@ -37,6 +35,7 @@ export async function docAccessOperation(args: Arguments): Promise<SanitizedColl
   if (config.versions) {
     collectionOperations.push('readVersions')
   }
+
   try {
     const result = await getEntityPolicies({
       id,
@@ -45,7 +44,6 @@ export async function docAccessOperation(args: Arguments): Promise<SanitizedColl
       entity: config,
       operations: collectionOperations,
       req,
-      version,
     })
 
     const sanitizedPermissions = sanitizePermissions({

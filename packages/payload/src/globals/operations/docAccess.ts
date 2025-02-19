@@ -12,11 +12,10 @@ import { sanitizePermissions } from '../../utilities/sanitizePermissions.js'
 type Arguments = {
   globalConfig: SanitizedGlobalConfig
   req: PayloadRequest
-  version?: boolean
 }
 
 export const docAccessOperation = async (args: Arguments): Promise<SanitizedGlobalPermission> => {
-  const { globalConfig, req, version } = args
+  const { globalConfig, req } = args
 
   const globalOperations: AllOperations[] = ['read', 'update']
 
@@ -32,7 +31,6 @@ export const docAccessOperation = async (args: Arguments): Promise<SanitizedGlob
       entity: globalConfig,
       operations: globalOperations,
       req,
-      version,
     })
     if (shouldCommit) {
       await commitTransaction(req)
