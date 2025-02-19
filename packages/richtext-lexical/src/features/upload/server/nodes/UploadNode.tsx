@@ -49,11 +49,13 @@ export type UploadDataImproved<TUploadExtraFieldsData extends JsonObject = JsonO
     fields: TUploadExtraFieldsData
     /**
      * Every lexical node that has sub-fields needs to have a unique ID. This is the ID of this upload node, not the ID of the linked upload document
-     */ id: string
+     */
+    id: string
     relationTo: TCollectionSlug
     /**
      * Value can be just the document ID, or the full, populated document
-     */ value: number | string | TypedUploadCollection[TCollectionSlug]
+     */
+    value: number | string | TypedUploadCollection[TCollectionSlug]
   }
 }[UploadCollectionSlug]
 
