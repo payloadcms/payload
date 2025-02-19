@@ -743,6 +743,49 @@ describe('Versions', () => {
       expect(versionsTabUpdated).toBeTruthy()
     })
   })
+
+  describe('Scheduled publish', () => {
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, draftCollectionSlug)
+    })
+
+    test('should schedule publish', async () => {
+      await page.goto(url.create)
+      await page.waitForURL(url.create)
+      await page.locator('#field-title').fill('scheduled publish')
+      await page.locator('#field-description').fill('scheduled publish description')
+
+      // schedule publish should not be available before document has been saved
+      await page.locator('#action-save-popup').click()
+      await expect(page.locator('#schedule-publish')).not.toBeVisible()
+
+      // save draft then try to schedule publish
+      await saveDocAndAssert(page)
+      await page.locator('#action-save-popup').click()
+      await page.locator('#schedule-publish').click()
+
+      // drawer should open
+      await expect(page.locator('.schedule-publish__drawer-header')).toBeVisible()
+      // nothing in scheduled
+      await expect(page.locator('.drawer__content')).toContainText('No upcoming events scheduled.')
+
+      // set date and time
+      await page.locator('.date-time-picker input').fill('Feb 21, 2050 12:00 AM')
+      await page.keyboard.press('Enter')
+
+      // save the scheduled publish
+      await page.locator('#scheduled-publish-save').click()
+
+      // delete the scheduled event after it was made
+      await page.locator('.cell-delete').locator('.btn').click()
+
+      // see toast deleted successfully
+      await expect(
+        page.locator('.payload-toast-item:has-text("Deleted successfully.")'),
+      ).toBeVisible()
+    })
+  })
+
   describe('Collections - publish specific locale', () => {
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, localizedCollectionSlug)

@@ -73,7 +73,10 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
     entityConfig?.versions?.drafts.schedulePublish
 
   const canSchedulePublish = Boolean(
-    scheduledPublishEnabled && hasPublishPermission && (globalSlug || (collectionSlug && id)),
+    scheduledPublishEnabled &&
+      hasPublishPermission &&
+      (globalSlug || (collectionSlug && id)) &&
+      !modified,
   )
 
   const operation = useOperation()
@@ -209,7 +212,10 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
                   <React.Fragment>
                     {canSchedulePublish && (
                       <PopupList.ButtonGroup key="schedule-publish">
-                        <PopupList.Button onClick={() => [toggleModal(drawerSlug), close()]}>
+                        <PopupList.Button
+                          id="schedule-publish"
+                          onClick={() => [toggleModal(drawerSlug), close()]}
+                        >
                           {t('version:schedulePublish')}
                         </PopupList.Button>
                       </PopupList.ButtonGroup>
@@ -230,7 +236,12 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
       >
         {localization ? defaultLabel : label}
       </FormSubmit>
-      {canSchedulePublish && isModalOpen(drawerSlug) && <ScheduleDrawer slug={drawerSlug} />}
+      {canSchedulePublish && isModalOpen(drawerSlug) && (
+        <ScheduleDrawer
+          defaultType={!hasNewerVersions ? 'unpublish' : 'publish'}
+          slug={drawerSlug}
+        />
+      )}
     </React.Fragment>
   )
 }
