@@ -289,7 +289,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   })
 
   const didMount = useRef(false)
-  const previousDebouncedFields = useRef(debouncedFields)
+  const previousDebouncedFieldValues = useRef(reduceFieldsToValues(debouncedFields))
   // When debounced fields change, autosave
   useEffect(() => {
     /**
@@ -303,16 +303,12 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     /**
      * Ensure autosave only runs if the form data changes, not every time the entire form state changes
      */
-    if (
-      dequal(
-        reduceFieldsToValues(debouncedFields),
-        reduceFieldsToValues(previousDebouncedFields.current),
-      )
-    ) {
+    const debouncedFieldValues = reduceFieldsToValues(debouncedFields)
+    if (dequal(debouncedFieldValues, previousDebouncedFieldValues)) {
       return
     }
 
-    previousDebouncedFields.current = debouncedFields
+    previousDebouncedFieldValues.current = debouncedFieldValues
 
     handleAutosave()
   }, [debouncedFields])
