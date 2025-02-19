@@ -14,6 +14,7 @@ import { CollectionGroup1B } from './collections/Group1B.js'
 import { CollectionGroup2A } from './collections/Group2A.js'
 import { CollectionGroup2B } from './collections/Group2B.js'
 import { CollectionHidden } from './collections/Hidden.js'
+import { ListDrawer } from './collections/ListDrawer.js'
 import { CollectionNoApiView } from './collections/NoApiView.js'
 import { CollectionNotInView } from './collections/NotInView.js'
 import { Posts } from './collections/Posts.js'
@@ -39,7 +40,6 @@ import {
   protectedCustomNestedViewPath,
   publicCustomViewPath,
 } from './shared.js'
-
 export default buildConfigWithDefaults({
   admin: {
     importMap: {
@@ -157,6 +157,7 @@ export default buildConfigWithDefaults({
     DisableDuplicate,
     BaseListFilter,
     with300Documents,
+    ListDrawer,
   ],
   globals: [
     GlobalHidden,

@@ -87,6 +87,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
         const { List: ViewResult } = (await serverFunction({
           name: 'render-list',
           args: {
+            allowCreate,
             collectionSlug: slug,
             disableBulkDelete: true,
             disableBulkEdit: true,
@@ -160,6 +161,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 
   return (
     <ListDrawerContextProvider
+      allowCreate={allowCreate}
       createNewDrawerSlug={documentDrawerSlug}
       DocumentDrawerToggler={DocumentDrawerToggler}
       drawerSlug={drawerSlug}

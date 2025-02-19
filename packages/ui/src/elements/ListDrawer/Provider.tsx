@@ -7,6 +7,7 @@ import type { UseDocumentDrawer } from '../DocumentDrawer/types.js'
 import type { Option } from '../ReactSelect/index.js'
 
 export type ListDrawerContextProps = {
+  readonly allowCreate?: boolean
   readonly createNewDrawerSlug?: string
   readonly DocumentDrawerToggler?: ReturnType<UseDocumentDrawer>[1]
   readonly drawerSlug?: string

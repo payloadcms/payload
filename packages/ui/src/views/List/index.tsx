@@ -51,7 +51,7 @@ export function DefaultListView(props: ListViewClientProps) {
     disableBulkDelete,
     disableBulkEdit,
     enableRowSelections,
-    hasCreatePermission,
+    hasCreatePermission: hasCreatePermissionFromProps,
     listMenuItems,
     listPreferences,
     newDocumentURL,
@@ -63,7 +63,17 @@ export function DefaultListView(props: ListViewClientProps) {
 
   const [Table, setTable] = useState(InitialTable)
 
-  const { createNewDrawerSlug, drawerSlug: listDrawerSlug, onBulkSelect } = useListDrawerContext()
+  const {
+    allowCreate,
+    createNewDrawerSlug,
+    drawerSlug: listDrawerSlug,
+    onBulkSelect,
+  } = useListDrawerContext()
+
+  const hasCreatePermission =
+    allowCreate !== undefined
+      ? allowCreate && hasCreatePermissionFromProps
+      : hasCreatePermissionFromProps
 
   useEffect(() => {
     if (InitialTable) {
@@ -145,7 +155,6 @@ export function DefaultListView(props: ListViewClientProps) {
       ])
     }
   }, [setStepNav, labels, drawerDepth])
-
   return (
     <Fragment>
       <TableColumnsProvider
