@@ -106,7 +106,6 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     if (isProcessingRef.current || queueRef.current.length === 0) {
       return
     }
-    isProcessingRef.current = true
 
     if (!isValidRef.current) {
       // Clear queue so we don't end up in an infinite loop
@@ -115,6 +114,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
       isValidRef.current = true
       return
     }
+    isProcessingRef.current = true
 
     const latestAction = queueRef.current[queueRef.current.length - 1]
     queueRef.current = []
@@ -136,6 +136,20 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     // We need to log the time in order to figure out if we need to trigger the state off later
     let startTimestamp = undefined
     let endTimestamp = undefined
+
+    const hideIndicator = () => {
+      // If request was faster than minimum animation time, animate the difference
+      if (endTimestamp - startTimestamp < minimumAnimationTime) {
+        autosaveTimeoutRef.current = setTimeout(
+          () => {
+            setSaving(false)
+          },
+          minimumAnimationTime - (endTimestamp - startTimestamp),
+        )
+      } else {
+        stopAutoSaveIndicator()
+      }
+    }
 
     const autosave = async () => {
       if (modified) {
@@ -247,7 +261,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
                   isValidRef.current = false
                   setIsValid(false)
                   setSubmitted(true)
-
+                  hideIndicator()
                   return
                 }
               } else {
@@ -264,17 +278,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
                 }
               }
 
-              // If request was faster than minimum animation time, animate the difference
-              if (endTimestamp - startTimestamp < minimumAnimationTime) {
-                autosaveTimeoutRef.current = setTimeout(
-                  () => {
-                    setSaving(false)
-                  },
-                  minimumAnimationTime - (endTimestamp - startTimestamp),
-                )
-              } else {
-                setSaving(false)
-              }
+              hideIndicator()
             }
           }
         }
