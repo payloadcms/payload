@@ -21,6 +21,7 @@ export const LocalizerLabel: React.FC<{
     <div
       aria-label={ariaLabel || t('general:locale')}
       className={[baseClass, className].filter(Boolean).join(' ')}
+      data-locale={locale ? locale.code : undefined}
     >
       <div className={`${baseClass}__label`}>{`${t('general:locale')}:`}&nbsp;</div>
       <div className={`${baseClass}__current`}>
