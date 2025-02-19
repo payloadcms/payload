@@ -703,6 +703,31 @@ import { addLocalesToRequestFromData } from 'payload'
 }
 ```
 
+`headersWithCors`
+
+By default, custom endpoints don't handle CORS headers in responses. The `headersWithCors` function checks the Payload config and sets the appropriate CORS headers in the response accordingly.
+
+```ts
+import { headersWithCors } from 'payload'
+
+// custom endpoint example
+{
+  path: '/:id/tracking',
+  method: 'post',
+  handler: async (req) => {
+    return Response.json(
+      { message: 'success' },
+      {
+        headers: headersWithCors({
+          headers: new Headers(),
+          req,
+        })
+      },
+    )
+  }
+}
+```
+
 ## Method Override for GET Requests
 
 Payload supports a method override feature that allows you to send GET requests using the HTTP POST method. This can be particularly useful in scenarios when the query string in a regular GET request is too long.
