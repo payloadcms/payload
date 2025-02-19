@@ -4,7 +4,7 @@ import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
 
 import { dequal } from 'dequal/lite'
 import { reduceFieldsToValues, versionDefaults } from 'payload/shared'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useDeferredValue, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import {
@@ -77,7 +77,8 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     docConfig?.versions?.drafts && docConfig?.versions?.drafts.validate,
   )
 
-  const [saving, setSaving] = useState(false)
+  const [_saving, setSaving] = useState(false)
+  const saving = useDeferredValue(_saving)
   const debouncedFields = useDebounce(fields, interval)
   const fieldRef = useRef(fields)
   const modifiedRef = useRef(modified)
