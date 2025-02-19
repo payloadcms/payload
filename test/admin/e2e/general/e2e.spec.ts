@@ -704,7 +704,7 @@ describe('General', () => {
       await page.goto(postsUrl.edit(id))
       await openDocControls(page)
       await page.locator('#action-delete').click()
-      await page.locator('#confirm-delete').click()
+      await page.locator('#delete-posts #confirm-action').click()
       await expect(page.locator(`text=Post "${title}" successfully deleted.`)).toBeVisible()
       expect(page.url()).toContain(postsUrl.list)
     })
@@ -715,7 +715,7 @@ describe('General', () => {
       await page.goto(postsUrl.list)
       await page.locator('input#select-all').check()
       await page.locator('.delete-documents__toggle').click()
-      await page.locator('#confirm-delete').click()
+      await page.locator('#delete-posts #confirm-action').click()
 
       await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
         'Deleted 3 Posts successfully.',
@@ -733,7 +733,7 @@ describe('General', () => {
       await page.locator('input#select-all').check()
       await page.locator('button.list-selection__button').click()
       await page.locator('.delete-documents__toggle').click()
-      await page.locator('#confirm-delete').click()
+      await page.locator('#delete-posts #confirm-action').click()
 
       await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
         'Deleted 1 Post successfully.',

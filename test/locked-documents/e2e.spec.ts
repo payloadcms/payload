@@ -243,7 +243,7 @@ describe('Locked Documents', () => {
       await page.locator('input#select-all').check()
       await page.locator('.list-selection .list-selection__button').click()
       await page.locator('.delete-documents__toggle').click()
-      await page.locator('#confirm-delete').click()
+      await page.locator('#delete-posts #confirm-action').click()
       await expect(page.locator('.cell-_select')).toHaveCount(1)
     })
 
@@ -257,12 +257,11 @@ describe('Locked Documents', () => {
       await page.reload()
 
       await page.goto(postsUrl.list)
-      await page.waitForURL(new RegExp(postsUrl.list))
 
       await page.locator('input#select-all').check()
       await page.locator('.list-selection .list-selection__button').click()
       await page.locator('.publish-many__toggle').click()
-      await page.locator('#confirm-publish').click()
+      await page.locator('#delete-posts #confirm-action').click()
 
       const paginator = page.locator('.paginator')
 
@@ -273,12 +272,11 @@ describe('Locked Documents', () => {
 
     test('should only allow bulk unpublish on unlocked documents on all pages', async () => {
       await page.goto(postsUrl.list)
-      await page.waitForURL(new RegExp(postsUrl.list))
 
       await page.locator('input#select-all').check()
       await page.locator('.list-selection .list-selection__button').click()
       await page.locator('.unpublish-many__toggle').click()
-      await page.locator('#confirm-unpublish').click()
+      await page.locator('#delete-posts #confirm-action').click()
       await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
         'Updated 10 Posts successfully.',
       )
