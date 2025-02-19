@@ -318,121 +318,53 @@ export async function resizeAndTransformImageSizes({
     width: originalImageMeta.width,
   }
 
-  const results: ImageSizesResult[] = await Promise.all(
-    imageSizes.map(async (imageResizeConfig): Promise<ImageSizesResult> => {
-      imageResizeConfig = sanitizeResizeConfig(imageResizeConfig)
+  const results: ImageSizesResult[] = []
 
-      const resizeAction = getImageResizeAction({
-        dimensions,
-        hasFocalPoint: Boolean(incomingFocalPoint),
-        imageResizeConfig,
+  for (let imageResizeConfig of imageSizes) {
+    imageResizeConfig = sanitizeResizeConfig(imageResizeConfig)
+
+    const resizeAction = getImageResizeAction({
+      dimensions,
+      hasFocalPoint: Boolean(incomingFocalPoint),
+      imageResizeConfig,
+    })
+    if (resizeAction === 'omit') {
+      results.push(createResult({ name: imageResizeConfig.name }))
+      continue
+    }
+
+    const imageToResize = sharpBase.clone()
+    let resized = imageToResize
+
+    if (resizeAction === 'resizeWithFocalPoint') {
+      let { height: resizeHeight, width: resizeWidth } = imageResizeConfig
+
+      const originalAspectRatio = adjustedDimensions.width / adjustedDimensions.height
+
+      // Calculate resizeWidth based on original aspect ratio if it's undefined
+      if (resizeHeight && !resizeWidth) {
+        resizeWidth = Math.round(resizeHeight * originalAspectRatio)
+      }
+
+      // Calculate resizeHeight based on original aspect ratio if it's undefined
+      if (resizeWidth && !resizeHeight) {
+        resizeHeight = Math.round(resizeWidth / originalAspectRatio)
+      }
+
+      if (!resizeHeight) {
+        resizeHeight = resizeImageMeta.height
+      }
+      if (!resizeWidth) {
+        resizeWidth = resizeImageMeta.width
+      }
+
+      const resizeAspectRatio = resizeWidth / resizeHeight
+      const prioritizeHeight = resizeAspectRatio < originalAspectRatio
+      // Scales the image before extracting from it
+      resized = imageToResize.resize({
+        height: prioritizeHeight ? resizeHeight : undefined,
+        width: prioritizeHeight ? undefined : resizeWidth,
       })
-      if (resizeAction === 'omit') {
-        return createResult({ name: imageResizeConfig.name })
-      }
-
-      const imageToResize = sharpBase.clone()
-      let resized = imageToResize
-
-      if (resizeAction === 'resizeWithFocalPoint') {
-        let { height: resizeHeight, width: resizeWidth } = imageResizeConfig
-
-        const originalAspectRatio = adjustedDimensions.width / adjustedDimensions.height
-
-        // Calculate resizeWidth based on original aspect ratio if it's undefined
-        if (resizeHeight && !resizeWidth) {
-          resizeWidth = Math.round(resizeHeight * originalAspectRatio)
-        }
-
-        // Calculate resizeHeight based on original aspect ratio if it's undefined
-        if (resizeWidth && !resizeHeight) {
-          resizeHeight = Math.round(resizeWidth / originalAspectRatio)
-        }
-
-        if (!resizeHeight) {
-          resizeHeight = resizeImageMeta.height
-        }
-        if (!resizeWidth) {
-          resizeWidth = resizeImageMeta.width
-        }
-
-        const resizeAspectRatio = resizeWidth / resizeHeight
-        const prioritizeHeight = resizeAspectRatio < originalAspectRatio
-        // Scales the image before extracting from it
-        resized = imageToResize.resize({
-          height: prioritizeHeight ? resizeHeight : undefined,
-          width: prioritizeHeight ? undefined : resizeWidth,
-        })
-
-        const metadataAppendedFile = await optionallyAppendMetadata({
-          req,
-          sharpFile: resized,
-          withMetadata,
-        })
-
-        // Must read from buffer, resized.metadata will return the original image metadata
-        const { info } = await metadataAppendedFile.toBuffer({ resolveWithObject: true })
-
-        resizeImageMeta.height = extractHeightFromImage({
-          ...originalImageMeta,
-          height: info.height,
-        })
-        resizeImageMeta.width = info.width
-
-        const halfResizeX = resizeWidth / 2
-        const xFocalCenter = resizeImageMeta.width * (incomingFocalPoint.x / 100)
-        const calculatedRightPixelBound = xFocalCenter + halfResizeX
-        let leftBound = xFocalCenter - halfResizeX
-
-        // if the right bound is greater than the image width, adjust the left bound
-        // keeping focus on the right
-        if (calculatedRightPixelBound > resizeImageMeta.width) {
-          leftBound = resizeImageMeta.width - resizeWidth
-        }
-
-        // if the left bound is less than 0, adjust the left bound to 0
-        // keeping the focus on the left
-        if (leftBound < 0) {
-          leftBound = 0
-        }
-
-        const halfResizeY = resizeHeight / 2
-        const yFocalCenter = resizeImageMeta.height * (incomingFocalPoint.y / 100)
-        const calculatedBottomPixelBound = yFocalCenter + halfResizeY
-        let topBound = yFocalCenter - halfResizeY
-
-        // if the bottom bound is greater than the image height, adjust the top bound
-        // keeping the image as far right as possible
-        if (calculatedBottomPixelBound > resizeImageMeta.height) {
-          topBound = resizeImageMeta.height - resizeHeight
-        }
-
-        // if the top bound is less than 0, adjust the top bound to 0
-        // keeping the image focus near the top
-        if (topBound < 0) {
-          topBound = 0
-        }
-
-        resized = resized.extract({
-          height: resizeHeight,
-          left: Math.floor(leftBound),
-          top: Math.floor(topBound),
-          width: resizeWidth,
-        })
-      } else {
-        resized = imageToResize.resize(imageResizeConfig)
-      }
-
-      if (imageResizeConfig.formatOptions) {
-        resized = resized.toFormat(
-          imageResizeConfig.formatOptions.format,
-          imageResizeConfig.formatOptions.options,
-        )
-      }
-
-      if (imageResizeConfig.trimOptions) {
-        resized = resized.trim(imageResizeConfig.trimOptions)
-      }
 
       const metadataAppendedFile = await optionallyAppendMetadata({
         req,
@@ -440,51 +372,120 @@ export async function resizeAndTransformImageSizes({
         withMetadata,
       })
 
-      const { data: bufferData, info: bufferInfo } = await metadataAppendedFile.toBuffer({
-        resolveWithObject: true,
+      // Must read from buffer, resized.metadata will return the original image metadata
+      const { info } = await metadataAppendedFile.toBuffer({ resolveWithObject: true })
+
+      resizeImageMeta.height = extractHeightFromImage({
+        ...originalImageMeta,
+        height: info.height,
       })
+      resizeImageMeta.width = info.width
 
-      const sanitizedImage = getSanitizedImageData(savedFilename)
+      const halfResizeX = resizeWidth / 2
+      const xFocalCenter = resizeImageMeta.width * (incomingFocalPoint.x / 100)
+      const calculatedRightPixelBound = xFocalCenter + halfResizeX
+      let leftBound = xFocalCenter - halfResizeX
 
-      if (req.payloadUploadSizes) {
-        req.payloadUploadSizes[imageResizeConfig.name] = bufferData
+      // if the right bound is greater than the image width, adjust the left bound
+      // keeping focus on the right
+      if (calculatedRightPixelBound > resizeImageMeta.width) {
+        leftBound = resizeImageMeta.width - resizeWidth
       }
 
-      const mimeInfo = await fileTypeFromBuffer(bufferData)
-
-      const imageNameWithDimensions = imageResizeConfig.generateImageName
-        ? imageResizeConfig.generateImageName({
-            extension: mimeInfo?.ext || sanitizedImage.ext,
-            height: extractHeightFromImage({
-              ...originalImageMeta,
-              height: bufferInfo.height,
-            }),
-            originalName: sanitizedImage.name,
-            sizeName: imageResizeConfig.name,
-            width: bufferInfo.width,
-          })
-        : createImageName({
-            extension: mimeInfo?.ext || sanitizedImage.ext,
-            height: extractHeightFromImage({
-              ...originalImageMeta,
-              height: bufferInfo.height,
-            }),
-            outputImageName: sanitizedImage.name,
-            width: bufferInfo.width,
-          })
-
-      const imagePath = `${staticPath}/${imageNameWithDimensions}`
-
-      if (await fileExists(imagePath)) {
-        try {
-          fs.unlinkSync(imagePath)
-        } catch {
-          // Ignore unlink errors
-        }
+      // if the left bound is less than 0, adjust the left bound to 0
+      // keeping the focus on the left
+      if (leftBound < 0) {
+        leftBound = 0
       }
 
-      const { height, size, width } = bufferInfo
-      return createResult({
+      const halfResizeY = resizeHeight / 2
+      const yFocalCenter = resizeImageMeta.height * (incomingFocalPoint.y / 100)
+      const calculatedBottomPixelBound = yFocalCenter + halfResizeY
+      let topBound = yFocalCenter - halfResizeY
+
+      // if the bottom bound is greater than the image height, adjust the top bound
+      // keeping the image as far right as possible
+      if (calculatedBottomPixelBound > resizeImageMeta.height) {
+        topBound = resizeImageMeta.height - resizeHeight
+      }
+
+      // if the top bound is less than 0, adjust the top bound to 0
+      // keeping the image focus near the top
+      if (topBound < 0) {
+        topBound = 0
+      }
+
+      resized = resized.extract({
+        height: resizeHeight,
+        left: Math.floor(leftBound),
+        top: Math.floor(topBound),
+        width: resizeWidth,
+      })
+    } else {
+      resized = imageToResize.resize(imageResizeConfig)
+    }
+
+    if (imageResizeConfig.formatOptions) {
+      resized = resized.toFormat(
+        imageResizeConfig.formatOptions.format,
+        imageResizeConfig.formatOptions.options,
+      )
+    }
+
+    if (imageResizeConfig.trimOptions) {
+      resized = resized.trim(imageResizeConfig.trimOptions)
+    }
+
+    const metadataAppendedFile = await optionallyAppendMetadata({
+      req,
+      sharpFile: resized,
+      withMetadata,
+    })
+
+    const { data: bufferData, info: bufferInfo } = await metadataAppendedFile.toBuffer({
+      resolveWithObject: true,
+    })
+
+    const sanitizedImage = getSanitizedImageData(savedFilename)
+
+    if (req.payloadUploadSizes) {
+      req.payloadUploadSizes[imageResizeConfig.name] = bufferData
+    }
+
+    const mimeInfo = await fileTypeFromBuffer(bufferData)
+
+    const imageNameWithDimensions = imageResizeConfig.generateImageName
+      ? imageResizeConfig.generateImageName({
+          extension: mimeInfo?.ext || sanitizedImage.ext,
+          height: extractHeightFromImage({
+            ...originalImageMeta,
+            height: bufferInfo.height,
+          }),
+          originalName: sanitizedImage.name,
+          sizeName: imageResizeConfig.name,
+          width: bufferInfo.width,
+        })
+      : createImageName({
+          extension: mimeInfo?.ext || sanitizedImage.ext,
+          height: extractHeightFromImage({
+            ...originalImageMeta,
+            height: bufferInfo.height,
+          }),
+          outputImageName: sanitizedImage.name,
+          width: bufferInfo.width,
+        })
+
+    const imagePath = `${staticPath}/${imageNameWithDimensions}`
+
+    void fileExists(imagePath).then((value) => {
+      if (value) {
+        void fs.promises.unlink(imagePath)
+      }
+    })
+
+    const { height, size, width } = bufferInfo
+    results.push(
+      createResult({
         name: imageResizeConfig.name,
         filename: imageNameWithDimensions,
         filesize: size,
@@ -493,9 +494,9 @@ export async function resizeAndTransformImageSizes({
         mimeType: mimeInfo?.mime || mimeType,
         sizesToSave: [{ buffer: bufferData, path: imagePath }],
         width,
-      })
-    }),
-  )
+      }),
+    )
+  }
 
   return results.reduce(
     (acc, result) => {
