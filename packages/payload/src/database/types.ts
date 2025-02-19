@@ -305,6 +305,9 @@ export type UpdateGlobalVersionArgs<T = TypeWithID> = {
     }
 )
 
+/**
+ * @todo type as Promise<TypeWithVersion<T> | null> in 4.0
+ */
 export type UpdateGlobalVersion = <T extends TypeWithID = TypeWithID>(
   args: UpdateGlobalVersionArgs<T>,
 ) => Promise<TypeWithVersion<T>>
@@ -332,6 +335,9 @@ export type UpdateGlobalArgs<T extends Record<string, unknown> = any> = {
   select?: SelectType
   slug: string
 }
+/**
+ * @todo type as Promise<T | null> in 4.0
+ */
 export type UpdateGlobal = <T extends Record<string, unknown> = any>(
   args: UpdateGlobalArgs<T>,
 ) => Promise<T>
@@ -410,6 +416,9 @@ export type UpdateVersionArgs<T = TypeWithID> = {
     }
 )
 
+/**
+ * @todo type as Promise<TypeWithVersion<T> | null> in 4.0
+ */
 export type UpdateVersion = <T extends TypeWithID = TypeWithID>(
   args: UpdateVersionArgs<T>,
 ) => Promise<TypeWithVersion<T>>
@@ -448,6 +457,9 @@ export type UpdateOneArgs = {
     }
 )
 
+/**
+ * @todo type as Promise<Document | null> in 4.0
+ */
 export type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
 
 export type UpsertArgs = {
@@ -470,6 +482,9 @@ export type DeleteOneArgs = {
   where: Where
 }
 
+/**
+ * @todo type as Promise<Document | null> in 4.0
+ */
 export type DeleteOne = (args: DeleteOneArgs) => Promise<Document>
 
 export type DeleteManyArgs = {
