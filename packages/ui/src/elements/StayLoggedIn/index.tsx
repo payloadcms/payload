@@ -30,7 +30,8 @@ export const StayLoggedInModal: React.FC = () => {
   const { startRouteTransition } = useRouteTransition()
 
   const onConfirm: OnConfirm = useCallback(
-    ({ closeConfirmationModal }) => {
+    ({ closeConfirmationModal, setConfirming }) => {
+      setConfirming(false)
       closeConfirmationModal()
 
       startRouteTransition(() =>

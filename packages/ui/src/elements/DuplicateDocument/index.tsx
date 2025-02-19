@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation.js'
 import React, { useCallback } from 'react'
 import { toast } from 'sonner'
 
+import type { OnConfirm } from '../ConfirmationModal/index.js'
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
@@ -57,13 +58,9 @@ export const DuplicateDocument: React.FC<Props> = ({
 
   const modalSlug = `duplicate-${id}`
 
-  const handleClick = useCallback(
-    async (override = false) => {
+  const duplicate = useCallback(
+    async ({ onResponse }: { onResponse?: () => void } = {}) => {
       setRenderModal(true)
-
-      if (modified && !override) {
-        return openModal(modalSlug)
-      }
 
       await requests
         .post(
@@ -79,6 +76,10 @@ export const DuplicateDocument: React.FC<Props> = ({
         )
         .then(async (res) => {
           const { doc, errors, message } = await res.json()
+          if (typeof onResponse === 'function') {
+            onResponse()
+          }
+
           if (res.status < 400) {
             toast.success(
               message ||
@@ -112,14 +113,11 @@ export const DuplicateDocument: React.FC<Props> = ({
     },
     [
       locale,
-      modified,
       serverURL,
       apiRoute,
       slug,
       id,
       i18n,
-      openModal,
-      modalSlug,
       t,
       singularLabel,
       onDuplicate,
@@ -132,14 +130,33 @@ export const DuplicateDocument: React.FC<Props> = ({
     ],
   )
 
-  const onConfirm = useCallback(async () => {
-    setRenderModal(false)
-    await handleClick(true)
-  }, [handleClick])
+  const onConfirm: OnConfirm = useCallback(
+    async ({ closeConfirmationModal, setConfirming }) => {
+      setRenderModal(false)
+
+      await duplicate({
+        onResponse: () => {
+          setConfirming(false)
+          closeConfirmationModal()
+        },
+      })
+    },
+    [duplicate],
+  )
 
   return (
     <React.Fragment>
-      <PopupList.Button id="action-duplicate" onClick={() => void handleClick(false)}>
+      <PopupList.Button
+        id="action-duplicate"
+        onClick={() => {
+          if (modified) {
+            setRenderModal(true)
+            return openModal(modalSlug)
+          }
+
+          return duplicate()
+        }}
+      >
         {t('general:duplicate')}
       </PopupList.Button>
       {renderModal && (

@@ -75,21 +75,27 @@ const Restore: React.FC<Props> = ({
     })
   }
 
-  const handleRestore: OnConfirm = useCallback(async () => {
-    const res = await requests.post(fetchURL, {
-      headers: {
-        'Accept-Language': i18n.language,
-      },
-    })
+  const handleRestore: OnConfirm = useCallback(
+    async ({ closeConfirmationModal, setConfirming }) => {
+      const res = await requests.post(fetchURL, {
+        headers: {
+          'Accept-Language': i18n.language,
+        },
+      })
 
-    if (res.status === 200) {
-      const json = await res.json()
-      toast.success(json.message)
-      startRouteTransition(() => router.push(redirectURL))
-    } else {
-      toast.error(t('version:problemRestoringVersion'))
-    }
-  }, [fetchURL, redirectURL, t, i18n, router, startRouteTransition])
+      setConfirming(false)
+      closeConfirmationModal()
+
+      if (res.status === 200) {
+        const json = await res.json()
+        toast.success(json.message)
+        startRouteTransition(() => router.push(redirectURL))
+      } else {
+        toast.error(t('version:problemRestoringVersion'))
+      }
+    },
+    [fetchURL, redirectURL, t, i18n, router, startRouteTransition],
+  )
 
   return (
     <Fragment>

@@ -100,11 +100,12 @@ export const Status: React.FC = () => {
         },
       })
 
+      setConfirming(false)
+      closeConfirmationModal()
+
       if (res.status === 200) {
         let data
         const json = await res.json()
-        setConfirming(false)
-        closeConfirmationModal()
 
         if (globalSlug) {
           data = json.result

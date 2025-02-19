@@ -24,7 +24,7 @@ export const LeaveWithoutSaving: React.FC = () => {
 
   const onPrevent = useCallback(() => {
     openModal(modalSlug)
-  }, [])
+  }, [openModal])
 
   const handleAccept = useCallback(() => {
     closeModal(modalSlug)
@@ -36,8 +36,10 @@ export const LeaveWithoutSaving: React.FC = () => {
     closeModal(modalSlug)
   }, [closeModal])
 
-  const onConfirm: OnConfirm = useCallback(() => {
+  const onConfirm: OnConfirm = useCallback(({ closeConfirmationModal, setConfirming }) => {
     setHasAccepted(true)
+    setConfirming(false)
+    closeConfirmationModal()
   }, [])
 
   return (
