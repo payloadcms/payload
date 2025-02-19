@@ -63,7 +63,7 @@ export const checkDocumentLockStatus = async ({
       collection: 'payload-locked-documents',
       limit: 1,
       pagination: false,
-      req,
+      //req,
       sort: '-updatedAt',
       where: lockedDocumentQuery,
     })
