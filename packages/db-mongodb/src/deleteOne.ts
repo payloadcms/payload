@@ -29,7 +29,11 @@ export const deleteOne: DeleteOne = async function deleteOne(
     where,
   })
 
-  const doc = await Model.findOneAndDelete(query, options).lean()
+  const doc = await Model.findOneAndDelete(query, options)?.lean()
+
+  if (!doc) {
+    return null
+  }
 
   let result: Document = JSON.parse(JSON.stringify(doc))
 

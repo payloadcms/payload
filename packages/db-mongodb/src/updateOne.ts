@@ -51,6 +51,10 @@ export const updateOne: UpdateOne = async function updateOne(
     handleError({ collection, error, req })
   }
 
+  if (!result) {
+    return null
+  }
+
   result = JSON.parse(JSON.stringify(result))
   result.id = result._id
   result = sanitizeInternalFields(result)

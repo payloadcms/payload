@@ -53,6 +53,10 @@ export const updateVersion: UpdateVersion = async function updateVersion(
 
   const doc = await VersionModel.findOneAndUpdate(query, sanitizedData, options)
 
+  if (!doc) {
+    return null
+  }
+
   const result = JSON.parse(JSON.stringify(doc))
 
   const verificationToken = doc._verificationToken
