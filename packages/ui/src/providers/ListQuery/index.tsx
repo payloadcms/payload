@@ -4,41 +4,15 @@ import type { ListQuery, PaginatedDocs, Sort, Where } from 'payload'
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import { isNumber } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+
+import type { ListQueryProps } from './types.js'
 
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
+import { ListQueryContext, ListQueryModifiedContext } from './context.js'
 
-type ContextHandlers = {
-  handlePageChange?: (page: number) => Promise<void>
-  handlePerPageChange?: (limit: number) => Promise<void>
-  handleSearchChange?: (search: string) => Promise<void>
-  handleSortChange?: (sort: string) => Promise<void>
-  handleWhereChange?: (where: Where) => Promise<void>
-}
-
-export type ListQueryProps = {
-  readonly children: React.ReactNode
-  readonly collectionSlug?: string
-  readonly data: PaginatedDocs
-  readonly defaultLimit?: number
-  readonly defaultSort?: Sort
-  readonly modifySearchParams?: boolean
-  readonly onQueryChange?: (query: ListQuery) => void
-  readonly preferenceKey?: string
-}
-
-export type ListQueryContext = {
-  data: PaginatedDocs
-  defaultLimit?: number
-  defaultSort?: Sort
-  query: ListQuery
-  refineListData: (args: ListQuery) => Promise<void>
-} & ContextHandlers
-
-const Context = createContext({} as ListQueryContext)
-
-export const useListQuery = (): ListQueryContext => useContext(Context)
+export { useListQuery } from './context.js'
 
 export const ListQueryProvider: React.FC<ListQueryProps> = ({
   children,
@@ -52,6 +26,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   const router = useRouter()
   const rawSearchParams = useSearchParams()
   const searchParams = useMemo(() => parseSearchParams(rawSearchParams), [rawSearchParams])
+  const [modified, setModified] = useState(false)
 
   const { onQueryChange } = useListDrawerContext()
 
@@ -75,6 +50,8 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   const refineListData = useCallback(
     // eslint-disable-next-line @typescript-eslint/require-await
     async (query: ListQuery) => {
+      setModified(true)
+
       let page = 'page' in query ? query.page : currentQuery?.page
 
       if ('where' in query || 'search' in query) {
@@ -180,7 +157,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   }, [defaultSort, defaultLimit, router, modifySearchParams])
 
   return (
-    <Context.Provider
+    <ListQueryContext.Provider
       value={{
         data,
         handlePageChange,
@@ -192,7 +169,9 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         refineListData,
       }}
     >
-      {children}
-    </Context.Provider>
+      <ListQueryModifiedContext.Provider value={modified}>
+        {children}
+      </ListQueryModifiedContext.Provider>
+    </ListQueryContext.Provider>
   )
 }

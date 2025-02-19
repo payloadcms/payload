@@ -7,6 +7,7 @@ import { Fragment, useCallback, useState } from 'react'
 
 import { useListDrawer } from '../../elements/ListDrawer/index.js'
 import { Dots } from '../../icons/Dots/index.js'
+import { useQueryModified } from '../../providers/ListQuery/context.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
@@ -24,6 +25,7 @@ export function SharedListFilters({ filters }: { filters: PaginatedDocs<SharedLi
   const [currentlyOpenDrawer, setCurrentlyOpenDrawer] = useState<number | string>(null)
   const { i18n, t } = useTranslation()
   const { openModal } = useModal()
+  const queryModified = useQueryModified()
 
   const [DocumentDrawer, , { openDrawer: openEditDrawer }] = useDocumentDrawer({
     id: currentlyOpenDrawer,
@@ -57,9 +59,11 @@ export function SharedListFilters({ filters }: { filters: PaginatedDocs<SharedLi
           ))}
         </div>
         <div className={`${baseClass}__actions`}>
-          <button className={`${baseClass}__actions__reset`} onClick={() => {}} type="button">
-            {t('general:reset')}
-          </button>
+          {queryModified ? (
+            <button className={`${baseClass}__actions__reset`} onClick={() => {}} type="button">
+              {t('general:reset')}
+            </button>
+          ) : null}
           <button className={`${baseClass}__actions__save`} onClick={() => {}} type="button">
             Save For Everyone
           </button>
