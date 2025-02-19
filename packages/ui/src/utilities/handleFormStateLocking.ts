@@ -64,7 +64,6 @@ export const handleFormStateLocking = async ({
         limit: 1,
         overrideAccess: false,
         pagination: false,
-        req,
         where: lockedDocumentQuery,
       })
 
@@ -85,7 +84,6 @@ export const handleFormStateLocking = async ({
             id: lockedDocument.docs[0].id,
             collection: 'payload-locked-documents',
             data: {},
-            req,
           })
         }
       } else {
@@ -119,7 +117,6 @@ export const handleFormStateLocking = async ({
 
         await req.payload.db.deleteMany({
           collection: 'payload-locked-documents',
-          req,
           where: deleteExpiredLocksQuery,
         })
 
@@ -138,7 +135,6 @@ export const handleFormStateLocking = async ({
               value: req.user.id,
             },
           },
-          req,
         })
 
         result = {
