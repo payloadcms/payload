@@ -1648,7 +1648,10 @@ describe('Select', () => {
         },
       })
 
-      expect(Object.keys(res)).toStrictEqual(['id', 'text'])
+      expect(res).toStrictEqual({
+        id: res.id,
+        text: res.text,
+      })
     })
 
     it('should apply select with updateByID', async () => {
@@ -1661,7 +1664,10 @@ describe('Select', () => {
         select: { text: true },
       })
 
-      expect(Object.keys(res)).toStrictEqual(['id', 'text'])
+      expect(res).toStrictEqual({
+        id: res.id,
+        text: res.text,
+      })
     })
 
     it('should apply select with updateBulk', async () => {
@@ -1680,7 +1686,10 @@ describe('Select', () => {
 
       assert(res.docs[0])
 
-      expect(Object.keys(res.docs[0])).toStrictEqual(['id', 'text'])
+      expect(res.docs[0]).toStrictEqual({
+        id: res.docs[0].id,
+        text: res.docs[0].text,
+      })
     })
 
     it('should apply select with deleteByID', async () => {
@@ -1692,7 +1701,10 @@ describe('Select', () => {
         select: { text: true },
       })
 
-      expect(Object.keys(res)).toStrictEqual(['id', 'text'])
+      expect(res).toStrictEqual({
+        id: res.id,
+        text: res.text,
+      })
     })
 
     it('should apply select with deleteBulk', async () => {
@@ -1710,7 +1722,10 @@ describe('Select', () => {
 
       assert(res.docs[0])
 
-      expect(Object.keys(res.docs[0])).toStrictEqual(['id', 'text'])
+      expect(res.docs[0]).toStrictEqual({
+        id: res.docs[0].id,
+        text: res.docs[0].text,
+      })
     })
 
     it('should apply select with duplicate', async () => {
@@ -1722,7 +1737,10 @@ describe('Select', () => {
         select: { text: true },
       })
 
-      expect(Object.keys(res)).toStrictEqual(['id', 'text'])
+      expect(res).toStrictEqual({
+        id: res.id,
+        text: res.text,
+      })
     })
   })
 

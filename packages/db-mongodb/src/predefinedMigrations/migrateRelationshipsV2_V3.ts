@@ -6,11 +6,12 @@ import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
 import type { MongooseAdapter } from '../index.js'
 
 import { getSession } from '../utilities/getSession.js'
-import { sanitizeRelationshipIDs } from '../utilities/sanitizeRelationshipIDs.js'
+import { transform } from '../utilities/transform.js'
 
 const migrateModelWithBatching = async ({
   batchSize,
   config,
+  db,
   fields,
   Model,
   parentIsLocalized,
@@ -18,6 +19,7 @@ const migrateModelWithBatching = async ({
 }: {
   batchSize: number
   config: SanitizedConfig
+  db: MongooseAdapter
   fields: Field[]
   Model: Model<any>
   parentIsLocalized: boolean
@@ -49,7 +51,7 @@ const migrateModelWithBatching = async ({
     }
 
     for (const doc of docs) {
-      sanitizeRelationshipIDs({ config, data: doc, fields, parentIsLocalized })
+      transform({ adapter: db, data: doc, fields, operation: 'write', parentIsLocalized })
     }
 
     await Model.collection.bulkWrite(
@@ -124,6 +126,7 @@ export async function migrateRelationshipsV2_V3({
       await migrateModelWithBatching({
         batchSize,
         config,
+        db,
         fields: collection.fields,
         Model: db.collections[collection.slug],
         parentIsLocalized: false,
@@ -139,6 +142,7 @@ export async function migrateRelationshipsV2_V3({
       await migrateModelWithBatching({
         batchSize,
         config,
+        db,
         fields: buildVersionCollectionFields(config, collection),
         Model: db.versions[collection.slug],
         parentIsLocalized: false,
@@ -167,10 +171,11 @@ export async function migrateRelationshipsV2_V3({
 
       // in case if the global doesn't exist in the database yet  (not saved)
       if (doc) {
-        sanitizeRelationshipIDs({
-          config,
+        transform({
+          adapter: db,
           data: doc,
           fields: global.fields,
+          operation: 'write',
         })
 
         await GlobalsModel.collection.updateOne(
@@ -191,6 +196,7 @@ export async function migrateRelationshipsV2_V3({
       await migrateModelWithBatching({
         batchSize,
         config,
+        db,
         fields: buildVersionGlobalFields(config, global),
         Model: db.versions[global.slug],
         parentIsLocalized: false,

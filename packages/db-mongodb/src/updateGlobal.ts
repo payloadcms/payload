@@ -5,8 +5,7 @@ import type { MongooseAdapter } from './index.js'
 
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { getSession } from './utilities/getSession.js'
-import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
-import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
+import { transform } from './utilities/transform.js'
 
 export const updateGlobal: UpdateGlobal = async function updateGlobal(
   this: MongooseAdapter,
@@ -27,25 +26,11 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(
     session: await getSession(this, req),
   }
 
-  let result
+  transform({ adapter: this, data, fields, globalSlug: slug, operation: 'write' })
 
-  const sanitizedData = sanitizeRelationshipIDs({
-    config: this.payload.config,
-    data,
-    fields,
-  })
+  const result: any = await Model.findOneAndUpdate({ globalType: slug }, data, options)
 
-  result = await Model.findOneAndUpdate({ globalType: slug }, sanitizedData, options)
-
-  if (!result) {
-    return null
-  }
-
-  result = JSON.parse(JSON.stringify(result))
-
-  // custom id type reset
-  result.id = result._id
-  result = sanitizeInternalFields(result)
+  transform({ adapter: this, data: result, fields, globalSlug: slug, operation: 'read' })
 
   return result
 }
