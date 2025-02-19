@@ -48,7 +48,10 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
 
   let docBeingAccessed: EntityDoc | Promise<EntityDoc | undefined> | undefined
 
-  async function getEntityDoc({ where }: { where?: Where } = {}): Promise<EntityDoc | undefined> {
+  async function getEntityDoc({
+    operation,
+    where,
+  }: { operation?: AllOperations; where?: Where } = {}): Promise<EntityDoc | undefined> {
     if (!entity.slug) {
       return undefined
     }
@@ -66,18 +69,28 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
 
     if (type === 'collection' && id) {
       if (typeof where === 'object') {
-        const paginatedRes = await payload.find({
+        const options = {
           collection: entity.slug,
           depth: 0,
           fallbackLocale: null,
           limit: 1,
           locale,
           overrideAccess: true,
-          pagination: false,
           req,
+        }
+        if (operation === 'readVersions') {
+          const paginatedRes = await payload.findVersions({
+            ...options,
+            where: combineQueries(where, { parent: { equals: id } }),
+          })
+          return paginatedRes?.docs?.[0] || undefined
+        }
+
+        const paginatedRes = await payload.find({
+          ...options,
+          pagination: false,
           where: combineQueries(where, { id: { equals: id } }),
         })
-
         return paginatedRes?.docs?.[0] || undefined
       }
 
@@ -116,7 +129,9 @@ export async function getEntityPolicies<T extends Args>(args: T): Promise<Return
     if (typeof accessResult === 'object' && !disableWhere) {
       mutablePolicies[operation] = {
         permission:
-          id || type === 'global' ? !!(await getEntityDoc({ where: accessResult })) : true,
+          id || type === 'global'
+            ? !!(await getEntityDoc({ operation, where: accessResult }))
+            : true,
         where: accessResult,
       }
     } else if (mutablePolicies[operation]?.permission !== false) {
