@@ -37,7 +37,7 @@ export const DuplicateDocument: React.FC<Props> = ({
 }) => {
   const router = useRouter()
   const modified = useFormModified()
-  const { toggleModal } = useModal()
+  const { openModal } = useModal()
   const locale = useLocale()
   const { setModified } = useForm()
   const { startRouteTransition } = useRouteTransition()
@@ -52,17 +52,17 @@ export const DuplicateDocument: React.FC<Props> = ({
 
   const collectionConfig = getEntityConfig({ collectionSlug: slug })
 
-  const [show, setShow] = React.useState(false)
+  const [renderModal, setRenderModal] = React.useState(false)
   const { i18n, t } = useTranslation()
 
   const modalSlug = `duplicate-${id}`
 
   const handleClick = useCallback(
     async (override = false) => {
-      setShow(true)
+      setRenderModal(true)
+
       if (modified && !override) {
-        toggleModal(modalSlug)
-        return
+        return openModal(modalSlug)
       }
 
       await requests
@@ -118,7 +118,7 @@ export const DuplicateDocument: React.FC<Props> = ({
       slug,
       id,
       i18n,
-      toggleModal,
+      openModal,
       modalSlug,
       t,
       singularLabel,
@@ -133,7 +133,7 @@ export const DuplicateDocument: React.FC<Props> = ({
   )
 
   const onConfirm = useCallback(async () => {
-    setShow(false)
+    setRenderModal(false)
     await handleClick(true)
   }, [handleClick])
 
@@ -142,7 +142,7 @@ export const DuplicateDocument: React.FC<Props> = ({
       <PopupList.Button id="action-duplicate" onClick={() => void handleClick(false)}>
         {t('general:duplicate')}
       </PopupList.Button>
-      {show && (
+      {renderModal && (
         <ConfirmationModal
           body={t('general:unsavedChangesDuplicate')}
           confirmLabel={t('general:duplicateWithoutSaving')}

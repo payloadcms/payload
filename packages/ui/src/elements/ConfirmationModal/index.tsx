@@ -1,6 +1,6 @@
 'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
-import React, { useEffect } from 'react'
+import React from 'react'
 
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -46,12 +46,6 @@ export function ConfirmationModal(props: ConfirmationModalProps) {
 
   const { closeModal } = useModal()
   const { t } = useTranslation()
-
-  useEffect(() => {
-    return () => {
-      closeModal(modalSlug)
-    }
-  }, [closeModal, modalSlug])
 
   return (
     <Modal
