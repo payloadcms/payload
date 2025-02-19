@@ -63,7 +63,7 @@ export const checkDocumentLockStatus = async ({
       collection: 'payload-locked-documents',
       limit: 1,
       pagination: false,
-      req,
+      //req,
       sort: '-updatedAt',
       where: lockedDocumentQuery,
     })
@@ -93,7 +93,7 @@ export const checkDocumentLockStatus = async ({
   // Perform the delete operation regardless of overrideLock status
   await payload.db.deleteMany({
     collection: 'payload-locked-documents',
-    req, //
+    //req,
     where: lockedDocumentQuery,
   })
 }
