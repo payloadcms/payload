@@ -92,7 +92,7 @@ const traverseArrayOrBlocksField = ({
   }
 }
 
-export type TraverseFieldsCallback<T = unknown> = (args: {
+export type TraverseFieldsCallback = (args: {
   /**
    * The current field
    */
