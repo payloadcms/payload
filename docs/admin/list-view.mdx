@@ -1,0 +1,80 @@
+---
+title: List View
+label: List View
+order: 50
+desc:
+keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
+---
+
+The List View is where users interact with a list of [Collection](../collections/overview) Documents within the [Admin Panel](../admin/overview). This is where they can view, sort, filter, and paginate their documents to find exactly what they're looking for. This is also where users can perform bulk operations on multiple documents at once, such as deleting, editing, or publishing many.
+
+## List filters
+
+List Filters are used to filter the documents displayed in a Collection's List View. Filters can be used to narrow down the list of documents based on specific criteria, such as a date range, status, or other custom fields.
+
+List Filters are simply [Queries](../queries) under the hood. Within the Admin Panel, List Filters are displayed within a "Where Builder" interface, allowing users to generate complex queries through an easy-to-use GUI.
+
+### Base List Filter
+
+You can define a default base filter for this collection's List view, which will be merged into any filters that the user performs.
+
+## Searchable Fields
+
+Specify which fields should be searched in the List search view.
+
+## Default Columns
+
+Array of field names that correspond to which columns to show by default in this Collection's List View.
+
+## Pagination
+
+All Collections receive their own List View which displays a paginated list of documents that can be sorted and filtered. The pagination behavior of the List View can be customized on a per-Collection basis, and uses the same [Pagination](../queries/pagination) API that Payload provides.
+
+To configure pagination options, use the `admin.pagination` property in your Collection Config:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Posts: CollectionConfig = {
+  // ...
+  admin: {
+    // highlight-start
+    pagination: {
+      defaultLimit: 10,
+      limits: [10, 20, 50],
+    },
+    // highlight-end
+  },
+}
+```
+
+The following options are available:
+
+| Option         | Description                                                                                         |
+| -------------- | --------------------------------------------------------------------------------------------------- |
+| `defaultLimit` | Integer that specifies the default per-page limit that should be used. Defaults to 10.              |
+| `limits`       | Provide an array of integers to use as per-page options for admins to choose from in the List View. |
+
+## List Searchable Fields
+
+In the List View, there is a "search" box that allows you to quickly find a document through a simple text search. By default, it searches on the ID field. If defined, the `admin.useAsTitle` field is used. Or, you can explicitly define which fields to search based on the needs of your application.
+
+To define which fields should be searched, use the `admin.listSearchableFields` property in your Collection Config:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Posts: CollectionConfig = {
+  // ...
+  admin: {
+    // highlight-start
+    listSearchableFields: ['title', 'slug'],
+    // highlight-end
+  },
+}
+```
+
+<Banner type="warning">
+  **Tip:**
+  If you are adding `listSearchableFields`, make sure you index each of these fields so your admin queries can remain performant.
+</Banner>
