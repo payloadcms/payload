@@ -17,20 +17,20 @@ export default buildConfigWithDefaults({
     },
     sharedListFilters: {
       access: {
-        read: ({ req: { user } }) => {
-          if (!user) {
-            return false
-          }
-
-          return {
-            roles: {
-              in: user.roles,
-            },
-          }
-        },
+        read: ({ req: { user } }) => ({
+          'readConstraints.roles': {
+            in: user.roles,
+          },
+        }),
+        update: ({ req: { user } }) => ({
+          'updateConstraints.roles': {
+            in: user.roles,
+          },
+        }),
       },
       accessOptions: {
         read: [{ label: 'Specific Roles', value: 'specificRoles', fields: [roles] }],
+        update: [{ label: 'Specific Roles', value: 'specificRoles', fields: [roles] }],
       },
     },
   },

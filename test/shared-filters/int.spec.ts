@@ -43,7 +43,7 @@ describe('Shared Filters', () => {
       ?.then((result) => result.user)
   })
 
-  describe('access control', () => {
+  describe('default access control', () => {
     it('should respect access when set to "specificUsers"', async () => {
       const filterDoc = await payload.create({
         collection: sharedFilterCollectionSlug,
@@ -276,6 +276,94 @@ describe('Shared Filters', () => {
       })
 
       expect(resultUpdatedByUser2.title).toBe('Everyone (Updated)')
+    })
+  })
+
+  describe('user-defined access control', () => {
+    it('should respect access when set to "specificRoles"', async () => {
+      const adminOnlyFilter = await payload.create({
+        collection: sharedFilterCollectionSlug,
+        user,
+        data: {
+          title: 'Specific Roles',
+          where: {
+            text: {
+              equals: 'example page',
+            },
+          },
+          readAccess: 'specificRoles',
+          updateAccess: 'specificRoles',
+          readConstraints: {
+            roles: ['admin'],
+          },
+          updateConstraints: {
+            roles: ['admin'],
+          },
+          relatedCollection: 'pages',
+        },
+      })
+
+      const resultWithUser = await payload.findByID({
+        collection: sharedFilterCollectionSlug,
+        depth: 0,
+        user,
+        overrideAccess: false,
+        id: adminOnlyFilter.id,
+        select: {},
+      })
+
+      expect(resultWithUser.id).toBe(adminOnlyFilter.id)
+
+      try {
+        const resultWithUser2 = await payload.findByID({
+          collection: sharedFilterCollectionSlug,
+          depth: 0,
+          user: user2,
+          overrideAccess: false,
+          id: adminOnlyFilter.id,
+          select: {},
+        })
+
+        expect(resultWithUser2).toBeFalsy()
+      } catch (error) {
+        expect(error).toBeDefined()
+        // swallow error
+      }
+
+      const resultUpdatedByUser = await payload.update({
+        collection: sharedFilterCollectionSlug,
+        id: adminOnlyFilter.id,
+        user,
+        overrideAccess: false,
+        data: {
+          title: 'Specific Roles (Updated)',
+        },
+        select: {
+          title: true,
+        },
+      })
+
+      expect(resultUpdatedByUser.title).toBe('Specific Roles (Updated)')
+
+      try {
+        const resultUpdatedByUser2 = await payload.update({
+          collection: sharedFilterCollectionSlug,
+          id: adminOnlyFilter.id,
+          user: user2,
+          overrideAccess: false,
+          data: {
+            title: 'Specific Roles (Updated)',
+          },
+          select: {
+            title: true,
+          },
+        })
+
+        expect(resultUpdatedByUser2).toBeFalsy()
+      } catch (error) {
+        expect(error).toBeDefined()
+        // swallow error
+      }
     })
   })
 

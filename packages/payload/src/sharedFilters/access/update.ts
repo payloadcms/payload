@@ -1,50 +1,69 @@
 import type { Access, Config } from '../../config/types.js'
-import type { Field } from '../../fields/config/types.js'
 import type { Where } from '../../types/index.js'
 
-export const updateAccess: Access = ({ req }) => {
-  if (!req.user) {
-    return false
-  }
+import { type Field, fieldAffectsData } from '../../fields/config/types.js'
 
-  return {
-    or: [
-      {
-        and: [
-          {
-            'updateConstraints.user': {
-              equals: req.user.id,
+export const getUpdateAccess =
+  (config: Config): Access =>
+  async (args) => {
+    const { req } = args
+
+    const userDefinedAccess = config?.admin?.sharedListFilters?.access?.update
+      ? await config?.admin?.sharedListFilters?.access?.update(args)
+      : undefined
+
+    if (typeof userDefinedAccess === 'boolean') {
+      return userDefinedAccess
+    }
+
+    if (!req.user) {
+      return false
+    }
+
+    const constraints = {
+      or: [
+        {
+          and: [
+            {
+              'updateConstraints.user': {
+                equals: req.user.id,
+              },
             },
-          },
-          {
-            updateAccess: {
-              equals: 'onlyMe',
+            {
+              updateAccess: {
+                equals: 'onlyMe',
+              },
             },
-          },
-        ],
-      },
-      {
-        and: [
-          {
-            'updateConstraints.users': {
-              in: req.user.id,
-            },
-          },
-          {
-            updateAccess: {
-              equals: 'specificUsers',
-            },
-          },
-        ],
-      },
-      {
-        updateAccess: {
-          equals: 'everyone',
+          ],
         },
-      },
-    ],
-  } as Where
-}
+        {
+          and: [
+            {
+              'updateConstraints.users': {
+                in: req.user.id,
+              },
+            },
+            {
+              updateAccess: {
+                equals: 'specificUsers',
+              },
+            },
+          ],
+        },
+        {
+          updateAccess: {
+            equals: 'everyone',
+          },
+        },
+      ],
+    } satisfies Where
+
+    if (typeof userDefinedAccess === 'object') {
+      constraints.or.push(userDefinedAccess)
+    }
+
+    return constraints
+  }
 
 export const getUpdateAccessFields = (config: Config): Field[] => [
   {
@@ -63,18 +82,14 @@ export const getUpdateAccessFields = (config: Config): Field[] => [
         label: 'Specific Users',
         value: 'specificUsers',
       },
-      ...(config.admin?.sharedListFilters &&
-      config.admin.sharedListFilters.accessOptions &&
-      config.admin.sharedListFilters.accessOptions.update
-        ? config.admin.sharedListFilters.accessOptions.update.map((option) => ({
-            label: option.label,
-            value: option.value,
-          }))
-        : []),
+      ...(config?.admin?.sharedListFilters?.accessOptions?.update?.map((option) => ({
+        label: option.label,
+        value: option.value,
+      })) || []),
     ],
   },
   {
-    name: 'updateConstraints',
+    name: `updateConstraints`,
     type: 'group',
     fields: [
       {
@@ -107,6 +122,20 @@ export const getUpdateAccessFields = (config: Config): Field[] => [
         hasMany: true,
         relationTo: 'users',
       },
+      ...(config.admin?.sharedListFilters?.accessOptions?.update?.reduce((acc, option) => {
+        option.fields.forEach((field, index) => {
+          acc.push({ ...field })
+
+          if (fieldAffectsData(field)) {
+            acc[index].admin = {
+              ...(acc[index]?.admin || {}),
+              condition: (data) => Boolean(data?.updateAccess === option.value),
+            }
+          }
+        })
+
+        return acc
+      }, [] as Field[]) || []),
     ],
   },
 ]

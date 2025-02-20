@@ -10,12 +10,8 @@ export const roles: Field = {
       value: 'admin',
     },
     {
-      label: 'Editor',
-      value: 'editor',
-    },
-    {
-      label: 'Reader',
-      value: 'reader',
+      label: 'User',
+      value: 'user',
     },
   ],
 }

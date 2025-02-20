@@ -3,16 +3,16 @@ import type { Config } from '../config/types.js'
 
 import { transformWhereQuery } from '../utilities/transformWhereQuery.js'
 import { validateWhereQuery } from '../utilities/validateWhereQuery.js'
-import { getReadAccessFields, readAccess } from './access/read.js'
-import { getUpdateAccessFields, updateAccess } from './access/update.js'
+import { getReadAccess, getReadAccessFields } from './access/read.js'
+import { getUpdateAccess, getUpdateAccessFields } from './access/update.js'
 
 export const sharedFiltersCollectionSlug = 'payload-shared-filters'
 
 export const getSharedFiltersCollection = (config: Config): CollectionConfig => ({
   slug: sharedFiltersCollectionSlug,
   access: {
-    read: readAccess,
-    update: updateAccess,
+    read: getReadAccess(config),
+    update: getUpdateAccess(config),
   },
   admin: {
     // hidden: true, // uncomment this when ready

@@ -24,8 +24,8 @@ export const seed = async (_payload: Payload) => {
           data: {
             email: regularCredentials.email,
             password: regularCredentials.password,
-            name: 'Editor',
-            roles: ['editor'],
+            name: 'User',
+            roles: ['user'],
           },
         }),
     ],

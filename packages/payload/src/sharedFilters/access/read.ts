@@ -1,50 +1,69 @@
 import type { Access, Config } from '../../config/types.js'
-import type { Field } from '../../fields/config/types.js'
 import type { Where } from '../../types/index.js'
 
-export const readAccess: Access = ({ req }) => {
-  if (!req.user) {
-    return false
-  }
+import { type Field, fieldAffectsData } from '../../fields/config/types.js'
 
-  return {
-    or: [
-      {
-        and: [
-          {
-            'readConstraints.user': {
-              equals: req.user.id,
+export const getReadAccess =
+  (config: Config): Access =>
+  async (args) => {
+    const { req } = args
+
+    const userDefinedAccess = config?.admin?.sharedListFilters?.access?.read
+      ? await config?.admin?.sharedListFilters?.access?.read(args)
+      : undefined
+
+    if (typeof userDefinedAccess === 'boolean') {
+      return userDefinedAccess
+    }
+
+    if (!req.user) {
+      return false
+    }
+
+    const constraints = {
+      or: [
+        {
+          and: [
+            {
+              'readConstraints.user': {
+                equals: req.user.id,
+              },
             },
-          },
-          {
-            readAccess: {
-              equals: 'onlyMe',
+            {
+              readAccess: {
+                equals: 'onlyMe',
+              },
             },
-          },
-        ],
-      },
-      {
-        and: [
-          {
-            'readConstraints.users': {
-              in: req.user.id,
-            },
-          },
-          {
-            readAccess: {
-              equals: 'specificUsers',
-            },
-          },
-        ],
-      },
-      {
-        readAccess: {
-          equals: 'everyone',
+          ],
         },
-      },
-    ],
-  } as Where
-}
+        {
+          and: [
+            {
+              'readConstraints.users': {
+                in: req.user.id,
+              },
+            },
+            {
+              readAccess: {
+                equals: 'specificUsers',
+              },
+            },
+          ],
+        },
+        {
+          readAccess: {
+            equals: 'everyone',
+          },
+        },
+      ],
+    } satisfies Where
+
+    if (typeof userDefinedAccess === 'object') {
+      constraints.or.push(userDefinedAccess)
+    }
+
+    return constraints
+  }
 
 export const getReadAccessFields = (config: Config): Field[] => [
   {
@@ -63,14 +82,10 @@ export const getReadAccessFields = (config: Config): Field[] => [
         label: 'Specific Users',
         value: 'specificUsers',
       },
-      ...(config.admin?.sharedListFilters &&
-      config.admin.sharedListFilters.accessOptions &&
-      config.admin.sharedListFilters.accessOptions.read
-        ? config.admin.sharedListFilters.accessOptions.read.map((option) => ({
-            label: option.label,
-            value: option.value,
-          }))
-        : []),
+      ...(config?.admin?.sharedListFilters?.accessOptions?.read?.map((option) => ({
+        label: option.label,
+        value: option.value,
+      })) || []),
     ],
   },
   {
@@ -107,6 +122,20 @@ export const getReadAccessFields = (config: Config): Field[] => [
         hasMany: true,
         relationTo: 'users',
       },
+      ...(config.admin?.sharedListFilters?.accessOptions?.read?.reduce((acc, option) => {
+        option.fields.forEach((field, index) => {
+          acc.push({ ...field })
+
+          if (fieldAffectsData(field)) {
+            acc[index].admin = {
+              ...(acc[index]?.admin || {}),
+              condition: (data) => Boolean(data?.readAccess === option.value),
+            }
+          }
+        })
+
+        return acc
+      }, [] as Field[]) || []),
     ],
   },
 ]
