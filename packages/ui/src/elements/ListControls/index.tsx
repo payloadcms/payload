@@ -5,8 +5,10 @@ import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useEffect, useRef, useState } from 'react'
 
+import { Popup, PopupList } from '../../elements/Popup/index.js'
 import { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
+import { Dots } from '../../icons/Dots/index.js'
 import { SearchIcon } from '../../icons/Search/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -36,6 +38,7 @@ export type ListControlsProps = {
   readonly handleSearchChange?: (search: string) => void
   readonly handleSortChange?: (sort: string) => void
   readonly handleWhereChange?: (where: Where) => void
+  readonly listMenuItems?: React.ReactNode[]
   readonly renderedFilters?: Map<string, React.ReactNode>
   readonly resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
 }
@@ -54,10 +57,10 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     disableBulkEdit,
     enableColumns = true,
     enableSort = false,
+    listMenuItems,
     renderedFilters,
     resolvedFilterOptions,
   } = props
-
   const { handleSearchChange, query } = useListQuery()
   const titleField = useUseTitleField(collectionConfig)
   const { i18n, t } = useTranslation()
@@ -193,6 +196,17 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               >
                 {t('general:sort')}
               </Pill>
+            )}
+            {listMenuItems && (
+              <Popup
+                button={<Dots ariaLabel={t('general:moreOptions')} />}
+                className={`${baseClass}__popup`}
+                horizontalAlign="right"
+                size="large"
+                verticalAlign="bottom"
+              >
+                <PopupList.ButtonGroup>{listMenuItems.map((item) => item)}</PopupList.ButtonGroup>
+              </Popup>
             )}
           </div>
         </div>

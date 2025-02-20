@@ -1,15 +1,9 @@
 'use client'
-import type {
-  ClientCollectionConfig,
-  ListPreferences,
-  PaginatedDocs,
-  SanitizedCollectionConfig,
-} from 'payload'
+import type { Column, ListPreferences, PaginatedDocs, SanitizedCollectionConfig } from 'payload'
 
 import React, { createContext, useCallback, useContext, useEffect } from 'react'
 
 import type { SortColumnProps } from '../SortColumn/index.js'
-import type { Column } from '../Table/index.js'
 
 import { useConfig } from '../../providers/Config/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
@@ -31,7 +25,7 @@ export const useTableColumns = (): ITableColumns => useContext(TableColumnContex
 
 type Props = {
   readonly children: React.ReactNode
-  readonly collectionSlug: string
+  readonly collectionSlug: string | string[]
   readonly columnState: Column[]
   readonly data?: PaginatedDocs
   readonly docs: any[]
@@ -77,7 +71,9 @@ export const TableColumnsProvider: React.FC<Props> = ({
     collectionSlug,
   })
 
-  const prevCollection = React.useRef<SanitizedCollectionConfig['slug']>(collectionSlug)
+  const prevCollection = React.useRef<SanitizedCollectionConfig['slug']>(
+    Array.isArray(collectionSlug) ? collectionSlug[0] : collectionSlug,
+  )
   const { getPreference } = usePreferences()
 
   const [tableColumns, setTableColumns] = React.useState(columnState)
@@ -255,14 +251,15 @@ export const TableColumnsProvider: React.FC<Props> = ({
 
   React.useEffect(() => {
     const sync = async () => {
-      const collectionHasChanged = prevCollection.current !== collectionSlug
+      const defaultCollection = Array.isArray(collectionSlug) ? collectionSlug[0] : collectionSlug
+      const collectionHasChanged = prevCollection.current !== defaultCollection
 
       if (collectionHasChanged || !listPreferences) {
         const currentPreferences = await getPreference<{
           columns: ListPreferences['columns']
         }>(preferenceKey)
 
-        prevCollection.current = collectionSlug
+        prevCollection.current = defaultCollection
 
         if (currentPreferences?.columns) {
           // setTableColumns()

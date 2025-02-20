@@ -47,4 +47,16 @@ export const blocksDoc: Partial<BlockField> = {
       blockType: 'blockWithMinRows',
     },
   ],
+  localizedReferencesLocalizedBlock: [
+    {
+      blockType: 'localizedTextReference',
+      text: 'localized text',
+    },
+  ],
+  localizedReferences: [
+    {
+      blockType: 'localizedTextReference2',
+      text: 'localized text',
+    },
+  ],
 }

@@ -1,7 +1,13 @@
-// @ts-strict-ignore
-import type { Field, FlattenedBlock, FlattenedField } from '../fields/config/types.js'
 import type { Payload } from '../index.js'
 import type { PathToQuery } from './queryValidation/types.js'
+
+// @ts-strict-ignore
+import {
+  type Field,
+  fieldShouldBeLocalized,
+  type FlattenedBlock,
+  type FlattenedField,
+} from '../fields/config/types.js'
 
 export function getLocalizedPaths({
   collectionSlug,
@@ -10,6 +16,7 @@ export function getLocalizedPaths({
   incomingPath,
   locale,
   overrideAccess = false,
+  parentIsLocalized,
   payload,
 }: {
   collectionSlug?: string
@@ -18,6 +25,10 @@ export function getLocalizedPaths({
   incomingPath: string
   locale?: string
   overrideAccess?: boolean
+  /**
+   * @todo make required in v4.0. Usually, you'd wanna pass this through
+   */
+  parentIsLocalized?: boolean
   payload: Payload
 }): PathToQuery[] {
   const pathSegments = incomingPath.split('.')
@@ -31,6 +42,7 @@ export function getLocalizedPaths({
       fields,
       globalSlug,
       invalid: false,
+      parentIsLocalized,
       path: '',
     },
   ]
@@ -45,6 +57,7 @@ export function getLocalizedPaths({
       let currentPath = path ? `${path}.${segment}` : segment
 
       let fieldsToSearch: FlattenedField[]
+      let _parentIsLocalized = parentIsLocalized
 
       let matchedField: FlattenedField
 
@@ -76,6 +89,7 @@ export function getLocalizedPaths({
         } else {
           fieldsToSearch = lastIncompletePath.fields
         }
+        _parentIsLocalized = parentIsLocalized || lastIncompletePath.field?.localized
 
         matchedField = fieldsToSearch.find((field) => field.name === segment)
       }
@@ -88,6 +102,18 @@ export function getLocalizedPaths({
         lastIncompletePath.field = {
           name: 'globalType',
           type: 'text',
+        }
+
+        return paths
+      }
+
+      if (currentPath === 'relationTo') {
+        lastIncompletePath.path = currentPath
+        lastIncompletePath.complete = true
+        lastIncompletePath.field = {
+          name: 'relationTo',
+          type: 'select',
+          options: Object.keys(payload.collections),
         }
 
         return paths
@@ -117,7 +143,10 @@ export function getLocalizedPaths({
           // Skip the next iteration, because it's a locale
           i += 1
           currentPath = `${currentPath}.${nextSegment}`
-        } else if (localizationConfig && 'localized' in matchedField && matchedField.localized) {
+        } else if (
+          localizationConfig &&
+          fieldShouldBeLocalized({ field: matchedField, parentIsLocalized: _parentIsLocalized })
+        ) {
           currentPath = `${currentPath}.${locale}`
         }
 
@@ -167,6 +196,7 @@ export function getLocalizedPaths({
                   globalSlug,
                   incomingPath: nestedPathToQuery,
                   locale,
+                  parentIsLocalized: false,
                   payload,
                 })
 

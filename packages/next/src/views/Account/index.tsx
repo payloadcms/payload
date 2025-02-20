@@ -1,4 +1,4 @@
-import type { AdminViewProps } from 'payload'
+import type { AdminViewServerProps, DocumentViewServerPropsOnly } from 'payload'
 
 import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
@@ -18,11 +18,7 @@ import { Settings } from './Settings/index.js'
 
 export { generateAccountMetadata } from './meta.js'
 
-export const Account: React.FC<AdminViewProps> = async ({
-  initPageResult,
-  params,
-  searchParams,
-}) => {
+export async function Account({ initPageResult, params, searchParams }: AdminViewServerProps) {
   const {
     languageOptions,
     locale,
@@ -153,6 +149,7 @@ export const Account: React.FC<AdminViewProps> = async ({
             Fallback: EditView,
             importMap: payload.importMap,
             serverProps: {
+              doc: data,
               i18n,
               initPageResult,
               locale,
@@ -162,7 +159,7 @@ export const Account: React.FC<AdminViewProps> = async ({
               routeSegments: [],
               searchParams,
               user,
-            },
+            } satisfies DocumentViewServerPropsOnly,
           })}
           <AccountClient />
         </EditDepthProvider>

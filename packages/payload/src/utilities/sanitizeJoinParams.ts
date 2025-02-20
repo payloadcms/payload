@@ -28,6 +28,7 @@ export const sanitizeJoinParams = (
     } else {
       joinQuery[schemaPath] = {
         limit: isNumber(joins[schemaPath]?.limit) ? Number(joins[schemaPath].limit) : undefined,
+        page: isNumber(joins[schemaPath]?.page) ? Number(joins[schemaPath].page) : undefined,
         sort: joins[schemaPath]?.sort ? joins[schemaPath].sort : undefined,
         where: joins[schemaPath]?.where ? joins[schemaPath].where : undefined,
       }

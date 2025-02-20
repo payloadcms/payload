@@ -147,6 +147,7 @@ export const renderDocumentHandler = async (args: {
     disableActions,
     documentSubViewType: 'default',
     drawerSlug,
+    i18n,
     importMap: payload.importMap,
     initialData,
     initPageResult: {
@@ -165,6 +166,7 @@ export const renderDocumentHandler = async (args: {
     params: {
       segments: ['collections', collectionSlug, docID],
     },
+    payload,
     redirectAfterCreate,
     redirectAfterDelete,
     redirectAfterDuplicate,

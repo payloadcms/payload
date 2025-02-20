@@ -40,6 +40,7 @@ export async function docAccessOperation(args: Arguments): Promise<SanitizedColl
     const result = await getEntityPolicies({
       id,
       type: 'collection',
+      blockPolicies: {},
       entity: config,
       operations: collectionOperations,
       req,

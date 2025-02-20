@@ -3,6 +3,7 @@ import type { Document, FindOne } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildQuery } from './queries/buildQuery.js'
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { getSession } from './utilities/getSession.js'
@@ -20,9 +21,11 @@ export const findOne: FindOne = async function findOne(
     session,
   }
 
-  const query = await Model.buildQuery({
+  const query = await buildQuery({
+    adapter: this,
+    collectionSlug: collection,
+    fields: collectionConfig.flattenedFields,
     locale,
-    payload: this.payload,
     where,
   })
 

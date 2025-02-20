@@ -93,17 +93,16 @@ export const SelectionProvider: React.FC<Props> = ({ children, docs = [], totalD
       const existingValue = selected.get(id)
       const isSelected = typeof existingValue === 'boolean' ? !existingValue : true
 
-      let newMap = new Map()
+      const newMap = new Map(selected.set(id, isSelected))
 
-      if (isSelected) {
-        newMap = new Map(selected.set(id, isSelected))
-      } else {
-        newMap = new Map(selected.set(id, false))
+      // If previously selected all and now deselecting, adjust status
+      if (selectAll === SelectAllStatus.AllAvailable && !isSelected) {
+        setSelectAll(SelectAllStatus.Some)
       }
 
       setSelected(newMap)
     },
-    [selected, docs, user?.id],
+    [selected, docs, selectAll, user?.id],
   )
 
   const getQueryParams = useCallback(

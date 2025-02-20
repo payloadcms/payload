@@ -85,6 +85,7 @@ export async function afterRead<T extends JsonObject>(args: Args<T>): Promise<T>
     locale,
     overrideAccess,
     parentIndexPath: '',
+    parentIsLocalized: false,
     parentPath: '',
     parentSchemaPath: '',
     populate,
