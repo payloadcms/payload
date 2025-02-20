@@ -1,11 +1,10 @@
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Config } from '../config/types.js'
 
+import { transformWhereQuery } from '../utilities/transformWhereQuery.js'
+import { validateWhereQuery } from '../utilities/validateWhereQuery.js'
 import { getReadAccessFields, readAccess } from './access/read.js'
 import { getUpdateAccessFields, updateAccess } from './access/update.js'
-
-// import { mergeListSearchAndWhere } from '../utilities/mergeListSearchAndWhere.js'
-// import { validateWhereQuery } from '../utilities/validateWhereQuery.js'
 
 export const sharedFiltersCollectionSlug = 'payload-shared-filters'
 
@@ -16,8 +15,7 @@ export const getSharedFiltersCollection = (config: Config): CollectionConfig => 
     update: updateAccess,
   },
   admin: {
-    // uncomment this when ready
-    // hidden: true,
+    // hidden: true, // uncomment this when ready
     useAsTitle: 'title',
   },
   fields: [
@@ -31,28 +29,27 @@ export const getSharedFiltersCollection = (config: Config): CollectionConfig => 
     {
       name: 'where',
       type: 'json',
-      // uncomment this when ready
-      // hidden: true,
-      // TODO: wire this up properly
-      // hooks: {
-      //   beforeValidate: [
-      //     (value) => {
-      //       return mergeListSearchAndWhere({ where: value })
-      //     },
-      //   ],
-      // },
+      // hidden: true, // uncomment this when ready
+      hooks: {
+        beforeValidate: [
+          ({ data }) => {
+            // transform the "where" query here so that the client-side doesn't have to
+            if (data?.where) {
+              if (validateWhereQuery(data.where)) {
+                return data
+              } else {
+                return transformWhereQuery(data.where)
+              }
+            }
+          },
+        ],
+      },
       required: true,
-      // TODO: wire this up properly
-      // validate: (value) => {
-      //   console.log(value)
-      //   return value && validateWhereQuery(JSON.parse(value)) ? true : 'Invalid where query'
-      // },
     },
     {
       name: 'columns',
       type: 'json',
-      // uncomment this when ready
-      // hidden: true,
+      // hidden: true, // uncomment this when ready
       validate: (value) => {
         if (value) {
           try {

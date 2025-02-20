@@ -1,15 +1,18 @@
-'use client'
-import type { Where } from 'payload'
+import type { Where } from '../types/index.js'
 
 /**
- * Something like [or][0][and][0][text][equals]=example%20post will work and pass through the validateWhereQuery check.
- * However, something like [text][equals]=example%20post will not work and will fail the validateWhereQuery check,
- * even though it is a valid Where query. This needs to be transformed here.
+ * Transforms a basic "where" query into a format in which the "where builder" can understand.
+ * Even though basic queries are valid, we need to hoist them into the "and" / "or" format.
+ * Use this function alongside `validateWhereQuery` to check that for valid queries before transforming.
+ * @example
+ * Inaccurate: [text][equals]=example%20post
+ * Accurate: [or][0][and][0][text][equals]=example%20post
  */
-export const transformWhereQuery = (whereQuery): Where => {
+export const transformWhereQuery = (whereQuery: Where): Where => {
   if (!whereQuery) {
     return {}
   }
+
   // Check if 'whereQuery' has 'or' field but no 'and'. This is the case for "correct" queries
   if (whereQuery.or && !whereQuery.and) {
     return {

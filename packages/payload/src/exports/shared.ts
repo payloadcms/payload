@@ -90,8 +90,9 @@ export { setsAreEqual } from '../utilities/setsAreEqual.js'
 
 export { default as toKebabCase } from '../utilities/toKebabCase.js'
 
-export { unflatten } from '../utilities/unflatten.js'
+export { transformWhereQuery } from '../utilities/transformWhereQuery.js'
 
+export { unflatten } from '../utilities/unflatten.js'
 export { validateMimeType } from '../utilities/validateMimeType.js'
 export { validateWhereQuery } from '../utilities/validateWhereQuery.js'
 export { wait } from '../utilities/wait.js'

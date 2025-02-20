@@ -279,6 +279,40 @@ describe('Shared Filters', () => {
     })
   })
 
+  describe('Where object formatting', () => {
+    it('transforms "where" query objects into the "and" / "or" format', async () => {
+      const result = await payload.create({
+        collection: sharedFilterCollectionSlug,
+        user,
+        data: {
+          title: 'Where Object Formatting',
+          where: {
+            text: {
+              equals: 'example page',
+            },
+          },
+          readAccess: 'everyone',
+          updateAccess: 'everyone',
+          relatedCollection: 'pages',
+        },
+      })
+
+      expect(result.where).toMatchObject({
+        or: [
+          {
+            and: [
+              {
+                text: {
+                  equals: 'example page',
+                },
+              },
+            ],
+          },
+        ],
+      })
+    })
+  })
+
   afterAll(async () => {
     if (typeof payload.db.destroy === 'function') {
       await payload.db.destroy()
