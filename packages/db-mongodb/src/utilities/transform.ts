@@ -15,20 +15,6 @@ import { fieldAffectsData, fieldShouldBeLocalized } from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
 
-type Args = {
-  adapter: MongooseAdapter
-  data: Record<string, unknown> | Record<string, unknown>[]
-  fields: Field[]
-  globalSlug?: string
-  operation: 'read' | 'write'
-  parentIsLocalized?: boolean
-  /**
-   * Throw errors on invalid relationships
-   * @default true
-   */
-  validateRelationships?: boolean
-}
-
 interface RelationObject {
   relationTo: string
   value: number | string
@@ -219,9 +205,29 @@ const sanitizeDate = ({
   }
 }
 
-/**
- * @experimental This API can be changed without a major version bump.
- */
+type Args = {
+  /** instance of the adapter */
+  adapter: MongooseAdapter
+  /** data to transform, can be an array of documents or a single document */
+  data: Record<string, unknown> | Record<string, unknown>[]
+  /** fields accossiated with the data */
+  fields: Field[]
+  /** slug of the global, pass only when the operation is `write` */
+  globalSlug?: string
+  /**
+   * Type of the operation
+   * read - sanitizes ObjectIDs, Date to strings.
+   * write - sanitizes string relationships to ObjectIDs.
+   */
+  operation: 'read' | 'write'
+  parentIsLocalized?: boolean
+  /**
+   * Throw errors on invalid relationships
+   * @default true
+   */
+  validateRelationships?: boolean
+}
+
 export const transform = ({
   adapter,
   data,
