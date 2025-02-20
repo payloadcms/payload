@@ -31,6 +31,19 @@ export const getBlocksField = (prefix?: string): BlocksField => ({
       ],
     },
     {
+      slug: prefix ? `${prefix}NoBlockname` : 'noBlockname',
+      interfaceName: prefix ? `${prefix}NoBlockname` : 'NoBlockname',
+      admin: {
+        blockName: false,
+      },
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
+    {
       slug: prefix ? `${prefix}Number` : 'number',
       interfaceName: prefix ? `${prefix}NumberBlock` : 'NumberBlock',
       fields: [

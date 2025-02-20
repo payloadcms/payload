@@ -15,7 +15,7 @@ import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../helpers/rest.js'
-import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -342,6 +342,33 @@ describe('Block fields', () => {
         '#field-disableSort > .blocks-field__rows > div > div > .collapsible__drag',
       )
       expect(await field.count()).toEqual(0)
+    })
+  })
+
+  describe('blockNames', () => {
+    test('should show blockName field', async () => {
+      await page.goto(url.create)
+
+      const blockWithBlockname = page.locator('#field-blocks .blocks-field__rows #blocks-row-1')
+
+      const blocknameField = blockWithBlockname.locator('.section-title')
+
+      await expect(async () => await expect(blocknameField).toBeVisible()).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+
+      await expect(blocknameField).toHaveAttribute('data-value', 'Second block')
+    })
+
+    test("should not show blockName field when it's disabled", async () => {
+      await page.goto(url.create)
+      const blockWithBlockname = page.locator('#field-blocks .blocks-field__rows #blocks-row-3')
+
+      await expect(
+        async () => await expect(blockWithBlockname.locator('.section-title')).toBeHidden(),
+      ).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
     })
   })
 })
