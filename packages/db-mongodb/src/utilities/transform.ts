@@ -106,12 +106,12 @@ const sanitizeRelationship = ({
     ) {
       for (let i = 0; i < value.docs.length; i++) {
         const item = value.docs[i]
+
         if (item instanceof Types.ObjectId) {
           value.docs[i] = item.toHexString()
-        } else if (item && typeof item === 'object' && 'value' in item) {
-          if (item.value instanceof Types.ObjectId) {
-            item.value = item.value.toHexString()
-          }
+        } else if (Array.isArray(field.collection) && item) {
+          // Fields here for polymorphic joins cannot be determinted, JSON.parse needed
+          value.docs[i] = JSON.parse(JSON.stringify(value.docs[i]))
         }
       }
     }
