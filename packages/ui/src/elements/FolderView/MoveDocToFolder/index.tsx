@@ -27,6 +27,7 @@ export function MoveDocToFolder({ className = '', onConfirm }: Props) {
       </div>
 
       <MoveToFolderDrawer
+        count={1}
         drawerSlug={moveDocToFolderDrawerSlug}
         hiddenFolderIDs={[]}
         onMoveConfirm={(folderIDToMove) => {

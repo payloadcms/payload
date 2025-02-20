@@ -3,6 +3,7 @@ import type { DragEndEvent } from '@dnd-kit/core'
 
 import { DndContext, pointerWithin, useDndMonitor } from '@dnd-kit/core'
 import { useModal } from '@faceless-ui/modal'
+import { getTranslation } from '@payloadcms/translations'
 import { extractID, type FolderInterface } from 'payload/shared'
 import React from 'react'
 
@@ -24,7 +25,6 @@ import { MoveToFolderDrawer } from '../Drawers/MoveToFolder/index.js'
 import { NewFolderDrawer } from '../Drawers/NewFolder/index.js'
 import { RenameFolderDrawer } from '../Drawers/RenameFolder/index.js'
 import './index.scss'
-import { strings } from '../strings.js'
 
 const baseClass = 'folder-and-documents'
 const renameFolderDrawerSlug = 'rename-folder'
@@ -59,7 +59,7 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
     subfolders,
   } = useFolder()
   const { config } = useConfig()
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
   const { setPreference } = usePreferences()
   const { closeModal, isModalOpen, openModal } = useModal()
 
@@ -71,6 +71,10 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
   const [itemsToMove, setItemsToMove] = React.useState<PolymorphicRelationshipValue[]>([])
   const dndContextID = React.useId()
   const renameFolderWasOpenRef = React.useRef(false)
+
+  const folderConfig = config.collections.find(
+    (collection) => collection.slug === folderCollectionSlug,
+  )
 
   const onDisplayTypeChange = React.useCallback(
     (newDisplayType: 'grid' | 'list') => {
@@ -212,7 +216,7 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
                       openModal(newFolderSlug)
                     }}
                   >
-                    Folder
+                    {getTranslation(folderConfig.labels.singular, i18n)}
                   </PopupList.Button>
                   {config.collections.map((collection, index) => {
                     if (collection.admin.enableFolders) {
@@ -255,7 +259,7 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
                       openModal(renameFolderDrawerSlug)
                     }}
                   >
-                    Rename Folder
+                    {t('folder:renameFolder')}
                   </PopupList.Button>
                   <PopupList.Button
                     disabled={isRootFolder}
@@ -270,7 +274,7 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
                       })
                     }}
                   >
-                    Move Folder
+                    {t('general:rename')}
                   </PopupList.Button>
                   <PopupList.Button
                     disabled={isRootFolder}
@@ -278,7 +282,7 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
                       await deleteCurrentFolder()
                     }}
                   >
-                    Delete Folder
+                    {t('folder:deleteFolder')}
                   </PopupList.Button>
                 </PopupList.ButtonGroup>
               </Popup>
@@ -345,14 +349,14 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
                     onMoveToFolderOpen({ items: [document] })
                   }}
                 >
-                  {strings.move}
+                  {t('general:move')}
                 </PopupList.Button>
                 <PopupList.Button
                   disabled={isRootFolder}
                   id="action-delete-document"
                   onClick={() => removeItems([index])}
                 >
-                  {strings.removeFromFolder}
+                  {t('folder:removeFromFolder')}
                 </PopupList.Button>
               </PopupList.ButtonGroup>
             )}
@@ -365,7 +369,7 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
                     openModal(renameFolderDrawerSlug)
                   }}
                 >
-                  {strings.rename}
+                  {t('general:rename')}
                 </PopupList.Button>
                 <PopupList.Button
                   id="action-move-folder"
@@ -373,7 +377,7 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
                     onMoveToFolderOpen({ items: [subfolder] })
                   }}
                 >
-                  {strings.move}
+                  {t('general:move')}
                 </PopupList.Button>
                 {folderID ? (
                   <PopupList.Button id="action-delete-folder" onClick={() => removeItems([index])}>

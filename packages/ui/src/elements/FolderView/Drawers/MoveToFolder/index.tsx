@@ -11,9 +11,8 @@ import { DrawerActionHeader } from '../../../DrawerActionHeader/index.js'
 import { DrawerContentContainer } from '../../../DrawerContentContainer/index.js'
 import { FolderBreadcrumbs } from '../../Breadcrumbs/index.js'
 import { DisplayItems } from '../../DisplayItems/index.js'
-import { strings } from '../../strings.js'
-import './index.scss'
 import { DrawerWithFolderContext } from '../DrawerWithFolderContext.js'
+import './index.scss'
 
 const baseClass = 'move-folder-drawer'
 const confirmModalSlug = 'move-folder-drawer-confirm'
@@ -43,8 +42,8 @@ export const MoveToFolderDrawer = DrawerWithFolderContext<Props>((props) => {
         onSave={() => {
           openModal(confirmModalSlug)
         }}
-        saveLabel={strings.selectFolder}
-        title={strings.movingNItems(count)}
+        saveLabel={t('folder:selectFolder')}
+        title={t('general:movingItems', { count })}
       />
 
       <DrawerContentContainer className={baseClass}>

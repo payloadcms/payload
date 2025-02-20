@@ -11,7 +11,6 @@ import { useFolder } from '../../../../providers/Folders/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { Drawer } from '../../../Drawer/index.js'
 import { DrawerContentContainer } from '../../../DrawerContentContainer/index.js'
-import { strings } from '../../strings.js'
 import { DrawerHeader } from '../DrawerHeader/index.js'
 
 type Props = {
@@ -61,13 +60,13 @@ export function RenameFolderDrawer(props: Props) {
           })
         }}
       >
-        <DrawerHeader onCancel={() => closeModal(drawerSlug)} title={strings.renameFolder} />
+        <DrawerHeader onCancel={() => closeModal(drawerSlug)} title={t('folder:renameFolder')} />
 
         <DrawerContentContainer>
           <TextField
             field={{
               name: 'name',
-              label: strings.folderName,
+              label: t('folder:folderName'),
               required: true,
             }}
             path="name"

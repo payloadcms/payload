@@ -11,7 +11,6 @@ import { Form } from '../../../../forms/Form/index.js'
 import { useConfig } from '../../../../providers/Config/index.js'
 import { useFolder } from '../../../../providers/Folders/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
-import { strings } from '../../../../strings.js'
 import { Drawer } from '../../../Drawer/index.js'
 import { DrawerActionHeader } from '../../../DrawerActionHeader/index.js'
 import { DrawerContentContainer } from '../../../DrawerContentContainer/index.js'
@@ -65,14 +64,14 @@ export const NewFolderDrawer = ({ drawerSlug, onNewFolderSuccess }: Props) => {
           onCancel={() => {
             closeModal(drawerSlug)
           }}
-          title={strings.newFolder}
+          title={t('folder:newFolder')}
         />
 
         <DrawerContentContainer>
           <TextField
             field={{
               name: 'name',
-              label: strings.folderName,
+              label: t('folder:folderName'),
               required: true,
             }}
             path="name"
