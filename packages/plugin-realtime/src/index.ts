@@ -101,10 +101,13 @@ export const realtimePlugin =
     const payloadQueryEndpoint: Endpoint = {
       handler: async (req) => {
         try {
-          if (typeof req.json !== 'function') {
+          if (!req.json) {
             return new Response('req.json is not a function', { status: 500 })
           }
-          const { type, clientId, query } = await req.json()
+          const body = await req.json()
+          console.log('req.json 0', body)
+
+          const { type, clientId, query } = body
           if (!type || !query || !clientId) {
             throw new Error('Missing required parameters')
           }
@@ -161,7 +164,6 @@ export const realtimePlugin =
     const payloadSSEEndpoint: Endpoint = {
       handler: async (req) => {
         try {
-          const clientId = `client-${Date.now()}-${Math.random()}`
           const stream = new TransformStream()
           const writer = stream.writable.getWriter()
           const response = new Response(stream.readable, {
@@ -172,13 +174,22 @@ export const realtimePlugin =
               'Content-Type': 'text/event-stream',
             },
           })
+          if (!req.url) {
+            throw new Error('Missing required parameters')
+          }
+          const url = new URL(req.url)
+          const clientId = url.searchParams.get('clientId')
+          console.log('clientId', clientId)
+          if (!clientId) {
+            throw new Error('Missing required parameters')
+          }
 
           // Send initial heartbeat with clientId
           const encoder = new TextEncoder()
           await writer.write(encoder.encode(`data: ${JSON.stringify({ clientId })}\n\n`))
 
           // Store client connection
-          const client = { clientId, response, writer }
+          const client = { response, writer }
           clients.add(client)
 
           // Clean up when client disconnects

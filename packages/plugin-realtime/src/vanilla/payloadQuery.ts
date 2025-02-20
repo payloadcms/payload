@@ -9,17 +9,23 @@ type PayloadQueryResult<T extends ReadOperation> = Promise<{
   error: Error | null
 }>
 
-// TODO: this should not be exported, rename to _payloadQuery (take care in line 67, should call _payloadQuery)
-export async function payloadQuery<T extends ReadOperation>(
-  type: T,
-  query: Parameters<Payload[T]>[0],
-  _options?: {
+type PayloadQueryArgs<T extends ReadOperation> = {
+  clientId: string
+  options?: {
     onChange?: (result: PayloadQueryResult<T>) => void
-  },
+  }
+  query: Parameters<Payload[T]>[0]
+  type: T
+}
+
+// TODO: this should not be exported, rename to _payloadQuery (take care in line 67, should call _payloadQuery)
+export async function _payloadQuery<T extends ReadOperation>(
+  args: PayloadQueryArgs<T>,
 ): PayloadQueryResult<T> {
   try {
+    const { type, clientId, options, query } = args
     const response = await fetch(`/api/payload-query`, {
-      body: JSON.stringify({ type, query }),
+      body: JSON.stringify({ type, clientId, query }),
       headers: {
         'Content-Type': 'application/json',
       },
@@ -36,8 +42,14 @@ export async function payloadQuery<T extends ReadOperation>(
   }
 }
 
-export function createPayloadClient(): { payloadQuery: typeof payloadQuery } {
-  let clientId: null | string = null
+export function createPayloadClient(): {
+  payloadQuery: (
+    type: ReadOperation,
+    query: Parameters<Payload[ReadOperation]>[0],
+    options?: { onChange?: (result: PayloadQueryResult<ReadOperation>) => void },
+  ) => PayloadQueryResult<ReadOperation>
+} {
+  const clientId = `client-${Date.now()}-${Math.random()}`
   const subscriptions = new Map<string, Set<(result: PayloadQueryResult<ReadOperation>) => void>>()
   let eventSource: EventSource | null = null
 
@@ -46,15 +58,16 @@ export function createPayloadClient(): { payloadQuery: typeof payloadQuery } {
       return
     }
 
-    eventSource = new EventSource('/api/payload-sse')
+    eventSource = new EventSource(`/api/payload-sse?clientId=${clientId}`)
 
     eventSource.onmessage = (event) => {
       try {
         console.log('event.data', event.data)
-        // initial connection message
+        // ignore initial connection message
         const data = JSON.parse(event.data)
-        if (data.clientId) {
-          clientId = data.clientId
+        console.log('data', data)
+        if (data === 'connected') {
+          console.log('client with id ', clientId, ' connected successfully')
         }
 
         // Notify all subscribers that match this data update
@@ -92,7 +105,7 @@ export function createPayloadClient(): { payloadQuery: typeof payloadQuery } {
         connectSSE()
       }
 
-      return payloadQuery(type, query, options)
+      return _payloadQuery({ type, clientId, options, query })
     },
   }
 }
