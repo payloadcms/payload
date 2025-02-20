@@ -1104,6 +1104,17 @@ plugins: [
 
 If you have custom features for `@payloadcms/richtext-lexical` you will need to migrate your code to the new API. Read more about the new API in the [documentation](https://payloadcms.com/docs/rich-text/building-custom-features).
 
+## Reserved Field names
+
+Payload reserves certain field names for internal use. If your v2 collection uses any of these names, the field will be sanitized from the config, causing errors when deploying your application. Make sure to rename any fields that conflict with the reserved names:
+
+- `__v`
+- `salt`
+- `hash`
+- `file`
+
+If any of these names are found in your collection fields, update them before migrating to avoid unexpected issues.
+
 ## Upgrade from previous beta
 
 Reference this [community-made site](https://payload-releases-filter.vercel.app/?version=3&from=152429656&to=188243150&sort=asc&breaking=on). Set your version, sort by oldest first, enable breaking changes only.
