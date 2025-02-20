@@ -60,10 +60,7 @@ const sendToClients = async (querySubscription: QuerySubscription, payload: Payl
           new TextEncoder().encode(
             `data: ${JSON.stringify({
               queryResult: result,
-              stringifiedQuery: {
-                type,
-                queryParams,
-              },
+              stringifiedQuery: JSON.stringify({ type, queryParams }),
             })}\n\n`,
           ),
         )

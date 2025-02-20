@@ -26,12 +26,15 @@ export function PostCount() {
         {
           onChange: (result) => {
             console.log('result', result)
+            setCount3(result?.totalDocs)
           },
         },
       )
+      // TODO: WHY DATA IS NEEDED HERE AND NOT IN THE ONCHANGE?
       const count = (await promiseCount)?.data?.totalDocs
       console.log('count', count)
-      if (count) {
+      if (count && !count3) {
+        console.log('no count')
         setCount3(count)
       }
       // payloadQuery('count', { collection: 'posts' }).then((result) => {
