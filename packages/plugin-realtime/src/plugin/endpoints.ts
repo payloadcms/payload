@@ -41,6 +41,7 @@ export const payloadQueryEndpoint: Endpoint = {
       } else if (type === 'findByID') {
         result = await req.payload.findByID(queryParams as Parameters<Payload['findByID']>[0])
       } else {
+         
         throw new Error(`Unsupported query type: ${type}`)
       }
 
@@ -58,15 +59,12 @@ export const payloadQueryEndpoint: Endpoint = {
       const querySubscription = querySubscriptions.get(stringifiedQuery)!
       querySubscription.clients.add(clientId)
 
-      console.log('result', result)
-
       return new Response(JSON.stringify(result), {
         headers: { 'Content-Type': 'application/json' },
         status: 200,
       })
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err))
-      console.error(error)
       return new Response(JSON.stringify({ error: error.message }), {
         headers: { 'Content-Type': 'application/json' },
         status: 500,

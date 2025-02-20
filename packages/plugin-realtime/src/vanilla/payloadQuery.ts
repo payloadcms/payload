@@ -1,60 +1,12 @@
 /* eslint-disable no-console */
 'use client'
+
 import type { Payload } from 'payload'
 
 import type { StringifiedQuery } from '../plugin/index.js'
 import type { ReadOperation } from '../usePayloadQuery.js'
 
-type PayloadQueryResult<T extends ReadOperation> = Promise<{
-  data: Awaited<ReturnType<Payload[T]>> | undefined
-  error: Error | null
-}>
-
-type PayloadQueryArgs<T extends ReadOperation> = {
-  clientId: string
-  options?: {
-    onChange?: (result: PayloadQueryResult<T>) => void
-  }
-  queryParams: Parameters<Payload[T]>[0]
-  type: T
-}
-
-// TODO: this should not be exported, rename to _payloadQuery (take care in line 67, should call _payloadQuery)
-export async function _payloadQuery<T extends ReadOperation>(
-  args: PayloadQueryArgs<T>,
-): PayloadQueryResult<T> {
-  try {
-    const { type, clientId, options, queryParams } = args
-    const response = await fetch(`/api/payload-query`, {
-      body: JSON.stringify({ type, clientId, queryParams }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      method: 'POST',
-    })
-    if (!response.ok) {
-      throw new Error('Network response was not ok')
-    }
-    const data = await response.json()
-    return { data, error: null }
-  } catch (err) {
-    const error = err instanceof Error ? err : new Error(String(err))
-    return { data: undefined, error }
-  }
-}
-
-type QuerySubscription = {
-  options?: { onChange?: (result: PayloadQueryResult<ReadOperation>) => void }
-  stringifiedQuery: StringifiedQuery
-}
-
-export function createPayloadClient(): {
-  payloadQuery: (
-    type: ReadOperation,
-    queryParams: Parameters<Payload[ReadOperation]>[0],
-    options?: { onChange?: (result: PayloadQueryResult<ReadOperation>) => void },
-  ) => PayloadQueryResult<ReadOperation>
-} {
+export function createPayloadClient() {
   const clientId = `client-${Date.now()}-${Math.random()}`
   const querySubscriptions = new Map<StringifiedQuery, Set<QuerySubscription>>()
   let eventSource: EventSource | null = null
@@ -100,20 +52,55 @@ export function createPayloadClient(): {
 
   connectSSE()
 
-  return {
-    payloadQuery: (type, queryParams, options) => {
-      const stringifiedQuery = JSON.stringify({ type, queryParams })
-
-      if (options?.onChange) {
+  const payloadQuery = async <T extends ReadOperation>(
+    type: T,
+    queryParams: Parameters<Payload[T]>[0],
+    options?: {
+      onChange?: (result: PayloadQueryResult<T>) => void
+    },
+  ) => {
+    try {
+      // We add the onChange callback to the query subscriptions for future updates
+      if (options && options?.onChange) {
+        const stringifiedQuery = JSON.stringify({ type, queryParams })
         let callbacks = querySubscriptions.get(stringifiedQuery)
         if (!callbacks) {
           callbacks = new Set()
           querySubscriptions.set(stringifiedQuery, callbacks)
         }
+        // @ts-expect-error - error inferring the type parameter. It is correct
         callbacks.add({ options, stringifiedQuery })
       }
 
-      return _payloadQuery({ type, clientId, options, queryParams })
-    },
+      // The initial query request (). This request does not remain open.
+      // It is immediate to obtain the initial value
+      const response = await fetch(`/api/payload-query`, {
+        body: JSON.stringify({ type, clientId, queryParams }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
+      })
+      if (!response.ok) {
+        throw new Error('Network response was not ok')
+      }
+      const data = await response.json()
+      return { data, error: null }
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err))
+      return { data: undefined, error }
+    }
   }
+
+  return { payloadQuery }
 }
+
+type QuerySubscription<T extends ReadOperation = ReadOperation> = {
+  options?: { onChange?: (result: PayloadQueryResult<T>) => void }
+  stringifiedQuery: StringifiedQuery
+}
+
+type PayloadQueryResult<T extends ReadOperation> = Promise<{
+  data: Awaited<ReturnType<Payload[T]>> | undefined
+  error: Error | null
+}>
