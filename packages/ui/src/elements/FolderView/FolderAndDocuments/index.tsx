@@ -342,7 +342,6 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
                 <PopupList.Button
                   id="action-move-document"
                   onClick={() => {
-                    setSelectedIndexes(new Set([index]))
                     onMoveToFolderOpen({ items: [document] })
                   }}
                 >
@@ -371,7 +370,6 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
                 <PopupList.Button
                   id="action-move-folder"
                   onClick={() => {
-                    setSelectedIndexes(new Set([index]))
                     onMoveToFolderOpen({ items: [subfolder] })
                   }}
                 >

@@ -16,12 +16,13 @@ import { DrawerWithFolderContext } from '../DrawerWithFolderContext.js'
 const baseClass = 'move-folder-drawer'
 
 type Props = {
+  readonly count: number
   readonly drawerSlug: string
   readonly hiddenFolderIDs: (number | string)[]
   readonly onMoveConfirm: (folderID: number | string) => Promise<void> | void
 }
 export const MoveToFolderDrawer = DrawerWithFolderContext<Props>((props) => {
-  const { drawerSlug, hiddenFolderIDs, onMoveConfirm } = props
+  const { count, drawerSlug, hiddenFolderIDs, onMoveConfirm } = props
   const folderContext = useFolder()
   const { closeModal } = useModal()
 
@@ -47,7 +48,7 @@ export const MoveToFolderDrawer = DrawerWithFolderContext<Props>((props) => {
           await onMoveConfirm(folderToMoveTo)
         }}
         saveLabel={strings.selectFolder}
-        title={strings.moveTo}
+        title={strings.movingNItems(count)}
       />
 
       <DrawerContentContainer className={baseClass}>
