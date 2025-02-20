@@ -5,7 +5,6 @@ import { fileURLToPath } from 'url'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { Page } from './payload-types.js'
-import { update } from 'node_modules/payload/src/preferences/operations/update.js'
 
 let payload: Payload
 
@@ -140,6 +139,59 @@ describe('@payloadcms/plugin-nested-docs', () => {
       childDoc.breadcrumbs?.map((breadcrumb) => {
         expect(breadcrumb).toBeInstanceOf(Object)
       })
+    })
+
+    it('should update child doc breadcrumb without affecting any other data', async () => {
+      const parentDoc = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'parent doc',
+          slug: 'parent',
+        },
+      })
+
+      const childDoc = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'child doc',
+          slug: 'child',
+          parent: parentDoc.id,
+        },
+      })
+
+      await payload.update({
+        collection: 'pages',
+        id: parentDoc.id,
+        data: {
+          title: 'parent updated',
+          slug: 'parent-updated',
+          _status: 'published',
+        },
+      })
+
+      const updatedChild = await payload
+        .find({
+          collection: 'pages',
+          where: {
+            id: {
+              equals: childDoc.id,
+            },
+          },
+        })
+        .then(({ docs }) => docs[0])
+
+      if (!updatedChild) {
+        return
+      }
+
+      // breadcrumbs should be updated
+      expect(updatedChild.breadcrumbs).toHaveLength(2)
+      expect(updatedChild.breadcrumbs?.[0]?.url).toStrictEqual('/parent-updated')
+      expect(updatedChild.breadcrumbs?.[1]?.url).toStrictEqual('/parent-updated/child')
+
+      // no other data should be affected
+      expect(updatedChild.title).toEqual('child doc')
+      expect(updatedChild.slug).toEqual('child')
     })
   })
 
