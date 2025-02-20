@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 'use client'
 import { createPayloadClient, usePayloadQuery } from '@payloadcms/plugin-realtime'
@@ -25,16 +24,13 @@ export function PostCount() {
         { collection: 'posts' },
         {
           onChange: (result) => {
-            console.log('result', result)
             setCount3(result?.totalDocs)
           },
         },
       )
       // TODO: WHY DATA IS NEEDED HERE AND NOT IN THE ONCHANGE?
       const count = (await promiseCount)?.data?.totalDocs
-      console.log('count', count)
       if (count && !count3) {
-        console.log('no count')
         setCount3(count)
       }
       // payloadQuery('count', { collection: 'posts' }).then((result) => {
@@ -52,7 +48,6 @@ export function PostCount() {
   if (isLoading) {
     return <div>Loading...</div>
   }
-  console.log(data)
   // if (isLoading2) {
   //   return <div>Loading 2...</div>
   // }

@@ -81,7 +81,6 @@ export function createPayloadClient(): {
 
         // Notify all subscribers that match this data update
         const querySubscription = querySubscriptions.get(stringifiedQuery)
-        console.log('data', data, 'querySubscriptions', querySubscriptions)
         if (querySubscription) {
           querySubscription.forEach(({ options }) => options?.onChange?.(queryResult))
         }
