@@ -922,9 +922,11 @@ export const getPayload = async (
     ) {
       try {
         const port = process.env.PORT || '3000'
+        const basePath = process.env.NEXT_BASE_PATH || ''
+        const assetPrefix = process.env.NEXT_ASSET_PREFIX || ''
 
         cached.ws = new WebSocket(
-          `ws://localhost:${port}${process.env.NEXT_BASE_PATH ?? ''}/_next/webpack-hmr`,
+          `ws://localhost:${port}${basePath}${assetPrefix}/_next/webpack-hmr`,
         )
 
         cached.ws.onmessage = (event) => {
