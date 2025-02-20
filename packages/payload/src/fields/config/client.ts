@@ -122,6 +122,13 @@ export const createClientBlocks = ({
       clientBlock.jsx = jsxResolved
     }
 
+    if (!clientBlock?.admin?.blockName) {
+      clientBlock.admin = {
+        ...clientBlock.admin,
+        blockName: typeof block?.admin?.blockName === 'undefined' ? true : block.admin.blockName,
+      }
+    }
+
     if (block.labels) {
       clientBlock.labels = {} as unknown as LabelsClient
 
