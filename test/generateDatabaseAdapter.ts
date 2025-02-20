@@ -26,6 +26,7 @@ export const allDatabaseAdapters = {
     pool: {
       connectionString: process.env.POSTGRES_URL || 'postgres://127.0.0.1:5432/payloadtests',
     },
+    logger: true
   })`,
   'postgres-custom-schema': `
   import { postgresAdapter } from '@payloadcms/db-postgres'

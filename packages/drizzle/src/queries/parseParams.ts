@@ -1,7 +1,8 @@
 import type { SQL, Table } from 'drizzle-orm'
+import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { FlattenedField, Operator, Where } from 'payload'
 
-import { and, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
+import { and, count, eq, inArray, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
 import { PgUUID } from 'drizzle-orm/pg-core'
 import { QueryError } from 'payload'
 import { validOperatorSet } from 'payload/shared'
@@ -166,7 +167,7 @@ export function parseParams({
                   let formattedValue = val
                   if (adapter.name === 'sqlite' && operator === 'equals' && !isNaN(val)) {
                     formattedValue = val
-                  } else if (['in', 'not_in'].includes(operator) && Array.isArray(val)) {
+                  } else if (['all', 'in', 'not_in'].includes(operator) && Array.isArray(val)) {
                     formattedValue = `(${val.map((v) => `${v}`).join(',')})`
                   } else {
                     formattedValue = `'${operatorKeys[operator].wildcard}${val}${operatorKeys[operator].wildcard}'`
@@ -352,6 +353,24 @@ export function parseParams({
                     default:
                       break
                   }
+                  break
+                }
+
+                if (operator === 'all' && Array.isArray(queryValue)) {
+                  const db = adapter.drizzle as LibSQLDatabase
+
+                  constraints.push(
+                    eq(
+                      sql`${db
+                        .select({
+                          count: count(),
+                        })
+                        .from(table)
+                        .where(inArray(resolvedColumn, queryValue))}`,
+                      queryValue.length,
+                    ),
+                  )
+
                   break
                 }
 

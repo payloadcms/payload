@@ -552,7 +552,7 @@ describe('Relationships', () => {
         })
 
         // all operator is not supported in Postgres yet for any fields
-        mongoIt('should query using "all" by hasMany relationship field', async () => {
+        it('should query using "all" by hasMany relationship field', async () => {
           const movie1 = await payload.create({
             collection: 'movies',
             data: {},
@@ -562,7 +562,7 @@ describe('Relationships', () => {
             data: {},
           })
 
-          await payload.create({
+          const director1 = await payload.create({
             collection: 'directors',
             data: {
               name: 'Quentin Tarantino',
@@ -570,10 +570,10 @@ describe('Relationships', () => {
             },
           })
 
-          await payload.create({
+          const director2 = await payload.create({
             collection: 'directors',
             data: {
-              name: 'Quentin Tarantino',
+              name: 'Quentin Tarantino Junior',
               movies: [movie2.id],
             },
           })
@@ -583,13 +583,28 @@ describe('Relationships', () => {
             depth: 0,
             where: {
               movies: {
-                all: [movie1.id],
+                in: [movie1.id],
               },
             },
           })
 
-          // eslint-disable-next-line jest/no-standalone-expect
+          // process.exit(0)
+
           expect(query1.totalDocs).toStrictEqual(1)
+          expect(query1.docs[0].id).toBe(director1.id)
+
+          const query2 = await payload.find({
+            collection: 'directors',
+            depth: 0,
+            where: {
+              movies: {
+                all: [movie1.id, movie2.id],
+              },
+            },
+          })
+
+          expect(query2.totalDocs).toStrictEqual(1)
+          expect(query2.docs[0].id).toBe(director1.id)
         })
 
         it('should sort by a property of a hasMany relationship', async () => {

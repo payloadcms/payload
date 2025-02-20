@@ -18,6 +18,7 @@ import {
 } from 'drizzle-orm'
 
 type OperatorKeys =
+  | 'all'
   | 'and'
   | 'contains'
   | 'equals'
@@ -36,6 +37,7 @@ type OperatorKeys =
 export type Operators = Record<OperatorKeys, (column: Column, value: SQLWrapper | unknown) => SQL>
 
 export const operatorMap: Operators = {
+  all: inArray,
   and,
   contains: ilike,
   equals: eq,
@@ -48,8 +50,6 @@ export const operatorMap: Operators = {
   less_than_equal: lte,
   like: ilike,
   not_equals: ne,
-  // TODO: support this
-  // all: all,
   not_in: notInArray,
   or,
 }
