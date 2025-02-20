@@ -81,7 +81,7 @@ describe('Block fields', () => {
     const addedRow = page.locator('#field-blocks .blocks-field__row').last()
     await expect(addedRow).toBeVisible()
     await expect(addedRow.locator('.blocks-field__block-header')).toHaveText(
-      'Custom Block Label: Content 04',
+      'Custom Block Label: Content 05',
     )
   })
 
@@ -155,7 +155,7 @@ describe('Block fields', () => {
     await duplicateButton.click()
 
     const blocks = page.locator('#field-blocks > .blocks-field__rows > div')
-    expect(await blocks.count()).toEqual(4)
+    expect(await blocks.count()).toEqual(5)
   })
 
   test('should save when duplicating subblocks', async () => {
@@ -170,7 +170,7 @@ describe('Block fields', () => {
     await duplicateButton.click()
 
     const blocks = page.locator('#field-blocks > .blocks-field__rows > div')
-    expect(await blocks.count()).toEqual(4)
+    expect(await blocks.count()).toEqual(5)
 
     await page.click('#action-save')
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
