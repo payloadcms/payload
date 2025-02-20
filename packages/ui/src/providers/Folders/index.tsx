@@ -185,7 +185,7 @@ export function FolderProvider({ children, initialData }: Props) {
     return Array.from(selectedIndexes).map((index) => allItems[index])
   }, [documents, selectedIndexes, subfolders])
 
-  const clearSelecttions = React.useCallback(() => {
+  const clearSelections = React.useCallback(() => {
     setSelectedIndexes(new Set())
     setLastSelectedIndex(undefined)
   }, [])
@@ -388,11 +388,11 @@ export function FolderProvider({ children, initialData }: Props) {
       const isMovingCurrentFolder = itemsToMove.some(
         (item) => item.relationTo === folderCollectionSlug && extractID(item.value) === toFolderID,
       )
+      clearSelections()
+
       await populateFolderData({
         folderID: isMovingCurrentFolder ? toFolderID : activeFolderID,
       })
-
-      clearSelecttions()
     },
     [
       routes.api,
@@ -402,7 +402,7 @@ export function FolderProvider({ children, initialData }: Props) {
       setSubfolders,
       populateFolderData,
       activeFolderID,
-      clearSelecttions,
+      clearSelections,
     ],
   )
 

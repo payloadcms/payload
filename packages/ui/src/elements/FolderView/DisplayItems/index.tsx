@@ -16,11 +16,9 @@ import { SimpleTable, TableHeader } from '../SimpleTable/index.js'
 const baseClass = 'displayed-items'
 
 const getShiftSelection = ({
-  selectedIndexes,
   selectFromIndex,
   selectToIndex,
 }: {
-  selectedIndexes: Set<number>
   selectFromIndex: number
   selectToIndex: number
 }): Set<number> => {
@@ -32,7 +30,7 @@ const getShiftSelection = ({
   const end = Math.max(selectToIndex, selectFromIndex)
   const rangeSelection = new Set(
     Array.from({ length: Math.max(start, end) + 1 }, (_, i) => i).filter((index) => {
-      return selectedIndexes.has(index) ? index >= start && index <= end : false
+      return index >= start && index <= end
     }),
   )
   return rangeSelection
@@ -142,9 +140,8 @@ export function DisplayItems(props: Props) {
 
           if (allowMultiSelection && isShiftPressed) {
             newSelectedIndexes = getShiftSelection({
-              selectedIndexes,
-              selectFromIndex: lastSelectedIndex,
-              selectToIndex: nextIndex,
+              selectFromIndex: Math.min(lastSelectedIndex, totalCount),
+              selectToIndex: Math.min(nextIndex, totalCount),
             })
           } else {
             setLastSelectedIndex(nextIndex)
@@ -163,7 +160,6 @@ export function DisplayItems(props: Props) {
 
           if (allowMultiSelection && isShiftPressed) {
             newSelectedIndexes = getShiftSelection({
-              selectedIndexes,
               selectFromIndex: lastSelectedIndex,
               selectToIndex: prevIndex,
             })
@@ -256,7 +252,6 @@ export function DisplayItems(props: Props) {
         })
       } else if (allowMultiSelection && isShiftPressed && lastSelectedIndex !== undefined) {
         newSelectedIndexes = getShiftSelection({
-          selectedIndexes,
           selectFromIndex: lastSelectedIndex,
           selectToIndex: itemIndex,
         })

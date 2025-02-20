@@ -231,7 +231,7 @@
     }
 
     &--size-small {
-      --btn-icon-size: calc(var(--base) * 1.2);
+      --btn-icon-size: calc(var(--base) * 0.9);
       --btn-icon-padding: 3px;
       --btn-icon-content-gap: calc(var(--base) * 0.2);
       --btn-padding-block-start: 0;

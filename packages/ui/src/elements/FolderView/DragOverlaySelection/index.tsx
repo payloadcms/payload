@@ -22,11 +22,12 @@ export function DragOverlaySelection({
   lastSelected,
   selectedCount,
 }: DragCardsProps) {
-  if (!selectedCount) {
+  const visibleItem = allItems?.[lastSelected || 0]
+  if (!selectedCount || !visibleItem) {
     return null
   }
 
-  const { relationTo, value } = allItems[lastSelected || 0]
+  const { relationTo, value } = visibleItem
   const useAsTitle = collectionUseAsTitles.has(relationTo)
     ? collectionUseAsTitles.get(relationTo)
     : 'id'
