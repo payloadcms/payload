@@ -89,6 +89,8 @@ export function createPayloadClient(): {
     }
   }
 
+  connectSSE()
+
   return {
     payloadQuery: (type, query, options) => {
       const queryKey = JSON.stringify({ type, clientId, query })
@@ -100,9 +102,6 @@ export function createPayloadClient(): {
           subscriptions.set(queryKey, callbacks)
         }
         callbacks.add(options.onChange)
-
-        // Ensure SSE connection is established when we have subscribers
-        connectSSE()
       }
 
       return _payloadQuery({ type, clientId, options, query })

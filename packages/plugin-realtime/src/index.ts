@@ -12,13 +12,7 @@ import {
 import type { ReadOperation } from './usePayloadQuery.js'
 
 export { usePayloadQuery } from './usePayloadQuery.js'
-export { createPayloadClient, payloadQuery } from './vanilla/payloadQuery.js'
-
-// TODO: review PayloadQueryRequestBody, Client, QuerySubscription and subscriptions
-type PayloadQueryRequestBody =
-  | { query: Parameters<Payload['count']>[0]; type: 'count' }
-  | { query: Parameters<Payload['find']>[0]; type: 'find' }
-  | { query: Parameters<Payload['findByID']>[0]; type: 'findByID' }
+export { createPayloadClient } from './vanilla/payloadQuery.js'
 
 type Client = {
   clientId: string
@@ -27,16 +21,18 @@ type Client = {
 }
 
 type QuerySubscription = {
-  clients: Set<Client>
+  clients: Set<string> // clientId
   query: any
   type: 'count' | 'find' | 'findByID'
 }
 
-const subscriptions = new Map<string, QuerySubscription>()
-const clients = new Set<Client>()
+type QueryId = `${ReadOperation}-${string}`
 
-const sendToClients = async (subscription: QuerySubscription, payload: Payload) => {
-  const { type, query } = subscription
+const querySubscriptions = new Map<QueryId, QuerySubscription>()
+const clients = new Map<string, Client>()
+
+const sendToClients = async (querySubscription: QuerySubscription, payload: Payload) => {
+  const { type, query } = querySubscription
   let result: Awaited<ReturnType<Payload[ReadOperation]>> | undefined
 
   if (type === 'count') {
@@ -52,8 +48,12 @@ const sendToClients = async (subscription: QuerySubscription, payload: Payload) 
   try {
     // TODO: is this correct?
     await Promise.all(
-      Array.from(subscription.clients).map(async ({ writer }) => {
-        await writer.write(new TextEncoder().encode(`data: ${JSON.stringify(result)}\n\n`))
+      Array.from(querySubscription.clients).map(async (clientId) => {
+        const client = clients.get(clientId)
+        if (!client) {
+          throw new Error('Client not found')
+        }
+        await client.writer.write(new TextEncoder().encode(`data: ${JSON.stringify(result)}\n\n`))
       }),
     )
   } catch (error) {
@@ -66,26 +66,24 @@ export const realtimePlugin =
   () =>
   (config: Config): Config => {
     const myAfterChangeHook: CollectionAfterChangeHook = async ({ collection, doc, req }) => {
-      console.log('afterChange triggered for collection:', collection.slug, 'doc:', doc.id)
-      for (const [key, subscription] of subscriptions) {
-        console.log('checking subscription:', key, subscription.type, subscription.query)
-        if (subscription.type === 'count') {
+      for (const [, querySubscription] of querySubscriptions) {
+        if (querySubscription.type === 'count') {
           // Always refresh count queries for the affected collection
-          if (subscription.query.collection === collection.slug) {
-            await sendToClients(subscription, req.payload)
+          if (querySubscription.query.collection === collection.slug) {
+            await sendToClients(querySubscription, req.payload)
           }
-        } else if (subscription.type === 'find') {
+        } else if (querySubscription.type === 'find') {
           // Refresh find queries if the collection matches
-          if (subscription.query.collection === collection.slug) {
-            await sendToClients(subscription, req.payload)
+          if (querySubscription.query.collection === collection.slug) {
+            await sendToClients(querySubscription, req.payload)
           }
-        } else if (subscription.type === 'findByID') {
+        } else if (querySubscription.type === 'findByID') {
           // Refresh findByID queries if the specific document changed
           if (
-            subscription.query.collection === collection.slug &&
-            subscription.query.id === doc.id
+            querySubscription.query.collection === collection.slug &&
+            querySubscription.query.id === doc.id
           ) {
-            await sendToClients(subscription, req.payload)
+            await sendToClients(querySubscription, req.payload)
           }
         }
       }
@@ -101,15 +99,23 @@ export const realtimePlugin =
     const payloadQueryEndpoint: Endpoint = {
       handler: async (req) => {
         try {
+          console.log('\n\npayloadQueryEndpoint\n\n')
           if (!req.json) {
             return new Response('req.json is not a function', { status: 500 })
           }
           const body = await req.json()
           console.log('req.json 0', body)
 
-          const { type, clientId, query } = body
+          const { type, clientId, query } = body as {
+            clientId: string
+            query: Parameters<Payload[ReadOperation]>[0]
+            type: ReadOperation
+          }
           if (!type || !query || !clientId) {
             throw new Error('Missing required parameters')
+          }
+          if (!clients.has(clientId)) {
+            throw new Error('Client not found')
           }
 
           // Execute the initial query
@@ -121,26 +127,23 @@ export const realtimePlugin =
           } else if (type === 'findByID') {
             result = await req.payload.findByID(query)
           } else {
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             throw new Error(`Unsupported query type: ${type}`)
           }
 
-          const subscriptionId = `${type}-${JSON.stringify(query)}`
-          if (!subscriptions.has(subscriptionId)) {
-            subscriptions.set(subscriptionId, {
+          // Insert or update the querySubscription (depending if queryId already exists)
+          const queryId = `${type}-${JSON.stringify(query)}` satisfies QueryId
+          if (!querySubscriptions.has(queryId)) {
+            querySubscriptions.set(queryId, {
               type,
               clients: new Set(),
               query,
             })
           }
 
-          // Add this client to the subscription
-          const subscription = subscriptions.get(subscriptionId)!
-          const existingClient = Array.from(subscription.clients).find(
-            (client) => client.clientId === clientId,
-          )
-          if (existingClient) {
-            subscription.clients.add(existingClient)
-          }
+          // Add this client to the querySubscription
+          const querySubscription = querySubscriptions.get(queryId)!
+          querySubscription.clients.add(clientId)
 
           console.log('result', result)
 
@@ -162,8 +165,9 @@ export const realtimePlugin =
     }
 
     const payloadSSEEndpoint: Endpoint = {
-      handler: async (req) => {
+      handler: (req) => {
         try {
+          console.log('\n\npayloadSSEEndpoint\n\n')
           const stream = new TransformStream()
           const writer = stream.writable.getWriter()
           const response = new Response(stream.readable, {
@@ -185,17 +189,18 @@ export const realtimePlugin =
           }
 
           // Send initial heartbeat with clientId
-          const encoder = new TextEncoder()
-          await writer.write(encoder.encode(`data: ${JSON.stringify({ clientId })}\n\n`))
+          // await writer.write(new TextEncoder().encode(`data: ${JSON.stringify({ clientId })}\n\n`))
 
           // Store client connection
-          const client = { response, writer }
-          clients.add(client)
+          const client = { clientId, response, writer }
+          clients.set(clientId, client)
+          console.log('client added successfully')
 
           // Clean up when client disconnects
           req.signal?.addEventListener('abort', () => {
-            // Remove this client from all subscriptions
-            for (const subscription of subscriptions.values()) {
+            console.log('client disconnected', clientId)
+            // Remove this client from all querySubscriptions
+            for (const subscription of querySubscriptions.values()) {
               subscription.clients.delete(client)
             }
             writer.close().catch(console.error)

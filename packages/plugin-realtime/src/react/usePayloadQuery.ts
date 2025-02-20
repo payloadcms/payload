@@ -3,8 +3,6 @@ import type { Payload } from 'payload'
 
 import { useEffect, useState } from 'react'
 
-import { payloadQuery } from '../vanilla/payloadQuery.js'
-
 export type ReadOperation = 'count' | 'find' | 'findByID'
 
 // TODO: improve type. error, data and isLoading cannot accept all possible combinations
@@ -33,17 +31,17 @@ export function usePayloadQuery<T extends ReadOperation>(
       }
 
       setResult({ data: undefined, error: null, isLoading: true })
-      try {
-        const { data, error } = await payloadQuery(type, query)
-        if (isMounted) {
-          setResult({ data, error, isLoading: false })
-        }
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err))
-        if (isMounted) {
-          setResult({ data: undefined, error, isLoading: false })
-        }
-      }
+      // try {
+      //   const { data, error } = await payloadQuery(type, query)
+      //   if (isMounted) {
+      //     setResult({ data, error, isLoading: false })
+      //   }
+      // } catch (err) {
+      //   const error = err instanceof Error ? err : new Error(String(err))
+      //   if (isMounted) {
+      //     setResult({ data: undefined, error, isLoading: false })
+      //   }
+      // }
     }
 
     fetchData().catch(console.error)
