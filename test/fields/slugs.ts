@@ -17,6 +17,9 @@ export const lexicalFieldsSlug = 'lexical-fields'
 export const lexicalLocalizedFieldsSlug = 'lexical-localized-fields'
 export const lexicalMigrateFieldsSlug = 'lexical-migrate-fields'
 export const lexicalRelationshipFieldsSlug = 'lexical-relationship-fields'
+
+export const lexicalAccessControlSlug = 'lexical-access-control'
+
 export const numberFieldsSlug = 'number-fields'
 export const pointFieldsSlug = 'point-fields'
 export const radioFieldsSlug = 'radio-fields'
@@ -24,6 +27,7 @@ export const relationshipFieldsSlug = 'relationship-fields'
 export const richTextFieldsSlug = 'rich-text-fields'
 export const rowFieldsSlug = 'row-fields'
 export const selectFieldsSlug = 'select-fields'
+export const selectVersionsFieldsSlug = 'select-versions-fields'
 export const tabsFieldsSlug = 'tabs-fields'
 export const tabsFields2Slug = 'tabs-fields-2'
 export const textFieldsSlug = 'text-fields'
@@ -51,6 +55,7 @@ export const collectionSlugs = [
   lexicalFieldsSlug,
   lexicalMigrateFieldsSlug,
   lexicalRelationshipFieldsSlug,
+  lexicalAccessControlSlug,
   numberFieldsSlug,
   pointFieldsSlug,
   radioFieldsSlug,

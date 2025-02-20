@@ -22,14 +22,13 @@ import {
   hiddenAccessSlug,
   hiddenFieldsSlug,
   nonAdminEmail,
-  nonAdminUserEmail,
-  nonAdminUserSlug,
   publicUserEmail,
   publicUsersSlug,
   readNotUpdateGlobalSlug,
   readOnlyGlobalSlug,
   readOnlySlug,
   relyOnRequestHeadersSlug,
+  restrictedVersionsAdminPanelSlug,
   restrictedVersionsSlug,
   secondArrayText,
   siblingDataSlug,
@@ -320,6 +319,35 @@ export default buildConfigWithDefaults(
             name: 'hidden',
             type: 'checkbox',
             hidden: true,
+          },
+        ],
+        versions: true,
+      },
+      {
+        slug: restrictedVersionsAdminPanelSlug,
+        access: {
+          read: ({ req: { user } }) => {
+            if (user) {
+              return true
+            }
+            return false
+          },
+          readVersions: () => {
+            return {
+              'version.hidden': {
+                not_equals: true,
+              },
+            }
+          },
+        },
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+          },
+          {
+            name: 'hidden',
+            type: 'checkbox',
           },
         ],
         versions: true,

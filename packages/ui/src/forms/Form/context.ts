@@ -11,6 +11,7 @@ import {
 import type { Context, FormFieldsContext as FormFieldsContextType } from './types.js'
 
 const FormContext = createContext({} as Context)
+const DocumentFormContext = createContext({} as Context)
 const FormWatchContext = createContext({} as Context)
 const SubmittedContext = createContext(false)
 const ProcessingContext = createContext(false)
@@ -26,6 +27,12 @@ export type RenderedFieldSlots = Map<string, RenderedField>
  * @see https://payloadcms.com/docs/admin/hooks#useform
  */
 const useForm = (): Context => useContext(FormContext)
+/**
+ * Get the state of the document-level form. This is useful if you need to access the document-level Form from within a child Form.
+ * This is the case withing lexical Blocks, as each lexical blocks renders their own Form.
+ */
+const useDocumentForm = (): Context => useContext(DocumentFormContext)
+
 const useWatchForm = (): Context => useContext(FormWatchContext)
 const useFormSubmitted = (): boolean => useContext(SubmittedContext)
 const useFormProcessing = (): boolean => useContext(ProcessingContext)
@@ -49,6 +56,7 @@ const useFormFields = <Value = unknown>(
 const useAllFormFields = (): FormFieldsContextType => useFullContext(FormFieldsContext)
 
 export {
+  DocumentFormContext,
   FormContext,
   FormFieldsContext,
   FormWatchContext,
@@ -57,6 +65,7 @@ export {
   ProcessingContext,
   SubmittedContext,
   useAllFormFields,
+  useDocumentForm,
   useForm,
   useFormFields,
   useFormInitializing,

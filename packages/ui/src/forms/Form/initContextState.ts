@@ -39,14 +39,17 @@ export const initContextState: Context = {
   getFields: (): FormState => ({}),
   getSiblingData,
   initializing: undefined,
+  isValid: true,
   removeFieldRow: () => undefined,
   replaceFieldRow: () => undefined,
   replaceState: () => undefined,
   reset,
   setDisabled: () => undefined,
+  setIsValid: () => undefined,
   setModified,
   setProcessing,
   setSubmitted,
   submit,
+
   validateForm,
 }

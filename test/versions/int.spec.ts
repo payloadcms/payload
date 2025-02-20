@@ -1,8 +1,8 @@
-import { createLocalReq, Payload } from 'payload'
-import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublishHandler'
+import type { Payload } from 'payload';
 
+import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublishHandler'
 import path from 'path'
-import { ValidationError } from 'payload'
+import { createLocalReq , ValidationError } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
@@ -1153,6 +1153,11 @@ describe('Versions', () => {
       const allDocs = await payload.find({
         collection: 'draft-posts',
         draft: true,
+        where: {
+          title: {
+            like: 'title',
+          },
+        },
       })
 
       expect(allDocs.docs.length).toBeGreaterThan(1)
@@ -1169,14 +1174,14 @@ describe('Versions', () => {
             },
             {
               title: {
-                like: 'Published',
+                like: 'title',
               },
             },
           ],
         },
       })
 
-      expect(results.docs).toHaveLength(1)
+      expect(results.docs).toHaveLength(allDocs.docs.length - 1)
     })
   })
 

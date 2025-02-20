@@ -8,7 +8,13 @@ import type {
   NodeKey,
   Spread,
 } from 'lexical'
-import type { CollectionSlug, DataFromCollectionSlug, JsonObject } from 'payload'
+import type {
+  CollectionSlug,
+  DataFromCollectionSlug,
+  JsonObject,
+  TypedUploadCollection,
+  UploadCollectionSlug,
+} from 'payload'
 import type { JSX } from 'react'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
@@ -26,6 +32,20 @@ export type UploadData<TUploadExtraFieldsData extends JsonObject = JsonObject> =
     value: DataFromCollectionSlug<TCollectionSlug> | number | string
   }
 }[CollectionSlug]
+
+/**
+ * @todo Replace UploadData with UploadDataImproved
+ */
+export type UploadDataImproved<TUploadExtraFieldsData extends JsonObject = JsonObject> = {
+  [TCollectionSlug in UploadCollectionSlug]: {
+    fields: TUploadExtraFieldsData
+    // Every lexical node that has sub-fields needs to have a unique ID. This is the ID of this upload node, not the ID of the linked upload document
+    id: string
+    relationTo: TCollectionSlug
+    // Value can be just the document ID, or the full, populated document
+    value: number | string | TypedUploadCollection[TCollectionSlug]
+  }
+}[UploadCollectionSlug]
 
 export function isGoogleDocCheckboxImg(img: HTMLImageElement): boolean {
   return (

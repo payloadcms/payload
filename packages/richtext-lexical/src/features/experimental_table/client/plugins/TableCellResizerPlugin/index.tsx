@@ -210,13 +210,15 @@ function TableCellResizer({ editor }: { editor: LexicalEditor }): JSX.Element {
   }
 
   const getCellColumnIndex = (tableCellNode: TableCellNode, tableMap: TableMapType) => {
-    for (let row = 0; row < tableMap.length; row++) {
-      for (let column = 0; column < tableMap[row].length; column++) {
-        if (tableMap[row][column].cell === tableCellNode) {
-          return column
+    let columnIndex: number | undefined
+    tableMap.forEach((row) => {
+      row.forEach((cell, columnIndexInner) => {
+        if (cell.cell === tableCellNode) {
+          columnIndex = columnIndexInner
         }
-      }
-    }
+      })
+    })
+    return columnIndex
   }
 
   const updateColumnWidth = useCallback(

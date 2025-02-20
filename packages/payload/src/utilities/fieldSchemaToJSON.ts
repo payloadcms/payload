@@ -1,3 +1,5 @@
+import type { ClientConfig } from '../config/client.js'
+// @ts-strict-ignore
 import type { ClientField } from '../fields/config/client.js'
 import type { FieldTypes } from '../fields/config/types.js'
 
@@ -11,7 +13,7 @@ export type FieldSchemaJSON = {
   type: FieldTypes
 }[]
 
-export const fieldSchemaToJSON = (fields: ClientField[]): FieldSchemaJSON => {
+export const fieldSchemaToJSON = (fields: ClientField[], config: ClientConfig): FieldSchemaJSON => {
   return fields.reduce((acc, field) => {
     let result = acc
 
@@ -20,13 +22,16 @@ export const fieldSchemaToJSON = (fields: ClientField[]): FieldSchemaJSON => {
         acc.push({
           name: field.name,
           type: field.type,
-          fields: fieldSchemaToJSON([
-            ...field.fields,
-            {
-              name: 'id',
-              type: 'text',
-            },
-          ]),
+          fields: fieldSchemaToJSON(
+            [
+              ...field.fields,
+              {
+                name: 'id',
+                type: 'text',
+              },
+            ],
+            config,
+          ),
         })
 
         break
@@ -35,15 +40,19 @@ export const fieldSchemaToJSON = (fields: ClientField[]): FieldSchemaJSON => {
         acc.push({
           name: field.name,
           type: field.type,
-          blocks: field.blocks.reduce((acc, block) => {
+          blocks: (field.blockReferences ?? field.blocks).reduce((acc, _block) => {
+            const block = typeof _block === 'string' ? config.blocksMap[_block] : _block
             acc[block.slug] = {
-              fields: fieldSchemaToJSON([
-                ...block.fields,
-                {
-                  name: 'id',
-                  type: 'text',
-                },
-              ]),
+              fields: fieldSchemaToJSON(
+                [
+                  ...block.fields,
+                  {
+                    name: 'id',
+                    type: 'text',
+                  },
+                ],
+                config,
+              ),
             }
 
             return acc
@@ -54,14 +63,14 @@ export const fieldSchemaToJSON = (fields: ClientField[]): FieldSchemaJSON => {
 
       case 'collapsible': // eslint-disable no-fallthrough
       case 'row':
-        result = result.concat(fieldSchemaToJSON(field.fields))
+        result = result.concat(fieldSchemaToJSON(field.fields, config))
         break
 
       case 'group':
         acc.push({
           name: field.name,
           type: field.type,
-          fields: fieldSchemaToJSON(field.fields),
+          fields: fieldSchemaToJSON(field.fields, config),
         })
 
         break
@@ -85,12 +94,12 @@ export const fieldSchemaToJSON = (fields: ClientField[]): FieldSchemaJSON => {
             tabFields.push({
               name: tab.name,
               type: field.type,
-              fields: fieldSchemaToJSON(tab.fields),
+              fields: fieldSchemaToJSON(tab.fields, config),
             })
             return
           }
 
-          tabFields = tabFields.concat(fieldSchemaToJSON(tab.fields))
+          tabFields = tabFields.concat(fieldSchemaToJSON(tab.fields, config))
         })
 
         result = result.concat(tabFields)

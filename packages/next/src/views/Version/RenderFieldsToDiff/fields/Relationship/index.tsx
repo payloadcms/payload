@@ -1,20 +1,20 @@
 'use client'
-import type { ClientCollectionConfig, ClientField, RelationshipFieldClient } from 'payload'
+import type {
+  ClientCollectionConfig,
+  ClientConfig,
+  ClientField,
+  RelationshipFieldDiffClientComponent,
+} from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useConfig } from '@payloadcms/ui'
-import { fieldAffectsData, fieldIsPresentationalOnly } from 'payload/shared'
+import { useConfig, useTranslation } from '@payloadcms/ui'
+import { fieldAffectsData, fieldIsPresentationalOnly, fieldShouldBeLocalized } from 'payload/shared'
 import React from 'react'
-import ReactDiffViewerImport from 'react-diff-viewer-continued'
-
-import type { DiffComponentProps } from '../types.js'
+import ReactDiffViewer from 'react-diff-viewer-continued'
 
 import Label from '../../Label/index.js'
-import { diffStyles } from '../styles.js'
 import './index.scss'
-
-const ReactDiffViewer = (ReactDiffViewerImport.default ||
-  ReactDiffViewerImport) as unknown as typeof ReactDiffViewerImport.default
+import { diffStyles } from '../styles.js'
 
 const baseClass = 'relationship-diff'
 
@@ -25,10 +25,12 @@ const generateLabelFromValue = (
   field: ClientField,
   locale: string,
   value: { relationTo: string; value: RelationshipValue } | RelationshipValue,
+  config: ClientConfig,
+  parentIsLocalized: boolean,
 ): string => {
   if (Array.isArray(value)) {
     return value
-      .map((v) => generateLabelFromValue(collections, field, locale, v))
+      .map((v) => generateLabelFromValue(collections, field, locale, v, config, parentIsLocalized))
       .filter(Boolean) // Filters out any undefined or empty values
       .join(', ')
   }
@@ -66,7 +68,7 @@ const generateLabelFromValue = (
     let titleFieldIsLocalized = false
 
     if (useAsTitleField && fieldAffectsData(useAsTitleField)) {
-      titleFieldIsLocalized = useAsTitleField.localized
+      titleFieldIsLocalized = fieldShouldBeLocalized({ field: useAsTitleField, parentIsLocalized })
     }
 
     if (typeof relatedDoc?.[useAsTitle] !== 'undefined') {
@@ -99,13 +101,16 @@ const generateLabelFromValue = (
   return valueToReturn
 }
 
-export const Relationship: React.FC<DiffComponentProps<RelationshipFieldClient>> = ({
-  comparison,
+export const Relationship: RelationshipFieldDiffClientComponent = ({
+  comparisonValue,
   field,
-  i18n,
   locale,
-  version,
+  parentIsLocalized,
+  versionValue,
 }) => {
+  const { i18n } = useTranslation()
+  const { config } = useConfig()
+
   const placeholder = `[${i18n.t('general:noValue')}]`
 
   const {
@@ -115,25 +120,45 @@ export const Relationship: React.FC<DiffComponentProps<RelationshipFieldClient>>
   let versionToRender: string | undefined = placeholder
   let comparisonToRender: string | undefined = placeholder
 
-  if (version) {
-    if ('hasMany' in field && field.hasMany && Array.isArray(version)) {
+  if (versionValue) {
+    if ('hasMany' in field && field.hasMany && Array.isArray(versionValue)) {
       versionToRender =
-        version.map((val) => generateLabelFromValue(collections, field, locale, val)).join(', ') ||
-        placeholder
+        versionValue
+          .map((val) =>
+            generateLabelFromValue(collections, field, locale, val, config, parentIsLocalized),
+          )
+          .join(', ') || placeholder
     } else {
-      versionToRender = generateLabelFromValue(collections, field, locale, version) || placeholder
+      versionToRender =
+        generateLabelFromValue(
+          collections,
+          field,
+          locale,
+          versionValue,
+          config,
+          parentIsLocalized,
+        ) || placeholder
     }
   }
 
-  if (comparison) {
-    if ('hasMany' in field && field.hasMany && Array.isArray(comparison)) {
+  if (comparisonValue) {
+    if ('hasMany' in field && field.hasMany && Array.isArray(comparisonValue)) {
       comparisonToRender =
-        comparison
-          .map((val) => generateLabelFromValue(collections, field, locale, val))
+        comparisonValue
+          .map((val) =>
+            generateLabelFromValue(collections, field, locale, val, config, parentIsLocalized),
+          )
           .join(', ') || placeholder
     } else {
       comparisonToRender =
-        generateLabelFromValue(collections, field, locale, comparison) || placeholder
+        generateLabelFromValue(
+          collections,
+          field,
+          locale,
+          comparisonValue,
+          config,
+          parentIsLocalized,
+        ) || placeholder
     }
   }
 

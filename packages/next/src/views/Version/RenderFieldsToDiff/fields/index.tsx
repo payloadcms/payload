@@ -1,3 +1,5 @@
+import type { FieldDiffClientProps, FieldTypes } from 'payload'
+
 import { Collapsible } from './Collapsible/index.js'
 import { Group } from './Group/index.js'
 import { Iterable } from './Iterable/index.js'
@@ -7,7 +9,7 @@ import { Select } from './Select/index.js'
 import { Tabs } from './Tabs/index.js'
 import { Text } from './Text/index.js'
 
-export const diffComponents = {
+export const diffComponents: Record<FieldTypes, React.ComponentType<FieldDiffClientProps>> = {
   array: Iterable,
   blocks: Iterable,
   checkbox: Text,
@@ -16,6 +18,7 @@ export const diffComponents = {
   date: Text,
   email: Text,
   group: Group,
+  join: null,
   json: Text,
   number: Text,
   point: Text,
@@ -27,5 +30,6 @@ export const diffComponents = {
   tabs: Tabs,
   text: Text,
   textarea: Text,
+  ui: null,
   upload: Relationship,
 }

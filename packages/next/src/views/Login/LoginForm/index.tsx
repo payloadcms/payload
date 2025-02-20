@@ -1,15 +1,21 @@
 'use client'
 
-import LinkImport from 'next/link.js'
 import React from 'react'
 
 const baseClass = 'login__form'
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 import type { UserWithToken } from '@payloadcms/ui'
 import type { FormState } from 'payload'
 
-import { Form, FormSubmit, PasswordField, useAuth, useConfig, useTranslation } from '@payloadcms/ui'
+import {
+  Form,
+  FormSubmit,
+  Link,
+  PasswordField,
+  useAuth,
+  useConfig,
+  useTranslation,
+} from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import { getLoginOptions } from 'payload/shared'
 

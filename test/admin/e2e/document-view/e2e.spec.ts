@@ -21,10 +21,10 @@ import {
   customEditLabel,
   customNestedTabViewPath,
   customNestedTabViewTitle,
+  customTabAdminDescription,
   customTabLabel,
   customTabViewPath,
   customTabViewTitle,
-  customTabAdminDescription,
 } from '../../shared.js'
 import {
   customFieldsSlug,
@@ -274,9 +274,7 @@ describe('Document View', () => {
     test('List drawer should not effect underlying breadcrumbs', async () => {
       await navigateToDoc(page, postsUrl)
 
-      expect(await page.locator('.step-nav.app-header__step-nav a').nth(1).innerText()).toBe(
-        'Posts',
-      )
+      await expect(page.locator('.step-nav.app-header__step-nav a').nth(1)).toHaveText('Posts')
 
       await page.locator('#field-upload button.upload__listToggler').click()
       await expect(page.locator('[id^=list-drawer_1_]')).toBeVisible()
@@ -286,9 +284,7 @@ describe('Document View', () => {
         page.locator('.step-nav.app-header__step-nav .step-nav__last'),
       ).not.toContainText('Uploads')
 
-      expect(await page.locator('.step-nav.app-header__step-nav a').nth(1).innerText()).toBe(
-        'Posts',
-      )
+      await expect(page.locator('.step-nav.app-header__step-nav a').nth(1)).toHaveText('Posts')
     })
   })
 
@@ -400,9 +396,9 @@ describe('Document View', () => {
       await page.waitForURL(postsUrl.create)
 
       const secondTab = page.locator('.tabs-field__tab-button').nth(1)
-      secondTab.click()
+      await secondTab.click()
 
-      wait(500)
+      await wait(500)
 
       const tabsContent = page.locator('.tabs-field__content-wrap')
       await expect(
@@ -461,6 +457,24 @@ describe('Document View', () => {
           hasText: exactText('Description: the max length of this field is: 100'),
         }),
       ).toBeVisible()
+    })
+
+    test('custom select input can have its value cleared', async () => {
+      await page.goto(customFieldsURL.create)
+      await page.waitForURL(customFieldsURL.create)
+      await expect(page.locator('#field-customSelectInput')).toBeVisible()
+
+      await page.locator('#field-customSelectInput .rs__control').click()
+      await page.locator('#field-customSelectInput .rs__option').first().click()
+
+      await expect(page.locator('#field-customSelectInput .rs__single-value')).toHaveText(
+        'Option 1',
+      )
+
+      await page.locator('.clear-value').click()
+      await expect(page.locator('#field-customSelectInput .rs__placeholder')).toHaveText(
+        'Select a value',
+      )
     })
 
     describe('field descriptions', () => {
@@ -535,7 +549,7 @@ describe('Document View', () => {
   describe('publish button', () => {
     test('should show publish active locale button with defaultLocalePublishOption', async () => {
       await navigateToDoc(page, postsUrl)
-      const publishButton = await page.locator('#action-save')
+      const publishButton = page.locator('#action-save')
       await expect(publishButton).toBeVisible()
       await expect(publishButton).toContainText('Publish in English')
     })

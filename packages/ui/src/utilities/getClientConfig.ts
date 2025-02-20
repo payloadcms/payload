@@ -4,7 +4,7 @@ import type { ClientConfig, ImportMap, SanitizedConfig } from 'payload'
 import { createClientConfig } from 'payload'
 import { cache } from 'react'
 
-let cachedClientConfig = global._payload_clientConfig
+let cachedClientConfig: ClientConfig | null = global._payload_clientConfig
 
 if (!cachedClientConfig) {
   cachedClientConfig = global._payload_clientConfig = null

@@ -336,11 +336,10 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
           )}
         </DraggableSortable>
       )}
-      {!hasMaxRows && (
+      {!hasMaxRows && !readOnly && (
         <Button
           buttonStyle="icon-label"
           className={`${baseClass}__add-row`}
-          disabled={readOnly}
           icon="plus"
           iconPosition="left"
           iconStyle="with-border"

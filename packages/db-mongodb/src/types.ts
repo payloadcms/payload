@@ -35,7 +35,7 @@ import type {
   UploadField,
 } from 'payload'
 
-import type { BuildQueryArgs } from './queries/buildQuery.js'
+import type { BuildQueryArgs } from './queries/getBuildQueryPlugin.js'
 
 export interface CollectionModel
   extends Model<any>,

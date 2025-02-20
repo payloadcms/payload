@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { AccessResult } from '../../config/types.js'
 import type { PayloadRequest, PopulateType, SelectType, Where } from '../../types/index.js'
 import type { SanitizedGlobalConfig } from '../config/types.js'

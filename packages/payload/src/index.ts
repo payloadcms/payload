@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
 import type { Request as graphQLRequest, OperationArgs } from 'graphql-http'
 import type { Logger } from 'pino'
@@ -74,7 +75,7 @@ import { generateImportMap, type ImportMap } from './bin/generateImportMap/index
 import { checkPayloadDependencies } from './checkPayloadDependencies.js'
 import localOperations from './collections/operations/local/index.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
-import { fieldAffectsData } from './fields/config/types.js'
+import { fieldAffectsData, type FlattenedBlock } from './fields/config/types.js'
 import localGlobalOperations from './globals/operations/local/index.js'
 import { getJobsLocalAPI } from './queues/localAPI.js'
 import { isNextBuild } from './utilities/isNextBuild.js'
@@ -105,6 +106,9 @@ export interface GeneratedTypes {
     }
   }
 
+  blocksUntyped: {
+    [slug: string]: JsonObject
+  }
   collectionsJoinsUntyped: {
     [slug: string]: {
       [schemaPath: string]: CollectionSlug
@@ -150,6 +154,11 @@ type ResolveCollectionType<T> = 'collections' extends keyof T
   : // @ts-expect-error
     T['collectionsUntyped']
 
+type ResolveBlockType<T> = 'blocks' extends keyof T
+  ? T['blocks']
+  : // @ts-expect-error
+    T['blocksUntyped']
+
 type ResolveCollectionSelectType<T> = 'collectionsSelect' extends keyof T
   ? T['collectionsSelect']
   : // @ts-expect-error
@@ -172,6 +181,8 @@ type ResolveGlobalSelectType<T> = 'globalsSelect' extends keyof T
 
 // Applying helper types to GeneratedTypes
 export type TypedCollection = ResolveCollectionType<GeneratedTypes>
+
+export type TypedBlock = ResolveBlockType<GeneratedTypes>
 
 export type TypedUploadCollection = NonNever<{
   [K in keyof TypedCollection]:
@@ -196,6 +207,8 @@ export type StringKeyOf<T> = Extract<keyof T, string>
 
 // Define the types for slugs using the appropriate collections and globals
 export type CollectionSlug = StringKeyOf<TypedCollection>
+
+export type BlockSlug = StringKeyOf<TypedBlock>
 
 export type UploadCollectionSlug = StringKeyOf<TypedUploadCollection>
 
@@ -245,6 +258,8 @@ export class BasePayload {
   }
 
   authStrategies: AuthStrategy[]
+
+  blocks: Record<BlockSlug, FlattenedBlock> = {}
 
   collections: Record<CollectionSlug, Collection> = {}
 
@@ -601,13 +616,23 @@ export class BasePayload {
         }
       }
 
-      traverseFields({ callback: findCustomID, fields: collection.fields })
+      traverseFields({
+        callback: findCustomID,
+        config: this.config,
+        fields: collection.fields,
+        parentIsLocalized: false,
+      })
 
       this.collections[collection.slug] = {
         config: collection,
         customIDType,
       }
     }
+
+    this.blocks = this.config.blocks.reduce((blocks, block) => {
+      blocks[block.slug] = block
+      return blocks
+    }, {})
 
     // Generate types on startup
     if (process.env.NODE_ENV !== 'production' && this.config.typescript.autoGenerate !== false) {
@@ -729,9 +754,20 @@ export class BasePayload {
         typeof this.config.jobs.autoRun === 'function'
           ? await this.config.jobs.autoRun(this)
           : this.config.jobs.autoRun
+
       await Promise.all(
         cronJobs.map((cronConfig) => {
-          new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
+          const job = new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
+            if (typeof this.config.jobs.shouldAutoRun === 'function') {
+              const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
+
+              if (!shouldAutoRun) {
+                job.stop()
+
+                return false
+              }
+            }
+
             await this.jobs.run({
               limit: cronConfig.limit ?? DEFAULT_LIMIT,
               queue: cronConfig.queue,
@@ -797,6 +833,11 @@ export const reload = async (
       customIDType: payload.collections[collection.slug]?.customIDType,
     }
     return collections
+  }, {})
+
+  payload.blocks = config.blocks.reduce((blocks, block) => {
+    blocks[block.slug] = block
+    return blocks
   }, {})
 
   payload.globals = {
@@ -905,6 +946,8 @@ export const getPayload = async (
     }
   } catch (e) {
     cached.promise = null
+    // add identifier to error object, so that our error logger in routeError.ts does not attempt to re-initialize getPayload
+    e.payloadInitError = true
     throw e
   }
 
@@ -925,6 +968,7 @@ interface RequestContext {
 export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 export type { Payload, RequestContext }
 export { executeAuthStrategies } from './auth/executeAuthStrategies.js'
+export { extractAccessFromPermission } from './auth/extractAccessFromPermission.js'
 export { getAccessResults } from './auth/getAccessResults.js'
 export { getFieldsToSign } from './auth/getFieldsToSign.js'
 export * from './auth/index.js'
@@ -941,6 +985,7 @@ export { resetPasswordOperation } from './auth/operations/resetPassword.js'
 export { unlockOperation } from './auth/operations/unlock.js'
 export { verifyEmailOperation } from './auth/operations/verifyEmail.js'
 export { JWTAuthentication } from './auth/strategies/jwt.js'
+
 export type {
   AuthStrategyFunction,
   AuthStrategyFunctionArgs,
@@ -961,8 +1006,8 @@ export type {
 } from './auth/types.js'
 
 export { generateImportMap } from './bin/generateImportMap/index.js'
-
 export type { ImportMap } from './bin/generateImportMap/index.js'
+
 export { genImportMapIterateFields } from './bin/generateImportMap/iterateFields.js'
 
 export {
@@ -1009,7 +1054,6 @@ export type {
   TypeWithID,
   TypeWithTimestamps,
 } from './collections/config/types.js'
-
 export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
 export { countOperation } from './collections/operations/count.js'
 export { createOperation } from './collections/operations/create.js'
@@ -1030,9 +1074,10 @@ export {
   createClientConfig,
   serverOnlyAdminConfigProperties,
   serverOnlyConfigProperties,
+  type UnsanitizedClientConfig,
 } from './config/client.js'
-export { defaults } from './config/defaults.js'
 
+export { defaults } from './config/defaults.js'
 export { sanitizeConfig } from './config/sanitize.js'
 export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
@@ -1202,6 +1247,7 @@ export type {
   FlattenedBlocksField,
   FlattenedField,
   FlattenedGroupField,
+  FlattenedJoinField,
   FlattenedTabAsField,
   GroupField,
   GroupFieldClient,
