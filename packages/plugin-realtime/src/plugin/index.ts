@@ -1,12 +1,9 @@
 import { type Config, type Payload } from 'payload'
 
-import type { ReadOperation } from './usePayloadQuery.js'
+import type { ReadOperation } from '../usePayloadQuery.js'
 
 import { payloadQueryEndpoint, payloadSSEEndpoint } from './endpoints.js'
 import { myAfterChangeHook, myAfterDeleteHook } from './hooks.js'
-
-export { usePayloadQuery } from './usePayloadQuery.js'
-export { createPayloadClient } from './vanilla/payloadQuery.js'
 
 export type QuerySubscription = {
   clients: Set<string> // clientId

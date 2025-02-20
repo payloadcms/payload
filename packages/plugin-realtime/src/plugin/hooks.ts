@@ -1,7 +1,7 @@
 import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, Payload } from 'payload'
 
+import type { ReadOperation } from '../usePayloadQuery.js'
 import type { QuerySubscription } from './index.js'
-import type { ReadOperation } from './usePayloadQuery.js'
 
 import { clients, querySubscriptions } from './endpoints.js'
 
@@ -14,7 +14,7 @@ const sendToClients = async (querySubscription: QuerySubscription, payload: Payl
   } else if (type === 'find') {
     result = await payload.find(queryParams)
   } else if (type === 'findByID') {
-    result = await payload.findByID(queryParams)
+    result = await payload.findByID(queryParams as Parameters<Payload['findByID']>[0])
   } else {
     throw new Error('Invalid query type')
   }
@@ -58,7 +58,7 @@ export const myAfterChangeHook: CollectionAfterChangeHook = async ({ collection,
       // Refresh findByID queries if the specific document changed
       if (
         querySubscription.queryParams.collection === collection.slug &&
-        querySubscription.queryParams.id === doc.id
+        (querySubscription.queryParams as Parameters<Payload['findByID']>[0]).id === doc.id
       ) {
         await sendToClients(querySubscription, req.payload)
       }

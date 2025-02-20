@@ -2,7 +2,7 @@
 'use client'
 import type { Payload } from 'payload'
 
-import type { StringifiedQuery } from '../index.js'
+import type { StringifiedQuery } from '../plugin/index.js'
 import type { ReadOperation } from '../usePayloadQuery.js'
 
 type PayloadQueryResult<T extends ReadOperation> = Promise<{
