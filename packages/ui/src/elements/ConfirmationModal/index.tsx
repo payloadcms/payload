@@ -2,10 +2,9 @@
 import { Modal, useModal } from '@faceless-ui/modal'
 import React, { useCallback } from 'react'
 
-import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
-import { drawerZBase } from '../Drawer/index.js'
+import { drawerZBase, useDrawerDepth } from '../Drawer/index.js'
 import './index.scss'
 
 const baseClass = 'confirmation-modal'
@@ -37,7 +36,7 @@ export function ConfirmationModal(props: ConfirmationModalProps) {
     onConfirm: onConfirmFromProps,
   } = props
 
-  const editDepth = useEditDepth()
+  const editDepth = useDrawerDepth()
 
   const [confirming, setConfirming] = React.useState(false)
 
