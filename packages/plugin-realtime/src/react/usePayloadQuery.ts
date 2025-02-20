@@ -3,7 +3,7 @@ import type { Payload } from 'payload'
 
 import { useEffect, useState } from 'react'
 
-import { payloadQuery } from './vanilla/payloadQuery.js'
+import { payloadQuery } from '../vanilla/payloadQuery.js'
 
 export type ReadOperation = 'count' | 'find' | 'findByID'
 
