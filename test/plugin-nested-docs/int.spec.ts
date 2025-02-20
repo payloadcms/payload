@@ -76,7 +76,6 @@ describe('@payloadcms/plugin-nested-docs', () => {
           },
         })
       }
-
       // update parent doc
       await payload.update({
         collection: 'pages',
@@ -131,17 +130,6 @@ describe('@payloadcms/plugin-nested-docs', () => {
         },
       })
 
-      // update the parent
-      await payload.update({
-        collection: 'pages',
-        id: parentDoc.id,
-        data: {
-          title: 'parent updated',
-          slug: 'parent-updated',
-          _status: 'published',
-        },
-      })
-
       // expect breadcrumbs to be an array
       expect(childDoc.breadcrumbs).toBeInstanceOf(Array)
       expect(childDoc.breadcrumbs).toBeDefined()
@@ -167,6 +155,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
           title: 'child doc',
           slug: 'child',
           parent: parentDoc.id,
+          _status: 'published',
         },
       })
 
@@ -197,6 +186,7 @@ describe('@payloadcms/plugin-nested-docs', () => {
 
       // breadcrumbs should be updated
       expect(updatedChild.breadcrumbs).toHaveLength(2)
+
       expect(updatedChild.breadcrumbs?.[0]?.url).toStrictEqual('/parent-updated')
       expect(updatedChild.breadcrumbs?.[1]?.url).toStrictEqual('/parent-updated/child')
 
