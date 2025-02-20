@@ -4,7 +4,7 @@ This is the official [Payload Website Template](https://github.com/payloadcms/pa
 
 You can deploy to Vercel, using Neon and Vercel Blob Storage with one click:
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/payloadcms/payload/tree/main/templates/with-vercel-website&project-name=payload-project&env=PAYLOAD_SECRET%2CCRON_SECRET%2CPREVIEW_SECRET&build-command=pnpm%20run%20ci&stores=%5B%7B%22type%22:%22postgres%22%7D,%7B%22type%22:%22blob%22%7D%5D)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/templates/Next.js/payload-website-starter)
 
 This template is right for you if you are working on:
 
@@ -27,11 +27,10 @@ Core features:
 - [Jobs and Scheduled Publishing](#jobs-and-scheduled-publish)
 - [Website](#website)
 
-## Quick start
+## Quick start – Deploying to Vercel
 
-Click the 'Deploy' button above to spin up this template directly into Vercel hosting. It will first prompt you save this template into your own Github repo so that you own the code and can make any changes you want to it.
+Click the 'Deploy' button to spin up this template directly into Vercel hosting. It will first prompt you save this template into your own Github repo so that you own the code and can make any changes you want to it. You will be prompted to set up the required services and secrets. Once the app is built and deployed, you can visit your site using the generated URL.
 
-Set up the following services and secrets and then once the app has been built and deployed you will be able to visit your site at the generated URL.  
 From this point on you can access your admin panel at `/admin` of your app URL, create an admin user and then click the 'Seed the database' button in the dashboard to add content into your app.
 
 ### Services
