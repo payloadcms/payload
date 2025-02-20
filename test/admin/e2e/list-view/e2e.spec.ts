@@ -19,6 +19,7 @@ import { customAdminRoutes } from '../../shared.js'
 import {
   customViews1CollectionSlug,
   geoCollectionSlug,
+  listDrawerSlug,
   postsCollectionSlug,
   with300DocumentsSlug,
 } from '../../slugs.js'
@@ -56,6 +57,7 @@ describe('List View', () => {
   let baseListFiltersUrl: AdminUrlUtil
   let customViewsUrl: AdminUrlUtil
   let with300DocumentsUrl: AdminUrlUtil
+  let withListViewUrl: AdminUrlUtil
 
   let serverURL: string
   let adminRoutes: ReturnType<typeof getRoutes>
@@ -76,6 +78,7 @@ describe('List View', () => {
     with300DocumentsUrl = new AdminUrlUtil(serverURL, with300DocumentsSlug)
     baseListFiltersUrl = new AdminUrlUtil(serverURL, 'base-list-filters')
     customViewsUrl = new AdminUrlUtil(serverURL, customViews1CollectionSlug)
+    withListViewUrl = new AdminUrlUtil(serverURL, listDrawerSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -155,6 +158,20 @@ describe('List View', () => {
         'href',
         `${adminRoutes.routes?.admin}/collections/posts/${id}`,
       )
+    })
+
+    test('should hide create new button when allowCreate is false', async () => {
+      await page.goto(withListViewUrl.list)
+
+      const drawerButton = page.locator('button', { hasText: 'Select Posts' })
+      await expect(drawerButton).toBeVisible()
+      await drawerButton.click()
+
+      const drawer = page.locator('.drawer__content')
+      await expect(drawer).toBeVisible()
+
+      const createButton = page.locator('button', { hasText: 'Create New' })
+      await expect(createButton).toBeHidden()
     })
   })
 
