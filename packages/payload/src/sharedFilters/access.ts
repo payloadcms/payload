@@ -4,6 +4,12 @@ import type { Where } from '../types/index.js'
 import { type Field, fieldAffectsData } from '../fields/config/types.js'
 
 const operationMap = {
+  delete: {
+    accessFieldName: 'deleteAccess',
+    constraintsFieldName: 'deleteConstraints',
+    userConstraintFieldName: 'deleteConstraints.user',
+    usersConstraintFieldName: 'deleteConstraints.users',
+  },
   read: {
     accessFieldName: 'readAccess',
     constraintsFieldName: 'readConstraints',
@@ -18,8 +24,10 @@ const operationMap = {
   },
 }
 
+type Operation = keyof typeof operationMap
+
 export const getAccess =
-  ({ config, operation }: { config: Config; operation: 'read' | 'update' }): Access =>
+  ({ config, operation }: { config: Config; operation: Operation }): Access =>
   async (args) => {
     const { req } = args
 
@@ -91,7 +99,7 @@ export const getAccessFields = ({
   operation,
 }: {
   config: Config
-  operation: 'read' | 'update'
+  operation: Operation
 }): Field[] => [
   {
     name: operationMap[operation].accessFieldName,

@@ -9,6 +9,7 @@ export const sharedFiltersCollectionSlug = 'payload-shared-filters'
 export const getSharedFiltersCollection = (config: Config): CollectionConfig => ({
   slug: sharedFiltersCollectionSlug,
   access: {
+    delete: getAccess({ config, operation: 'delete' }),
     read: getAccess({ config, operation: 'read' }),
     update: getAccess({ config, operation: 'update' }),
   },
@@ -24,6 +25,7 @@ export const getSharedFiltersCollection = (config: Config): CollectionConfig => 
     },
     ...getAccessFields({ config, operation: 'read' }),
     ...getAccessFields({ config, operation: 'update' }),
+    ...getAccessFields({ config, operation: 'delete' }),
     {
       name: 'where',
       type: 'json',
