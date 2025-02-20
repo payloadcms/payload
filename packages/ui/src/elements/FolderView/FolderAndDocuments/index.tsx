@@ -406,6 +406,7 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
       />
 
       <MoveToFolderDrawer
+        count={itemsToMove.length}
         drawerSlug={moveToFolderDrawerSlug}
         hiddenFolderIDs={hiddenFolderIDs}
         onMoveConfirm={async (toFolderID) => {
