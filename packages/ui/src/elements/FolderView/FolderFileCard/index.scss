@@ -35,6 +35,22 @@
       --card-label-color: var(--theme-text);
     }
 
+    &--disabled {
+      --card-bg-color: var(--theme-elevation-50);
+      cursor: not-allowed;
+      &:after {
+        content: '';
+        position: absolute;
+        background-color: var(--theme-bg);
+        opacity: 0.5;
+        width: calc(100% + 2px);
+        height: calc(100% + 2px);
+        top: -1px;
+        left: -1px;
+        border-radius: inherit;
+      }
+    }
+
     &--selected {
       --card-border-color: var(--theme-success-300);
       --card-bg-color: var(--theme-success-50);
@@ -63,20 +79,6 @@
 
       .folder-file-card__preview-area .icon {
         opacity: 0.7;
-      }
-
-      &.folder-file-card--dragging {
-        &:after {
-          content: '';
-          position: absolute;
-          background-color: var(--theme-bg);
-          opacity: 0.6;
-          width: calc(100% + 2px);
-          height: calc(100% + 2px);
-          top: -1px;
-          left: -1px;
-          border-radius: inherit;
-        }
       }
     }
 

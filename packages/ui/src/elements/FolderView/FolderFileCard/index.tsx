@@ -15,10 +15,9 @@ const baseClass = 'folder-file-card'
 
 type Props = {
   readonly className?: string
+  readonly disabled?: boolean
   readonly id: number | string
   readonly isDeleting?: boolean
-  readonly isDragging?: boolean
-  readonly isDroppable?: boolean
   readonly isFocused?: boolean
   readonly isSelected?: boolean
   readonly isSelecting?: boolean
@@ -33,9 +32,8 @@ export function FolderFileCard({
   id,
   type,
   className = '',
+  disabled = false,
   isDeleting = false,
-  isDragging = false,
-  isDroppable = false,
   isFocused = false,
   isSelected = false,
   isSelecting = false,
@@ -47,7 +45,7 @@ export function FolderFileCard({
 }: Props) {
   const { isOver, setNodeRef } = useDroppable({
     id: String(id),
-    disabled: !isDroppable || isSelected,
+    disabled,
   })
   const ref = React.useRef(null)
 
@@ -72,8 +70,8 @@ export function FolderFileCard({
         className,
         isSelected && `${baseClass}--selected`,
         isSelecting && `${baseClass}--selecting`,
+        disabled && `${baseClass}--disabled`,
         isDeleting && `${baseClass}--deleting`,
-        isDragging && `${baseClass}--dragging`,
         isFocused && `${baseClass}--focused`,
         isOver && `${baseClass}--over`,
         `${baseClass}--${type}`,
@@ -81,7 +79,7 @@ export function FolderFileCard({
         .filter(Boolean)
         .join(' ')}
     >
-      {(onClick || onKeyDown) && (
+      {!disabled && (onClick || onKeyDown) && (
         <DraggableWithClick
           className={`${baseClass}__drag-handle`}
           id={String(id)}
@@ -91,7 +89,7 @@ export function FolderFileCard({
           ref={ref}
         />
       )}
-      {isDroppable ? <div className={`${baseClass}__drop-area`} ref={setNodeRef} /> : null}
+      {!disabled ? <div className={`${baseClass}__drop-area`} ref={setNodeRef} /> : null}
 
       {type === 'file' ? (
         <div className={`${baseClass}__preview-area`}>

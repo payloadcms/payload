@@ -54,7 +54,8 @@ const getMetaSelection = ({
 type RowItemEventData = { id: number | string; index: number; relationTo: string }
 type Props = {
   readonly allowMultiSelection?: boolean
-  readonly isDragging: boolean
+  readonly disabledFolderIDs?: (number | string)[]
+  readonly isMovingItems: boolean
   readonly RenderDocumentActionGroup?: (args: {
     document: GetFolderDataResult['items'][number]
     index: number
@@ -80,9 +81,10 @@ export function DisplayItems(props: Props) {
   const {
     allowMultiSelection = true,
     collectionUseAsTitles,
+    disabledFolderIDs = [],
     documents = [],
     folderCollectionSlug,
-    isDragging,
+    isMovingItems,
     lastSelectedIndex,
     RenderDocumentActionGroup,
     RenderSubfolderActionGroup,
@@ -312,9 +314,8 @@ export function DisplayItems(props: Props) {
                     typeof value === 'object' ? value?.[useAsTitle] || subfolderID : subfolderID
                   return (
                     <FolderFileCard
+                      disabled={isMovingItems && disabledFolderIDs.includes(subfolderID)}
                       id={subfolderID}
-                      isDragging={isDragging}
-                      isDroppable
                       isFocused={focusedRowIndex === subfolderIndex}
                       isSelected={selectedIndexes.has(subfolderIndex)}
                       isSelecting={selectedIndexes.size > 0}
@@ -369,7 +370,6 @@ export function DisplayItems(props: Props) {
                     return (
                       <FolderFileCard
                         id={documentID}
-                        isDragging={isDragging}
                         isFocused={focusedRowIndex === adjustedIndex}
                         isSelected={selectedIndexes.has(adjustedIndex)}
                         isSelecting={selectedIndexes.size > 0}
@@ -424,7 +424,7 @@ export function DisplayItems(props: Props) {
                   // @ts-expect-error
                   columns={[title, value?.createdAt, value?.updatedAt]}
                   id={subfolderID}
-                  isDragging={isDragging}
+                  isDragging={isMovingItems}
                   isDroppable
                   isFocused={focusedRowIndex === subfolderIndex}
                   isSelected={selectedIndexes.has(subfolderIndex)}
@@ -462,7 +462,7 @@ export function DisplayItems(props: Props) {
                   // @ts-expect-error
                   columns={[title, value.createdAt, value.updatedAt]}
                   id={documentID}
-                  isDragging={isDragging}
+                  isDragging={isMovingItems}
                   isFocused={focusedRowIndex === adjustedIndex}
                   isSelected={selectedIndexes.has(adjustedIndex)}
                   isSelecting={selectedIndexes.size > 0}

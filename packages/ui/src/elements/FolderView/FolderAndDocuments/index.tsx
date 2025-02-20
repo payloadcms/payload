@@ -337,9 +337,10 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
 
           <DisplayItems
             collectionUseAsTitles={collectionUseAsTitles}
+            disabledFolderIDs={getSelectedItems().map(({ value }) => extractID(value))}
             documents={documents}
             folderCollectionSlug={folderCollectionSlug}
-            isDragging={isDragging}
+            isMovingItems={isDragging}
             lastSelectedIndex={lastSelectedIndex}
             RenderDocumentActionGroup={({ document, index }) => (
               <PopupList.ButtonGroup>
@@ -411,8 +412,8 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
 
       <MoveToFolderDrawer
         count={itemsToMove.length}
+        disabledFolderIDs={hiddenFolderIDs}
         drawerSlug={moveToFolderDrawerSlug}
-        hiddenFolderIDs={hiddenFolderIDs}
         onMoveConfirm={async (toFolderID) => {
           await moveToFolder({
             itemsToMove,

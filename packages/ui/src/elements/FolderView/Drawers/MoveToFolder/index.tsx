@@ -19,19 +19,15 @@ const confirmModalSlug = 'move-folder-drawer-confirm'
 
 type Props = {
   readonly count: number
+  readonly disabledFolderIDs: (number | string)[]
   readonly drawerSlug: string
-  readonly hiddenFolderIDs: (number | string)[]
   readonly onMoveConfirm: (folderID: number | string) => Promise<void> | void
 }
 export const MoveToFolderDrawer = DrawerWithFolderContext<Props>((props) => {
-  const { count, drawerSlug, hiddenFolderIDs, onMoveConfirm } = props
+  const { count, disabledFolderIDs, drawerSlug, onMoveConfirm } = props
   const folderContext = useFolder()
   const { closeModal, openModal } = useModal()
   const { t } = useTranslation()
-
-  const subfoldersToShow = folderContext.subfolders.filter(
-    (subfolder) => !hiddenFolderIDs.includes(extractID(subfolder.value)),
-  )
 
   return (
     <>
@@ -56,14 +52,15 @@ export const MoveToFolderDrawer = DrawerWithFolderContext<Props>((props) => {
           <DisplayItems
             allowMultiSelection={false}
             collectionUseAsTitles={folderContext.collectionUseAsTitles}
+            disabledFolderIDs={disabledFolderIDs}
             folderCollectionSlug={folderContext.folderCollectionSlug}
-            isDragging={false}
+            isMovingItems={true}
             lastSelectedIndex={folderContext.lastSelectedIndex}
             selectedIndexes={folderContext.selectedIndexes}
             setFolderID={folderContext.setFolderID}
             setLastSelectedIndex={folderContext.setLastSelectedIndex}
             setSelectedIndexes={folderContext.setSelectedIndexes}
-            subfolders={subfoldersToShow}
+            subfolders={folderContext.subfolders}
             viewType="grid"
           />
         </div>
@@ -82,7 +79,7 @@ export const MoveToFolderDrawer = DrawerWithFolderContext<Props>((props) => {
           if (folderContext.selectedIndexes.size > 0) {
             const index = Array.from(folderContext.selectedIndexes).pop()
             if (typeof index === 'number') {
-              folderToMoveTo = extractID(subfoldersToShow[index].value)
+              folderToMoveTo = extractID(folderContext.subfolders[index].value)
             }
           }
 
