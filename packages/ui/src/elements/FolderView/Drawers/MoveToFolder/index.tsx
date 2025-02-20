@@ -62,7 +62,6 @@ export const MoveToFolderDrawer = DrawerWithFolderContext<Props>((props) => {
             lastSelectedIndex={folderContext.lastSelectedIndex}
             selectedIndexes={folderContext.selectedIndexes}
             setFolderID={folderContext.setFolderID}
-            setItemsToMove={folderContext.setItemsToMove}
             setLastSelectedIndex={folderContext.setLastSelectedIndex}
             setSelectedIndexes={folderContext.setSelectedIndexes}
             subfolders={subfoldersToShow}

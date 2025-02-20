@@ -103,20 +103,12 @@ export const Dashboard: React.FC<AdminViewProps> = async ({
     i18n,
   )
 
-  const { breadcrumbs, items } = await getFolderData({
-    folderID: searchParams?.folder as string,
-    payload,
-  })
-
   return (
     <Fragment>
       <HydrateAuthProvider permissions={permissions} />
       <SetStepNav nav={[]} />
       {RenderServerComponent({
         clientProps: {
-          breadcrumbs,
-          folderID: breadcrumbs[breadcrumbs.length - 1]?.id,
-          items,
           locale,
         },
         Component: config.admin?.components?.views?.dashboard?.Component,

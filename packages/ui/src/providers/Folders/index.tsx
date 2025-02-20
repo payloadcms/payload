@@ -1,8 +1,13 @@
 'use client'
 import type { PaginatedDocs } from 'payload'
-import type { FolderBreadcrumb, FolderInterface, GetFolderDataResult } from 'payload/shared'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
+import {
+  extractID,
+  type FolderBreadcrumb,
+  type FolderInterface,
+  type GetFolderDataResult,
+} from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 import { toast } from 'sonner'
@@ -30,8 +35,8 @@ export type FolderContextValue = {
   documents?: GetFolderDataResult['items']
   folderCollectionSlug: string
   folderID?: number | string
+  getSelectedItems?: () => PolymorphicRelationshipValue[]
   isRootFolder?: boolean
-  itemsToMove: PolymorphicRelationshipValue[]
   lastSelectedIndex?: number
   moveToFolder: (args: {
     itemsToMove: PolymorphicRelationshipValue[]
@@ -42,7 +47,6 @@ export type FolderContextValue = {
   selectedIndexes: Set<number>
   setBreadcrumbs: React.Dispatch<React.SetStateAction<FolderBreadcrumb[]>>
   setFolderID: (args: { folderID: number | string }) => Promise<void>
-  setItemsToMove: React.Dispatch<React.SetStateAction<PolymorphicRelationshipValue[]>>
   setLastSelectedIndex: React.Dispatch<React.SetStateAction<null | number>>
   setSelectedIndexes: React.Dispatch<React.SetStateAction<Set<number>>>
   setSubfolders: React.Dispatch<React.SetStateAction<GetFolderDataResult['items']>>
@@ -57,8 +61,8 @@ const Context = React.createContext<FolderContextValue>({
   documents: [],
   folderCollectionSlug: '',
   folderID: undefined,
+  getSelectedItems: () => [],
   isRootFolder: undefined,
-  itemsToMove: [],
   lastSelectedIndex: undefined,
   moveToFolder: () => Promise.resolve(undefined),
   populateFolderData: () => Promise.resolve(undefined),
@@ -66,7 +70,6 @@ const Context = React.createContext<FolderContextValue>({
   selectedIndexes: new Set(),
   setBreadcrumbs: () => {},
   setFolderID: () => Promise.resolve(undefined),
-  setItemsToMove: () => [],
   setLastSelectedIndex: () => {},
   setSelectedIndexes: () => {},
   setSubfolders: () => {},
@@ -112,11 +115,7 @@ export function FolderProvider({ children, initialData }: Props) {
     }
     return useAsTitleMap
   })
-  const [itemsToMove, setItemsToMove] = React.useState<PolymorphicRelationshipValue[]>([])
   const [lastSelectedIndex, setLastSelectedIndex] = React.useState<null | number>()
-
-  const folderIDFromParams = searchParams.get('folderID') || ''
-  const folderIDParamRef = React.useRef(folderIDFromParams || '')
 
   const isRootFolder = React.useMemo(() => {
     return folderBreadcrumbs.length === 1
@@ -163,7 +162,6 @@ export function FolderProvider({ children, initialData }: Props) {
         setSubfolders([])
         setDocuments([])
       }
-      setSelectedIndexes(new Set())
     },
     [routes.api, serverURL, searchParams],
   )
@@ -181,6 +179,16 @@ export function FolderProvider({ children, initialData }: Props) {
     },
     [drawerDepth, router, routes.admin, populateFolderData, folderBreadcrumbs],
   )
+
+  const getSelectedItems = React.useCallback(() => {
+    const allItems = [...subfolders, ...documents]
+    return Array.from(selectedIndexes).map((index) => allItems[index])
+  }, [documents, selectedIndexes, subfolders])
+
+  const clearSelecttions = React.useCallback(() => {
+    setSelectedIndexes(new Set())
+    setLastSelectedIndex(undefined)
+  }, [])
 
   /**
    * Remove multiple documents or folders from a folder
@@ -293,7 +301,7 @@ export function FolderProvider({ children, initialData }: Props) {
 
   const moveToFolder: FolderContextValue['moveToFolder'] = React.useCallback(
     async (args) => {
-      const { itemsToMove, toFolderID: folderID } = args
+      const { itemsToMove, toFolderID } = args
       if (!itemsToMove.length) {
         return
       }
@@ -335,7 +343,7 @@ export function FolderProvider({ children, initialData }: Props) {
           },
         )
         const res = await fetch(`${serverURL}${routes.api}/${relationSlug}${query}`, {
-          body: JSON.stringify({ _parentFolder: folderID || null }),
+          body: JSON.stringify({ _parentFolder: toFolderID || null }),
           credentials: 'include',
           headers: {
             'content-type': 'application/json',
@@ -376,18 +384,27 @@ export function FolderProvider({ children, initialData }: Props) {
       }
 
       toast.success(t('general:success'))
-    },
-    [routes.api, serverURL, t, setDocuments, setSubfolders],
-  )
 
-  React.useEffect(() => {
-    if (drawerDepth === 1) {
-      if (folderIDParamRef.current !== folderIDFromParams) {
-        folderIDParamRef.current = folderIDFromParams
-        // void setNewActiveFolderID({ folderID: folderIDFromParams })
-      }
-    }
-  }, [folderIDFromParams, drawerDepth])
+      const isMovingCurrentFolder = itemsToMove.some(
+        (item) => item.relationTo === folderCollectionSlug && extractID(item.value) === toFolderID,
+      )
+      await populateFolderData({
+        folderID: isMovingCurrentFolder ? toFolderID : activeFolderID,
+      })
+
+      clearSelecttions()
+    },
+    [
+      routes.api,
+      serverURL,
+      t,
+      setDocuments,
+      setSubfolders,
+      populateFolderData,
+      activeFolderID,
+      clearSelecttions,
+    ],
+  )
 
   React.useEffect(() => {
     if (initialData) {
@@ -419,8 +436,8 @@ export function FolderProvider({ children, initialData }: Props) {
         documents,
         folderCollectionSlug,
         folderID: activeFolderID,
+        getSelectedItems,
         isRootFolder,
-        itemsToMove,
         lastSelectedIndex,
         moveToFolder,
         populateFolderData,
@@ -428,7 +445,6 @@ export function FolderProvider({ children, initialData }: Props) {
         selectedIndexes,
         setBreadcrumbs: setFolderBreadcrumbs,
         setFolderID: setNewActiveFolderID,
-        setItemsToMove,
         setLastSelectedIndex,
         setSelectedIndexes,
         setSubfolders,

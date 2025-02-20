@@ -16,9 +16,11 @@ import { SimpleTable, TableHeader } from '../SimpleTable/index.js'
 const baseClass = 'displayed-items'
 
 const getShiftSelection = ({
+  selectedIndexes,
   selectFromIndex,
   selectToIndex,
 }: {
+  selectedIndexes: Set<number>
   selectFromIndex: number
   selectToIndex: number
 }): Set<number> => {
@@ -29,9 +31,9 @@ const getShiftSelection = ({
   const start = Math.min(selectToIndex, selectFromIndex)
   const end = Math.max(selectToIndex, selectFromIndex)
   const rangeSelection = new Set(
-    Array.from({ length: Math.max(start, end) + 1 }, (_, i) => i).filter(
-      (index) => index >= start && index <= end,
-    ),
+    Array.from({ length: Math.max(start, end) + 1 }, (_, i) => i).filter((index) => {
+      return selectedIndexes.has(index) ? index >= start && index <= end : false
+    }),
   )
   return rangeSelection
 }
@@ -72,7 +74,6 @@ type Props = {
   | 'lastSelectedIndex'
   | 'selectedIndexes'
   | 'setFolderID'
-  | 'setItemsToMove'
   | 'setLastSelectedIndex'
   | 'setSelectedIndexes'
   | 'subfolders'
@@ -89,7 +90,6 @@ export function DisplayItems(props: Props) {
     RenderSubfolderActionGroup,
     selectedIndexes,
     setFolderID,
-    setItemsToMove,
     setLastSelectedIndex,
     setSelectedIndexes,
     subfolders = [],
@@ -142,6 +142,7 @@ export function DisplayItems(props: Props) {
 
           if (allowMultiSelection && isShiftPressed) {
             newSelectedIndexes = getShiftSelection({
+              selectedIndexes,
               selectFromIndex: lastSelectedIndex,
               selectToIndex: nextIndex,
             })
@@ -162,6 +163,7 @@ export function DisplayItems(props: Props) {
 
           if (allowMultiSelection && isShiftPressed) {
             newSelectedIndexes = getShiftSelection({
+              selectedIndexes,
               selectFromIndex: lastSelectedIndex,
               selectToIndex: prevIndex,
             })
@@ -221,27 +223,14 @@ export function DisplayItems(props: Props) {
       }
 
       setSelectedIndexes(newSelectedIndexes)
-      setItemsToMove(
-        Array.from(newSelectedIndexes)
-          .map((index) => {
-            const allItems = [...subfolders, ...documents]
-            if (allItems[index]) {
-              return allItems[index]
-            }
-          })
-          .filter(Boolean),
-      )
 
       if (shouldNavigateAfterClick) {
         await navigateAfterClick({ collectionSlug: relationTo, docID: id })
       }
     },
     [
-      documents,
-      subfolders,
       lastSelectedIndex,
       totalCount,
-      setItemsToMove,
       setSelectedIndexes,
       setLastSelectedIndex,
       selectedIndexes,
@@ -267,6 +256,7 @@ export function DisplayItems(props: Props) {
         })
       } else if (allowMultiSelection && isShiftPressed && lastSelectedIndex !== undefined) {
         newSelectedIndexes = getShiftSelection({
+          selectedIndexes,
           selectFromIndex: lastSelectedIndex,
           selectToIndex: itemIndex,
         })
@@ -294,27 +284,14 @@ export function DisplayItems(props: Props) {
         setFocusedRowIndex(itemIndex)
       }
       setSelectedIndexes(newSelectedIndexes)
-      setItemsToMove(
-        Array.from(newSelectedIndexes)
-          .map((index) => {
-            const allItems = [...subfolders, ...documents]
-            if (allItems[index]) {
-              return allItems[index]
-            }
-          })
-          .filter(Boolean),
-      )
 
       if (shouldNavigateAfterClick) {
         await navigateAfterClick({ collectionSlug: relationTo, docID: id })
       }
     },
     [
-      documents,
-      subfolders,
       lastSelectedIndex,
       selectedIndexes,
-      setItemsToMove,
       setSelectedIndexes,
       setFocusedRowIndex,
       setLastSelectedIndex,

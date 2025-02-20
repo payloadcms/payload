@@ -1,31 +1,33 @@
 @import '../../../scss/styles.scss';
 
-.folderBreadcrumbs {
-  display: flex;
-
-  &__crumb,
-  &__crumb-item {
+@layer payload-default {
+  .folderBreadcrumbs {
     display: flex;
-    align-items: center;
-    font-size: var(--base);
-    font-weight: bold;
-    margin: 0;
-    line-height: normal;
-    font-family: inherit;
-  }
 
-  &__crumb-item--over {
-    opacity: 0.5;
-  }
+    &__crumb,
+    &__crumb-item {
+      display: flex;
+      align-items: center;
+      font-size: var(--base);
+      font-weight: bold;
+      margin: 0;
+      line-height: normal;
+      font-family: inherit;
+    }
 
-  &__crumb-chevron {
-    margin: 0 calc(var(--base) * 0.5);
-    position: relative;
-    top: 1px;
+    &__crumb-item--over {
+      opacity: 0.5;
+    }
 
-    .stroke {
-      stroke: var(--theme-border-color);
-      stroke-width: 2px;
+    &__crumb-chevron {
+      margin: 0 calc(var(--base) * 0.5);
+      position: relative;
+      top: 1px;
+
+      .stroke {
+        stroke: var(--theme-border-color);
+        stroke-width: 2px;
+      }
     }
   }
 }

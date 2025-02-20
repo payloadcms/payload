@@ -33,7 +33,7 @@
 
     &__header-actions {
       display: flex;
-      gap: calc(var(--base) * .25);
+      gap: calc(var(--base) * 0.25);
     }
 
     &__search {
@@ -57,7 +57,7 @@
 
     &__search-actions {
       display: flex;
-      gap: calc(var(--base) * .25);
+      gap: calc(var(--base) * 0.25);
     }
 
     &__subfolders {
@@ -67,7 +67,7 @@
     &__list-toggle,
     &__grid-toggle {
       padding: 0 2px;
-      
+
       &:not(.active) {
         background-color: transparent;
         color: var(--theme-elevation-400);
@@ -91,38 +91,6 @@
         display: flex;
         height: 100%;
       }
-    }
-
-    &__drag-cards {
-      display: grid;
-      grid-template-columns: 1fr;
-      grid-template-rows: 1fr;
-    }
-
-    &__drag-card {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      grid-column: 1/2;
-      grid-row: 1/2;
-    }
-
-    &__drag-card-count {
-      position: absolute;
-      transform: translate(calc(50% - 3px), calc(-50% - 3px));
-      right: 0;
-      top: 0;
-      border-radius: 50%;
-      line-height: 1;
-      width: 26px;
-      height: 26px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--theme-success-50);
-      background: var(--theme-success-600);
-      font-weight: bold;
-      font-variant-numeric: tabular-nums;
     }
   }
 }

@@ -5,14 +5,16 @@ import type {
   ServerProps,
   VisibleEntities,
 } from 'payload'
-import type { GetFolderDataResult } from 'payload/shared'
 
 import { FolderAndDocuments, FolderProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { type groupNavItems, sanitizeID } from '@payloadcms/ui/shared'
-import React from 'react'
+import { redirect } from 'next/navigation.js'
+import { getFolderData, type GetFolderDataResult } from 'payload/shared'
 
 import './index.scss'
+
+import React from 'react'
 
 const baseClass = 'folder-dashboard'
 
@@ -33,10 +35,7 @@ export type FolderDashboardProps = {
 
 export const FolderDashboard: React.FC<FolderDashboardProps> = async (props) => {
   const {
-    breadcrumbs,
-    folderID,
     i18n,
-    items,
     locale,
     params,
     payload: {
@@ -44,6 +43,7 @@ export const FolderDashboard: React.FC<FolderDashboardProps> = async (props) => 
         admin: {
           components: { afterDashboard, beforeDashboard },
         },
+        routes,
       },
     },
     payload,
@@ -51,6 +51,19 @@ export const FolderDashboard: React.FC<FolderDashboardProps> = async (props) => 
     searchParams,
     user,
   } = props
+
+  const searchParamFolderID = searchParams?.folder as string
+
+  const { breadcrumbs, items } = await getFolderData({
+    folderID: searchParamFolderID,
+    payload,
+  })
+
+  const folderID = breadcrumbs[breadcrumbs.length - 1]?.id
+
+  if (folderID && searchParamFolderID && searchParamFolderID !== String(folderID)) {
+    return redirect(`${routes.admin}`)
+  }
 
   const displayTypePref = (await payload.find({
     collection: 'payload-preferences',

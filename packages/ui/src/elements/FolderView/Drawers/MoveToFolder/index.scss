@@ -1,5 +1,7 @@
-.move-folder-drawer {
-  display: grid;
-  grid-template-rows: auto 1fr;
-  gap: var(--base);
+@layer payload-default {
+  .move-folder-drawer {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: var(--base);
+  }
 }

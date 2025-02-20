@@ -1,8 +1,7 @@
 'use client'
 import type { DragEndEvent } from '@dnd-kit/core'
 
-import { DndContext, DragOverlay, pointerWithin, useDndMonitor } from '@dnd-kit/core'
-import { snapCenterToCursor } from '@dnd-kit/modifiers'
+import { DndContext, pointerWithin, useDndMonitor } from '@dnd-kit/core'
 import { useModal } from '@faceless-ui/modal'
 import { extractID, type FolderInterface } from 'payload/shared'
 import React from 'react'
@@ -20,10 +19,10 @@ import { DocumentDrawer } from '../../DocumentDrawer/index.js'
 import { Popup, PopupList } from '../../Popup/index.js'
 import { FolderBreadcrumbs } from '../Breadcrumbs/index.js'
 import { DisplayItems } from '../DisplayItems/index.js'
+import { DragOverlaySelection } from '../DragOverlaySelection/index.js'
 import { MoveToFolderDrawer } from '../Drawers/MoveToFolder/index.js'
 import { NewFolderDrawer } from '../Drawers/NewFolder/index.js'
 import { RenameFolderDrawer } from '../Drawers/RenameFolder/index.js'
-import { FolderFileCard } from '../FolderFileCard/index.js'
 import './index.scss'
 import { strings } from '../strings.js'
 
@@ -45,8 +44,8 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
     documents,
     folderCollectionSlug,
     folderID,
+    getSelectedItems,
     isRootFolder,
-    itemsToMove,
     lastSelectedIndex,
     moveToFolder,
     populateFolderData,
@@ -54,7 +53,6 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
     selectedIndexes,
     setBreadcrumbs,
     setFolderID,
-    setItemsToMove,
     setLastSelectedIndex,
     setSelectedIndexes,
     setSubfolders,
@@ -62,26 +60,17 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
   } = useFolder()
   const { config } = useConfig()
   const { t } = useTranslation()
+  const { setPreference } = usePreferences()
   const { closeModal, isModalOpen, openModal } = useModal()
 
   const [folderToRename, setFolderToRename] = React.useState<FolderInterface>()
   const [isDragging, setIsDragging] = React.useState(false)
-  const { setPreference } = usePreferences()
   const [viewType, setViewType] = React.useState<'grid' | 'list'>(initialDisplayType || 'grid')
   const [createCollectionSlug, setCreateCollectionSlug] = React.useState<string | undefined>()
+  const [hiddenFolderIDs, setHiddenFolderIDs] = React.useState<(number | string)[]>([])
+  const [itemsToMove, setItemsToMove] = React.useState<PolymorphicRelationshipValue[]>([])
   const dndContextID = React.useId()
   const renameFolderWasOpenRef = React.useRef(false)
-
-  const hiddenMoveToFolderIDs = React.useMemo(
-    () =>
-      itemsToMove.reduce((acc, item) => {
-        if (item.relationTo === folderCollectionSlug) {
-          return [...acc, extractID(item.value)]
-        }
-        return acc
-      }, []),
-    [itemsToMove, folderCollectionSlug],
-  )
 
   const onDisplayTypeChange = React.useCallback(
     (newDisplayType: 'grid' | 'list') => {
@@ -89,6 +78,26 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
       void setPreference('folder-view-display', newDisplayType)
     },
     [setPreference],
+  )
+
+  // When the move to folder drawer is opened
+  // - set hidden folders from the items that are being moved
+  // - set the items that are being moved
+  const onMoveToFolderOpen = React.useCallback(
+    ({ items }: { items: PolymorphicRelationshipValue[] }) => {
+      setHiddenFolderIDs(
+        items.reduce<(number | string)[]>((acc, { relationTo, value }) => {
+          if (relationTo === folderCollectionSlug) {
+            acc.push(extractID(value))
+          }
+
+          return acc
+        }, []),
+      )
+      setItemsToMove(items)
+      openModal(moveToFolderDrawerSlug)
+    },
+    [openModal, folderCollectionSlug],
   )
 
   const onNewFolderCreate = React.useCallback(
@@ -149,29 +158,18 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
     [closeModal, setSubfolders, folderID, setBreadcrumbs],
   )
 
-  const moveItemsToFolder = React.useCallback(
-    async (folderToMoveTo: number | string) => {
-      const movingCurrentFolder = itemsToMove.some(({ relationTo, value }) => {
-        return relationTo === folderCollectionSlug && value === folderID
-      })
-      await moveToFolder({
-        itemsToMove,
-        toFolderID: folderToMoveTo,
-      })
-      await populateFolderData({ folderID: movingCurrentFolder ? folderToMoveTo : folderID })
-    },
-    [folderID, folderCollectionSlug, moveToFolder, populateFolderData, itemsToMove],
-  )
-
   const onDragEnd = React.useCallback(
     async (event: DragEndEvent) => {
       if (!event.over) {
         return
       }
 
-      await moveItemsToFolder(event.over.id)
+      await moveToFolder({
+        itemsToMove: getSelectedItems(),
+        toFolderID: event.over.id,
+      })
     },
-    [moveItemsToFolder],
+    [moveToFolder, getSelectedItems],
   )
 
   React.useEffect(() => {
@@ -179,11 +177,10 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
     if (renameFolderWasOpenRef.current && !renameModalIsOpen) {
       setFolderToRename(undefined)
       setSelectedIndexes(new Set([]))
-      setItemsToMove([])
     }
 
     renameFolderWasOpenRef.current = renameModalIsOpen
-  }, [isModalOpen, setFolderToRename, setSelectedIndexes, setItemsToMove])
+  }, [isModalOpen, setFolderToRename, setSelectedIndexes])
 
   return (
     <>
@@ -263,13 +260,14 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
                   <PopupList.Button
                     disabled={isRootFolder}
                     onClick={() => {
-                      setItemsToMove([
-                        {
-                          relationTo: folderCollectionSlug,
-                          value: currentFolder.id,
-                        },
-                      ])
-                      openModal(moveToFolderDrawerSlug)
+                      onMoveToFolderOpen({
+                        items: [
+                          {
+                            relationTo: folderCollectionSlug,
+                            value: currentFolder,
+                          },
+                        ],
+                      })
                     }}
                   >
                     Move Folder
@@ -303,7 +301,7 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
                     <Button
                       buttonStyle="pill"
                       onClick={() => {
-                        openModal(moveToFolderDrawerSlug)
+                        onMoveToFolderOpen({ items: getSelectedItems() })
                       }}
                       size="small"
                     >
@@ -344,8 +342,8 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
                 <PopupList.Button
                   id="action-move-document"
                   onClick={() => {
-                    setItemsToMove([document])
-                    openModal(moveToFolderDrawerSlug)
+                    setSelectedIndexes(new Set([index]))
+                    onMoveToFolderOpen({ items: [document] })
                   }}
                 >
                   {strings.move}
@@ -373,8 +371,8 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
                 <PopupList.Button
                   id="action-move-folder"
                   onClick={() => {
-                    setItemsToMove([subfolder])
-                    openModal(moveToFolderDrawerSlug)
+                    setSelectedIndexes(new Set([index]))
+                    onMoveToFolderOpen({ items: [subfolder] })
                   }}
                 >
                   {strings.move}
@@ -388,7 +386,6 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
             )}
             selectedIndexes={selectedIndexes}
             setFolderID={setFolderID}
-            setItemsToMove={setItemsToMove}
             setLastSelectedIndex={setLastSelectedIndex}
             setSelectedIndexes={setSelectedIndexes}
             subfolders={subfolders}
@@ -396,21 +393,12 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
           />
         </div>
 
-        <DragOverlay
-          dropAnimation={null}
-          modifiers={[snapCenterToCursor]}
-          style={{
-            height: 'unset',
-            maxWidth: '220px',
-          }}
-        >
-          <DragCards
-            allItems={[...subfolders, ...documents]}
-            collectionUseAsTitles={collectionUseAsTitles}
-            lastSelected={lastSelectedIndex}
-            selectedCount={selectedIndexes.size}
-          />
-        </DragOverlay>
+        <DragOverlaySelection
+          allItems={[...subfolders, ...documents]}
+          collectionUseAsTitles={collectionUseAsTitles}
+          lastSelected={lastSelectedIndex}
+          selectedCount={selectedIndexes.size}
+        />
       </DndContext>
 
       <RenameFolderDrawer
@@ -421,9 +409,12 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
 
       <MoveToFolderDrawer
         drawerSlug={moveToFolderDrawerSlug}
-        hiddenFolderIDs={hiddenMoveToFolderIDs}
-        onMoveConfirm={async (folderIDToMove) => {
-          await moveItemsToFolder(folderIDToMove)
+        hiddenFolderIDs={hiddenFolderIDs}
+        onMoveConfirm={async (toFolderID) => {
+          await moveToFolder({
+            itemsToMove,
+            toFolderID,
+          })
           closeModal(moveToFolderDrawerSlug)
         }}
       />
@@ -465,45 +456,4 @@ function DndEventListener({ onDragEnd, setIsDragging }) {
   })
 
   return null
-}
-
-type DragCardsProps = {
-  readonly allItems: Array<PolymorphicRelationshipValue>
-  readonly collectionUseAsTitles: Map<string, string>
-  readonly lastSelected?: number
-  readonly selectedCount: number
-}
-function DragCards({
-  allItems,
-  collectionUseAsTitles,
-  lastSelected,
-  selectedCount,
-}: DragCardsProps) {
-  const { relationTo, value } = allItems[lastSelected || 0]
-  if (!selectedCount) {
-    return null
-  }
-  const useAsTitle = collectionUseAsTitles.has(relationTo)
-    ? collectionUseAsTitles.get(relationTo)
-    : 'id'
-  const title = typeof value === 'object' ? value?.[useAsTitle] : value
-  return (
-    <div className={`${baseClass}__drag-cards`}>
-      {Array.from({ length: selectedCount > 1 ? 2 : 1 }).map((_, index) => (
-        <div
-          className={`${baseClass}__drag-card`}
-          key={index}
-          style={{
-            right: `${index * 3}px`,
-            top: `-${index * 3}px`,
-          }}
-        >
-          <FolderFileCard id="" isSelected title={title} type="folder" />
-        </div>
-      ))}
-      {selectedCount > 1 ? (
-        <span className={`${baseClass}__drag-card-count`}>{selectedCount}</span>
-      ) : null}
-    </div>
-  )
 }
