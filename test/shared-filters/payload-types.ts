@@ -199,15 +199,17 @@ export interface PayloadSharedFilter {
   title: string;
   readAccess?: ('everyone' | 'onlyMe' | 'specificUsers' | 'specificRoles') | null;
   readConstraints?: {
-    user?: (string | null) | User;
     users?: (string | User)[] | null;
     roles?: ('admin' | 'user')[] | null;
   };
   updateAccess?: ('everyone' | 'onlyMe' | 'specificUsers' | 'specificRoles') | null;
   updateConstraints?: {
-    user?: (string | null) | User;
     users?: (string | User)[] | null;
     roles?: ('admin' | 'user')[] | null;
+  };
+  deleteAccess?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
+  deleteConstraints?: {
+    users?: (string | User)[] | null;
   };
   where:
     | {
@@ -301,7 +303,6 @@ export interface PayloadSharedFiltersSelect<T extends boolean = true> {
   readConstraints?:
     | T
     | {
-        user?: T;
         users?: T;
         roles?: T;
       };
@@ -309,9 +310,14 @@ export interface PayloadSharedFiltersSelect<T extends boolean = true> {
   updateConstraints?:
     | T
     | {
-        user?: T;
         users?: T;
         roles?: T;
+      };
+  deleteAccess?: T;
+  deleteConstraints?:
+    | T
+    | {
+        users?: T;
       };
   where?: T;
   columns?: T;

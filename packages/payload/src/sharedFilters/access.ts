@@ -3,28 +3,31 @@ import type { Where } from '../types/index.js'
 
 import { type Field, fieldAffectsData } from '../fields/config/types.js'
 
-const operationMap = {
+type Operation = 'delete' | 'read' | 'update'
+
+const operationMap: {
+  [key in Operation]: {
+    accessFieldName: string
+    constraintsFieldName: string
+    usersConstraintFieldName: string
+  }
+} = {
   delete: {
     accessFieldName: 'deleteAccess',
     constraintsFieldName: 'deleteConstraints',
-    userConstraintFieldName: 'deleteConstraints.user',
     usersConstraintFieldName: 'deleteConstraints.users',
   },
   read: {
     accessFieldName: 'readAccess',
     constraintsFieldName: 'readConstraints',
-    userConstraintFieldName: 'readConstraints.user',
     usersConstraintFieldName: 'readConstraints.users',
   },
   update: {
     accessFieldName: 'updateAccess',
     constraintsFieldName: 'updateConstraints',
-    userConstraintFieldName: 'updateConstraints.user',
     usersConstraintFieldName: 'updateConstraints.users',
   },
 }
-
-type Operation = keyof typeof operationMap
 
 export const getAccess =
   ({ config, operation }: { config: Config; operation: Operation }): Access =>
@@ -45,26 +48,10 @@ export const getAccess =
 
     const accessFieldName = operationMap[operation].accessFieldName
 
-    const userConstraintFieldName = operationMap[operation].userConstraintFieldName
-
     const usersConstraintFieldName = operationMap[operation].usersConstraintFieldName
 
     const constraints = {
       or: [
-        {
-          and: [
-            {
-              [userConstraintFieldName]: {
-                equals: req.user.id,
-              },
-            },
-            {
-              [accessFieldName]: {
-                equals: 'onlyMe',
-              },
-            },
-          ],
-        },
         {
           and: [
             {
@@ -73,9 +60,18 @@ export const getAccess =
               },
             },
             {
-              [accessFieldName]: {
-                equals: 'specificUsers',
-              },
+              or: [
+                {
+                  [accessFieldName]: {
+                    equals: 'onlyMe',
+                  },
+                },
+                {
+                  [accessFieldName]: {
+                    equals: 'specificUsers',
+                  },
+                },
+              ],
             },
           ],
         },
@@ -128,28 +124,6 @@ export const getAccessFields = ({
     type: 'group',
     fields: [
       {
-        name: 'user',
-        type: 'relationship',
-        admin: {
-          condition: (data) =>
-            Boolean(data?.[operationMap[operation].accessFieldName] === 'onlyMe'),
-        },
-        hooks: {
-          beforeChange: [
-            ({ data, req }) => {
-              if (data?.[operationMap[operation].accessFieldName] === 'onlyMe') {
-                if (req.user) {
-                  return req.user.id
-                }
-              }
-
-              return data?.[operationMap[operation].constraintsFieldName]?.user
-            },
-          ],
-        },
-        relationTo: 'users',
-      },
-      {
         name: 'users',
         type: 'relationship',
         admin: {
@@ -157,6 +131,19 @@ export const getAccessFields = ({
             Boolean(data?.[operationMap[operation].accessFieldName] === 'specificUsers'),
         },
         hasMany: true,
+        hooks: {
+          beforeChange: [
+            ({ data, req }) => {
+              if (data?.[operationMap[operation].accessFieldName] === 'onlyMe') {
+                if (req.user) {
+                  return [req.user.id]
+                }
+              }
+
+              return data?.[operationMap[operation].constraintsFieldName]?.user
+            },
+          ],
+        },
         relationTo: 'users',
       },
       ...(config.admin?.sharedListFilters?.accessOptions?.[operation]?.reduce((acc, option) => {
