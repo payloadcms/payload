@@ -101,7 +101,12 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
 
   const result = await Model.paginate(query, paginationOptions)
 
-  transform({ adapter: this, data: result, fields: globalConfig.fields, operation: 'read' })
+  transform({
+    adapter: this,
+    data: result.docs,
+    fields: buildVersionGlobalFields(this.payload.config, globalConfig),
+    operation: 'read',
+  })
 
   return result
 }
