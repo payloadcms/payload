@@ -1,54 +1,282 @@
-import type { Payload, SanitizedCollectionConfig } from 'payload'
+import type { NextRESTClient } from 'helpers/NextRESTClient.js'
+import type { Payload, User } from 'payload'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-import type { Page } from './payload-types.js'
-
-import { devUser } from '../credentials.js'
+import { devUser, regularUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { pagesSlug } from './slugs.js'
 
-const sharedFilterCollection = 'payload-shared-filters'
+const sharedFilterCollectionSlug = 'payload-shared-filters'
 
 let payload: Payload
-let token: string
 let restClient: NextRESTClient
+let user: User
+let user2: User
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 describe('Shared Filters', () => {
-  let page: Page
-  let postConfig: SanitizedCollectionConfig
-
   beforeAll(async () => {
     // @ts-expect-error: initPayloadInt does not have a proper type definition
     ;({ payload, restClient } = await initPayloadInt(dirname))
 
-    const loginResult = await payload.login({
-      collection: 'users',
-      data: {
-        email: devUser.email,
-        password: devUser.password,
-      },
-    })
+    user = await payload
+      .login({
+        collection: 'users',
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+      ?.then((result) => result.user)
 
-    user = loginResult.user
-
-    token = loginResult.token as string
-
-    page = await payload.create({
-      collection: pagesSlug,
-      data: {
-        text: 'some page',
-      },
-    })
+    user2 = await payload
+      .login({
+        collection: 'users',
+        data: {
+          email: regularUser.email,
+          password: regularUser.password,
+        },
+      })
+      ?.then((result) => result.user)
   })
 
   describe('access control', () => {
-    it.todo('should only allow read access to readers')
+    it('should respect access when set to "specificUsers"', async () => {
+      const filterDoc = await payload.create({
+        collection: sharedFilterCollectionSlug,
+        data: {
+          title: 'Specific Users',
+          where: {
+            text: {
+              equals: 'example page',
+            },
+          },
+          user,
+          readAccess: 'specificUsers',
+          updateAccess: 'specificUsers',
+          readConstraints: {
+            users: [user.id],
+          },
+          updateConstraints: {
+            users: [user.id],
+          },
+          relatedCollection: 'pages',
+        },
+      })
+
+      const resultWithUser = await payload.findByID({
+        collection: sharedFilterCollectionSlug,
+        depth: 0,
+        user,
+        overrideAccess: false,
+        id: filterDoc.id,
+        select: {},
+      })
+
+      expect(resultWithUser.id).toBe(filterDoc.id)
+
+      try {
+        const resultWithUser2 = await payload.findByID({
+          collection: sharedFilterCollectionSlug,
+          depth: 0,
+          user: user2,
+          overrideAccess: false,
+          id: filterDoc.id,
+          select: {},
+        })
+
+        expect(resultWithUser2).toBeFalsy()
+      } catch (error) {
+        expect(error).toBeDefined()
+      }
+
+      const resultUpdatedByUser = await payload.update({
+        collection: sharedFilterCollectionSlug,
+        id: filterDoc.id,
+        user,
+        overrideAccess: false,
+        data: {
+          title: 'Specific Users (Updated)',
+        },
+        select: {
+          title: true,
+        },
+      })
+
+      expect(resultUpdatedByUser.title).toBe('Specific Users (Updated)')
+
+      try {
+        const resultWithUser2 = await payload.update({
+          collection: sharedFilterCollectionSlug,
+          id: filterDoc.id,
+          user: user2,
+          overrideAccess: false,
+          data: {
+            title: 'Specific Users (Updated)',
+          },
+          select: {},
+        })
+
+        expect(resultWithUser2).toBeFalsy()
+      } catch (error) {
+        expect(error).toBeDefined()
+        // swallow error
+      }
+    })
+
+    it('should respect access when set to "onlyMe"', async () => {
+      // create a new doc so that the creating user is the owner
+      const filterDoc = await payload.create({
+        collection: sharedFilterCollectionSlug,
+        user,
+        data: {
+          title: 'Only Me',
+          where: {
+            text: {
+              equals: 'example page',
+            },
+          },
+          readAccess: 'onlyMe',
+          updateAccess: 'onlyMe',
+          relatedCollection: 'pages',
+        },
+      })
+
+      console.log(filterDoc.readConstraints.users)
+
+      const resultWithUser = await payload.findByID({
+        collection: sharedFilterCollectionSlug,
+        depth: 0,
+        user,
+        overrideAccess: false,
+        id: filterDoc.id,
+        select: {},
+      })
+
+      expect(resultWithUser.id).toBe(filterDoc.id)
+
+      try {
+        const resultWithUser2 = await payload.findByID({
+          collection: sharedFilterCollectionSlug,
+          depth: 0,
+          user: user2,
+          overrideAccess: false,
+          id: filterDoc.id,
+          select: {},
+        })
+
+        expect(resultWithUser2).toBeFalsy()
+      } catch (error) {
+        expect(error).toBeDefined()
+        // swallow error
+      }
+
+      const resultUpdatedByUser = await payload.update({
+        collection: sharedFilterCollectionSlug,
+        id: filterDoc.id,
+        user,
+        overrideAccess: false,
+        data: {
+          title: 'Only Me (Updated)',
+        },
+        select: {
+          title: true,
+        },
+      })
+
+      expect(resultUpdatedByUser.title).toBe('Only Me (Updated)')
+
+      try {
+        const resultWithUser2 = await payload.update({
+          collection: sharedFilterCollectionSlug,
+          id: filterDoc.id,
+          user: user2,
+          overrideAccess: false,
+          data: {
+            title: 'Only Me (Updated)',
+          },
+          select: {},
+        })
+
+        expect(resultWithUser2).toBeFalsy()
+      } catch (error) {
+        expect(error).toBeDefined()
+        // swallow error
+      }
+    })
+
+    it('should respect access when set to "everyone"', async () => {
+      const filterDoc = await payload.create({
+        collection: sharedFilterCollectionSlug,
+        user,
+        data: {
+          title: 'Everyone',
+          where: {
+            text: {
+              equals: 'example page',
+            },
+          },
+          readAccess: 'everyone',
+          updateAccess: 'everyone',
+          relatedCollection: 'pages',
+        },
+      })
+
+      const resultWithUser = await payload.findByID({
+        collection: sharedFilterCollectionSlug,
+        depth: 0,
+        user,
+        overrideAccess: false,
+        id: filterDoc.id,
+        select: {},
+      })
+
+      expect(resultWithUser.id).toBe(filterDoc.id)
+
+      const resultWithUser2 = await payload.findByID({
+        collection: sharedFilterCollectionSlug,
+        depth: 0,
+        user: user2,
+        overrideAccess: false,
+        id: filterDoc.id,
+        select: {},
+      })
+
+      expect(resultWithUser2.id).toBe(filterDoc.id)
+
+      const resultUpdatedByUser = await payload.update({
+        collection: sharedFilterCollectionSlug,
+        id: filterDoc.id,
+        user,
+        overrideAccess: false,
+        data: {
+          title: 'Everyone (Updated)',
+        },
+        select: {
+          title: true,
+        },
+      })
+
+      expect(resultUpdatedByUser.title).toBe('Everyone (Updated)')
+
+      const resultUpdatedByUser2 = await payload.update({
+        collection: sharedFilterCollectionSlug,
+        id: filterDoc.id,
+        user: user2,
+        overrideAccess: false,
+        data: {
+          title: 'Everyone (Updated)',
+        },
+        select: {
+          title: true,
+        },
+      })
+
+      expect(resultUpdatedByUser2.title).toBe('Everyone (Updated)')
+    })
   })
 
   afterAll(async () => {
@@ -56,6 +284,4 @@ describe('Shared Filters', () => {
       await payload.db.destroy()
     }
   })
-
-  it.todo('should')
 })

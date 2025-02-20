@@ -1,5 +1,6 @@
 import type { Access, Config } from '../../config/types.js'
 import type { Field } from '../../fields/config/types.js'
+import type { Where } from '../../types/index.js'
 
 export const readAccess: Access = ({ req }) => {
   if (!req.user) {
@@ -11,8 +12,8 @@ export const readAccess: Access = ({ req }) => {
       {
         and: [
           {
-            'readConstraints.users': {
-              equals: [req.user.id],
+            'readConstraints.user': {
+              equals: req.user.id,
             },
           },
           {
@@ -42,7 +43,7 @@ export const readAccess: Access = ({ req }) => {
         },
       },
     ],
-  }
+  } as Where
 }
 
 export const getReadAccessFields = (config: Config): Field[] => [
@@ -77,24 +78,33 @@ export const getReadAccessFields = (config: Config): Field[] => [
     type: 'group',
     fields: [
       {
-        name: 'users',
+        name: 'user',
         type: 'relationship',
         admin: {
-          condition: (data) =>
-            Boolean(data?.readAccess === 'specificUsers' || data?.readAccess === 'onlyMe'),
+          condition: (data) => Boolean(data?.readAccess === 'onlyMe'),
         },
-        hasMany: true,
         hooks: {
           beforeChange: [
             ({ data, req }) => {
               if (data?.readAccess === 'onlyMe') {
-                return [req.user?.id]
+                if (req.user) {
+                  return req.user.id
+                }
               }
 
-              return data?.readConstraints?.users
+              return data?.readConstraints?.user
             },
           ],
         },
+        relationTo: 'users',
+      },
+      {
+        name: 'users',
+        type: 'relationship',
+        admin: {
+          condition: (data) => Boolean(data?.readAccess === 'specificUsers'),
+        },
+        hasMany: true,
         relationTo: 'users',
       },
     ],

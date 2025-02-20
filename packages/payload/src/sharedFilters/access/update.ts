@@ -1,5 +1,6 @@
 import type { Access, Config } from '../../config/types.js'
 import type { Field } from '../../fields/config/types.js'
+import type { Where } from '../../types/index.js'
 
 export const updateAccess: Access = ({ req }) => {
   if (!req.user) {
@@ -11,8 +12,8 @@ export const updateAccess: Access = ({ req }) => {
       {
         and: [
           {
-            'updateConstraints.users': {
-              equals: [req.user.id],
+            'updateConstraints.user': {
+              equals: req.user.id,
             },
           },
           {
@@ -42,7 +43,7 @@ export const updateAccess: Access = ({ req }) => {
         },
       },
     ],
-  }
+  } as Where
 }
 
 export const getUpdateAccessFields = (config: Config): Field[] => [
@@ -77,24 +78,33 @@ export const getUpdateAccessFields = (config: Config): Field[] => [
     type: 'group',
     fields: [
       {
-        name: 'users',
+        name: 'user',
         type: 'relationship',
         admin: {
-          condition: (data) =>
-            Boolean(data?.updateAccess === 'specificUsers' || data?.updateAccess === 'onlyMe'),
+          condition: (data) => Boolean(data?.updateAccess === 'onlyMe'),
         },
-        hasMany: true,
         hooks: {
           beforeChange: [
             ({ data, req }) => {
               if (data?.updateAccess === 'onlyMe') {
-                return [req.user?.id]
+                if (req.user) {
+                  return req.user.id
+                }
               }
 
-              return data?.updateConstraints?.users
+              return data?.updateConstraints?.user
             },
           ],
         },
+        relationTo: 'users',
+      },
+      {
+        name: 'users',
+        type: 'relationship',
+        admin: {
+          condition: (data) => Boolean(data?.updateAccess === 'specificUsers'),
+        },
+        hasMany: true,
         relationTo: 'users',
       },
     ],

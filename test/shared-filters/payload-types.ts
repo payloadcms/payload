@@ -199,10 +199,12 @@ export interface PayloadSharedFilter {
   title: string;
   readAccess?: ('everyone' | 'onlyMe' | 'specificUsers' | 'specificRoles') | null;
   readConstraints?: {
+    user?: (string | null) | User;
     users?: (string | User)[] | null;
   };
   updateAccess?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
   updateConstraints?: {
+    user?: (string | null) | User;
     users?: (string | User)[] | null;
   };
   where:
@@ -297,12 +299,14 @@ export interface PayloadSharedFiltersSelect<T extends boolean = true> {
   readConstraints?:
     | T
     | {
+        user?: T;
         users?: T;
       };
   updateAccess?: T;
   updateConstraints?:
     | T
     | {
+        user?: T;
         users?: T;
       };
   where?: T;

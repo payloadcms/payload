@@ -6,7 +6,7 @@ import { seedDB } from '../helpers/seed.js'
 import { collectionSlugs, pagesSlug, usersSlug } from './slugs.js'
 
 export const seed = async (_payload: Payload) => {
-  const [devUser, regularUser] = await executePromises(
+  const [devUser] = await executePromises(
     [
       () =>
         _payload.create({
@@ -52,7 +52,11 @@ export const seed = async (_payload: Payload) => {
               },
             },
             readAccess: 'specificUsers',
+            updateAccess: 'specificUsers',
             readConstraints: {
+              users: [devUser?.id || ''],
+            },
+            updateConstraints: {
               users: [devUser?.id || ''],
             },
             columns: [
@@ -75,6 +79,28 @@ export const seed = async (_payload: Payload) => {
               },
             },
             readAccess: 'everyone',
+            updateAccess: 'everyone',
+            columns: [
+              {
+                accessor: 'text',
+                active: true,
+              },
+            ],
+            relatedCollection: pagesSlug,
+          },
+        }),
+      () =>
+        _payload.create({
+          collection: 'payload-shared-filters',
+          data: {
+            title: 'Only Me',
+            where: {
+              text: {
+                equals: 'example page',
+              },
+            },
+            readAccess: 'onlyMe',
+            updateAccess: 'onlyMe',
             columns: [
               {
                 accessor: 'text',
