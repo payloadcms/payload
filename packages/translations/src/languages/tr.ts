@@ -175,6 +175,15 @@ export const trTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Bloğu aç/kapat',
     uploadNewLabel: 'Karşıya {{label}} yükle',
   },
+  folder: {
+    deleteFolder: 'Klasörü Sil',
+    folderName: 'Klasör Adı',
+    moveFolder: 'Klasörü Taşı',
+    newFolder: 'Yeni Klasör',
+    removeFromFolder: 'Klasörden Çıkar',
+    renameFolder: 'Klasörü Yeniden Adlandır',
+    selectFolder: 'Klasör Seçin',
+  },
   general: {
     aboutToDelete:
       '<1>{{title}}</1> {{label}} silinmek üzere. Silme işlemine devam etmek istiyor musunuz?',
@@ -263,6 +272,8 @@ export const trTranslations: DefaultTranslationsObject = {
     globals: 'Globaller',
     goBack: 'Geri dön',
     isEditing: 'düzenliyor',
+    item: 'öğe',
+    items: 'öğeler',
     language: 'Dil',
     lastModified: 'Son değiştirme',
     leaveAnyway: 'Yine de ayrıl',
@@ -274,8 +285,10 @@ export const trTranslations: DefaultTranslationsObject = {
     locales: 'Diller',
     menu: 'Menü',
     moreOptions: 'Daha fazla seçenek',
+    move: 'Hareket et',
     moveDown: 'Aşağı taşı',
     moveUp: 'Yukarı taşı',
+    movingItems: '{{count}} {{label}} taşıma',
     newPassword: 'Yeni parola',
     next: 'Sonraki',
     noDateSelected: 'Tarih seçilmedi',
@@ -303,6 +316,7 @@ export const trTranslations: DefaultTranslationsObject = {
     reindex: 'Yeniden İndeksle',
     reindexingAll: 'Tüm {{collections}} yeniden dizine alınıyor.',
     remove: 'Kaldır',
+    rename: 'Yeniden adlandır',
     reset: 'Sıfırla',
     resetPreferences: 'Tercihleri sıfırla',
     resetPreferencesDescription:

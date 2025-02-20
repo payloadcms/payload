@@ -174,6 +174,15 @@ export const myTranslations: DefaultTranslationsObject = {
     toggleBlock: 'ဘလောက်ကို ပြောင်းပါ။',
     uploadNewLabel: '{{label}} အသစ်တင်မည်။',
   },
+  folder: {
+    deleteFolder: 'Padam Folder',
+    folderName: 'ဖိုင်နာမည်',
+    moveFolder: 'Pindah Folder',
+    newFolder: 'Folder Baru',
+    removeFromFolder: 'Dari Folder Buang',
+    renameFolder: 'ဖိုလ်ဒါအမည်ပြောင်းရန်',
+    selectFolder: 'Pilih Folder',
+  },
   general: {
     aboutToDelete:
       '{{label}} <1>{{title}}</1> ကို ဖျက်ပါတော့မည်။ သေချာပြီလား။ ဖျက်ပြီးရင် ပြန်မရဘူးနော်။',
@@ -262,6 +271,8 @@ export const myTranslations: DefaultTranslationsObject = {
     globals: 'Globals',
     goBack: 'နောက်သို့',
     isEditing: 'ပြင်ဆင်နေသည်',
+    item: 'barang',
+    items: 'barang-barang',
     language: 'ဘာသာစကား',
     lastModified: 'နောက်ဆုံးပြင်ဆင်ထားသည်။',
     leaveAnyway: 'ဘာဖြစ်ဖြစ် ထွက်မည်။',
@@ -273,8 +284,10 @@ export const myTranslations: DefaultTranslationsObject = {
     locales: 'Locales',
     menu: 'မီနူး',
     moreOptions: 'ပိုမိုများစွာရွေးချယ်ခွင့်',
+    move: 'ရွှေ့ပြောင်းပါ',
     moveDown: 'Move Down',
     moveUp: 'Move Up',
+    movingItems: 'ရွှေ့ပြေးနေသည် {{count}} {{label}}',
     newPassword: 'စကားဝှက် အသစ်',
     next: 'Seterusnya',
     noDateSelected: 'ရက်စွဲမရွေးချယ်ထားပါ',
@@ -302,6 +315,7 @@ export const myTranslations: DefaultTranslationsObject = {
     reindex: 'ပြန်လည်အညွှန်းပြုလုပ်ပါ',
     reindexingAll: 'အပေါ် {{collections}} အားလုံးကို ထပ်လိပ်နေပါသည်။',
     remove: 'ဖယ်ရှားမည်။',
+    rename: 'အမည်ပြောင်း',
     reset: 'Tetapkan semula',
     resetPreferences: 'ကြိုတင်သတ်မှတ်ချက်များ ပြန်လည်တပ်ဆင်မည်',
     resetPreferencesDescription:

@@ -179,6 +179,15 @@ export const frTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Bloc bascule',
     uploadNewLabel: 'Téléverser un(e) nouveau ou nouvelle {{label}}',
   },
+  folder: {
+    deleteFolder: 'Supprimer le dossier',
+    folderName: 'Nom du dossier',
+    moveFolder: 'Déplacer le dossier',
+    newFolder: 'Nouveau Dossier',
+    removeFromFolder: 'Retirer du dossier',
+    renameFolder: 'Renommer le dossier',
+    selectFolder: 'Sélectionnez le dossier',
+  },
   general: {
     aboutToDelete:
       'Vous êtes sur le point de supprimer ce ou cette {{label}} <1>{{title}}</1>. Êtes-vous sûr ?',
@@ -267,6 +276,8 @@ export const frTranslations: DefaultTranslationsObject = {
     globals: 'Globals(es)',
     goBack: 'Retourner',
     isEditing: 'est en train de modifier',
+    item: 'article',
+    items: 'articles',
     language: 'Langue',
     lastModified: 'Dernière modification',
     leaveAnyway: 'Quitter quand même',
@@ -278,8 +289,10 @@ export const frTranslations: DefaultTranslationsObject = {
     locales: 'Paramètres régionaux',
     menu: 'Menu',
     moreOptions: "Plus d'options",
+    move: 'Déplacez-vous',
     moveDown: 'Déplacer vers le bas',
     moveUp: 'Déplacer vers le haut',
+    movingItems: 'Déplacer {{count}} {{label}}',
     newPassword: 'Nouveau mot de passe',
     next: 'Prochain',
     noDateSelected: 'Aucune date sélectionnée',
@@ -307,6 +320,7 @@ export const frTranslations: DefaultTranslationsObject = {
     reindex: 'Réindexer',
     reindexingAll: 'Réindexation de toutes les {{collections}}.',
     remove: 'Retirer',
+    rename: 'Renommer',
     reset: 'Réinitialiser',
     resetPreferences: 'Réinitialiser les préférences',
     resetPreferencesDescription:
