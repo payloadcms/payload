@@ -105,10 +105,6 @@ export const RootLayout = async ({
     clientConfig.localization.localeCodes = config.localization.locales.map(({ code }) => code)
   }
 
-  const locale = await getRequestLocale({
-    req,
-  })
-
   return (
     <html
       data-theme={theme}
@@ -127,7 +123,7 @@ export const RootLayout = async ({
           isNavOpen={navPrefs?.open ?? true}
           languageCode={languageCode}
           languageOptions={languageOptions}
-          locale={locale?.code}
+          locale={req.locale}
           permissions={permissions}
           serverFunction={serverFunction}
           switchLanguageServerAction={switchLanguageServerAction}
