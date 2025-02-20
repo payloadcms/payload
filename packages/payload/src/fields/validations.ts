@@ -357,10 +357,10 @@ export const json: JSONFieldValidation = async (
       const ajv = new Ajv()
 
       if (!ajv.validate(schema, value)) {
-        return t(ajv.errorsText())
+        return ajv.errorsText()
       }
     } catch (error) {
-      return t(error.message)
+      return error.message
     }
   }
   return true
