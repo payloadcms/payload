@@ -1106,14 +1106,54 @@ If you have custom features for `@payloadcms/richtext-lexical` you will need to 
 
 ## Reserved Field names
 
-Payload reserves certain field names for internal use. If your v2 collection uses any of these names, the field will be sanitized from the config, causing errors when deploying your application. Make sure to rename any fields that conflict with the reserved names:
+Payload reserves certain field names for internal use. Using any of the following names in your collections or globals will result in those fields being sanitized from the config, which can cause deployment errors. Ensure that any conflicting fields are renamed before migrating.
 
-- `__v`
+### General Reserved Names
+
+- `file`
+- `_id` (MongoDB only)
+- `__v` (MongoDB only)
+
+**Important Note**: It is recommended to avoid using field names with an underscore (`_`) prefix unless explicitly required by a plugin. Payload uses this prefix for internal columns, which can lead to conflicts in certain SQL conditions. The following are examples of reserved internal columns (this list is not exhaustive and other internal fields may also apply):
+
+- `_order`
+- `_path`
+- `_uuid`
+- `_parent_id`
+- `_locale`
+
+### Auth-Related Reserved Names
+
+These are restricted if your collection uses `auth`: true and does not have `disableAuthStrategy: true`:
 - `salt`
 - `hash`
-- `file`
+- `apiKey` (when `auth.useAPIKey: true` is enabled)
+- `useAPIKey` (when `auth.useAPIKey: true` is enabled)
+- `resetPasswordToken`
+- `resetPasswordExpiration`
+- `password`
+- `email`
+- `username`
 
-If any of these names are found in your collection fields, update them before migrating to avoid unexpected issues.
+### Upload-Related Reserved Names
+
+These apply if your collection has `upload: true` configured:
+
+- `filename`
+- `mimetype`
+- `filesize`
+- `width`
+- `height`
+- `focalX`
+- `focalY`
+- `url`
+- `thumbnailURL`
+
+If `imageSizes` is configured, the following are also reserved:
+
+- `sizes`
+
+If any of these names are found in your collection / global fields, update them before migrating to avoid unexpected issues.
 
 ## Upgrade from previous beta
 
