@@ -43,7 +43,10 @@ export const MoveToFolderDrawer = DrawerWithFolderContext<Props>((props) => {
           openModal(confirmModalSlug)
         }}
         saveLabel={t('folder:selectFolder')}
-        title={t('general:movingItems', { count })}
+        title={t('general:movingCount', {
+          count,
+          label: count > 1 ? t('general:items') : t('general:item'),
+        })}
       />
 
       <DrawerContentContainer className={baseClass}>
@@ -67,11 +70,12 @@ export const MoveToFolderDrawer = DrawerWithFolderContext<Props>((props) => {
       </DrawerContentContainer>
 
       <ConfirmationModal
-        body={t('general:aboutToDeleteCount', {
+        body={t('general:moveCount', {
           count,
+          label: count > 1 ? t('general:items') : t('general:item'),
         })}
-        confirmingLabel={t('general:deleting')}
-        heading={t('general:confirmDeletion')}
+        confirmingLabel={t('general:moving')}
+        heading={t('general:confirm')}
         modalSlug={confirmModalSlug}
         onConfirm={async () => {
           let folderToMoveTo = folderContext?.folderID || null
