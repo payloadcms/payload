@@ -2,6 +2,7 @@
 'use client'
 import type { Payload } from 'payload'
 
+import type { StringifiedQuery } from '../index.js'
 import type { ReadOperation } from '../usePayloadQuery.js'
 
 type PayloadQueryResult<T extends ReadOperation> = Promise<{
@@ -14,7 +15,7 @@ type PayloadQueryArgs<T extends ReadOperation> = {
   options?: {
     onChange?: (result: PayloadQueryResult<T>) => void
   }
-  query: Parameters<Payload[T]>[0]
+  queryParams: Parameters<Payload[T]>[0]
   type: T
 }
 
@@ -23,9 +24,9 @@ export async function _payloadQuery<T extends ReadOperation>(
   args: PayloadQueryArgs<T>,
 ): PayloadQueryResult<T> {
   try {
-    const { type, clientId, options, query } = args
+    const { type, clientId, options, queryParams } = args
     const response = await fetch(`/api/payload-query`, {
-      body: JSON.stringify({ type, clientId, query }),
+      body: JSON.stringify({ type, clientId, queryParams }),
       headers: {
         'Content-Type': 'application/json',
       },
@@ -42,15 +43,20 @@ export async function _payloadQuery<T extends ReadOperation>(
   }
 }
 
+type QuerySubscription = {
+  options?: { onChange?: (result: PayloadQueryResult<ReadOperation>) => void }
+  stringifiedQuery: StringifiedQuery
+}
+
 export function createPayloadClient(): {
   payloadQuery: (
     type: ReadOperation,
-    query: Parameters<Payload[ReadOperation]>[0],
+    queryParams: Parameters<Payload[ReadOperation]>[0],
     options?: { onChange?: (result: PayloadQueryResult<ReadOperation>) => void },
   ) => PayloadQueryResult<ReadOperation>
 } {
   const clientId = `client-${Date.now()}-${Math.random()}`
-  const subscriptions = new Map<string, Set<(result: PayloadQueryResult<ReadOperation>) => void>>()
+  const querySubscriptions = new Map<StringifiedQuery, Set<QuerySubscription>>()
   let eventSource: EventSource | null = null
 
   const connectSSE = () => {
@@ -62,19 +68,21 @@ export function createPayloadClient(): {
 
     eventSource.onmessage = (event) => {
       try {
-        console.log('event.data', event.data)
-        // ignore initial connection message
         const data = JSON.parse(event.data)
-        console.log('data', data)
+
+        // ignore initial connection message
         if (data === 'connected') {
-          console.log('client with id ', clientId, ' connected successfully')
+          return
         }
+        console.log('data', data)
 
         // Notify all subscribers that match this data update
-        subscriptions.forEach((callbacks, queryKey) => {
-          const { type, query } = JSON.parse(queryKey)
-          callbacks.forEach((callback) => callback(Promise.resolve({ data, error: null })))
-        })
+        const querySubscription = querySubscriptions.get(data)
+        if (querySubscription) {
+          querySubscription.forEach(({ options }) =>
+            options?.onChange?.(Promise.resolve({ data, error: null })),
+          )
+        }
       } catch (err) {
         console.error('Error processing server-sent event:', err)
       }
@@ -92,19 +100,19 @@ export function createPayloadClient(): {
   connectSSE()
 
   return {
-    payloadQuery: (type, query, options) => {
-      const queryKey = JSON.stringify({ type, clientId, query })
+    payloadQuery: (type, queryParams, options) => {
+      const stringifiedQuery = JSON.stringify({ type, queryParams })
 
       if (options?.onChange) {
-        let callbacks = subscriptions.get(queryKey)
+        let callbacks = querySubscriptions.get(stringifiedQuery)
         if (!callbacks) {
           callbacks = new Set()
-          subscriptions.set(queryKey, callbacks)
+          querySubscriptions.set(stringifiedQuery, callbacks)
         }
-        callbacks.add(options.onChange)
+        callbacks.add({ options, stringifiedQuery })
       }
 
-      return _payloadQuery({ type, clientId, options, query })
+      return _payloadQuery({ type, clientId, options, queryParams })
     },
   }
 }

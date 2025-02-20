@@ -22,42 +22,55 @@ type Client = {
 
 type QuerySubscription = {
   clients: Set<string> // clientId
-  query: any
+  queryParams: Parameters<Payload[ReadOperation]>[0]
   type: 'count' | 'find' | 'findByID'
 }
 
-type QueryId = `${ReadOperation}-${string}`
+export type Query<T extends ReadOperation> = {
+  queryParams: Parameters<Payload[T]>[0]
+  type: T
+}
+export type StringifiedQuery = string
 
-const querySubscriptions = new Map<QueryId, QuerySubscription>()
+const querySubscriptions = new Map<StringifiedQuery, QuerySubscription>()
 const clients = new Map<string, Client>()
 
 const sendToClients = async (querySubscription: QuerySubscription, payload: Payload) => {
-  const { type, query } = querySubscription
+  const { type, queryParams } = querySubscription
   let result: Awaited<ReturnType<Payload[ReadOperation]>> | undefined
 
   if (type === 'count') {
-    result = await payload.count(query)
+    result = await payload.count(queryParams)
   } else if (type === 'find') {
-    result = await payload.find(query)
+    result = await payload.find(queryParams)
   } else if (type === 'findByID') {
-    result = await payload.findByID(query)
+    result = await payload.findByID(queryParams)
   } else {
     throw new Error('Invalid query type')
   }
 
   try {
-    // TODO: is this correct?
     await Promise.all(
       Array.from(querySubscription.clients).map(async (clientId) => {
         const client = clients.get(clientId)
         if (!client) {
           throw new Error('Client not found')
         }
-        await client.writer.write(new TextEncoder().encode(`data: ${JSON.stringify(result)}\n\n`))
+        await client.writer.write(
+          new TextEncoder().encode(
+            `data: ${JSON.stringify({
+              queryResult: result,
+              stringifiedQuery: {
+                type,
+                queryParams,
+              },
+            })}\n\n`,
+          ),
+        )
       }),
     )
   } catch (error) {
-    console.error('Error in Promise.all:', error)
+    console.error('Error sending to clients:', error)
   }
   console.log('sendToClients done', result)
 }
@@ -69,19 +82,19 @@ export const realtimePlugin =
       for (const [, querySubscription] of querySubscriptions) {
         if (querySubscription.type === 'count') {
           // Always refresh count queries for the affected collection
-          if (querySubscription.query.collection === collection.slug) {
+          if (querySubscription.queryParams.collection === collection.slug) {
             await sendToClients(querySubscription, req.payload)
           }
         } else if (querySubscription.type === 'find') {
           // Refresh find queries if the collection matches
-          if (querySubscription.query.collection === collection.slug) {
+          if (querySubscription.queryParams.collection === collection.slug) {
             await sendToClients(querySubscription, req.payload)
           }
         } else if (querySubscription.type === 'findByID') {
           // Refresh findByID queries if the specific document changed
           if (
-            querySubscription.query.collection === collection.slug &&
-            querySubscription.query.id === doc.id
+            querySubscription.queryParams.collection === collection.slug &&
+            querySubscription.queryParams.id === doc.id
           ) {
             await sendToClients(querySubscription, req.payload)
           }
@@ -106,12 +119,12 @@ export const realtimePlugin =
           const body = await req.json()
           console.log('req.json 0', body)
 
-          const { type, clientId, query } = body as {
+          const { type, clientId, queryParams } = body as {
             clientId: string
-            query: Parameters<Payload[ReadOperation]>[0]
+            queryParams: Parameters<Payload[ReadOperation]>[0]
             type: ReadOperation
           }
-          if (!type || !query || !clientId) {
+          if (!type || !queryParams || !clientId) {
             throw new Error('Missing required parameters')
           }
           if (!clients.has(clientId)) {
@@ -121,28 +134,28 @@ export const realtimePlugin =
           // Execute the initial query
           let result
           if (type === 'count') {
-            result = await req.payload.count(query)
+            result = await req.payload.count(queryParams)
           } else if (type === 'find') {
-            result = await req.payload.find(query)
+            result = await req.payload.find(queryParams)
           } else if (type === 'findByID') {
-            result = await req.payload.findByID(query)
+            result = await req.payload.findByID(queryParams)
           } else {
             // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             throw new Error(`Unsupported query type: ${type}`)
           }
 
           // Insert or update the querySubscription (depending if queryId already exists)
-          const queryId = `${type}-${JSON.stringify(query)}` satisfies QueryId
-          if (!querySubscriptions.has(queryId)) {
-            querySubscriptions.set(queryId, {
+          const stringifiedQuery = JSON.stringify({ type, queryParams })
+          if (!querySubscriptions.has(stringifiedQuery)) {
+            querySubscriptions.set(stringifiedQuery, {
               type,
               clients: new Set(),
-              query,
+              queryParams,
             })
           }
 
           // Add this client to the querySubscription
-          const querySubscription = querySubscriptions.get(queryId)!
+          const querySubscription = querySubscriptions.get(stringifiedQuery)!
           querySubscription.clients.add(clientId)
 
           console.log('result', result)
