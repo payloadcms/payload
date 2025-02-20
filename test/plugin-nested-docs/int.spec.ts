@@ -131,6 +131,17 @@ describe('@payloadcms/plugin-nested-docs', () => {
         },
       })
 
+      // update the parent
+      await payload.update({
+        collection: 'pages',
+        id: parentDoc.id,
+        data: {
+          title: 'parent updated',
+          slug: 'parent-updated',
+          _status: 'published',
+        },
+      })
+
       // expect breadcrumbs to be an array
       expect(childDoc.breadcrumbs).toBeInstanceOf(Array)
       expect(childDoc.breadcrumbs).toBeDefined()
