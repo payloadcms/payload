@@ -172,15 +172,37 @@ export const promise = async ({
         req,
         siblingData: deepMergeWithSourceArrays(siblingDoc, siblingData),
       })
-
       if (typeof validationResult === 'string') {
         const label = getTranslatedLabel(field?.label || field?.name, req.i18n)
-        const parentPathSegments = parentPath ? parentPath.split('.') : []
 
-        const fieldLabel =
-          Array.isArray(parentPathSegments) && parentPathSegments.length > 0
-            ? getLabelFromPath(parentPathSegments.concat(label))
-            : label
+        const findLabelInFields = (fields, pathSegments) => {
+          if (pathSegments.length === 0) {return undefined}
+
+          const [currentSegment, ...remainingSegments] = pathSegments
+
+          for (const field of fields) {
+            if (field.name === currentSegment) {
+              if (remainingSegments.length === 0) {
+                return field.label
+              }
+
+              if (field.fields && field.fields.length > 0) {
+                return findLabelInFields(field.fields, remainingSegments)
+              }
+            }
+          }
+        }
+
+        const parentLabels = parentPath.split('.').map((segment, index, array) => {
+          const fullPath = array.slice(0, index + 1).join('.')
+          const pathSegments = fullPath.split('.')
+
+          const parentLabel = findLabelInFields(collection.flattenedFields, pathSegments) || segment
+
+          return getTranslatedLabel(parentLabel, req.i18n)
+        })
+
+        const fieldLabel = parentLabels.length > 0 ? [...parentLabels, label].join(' > ') : label
 
         errors.push({
           label: fieldLabel,
