@@ -1152,42 +1152,6 @@ export function configToJSONSchema(
       )
     : {}
 
-  const blocksDefinition: JSONSchema4 = {
-    type: 'object',
-    additionalProperties: false,
-    properties: {},
-    required: [],
-  }
-  for (const block of config.blocks) {
-    const blockFieldSchemas = fieldsToJSONSchema(
-      collectionIDFieldTypes,
-      block.flattenedFields,
-      interfaceNameDefinitions,
-      config,
-      i18n,
-    )
-
-    const blockSchema: JSONSchema4 = {
-      type: 'object',
-      additionalProperties: false,
-      properties: {
-        ...blockFieldSchemas.properties,
-        blockType: {
-          const: block.slug,
-        },
-      },
-      required: ['blockType', ...blockFieldSchemas.required],
-    }
-
-    const interfaceName = block.interfaceName ?? block.slug
-    interfaceNameDefinitions.set(interfaceName, blockSchema)
-
-    blocksDefinition.properties[block.slug] = {
-      $ref: `#/definitions/${interfaceName}`,
-    }
-    ;(blocksDefinition.required as string[]).push(block.slug)
-  }
-
   let jsonSchema: JSONSchema4 = {
     additionalProperties: false,
     definitions: {
@@ -1200,7 +1164,6 @@ export function configToJSONSchema(
     type: 'object',
     properties: {
       auth: generateAuthOperationSchemas(config.collections),
-      blocks: blocksDefinition,
       collections: generateEntitySchemas(config.collections || []),
       collectionsJoins: generateCollectionJoinsSchemas(config.collections || []),
       collectionsSelect: generateEntitySelectSchemas(config.collections || []),
@@ -1225,6 +1188,46 @@ export function configToJSONSchema(
     ],
     title: 'Config',
   }
+
+  if (config?.blocks?.length) {
+    const blocksDefinition: JSONSchema4 = {
+      type: 'object',
+      additionalProperties: false,
+      properties: {},
+      required: [],
+    }
+    for (const block of config.blocks) {
+      const blockFieldSchemas = fieldsToJSONSchema(
+        collectionIDFieldTypes,
+        block.flattenedFields,
+        interfaceNameDefinitions,
+        config,
+        i18n,
+      )
+
+      const blockSchema: JSONSchema4 = {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          ...blockFieldSchemas.properties,
+          blockType: {
+            const: block.slug,
+          },
+        },
+        required: ['blockType', ...blockFieldSchemas.required],
+      }
+
+      const interfaceName = block.interfaceName ?? block.slug
+      interfaceNameDefinitions.set(interfaceName, blockSchema)
+
+      blocksDefinition.properties[block.slug] = {
+        $ref: `#/definitions/${interfaceName}`,
+      }
+      ;(blocksDefinition.required as string[]).push(block.slug)
+    }
+    jsonSchema.properties.blocks = blocksDefinition
+  }
+
   if (jobsSchemas.definitions?.size) {
     for (const [key, value] of jobsSchemas.definitions) {
       jsonSchema.definitions[key] = value
