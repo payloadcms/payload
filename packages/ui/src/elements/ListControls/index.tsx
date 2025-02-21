@@ -18,10 +18,10 @@ import { AnimateHeight } from '../AnimateHeight/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
 import { DeleteMany } from '../DeleteMany/index.js'
 import { EditMany } from '../EditMany/index.js'
+import { ListPresets } from '../ListPresets/index.js'
 import { Pill } from '../Pill/index.js'
 import { PublishMany } from '../PublishMany/index.js'
 import { SearchFilter } from '../SearchFilter/index.js'
-import { SelectListPreset } from '../SelectListPreset/index.js'
 import { UnpublishMany } from '../UnpublishMany/index.js'
 import { WhereBuilder } from '../WhereBuilder/index.js'
 import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched.js'
@@ -36,6 +36,7 @@ export type ListControlsProps = {
   readonly collectionSlug: string
   readonly disableBulkDelete?: boolean
   readonly disableBulkEdit?: boolean
+  readonly disableListFilters?: boolean
   readonly enableColumns?: boolean
   readonly enableSort?: boolean
   readonly handleSearchChange?: (search: string) => void
@@ -59,6 +60,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     collectionSlug,
     disableBulkDelete,
     disableBulkEdit,
+    disableListFilters,
     enableColumns = true,
     enableSort = false,
     listMenuItems: listMenuItemsFromProps,
@@ -179,82 +181,84 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__wrap`}>
-        <SearchIcon />
-        <SearchFilter
-          fieldName={titleField && 'name' in titleField ? titleField?.name : null}
-          handleChange={(search) => {
-            return void handleSearchChange(search)
-          }}
-          // @ts-expect-error @todo: fix types
-          initialParams={query}
-          key={collectionSlug}
-          label={searchLabelTranslated.current}
-        />
-        <div className={`${baseClass}__buttons`}>
-          <div className={`${baseClass}__buttons-wrap`}>
-            {!smallBreak && (
-              <React.Fragment>
-                {beforeActions && beforeActions}
-                {!disableBulkEdit && (
-                  <Fragment>
-                    <EditMany collection={collectionConfig} />
-                    <PublishMany collection={collectionConfig} />
-                    <UnpublishMany collection={collectionConfig} />
-                  </Fragment>
-                )}
-                {!disableBulkDelete && <DeleteMany collection={collectionConfig} />}
-              </React.Fragment>
-            )}
-            {enableColumns && (
+        <div className={`${baseClass}__search-wrap`}>
+          <SearchIcon />
+          <SearchFilter
+            fieldName={titleField && 'name' in titleField ? titleField?.name : null}
+            handleChange={(search) => {
+              return void handleSearchChange(search)
+            }}
+            // @ts-expect-error @todo: fix types
+            initialParams={query}
+            key={collectionSlug}
+            label={searchLabelTranslated.current}
+          />
+          <div className={`${baseClass}__buttons`}>
+            <div className={`${baseClass}__buttons-wrap`}>
+              {!smallBreak && (
+                <React.Fragment>
+                  {beforeActions && beforeActions}
+                  {!disableBulkEdit && (
+                    <Fragment>
+                      <EditMany collection={collectionConfig} />
+                      <PublishMany collection={collectionConfig} />
+                      <UnpublishMany collection={collectionConfig} />
+                    </Fragment>
+                  )}
+                  {!disableBulkDelete && <DeleteMany collection={collectionConfig} />}
+                </React.Fragment>
+              )}
+              {enableColumns && (
+                <Pill
+                  aria-controls={`${baseClass}-columns`}
+                  aria-expanded={visibleDrawer === 'columns'}
+                  className={`${baseClass}__toggle-columns`}
+                  icon={<ChevronIcon direction={visibleDrawer === 'columns' ? 'up' : 'down'} />}
+                  onClick={() =>
+                    setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)
+                  }
+                  pillStyle="light"
+                >
+                  {t('general:columns')}
+                </Pill>
+              )}
               <Pill
-                aria-controls={`${baseClass}-columns`}
-                aria-expanded={visibleDrawer === 'columns'}
-                className={`${baseClass}__toggle-columns`}
-                icon={<ChevronIcon direction={visibleDrawer === 'columns' ? 'up' : 'down'} />}
-                onClick={() =>
-                  setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)
-                }
+                aria-controls={`${baseClass}-where`}
+                aria-expanded={visibleDrawer === 'where'}
+                className={`${baseClass}__toggle-where`}
+                icon={<ChevronIcon direction={visibleDrawer === 'where' ? 'up' : 'down'} />}
+                onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
                 pillStyle="light"
               >
-                {t('general:columns')}
+                {t('general:filters')}
               </Pill>
-            )}
-            <Pill
-              aria-controls={`${baseClass}-where`}
-              aria-expanded={visibleDrawer === 'where'}
-              className={`${baseClass}__toggle-where`}
-              icon={<ChevronIcon direction={visibleDrawer === 'where' ? 'up' : 'down'} />}
-              onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
-              pillStyle="light"
-            >
-              {t('general:filters')}
-            </Pill>
-            <SelectListPreset activePreset={activePreset} />
-            {enableSort && (
-              <Pill
-                aria-controls={`${baseClass}-sort`}
-                aria-expanded={visibleDrawer === 'sort'}
-                className={`${baseClass}__toggle-sort`}
-                icon={<ChevronIcon />}
-                onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : undefined)}
-                pillStyle="light"
-              >
-                {t('general:sort')}
-              </Pill>
-            )}
-            {listMenuItems && (
-              <Popup
-                button={<Dots ariaLabel={t('general:moreOptions')} />}
-                className={`${baseClass}__popup`}
-                horizontalAlign="right"
-                size="large"
-                verticalAlign="bottom"
-              >
-                <PopupList.ButtonGroup>{listMenuItems}</PopupList.ButtonGroup>
-              </Popup>
-            )}
+              {enableSort && (
+                <Pill
+                  aria-controls={`${baseClass}-sort`}
+                  aria-expanded={visibleDrawer === 'sort'}
+                  className={`${baseClass}__toggle-sort`}
+                  icon={<ChevronIcon />}
+                  onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : undefined)}
+                  pillStyle="light"
+                >
+                  {t('general:sort')}
+                </Pill>
+              )}
+              {listMenuItems && (
+                <Popup
+                  button={<Dots ariaLabel={t('general:moreOptions')} />}
+                  className={`${baseClass}__popup`}
+                  horizontalAlign="right"
+                  size="large"
+                  verticalAlign="bottom"
+                >
+                  <PopupList.ButtonGroup>{listMenuItems}</PopupList.ButtonGroup>
+                </Popup>
+              )}
+            </div>
           </div>
         </div>
+        {!disableListFilters && <ListPresets activePreset={activePreset} />}
       </div>
       {enableColumns && (
         <AnimateHeight

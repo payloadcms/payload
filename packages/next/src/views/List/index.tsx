@@ -25,6 +25,7 @@ type RenderListViewArgs = {
   customCellProps?: Record<string, any>
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
+  disableListFilters?: boolean
   drawerSlug?: string
   enableRowSelections: boolean
   overrideEntityVisibility?: boolean
@@ -41,6 +42,7 @@ export const renderListView = async (
     customCellProps,
     disableBulkDelete,
     disableBulkEdit,
+    disableListFilters,
     drawerSlug,
     enableRowSelections,
     initPageResult,
@@ -231,6 +233,7 @@ export const renderListView = async (
                 columnState,
                 disableBulkDelete,
                 disableBulkEdit,
+                disableListFilters,
                 enableRowSelections,
                 hasCreatePermission,
                 listPreferences,

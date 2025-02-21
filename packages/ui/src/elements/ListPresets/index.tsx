@@ -5,24 +5,23 @@ import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { Fragment, useCallback, useState } from 'react'
 
-import { useListDrawer } from '../../elements/ListDrawer/index.js'
-import { Dots } from '../../icons/Dots/index.js'
+import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { XIcon } from '../../icons/X/index.js'
 import { useListQuery } from '../../providers/ListQuery/context.js'
 import { useTableColumns } from '../../providers/TableColumns/context.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
-import { Pill } from '../Pill/index.js'
+import { useListDrawer } from '../ListDrawer/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
 import { Translation } from '../Translation/index.js'
 import './index.scss'
 
-const baseClass = 'select-list-preset'
+const baseClass = 'list-presets'
 
 const confirmDeleteModalSlug = 'confirm-delete-filter'
 
-export function SelectListPreset({ activePreset: initialPreset }: { activePreset: ListPreset }) {
+export function ListPresets({ activePreset: initialPreset }: { activePreset: ListPreset }) {
   const { i18n, t } = useTranslation()
   const { openModal } = useModal()
 
@@ -50,29 +49,37 @@ export function SelectListPreset({ activePreset: initialPreset }: { activePreset
 
   return (
     <Fragment>
-      <Pill className={baseClass} pillStyle="light">
-        <div className={`${baseClass}__actions`}>
+      <div className={baseClass}>
+        <button
+          className={`${baseClass}__select`}
+          onClick={() => {
+            openListDrawer()
+          }}
+          type="button"
+        >
           {selectedFilter ? (
-            <button
-              className={`${baseClass}__clear`}
-              onClick={() => setSelectedFilter(undefined)}
-              type="button"
+            <div
+              className={`${baseClass}__select__clear`}
+              onClick={(e) => {
+                e.stopPropagation()
+                setSelectedFilter(undefined)
+              }}
+              onKeyDown={(e) => {
+                e.stopPropagation()
+                setSelectedFilter(undefined)
+              }}
+              role="button"
+              tabIndex={0}
             >
               <XIcon />
-            </button>
+            </div>
           ) : null}
-          <button
-            className={`${baseClass}__select`}
-            onClick={() => {
-              openListDrawer()
-            }}
-            type="button"
-          >
-            {selectedFilter?.title || selectedFilter?.docID || 'Select preset'}
-          </button>
-        </div>
+          <div className={`${baseClass}__select__label`}>
+            {selectedFilter?.title || 'Select preset'}
+          </div>
+        </button>
         <Popup
-          button={<Dots ariaLabel={t('general:moreOptions')} />}
+          button={<ChevronIcon ariaLabel={t('general:moreOptions')} direction="down" />}
           className={`${baseClass}__popup`}
           horizontalAlign="right"
           size="large"
@@ -119,11 +126,12 @@ export function SelectListPreset({ activePreset: initialPreset }: { activePreset
             ) : null}
           </PopupList.ButtonGroup>
         </Popup>
-      </Pill>
+      </div>
       <ListDrawer
-        onSelect={(doc) => {
+        disableListFilters
+        onSelect={({ doc }) => {
           closeListDrawer()
-          setSelectedFilter(doc)
+          setSelectedFilter(doc as ListPreset)
         }}
       />
       <DocumentDrawer

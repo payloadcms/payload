@@ -1,0 +1,49 @@
+@layer payload-default {
+  .list-presets {
+    overflow: visible;
+    display: flex;
+    justify-content: flex-start;
+    background-color: var(--theme-elevation-50);
+    border-radius: var(--style-radius-m);
+    padding-left: calc(var(--base) / 2);
+
+    &__select {
+      width: calc(var(--base) * 6);
+      text-align: left;
+      display: flex;
+      align-items: center;
+
+      &__label {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+    }
+
+    &__popup .popup-button {
+      padding: 0 calc(var(--base) / 2);
+      display: flex;
+      align-items: center;
+    }
+
+    &__select__clear {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    &__select__clear,
+    &__select {
+      margin: 0;
+      background: transparent;
+      appearance: none;
+      border: 0;
+      padding: 0;
+      cursor: pointer;
+      font-size: inherit;
+      color: var(--theme-elevation-500);
+      color: inherit;
+      line-height: inherit;
+    }
+  }
+}

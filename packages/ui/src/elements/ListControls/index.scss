@@ -4,6 +4,12 @@
   .list-controls {
     &__wrap {
       display: flex;
+      gap: 4px;
+    }
+
+    &__search-wrap {
+      width: 100%;
+      display: flex;
       align-items: center;
       background-color: var(--theme-elevation-50);
       border-radius: var(--style-radius-m);
@@ -27,7 +33,7 @@
     &__buttons-wrap {
       display: flex;
       align-items: center;
-      gap: base(0.2);
+      gap: 4px;
 
       .pill {
         background-color: var(--theme-elevation-150);
@@ -46,6 +52,11 @@
 
     @include small-break {
       &__wrap {
+        flex-wrap: wrap;
+        position: relative;
+      }
+
+      &__search-wrap {
         flex-wrap: wrap;
         background-color: unset;
         padding: 0;

@@ -42,6 +42,7 @@ export type ListViewClientProps = {
   columnState: Column[]
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
+  disableListFilters?: boolean
   enableRowSelections?: boolean
   hasCreatePermission: boolean
   listPreferences?: ListPreferences
