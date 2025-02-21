@@ -36,12 +36,12 @@ export const createJSONQuery = ({ column, operator, pathSegments, value }: Creat
     })
   } else if (operator === 'exists') {
     sql = `${value === false ? 'NOT ' : ''}jsonb_path_exists(${columnName}, '$.${jsonPaths}')`
-  } else {
+  } else if (['not_like'].includes(operator)) {
     const mappedOperator = operatorMap[operator]
-    const isNegated = mappedOperator.startsWith('!')
-    const cleanOperator = isNegated ? mappedOperator.substring(1) : mappedOperator
 
-    sql = `${isNegated ? 'NOT ' : ''}jsonb_path_exists(${columnName}, '$.${jsonPaths} ? (@ ${cleanOperator} ${sanitizeValue(value, operator)})')`
+    sql = `NOT jsonb_path_exists(${columnName}, '$.${jsonPaths} ? (@ ${mappedOperator.substring(1)} ${sanitizeValue(value, operator)})')`
+  } else {
+    sql = `jsonb_path_exists(${columnName}, '$.${jsonPaths} ? (@ ${operatorMap[operator]} ${sanitizeValue(value, operator)})')`
   }
 
   return sql
