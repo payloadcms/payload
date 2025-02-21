@@ -65,23 +65,15 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     disableListFilters,
     enableColumns = true,
     enableSort = false,
-    listMenuItems: listMenuItemsFromProps,
+    listMenuItems,
     renderedFilters,
     resolvedFilterOptions,
   } = props
 
-  const {
-    handleSearchChange,
-    modified: listQueryModified,
-    query,
-    setModified: setQueryModified,
-  } = useListQuery()
+  const { handleSearchChange, query } = useListQuery()
+
   const titleField = useUseTitleField(collectionConfig)
   const { i18n, t } = useTranslation()
-
-  const { modified: columnsModified, setModified: setColumnsModified } = useTableColumns()
-
-  const modifiedPreset = listQueryModified || columnsModified
 
   const {
     breakpoints: { s: smallBreak },
@@ -150,35 +142,6 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
       })
     }
   }, [t, listSearchableFields, i18n, searchLabel])
-
-  let listMenuItems = listMenuItemsFromProps
-
-  if (modifiedPreset) {
-    if (!listMenuItems) {
-      listMenuItems = []
-    }
-
-    listMenuItems.push(
-      <PopupList.Button
-      // onClick={() => {
-      //   setDocumentEditID(selectedFilter.id)
-      //   openEditDrawer()
-      // }}
-      >
-        {t('general:edit')}
-      </PopupList.Button>,
-      <PopupList.Button
-      // onClick={() => openListDrawer()}
-      >
-        Manage All
-      </PopupList.Button>,
-      <PopupList.Button
-      // onClick={() => openModal(confirmDeleteModalSlug)}
-      >
-        {t('general:delete')}
-      </PopupList.Button>,
-    )
-  }
 
   return (
     <div className={baseClass}>
