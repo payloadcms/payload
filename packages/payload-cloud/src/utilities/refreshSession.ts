@@ -6,7 +6,7 @@ import { authAsCognitoUser } from './authAsCognitoUser.js'
 
 export type GetStorageClient = () => Promise<{
   identityID: string
-  storageClient: AWS.S3 | null
+  storageClient: AWS.S3
 }>
 
 export const refreshSession = async () => {
