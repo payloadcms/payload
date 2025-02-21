@@ -50,7 +50,12 @@ const getPartialInitReqContainer = cache(function (): {
   }
 })
 
-const getInitReqContainer = cache(function (key: string): {
+const getInitReqContainer = cache(function (
+  /**
+   * The key is solely used to control caching behavior
+   */
+  key: string,
+): {
   reqResult: false | Promise<Result> | Result
 } {
   return {
@@ -69,7 +74,7 @@ const initPartialReq = async function ({
 
   if (
     partialReqContainer?.reqResult &&
-    'then' in partialReqContainer?.reqResult &&
+    'then' in partialReqContainer.reqResult &&
     typeof partialReqContainer?.reqResult?.then === 'function'
   ) {
     return await partialReqContainer.reqResult
@@ -144,7 +149,7 @@ export const initReq = async function ({
 
   if (
     reqContainer?.reqResult &&
-    'then' in reqContainer?.reqResult &&
+    'then' in reqContainer.reqResult &&
     typeof reqContainer?.reqResult?.then === 'function'
   ) {
     return await reqContainer.reqResult
