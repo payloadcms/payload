@@ -15,6 +15,7 @@ export const getConstraints = (config: Config): Field => ({
       {
         name: 'constraint',
         type: 'select',
+        defaultValue: 'onlyMe',
         options: [
           {
             label: 'Everyone',
@@ -72,4 +73,27 @@ export const getConstraints = (config: Config): Field => ({
       }, [] as Field[]) || []),
     ],
   })),
+  hooks: {
+    beforeChange: [
+      ({ data }) => {
+        const dataToReturn = { ...data }
+
+        // ensure all operations have a constraint
+        operations.forEach((operation) => {
+          if (!dataToReturn[operation]) {
+            dataToReturn[operation] = {}
+          }
+
+          if (!dataToReturn[operation]?.constraint) {
+            dataToReturn[operation] = {
+              ...dataToReturn[operation],
+              constraint: 'onlyMe',
+            }
+          }
+        })
+
+        return dataToReturn
+      },
+    ],
+  },
 })

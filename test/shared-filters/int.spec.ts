@@ -75,7 +75,6 @@ describe('Shared Filters', () => {
         user,
         overrideAccess: false,
         id: filterDoc.id,
-        select: {},
       })
 
       expect(resultWithUser.id).toBe(filterDoc.id)
@@ -87,7 +86,6 @@ describe('Shared Filters', () => {
           user: user2,
           overrideAccess: false,
           id: filterDoc.id,
-          select: {},
         })
 
         expect(resultWithUser2).toBeFalsy()
@@ -103,9 +101,6 @@ describe('Shared Filters', () => {
         data: {
           title: 'Specific Users (Updated)',
         },
-        select: {
-          title: true,
-        },
       })
 
       expect(resultUpdatedByUser.title).toBe('Specific Users (Updated)')
@@ -119,7 +114,6 @@ describe('Shared Filters', () => {
           data: {
             title: 'Specific Users (Updated)',
           },
-          select: {},
         })
 
         expect(resultWithUser2).toBeFalsy()
@@ -159,7 +153,6 @@ describe('Shared Filters', () => {
         user,
         overrideAccess: false,
         id: filterDoc.id,
-        select: {},
       })
 
       expect(resultWithUser.id).toBe(filterDoc.id)
@@ -171,7 +164,6 @@ describe('Shared Filters', () => {
           user: user2,
           overrideAccess: false,
           id: filterDoc.id,
-          select: {},
         })
 
         expect(resultWithUser2).toBeFalsy()
@@ -188,9 +180,6 @@ describe('Shared Filters', () => {
         data: {
           title: 'Only Me (Updated)',
         },
-        select: {
-          title: true,
-        },
       })
 
       expect(resultUpdatedByUser.title).toBe('Only Me (Updated)')
@@ -204,7 +193,6 @@ describe('Shared Filters', () => {
           data: {
             title: 'Only Me (Updated)',
           },
-          select: {},
         })
 
         expect(resultWithUser2).toBeFalsy()
@@ -243,7 +231,6 @@ describe('Shared Filters', () => {
         user,
         overrideAccess: false,
         id: filterDoc.id,
-        select: {},
       })
 
       expect(resultWithUser.id).toBe(filterDoc.id)
@@ -254,7 +241,6 @@ describe('Shared Filters', () => {
         user: user2,
         overrideAccess: false,
         id: filterDoc.id,
-        select: {},
       })
 
       expect(resultWithUser2.id).toBe(filterDoc.id)
@@ -265,14 +251,11 @@ describe('Shared Filters', () => {
         user,
         overrideAccess: false,
         data: {
-          title: 'Everyone (Updated)',
-        },
-        select: {
-          title: true,
+          title: 'Everyone (Update 1)',
         },
       })
 
-      expect(resultUpdatedByUser.title).toBe('Everyone (Updated)')
+      expect(resultUpdatedByUser.title).toBe('Everyone (Update 1)')
 
       const resultUpdatedByUser2 = await payload.update({
         collection: sharedFilterCollectionSlug,
@@ -280,14 +263,11 @@ describe('Shared Filters', () => {
         user: user2,
         overrideAccess: false,
         data: {
-          title: 'Everyone (Updated)',
-        },
-        select: {
-          title: true,
+          title: 'Everyone (Update 2)',
         },
       })
 
-      expect(resultUpdatedByUser2.title).toBe('Everyone (Updated)')
+      expect(resultUpdatedByUser2.title).toBe('Everyone (Update 2)')
     })
   })
 
@@ -323,7 +303,6 @@ describe('Shared Filters', () => {
         user,
         overrideAccess: false,
         id: adminOnlyFilter.id,
-        select: {},
       })
 
       expect(resultWithUser.id).toBe(adminOnlyFilter.id)
@@ -335,7 +314,6 @@ describe('Shared Filters', () => {
           user: user2,
           overrideAccess: false,
           id: adminOnlyFilter.id,
-          select: {},
         })
 
         expect(resultWithUser2).toBeFalsy()
@@ -352,9 +330,6 @@ describe('Shared Filters', () => {
         data: {
           title: 'Specific Roles (Updated)',
         },
-        select: {
-          title: true,
-        },
       })
 
       expect(resultUpdatedByUser.title).toBe('Specific Roles (Updated)')
@@ -367,9 +342,6 @@ describe('Shared Filters', () => {
           overrideAccess: false,
           data: {
             title: 'Specific Roles (Updated)',
-          },
-          select: {
-            title: true,
           },
         })
 

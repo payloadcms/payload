@@ -23,36 +23,39 @@ export const getAccess = (config: Config): Record<Operation, Access> =>
           return false
         }
 
-        const constraintFieldName = `access.${operation}.constraint`
+        const constraintField = `access.${operation}.constraint`
 
         const constraints = {
           or: [
             {
               and: [
                 {
-                  [`access.${operation}.users`]: {
-                    in: req.user.id,
+                  access: {
+                    [operation]: {
+                      users: {
+                        in: [req.user.id],
+                      },
+                    },
                   },
                 },
                 {
-                  or: [
-                    {
-                      [constraintFieldName]: {
-                        equals: 'onlyMe',
+                  access: {
+                    [operation]: {
+                      constraint: {
+                        in: ['onlyMe', 'specificUsers'],
                       },
                     },
-                    {
-                      [constraintFieldName]: {
-                        equals: 'specificUsers',
-                      },
-                    },
-                  ],
+                  },
                 },
               ],
             },
             {
-              [constraintFieldName]: {
-                equals: 'everyone',
+              access: {
+                [operation]: {
+                  constraint: {
+                    equals: 'everyone',
+                  },
+                },
               },
             },
           ],
