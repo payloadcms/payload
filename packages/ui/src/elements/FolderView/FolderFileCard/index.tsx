@@ -113,7 +113,7 @@ export function FolderFileCard({
         {PopupActions ? (
           <Popup
             button={<ThreeDotsIcon />}
-            disabled={!selectedCount || selectedCount > 1 || (selectedCount === 1 && !isSelected)}
+            disabled={selectedCount > 1 || (selectedCount === 1 && !isSelected)}
             horizontalAlign="right"
             size="large"
             verticalAlign="bottom"
