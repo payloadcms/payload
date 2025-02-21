@@ -11,5 +11,6 @@ export const operatorMap = {
   near: '$near',
   not_equals: '$ne',
   not_in: '$nin',
+  not_like: '$not',
   within: '$geoWithin',
 }

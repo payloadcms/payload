@@ -54,6 +54,9 @@ const createConstraint = ({
   if (['contains', 'like'].includes(operator)) {
     formattedOperator = 'like'
     formattedValue = `%${value}%`
+  } else if (['not_like'].includes(operator)) {
+    formattedOperator = 'notlike'
+    formattedValue = `%${value}%`
   } else if (operator === 'equals') {
     formattedOperator = '='
   }

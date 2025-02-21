@@ -161,6 +161,7 @@ export function parseParams({
                     like: { operator: 'like', wildcard: '%' },
                     not_equals: { operator: '<>', wildcard: '' },
                     not_in: { operator: 'not in', wildcard: '' },
+                    not_like: { operator: 'not like', wildcard: '%' },
                   }
 
                   let formattedValue = val
