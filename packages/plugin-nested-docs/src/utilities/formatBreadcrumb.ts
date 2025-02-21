@@ -20,7 +20,9 @@ export const formatBreadcrumb = (
     label = pluginConfig.generateLabel(docs, lastDoc)
   } else {
     const useAsTitle = collection?.admin?.useAsTitle || 'id'
-    label = lastDoc[useAsTitle] as string
+
+    // Fallback to ID if useAsTitle field is not filled (e.g., optional fields).
+    label = (lastDoc[useAsTitle] ?? lastDoc.id) as string
   }
 
   return {
