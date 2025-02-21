@@ -269,6 +269,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     locale: 'Локализация',
     locales: 'Локализации',
     menu: 'Меню',
+    moreOptions: 'Повече опции',
     moveDown: 'Надолу',
     moveUp: 'Нагоре',
     newPassword: 'Нова парола',
@@ -329,6 +330,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     takeOver: 'Поемане',
     thisLanguage: 'Български',
     time: 'Време',
+    timezone: 'Часова зона',
     titleDeleted: '{{label}} "{{title}}" успешно изтрит.',
     true: 'Вярно',
     unauthorized: 'Неоторизиран',
@@ -423,6 +425,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'Това поле изисква 2 числа.',
     shorterThanMax:
       'Тази стойност трябва да е по-малка от максималната стойност от {{maxLength}} символа.',
+    timezoneRequired: 'Изисква се часова зона.',
     trueOrFalse: 'Това поле може да бъде само "true" или "false".',
     username:
       'Моля, въведете валидно потребителско име. Може да съдържа букви, цифри, тирета, точки и долни черти.',

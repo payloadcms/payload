@@ -9,6 +9,7 @@ type Args = {
   adapter: DrizzleAdapter
   data: Record<string, unknown>
   fields: FlattenedField[]
+  parentIsLocalized?: boolean
   path?: string
   tableName: string
 }
@@ -17,6 +18,7 @@ export const transformForWrite = ({
   adapter,
   data,
   fields,
+  parentIsLocalized,
   path = '',
   tableName,
 }: Args): RowToInsert => {
@@ -48,6 +50,7 @@ export const transformForWrite = ({
     fields,
     locales: rowToInsert.locales,
     numbers: rowToInsert.numbers,
+    parentIsLocalized,
     parentTableName: tableName,
     path,
     relationships: rowToInsert.relationships,

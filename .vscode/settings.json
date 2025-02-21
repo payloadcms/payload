@@ -19,6 +19,7 @@
   // Load .git-blame-ignore-revs file
   "gitlens.advanced.blame.customArguments": ["--ignore-revs-file", ".git-blame-ignore-revs"],
   "jestrunner.jestCommand": "pnpm exec cross-env NODE_OPTIONS=\"--no-deprecation\" node 'node_modules/jest/bin/jest.js'",
+  "jestrunner.changeDirectoryToWorkspaceRoot": false,
   "jestrunner.debugOptions": {
     "runtimeArgs": ["--no-deprecation"]
   },

@@ -1,11 +1,12 @@
 import type { QueryOptions } from 'mongoose'
-import type { DeleteOne, Document } from 'payload'
+import type { DeleteOne } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildQuery } from './queries/buildQuery.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { getSession } from './utilities/getSession.js'
-import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
+import { transform } from './utilities/transform.js'
 
 export const deleteOne: DeleteOne = async function deleteOne(
   this: MongooseAdapter,
@@ -21,18 +22,25 @@ export const deleteOne: DeleteOne = async function deleteOne(
     session: await getSession(this, req),
   }
 
-  const query = await Model.buildQuery({
-    payload: this.payload,
+  const query = await buildQuery({
+    adapter: this,
+    collectionSlug: collection,
+    fields: this.payload.collections[collection].config.flattenedFields,
     where,
   })
 
-  const doc = await Model.findOneAndDelete(query, options).lean()
+  const doc = await Model.findOneAndDelete(query, options)?.lean()
 
-  let result: Document = JSON.parse(JSON.stringify(doc))
+  if (!doc) {
+    return null
+  }
 
-  // custom id type reset
-  result.id = result._id
-  result = sanitizeInternalFields(result)
+  transform({
+    adapter: this,
+    data: doc,
+    fields: this.payload.collections[collection].config.fields,
+    operation: 'read',
+  })
 
-  return result
+  return doc
 }

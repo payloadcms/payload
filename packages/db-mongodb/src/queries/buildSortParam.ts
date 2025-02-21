@@ -7,6 +7,7 @@ type Args = {
   config: SanitizedConfig
   fields: FlattenedField[]
   locale: string
+  parentIsLocalized?: boolean
   sort: Sort
   timestamps: boolean
 }
@@ -22,6 +23,7 @@ export const buildSortParam = ({
   config,
   fields,
   locale,
+  parentIsLocalized,
   sort,
   timestamps,
 }: Args): PaginateOptions['sort'] => {
@@ -55,6 +57,7 @@ export const buildSortParam = ({
       config,
       fields,
       locale,
+      parentIsLocalized,
       segments: sortProperty.split('.'),
     })
     acc[localizedProperty] = sortDirection

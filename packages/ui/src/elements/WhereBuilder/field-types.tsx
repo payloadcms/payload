@@ -78,7 +78,12 @@ const contains = {
   value: 'contains',
 }
 
-const fieldTypeConditions = {
+const fieldTypeConditions: {
+  [key: string]: {
+    component: string
+    operators: { label: string; value: string }[]
+  }
+} = {
   checkbox: {
     component: 'Text',
     operators: boolean,

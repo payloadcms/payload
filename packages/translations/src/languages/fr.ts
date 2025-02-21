@@ -277,6 +277,7 @@ export const frTranslations: DefaultTranslationsObject = {
     locale: 'Paramètres régionaux',
     locales: 'Paramètres régionaux',
     menu: 'Menu',
+    moreOptions: "Plus d'options",
     moveDown: 'Déplacer vers le bas',
     moveUp: 'Déplacer vers le haut',
     newPassword: 'Nouveau mot de passe',
@@ -337,6 +338,7 @@ export const frTranslations: DefaultTranslationsObject = {
     takeOver: 'Prendre en charge',
     thisLanguage: 'Français',
     time: 'Temps',
+    timezone: 'Fuseau horaire',
     titleDeleted: '{{label}} "{{title}}" supprimé(e) avec succès.',
     true: 'Vrai',
     unauthorized: 'Non autorisé',
@@ -433,6 +435,7 @@ export const frTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'Ce champ doit avoir deux chiffres.',
     shorterThanMax:
       'Cette valeur doit être inférieure à la longueur maximale de {{maxLength}} caractères.',
+    timezoneRequired: 'Un fuseau horaire est requis.',
     trueOrFalse: 'Ce champ ne peut être égal qu’à vrai ou faux.',
     username:
       "Veuillez entrer un nom d'utilisateur valide. Il peut contenir des lettres, des chiffres, des tirets, des points et des tirets bas.",

@@ -1,21 +1,26 @@
+// @ts-strict-ignore
 import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { ValidationFieldError } from '../../../errors/index.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, Operation, PayloadRequest } from '../../../types/index.js'
-import type { Field, TabAsField } from '../../config/types.js'
+import type { Block, Field, TabAsField, Validate } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
 import { getLabelFromPath } from '../../../utilities/getLabelFromPath.js'
 import { getTranslatedLabel } from '../../../utilities/getTranslatedLabel.js'
-import { fieldAffectsData, tabHasName } from '../../config/types.js'
+import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../../config/types.js'
 import { getFieldPathsModified as getFieldPaths } from '../../getFieldPaths.js'
 import { getExistingRowDoc } from './getExistingRowDoc.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
+  /**
+   * Data of the nearest parent block. If no parent block exists, this will be the `undefined`
+   */
+  blockData?: JsonObject
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   data: JsonObject
@@ -29,12 +34,14 @@ type Args = {
   mergeLocaleActions: (() => Promise<void>)[]
   operation: Operation
   parentIndexPath: string
+  parentIsLocalized: boolean
   parentPath: string
   parentSchemaPath: string
   req: PayloadRequest
   siblingData: JsonObject
   siblingDoc: JsonObject
   siblingDocWithLocales?: JsonObject
+  siblingFields?: (Field | TabAsField)[]
   skipValidation: boolean
 }
 
@@ -48,6 +55,7 @@ type Args = {
 
 export const promise = async ({
   id,
+  blockData,
   collection,
   context,
   data,
@@ -60,12 +68,14 @@ export const promise = async ({
   mergeLocaleActions,
   operation,
   parentIndexPath,
+  parentIsLocalized,
   parentPath,
   parentSchemaPath,
   req,
   siblingData,
   siblingDoc,
   siblingDocWithLocales,
+  siblingFields,
   skipValidation,
 }: Args): Promise<void> => {
   const { indexPath, path, schemaPath } = getFieldPaths({
@@ -77,7 +87,7 @@ export const promise = async ({
   })
 
   const passesCondition = field.admin?.condition
-    ? Boolean(field.admin.condition(data, siblingData, { user: req.user }))
+    ? Boolean(field.admin.condition(data, siblingData, { blockData, user: req.user }))
     : true
   let skipValidationFromHere = skipValidation || !passesCondition
   const { localization } = req.payload.config
@@ -90,7 +100,7 @@ export const promise = async ({
 
   if (fieldAffectsData(field)) {
     // skip validation if the field is localized and the incoming data is null
-    if (field.localized && operationLocale !== defaultLocale) {
+    if (fieldShouldBeLocalized({ field, parentIsLocalized }) && operationLocale !== defaultLocale) {
       if (['array', 'blocks'].includes(field.type) && siblingData[field.name] === null) {
         skipValidationFromHere = true
       }
@@ -102,6 +112,7 @@ export const promise = async ({
         await priorHook
 
         const hookedValue = await currentHook({
+          blockData,
           collection,
           context,
           data,
@@ -117,6 +128,7 @@ export const promise = async ({
           schemaPath: schemaPathSegments,
           siblingData,
           siblingDocWithLocales,
+          siblingFields,
           value: siblingData[field.name],
         })
 
@@ -139,22 +151,27 @@ export const promise = async ({
         }
       }
 
-      const validationResult = await field.validate(
-        valueToValidate as never,
-        {
-          ...field,
-          id,
-          collectionSlug: collection?.slug,
-          data: deepMergeWithSourceArrays(doc, data),
-          event: 'submit',
-          jsonError,
-          operation,
-          preferences: { fields: {} },
-          previousValue: siblingDoc[field.name],
-          req,
-          siblingData: deepMergeWithSourceArrays(siblingDoc, siblingData),
-        } as any,
-      )
+      const validateFn: Validate<object, object, object, object> = field.validate as Validate<
+        object,
+        object,
+        object,
+        object
+      >
+      const validationResult = await validateFn(valueToValidate as never, {
+        ...field,
+        id,
+        blockData,
+        collectionSlug: collection?.slug,
+        data: deepMergeWithSourceArrays(doc, data),
+        event: 'submit',
+        // @ts-expect-error
+        jsonError,
+        operation,
+        preferences: { fields: {} },
+        previousValue: siblingDoc[field.name],
+        req,
+        siblingData: deepMergeWithSourceArrays(siblingDoc, siblingData),
+      })
 
       if (typeof validationResult === 'string') {
         const label = getTranslatedLabel(field?.label || field?.name, req.i18n)
@@ -174,7 +191,7 @@ export const promise = async ({
     }
 
     // Push merge locale action if applicable
-    if (localization && field.localized) {
+    if (localization && fieldShouldBeLocalized({ field, parentIsLocalized })) {
       mergeLocaleActions.push(async () => {
         const localeData = await localization.localeCodes.reduce(
           async (localizedValuesPromise: Promise<JsonObject>, locale) => {
@@ -217,6 +234,7 @@ export const promise = async ({
           promises.push(
             traverseFields({
               id,
+              blockData,
               collection,
               context,
               data,
@@ -228,6 +246,7 @@ export const promise = async ({
               mergeLocaleActions,
               operation,
               parentIndexPath: '',
+              parentIsLocalized: parentIsLocalized || field.localized,
               parentPath: path + '.' + rowIndex,
               parentSchemaPath: schemaPath,
               req,
@@ -262,12 +281,18 @@ export const promise = async ({
           )
 
           const blockTypeToMatch = (row as JsonObject).blockType || rowSiblingDoc.blockType
-          const block = field.blocks.find((blockType) => blockType.slug === blockTypeToMatch)
+
+          const block: Block | undefined =
+            req.payload.blocks[blockTypeToMatch] ??
+            ((field.blockReferences ?? field.blocks).find(
+              (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
+            ) as Block | undefined)
 
           if (block) {
             promises.push(
               traverseFields({
                 id,
+                blockData: row,
                 collection,
                 context,
                 data,
@@ -279,6 +304,7 @@ export const promise = async ({
                 mergeLocaleActions,
                 operation,
                 parentIndexPath: '',
+                parentIsLocalized: parentIsLocalized || field.localized,
                 parentPath: path + '.' + rowIndex,
                 parentSchemaPath: schemaPath + '.' + block.slug,
                 req,
@@ -301,6 +327,7 @@ export const promise = async ({
     case 'row': {
       await traverseFields({
         id,
+        blockData,
         collection,
         context,
         data,
@@ -312,6 +339,7 @@ export const promise = async ({
         mergeLocaleActions,
         operation,
         parentIndexPath: indexPath,
+        parentIsLocalized,
         parentPath,
         parentSchemaPath: schemaPath,
         req,
@@ -339,6 +367,7 @@ export const promise = async ({
 
       await traverseFields({
         id,
+        blockData,
         collection,
         context,
         data,
@@ -350,6 +379,7 @@ export const promise = async ({
         mergeLocaleActions,
         operation,
         parentIndexPath: '',
+        parentIsLocalized: parentIsLocalized || field.localized,
         parentPath: path,
         parentSchemaPath: schemaPath,
         req,
@@ -408,6 +438,7 @@ export const promise = async ({
             mergeLocaleActions,
             operation,
             originalDoc: doc,
+            parentIsLocalized,
             path: pathSegments,
             previousSiblingDoc: siblingDoc,
             previousValue: siblingDoc[field.name],
@@ -455,6 +486,7 @@ export const promise = async ({
 
       await traverseFields({
         id,
+        blockData,
         collection,
         context,
         data,
@@ -466,6 +498,7 @@ export const promise = async ({
         mergeLocaleActions,
         operation,
         parentIndexPath: isNamedTab ? '' : indexPath,
+        parentIsLocalized: parentIsLocalized || field.localized,
         parentPath: isNamedTab ? path : parentPath,
         parentSchemaPath: schemaPath,
         req,
@@ -481,6 +514,7 @@ export const promise = async ({
     case 'tabs': {
       await traverseFields({
         id,
+        blockData,
         collection,
         context,
         data,
@@ -492,6 +526,7 @@ export const promise = async ({
         mergeLocaleActions,
         operation,
         parentIndexPath: indexPath,
+        parentIsLocalized,
         parentPath: path,
         parentSchemaPath: schemaPath,
         req,

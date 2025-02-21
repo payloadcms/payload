@@ -22,20 +22,21 @@ import { RESTClient } from '../helpers/rest.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   adminThumbnailFunctionSlug,
-  adminThumbnailWithSearchQueries,
-  mediaWithoutCacheTagsSlug,
   adminThumbnailSizeSlug,
+  adminThumbnailWithSearchQueries,
   animatedTypeMedia,
   audioSlug,
   customFileNameMediaSlug,
+  customUploadFieldSlug,
   focalOnlySlug,
+  hideFileInputOnCreateSlug,
   mediaSlug,
+  mediaWithoutCacheTagsSlug,
   relationPreviewSlug,
   relationSlug,
   withMetadataSlug,
   withOnlyJPEGMetadataSlug,
   withoutMetadataSlug,
-  customUploadFieldSlug,
 } from './shared.js'
 import { startMockCorsServer } from './startMockCorsServer.js'
 const filename = fileURLToPath(import.meta.url)
@@ -63,6 +64,7 @@ let customFileNameURL: AdminUrlUtil
 let uploadsOne: AdminUrlUtil
 let uploadsTwo: AdminUrlUtil
 let customUploadFieldURL: AdminUrlUtil
+let hideFileInputOnCreateURL: AdminUrlUtil
 
 describe('Uploads', () => {
   let page: Page
@@ -92,6 +94,7 @@ describe('Uploads', () => {
     uploadsOne = new AdminUrlUtil(serverURL, 'uploads-1')
     uploadsTwo = new AdminUrlUtil(serverURL, 'uploads-2')
     customUploadFieldURL = new AdminUrlUtil(serverURL, customUploadFieldSlug)
+    hideFileInputOnCreateURL = new AdminUrlUtil(serverURL, hideFileInputOnCreateSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -109,7 +112,7 @@ describe('Uploads', () => {
     if (client) {
       await client.logout()
     }
-    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
+    client = new RESTClient({ defaultSlug: 'users', serverURL })
     await client.login()
 
     await ensureCompilationIsDone({ page, serverURL })
@@ -366,79 +369,81 @@ describe('Uploads', () => {
     await page.locator('.doc-drawer__header-close').click()
 
     // remove the selected versioned image
-    await page.locator('.field-type:nth-of-type(2) .icon--x').click()
+    await page.locator('#field-versionedImage .icon--x').click()
 
     // choose from existing
-    await openDocDrawer(page, '.upload__listToggler')
+    await openDocDrawer(page, '#field-versionedImage .upload__listToggler')
 
     await expect(page.locator('.row-3 .cell-title')).toContainText('draft')
   })
 
-  test('should restrict mimetype based on filterOptions', async () => {
-    const audioDoc = (
-      await payload.find({
-        collection: audioSlug,
-        depth: 0,
-        pagination: false,
-      })
-    ).docs[0]
+  describe('filterOptions', () => {
+    test('should restrict mimetype based on filterOptions', async () => {
+      const audioDoc = (
+        await payload.find({
+          collection: audioSlug,
+          depth: 0,
+          pagination: false,
+        })
+      ).docs[0]
 
-    await page.goto(audioURL.edit(audioDoc.id))
-    await page.waitForURL(audioURL.edit(audioDoc.id))
+      await page.goto(audioURL.edit(audioDoc.id))
+      await page.waitForURL(audioURL.edit(audioDoc.id))
 
-    // remove the selection and open the list drawer
-    await wait(500) // flake workaround
-    await page.locator('#field-audio .upload-relationship-details__remove').click()
+      // remove the selection and open the list drawer
+      await wait(500) // flake workaround
+      await page.locator('#field-audio .upload-relationship-details__remove').click()
 
-    await openDocDrawer(page, '#field-audio .upload__listToggler')
+      await openDocDrawer(page, '#field-audio .upload__listToggler')
 
-    const listDrawer = page.locator('[id^=list-drawer_1_]')
-    await expect(listDrawer).toBeVisible()
+      const listDrawer = page.locator('[id^=list-drawer_1_]')
+      await expect(listDrawer).toBeVisible()
 
-    await openDocDrawer(page, 'button.list-drawer__create-new-button.doc-drawer__toggler')
-    await expect(page.locator('[id^=doc-drawer_media_1_]')).toBeVisible()
+      await openDocDrawer(page, 'button.list-drawer__create-new-button.doc-drawer__toggler')
+      await expect(page.locator('[id^=doc-drawer_media_1_]')).toBeVisible()
 
-    // upload an image and try to select it
-    await page
-      .locator('[id^=doc-drawer_media_1_] .file-field__upload input[type="file"]')
-      .setInputFiles(path.resolve(dirname, './image.png'))
-    await page.locator('[id^=doc-drawer_media_1_] button#action-save').click()
-    await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
-      'successfully',
-    )
-    await page
-      .locator('.payload-toast-container .toast-success .payload-toast-close-button')
-      .click()
+      // upload an image and try to select it
+      await page
+        .locator('[id^=doc-drawer_media_1_] .file-field__upload input[type="file"]')
+        .setInputFiles(path.resolve(dirname, './image.png'))
+      await page.locator('[id^=doc-drawer_media_1_] button#action-save').click()
+      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+        'successfully',
+      )
+      await page
+        .locator('.payload-toast-container .toast-success .payload-toast-close-button')
+        .click()
 
-    // save the document and expect an error
-    await page.locator('button#action-save').click()
-    await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
-      'The following field is invalid: Audio',
-    )
-  })
+      // save the document and expect an error
+      await page.locator('button#action-save').click()
+      await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
+        'The following field is invalid: Audio',
+      )
+    })
 
-  test('should restrict uploads in drawer based on filterOptions', async () => {
-    const audioDoc = (
-      await payload.find({
-        collection: audioSlug,
-        depth: 0,
-        pagination: false,
-      })
-    ).docs[0]
+    test('should restrict uploads in drawer based on filterOptions', async () => {
+      const audioDoc = (
+        await payload.find({
+          collection: audioSlug,
+          depth: 0,
+          pagination: false,
+        })
+      ).docs[0]
 
-    await page.goto(audioURL.edit(audioDoc.id))
-    await page.waitForURL(audioURL.edit(audioDoc.id))
+      await page.goto(audioURL.edit(audioDoc.id))
+      await page.waitForURL(audioURL.edit(audioDoc.id))
 
-    // remove the selection and open the list drawer
-    await wait(500) // flake workaround
-    await page.locator('#field-audio .upload-relationship-details__remove').click()
+      // remove the selection and open the list drawer
+      await wait(500) // flake workaround
+      await page.locator('#field-audio .upload-relationship-details__remove').click()
 
-    await openDocDrawer(page, '.upload__listToggler')
+      await openDocDrawer(page, '.upload__listToggler')
 
-    const listDrawer = page.locator('[id^=list-drawer_1_]')
-    await expect(listDrawer).toBeVisible()
+      const listDrawer = page.locator('[id^=list-drawer_1_]')
+      await expect(listDrawer).toBeVisible()
 
-    await expect(listDrawer.locator('tbody tr')).toHaveCount(1)
+      await expect(listDrawer.locator('tbody tr')).toHaveCount(1)
+    })
   })
 
   test('should throw error when file is larger than the limit and abortOnLimit is true', async () => {
@@ -454,7 +459,6 @@ describe('Uploads', () => {
 
   test('should render adminThumbnail when using a function', async () => {
     await page.goto(adminThumbnailFunctionURL.list)
-    await page.waitForURL(adminThumbnailFunctionURL.list)
 
     // Ensure sure false or null shows generic file svg
     const genericUploadImage = page.locator('tr.row-1 .thumbnail img')
@@ -466,7 +470,6 @@ describe('Uploads', () => {
 
   test('should render adminThumbnail when using a custom thumbnail URL with additional queries', async () => {
     await page.goto(adminThumbnailWithSearchQueriesURL.list)
-    await page.waitForURL(adminThumbnailWithSearchQueriesURL.list)
 
     const genericUploadImage = page.locator('tr.row-1 .thumbnail img')
     // Match the URL with the regex pattern
@@ -498,9 +501,9 @@ describe('Uploads', () => {
     /**
      * Regex matcher for date cache tags.
      *
-     * @example it will match `?2022-01-01T00:00:00.000Z`
+     * @example it will match `?2022-01-01T00%3A00%3A00.000Z` (`?2022-01-01T00:00:00.000Z` encoded)
      */
-    const cacheTagPattern = /\?\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/
+    const cacheTagPattern = /\?\d{4}-\d{2}-\d{2}T\d{2}%3A\d{2}%3A\d{2}\.\d{3}Z/
 
     expect(src).not.toMatch(cacheTagPattern)
   })
@@ -528,16 +531,15 @@ describe('Uploads', () => {
     /**
      * Regex matcher for date cache tags.
      *
-     * @example it will match `?2022-01-01T00:00:00.000Z`
+     * @example it will match `?2022-01-01T00%3A00%3A00.000Z` (`?2022-01-01T00:00:00.000Z` encoded)
      */
-    const cacheTagPattern = /\?\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/
+    const cacheTagPattern = /\?\d{4}-\d{2}-\d{2}T\d{2}%3A\d{2}%3A\d{2}\.\d{3}Z/
 
     expect(src).toMatch(cacheTagPattern)
   })
 
   test('should render adminThumbnail when using a specific size', async () => {
     await page.goto(adminThumbnailSizeURL.list)
-    await page.waitForURL(adminThumbnailSizeURL.list)
 
     // Ensure sure false or null shows generic file svg
     const genericUploadImage = page.locator('tr.row-1 .thumbnail img')
@@ -745,7 +747,6 @@ describe('Uploads', () => {
     test('should apply field value to all bulk upload files after edit many', async () => {
       // Navigate to the upload creation page
       await page.goto(uploadsOne.create)
-      await page.waitForURL(uploadsOne.create)
 
       // Upload single file
       await page.setInputFiles(
@@ -855,7 +856,7 @@ describe('Uploads', () => {
   })
 
   describe('remote url fetching', () => {
-    beforeAll(async () => {
+    beforeAll(() => {
       mockCorsServer = startMockCorsServer()
     })
 
@@ -1117,5 +1118,30 @@ describe('Uploads', () => {
     // collection's displayPreview: false, field's displayPreview: false
     const relationPreview6 = page.locator('.cell-imageWithoutPreview3 img')
     await expect(relationPreview6).toBeHidden()
+  })
+
+  test('should hide file input when disableCreateFileInput is true on collection create', async () => {
+    await page.goto(hideFileInputOnCreateURL.create)
+    await page.waitForURL(hideFileInputOnCreateURL.create)
+
+    await expect(page.locator('.file-field__upload')).toBeHidden()
+  })
+
+  test('should hide bulk upload from list view when disableCreateFileInput is true', async () => {
+    await page.goto(hideFileInputOnCreateURL.list)
+
+    await expect(page.locator('.list-header')).not.toContainText('Bulk Upload')
+  })
+
+  test('should hide remove button in file input when hideRemove is true', async () => {
+    const doc = await payload.create({
+      collection: hideFileInputOnCreateSlug,
+      data: {
+        title: 'test',
+      },
+    })
+    await page.goto(hideFileInputOnCreateURL.edit(doc.id))
+
+    await expect(page.locator('.file-field .file-details__remove')).toBeHidden()
   })
 })

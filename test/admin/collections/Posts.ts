@@ -33,6 +33,26 @@ export const Posts: CollectionConfig = {
           },
         },
       ],
+      listMenuItems: [
+        {
+          path: '/components/Banner/index.js#Banner',
+          clientProps: {
+            message: 'listMenuItems',
+          },
+        },
+        {
+          path: '/components/Banner/index.js#Banner',
+          clientProps: {
+            message: 'Many of them',
+          },
+        },
+        {
+          path: '/components/Banner/index.js#Banner',
+          clientProps: {
+            message: 'Ok last one',
+          },
+        },
+      ],
       afterList: [
         {
           path: '/components/Banner/index.js#Banner',
@@ -182,6 +202,14 @@ export const Posts: CollectionConfig = {
         position: 'sidebar',
       },
       relationTo: 'posts',
+    },
+    {
+      name: 'users',
+      type: 'relationship',
+      admin: {
+        position: 'sidebar',
+      },
+      relationTo: 'users',
     },
     {
       name: 'customCell',

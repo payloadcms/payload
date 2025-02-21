@@ -270,6 +270,7 @@ export const caTranslations: DefaultTranslationsObject = {
     locale: 'Idioma',
     locales: 'Idiomes',
     menu: 'Menu',
+    moreOptions: 'Més opcions',
     moveDown: 'Mou avall',
     moveUp: 'Move amunt',
     newPassword: 'Nova contrasenya',
@@ -330,6 +331,7 @@ export const caTranslations: DefaultTranslationsObject = {
     takeOver: 'Prendre el control',
     thisLanguage: 'Catala',
     time: 'Temps',
+    timezone: 'Fus horari',
     titleDeleted: '{{label}} "{{title}}" eliminat correctament.',
     true: 'Veritat',
     unauthorized: 'No autoritzat',
@@ -424,6 +426,7 @@ export const caTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'Aquest camp requereix dos números.',
     shorterThanMax:
       'Aquest valor ha de ser més curt que la longitud màxima de {{maxLength}} caràcters.',
+    timezoneRequired: 'Es requereix una zona horària.',
     trueOrFalse: 'Aquest camp només pot ser igual a true o false.',
     username:
       "Si us plau, introdueix un nom d'usuari vàlid. Pot contenir lletres, números, guions, punts i guions baixos.",

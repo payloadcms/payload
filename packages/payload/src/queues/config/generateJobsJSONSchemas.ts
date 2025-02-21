@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { I18n } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 

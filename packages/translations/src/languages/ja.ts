@@ -270,6 +270,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     locale: 'ロケール',
     locales: 'ロケール',
     menu: 'メニュー',
+    moreOptions: 'より多くのオプション',
     moveDown: '下へ移動',
     moveUp: '上へ移動',
     newPassword: '新しいパスワード',
@@ -329,6 +330,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     takeOver: '引き継ぐ',
     thisLanguage: 'Japanese',
     time: '時間',
+    timezone: 'タイムゾーン',
     titleDeleted: '{{label}} "{{title}}" が削除されました。',
     true: '真実',
     unauthorized: '未認証',
@@ -420,6 +422,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     requiresNoMoreThan: '最大で {{count}} {{label}} 以下にする必要があります。',
     requiresTwoNumbers: '2つの数値が必要です。',
     shorterThanMax: '{{maxLength}} 文字以下にする必要があります。',
+    timezoneRequired: 'タイムゾーンが必要です。',
     trueOrFalse: '"true" または "false" の値にする必要があります。',
     username:
       '有効なユーザーネームを入力してください。文字、数字、ハイフン、ピリオド、アンダースコアを使用できます。',

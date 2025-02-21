@@ -58,6 +58,7 @@ export type UploadInputProps = {
   readonly Error?: React.ReactNode
   readonly filterOptions?: FilterOptionsResult
   readonly hasMany?: boolean
+  readonly hideRemoveFile?: boolean
   readonly isSortable?: boolean
   readonly Label?: React.ReactNode
   readonly label?: StaticLabel
@@ -349,9 +350,9 @@ export function UploadInput(props: UploadInputProps) {
     [closeCreateDocDrawer, activeRelationTo, onChange],
   )
 
-  const onListSelect = React.useCallback<NonNullable<ListDrawerProps['onSelect']>>(
-    async ({ collectionSlug, docID }) => {
-      const loadedDocs = await populateDocs([docID], collectionSlug)
+  const onListSelect = useCallback<NonNullable<ListDrawerProps['onSelect']>>(
+    async ({ collectionSlug, doc }) => {
+      const loadedDocs = await populateDocs([doc.id], collectionSlug)
       const selectedDoc = loadedDocs ? loadedDocs.docs?.[0] : null
       setPopulatedDocs((currentDocs) => {
         if (selectedDoc) {
@@ -374,9 +375,9 @@ export function UploadInput(props: UploadInputProps) {
         return currentDocs
       })
       if (hasMany) {
-        onChange([...(Array.isArray(value) ? value : []), docID])
+        onChange([...(Array.isArray(value) ? value : []), doc.id])
       } else {
-        onChange(docID)
+        onChange(doc.id)
       }
       closeListDrawer()
     },

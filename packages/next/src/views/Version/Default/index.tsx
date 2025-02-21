@@ -1,7 +1,14 @@
 'use client'
 import type { OptionObject } from 'payload'
 
-import { CheckboxInput, Gutter, useConfig, useDocumentInfo, useTranslation } from '@payloadcms/ui'
+import {
+  CheckboxInput,
+  Gutter,
+  useConfig,
+  useDocumentInfo,
+  useRouteTransition,
+  useTranslation,
+} from '@payloadcms/ui'
 import { formatDate } from '@payloadcms/ui/shared'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation.js'
 import React, { useEffect, useMemo, useState } from 'react'
@@ -42,6 +49,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
 
   const { i18n } = useTranslation()
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
+  const { startRouteTransition } = useRouteTransition()
 
   const [collectionConfig] = useState(() => getEntityConfig({ collectionSlug }))
 
@@ -59,8 +67,8 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
   }
 
   useEffect(() => {
-    // If the selected comparison doc or locales change, update URL params so that version page RSC
-    // can update the version comparison state
+    // If the selected comparison doc or locales change, update URL params so that version page
+    // This is so that RSC can update the version comparison state
     const current = new URLSearchParams(Array.from(searchParams.entries()))
 
     if (!compareValue) {
@@ -68,6 +76,7 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
     } else {
       current.set('compareValue', compareValue?.value)
     }
+
     if (!selectedLocales) {
       current.delete('localeCodes')
     } else {
@@ -82,8 +91,18 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
 
     const search = current.toString()
     const query = search ? `?${search}` : ''
-    router.push(`${pathname}${query}`)
-  }, [compareValue, pathname, router, searchParams, selectedLocales, modifiedOnly])
+
+    // TODO: this transition occurs multiple times during the initial rendering phases, need to evaluate
+    startRouteTransition(() => router.push(`${pathname}${query}`))
+  }, [
+    compareValue,
+    pathname,
+    router,
+    searchParams,
+    selectedLocales,
+    modifiedOnly,
+    startRouteTransition,
+  ])
 
   const {
     admin: { dateFormat },

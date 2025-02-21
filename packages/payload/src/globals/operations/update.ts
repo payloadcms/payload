@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { DeepPartial } from 'ts-essentials'
 
 import type { GlobalSlug, JsonObject } from '../../index.js'
@@ -244,6 +245,11 @@ export const updateOperation = async <
     // /////////////////////////////////////
 
     if (!shouldSaveDraft) {
+      // Ensure global has createdAt
+      if (!result.createdAt) {
+        result.createdAt = new Date().toISOString()
+      }
+
       if (globalExists) {
         result = await payload.db.updateGlobal({
           slug,

@@ -1,12 +1,10 @@
 'use client'
 import type { SanitizedConfig } from 'payload'
 
+import { Link } from '@payloadcms/ui'
 import { formatAdminURL } from '@payloadcms/ui/shared'
-import LinkImport from 'next/link.js'
 import { useParams, usePathname, useSearchParams } from 'next/navigation.js'
 import React from 'react'
-
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export const DocumentTabLink: React.FC<{
   adminRoute: SanitizedConfig['routes']['admin']

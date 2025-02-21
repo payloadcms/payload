@@ -3,11 +3,11 @@ import type { UpdateOne } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildQuery } from './queries/buildQuery.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { getSession } from './utilities/getSession.js'
 import { handleError } from './utilities/handleError.js'
-import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
-import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
+import { transform } from './utilities/transform.js'
 
 export const updateOne: UpdateOne = async function updateOne(
   this: MongooseAdapter,
@@ -28,29 +28,29 @@ export const updateOne: UpdateOne = async function updateOne(
     session: await getSession(this, req),
   }
 
-  const query = await Model.buildQuery({
+  const query = await buildQuery({
+    adapter: this,
+    collectionSlug: collection,
+    fields: this.payload.collections[collection].config.flattenedFields,
     locale,
-    payload: this.payload,
     where,
   })
 
   let result
 
-  const sanitizedData = sanitizeRelationshipIDs({
-    config: this.payload.config,
-    data,
-    fields,
-  })
+  transform({ adapter: this, data, fields, operation: 'write' })
 
   try {
-    result = await Model.findOneAndUpdate(query, sanitizedData, options)
+    result = await Model.findOneAndUpdate(query, data, options)
   } catch (error) {
     handleError({ collection, error, req })
   }
 
-  result = JSON.parse(JSON.stringify(result))
-  result.id = result._id
-  result = sanitizeInternalFields(result)
+  if (!result) {
+    return null
+  }
+
+  transform({ adapter: this, data: result, fields, operation: 'read' })
 
   return result
 }

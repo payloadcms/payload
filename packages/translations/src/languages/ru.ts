@@ -272,6 +272,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     locale: 'Локаль',
     locales: 'Локали',
     menu: 'Меню',
+    moreOptions: 'Больше вариантов',
     moveDown: 'Сдвинуть вниз',
     moveUp: 'Сдвинуть вверх',
     newPassword: 'Новый пароль',
@@ -331,6 +332,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     takeOver: 'Взять на себя',
     thisLanguage: 'Русский',
     time: 'Время',
+    timezone: 'Часовой пояс',
     titleDeleted: '{{label}} {{title}} успешно удалено.',
     true: 'Правда',
     unauthorized: 'Нет доступа',
@@ -425,6 +427,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     requiresNoMoreThan: 'Это поле требует не более {{count}} {{label}}',
     requiresTwoNumbers: 'В этом поле требуется два числа.',
     shorterThanMax: 'Это значение должно быть короче максимальной длины символов {{maxLength}}.',
+    timezoneRequired: 'Требуется указать часовой пояс.',
     trueOrFalse: 'Это поле может быть равно только true или false.',
     username:
       'Пожалуйста, введите действительное имя пользователя. Может содержать буквы, цифры, дефисы, точки и подчёркивания.',

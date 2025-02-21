@@ -9,8 +9,8 @@
   h4,
   h5,
   h6 {
-    font-size: auto;
-    font-weight: auto;
+    font-size: unset;
+    font-weight: unset;
   }
 
   :root {

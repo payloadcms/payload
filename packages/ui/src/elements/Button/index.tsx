@@ -9,6 +9,7 @@ import { LinkIcon } from '../../icons/Link/index.js'
 import { PlusIcon } from '../../icons/Plus/index.js'
 import { SwapIcon } from '../../icons/Swap/index.js'
 import { XIcon } from '../../icons/X/index.js'
+import { Link } from '../Link/index.js'
 import { Popup } from '../Popup/index.js'
 import { Tooltip } from '../Tooltip/index.js'
 import './index.scss'
@@ -57,10 +58,10 @@ export const Button: React.FC<Props> = (props) => {
     className,
     disabled,
     el = 'button',
+    enableSubMenu,
     icon,
     iconPosition = 'right',
     iconStyle = 'without-border',
-    Link,
     newTab,
     onClick,
     onMouseDown,
@@ -142,26 +143,24 @@ export const Button: React.FC<Props> = (props) => {
       break
 
     case 'link':
-      if (!Link) {
-        console.error('Link is required when using el="link"', children)
-        return null
-      }
-
-      let LinkTag = Link // eslint-disable-line no-case-declarations
-
       if (disabled) {
-        LinkTag = 'div'
-      } else {
-        prefetch = false
+        buttonElement = (
+          <div {...buttonProps}>
+            <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
+              {children}
+            </ButtonContents>
+          </div>
+        )
       }
 
       buttonElement = (
-        <LinkTag {...buttonProps} href={to || url} prefetch={prefetch} to={to || url}>
+        <Link {...buttonProps} href={to || url} prefetch={prefetch}>
           <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
             {children}
           </ButtonContents>
-        </LinkTag>
+        </Link>
       )
+
       break
 
     default:
@@ -183,9 +182,10 @@ export const Button: React.FC<Props> = (props) => {
         <Popup
           button={<ChevronIcon />}
           buttonSize={size}
-          className={disabled ? `${baseClass}--popup-disabled` : ''}
-          disabled={disabled}
+          className={disabled && !enableSubMenu ? `${baseClass}--popup-disabled` : ''}
+          disabled={disabled && !enableSubMenu}
           horizontalAlign="right"
+          id={`${id}-popup`}
           noBackground
           render={({ close }) => SubMenuPopupContent({ close: () => close() })}
           size="large"
