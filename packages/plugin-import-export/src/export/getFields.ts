@@ -86,20 +86,18 @@ export const getFields = (config: Config): Field[] => {
               name: 'drafts',
               type: 'select',
               admin: {
-                width: '33%',
-                // TODO: make sure condition works for draft enabled collections
                 condition: (data) => {
                   const collectionConfig = (config.collections ?? []).find(
-                    (collection) => collection.slug === data.collection,
+                    (collection) => collection.slug === data.collectionSlug,
                   )
-
-                  return true
-                  // return Boolean(
-                  //   typeof collectionConfig?.versions === 'object' &&
-                  //     collectionConfig.versions?.drafts,
-                  // )
+                  return Boolean(
+                    typeof collectionConfig?.versions === 'object' &&
+                      collectionConfig?.versions?.drafts,
+                  )
                 },
+                width: '33%',
               },
+              defaultValue: 'true',
               label: 'Drafts',
               options: [
                 {
@@ -124,6 +122,7 @@ export const getFields = (config: Config): Field[] => {
           ],
         },
         {
+          // virtual field for the UI component to modify the hidden `where` field
           name: 'selectionToUse',
           type: 'radio',
           defaultValue: 'all',
