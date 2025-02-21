@@ -278,6 +278,7 @@ jobs:
           - admin-root
           - auth
           - auth-basic
+          #          - hooks // TODO: disabled until hook issue can be resolved
           - joins
           - field-error-states
           - fields-relationship
@@ -307,6 +308,7 @@ jobs:
           - fields__collections__Text
           - fields__collections__UI
           - fields__collections__Upload
+          - fields__collections__UploadRestricted
           - live-preview
           - localization
           - locked-documents
