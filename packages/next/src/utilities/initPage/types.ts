@@ -21,12 +21,14 @@ export type Args = {
    */
   searchParams: { [key: string]: string | string[] | undefined }
   /**
-   * If `useLayoutReq`, this page will use the `req` created by the root layout.
-   * This is useful for pages that share the same `req` as the root layout, as permissions
-   * do not need to be re-fetched.
+   * If `useLayoutReq` is `true`, this page will use the cached `req` created by the root layout
+   * instead of creating a new one.
    *
-   * If you need the query and url properties of the `req` object to be updated, or if you
-   * need permissions calculation to respect the current locale or url, you should not use this.
+   * This is improves performance for pages that are able to share the same `req` as the root layout,
+   * as permissions do not need to be re-calculated.
+   *
+   * If the page has unique query and url params that need to be part of the `req` object, or if you
+   * need permissions calculation to respect those you should not use this property.
    */
   useLayoutReq?: boolean
 }
