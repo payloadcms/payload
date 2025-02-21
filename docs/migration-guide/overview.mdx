@@ -414,7 +414,7 @@ For more details, see the [Documentation](https://payloadcms.com/docs/getting-st
     ```
 1. The `./src/public` directory is now located directly at root level `./public` [see Next.js docs for details](https://nextjs.org/docs/pages/building-your-application/optimizing/static-assets)
 
-1.  Data structure changes for all fields with `localized: true`. All nested locale has a new, simplified data structure. You need to create your own migrations that work with your payload collections and fields.
+1.  Data structure changes for all fields with `localized: true`. All nested locale has a new, simplified data structure. If you want to retain v2 data structure, you need to enable `allowLocalizedWithinLocalized` flag in your payload.config [read more in documentation](https://payloadcms.com/docs/configuration/overview#compatibility-flags). If you want to align with v3 structure you have to create your own migrations that work for your payload collections and fields.
 Mongodb example for a link in a page layout.
 
     ```diff
