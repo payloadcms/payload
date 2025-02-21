@@ -16,7 +16,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
-import { Pill } from '../Pill/index.js'
+import './index.scss'
 
 export type UnpublishManyProps = {
   collection: ClientCollectionConfig
@@ -130,14 +130,15 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
 
   return (
     <React.Fragment>
-      <Pill
+      <button
         className={`${baseClass}__toggle`}
         onClick={() => {
           toggleModal(modalSlug)
         }}
+        type="button"
       >
         {t('version:unpublish')}
-      </Pill>
+      </button>
       <ConfirmationModal
         body={t('version:aboutToUnpublishSelection', { label: getTranslation(plural, i18n) })}
         confirmingLabel={t('version:unpublishing')}

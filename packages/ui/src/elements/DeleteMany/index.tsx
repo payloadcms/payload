@@ -16,7 +16,6 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { mergeListSearchAndWhere } from '../../utilities/mergeListSearchAndWhere.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
-import { Pill } from '../Pill/index.js'
 import './index.scss'
 
 const baseClass = 'delete-documents'
@@ -140,14 +139,15 @@ export const DeleteMany: React.FC<Props> = (props) => {
 
   return (
     <React.Fragment>
-      <Pill
+      <button
         className={`${baseClass}__toggle`}
         onClick={() => {
           openModal(modalSlug)
         }}
+        type="button"
       >
         {t('general:delete')}
-      </Pill>
+      </button>
       <ConfirmationModal
         body={t('general:aboutToDeleteCount', {
           count,
