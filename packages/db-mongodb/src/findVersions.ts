@@ -9,7 +9,7 @@ import { buildQuery } from './queries/buildQuery.js'
 import { buildSortParam } from './queries/buildSortParam.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { getSession } from './utilities/getSession.js'
-import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
+import { transform } from './utilities/transform.js'
 
 export const findVersions: FindVersions = async function findVersions(
   this: MongooseAdapter,
@@ -104,13 +104,13 @@ export const findVersions: FindVersions = async function findVersions(
   }
 
   const result = await Model.paginate(query, paginationOptions)
-  const docs = JSON.parse(JSON.stringify(result.docs))
 
-  return {
-    ...result,
-    docs: docs.map((doc) => {
-      doc.id = doc._id
-      return sanitizeInternalFields(doc)
-    }),
-  }
+  transform({
+    adapter: this,
+    data: result.docs,
+    fields: buildVersionCollectionFields(this.payload.config, collectionConfig),
+    operation: 'read',
+  })
+
+  return result
 }
