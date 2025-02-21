@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 'use client'
-import { createPayloadClient, usePayloadQuery } from '@payloadcms/plugin-realtime'
+import { createPayloadClient } from '@payloadcms/plugin-realtime'
 import { usePayloadAPI } from '@payloadcms/ui'
 import { useEffect, useState } from 'react'
 
@@ -24,7 +24,9 @@ export function PostCount() {
         { collection: 'posts' },
         {
           onChange: (result) => {
-            setCount3(result?.totalDocs)
+            if (result.data) {
+              setCount3(result.data.totalDocs)
+            }
           },
         },
       )

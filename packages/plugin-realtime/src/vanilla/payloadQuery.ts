@@ -27,14 +27,19 @@ export function createPayloadClient() {
           return
         }
         const { queryResult, stringifiedQuery } = data as {
-          queryResult: PayloadQueryResult<ReadOperation>
+          queryResult: Awaited<ReturnType<Payload[ReadOperation]>>
           stringifiedQuery: StringifiedQuery
         }
 
         // Notify all subscribers that match this data update
         const querySubscription = querySubscriptions.get(stringifiedQuery)
         if (querySubscription) {
-          querySubscription.forEach(({ options }) => options?.onChange?.(queryResult))
+          querySubscription.forEach(({ options }) =>
+            options?.onChange?.({
+              data: queryResult,
+              error: null,
+            }),
+          )
         }
       } catch (err) {
         console.error('Error processing server-sent event:', err)
@@ -52,13 +57,7 @@ export function createPayloadClient() {
 
   connectSSE()
 
-  const payloadQuery = async <T extends ReadOperation>(
-    type: T,
-    queryParams: Parameters<Payload[T]>[0],
-    options?: {
-      onChange?: (result: PayloadQueryResult<T>) => void
-    },
-  ) => {
+  const payloadQuery: PayloadQueryFn = async (type, queryParams, options) => {
     try {
       // We add the onChange callback to the query subscriptions for future updates
       if (options && options?.onChange) {
@@ -68,7 +67,6 @@ export function createPayloadClient() {
           callbacks = new Set()
           querySubscriptions.set(stringifiedQuery, callbacks)
         }
-        // @ts-expect-error - error inferring the type parameter. It is correct
         callbacks.add({ options, stringifiedQuery })
       }
 
@@ -100,7 +98,15 @@ type QuerySubscription<T extends ReadOperation = ReadOperation> = {
   stringifiedQuery: StringifiedQuery
 }
 
-type PayloadQueryResult<T extends ReadOperation> = Promise<{
+type PayloadQueryResult<T extends ReadOperation> = {
   data: Awaited<ReturnType<Payload[T]>> | undefined
   error: Error | null
-}>
+}
+
+export type PayloadQueryFn = <T extends ReadOperation>(
+  type: T,
+  queryParams: Parameters<Payload[T]>[0],
+  options?: {
+    onChange?: (result: PayloadQueryResult<T>) => void
+  },
+) => Promise<PayloadQueryResult<T>>
