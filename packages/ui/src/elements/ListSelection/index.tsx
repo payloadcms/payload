@@ -38,6 +38,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
       <span>{t('general:selectedCount', { count, label: '' })}</span>
       {selectAll !== SelectAllStatus.AllAvailable && count < totalDocs && (
         <Fragment>
+          <span>&mdash;</span>
           <button
             aria-label={t('general:selectAll', { count, label })}
             className={`${baseClass}__button`}

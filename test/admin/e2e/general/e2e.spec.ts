@@ -51,6 +51,7 @@ let payload: PayloadTestSDK<Config>
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
@@ -721,7 +722,8 @@ describe('General', () => {
         'Deleted 3 Posts successfully.',
       )
 
-      await expect(page.locator('.collection-list__no-results')).toBeVisible()
+      // Poll until router has refreshed
+      await expect.poll(() => page.locator('.collection-list__no-results').isVisible()).toBeTruthy()
     })
 
     test('should bulk delete with filters and across pages', async () => {
@@ -743,7 +745,8 @@ describe('General', () => {
         'Deleted 6 Posts successfully.',
       )
 
-      await expect(page.locator('.table table > tbody > tr')).toHaveCount(1)
+      // Poll until router has refreshed
+      await expect.poll(() => page.locator('.table table > tbody > tr').count()).toBe(0)
     })
 
     test('should bulk update', async () => {
@@ -839,6 +842,14 @@ describe('General', () => {
       expect(updatedPost.docs[0].defaultValueField).toBe('not the default value')
     })
 
+    test('should not show "select all across pages" button if already selected all', async () => {
+      await deleteAllPosts()
+      await createPost({ title: `Post 1` })
+      await page.goto(postsUrl.list)
+      await page.locator('input#select-all').check()
+      await expect(page.locator('button#select-all-across-pages')).toBeHidden()
+    })
+
     test('should bulk update with filters and across pages', async () => {
       // First, delete all posts created by the seed
       await deleteAllPosts()
@@ -871,7 +882,8 @@ describe('General', () => {
         'Updated 6 Posts successfully.',
       )
 
-      await expect(page.locator('.table table > tbody > tr')).toHaveCount(5)
+      // Poll until router has refreshed
+      await expect.poll(() => page.locator('.table table > tbody > tr').count()).toBe(5)
       await expect(page.locator('.row-1 .cell-title')).toContainText(updatedTitle)
     })
 

@@ -10,7 +10,7 @@ import { buildSortParam } from './queries/buildSortParam.js'
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { getSession } from './utilities/getSession.js'
-import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
+import { transform } from './utilities/transform.js'
 
 export const find: Find = async function find(
   this: MongooseAdapter,
@@ -133,13 +133,12 @@ export const find: Find = async function find(
     result = await Model.paginate(query, paginationOptions)
   }
 
-  const docs = JSON.parse(JSON.stringify(result.docs))
+  transform({
+    adapter: this,
+    data: result.docs,
+    fields: this.payload.collections[collection].config.fields,
+    operation: 'read',
+  })
 
-  return {
-    ...result,
-    docs: docs.map((doc) => {
-      doc.id = doc._id
-      return sanitizeInternalFields(doc)
-    }),
-  }
+  return result
 }

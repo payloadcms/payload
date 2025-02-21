@@ -2,7 +2,8 @@ import { flattenAllFields, type Field, type SanitizedConfig } from 'payload'
 
 import { Types } from 'mongoose'
 
-import { sanitizeRelationshipIDs } from './sanitizeRelationshipIDs.js'
+import { transform } from './transform.js'
+import type { MongooseAdapter } from '../index.js'
 
 const flattenRelationshipValues = (obj: Record<string, any>, prefix = ''): Record<string, any> => {
   return Object.keys(obj).reduce(
@@ -297,7 +298,7 @@ const relsData = {
   },
 }
 
-describe('sanitizeRelationshipIDs', () => {
+describe('transform', () => {
   it('should sanitize relationships', () => {
     const data = {
       ...relsData,
@@ -382,7 +383,18 @@ describe('sanitizeRelationshipIDs', () => {
     }
     const flattenValuesBefore = Object.values(flattenRelationshipValues(data))
 
-    sanitizeRelationshipIDs({ config, data, fields: config.collections[0].fields })
+    const mockAdapter = {
+      payload: {
+        config,
+      },
+    } as MongooseAdapter
+
+    transform({
+      adapter: mockAdapter,
+      operation: 'write',
+      data,
+      fields: config.collections[0].fields,
+    })
     const flattenValuesAfter = Object.values(flattenRelationshipValues(data))
 
     flattenValuesAfter.forEach((value, i) => {
