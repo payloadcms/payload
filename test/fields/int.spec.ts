@@ -2775,6 +2775,20 @@ describe('Fields', () => {
         expect(docIDs).not.toContain(bazBar.id)
       })
 
+      it('should query nested properties - not_like', async () => {
+        const { docs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.baz': { not_like: 'bar' },
+          },
+        })
+
+        const docIDs = docs.map(({ id }) => id)
+
+        expect(docIDs).toContain(fooBar.id)
+        expect(docIDs).not.toContain(bazBar.id)
+      })
+
       it('should query nested properties - equals', async () => {
         const { docs } = await payload.find({
           collection: 'json-fields',
