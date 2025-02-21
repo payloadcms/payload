@@ -110,7 +110,6 @@
       &:focus-visible,
       &:focus,
       &:active {
-        --color: var(--hover-color);
         background-color: var(--hover-bg);
         color: var(--hover-color);
         box-shadow: var(--hover-box-shadow);
@@ -124,7 +123,6 @@
     &:focus-visible,
     &:focus,
     &:active {
-      --color: var(--hover-color);
       color: var(--hover-color);
       box-shadow: var(--hover-box-shadow);
       background-color: var(--hover-bg);

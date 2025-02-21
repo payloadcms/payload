@@ -323,6 +323,13 @@ export function FolderProvider({ children, initialData }: Props) {
       let folderIDsToFilterOut: (number | string)[] = []
       const docsToFilterOut: GetFolderDataResult['items'] = []
 
+      const toastID = toast.loading(
+        t('general:movingCount', {
+          count: itemsToMove.length,
+          label: itemsToMove.length === 1 ? t('general:item') : t('general:items'),
+        }),
+      )
+
       for (const [relationSlug, ids] of Object.entries(groupedByRelationTo)) {
         const query = qs.stringify(
           {
@@ -336,28 +343,35 @@ export function FolderProvider({ children, initialData }: Props) {
             addQueryPrefix: true,
           },
         )
-        const res = await fetch(`${serverURL}${routes.api}/${relationSlug}${query}`, {
-          body: JSON.stringify({ _parentFolder: toFolderID || null }),
-          credentials: 'include',
-          headers: {
-            'content-type': 'application/json',
-          },
-          method: 'PATCH',
-        })
+        try {
+          const res = await fetch(`${serverURL}${routes.api}/${relationSlug}${query}`, {
+            body: JSON.stringify({ _parentFolder: toFolderID || null }),
+            credentials: 'include',
+            headers: {
+              'content-type': 'application/json',
+            },
+            method: 'PATCH',
+          })
 
-        if (res.status === 200) {
-          if (relationSlug === folderCollectionSlug) {
-            folderIDsToFilterOut = ids
-          } else {
-            docsToFilterOut.push(
-              ...ids.map((id) => ({
-                relationTo: relationSlug,
-                value: id,
-              })),
-            )
+          if (res.status === 200) {
+            if (relationSlug === folderCollectionSlug) {
+              folderIDsToFilterOut = ids
+            } else {
+              docsToFilterOut.push(
+                ...ids.map((id) => ({
+                  relationTo: relationSlug,
+                  value: id,
+                })),
+              )
+            }
           }
+        } catch (error) {
+          toast.error(t('general:error'))
+          return
         }
       }
+
+      toast.success(t('general:success'), { id: toastID })
 
       if (docsToFilterOut.length) {
         setDocuments((prevDocs) =>
@@ -376,8 +390,6 @@ export function FolderProvider({ children, initialData }: Props) {
           }),
         )
       }
-
-      toast.success(t('general:success'))
 
       const isMovingCurrentFolder = itemsToMove.some(
         (item) => item.relationTo === folderCollectionSlug && extractID(item.value) === toFolderID,
