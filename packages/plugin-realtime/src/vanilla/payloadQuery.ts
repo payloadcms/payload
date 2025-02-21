@@ -6,11 +6,11 @@ import type { Payload } from 'payload'
 import type { StringifiedQuery } from '../plugin/index.js'
 import type { ReadOperation } from '../usePayloadQuery.js'
 
-export function createPayloadClient() {
-  const clientId = `client-${Date.now()}-${Math.random()}`
-  const querySubscriptions = new Map<StringifiedQuery, Set<QuerySubscription>>()
-  let eventSource: EventSource | null = null
+const clientId = `client-${Date.now()}-${Math.random()}`
+const querySubscriptions = new Map<StringifiedQuery, Set<QuerySubscription>>()
+let eventSource: EventSource | null = null
 
+export function createPayloadClient() {
   const connectSSE = () => {
     if (typeof window === 'undefined' || eventSource) {
       return

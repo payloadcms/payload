@@ -27,19 +27,24 @@ export function usePayloadQuery<T extends ReadOperation>(
   })
 
   useEffect(() => {
-    if (!payloadQuery) {
+    if (typeof payloadQuery !== 'function') {
       return
     }
 
     let isMounted = true
 
     const fetchData = async () => {
-      if (!isMounted) {
-        return
-      }
       setResult({ data: undefined, error: null, isLoading: true })
       try {
-        const promise = payloadQuery(type, query)
+        const promise = payloadQuery(type, query, {
+          onChange: (result) => {
+            setResult({
+              data: result.data,
+              error: result.error,
+              isLoading: false,
+            })
+          },
+        })
         const { data, error } = await promise
         if (isMounted) {
           setResult({ data, error, isLoading: false })
@@ -52,13 +57,13 @@ export function usePayloadQuery<T extends ReadOperation>(
       }
     }
 
-    // eslint-disable-next-line no-console
     fetchData().catch(console.error)
 
     return () => {
       isMounted = false
     }
-  }, [payloadQuery, query, type]) // Serialize query object to compare values instead of references
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [payloadQuery, type, JSON.stringify(query)])
 
   return result
 }
@@ -66,12 +71,18 @@ export function usePayloadQuery<T extends ReadOperation>(
 const PayloadQueryContext = createContext<PayloadQueryFn | undefined>(undefined)
 
 export function PayloadQueryClientProvider({ children }: { children: React.ReactNode }) {
-  const [payloadClient, setPayloadClient] = useState<PayloadQueryFn>()
+  const [payloadClient, setPayloadClient] = useState<PayloadQueryFn>(() => {
+    return () => Promise.reject(new Error('PayloadQuery client not initialized'))
+  })
 
   useLayoutEffect(() => {
     const client = createPayloadClient()
-    setPayloadClient(client.payloadQuery)
+    setPayloadClient(() => client.payloadQuery)
   }, [])
+
+  if (!payloadClient) {
+    return null // or a loading indicator
+  }
 
   return (
     <PayloadQueryContext.Provider value={payloadClient}>{children}</PayloadQueryContext.Provider>
