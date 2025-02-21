@@ -36,7 +36,7 @@ export default buildConfigWithDefaults({
           },
         }),
       },
-      accessOptions: {
+      constraints: {
         read: [{ label: 'Specific Roles', value: 'specificRoles', fields: [roles] }],
         update: [{ label: 'Specific Roles', value: 'specificRoles', fields: [roles] }],
       },

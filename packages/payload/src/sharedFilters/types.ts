@@ -10,7 +10,7 @@ export type SharedListFilter = {
   where: Where
 }
 
-export type ListFilterAccessOptions = {
+export type ListFilterConstraints = {
   fields: Field[]
   label: string
   value: string

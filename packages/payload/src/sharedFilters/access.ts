@@ -23,8 +23,6 @@ export const getAccess = (config: Config): Record<Operation, Access> =>
           return false
         }
 
-        const constraintField = `access.${operation}.constraint`
-
         const constraints = {
           or: [
             {

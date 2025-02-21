@@ -48,7 +48,7 @@ import type {
   RequestContext,
   TypedUser,
 } from '../index.js'
-import type { ListFilterAccessOptions } from '../sharedFilters/types.js'
+import type { ListFilterConstraints } from '../sharedFilters/types.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -906,11 +906,11 @@ export type Config = {
         read?: Access
         update?: Access
       }
-      accessOptions: {
-        create?: ListFilterAccessOptions
-        delete?: ListFilterAccessOptions
-        read?: ListFilterAccessOptions
-        update?: ListFilterAccessOptions
+      constraints: {
+        create?: ListFilterConstraints
+        delete?: ListFilterConstraints
+        read?: ListFilterConstraints
+        update?: ListFilterConstraints
       }
     }
     /**
