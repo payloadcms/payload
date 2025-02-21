@@ -149,7 +149,9 @@ export const syncDocAsSearchIndex = async ({
             } = await payload.find({
               collection,
               draft: false,
+              limit: 1,
               locale: syncLocale,
+              pagination: false,
               req,
               where: {
                 and: [
