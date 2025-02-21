@@ -1,13 +1,7 @@
 @import '../../scss/styles.scss';
 
 @layer payload-default {
-  .delete-documents {
-    @include blur-bg;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-
+  .unpublish-many {
     &__toggle {
       font-size: inherit;
       line-height: inherit;

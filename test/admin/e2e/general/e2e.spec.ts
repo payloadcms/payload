@@ -12,6 +12,7 @@ import {
   openNav,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
+  // throttleTest,
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
@@ -51,7 +52,6 @@ let payload: PayloadTestSDK<Config>
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import path from 'path'
-import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
@@ -101,6 +101,12 @@ describe('General', () => {
   })
 
   beforeEach(async () => {
+    // await throttleTest({
+    //   page,
+    //   context,
+    //   delay: 'Fast 4G',
+    // })
+
     await reInitializeDB({
       serverURL,
       snapshotKey: 'adminTests',
@@ -735,6 +741,7 @@ describe('General', () => {
 
       await page.goto(postsUrl.list)
       await page.locator('#search-filter-input').fill('Post')
+      await page.waitForURL(/search=Post/)
       await expect(page.locator('.table table > tbody > tr')).toHaveCount(5)
       await page.locator('input#select-all').check()
       await page.locator('button#select-all-across-pages').click()
@@ -860,9 +867,12 @@ describe('General', () => {
 
       await page.goto(postsUrl.list)
       await page.locator('#search-filter-input').fill('Post')
+      await page.waitForURL(/search=Post/)
       await expect(page.locator('.table table > tbody > tr')).toHaveCount(5)
+
       await page.locator('input#select-all').check()
       await page.locator('button#select-all-across-pages').click()
+
       await page.locator('.edit-many__toggle').click()
       await page.locator('.field-select .rs__control').click()
 
