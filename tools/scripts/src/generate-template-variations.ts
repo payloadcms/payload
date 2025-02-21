@@ -68,6 +68,7 @@ async function main() {
         dbUri: 'POSTGRES_URL',
       },
       sharp: false,
+      skipDockerCompose: true,
       storage: 'vercelBlobStorage',
       vercelDeployButtonLink:
         `https://vercel.com/new/clone?repository-url=` +
@@ -107,6 +108,7 @@ async function main() {
       db: 'postgres',
       dirname: 'with-postgres',
       sharp: true,
+      skipDockerCompose: true,
       storage: 'localDisk',
     },
     {
