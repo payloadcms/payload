@@ -1,7 +1,15 @@
 @import '~@payloadcms/ui/scss';
 
 @layer payload-default {
-  .export-drawer {
+  .export-list-menu-item {
+    .doc-drawer__toggler {
+      height: 100%;
+      width: 100%;
+      text-align: left;
+    }
+
+
+    // TODO: is any of this css needed?
     &__subheader,
     &__header {
       padding: 0 var(--gutter-h);

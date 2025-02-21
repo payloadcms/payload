@@ -57,7 +57,7 @@ export const importExportPlugin =
         clientProps: {
           exportCollectionSlug: exportCollection.slug,
         },
-        path: '@payloadcms/plugin-import-export/rsc#ExportButton',
+        path: '@payloadcms/plugin-import-export/rsc#ExportListMenuItem',
       })
     })
 

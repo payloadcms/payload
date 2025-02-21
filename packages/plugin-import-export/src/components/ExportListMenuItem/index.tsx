@@ -1,18 +1,15 @@
 'use client'
 
-import { useConfig, useDocumentDrawer, useSelection } from '@payloadcms/ui'
-
-import './index.scss'
-
-import React, { Fragment, useEffect } from 'react'
+import { PopupList, useConfig, useDocumentDrawer, useSelection } from '@payloadcms/ui'
+import React, { useEffect } from 'react'
 
 import { useImportExport } from '../ImportExportProvider/index.js'
+import './index.scss'
 
-const baseClass = 'export-drawer'
+const baseClass = 'export-list-menu-item'
 
-export const ExportDrawer: React.FC<{
+export const ExportListMenuItem: React.FC<{
   collectionSlug: string
-  drawerSlug: string
   exportCollectionSlug: string
 }> = ({ collectionSlug, exportCollectionSlug }) => {
   const { getEntityConfig } = useConfig()
@@ -21,24 +18,22 @@ export const ExportDrawer: React.FC<{
   const [DocumentDrawer, DocumentDrawerToggler] = useDocumentDrawer({
     collectionSlug: exportCollectionSlug,
   })
-  const { setCollection } = useImportExport()
+  const { setCollection, setSelected } = useImportExport()
+  const selection = useSelection()
 
+  // Set collection and selected items on mount or when selection changes
   useEffect(() => {
     setCollection(currentCollectionConfig.slug ?? '')
   }, [currentCollectionConfig, setCollection])
 
-  const selectedDocs = []
-  const selection = useSelection()
-  selection.selected.forEach((value, key) => {
-    if (value === true) {
-      selectedDocs.push(key)
-    }
-  })
+  useEffect(() => {
+    setSelected(selection.selected)
+  }, [selection.selected, setSelected])
 
   return (
-    <Fragment>
+    <PopupList.Button className={baseClass}>
       <DocumentDrawerToggler>Export</DocumentDrawerToggler>
       <DocumentDrawer />
-    </Fragment>
+    </PopupList.Button>
   )
 }
