@@ -21,18 +21,17 @@ export const ListSelection: React.FC<ListSelectionProps> = ({ label }) => {
 
   return (
     <div className={baseClass}>
-      <span>{t('general:selectedCount', { count, label })}</span>
-      {selectAll !== SelectAllStatus.AllAvailable && (
+      <span>{t('general:selectedCount', { count, label: '' })}</span>
+      {selectAll !== SelectAllStatus.AllAvailable && count < totalDocs && (
         <Fragment>
-          {' '}
-          &mdash;
+          <span>&mdash;</span>
           <button
             aria-label={t('general:selectAll', { count, label })}
             className={`${baseClass}__button`}
             onClick={() => toggleAll(true)}
             type="button"
           >
-            {t('general:selectAll', { count: totalDocs, label })}
+            {t('general:selectAll', { count: totalDocs, label: '' })}
           </button>
         </Fragment>
       )}
