@@ -41,9 +41,6 @@ export const getExportCollection = ({
       filesRequiredOnCreate: false,
       hideFileInputOnCreate: true,
       hideRemoveFile: true,
-      // must be csv, json or zip
-      // TODO: mimeTypes should not be required by validation when filesRequiredOnCreate is true
-      // mimeTypes: ['application/json', 'text/csv', 'application/zip'],
     },
   }
 

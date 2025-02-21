@@ -1,9 +1,7 @@
-import type { CollectionSlug, Payload, User } from 'payload'
+import type { CollectionSlug, Payload } from 'payload'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
-
-import type { Page } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
@@ -11,7 +9,6 @@ import { readCSV, readJSON } from './helpers.js'
 import { richTextData } from './seed/richTextData.js'
 
 let payload: Payload
-let page: Page
 let user: any
 
 const filename = fileURLToPath(import.meta.url)
@@ -19,7 +16,7 @@ const dirname = path.dirname(filename)
 
 describe('@payloadcms/plugin-import-export', () => {
   beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(dirname))
+    ;({ payload } = (await initPayloadInt(dirname)) as { payload: Payload })
     user = await payload.login({
       collection: 'users',
       data: {
@@ -37,19 +34,6 @@ describe('@payloadcms/plugin-import-export', () => {
 
   describe('exports', () => {
     it('should create a file for collection csv from defined fields', async () => {
-      // large data set
-      for (let i = 0; i < 5; i++) {
-        await payload.create({
-          collection: 'pages',
-          data: {
-            title: `Page ${i}`,
-            group: {
-              array: [{ field1: 'test' }],
-            },
-          },
-        })
-      }
-
       let doc = await payload.create({
         collection: 'exports',
         user,
@@ -58,6 +42,9 @@ describe('@payloadcms/plugin-import-export', () => {
           sort: 'createdAt',
           fields: ['id', 'title', 'group.value', 'group.array.field1', 'createdAt', 'updatedAt'],
           format: 'csv',
+          where: {
+            title: { contains: 'Title ' },
+          },
         },
       })
 
@@ -71,7 +58,7 @@ describe('@payloadcms/plugin-import-export', () => {
       const data = await readCSV(expectedPath)
 
       expect(data[0].id).toBeDefined()
-      expect(data[0].title).toStrictEqual('Page 0')
+      expect(data[0].title).toStrictEqual('Title 0')
       expect(data[0].group_value).toStrictEqual('group value')
       expect(data[0].group_ignore).toBeUndefined()
       expect(data[0].group_array_0_field1).toStrictEqual('test')
@@ -80,26 +67,6 @@ describe('@payloadcms/plugin-import-export', () => {
     })
 
     it('should create a file for collection csv from array', async () => {
-      // large data set
-      for (let i = 0; i < 5; i++) {
-        await payload.create({
-          collection: 'pages',
-          data: {
-            title: `Array ${i}`,
-            array: [
-              {
-                field1: 'foo',
-                field2: 'bar',
-              },
-              {
-                field1: 'foo',
-                field2: 'baz',
-              },
-            ],
-          },
-        })
-      }
-
       let doc = await payload.create({
         collection: 'exports',
         user,
@@ -107,6 +74,9 @@ describe('@payloadcms/plugin-import-export', () => {
           collectionSlug: 'pages',
           fields: ['id', 'array'],
           format: 'csv',
+          where: {
+            title: { contains: 'Array ' },
+          },
         },
       })
 
@@ -126,26 +96,6 @@ describe('@payloadcms/plugin-import-export', () => {
     })
 
     it('should create a file for collection csv from array.subfield', async () => {
-      // large data set
-      for (let i = 0; i < 5; i++) {
-        await payload.create({
-          collection: 'pages',
-          data: {
-            title: `Array ${i}`,
-            array: [
-              {
-                field1: 'foo',
-                field2: 'bar',
-              },
-              {
-                field1: 'foo',
-                field2: 'baz',
-              },
-            ],
-          },
-        })
-      }
-
       let doc = await payload.create({
         collection: 'exports',
         user,
@@ -153,6 +103,9 @@ describe('@payloadcms/plugin-import-export', () => {
           collectionSlug: 'pages',
           fields: ['id', 'array.field1'],
           format: 'csv',
+          where: {
+            title: { contains: 'Array Subfield ' },
+          },
         },
       })
 
@@ -172,17 +125,6 @@ describe('@payloadcms/plugin-import-export', () => {
     })
 
     it('should create a file for collection csv from hasMany field', async () => {
-      // large data set
-      for (let i = 0; i < 5; i++) {
-        await payload.create({
-          collection: 'pages',
-          data: {
-            title: `Array ${i}`,
-            hasManyNumber: [0, 1, 1, 2, 3, 5, 8, 13, 21],
-          },
-        })
-      }
-
       let doc = await payload.create({
         collection: 'exports',
         user,
@@ -190,6 +132,9 @@ describe('@payloadcms/plugin-import-export', () => {
           collectionSlug: 'pages',
           fields: ['id', 'hasManyNumber'],
           format: 'csv',
+          where: {
+            title: { contains: 'hasMany Number ' },
+          },
         },
       })
 
@@ -210,31 +155,6 @@ describe('@payloadcms/plugin-import-export', () => {
     })
 
     it('should create a file for collection csv from blocks field', async () => {
-      // large data set
-      const allPromises = []
-      const promises = []
-      for (let i = 0; i < 5; i++) {
-        promises.push(
-          payload.create({
-            collection: 'pages',
-            data: {
-              title: `Array ${i}`,
-              blocks: [
-                {
-                  blockType: 'hero',
-                  title: 'test',
-                },
-                {
-                  blockType: 'content',
-                  richText: richTextData,
-                },
-              ],
-            },
-          }),
-        )
-      }
-      await Promise.all(promises)
-
       let doc = await payload.create({
         collection: 'exports',
         user,
@@ -242,6 +162,9 @@ describe('@payloadcms/plugin-import-export', () => {
           collectionSlug: 'pages',
           fields: ['id', 'blocks'],
           format: 'csv',
+          where: {
+            title: { contains: 'Blocks ' },
+          },
         },
       })
 
@@ -258,66 +181,23 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].blocks_1_blockType).toStrictEqual('content')
     })
 
-    it('should create a file for collection csv using a where filter', async () => {
-      // data set
-      for (let i = 0; i < 5; i++) {
-        await payload.create({
-          collection: 'pages',
-          data: {
-            title: `Array ${i}`,
-          },
-        })
-      }
-
-      let doc = await payload.create({
-        collection: 'exports',
-        user,
-        data: {
-          collectionSlug: 'pages',
-          fields: ['id', 'title'],
-          where: {
-            title: { equals: 'Array 2' },
-          },
-          format: 'csv',
-        },
-      })
-
-      doc = await payload.findByID({
-        collection: 'exports',
-        id: doc.id,
-      })
-
-      expect(doc.filename).toBeDefined()
-      const expectedPath = path.join(dirname, './uploads', doc.filename as string)
-      const data = await readCSV(expectedPath)
-
-      expect(data[0].title).toStrictEqual('Array 2')
-    })
-
     it('should create a JSON file for collection', async () => {
-      // data set
-      for (let i = 0; i < 5; i++) {
-        await payload.create({
-          collection: 'pages',
-          data: {
-            title: `Array ${i}`,
-          },
-        })
-      }
-
       let doc = await payload.create({
-        collection: 'exports' as CollectionSlug,
+        collection: 'exports',
         user,
         data: {
           collectionSlug: 'pages',
           fields: ['id', 'title'],
           format: 'json',
           sort: 'title',
+          where: {
+            title: { contains: 'JSON ' },
+          },
         },
       })
 
       doc = await payload.findByID({
-        collection: 'exports' as CollectionSlug,
+        collection: 'exports',
         id: doc.id,
       })
 
@@ -325,20 +205,10 @@ describe('@payloadcms/plugin-import-export', () => {
       const expectedPath = path.join(dirname, './uploads', doc.filename as string)
       const data = await readJSON(expectedPath)
 
-      expect(data[0].title).toStrictEqual('Array 0')
+      expect(data[0].title).toStrictEqual('JSON 0')
     })
 
     it('should create jobs task for exports', async () => {
-      // data set
-      for (let i = 0; i < 5; i++) {
-        await payload.create({
-          collection: 'pages',
-          data: {
-            title: `Array ${i}`,
-          },
-        })
-      }
-
       const doc = await payload.create({
         collection: 'exports-tasks' as CollectionSlug,
         user,
@@ -347,6 +217,9 @@ describe('@payloadcms/plugin-import-export', () => {
           fields: ['id', 'title'],
           format: 'csv',
           sort: 'title',
+          where: {
+            title: { contains: 'Jobs ' },
+          },
         },
       })
 
@@ -357,7 +230,6 @@ describe('@payloadcms/plugin-import-export', () => {
 
       expect(job).toBeDefined()
 
-      // @ts-expect-error
       const { input } = job
 
       expect(input.id).toBeDefined()
@@ -381,7 +253,7 @@ describe('@payloadcms/plugin-import-export', () => {
       const expectedPath = path.join(dirname, './uploads', exportDoc.filename as string)
       const data = await readCSV(expectedPath)
 
-      expect(data[0].title).toStrictEqual('Array 0')
+      expect(data[0].title).toStrictEqual('Jobs 0')
     })
 
     // disabled so we don't always run a massive test

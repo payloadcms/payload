@@ -1,7 +1,7 @@
 export const getFilename = () => {
-  const [yyymmdd = '', hhmmss = ''] = new Date().toISOString().split('T')
-  const formattedDate = yyymmdd.replace(/\D/g, '')
-  const formattedTime = (hhmmss.split('.')[0] ?? '').replace(/\D/g, '')
+  const now = new Date()
+  const yyymmdd = now.toISOString().split('T')[0] // "YYYY-MM-DD"
+  const hhmmss = now.toTimeString().split(' ')[0] // "HH:MM:SS"
 
-  return `${formattedDate}_${formattedTime}`
+  return `${yyymmdd} ${hhmmss}`
 }

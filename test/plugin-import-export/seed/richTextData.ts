@@ -1,99 +1,110 @@
-export const richTextData = [
-  {
-    type: 'ul',
+export const richTextData = {
+  root: {
     children: [
       {
-        type: 'li',
         children: [
           {
-            children: [
-              {
-                text: 'I am semantically connected to my sub-bullets',
-              },
-            ],
-          },
-          {
-            type: 'ul',
-            children: [
-              {
-                type: 'li',
-                children: [
-                  {
-                    text: 'I am sub-bullets that are semantically connected to the parent bullet',
-                  },
-                ],
-              },
-            ],
+            detail: 0,
+            format: 0,
+            mode: 'normal',
+            style: '',
+            text: 'This is some content in a block',
+            type: 'text',
+            version: 1,
           },
         ],
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        type: 'heading',
+        version: 1,
+        tag: 'h2',
       },
       {
         children: [
           {
-            text: 'Normal bullet',
+            detail: 0,
+            format: 0,
+            mode: 'normal',
+            style: '',
+            text: 'Paragraph of text',
+            type: 'text',
+            version: 1,
           },
         ],
-        type: 'li',
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        type: 'paragraph',
+        version: 1,
+        textFormat: 0,
+        textStyle: '',
       },
       {
-        type: 'li',
-        children: [
-          {
-            type: 'ul',
-            children: [
-              {
-                type: 'li',
-                children: [
-                  {
-                    text: 'I am the old style of sub-bullet',
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-      {
-        type: 'li',
-        children: [
-          {
-            text: 'Another normal bullet',
-          },
-        ],
-      },
-      {
-        type: 'li',
         children: [
           {
             children: [
               {
-                text: 'This text precedes a nested list',
+                detail: 0,
+                format: 0,
+                mode: 'normal',
+                style: '',
+                text: 'Testing ',
+                type: 'text',
+                version: 1,
               },
             ],
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            type: 'listitem',
+            version: 1,
+            value: 1,
           },
           {
-            type: 'ul',
             children: [
               {
-                type: 'li',
-                children: [
-                  {
-                    text: 'I am a sub-bullet',
-                  },
-                ],
-              },
-              {
-                type: 'li',
-                children: [
-                  {
-                    text: 'And I am another sub-bullet',
-                  },
-                ],
+                detail: 0,
+                format: 0,
+                mode: 'normal',
+                style: '',
+                text: 'Richtext',
+                type: 'text',
+                version: 1,
               },
             ],
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            type: 'listitem',
+            version: 1,
+            value: 2,
           },
         ],
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        type: 'list',
+        version: 1,
+        listType: 'number',
+        start: 1,
+        tag: 'ol',
+      },
+      {
+        children: [],
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        type: 'paragraph',
+        version: 1,
+        textFormat: 0,
+        textStyle: '',
       },
     ],
+    direction: 'ltr',
+    format: '',
+    indent: 0,
+    type: 'root',
+    version: 1,
   },
-]
+}
