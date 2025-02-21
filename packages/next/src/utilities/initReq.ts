@@ -1,5 +1,13 @@
-import type { I18n, I18nClient } from '@payloadcms/translations'
-import type { Locale, PayloadRequest, SanitizedConfig, SanitizedPermissions } from 'payload'
+import type { AcceptedLanguages, I18n, I18nClient } from '@payloadcms/translations'
+import type {
+  ImportMap,
+  Locale,
+  Payload,
+  PayloadRequest,
+  SanitizedConfig,
+  SanitizedPermissions,
+  User,
+} from 'payload'
 
 import { initI18n } from '@payloadcms/translations'
 import { headers as getHeaders } from 'next/headers.js'
@@ -16,32 +24,60 @@ import { cache } from 'react'
 import { getRequestLocale } from './getRequestLocale.js'
 
 type Result = {
+  cookies: Map<string, string>
+  headers: Awaited<ReturnType<typeof getHeaders>>
+  languageCode: AcceptedLanguages
   locale?: Locale
   permissions: SanitizedPermissions
   req: PayloadRequest
 }
 
-const getInitReqContainer = cache(function (): {
-  reqResult: false | Promise<Result>
+type PartialResult = {
+  cookies: Map<string, string>
+  headers: Awaited<ReturnType<typeof getHeaders>>
+  i18n: I18nClient
+  languageCode: AcceptedLanguages
+  payload: Payload
+  responseHeaders: Headers
+  user: null | User
+}
+
+const getPartialInitReqContainer = cache(function (): {
+  reqResult: false | PartialResult | Promise<PartialResult>
 } {
   return {
     reqResult: false,
   }
 })
 
-export const initReq = async function (
-  configPromise: Promise<SanitizedConfig> | SanitizedConfig,
-  overrides?: Parameters<typeof createLocalReq>[0],
-): Promise<Result> {
-  const reqContainer = getInitReqContainer()
+const getInitReqContainer = cache(function (key: string): {
+  reqResult: false | Promise<Result> | Result
+} {
+  return {
+    reqResult: false,
+  }
+})
 
-  if (reqContainer?.reqResult && typeof reqContainer?.reqResult?.then === 'function') {
-    return await reqContainer.reqResult
+const initPartialReq = async function ({
+  configPromise,
+  importMap,
+}: {
+  configPromise: Promise<SanitizedConfig> | SanitizedConfig
+  importMap: ImportMap
+}): Promise<PartialResult> {
+  const partialReqContainer = getPartialInitReqContainer()
+
+  if (
+    partialReqContainer?.reqResult &&
+    'then' in partialReqContainer?.reqResult &&
+    typeof partialReqContainer?.reqResult?.then === 'function'
+  ) {
+    return await partialReqContainer.reqResult
   }
 
-  reqContainer.reqResult = (async () => {
+  partialReqContainer.reqResult = (async () => {
     const config = await configPromise
-    const payload = await getPayload({ config })
+    const payload = await getPayload({ config, importMap })
 
     const headers = await getHeaders()
     const cookies = parseCookies(headers)
@@ -67,6 +103,54 @@ export const initReq = async function (
       payload,
     })
 
+    const result: PartialResult = {
+      cookies,
+      headers,
+      i18n,
+      languageCode,
+      payload,
+      responseHeaders,
+      user,
+    }
+
+    return result
+  })()
+
+  partialReqContainer.reqResult = await partialReqContainer.reqResult
+
+  return partialReqContainer.reqResult
+}
+
+export const initReq = async function ({
+  configPromise,
+  importMap,
+  key,
+  overrides,
+  urlSuffix,
+}: {
+  configPromise: Promise<SanitizedConfig> | SanitizedConfig
+  importMap: ImportMap
+  key: string
+  overrides?: Parameters<typeof createLocalReq>[0]
+  urlSuffix?: string
+}): Promise<Result> {
+  const { cookies, headers, i18n, languageCode, payload, responseHeaders, user } =
+    await initPartialReq({
+      configPromise,
+      importMap,
+    })
+
+  const reqContainer = getInitReqContainer(key)
+
+  if (
+    reqContainer?.reqResult &&
+    'then' in reqContainer?.reqResult &&
+    typeof reqContainer?.reqResult?.then === 'function'
+  ) {
+    return await reqContainer.reqResult
+  }
+
+  reqContainer.reqResult = (async () => {
     const { req: reqOverrides, ...optionsOverrides } = overrides || {}
 
     const req = await createLocalReq(
@@ -76,7 +160,7 @@ export const initReq = async function (
           host: headers.get('host'),
           i18n: i18n as I18n,
           responseHeaders,
-          url: `${payload.config.serverURL}`,
+          url: `${payload.config.serverURL}${urlSuffix || ''}`,
           user,
           ...(reqOverrides || {}),
         },
@@ -96,6 +180,9 @@ export const initReq = async function (
     })
 
     const result: Result = {
+      cookies,
+      headers,
+      languageCode,
       locale,
       permissions,
       req,
@@ -104,5 +191,7 @@ export const initReq = async function (
     return result
   })()
 
-  return await reqContainer.reqResult
+  reqContainer.reqResult = await reqContainer.reqResult
+
+  return reqContainer.reqResult
 }
