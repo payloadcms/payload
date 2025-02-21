@@ -1,5 +1,3 @@
-import type { CognitoUserSession } from 'amazon-cognito-identity-js'
-
 import { CognitoIdentityClient } from '@aws-sdk/client-cognito-identity'
 import * as AWS from '@aws-sdk/client-s3'
 import { fromCognitoIdentityPool } from '@aws-sdk/credential-providers'
@@ -11,12 +9,8 @@ export type GetStorageClient = () => Promise<{
   storageClient: AWS.S3 | null
 }>
 
-export let storageClient: AWS.S3 | null = null
-export let session: CognitoUserSession | null = null
-export let identityID: string
-
 export const refreshSession = async () => {
-  session = await authAsCognitoUser(
+  const session = await authAsCognitoUser(
     process.env.PAYLOAD_CLOUD_PROJECT_ID || '',
     process.env.PAYLOAD_CLOUD_COGNITO_PASSWORD || '',
   )
@@ -37,10 +31,16 @@ export const refreshSession = async () => {
   const credentials = await cognitoIdentity.config.credentials()
 
   // @ts-expect-error - Incorrect AWS types
-  identityID = credentials.identityId
+  const identityID = credentials.identityId
 
-  storageClient = new AWS.S3({
+  const storageClient = new AWS.S3({
     credentials,
     region: process.env.PAYLOAD_CLOUD_BUCKET_REGION,
   })
+
+  return {
+    identityID,
+    session,
+    storageClient,
+  }
 }
