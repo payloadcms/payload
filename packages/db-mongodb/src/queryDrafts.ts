@@ -10,7 +10,7 @@ import { buildSortParam } from './queries/buildSortParam.js'
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { getSession } from './utilities/getSession.js'
-import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
+import { transform } from './utilities/transform.js'
 
 export const queryDrafts: QueryDrafts = async function queryDrafts(
   this: MongooseAdapter,
@@ -124,18 +124,18 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     result = await VersionModel.paginate(versionQuery, paginationOptions)
   }
 
-  const docs = JSON.parse(JSON.stringify(result.docs))
+  transform({
+    adapter: this,
+    data: result.docs,
+    fields: buildVersionCollectionFields(this.payload.config, collectionConfig),
+    operation: 'read',
+  })
 
-  return {
-    ...result,
-    docs: docs.map((doc) => {
-      doc = {
-        _id: doc.parent,
-        id: doc.parent,
-        ...doc.version,
-      }
-
-      return sanitizeInternalFields(doc)
-    }),
+  for (let i = 0; i < result.docs.length; i++) {
+    const id = result.docs[i].parent
+    result.docs[i] = result.docs[i].version
+    result.docs[i].id = id
   }
+
+  return result
 }
