@@ -76,7 +76,7 @@ export const getStaticHandler = ({ cachingOptions, collection, debug }: Args): S
         stream.on('error', (err) => {
           req.payload.logger.error({
             err,
-            Key,
+            key,
             msg: 'Error streaming S3 object, destroying stream',
           })
           stream.destroy()
@@ -108,7 +108,7 @@ export const getStaticHandler = ({ cachingOptions, collection, debug }: Args): S
             collectionSlug: collection.slug,
             msg: `Requested file not found in cloud storage: ${params.filename}`,
             params,
-            requestedKey: Key,
+            requestedKey: key,
           })
           return new Response(null, { status: 404, statusText: 'Not Found' })
         } else if (err.name === 'NoSuchKey') {
@@ -117,7 +117,7 @@ export const getStaticHandler = ({ cachingOptions, collection, debug }: Args): S
             collectionSlug: collection.slug,
             msg: `Requested file not found in cloud storage: ${params.filename}`,
             params,
-            requestedKey: Key,
+            requestedKey: key,
           })
           return new Response(null, { status: 404, statusText: 'Not Found' })
         }
