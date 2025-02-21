@@ -743,7 +743,7 @@ describe('General', () => {
         'Deleted 6 Posts successfully.',
       )
 
-      await expect(page.locator('.table table > tbody > tr')).toHaveCount(1)
+      await expect(page.locator('.table table > tbody > tr')).toHaveCount(5)
     })
 
     test('should bulk update', async () => {
@@ -837,6 +837,14 @@ describe('General', () => {
       expect(updatedPost.docs[0].arrayOfFields[0].innerArrayOfFields.length).toBe(1)
       expect(updatedPost.docs[0].someBlock[0].textFieldForBlock).toBe('some text for block text')
       expect(updatedPost.docs[0].defaultValueField).toBe('not the default value')
+    })
+
+    test('should not show "select all across pages" button if already selected all', async () => {
+      await deleteAllPosts()
+      await createPost({ title: `Post 1` })
+      await page.goto(postsUrl.list)
+      await page.locator('input#select-all').check()
+      await expect(page.locator('button#select-all-across-pages')).toBeHidden()
     })
 
     test('should bulk update with filters and across pages', async () => {
