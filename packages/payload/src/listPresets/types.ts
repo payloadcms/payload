@@ -3,14 +3,14 @@ import type { ListPreferences } from '../preferences/types.js'
 import type { Where } from '../types/index.js'
 
 // TODO: this should just exist in `GeneratedTypes` instead
-export type SharedListFilter = {
+export type ListPreset = {
   columns: ListPreferences['columns']
   id: number | string
   title: string
   where: Where
 }
 
-export type ListFilterConstraints = {
+export type ListPresetConstraints = {
   fields: Field[]
   label: string
   value: string

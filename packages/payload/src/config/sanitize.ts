@@ -26,13 +26,13 @@ import {
   type GlobalSlug,
   sanitizeFields,
 } from '../index.js'
+import { getListPresetsConfig, listPresetsCollectionSlug } from '../listPresets/config.js'
 import {
   getLockedDocumentsCollection,
   lockedDocumentsCollectionSlug,
 } from '../lockedDocuments/config.js'
 import { getPreferencesCollection, preferencesCollectionSlug } from '../preferences/config.js'
 import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/jobsCollection.js'
-import { getSharedFiltersCollection, sharedFiltersCollectionSlug } from '../sharedFilters/config.js'
 import { flattenBlock } from '../utilities/flattenAllFields.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
 import { defaults } from './defaults.js'
@@ -238,7 +238,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     jobsCollectionSlug,
     lockedDocumentsCollectionSlug,
     preferencesCollectionSlug,
-    sharedFiltersCollectionSlug,
+    listPresetsCollectionSlug,
   ]
 
   /**
@@ -374,7 +374,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   configWithDefaults.collections.push(
     await sanitizeCollection(
       config as unknown as Config,
-      getSharedFiltersCollection(config as unknown as Config),
+      getListPresetsConfig(config as unknown as Config),
       richTextSanitizationPromises,
       validRelationships,
     ),

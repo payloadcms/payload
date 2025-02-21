@@ -29,7 +29,7 @@ export const getConstraints = (config: Config): Field => ({
             label: 'Specific Users',
             value: 'specificUsers',
           },
-          ...(config?.admin?.sharedListFilters?.constraints?.[operation]?.map((option) => ({
+          ...(config?.admin?.listPresets?.constraints?.[operation]?.map((option) => ({
             label: option.label,
             value: option.value,
           })) || []),
@@ -57,7 +57,7 @@ export const getConstraints = (config: Config): Field => ({
         },
         relationTo: 'users',
       },
-      ...(config.admin?.sharedListFilters?.constraints?.[operation]?.reduce((acc, option) => {
+      ...(config.admin?.listPresets?.constraints?.[operation]?.reduce((acc, option) => {
         option.fields.forEach((field, index) => {
           acc.push({ ...field })
 

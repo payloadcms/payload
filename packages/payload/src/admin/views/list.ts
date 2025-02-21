@@ -3,10 +3,9 @@ import type {
   SanitizedCollectionConfig,
 } from '../../collections/config/types.js'
 import type { ServerProps } from '../../config/types.js'
-import type { PaginatedDocs } from '../../database/types.js'
+import type { ListPreset } from '../../listPresets/types.js'
 import type { ListPreferences } from '../../preferences/types.js'
-import type { SharedListFilter } from '../../sharedFilters/types.js'
-import type { ResolvedFilterOptions, Where } from '../../types/index.js'
+import type { ResolvedFilterOptions } from '../../types/index.js'
 import type { Column } from '../elements/Table.js'
 import type { Data } from '../types.js'
 
@@ -37,7 +36,7 @@ export type ListViewServerPropsOnly = {
 export type ListViewServerProps = ListViewClientProps & ListViewServerPropsOnly
 
 export type ListViewClientProps = {
-  activePreset?: SharedListFilter
+  activePreset?: ListPreset
   beforeActions?: React.ReactNode[]
   collectionSlug: SanitizedCollectionConfig['slug']
   columnState: Column[]

@@ -70,7 +70,7 @@ export interface Config {
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
-    'payload-shared-filters': PayloadSharedFilter;
+    'payload-list-presets': PayloadListPreset;
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
@@ -79,7 +79,7 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
-    'payload-shared-filters': PayloadSharedFiltersSelect<false> | PayloadSharedFiltersSelect<true>;
+    'payload-list-presets': PayloadListPresetsSelect<false> | PayloadListPresetsSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
@@ -192,9 +192,9 @@ export interface PayloadPreference {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-shared-filters".
+ * via the `definition` "payload-list-presets".
  */
-export interface PayloadSharedFilter {
+export interface PayloadListPreset {
   id: string;
   title: string;
   access?: {
@@ -297,9 +297,9 @@ export interface PayloadPreferencesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-shared-filters_select".
+ * via the `definition` "payload-list-presets_select".
  */
-export interface PayloadSharedFiltersSelect<T extends boolean = true> {
+export interface PayloadListPresetsSelect<T extends boolean = true> {
   title?: T;
   access?:
     | T

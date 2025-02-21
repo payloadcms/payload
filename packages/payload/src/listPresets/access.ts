@@ -11,8 +11,8 @@ export const getAccess = (config: Config): Record<Operation, Access> =>
       acc[operation] = async (args) => {
         const { req } = args
 
-        const userDefinedAccess = config?.admin?.sharedListFilters?.access?.[operation]
-          ? await config?.admin?.sharedListFilters?.access?.[operation](args)
+        const userDefinedAccess = config?.admin?.listPresets?.access?.[operation]
+          ? await config?.admin?.listPresets?.access?.[operation](args)
           : undefined
 
         if (typeof userDefinedAccess === 'boolean') {

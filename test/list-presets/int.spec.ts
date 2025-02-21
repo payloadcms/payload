@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url'
 import { devUser, regularUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 
-const sharedFilterCollectionSlug = 'payload-shared-filters'
+const listPresetsCollectionSlug = 'payload-list-presets'
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -46,7 +46,7 @@ describe('Shared Filters', () => {
   describe('default access control', () => {
     it('should respect access when set to "specificUsers"', async () => {
       const filterDoc = await payload.create({
-        collection: sharedFilterCollectionSlug,
+        collection: listPresetsCollectionSlug,
         data: {
           title: 'Specific Users',
           where: {
@@ -70,7 +70,7 @@ describe('Shared Filters', () => {
       })
 
       const resultWithUser = await payload.findByID({
-        collection: sharedFilterCollectionSlug,
+        collection: listPresetsCollectionSlug,
         depth: 0,
         user,
         overrideAccess: false,
@@ -81,7 +81,7 @@ describe('Shared Filters', () => {
 
       try {
         const resultWithUser2 = await payload.findByID({
-          collection: sharedFilterCollectionSlug,
+          collection: listPresetsCollectionSlug,
           depth: 0,
           user: user2,
           overrideAccess: false,
@@ -94,7 +94,7 @@ describe('Shared Filters', () => {
       }
 
       const resultUpdatedByUser = await payload.update({
-        collection: sharedFilterCollectionSlug,
+        collection: listPresetsCollectionSlug,
         id: filterDoc.id,
         user,
         overrideAccess: false,
@@ -107,7 +107,7 @@ describe('Shared Filters', () => {
 
       try {
         const resultWithUser2 = await payload.update({
-          collection: sharedFilterCollectionSlug,
+          collection: listPresetsCollectionSlug,
           id: filterDoc.id,
           user: user2,
           overrideAccess: false,
@@ -126,7 +126,7 @@ describe('Shared Filters', () => {
     it('should respect access when set to "onlyMe"', async () => {
       // create a new doc so that the creating user is the owner
       const filterDoc = await payload.create({
-        collection: sharedFilterCollectionSlug,
+        collection: listPresetsCollectionSlug,
         user,
         data: {
           title: 'Only Me',
@@ -148,7 +148,7 @@ describe('Shared Filters', () => {
       })
 
       const resultWithUser = await payload.findByID({
-        collection: sharedFilterCollectionSlug,
+        collection: listPresetsCollectionSlug,
         depth: 0,
         user,
         overrideAccess: false,
@@ -159,7 +159,7 @@ describe('Shared Filters', () => {
 
       try {
         const resultWithUser2 = await payload.findByID({
-          collection: sharedFilterCollectionSlug,
+          collection: listPresetsCollectionSlug,
           depth: 0,
           user: user2,
           overrideAccess: false,
@@ -173,7 +173,7 @@ describe('Shared Filters', () => {
       }
 
       const resultUpdatedByUser = await payload.update({
-        collection: sharedFilterCollectionSlug,
+        collection: listPresetsCollectionSlug,
         id: filterDoc.id,
         user,
         overrideAccess: false,
@@ -186,7 +186,7 @@ describe('Shared Filters', () => {
 
       try {
         const resultWithUser2 = await payload.update({
-          collection: sharedFilterCollectionSlug,
+          collection: listPresetsCollectionSlug,
           id: filterDoc.id,
           user: user2,
           overrideAccess: false,
@@ -204,7 +204,7 @@ describe('Shared Filters', () => {
 
     it('should respect access when set to "everyone"', async () => {
       const filterDoc = await payload.create({
-        collection: sharedFilterCollectionSlug,
+        collection: listPresetsCollectionSlug,
         user,
         data: {
           title: 'Everyone',
@@ -226,7 +226,7 @@ describe('Shared Filters', () => {
       })
 
       const resultWithUser = await payload.findByID({
-        collection: sharedFilterCollectionSlug,
+        collection: listPresetsCollectionSlug,
         depth: 0,
         user,
         overrideAccess: false,
@@ -236,7 +236,7 @@ describe('Shared Filters', () => {
       expect(resultWithUser.id).toBe(filterDoc.id)
 
       const resultWithUser2 = await payload.findByID({
-        collection: sharedFilterCollectionSlug,
+        collection: listPresetsCollectionSlug,
         depth: 0,
         user: user2,
         overrideAccess: false,
@@ -246,7 +246,7 @@ describe('Shared Filters', () => {
       expect(resultWithUser2.id).toBe(filterDoc.id)
 
       const resultUpdatedByUser = await payload.update({
-        collection: sharedFilterCollectionSlug,
+        collection: listPresetsCollectionSlug,
         id: filterDoc.id,
         user,
         overrideAccess: false,
@@ -258,7 +258,7 @@ describe('Shared Filters', () => {
       expect(resultUpdatedByUser.title).toBe('Everyone (Update 1)')
 
       const resultUpdatedByUser2 = await payload.update({
-        collection: sharedFilterCollectionSlug,
+        collection: listPresetsCollectionSlug,
         id: filterDoc.id,
         user: user2,
         overrideAccess: false,
@@ -274,7 +274,7 @@ describe('Shared Filters', () => {
   describe('user-defined access control', () => {
     it('should respect access when set to "specificRoles"', async () => {
       const adminOnlyFilter = await payload.create({
-        collection: sharedFilterCollectionSlug,
+        collection: listPresetsCollectionSlug,
         user,
         data: {
           title: 'Specific Roles',
@@ -298,7 +298,7 @@ describe('Shared Filters', () => {
       })
 
       const resultWithUser = await payload.findByID({
-        collection: sharedFilterCollectionSlug,
+        collection: listPresetsCollectionSlug,
         depth: 0,
         user,
         overrideAccess: false,
@@ -309,7 +309,7 @@ describe('Shared Filters', () => {
 
       try {
         const resultWithUser2 = await payload.findByID({
-          collection: sharedFilterCollectionSlug,
+          collection: listPresetsCollectionSlug,
           depth: 0,
           user: user2,
           overrideAccess: false,
@@ -323,7 +323,7 @@ describe('Shared Filters', () => {
       }
 
       const resultUpdatedByUser = await payload.update({
-        collection: sharedFilterCollectionSlug,
+        collection: listPresetsCollectionSlug,
         id: adminOnlyFilter.id,
         user,
         overrideAccess: false,
@@ -336,7 +336,7 @@ describe('Shared Filters', () => {
 
       try {
         const resultUpdatedByUser2 = await payload.update({
-          collection: sharedFilterCollectionSlug,
+          collection: listPresetsCollectionSlug,
           id: adminOnlyFilter.id,
           user: user2,
           overrideAccess: false,
@@ -356,7 +356,7 @@ describe('Shared Filters', () => {
   describe('Where object formatting', () => {
     it('transforms "where" query objects into the "and" / "or" format', async () => {
       const result = await payload.create({
-        collection: sharedFilterCollectionSlug,
+        collection: listPresetsCollectionSlug,
         user,
         data: {
           title: 'Where Object Formatting',

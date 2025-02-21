@@ -43,7 +43,7 @@ export const seed = async (_payload: Payload) => {
         }),
       () =>
         _payload.create({
-          collection: 'payload-shared-filters',
+          collection: 'payload-list-presets',
           data: {
             title: 'Specific Users',
             where: {
@@ -72,7 +72,7 @@ export const seed = async (_payload: Payload) => {
         }),
       () =>
         _payload.create({
-          collection: 'payload-shared-filters',
+          collection: 'payload-list-presets',
           data: {
             title: 'Everyone',
             where: {
@@ -99,7 +99,7 @@ export const seed = async (_payload: Payload) => {
         }),
       () =>
         _payload.create({
-          collection: 'payload-shared-filters',
+          collection: 'payload-list-presets',
           data: {
             title: 'Only Me',
             where: {

@@ -1,5 +1,5 @@
 'use client'
-import type { SharedListFilter } from 'payload'
+import type { ListPreset } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -22,15 +22,11 @@ const baseClass = 'select-list-preset'
 
 const confirmDeleteModalSlug = 'confirm-delete-filter'
 
-export function SelectListPreset({
-  activePreset: initialPreset,
-}: {
-  activePreset: SharedListFilter
-}) {
+export function SelectListPreset({ activePreset: initialPreset }: { activePreset: ListPreset }) {
   const { i18n, t } = useTranslation()
   const { openModal } = useModal()
 
-  const [selectedFilter, setSelectedFilter] = useState<SharedListFilter>(initialPreset)
+  const [selectedFilter, setSelectedFilter] = useState<ListPreset>(initialPreset)
   const [documentEditID, setDocumentEditID] = useState<number | string>(null)
 
   const { modified: listQueryModified, setModified: setQueryModified } = useListQuery()
@@ -40,12 +36,12 @@ export function SelectListPreset({
 
   const [DocumentDrawer, , { openDrawer: openEditDrawer }] = useDocumentDrawer({
     id: documentEditID,
-    collectionSlug: 'payload-shared-filters',
+    collectionSlug: 'payload-list-presets',
   })
 
   const [ListDrawer, , { closeDrawer: closeListDrawer, openDrawer: openListDrawer }] =
     useListDrawer({
-      collectionSlugs: ['payload-shared-filters'],
+      collectionSlugs: ['payload-list-presets'],
     })
 
   const handleDelete = useCallback(() => {

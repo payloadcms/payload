@@ -1,10 +1,10 @@
 import type {
   AdminViewServerProps,
   ListPreferences,
+  ListPreset,
   ListQuery,
   ListViewClientProps,
   ListViewServerPropsOnly,
-  SharedListFilter,
   Where,
 } from 'payload'
 
@@ -120,16 +120,16 @@ export const renderListView = async (
       }
     }
 
-    let activePreset: SharedListFilter | undefined
+    let activePreset: ListPreset | undefined
 
     try {
       activePreset = (await payload.findByID({
         id: listPreferences?.listPresets?.[collectionSlug],
-        collection: 'payload-shared-filters',
+        collection: 'payload-list-presets',
         depth: 0,
         overrideAccess: false,
         user,
-      })) as SharedListFilter
+      })) as ListPreset
     } catch (_err) {
       // swallow error
     }

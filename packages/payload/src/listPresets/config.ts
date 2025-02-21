@@ -5,10 +5,10 @@ import { transformWhereQuery } from '../utilities/transformWhereQuery.js'
 import { validateWhereQuery } from '../utilities/validateWhereQuery.js'
 import { getAccess } from './access.js'
 import { getConstraints } from './constraints.js'
-export const sharedFiltersCollectionSlug = 'payload-shared-filters'
+export const listPresetsCollectionSlug = 'payload-list-presets'
 
-export const getSharedFiltersCollection = (config: Config): CollectionConfig => ({
-  slug: sharedFiltersCollectionSlug,
+export const getListPresetsConfig = (config: Config): CollectionConfig => ({
+  slug: listPresetsCollectionSlug,
   access: getAccess(config),
   admin: {
     // hidden: true, // uncomment this when ready

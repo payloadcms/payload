@@ -15,7 +15,7 @@ export default buildConfigWithDefaults({
     importMap: {
       baseDir: path.resolve(dirname),
     },
-    sharedListFilters: {
+    listPresets: {
       access: {
         read: ({ req: { user } }) => ({
           access: {

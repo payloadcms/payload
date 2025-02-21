@@ -48,7 +48,7 @@ import type {
   RequestContext,
   TypedUser,
 } from '../index.js'
-import type { ListFilterConstraints } from '../sharedFilters/types.js'
+import type { ListFilterConstraints } from '../listPresets/types.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -875,6 +875,20 @@ export type Config = {
         }) => void
       >
     }
+    listPresets?: {
+      access: {
+        create?: Access
+        delete?: Access
+        read?: Access
+        update?: Access
+      }
+      constraints: {
+        create?: ListFilterConstraints
+        delete?: ListFilterConstraints
+        read?: ListFilterConstraints
+        update?: ListFilterConstraints
+      }
+    }
     livePreview?: {
       collections?: string[]
       globals?: string[]
@@ -898,20 +912,6 @@ export type Config = {
       reset?: string
       /** The route for the unauthorized page. */
       unauthorized?: string
-    }
-    sharedListFilters?: {
-      access: {
-        create?: Access
-        delete?: Access
-        read?: Access
-        update?: Access
-      }
-      constraints: {
-        create?: ListFilterConstraints
-        delete?: ListFilterConstraints
-        read?: ListFilterConstraints
-        update?: ListFilterConstraints
-      }
     }
     /**
      * Suppresses React hydration mismatch warnings during the hydration of the root <html> tag.

@@ -1,10 +1,5 @@
 'use client'
-import type {
-  ClientCollectionConfig,
-  ResolvedFilterOptions,
-  SharedListFilter,
-  Where,
-} from 'payload'
+import type { ClientCollectionConfig, ListPreset, ResolvedFilterOptions, Where } from 'payload'
 
 import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
@@ -35,7 +30,7 @@ import './index.scss'
 const baseClass = 'list-controls'
 
 export type ListControlsProps = {
-  readonly activePreset?: SharedListFilter
+  readonly activePreset?: ListPreset
   readonly beforeActions?: React.ReactNode[]
   readonly collectionConfig: ClientCollectionConfig
   readonly collectionSlug: string
