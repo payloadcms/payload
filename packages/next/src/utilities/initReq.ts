@@ -21,7 +21,7 @@ type Result = {
   req: PayloadRequest
 }
 
-export const getInitReqContainer = cache(function (): {
+const getInitReqContainer = cache(function (): {
   reqResult: false | Promise<Result>
 } {
   return {
