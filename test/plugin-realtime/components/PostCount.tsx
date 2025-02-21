@@ -19,14 +19,14 @@ export function PostCount() {
 }
 
 export function PostCountChild() {
-  const [{ data, isError, isLoading }, { setParams: _ }] = usePayloadAPI('/api/posts', {
-    initialParams: { depth: 1 /** where: { title: { contains: 'Test' } } */ },
-  })
-  const {
-    data: data2,
-    error,
-    isLoading: isLoading2,
-  } = usePayloadQuery('count', { collection: 'posts' })
+  const { data, error, isLoading } = usePayloadQuery('count', { collection: 'posts' })
+
+  const [{ data: data2, isError, isLoading: isLoading2 }, { setParams: _ }] = usePayloadAPI(
+    '/api/posts',
+    {
+      initialParams: { depth: 1 /** where: { title: { contains: 'Test' } } */ },
+    },
+  )
   const [count3, setCount3] = useState(0)
 
   useEffect(() => {
@@ -65,9 +65,9 @@ export function PostCountChild() {
   console.log(data2)
   return (
     <>
-      <div>Posts count from REST API (usePayloadAPI): {data?.totalDocs}</div>
+      <div>Posts count from REST API (usePayloadAPI): {data2?.totalDocs}</div>
       <div>Posts count from reactive (vanilla): {count3}</div>
-      <div>Posts count from reactive (usePayloadQuery): {data2?.totalDocs}</div>
+      <div>Posts count from reactive (usePayloadQuery): {data?.totalDocs}</div>
       <button
         onClick={() => {
           // createPost()
