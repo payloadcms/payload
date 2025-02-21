@@ -43,7 +43,7 @@ export type FolderContextValue = {
     toFolderID?: number | string
   }) => Promise<void>
   populateFolderData: (args: { folderID: number | string }) => Promise<void>
-  removeItems: (args: number[]) => Promise<void>
+  removeItems: (args: PolymorphicRelationshipValue[]) => Promise<void>
   selectedIndexes: Set<number>
   setBreadcrumbs: React.Dispatch<React.SetStateAction<FolderBreadcrumb[]>>
   setFolderID: (args: { folderID: number | string }) => Promise<void>
@@ -197,24 +197,17 @@ export function FolderProvider({ children, initialData }: Props) {
    * This deletes folders, but only unassociates documents from folders
    */
   const removeItems: FolderContextValue['removeItems'] = React.useCallback(
-    async (indexesToDelete) => {
-      if (!indexesToDelete.length) {
+    async (itemsToDelete) => {
+      if (!itemsToDelete.length) {
         return
       }
-      const allItems = [...subfolders, ...documents]
-      const groupedByRelationTo = indexesToDelete.reduce(
-        (acc, index) => {
-          const item = allItems[index]
-          if (!item) {
-            return acc
-          }
+
+      const groupedByRelationTo = itemsToDelete.reduce(
+        (acc, item) => {
           if (!acc[item.relationTo]) {
             acc[item.relationTo] = []
           }
-          const itemID = typeof item.value === 'object' ? item.value.id : item.value
-          if (itemID) {
-            acc[item.relationTo].push(itemID)
-          }
+          acc[item.relationTo].push(extractID(item.value))
 
           return acc
         },
@@ -287,7 +280,7 @@ export function FolderProvider({ children, initialData }: Props) {
 
       toast.success(t('general:deletedSuccessfully'))
     },
-    [routes.api, serverURL, subfolders, documents, t, activeFolderID, populateFolderData],
+    [routes.api, serverURL, t, activeFolderID, populateFolderData],
   )
 
   const deleteCurrentFolder = React.useCallback(async () => {

@@ -1,10 +1,10 @@
 'use client'
 import type { DragEndEvent } from '@dnd-kit/core'
+import type { FolderInterface } from 'payload/shared'
 
 import { DndContext, pointerWithin, useDndMonitor } from '@dnd-kit/core'
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { extractID, type FolderInterface } from 'payload/shared'
 import React from 'react'
 
 import type { PolymorphicRelationshipValue } from '../types.js'
@@ -16,6 +16,7 @@ import { useFolder } from '../../../providers/Folders/index.js'
 import { usePreferences } from '../../../providers/Preferences/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
+import { ConfirmationModal } from '../../ConfirmationModal/index.js'
 import { DocumentDrawer } from '../../DocumentDrawer/index.js'
 import { Popup, PopupList } from '../../Popup/index.js'
 import { FolderBreadcrumbs } from '../Breadcrumbs/index.js'
@@ -23,12 +24,13 @@ import { DisplayItems } from '../DisplayItems/index.js'
 import { DragOverlaySelection } from '../DragOverlaySelection/index.js'
 import { MoveToFolderDrawer } from '../Drawers/MoveToFolder/index.js'
 import { NewFolderDrawer } from '../Drawers/NewFolder/index.js'
-import { RenameFolderDrawer } from '../Drawers/RenameFolder/index.js'
 import './index.scss'
+import { RenameFolderDrawer } from '../Drawers/RenameFolder/index.js'
 
 const baseClass = 'folder-and-documents'
 const renameFolderDrawerSlug = 'rename-folder'
 const moveToFolderDrawerSlug = 'move-to-folder'
+const deleteFolderItemsDrawerSlug = 'delete--folder-items-folder'
 const newFolderSlug = 'new-folder'
 
 type Props = {
@@ -68,6 +70,7 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
   const [viewType, setViewType] = React.useState<'grid' | 'list'>(initialDisplayType || 'grid')
   const [createCollectionSlug, setCreateCollectionSlug] = React.useState<string | undefined>()
   const [itemsToMove, setItemsToMove] = React.useState<PolymorphicRelationshipValue[]>([])
+  const [itemsToDelete, setItemsToDelete] = React.useState<PolymorphicRelationshipValue[]>([])
   const dndContextID = React.useId()
   const renameFolderWasOpenRef = React.useRef(false)
 
@@ -83,13 +86,18 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
     [setPreference],
   )
 
-  // When the move to folder drawer is opened
-  // - set hidden folders from the items that are being moved
-  // - set the items that are being moved
   const onMoveToFolderOpen = React.useCallback(
     ({ items }: { items: PolymorphicRelationshipValue[] }) => {
       setItemsToMove(items)
       openModal(moveToFolderDrawerSlug)
+    },
+    [openModal],
+  )
+
+  const onDeleteFolderItemsOpen = React.useCallback(
+    ({ items }: { items: PolymorphicRelationshipValue[] }) => {
+      setItemsToDelete(items)
+      openModal(deleteFolderItemsDrawerSlug)
     },
     [openModal],
   )
@@ -266,7 +274,7 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
                       })
                     }}
                   >
-                    {t('general:rename')}
+                    {t('folder:moveFolder')}
                   </PopupList.Button>
                   <PopupList.Button
                     disabled={isRootFolder}
@@ -287,8 +295,8 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
                   <>
                     <Button
                       buttonStyle="pill"
-                      onClick={async () => {
-                        await removeItems(Array.from(selectedIndexes))
+                      onClick={() => {
+                        onDeleteFolderItemsOpen({ items: getSelectedItems() })
                       }}
                       size="small"
                     >
@@ -334,10 +342,9 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
             collectionUseAsTitles={collectionUseAsTitles}
             documents={documents}
             folderCollectionSlug={folderCollectionSlug}
-            getSelectedItems={getSelectedItems}
             isMovingItems={isDragging}
             lastSelectedIndex={lastSelectedIndex}
-            RenderDocumentActionGroup={({ document, index }) => (
+            RenderDocumentActionGroup={({ document }) => (
               <PopupList.ButtonGroup>
                 <PopupList.Button
                   id="action-move-document"
@@ -350,13 +357,13 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
                 <PopupList.Button
                   disabled={isRootFolder}
                   id="action-delete-document"
-                  onClick={() => removeItems([index])}
+                  onClick={() => onDeleteFolderItemsOpen({ items: [document] })}
                 >
                   {t('folder:removeFromFolder')}
                 </PopupList.Button>
               </PopupList.ButtonGroup>
             )}
-            RenderSubfolderActionGroup={({ index, subfolder }) => (
+            RenderSubfolderActionGroup={({ subfolder }) => (
               <PopupList.ButtonGroup>
                 <PopupList.Button
                   id="action-rename-folder"
@@ -376,13 +383,17 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
                   {t('general:move')}
                 </PopupList.Button>
                 {folderID ? (
-                  <PopupList.Button id="action-delete-folder" onClick={() => removeItems([index])}>
+                  <PopupList.Button
+                    id="action-delete-folder"
+                    onClick={() => onDeleteFolderItemsOpen({ items: [subfolder] })}
+                  >
                     {t('general:delete')}
                   </PopupList.Button>
                 ) : null}
               </PopupList.ButtonGroup>
             )}
             selectedIndexes={selectedIndexes}
+            selectedItems={getSelectedItems()}
             setFolderID={setFolderID}
             setLastSelectedIndex={setLastSelectedIndex}
             setSelectedIndexes={setSelectedIndexes}
@@ -407,13 +418,26 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
 
       <MoveToFolderDrawer
         drawerSlug={moveToFolderDrawerSlug}
-        getSelectedItems={getSelectedItems}
+        itemsToMove={itemsToMove}
         onMoveConfirm={async (toFolderID) => {
           await moveToFolder({
             itemsToMove,
             toFolderID,
           })
           closeModal(moveToFolderDrawerSlug)
+        }}
+      />
+
+      <ConfirmationModal
+        body={t('folder:deleteConfirmation')}
+        heading={`${t('general:aboutToDeleteCount', {
+          count: itemsToDelete.length,
+          label: itemsToDelete.length > 1 ? t('general:items') : t('general:item'),
+        })}`}
+        modalSlug={deleteFolderItemsDrawerSlug}
+        onConfirm={async () => {
+          await removeItems(itemsToDelete)
+          closeModal(deleteFolderItemsDrawerSlug)
         }}
       />
 

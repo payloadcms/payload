@@ -4,7 +4,7 @@ import { useModal } from '@faceless-ui/modal'
 import { extractID } from 'payload/shared'
 import React from 'react'
 
-import type { FolderContextValue } from '../../../../providers/Folders/index.js'
+import type { PolymorphicRelationshipValue } from '../../types.js'
 
 import { useFolder } from '../../../../providers/Folders/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
@@ -14,20 +14,20 @@ import { DrawerContentContainer } from '../../../DrawerContentContainer/index.js
 import { Translation } from '../../../Translation/index.js'
 import { FolderBreadcrumbs } from '../../Breadcrumbs/index.js'
 import { DisplayItems } from '../../DisplayItems/index.js'
-import { DrawerWithFolderContext } from '../DrawerWithFolderContext.js'
 import './index.scss'
+import { DrawerWithFolderContext } from '../DrawerWithFolderContext.js'
 
 const baseClass = 'move-folder-drawer'
 const confirmModalSlug = 'move-folder-drawer-confirm'
 
 type Props = {
   readonly drawerSlug: string
-  readonly getSelectedItems: FolderContextValue['getSelectedItems']
+  readonly itemsToMove: PolymorphicRelationshipValue[]
   readonly onMoveConfirm: (folderID: number | string) => Promise<void> | void
 }
 export const MoveToFolderDrawer = DrawerWithFolderContext<Props>((props) => {
-  const { drawerSlug, getSelectedItems, onMoveConfirm } = props
-  const [count] = React.useState(() => getSelectedItems().length)
+  const { drawerSlug, itemsToMove, onMoveConfirm } = props
+  const [count] = React.useState(() => itemsToMove.length)
   const folderContext = useFolder()
   const { closeModal, openModal } = useModal()
   const { t } = useTranslation()
@@ -85,11 +85,11 @@ export const MoveToFolderDrawer = DrawerWithFolderContext<Props>((props) => {
           <DisplayItems
             allowMultiSelection={false}
             collectionUseAsTitles={folderContext.collectionUseAsTitles}
+            disabledItems={itemsToMove}
             folderCollectionSlug={folderContext.folderCollectionSlug}
-            getDisabledItems={getSelectedItems}
-            getSelectedItems={folderContext.getSelectedItems}
             lastSelectedIndex={folderContext.lastSelectedIndex}
             selectedIndexes={folderContext.selectedIndexes}
+            selectedItems={folderContext.getSelectedItems()}
             setFolderID={folderContext.setFolderID}
             setLastSelectedIndex={folderContext.setLastSelectedIndex}
             setSelectedIndexes={folderContext.setSelectedIndexes}

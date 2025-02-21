@@ -5,6 +5,7 @@ import { extractID, type GetFolderDataResult } from 'payload/shared'
 import React from 'react'
 
 import type { FolderContextValue } from '../../../providers/Folders/index.js'
+import type { PolymorphicRelationshipValue } from '../types.js'
 
 import { useConfig } from '../../../providers/Config/index.js'
 import { FolderFileCard } from '../FolderFileCard/index.js'
@@ -54,11 +55,7 @@ type ItemKey = `${string}-${number | string}`
 type RowItemEventData = { id: number | string; index: number; relationTo: string }
 type Props = {
   readonly allowMultiSelection?: boolean
-  /**
-   * A Set of keys that should be disabled
-   * in the form of: `${relationTo}-${id}`
-   */
-  readonly getDisabledItems?: FolderContextValue['getSelectedItems']
+  readonly disabledItems?: PolymorphicRelationshipValue[]
   readonly isMovingItems?: boolean
   readonly RenderDocumentActionGroup?: (args: {
     document: GetFolderDataResult['items'][number]
@@ -68,33 +65,33 @@ type Props = {
     index: number
     subfolder: GetFolderDataResult['items'][number]
   }) => React.ReactNode
+  readonly selectedItems: PolymorphicRelationshipValue[]
   readonly viewType: 'grid' | 'list'
-} & NonNullable<Pick<FolderContextValue, 'getSelectedItems'>> &
-  Pick<
-    FolderContextValue,
-    | 'collectionUseAsTitles'
-    | 'documents'
-    | 'folderCollectionSlug'
-    | 'lastSelectedIndex'
-    | 'selectedIndexes'
-    | 'setFolderID'
-    | 'setLastSelectedIndex'
-    | 'setSelectedIndexes'
-    | 'subfolders'
-  >
+} & Pick<
+  FolderContextValue,
+  | 'collectionUseAsTitles'
+  | 'documents'
+  | 'folderCollectionSlug'
+  | 'lastSelectedIndex'
+  | 'selectedIndexes'
+  | 'setFolderID'
+  | 'setLastSelectedIndex'
+  | 'setSelectedIndexes'
+  | 'subfolders'
+>
 export function DisplayItems(props: Props) {
   const {
     allowMultiSelection = true,
     collectionUseAsTitles,
+    disabledItems = [],
     documents = [],
     folderCollectionSlug,
-    getDisabledItems,
-    getSelectedItems,
     isMovingItems = false,
     lastSelectedIndex,
     RenderDocumentActionGroup,
     RenderSubfolderActionGroup,
     selectedIndexes,
+    selectedItems = [],
     setFolderID,
     setLastSelectedIndex,
     setSelectedIndexes,
@@ -112,7 +109,7 @@ export function DisplayItems(props: Props) {
   const lastClickTime = React.useRef(0)
 
   const selectedItemKeys = new Set<`${string}-${number | string}`>(
-    getSelectedItems().reduce((acc, item) => {
+    selectedItems.reduce((acc, item) => {
       if (item) {
         if (item.relationTo && item.value) {
           acc.push(`${item.relationTo}-${extractID(item.value)}`)
@@ -123,7 +120,7 @@ export function DisplayItems(props: Props) {
   )
 
   const disabledItemKeys = new Set<`${string}-${number | string}`>(
-    getDisabledItems?.().reduce((acc, item) => {
+    disabledItems.reduce((acc, item) => {
       if (item) {
         if (item.relationTo && item.value) {
           acc.push(`${item.relationTo}-${extractID(item.value)}`)

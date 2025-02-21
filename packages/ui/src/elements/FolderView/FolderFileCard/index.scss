@@ -185,6 +185,7 @@
     &__name {
       overflow: hidden;
       font-weight: bold;
+      text-indent: 1px; // prevents left cuttoff of the first letter
       text-wrap: nowrap;
       text-overflow: ellipsis;
       line-height: normal;

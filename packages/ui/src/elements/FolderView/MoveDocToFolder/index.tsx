@@ -30,7 +30,7 @@ export function MoveDocToFolder({ className = '' }) {
 
       <MoveToFolderDrawer
         drawerSlug={moveDocToFolderDrawerSlug}
-        getSelectedItems={() => [
+        itemsToMove={[
           {
             relationTo: collectionSlug,
             value: { ...initialData, id },
