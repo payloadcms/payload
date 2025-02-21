@@ -21,7 +21,6 @@ import { PerPage } from '../../elements/PerPage/index.js'
 import { PublishMany } from '../../elements/PublishMany/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { SelectMany } from '../../elements/SelectMany/index.js'
-import { SharedListFilters } from '../../elements/SharedListFilters/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
 import { UnpublishMany } from '../../elements/UnpublishMany/index.js'
@@ -41,6 +40,7 @@ const baseClass = 'collection-list'
 
 export function DefaultListView(props: ListViewClientProps) {
   const {
+    activePreset,
     AfterList,
     AfterListTable,
     beforeActions,
@@ -59,7 +59,6 @@ export function DefaultListView(props: ListViewClientProps) {
     preferenceKey,
     renderedFilters,
     resolvedFilterOptions,
-    sharedListFilters,
     Table: InitialTable,
   } = props
 
@@ -186,8 +185,8 @@ export function DefaultListView(props: ListViewClientProps) {
                 smallBreak={smallBreak}
                 t={t}
               />
-              <SharedListFilters filters={sharedListFilters} />
               <ListControls
+                activePreset={activePreset}
                 beforeActions={
                   enableRowSelections && typeof onBulkSelect === 'function'
                     ? beforeActions

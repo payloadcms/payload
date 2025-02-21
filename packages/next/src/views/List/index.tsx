@@ -4,7 +4,6 @@ import type {
   ListQuery,
   ListViewClientProps,
   ListViewServerPropsOnly,
-  PaginatedDocs,
   SharedListFilter,
   Where,
 } from 'payload'
@@ -121,18 +120,19 @@ export const renderListView = async (
       }
     }
 
-    const sharedListFilters = await payload.find({
-      collection: 'payload-shared-filters',
-      depth: 0,
-      overrideAccess: false,
-      req,
-      user,
-      where: {
-        relatedCollection: {
-          equals: collectionSlug,
-        },
-      },
-    })
+    let activePreset: SharedListFilter | undefined
+
+    try {
+      activePreset = (await payload.findByID({
+        id: listPreferences?.listPresets?.[collectionSlug],
+        collection: 'payload-shared-filters',
+        depth: 0,
+        overrideAccess: false,
+        user,
+      })) as SharedListFilter
+    } catch (_err) {
+      // swallow error
+    }
 
     const data = await payload.find({
       collection: collectionSlug,
@@ -226,6 +226,7 @@ export const renderListView = async (
             {RenderServerComponent({
               clientProps: {
                 ...listViewSlots,
+                activePreset,
                 collectionSlug,
                 columnState,
                 disableBulkDelete,
@@ -236,7 +237,6 @@ export const renderListView = async (
                 newDocumentURL,
                 renderedFilters,
                 resolvedFilterOptions,
-                sharedListFilters: sharedListFilters as PaginatedDocs<SharedListFilter>,
                 Table,
               } satisfies ListViewClientProps,
               Component: collectionConfig?.admin?.components?.views?.list?.Component,

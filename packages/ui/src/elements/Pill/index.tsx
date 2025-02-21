@@ -101,6 +101,7 @@ const StaticPill: React.FC<PillProps> = (props) => {
   if (onClick && !to) {
     Element = 'button'
   }
+
   if (to) {
     Element = Link
   }

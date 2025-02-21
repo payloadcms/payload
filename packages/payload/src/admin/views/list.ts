@@ -37,6 +37,7 @@ export type ListViewServerPropsOnly = {
 export type ListViewServerProps = ListViewClientProps & ListViewServerPropsOnly
 
 export type ListViewClientProps = {
+  activePreset?: SharedListFilter
   beforeActions?: React.ReactNode[]
   collectionSlug: SanitizedCollectionConfig['slug']
   columnState: Column[]
@@ -49,7 +50,6 @@ export type ListViewClientProps = {
   preferenceKey?: string
   renderedFilters?: Map<string, React.ReactNode>
   resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
-  sharedListFilters?: PaginatedDocs<SharedListFilter>
 } & ListViewSlots
 
 export type ListViewSlotSharedClientProps = {

@@ -1,5 +1,10 @@
 'use client'
-import type { ClientCollectionConfig, ResolvedFilterOptions, Where } from 'payload'
+import type {
+  ClientCollectionConfig,
+  ResolvedFilterOptions,
+  SharedListFilter,
+  Where,
+} from 'payload'
 
 import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
@@ -12,6 +17,7 @@ import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { Dots } from '../../icons/Dots/index.js'
 import { SearchIcon } from '../../icons/Search/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
+import { useTableColumns } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { AnimateHeight } from '../AnimateHeight/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
@@ -20,6 +26,7 @@ import { EditMany } from '../EditMany/index.js'
 import { Pill } from '../Pill/index.js'
 import { PublishMany } from '../PublishMany/index.js'
 import { SearchFilter } from '../SearchFilter/index.js'
+import { SelectListPreset } from '../SelectListPreset/index.js'
 import { UnpublishMany } from '../UnpublishMany/index.js'
 import { WhereBuilder } from '../WhereBuilder/index.js'
 import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched.js'
@@ -28,6 +35,7 @@ import './index.scss'
 const baseClass = 'list-controls'
 
 export type ListControlsProps = {
+  readonly activePreset?: SharedListFilter
   readonly beforeActions?: React.ReactNode[]
   readonly collectionConfig: ClientCollectionConfig
   readonly collectionSlug: string
@@ -50,6 +58,7 @@ export type ListControlsProps = {
  */
 export const ListControls: React.FC<ListControlsProps> = (props) => {
   const {
+    activePreset,
     beforeActions,
     collectionConfig,
     collectionSlug,
@@ -57,13 +66,24 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     disableBulkEdit,
     enableColumns = true,
     enableSort = false,
-    listMenuItems,
+    listMenuItems: listMenuItemsFromProps,
     renderedFilters,
     resolvedFilterOptions,
   } = props
-  const { handleSearchChange, query } = useListQuery()
+
+  const {
+    handleSearchChange,
+    modified: listQueryModified,
+    query,
+    setModified: setQueryModified,
+  } = useListQuery()
   const titleField = useUseTitleField(collectionConfig)
   const { i18n, t } = useTranslation()
+
+  const { modified: columnsModified, setModified: setColumnsModified } = useTableColumns()
+
+  const modifiedPreset = listQueryModified || columnsModified
+
   const {
     breakpoints: { s: smallBreak },
   } = useWindowInfo()
@@ -132,6 +152,35 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     }
   }, [t, listSearchableFields, i18n, searchLabel])
 
+  let listMenuItems = listMenuItemsFromProps
+
+  if (modifiedPreset) {
+    if (!listMenuItems) {
+      listMenuItems = []
+    }
+
+    listMenuItems.push(
+      <PopupList.Button
+      // onClick={() => {
+      //   setDocumentEditID(selectedFilter.id)
+      //   openEditDrawer()
+      // }}
+      >
+        {t('general:edit')}
+      </PopupList.Button>,
+      <PopupList.Button
+      // onClick={() => openListDrawer()}
+      >
+        Manage All
+      </PopupList.Button>,
+      <PopupList.Button
+      // onClick={() => openModal(confirmDeleteModalSlug)}
+      >
+        {t('general:delete')}
+      </PopupList.Button>,
+    )
+  }
+
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__wrap`}>
@@ -185,6 +234,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
             >
               {t('general:filters')}
             </Pill>
+            <SelectListPreset activePreset={activePreset} />
             {enableSort && (
               <Pill
                 aria-controls={`${baseClass}-sort`}
@@ -205,7 +255,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                 size="large"
                 verticalAlign="bottom"
               >
-                <PopupList.ButtonGroup>{listMenuItems.map((item) => item)}</PopupList.ButtonGroup>
+                <PopupList.ButtonGroup>{listMenuItems}</PopupList.ButtonGroup>
               </Popup>
             )}
           </div>

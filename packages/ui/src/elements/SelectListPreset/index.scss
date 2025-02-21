@@ -1,0 +1,33 @@
+@layer payload-default {
+  .select-list-preset {
+    overflow: visible;
+    padding-left: 0;
+    padding-right: 0;
+
+    .pill__label {
+      overflow: visible;
+      display: flex;
+    }
+
+    &__actions {
+      display: flex;
+    }
+
+    &__clear,
+    &__select {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+      background: transparent;
+      appearance: none;
+      border: 0;
+      padding: 0;
+      cursor: pointer;
+      font-size: inherit;
+      color: var(--theme-elevation-500);
+      color: inherit;
+      line-height: inherit;
+    }
+  }
+}

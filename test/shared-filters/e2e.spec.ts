@@ -37,6 +37,10 @@ describe('Shared Filters', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
+  test.skip('saves last used preset to preferences and loads on initial render', async () => {
+    // TODO: create a filter, select it, and ensure it is saved to preferences
+  })
+
   test.skip('displays shared filters when user has at least one', () => {
     // TODO: create a filter, and ensure it is displayed in the list
   })
