@@ -1152,45 +1152,9 @@ export function configToJSONSchema(
       )
     : {}
 
-  let jsonSchema: JSONSchema4 = {
-    additionalProperties: false,
-    definitions: {
-      supportedTimezones: timezoneDefinitions,
-      ...entityDefinitions,
-      ...Object.fromEntries(interfaceNameDefinitions),
-      ...authOperationDefinitions,
-    },
-    // These properties here will be very simple, as all the complexity is in the definitions. These are just the properties for the top-level `Config` type
-    type: 'object',
-    properties: {
-      auth: generateAuthOperationSchemas(config.collections),
-      collections: generateEntitySchemas(config.collections || []),
-      collectionsJoins: generateCollectionJoinsSchemas(config.collections || []),
-      collectionsSelect: generateEntitySelectSchemas(config.collections || []),
-      db: generateDbEntitySchema(config),
-      globals: generateEntitySchemas(config.globals || []),
-      globalsSelect: generateEntitySelectSchemas(config.globals || []),
-      locale: generateLocaleEntitySchemas(config.localization),
-      user: generateAuthEntitySchemas(config.collections),
-    },
-    required: [
-      'user',
-      'locale',
-      'collections',
-      'collectionsSelect',
-      'collectionsJoins',
-      'globalsSelect',
-      'globals',
-      'auth',
-      'db',
-      'jobs',
-      'blocks',
-    ],
-    title: 'Config',
-  }
-
+  let blocksDefinition: JSONSchema4 | undefined = undefined
   if (config?.blocks?.length) {
-    const blocksDefinition: JSONSchema4 = {
+    blocksDefinition = {
       type: 'object',
       additionalProperties: false,
       properties: {},
@@ -1225,7 +1189,44 @@ export function configToJSONSchema(
       }
       ;(blocksDefinition.required as string[]).push(block.slug)
     }
-    jsonSchema.properties.blocks = blocksDefinition
+  }
+
+  let jsonSchema: JSONSchema4 = {
+    additionalProperties: false,
+    definitions: {
+      supportedTimezones: timezoneDefinitions,
+      ...entityDefinitions,
+      ...Object.fromEntries(interfaceNameDefinitions),
+      ...authOperationDefinitions,
+    },
+    // These properties here will be very simple, as all the complexity is in the definitions. These are just the properties for the top-level `Config` type
+    type: 'object',
+    properties: {
+      auth: generateAuthOperationSchemas(config.collections),
+      blocks: blocksDefinition,
+      collections: generateEntitySchemas(config.collections || []),
+      collectionsJoins: generateCollectionJoinsSchemas(config.collections || []),
+      collectionsSelect: generateEntitySelectSchemas(config.collections || []),
+      db: generateDbEntitySchema(config),
+      globals: generateEntitySchemas(config.globals || []),
+      globalsSelect: generateEntitySelectSchemas(config.globals || []),
+      locale: generateLocaleEntitySchemas(config.localization),
+      user: generateAuthEntitySchemas(config.collections),
+    },
+    required: [
+      'user',
+      'locale',
+      'collections',
+      'collectionsSelect',
+      'collectionsJoins',
+      'globalsSelect',
+      'globals',
+      'auth',
+      'db',
+      'jobs',
+      'blocks',
+    ],
+    title: 'Config',
   }
 
   if (jobsSchemas.definitions?.size) {
