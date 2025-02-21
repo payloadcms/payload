@@ -2,17 +2,19 @@
 
 import type React from 'react'
 
-import { useField, useListQuery } from '@payloadcms/ui'
+import { useDocumentInfo, useField, useListQuery, useSelection } from '@payloadcms/ui'
 import { useEffect } from 'react'
 
 import './index.scss'
-import { useImportExport } from '../ImportExportProvider/index.js'
 
 export const WhereField: React.FC = () => {
-  const { value: selectionToUseValue } = useField({ path: 'selectionToUse' })
+  const { setValue: setSelectionToUseValue, value: selectionToUseValue } = useField({
+    path: 'selectionToUse',
+  })
   const { setValue } = useField({ path: 'where' })
-  const { selected } = useImportExport()
+  const { selectAll, selected } = useSelection()
   const { query } = useListQuery()
+  const { id } = useDocumentInfo()
 
   // setValue based on selectionToUseValue
   useEffect(() => {
@@ -42,6 +44,24 @@ export const WhereField: React.FC = () => {
 
     // Selected set a where query with IDs
   }, [selectionToUseValue, query, selected, setValue])
+
+  // handles default value of selectionToUse
+  useEffect(() => {
+    if (id) {
+      return
+    }
+    let defaultSelection: 'all' | 'currentFilters' | 'currentSelection' = 'all'
+
+    if (['allInPage', 'some'].includes(selectAll)) {
+      defaultSelection = 'currentSelection'
+    }
+
+    if (defaultSelection === 'all' && query.where) {
+      defaultSelection = 'currentFilters'
+    }
+
+    setSelectionToUseValue(defaultSelection)
+  }, [])
 
   return null
 }
