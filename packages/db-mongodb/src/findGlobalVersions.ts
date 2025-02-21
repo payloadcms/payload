@@ -9,18 +9,15 @@ import { buildQuery } from './queries/buildQuery.js'
 import { buildSortParam } from './queries/buildSortParam.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { getSession } from './utilities/getSession.js'
-import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
+import { transform } from './utilities/transform.js'
 
 export const findGlobalVersions: FindGlobalVersions = async function findGlobalVersions(
   this: MongooseAdapter,
   { global, limit, locale, page, pagination, req, select, skip, sort: sortArg, where },
 ) {
+  const globalConfig = this.payload.globals.config.find(({ slug }) => slug === global)
   const Model = this.versions[global]
-  const versionFields = buildVersionGlobalFields(
-    this.payload.config,
-    this.payload.globals.config.find(({ slug }) => slug === global),
-    true,
-  )
+  const versionFields = buildVersionGlobalFields(this.payload.config, globalConfig, true)
 
   const session = await getSession(this, req)
   const options: QueryOptions = {
@@ -103,13 +100,13 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   }
 
   const result = await Model.paginate(query, paginationOptions)
-  const docs = JSON.parse(JSON.stringify(result.docs))
 
-  return {
-    ...result,
-    docs: docs.map((doc) => {
-      doc.id = doc._id
-      return sanitizeInternalFields(doc)
-    }),
-  }
+  transform({
+    adapter: this,
+    data: result.docs,
+    fields: buildVersionGlobalFields(this.payload.config, globalConfig),
+    operation: 'read',
+  })
+
+  return result
 }

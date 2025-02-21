@@ -9,7 +9,6 @@ import { getPayload, getRequestLanguage, parseCookies } from 'payload'
 import React from 'react'
 
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
-import { getRequestLocale } from '../../utilities/getRequestLocale.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { initReq } from '../../utilities/initReq.js'
 import { checkDependencies } from './checkDependencies.js'
@@ -83,7 +82,7 @@ export const RootLayout = async ({
     })
   }
 
-  const navPrefs = await getNavPrefs({ payload, user: req.user })
+  const navPrefs = await getNavPrefs(req.payload, req.user?.id, req.user?.collection)
 
   const clientConfig = getClientConfig({
     config,
@@ -105,10 +104,6 @@ export const RootLayout = async ({
     clientConfig.localization.localeCodes = config.localization.locales.map(({ code }) => code)
   }
 
-  const locale = await getRequestLocale({
-    req,
-  })
-
   return (
     <html
       data-theme={theme}
@@ -127,7 +122,7 @@ export const RootLayout = async ({
           isNavOpen={navPrefs?.open ?? true}
           languageCode={languageCode}
           languageOptions={languageOptions}
-          locale={locale?.code}
+          locale={req.locale}
           permissions={permissions}
           serverFunction={serverFunction}
           switchLanguageServerAction={switchLanguageServerAction}

@@ -4,7 +4,7 @@ import type { ClientCollectionConfig, ListPreset, ResolvedFilterOptions, Where }
 import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
 import { validateWhereQuery } from 'payload/shared'
-import React, { Fragment, useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 import { Popup, PopupList } from '../../elements/Popup/index.js'
 import { useUseTitleField } from '../../hooks/useUseAsTitle.js'
@@ -16,13 +16,9 @@ import { useTableColumns } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { AnimateHeight } from '../AnimateHeight/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
-import { DeleteMany } from '../DeleteMany/index.js'
-import { EditMany } from '../EditMany/index.js'
 import { ListPresets } from '../ListPresets/index.js'
 import { Pill } from '../Pill/index.js'
-import { PublishMany } from '../PublishMany/index.js'
 import { SearchFilter } from '../SearchFilter/index.js'
-import { UnpublishMany } from '../UnpublishMany/index.js'
 import { WhereBuilder } from '../WhereBuilder/index.js'
 import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched.js'
 import './index.scss'
@@ -34,7 +30,15 @@ export type ListControlsProps = {
   readonly beforeActions?: React.ReactNode[]
   readonly collectionConfig: ClientCollectionConfig
   readonly collectionSlug: string
+  /**
+   * @deprecated
+   * These are now handled by the `ListSelection` component
+   */
   readonly disableBulkDelete?: boolean
+  /**
+   * @deprecated
+   * These are now handled by the `ListSelection` component
+   */
   readonly disableBulkEdit?: boolean
   readonly disableListFilters?: boolean
   readonly enableColumns?: boolean
@@ -58,8 +62,6 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     beforeActions,
     collectionConfig,
     collectionSlug,
-    disableBulkDelete,
-    disableBulkEdit,
     disableListFilters,
     enableColumns = true,
     enableSort = false,
@@ -195,19 +197,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
           />
           <div className={`${baseClass}__buttons`}>
             <div className={`${baseClass}__buttons-wrap`}>
-              {!smallBreak && (
-                <React.Fragment>
-                  {beforeActions && beforeActions}
-                  {!disableBulkEdit && (
-                    <Fragment>
-                      <EditMany collection={collectionConfig} />
-                      <PublishMany collection={collectionConfig} />
-                      <UnpublishMany collection={collectionConfig} />
-                    </Fragment>
-                  )}
-                  {!disableBulkDelete && <DeleteMany collection={collectionConfig} />}
-                </React.Fragment>
-              )}
+              {!smallBreak && <React.Fragment>{beforeActions && beforeActions}</React.Fragment>}
               {enableColumns && (
                 <Pill
                   aria-controls={`${baseClass}-columns`}

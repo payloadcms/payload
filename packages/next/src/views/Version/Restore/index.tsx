@@ -5,6 +5,7 @@ import {
   Button,
   ConfirmationModal,
   PopupList,
+  toast,
   useConfig,
   useModal,
   useRouteTransition,
@@ -13,7 +14,6 @@ import {
 import { formatAdminURL, requests } from '@payloadcms/ui/shared'
 import { useRouter } from 'next/navigation.js'
 import React, { Fragment, useCallback, useState } from 'react'
-import { toast } from 'sonner'
 
 import type { Props } from './types.js'
 

@@ -16,7 +16,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
-import { Pill } from '../Pill/index.js'
+import './index.scss'
 
 export type PublishManyProps = {
   collection: ClientCollectionConfig
@@ -133,14 +133,15 @@ export const PublishMany: React.FC<PublishManyProps> = (props) => {
 
   return (
     <React.Fragment>
-      <Pill
+      <button
         className={`${baseClass}__toggle`}
         onClick={() => {
           openModal(modalSlug)
         }}
+        type="button"
       >
         {t('version:publish')}
-      </Pill>
+      </button>
       <ConfirmationModal
         body={t('version:aboutToPublishSelection', { label: getTranslation(plural, i18n) })}
         cancelLabel={t('general:cancel')}
