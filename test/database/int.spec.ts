@@ -1017,6 +1017,28 @@ describe('database', () => {
     }
   })
 
+  describe('Custom column names', () => {
+    const sqlIt = process.env.PAYLOAD_DATABASE === 'mongodb' ? it.skip : it
+
+    sqlIt('schema should have custom column names', () => {
+      // eslint-disable-next-line jest/no-standalone-expect
+      expect(payload.db.rawTables.custom_column_names.columns.title.name).toStrictEqual(
+        'custom_title',
+      )
+
+      expect(payload.db.rawTables.custom_column_names.columns.id.name).toStrictEqual('custom_id')
+    })
+
+    it('should create and read doc with custom column names', async () => {
+      const doc = await payload.create({
+        collection: 'custom-column-names',
+        data: { title: 'hello' },
+      })
+
+      expect(doc.title).toStrictEqual('hello')
+    })
+  })
+
   describe('drizzle: schema hooks', () => {
     beforeAll(() => {
       process.env.PAYLOAD_FORCE_DRIZZLE_PUSH = 'true'
