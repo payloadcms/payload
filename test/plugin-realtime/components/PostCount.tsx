@@ -31,7 +31,7 @@ export function PostCountChild() {
 
   useEffect(() => {
     const fetchCount = async () => {
-      const promiseCount = payloadQuery(
+      const initialCount = await payloadQuery(
         'count',
         { collection: 'posts' },
         {
@@ -42,9 +42,8 @@ export function PostCountChild() {
           },
         },
       )
-      const count = (await promiseCount)?.data?.totalDocs
-      if (count && !count3) {
-        setCount3(count)
+      if (initialCount.data && !count3) {
+        setCount3(initialCount.data?.totalDocs)
       }
     }
     fetchCount()
@@ -79,6 +78,13 @@ export function PostCountChild() {
             },
             method: 'POST',
           })
+
+          // count with fetch
+          fetch('/api/posts/count')
+            .then((res) => res.json())
+            .then((data) => {
+              console.log('COUNT', data)
+            })
         }}
         type="button"
       >
