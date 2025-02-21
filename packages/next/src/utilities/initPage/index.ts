@@ -18,6 +18,7 @@ export const initPage = async ({
   importMap,
   route,
   searchParams,
+  useLayoutReq,
 }: Args): Promise<InitPageResult> => {
   const queryString = `${qs.stringify(searchParams ?? {}, { addQueryPrefix: true })}`
 
@@ -30,7 +31,7 @@ export const initPage = async ({
   } = await initReq({
     configPromise,
     importMap,
-    key: 'initPage',
+    key: useLayoutReq ? 'RootLayout' : 'initPage',
     overrides: {
       fallbackLocale: false,
       req: {
