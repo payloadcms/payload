@@ -283,6 +283,8 @@ export const svTranslations: DefaultTranslationsObject = {
     menu: 'Meny',
     moreOptions: 'Fler alternativ',
     move: 'Flytta',
+    moveConfirm:
+      'Du håller på att flytta {{count}} {{label}} till <1>{{destination}}</1>. Är du säker?',
     moveCount: 'Flytta {{count}} {{label}}',
     moveDown: 'Flytta Ner',
     moveUp: 'Flytta Upp',

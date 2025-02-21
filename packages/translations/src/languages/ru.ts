@@ -285,6 +285,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     menu: 'Меню',
     moreOptions: 'Больше вариантов',
     move: 'Переместить',
+    moveConfirm:
+      'Вы собираетесь переместить {{count}} {{label}} в <1>{{destination}}</1>. Вы уверены?',
     moveCount: 'Переместить {{count}} {{label}}',
     moveDown: 'Сдвинуть вниз',
     moveUp: 'Сдвинуть вверх',

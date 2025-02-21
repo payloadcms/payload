@@ -281,6 +281,8 @@ export const csTranslations: DefaultTranslationsObject = {
     menu: 'Jídelní lístek',
     moreOptions: 'Více možností',
     move: 'Pohnout',
+    moveConfirm:
+      'Chystáte se přesunout {{count}} {{label}} do <1>{{destination}}</1>. Jste si jisti?',
     moveCount: 'Přesuňte {{count}} {{label}}',
     moveDown: 'Posunout dolů',
     moveUp: 'Posunout nahoru',

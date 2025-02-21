@@ -287,6 +287,8 @@ export const esTranslations: DefaultTranslationsObject = {
     menu: 'Menú',
     moreOptions: 'Más opciones',
     move: 'Mover',
+    moveConfirm:
+      'Estás a punto de mover {{count}} {{label}} a <1>{{destination}}</1>. ¿Estás seguro?',
     moveCount: 'Mueva {{count}} {{label}}',
     moveDown: 'Mover abajo',
     moveUp: 'Mover arriba',

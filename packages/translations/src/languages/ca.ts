@@ -283,6 +283,8 @@ export const caTranslations: DefaultTranslationsObject = {
     menu: 'Menu',
     moreOptions: 'Més opcions',
     move: 'Mou-te',
+    moveConfirm:
+      "Està a punt de moure {{count}} {{label}} a <1>{{destination}}</1>. N'estàs segur?",
     moveCount: 'Mou {{count}} {{label}}',
     moveDown: 'Mou avall',
     moveUp: 'Move amunt',

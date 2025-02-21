@@ -280,6 +280,7 @@ export const etTranslations: DefaultTranslationsObject = {
     menu: 'Menüü',
     moreOptions: 'Rohkem valikuid',
     move: 'Liiguta',
+    moveConfirm: 'Te olete liikumas {{count}} {{label}} <1>{{destination}}</1>. Kas olete kindel?',
     moveCount: 'Teisalda {{count}} {{label}}',
     moveDown: 'Liiguta alla',
     moveUp: 'Liiguta üles',

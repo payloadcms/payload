@@ -281,6 +281,8 @@ export const faTranslations: DefaultTranslationsObject = {
     menu: 'منو',
     moreOptions: 'گزینه‌های بیشتر',
     move: 'حرکت کنید',
+    moveConfirm:
+      'شما در حال انتقال {{count}} {{label}} به <1>{{destination}}</1> هستید. آیا مطمئن هستید؟',
     moveCount: 'انتقال {{count}} {{label}}',
     moveDown: 'حرکت به پایین',
     moveUp: 'حرکت به بالا',

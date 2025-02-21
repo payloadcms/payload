@@ -286,6 +286,7 @@ export const itTranslations: DefaultTranslationsObject = {
     menu: 'Menù',
     moreOptions: 'Più opzioni',
     move: 'Muoviti',
+    moveConfirm: 'Stai per spostare {{count}} {{label}} in <1>{{destination}}</1>. Sei sicuro?',
     moveCount: 'Sposta {{count}} {{label}}',
     moveDown: 'Sposta sotto',
     moveUp: 'Sposta sopra',

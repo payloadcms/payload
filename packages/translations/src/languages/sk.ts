@@ -284,6 +284,7 @@ export const skTranslations: DefaultTranslationsObject = {
     menu: 'Menu',
     moreOptions: 'Viac možností',
     move: 'Presuňte sa',
+    moveConfirm: 'Chystáte sa presunúť {{count}} {{label}} do <1>{{destination}}</1>. Ste si istý?',
     moveCount: 'Presuňte {{count}} {{label}}',
     moveDown: 'Presunúť dolu',
     moveUp: 'Presunúť hore',

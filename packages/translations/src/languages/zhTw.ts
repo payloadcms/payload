@@ -273,6 +273,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     menu: '菜單',
     moreOptions: '更多選項',
     move: '移動',
+    moveConfirm: '您即將移動 {{count}} {{label}} 到 <1>{{destination}}</1>。您確定嗎？',
     moveCount: '移動 {{count}} {{label}}',
     moveDown: '向下移動',
     moveUp: '向上移動',

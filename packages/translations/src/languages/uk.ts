@@ -282,6 +282,8 @@ export const ukTranslations: DefaultTranslationsObject = {
     menu: 'Меню',
     moreOptions: 'Більше варіантів',
     move: 'Рухайтесь',
+    moveConfirm:
+      'Ви збираєтесь перемістити {{count}} {{label}} до <1>{{destination}}</1>. Ви впевнені?',
     moveCount: 'Перемістити {{count}} {{label}}',
     moveDown: 'Перемістити нижче',
     moveUp: 'Перемістити вище',

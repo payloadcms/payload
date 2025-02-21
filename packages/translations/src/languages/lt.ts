@@ -285,6 +285,8 @@ export const ltTranslations: DefaultTranslationsObject = {
     menu: 'Meniu',
     moreOptions: 'Daugiau parinkčių',
     move: 'Judėti',
+    moveConfirm:
+      'Jūs ketinate perkelti {{count}} {{label}} į <1>{{destination}}</1>. Ar esate tikri?',
     moveCount: 'Perkelti {{count}} {{label}}',
     moveDown: 'Perkelti žemyn',
     moveUp: 'Pakilti',

@@ -279,6 +279,7 @@ export const thTranslations: DefaultTranslationsObject = {
     menu: 'เมนู',
     moreOptions: 'ตัวเลือกเพิ่มเติม',
     move: 'ย้าย',
+    moveConfirm: 'คุณกำลังจะย้าย {{count}} {{label}} ไปที่ <1>{{destination}}</1> แน่ใจไหม?',
     moveCount: 'ย้าย {{count}} {{label}}',
     moveDown: 'ขยับขึ้น',
     moveUp: 'ขยับลง',

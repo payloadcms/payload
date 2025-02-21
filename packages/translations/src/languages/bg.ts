@@ -282,6 +282,8 @@ export const bgTranslations: DefaultTranslationsObject = {
     menu: 'Меню',
     moreOptions: 'Повече опции',
     move: 'Премести',
+    moveConfirm:
+      'Вие сте на път да преместите {{count}} {{label}} към <1>{{destination}}</1>. Сигурни ли сте?',
     moveCount: 'Преместете {{count}} {{label}}',
     moveDown: 'Надолу',
     moveUp: 'Нагоре',

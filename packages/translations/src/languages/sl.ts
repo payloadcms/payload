@@ -282,6 +282,8 @@ export const slTranslations: DefaultTranslationsObject = {
     menu: 'Meni',
     moreOptions: 'Več možnosti',
     move: 'Premakni',
+    moveConfirm:
+      'Pravkar boste premaknili {{count}} {{label}} na <1>{{destination}}</1>. Ste prepričani?',
     moveCount: 'Premakni {{count}} {{label}}',
     moveDown: 'Premakni dol',
     moveUp: 'Premakni gor',

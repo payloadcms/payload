@@ -286,6 +286,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     menu: 'Menu',
     moreOptions: 'Meer opties',
     move: 'Verplaatsen',
+    moveConfirm:
+      'U staat op het punt om {{count}} {{label}} te verplaatsen naar <1>{{destination}}</1>. Weet u het zeker?',
     moveCount: 'Verplaats {{count}} {{label}}',
     moveDown: 'Verplaats naar beneden',
     moveUp: 'Verplaats naar boven',

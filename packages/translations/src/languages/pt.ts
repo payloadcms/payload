@@ -283,6 +283,8 @@ export const ptTranslations: DefaultTranslationsObject = {
     menu: 'Cardápio',
     moreOptions: 'Mais opções',
     move: 'Mova',
+    moveConfirm:
+      'Você está prestes a mover {{count}} {{label}} para <1>{{destination}}</1>. Tem certeza?',
     moveCount: 'Mova {{count}} {{label}}',
     moveDown: 'Mover para Baixo',
     moveUp: 'Mover para Cima',

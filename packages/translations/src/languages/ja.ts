@@ -283,6 +283,8 @@ export const jaTranslations: DefaultTranslationsObject = {
     menu: 'メニュー',
     moreOptions: 'より多くのオプション',
     move: '移動します',
+    moveConfirm:
+      'あなたは{{count}} {{label}}を<1>{{destination}}</1>に移動しようとしています。よろしいですか？',
     moveCount: '{{count}} {{label}}を移動してください',
     moveDown: '下へ移動',
     moveUp: '上へ移動',

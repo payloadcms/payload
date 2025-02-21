@@ -283,6 +283,8 @@ export const azTranslations: DefaultTranslationsObject = {
     menu: 'Menyu',
     moreOptions: 'Daha çox seçimlər',
     move: 'Hərəkət et',
+    moveConfirm:
+      'Siz <1>{{destination}}</1> -ə {{count}} {{label}} köçürmək ətrafında. Eminsinizmi?',
     moveCount: '{{count}} {{label}} hərəkət etdirin',
     moveDown: 'Aşağı hərəkət et',
     moveUp: 'Yuxarı hərəkət et',

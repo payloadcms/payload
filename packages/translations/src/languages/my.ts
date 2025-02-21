@@ -285,6 +285,8 @@ export const myTranslations: DefaultTranslationsObject = {
     menu: 'မီနူး',
     moreOptions: 'ပိုမိုများစွာရွေးချယ်ခွင့်',
     move: 'ရွှေ့ပြောင်းပါ',
+    moveConfirm:
+      'သင် <1>{{destination}}</1> သို့ {{count}} {{label}} ကို ရွှေ့မည်ဖြစ်သည်။ သင့်တောင်းဆိုမှုကို သေချာပါသလား?',
     moveCount: 'Pindah {{count}} {{label}}',
     moveDown: 'Move Down',
     moveUp: 'Move Up',

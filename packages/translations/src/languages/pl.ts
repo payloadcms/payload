@@ -283,6 +283,8 @@ export const plTranslations: DefaultTranslationsObject = {
     menu: 'Menu',
     moreOptions: 'Więcej opcji',
     move: 'Przesuń',
+    moveConfirm:
+      'Zamierzasz przenieść {{count}} {{label}} do <1>{{destination}}</1>. Czy na pewno?',
     moveCount: 'Przenieś {{count}} {{label}}',
     moveDown: 'Przesuń niżej',
     moveUp: 'Przesuń wyżej',

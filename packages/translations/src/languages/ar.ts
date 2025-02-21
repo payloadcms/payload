@@ -279,6 +279,7 @@ export const arTranslations: DefaultTranslationsObject = {
     menu: 'قائمة',
     moreOptions: 'خيارات أكثر',
     move: 'تحرك',
+    moveConfirm: 'أنت على وشك نقل {{count}} {{label}} إلى <1>{{destination}}</1>. هل أنت متأكد؟',
     moveCount: 'انقل {{count}} {{label}}',
     moveDown: 'التّحريك إلى الأسفل',
     moveUp: 'التّحريك إلى الأعلى',

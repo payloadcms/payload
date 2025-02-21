@@ -286,6 +286,8 @@ export const trTranslations: DefaultTranslationsObject = {
     menu: 'Menü',
     moreOptions: 'Daha fazla seçenek',
     move: 'Hareket et',
+    moveConfirm:
+      '<1>{{destination}}</1> konumuna {{count}} {{label}} taşımayı planlıyorsunuz. Emin misiniz?',
     moveCount: '{{count}} {{label}} taşı',
     moveDown: 'Aşağı taşı',
     moveUp: 'Yukarı taşı',

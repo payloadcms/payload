@@ -221,6 +221,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:menu',
   'general:moreOptions',
   'general:move',
+  'general:moveConfirm',
   'general:moveCount',
   'general:moveDown',
   'general:moveUp',

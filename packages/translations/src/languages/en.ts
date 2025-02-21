@@ -283,6 +283,8 @@ export const enTranslations = {
     menu: 'Menu',
     moreOptions: 'More options',
     move: 'Move',
+    moveConfirm:
+      'You are about to move {{count}} {{label}} to <1>{{destination}}</1>. Are you sure?',
     moveCount: 'Move {{count}} {{label}}',
     moveDown: 'Move Down',
     moveUp: 'Move Up',

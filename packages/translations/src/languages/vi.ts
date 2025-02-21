@@ -282,6 +282,8 @@ export const viTranslations: DefaultTranslationsObject = {
     menu: 'Thực đơn',
     moreOptions: 'Nhiều lựa chọn hơn',
     move: 'Di chuyển',
+    moveConfirm:
+      'Bạn sắp chuyển {{count}} {{label}} đến <1>{{destination}}</1>. Bạn có chắc chắn không?',
     moveCount: 'Di chuyển {{count}} {{label}}',
     moveDown: 'Di chuyển xuống',
     moveUp: 'Di chuyển lên',

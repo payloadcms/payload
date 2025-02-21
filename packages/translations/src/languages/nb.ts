@@ -283,6 +283,8 @@ export const nbTranslations: DefaultTranslationsObject = {
     menu: 'Meny',
     moreOptions: 'Flere alternativer',
     move: 'Flytt',
+    moveConfirm:
+      'Du er i ferd med å flytte {{count}} {{label}} til <1>{{destination}}</1>. Er du sikker?',
     moveCount: 'Flytt {{count}} {{label}}',
     moveDown: 'Flytt ned',
     moveUp: 'Flytt opp',

@@ -283,6 +283,8 @@ export const hrTranslations: DefaultTranslationsObject = {
     menu: 'Izbornik',
     moreOptions: 'Više opcija',
     move: 'Pomakni',
+    moveConfirm:
+      'Upravo ćete premjestiti {{count}} {{label}} u <1>{{destination}}</1>. Jeste li sigurni?',
     moveCount: 'Pomakni {{count}} {{label}}',
     moveDown: 'Pomakni dolje',
     moveUp: 'Pomakni gore',

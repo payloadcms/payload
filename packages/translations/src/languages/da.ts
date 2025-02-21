@@ -281,6 +281,8 @@ export const daTranslations: DefaultTranslationsObject = {
     menu: 'Menu',
     moreOptions: 'Flere muligheder',
     move: 'Flyt',
+    moveConfirm:
+      'Du er ved at flytte {{count}} {{label}} til <1>{{destination}}</1>. Er du sikker?',
     moveCount: 'Flyt {{count}} {{label}}',
     moveDown: 'Ryk ned',
     moveUp: 'Ryk op',

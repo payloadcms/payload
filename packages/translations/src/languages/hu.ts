@@ -285,6 +285,7 @@ export const huTranslations: DefaultTranslationsObject = {
     menu: 'Menü',
     moreOptions: 'Több opció',
     move: 'Mozdulj',
+    moveConfirm: 'Ön <1>{{destination}}</1>-re fogja {{count}} {{label}}-t mozgatni. Biztos benne?',
     moveCount: 'Mozduljon {{count}} {{label}}',
     moveDown: 'Mozgatás lefelé',
     moveUp: 'Mozgatás felfelé',

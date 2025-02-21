@@ -277,6 +277,7 @@ export const heTranslations: DefaultTranslationsObject = {
     menu: 'תפריט',
     moreOptions: 'אפשרויות נוספות',
     move: 'הזוז',
+    moveConfirm: 'אתה עומד להעביר {{count}} {{label}} ל-<1>{{destination}}</1>. האם אתה בטוח?',
     moveCount: 'הזז {{count}} {{label}}',
     moveDown: 'הזז למטה',
     moveUp: 'הזז למעלה',

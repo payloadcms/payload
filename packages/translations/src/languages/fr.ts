@@ -290,6 +290,8 @@ export const frTranslations: DefaultTranslationsObject = {
     menu: 'Menu',
     moreOptions: "Plus d'options",
     move: 'Déplacez-vous',
+    moveConfirm:
+      'Vous êtes sur le point de déplacer {{count}} {{label}} vers <1>{{destination}}</1>. Êtes-vous sûr ?',
     moveCount: 'Déplacez {{count}} {{label}}',
     moveDown: 'Déplacer vers le bas',
     moveUp: 'Déplacer vers le haut',

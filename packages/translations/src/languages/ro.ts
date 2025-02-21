@@ -287,6 +287,8 @@ export const roTranslations: DefaultTranslationsObject = {
     menu: 'Meniu',
     moreOptions: 'Mai multe opțiuni',
     move: 'Mutați',
+    moveConfirm:
+      'Sunteți pe cale să mutați {{count}} {{label}} la <1>{{destination}}</1>. Sunteți sigur?',
     moveCount: 'Mutați {{count}} {{label}}',
     moveDown: 'Mutați în jos',
     moveUp: 'Mutați în sus',

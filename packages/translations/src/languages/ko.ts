@@ -281,6 +281,8 @@ export const koTranslations: DefaultTranslationsObject = {
     menu: '메뉴',
     moreOptions: '더 많은 옵션',
     move: '움직이세요',
+    moveConfirm:
+      '당신은 <1>{{destination}}</1>로 {{count}}개의 {{label}}을(를) 이동하려고 합니다. 확실합니까?',
     moveCount: '{{count}} {{label}} 이동',
     moveDown: '아래로 이동',
     moveUp: '위로 이동',

@@ -283,6 +283,8 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     menu: 'Meni',
     moreOptions: 'Više opcija',
     move: 'Pomeri',
+    moveConfirm:
+      'Uskoro ćete premestiti {{count}} {{label}} u <1>{{destination}}</1>. Da li ste sigurni?',
     moveCount: 'Pomeri {{count}} {{label}}',
     moveDown: 'Pomeri dole',
     moveUp: 'Pomeri gore',
