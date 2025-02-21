@@ -28,7 +28,7 @@ export async function getRequestLocale({ req }: GetRequestLocalesArgs): Promise<
               req.user.id,
               req.user.collection,
             )
-          ).value,
+          )?.value,
       ) ||
       findLocaleFromCode(
         req.payload.config.localization,
