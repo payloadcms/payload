@@ -41,6 +41,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
           <button
             aria-label={t('general:selectAll', { count, label })}
             className={`${baseClass}__button`}
+            id="select-all-across-pages"
             onClick={() => toggleAll(true)}
             type="button"
           >
