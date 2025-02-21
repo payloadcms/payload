@@ -11,6 +11,7 @@ import {
   useAllFormFields,
   useForm,
   useFormModified,
+  useFormProcessing,
   useFormSubmitted,
 } from '../../forms/Form/context.js'
 import { useDebounce } from '../../hooks/useDebounce.js'
@@ -57,7 +58,8 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   const isProcessingRef = useRef(false)
 
   const { reportUpdate } = useDocumentEvents()
-  const { dispatchFields, isValid, setIsValid, setSubmitted } = useForm()
+  const { dispatchFields, isValid, setBackgroundProcessing, setIsValid, setSubmitted } = useForm()
+  const isFormProcessing = useFormProcessing()
 
   const [fields] = useAllFormFields()
   const modified = useFormModified()
@@ -107,6 +109,10 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     if (isProcessingRef.current || queueRef.current.length === 0) {
       return
     }
+    if (isFormProcessing) {
+      queueRef.current = []
+      return
+    }
 
     if (!isValidRef.current) {
       // Clear queue so we don't end up in an infinite loop
@@ -120,15 +126,18 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     const latestAction = queueRef.current[queueRef.current.length - 1]
     queueRef.current = []
 
+    setBackgroundProcessing(true)
     try {
       await latestAction()
     } finally {
       isProcessingRef.current = false
+      setBackgroundProcessing(false)
       if (queueRef.current.length > 0) {
         await processQueue()
       }
     }
-  }, [])
+    setBackgroundProcessing(false)
+  }, [isFormProcessing, setBackgroundProcessing])
 
   const autosaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 

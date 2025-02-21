@@ -192,6 +192,7 @@ export {
   useAllFormFields,
   useDocumentForm,
   useForm,
+  useFormBackgroundProcessing,
   useFormFields,
   useFormInitializing,
   useFormModified,
