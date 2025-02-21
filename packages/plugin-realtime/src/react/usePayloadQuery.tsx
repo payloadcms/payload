@@ -3,10 +3,10 @@ import type { Payload } from 'payload'
 
 import { createContext, use, useEffect, useLayoutEffect, useState } from 'react'
 
+import type { ReadOperation } from '../plugin/index.js'
 import type { PayloadQueryFn } from '../vanilla/payloadQuery.js'
 
 import { createPayloadClient } from '../vanilla/payloadQuery.js'
-type ReadOperation = 'count' | 'find' | 'findByID'
 
 // TODO: improve type. error, data and isLoading cannot accept all possible combinations
 type PayloadQueryResult<T extends ReadOperation> = Promise<{

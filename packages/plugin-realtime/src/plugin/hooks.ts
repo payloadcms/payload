@@ -1,6 +1,6 @@
 import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, Payload } from 'payload'
 
-import type { ReadOperation } from '../usePayloadQuery.js'
+import type { ReadOperation } from '../plugin/index.js'
 import type { QuerySubscription } from './index.js'
 
 import { clients, querySubscriptions } from './endpoints.js'

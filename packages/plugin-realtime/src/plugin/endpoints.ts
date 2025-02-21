@@ -1,6 +1,6 @@
 import type { Endpoint, Payload } from 'payload'
 
-import type { ReadOperation } from '../usePayloadQuery.js'
+import type { ReadOperation } from '../plugin/index.js'
 import type { QuerySubscription, StringifiedQuery } from './index.js'
 
 type Client = {
@@ -41,7 +41,6 @@ export const payloadQueryEndpoint: Endpoint = {
       } else if (type === 'findByID') {
         result = await req.payload.findByID(queryParams as Parameters<Payload['findByID']>[0])
       } else {
-         
         throw new Error(`Unsupported query type: ${type}`)
       }
 

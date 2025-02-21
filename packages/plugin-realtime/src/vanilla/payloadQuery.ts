@@ -3,8 +3,7 @@
 
 import type { Payload } from 'payload'
 
-import type { StringifiedQuery } from '../plugin/index.js'
-import type { ReadOperation } from '../usePayloadQuery.js'
+import type { ReadOperation, StringifiedQuery } from '../plugin/index.js'
 
 const clientId = `client-${Date.now()}-${Math.random()}`
 const querySubscriptions = new Map<StringifiedQuery, Set<QuerySubscription>>()

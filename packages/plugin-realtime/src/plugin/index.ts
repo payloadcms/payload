@@ -1,7 +1,5 @@
 import { type Config, type Payload } from 'payload'
 
-import type { ReadOperation } from '../usePayloadQuery.js'
-
 import { payloadQueryEndpoint, payloadSSEEndpoint } from './endpoints.js'
 import { myAfterChangeHook, myAfterDeleteHook } from './hooks.js'
 
@@ -16,6 +14,8 @@ export type Query<T extends ReadOperation> = {
   type: T
 }
 export type StringifiedQuery = string
+
+export type ReadOperation = 'count' | 'find' | 'findByID'
 
 export const realtimePlugin =
   () =>
