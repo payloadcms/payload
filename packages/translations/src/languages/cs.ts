@@ -174,6 +174,8 @@ export const csTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Nahrát nový {{label}}',
   },
   folder: {
+    deleteConfirmation:
+      'Vnořené složky budou smazány. Vnořené dokumenty se přesunou do nejbližší nadřazené složky. Jste si jistý?',
     deleteFolder: 'Smazat složku',
     folderName: 'Název složky',
     moveFolder: 'Přesunout složku',

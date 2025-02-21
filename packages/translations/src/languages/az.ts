@@ -174,6 +174,8 @@ export const azTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Yeni {{label}} yüklə',
   },
   folder: {
+    deleteConfirmation:
+      'İç içə qovşaqlar silinəcək. İç içə sənədlər ən yaxın ana qovşağa köçəriləcək. Eminsiniz?',
     deleteFolder: 'Qovluğu Sil',
     folderName: 'Qovluq Adı',
     moveFolder: 'Qovluğu Köçür',

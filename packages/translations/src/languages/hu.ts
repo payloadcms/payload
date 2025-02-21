@@ -176,6 +176,8 @@ export const huTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Új {{label}} feltöltése',
   },
   folder: {
+    deleteConfirmation:
+      'Beágyazott mappák törlődnek. Beágyazott dokumentumok átkerülnek a legközelebbi szülő mappába. Biztos benne?',
     deleteFolder: 'Mappa törlése',
     folderName: 'Mappa neve',
     moveFolder: 'Mappa áthelyezése',

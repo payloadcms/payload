@@ -177,6 +177,8 @@ export const skTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Nahrať nový {{label}}',
   },
   folder: {
+    deleteConfirmation:
+      'Vnorené priečinky budú vymazané. Vnorené dokumenty sa presunú do najbližšej nadradenej zložky. Ste si istý?',
     deleteFolder: 'Odstrániť priečinok',
     folderName: 'Názov priečinka',
     moveFolder: 'Presunúť priečinok',

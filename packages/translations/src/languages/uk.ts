@@ -175,6 +175,8 @@ export const ukTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Завантажити новий {{label}}',
   },
   folder: {
+    deleteConfirmation:
+      'Вкладені папки будуть видалені. Вкладені документи будуть переміщені до найближчої батьківської папки. Ви впевнені?',
     deleteFolder: 'Видалити папку',
     folderName: 'Назва папки',
     moveFolder: 'Перемістити папку',

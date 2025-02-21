@@ -168,6 +168,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     uploadNewLabel: '上传新的{{label}}',
   },
   folder: {
+    deleteConfirmation: '嵌套文件夹将被删除。嵌套文件将移至最近的父文件夹。你确定吗？',
     deleteFolder: '删除文件夹',
     folderName: '文件夹名称',
     moveFolder: '移动文件夹',

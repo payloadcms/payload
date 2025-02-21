@@ -178,6 +178,8 @@ export const itTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Carica nuovo {{label}}',
   },
   folder: {
+    deleteConfirmation:
+      'Le cartelle annidate verranno eliminate. I documenti annidati si sposteranno nella cartella genitore più vicina. Sei sicuro?',
     deleteFolder: 'Elimina cartella',
     folderName: 'Nome Cartella',
     moveFolder: 'Sposta Cartella',

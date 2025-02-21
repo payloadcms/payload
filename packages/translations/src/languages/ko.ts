@@ -174,6 +174,8 @@ export const koTranslations: DefaultTranslationsObject = {
     uploadNewLabel: '새로운 {{label}} 업로드',
   },
   folder: {
+    deleteConfirmation:
+      '중첩 폴더는 삭제됩니다. 중첩 문서는 가장 가까운 부모 폴더로 이동하게 됩니다. 확실합니까?',
     deleteFolder: '폴더 삭제',
     folderName: '폴더 이름',
     moveFolder: '폴더 이동',

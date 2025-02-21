@@ -172,6 +172,8 @@ export const arTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'رفع {{label}} جديد',
   },
   folder: {
+    deleteConfirmation:
+      'سيتم حذف المجلدات المتداخلة. ستنتقل المستندات المتداخلة إلى المجلد الأصل الأقرب. هل أنت متأكد؟',
     deleteFolder: 'حذف المجلد',
     folderName: 'اسم المجلد',
     moveFolder: 'نقل المجلد',

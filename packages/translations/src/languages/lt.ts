@@ -176,6 +176,8 @@ export const ltTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Įkelti naują {{label}}',
   },
   folder: {
+    deleteConfirmation:
+      'Įdėti aplankai bus ištrinti. Įdėti dokumentai bus perkelti į artimiausią tėvinį aplanką. Ar esate įsitikinęs?',
     deleteFolder: 'Ištrinti aplanką',
     folderName: 'Aplanko pavadinimas',
     moveFolder: 'Perkelti aplanką',

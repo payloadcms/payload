@@ -174,6 +174,8 @@ export const nbTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Last opp ny {{label}}',
   },
   folder: {
+    deleteConfirmation:
+      'Nestede mapper vil bli slettet. Nestede dokumenter vil bli flyttet til den nærmeste overordnede mappen. Er du sikker?',
     deleteFolder: 'Slett mappe',
     folderName: 'Mappenavn',
     moveFolder: 'Flytt mappe',

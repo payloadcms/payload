@@ -172,6 +172,8 @@ export const faTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'بارگذاری تازه {{label}}',
   },
   folder: {
+    deleteConfirmation:
+      'پوشه های تو در تو حذف خواهند شد. اسناد تو در تو به نزدیک ترین پوشه اصلی منتقل خواهند شد. آیا مطمئن هستید؟',
     deleteFolder: 'حذف پوشه',
     folderName: 'نام پوشه',
     moveFolder: 'انتقال پوشه',

@@ -174,6 +174,8 @@ export const enTranslations = {
     uploadNewLabel: 'Upload new {{label}}',
   },
   folder: {
+    deleteConfirmation:
+      'Nested folders will be deleted. Nested documents will move to the nearest parent folder. Are you sure?',
     deleteFolder: 'Delete Folder',
     folderName: 'Folder Name',
     moveFolder: 'Move Folder',

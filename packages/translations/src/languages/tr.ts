@@ -176,6 +176,8 @@ export const trTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Karşıya {{label}} yükle',
   },
   folder: {
+    deleteConfirmation:
+      'İç içe klasörler silinecektir. İç içe belgeler en yakın üst klasöre taşınacaktır. Emin misiniz?',
     deleteFolder: 'Klasörü Sil',
     folderName: 'Klasör Adı',
     moveFolder: 'Klasörü Taşı',

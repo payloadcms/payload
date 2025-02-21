@@ -175,6 +175,8 @@ export const hrTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Učitaj novi {{label}}',
   },
   folder: {
+    deleteConfirmation:
+      'Ugniježđene mape bit će izbrisane. Ugniježđeni dokumenti premjestit će se u najbližu nadređenu mapu. Jeste li sigurni?',
     deleteFolder: 'Izbriši mapu',
     folderName: 'Naziv mape',
     moveFolder: 'Premjesti mapu',

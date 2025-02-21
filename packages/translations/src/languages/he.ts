@@ -170,6 +170,8 @@ export const heTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'העלאת {{label}} חדשה',
   },
   folder: {
+    deleteConfirmation:
+      'תיקיות משנה יימחקו. מסמכים משנים יעברו לתיקיית ההורה הקרובה ביותר. האם אתה בטוח?',
     deleteFolder: 'מחק תיקייה',
     folderName: 'שם תיקייה',
     moveFolder: 'העבר תיקייה',

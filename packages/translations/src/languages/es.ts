@@ -178,6 +178,8 @@ export const esTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Subir nuevo {{label}}',
   },
   folder: {
+    deleteConfirmation:
+      'Las carpetas anidadas serán eliminadas. Los documentos anidados se moverán a la carpeta principal más cercana. ¿Está seguro?',
     deleteFolder: 'Eliminar Carpeta',
     folderName: 'Nombre de la Carpeta',
     moveFolder: 'Mover Carpeta',

@@ -174,6 +174,8 @@ export const slTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Naloži nov {{label}}',
   },
   folder: {
+    deleteConfirmation:
+      'Vgnešene mape bodo izbrisane. Vgnešeni dokumenti se bodo premaknili v najbližjo starševsko mapo. Ste prepričani?',
     deleteFolder: 'Izbriši mapo',
     folderName: 'Ime mape',
     moveFolder: 'Premakni mapo',

@@ -174,6 +174,8 @@ export const ptTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Carregar novo(a) {{label}}',
   },
   folder: {
+    deleteConfirmation:
+      'As pastas aninhadas serão excluídas. Os documentos aninhados serão movidos para a pasta pai mais próxima. Você tem certeza?',
     deleteFolder: 'Apagar Pasta',
     folderName: 'Nome da Pasta',
     moveFolder: 'Mover Pasta',

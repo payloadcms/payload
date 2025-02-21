@@ -175,6 +175,8 @@ export const rsTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Учитај нови {{label}}',
   },
   folder: {
+    deleteConfirmation:
+      'Ugnežđene fascikle će biti obrisane. Ugnežđeni dokumenti će se premestiti u najbližu matičnu fasciklu. Da li ste sigurni?',
     deleteFolder: 'Obriši fasciklu',
     folderName: 'Ime fascikle',
     moveFolder: 'Premesti fasciklu',

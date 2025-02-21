@@ -175,6 +175,8 @@ export const myTranslations: DefaultTranslationsObject = {
     uploadNewLabel: '{{label}} အသစ်တင်မည်။',
   },
   folder: {
+    deleteConfirmation:
+      'နဂိုဖိုလ်ဒါများကို ဖျက်သွားပါမည်။ ဂုဏ်ယူပါတယ်ဖိုင်များကို အနီးဆုံးမှတ်တမ်းဖိ',
     deleteFolder: 'Padam Folder',
     folderName: 'ဖိုင်နာမည်',
     moveFolder: 'Pindah Folder',

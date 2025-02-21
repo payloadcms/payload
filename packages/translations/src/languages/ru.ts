@@ -176,6 +176,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Загрузить новый {{label}}',
   },
   folder: {
+    deleteConfirmation:
+      'Вложенные папки будут удалены. Вложенные документы будут перемещены в ближайшую родительскую папку. Вы уверены?',
     deleteFolder: 'Удалить папку',
     folderName: 'Название папки',
     moveFolder: 'Переместить папку',

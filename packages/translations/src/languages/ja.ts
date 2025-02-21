@@ -175,6 +175,8 @@ export const jaTranslations: DefaultTranslationsObject = {
     uploadNewLabel: '新規 {{label}} アップロード',
   },
   folder: {
+    deleteConfirmation:
+      'ネストされたフォルダは削除されます。ネストされたドキュメントは最も近い親フォルダに移動します。よろしいですか？',
     deleteFolder: 'フォルダを削除する',
     folderName: 'フォルダ名',
     moveFolder: 'フォルダを移動する',

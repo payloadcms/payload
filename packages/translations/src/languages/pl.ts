@@ -174,6 +174,8 @@ export const plTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Wrzuć nowy {{label}}',
   },
   folder: {
+    deleteConfirmation:
+      'Zagnieżdżone foldery zostaną usunięte. Zagnieżdżone dokumenty zostaną przeniesione do najbliższego folderu nadrzędnego. Czy jesteś pewien?',
     deleteFolder: 'Usuń folder',
     folderName: 'Nazwa folderu',
     moveFolder: 'Przenieś folder',

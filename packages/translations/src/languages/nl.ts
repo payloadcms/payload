@@ -176,6 +176,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Upload nieuw(e) {{label}}',
   },
   folder: {
+    deleteConfirmation:
+      'Geneste mappen zullen worden verwijderd. Geneste documenten worden verplaatst naar de dichtstbijzijnde bovenliggende map. Weet u het zeker?',
     deleteFolder: 'Verwijder map',
     folderName: 'Mapnaam',
     moveFolder: 'Verplaats Map',

@@ -178,6 +178,8 @@ export const roTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Încărcați un nou {{label}}',
   },
   folder: {
+    deleteConfirmation:
+      'Folderele înglobate vor fi șterse. Documentele înglobate se vor muta în folderul părinte cel mai apropiat. Sunteți sigur(a)?',
     deleteFolder: 'Ștergeți dosarul',
     folderName: 'Nume dosar',
     moveFolder: 'Mutare Dosar',

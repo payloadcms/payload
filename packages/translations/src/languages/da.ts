@@ -173,6 +173,8 @@ export const daTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Upload ny {{label}}',
   },
   folder: {
+    deleteConfirmation:
+      'Indlejrede mapper vil blive slettet. Indlejrede dokumenter vil blive flyttet til den nærmeste forældremappe. Er du sikker?',
     deleteFolder: 'Slet mappe',
     folderName: 'Mappenavn',
     moveFolder: 'Flyt Mappe',

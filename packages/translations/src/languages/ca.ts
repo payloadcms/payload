@@ -175,6 +175,8 @@ export const caTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Puja un nou {{label}}',
   },
   folder: {
+    deleteConfirmation:
+      "Les carpetes imbricades seran eliminades. Els documents imbricats es mouran a la carpeta principal més propera. N'estàs segur?",
     deleteFolder: 'Esborra la carpeta',
     folderName: 'Nom de la Carpeta',
     moveFolder: 'Mou la carpeta',

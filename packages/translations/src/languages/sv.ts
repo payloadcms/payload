@@ -174,6 +174,8 @@ export const svTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Ladda upp ny {{label}}',
   },
   folder: {
+    deleteConfirmation:
+      'Nästlade mappar kommer att raderas. Nästlade dokument kommer att flyttas till den närmaste föräldramappen. Är du säker?',
     deleteFolder: 'Ta bort mapp',
     folderName: 'Mappnamn',
     moveFolder: 'Flytta mapp',

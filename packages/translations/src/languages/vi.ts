@@ -174,6 +174,8 @@ export const viTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Tải lên bản mới: {{label}}',
   },
   folder: {
+    deleteConfirmation:
+      'Các thư mục lồng nhau sẽ bị xóa. Các tài liệu lồng nhau sẽ chuyển đến thư mục cha gần nhất. Bạn có chắc chắn không?',
     deleteFolder: 'Xóa Thư mục',
     folderName: 'Tên thư mục',
     moveFolder: 'Di chuyển thư mục',

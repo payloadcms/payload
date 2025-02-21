@@ -178,6 +178,8 @@ export const deTranslations: DefaultTranslationsObject = {
     uploadNewLabel: '{{label}} neu hochladen',
   },
   folder: {
+    deleteConfirmation:
+      'Verschachtelte Ordner werden gelöscht. Verschachtelte Dokumente werden in den nächstgelegenen übergeordneten Ordner verschoben. Sind Sie sicher?',
     deleteFolder: 'Ordner löschen',
     folderName: 'Ordnername',
     moveFolder: 'Ordner verschieben',

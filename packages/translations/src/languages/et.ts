@@ -173,6 +173,8 @@ export const etTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Lae üles uus {{label}}',
   },
   folder: {
+    deleteConfirmation:
+      'Pesastatud kaustad kustutatakse. Pesastatud dokumendid liiguvad lähimasse ülemkausta. Kas olete kindel?',
     deleteFolder: 'Kustuta kaust',
     folderName: 'Kausta nimi',
     moveFolder: 'Liiguta kausta',

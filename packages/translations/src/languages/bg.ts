@@ -174,6 +174,8 @@ export const bgTranslations: DefaultTranslationsObject = {
     uploadNewLabel: 'Качи нов {{label}}',
   },
   folder: {
+    deleteConfirmation:
+      'Вложените папки ще бъдат изтрити. Вложените документи ще се преместят в най-близката родителска папка. Сигурни ли сте?',
     deleteFolder: 'Изтрий папка',
     folderName: 'Име на папка',
     moveFolder: 'Премести папка',
