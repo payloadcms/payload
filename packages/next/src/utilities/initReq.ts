@@ -42,6 +42,9 @@ type PartialResult = {
   user: null | User
 }
 
+/**
+ * Stable object to cache the partial request object across all pages
+ */
 const getPartialInitReqContainer = cache(function (): {
   reqResult: false | PartialResult | Promise<PartialResult>
 } {
@@ -50,6 +53,9 @@ const getPartialInitReqContainer = cache(function (): {
   }
 })
 
+/**
+ * Stable object to cache the request object across all pages with the same key
+ */
 const getInitReqContainer = cache(function (
   /**
    * The key is solely used to control caching behavior
@@ -63,6 +69,13 @@ const getInitReqContainer = cache(function (
   }
 })
 
+/**
+ * Initializes a partial request object. This does not construct the `req` object and does
+ * not run access control.
+ *
+ * The output of this function can be cached across all pages, which is why it is
+ * separated from `initReq`.
+ */
 const initPartialReq = async function ({
   configPromise,
   importMap,
@@ -126,6 +139,11 @@ const initPartialReq = async function ({
   return partialReqContainer.reqResult
 }
 
+/**
+ * Initializes a full request object, including the `req` object and access control.
+ * As access control and getting the request locale is dependent on the current URL and
+ * query parameters, this function cannot be cached as often as the partial request object.
+ */
 export const initReq = async function ({
   configPromise,
   importMap,
