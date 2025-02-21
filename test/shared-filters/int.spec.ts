@@ -55,13 +55,15 @@ describe('Shared Filters', () => {
             },
           },
           user,
-          readAccess: 'specificUsers',
-          updateAccess: 'specificUsers',
-          readConstraints: {
-            users: [user.id],
-          },
-          updateConstraints: {
-            users: [user.id],
+          access: {
+            read: {
+              constraint: 'specificUsers',
+              users: [user.id],
+            },
+            update: {
+              constraint: 'specificUsers',
+              users: [user.id],
+            },
           },
           relatedCollection: 'pages',
         },
@@ -139,13 +141,17 @@ describe('Shared Filters', () => {
               equals: 'example page',
             },
           },
-          readAccess: 'onlyMe',
-          updateAccess: 'onlyMe',
+          access: {
+            read: {
+              constraint: 'onlyMe',
+            },
+            update: {
+              constraint: 'onlyMe',
+            },
+          },
           relatedCollection: 'pages',
         },
       })
-
-      console.log(filterDoc.readConstraints.users)
 
       const resultWithUser = await payload.findByID({
         collection: sharedFilterCollectionSlug,
@@ -219,8 +225,14 @@ describe('Shared Filters', () => {
               equals: 'example page',
             },
           },
-          readAccess: 'everyone',
-          updateAccess: 'everyone',
+          access: {
+            read: {
+              constraint: 'everyone',
+            },
+            update: {
+              constraint: 'everyone',
+            },
+          },
           relatedCollection: 'pages',
         },
       })
@@ -291,13 +303,15 @@ describe('Shared Filters', () => {
               equals: 'example page',
             },
           },
-          readAccess: 'specificRoles',
-          updateAccess: 'specificRoles',
-          readConstraints: {
-            roles: ['admin'],
-          },
-          updateConstraints: {
-            roles: ['admin'],
+          access: {
+            read: {
+              constraint: 'specificRoles',
+              roles: ['admin'],
+            },
+            update: {
+              constraint: 'specificRoles',
+              roles: ['admin'],
+            },
           },
           relatedCollection: 'pages',
         },
@@ -379,8 +393,14 @@ describe('Shared Filters', () => {
               equals: 'example page',
             },
           },
-          readAccess: 'everyone',
-          updateAccess: 'everyone',
+          access: {
+            read: {
+              constraint: 'everyone',
+            },
+            update: {
+              constraint: 'everyone',
+            },
+          },
           relatedCollection: 'pages',
         },
       })

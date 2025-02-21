@@ -3,16 +3,13 @@ import type { Config } from '../config/types.js'
 
 import { transformWhereQuery } from '../utilities/transformWhereQuery.js'
 import { validateWhereQuery } from '../utilities/validateWhereQuery.js'
-import { getAccess, getAccessFields } from './access.js'
+import { getAccess } from './access.js'
+import { getConstraints } from './constraints.js'
 export const sharedFiltersCollectionSlug = 'payload-shared-filters'
 
 export const getSharedFiltersCollection = (config: Config): CollectionConfig => ({
   slug: sharedFiltersCollectionSlug,
-  access: {
-    delete: getAccess({ config, operation: 'delete' }),
-    read: getAccess({ config, operation: 'read' }),
-    update: getAccess({ config, operation: 'update' }),
-  },
+  access: getAccess(config),
   admin: {
     // hidden: true, // uncomment this when ready
     useAsTitle: 'title',
@@ -23,9 +20,7 @@ export const getSharedFiltersCollection = (config: Config): CollectionConfig => 
       type: 'text',
       required: true,
     },
-    ...getAccessFields({ config, operation: 'read' }),
-    ...getAccessFields({ config, operation: 'update' }),
-    ...getAccessFields({ config, operation: 'delete' }),
+    getConstraints(config),
     {
       name: 'where',
       type: 'json',

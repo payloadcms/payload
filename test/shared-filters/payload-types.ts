@@ -197,19 +197,21 @@ export interface PayloadPreference {
 export interface PayloadSharedFilter {
   id: string;
   title: string;
-  readAccess?: ('everyone' | 'onlyMe' | 'specificUsers' | 'specificRoles') | null;
-  readConstraints?: {
-    users?: (string | User)[] | null;
-    roles?: ('admin' | 'user')[] | null;
-  };
-  updateAccess?: ('everyone' | 'onlyMe' | 'specificUsers' | 'specificRoles') | null;
-  updateConstraints?: {
-    users?: (string | User)[] | null;
-    roles?: ('admin' | 'user')[] | null;
-  };
-  deleteAccess?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
-  deleteConstraints?: {
-    users?: (string | User)[] | null;
+  access?: {
+    delete?: {
+      constraint?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
+      users?: (string | User)[] | null;
+    };
+    read?: {
+      constraint?: ('everyone' | 'onlyMe' | 'specificUsers' | 'specificRoles') | null;
+      users?: (string | User)[] | null;
+      roles?: ('admin' | 'user')[] | null;
+    };
+    update?: {
+      constraint?: ('everyone' | 'onlyMe' | 'specificUsers' | 'specificRoles') | null;
+      users?: (string | User)[] | null;
+      roles?: ('admin' | 'user')[] | null;
+    };
   };
   where:
     | {
@@ -299,25 +301,29 @@ export interface PayloadPreferencesSelect<T extends boolean = true> {
  */
 export interface PayloadSharedFiltersSelect<T extends boolean = true> {
   title?: T;
-  readAccess?: T;
-  readConstraints?:
+  access?:
     | T
     | {
-        users?: T;
-        roles?: T;
-      };
-  updateAccess?: T;
-  updateConstraints?:
-    | T
-    | {
-        users?: T;
-        roles?: T;
-      };
-  deleteAccess?: T;
-  deleteConstraints?:
-    | T
-    | {
-        users?: T;
+        delete?:
+          | T
+          | {
+              constraint?: T;
+              users?: T;
+            };
+        read?:
+          | T
+          | {
+              constraint?: T;
+              users?: T;
+              roles?: T;
+            };
+        update?:
+          | T
+          | {
+              constraint?: T;
+              users?: T;
+              roles?: T;
+            };
       };
   where?: T;
   columns?: T;

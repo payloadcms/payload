@@ -18,12 +18,12 @@ export default buildConfigWithDefaults({
     sharedListFilters: {
       access: {
         read: ({ req: { user } }) => ({
-          'readConstraints.roles': {
+          'access.read.roles': {
             in: user.roles,
           },
         }),
         update: ({ req: { user } }) => ({
-          'updateConstraints.roles': {
+          'access.update.roles': {
             in: user.roles,
           },
         }),

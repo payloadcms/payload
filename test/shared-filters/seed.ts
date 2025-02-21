@@ -51,13 +51,15 @@ export const seed = async (_payload: Payload) => {
                 equals: 'example page',
               },
             },
-            readAccess: 'specificUsers',
-            updateAccess: 'specificUsers',
-            readConstraints: {
-              users: [devUser?.id || ''],
-            },
-            updateConstraints: {
-              users: [devUser?.id || ''],
+            access: {
+              read: {
+                constraint: 'specificUsers',
+                users: [devUser?.id || ''],
+              },
+              update: {
+                constraint: 'specificUsers',
+                users: [devUser?.id || ''],
+              },
             },
             columns: [
               {
@@ -78,8 +80,14 @@ export const seed = async (_payload: Payload) => {
                 equals: 'example page',
               },
             },
-            readAccess: 'everyone',
-            updateAccess: 'everyone',
+            access: {
+              update: {
+                constraint: 'everyone',
+              },
+              read: {
+                constraint: 'everyone',
+              },
+            },
             columns: [
               {
                 accessor: 'text',
@@ -99,8 +107,14 @@ export const seed = async (_payload: Payload) => {
                 equals: 'example page',
               },
             },
-            readAccess: 'onlyMe',
-            updateAccess: 'onlyMe',
+            access: {
+              update: {
+                constraint: 'onlyMe',
+              },
+              read: {
+                constraint: 'onlyMe',
+              },
+            },
             columns: [
               {
                 accessor: 'text',
