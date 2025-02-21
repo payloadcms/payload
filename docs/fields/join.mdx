@@ -62,6 +62,10 @@ of relationship types in an easy manner.
   The Join field is extremely performant and does not add additional query overhead to your API responses until you add depth of 1 or above. It works in all database adapters. In MongoDB, we use **aggregations** to automatically join in related documents, and in relational databases, we use joins.
 </Banner>
 
+<Banner type="warning">
+  The Join Field is not supported in [DocumentDB](https://aws.amazon.com/documentdb/) and [Azure Cosmos DB](https://azure.microsoft.com/en-us/products/cosmos-db), as we internally use MongoDB aggregations to query data for that field, which are limited there. This can be changed in the future.
+</Banner>
+
 ### Schema advice
 
 When modeling your database, you might come across many places where you'd like to feature bi-directional relationships.
