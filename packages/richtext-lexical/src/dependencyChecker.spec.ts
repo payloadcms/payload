@@ -14,5 +14,8 @@ describe('Lexical dependency checker', () => {
     const packageJsonLexicalVersion = packageJson.dependencies['lexical']
 
     expect(packageJsonLexicalVersion).toBe(lexicalTargetVersion)
+
+    const packageJsonLexicalPeerDepVersion = packageJson.peerDependencies['lexical']
+    expect(packageJsonLexicalPeerDepVersion).toBe(lexicalTargetVersion)
   })
 })

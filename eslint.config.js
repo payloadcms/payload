@@ -19,7 +19,7 @@ export const defaultESLintIgnores = [
   '**/build/',
   '**/node_modules/',
   '**/temp/',
-  'packages/**/*.spec.ts',
+  '**/packages/*.spec.ts',
   'next-env.d.ts',
   '**/app',
   'src/**/*.spec.ts',
@@ -31,7 +31,10 @@ export const defaultESLintIgnores = [
 export const rootParserOptions = {
   sourceType: 'module',
   ecmaVersion: 'latest',
-  projectService: true,
+  projectService: {
+    maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: 40,
+    allowDefaultProject: ['scripts/*.ts', '*.js', '*.mjs', '*.d.ts'],
+  },
 }
 
 /** @type {Config[]} */
