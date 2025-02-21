@@ -350,7 +350,7 @@ export function UploadInput(props: UploadInputProps) {
     [closeCreateDocDrawer, activeRelationTo, onChange],
   )
 
-  const onListSelect = React.useCallback<NonNullable<ListDrawerProps['onSelect']>>(
+  const onListSelect = useCallback<NonNullable<ListDrawerProps['onSelect']>>(
     async ({ collectionSlug, doc }) => {
       const loadedDocs = await populateDocs([doc.id], collectionSlug)
       const selectedDoc = loadedDocs ? loadedDocs.docs?.[0] : null
