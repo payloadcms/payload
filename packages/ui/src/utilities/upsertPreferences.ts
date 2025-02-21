@@ -61,7 +61,9 @@ export const upsertPreferences = async <T extends Record<string, unknown> | stri
   req: PayloadRequest
   value: T
 }): Promise<T> => {
-  const existingPrefs = await getPreferences<T>(key, req.payload, req.user.id, req.user.collection)
+  const existingPrefs: { id?: DefaultDocumentIDType; value?: T } = req.user
+    ? await getPreferences<T>(key, req.payload, req.user.id, req.user.collection)
+    : {}
 
   let newPrefs = existingPrefs?.value
 
