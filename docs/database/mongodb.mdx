@@ -54,7 +54,7 @@ You can access Mongoose models as follows:
 ## Using other MongoDB implementations
 Limitations with [DocumentDB](https://aws.amazon.com/documentdb/) and [Azure Cosmos DB](https://azure.microsoft.com/en-us/products/cosmos-db):
 
-* For Azure Cosmos DB you must pass `transactionOptions: false` to the database, transactions are not supported with it.
+* For Azure Cosmos DB you must pass `transactionOptions: false` to the adapter options, transactions are not supported with it.
 * For Azure Cosmos DB the root config property `indexSortableFields` must be set to `true`.
 * The [Join Field](../fields/join) is not supported in DocumentDB and Azure Cosmos DB, as we internally use MongoDB aggregations to query data for that field, which are limited there. This can be changed in the future.
 
