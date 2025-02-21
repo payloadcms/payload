@@ -476,6 +476,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
 
     if (fieldShouldBeLocalized({ field, parentIsLocalized }) && payload.config.localization) {
       schemaToReturn = {
+        _id: false,
         type: payload.config.localization.localeCodes.reduce((locales, locale) => {
           let localeSchema: { [key: string]: any } = {}
 
@@ -698,6 +699,7 @@ const fieldToSchemaMap: Record<string, FieldSchemaGenerator> = {
 
     if (fieldShouldBeLocalized({ field, parentIsLocalized }) && payload.config.localization) {
       schemaToReturn = {
+        _id: false,
         type: payload.config.localization.localeCodes.reduce((locales, locale) => {
           let localeSchema: { [key: string]: any } = {}
 
