@@ -37,18 +37,15 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
     <div className={baseClass}>
       <span>{t('general:selectedCount', { count, label: '' })}</span>
       {selectAll !== SelectAllStatus.AllAvailable && count < totalDocs && (
-        <Fragment>
-          <span>&mdash;</span>
-          <button
-            aria-label={t('general:selectAll', { count, label })}
-            className={`${baseClass}__button`}
-            id="select-all-across-pages"
-            onClick={() => toggleAll(true)}
-            type="button"
-          >
-            {t('general:selectAll', { count: totalDocs, label: '' })}
-          </button>
-        </Fragment>
+        <button
+          aria-label={t('general:selectAll', { count, label })}
+          className={`${baseClass}__button`}
+          id="select-all-across-pages"
+          onClick={() => toggleAll(true)}
+          type="button"
+        >
+          {t('general:selectAll', { count: totalDocs, label: '' })}
+        </button>
       )}
       {!disableBulkEdit && !disableBulkDelete && <span>&mdash;</span>}
       {!disableBulkEdit && (
