@@ -1,5 +1,5 @@
 'use client'
-import { useSelection } from '@payloadcms/ui'
+import { PopupList, useSelection } from '@payloadcms/ui'
 import React, { useEffect } from 'react'
 
 import { ExportDrawer } from '../ExportDrawer/index.js'
@@ -25,12 +25,12 @@ export const ExportButton: React.FC<{ collectionSlug: string; exportCollectionSl
   }, [collectionSlug, setCollection])
 
   return (
-    <React.Fragment>
+    <PopupList.Button>
       <ExportDrawer
         collectionSlug={collectionSlug}
         drawerSlug={exportDrawerSlug}
         exportCollectionSlug={exportCollectionSlug}
       />
-    </React.Fragment>
+    </PopupList.Button>
   )
 }
