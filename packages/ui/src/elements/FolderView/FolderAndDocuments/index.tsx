@@ -67,7 +67,6 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
   const [isDragging, setIsDragging] = React.useState(false)
   const [viewType, setViewType] = React.useState<'grid' | 'list'>(initialDisplayType || 'grid')
   const [createCollectionSlug, setCreateCollectionSlug] = React.useState<string | undefined>()
-  const [hiddenFolderIDs, setHiddenFolderIDs] = React.useState<(number | string)[]>([])
   const [itemsToMove, setItemsToMove] = React.useState<PolymorphicRelationshipValue[]>([])
   const dndContextID = React.useId()
   const renameFolderWasOpenRef = React.useRef(false)
@@ -89,19 +88,10 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
   // - set the items that are being moved
   const onMoveToFolderOpen = React.useCallback(
     ({ items }: { items: PolymorphicRelationshipValue[] }) => {
-      setHiddenFolderIDs(
-        items.reduce<(number | string)[]>((acc, { relationTo, value }) => {
-          if (relationTo === folderCollectionSlug) {
-            acc.push(extractID(value))
-          }
-
-          return acc
-        }, []),
-      )
       setItemsToMove(items)
       openModal(moveToFolderDrawerSlug)
     },
-    [openModal, folderCollectionSlug],
+    [openModal],
   )
 
   const onNewFolderCreate = React.useCallback(
@@ -168,10 +158,12 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
         return
       }
 
-      await moveToFolder({
-        itemsToMove: getSelectedItems(),
-        toFolderID: event.over.id,
-      })
+      if (event.over.data.current.type === 'folder' && event.over.data.current.id) {
+        await moveToFolder({
+          itemsToMove: getSelectedItems(),
+          toFolderID: event.over.data.current.id,
+        })
+      }
     },
     [moveToFolder, getSelectedItems],
   )
@@ -300,7 +292,7 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
                       }}
                       size="small"
                     >
-                      Delete ({selectedIndexes.size})
+                      {t('general:delete')} ({selectedIndexes.size})
                     </Button>
                     <Button
                       buttonStyle="pill"
@@ -309,7 +301,10 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
                       }}
                       size="small"
                     >
-                      Move ({selectedIndexes.size})
+                      {t('general:moveCount', {
+                        count: `(${selectedIndexes.size})`,
+                        label: '',
+                      })}
                     </Button>
                   </>
                 )}
@@ -337,9 +332,9 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
 
           <DisplayItems
             collectionUseAsTitles={collectionUseAsTitles}
-            disabledFolderIDs={getSelectedItems().map(({ value }) => extractID(value))}
             documents={documents}
             folderCollectionSlug={folderCollectionSlug}
+            getSelectedItems={getSelectedItems}
             isMovingItems={isDragging}
             lastSelectedIndex={lastSelectedIndex}
             RenderDocumentActionGroup={({ document, index }) => (
@@ -411,9 +406,8 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
       />
 
       <MoveToFolderDrawer
-        count={itemsToMove.length}
-        disabledFolderIDs={hiddenFolderIDs}
         drawerSlug={moveToFolderDrawerSlug}
+        getSelectedItems={getSelectedItems}
         onMoveConfirm={async (toFolderID) => {
           await moveToFolder({
             itemsToMove,

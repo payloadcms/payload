@@ -11,12 +11,13 @@ import './index.scss'
 const baseClass = 'folder-file-row'
 type Props = {
   readonly columns: React.ReactNode[]
+  readonly disabled?: boolean
   readonly id: number | string
-  readonly isDragging?: boolean
   readonly isDroppable?: boolean
   readonly isFocused?: boolean
   readonly isSelected?: boolean
   readonly isSelecting?: boolean
+  readonly itemKey: string
   readonly onClick?: (e: React.MouseEvent) => void
   readonly onKeyDown?: (e: React.KeyboardEvent) => void
   readonly type: 'file' | 'folder'
@@ -25,17 +26,22 @@ export function FolderFileRow({
   id,
   type,
   columns,
-  isDragging,
+  disabled,
   isDroppable,
   isFocused,
   isSelected,
   isSelecting,
+  itemKey,
   onClick,
   onKeyDown,
 }: Props) {
   const enableDroppable = isDroppable && !isSelected
   const { isOver, setNodeRef } = useDroppable({
-    id: String(id),
+    id,
+    data: {
+      id,
+      type,
+    },
     disabled: !enableDroppable,
   })
   const ref = React.useRef(null)
@@ -61,7 +67,7 @@ export function FolderFileRow({
         `${baseClass}--${type}`,
         isSelected && `${baseClass}--selected`,
         isSelecting && `${baseClass}--selecting`,
-        isDragging && `${baseClass}--dragging`,
+        disabled && `${baseClass}--disabled`,
         isFocused && `${baseClass}--focused`,
         isOver && `${baseClass}--over`,
       ]
@@ -82,8 +88,8 @@ export function FolderFileRow({
         {onClick || onKeyDown ? (
           <DraggableWithClick
             className={`${baseClass}__drag-handle`}
-            id={String(id)}
-            key={id}
+            id={itemKey}
+            key={itemKey}
             onClick={onClick}
             onKeyDown={onKeyDown}
             ref={ref}

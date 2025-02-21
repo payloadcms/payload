@@ -38,11 +38,13 @@ export const DraggableWithClick = ({
 
       if (deltaX > thresholdPixels || deltaY > thresholdPixels) {
         isDragging.current = true
-        listeners.onPointerDown(e)
-        // when the user starts dragging
-        // - call the click handler
-        // - remove the pointermove listener
-        onClick(moveEvent)
+        if (listeners?.onPointerDown) {
+          listeners.onPointerDown(e)
+          // when the user starts dragging
+          // - call the click handler
+          // - remove the pointermove listener
+          onClick(moveEvent)
+        }
         window.removeEventListener('pointermove', handlePointerMove)
       }
     }

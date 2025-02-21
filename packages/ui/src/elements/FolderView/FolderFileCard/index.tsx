@@ -20,11 +20,12 @@ type Props = {
   readonly isDeleting?: boolean
   readonly isFocused?: boolean
   readonly isSelected?: boolean
-  readonly isSelecting?: boolean
+  readonly itemKey: string
   readonly onClick?: (e: React.MouseEvent) => void
   readonly onKeyDown?: (e: React.KeyboardEvent) => void
   readonly PopupActions?: React.ReactNode
   readonly previewUrl?: string
+  readonly selectedCount?: number
   readonly title: string
   readonly type: 'file' | 'folder'
 }
@@ -36,16 +37,22 @@ export function FolderFileCard({
   isDeleting = false,
   isFocused = false,
   isSelected = false,
-  isSelecting = false,
+  itemKey,
   onClick,
   onKeyDown,
   PopupActions,
   previewUrl,
+  selectedCount = 0,
   title,
 }: Props) {
+  const disableDrop = !id || disabled || type !== 'folder'
   const { isOver, setNodeRef } = useDroppable({
-    id: String(id),
-    disabled,
+    id,
+    data: {
+      id,
+      type,
+    },
+    disabled: disableDrop,
   })
   const ref = React.useRef(null)
 
@@ -69,7 +76,6 @@ export function FolderFileCard({
         baseClass,
         className,
         isSelected && `${baseClass}--selected`,
-        isSelecting && `${baseClass}--selecting`,
         disabled && `${baseClass}--disabled`,
         isDeleting && `${baseClass}--deleting`,
         isFocused && `${baseClass}--focused`,
@@ -82,14 +88,14 @@ export function FolderFileCard({
       {!disabled && (onClick || onKeyDown) && (
         <DraggableWithClick
           className={`${baseClass}__drag-handle`}
-          id={String(id)}
-          key={id}
+          id={itemKey}
+          key={itemKey}
           onClick={onClick}
           onKeyDown={onKeyDown}
           ref={ref}
         />
       )}
-      {!disabled ? <div className={`${baseClass}__drop-area`} ref={setNodeRef} /> : null}
+      {!disableDrop ? <div className={`${baseClass}__drop-area`} ref={setNodeRef} /> : null}
 
       {type === 'file' ? (
         <div className={`${baseClass}__preview-area`}>
@@ -107,7 +113,7 @@ export function FolderFileCard({
         {PopupActions ? (
           <Popup
             button={<ThreeDotsIcon />}
-            disabled={isSelecting}
+            disabled={!selectedCount || selectedCount > 1 || (selectedCount === 1 && !isSelected)}
             horizontalAlign="right"
             size="large"
             verticalAlign="bottom"

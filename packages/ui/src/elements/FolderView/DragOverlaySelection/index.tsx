@@ -52,7 +52,13 @@ export function DragOverlaySelection({
               top: `-${index * 3}px`,
             }}
           >
-            <FolderFileCard id="" isSelected title={title} type="folder" />
+            <FolderFileCard
+              id={null}
+              isSelected
+              itemKey="overlay-card"
+              title={title}
+              type="folder"
+            />
           </div>
         ))}
         {selectedCount > 1 ? (

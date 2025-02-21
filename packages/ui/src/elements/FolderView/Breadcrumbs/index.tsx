@@ -37,7 +37,11 @@ export function FolderBreadcrumbs({ breadcrumbs, className }: Props) {
 
 function DroppableBreadcrumb({ id, name }: FolderBreadcrumb) {
   const { isOver, setNodeRef } = useDroppable({
-    id: String(id),
+    id,
+    data: {
+      id,
+      type: 'folder',
+    },
   })
   const { setFolderID } = useFolder()
 

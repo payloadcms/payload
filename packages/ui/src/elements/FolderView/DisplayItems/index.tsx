@@ -1,8 +1,7 @@
 'use client'
 
-import type { GetFolderDataResult } from 'payload/shared'
-
 import { useRouter } from 'next/navigation.js'
+import { extractID, type GetFolderDataResult } from 'payload/shared'
 import React from 'react'
 
 import type { FolderContextValue } from '../../../providers/Folders/index.js'
@@ -51,11 +50,16 @@ const getMetaSelection = ({
   return selectedIndexes
 }
 
+type ItemKey = `${string}-${number | string}`
 type RowItemEventData = { id: number | string; index: number; relationTo: string }
 type Props = {
   readonly allowMultiSelection?: boolean
-  readonly disabledFolderIDs?: (number | string)[]
-  readonly isMovingItems: boolean
+  /**
+   * A Set of keys that should be disabled
+   * in the form of: `${relationTo}-${id}`
+   */
+  readonly getDisabledItems?: FolderContextValue['getSelectedItems']
+  readonly isMovingItems?: boolean
   readonly RenderDocumentActionGroup?: (args: {
     document: GetFolderDataResult['items'][number]
     index: number
@@ -65,26 +69,28 @@ type Props = {
     subfolder: GetFolderDataResult['items'][number]
   }) => React.ReactNode
   readonly viewType: 'grid' | 'list'
-} & Pick<
-  FolderContextValue,
-  | 'collectionUseAsTitles'
-  | 'documents'
-  | 'folderCollectionSlug'
-  | 'lastSelectedIndex'
-  | 'selectedIndexes'
-  | 'setFolderID'
-  | 'setLastSelectedIndex'
-  | 'setSelectedIndexes'
-  | 'subfolders'
->
+} & NonNullable<Pick<FolderContextValue, 'getSelectedItems'>> &
+  Pick<
+    FolderContextValue,
+    | 'collectionUseAsTitles'
+    | 'documents'
+    | 'folderCollectionSlug'
+    | 'lastSelectedIndex'
+    | 'selectedIndexes'
+    | 'setFolderID'
+    | 'setLastSelectedIndex'
+    | 'setSelectedIndexes'
+    | 'subfolders'
+  >
 export function DisplayItems(props: Props) {
   const {
     allowMultiSelection = true,
     collectionUseAsTitles,
-    disabledFolderIDs = [],
     documents = [],
     folderCollectionSlug,
-    isMovingItems,
+    getDisabledItems,
+    getSelectedItems,
+    isMovingItems = false,
     lastSelectedIndex,
     RenderDocumentActionGroup,
     RenderSubfolderActionGroup,
@@ -104,6 +110,28 @@ export function DisplayItems(props: Props) {
   const totalCount = subfolders.length + documents.length || 0
 
   const lastClickTime = React.useRef(0)
+
+  const selectedItemKeys = new Set<`${string}-${number | string}`>(
+    getSelectedItems().reduce((acc, item) => {
+      if (item) {
+        if (item.relationTo && item.value) {
+          acc.push(`${item.relationTo}-${extractID(item.value)}`)
+        }
+      }
+      return acc
+    }, []),
+  )
+
+  const disabledItemKeys = new Set<`${string}-${number | string}`>(
+    getDisabledItems?.().reduce((acc, item) => {
+      if (item) {
+        if (item.relationTo && item.value) {
+          acc.push(`${item.relationTo}-${extractID(item.value)}`)
+        }
+      }
+      return acc
+    }, []),
+  )
 
   const navigateAfterClick = React.useCallback(
     async ({ collectionSlug, docID }: { collectionSlug: string; docID: number | string }) => {
@@ -309,17 +337,21 @@ export function DisplayItems(props: Props) {
                   const useAsTitle = collectionUseAsTitles.has(relationTo)
                     ? collectionUseAsTitles.get(relationTo)
                     : 'id'
-                  const subfolderID = typeof value === 'object' ? value?.id : value
+                  const subfolderID = extractID(value)
                   const title =
                     typeof value === 'object' ? value?.[useAsTitle] || subfolderID : subfolderID
+                  const itemKey: ItemKey = `${relationTo}-${subfolderID}`
                   return (
                     <FolderFileCard
-                      disabled={isMovingItems && disabledFolderIDs.includes(subfolderID)}
+                      disabled={
+                        (isMovingItems && selectedItemKeys.has(itemKey)) ||
+                        disabledItemKeys?.has(itemKey)
+                      }
                       id={subfolderID}
                       isFocused={focusedRowIndex === subfolderIndex}
-                      isSelected={selectedIndexes.has(subfolderIndex)}
-                      isSelecting={selectedIndexes.size > 0}
-                      key={subfolderID}
+                      isSelected={selectedItemKeys.has(itemKey)}
+                      itemKey={itemKey}
+                      key={itemKey}
                       onClick={(event) => {
                         void onItemClick({
                           event,
@@ -340,6 +372,7 @@ export function DisplayItems(props: Props) {
                             })
                           : null
                       }
+                      selectedCount={selectedIndexes.size}
                       title={title}
                       type="folder"
                     />
@@ -353,7 +386,7 @@ export function DisplayItems(props: Props) {
                 ? null
                 : documents.map((document, documentIndex) => {
                     const { relationTo, value } = document
-                    const documentID = typeof value === 'object' ? value?.id : value
+                    const documentID = extractID(value)
                     const useAsTitle = collectionUseAsTitles.has(relationTo)
                       ? collectionUseAsTitles.get(relationTo)
                       : 'id'
@@ -367,13 +400,15 @@ export function DisplayItems(props: Props) {
                         ? value.url
                         : undefined
                     const adjustedIndex = documentIndex + subfolders.length
+                    const itemKey: ItemKey = `${relationTo}-${documentID}`
                     return (
                       <FolderFileCard
+                        disabled={isMovingItems || disabledItemKeys?.has(itemKey)}
                         id={documentID}
                         isFocused={focusedRowIndex === adjustedIndex}
-                        isSelected={selectedIndexes.has(adjustedIndex)}
-                        isSelecting={selectedIndexes.size > 0}
-                        key={documentID}
+                        isSelected={selectedItemKeys.has(itemKey)}
+                        itemKey={itemKey}
+                        key={itemKey}
                         onClick={(event) => {
                           void onItemClick({
                             event,
@@ -395,6 +430,7 @@ export function DisplayItems(props: Props) {
                             : null
                         }
                         previewUrl={previewUrl}
+                        selectedCount={selectedIndexes.size}
                         title={title}
                         type="file"
                       />
@@ -404,87 +440,96 @@ export function DisplayItems(props: Props) {
           </div>
         </>
       ) : (
-        <SimpleTable
-          headerCells={[
-            <TableHeader key={'name'}>Title</TableHeader>,
-            <TableHeader key={'createdAt'}>Created At</TableHeader>,
-            <TableHeader key={'updatedAt'}>Updated At</TableHeader>,
-          ]}
-          tableRows={[
-            ...subfolders.map((subfolder, subfolderIndex) => {
-              const { relationTo, value } = subfolder
-              const subfolderID = typeof value === 'object' ? value?.id : value
-              const useAsTitle = collectionUseAsTitles.has(relationTo)
-                ? collectionUseAsTitles.get(relationTo)
-                : 'id'
-              const title =
-                typeof value === 'object' ? value?.[useAsTitle] || subfolderID : subfolderID
-              return (
-                <FolderFileRow
-                  // @ts-expect-error
-                  columns={[title, value?.createdAt, value?.updatedAt]}
-                  id={subfolderID}
-                  isDragging={isMovingItems}
-                  isDroppable
-                  isFocused={focusedRowIndex === subfolderIndex}
-                  isSelected={selectedIndexes.has(subfolderIndex)}
-                  isSelecting={selectedIndexes.size > 0}
-                  key={subfolderID}
-                  onClick={(event) => {
-                    void onItemClick({
-                      event,
-                      item: { id: subfolderID, index: subfolderIndex, relationTo },
-                    })
-                  }}
-                  onKeyDown={(event) => {
-                    void onItemKeyPress({
-                      event,
-                      item: { id: subfolderID, index: subfolderIndex, relationTo },
-                    })
-                  }}
-                  type="folder"
-                />
-              )
-            }),
+        totalCount > 0 && (
+          <SimpleTable
+            headerCells={[
+              <TableHeader key={'name'}>Title</TableHeader>,
+              <TableHeader key={'createdAt'}>Created At</TableHeader>,
+              <TableHeader key={'updatedAt'}>Updated At</TableHeader>,
+            ]}
+            tableRows={[
+              ...subfolders.map((subfolder, subfolderIndex) => {
+                const { relationTo, value } = subfolder
+                const subfolderID = extractID(value)
+                const useAsTitle = collectionUseAsTitles.has(relationTo)
+                  ? collectionUseAsTitles.get(relationTo)
+                  : 'id'
+                const title =
+                  typeof value === 'object' ? value?.[useAsTitle] || subfolderID : subfolderID
+                const itemKey: ItemKey = `${relationTo}-${subfolderID}`
+                return (
+                  <FolderFileRow
+                    // @ts-expect-error
+                    columns={[title, value?.createdAt, value?.updatedAt]}
+                    disabled={
+                      (isMovingItems && selectedItemKeys.has(itemKey)) ||
+                      disabledItemKeys?.has(itemKey)
+                    }
+                    id={subfolderID}
+                    isDroppable
+                    isFocused={focusedRowIndex === subfolderIndex}
+                    isSelected={selectedItemKeys.has(itemKey)}
+                    isSelecting={selectedIndexes.size > 0}
+                    itemKey={itemKey}
+                    key={itemKey}
+                    onClick={(event) => {
+                      void onItemClick({
+                        event,
+                        item: { id: subfolderID, index: subfolderIndex, relationTo },
+                      })
+                    }}
+                    onKeyDown={(event) => {
+                      void onItemKeyPress({
+                        event,
+                        item: { id: subfolderID, index: subfolderIndex, relationTo },
+                      })
+                    }}
+                    type="folder"
+                  />
+                )
+              }),
 
-            ...documents.map((document, documentIndex) => {
-              const { relationTo, value } = document
-              const documentID = typeof value === 'object' ? value?.id : value
-              const useAsTitle = collectionUseAsTitles.has(relationTo)
-                ? collectionUseAsTitles.get(relationTo)
-                : 'id'
-              const title = (
-                typeof value === 'object' ? value?.[useAsTitle] || documentID : documentID
-              ) as string
-              const adjustedIndex = documentIndex + subfolders.length
-              return (
-                <FolderFileRow
-                  // @ts-expect-error
-                  columns={[title, value.createdAt, value.updatedAt]}
-                  id={documentID}
-                  isDragging={isMovingItems}
-                  isFocused={focusedRowIndex === adjustedIndex}
-                  isSelected={selectedIndexes.has(adjustedIndex)}
-                  isSelecting={selectedIndexes.size > 0}
-                  key={documentID}
-                  onClick={(event) => {
-                    void onItemClick({
-                      event,
-                      item: { id: documentID, index: adjustedIndex, relationTo },
-                    })
-                  }}
-                  onKeyDown={(event) => {
-                    void onItemKeyPress({
-                      event,
-                      item: { id: documentID, index: adjustedIndex, relationTo },
-                    })
-                  }}
-                  type="file"
-                />
-              )
-            }),
-          ]}
-        />
+              ...documents.map((document, documentIndex) => {
+                const { relationTo, value } = document
+                const documentID = extractID(value)
+                const useAsTitle = collectionUseAsTitles.has(relationTo)
+                  ? collectionUseAsTitles.get(relationTo)
+                  : 'id'
+                const title = (
+                  typeof value === 'object' ? value?.[useAsTitle] || documentID : documentID
+                ) as string
+                const adjustedIndex = documentIndex + subfolders.length
+                const itemKey: ItemKey = `${relationTo}-${documentID}`
+                return (
+                  <FolderFileRow
+                    // @ts-expect-error
+                    columns={[title, value.createdAt, value.updatedAt]}
+                    disabled={isMovingItems || disabledItemKeys?.has(itemKey)}
+                    id={documentID}
+                    isFocused={focusedRowIndex === adjustedIndex}
+                    isSelected={selectedItemKeys.has(itemKey)}
+                    isSelecting={selectedIndexes.size > 0}
+                    itemKey={itemKey}
+                    key={itemKey}
+                    onClick={(event) => {
+                      void onItemClick({
+                        event,
+                        item: { id: documentID, index: adjustedIndex, relationTo },
+                      })
+                    }}
+                    onKeyDown={(event) => {
+                      void onItemKeyPress({
+                        event,
+                        item: { id: documentID, index: adjustedIndex, relationTo },
+                      })
+                    }}
+                    type="file"
+                  />
+                )
+              }),
+            ]}
+          />
+        )
       )}
     </>
   )

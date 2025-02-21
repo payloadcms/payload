@@ -3,7 +3,9 @@
 import { useModal } from '@faceless-ui/modal'
 import React from 'react'
 
+import { useForm, useFormFields } from '../../../forms/Form/context.js'
 import { MoveFolderIcon } from '../../../icons/MoveFolder/index.js'
+import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { Button } from '../../Button/index.js'
 import { MoveToFolderDrawer } from '../Drawers/MoveToFolder/index.js'
 import './index.scss'
@@ -11,13 +13,13 @@ import './index.scss'
 const baseClass = 'move-doc-to-folder'
 const moveDocToFolderDrawerSlug = 'move-doc-to-folder'
 
-type Props = {
-  className?: string
-  onConfirm: (folderID: number | string) => Promise<void> | void
-}
-
-export function MoveDocToFolder({ className = '', onConfirm }: Props) {
+export function MoveDocToFolder({ className = '' }) {
+  const dispatchField = useFormFields(([_, dispatch]) => dispatch)
+  const currentParentFolder = useFormFields(([fields]) => (fields && fields?._parentFolder) || null)
+  const { setModified } = useForm()
   const { closeModal, openModal } = useModal()
+  const { id, collectionSlug, initialData } = useDocumentInfo()
+
   return (
     <>
       <div className={`${baseClass} ${className}`.trim()}>
@@ -27,11 +29,22 @@ export function MoveDocToFolder({ className = '', onConfirm }: Props) {
       </div>
 
       <MoveToFolderDrawer
-        count={1}
         drawerSlug={moveDocToFolderDrawerSlug}
-        hiddenFolderIDs={[]}
-        onMoveConfirm={(folderIDToMove) => {
-          void onConfirm(folderIDToMove)
+        getSelectedItems={() => [
+          {
+            relationTo: collectionSlug,
+            value: { ...initialData, id },
+          },
+        ]}
+        onMoveConfirm={(destinationFolderID) => {
+          if (currentParentFolder !== destinationFolderID) {
+            dispatchField({
+              type: 'UPDATE',
+              path: '_parentFolder',
+              value: destinationFolderID,
+            })
+            setModified(true)
+          }
           closeModal(moveDocToFolderDrawerSlug)
         }}
       />

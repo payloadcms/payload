@@ -121,6 +121,11 @@ export function FolderProvider({ children, initialData }: Props) {
     return folderBreadcrumbs.length === 1
   }, [folderBreadcrumbs])
 
+  const clearSelections = React.useCallback(() => {
+    setSelectedIndexes(new Set())
+    setLastSelectedIndex(undefined)
+  }, [])
+
   const populateFolderData = React.useCallback(
     async ({ folderID: folderToPopulate }) => {
       // when in a drawer, you cannot rely on the server rendered data
@@ -168,6 +173,7 @@ export function FolderProvider({ children, initialData }: Props) {
 
   const setNewActiveFolderID: FolderContextValue['setFolderID'] = React.useCallback(
     async ({ folderID: toFolderID }) => {
+      clearSelections()
       setActiveFolderID(toFolderID)
       if (drawerDepth === 1) {
         router.push(
@@ -177,18 +183,13 @@ export function FolderProvider({ children, initialData }: Props) {
         await populateFolderData({ folderID: toFolderID })
       }
     },
-    [drawerDepth, router, routes.admin, populateFolderData, folderBreadcrumbs],
+    [drawerDepth, router, routes.admin, populateFolderData, folderBreadcrumbs, clearSelections],
   )
 
   const getSelectedItems = React.useCallback(() => {
     const allItems = [...subfolders, ...documents]
     return Array.from(selectedIndexes).map((index) => allItems[index])
   }, [documents, selectedIndexes, subfolders])
-
-  const clearSelections = React.useCallback(() => {
-    setSelectedIndexes(new Set())
-    setLastSelectedIndex(undefined)
-  }, [])
 
   /**
    * Remove multiple documents or folders from a folder

@@ -4,11 +4,14 @@ import { useModal } from '@faceless-ui/modal'
 import { extractID } from 'payload/shared'
 import React from 'react'
 
+import type { FolderContextValue } from '../../../../providers/Folders/index.js'
+
 import { useFolder } from '../../../../providers/Folders/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { ConfirmationModal } from '../../../ConfirmationModal/index.js'
 import { DrawerActionHeader } from '../../../DrawerActionHeader/index.js'
 import { DrawerContentContainer } from '../../../DrawerContentContainer/index.js'
+import { Translation } from '../../../Translation/index.js'
 import { FolderBreadcrumbs } from '../../Breadcrumbs/index.js'
 import { DisplayItems } from '../../DisplayItems/index.js'
 import { DrawerWithFolderContext } from '../DrawerWithFolderContext.js'
@@ -18,16 +21,46 @@ const baseClass = 'move-folder-drawer'
 const confirmModalSlug = 'move-folder-drawer-confirm'
 
 type Props = {
-  readonly count: number
-  readonly disabledFolderIDs: (number | string)[]
   readonly drawerSlug: string
+  readonly getSelectedItems: FolderContextValue['getSelectedItems']
   readonly onMoveConfirm: (folderID: number | string) => Promise<void> | void
 }
 export const MoveToFolderDrawer = DrawerWithFolderContext<Props>((props) => {
-  const { count, disabledFolderIDs, drawerSlug, onMoveConfirm } = props
+  const { drawerSlug, getSelectedItems, onMoveConfirm } = props
+  const [count] = React.useState(() => getSelectedItems().length)
   const folderContext = useFolder()
   const { closeModal, openModal } = useModal()
   const { t } = useTranslation()
+
+  const getSelectedFolder = React.useCallback(
+    ({ key }: { key: 'id' | 'name' }) => {
+      let value =
+        key === 'id'
+          ? folderContext?.folderID || null
+          : folderContext?.breadcrumbs?.[folderContext.breadcrumbs.length - 1]?.name || ''
+      if (folderContext.selectedIndexes.size > 0) {
+        const index = Array.from(folderContext.selectedIndexes).pop()
+        if (typeof index === 'number') {
+          const folderObject = folderContext.subfolders[index].value
+          const folderID = extractID(folderObject)
+          value =
+            key === 'id'
+              ? folderID
+              : typeof folderObject === 'object'
+                ? folderObject.name
+                : folderID
+        }
+      }
+
+      return value
+    },
+    [
+      folderContext?.breadcrumbs,
+      folderContext?.folderID,
+      folderContext.selectedIndexes,
+      folderContext.subfolders,
+    ],
+  )
 
   return (
     <>
@@ -52,9 +85,9 @@ export const MoveToFolderDrawer = DrawerWithFolderContext<Props>((props) => {
           <DisplayItems
             allowMultiSelection={false}
             collectionUseAsTitles={folderContext.collectionUseAsTitles}
-            disabledFolderIDs={disabledFolderIDs}
             folderCollectionSlug={folderContext.folderCollectionSlug}
-            isMovingItems={true}
+            getDisabledItems={getSelectedItems}
+            getSelectedItems={folderContext.getSelectedItems}
             lastSelectedIndex={folderContext.lastSelectedIndex}
             selectedIndexes={folderContext.selectedIndexes}
             setFolderID={folderContext.setFolderID}
@@ -67,23 +100,28 @@ export const MoveToFolderDrawer = DrawerWithFolderContext<Props>((props) => {
       </DrawerContentContainer>
 
       <ConfirmationModal
-        body={t('general:moveCount', {
+        body={
+          <Translation
+            elements={{
+              1: ({ children }) => <strong>{children}</strong>,
+            }}
+            i18nKey="general:moveConfirm"
+            t={t}
+            variables={{
+              count,
+              destination: getSelectedFolder({ key: 'name' }),
+              label: count > 1 ? t('general:items') : t('general:item'),
+            }}
+          />
+        }
+        confirmingLabel={t('general:moving')}
+        heading={t('general:moveCount', {
           count,
           label: count > 1 ? t('general:items') : t('general:item'),
         })}
-        confirmingLabel={t('general:moving')}
-        heading={t('general:confirm')}
         modalSlug={confirmModalSlug}
         onConfirm={async () => {
-          let folderToMoveTo = folderContext?.folderID || null
-          if (folderContext.selectedIndexes.size > 0) {
-            const index = Array.from(folderContext.selectedIndexes).pop()
-            if (typeof index === 'number') {
-              folderToMoveTo = extractID(folderContext.subfolders[index].value)
-            }
-          }
-
-          await onMoveConfirm(folderToMoveTo)
+          await onMoveConfirm(getSelectedFolder({ key: 'id' }))
         }}
       />
     </>
