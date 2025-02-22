@@ -109,6 +109,9 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     if (isProcessingRef.current || queueRef.current.length === 0) {
       return
     }
+
+    // Do not autosave if the form is already processing (e.g. if the user clicked the publish button
+    // right before this autosave runs), as parallel updates could ause conflicts
     if (isFormProcessing) {
       queueRef.current = []
       return
