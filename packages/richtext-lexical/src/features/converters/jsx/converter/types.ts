@@ -6,19 +6,20 @@ import type {
   SerializedInlineBlockNode,
 } from '../../../../nodeTypes.js'
 export type JSXConverter<T extends { [key: string]: any; type?: string } = SerializedLexicalNode> =
-  (args: {
-    childIndex: number
-    converters: JSXConverters
-    node: T
-    nodesToJSX: (args: {
-      converters?: JSXConverters
-      disableIndent?: boolean | string[]
-      disableTextAlign?: boolean | string[]
-      nodes: SerializedLexicalNode[]
-      parent?: SerializedLexicalNodeWithParent
-    }) => React.ReactNode[]
-    parent: SerializedLexicalNodeWithParent
-  }) => React.ReactNode
+  | ((args: {
+      childIndex: number
+      converters: JSXConverters
+      node: T
+      nodesToJSX: (args: {
+        converters?: JSXConverters
+        disableIndent?: boolean | string[]
+        disableTextAlign?: boolean | string[]
+        nodes: SerializedLexicalNode[]
+        parent?: SerializedLexicalNodeWithParent
+      }) => React.ReactNode[]
+      parent: SerializedLexicalNodeWithParent
+    }) => React.ReactNode)
+  | React.ReactNode
 
 export type JSXConverters<
   T extends { [key: string]: any; type?: string } =

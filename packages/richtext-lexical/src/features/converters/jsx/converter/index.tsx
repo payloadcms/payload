@@ -73,28 +73,33 @@ export function convertLexicalNodesToJSX({
         converterForNode = unknownConverter
       }
 
-      const reactNode = converterForNode ? (
-        converterForNode({
-          childIndex: i,
-          converters,
-          node,
-          nodesToJSX: (args) => {
-            return convertLexicalNodesToJSX({
-              converters: args.converters ?? converters,
-              disableIndent: args.disableIndent ?? disableIndent,
-              disableTextAlign: args.disableTextAlign ?? disableTextAlign,
-              nodes: args.nodes,
-              parent: args.parent ?? {
-                ...node,
+      let reactNode: React.ReactNode
+      if (converterForNode) {
+        const converted =
+          typeof converterForNode === 'function'
+            ? converterForNode({
+                childIndex: i,
+                converters,
+                node,
+                nodesToJSX: (args) => {
+                  return convertLexicalNodesToJSX({
+                    converters: args.converters ?? converters,
+                    disableIndent: args.disableIndent ?? disableIndent,
+                    disableTextAlign: args.disableTextAlign ?? disableTextAlign,
+                    nodes: args.nodes,
+                    parent: args.parent ?? {
+                      ...node,
+                      parent,
+                    },
+                  })
+                },
                 parent,
-              },
-            })
-          },
-          parent,
-        })
-      ) : (
-        <span key={i}>unknown node</span>
-      )
+              })
+            : converterForNode
+        reactNode = converted
+      } else {
+        reactNode = <span key={i}>unknown node</span>
+      }
 
       const style: React.CSSProperties = {}
 
