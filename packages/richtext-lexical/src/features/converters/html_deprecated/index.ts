@@ -9,6 +9,9 @@ export type HTMLConverterFeatureProps = {
 }
 
 // This is just used to save the props on the richText field
+/**
+ * @deprecated - will be removed in 4.0
+ */
 export const HTMLConverterFeature = createServerFeature<HTMLConverterFeatureProps>({
   feature: {},
   key: 'htmlConverter',

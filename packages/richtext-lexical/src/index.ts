@@ -899,24 +899,27 @@ export {
   ServerBlockNode,
 } from './features/blocks/server/nodes/BlocksNode.js'
 
-export { LinebreakHTMLConverter } from './features/converters/html/converter/converters/linebreak.js'
-export { ParagraphHTMLConverter } from './features/converters/html/converter/converters/paragraph.js'
+export { LinebreakHTMLConverter } from './features/converters/html_deprecated/converter/converters/linebreak.js'
+export { ParagraphHTMLConverter } from './features/converters/html_deprecated/converter/converters/paragraph.js'
 
-export { TabHTMLConverter } from './features/converters/html/converter/converters/tab.js'
+export { TabHTMLConverter } from './features/converters/html_deprecated/converter/converters/tab.js'
 
-export { TextHTMLConverter } from './features/converters/html/converter/converters/text.js'
-export { defaultHTMLConverters } from './features/converters/html/converter/defaultConverters.js'
+export { TextHTMLConverter } from './features/converters/html_deprecated/converter/converters/text.js'
+export { defaultHTMLConverters } from './features/converters/html_deprecated/converter/defaultConverters.js'
 export {
   convertLexicalNodesToHTML,
   convertLexicalToHTML,
-} from './features/converters/html/converter/index.js'
+} from './features/converters/html_deprecated/converter/index.js'
 
-export type { HTMLConverter } from './features/converters/html/converter/types.js'
-export { consolidateHTMLConverters, lexicalHTML } from './features/converters/html/field/index.js'
+export type { HTMLConverter } from './features/converters/html_deprecated/converter/types.js'
+export {
+  consolidateHTMLConverters,
+  lexicalHTML,
+} from './features/converters/html_deprecated/field/index.js'
 export {
   HTMLConverterFeature,
   type HTMLConverterFeatureProps,
-} from './features/converters/html/index.js'
+} from './features/converters/html_deprecated/index.js'
 export { TestRecorderFeature } from './features/debug/testRecorder/server/index.js'
 export { TreeViewFeature } from './features/debug/treeView/server/index.js'
 export { EXPERIMENTAL_TableFeature } from './features/experimental_table/server/index.js'

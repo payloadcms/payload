@@ -28,6 +28,7 @@ type Props = {
 /**
  * Combines the default HTML converters with HTML converters found in the features, and with HTML converters configured in the htmlConverter feature.
  *
+ * @deprecated - will be removed in 4.0
  * @param editorConfig
  */
 export const consolidateHTMLConverters = ({

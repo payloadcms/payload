@@ -44,6 +44,9 @@ export type ConvertLexicalToHTMLArgs = {
     }
 )
 
+/**
+ * @deprecated - will be removed in 4.0
+ */
 export async function convertLexicalToHTML({
   converters,
   currentDepth,
