@@ -165,5 +165,5 @@ export function convertLexicalNodesToJSX({
     }
   })
 
-  return jsxArray.filter(Boolean).map((jsx) => jsx)
+  return jsxArray.filter(Boolean)
 }
