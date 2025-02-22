@@ -6,11 +6,11 @@ import type {
   DefaultNodeTypes,
   SerializedBlockNode,
   SerializedInlineBlockNode,
-} from '../../../../../nodeTypes.js'
-import type { JSXConverters } from './converter/types.js'
+} from '../../../../nodeTypes.js'
+import type { JSXConverters } from '../converter/types.js'
 
-import { defaultJSXConverters } from './converter/defaultConverters.js'
-import { convertLexicalToJSX } from './converter/index.js'
+import { defaultJSXConverters } from '../converter/defaultConverters.js'
+import { convertLexicalToJSX } from '../converter/index.js'
 
 export type JSXConvertersFunction<
   T extends { [key: string]: any; type?: string } =
