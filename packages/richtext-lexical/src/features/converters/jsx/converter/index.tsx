@@ -7,7 +7,7 @@ import type { JSXConverter, JSXConverters, SerializedLexicalNodeWithParent } fro
 
 import { hasText } from '../../../../validate/hasText.js'
 
-export type ConvertLexicalToHTMLArgs = {
+export type ConvertLexicalToJSXArgs = {
   converters: JSXConverters
   data: SerializedEditorState
   disableIndent?: boolean | string[]
@@ -19,7 +19,7 @@ export function convertLexicalToJSX({
   data,
   disableIndent,
   disableTextAlign,
-}: ConvertLexicalToHTMLArgs): React.ReactNode {
+}: ConvertLexicalToJSXArgs): React.ReactNode {
   if (hasText(data)) {
     return convertLexicalNodesToJSX({
       converters,
@@ -176,7 +176,7 @@ export function convertLexicalNodesToJSX({
 
       return reactNode
     } catch (error) {
-      console.error('Error converting lexical node to HTML:', error, 'node:', node)
+      console.error('Error converting lexical node to JSX:', error, 'node:', node)
       return null
     }
   })
