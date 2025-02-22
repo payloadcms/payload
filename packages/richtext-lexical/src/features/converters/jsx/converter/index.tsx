@@ -69,48 +69,32 @@ export function convertLexicalNodesToJSX({
     }
 
     try {
-      if (!converterForNode) {
-        if (unknownConverter) {
-          return unknownConverter({
-            childIndex: i,
-            converters,
-            node,
-            nodesToJSX: (args) => {
-              return convertLexicalNodesToJSX({
-                converters: args.converters ?? converters,
-                disableIndent: args.disableIndent ?? disableIndent,
-                disableTextAlign: args.disableTextAlign ?? disableTextAlign,
-                nodes: args.nodes,
-                parent: args.parent ?? {
-                  ...node,
-                  parent,
-                },
-              })
-            },
-            parent,
-          })
-        }
-        return <span key={i}>unknown node</span>
+      if (!converterForNode && unknownConverter) {
+        converterForNode = unknownConverter
       }
 
-      const reactNode = converterForNode({
-        childIndex: i,
-        converters,
-        node,
-        nodesToJSX: (args) => {
-          return convertLexicalNodesToJSX({
-            converters: args.converters ?? converters,
-            disableIndent: args.disableIndent ?? disableIndent,
-            disableTextAlign: args.disableTextAlign ?? disableTextAlign,
-            nodes: args.nodes,
-            parent: args.parent ?? {
-              ...node,
-              parent,
-            },
-          })
-        },
-        parent,
-      })
+      const reactNode = converterForNode ? (
+        converterForNode({
+          childIndex: i,
+          converters,
+          node,
+          nodesToJSX: (args) => {
+            return convertLexicalNodesToJSX({
+              converters: args.converters ?? converters,
+              disableIndent: args.disableIndent ?? disableIndent,
+              disableTextAlign: args.disableTextAlign ?? disableTextAlign,
+              nodes: args.nodes,
+              parent: args.parent ?? {
+                ...node,
+                parent,
+              },
+            })
+          },
+          parent,
+        })
+      ) : (
+        <span key={i}>unknown node</span>
+      )
 
       const style: React.CSSProperties = {}
 
