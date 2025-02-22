@@ -301,6 +301,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'operators:isIn',
   'operators:contains',
   'operators:isLike',
+  'operators:isNotLike',
   'operators:isNotEqualTo',
   'operators:near',
   'operators:isGreaterThan',

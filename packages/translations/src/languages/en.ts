@@ -374,6 +374,7 @@ export const enTranslations = {
     isLike: 'is like',
     isNotEqualTo: 'is not equal to',
     isNotIn: 'is not in',
+    isNotLike: 'is not like',
     near: 'near',
     within: 'within',
   },

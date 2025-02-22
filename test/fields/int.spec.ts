@@ -165,6 +165,68 @@ describe('Fields', () => {
       expect(missResult).toBeFalsy()
     })
 
+    it('should query like on value', async () => {
+      const miss = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'dog',
+        },
+      })
+
+      const hit = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'cat',
+        },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'text-fields',
+        where: {
+          text: {
+            like: 'cat',
+          },
+        },
+      })
+
+      const hitResult = docs.find(({ id: findID }) => hit.id === findID)
+      const missResult = docs.find(({ id: findID }) => miss.id === findID)
+
+      expect(hitResult).toBeDefined()
+      expect(missResult).toBeFalsy()
+    })
+
+    it('should query not_like on value', async () => {
+      const hit = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'dog',
+        },
+      })
+
+      const miss = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'cat',
+        },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'text-fields',
+        where: {
+          text: {
+            not_like: 'cat',
+          },
+        },
+      })
+
+      const hitResult = docs.find(({ id: findID }) => hit.id === findID)
+      const missResult = docs.find(({ id: findID }) => miss.id === findID)
+
+      expect(hitResult).toBeDefined()
+      expect(missResult).toBeFalsy()
+    })
+
     it('should query hasMany within an array', async () => {
       const docFirst = await payload.create({
         collection: 'text-fields',
@@ -2704,6 +2766,20 @@ describe('Fields', () => {
           collection: 'json-fields',
           where: {
             'json.foo': { like: 'bar' },
+          },
+        })
+
+        const docIDs = docs.map(({ id }) => id)
+
+        expect(docIDs).toContain(fooBar.id)
+        expect(docIDs).not.toContain(bazBar.id)
+      })
+
+      it('should query nested properties - not_like', async () => {
+        const { docs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.baz': { not_like: 'bar' },
           },
         })
 
