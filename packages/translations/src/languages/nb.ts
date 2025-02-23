@@ -374,6 +374,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     isLike: 'er som',
     isNotEqualTo: 'er ikke lik',
     isNotIn: 'er ikke med',
+    isNotLike: 'er ikke lik',
     near: 'nær',
     within: 'innen',
   },

@@ -371,6 +371,7 @@ export const csTranslations: DefaultTranslationsObject = {
     isLike: 'je jako',
     isNotEqualTo: 'není rovno',
     isNotIn: 'není v',
+    isNotLike: 'není jako',
     near: 'blízko',
     within: 'uvnitř',
   },

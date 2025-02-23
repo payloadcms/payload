@@ -377,6 +377,7 @@ export const itTranslations: DefaultTranslationsObject = {
     isLike: 'è come',
     isNotEqualTo: 'non è uguale a',
     isNotIn: 'non è in',
+    isNotLike: 'non è come',
     near: 'vicino',
     within: "all'interno",
   },

@@ -377,6 +377,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     isLike: 'похоже',
     isNotEqualTo: 'не равно',
     isNotIn: 'нет в',
+    isNotLike: 'не похож',
     near: 'рядом',
     within: 'в пределах',
   },
