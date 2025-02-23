@@ -10,7 +10,7 @@ export const svTranslations: DefaultTranslationsObject = {
     apiKey: 'API-Nyckel',
     authenticated: 'Autentiserad',
     backToLogin: 'Tillbaka till inloggningen',
-    beginCreateFirstUser: 'För att Komma igång, skapa din första användare.',
+    beginCreateFirstUser: 'För att komma igång, skapa din första användare.',
     changePassword: 'Byt lösenord',
     checkYourEmailForPasswordReset:
       'Om e-postadressen är kopplad till ett konto kommer du inom kort att få instruktioner för att återställa ditt lösenord. Vänligen kontrollera din skräppost-mapp om du inte ser e-postmeddelandet i din inkorg.',
