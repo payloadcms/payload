@@ -19,7 +19,7 @@ export const formatBreadcrumb = (
   if (typeof pluginConfig?.generateLabel === 'function') {
     label = pluginConfig.generateLabel(docs, lastDoc)
   } else {
-    const title = lastDoc[collection?.admin?.useAsTitle || 'id']
+    const title = lastDoc[collection.admin.useAsTitle]
 
     label = typeof title === 'string' || typeof title === 'number' ? String(title) : ''
   }
