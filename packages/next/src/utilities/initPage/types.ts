@@ -24,7 +24,7 @@ export type Args = {
    * If `useLayoutReq` is `true`, this page will use the cached `req` created by the root layout
    * instead of creating a new one.
    *
-   * This is improves performance for pages that are able to share the same `req` as the root layout,
+   * This improves performance for pages that are able to share the same `req` as the root layout,
    * as permissions do not need to be re-calculated.
    *
    * If the page has unique query and url params that need to be part of the `req` object, or if you
