@@ -216,12 +216,12 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
           customComponents.RowLabels.length = moveToIndex + 1
         }
 
-        const copyOfMOvingRow = customComponents.RowLabels[moveFromIndex]
+        const copyOfMovingLabel = customComponents.RowLabels[moveFromIndex]
 
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         customComponents.RowLabels.splice(moveFromIndex, 1)
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        customComponents.RowLabels.splice(moveToIndex, 0, copyOfMOvingRow)
+        customComponents.RowLabels.splice(moveToIndex, 0, copyOfMovingLabel)
 
         newState[path].customComponents = customComponents
       }
