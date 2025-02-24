@@ -67,6 +67,15 @@ const JSON: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'customJSON',
+      type: 'json',
+      admin: {
+        components: {
+          afterInput: ['./collections/JSON/AfterField#AfterField'],
+        },
+      },
+    },
   ],
   versions: {
     maxPerDoc: 1,

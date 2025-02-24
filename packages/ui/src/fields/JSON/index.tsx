@@ -10,10 +10,10 @@ import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
-import './index.scss'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
+import './index.scss'
 
 const baseClass = 'json-field'
 
@@ -34,7 +34,8 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
 
   const [stringValue, setStringValue] = useState<string>()
   const [jsonError, setJsonError] = useState<string>()
-  const [hasLoadedValue, setHasLoadedValue] = useState(false)
+  const inputChangeFromRef = React.useRef<'system' | 'user'>('system')
+  const [editorKey, setEditorKey] = useState<string>('')
 
   const memoizedValidate = useCallback(
     (value, options) => {
@@ -88,6 +89,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
       if (readOnly) {
         return
       }
+      inputChangeFromRef.current = 'user'
       setStringValue(val)
 
       try {
@@ -102,16 +104,16 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
   )
 
   useEffect(() => {
-    if (hasLoadedValue || value === undefined) {
-      return
+    if (inputChangeFromRef.current === 'system') {
+      setStringValue(
+        value || initialValue ? JSON.stringify(value ? value : initialValue, null, 2) : '',
+      )
+
+      setEditorKey(new Date().toString())
     }
 
-    setStringValue(
-      value || initialValue ? JSON.stringify(value ? value : initialValue, null, 2) : '',
-    )
-
-    setHasLoadedValue(true)
-  }, [initialValue, value, hasLoadedValue])
+    inputChangeFromRef.current = 'system'
+  }, [initialValue, value])
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
 
@@ -142,6 +144,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
         {BeforeInput}
         <CodeEditor
           defaultLanguage="json"
+          key={editorKey}
           maxHeight={maxHeight}
           onChange={handleChange}
           onMount={handleMount}
