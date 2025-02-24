@@ -72,7 +72,7 @@ export const getFields = (config: Config): Field[] => {
               type: 'text',
               admin: {
                 components: {
-                  Field: '@payloadcms/plugin-import-export/rsc#SortByFields',
+                  Field: '@payloadcms/plugin-import-export/rsc#SortBy',
                 },
               },
             },

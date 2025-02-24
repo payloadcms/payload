@@ -1,55 +1,89 @@
 'use client'
-import type { OptionObject, SelectFieldClientComponent } from 'payload'
 
-import { FieldLabel, ReactSelect, useConfig, useDocumentInfo, useField } from '@payloadcms/ui'
-import React, { useEffect } from 'react'
+import type { SelectFieldClientComponent } from 'payload'
+import type { ReactNode } from 'react'
+
+import {
+  FieldLabel,
+  ReactSelect,
+  useConfig,
+  useDocumentInfo,
+  useField,
+  useListQuery,
+} from '@payloadcms/ui'
+import React, { useEffect, useState } from 'react'
 
 import { reduceFields } from '../FieldsToExport/reduceFields.js'
 import { useImportExport } from '../ImportExportProvider/index.js'
-import './index.scss'
 
 const baseClass = 'sort-by-fields'
 
-export const SortByFields: SelectFieldClientComponent = (props) => {
+export const SortBy: SelectFieldClientComponent = (props) => {
   const { id } = useDocumentInfo()
-  const { setValue, value } = useField({ path: 'sort' })
-  const { value: collectionValue } = useField({ path: 'collectionSlug' })
+  const { path } = props
+  const { setValue, value } = useField<string>({ path })
+  const { value: collectionSlug } = useField<string>({ path: 'collectionSlug' })
+  const { query } = useListQuery()
   const { getEntityConfig } = useConfig()
   const { collection } = useImportExport()
-  const collectionConfig = getEntityConfig({ collectionSlug: collectionValue ?? collection })
+  const [displayedValue, setDisplayedValue] = useState<{
+    id: string
+    label: ReactNode
+    value: string
+  } | null>(null)
 
-  const fieldOptions = reduceFields({ fields: collectionConfig?.fields }) as any[]
+  const collectionConfig = getEntityConfig({ collectionSlug: collectionSlug ?? collection })
+  const fieldOptions = reduceFields({ fields: collectionConfig?.fields })
 
-  const options = fieldOptions.map((field) => {
-    return {
-      // TODO: the label should be used, for some reason on save there was a circular JSON error
-      label: field.value.path,
-      value: field.value.path,
+  // Sync displayedValue with value from useField
+  useEffect(() => {
+    if (!value) {
+      setDisplayedValue(null)
+      return
     }
-  })
 
-  // TODO: this is causing the form to crash
-  // useEffect(() => {
-  //   if (options && options[0] && options[0].value !== value) {
-  //     setValue(options[0])
-  //   }
-  // }, [options, setValue, value])
+    const option = fieldOptions.find((field) => field.value === value)
+    if (option && (!displayedValue || displayedValue.value !== value)) {
+      setDisplayedValue(option)
+    }
+  }, [value, fieldOptions])
 
-  // TODO: after save the form crashes, returning null to avoid errors when the id is present
-  if (id) {
-    return null
+  useEffect(() => {
+    if (id || !query.sort || value) {
+      return
+    }
+
+    const option = fieldOptions.find((field) => field.value === query.sort)
+    if (option) {
+      setValue(option.value)
+      setDisplayedValue(option)
+    }
+  }, [fieldOptions, id, query?.sort, value, setValue])
+
+  const onChange = (option: { id: string; label: ReactNode; value: string } | null) => {
+    if (!option) {
+      setValue('')
+      setDisplayedValue(null)
+    } else {
+      setValue(option.value)
+      setDisplayedValue(option)
+    }
   }
 
   return (
     <div className={baseClass} style={{ '--field-width': '33%' } as React.CSSProperties}>
       <FieldLabel label="Sort By" />
       <ReactSelect
+        className={baseClass}
         disabled={props.readOnly}
+        getOptionValue={(option) => String(option.value)}
         isClearable={true}
-        isMulti={false}
-        onChange={(value) => setValue(value ?? null)}
-        options={options}
-        value={value as OptionObject}
+        isSortable={true}
+        // @ts-expect-error react select option
+        onChange={onChange}
+        options={fieldOptions}
+        // @ts-expect-error react select
+        value={displayedValue}
       />
     </div>
   )

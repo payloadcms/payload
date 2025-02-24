@@ -18,6 +18,10 @@ export const WhereField: React.FC = () => {
 
   // setValue based on selectionToUseValue
   useEffect(() => {
+    if (id) {
+      return
+    }
+
     if (selectionToUseValue === 'currentFilters' && query && query?.where) {
       setValue(query.where)
     }
@@ -43,7 +47,7 @@ export const WhereField: React.FC = () => {
     }
 
     // Selected set a where query with IDs
-  }, [selectionToUseValue, query, selected, setValue])
+  }, [id, selectionToUseValue, query, selected, setValue])
 
   // handles default value of selectionToUse
   useEffect(() => {
@@ -56,12 +60,12 @@ export const WhereField: React.FC = () => {
       defaultSelection = 'currentSelection'
     }
 
-    if (defaultSelection === 'all' && query.where) {
+    if (defaultSelection === 'all' && query?.where) {
       defaultSelection = 'currentFilters'
     }
 
     setSelectionToUseValue(defaultSelection)
-  }, [])
+  }, [id, query, selectAll, setSelectionToUseValue])
 
   return null
 }
