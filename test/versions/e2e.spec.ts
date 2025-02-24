@@ -438,6 +438,47 @@ describe('Versions', () => {
       await expect(drawer.locator('.id-label')).toBeVisible()
     })
 
+    test('collection - autosave - should not create duplicates when clicking Create new', async () => {
+      // This test checks that when we click "Create new" in the list view, it only creates 1 extra document and not more
+      const { totalDocs: initialDocsCount } = await payload.find({
+        collection: autosaveCollectionSlug,
+        draft: true,
+      })
+
+      await page.goto(autosaveURL.create)
+      await page.locator('#field-title').fill('autosave title')
+      await waitForAutoSaveToRunAndComplete(page)
+      await expect(page.locator('#field-title')).toHaveValue('autosave title')
+
+      const { totalDocs: updatedDocsCount } = await payload.find({
+        collection: autosaveCollectionSlug,
+        draft: true,
+      })
+
+      await expect(() => {
+        expect(updatedDocsCount).toBe(initialDocsCount + 1)
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT, intervals: [100] })
+
+      await page.goto(autosaveURL.list)
+      const createNewButton = page.locator('.list-header .btn:has-text("Create New")')
+      await createNewButton.click()
+
+      await page.waitForURL(`**/${autosaveCollectionSlug}/**`)
+
+      await page.locator('#field-title').fill('autosave title')
+      await waitForAutoSaveToRunAndComplete(page)
+      await expect(page.locator('#field-title')).toHaveValue('autosave title')
+
+      const { totalDocs: latestDocsCount } = await payload.find({
+        collection: autosaveCollectionSlug,
+        draft: true,
+      })
+
+      await expect(() => {
+        expect(latestDocsCount).toBe(updatedDocsCount + 1)
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT, intervals: [100] })
+    })
+
     test('collection - should update updatedAt', async () => {
       await page.goto(url.create)
       await page.waitForURL(`**/${url.create}`)
@@ -757,7 +798,7 @@ describe('Versions', () => {
 
       // schedule publish should not be available before document has been saved
       await page.locator('#action-save-popup').click()
-      await expect(page.locator('#schedule-publish')).not.toBeVisible()
+      await expect(page.locator('#schedule-publish')).toBeHidden()
 
       // save draft then try to schedule publish
       await saveDocAndAssert(page)
