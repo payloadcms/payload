@@ -15,14 +15,14 @@ process.env.PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY = 'true'
 shelljs.env.DISABLE_LOGGING = 'true'
 
 const prod = process.argv.includes('--prod')
-process.argv = process.argv.filter((arg) => arg !== '--prod')
 if (prod) {
   process.env.PAYLOAD_TEST_PROD = 'true'
   shelljs.env.PAYLOAD_TEST_PROD = 'true'
 }
 
 const turbo = process.argv.includes('--turbo')
-process.argv = process.argv.filter((arg) => arg !== '--turbo')
+
+process.argv = process.argv.filter((arg) => arg !== '--prod' && arg !== '--turbo')
 
 const playwrightBin = path.resolve(dirname, '../node_modules/.bin/playwright')
 
