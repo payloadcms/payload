@@ -7,6 +7,7 @@ export function AfterField() {
 
   return (
     <button
+      id="set-custom-json"
       onClick={(e) => {
         e.preventDefault()
         setValue({
@@ -31,7 +32,7 @@ export function AfterField() {
       style={{ marginTop: '5px', padding: '5px 10px' }}
       type="button"
     >
-      Set Users Data
+      Set Custom JSON
     </button>
   )
 }

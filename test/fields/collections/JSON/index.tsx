@@ -75,6 +75,7 @@ const JSON: CollectionConfig = {
           afterInput: ['./collections/JSON/AfterField#AfterField'],
         },
       },
+      label: 'Custom Json',
     },
   ],
   versions: {

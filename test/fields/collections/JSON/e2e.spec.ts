@@ -103,4 +103,24 @@ describe('JSON', () => {
       '"foo.with.periods": "bar"',
     )
   })
+
+  test('should update', async () => {
+    const createdDoc = await payload.create({
+      collection: 'json-fields',
+      data: {
+        customJSON: {
+          default: 'value',
+        },
+      },
+    })
+
+    await page.goto(url.edit(createdDoc.id))
+    const jsonField = page.locator('.json-field #field-customJSON')
+    await expect(jsonField).toContainText('"default": "value"')
+
+    const originalHeight = (await page.locator('#field-customJSON').boundingBox())?.height || 0
+    await page.locator('#set-custom-json').click()
+    const newHeight = (await page.locator('#field-customJSON').boundingBox())?.height || 0
+    expect(newHeight).toBeGreaterThan(originalHeight)
+  })
 })

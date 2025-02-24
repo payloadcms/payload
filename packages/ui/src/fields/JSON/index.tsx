@@ -55,7 +55,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
     validate: memoizedValidate,
   })
 
-  const [initialStringValue] = useState<string | undefined>(() =>
+  const [initialStringValue, setInitialStringValue] = useState<string | undefined>(() =>
     (value || initialValue) !== undefined
       ? JSON.stringify(value || initialValue, null, 2)
       : undefined,
@@ -108,6 +108,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
 
   useEffect(() => {
     if (inputChangeFromRef.current === 'system') {
+      setInitialStringValue(JSON.stringify(value || initialValue, null, 2))
       setEditorKey(new Date().toString())
     }
 
@@ -150,6 +151,9 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
           options={editorOptions}
           readOnly={readOnly}
           value={initialStringValue}
+          wrapperProps={{
+            id: `field-${path?.replace(/\./g, '__')}`,
+          }}
         />
         {AfterInput}
       </div>
