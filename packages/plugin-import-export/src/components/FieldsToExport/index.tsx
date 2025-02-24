@@ -46,24 +46,30 @@ export const FieldsToExport: SelectFieldClientComponent = (props) => {
         })
       })
     }
-  }, [value, fieldOptions, id])
+  }, [value, fieldOptions])
 
   useEffect(() => {
+    if (id || !collectionSlug) {
+      return
+    }
     const doAsync = async () => {
       const currentPreferences = await getPreference<{
         columns: ListPreferences['columns']
       }>(`${collectionSlug}-list`)
 
-      if (!currentPreferences) {
-        return
-      }
-
       const columns = currentPreferences?.columns?.filter((a) => a.active).map((b) => b.accessor)
-      setValue(columns)
+      setValue(columns ?? collectionConfig?.admin?.defaultColumns ?? [])
     }
 
     void doAsync()
-  }, [getPreference, collection, setValue, collectionSlug])
+  }, [
+    getPreference,
+    collection,
+    setValue,
+    collectionSlug,
+    id,
+    collectionConfig.admin.defaultColumns,
+  ])
   const onChange = (options: { id: string; label: ReactNode; value: string }[]) => {
     if (!options) {
       setValue([])
