@@ -26,15 +26,17 @@ function isModifiedEvent(event: React.MouseEvent): boolean {
 type Props = {
   /**
    * Disable the e.preventDefault() call on click if you want to handle it yourself via onClick
+   *
+   * @default true
    */
-  disablePreventDefault?: boolean
+  preventDefault?: boolean
 } & Parameters<typeof NextLink>[0]
 
 export const Link: React.FC<Props> = ({
   children,
-  disablePreventDefault,
   href,
   onClick,
+  preventDefault = true,
   ref,
   replace,
   scroll,
@@ -57,7 +59,7 @@ export const Link: React.FC<Props> = ({
 
         // We need a preventDefault here so that a clicked link doesn't trigger twice,
         // once for default browser navigation and once for startRouteTransition
-        if (!disablePreventDefault) {
+        if (preventDefault) {
           e.preventDefault()
         }
 
