@@ -6,7 +6,6 @@ import type { Block, Field, FieldHookArgs, TabAsField } from '../../config/types
 
 import { fieldAffectsData, fieldShouldBeLocalized } from '../../config/types.js'
 import { getFieldPathsModified as getFieldPaths } from '../../getFieldPaths.js'
-import { runBeforeDuplicateHooks } from './runHook.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args<T> = {
@@ -68,42 +67,37 @@ export const promise = async <T>({
     // Run field beforeDuplicate hooks
     if (Array.isArray(field.hooks?.beforeDuplicate)) {
       if (fieldIsLocalized) {
-        const localeData = await localization.localeCodes.reduce(
-          async (localizedValuesPromise: Promise<JsonObject>, locale) => {
-            const localizedValues = await localizedValuesPromise
+        const localeData: JsonObject = {}
 
-            const beforeDuplicateArgs: FieldHookArgs = {
-              blockData,
-              collection,
-              context,
-              data: doc,
-              field,
-              global: undefined,
-              indexPath: indexPathSegments,
-              path: pathSegments,
-              previousSiblingDoc: siblingDoc,
-              previousValue: siblingDoc[field.name]?.[locale],
-              req,
-              schemaPath: schemaPathSegments,
-              siblingData: siblingDoc,
-              siblingDocWithLocales: siblingDoc,
-              siblingFields,
-              value: siblingDoc[field.name]?.[locale],
-            }
+        for (const locale of localization.localeCodes) {
+          const beforeDuplicateArgs: FieldHookArgs = {
+            blockData,
+            collection,
+            context,
+            data: doc,
+            field,
+            global: undefined,
+            indexPath: indexPathSegments,
+            path: pathSegments,
+            previousSiblingDoc: siblingDoc,
+            previousValue: siblingDoc[field.name]?.[locale],
+            req,
+            schemaPath: schemaPathSegments,
+            siblingData: siblingDoc,
+            siblingDocWithLocales: siblingDoc,
+            siblingFields,
+            value: siblingDoc[field.name]?.[locale],
+          }
 
-            const hookResult = await runBeforeDuplicateHooks(beforeDuplicateArgs)
+          let hookResult
+          for (const hook of field.hooks.beforeDuplicate) {
+            hookResult = await hook(beforeDuplicateArgs)
+          }
 
-            if (typeof hookResult !== 'undefined') {
-              return {
-                ...localizedValues,
-                [locale]: hookResult,
-              }
-            }
-
-            return localizedValuesPromise
-          },
-          Promise.resolve({}),
-        )
+          if (typeof hookResult !== 'undefined') {
+            localeData[locale] = hookResult
+          }
+        }
 
         siblingDoc[field.name] = localeData
       } else {
@@ -126,7 +120,11 @@ export const promise = async <T>({
           value: siblingDoc[field.name],
         }
 
-        const hookResult = await runBeforeDuplicateHooks(beforeDuplicateArgs)
+        let hookResult
+        for (const hook of field.hooks.beforeDuplicate) {
+          hookResult = await hook(beforeDuplicateArgs)
+        }
+
         if (typeof hookResult !== 'undefined') {
           siblingDoc[field.name] = hookResult
         }
