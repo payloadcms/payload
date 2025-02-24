@@ -31,8 +31,6 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
     readOnly,
     validate,
   } = props
-
-  const [stringValue, setStringValue] = useState<string>()
   const [jsonError, setJsonError] = useState<string>()
   const inputChangeFromRef = React.useRef<'system' | 'user'>('system')
   const [editorKey, setEditorKey] = useState<string>('')
@@ -56,6 +54,12 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
     path,
     validate: memoizedValidate,
   })
+
+  const [initialStringValue] = useState<string | undefined>(() =>
+    (value || initialValue) !== undefined
+      ? JSON.stringify(value || initialValue, null, 2)
+      : undefined,
+  )
 
   const handleMount = useCallback<OnMount>(
     (editor, monaco) => {
@@ -90,7 +94,6 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
         return
       }
       inputChangeFromRef.current = 'user'
-      setStringValue(val)
 
       try {
         setValue(val ? JSON.parse(val) : null)
@@ -100,15 +103,11 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
         setJsonError(e)
       }
     },
-    [readOnly, setValue, setStringValue],
+    [readOnly, setValue],
   )
 
   useEffect(() => {
     if (inputChangeFromRef.current === 'system') {
-      setStringValue(
-        value || initialValue ? JSON.stringify(value ? value : initialValue, null, 2) : '',
-      )
-
       setEditorKey(new Date().toString())
     }
 
@@ -150,7 +149,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
           onMount={handleMount}
           options={editorOptions}
           readOnly={readOnly}
-          value={stringValue}
+          value={initialStringValue}
         />
         {AfterInput}
       </div>
