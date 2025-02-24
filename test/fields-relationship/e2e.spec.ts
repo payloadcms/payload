@@ -351,6 +351,41 @@ describe('Relationship Field', () => {
       await expect(valueOptions.locator(`text=${idToInclude}`)).toBeVisible()
     })
 
+    test('should apply filter options of nested fields to list view filter controls', async () => {
+      const { id: idToInclude } = await payload.create({
+        collection: slug,
+        data: {
+          filter: 'Include me',
+        },
+      })
+
+      // first ensure that filter options are applied in the edit view
+      await page.goto(url.edit(idToInclude))
+      const field = page.locator('#field-nestedRelationshipFilteredByField')
+      await field.click({ delay: 100 })
+      const options = field.locator('.rs__option')
+      await expect(options).toHaveCount(1)
+      await expect(options).toContainText(idToInclude)
+
+      // now ensure that the same filter options are applied in the list view
+      await page.goto(url.list)
+
+      const whereBuilder = await addListFilter({
+        page,
+        fieldLabel: 'Collapsible > Nested Relationship Filtered By Field',
+        operatorLabel: 'equals',
+        skipValueInput: true,
+      })
+
+      const valueInput = page.locator('.condition__value input')
+      await valueInput.click()
+      const valueOptions = whereBuilder.locator('.condition__value .rs__option')
+
+      await expect(valueOptions).toHaveCount(2)
+      await expect(valueOptions.locator(`text=None`)).toBeVisible()
+      await expect(valueOptions.locator(`text=${idToInclude}`)).toBeVisible()
+    })
+
     test('should allow usage of relationTo in filterOptions', async () => {
       const { id: include } = (await payload.create({
         collection: relationOneSlug,
