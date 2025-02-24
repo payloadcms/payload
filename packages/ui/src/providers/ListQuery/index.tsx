@@ -102,11 +102,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       setCurrentQuery(newQuery)
     },
     [
-      currentQuery?.page,
-      currentQuery?.limit,
-      currentQuery?.search,
-      currentQuery?.sort,
-      currentQuery?.where,
+      currentQuery,
       defaultLimit,
       defaultSort,
       modifySearchParams,
@@ -173,8 +169,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
       if (shouldUpdateQueryString) {
         setCurrentQuery(newQuery)
-        // Do not use router.replace here to avoid re-rendering on initial load
-        window.history.replaceState(null, '', `?${qs.stringify(newQuery)}`)
+        router.replace(`${qs.stringify(newQuery, { addQueryPrefix: true })}`)
       }
     }
   }, [defaultSort, defaultLimit, router, modifySearchParams])

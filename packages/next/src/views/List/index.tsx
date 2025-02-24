@@ -11,7 +11,7 @@ import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloa
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
 import { formatAdminURL, mergeListSearchAndWhere } from '@payloadcms/ui/shared'
-import { notFound } from 'next/navigation.js'
+import { notFound, redirect } from 'next/navigation.js'
 import { isNumber } from 'payload/shared'
 import React, { Fragment } from 'react'
 
@@ -71,12 +71,13 @@ export const renderListView = async (
   }
 
   const query = queryFromArgs || queryFromReq
+  const limitFromQuery = isNumber(query?.limit) ? Number(query.limit) : undefined
 
   const listPreferences = await upsertPreferences<ListPreferences>({
     key: `${collectionSlug}-list`,
     req,
     value: {
-      limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
+      limit: limitFromQuery,
       sort: query?.sort as string,
     },
   })
@@ -238,6 +239,19 @@ export const renderListView = async (
 }
 
 export const ListView: React.FC<RenderListViewArgs> = async (args) => {
+  const {
+    initPageResult: { collectionConfig, req },
+  } = args
+
+  if (!req.query?.limit) {
+    return redirect(
+      `${req.url}?${new URLSearchParams({
+        ...req.query,
+        limit: String(collectionConfig.admin.pagination.defaultLimit),
+      }).toString()}`,
+    )
+  }
+
   try {
     const { List: RenderedList } = await renderListView({ ...args, enableRowSelections: true })
     return RenderedList
