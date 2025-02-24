@@ -10,7 +10,7 @@ import {
   reduceFieldsToValues,
   wait,
 } from 'payload/shared'
-import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import type {
@@ -29,6 +29,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
+import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
@@ -88,12 +89,18 @@ export const Form: React.FC<FormProps> = (props) => {
   const operation = useOperation()
 
   const { getFormState } = useServerFunctions()
+  const { startRouteTransition } = useRouteTransition()
 
   const { config } = useConfig()
 
   const [disabled, setDisabled] = useState(disabledFromProps || false)
   const [isMounted, setIsMounted] = useState(false)
   const [modified, setModified] = useState(false)
+  /**
+   * Tracks wether the form state passes validation.
+   * For example the state could be submitted but invalid as field errors have been returned.
+   */
+  const [isValid, setIsValid] = useState(true)
   const [initializing, setInitializing] = useState(initializingFromProps)
   const [processing, setProcessing] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -175,6 +182,8 @@ export const Form: React.FC<FormProps> = (props) => {
       dispatchFields({ type: 'REPLACE_STATE', state: validatedFieldState })
     }
 
+    setIsValid(isValid)
+
     return isValid
   }, [collectionSlug, config, dispatchFields, id, operation, t, user, documentForm])
 
@@ -255,6 +264,8 @@ export const Form: React.FC<FormProps> = (props) => {
           ([, field]) => field.valid !== false,
         )
 
+        setIsValid(isValid)
+
         if (!isValid) {
           setProcessing(false)
           setSubmitted(true)
@@ -266,6 +277,7 @@ export const Form: React.FC<FormProps> = (props) => {
       const isValid =
         skipValidation || disableValidationOnSubmit ? true : await contextRef.current.validateForm()
 
+      setIsValid(isValid)
       // If not valid, prevent submission
       if (!isValid) {
         errorToast(t('error:correctInvalidFields'))
@@ -363,7 +375,7 @@ export const Form: React.FC<FormProps> = (props) => {
           setProcessing(false)
 
           if (redirect) {
-            router.push(redirect)
+            startRouteTransition(() => router.push(redirect))
           } else if (!disableSuccessStatus) {
             successToast(json.message || t('general:submissionSuccessful'))
           }
@@ -406,6 +418,8 @@ export const Form: React.FC<FormProps> = (props) => {
               [[], []],
             )
 
+            setIsValid(false)
+
             dispatchFields({
               type: 'ADD_SERVER_ERRORS',
               errors: fieldErrors,
@@ -432,6 +446,7 @@ export const Form: React.FC<FormProps> = (props) => {
     },
     [
       beforeSubmit,
+      startRouteTransition,
       action,
       disableSuccessStatus,
       disableValidationOnSubmit,
@@ -613,6 +628,7 @@ export const Form: React.FC<FormProps> = (props) => {
   contextRef.current.setModified = setModified
   contextRef.current.setProcessing = setProcessing
   contextRef.current.setSubmitted = setSubmitted
+  contextRef.current.setIsValid = setIsValid
   contextRef.current.disabled = disabled
   contextRef.current.setDisabled = setDisabled
   contextRef.current.formRef = formRef
@@ -624,6 +640,7 @@ export const Form: React.FC<FormProps> = (props) => {
   contextRef.current.replaceFieldRow = replaceFieldRow
   contextRef.current.uuid = uuid
   contextRef.current.initializing = initializing
+  contextRef.current.isValid = isValid
 
   useEffect(() => {
     setIsMounted(true)

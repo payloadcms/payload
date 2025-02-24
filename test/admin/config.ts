@@ -14,9 +14,9 @@ import { CollectionGroup1B } from './collections/Group1B.js'
 import { CollectionGroup2A } from './collections/Group2A.js'
 import { CollectionGroup2B } from './collections/Group2B.js'
 import { CollectionHidden } from './collections/Hidden.js'
+import { ListDrawer } from './collections/ListDrawer.js'
 import { CollectionNoApiView } from './collections/NoApiView.js'
 import { CollectionNotInView } from './collections/NotInView.js'
-import { Orders } from './collections/Orders.js'
 import { Posts } from './collections/Posts.js'
 import { UploadCollection } from './collections/Upload.js'
 import { Users } from './collections/Users.js'
@@ -40,14 +40,13 @@ import {
   protectedCustomNestedViewPath,
   publicCustomViewPath,
 } from './shared.js'
-
 export default buildConfigWithDefaults({
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
     },
     components: {
-      actions: ['/components/AdminButton/index.js#AdminButton'],
+      actions: ['/components/actions/AdminButton/index.js#AdminButton'],
       afterDashboard: [
         '/components/AfterDashboard/index.js#AfterDashboard',
         '/components/AfterDashboardClient/index.js#AfterDashboardClient',
@@ -158,6 +157,7 @@ export default buildConfigWithDefaults({
     DisableDuplicate,
     BaseListFilter,
     with300Documents,
+    ListDrawer,
   ],
   globals: [
     GlobalHidden,

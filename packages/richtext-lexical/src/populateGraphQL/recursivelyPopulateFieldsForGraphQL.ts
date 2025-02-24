@@ -22,6 +22,7 @@ type NestedRichTextFieldsArgs = {
   findMany: boolean
   flattenLocales: boolean
   overrideAccess: boolean
+  parentIsLocalized: boolean
   populationPromises: Promise<void>[]
   req: PayloadRequest
   showHiddenFields: boolean
@@ -39,6 +40,7 @@ export const recursivelyPopulateFieldsForGraphQL = ({
   findMany,
   flattenLocales,
   overrideAccess = false,
+  parentIsLocalized,
   populationPromises,
   req,
   showHiddenFields,
@@ -60,6 +62,7 @@ export const recursivelyPopulateFieldsForGraphQL = ({
     locale: req.locale!,
     overrideAccess,
     parentIndexPath: '',
+    parentIsLocalized,
     parentPath: '',
     parentSchemaPath: '',
     populationPromises, // This is not the same as populationPromises passed into this recurseNestedFields. These are just promises resolved at the very end.

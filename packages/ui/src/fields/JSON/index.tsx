@@ -1,6 +1,7 @@
 'use client'
 import type { JSONFieldClientComponent } from 'payload'
 
+import { type OnMount } from '@monaco-editor/react'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { CodeEditor } from '../../elements/CodeEditor/index.js'
@@ -9,9 +10,9 @@ import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
+import './index.scss'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
-import './index.scss'
 import { fieldBaseClass } from '../shared/index.js'
 
 const baseClass = 'json-field'
@@ -55,23 +56,29 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
     validate: memoizedValidate,
   })
 
-  const handleMount = useCallback(
+  const handleMount = useCallback<OnMount>(
     (editor, monaco) => {
       if (!jsonSchema) {
         return
       }
 
-      const existingSchemas = monaco.languages.json.jsonDefaults.diagnosticsOptions.schemas || []
-      const modelUri = monaco.Uri.parse(jsonSchema.uri)
-
-      const model = monaco.editor.createModel(JSON.stringify(value, null, 2), 'json', modelUri)
       monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
         enableSchemaRequest: true,
-        schemas: [...existingSchemas, jsonSchema],
+        schemas: [
+          ...(monaco.languages.json.jsonDefaults.diagnosticsOptions.schemas || []),
+          jsonSchema,
+        ],
         validate: true,
       })
 
-      editor.setModel(model)
+      const uri = jsonSchema.uri
+      const newUri = uri.includes('?')
+        ? `${uri}&${crypto.randomUUID()}`
+        : `${uri}?${crypto.randomUUID()}`
+
+      editor.setModel(
+        monaco.editor.createModel(JSON.stringify(value, null, 2), 'json', monaco.Uri.parse(newUri)),
+      )
     },
     [jsonSchema, value],
   )

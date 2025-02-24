@@ -30,23 +30,7 @@ import type { AdapterProps } from '../types.js'
 import type { HTMLConverter } from './converters/html/converter/types.js'
 import type { BaseClientFeatureProps } from './typesClient.js'
 
-export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexicalNode> = ({
-  context,
-  currentDepth,
-  depth,
-  draft,
-  editorPopulationPromises,
-  field,
-  fieldPromises,
-  findMany,
-  flattenLocales,
-  node,
-  overrideAccess,
-  populationPromises,
-  req,
-  showHiddenFields,
-  siblingDoc,
-}: {
+export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexicalNode> = (args: {
   context: RequestContext
   currentDepth: number
   depth: number
@@ -64,6 +48,7 @@ export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexica
   flattenLocales: boolean
   node: T
   overrideAccess: boolean
+  parentIsLocalized: boolean
   populationPromises: Promise<void>[]
   req: PayloadRequest
   showHiddenFields: boolean

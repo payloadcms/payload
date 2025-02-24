@@ -3,21 +3,19 @@ import type { ClientCollectionConfig, ResolvedFilterOptions, Where } from 'paylo
 
 import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
-import React, { Fragment, useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
+import { Popup, PopupList } from '../../elements/Popup/index.js'
 import { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
+import { Dots } from '../../icons/Dots/index.js'
 import { SearchIcon } from '../../icons/Search/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { AnimateHeight } from '../AnimateHeight/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
-import { DeleteMany } from '../DeleteMany/index.js'
-import { EditMany } from '../EditMany/index.js'
 import { Pill } from '../Pill/index.js'
-import { PublishMany } from '../PublishMany/index.js'
 import { SearchFilter } from '../SearchFilter/index.js'
-import { UnpublishMany } from '../UnpublishMany/index.js'
 import { WhereBuilder } from '../WhereBuilder/index.js'
 import validateWhereQuery from '../WhereBuilder/validateWhereQuery.js'
 import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched.js'
@@ -29,13 +27,22 @@ export type ListControlsProps = {
   readonly beforeActions?: React.ReactNode[]
   readonly collectionConfig: ClientCollectionConfig
   readonly collectionSlug: string
+  /**
+   * @deprecated
+   * These are now handled by the `ListSelection` component
+   */
   readonly disableBulkDelete?: boolean
+  /**
+   * @deprecated
+   * These are now handled by the `ListSelection` component
+   */
   readonly disableBulkEdit?: boolean
   readonly enableColumns?: boolean
   readonly enableSort?: boolean
   readonly handleSearchChange?: (search: string) => void
   readonly handleSortChange?: (sort: string) => void
   readonly handleWhereChange?: (where: Where) => void
+  readonly listMenuItems?: React.ReactNode[]
   readonly renderedFilters?: Map<string, React.ReactNode>
   readonly resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
 }
@@ -50,14 +57,12 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     beforeActions,
     collectionConfig,
     collectionSlug,
-    disableBulkDelete,
-    disableBulkEdit,
     enableColumns = true,
     enableSort = false,
+    listMenuItems,
     renderedFilters,
     resolvedFilterOptions,
   } = props
-
   const { handleSearchChange, query } = useListQuery()
   const titleField = useUseTitleField(collectionConfig)
   const { i18n, t } = useTranslation()
@@ -145,19 +150,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
         />
         <div className={`${baseClass}__buttons`}>
           <div className={`${baseClass}__buttons-wrap`}>
-            {!smallBreak && (
-              <React.Fragment>
-                {beforeActions && beforeActions}
-                {!disableBulkEdit && (
-                  <Fragment>
-                    <EditMany collection={collectionConfig} />
-                    <PublishMany collection={collectionConfig} />
-                    <UnpublishMany collection={collectionConfig} />
-                  </Fragment>
-                )}
-                {!disableBulkDelete && <DeleteMany collection={collectionConfig} />}
-              </React.Fragment>
-            )}
+            {!smallBreak && <React.Fragment>{beforeActions && beforeActions}</React.Fragment>}
             {enableColumns && (
               <Pill
                 aria-controls={`${baseClass}-columns`}
@@ -193,6 +186,17 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               >
                 {t('general:sort')}
               </Pill>
+            )}
+            {listMenuItems && (
+              <Popup
+                button={<Dots ariaLabel={t('general:moreOptions')} />}
+                className={`${baseClass}__popup`}
+                horizontalAlign="right"
+                size="large"
+                verticalAlign="bottom"
+              >
+                <PopupList.ButtonGroup>{listMenuItems.map((item) => item)}</PopupList.ButtonGroup>
+              </Popup>
             )}
           </div>
         </div>

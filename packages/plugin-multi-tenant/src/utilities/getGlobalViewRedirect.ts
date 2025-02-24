@@ -52,6 +52,7 @@ export async function getGlobalViewRedirect({
       depth: 0,
       limit: 1,
       overrideAccess: false,
+      pagination: false,
       user,
       where: {
         [tenantFieldName]: {

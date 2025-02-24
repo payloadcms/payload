@@ -1,4 +1,4 @@
-import type { Access, CollectionConfig } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 import type { MultiTenantPluginConfig } from '../types.js'
 
@@ -20,6 +20,8 @@ const collectionAccessKeys: AllAccessKeys<
 type Args<ConfigType> = {
   collection: CollectionConfig
   fieldName: string
+  tenantsArrayFieldName?: string
+  tenantsArrayTenantFieldName?: string
   userHasAccessToAllTenants: Required<
     MultiTenantPluginConfig<ConfigType>
   >['userHasAccessToAllTenants']
@@ -32,23 +34,22 @@ type Args<ConfigType> = {
 export const addCollectionAccess = <ConfigType>({
   collection,
   fieldName,
+  tenantsArrayFieldName,
+  tenantsArrayTenantFieldName,
   userHasAccessToAllTenants,
 }: Args<ConfigType>): void => {
-  if (!collection?.access) {
-    collection.access = {}
-  }
-  collectionAccessKeys.reduce<{
-    [key in (typeof collectionAccessKeys)[number]]?: Access
-  }>((acc, key) => {
+  collectionAccessKeys.forEach((key) => {
     if (!collection.access) {
-      return acc
+      collection.access = {}
     }
     collection.access[key] = withTenantAccess<ConfigType>({
       accessFunction: collection.access?.[key],
-      fieldName,
+      collection,
+      fieldName: key === 'readVersions' ? `version.${fieldName}` : fieldName,
+      operation: key,
+      tenantsArrayFieldName,
+      tenantsArrayTenantFieldName,
       userHasAccessToAllTenants,
     })
-
-    return acc
-  }, {})
+  })
 }

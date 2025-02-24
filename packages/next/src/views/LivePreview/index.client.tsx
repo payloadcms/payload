@@ -28,6 +28,7 @@ import {
   useDocumentEvents,
   useDocumentInfo,
   useEditDepth,
+  useRouteTransition,
   useServerFunctions,
   useTranslation,
   useUploadEdits,
@@ -132,6 +133,7 @@ const PreviewView: React.FC<Props> = ({
   const { reportUpdate } = useDocumentEvents()
   const { resetUploadEdits } = useUploadEdits()
   const { getFormState } = useServerFunctions()
+  const { startRouteTransition } = useRouteTransition()
 
   const docConfig = collectionConfig || globalConfig
 
@@ -212,7 +214,8 @@ const PreviewView: React.FC<Props> = ({
           adminRoute,
           path: `/collections/${collectionSlug}/${json?.doc?.id}${locale ? `?locale=${locale}` : ''}`,
         })
-        router.push(redirectRoute)
+
+        startRouteTransition(() => router.push(redirectRoute))
       } else {
         resetUploadEdits()
       }
@@ -270,6 +273,7 @@ const PreviewView: React.FC<Props> = ({
       router,
       setDocumentIsLocked,
       updateSavedDocumentData,
+      startRouteTransition,
       user,
       userSlug,
       autosaveEnabled,

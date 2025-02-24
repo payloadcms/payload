@@ -1,14 +1,7 @@
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
 
-import type {
-  CustomPreviewButton,
-  CustomPublishButton,
-  CustomSaveButton,
-  CustomSaveDraftButton,
-  CustomStatus,
-  CustomUpload,
-} from '../../admin/types.js'
+import type { CustomStatus, CustomUpload } from '../../admin/types.js'
 import type { Arguments as MeArguments } from '../../auth/operations/me.js'
 import type {
   Arguments as RefreshArguments,
@@ -288,23 +281,23 @@ export type CollectionAdminOptions = {
       /**
        * Replaces the "Preview" button
        */
-      PreviewButton?: CustomPreviewButton
+      PreviewButton?: CustomComponent
       /**
        * Replaces the "Publish" button
        * + drafts must be enabled
        */
-      PublishButton?: CustomPublishButton
+      PublishButton?: CustomComponent
       /**
        * Replaces the "Save" button
        * + drafts must be disabled
        */
-      SaveButton?: CustomSaveButton
+      SaveButton?: CustomComponent
       /**
        * Replaces the "Save Draft" button
        * + drafts must be enabled
        * + autosave must be disabled
        */
-      SaveDraftButton?: CustomSaveDraftButton
+      SaveDraftButton?: CustomComponent
       /**
        * Replaces the "Status" section
        */
@@ -315,6 +308,7 @@ export type CollectionAdminOptions = {
        */
       Upload?: CustomUpload
     }
+    listMenuItems?: CustomComponent[]
     views?: {
       /**
        * Set to a React component to replace the entire Edit View, including all nested routes.
@@ -527,6 +521,11 @@ export type SanitizedJoin = {
    * The path of the join field in dot notation
    */
   joinPath: string
+  /**
+   * `parentIsLocalized` is true if any parent field of the
+   * field configuration defining the join is localized
+   */
+  parentIsLocalized: boolean
   targetField: RelationshipField | UploadField
 }
 
@@ -553,6 +552,12 @@ export interface SanitizedCollectionConfig
    * Object of collections to join 'Join Fields object keyed by collection
    */
   joins: SanitizedJoins
+
+  /**
+   * List of all polymorphic join fields
+   */
+  polymorphicJoins: SanitizedJoin[]
+
   slug: CollectionSlug
   upload: SanitizedUploadConfig
   versions: SanitizedCollectionVersions

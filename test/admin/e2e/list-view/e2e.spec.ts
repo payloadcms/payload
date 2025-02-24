@@ -19,6 +19,7 @@ import { customAdminRoutes } from '../../shared.js'
 import {
   customViews1CollectionSlug,
   geoCollectionSlug,
+  listDrawerSlug,
   postsCollectionSlug,
   with300DocumentsSlug,
 } from '../../slugs.js'
@@ -56,6 +57,7 @@ describe('List View', () => {
   let baseListFiltersUrl: AdminUrlUtil
   let customViewsUrl: AdminUrlUtil
   let with300DocumentsUrl: AdminUrlUtil
+  let withListViewUrl: AdminUrlUtil
 
   let serverURL: string
   let adminRoutes: ReturnType<typeof getRoutes>
@@ -76,6 +78,7 @@ describe('List View', () => {
     with300DocumentsUrl = new AdminUrlUtil(serverURL, with300DocumentsSlug)
     baseListFiltersUrl = new AdminUrlUtil(serverURL, 'base-list-filters')
     customViewsUrl = new AdminUrlUtil(serverURL, customViews1CollectionSlug)
+    withListViewUrl = new AdminUrlUtil(serverURL, listDrawerSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -156,6 +159,20 @@ describe('List View', () => {
         `${adminRoutes.routes?.admin}/collections/posts/${id}`,
       )
     })
+
+    test('should hide create new button when allowCreate is false', async () => {
+      await page.goto(withListViewUrl.list)
+
+      const drawerButton = page.locator('button', { hasText: 'Select Posts' })
+      await expect(drawerButton).toBeVisible()
+      await drawerButton.click()
+
+      const drawer = page.locator('.drawer__content')
+      await expect(drawer).toBeVisible()
+
+      const createButton = page.locator('button', { hasText: 'Create New' })
+      await expect(createButton).toBeHidden()
+    })
   })
 
   describe('list view custom components', () => {
@@ -194,6 +211,19 @@ describe('List View', () => {
       await expect(
         page.locator('.collection-list__wrap').locator('div', {
           hasText: exactText('AfterListTable custom component'),
+        }),
+      ).toBeVisible()
+    })
+
+    test('should render custom listMenuItems component', async () => {
+      await page.goto(postsUrl.list)
+      const kebabMenu = page.locator('.list-controls__popup')
+      await expect(kebabMenu).toBeVisible()
+      await kebabMenu.click()
+
+      await expect(
+        page.locator('.popup-button-list').locator('div', {
+          hasText: 'listMenuItems',
         }),
       ).toBeVisible()
     })
@@ -993,19 +1023,18 @@ describe('List View', () => {
 
     test('should delete many', async () => {
       await page.goto(postsUrl.list)
-      await page.waitForURL(new RegExp(postsUrl.list))
       // delete should not appear without selection
-      await expect(page.locator('#confirm-delete')).toHaveCount(0)
+      await expect(page.locator('#delete-posts #confirm-action')).toHaveCount(0)
       // select one row
       await page.locator('.row-1 .cell-_select input').check()
 
       // delete button should be present
-      await expect(page.locator('#confirm-delete')).toHaveCount(1)
+      await expect(page.locator('#delete-posts #confirm-action')).toHaveCount(1)
 
       await page.locator('.row-2 .cell-_select input').check()
 
       await page.locator('.delete-documents__toggle').click()
-      await page.locator('#confirm-delete').click()
+      await page.locator('#delete-posts #confirm-action').click()
       await expect(page.locator('.cell-_select')).toHaveCount(1)
     })
   })

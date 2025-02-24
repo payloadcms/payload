@@ -20,6 +20,7 @@ type BuildQueryArgs = {
   fields: FlattenedField[]
   joins?: BuildQueryJoinAliases
   locale?: string
+  parentIsLocalized?: boolean
   selectLocale?: boolean
   sort?: Sort
   tableName: string
@@ -41,6 +42,7 @@ const buildQuery = function buildQuery({
   fields,
   joins = [],
   locale,
+  parentIsLocalized,
   selectLocale,
   sort,
   tableName,
@@ -56,6 +58,7 @@ const buildQuery = function buildQuery({
     fields,
     joins,
     locale,
+    parentIsLocalized,
     selectFields,
     sort,
     tableName,
@@ -70,6 +73,7 @@ const buildQuery = function buildQuery({
       fields,
       joins,
       locale,
+      parentIsLocalized,
       selectFields,
       selectLocale,
       tableName,

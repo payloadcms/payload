@@ -121,6 +121,7 @@ import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type {
   ArrayFieldValidation,
   BlocksFieldValidation,
+  BlockSlug,
   CheckboxFieldValidation,
   CodeFieldValidation,
   CollectionSlug,
@@ -1044,6 +1045,13 @@ export type SelectField = {
    */
   enumName?: DBIdentifierName
   hasMany?: boolean
+  /** Customize generated GraphQL and Typescript schema names.
+   * By default, it is bound to the collection.
+   *
+   * This is useful if you would like to generate a top level type to share amongst collections/fields.
+   * **Note**: Top level types can collide, ensure they are unique amongst collections, arrays, groups, blocks, tabs.
+   */
+  interfaceName?: string
   options: Option[]
   type: 'select'
 } & (
@@ -1061,7 +1069,7 @@ export type SelectField = {
 export type SelectFieldClient = {
   admin?: AdminClient & Pick<SelectField['admin'], 'isClearable' | 'isSortable'>
 } & FieldBaseClient &
-  Pick<SelectField, 'hasMany' | 'options' | 'type'>
+  Pick<SelectField, 'hasMany' | 'interfaceName' | 'options' | 'type'>
 
 type SharedRelationshipProperties = {
   filterOptions?: FilterOptions
@@ -1268,6 +1276,13 @@ export type RadioField = {
    * Customize the DB enum name
    */
   enumName?: DBIdentifierName
+  /** Customize generated GraphQL and Typescript schema names.
+   * By default, it is bound to the collection.
+   *
+   * This is useful if you would like to generate a top level type to share amongst collections/fields.
+   * **Note**: Top level types can collide, ensure they are unique amongst collections, arrays, groups, blocks, tabs.
+   */
+  interfaceName?: string
   options: Option[]
   type: 'radio'
   validate?: RadioFieldValidation
@@ -1276,7 +1291,7 @@ export type RadioField = {
 export type RadioFieldClient = {
   admin?: AdminClient & Pick<RadioField['admin'], 'layout'>
 } & FieldBaseClient &
-  Pick<RadioField, 'options' | 'type'>
+  Pick<RadioField, 'interfaceName' | 'options' | 'type'>
 
 type BlockFields = {
   [key: string]: any
@@ -1358,6 +1373,7 @@ export type Block = {
     }
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>
+    group?: Record<string, string> | string
     jsx?: PayloadComponent
   }
   /** Extension point to add your custom data. Server only. */
@@ -1386,7 +1402,7 @@ export type Block = {
 }
 
 export type ClientBlock = {
-  admin?: Pick<Block['admin'], 'custom'>
+  admin?: Pick<Block['admin'], 'custom' | 'group'>
   fields: ClientField[]
   labels?: LabelsClient
 } & Pick<Block, 'imageAltText' | 'imageURL' | 'jsx' | 'slug'>
@@ -1405,6 +1421,12 @@ export type BlocksField = {
      */
     isSortable?: boolean
   } & Admin
+  /**
+   * Like `blocks`, but allows you to also pass strings that are slugs of blocks defined in `config.blocks`.
+   *
+   * @todo `blockReferences` will be merged with `blocks` in 4.0
+   */
+  blockReferences?: (Block | BlockSlug)[]
   blocks: Block[]
   defaultValue?: DefaultValue
   labels?: Labels
@@ -1416,6 +1438,12 @@ export type BlocksField = {
 
 export type BlocksFieldClient = {
   admin?: AdminClient & Pick<BlocksField['admin'], 'initCollapsed' | 'isSortable'>
+  /**
+   * Like `blocks`, but allows you to also pass strings that are slugs of blocks defined in `config.blocks`.
+   *
+   * @todo `blockReferences` will be merged with `blocks` in 4.0
+   */
+  blockReferences?: (ClientBlock | string)[]
   blocks: ClientBlock[]
   labels?: LabelsClient
 } & FieldBaseClient &
@@ -1465,7 +1493,7 @@ export type JoinField = {
   /**
    * The slug of the collection to relate with.
    */
-  collection: CollectionSlug
+  collection: CollectionSlug | CollectionSlug[]
   defaultLimit?: number
   defaultSort?: Sort
   defaultValue?: never
@@ -1491,6 +1519,7 @@ export type JoinField = {
    * A string for the field in the collection being joined to.
    */
   on: string
+  sanitizedMany?: JoinField[]
   type: 'join'
   validate?: never
   where?: Where
@@ -1511,8 +1540,14 @@ export type FlattenedBlock = {
 } & Block
 
 export type FlattenedBlocksField = {
+  /**
+   * Like `blocks`, but allows you to also pass strings that are slugs of blocks defined in `config.blocks`.
+   *
+   * @todo `blockReferences` will be merged with `blocks` in 4.0
+   */
+  blockReferences?: (FlattenedBlock | string)[]
   blocks: FlattenedBlock[]
-} & BlocksField
+} & Omit<BlocksField, 'blockReferences' | 'blocks'>
 
 export type FlattenedGroupField = {
   flattenedFields: FlattenedField[]
@@ -1835,8 +1870,33 @@ export function tabHasName<TField extends ClientTab | Tab>(tab: TField): tab is 
   return 'name' in tab
 }
 
+/**
+ * Check if a field has localized: true set. This does not check if a field *should*
+ * be localized. To check if a field should be localized, use `fieldShouldBeLocalized`.
+ *
+ * @deprecated this will be removed or modified in v4.0, as `fieldIsLocalized` can easily lead to bugs due to
+ * parent field localization not being taken into account.
+ */
 export function fieldIsLocalized(field: Field | Tab): boolean {
   return 'localized' in field && field.localized
+}
+
+/**
+ * Similar to `fieldIsLocalized`, but returns `false` if any parent field is localized.
+ */
+export function fieldShouldBeLocalized({
+  field,
+  parentIsLocalized,
+}: {
+  field: ClientField | ClientTab | Field | Tab
+  parentIsLocalized: boolean
+}): boolean {
+  return (
+    'localized' in field &&
+    field.localized &&
+    (!parentIsLocalized ||
+      process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true')
+  )
 }
 
 export function fieldIsVirtual(field: Field | Tab): boolean {

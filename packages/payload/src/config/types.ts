@@ -17,15 +17,13 @@ import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
-import type { DocumentTabConfig, RichTextAdapter } from '../admin/types.js'
 import type {
-  AdminViewConfig,
   DocumentSubViewTypes,
-  ServerPropsFromView,
-  ServerSideEditViewProps,
-  ViewTypes,
-  VisibleEntities,
-} from '../admin/views/types.js'
+  DocumentTabConfig,
+  DocumentViewServerProps,
+  RichTextAdapter,
+} from '../admin/types.js'
+import type { AdminViewConfig, ViewTypes, VisibleEntities } from '../admin/views/index.js'
 import type { SanitizedPermissions } from '../auth/index.js'
 import type {
   AddToImportMap,
@@ -42,7 +40,14 @@ import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { ErrorName } from '../errors/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { JobsConfig, Payload, RequestContext, TypedUser } from '../index.js'
+import type {
+  Block,
+  FlattenedBlock,
+  JobsConfig,
+  Payload,
+  RequestContext,
+  TypedUser,
+} from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -376,7 +381,7 @@ export type Endpoint = {
   root?: never
 }
 
-export type EditViewComponent = PayloadComponent<ServerSideEditViewProps>
+export type EditViewComponent = PayloadComponent<DocumentViewServerProps>
 
 export type EditViewConfig = {
   meta?: MetaConfig
@@ -400,22 +405,20 @@ export type EditViewConfig = {
     }
 )
 
-type ClientProps = {
-  readonly [key: string]: unknown
-}
+export type Params = { [key: string]: string | string[] | undefined }
 
 export type ServerProps = {
   readonly documentSubViewType?: DocumentSubViewTypes
   readonly i18n: I18nClient
   readonly locale?: Locale
-  readonly params?: { [key: string]: string | string[] | undefined }
+  readonly params?: Params
   readonly payload: Payload
   readonly permissions?: SanitizedPermissions
-  readonly searchParams?: { [key: string]: string | string[] | undefined }
+  readonly searchParams?: Params
   readonly user?: TypedUser
   readonly viewType?: ViewTypes
   readonly visibleEntities?: VisibleEntities
-} & ClientProps
+}
 
 export const serverProps: (keyof ServerProps)[] = [
   'payload',
@@ -758,7 +761,7 @@ export type Config = {
     /**
      * Add extra and/or replace built-in components with custom components
      *
-     * @see https://payloadcms.com/docs/admin/components
+     * @see https://payloadcms.com/docs/admin/custom-components/overview
      */
     components?: {
       /**
@@ -916,6 +919,7 @@ export type Config = {
   }
   /** Custom Payload bin scripts can be injected via the config. */
   bin?: BinScriptConfig[]
+  blocks?: Block[]
   /**
    * Manage the datamodel of your application
    *
@@ -932,6 +936,8 @@ export type Config = {
      * to `true` only if you have an existing Payload database from pre-3.0
      * that you would like to maintain without migrating. This is only
      * relevant for MongoDB databases.
+     *
+     * @todo Remove in v4
      */
     allowLocalizedWithinLocalized: true
   }
@@ -943,12 +949,12 @@ export type Config = {
   cookiePrefix?: string
   /** Either a whitelist array of URLS to allow CORS requests from, or a wildcard string ('*') to accept incoming requests from any domain. */
   cors?: '*' | CORSConfig | string[]
+
   /** A whitelist array of URLs to allow Payload cookies to be accepted from as a form of CSRF protection. */
   csrf?: string[]
 
   /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
-
   /** Pass in a database adapter for use on this project. */
   db: DatabaseAdapterResult
   /** Enable to expose more detailed error information. */
@@ -1183,6 +1189,7 @@ export type SanitizedConfig = {
   admin: {
     timezones: SanitizedTimezoneConfig
   } & DeepRequired<Config['admin']>
+  blocks?: FlattenedBlock[]
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */
   editor?: RichTextAdapter<any, any, any>
@@ -1207,7 +1214,15 @@ export type SanitizedConfig = {
   // E.g. in packages/ui/src/graphics/Account/index.tsx in getComponent, if avatar.Component is casted to what it's supposed to be,
   // the result type is different
   DeepRequired<Config>,
-  'admin' | 'collections' | 'editor' | 'endpoint' | 'globals' | 'i18n' | 'localization' | 'upload'
+  | 'admin'
+  | 'blocks'
+  | 'collections'
+  | 'editor'
+  | 'endpoint'
+  | 'globals'
+  | 'i18n'
+  | 'localization'
+  | 'upload'
 >
 
 export type EditConfig = EditConfigWithoutRoot | EditConfigWithRoot
@@ -1255,5 +1270,3 @@ export type EntityDescriptionFunction = ({ t }: { t: TFunction }) => string
 export type EntityDescription = EntityDescriptionFunction | Record<string, string> | string
 
 export type { EmailAdapter, SendEmailOptions }
-
-export type { DocumentSubViewTypes, ServerPropsFromView, ViewTypes }

@@ -1,4 +1,4 @@
-import type { AdminViewProps } from 'payload'
+import type { AdminViewServerProps } from 'payload'
 
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import React from 'react'
@@ -11,7 +11,7 @@ import './index.scss'
 
 export { generateCreateFirstUserMetadata } from './meta.js'
 
-export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageResult }) => {
+export async function CreateFirstUserView({ initPageResult }: AdminViewServerProps) {
   const {
     locale,
     req,

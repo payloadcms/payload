@@ -12,6 +12,7 @@ export async function parseParams({
   fields,
   globalSlug,
   locale,
+  parentIsLocalized,
   payload,
   where,
 }: {
@@ -19,6 +20,7 @@ export async function parseParams({
   fields: FlattenedField[]
   globalSlug?: string
   locale: string
+  parentIsLocalized: boolean
   payload: Payload
   where: Where
 }): Promise<Record<string, unknown>> {
@@ -40,6 +42,7 @@ export async function parseParams({
           fields,
           globalSlug,
           locale,
+          parentIsLocalized,
           payload,
           where: condition,
         })
@@ -63,6 +66,7 @@ export async function parseParams({
               incomingPath: relationOrPath,
               locale,
               operator,
+              parentIsLocalized,
               payload,
               val: pathOperators[operator],
             })

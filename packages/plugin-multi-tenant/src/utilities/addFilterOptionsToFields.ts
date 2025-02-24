@@ -1,9 +1,10 @@
-import type { Field, FilterOptionsProps, RelationshipField } from 'payload'
+import type { Config, Field, FilterOptionsProps, RelationshipField, SanitizedConfig } from 'payload'
 
 import { getCollectionIDType } from './getCollectionIDType.js'
 import { getTenantFromCookie } from './getTenantFromCookie.js'
 
 type AddFilterOptionsToFieldsArgs = {
+  config: Config | SanitizedConfig
   fields: Field[]
   tenantEnabledCollectionSlugs: string[]
   tenantEnabledGlobalSlugs: string[]
@@ -12,6 +13,7 @@ type AddFilterOptionsToFieldsArgs = {
 }
 
 export function addFilterOptionsToFields({
+  config,
   fields,
   tenantEnabledCollectionSlugs,
   tenantEnabledGlobalSlugs,
@@ -59,6 +61,7 @@ export function addFilterOptionsToFields({
       field.type === 'group'
     ) {
       addFilterOptionsToFields({
+        config,
         fields: field.fields,
         tenantEnabledCollectionSlugs,
         tenantEnabledGlobalSlugs,
@@ -68,20 +71,30 @@ export function addFilterOptionsToFields({
     }
 
     if (field.type === 'blocks') {
-      field.blocks.forEach((block) => {
-        addFilterOptionsToFields({
-          fields: block.fields,
-          tenantEnabledCollectionSlugs,
-          tenantEnabledGlobalSlugs,
-          tenantFieldName,
-          tenantsCollectionSlug,
-        })
+      ;(field.blockReferences ?? field.blocks).forEach((_block) => {
+        const block =
+          typeof _block === 'string'
+            ? // TODO: iterate over blocks mapped to block slug in v4, or pass through payload.blocks
+              config?.blocks?.find((b) => b.slug === _block)
+            : _block
+
+        if (block?.fields) {
+          addFilterOptionsToFields({
+            config,
+            fields: block.fields,
+            tenantEnabledCollectionSlugs,
+            tenantEnabledGlobalSlugs,
+            tenantFieldName,
+            tenantsCollectionSlug,
+          })
+        }
       })
     }
 
     if (field.type === 'tabs') {
       field.tabs.forEach((tab) => {
         addFilterOptionsToFields({
+          config,
           fields: tab.fields,
           tenantEnabledCollectionSlugs,
           tenantEnabledGlobalSlugs,
