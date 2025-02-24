@@ -374,6 +374,7 @@ export const skTranslations: DefaultTranslationsObject = {
     isLike: 'je ako',
     isNotEqualTo: 'nie je rovné',
     isNotIn: 'nie je v',
+    isNotLike: 'nie je ako',
     near: 'blízko',
     within: 'vnútri',
   },

@@ -7,7 +7,7 @@ import type { MongooseAdapter } from './index.js'
 import { buildQuery } from './queries/buildQuery.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { getSession } from './utilities/getSession.js'
-import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
+import { transform } from './utilities/transform.js'
 
 export const updateVersion: UpdateVersion = async function updateVersion(
   this: MongooseAdapter,
@@ -45,26 +45,15 @@ export const updateVersion: UpdateVersion = async function updateVersion(
     where: whereToUse,
   })
 
-  const sanitizedData = sanitizeRelationshipIDs({
-    config: this.payload.config,
-    data: versionData,
-    fields,
-  })
+  transform({ adapter: this, data: versionData, fields, operation: 'write' })
 
-  const doc = await VersionModel.findOneAndUpdate(query, sanitizedData, options)
+  const doc = await VersionModel.findOneAndUpdate(query, versionData, options)
 
   if (!doc) {
     return null
   }
 
-  const result = JSON.parse(JSON.stringify(doc))
+  transform({ adapter: this, data: doc, fields, operation: 'write' })
 
-  const verificationToken = doc._verificationToken
-
-  // custom id type reset
-  result.id = result._id
-  if (verificationToken) {
-    result._verificationToken = verificationToken
-  }
-  return result
+  return doc
 }

@@ -375,6 +375,7 @@ export const azTranslations: DefaultTranslationsObject = {
     isLike: 'kimi',
     isNotEqualTo: 'bərabər deyil',
     isNotIn: 'daxil deyil',
+    isNotLike: 'deyil kimi',
     near: 'yaxın',
     within: 'daxilinde',
   },

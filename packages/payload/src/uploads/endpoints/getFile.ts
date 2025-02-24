@@ -1,3 +1,5 @@
+import type { Stats } from 'fs'
+
 // @ts-strict-ignore
 import { fileTypeFromFile } from 'file-type'
 import fsPromises from 'fs/promises'
@@ -54,7 +56,39 @@ export const getFileHandler: PayloadHandler = async (req) => {
 
   const fileDir = collection.config.upload?.staticDir || collection.config.slug
   const filePath = path.resolve(`${fileDir}/${filename}`)
-  const stats = await fsPromises.stat(filePath)
+  let stats: Stats
+
+  try {
+    stats = await fsPromises.stat(filePath)
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      req.payload.logger.error(
+        `File ${filename} for collection ${collection.config.slug} is missing on the disk. Expected path: ${filePath}`,
+      )
+
+      // Omit going to the routeError handler by returning response instead of
+      // throwing an error to cut down log noise. The response still matches what you get with APIError to not leak details to the user.
+      return Response.json(
+        {
+          errors: [
+            {
+              message: 'Something went wrong.',
+            },
+          ],
+        },
+        {
+          headers: headersWithCors({
+            headers: new Headers(),
+            req,
+          }),
+          status: 500,
+        },
+      )
+    }
+
+    throw err
+  }
+
   const data = streamFile(filePath)
   const fileTypeResult = (await fileTypeFromFile(filePath)) || getFileTypeFallback(filePath)
 

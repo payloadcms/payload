@@ -370,6 +370,7 @@ export const arTranslations: DefaultTranslationsObject = {
     isLike: 'هو مثل',
     isNotEqualTo: 'لا يساوي',
     isNotIn: 'غير موجود في',
+    isNotLike: 'ليس مثل',
     near: 'قريب من',
     within: 'في غضون',
   },

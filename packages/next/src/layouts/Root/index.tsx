@@ -82,7 +82,7 @@ export const RootLayout = async ({
     })
   }
 
-  const navPrefs = await getNavPrefs({ payload, user: req.user })
+  const navPrefs = await getNavPrefs(req.payload, req.user?.id, req.user?.collection)
 
   const clientConfig = getClientConfig({
     config,
