@@ -43,12 +43,14 @@ export const resolveAllFilterOptions = async ({
       }
 
       if (field.type === 'tabs') {
-        field.tabs.forEach(async (tab) =>
-          resolveAllFilterOptions({
-            fields: tab.fields,
-            req,
-            result: resolvedFilterOptions,
-          }),
+        await Promise.all(
+          field.tabs.map((tab) =>
+            resolveAllFilterOptions({
+              fields: tab.fields,
+              req,
+              result: resolvedFilterOptions,
+            }),
+          ),
         )
       }
     }),
