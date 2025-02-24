@@ -4,6 +4,7 @@ dist
 /.idea/*
 !/.idea/runConfigurations
 !/.idea/payload.iml
+.pnpm-store
 
 # Custom actions
 !.github/actions/**/dist
