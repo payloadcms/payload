@@ -237,18 +237,17 @@ export const promise = async ({
   if (fieldAffectsData(field)) {
     // Execute hooks
     if (triggerHooks && field.hooks?.afterRead) {
-      await field.hooks.afterRead.reduce(async (priorHook, currentHook) => {
-        await priorHook
-
+      for (const hook of field.hooks.afterRead) {
         const shouldRunHookOnAllLocales =
           fieldShouldBeLocalized({ field, parentIsLocalized }) &&
           (locale === 'all' || !flattenLocales) &&
           typeof siblingDoc[field.name] === 'object'
 
         if (shouldRunHookOnAllLocales) {
-          const hookPromises = Object.entries(siblingDoc[field.name]).map(([locale, value]) =>
-            (async () => {
-              const hookedValue = await currentHook({
+          const localesAndValues = Object.entries(siblingDoc[field.name])
+          await Promise.all(
+            localesAndValues.map(async ([localeKey, value]) => {
+              const hookedValue = await hook({
                 blockData,
                 collection,
                 context,
@@ -273,14 +272,12 @@ export const promise = async ({
               })
 
               if (hookedValue !== undefined) {
-                siblingDoc[field.name][locale] = hookedValue
+                siblingDoc[field.name][localeKey] = hookedValue
               }
-            })(),
+            }),
           )
-
-          await Promise.all(hookPromises)
         } else {
-          const hookedValue = await currentHook({
+          const hookedValue = await hook({
             blockData,
             collection,
             context,
@@ -308,7 +305,7 @@ export const promise = async ({
             siblingDoc[field.name] = hookedValue
           }
         }
-      }, Promise.resolve())
+      }
     }
 
     // Execute access control
@@ -677,18 +674,18 @@ export const promise = async ({
       const editor: RichTextAdapter = field?.editor
 
       if (editor?.hooks?.afterRead?.length) {
-        await editor.hooks.afterRead.reduce(async (priorHook, currentHook) => {
-          await priorHook
-
+        for (const hook of editor.hooks.afterRead) {
           const shouldRunHookOnAllLocales =
             fieldShouldBeLocalized({ field, parentIsLocalized }) &&
             (locale === 'all' || !flattenLocales) &&
             typeof siblingDoc[field.name] === 'object'
 
           if (shouldRunHookOnAllLocales) {
-            const hookPromises = Object.entries(siblingDoc[field.name]).map(([locale, value]) =>
-              (async () => {
-                const hookedValue = await currentHook({
+            const localesAndValues = Object.entries(siblingDoc[field.name])
+
+            await Promise.all(
+              localesAndValues.map(async ([locale, value]) => {
+                const hookedValue = await hook({
                   collection,
                   context,
                   currentDepth,
@@ -722,12 +719,10 @@ export const promise = async ({
                 if (hookedValue !== undefined) {
                   siblingDoc[field.name][locale] = hookedValue
                 }
-              })(),
+              }),
             )
-
-            await Promise.all(hookPromises)
           } else {
-            const hookedValue = await currentHook({
+            const hookedValue = await hook({
               collection,
               context,
               currentDepth,
@@ -762,7 +757,7 @@ export const promise = async ({
               siblingDoc[field.name] = hookedValue
             }
           }
-        }, Promise.resolve())
+        }
       }
       break
     }

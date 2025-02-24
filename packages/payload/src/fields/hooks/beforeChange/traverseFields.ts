@@ -28,7 +28,7 @@ type Args = {
   fields: (Field | TabAsField)[]
   global: null | SanitizedGlobalConfig
   id?: number | string
-  mergeLocaleActions: (() => Promise<void>)[]
+  mergeLocaleActions: (() => Promise<void> | void)[]
   operation: Operation
   parentIndexPath: string
   /**
