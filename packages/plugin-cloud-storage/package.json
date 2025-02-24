@@ -33,6 +33,11 @@
       "import": "./src/exports/utilities.ts",
       "types": "./src/exports/utilities.ts",
       "default": "./src/exports/utilities.ts"
+    },
+    "./client": {
+      "import": "./src/exports/client.ts",
+      "types": "./src/exports/client.ts",
+      "default": "./src/exports/client.ts"
     }
   },
   "main": "./src/index.ts",
@@ -57,6 +62,7 @@
     "range-parser": "^1.2.1"
   },
   "devDependencies": {
+    "@payloadcms/ui": "workspace:*",
     "@types/find-node-modules": "^2.1.2",
     "payload": "workspace:*"
   },
@@ -79,6 +85,11 @@
         "import": "./dist/exports/utilities.js",
         "types": "./dist/exports/utilities.d.ts",
         "default": "./dist/exports/utilities.js"
+      },
+      "./client": {
+        "import": "./dist/exports/client.js",
+        "types": "./dist/exports/client.d.ts",
+        "default": "./dist/exports/client.js"
       }
     },
     "main": "./dist/index.js",

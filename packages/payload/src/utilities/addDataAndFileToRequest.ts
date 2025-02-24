@@ -43,6 +43,40 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
       if (fields?._payload && typeof fields._payload === 'string') {
         req.data = JSON.parse(fields._payload)
       }
+
+      if (!req.file && fields?.file && typeof fields?.file === 'string') {
+        const { collectionSlug, filename, mimeType, size } = JSON.parse(fields.file)
+        const uploadConfig = req.payload.collections[collectionSlug].config.upload
+
+        if (!uploadConfig.handlers) {
+          throw new APIError('uploadConfig.handlers is not present for ' + collectionSlug)
+        }
+
+        let response: null | Response = null
+        for (const handler of uploadConfig.handlers) {
+          const result = await handler(req, {
+            doc: null,
+            params: {
+              collection: collectionSlug,
+              filename,
+            },
+          })
+          if (result) {
+            response = result
+          }
+        }
+
+        if (!response) {
+          throw new APIError('Expected response from the upload handler.')
+        }
+
+        req.file = {
+          name: filename,
+          data: Buffer.from(await response.arrayBuffer()),
+          mimetype: mimeType,
+          size,
+        }
+      }
     }
   }
 }

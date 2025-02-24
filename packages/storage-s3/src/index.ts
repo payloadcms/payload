@@ -9,6 +9,7 @@ import type { Config, Plugin, UploadCollectionSlug } from 'payload'
 import * as AWS from '@aws-sdk/client-s3'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 
+import { getGenerateSignedURLHandler } from './generateSignedURL.js'
 import { getGenerateURL } from './generateURL.js'
 import { getHandleDelete } from './handleDelete.js'
 import { getHandleUpload } from './handleUpload.js'
@@ -28,10 +29,12 @@ export type S3StorageOptions = {
 
   bucket: string
 
+  clientUploads?: boolean
   /**
    * Collection options to apply the S3 adapter to.
    */
   collections: Partial<Record<UploadCollectionSlug, Omit<CollectionOptions, 'adapter'> | true>>
+
   /**
    * AWS S3 client configuration. Highly dependent on your AWS setup.
    *
@@ -63,7 +66,53 @@ export const s3Storage: S3StoragePlugin =
       return incomingConfig
     }
 
-    const adapter = s3StorageInternal(s3StorageOptions)
+    let storageClient: AWS.S3 | null = null
+
+    const getStorageClient: () => AWS.S3 = () => {
+      if (storageClient) {
+        return storageClient
+      }
+      storageClient = new AWS.S3(s3StorageOptions.config ?? {})
+      return storageClient
+    }
+
+    if (s3StorageOptions.clientUploads) {
+      if (!incomingConfig.endpoints) {
+        incomingConfig.endpoints = []
+      }
+
+      incomingConfig.endpoints.push({
+        handler: getGenerateSignedURLHandler({
+          acl: s3StorageOptions.acl,
+          bucket: s3StorageOptions.bucket,
+          collections: s3StorageOptions.collections,
+          getStorageClient,
+        }),
+        method: 'post',
+        path: '/storage-s3-generate-signed-url',
+      })
+    }
+
+    if (!incomingConfig.admin) {
+      incomingConfig.admin = {}
+    }
+
+    if (!incomingConfig.admin.components) {
+      incomingConfig.admin.components = {}
+    }
+
+    if (!incomingConfig.admin.components.providers) {
+      incomingConfig.admin.components.providers = []
+    }
+
+    for (const collectionSlug in s3StorageOptions.collections) {
+      incomingConfig.admin.components.providers.push({
+        clientProps: { collectionSlug },
+        path: '@payloadcms/storage-s3/client#S3ClientUploadHandler',
+      })
+    }
+
+    const adapter = s3StorageInternal(getStorageClient, s3StorageOptions)
 
     // Add adapter to each collection option object
     const collectionsWithAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
@@ -102,17 +151,11 @@ export const s3Storage: S3StoragePlugin =
     })(config)
   }
 
-function s3StorageInternal({ acl, bucket, config = {} }: S3StorageOptions): Adapter {
+function s3StorageInternal(
+  getStorageClient: () => AWS.S3,
+  { acl, bucket, config = {} }: S3StorageOptions,
+): Adapter {
   return ({ collection, prefix }): GeneratedAdapter => {
-    let storageClient: AWS.S3 | null = null
-    const getStorageClient: () => AWS.S3 = () => {
-      if (storageClient) {
-        return storageClient
-      }
-      storageClient = new AWS.S3(config)
-      return storageClient
-    }
-
     return {
       name: 's3',
       generateURL: getGenerateURL({ bucket, config }),
