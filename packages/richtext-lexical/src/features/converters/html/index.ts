@@ -6,35 +6,74 @@ import type { SerializedBlockNode, SerializedInlineBlockNode } from '../../../no
 import type {
   HTMLConverter,
   HTMLConverters,
+  HTMLConvertersFunction,
   ProvidedCSS,
   SerializedLexicalNodeWithParent,
 } from './types.js'
 
 import { hasText } from '../../../validate/hasText.js'
+import { defaultHTMLConverters } from './defaultConverters.js'
 
 export type ConvertLexicalToHTMLArgs = {
-  converters: HTMLConverters
+  /**
+   * Override class names for the container.
+   */
+  className?: string
+  converters?: HTMLConverters | HTMLConvertersFunction
   data: SerializedEditorState
+  /**
+   * If true, removes the container div wrapper.
+   */
+  disableContainer?: boolean
+  /**
+   * If true, disables indentation globally. If an array, disables for specific node `type` values.
+   */
   disableIndent?: boolean | string[]
+  /**
+   * If true, disables text alignment globally. If an array, disables for specific node `type` values.
+   */
   disableTextAlign?: boolean | string[]
 }
 
 export function convertLexicalToHTML({
+  className,
   converters,
   data,
+  disableContainer,
   disableIndent,
   disableTextAlign,
 }: ConvertLexicalToHTMLArgs): string {
   if (hasText(data)) {
-    return convertLexicalNodesToHTML({
-      converters,
+    let finalConverters: HTMLConverters = {}
+    if (converters) {
+      if (typeof converters === 'function') {
+        finalConverters = converters({ defaultConverters: defaultHTMLConverters })
+      } else {
+        finalConverters = converters
+      }
+    } else {
+      finalConverters = defaultHTMLConverters
+    }
+
+    const html = convertLexicalNodesToHTML({
+      converters: finalConverters,
       disableIndent,
       disableTextAlign,
       nodes: data?.root?.children,
       parent: data?.root,
     }).join('')
+
+    if (disableContainer) {
+      return html
+    } else {
+      return `<div class="${className ?? 'payload-richtext'}">${html}</div>`
+    }
   }
-  return ''
+  if (disableContainer) {
+    return ''
+  } else {
+    return `<div class="${className ?? 'payload-richtext'}"></div>`
+  }
 }
 
 export function convertLexicalNodesToHTML({

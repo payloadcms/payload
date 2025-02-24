@@ -75,6 +75,14 @@ export type HTMLConverters<
     >
   }
 }
+
+export type HTMLConvertersFunction<
+  T extends { [key: string]: any; type?: string } =
+    | DefaultNodeTypes
+    | SerializedBlockNode<{ blockName?: null | string }>
+    | SerializedInlineBlockNode<{ blockName?: null | string; blockType: string }>,
+> = (args: { defaultConverters: HTMLConverters<DefaultNodeTypes> }) => HTMLConverters<T>
+
 export type SerializedLexicalNodeWithParent = {
   parent?: SerializedLexicalNode
 } & SerializedLexicalNode

@@ -16,6 +16,7 @@ export { convertLexicalToHTML } from '../../features/converters/html/index.js'
 export type {
   HTMLConverter,
   HTMLConverters,
+  HTMLConvertersFunction,
   ProvidedCSS,
   SerializedLexicalNodeWithParent,
 } from '../../features/converters/html/types.js'

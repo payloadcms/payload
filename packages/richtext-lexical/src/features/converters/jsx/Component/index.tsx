@@ -21,7 +21,7 @@ export type JSXConvertersFunction<
 
 type RichTextProps = {
   /**
-   * Additional class names for the container.
+   * Override class names for the container.
    */
   className?: string
   /**
