@@ -3,7 +3,10 @@ import type { UploadCollectionSlug } from 'payload'
 
 import React, { useState } from 'react'
 
-type UploadHandler = (args: { file: File }) => Promise<void>
+type UploadHandler = (args: {
+  file: File
+  updateFilename: (filename: string) => void
+}) => Promise<void>
 
 export type UploadHandlersContext = {
   getUploadHandler: (args: { collectionSlug: UploadCollectionSlug }) => null | UploadHandler

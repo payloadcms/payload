@@ -22,7 +22,6 @@ export const getStaticHandler = (
 
       const fileUrl = `${baseUrl}/${fileKey}`
       const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
-
       const blobMetadata = await head(fileUrl, { token })
       const uploadedAtString = blobMetadata.uploadedAt.toISOString()
       const ETag = `"${fileKey}-${uploadedAtString}"`

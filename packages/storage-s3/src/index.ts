@@ -107,7 +107,10 @@ export const s3Storage: S3StoragePlugin =
 
     for (const collectionSlug in s3StorageOptions.collections) {
       incomingConfig.admin.components.providers.push({
-        clientProps: { collectionSlug },
+        clientProps: {
+          collectionSlug,
+          enabled: !!s3StorageOptions.clientUploads,
+        },
         path: '@payloadcms/storage-s3/client#S3ClientUploadHandler',
       })
     }

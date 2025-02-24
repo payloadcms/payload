@@ -9,6 +9,7 @@ import type { Config, Plugin, UploadCollectionSlug } from 'payload'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 
 import { getGenerateUrl } from './generateURL.js'
+import { getClientUploadRoute } from './getClientUploadRoute.js'
 import { getHandleDelete } from './handleDelete.js'
 import { getHandleUpload } from './handleUpload.js'
 import { getStaticHandler } from './staticHandler.js'
@@ -35,6 +36,8 @@ export type VercelBlobStorageOptions = {
    * @defaultvalue 365 * 24 * 60 * 60 (1 Year)
    */
   cacheControlMaxAge?: number
+
+  clientUploads?: boolean
 
   /**
    * Collections to apply the Vercel Blob adapter to
@@ -89,7 +92,50 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
       ...options,
     }
 
+    if (options.clientUploads) {
+      if (!incomingConfig.endpoints) {
+        incomingConfig.endpoints = []
+      }
+
+      incomingConfig.endpoints.push({
+        handler: getClientUploadRoute({
+          addRandomSuffix: options.addRandomSuffix,
+          cacheControlMaxAge: options.cacheControlMaxAge,
+          token: options.token,
+        }),
+        method: 'post',
+        path: '/vercel-blob-client-upload-route',
+      })
+    }
+
+    if (!incomingConfig.admin) {
+      incomingConfig.admin = {}
+    }
+
+    if (!incomingConfig.admin.components) {
+      incomingConfig.admin.components = {}
+    }
+
+    if (!incomingConfig.admin.components.providers) {
+      incomingConfig.admin.components.providers = []
+    }
+
     const baseUrl = `https://${storeId}.${optionsWithDefaults.access}.blob.vercel-storage.com`
+
+    for (const collectionSlug in options.collections) {
+      const collectionConfig = options.collections[collectionSlug]
+
+      incomingConfig.admin.components.providers.push({
+        clientProps: {
+          addRandomSuffix: options.addRandomSuffix,
+          baseURL: baseUrl,
+          collectionSlug,
+          enabled: !!options.clientUploads,
+          prefix: (typeof collectionConfig === 'object' && collectionConfig.prefix) || '',
+        },
+        path: '@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler',
+      })
+    }
 
     const adapter = vercelBlobStorageInternal({ ...optionsWithDefaults, baseUrl })
 
