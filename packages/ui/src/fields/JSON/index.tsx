@@ -57,7 +57,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
 
   const [initialStringValue, setInitialStringValue] = useState<string | undefined>(() =>
     (value || initialValue) !== undefined
-      ? JSON.stringify(value || initialValue, null, 2)
+      ? JSON.stringify(value ?? initialValue, null, 2)
       : undefined,
   )
 
@@ -108,7 +108,11 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
 
   useEffect(() => {
     if (inputChangeFromRef.current === 'system') {
-      setInitialStringValue(JSON.stringify(value || initialValue, null, 2))
+      setInitialStringValue(
+        (value || initialValue) !== undefined
+          ? JSON.stringify(value ?? initialValue, null, 2)
+          : undefined,
+      )
       setEditorKey(new Date().toString())
     }
 
