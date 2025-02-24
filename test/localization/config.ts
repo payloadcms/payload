@@ -64,8 +64,16 @@ export default buildConfigWithDefaults({
     NestedArray,
     NestedFields,
     {
+      admin: {
+        listSearchableFields: 'name',
+      },
       auth: true,
       fields: [
+        {
+          name: 'name',
+          label: { en: 'Full name' },
+          type: 'text',
+        },
         {
           name: 'relation',
           relationTo: localizedPostsSlug,
@@ -83,6 +91,7 @@ export default buildConfigWithDefaults({
       fields: [
         {
           name: 'title',
+          label: { en: 'Full title' },
           index: true,
           localized: true,
           type: 'text',
