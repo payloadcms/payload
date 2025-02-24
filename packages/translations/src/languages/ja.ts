@@ -373,6 +373,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     isLike: 'のような',
     isNotEqualTo: '等しくない',
     isNotIn: '入っていません',
+    isNotLike: 'ではない',
     near: '近く',
     within: '内で',
   },

@@ -24,7 +24,7 @@ export type RenderedFieldSlots = Map<string, RenderedField>
 /**
  * Get the state of the form, can be used to submit & validate the form.
  *
- * @see https://payloadcms.com/docs/admin/hooks#useform
+ * @see https://payloadcms.com/docs/admin/react-hooks#useform
  */
 const useForm = (): Context => useContext(FormContext)
 /**
@@ -42,7 +42,7 @@ const useFormInitializing = (): boolean => useContext(InitializingContext)
 /**
  * Get and set the value of a form field based on a selector
  *
- * @see https://payloadcms.com/docs/admin/hooks#useformfields
+ * @see https://payloadcms.com/docs/admin/react-hooks#useformfields
  */
 const useFormFields = <Value = unknown>(
   selector: (context: FormFieldsContextType) => Value,
@@ -51,7 +51,7 @@ const useFormFields = <Value = unknown>(
 /**
  * Get the state of all form fields.
  *
- * @see https://payloadcms.com/docs/admin/hooks#useallformfields
+ * @see https://payloadcms.com/docs/admin/react-hooks#useallformfields
  */
 const useAllFormFields = (): FormFieldsContextType => useFullContext(FormFieldsContext)
 

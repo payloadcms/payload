@@ -9,9 +9,26 @@ import React, { createContext } from 'react'
 import { SELECT_ALL } from '../../constants.js'
 
 type ContextType = {
+  /**
+   * Array of options to select from
+   */
   options: OptionObject[]
+  /**
+   * The currently selected tenant ID
+   */
   selectedTenantID: number | string | undefined
+  /**
+   * Prevents a refresh when the tenant is changed
+   *
+   * If not switching tenants while viewing a "global", set to true
+   */
   setPreventRefreshOnChange: React.Dispatch<React.SetStateAction<boolean>>
+  /**
+   * Sets the selected tenant ID
+   *
+   * @param args.id - The ID of the tenant to select
+   * @param args.refresh - Whether to refresh the page after changing the tenant
+   */
   setTenant: (args: { id: number | string | undefined; refresh?: boolean }) => void
 }
 

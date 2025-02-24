@@ -373,6 +373,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     isLike: 'е като',
     isNotEqualTo: 'не е равно на',
     isNotIn: 'не е в',
+    isNotLike: 'не е като',
     near: 'близко',
     within: 'в рамките на',
   },

@@ -92,6 +92,8 @@ export const multiTenantPlugin =
     addCollectionAccess({
       collection: adminUsersCollection,
       fieldName: `${tenantsArrayFieldName}.${tenantsArrayTenantFieldName}`,
+      tenantsArrayFieldName,
+      tenantsArrayTenantFieldName,
       userHasAccessToAllTenants,
     })
 
@@ -130,6 +132,8 @@ export const multiTenantPlugin =
           addCollectionAccess({
             collection,
             fieldName: 'id',
+            tenantsArrayFieldName,
+            tenantsArrayTenantFieldName,
             userHasAccessToAllTenants,
           })
         }
@@ -205,6 +209,8 @@ export const multiTenantPlugin =
           addCollectionAccess({
             collection,
             fieldName: tenantFieldName,
+            tenantsArrayFieldName,
+            tenantsArrayTenantFieldName,
             userHasAccessToAllTenants,
           })
         }

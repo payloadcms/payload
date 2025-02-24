@@ -366,6 +366,7 @@ export const heTranslations: DefaultTranslationsObject = {
     isLike: 'דומה ל',
     isNotEqualTo: 'לא שווה ל',
     isNotIn: 'לא נמצא ב',
+    isNotLike: 'אינו דומה',
     near: 'קרוב ל',
     within: 'בתוך',
   },
