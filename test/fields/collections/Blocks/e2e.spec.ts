@@ -3,6 +3,7 @@ import type { BrowserContext, Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 import { addBlock } from 'helpers/e2e/addBlock.js'
 import { openBlocksDrawer } from 'helpers/e2e/openBlocksDrawer.js'
+import { reorderBlocks } from 'helpers/e2e/reorderBlocks.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -289,6 +290,39 @@ describe('Block fields', () => {
   })
 
   describe('row manipulation', () => {
+    test('moving rows should immediately move custom row labels', async () => {
+      await page.goto(url.create)
+
+      // first ensure that the first block has the custom header, and that the second block doesn't
+
+      await expect(
+        page.locator('#field-blocks #blocks-row-0 .blocks-field__block-header'),
+      ).toHaveText('Custom Block Label: Content 01')
+
+      const secondBlockHeader = page.locator(
+        '#field-blocks #blocks-row-1 .blocks-field__block-header',
+      )
+
+      await expect(secondBlockHeader.locator('.blocks-field__block-pill')).toHaveText('Number')
+
+      await expect(secondBlockHeader.locator('input[id="blocks.1.blockName"]')).toHaveValue(
+        'Second block',
+      )
+
+      await reorderBlocks({
+        page,
+        fieldName: 'blocks',
+        fromBlockIndex: 0,
+        toBlockIndex: 1,
+      })
+
+      // Important: do _not_ poll here, use `textContent()` instead of `toHaveText()`
+      // This will prevent Playwright from polling for the change to the DOM
+      expect(
+        await page.locator('#field-blocks #blocks-row-1 .blocks-field__block-header').textContent(),
+      ).toMatch(/^Custom Block Label: Content/)
+    })
+
     describe('react hooks', () => {
       test('should add 2 new block rows', async () => {
         await page.goto(url.create)
