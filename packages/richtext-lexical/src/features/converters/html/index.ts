@@ -111,16 +111,12 @@ export function convertLexicalNodesToHTML({
       }
     }
 
-    let providedCSSString: null | string = ''
+    let providedCSSString: string = ''
     for (const key of Object.keys(style)) {
       // @ts-expect-error we're iterating over the keys of the object
       providedCSSString += `${key}: ${style[key]};`
     }
-    if (!providedCSSString?.length) {
-      providedCSSString = null
-    }
-
-    const providedStyleTag = providedCSSString ? ` style="${providedCSSString}"` : ''
+    const providedStyleTag = providedCSSString?.length ? ` style="${providedCSSString}"` : ''
 
     try {
       if (!converterForNode && unknownConverter) {

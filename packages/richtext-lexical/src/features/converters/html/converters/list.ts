@@ -4,14 +4,14 @@ import type { SerializedListItemNode, SerializedListNode } from '../../../../nod
 import type { HTMLConverters } from '../types.js'
 
 export const ListHTMLConverter: HTMLConverters<SerializedListItemNode | SerializedListNode> = {
-  list: ({ node, nodesToHTML }) => {
+  list: ({ node, nodesToHTML, providedStyleTag }) => {
     const children = nodesToHTML({
       nodes: node.children,
     }).join('')
 
-    return `<${node.tag} class="list-${node.listType}">{children}</${node.tag}>`
+    return `<${node.tag}${providedStyleTag} class="list-${node.listType}">${children}</${node.tag}>`
   },
-  listitem: ({ node, nodesToHTML, parent }) => {
+  listitem: ({ node, nodesToHTML, parent, providedCSSString }) => {
     const hasSubLists = node.children.some((child) => child.type === 'list')
 
     const children = nodesToHTML({
@@ -24,24 +24,22 @@ export const ListHTMLConverter: HTMLConverters<SerializedListItemNode | Serializ
           aria-checked="${node.checked ? 'true' : 'false'}"
           class="list-item-checkbox${node.checked ? ' list-item-checkbox-checked' : ' list-item-checkbox-unchecked'}${hasSubLists ? ' nestedListItem' : ''}"
           role="checkbox"
-          style="list-style-type: none;"
+          style="list-style-type: none;${providedCSSString}"
           tabIndex="-1"
           value="${node.value}"
         >
           ${
             hasSubLists
               ? children
-              : `
-            <input checked="${node.checked}" id="${uuid}" readOnly="true" type="checkbox" />
+              : `<input checked="${node.checked}" id="${uuid}" readOnly="true" type="checkbox" />
             <label htmlFor="${uuid}">${children}</label>
-            <br />
-          `
+            <br />`
           }
         </li>`
     } else {
       return `<li
           class="${hasSubLists ? 'nestedListItem' : ''}"
-          style="${hasSubLists ? 'list-style-type: none;' : ''}"
+          style="${hasSubLists ? `list-style-type: none;${providedCSSString}` : providedCSSString}"
           value="${node.value}"
         >${children}</li>`
     }

@@ -1,24 +1,21 @@
-export {
-  type JSXConvertersFunction,
-  RichText,
-} from '../../features/converters/jsx/Component/index.js'
-export { BlockquoteJSXConverter } from '../../features/converters/jsx/converter/converters/blockquote.jsx'
-export { HeadingJSXConverter } from '../../features/converters/jsx/converter/converters/heading.jsx'
-export { HorizontalRuleJSXConverter } from '../../features/converters/jsx/converter/converters/horizontalRule.jsx'
-export { LinebreakJSXConverter } from '../../features/converters/jsx/converter/converters/linebreak.jsx'
-export { LinkJSXConverter } from '../../features/converters/jsx/converter/converters/link.jsx'
-export { ListJSXConverter } from '../../features/converters/jsx/converter/converters/list.jsx'
-export { ParagraphJSXConverter } from '../../features/converters/jsx/converter/converters/paragraph.jsx'
-export { TabJSXConverter } from '../../features/converters/jsx/converter/converters/tab.jsx'
-export { TableJSXConverter } from '../../features/converters/jsx/converter/converters/table.jsx'
+export { BlockquoteHTMLConverter } from '../../features/converters/html/converters/blockquote.js'
+export { HeadingHTMLConverter } from '../../features/converters/html/converters/heading.js'
+export { HorizontalRuleHTMLConverter } from '../../features/converters/html/converters/horizontalRule.js'
+export { LinebreakHTMLConverter } from '../../features/converters/html/converters/linebreak.js'
+export { LinkHTMLConverter } from '../../features/converters/html/converters/link.js'
+export { ListHTMLConverter } from '../../features/converters/html/converters/list.js'
+export { ParagraphHTMLConverter } from '../../features/converters/html/converters/paragraph.js'
+export { TabHTMLConverter } from '../../features/converters/html/converters/tab.js'
+export { TableHTMLConverter } from '../../features/converters/html/converters/table.js'
+export { TextHTMLConverter } from '../../features/converters/html/converters/text.js'
 
-export { TextJSXConverter } from '../../features/converters/jsx/converter/converters/text.jsx'
+export { UploadHTMLConverter } from '../../features/converters/html/converters/upload.js'
 
-export { UploadJSXConverter } from '../../features/converters/jsx/converter/converters/upload.jsx'
-export { defaultJSXConverters } from '../../features/converters/jsx/converter/defaultConverters.js'
-export { convertLexicalNodesToJSX } from '../../features/converters/jsx/converter/index.jsx'
+export { defaultHTMLConverters } from '../../features/converters/html/defaultConverters.js'
+export { convertLexicalToHTML } from '../../features/converters/html/index.js'
 export type {
-  JSXConverter,
-  JSXConverters,
+  HTMLConverter,
+  HTMLConverters,
+  ProvidedCSS,
   SerializedLexicalNodeWithParent,
-} from '../../features/converters/jsx/converter/types.js'
+} from '../../features/converters/html/types.js'

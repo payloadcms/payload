@@ -1,48 +1,44 @@
 import type { FileSizeImproved } from 'payload'
 
 import type { SerializedUploadNode } from '../../../../nodeTypes.js'
-import type { UploadDataImproved } from '../../../upload/server/nodes/UploadNode.jsx'
-import type { JSXConverters } from '../types.js'
+import type { UploadDataImproved } from '../../../upload/server/nodes/UploadNode.js'
+import type { HTMLConverters } from '../types.js'
 
-export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
-  upload: ({ node }) => {
-    // TO-DO (v4): SerializedUploadNode should use UploadData_P4
+export const UploadHTMLConverter: HTMLConverters<SerializedUploadNode> = {
+  upload: ({ node, providedStyleTag }) => {
     const uploadDocument = node as UploadDataImproved
+
+    // If there's no valid upload data, return an empty string
     if (typeof uploadDocument?.value !== 'object') {
-      return null
+      return ''
     }
 
     const value = uploadDocument.value
     const url = value.url
 
-    /**
-     * If the upload is not an image, return a link to the upload
-     */
+    // 1) If upload is NOT an image, return a link
     if (!value.mimeType.startsWith('image')) {
-      return (
-        <a href={url} rel="noopener noreferrer">
-          {value.filename}
-        </a>
-      )
+      return `<a${providedStyleTag} href="${url}" rel="noopener noreferrer">${value.filename}</a$>`
     }
 
-    /**
-     * If the upload is a simple image with no different sizes, return a simple img tag
-     */
+    // 2) If image has no different sizes, return a simple <img />
     if (!Object.keys(value.sizes).length) {
-      return <img alt={value.filename} height={value.height} src={url} width={value.width} />
+      return `
+        <img${providedStyleTag}
+          alt="${value.filename}"
+          height="${value.height}"
+          src="${url}"
+          width="${value.width}"
+        />
+      `
     }
 
-    /**
-     * If the upload is an image with different sizes, return a picture element
-     */
-    const pictureJSX: React.ReactNode[] = []
+    // 3) If image has different sizes, build a <picture> element with <source> tags
+    let pictureHTML = ''
 
-    // Iterate through each size in the data.sizes object
     for (const size in value.sizes) {
       const imageSize = value.sizes[size] as FileSizeImproved
 
-      // Skip if any property of the size object is null
       if (
         !imageSize ||
         !imageSize.width ||
@@ -54,28 +50,25 @@ export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
       ) {
         continue
       }
-      const imageSizeURL = imageSize?.url
 
-      pictureJSX.push(
+      pictureHTML += `
         <source
-          key={size}
-          media={`(max-width: ${imageSize.width}px)`}
-          srcSet={imageSizeURL}
-          type={imageSize.mimeType}
-        ></source>,
-      )
+          media="(max-width: ${imageSize.width}px)"
+          srcset="${imageSize.url}"
+          type="${imageSize.mimeType}"
+        />
+      `
     }
 
-    // Add the default img tag
-    pictureJSX.push(
+    pictureHTML += `
       <img
-        alt={value?.filename}
-        height={value?.height}
-        key={'image'}
-        src={url}
-        width={value?.width}
-      />,
-    )
-    return <picture>{pictureJSX}</picture>
+        alt="${value.filename}"
+        height="${value.height}"
+        src="${url}"
+        width="${value.width}"
+      />
+    `
+
+    return `<picture${providedStyleTag}>${pictureHTML}</picture$>`
   },
 }

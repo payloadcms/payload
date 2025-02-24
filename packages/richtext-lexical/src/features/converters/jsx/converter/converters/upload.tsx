@@ -62,7 +62,7 @@ export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
           media={`(max-width: ${imageSize.width}px)`}
           srcSet={imageSizeURL}
           type={imageSize.mimeType}
-        ></source>,
+        />,
       )
     }
 

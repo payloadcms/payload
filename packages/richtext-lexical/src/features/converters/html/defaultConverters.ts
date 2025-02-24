@@ -1,28 +1,28 @@
 import type { DefaultNodeTypes } from '../../../nodeTypes.js'
 import type { HTMLConverters } from './types.js'
 
-import { BlockquoteJSXConverter } from './converters/blockquote.js'
-import { HeadingJSXConverter } from './converters/heading.js'
-import { HorizontalRuleJSXConverter } from './converters/horizontalRule.js'
-import { LinebreakJSXConverter } from './converters/linebreak.js'
-import { LinkJSXConverter } from './converters/link.js'
-import { ListJSXConverter } from './converters/list.js'
-import { ParagraphJSXConverter } from './converters/paragraph.js'
-import { TabJSXConverter } from './converters/tab.js'
-import { TableJSXConverter } from './converters/table.js'
-import { TextJSXConverter } from './converters/text.js'
-import { UploadJSXConverter } from './converters/upload.js'
+import { BlockquoteHTMLConverter } from './converters/blockquote.js'
+import { HeadingHTMLConverter } from './converters/heading.js'
+import { HorizontalRuleHTMLConverter } from './converters/horizontalRule.js'
+import { LinebreakHTMLConverter } from './converters/linebreak.js'
+import { LinkHTMLConverter } from './converters/link.js'
+import { ListHTMLConverter } from './converters/list.js'
+import { ParagraphHTMLConverter } from './converters/paragraph.js'
+import { TabHTMLConverter } from './converters/tab.js'
+import { TableHTMLConverter } from './converters/table.js'
+import { TextHTMLConverter } from './converters/text.js'
+import { UploadHTMLConverter } from './converters/upload.js'
 
-export const defaultJSXConverters: HTMLConverters<DefaultNodeTypes> = {
-  ...ParagraphJSXConverter,
-  ...TextJSXConverter,
-  ...LinebreakJSXConverter,
-  ...BlockquoteJSXConverter,
-  ...TableJSXConverter,
-  ...HeadingJSXConverter,
-  ...HorizontalRuleJSXConverter,
-  ...ListJSXConverter,
-  ...LinkJSXConverter({}),
-  ...UploadJSXConverter,
-  ...TabJSXConverter,
+export const defaultHTMLConverters: HTMLConverters<DefaultNodeTypes> = {
+  ...ParagraphHTMLConverter,
+  ...TextHTMLConverter,
+  ...LinebreakHTMLConverter,
+  ...BlockquoteHTMLConverter,
+  ...TableHTMLConverter,
+  ...HeadingHTMLConverter,
+  ...HorizontalRuleHTMLConverter,
+  ...ListHTMLConverter,
+  ...LinkHTMLConverter({}),
+  ...UploadHTMLConverter,
+  ...TabHTMLConverter,
 }

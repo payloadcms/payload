@@ -4,7 +4,7 @@ import type { HTMLConverters } from '../types.js'
 export const LinkHTMLConverter: (args: {
   internalDocToHref?: (args: { linkNode: SerializedLinkNode }) => string
 }) => HTMLConverters<SerializedAutoLinkNode | SerializedLinkNode> = ({ internalDocToHref }) => ({
-  autolink: ({ node, nodesToHTML }) => {
+  autolink: ({ node, nodesToHTML, providedStyleTag }) => {
     const children = nodesToHTML({
       nodes: node.children,
     }).join('')
@@ -13,12 +13,12 @@ export const LinkHTMLConverter: (args: {
     const target: string | undefined = node.fields.newTab ? '_blank' : undefined
 
     return `(
-      <a href="${node.fields.url}" rel=${rel} target=${target}>
+      <a${providedStyleTag} href="${node.fields.url}" rel=${rel} target=${target}>
         ${children}
       </a>
     )`
   },
-  link: ({ node, nodesToHTML }) => {
+  link: ({ node, nodesToHTML, providedStyleTag }) => {
     const children = nodesToHTML({
       nodes: node.children,
     }).join('')
@@ -32,14 +32,14 @@ export const LinkHTMLConverter: (args: {
         href = internalDocToHref({ linkNode: node })
       } else {
         console.error(
-          'Lexical => JSX converter: Link converter: found internal link, but internalDocToHref is not provided',
+          'Lexical => HTML converter: Link converter: found internal link, but internalDocToHref is not provided',
         )
         href = '#' // fallback
       }
     }
 
     return `(
-      <a href="${href}" rel=${rel} target=${target}>
+      <a${providedStyleTag} href="${href}" rel=${rel} target=${target}>
         ${children}
       </a>
     )`

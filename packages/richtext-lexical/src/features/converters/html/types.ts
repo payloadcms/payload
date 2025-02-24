@@ -19,7 +19,7 @@ export type HTMLConverter<T extends { [key: string]: any; type?: string } = Seri
           parent?: SerializedLexicalNodeWithParent
         }) => string[]
         parent: SerializedLexicalNodeWithParent
-        providedCSSString: null | string
+        providedCSSString: string
         providedStyleTag: string
       }) => string)
     | string
