@@ -378,6 +378,7 @@ export const trTranslations: DefaultTranslationsObject = {
     isLike: 'gibidir',
     isNotEqualTo: 'eşit değildir',
     isNotIn: 'içinde değil',
+    isNotLike: 'gibi değil',
     near: 'yakın',
     within: 'içinde',
   },

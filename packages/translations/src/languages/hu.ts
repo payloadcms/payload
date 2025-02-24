@@ -376,6 +376,7 @@ export const huTranslations: DefaultTranslationsObject = {
     isLike: 'olyan, mint',
     isNotEqualTo: 'nem egyenlő',
     isNotIn: 'nincs benne',
+    isNotLike: 'nem olyan mint',
     near: 'közel',
     within: 'belül',
   },

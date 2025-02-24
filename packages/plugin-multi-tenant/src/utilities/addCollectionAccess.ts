@@ -20,6 +20,8 @@ const collectionAccessKeys: AllAccessKeys<
 type Args<ConfigType> = {
   collection: CollectionConfig
   fieldName: string
+  tenantsArrayFieldName?: string
+  tenantsArrayTenantFieldName?: string
   userHasAccessToAllTenants: Required<
     MultiTenantPluginConfig<ConfigType>
   >['userHasAccessToAllTenants']
@@ -32,6 +34,8 @@ type Args<ConfigType> = {
 export const addCollectionAccess = <ConfigType>({
   collection,
   fieldName,
+  tenantsArrayFieldName,
+  tenantsArrayTenantFieldName,
   userHasAccessToAllTenants,
 }: Args<ConfigType>): void => {
   collectionAccessKeys.forEach((key) => {
@@ -40,7 +44,11 @@ export const addCollectionAccess = <ConfigType>({
     }
     collection.access[key] = withTenantAccess<ConfigType>({
       accessFunction: collection.access?.[key],
+      collection,
       fieldName: key === 'readVersions' ? `version.${fieldName}` : fieldName,
+      operation: key,
+      tenantsArrayFieldName,
+      tenantsArrayTenantFieldName,
       userHasAccessToAllTenants,
     })
   })

@@ -378,6 +378,7 @@ export const myTranslations: DefaultTranslationsObject = {
     isLike: 'တူသည်',
     isNotEqualTo: 'ညီမျှသည်',
     isNotIn: 'မဝင်ပါ',
+    isNotLike: 'မဟုတ်ကဲ့သို့',
     near: 'နီး',
     within: 'အတွင်း',
   },

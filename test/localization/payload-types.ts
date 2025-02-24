@@ -64,7 +64,6 @@ export interface Config {
   auth: {
     users: UserAuthOperations;
   };
-  blocks: {};
   collections: {
     richText: RichText;
     'blocks-fields': BlocksField;
@@ -322,6 +321,7 @@ export interface NestedFieldTable {
  */
 export interface User {
   id: string;
+  name?: string | null;
   relation?: (string | null) | LocalizedPost;
   updatedAt: string;
   createdAt: string;
@@ -928,6 +928,7 @@ export interface NestedFieldTablesSelect<T extends boolean = true> {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  name?: T;
   relation?: T;
   updatedAt?: T;
   createdAt?: T;

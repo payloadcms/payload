@@ -374,6 +374,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     isLike: 'je kao',
     isNotEqualTo: 'nije jednako',
     isNotIn: 'nije unutra',
+    isNotLike: 'nije kao',
     near: 'blizu',
     within: 'unutar',
   },

@@ -378,6 +378,7 @@ export const esTranslations: DefaultTranslationsObject = {
     isLike: 'es como',
     isNotEqualTo: 'no es igual a',
     isNotIn: 'no está en',
+    isNotLike: 'no es como',
     near: 'cerca',
     within: 'dentro de',
   },
