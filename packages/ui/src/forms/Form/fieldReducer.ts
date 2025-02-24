@@ -205,23 +205,25 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
 
       // Do the same for custom components, i.e. `array.customComponents.RowLabels[0]` -> `array.customComponents.RowLabels[1]`
       // Do this _after_ initializing `newState` to avoid adding the `customComponents` key to the state if it doesn't exist
-      if (state[path]?.customComponents?.RowLabels) {
-        const RowLabels = [...state[path].customComponents.RowLabels]
-        const copyOfMovingRowLabel = RowLabels[moveFromIndex]
+      if (newState[path]?.customComponents?.RowLabels) {
+        const customComponents = {
+          ...newState[path].customComponents,
+          RowLabels: [...newState[path].customComponents.RowLabels],
+        }
 
         // Ensure the array grows if necessary
-        if (moveToIndex >= RowLabels.length) {
-          RowLabels.length = moveToIndex + 1
+        if (moveToIndex >= customComponents.RowLabels.length) {
+          customComponents.RowLabels.length = moveToIndex + 1
         }
 
-        RowLabels.splice(moveFromIndex, 1)
-        RowLabels.splice(moveToIndex, 0, copyOfMovingRowLabel)
+        const copyOfMOvingRow = customComponents.RowLabels[moveFromIndex]
 
-        if (!newState[path].customComponents) {
-          newState[path].customComponents = {}
-        }
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        customComponents.RowLabels.splice(moveFromIndex, 1)
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        customComponents.RowLabels.splice(moveToIndex, 0, copyOfMOvingRow)
 
-        newState[path].customComponents.RowLabels = RowLabels
+        newState[path].customComponents = customComponents
       }
 
       return newState
