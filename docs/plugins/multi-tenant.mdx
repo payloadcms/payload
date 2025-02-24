@@ -278,6 +278,50 @@ async rewrites() {
 }
 ```
 
+### React Hooks
+
+Below are the hooks exported from the plugin that you can import into your own custom components to consume.
+
+#### useTenantSelection
+
+You can import this like so:
+
+```tsx
+import { useTenantSelection } from '@payloadcms/plugin-multi-tenant/client'
+
+...
+
+const tenantContext = useTenantSelection()
+```
+
+The hook returns the following context:
+
+```ts
+type ContextType = {
+  /**
+   * Array of options to select from
+   */
+  options: OptionObject[]
+  /**
+   * The currently selected tenant ID
+   */
+  selectedTenantID: number | string | undefined
+  /**
+   * Prevents a refresh when the tenant is changed
+   *
+   * If not switching tenants while viewing a "global", set to true
+   */
+  setPreventRefreshOnChange: React.Dispatch<React.SetStateAction<boolean>>
+  /**
+   * Sets the selected tenant ID
+   * 
+   * @param args.id - The ID of the tenant to select
+   * @param args.refresh - Whether to refresh the page after changing the tenant
+   */
+  setTenant: (args: { id: number | string | undefined; refresh?: boolean }) => void
+}
+```
+
 
 ## Examples
 
