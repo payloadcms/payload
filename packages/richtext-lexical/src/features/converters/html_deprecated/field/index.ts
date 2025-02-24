@@ -1,5 +1,5 @@
 import type { SerializedEditorState } from 'lexical'
-import type { Field, FieldAffectingData, PayloadRequest, RichTextField } from 'payload'
+import type { Field, RichTextField } from 'payload'
 
 import type { SanitizedServerEditorConfig } from '../../../../lexical/config/types.js'
 import type { AdapterProps, LexicalRichTextAdapter } from '../../../../types.js'
@@ -9,7 +9,7 @@ import type { HTMLConverterFeatureProps } from '../index.js'
 import { defaultHTMLConverters } from '../converter/defaultConverters.js'
 import { convertLexicalToHTML } from '../converter/index.js'
 
-type Props = {
+type Args = {
   /**
    * Whether the lexicalHTML field should be hidden in the admin panel
    *
@@ -88,12 +88,12 @@ export const lexicalHTML: (
   /**
    * A string which matches the lexical field name you want to convert to HTML.
    *
-   * This has to be a SIBLING field of this lexicalHTML field - otherwise, it won't be able to find the lexical field.
+   * This has to be a sibling field of this lexicalHTML field - otherwise, it won't be able to find the lexical field.
    **/
   lexicalFieldName: string,
-  props: Props,
-) => Field = (lexicalFieldName, props) => {
-  const { name = 'lexicalHTML', hidden = true, storeInDB = false } = props
+  args: Args,
+) => Field = (lexicalFieldName, args) => {
+  const { name = 'lexicalHTML', hidden = true, storeInDB = false } = args
   return {
     name,
     type: 'code',
