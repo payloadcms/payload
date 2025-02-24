@@ -21,6 +21,9 @@ if (prod) {
   shelljs.env.PAYLOAD_TEST_PROD = 'true'
 }
 
+const turbo = process.argv.includes('--turbo')
+process.argv = process.argv.filter((arg) => arg !== '--turbo')
+
 const playwrightBin = path.resolve(dirname, '../node_modules/.bin/playwright')
 
 const testRunCodes: { code: number; suiteName: string }[] = []
@@ -120,6 +123,10 @@ function executePlaywright(
   ]
   if (prod) {
     spawnDevArgs.push('--prod')
+  }
+
+  if (turbo) {
+    spawnDevArgs.push('--turbo')
   }
 
   process.env.START_MEMORY_DB = 'true'
