@@ -48,22 +48,6 @@ export const getExportCollection = ({
     collection = overrideExportCollection(collection)
   }
 
-  // TODO: this should not be needed, we have to fix the select inputs
-  // sanitize incoming data
-  beforeOperation.push(({ args, operation }) => {
-    if (operation === 'create') {
-      if (args.data.sort) {
-        args.data.sort = typeof args.data.sort === 'string' ? args.data.sort : args.data.sort.value
-      }
-      args.data.fields = args.data.fields.map(
-        (option: { label: string; value: string } | string) =>
-          typeof option === 'string' ? option : option.value,
-      )
-    }
-
-    return args
-  })
-
   if (pluginConfig.disableJobsQueue) {
     beforeOperation.push(async ({ args, operation, req }) => {
       if (operation !== 'create') {

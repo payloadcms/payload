@@ -1,9 +1,17 @@
 'use client'
 
-import type { OptionObject, SelectFieldClientComponent } from 'payload'
+import type { ListPreferences, SelectFieldClientComponent } from 'payload'
+import type { ReactNode } from 'react'
 
-import { FieldLabel, ReactSelect, useConfig, useDocumentInfo, useField } from '@payloadcms/ui'
-import React, { useEffect } from 'react'
+import {
+  FieldLabel,
+  ReactSelect,
+  useConfig,
+  useDocumentInfo,
+  useField,
+  usePreferences,
+} from '@payloadcms/ui'
+import React, { useEffect, useState } from 'react'
 
 import { useImportExport } from '../ImportExportProvider/index.js'
 import { reduceFields } from './reduceFields.js'
@@ -13,53 +21,76 @@ const baseClass = 'fields-to-export'
 export const FieldsToExport: SelectFieldClientComponent = (props) => {
   const { id } = useDocumentInfo()
   const { path } = props
-  const { setValue, value } = useField({ path })
-  const { value: collectionValue } = useField({ path: 'collectionSlug' })
+  const { setValue, value } = useField<string[]>({ path })
+  const { value: collectionSlug } = useField<string>({ path: 'collectionSlug' })
   const { getEntityConfig } = useConfig()
-  const { collection, setColumnsToExport } = useImportExport()
+  const { collection } = useImportExport()
+  const { getPreference } = usePreferences()
+  const [displayedValue, setDisplayedValue] = useState<
+    { id: string; label: ReactNode; value: string }[]
+  >([])
 
-  const collectionConfig = getEntityConfig({ collectionSlug: collectionValue ?? collection })
+  const collectionConfig = getEntityConfig({ collectionSlug: collectionSlug ?? collection })
+  const fieldOptions = reduceFields({ fields: collectionConfig?.fields })
 
-  const reducedFields = reduceFields({ fields: collectionConfig?.fields }) as any[]
+  useEffect(() => {
+    if (value && value.length > 0) {
+      setDisplayedValue((prevDisplayedValue) => {
+        if (prevDisplayedValue.length > 0) {
+          return prevDisplayedValue
+        } // Prevent unnecessary updates
 
-  const fieldOptions = reducedFields.map((field) => {
-    return {
-      // TODO: the label should be used, for some reason on save there was a circular JSON error
-      label: field.value.path,
-      value: field.value.path,
+        return value.map((field) => {
+          const match = fieldOptions.find((option) => option.value === field)
+          return match ? { ...match, id: field } : { id: field, label: field, value: field }
+        })
+      })
     }
-  })
+  }, [value, fieldOptions, id])
 
-  // TODO: this is causing the form to crash
-  // set all fields to be selected by default
-  // useEffect(() => {
-  //   setValue(fieldOptions)
-  //   setColumnsToExport(fieldOptions as any)
-  // }, [fieldOptions, setColumnsToExport, setValue])
+  useEffect(() => {
+    const doAsync = async () => {
+      const currentPreferences = await getPreference<{
+        columns: ListPreferences['columns']
+      }>(`${collectionSlug}-list`)
 
-  const onChange = (value: any) => {
-    setValue(value)
-    setColumnsToExport(value)
-  }
+      if (!currentPreferences) {
+        return
+      }
 
-  // TODO: after save the form crashes, returning null to avoid errors when the id is present
-  if (id) {
-    return null
+      const columns = currentPreferences?.columns?.filter((a) => a.active).map((b) => b.accessor)
+      setValue(columns)
+    }
+
+    void doAsync()
+  }, [getPreference, collection, setValue, collectionSlug])
+  const onChange = (options: { id: string; label: ReactNode; value: string }[]) => {
+    if (!options) {
+      setValue([])
+      return
+    }
+    const updatedValue = options?.map((option) =>
+      typeof option === 'object' ? option.value : option,
+    )
+    setValue(updatedValue)
+    setDisplayedValue(options)
   }
 
   return (
-    <React.Fragment>
+    <div className={baseClass}>
       <FieldLabel label="Columns to Export" />
       <ReactSelect
         className={baseClass}
         disabled={props.readOnly}
+        getOptionValue={(option) => String(option.value)}
         isClearable={true}
         isMulti={true}
         isSortable={true}
+        // @ts-expect-error react select option
         onChange={onChange}
         options={fieldOptions}
-        value={value as OptionObject}
+        value={displayedValue}
       />
-    </React.Fragment>
+    </div>
   )
 }
