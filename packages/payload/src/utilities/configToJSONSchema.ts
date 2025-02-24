@@ -1156,14 +1156,13 @@ export function configToJSONSchema(
       )
     : {}
 
-  let blocksDefinition: JSONSchema4 | undefined = undefined
+  const blocksDefinition: JSONSchema4 | undefined = {
+    type: 'object',
+    additionalProperties: false,
+    properties: {},
+    required: [],
+  }
   if (config?.blocks?.length) {
-    blocksDefinition = {
-      type: 'object',
-      additionalProperties: false,
-      properties: {},
-      required: [],
-    }
     for (const block of config.blocks) {
       const blockFieldSchemas = fieldsToJSONSchema(
         collectionIDFieldTypes,
