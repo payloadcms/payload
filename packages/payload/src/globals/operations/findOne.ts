@@ -133,17 +133,17 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     // Execute before global hook
     // /////////////////////////////////////
 
-    await globalConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      doc =
-        (await hook({
-          context: req.context,
-          doc,
-          global: globalConfig,
-          req,
-        })) || doc
-    }, Promise.resolve())
+    if (globalConfig.hooks?.beforeRead?.length) {
+      for (const hook of globalConfig.hooks.beforeRead) {
+        doc =
+          (await hook({
+            context: req.context,
+            doc,
+            global: globalConfig,
+            req,
+          })) || doc
+      }
+    }
 
     // /////////////////////////////////////
     // Execute globalType field if not selected
@@ -182,17 +182,17 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     // Execute after global hook
     // /////////////////////////////////////
 
-    await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      doc =
-        (await hook({
-          context: req.context,
-          doc,
-          global: globalConfig,
-          req,
-        })) || doc
-    }, Promise.resolve())
+    if (globalConfig.hooks?.afterRead?.length) {
+      for (const hook of globalConfig.hooks.afterRead) {
+        doc =
+          (await hook({
+            context: req.context,
+            doc,
+            global: globalConfig,
+            req,
+          })) || doc
+      }
+    }
 
     // /////////////////////////////////////
     // Return results
