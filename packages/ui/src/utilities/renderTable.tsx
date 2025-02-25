@@ -3,9 +3,10 @@ import type {
   ClientConfig,
   ClientField,
   CollectionConfig,
+  Column,
+  ColumnPreference,
   Field,
   ImportMap,
-  ListPreferences,
   PaginatedDocs,
   Payload,
   SanitizedCollectionConfig,
@@ -13,9 +14,6 @@ import type {
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
 import { fieldAffectsData, fieldIsHiddenOrDisabled, flattenTopLevelFields } from 'payload/shared'
-
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import type { Column } from '../exports/client/index.js'
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import { buildColumnState } from '../elements/TableColumns/buildColumnState.js'
@@ -71,8 +69,8 @@ export const renderTable = ({
   clientConfig?: ClientConfig
   collectionConfig?: SanitizedCollectionConfig
   collections?: string[]
-  columnPreferences: ListPreferences['columns']
-  columns?: ListPreferences['columns']
+  columnPreferences: ColumnPreference[]
+  columns?: ColumnPreference[]
   customCellProps?: Record<string, any>
   docs: PaginatedDocs['docs']
   drawerSlug?: string
@@ -109,7 +107,7 @@ export const renderTable = ({
     const columns = columnsFromArgs
       ? columnsFromArgs?.filter((column) =>
           flattenTopLevelFields(fields, true)?.some(
-            (field) => 'name' in field && field.name === column.accessor,
+            (field) => 'name' in field && column[field.name],
           ),
         )
       : getInitialColumns(fields, useAsTitle, [])
@@ -130,7 +128,7 @@ export const renderTable = ({
     const columns = columnsFromArgs
       ? columnsFromArgs?.filter((column) =>
           flattenTopLevelFields(clientCollectionConfig.fields, true)?.some(
-            (field) => 'name' in field && field.name === column.accessor,
+            (field) => 'name' in field && field.name in column,
           ),
         )
       : getInitialColumns(
