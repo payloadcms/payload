@@ -43,7 +43,7 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
       })
 
       await refineListData({
-        columns: newColumnState.map((col) => ({ accessor: col.accessor, active: col.active })),
+        columns: newColumnState.map((col) => ({ [col.accessor]: col.active })),
       })
     },
     [refineListData, columnState, setOptimisticColumnState],
@@ -61,7 +61,7 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
       })
 
       await refineListData({
-        columns: newColumnState.map((col) => ({ accessor: col.accessor, active: col.active })),
+        columns: newColumnState.map((col) => ({ [col.accessor]: col.active })),
       })
     },
     [columnState, refineListData, setOptimisticColumnState],
@@ -69,8 +69,16 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
 
   const setActiveColumns = useCallback(
     async (columns: string[]) => {
-      const newColumnState = (currentQuery.columns || []).map((col) => {
-        return { ...col, active: columns.includes(col.accessor) }
+      const newColumnState = currentQuery.columns
+
+      columns.forEach((colName) => {
+        const colIndex = newColumnState.findIndex((c) => colName in c)
+
+        if (colIndex !== undefined) {
+          newColumnState[colIndex] = {
+            [colName]: true,
+          }
+        }
       })
 
       await refineListData({ columns: newColumnState })

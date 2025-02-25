@@ -1474,6 +1474,15 @@ export interface JsonField {
       | boolean
       | null;
   };
+  customJSON?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -3165,6 +3174,7 @@ export interface JsonFieldsSelect<T extends boolean = true> {
     | {
         jsonWithinGroup?: T;
       };
+  customJSON?: T;
   updatedAt?: T;
   createdAt?: T;
 }

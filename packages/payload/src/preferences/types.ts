@@ -29,8 +29,7 @@ export type DocumentPreferences = {
 }
 
 export type ColumnPreference = {
-  accessor: string
-  active: boolean
+  [key: string]: boolean
 }
 
 export type ListPreferences = {

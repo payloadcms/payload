@@ -2,6 +2,7 @@
 import type {
   CollectionSlug,
   Column,
+  ColumnPreference,
   JoinFieldClient,
   ListQuery,
   PaginatedDocs,
@@ -124,10 +125,9 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       }
 
       // map columns from string[] to ColumnPreference[]
-      const defaultColumns = field.admin.defaultColumns
+      const defaultColumns: ColumnPreference[] = field.admin.defaultColumns
         ? field.admin.defaultColumns.map((accessor) => ({
-            accessor,
-            active: true,
+            [accessor]: true,
           }))
         : undefined
 

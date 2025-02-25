@@ -57,7 +57,6 @@ export const getInitialColumns = <T extends ClientField[] | Field[]>(
   }
 
   return initialColumns.map((column) => ({
-    accessor: column,
-    active: true,
+    [column]: true,
   }))
 }
