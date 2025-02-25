@@ -10,10 +10,10 @@ import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
-import './index.scss'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
+import './index.scss'
 
 const baseClass = 'json-field'
 
@@ -31,10 +31,9 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
     readOnly,
     validate,
   } = props
-
-  const [stringValue, setStringValue] = useState<string>()
   const [jsonError, setJsonError] = useState<string>()
-  const [hasLoadedValue, setHasLoadedValue] = useState(false)
+  const inputChangeFromRef = React.useRef<'system' | 'user'>('system')
+  const [editorKey, setEditorKey] = useState<string>('')
 
   const memoizedValidate = useCallback(
     (value, options) => {
@@ -55,6 +54,12 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
     path,
     validate: memoizedValidate,
   })
+
+  const [initialStringValue, setInitialStringValue] = useState<string | undefined>(() =>
+    (value || initialValue) !== undefined
+      ? JSON.stringify(value ?? initialValue, null, 2)
+      : undefined,
+  )
 
   const handleMount = useCallback<OnMount>(
     (editor, monaco) => {
@@ -88,7 +93,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
       if (readOnly) {
         return
       }
-      setStringValue(val)
+      inputChangeFromRef.current = 'user'
 
       try {
         setValue(val ? JSON.parse(val) : null)
@@ -98,20 +103,21 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
         setJsonError(e)
       }
     },
-    [readOnly, setValue, setStringValue],
+    [readOnly, setValue],
   )
 
   useEffect(() => {
-    if (hasLoadedValue || value === undefined) {
-      return
+    if (inputChangeFromRef.current === 'system') {
+      setInitialStringValue(
+        (value || initialValue) !== undefined
+          ? JSON.stringify(value ?? initialValue, null, 2)
+          : undefined,
+      )
+      setEditorKey(new Date().toString())
     }
 
-    setStringValue(
-      value || initialValue ? JSON.stringify(value ? value : initialValue, null, 2) : '',
-    )
-
-    setHasLoadedValue(true)
-  }, [initialValue, value, hasLoadedValue])
+    inputChangeFromRef.current = 'system'
+  }, [initialValue, value])
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
 
@@ -142,12 +148,16 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
         {BeforeInput}
         <CodeEditor
           defaultLanguage="json"
+          key={editorKey}
           maxHeight={maxHeight}
           onChange={handleChange}
           onMount={handleMount}
           options={editorOptions}
           readOnly={readOnly}
-          value={stringValue}
+          value={initialStringValue}
+          wrapperProps={{
+            id: `field-${path?.replace(/\./g, '__')}`,
+          }}
         />
         {AfterInput}
       </div>
