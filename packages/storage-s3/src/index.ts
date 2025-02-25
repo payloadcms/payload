@@ -31,7 +31,7 @@ export type S3StorageOptions = {
   bucket: string
 
   /**
-   * Do uploads directly on the client to bypass limits on Vercel.
+   * Do uploads directly on the client to bypass limits on Vercel. You must allow CORS PUT method for the bucket to your website.
    */
   clientUploads?: ClientUploadsConfig
   /**
