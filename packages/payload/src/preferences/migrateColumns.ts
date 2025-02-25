@@ -5,7 +5,7 @@
  * In v4 can we use the new shape directly
  */
 export const migrateColumns = (value: Record<string, any>) => {
-  if ('columns' in value && Array.isArray(value.columns)) {
+  if (value && typeof value === 'object' && 'columns' in value && Array.isArray(value.columns)) {
     value.columns = value.columns.map((col) => {
       if ('accessor' in col) {
         return { [col.accessor]: col.active }
