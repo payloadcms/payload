@@ -9,6 +9,7 @@ import type { Config, Plugin, UploadCollectionSlug } from 'payload'
 
 import * as AWS from '@aws-sdk/client-s3'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
+import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
 
 import { getGenerateSignedURLHandler } from './generateSignedURL.js'
 import { getGenerateURL } from './generateURL.js'
@@ -80,48 +81,23 @@ export const s3Storage: S3StoragePlugin =
       return storageClient
     }
 
-    if (s3StorageOptions.clientUploads) {
-      if (!incomingConfig.endpoints) {
-        incomingConfig.endpoints = []
-      }
-
-      incomingConfig.endpoints.push({
-        handler: getGenerateSignedURLHandler({
-          access:
-            typeof s3StorageOptions.clientUploads === 'object'
-              ? s3StorageOptions.clientUploads.access
-              : undefined,
-          acl: s3StorageOptions.acl,
-          bucket: s3StorageOptions.bucket,
-          collections: s3StorageOptions.collections,
-          getStorageClient,
-        }),
-        method: 'post',
-        path: '/storage-s3-generate-signed-url',
-      })
-    }
-
-    if (!incomingConfig.admin) {
-      incomingConfig.admin = {}
-    }
-
-    if (!incomingConfig.admin.components) {
-      incomingConfig.admin.components = {}
-    }
-
-    if (!incomingConfig.admin.components.providers) {
-      incomingConfig.admin.components.providers = []
-    }
-
-    for (const collectionSlug in s3StorageOptions.collections) {
-      incomingConfig.admin.components.providers.push({
-        clientProps: {
-          collectionSlug,
-          enabled: !!s3StorageOptions.clientUploads,
-        },
-        path: '@payloadcms/storage-s3/client#S3ClientUploadHandler',
-      })
-    }
+    initClientUploads({
+      clientHandler: '@payloadcms/storage-s3/client#S3ClientUploadHandler',
+      collections: s3StorageOptions.collections,
+      config: incomingConfig,
+      enabled: !!s3StorageOptions.clientUploads,
+      serverHandler: getGenerateSignedURLHandler({
+        access:
+          typeof s3StorageOptions.clientUploads === 'object'
+            ? s3StorageOptions.clientUploads.access
+            : undefined,
+        acl: s3StorageOptions.acl,
+        bucket: s3StorageOptions.bucket,
+        collections: s3StorageOptions.collections,
+        getStorageClient,
+      }),
+      serverHandlerPath: '/storage-s3-generate-signed-url',
+    })
 
     const adapter = s3StorageInternal(getStorageClient, s3StorageOptions)
 

@@ -8,6 +8,9 @@ import type {
 import type { Config, Plugin, UploadCollectionSlug } from 'payload'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
+import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
+
+import type { VercelBlobClientUploadHandlerExtra } from './client/VercelBlobClientUploadHandler.js'
 
 import { getGenerateUrl } from './generateURL.js'
 import { getClientUploadRoute } from './getClientUploadRoute.js'
@@ -96,52 +99,30 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
       ...options,
     }
 
-    if (options.clientUploads) {
-      if (!incomingConfig.endpoints) {
-        incomingConfig.endpoints = []
-      }
-
-      incomingConfig.endpoints.push({
-        handler: getClientUploadRoute({
-          access:
-            typeof options.clientUploads === 'object' ? options.clientUploads.access : undefined,
-          addRandomSuffix: optionsWithDefaults.addRandomSuffix,
-          cacheControlMaxAge: options.cacheControlMaxAge,
-          token: options.token,
-        }),
-        method: 'post',
-        path: '/vercel-blob-client-upload-route',
-      })
-    }
-
-    if (!incomingConfig.admin) {
-      incomingConfig.admin = {}
-    }
-
-    if (!incomingConfig.admin.components) {
-      incomingConfig.admin.components = {}
-    }
-
-    if (!incomingConfig.admin.components.providers) {
-      incomingConfig.admin.components.providers = []
-    }
-
     const baseUrl = `https://${storeId}.${optionsWithDefaults.access}.blob.vercel-storage.com`
 
-    for (const collectionSlug in options.collections) {
-      const collectionConfig = options.collections[collectionSlug]
-
-      incomingConfig.admin.components.providers.push({
-        clientProps: {
-          addRandomSuffix: optionsWithDefaults.addRandomSuffix,
-          baseURL: baseUrl,
-          collectionSlug,
-          enabled: !!options.clientUploads,
-          prefix: (typeof collectionConfig === 'object' && collectionConfig.prefix) || '',
-        },
-        path: '@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler',
-      })
-    }
+    initClientUploads<
+      VercelBlobClientUploadHandlerExtra,
+      VercelBlobStorageOptions['collections'][string]
+    >({
+      clientHandler: '@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler',
+      collections: options.collections,
+      config: incomingConfig,
+      enabled: !!options.clientUploads,
+      extraClientHandlerProps: (collection) => ({
+        addRandomSuffix: !!optionsWithDefaults.addRandomSuffix,
+        baseURL: baseUrl,
+        prefix: (typeof collection === 'object' && collection.prefix) || '',
+      }),
+      serverHandler: getClientUploadRoute({
+        access:
+          typeof options.clientUploads === 'object' ? options.clientUploads.access : undefined,
+        addRandomSuffix: optionsWithDefaults.addRandomSuffix,
+        cacheControlMaxAge: options.cacheControlMaxAge,
+        token: options.token,
+      }),
+      serverHandlerPath: '/vercel-blob-client-upload-route',
+    })
 
     const adapter = vercelBlobStorageInternal({ ...optionsWithDefaults, baseUrl })
 

@@ -71,7 +71,6 @@ export interface GeneratedAdapter {
   handleUpload: HandleUpload
   name: string
   onInit?: () => void
-
   staticHandler: StaticHandler
 }
 

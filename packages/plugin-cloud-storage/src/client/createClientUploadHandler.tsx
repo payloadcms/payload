@@ -5,35 +5,31 @@ import type { UploadCollectionSlug } from 'payload'
 import { useConfig, useEffectEvent, useUploadHandlers } from '@payloadcms/ui'
 import { Fragment, type ReactNode, useEffect } from 'react'
 
-export const createClientUploadHandler = ({
+type ClientUploadHandlerProps<T extends Record<string, unknown>> = {
+  children: ReactNode
+  collectionSlug: UploadCollectionSlug
+  enabled?: boolean
+  extra: T
+}
+
+export const createClientUploadHandler = <T extends Record<string, unknown>>({
   handler,
 }: {
   handler: (args: {
-    addRandomSuffix?: boolean
     apiRoute: string
-    baseURL?: string
     collectionSlug: UploadCollectionSlug
+    extra: T
     file: File
-    prefix?: string
     serverURL: string
     updateFilename: (value: string) => void
   }) => Promise<void>
 }) => {
   return function ClientUploadHandler({
-    addRandomSuffix,
-    baseURL,
     children,
     collectionSlug,
     enabled,
-    prefix,
-  }: {
-    addRandomSuffix?: boolean
-    baseURL?: string
-    children: ReactNode
-    collectionSlug: UploadCollectionSlug
-    enabled?: boolean
-    prefix?: string
-  }) {
+    extra,
+  }: ClientUploadHandlerProps<T>) {
     const { setUploadHandler } = useUploadHandlers()
     const {
       config: {
@@ -48,12 +44,10 @@ export const createClientUploadHandler = ({
           collectionSlug,
           handler: ({ file, updateFilename }) => {
             return handler({
-              addRandomSuffix,
               apiRoute,
-              baseURL,
               collectionSlug,
+              extra,
               file,
-              prefix,
               serverURL,
               updateFilename,
             })

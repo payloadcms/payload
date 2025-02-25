@@ -28,11 +28,11 @@ export const UploadHandlersProvider = ({ children }) => {
     collectionSlug,
     handler,
   }) => {
-    const clone = new Map(uploadHandlers)
-
-    clone.set(collectionSlug, handler)
-
-    setUploadHandlers(clone)
+    setUploadHandlers((uploadHandlers) => {
+      const clone = new Map(uploadHandlers)
+      clone.set(collectionSlug, handler)
+      return clone
+    })
   }
 
   return (
