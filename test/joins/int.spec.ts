@@ -1221,6 +1221,21 @@ describe('Joins Field', () => {
       expect(parent.children.docs).toHaveLength(1)
       expect(parent.children?.hasNextPage).toBe(true)
 
+      parent = await payload.findByID({
+        collection: 'multiple-collections-parents',
+        id: parent.id,
+        depth: 1,
+        joins: {
+          children: {
+            limit: 2,
+            sort: 'title',
+          },
+        },
+      })
+
+      expect(parent.children.docs).toHaveLength(2)
+      expect(parent.children?.hasNextPage).toBe(false)
+
       // Sorting across collections
       parent = await payload.findByID({
         collection: 'multiple-collections-parents',
