@@ -178,6 +178,7 @@ pnpm add @payloadcms/storage-gcs
 
 - Configure the `collections` object to specify which collections should use the Google Cloud Storage adapter. The slug _must_ match one of your existing collection slugs.
 - When enabled, this package will automatically set `disableLocalStorage` to `true` for each collection.
+- When deploying to Vercel, server uploads are limited with 4.5MB. Set `clientUploads` to `true` to do uploads directly on the client.
 
 ```ts
 import { gcsStorage } from '@payloadcms/storage-gcs'
@@ -206,13 +207,14 @@ export default buildConfig({
 
 ### Configuration Options#gcs-configuration
 
-| Option        | Description                                                                                         | Default   |
-| ------------- | --------------------------------------------------------------------------------------------------- | --------- |
-| `enabled`     | Whether or not to enable the plugin                                                                 | `true`    |
-| `collections` | Collections to apply the storage to                                                                 |           |
-| `bucket`      | The name of the bucket to use                                                                       |           |
-| `options`     | Google Cloud Storage client configuration. See [Docs](https://github.com/googleapis/nodejs-storage) |           |
-| `acl`         | Access control list for files that are uploaded                                                     | `Private` |
+| Option          | Description                                                                                         | Default   |
+| --------------- | --------------------------------------------------------------------------------------------------- | --------- |
+| `enabled`       | Whether or not to enable the plugin                                                                 | `true`    |
+| `collections`   | Collections to apply the storage to                                                                 |           |
+| `bucket`        | The name of the bucket to use                                                                       |           |
+| `options`       | Google Cloud Storage client configuration. See [Docs](https://github.com/googleapis/nodejs-storage) |           |
+| `acl`           | Access control list for files that are uploaded                                                     | `Private` |
+| `clientUploads` | Do uploads directly on the client to bypass limits on Vercel.                                       |           |
 
 
 ## Uploadthing Storage
