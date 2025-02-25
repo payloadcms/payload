@@ -1,9 +1,9 @@
 'use client'
 import React from 'react'
 
-import './haha.scss'
+import './incorrect.scss'
 
 export const Child: React.FC = () => {
-  return <div>StepNav</div>
+  return <div>Child</div>
 }
 export { Three } from './test.js'
