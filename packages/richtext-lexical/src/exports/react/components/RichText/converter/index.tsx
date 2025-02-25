@@ -5,6 +5,8 @@ import React from 'react'
 import type { SerializedBlockNode, SerializedInlineBlockNode } from '../../../../../nodeTypes.js'
 import type { JSXConverter, JSXConverters, SerializedLexicalNodeWithParent } from './types.js'
 
+import { hasText } from '../../../../../validate/hasText.js'
+
 export type ConvertLexicalToHTMLArgs = {
   converters: JSXConverters
   data: SerializedEditorState
@@ -18,7 +20,7 @@ export function convertLexicalToJSX({
   disableIndent,
   disableTextAlign,
 }: ConvertLexicalToHTMLArgs): React.ReactNode {
-  if (data?.root?.children?.length) {
+  if (hasText(data)) {
     return convertLexicalNodesToJSX({
       converters,
       disableIndent,
@@ -146,7 +148,7 @@ export function convertLexicalNodesToJSX({
         !disableIndent &&
         (!Array.isArray(disableIndent) || !disableIndent?.includes(node.type))
       ) {
-        if ('indent' in node && node.indent) {
+        if ('indent' in node && node.indent && node.type !== 'listitem') {
           style.paddingInlineStart = `${Number(node.indent) * 2}em`
         }
       }

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { Payload } from '../index.js'
@@ -42,6 +43,11 @@ export const saveVersion = async ({
   if (draft) {
     versionData._status = 'draft'
   }
+
+  if (collection?.timestamps && draft) {
+    versionData.updatedAt = now
+  }
+
   if (versionData._id) {
     delete versionData._id
   }

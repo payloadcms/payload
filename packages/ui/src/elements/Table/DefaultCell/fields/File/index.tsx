@@ -1,5 +1,10 @@
 'use client'
-import type { DefaultCellComponentProps, TextFieldClient, UploadFieldClient } from 'payload'
+import type {
+  ClientCollectionConfig,
+  DefaultCellComponentProps,
+  TextFieldClient,
+  UploadFieldClient,
+} from 'payload'
 
 import React from 'react'
 
@@ -9,7 +14,9 @@ import './index.scss'
 const baseClass = 'file'
 
 export interface FileCellProps
-  extends DefaultCellComponentProps<TextFieldClient | UploadFieldClient> {}
+  extends DefaultCellComponentProps<TextFieldClient | UploadFieldClient> {
+  readonly collectionConfig: ClientCollectionConfig
+}
 
 export const FileCell: React.FC<FileCellProps> = ({
   cellData: filename,

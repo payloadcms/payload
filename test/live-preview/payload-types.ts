@@ -6,10 +6,65 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
+/**
+ * Supported timezones in IANA format.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supportedTimezones".
+ */
+export type SupportedTimezones =
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji';
+
 export interface Config {
   auth: {
     users: UserAuthOperations;
   };
+  blocks: {};
   collections: {
     users: User;
     pages: Page;
@@ -48,13 +103,13 @@ export interface Config {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
   };
-  locale: null;
+  locale: 'en' | 'es';
   user: User & {
     collection: 'users';
   };
-  jobs?: {
+  jobs: {
     tasks: unknown;
-    workflows?: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -135,6 +190,9 @@ export interface Page {
                         } | null);
                     url?: string | null;
                     label: string;
+                    /**
+                     * Choose how the link should be rendered.
+                     */
                     appearance?: ('primary' | 'secondary') | null;
                   };
                   id?: string | null;
@@ -169,6 +227,9 @@ export interface Page {
                         } | null);
                     url?: string | null;
                     label: string;
+                    /**
+                     * Choose how the link should be rendered.
+                     */
                     appearance?: ('default' | 'primary' | 'secondary') | null;
                   };
                   id?: string | null;
@@ -202,12 +263,18 @@ export interface Page {
                   value: string | Post;
                 }[]
               | null;
+            /**
+             * This field is auto-populated after-read
+             */
             populatedDocs?:
               | {
                   relationTo: 'posts';
                   value: string | Post;
                 }[]
               | null;
+            /**
+             * This field is auto-populated after-read
+             */
             populatedDocsTotal?: number | null;
             id?: string | null;
             blockName?: string | null;
@@ -215,6 +282,8 @@ export interface Page {
           }
       )[]
     | null;
+  localizedTitle?: string | null;
+  relationToLocalized?: (string | null) | Post;
   richTextSlate?:
     | {
         [k: string]: unknown;
@@ -365,6 +434,9 @@ export interface Post {
                         } | null);
                     url?: string | null;
                     label: string;
+                    /**
+                     * Choose how the link should be rendered.
+                     */
                     appearance?: ('primary' | 'secondary') | null;
                   };
                   id?: string | null;
@@ -399,6 +471,9 @@ export interface Post {
                         } | null);
                     url?: string | null;
                     label: string;
+                    /**
+                     * Choose how the link should be rendered.
+                     */
                     appearance?: ('default' | 'primary' | 'secondary') | null;
                   };
                   id?: string | null;
@@ -432,12 +507,18 @@ export interface Post {
                   value: string | Post;
                 }[]
               | null;
+            /**
+             * This field is auto-populated after-read
+             */
             populatedDocs?:
               | {
                   relationTo: 'posts';
                   value: string | Post;
                 }[]
               | null;
+            /**
+             * This field is auto-populated after-read
+             */
             populatedDocsTotal?: number | null;
             id?: string | null;
             blockName?: string | null;
@@ -446,6 +527,7 @@ export interface Post {
       )[]
     | null;
   relatedPosts?: (string | Post)[] | null;
+  localizedTitle?: string | null;
   meta?: {
     title?: string | null;
     description?: string | null;
@@ -507,6 +589,9 @@ export interface Ssr {
                         } | null);
                     url?: string | null;
                     label: string;
+                    /**
+                     * Choose how the link should be rendered.
+                     */
                     appearance?: ('primary' | 'secondary') | null;
                   };
                   id?: string | null;
@@ -541,6 +626,9 @@ export interface Ssr {
                         } | null);
                     url?: string | null;
                     label: string;
+                    /**
+                     * Choose how the link should be rendered.
+                     */
                     appearance?: ('default' | 'primary' | 'secondary') | null;
                   };
                   id?: string | null;
@@ -574,12 +662,18 @@ export interface Ssr {
                   value: string | Post;
                 }[]
               | null;
+            /**
+             * This field is auto-populated after-read
+             */
             populatedDocs?:
               | {
                   relationTo: 'posts';
                   value: string | Post;
                 }[]
               | null;
+            /**
+             * This field is auto-populated after-read
+             */
             populatedDocsTotal?: number | null;
             id?: string | null;
             blockName?: string | null;
@@ -638,6 +732,9 @@ export interface SsrAutosave {
                         } | null);
                     url?: string | null;
                     label: string;
+                    /**
+                     * Choose how the link should be rendered.
+                     */
                     appearance?: ('primary' | 'secondary') | null;
                   };
                   id?: string | null;
@@ -672,6 +769,9 @@ export interface SsrAutosave {
                         } | null);
                     url?: string | null;
                     label: string;
+                    /**
+                     * Choose how the link should be rendered.
+                     */
                     appearance?: ('default' | 'primary' | 'secondary') | null;
                   };
                   id?: string | null;
@@ -705,12 +805,18 @@ export interface SsrAutosave {
                   value: string | Post;
                 }[]
               | null;
+            /**
+             * This field is auto-populated after-read
+             */
             populatedDocs?:
               | {
                   relationTo: 'posts';
                   value: string | Post;
                 }[]
               | null;
+            /**
+             * This field is auto-populated after-read
+             */
             populatedDocsTotal?: number | null;
             id?: string | null;
             blockName?: string | null;
@@ -913,6 +1019,8 @@ export interface PagesSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  localizedTitle?: T;
+  relationToLocalized?: T;
   richTextSlate?: T;
   richTextLexical?: T;
   relationshipAsUpload?: T;
@@ -1037,6 +1145,7 @@ export interface PostsSelect<T extends boolean = true> {
             };
       };
   relatedPosts?: T;
+  localizedTitle?: T;
   meta?:
     | T
     | {
@@ -1339,6 +1448,9 @@ export interface Header {
               } | null);
           url?: string | null;
           label: string;
+          /**
+           * Choose how the link should be rendered.
+           */
           appearance?: ('default' | 'primary' | 'secondary') | null;
         };
         id?: string | null;
@@ -1369,6 +1481,9 @@ export interface Footer {
               } | null);
           url?: string | null;
           label: string;
+          /**
+           * Choose how the link should be rendered.
+           */
           appearance?: ('default' | 'primary' | 'secondary') | null;
         };
         id?: string | null;

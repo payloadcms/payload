@@ -1,13 +1,11 @@
-import type { ClientField, Field } from 'payload'
+import type { ClientField, CollectionConfig, Field, ListPreferences } from 'payload'
 
 import { fieldAffectsData } from 'payload/shared'
-
-import type { ColumnPreferences } from '../../providers/ListQuery/index.js'
 
 const getRemainingColumns = <T extends ClientField[] | Field[]>(
   fields: T,
   useAsTitle: string,
-): ColumnPreferences =>
+): ListPreferences['columns'] =>
   fields?.reduce((remaining, field) => {
     if (fieldAffectsData(field) && field.name === useAsTitle) {
       return remaining
@@ -33,11 +31,16 @@ const getRemainingColumns = <T extends ClientField[] | Field[]>(
     return [...remaining, field.name]
   }, [])
 
+/**
+ * Returns the initial columns to display in the table based on the following criteria:
+ * 1. If `defaultColumns` is set in the collection config, use those columns
+ * 2. Otherwise take `useAtTitle, if set, and the next 3 fields that are not hidden or disabled
+ */
 export const getInitialColumns = <T extends ClientField[] | Field[]>(
   fields: T,
-  useAsTitle: string,
-  defaultColumns: string[],
-): ColumnPreferences => {
+  useAsTitle: CollectionConfig['admin']['useAsTitle'],
+  defaultColumns: CollectionConfig['admin']['defaultColumns'],
+): ListPreferences['columns'] => {
   let initialColumns = []
 
   if (Array.isArray(defaultColumns) && defaultColumns.length >= 1) {

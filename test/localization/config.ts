@@ -2,6 +2,8 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+import type { CollectionConfig } from 'payload'
+
 import type { LocalizedPost } from './payload-types.js'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
@@ -18,6 +20,7 @@ import { RichTextCollection } from './collections/RichText/index.js'
 import { Tab } from './collections/Tab/index.js'
 import {
   blocksWithLocalizedSameName,
+  cannotCreateDefaultLocale,
   defaultLocale,
   englishTitle,
   hungarianLocale,
@@ -42,7 +45,7 @@ export type LocalizedPostAllLocale = {
   }
 } & LocalizedPost
 
-const openAccess = {
+const openAccess: CollectionConfig['access'] = {
   create: () => true,
   delete: () => true,
   read: () => true,
@@ -61,8 +64,16 @@ export default buildConfigWithDefaults({
     NestedArray,
     NestedFields,
     {
+      admin: {
+        listSearchableFields: 'name',
+      },
       auth: true,
       fields: [
+        {
+          name: 'name',
+          label: { en: 'Full name' },
+          type: 'text',
+        },
         {
           name: 'relation',
           relationTo: localizedPostsSlug,
@@ -80,6 +91,7 @@ export default buildConfigWithDefaults({
       fields: [
         {
           name: 'title',
+          label: { en: 'Full title' },
           index: true,
           localized: true,
           type: 'text',
@@ -258,14 +270,14 @@ export default buildConfigWithDefaults({
         // Relation multiple relationTo
         {
           name: 'localizedRelationMultiRelationTo',
-          relationTo: [localizedPostsSlug, 'dummy'],
+          relationTo: [localizedPostsSlug, cannotCreateDefaultLocale],
           type: 'relationship',
         },
         // Relation multiple relationTo hasMany
         {
           name: 'localizedRelationMultiRelationToHasMany',
           hasMany: true,
-          relationTo: [localizedPostsSlug, 'dummy'],
+          relationTo: [localizedPostsSlug, cannotCreateDefaultLocale],
           type: 'relationship',
         },
       ],
@@ -289,14 +301,14 @@ export default buildConfigWithDefaults({
         {
           name: 'relationMultiRelationTo',
           localized: true,
-          relationTo: [localizedPostsSlug, 'dummy'],
+          relationTo: [localizedPostsSlug, cannotCreateDefaultLocale],
           type: 'relationship',
         },
         {
           name: 'relationMultiRelationToHasMany',
           hasMany: true,
           localized: true,
-          relationTo: [localizedPostsSlug, 'dummy'],
+          relationTo: [localizedPostsSlug, cannotCreateDefaultLocale],
           type: 'relationship',
         },
         {
@@ -317,14 +329,17 @@ export default buildConfigWithDefaults({
       slug: relationshipLocalizedSlug,
     },
     {
-      access: openAccess,
+      access: {
+        ...openAccess,
+        create: ({ req }) => req.locale !== defaultLocale,
+      },
       fields: [
         {
           name: 'name',
           type: 'text',
         },
       ],
-      slug: 'dummy',
+      slug: cannotCreateDefaultLocale,
     },
     NestedToArrayAndBlock,
     Group,
@@ -408,9 +423,16 @@ export default buildConfigWithDefaults({
     },
   ],
   localization: {
+    filterAvailableLocales: ({ locales }) => {
+      return locales.filter((locale) => locale.code !== 'xx')
+    },
     defaultLocale,
     fallback: true,
     locales: [
+      {
+        code: 'xx',
+        label: 'FILTERED',
+      },
       {
         code: defaultLocale,
         label: 'English',
@@ -524,7 +546,7 @@ export default buildConfigWithDefaults({
         relationship: localizedRelation.id,
       },
     })
-    await payload.create({
+    const relationshipLocalized = await payload.create({
       collection: relationshipLocalizedSlug,
       data: {
         arrayField: [
@@ -541,6 +563,15 @@ export default buildConfigWithDefaults({
         relationshipHasMany: [localizedRelation.id, localizedRelation2.id],
       },
       locale: 'en',
+    })
+
+    await payload.update({
+      collection: relationshipLocalizedSlug,
+      id: relationshipLocalized.id,
+      data: {
+        relationMultiRelationTo: { relationTo: collection, value: localizedPost.id },
+      },
+      locale: 'es',
     })
 
     console.log('SEED 5')

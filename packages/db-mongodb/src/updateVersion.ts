@@ -1,25 +1,17 @@
 import type { QueryOptions } from 'mongoose'
 
-import { buildVersionCollectionFields, type PayloadRequest, type UpdateVersion } from 'payload'
+import { buildVersionCollectionFields, type UpdateVersion } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildQuery } from './queries/buildQuery.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
-import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
-import { withSession } from './withSession.js'
+import { getSession } from './utilities/getSession.js'
+import { transform } from './utilities/transform.js'
 
 export const updateVersion: UpdateVersion = async function updateVersion(
   this: MongooseAdapter,
-  {
-    id,
-    collection,
-    locale,
-    options: optionsArgs = {},
-    req = {} as PayloadRequest,
-    select,
-    versionData,
-    where,
-  },
+  { id, collection, locale, options: optionsArgs = {}, req, select, versionData, where },
 ) {
   const VersionModel = this.versions[collection]
   const whereToUse = where || { id: { equals: id } }
@@ -28,44 +20,40 @@ export const updateVersion: UpdateVersion = async function updateVersion(
     this.payload.collections[collection].config,
   )
 
+  const flattenedFields = buildVersionCollectionFields(
+    this.payload.config,
+    this.payload.collections[collection].config,
+    true,
+  )
+
   const options: QueryOptions = {
     ...optionsArgs,
-    ...(await withSession(this, req)),
     lean: true,
     new: true,
     projection: buildProjectionFromSelect({
       adapter: this,
-      fields: buildVersionCollectionFields(
-        this.payload.config,
-        this.payload.collections[collection].config,
-        true,
-      ),
+      fields: flattenedFields,
       select,
     }),
+    session: await getSession(this, req),
   }
 
-  const query = await VersionModel.buildQuery({
+  const query = await buildQuery({
+    adapter: this,
+    fields: flattenedFields,
     locale,
-    payload: this.payload,
     where: whereToUse,
   })
 
-  const sanitizedData = sanitizeRelationshipIDs({
-    config: this.payload.config,
-    data: versionData,
-    fields,
-  })
+  transform({ adapter: this, data: versionData, fields, operation: 'write' })
 
-  const doc = await VersionModel.findOneAndUpdate(query, sanitizedData, options)
+  const doc = await VersionModel.findOneAndUpdate(query, versionData, options)
 
-  const result = JSON.parse(JSON.stringify(doc))
-
-  const verificationToken = doc._verificationToken
-
-  // custom id type reset
-  result.id = result._id
-  if (verificationToken) {
-    result._verificationToken = verificationToken
+  if (!doc) {
+    return null
   }
-  return result
+
+  transform({ adapter: this, data: doc, fields, operation: 'write' })
+
+  return doc
 }

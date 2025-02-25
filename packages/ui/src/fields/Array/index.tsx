@@ -110,7 +110,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   )
 
   const {
-    customComponents: { Description, Error, Label, RowLabels } = {},
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label, RowLabels } = {},
     errorPaths,
     rows: rowsData = [],
     showError,
@@ -268,6 +268,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         />
       </header>
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
+      {BeforeInput}
       {(rowsData?.length > 0 || (!valid && (showRequired || showMinRows))) && (
         <DraggableSortable
           className={`${baseClass}__draggable-rows`}
@@ -275,7 +276,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
           onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
         >
           {rowsData.map((rowData, i) => {
-            const { id: rowID } = rowData
+            const { id: rowID, isLoading } = rowData
 
             const rowPath = `${path}.${i}`
 
@@ -295,6 +296,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                     fields={fields}
                     forceRender={forceRender}
                     hasMaxRows={hasMaxRows}
+                    isLoading={isLoading}
                     isSortable={isSortable}
                     labels={labels}
                     moveRow={moveRow}
@@ -334,11 +336,10 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
           )}
         </DraggableSortable>
       )}
-      {!hasMaxRows && (
+      {!hasMaxRows && !readOnly && (
         <Button
           buttonStyle="icon-label"
           className={`${baseClass}__add-row`}
-          disabled={readOnly}
           icon="plus"
           iconPosition="left"
           iconStyle="with-border"
@@ -349,6 +350,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
           {t('fields:addLabel', { label: getTranslation(labels.singular, i18n) })}
         </Button>
       )}
+      {AfterInput}
     </div>
   )
 }

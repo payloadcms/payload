@@ -5,20 +5,24 @@ import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
 
 import type { MongooseAdapter } from '../index.js'
 
-import { sanitizeRelationshipIDs } from '../utilities/sanitizeRelationshipIDs.js'
-import { withSession } from '../withSession.js'
+import { getSession } from '../utilities/getSession.js'
+import { transform } from '../utilities/transform.js'
 
 const migrateModelWithBatching = async ({
   batchSize,
   config,
+  db,
   fields,
   Model,
+  parentIsLocalized,
   session,
 }: {
   batchSize: number
   config: SanitizedConfig
+  db: MongooseAdapter
   fields: Field[]
   Model: Model<any>
+  parentIsLocalized: boolean
   session: ClientSession
 }): Promise<void> => {
   let hasNext = true
@@ -47,7 +51,7 @@ const migrateModelWithBatching = async ({
     }
 
     for (const doc of docs) {
-      sanitizeRelationshipIDs({ config, data: doc, fields })
+      transform({ adapter: db, data: doc, fields, operation: 'write', parentIsLocalized })
     }
 
     await Model.collection.bulkWrite(
@@ -80,6 +84,10 @@ const hasRelationshipOrUploadField = ({ fields }: { fields: Field[] }): boolean 
 
     if ('blocks' in field) {
       for (const block of field.blocks) {
+        if (typeof block === 'string') {
+          // Skip - string blocks have been added in v3 and thus don't need to be migrated
+          continue
+        }
         if (hasRelationshipOrUploadField({ fields: block.fields })) {
           return true
         }
@@ -109,20 +117,24 @@ export async function migrateRelationshipsV2_V3({
   const db = payload.db as MongooseAdapter
   const config = payload.config
 
-  const { session } = await withSession(db, req)
+  const session = await getSession(db, req)
 
-  for (const collection of payload.config.collections.filter(hasRelationshipOrUploadField)) {
-    payload.logger.info(`Migrating collection "${collection.slug}"`)
+  for (const collection of payload.config.collections) {
+    if (hasRelationshipOrUploadField(collection)) {
+      payload.logger.info(`Migrating collection "${collection.slug}"`)
 
-    await migrateModelWithBatching({
-      batchSize,
-      config,
-      fields: collection.fields,
-      Model: db.collections[collection.slug],
-      session,
-    })
+      await migrateModelWithBatching({
+        batchSize,
+        config,
+        db,
+        fields: collection.fields,
+        Model: db.collections[collection.slug],
+        parentIsLocalized: false,
+        session,
+      })
 
-    payload.logger.info(`Migrated collection "${collection.slug}"`)
+      payload.logger.info(`Migrated collection "${collection.slug}"`)
+    }
 
     if (collection.versions) {
       payload.logger.info(`Migrating collection versions "${collection.slug}"`)
@@ -130,8 +142,10 @@ export async function migrateRelationshipsV2_V3({
       await migrateModelWithBatching({
         batchSize,
         config,
+        db,
         fields: buildVersionCollectionFields(config, collection),
         Model: db.versions[collection.slug],
+        parentIsLocalized: false,
         session,
       })
 
@@ -141,33 +155,40 @@ export async function migrateRelationshipsV2_V3({
 
   const { globals: GlobalsModel } = db
 
-  for (const global of payload.config.globals.filter(hasRelationshipOrUploadField)) {
-    payload.logger.info(`Migrating global "${global.slug}"`)
+  for (const global of payload.config.globals) {
+    if (hasRelationshipOrUploadField(global)) {
+      payload.logger.info(`Migrating global "${global.slug}"`)
 
-    const doc = await GlobalsModel.findOne<Record<string, unknown>>(
-      {
-        globalType: {
-          $eq: global.slug,
-        },
-      },
-      {},
-      { lean: true, session },
-    )
-
-    // in case if the global doesn't exist in the database yet  (not saved)
-    if (doc) {
-      sanitizeRelationshipIDs({ config, data: doc, fields: global.fields })
-
-      await GlobalsModel.collection.updateOne(
+      const doc = await GlobalsModel.findOne<Record<string, unknown>>(
         {
-          globalType: global.slug,
+          globalType: {
+            $eq: global.slug,
+          },
         },
-        { $set: doc },
-        { session },
+        {},
+        { lean: true, session },
       )
-    }
 
-    payload.logger.info(`Migrated global "${global.slug}"`)
+      // in case if the global doesn't exist in the database yet  (not saved)
+      if (doc) {
+        transform({
+          adapter: db,
+          data: doc,
+          fields: global.fields,
+          operation: 'write',
+        })
+
+        await GlobalsModel.collection.updateOne(
+          {
+            globalType: global.slug,
+          },
+          { $set: doc },
+          { session },
+        )
+      }
+
+      payload.logger.info(`Migrated global "${global.slug}"`)
+    }
 
     if (global.versions) {
       payload.logger.info(`Migrating global versions "${global.slug}"`)
@@ -175,8 +196,10 @@ export async function migrateRelationshipsV2_V3({
       await migrateModelWithBatching({
         batchSize,
         config,
+        db,
         fields: buildVersionGlobalFields(config, global),
         Model: db.versions[global.slug],
+        parentIsLocalized: false,
         session,
       })
 

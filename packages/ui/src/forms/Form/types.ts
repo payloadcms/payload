@@ -37,11 +37,18 @@ export type FormProps = {
     errorToast: (value: string) => void,
   ) => void
   initialState?: FormState
+  /**
+   * Determines if this Form is the main, top-level Form of a document. If set to true, the
+   * Form's children will be wrapped in a DocumentFormContext, which lets you access this document
+   * Form's data and fields from any child component - even if that child component is wrapped in a child
+   * Form (e.g. a lexical block).
+   */
+  isDocumentForm?: boolean
   isInitializing?: boolean
   log?: boolean
-  onChange?: ((args: { formState: FormState }) => Promise<FormState>)[]
+  onChange?: ((args: { formState: FormState; submitted?: boolean }) => Promise<FormState>)[]
   onSubmit?: (fields: FormState, data: Data) => void
-  onSuccess?: (json: unknown) => Promise<void> | void
+  onSuccess?: (json: unknown) => Promise<FormState | void> | void
   redirect?: string
   submitted?: boolean
   uuid?: string
@@ -60,7 +67,7 @@ export type FormProps = {
 export type SubmitOptions = {
   action?: string
   method?: string
-  overrides?: Record<string, unknown>
+  overrides?: ((formState) => FormData) | Record<string, unknown>
   skipValidation?: boolean
 }
 
@@ -70,7 +77,14 @@ export type Submit = (
   e?: React.FormEvent<HTMLFormElement>,
 ) => Promise<void>
 export type ValidateForm = () => Promise<boolean>
-export type CreateFormData = (overrides?: any) => FormData
+export type CreateFormData = (
+  overrides?: Record<string, unknown>,
+  /**
+   * If mergeOverrideData true, the data will be merged with the existing data in the form state.
+   * @default true
+   */
+  options?: { mergeOverrideData?: boolean },
+) => FormData
 export type GetFields = () => FormState
 export type GetField = (path: string) => FormField
 export type GetData = () => Data
@@ -84,6 +98,11 @@ export type Reset = (data: unknown) => Promise<void>
 
 export type REPLACE_STATE = {
   optimize?: boolean
+  /**
+   * If `sanitize` is true, default values will be set for form field properties that are not present in the incoming state.
+   * For example, `valid` will be set to true if it is not present in the incoming state.
+   */
+  sanitize?: boolean
   state: FormState
   type: 'REPLACE_STATE'
 }
@@ -208,6 +227,11 @@ export type Context = {
   getFields: GetFields
   getSiblingData: GetSiblingData
   initializing: boolean
+  /**
+   * Tracks wether the form state passes validation.
+   * For example the state could be submitted but invalid as field errors have been returned.
+   */
+  isValid: boolean
   removeFieldRow: ({ path, rowIndex }: { path: string; rowIndex: number }) => void
   replaceFieldRow: ({
     blockType,
@@ -225,6 +249,7 @@ export type Context = {
   replaceState: (state: FormState) => void
   reset: Reset
   setDisabled: (disabled: boolean) => void
+  setIsValid: (processing: boolean) => void
   setModified: SetModified
   setProcessing: SetProcessing
   setSubmitted: SetSubmitted

@@ -8,6 +8,7 @@ import { v4 as uuid } from 'uuid'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { errorOnUnnamedFieldsSlug, postsSlug } from './shared.js'
 
 const defaultValueField: TextField = {
   name: 'defaultValue',
@@ -23,12 +24,71 @@ export default buildConfigWithDefaults({
   },
   collections: [
     {
-      slug: 'posts',
+      slug: postsSlug,
       fields: [
         {
           name: 'title',
           type: 'text',
           required: true,
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              name: 'D1',
+              fields: [
+                {
+                  name: 'D2',
+                  type: 'group',
+                  fields: [
+                    {
+                      type: 'row',
+                      fields: [
+                        {
+                          type: 'collapsible',
+                          fields: [
+                            {
+                              type: 'tabs',
+                              tabs: [
+                                {
+                                  fields: [
+                                    {
+                                      name: 'D3',
+                                      type: 'group',
+                                      fields: [
+                                        {
+                                          type: 'row',
+                                          fields: [
+                                            {
+                                              type: 'collapsible',
+                                              fields: [
+                                                {
+                                                  name: 'D4',
+                                                  type: 'text',
+                                                },
+                                              ],
+                                              label: 'Collapsible2',
+                                            },
+                                          ],
+                                        },
+                                      ],
+                                    },
+                                  ],
+                                  label: 'Tab1',
+                                },
+                              ],
+                            },
+                          ],
+                          label: 'Collapsible2',
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+              label: 'Tab1',
+            },
+          ],
         },
         {
           name: 'hasTransaction',
@@ -54,6 +114,31 @@ export default buildConfigWithDefaults({
             ],
           },
         },
+        {
+          name: 'arrayWithIDs',
+          type: 'array',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          name: 'blocksWithIDs',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'block',
+              fields: [
+                {
+                  name: 'text',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+        },
       ],
       hooks: {
         beforeOperation: [
@@ -70,6 +155,32 @@ export default buildConfigWithDefaults({
           },
         ],
       },
+    },
+    {
+      slug: errorOnUnnamedFieldsSlug,
+      fields: [
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              label: 'UnnamedTab',
+              fields: [
+                {
+                  name: 'groupWithinUnnamedTab',
+                  type: 'group',
+                  fields: [
+                    {
+                      name: 'text',
+                      type: 'text',
+                      required: true,
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
     },
     {
       slug: 'default-values',
@@ -451,6 +562,24 @@ export default buildConfigWithDefaults({
         },
       ],
       versions: true,
+    },
+    {
+      slug: 'global-2',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'global-3',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
     },
   ],
   localization: {

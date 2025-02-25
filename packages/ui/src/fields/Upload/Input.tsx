@@ -58,6 +58,7 @@ export type UploadInputProps = {
   readonly Error?: React.ReactNode
   readonly filterOptions?: FilterOptionsResult
   readonly hasMany?: boolean
+  readonly hideRemoveFile?: boolean
   readonly isSortable?: boolean
   readonly Label?: React.ReactNode
   readonly label?: StaticLabel
@@ -115,8 +116,14 @@ export function UploadInput(props: UploadInputProps) {
   )
 
   const { openModal } = useModal()
-  const { drawerSlug, setCollectionSlug, setInitialFiles, setMaxFiles, setOnSuccess } =
-    useBulkUpload()
+  const {
+    drawerSlug,
+    setCollectionSlug,
+    setCurrentActivePath,
+    setInitialFiles,
+    setMaxFiles,
+    setOnSuccess,
+  } = useBulkUpload()
   const { permissions } = useAuth()
   const { code } = useLocale()
   const { i18n, t } = useTranslation()
@@ -211,18 +218,30 @@ export function UploadInput(props: UploadInputProps) {
       })
       if (response.ok) {
         const json = await response.json()
-        const sortedDocs = ids.map((id) =>
+        let sortedDocs = ids.map((id) =>
           json.docs.find((doc) => {
             return String(doc.id) === String(id)
           }),
         )
+
+        if (sortedDocs.includes(undefined) && hasMany) {
+          sortedDocs = sortedDocs.map((doc, index) =>
+            doc
+              ? doc
+              : {
+                  id: ids[index],
+                  filename: `${t('general:untitled')} - ID: ${ids[index]}`,
+                  isPlaceholder: true,
+                },
+          )
+        }
 
         return { ...json, docs: sortedDocs }
       }
 
       return null
     },
-    [code, serverURL, api, i18n.language],
+    [code, serverURL, api, i18n.language, t, hasMany],
   )
 
   const onUploadSuccess = useCallback(
@@ -266,23 +285,23 @@ export function UploadInput(props: UploadInputProps) {
         setInitialFiles(fileListToUse)
       }
       setCollectionSlug(relationTo)
-      setOnSuccess(onUploadSuccess)
       if (typeof maxRows === 'number') {
         setMaxFiles(maxRows)
       }
+      setCurrentActivePath(path)
       openModal(drawerSlug)
     },
     [
       drawerSlug,
       hasMany,
-      onUploadSuccess,
       openModal,
       relationTo,
       setCollectionSlug,
       setInitialFiles,
-      setOnSuccess,
       maxRows,
       setMaxFiles,
+      path,
+      setCurrentActivePath,
     ],
   )
 
@@ -331,9 +350,9 @@ export function UploadInput(props: UploadInputProps) {
     [closeCreateDocDrawer, activeRelationTo, onChange],
   )
 
-  const onListSelect = React.useCallback<NonNullable<ListDrawerProps['onSelect']>>(
-    async ({ collectionSlug, docID }) => {
-      const loadedDocs = await populateDocs([docID], collectionSlug)
+  const onListSelect = useCallback<NonNullable<ListDrawerProps['onSelect']>>(
+    async ({ collectionSlug, doc }) => {
+      const loadedDocs = await populateDocs([doc.id], collectionSlug)
       const selectedDoc = loadedDocs ? loadedDocs.docs?.[0] : null
       setPopulatedDocs((currentDocs) => {
         if (selectedDoc) {
@@ -356,9 +375,9 @@ export function UploadInput(props: UploadInputProps) {
         return currentDocs
       })
       if (hasMany) {
-        onChange([...(Array.isArray(value) ? value : []), docID])
+        onChange([...(Array.isArray(value) ? value : []), doc.id])
       } else {
-        onChange(docID)
+        onChange(doc.id)
       }
       closeListDrawer()
     },
@@ -370,9 +389,11 @@ export function UploadInput(props: UploadInputProps) {
       const { docs } = await populateDocs([docID], collectionSlug)
 
       if (docs[0]) {
+        let updatedDocsToPropogate = []
         setPopulatedDocs((currentDocs) => {
           const existingDocIndex = currentDocs?.findIndex((doc) => {
-            return doc.value.id === docs[0].id && doc.relationTo === collectionSlug
+            const hasExisting = doc.value?.id === docs[0].id || doc.value?.isPlaceholder
+            return hasExisting && doc.relationTo === collectionSlug
           })
           if (existingDocIndex > -1) {
             const updatedDocs = [...currentDocs]
@@ -380,12 +401,17 @@ export function UploadInput(props: UploadInputProps) {
               relationTo: collectionSlug,
               value: docs[0],
             }
+            updatedDocsToPropogate = updatedDocs
             return updatedDocs
           }
         })
+
+        if (updatedDocsToPropogate.length && hasMany) {
+          onChange(updatedDocsToPropogate.map((doc) => doc.value?.id))
+        }
       }
     },
-    [populateDocs],
+    [populateDocs, onChange, hasMany],
   )
 
   // only hasMany can reorder
@@ -427,6 +453,10 @@ export function UploadInput(props: UploadInputProps) {
       void loadInitialDocs()
     }
   }, [populateDocs, activeRelationTo, value])
+
+  useEffect(() => {
+    setOnSuccess(path, onUploadSuccess)
+  }, [value, path, onUploadSuccess, setOnSuccess])
 
   const showDropzone =
     !value ||

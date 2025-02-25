@@ -6,6 +6,60 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
+/**
+ * Supported timezones in IANA format.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supportedTimezones".
+ */
+export type SupportedTimezones =
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji';
+
 export interface Config {
   auth: {
     users: UserAuthOperations;
@@ -22,7 +76,7 @@ export interface Config {
     'localized-required': LocalizedRequired;
     'with-localized-relationship': WithLocalizedRelationship;
     'relationship-localized': RelationshipLocalized;
-    dummy: Dummy;
+    'cannot-create-default-locale': CannotCreateDefaultLocale;
     nested: Nested;
     groups: Group;
     tabs: Tab;
@@ -46,7 +100,7 @@ export interface Config {
     'localized-required': LocalizedRequiredSelect<false> | LocalizedRequiredSelect<true>;
     'with-localized-relationship': WithLocalizedRelationshipSelect<false> | WithLocalizedRelationshipSelect<true>;
     'relationship-localized': RelationshipLocalizedSelect<false> | RelationshipLocalizedSelect<true>;
-    dummy: DummySelect<false> | DummySelect<true>;
+    'cannot-create-default-locale': CannotCreateDefaultLocaleSelect<false> | CannotCreateDefaultLocaleSelect<true>;
     nested: NestedSelect<false> | NestedSelect<true>;
     groups: GroupsSelect<false> | GroupsSelect<true>;
     tabs: TabsSelect<false> | TabsSelect<true>;
@@ -68,7 +122,7 @@ export interface Config {
     'global-array': GlobalArraySelect<false> | GlobalArraySelect<true>;
     'global-text': GlobalTextSelect<false> | GlobalTextSelect<true>;
   };
-  locale: 'en' | 'es' | 'pt' | 'ar' | 'hu';
+  locale: 'xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu';
   user: User & {
     collection: 'users';
   };
@@ -140,21 +194,6 @@ export interface BlocksField {
               blockType: 'textBlock';
             }[]
           | null;
-        array?:
-          | {
-              link?: {
-                label?: string | null;
-              };
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'blockInsideBlock';
-      }[]
-    | null;
-  nonLocalizedBlocksField?:
-    | {
         array?:
           | {
               link?: {
@@ -282,6 +321,7 @@ export interface NestedFieldTable {
  */
 export interface User {
   id: string;
+  name?: string | null;
   relation?: (string | null) | LocalizedPost;
   updatedAt: string;
   createdAt: string;
@@ -393,8 +433,8 @@ export interface WithLocalizedRelationship {
         value: string | LocalizedPost;
       } | null)
     | ({
-        relationTo: 'dummy';
-        value: string | Dummy;
+        relationTo: 'cannot-create-default-locale';
+        value: string | CannotCreateDefaultLocale;
       } | null);
   localizedRelationMultiRelationToHasMany?:
     | (
@@ -403,8 +443,8 @@ export interface WithLocalizedRelationship {
             value: string | LocalizedPost;
           }
         | {
-            relationTo: 'dummy';
-            value: string | Dummy;
+            relationTo: 'cannot-create-default-locale';
+            value: string | CannotCreateDefaultLocale;
           }
       )[]
     | null;
@@ -413,9 +453,9 @@ export interface WithLocalizedRelationship {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "dummy".
+ * via the `definition` "cannot-create-default-locale".
  */
-export interface Dummy {
+export interface CannotCreateDefaultLocale {
   id: string;
   name?: string | null;
   updatedAt: string;
@@ -435,8 +475,8 @@ export interface RelationshipLocalized {
         value: string | LocalizedPost;
       } | null)
     | ({
-        relationTo: 'dummy';
-        value: string | Dummy;
+        relationTo: 'cannot-create-default-locale';
+        value: string | CannotCreateDefaultLocale;
       } | null);
   relationMultiRelationToHasMany?:
     | (
@@ -445,8 +485,8 @@ export interface RelationshipLocalized {
             value: string | LocalizedPost;
           }
         | {
-            relationTo: 'dummy';
-            value: string | Dummy;
+            relationTo: 'cannot-create-default-locale';
+            value: string | CannotCreateDefaultLocale;
           }
       )[]
     | null;
@@ -483,6 +523,12 @@ export interface Nested {
     | {
         localizedText?: string | null;
         notLocalizedText?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  topLevelArrayLocalized?:
+    | {
+        text?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -531,6 +577,12 @@ export interface Tab {
   id: string;
   tabLocalized?: {
     title?: string | null;
+    array?:
+      | {
+          title?: string | null;
+          id?: string | null;
+        }[]
+      | null;
   };
   tab?: {
     title?: string | null;
@@ -671,8 +723,8 @@ export interface PayloadLockedDocument {
         value: string | RelationshipLocalized;
       } | null)
     | ({
-        relationTo: 'dummy';
-        value: string | Dummy;
+        relationTo: 'cannot-create-default-locale';
+        value: string | CannotCreateDefaultLocale;
       } | null)
     | ({
         relationTo: 'nested';
@@ -786,26 +838,6 @@ export interface BlocksFieldsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
-  nonLocalizedBlocksField?:
-    | T
-    | {
-        blockInsideBlock?:
-          | T
-          | {
-              array?:
-                | T
-                | {
-                    link?:
-                      | T
-                      | {
-                          label?: T;
-                        };
-                    id?: T;
-                  };
-              id?: T;
-              blockName?: T;
-            };
-      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -896,6 +928,7 @@ export interface NestedFieldTablesSelect<T extends boolean = true> {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  name?: T;
   relation?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1050,9 +1083,9 @@ export interface RelationshipLocalizedSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "dummy_select".
+ * via the `definition` "cannot-create-default-locale_select".
  */
-export interface DummySelect<T extends boolean = true> {
+export interface CannotCreateDefaultLocaleSelect<T extends boolean = true> {
   name?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1084,6 +1117,12 @@ export interface NestedSelect<T extends boolean = true> {
     | {
         localizedText?: T;
         notLocalizedText?: T;
+        id?: T;
+      };
+  topLevelArrayLocalized?:
+    | T
+    | {
+        text?: T;
         id?: T;
       };
   updatedAt?: T;
@@ -1142,6 +1181,12 @@ export interface TabsSelect<T extends boolean = true> {
     | T
     | {
         title?: T;
+        array?:
+          | T
+          | {
+              title?: T;
+              id?: T;
+            };
       };
   tab?:
     | T

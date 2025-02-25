@@ -1,8 +1,10 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { addListFilter } from 'helpers/e2e/addListFilter.js'
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
+import { openListFilters } from 'helpers/e2e/openListFilters.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -41,7 +43,7 @@ describe('relationship', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, serverURL } = await initPayloadE2ENoConfig({
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
       dirname,
     }))
 
@@ -61,7 +63,7 @@ describe('relationship', () => {
     if (client) {
       await client.logout()
     }
-    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
+    client = new RESTClient({ defaultSlug: 'users', serverURL })
     await client.login()
 
     await ensureCompilationIsDone({ page, serverURL })
@@ -181,6 +183,35 @@ describe('relationship', () => {
     // The reason why I check for locator 1 again is that I've noticed that sometimes
     // the default value does not appear after the first locator is tested. IDK why.
     await expect(locator1).toHaveCount(0)
+  })
+
+  test('should hide edit button in main doc when relationship deleted', async () => {
+    const createdRelatedDoc = await payload.create({
+      collection: textFieldsSlug,
+      data: {
+        text: 'doc to be deleted',
+      },
+    })
+    const doc = await payload.create({
+      collection: relationshipFieldsSlug,
+      data: {
+        relationship: {
+          value: createdRelatedDoc.id,
+          relationTo: textFieldsSlug,
+        },
+      },
+    })
+    await payload.delete({
+      collection: textFieldsSlug,
+      id: createdRelatedDoc.id,
+    })
+
+    await page.goto(url.edit(doc.id))
+
+    const editBtn = page.locator(
+      '#field-relationship button.relationship--single-value__drawer-toggler',
+    )
+    await expect(editBtn).toHaveCount(0)
   })
 
   // TODO: Flaky test in CI - fix this. https://github.com/payloadcms/payload/actions/runs/8910825395/job/24470963991
@@ -502,7 +533,7 @@ describe('relationship', () => {
       await drawer1Content.locator('#action-delete').click()
 
       await page
-        .locator('[id^=delete-].payload__modal-item.delete-document[open] button#confirm-delete')
+        .locator('[id^=delete-].payload__modal-item.confirmation-modal[open] button#confirm-action')
         .click()
 
       await expect(drawer1Content).toBeHidden()
@@ -564,24 +595,22 @@ describe('relationship', () => {
 
     await page.click('#action-save', { delay: 100 })
     await expect(page.locator('.payload-toast-container')).toContainText(
-      'The following field is invalid: relationshipWithMinRows',
+      'The following field is invalid: Relationship With Min Rows',
     )
   })
 
   test('should sort relationship options by sortOptions property (ID in ascending order)', async () => {
     await page.goto(url.create)
     await page.waitForURL(url.create)
-    await wait(400)
 
     const field = page.locator('#field-relationship')
-    await wait(400)
     await field.click()
     await wait(400)
 
     const textDocsGroup = page.locator('.rs__group-heading:has-text("Text Fields")')
     const firstTextDocOption = textDocsGroup.locator('+div .rs__option').first()
     const firstOptionLabel = await firstTextDocOption.textContent()
-    expect(firstOptionLabel.trim()).toBe('Another text document')
+    expect(firstOptionLabel?.trim()).toBe('Another text document')
   })
 
   test('should sort relationHasManyPolymorphic options by sortOptions property: text-fields collection (items in descending order)', async () => {
@@ -609,44 +638,13 @@ describe('relationship', () => {
 
     await page.goto(url.list)
     await page.waitForURL(new RegExp(url.list))
-    await wait(400)
 
-    await page.locator('.list-controls__toggle-columns').click()
-    await wait(400)
-
-    await page.locator('.list-controls__toggle-where').click()
-    await expect(page.locator('.list-controls__where.rah-static--height-auto')).toBeVisible()
-    await wait(400)
-
-    await page.locator('.where-builder__add-first-filter').click()
-
-    await wait(400)
-    const conditionField = page.locator('.condition__field')
-    await expect(conditionField.locator('input')).toBeEnabled()
-    await conditionField.click()
-    await wait(400)
-
-    const dropdownFieldOptions = conditionField.locator('.rs__option')
-    await dropdownFieldOptions.locator('text=Relationship').nth(0).click()
-    await wait(400)
-
-    const operatorField = page.locator('.condition__operator')
-    await expect(operatorField.locator('input')).toBeEnabled()
-    await operatorField.click()
-    await wait(400)
-
-    const dropdownOperatorOptions = operatorField.locator('.rs__option')
-    await dropdownOperatorOptions.locator('text=equals').click()
-    await wait(400)
-
-    const valueField = page.locator('.condition__value')
-    await expect(valueField.locator('input')).toBeEnabled()
-    await valueField.click()
-    await wait(400)
-
-    const dropdownValueOptions = valueField.locator('.rs__option')
-    await dropdownValueOptions.locator('text=some text').click()
-    await wait(400)
+    await addListFilter({
+      page,
+      fieldLabel: 'Relationship',
+      operatorLabel: 'equals',
+      value: 'some text',
+    })
 
     await expect(page.locator(tableRowLocator)).toHaveCount(1)
   })

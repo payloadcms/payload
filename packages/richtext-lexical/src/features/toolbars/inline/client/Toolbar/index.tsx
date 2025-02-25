@@ -8,6 +8,7 @@ import {
   $isRangeSelection,
   $isTextNode,
   COMMAND_PRIORITY_LOW,
+  getDOMSelection,
   SELECTION_CHANGE_COMMAND,
 } from 'lexical'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -85,7 +86,7 @@ function ToolbarGroupComponent({
         return
       }
       const item = activeItems[0]
-      setDropdownIcon(() => item.ChildComponent)
+      setDropdownIcon(() => item?.ChildComponent)
     },
     [group],
   )
@@ -199,7 +200,7 @@ function InlineToolbar({
   const $updateTextFormatFloatingToolbar = useCallback(() => {
     const selection = $getSelection()
 
-    const nativeSelection = window.getSelection()
+    const nativeSelection = getDOMSelection(editor._window)
 
     if (floatingToolbarRef.current === null) {
       return
@@ -324,7 +325,7 @@ function useInlineToolbar(
         return
       }
       const selection = $getSelection()
-      const nativeSelection = window.getSelection()
+      const nativeSelection = getDOMSelection(editor._window)
       const rootElement = editor.getRootElement()
 
       if (

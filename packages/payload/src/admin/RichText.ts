@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { GenericLanguages, I18n } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 
@@ -87,7 +88,7 @@ export type BeforeChangeRichTextHookArgs<
 
   errors?: ValidationFieldError[]
   /** Only available in `beforeChange` field hooks */
-  mergeLocaleActions?: (() => Promise<void>)[]
+  mergeLocaleActions?: (() => Promise<void> | void)[]
   /** A string relating to which operation the field type is currently executing within. */
   operation?: 'create' | 'delete' | 'read' | 'update'
   /** The sibling data of the document before changes being applied. */
@@ -116,14 +117,15 @@ export type BaseRichTextHookArgs<
   field: FieldAffectingData
   /** The global which the field belongs to. If the field belongs to a collection, this will be null. */
   global: null | SanitizedGlobalConfig
-
+  indexPath: number[]
   /** The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. */
   originalDoc?: TData
+  parentIsLocalized: boolean
+
   /**
    * The path of the field, e.g. ["group", "myArray", 1, "textField"]. The path is the schemaPath but with indexes and would be used in the context of field data, not field schemas.
    */
   path: (number | string)[]
-
   /** The Express request object. It is mocked for Local API operations. */
   req: PayloadRequest
   /**
@@ -207,6 +209,7 @@ type RichTextAdapterBase<
     findMany: boolean
     flattenLocales: boolean
     overrideAccess?: boolean
+    parentIsLocalized: boolean
     populateArg?: PopulateType
     populationPromises: Promise<void>[]
     req: PayloadRequest
@@ -215,16 +218,11 @@ type RichTextAdapterBase<
   }) => void
   hooks?: RichTextHooks
   i18n?: Partial<GenericLanguages>
-  outputSchema?: ({
-    collectionIDFieldTypes,
-    config,
-    field,
-    interfaceNameDefinitions,
-    isRequired,
-  }: {
+  outputSchema?: (args: {
     collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
     config?: SanitizedConfig
     field: RichTextField<Value, AdapterProps, ExtraFieldProperties>
+    i18n?: I18n
     /**
      * Allows you to define new top-level interfaces that can be re-used in the output schema.
      */

@@ -1,4 +1,4 @@
-import type { asc, desc, SQL } from 'drizzle-orm'
+import type { asc, desc, SQL, Table } from 'drizzle-orm'
 import type { PgTableWithColumns } from 'drizzle-orm/pg-core'
 import type { FlattenedField, Sort, Where } from 'payload'
 
@@ -9,15 +9,19 @@ import { parseParams } from './parseParams.js'
 
 export type BuildQueryJoinAliases = {
   condition: SQL
+  queryPath?: string
   table: GenericTable | PgTableWithColumns<any>
   type?: 'innerJoin' | 'leftJoin' | 'rightJoin'
 }[]
 
 type BuildQueryArgs = {
   adapter: DrizzleAdapter
+  aliasTable?: Table
   fields: FlattenedField[]
   joins?: BuildQueryJoinAliases
   locale?: string
+  parentIsLocalized?: boolean
+  selectLocale?: boolean
   sort?: Sort
   tableName: string
   where: Where
@@ -34,9 +38,12 @@ export type BuildQueryResult = {
 }
 const buildQuery = function buildQuery({
   adapter,
+  aliasTable,
   fields,
   joins = [],
   locale,
+  parentIsLocalized,
+  selectLocale,
   sort,
   tableName,
   where: incomingWhere,
@@ -47,9 +54,11 @@ const buildQuery = function buildQuery({
 
   const orderBy = buildOrderBy({
     adapter,
+    aliasTable,
     fields,
     joins,
     locale,
+    parentIsLocalized,
     selectFields,
     sort,
     tableName,
@@ -60,10 +69,13 @@ const buildQuery = function buildQuery({
   if (incomingWhere && Object.keys(incomingWhere).length > 0) {
     where = parseParams({
       adapter,
+      aliasTable,
       fields,
       joins,
       locale,
+      parentIsLocalized,
       selectFields,
+      selectLocale,
       tableName,
       where: incomingWhere,
     })

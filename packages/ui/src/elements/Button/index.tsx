@@ -1,5 +1,5 @@
 'use client'
-import React, { forwardRef, Fragment, isValidElement } from 'react'
+import React, { Fragment, isValidElement } from 'react'
 
 import type { Props } from './types.js'
 
@@ -9,6 +9,7 @@ import { LinkIcon } from '../../icons/Link/index.js'
 import { PlusIcon } from '../../icons/Plus/index.js'
 import { SwapIcon } from '../../icons/Swap/index.js'
 import { XIcon } from '../../icons/X/index.js'
+import { Link } from '../Link/index.js'
 import { Popup } from '../Popup/index.js'
 import { Tooltip } from '../Tooltip/index.js'
 import './index.scss'
@@ -47,7 +48,7 @@ export const ButtonContents = ({ children, icon, showTooltip, tooltip }) => {
   )
 }
 
-export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((props, ref) => {
+export const Button: React.FC<Props> = (props) => {
   const {
     id,
     type = 'button',
@@ -57,13 +58,14 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
     className,
     disabled,
     el = 'button',
+    enableSubMenu,
     icon,
     iconPosition = 'right',
     iconStyle = 'without-border',
-    Link,
     newTab,
     onClick,
     onMouseDown,
+    ref,
     round,
     size = 'medium',
     SubMenuPopupContent,
@@ -131,7 +133,7 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
         <a
           {...buttonProps}
           href={!disabled ? url : undefined}
-          ref={ref as React.Ref<HTMLAnchorElement>}
+          ref={ref as React.RefObject<HTMLAnchorElement>}
         >
           <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
             {children}
@@ -141,26 +143,24 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
       break
 
     case 'link':
-      if (!Link) {
-        console.error('Link is required when using el="link"', children)
-        return null
-      }
-
-      let LinkTag = Link // eslint-disable-line no-case-declarations
-
       if (disabled) {
-        LinkTag = 'div'
-      } else {
-        prefetch = false
+        buttonElement = (
+          <div {...buttonProps}>
+            <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
+              {children}
+            </ButtonContents>
+          </div>
+        )
       }
 
       buttonElement = (
-        <LinkTag {...buttonProps} href={to || url} prefetch={prefetch} to={to || url}>
+        <Link {...buttonProps} href={to || url} prefetch={prefetch}>
           <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
             {children}
           </ButtonContents>
-        </LinkTag>
+        </Link>
       )
+
       break
 
     default:
@@ -182,8 +182,10 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
         <Popup
           button={<ChevronIcon />}
           buttonSize={size}
-          className={disabled ? `${baseClass}--popup-disabled` : ''}
+          className={disabled && !enableSubMenu ? `${baseClass}--popup-disabled` : ''}
+          disabled={disabled && !enableSubMenu}
           horizontalAlign="right"
+          id={`${id}-popup`}
           noBackground
           render={({ close }) => SubMenuPopupContent({ close: () => close() })}
           size="large"
@@ -194,4 +196,4 @@ export const Button = forwardRef<HTMLAnchorElement | HTMLButtonElement, Props>((
   }
 
   return buttonElement
-})
+}

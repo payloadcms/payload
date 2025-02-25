@@ -1,3 +1,5 @@
+// @ts-strict-ignore
+/* eslint-disable no-console */
 import { Cron } from 'croner'
 import minimist from 'minimist'
 import { pathToFileURL } from 'node:url'
@@ -6,12 +8,23 @@ import path from 'path'
 import type { BinScript } from '../config/types.js'
 
 import { findConfig } from '../config/find.js'
-import { getPayload } from '../index.js'
+import payload, { getPayload } from '../index.js'
 import { generateImportMap } from './generateImportMap/index.js'
 import { generateTypes } from './generateTypes.js'
 import { info } from './info.js'
 import { loadEnv } from './loadEnv.js'
-import { migrate } from './migrate.js'
+import { migrate, availableCommands as migrateCommands } from './migrate.js'
+
+// Note: this does not account for any user bin scripts
+const availableScripts = [
+  'generate:db-schema',
+  'generate:importmap',
+  'generate:types',
+  'info',
+  'jobs:run',
+  'run',
+  ...migrateCommands,
+] as const
 
 export const bin = async () => {
   loadEnv()
@@ -63,8 +76,18 @@ export const bin = async () => {
 
   if (userBinScript) {
     try {
-      const script: BinScript = await import(pathToFileURL(userBinScript.scriptPath).toString())
-      await script(config)
+      const module = await import(pathToFileURL(userBinScript.scriptPath).toString())
+
+      if (!module.script || typeof module.script !== 'function') {
+        console.error(
+          `Could not find "script" function export for script ${userBinScript.key} in ${userBinScript.scriptPath}`,
+        )
+      } else {
+        await module.script(config).catch((err: unknown) => {
+          console.log(`Script ${userBinScript.key} failed, details:`)
+          console.error(err)
+        })
+      }
     } catch (err) {
       console.log(`Could not find associated bin script for the ${userBinScript.key} command`)
       console.error(err)
@@ -102,13 +125,43 @@ export const bin = async () => {
 
       return
     } else {
-      return await payload.jobs.run({
+      await payload.jobs.run({
         limit,
         queue,
       })
+
+      await payload.db.destroy() // close database connections after running jobs so process can exit cleanly
+
+      return
     }
   }
 
-  console.error(`Unknown script: "${script}".`)
+  if (script === 'generate:db-schema') {
+    // Barebones instance to access database adapter, without connecting to the DB
+    await payload.init({
+      config,
+      disableDBConnect: true,
+      disableOnInit: true,
+    })
+
+    if (typeof payload.db.generateSchema !== 'function') {
+      payload.logger.error({
+        msg: `${payload.db.packageName} does not support database schema generation`,
+      })
+
+      process.exit(1)
+    }
+
+    await payload.db.generateSchema({
+      log: args.log === 'false' ? false : true,
+      prettify: args.prettify === 'false' ? false : true,
+    })
+
+    process.exit(0)
+  }
+
+  console.error(script ? `Unknown command: "${script}"` : 'Please provide a command to run')
+  console.log(`\nAvailable commands:\n${availableScripts.map((c) => `  - ${c}`).join('\n')}`)
+
   process.exit(1)
 }

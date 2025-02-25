@@ -1,7 +1,10 @@
+// @ts-strict-ignore
 import type { I18nClient } from '@payloadcms/translations'
 import type { DeepPartial } from 'ts-essentials'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
+import type { ClientBlock } from '../fields/config/types.js'
+import type { BlockSlug } from '../index.js'
 import type {
   LivePreviewConfig,
   SanitizedConfig,
@@ -12,8 +15,8 @@ import {
   type ClientCollectionConfig,
   createClientCollectionConfigs,
 } from '../collections/config/client.js'
+import { createClientBlocks } from '../fields/config/client.js'
 import { type ClientGlobalConfig, createClientGlobalConfigs } from '../globals/config/client.js'
-
 export type ServerOnlyRootProperties = keyof Pick<
   SanitizedConfig,
   | 'bin'
@@ -26,6 +29,7 @@ export type ServerOnlyRootProperties = keyof Pick<
   | 'endpoints'
   | 'graphQL'
   | 'hooks'
+  | 'i18n'
   | 'jobs'
   | 'logger'
   | 'onInit'
@@ -37,15 +41,25 @@ export type ServerOnlyRootProperties = keyof Pick<
 
 export type ServerOnlyRootAdminProperties = keyof Pick<SanitizedConfig['admin'], 'components'>
 
-export type ClientConfig = {
+export type UnsanitizedClientConfig = {
   admin: {
-    dependencies?: Record<string, React.ReactNode>
     livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
   } & Omit<SanitizedConfig['admin'], 'components' | 'dependencies' | 'livePreview'>
+  blocks: ClientBlock[]
   collections: ClientCollectionConfig[]
   custom?: Record<string, any>
   globals: ClientGlobalConfig[]
-  i18n?: Omit<SanitizedConfig['i18n'], 'supportedLanguages'>
+} & Omit<SanitizedConfig, 'admin' | 'collections' | 'globals' | 'i18n' | ServerOnlyRootProperties>
+
+export type ClientConfig = {
+  admin: {
+    livePreview?: Omit<LivePreviewConfig, ServerOnlyLivePreviewProperties>
+  } & Omit<SanitizedConfig['admin'], 'components' | 'dependencies' | 'livePreview'>
+  blocks: ClientBlock[]
+  blocksMap: Record<BlockSlug, ClientBlock>
+  collections: ClientCollectionConfig[]
+  custom?: Record<string, any>
+  globals: ClientGlobalConfig[]
 } & Omit<SanitizedConfig, 'admin' | 'collections' | 'globals' | 'i18n' | ServerOnlyRootProperties>
 
 export const serverOnlyAdminConfigProperties: readonly Partial<ServerOnlyRootAdminProperties>[] = []
@@ -60,6 +74,7 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   'secret',
   'hooks',
   'bin',
+  'i18n',
   'typescript',
   'cors',
   'csrf',
@@ -93,12 +108,11 @@ export const createClientConfig = ({
           avatar: config.admin.avatar,
           custom: config.admin.custom,
           dateFormat: config.admin.dateFormat,
-          dependencies: config.admin.dependencies,
-          disable: config.admin.disable,
           importMap: config.admin.importMap,
           meta: config.admin.meta,
           routes: config.admin.routes,
           theme: config.admin.theme,
+          timezones: config.admin.timezones,
           user: config.admin.user,
         }
         if (config.admin.livePreview) {
@@ -109,6 +123,16 @@ export const createClientConfig = ({
           }
         }
         break
+      case 'blocks': {
+        ;(clientConfig.blocks as ClientBlock[]) = createClientBlocks({
+          blocks: config.blocks,
+          defaultIDType: config.db.defaultIDType,
+          i18n,
+          importMap,
+        }).filter((block) => typeof block !== 'string') as ClientBlock[]
+
+        break
+      }
       case 'collections':
         ;(clientConfig.collections as ClientCollectionConfig[]) = createClientCollectionConfigs({
           collections: config.collections,
@@ -125,17 +149,16 @@ export const createClientConfig = ({
           importMap,
         })
         break
-      case 'i18n':
-        clientConfig.i18n = {
-          fallbackLanguage: config.i18n.fallbackLanguage,
-          translations: config.i18n.translations,
-        }
-        break
+
       case 'localization':
         if (typeof config.localization === 'object' && config.localization) {
           clientConfig.localization = {}
           if (config.localization.defaultLocale) {
             clientConfig.localization.defaultLocale = config.localization.defaultLocale
+          }
+          if (config.localization.defaultLocalePublishOption) {
+            clientConfig.localization.defaultLocalePublishOption =
+              config.localization.defaultLocalePublishOption
           }
           if (config.localization.fallback) {
             clientConfig.localization.fallback = config.localization.fallback

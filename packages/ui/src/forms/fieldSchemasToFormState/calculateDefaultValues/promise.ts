@@ -1,4 +1,4 @@
-import type { Data, Field, TabAsField, User } from 'payload'
+import type { Data, Field, FlattenedBlock, PayloadRequest, TabAsField, User } from 'payload'
 
 import { getDefaultValue } from 'payload'
 import { fieldAffectsData, tabHasName } from 'payload/shared'
@@ -10,6 +10,7 @@ type Args<T> = {
   field: Field | TabAsField
   id?: number | string
   locale: string | undefined
+  req: PayloadRequest
   siblingData: Data
   user: User
 }
@@ -20,6 +21,7 @@ export const defaultValuePromise = async <T>({
   data,
   field,
   locale,
+  req,
   siblingData,
   user,
 }: Args<T>): Promise<void> => {
@@ -28,12 +30,20 @@ export const defaultValuePromise = async <T>({
       typeof siblingData[field.name] === 'undefined' &&
       typeof field.defaultValue !== 'undefined'
     ) {
-      siblingData[field.name] = await getDefaultValue({
-        defaultValue: field.defaultValue,
-        locale,
-        user,
-        value: siblingData[field.name],
-      })
+      try {
+        siblingData[field.name] = await getDefaultValue({
+          defaultValue: field.defaultValue,
+          locale,
+          req,
+          user,
+          value: siblingData[field.name],
+        })
+      } catch (err) {
+        req.payload.logger.error({
+          err,
+          msg: `Error calculating default value for field: ${field.name}`,
+        })
+      }
     }
   }
 
@@ -52,6 +62,7 @@ export const defaultValuePromise = async <T>({
               data,
               fields: field.fields,
               locale,
+              req,
               siblingData: row,
               user,
             }),
@@ -69,8 +80,12 @@ export const defaultValuePromise = async <T>({
       if (Array.isArray(rows)) {
         const promises = []
         rows.forEach((row) => {
-          const blockTypeToMatch = row.blockType
-          const block = field.blocks.find((blockType) => blockType.slug === blockTypeToMatch)
+          const blockTypeToMatch: string = row.blockType
+          const block =
+            req.payload.blocks[blockTypeToMatch] ??
+            ((field.blockReferences ?? field.blocks).find(
+              (blockType) => typeof blockType !== 'string' && blockType.slug === blockTypeToMatch,
+            ) as FlattenedBlock | undefined)
 
           if (block) {
             row.blockType = blockTypeToMatch
@@ -81,6 +96,7 @@ export const defaultValuePromise = async <T>({
                 data,
                 fields: block.fields,
                 locale,
+                req,
                 siblingData: row,
                 user,
               }),
@@ -94,13 +110,13 @@ export const defaultValuePromise = async <T>({
     }
 
     case 'collapsible':
-
     case 'row': {
       await iterateFields({
         id,
         data,
         fields: field.fields,
         locale,
+        req,
         siblingData,
         user,
       })
@@ -119,6 +135,7 @@ export const defaultValuePromise = async <T>({
         data,
         fields: field.fields,
         locale,
+        req,
         siblingData: groupData,
         user,
       })
@@ -143,6 +160,7 @@ export const defaultValuePromise = async <T>({
         data,
         fields: field.fields,
         locale,
+        req,
         siblingData: tabSiblingData,
         user,
       })
@@ -156,6 +174,7 @@ export const defaultValuePromise = async <T>({
         data,
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
         locale,
+        req,
         siblingData,
         user,
       })

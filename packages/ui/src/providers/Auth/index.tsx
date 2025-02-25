@@ -13,6 +13,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { useConfig } from '../Config/index.js'
+import { useRouteTransition } from '../RouteTransition/index.js'
 
 export type UserWithToken<T = ClientUser> = {
   exp: number
@@ -74,28 +75,22 @@ export function AuthProvider({
   const [lastLocationChange, setLastLocationChange] = useState(0)
   const debouncedLocationChange = useDebounce(lastLocationChange, 10000)
   const refreshTokenTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>(null)
+  const { startRouteTransition } = useRouteTransition()
 
   const id = user?.id
 
   const redirectToInactivityRoute = useCallback(() => {
-    if (window.location.pathname.startsWith(adminRoute)) {
-      const redirectParam = `?redirect=${encodeURIComponent(window.location.pathname)}`
+    startRouteTransition(() =>
       router.replace(
         formatAdminURL({
           adminRoute,
-          path: `${logoutInactivityRoute}${redirectParam}`,
+          path: `${logoutInactivityRoute}${window.location.pathname.startsWith(adminRoute) ? `?redirect=${encodeURIComponent(window.location.pathname)}` : ''}`,
         }),
-      )
-    } else {
-      router.replace(
-        formatAdminURL({
-          adminRoute,
-          path: logoutInactivityRoute,
-        }),
-      )
-    }
+      ),
+    )
+
     closeAllModals()
-  }, [router, adminRoute, logoutInactivityRoute, closeAllModals])
+  }, [router, adminRoute, logoutInactivityRoute, closeAllModals, startRouteTransition])
 
   const revokeTokenAndExpire = useCallback(() => {
     setTokenInMemory(undefined)
@@ -196,7 +191,7 @@ export function AuthProvider({
 
   const logOut = useCallback(async () => {
     try {
-      await requests.post(`${serverURL}${apiRoute}/${userSlug}/logout`)
+      await requests.post(`${serverURL}${apiRoute}/${user.collection}/logout`)
       setNewUser(null)
       revokeTokenAndExpire()
       return true
@@ -204,7 +199,7 @@ export function AuthProvider({
       toast.error(`Logging out failed: ${e.message}`)
       return false
     }
-  }, [apiRoute, revokeTokenAndExpire, serverURL, setNewUser, userSlug])
+  }, [apiRoute, revokeTokenAndExpire, serverURL, setNewUser, user])
 
   const refreshPermissions = useCallback(
     async ({ locale }: { locale?: string } = {}) => {
@@ -309,7 +304,7 @@ export function AuthProvider({
         clearTimeout(forceLogOut)
       }
     }
-  }, [tokenExpiration, openModal, i18n, setNewUser, user])
+  }, [tokenExpiration, openModal, i18n, setNewUser, user, redirectToInactivityRoute])
 
   return (
     <Context.Provider

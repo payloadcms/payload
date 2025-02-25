@@ -1,12 +1,21 @@
-import type { FlattenedBlock, FlattenedField, Payload, RelationshipField } from 'payload'
+import type {
+  FlattenedBlock,
+  FlattenedBlocksField,
+  FlattenedField,
+  Payload,
+  RelationshipField,
+} from 'payload'
 
 import { Types } from 'mongoose'
 import { createArrayFromCommaDelineated } from 'payload'
+import { fieldShouldBeLocalized } from 'payload/shared'
 
 type SanitizeQueryValueArgs = {
   field: FlattenedField
   hasCustomID: boolean
+  locale?: string
   operator: string
+  parentIsLocalized: boolean
   path: string
   payload: Payload
   val: any
@@ -39,14 +48,18 @@ const buildExistsQuery = (formattedValue, path, treatEmptyString = true) => {
 // returns nestedField Field object from blocks.nestedField path because getLocalizedPaths splits them only for relationships
 const getFieldFromSegments = ({
   field,
+  payload,
   segments,
 }: {
   field: FlattenedBlock | FlattenedField
+  payload: Payload
   segments: string[]
 }) => {
-  if ('blocks' in field) {
-    for (const block of field.blocks) {
-      const field = getFieldFromSegments({ field: block, segments })
+  if ('blocks' in field || 'blockReferences' in field) {
+    const _field: FlattenedBlocksField = field as FlattenedBlocksField
+    for (const _block of _field.blockReferences ?? _field.blocks) {
+      const block: FlattenedBlock = typeof _block === 'string' ? payload.blocks[_block] : _block
+      const field = getFieldFromSegments({ field: block, payload, segments })
       if (field) {
         return field
       }
@@ -66,7 +79,7 @@ const getFieldFromSegments = ({
       }
 
       segments.shift()
-      return getFieldFromSegments({ field: foundField, segments })
+      return getFieldFromSegments({ field: foundField, payload, segments })
     }
   }
 }
@@ -74,7 +87,9 @@ const getFieldFromSegments = ({
 export const sanitizeQueryValue = ({
   field,
   hasCustomID,
+  locale,
   operator,
+  parentIsLocalized,
   path,
   payload,
   val,
@@ -85,11 +100,10 @@ export const sanitizeQueryValue = ({
 } => {
   let formattedValue = val
   let formattedOperator = operator
-
   if (['array', 'blocks', 'group', 'tab'].includes(field.type) && path.includes('.')) {
     const segments = path.split('.')
     segments.shift()
-    const foundField = getFieldFromSegments({ field, segments })
+    const foundField = getFieldFromSegments({ field, payload, segments })
 
     if (foundField) {
       field = foundField
@@ -205,11 +219,38 @@ export const sanitizeQueryValue = ({
         formattedValue.value = new Types.ObjectId(value)
       }
 
+      let localizedPath = path
+
+      if (
+        fieldShouldBeLocalized({ field, parentIsLocalized }) &&
+        payload.config.localization &&
+        locale
+      ) {
+        localizedPath = `${path}.${locale}`
+      }
+
       return {
         rawQuery: {
-          $and: [
-            { [`${path}.value`]: { $eq: formattedValue.value } },
-            { [`${path}.relationTo`]: { $eq: formattedValue.relationTo } },
+          $or: [
+            {
+              [localizedPath]: {
+                $eq: {
+                  // disable auto sort
+                  /* eslint-disable */
+                  value: formattedValue.value,
+                  relationTo: formattedValue.relationTo,
+                  /* eslint-enable */
+                },
+              },
+            },
+            {
+              [localizedPath]: {
+                $eq: {
+                  relationTo: formattedValue.relationTo,
+                  value: formattedValue.value,
+                },
+              },
+            },
           ],
         },
       }
@@ -299,6 +340,19 @@ export const sanitizeQueryValue = ({
         }
       }
     }
+
+    if (
+      operator === 'all' &&
+      Array.isArray(relationTo) &&
+      path.endsWith('.value') &&
+      Array.isArray(formattedValue)
+    ) {
+      formattedValue.forEach((v, i) => {
+        if (Types.ObjectId.isValid(v)) {
+          formattedValue[i] = new Types.ObjectId(v)
+        }
+      })
+    }
   }
 
   // Set up specific formatting necessary by operators
@@ -324,10 +378,11 @@ export const sanitizeQueryValue = ({
         $geometry: { type: 'Point', coordinates: [parseFloat(lng), parseFloat(lat)] },
       }
 
-      if (maxDistance) {
+      if (maxDistance && !Number.isNaN(Number(maxDistance))) {
         formattedValue.$maxDistance = parseFloat(maxDistance)
       }
-      if (minDistance) {
+
+      if (minDistance && !Number.isNaN(Number(minDistance))) {
         formattedValue.$minDistance = parseFloat(minDistance)
       }
     }

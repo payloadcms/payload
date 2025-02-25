@@ -1,10 +1,12 @@
 import type { I18n } from '@payloadcms/translations'
 
 import {
+  type ClientBlock,
   type ClientConfig,
   type ClientField,
   type ClientFieldSchemaMap,
   createClientFields,
+  type Field,
   type FieldSchemaMap,
   type Payload,
 } from 'payload'
@@ -59,7 +61,14 @@ export const traverseFields = ({
         break
 
       case 'blocks':
-        field.blocks.map((block) => {
+        ;(field.blockReferences ?? field.blocks).map((_block) => {
+          const block =
+            typeof _block === 'string'
+              ? config.blocksMap
+                ? config.blocksMap[_block]
+                : config.blocks.find((block) => typeof block !== 'string' && block.slug === _block)
+              : _block
+
           const blockSchemaPath = `${schemaPath}.${block.slug}`
 
           clientSchemaMap.set(blockSchemaPath, block)
@@ -108,21 +117,33 @@ export const traverseFields = ({
 
         // Now loop through them, convert each entry to a client field and add it to the client schema map
         for (const [path, subField] of richTextFieldSchemaMap.entries()) {
+          // check if fields is the only key in the subField object
+          const isFieldsOnly = Object.keys(subField).length === 1 && 'fields' in subField
+
           const clientFields = createClientFields({
             defaultIDType: payload.config.db.defaultIDType,
             disableAddingID: true,
-            fields: 'fields' in subField ? subField.fields : [subField],
+            fields: isFieldsOnly ? subField.fields : [subField as Field],
             i18n,
             importMap: payload.importMap,
           })
-          clientSchemaMap.set(path, {
-            fields: clientFields,
-          })
+
+          clientSchemaMap.set(
+            path,
+            isFieldsOnly
+              ? {
+                  fields: clientFields,
+                }
+              : clientFields[0],
+          )
         }
         break
       }
+
       case 'tabs':
         field.tabs.map((tab, tabIndex) => {
+          const isNamedTab = tabHasName(tab)
+
           const { indexPath: tabIndexPath, schemaPath: tabSchemaPath } = getFieldPaths({
             field: {
               ...tab,
@@ -141,8 +162,8 @@ export const traverseFields = ({
             config,
             fields: tab.fields,
             i18n,
-            parentIndexPath: tabHasName(tab) ? '' : tabIndexPath,
-            parentSchemaPath: tabHasName(tab) ? tabSchemaPath : parentSchemaPath,
+            parentIndexPath: isNamedTab ? '' : tabIndexPath,
+            parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
             payload,
             schemaMap,
           })

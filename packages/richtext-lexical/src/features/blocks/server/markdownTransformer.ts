@@ -8,6 +8,7 @@ import type { NodeWithHooks } from '../../typesServer.js'
 
 import { getEnabledNodesFromServerNodes } from '../../../lexical/nodes/index.js'
 import {
+  $convertFromMarkdownString,
   $convertToMarkdownString,
   type MultilineElementTransformer,
   type TextMatchTransformer,
@@ -15,7 +16,6 @@ import {
 } from '../../../packages/@lexical/markdown/index.js'
 import { extractPropsFromJSXPropsString } from '../../../utilities/jsx/extractPropsFromJSXPropsString.js'
 import { propsToJSXString } from '../../../utilities/jsx/jsx.js'
-import { $convertFromMarkdownString } from '../../../utilities/jsx/lexicalMarkdownCopy.js'
 import { linesFromStartToContentAndPropsString } from './linesFromMatchToContentAndPropsString.js'
 import { $createServerBlockNode, $isServerBlockNode, ServerBlockNode } from './nodes/BlocksNode.js'
 import {
@@ -361,18 +361,19 @@ function getMarkdownTransformerForBlock(
             if (beforeStartLine?.length) {
               prevNodes = markdownToLexical({ markdown: beforeStartLine })?.root?.children ?? []
 
-              if (prevNodes?.length) {
-                rootNode.append($parseSerializedNode(prevNodes[0]))
+              const firstPrevNode = prevNodes?.[0]
+              if (firstPrevNode) {
+                rootNode.append($parseSerializedNode(firstPrevNode))
               }
             }
 
             rootNode.append(node)
 
             if (afterEndLine?.length) {
-              nextNodes = markdownToLexical({ markdown: afterEndLine })?.root?.children ?? []
+              nextNodes = markdownToLexical({ markdown: afterEndLine })?.root?.children
               const lastChild = rootNode.getChildren()[rootNode.getChildren().length - 1]
 
-              const children = ($parseSerializedNode(nextNodes[0]) as ElementNode)?.getChildren()
+              const children = ($parseSerializedNode(nextNodes[0]!) as ElementNode)?.getChildren()
               if (children?.length) {
                 for (const child of children) {
                   ;(lastChild as ElementNode).append(child)
@@ -403,13 +404,12 @@ function getMarkdownTransformerForBlock(
 
         let childrenString = ''
         if (block?.jsx?.doNotTrimChildren) {
-          // Do not trim, but remove empty lines
-          childrenString = linesInBetween.filter((line) => line.trim().length > 0).join('\n')
+          childrenString = linesInBetween.join('\n')
         } else {
           childrenString = linesInBetween.join('\n').trim()
         }
 
-        const propsString: null | string = openMatch?.length > 1 ? openMatch[1]?.trim() : null
+        const propsString = openMatch[1]?.trim()
 
         const markdownToLexical = getMarkdownToLexical(allNodes, allTransformers)
 

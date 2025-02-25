@@ -10,11 +10,17 @@ import { getClientSchemaMap } from './getClientSchemaMap.js'
 import { getSchemaMap } from './getSchemaMap.js'
 import { handleFormStateLocking } from './handleFormStateLocking.js'
 
+export type LockedState = {
+  isLocked: boolean
+  lastEditedAt: string
+  user: ClientUser | number | string
+}
+
 type BuildFormStateSuccessResult = {
   clientConfig?: ClientConfig
   errors?: never
   indexPath?: string
-  lockedState?: { isLocked: boolean; lastEditedAt: string; user: ClientUser | number | string }
+  lockedState?: LockedState
   state: FormState
 }
 
@@ -96,8 +102,11 @@ export const buildFormState = async (
     data: incomingData,
     docPermissions,
     docPreferences,
+    documentFormState,
     formState,
     globalSlug,
+    initialBlockData,
+    initialBlockFormState,
     operation,
     renderAllFields,
     req,
@@ -108,6 +117,7 @@ export const buildFormState = async (
     },
     returnLockStatus,
     schemaPath = collectionSlug || globalSlug,
+    skipValidation,
     updateLastEdited,
   } = args
 
@@ -158,6 +168,16 @@ export const buildFormState = async (
     data = reduceFieldsToValues(formState, true)
   }
 
+  let documentData = undefined
+  if (documentFormState) {
+    documentData = reduceFieldsToValues(documentFormState, true)
+  }
+
+  let blockData = initialBlockData
+  if (initialBlockFormState) {
+    blockData = reduceFieldsToValues(initialBlockFormState, true)
+  }
+
   /**
    * When building state for sub schemas we need to adjust:
    * - `fields`
@@ -178,8 +198,10 @@ export const buildFormState = async (
     clientFieldSchemaMap: clientSchemaMap,
     collectionSlug,
     data,
+    documentData,
     fields,
     fieldSchemaMap: schemaMap,
+    initialBlockData: blockData,
     operation,
     permissions: docPermissions?.fields || {},
     preferences: docPreferences || { fields: {} },
@@ -188,6 +210,7 @@ export const buildFormState = async (
     renderFieldFn: renderField,
     req,
     schemaPath,
+    skipValidation,
   })
 
   // Maintain form state of auth / upload fields

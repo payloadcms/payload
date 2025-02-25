@@ -1,5 +1,6 @@
 import path from 'path'
 import { deepCopyObject, type Payload } from 'payload'
+import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -28,6 +29,8 @@ describe('Select', () => {
   // --__--__--__--__--__--__--__--__--__
   beforeAll(async () => {
     const initialized = await initPayloadInt(dirname)
+    assert(initialized.payload)
+    assert(initialized.restClient)
     ;({ payload, restClient } = initialized)
   })
 
@@ -64,6 +67,7 @@ describe('Select', () => {
           collection: 'posts',
           id: postId,
           select: {},
+          depth: 0,
         })
 
         expect(res).toStrictEqual({
@@ -78,11 +82,44 @@ describe('Select', () => {
           select: {
             number: true,
           },
+          depth: 0,
         })
 
         expect(res).toStrictEqual({
           id: postId,
           number: post.number,
+        })
+      })
+
+      it('should select only select', async () => {
+        const res = await payload.findByID({
+          collection: 'posts',
+          id: postId,
+          select: {
+            select: true,
+          },
+          depth: 0,
+        })
+
+        expect(res).toStrictEqual({
+          id: postId,
+          select: post.select,
+        })
+      })
+
+      it('should select only hasMany select', async () => {
+        const res = await payload.findByID({
+          collection: 'posts',
+          id: postId,
+          select: {
+            selectMany: true,
+          },
+          depth: 0,
+        })
+
+        expect(res).toStrictEqual({
+          id: postId,
+          selectMany: post.selectMany,
         })
       })
 
@@ -94,12 +131,57 @@ describe('Select', () => {
             number: true,
             text: true,
           },
+          depth: 0,
         })
 
         expect(res).toStrictEqual({
           id: postId,
           number: post.number,
           text: post.text,
+        })
+      })
+
+      it('should select relationships', async () => {
+        const res_1 = await payload.findByID({
+          collection: 'posts',
+          id: postId,
+          select: {
+            hasManyUpload: true,
+          },
+          depth: 0,
+        })
+
+        expect(res_1).toStrictEqual({
+          id: postId,
+          hasManyUpload: post.hasManyUpload,
+        })
+
+        const res_2 = await payload.findByID({
+          collection: 'posts',
+          id: postId,
+          select: {
+            hasOne: true,
+          },
+          depth: 0,
+        })
+
+        expect(res_2).toStrictEqual({
+          id: postId,
+          hasOne: post.hasOne,
+        })
+
+        const res_3 = await payload.findByID({
+          collection: 'posts',
+          id: postId,
+          select: {
+            hasManyPoly: true,
+          },
+          depth: 0,
+        })
+
+        expect(res_3).toStrictEqual({
+          id: postId,
+          hasManyPoly: post.hasManyPoly,
         })
       })
 
@@ -110,6 +192,7 @@ describe('Select', () => {
           select: {
             group: true,
           },
+          depth: 0,
         })
 
         expect(res).toStrictEqual({
@@ -127,12 +210,13 @@ describe('Select', () => {
               text: true,
             },
           },
+          depth: 0,
         })
 
         expect(res).toStrictEqual({
           id: postId,
           group: {
-            text: post.group.text,
+            text: post.group?.text,
           },
         })
       })
@@ -144,6 +228,7 @@ describe('Select', () => {
           select: {
             tab: true,
           },
+          depth: 0,
         })
 
         expect(res).toStrictEqual({
@@ -161,12 +246,13 @@ describe('Select', () => {
               text: true,
             },
           },
+          depth: 0,
         })
 
         expect(res).toStrictEqual({
           id: postId,
           tab: {
-            text: post.tab.text,
+            text: post.tab?.text,
           },
         })
       })
@@ -178,6 +264,7 @@ describe('Select', () => {
           select: {
             unnamedTabText: true,
           },
+          depth: 0,
         })
 
         expect(res).toStrictEqual({
@@ -193,11 +280,12 @@ describe('Select', () => {
           select: {
             array: {},
           },
+          depth: 0,
         })
 
         expect(res).toStrictEqual({
           id: postId,
-          array: post.array.map((item) => ({ id: item.id })),
+          array: post.array?.map((item) => ({ id: item.id })),
         })
       })
 
@@ -208,6 +296,7 @@ describe('Select', () => {
           select: {
             array: true,
           },
+          depth: 0,
         })
 
         expect(res).toStrictEqual({
@@ -225,11 +314,12 @@ describe('Select', () => {
               text: true,
             },
           },
+          depth: 0,
         })
 
         expect(res).toStrictEqual({
           id: postId,
-          array: post.array.map((item) => ({
+          array: post.array?.map((item) => ({
             id: item.id,
             text: item.text,
           })),
@@ -243,11 +333,12 @@ describe('Select', () => {
           select: {
             blocks: {},
           },
+          depth: 0,
         })
 
         expect(res).toStrictEqual({
           id: postId,
-          blocks: post.blocks.map((block) => ({ blockType: block.blockType, id: block.id })),
+          blocks: post.blocks?.map((block) => ({ blockType: block.blockType, id: block.id })),
         })
       })
 
@@ -258,6 +349,7 @@ describe('Select', () => {
           select: {
             blocks: true,
           },
+          depth: 0,
         })
 
         expect(res).toStrictEqual({
@@ -275,11 +367,12 @@ describe('Select', () => {
               cta: true,
             },
           },
+          depth: 0,
         })
 
         expect(res).toStrictEqual({
           id: postId,
-          blocks: post.blocks.map((block) =>
+          blocks: post.blocks?.map((block) =>
             // eslint-disable-next-line jest/no-conditional-in-test
             block.blockType === 'cta'
               ? block
@@ -300,11 +393,12 @@ describe('Select', () => {
               cta: { ctaText: true },
             },
           },
+          depth: 0,
         })
 
         expect(res).toStrictEqual({
           id: postId,
-          blocks: post.blocks.map((block) =>
+          blocks: post.blocks?.map((block) =>
             // eslint-disable-next-line jest/no-conditional-in-test
             block.blockType === 'cta'
               ? { id: block.id, blockType: block.blockType, ctaText: block.ctaText }
@@ -342,6 +436,7 @@ describe('Select', () => {
           select: {
             text: false,
           },
+          depth: 0,
         })
 
         const expected = { ...post }
@@ -358,11 +453,46 @@ describe('Select', () => {
           select: {
             number: false,
           },
+          depth: 0,
         })
 
         const expected = { ...post }
 
         delete expected['number']
+
+        expect(res).toStrictEqual(expected)
+      })
+
+      it('should exclude select', async () => {
+        const res = await payload.findByID({
+          collection: 'posts',
+          id: postId,
+          select: {
+            select: false,
+          },
+          depth: 0,
+        })
+
+        const expected = { ...post }
+
+        delete expected['select']
+
+        expect(res).toStrictEqual(expected)
+      })
+
+      it('should exclude hasMany select', async () => {
+        const res = await payload.findByID({
+          collection: 'posts',
+          id: postId,
+          select: {
+            selectMany: false,
+          },
+          depth: 0,
+        })
+
+        const expected = { ...post }
+
+        delete expected['selectMany']
 
         expect(res).toStrictEqual(expected)
       })
@@ -375,12 +505,36 @@ describe('Select', () => {
             number: false,
             text: false,
           },
+          depth: 0,
         })
 
         const expected = { ...post }
 
         delete expected['text']
         delete expected['number']
+
+        expect(res).toStrictEqual(expected)
+      })
+
+      it('should exclude relationships', async () => {
+        const res = await payload.findByID({
+          collection: 'posts',
+          id: postId,
+          select: {
+            hasOne: false,
+            hasMany: false,
+            hasManyPoly: false,
+            hasOnePoly: false,
+          },
+          depth: 0,
+        })
+
+        const expected = { ...post }
+
+        delete expected['hasOne']
+        delete expected['hasMany']
+        delete expected['hasManyPoly']
+        delete expected['hasOnePoly']
 
         expect(res).toStrictEqual(expected)
       })
@@ -392,6 +546,7 @@ describe('Select', () => {
           select: {
             group: false,
           },
+          depth: 0,
         })
 
         const expected = { ...post }
@@ -410,11 +565,12 @@ describe('Select', () => {
               text: false,
             },
           },
+          depth: 0,
         })
 
         const expected = deepCopyObject(post)
 
-        delete expected.group.text
+        delete expected.group?.text
 
         expect(res).toStrictEqual(expected)
       })
@@ -426,6 +582,7 @@ describe('Select', () => {
           select: {
             array: false,
           },
+          depth: 0,
         })
 
         const expected = { ...post }
@@ -444,11 +601,12 @@ describe('Select', () => {
               text: false,
             },
           },
+          depth: 0,
         })
 
         expect(res).toStrictEqual({
           ...post,
-          array: post.array.map((item) => ({
+          array: post.array?.map((item) => ({
             id: item.id,
             number: item.number,
           })),
@@ -462,6 +620,7 @@ describe('Select', () => {
           select: {
             blocks: false,
           },
+          depth: 0,
         })
 
         const expected = { ...post }
@@ -480,11 +639,12 @@ describe('Select', () => {
               cta: false,
             },
           },
+          depth: 0,
         })
 
         expect(res).toStrictEqual({
           ...post,
-          blocks: post.blocks.map((block) =>
+          blocks: post.blocks?.map((block) =>
             // eslint-disable-next-line jest/no-conditional-in-test
             block.blockType === 'cta' ? { id: block.id, blockType: block.blockType } : block,
           ),
@@ -500,12 +660,16 @@ describe('Select', () => {
               cta: { ctaText: false },
             },
           },
+          depth: 0,
         })
 
         expect(res).toStrictEqual({
           ...post,
-          blocks: post.blocks.map((block) => {
-            delete block['ctaText']
+          blocks: post.blocks?.map((block) => {
+            // eslint-disable-next-line jest/no-conditional-in-test
+            if ('ctaText' in block) {
+              delete block['ctaText']
+            }
 
             return block
           }),
@@ -513,6 +677,7 @@ describe('Select', () => {
       })
 
       it('should exclude a point field', async () => {
+        // eslint-disable-next-line jest/no-conditional-in-test
         if (payload.db.name === 'sqlite') {
           return
         }
@@ -573,6 +738,36 @@ describe('Select', () => {
         })
       })
 
+      it('should select only select', async () => {
+        const res = await payload.findByID({
+          collection: 'localized-posts',
+          id: postId,
+          select: {
+            select: true,
+          },
+        })
+
+        expect(res).toStrictEqual({
+          id: postId,
+          select: post.select,
+        })
+      })
+
+      it('should select only hasMany select', async () => {
+        const res = await payload.findByID({
+          collection: 'localized-posts',
+          id: postId,
+          select: {
+            selectMany: true,
+          },
+        })
+
+        expect(res).toStrictEqual({
+          id: postId,
+          selectMany: post.selectMany,
+        })
+      })
+
       it('should select number and text', async () => {
         const res = await payload.findByID({
           collection: 'localized-posts',
@@ -619,7 +814,7 @@ describe('Select', () => {
         expect(res).toStrictEqual({
           id: postId,
           group: {
-            text: post.group.text,
+            text: post.group?.text,
           },
         })
       })
@@ -638,7 +833,7 @@ describe('Select', () => {
         expect(res).toStrictEqual({
           id: postId,
           groupSecond: {
-            text: post.groupSecond.text,
+            text: post.groupSecond?.text,
           },
         })
       })
@@ -654,7 +849,7 @@ describe('Select', () => {
 
         expect(res).toStrictEqual({
           id: postId,
-          array: post.array.map((item) => ({ id: item.id })),
+          array: post.array?.map((item) => ({ id: item.id })),
         })
       })
 
@@ -686,7 +881,7 @@ describe('Select', () => {
 
         expect(res).toStrictEqual({
           id: postId,
-          array: post.array.map((item) => ({
+          array: post.array?.map((item) => ({
             id: item.id,
             text: item.text,
           })),
@@ -706,7 +901,7 @@ describe('Select', () => {
 
         expect(res).toStrictEqual({
           id: postId,
-          arraySecond: post.arraySecond.map((item) => ({
+          arraySecond: post.arraySecond?.map((item) => ({
             id: item.id,
             text: item.text,
           })),
@@ -724,7 +919,7 @@ describe('Select', () => {
 
         expect(res).toStrictEqual({
           id: postId,
-          blocks: post.blocks.map((block) => ({ blockType: block.blockType, id: block.id })),
+          blocks: post.blocks?.map((block) => ({ blockType: block.blockType, id: block.id })),
         })
       })
 
@@ -756,7 +951,7 @@ describe('Select', () => {
 
         expect(res).toStrictEqual({
           id: postId,
-          blocks: post.blocks.map((block) =>
+          blocks: post.blocks?.map((block) =>
             // eslint-disable-next-line jest/no-conditional-in-test
             block.blockType === 'cta'
               ? block
@@ -781,7 +976,7 @@ describe('Select', () => {
 
         expect(res).toStrictEqual({
           id: postId,
-          blocks: post.blocks.map((block) =>
+          blocks: post.blocks?.map((block) =>
             // eslint-disable-next-line jest/no-conditional-in-test
             block.blockType === 'cta'
               ? { id: block.id, blockType: block.blockType, ctaText: block.ctaText }
@@ -806,7 +1001,7 @@ describe('Select', () => {
 
         expect(res).toStrictEqual({
           id: postId,
-          blocksSecond: post.blocksSecond.map((block) =>
+          blocksSecond: post.blocksSecond?.map((block) =>
             // eslint-disable-next-line jest/no-conditional-in-test
             block.blockType === 'second'
               ? { id: block.id, blockType: block.blockType, text: block.text }
@@ -831,7 +1026,7 @@ describe('Select', () => {
 
         expect(res).toStrictEqual({
           id: postId,
-          blocksSecond: post.blocksSecond.map((block) =>
+          blocksSecond: post.blocksSecond?.map((block) =>
             // eslint-disable-next-line jest/no-conditional-in-test
             block.blockType === 'first'
               ? { id: block.id, blockType: block.blockType, firstText: block.firstText }
@@ -873,6 +1068,38 @@ describe('Select', () => {
         const expected = { ...post }
 
         delete expected['number']
+
+        expect(res).toStrictEqual(expected)
+      })
+
+      it('should exclude select', async () => {
+        const res = await payload.findByID({
+          collection: 'localized-posts',
+          id: postId,
+          select: {
+            select: false,
+          },
+        })
+
+        const expected = { ...post }
+
+        delete expected['select']
+
+        expect(res).toStrictEqual(expected)
+      })
+
+      it('should exclude hasMany select', async () => {
+        const res = await payload.findByID({
+          collection: 'localized-posts',
+          id: postId,
+          select: {
+            selectMany: false,
+          },
+        })
+
+        const expected = { ...post }
+
+        delete expected['selectMany']
 
         expect(res).toStrictEqual(expected)
       })
@@ -924,7 +1151,7 @@ describe('Select', () => {
 
         const expected = deepCopyObject(post)
 
-        delete expected.group.text
+        delete expected.group?.text
 
         expect(res).toStrictEqual(expected)
       })
@@ -942,7 +1169,7 @@ describe('Select', () => {
 
         const expected = deepCopyObject(post)
 
-        delete expected.groupSecond.text
+        delete expected.groupSecond?.text
 
         expect(res).toStrictEqual(expected)
       })
@@ -976,7 +1203,7 @@ describe('Select', () => {
 
         expect(res).toStrictEqual({
           ...post,
-          array: post.array.map((item) => ({
+          array: post.array?.map((item) => ({
             id: item.id,
             number: item.number,
           })),
@@ -996,7 +1223,7 @@ describe('Select', () => {
 
         expect(res).toStrictEqual({
           ...post,
-          arraySecond: post.arraySecond.map((item) => ({
+          arraySecond: post.arraySecond?.map((item) => ({
             id: item.id,
             number: item.number,
           })),
@@ -1032,7 +1259,7 @@ describe('Select', () => {
 
         expect(res).toStrictEqual({
           ...post,
-          blocks: post.blocks.map((block) =>
+          blocks: post.blocks?.map((block) =>
             // eslint-disable-next-line jest/no-conditional-in-test
             block.blockType === 'cta' ? { id: block.id, blockType: block.blockType } : block,
           ),
@@ -1052,8 +1279,11 @@ describe('Select', () => {
 
         expect(res).toStrictEqual({
           ...post,
-          blocks: post.blocks.map((block) => {
-            delete block['ctaText']
+          blocks: post.blocks?.map((block) => {
+            // eslint-disable-next-line jest/no-conditional-in-test
+            if ('ctaText' in block) {
+              delete block['ctaText']
+            }
 
             return block
           }),
@@ -1073,7 +1303,7 @@ describe('Select', () => {
 
         expect(res).toStrictEqual({
           ...post,
-          blocksSecond: post.blocksSecond.map((block) => {
+          blocksSecond: post.blocksSecond?.map((block) => {
             // eslint-disable-next-line jest/no-conditional-in-test
             if (block.blockType === 'second') {
               delete block['text']
@@ -1097,8 +1327,11 @@ describe('Select', () => {
 
         expect(res).toStrictEqual({
           ...post,
-          blocksSecond: post.blocksSecond.map((block) => {
-            delete block['firstText']
+          blocksSecond: post.blocksSecond?.map((block) => {
+            // eslint-disable-next-line jest/no-conditional-in-test
+            if ('firstText' in block) {
+              delete block['firstText']
+            }
 
             return block
           }),
@@ -1126,10 +1359,10 @@ describe('Select', () => {
       expect(res).toStrictEqual({
         id: postId,
         group: {
-          array: post.group.array.map((item) => ({
+          array: post.group?.array?.map((item) => ({
             id: item.id,
             group: {
-              text: item.group.text,
+              text: item.group?.text,
             },
           })),
         },
@@ -1146,7 +1379,7 @@ describe('Select', () => {
       expect(res).toStrictEqual({
         id: postId,
         group: {
-          array: post.group.array.map((item) => ({
+          array: post.group?.array?.map((item) => ({
             id: item.id,
             group: item.group,
           })),
@@ -1164,7 +1397,7 @@ describe('Select', () => {
       expect(res).toStrictEqual({
         id: postId,
         group: {
-          blocks: post.group.blocks.map((item) => ({
+          blocks: post.group?.blocks?.map((item) => ({
             id: item.id,
             blockType: item.blockType,
             text: item.text,
@@ -1182,9 +1415,9 @@ describe('Select', () => {
 
       expect(res).toStrictEqual({
         id: postId,
-        arrayTop: post.arrayTop.map((item) => ({
+        arrayTop: post.arrayTop?.map((item) => ({
           id: item.id,
-          arrayNested: item.arrayNested.map((item) => ({
+          arrayNested: item.arrayNested?.map((item) => ({
             id: item.id,
             text: item.text,
           })),
@@ -1308,7 +1541,7 @@ describe('Select', () => {
 
       expect(res.docs[0]).toStrictEqual({
         id: postId,
-        array: post.array.map((each) => ({ id: each.id })),
+        array: post.array?.map((each) => ({ id: each.id })),
       })
     })
 
@@ -1328,7 +1561,7 @@ describe('Select', () => {
 
       expect(res.docs[0]).toStrictEqual({
         id: postId,
-        blocks: post.blocks.map((each) => ({ blockType: each.blockType, id: each.id })),
+        blocks: post.blocks?.map((each) => ({ blockType: each.blockType, id: each.id })),
       })
     })
 
@@ -1349,6 +1582,8 @@ describe('Select', () => {
       // undefined values are happened with drizzle adapters because of transform/read
 
       const doc = res.docs[0]
+
+      assert(doc)
 
       expect(doc.createdAt).toBeUndefined()
       expect(doc.updatedAt).toBeUndefined()
@@ -1413,7 +1648,10 @@ describe('Select', () => {
         },
       })
 
-      expect(Object.keys(res)).toStrictEqual(['id', 'text'])
+      expect(res).toStrictEqual({
+        id: res.id,
+        text: res.text,
+      })
     })
 
     it('should apply select with updateByID', async () => {
@@ -1426,7 +1664,10 @@ describe('Select', () => {
         select: { text: true },
       })
 
-      expect(Object.keys(res)).toStrictEqual(['id', 'text'])
+      expect(res).toStrictEqual({
+        id: res.id,
+        text: res.text,
+      })
     })
 
     it('should apply select with updateBulk', async () => {
@@ -1443,7 +1684,12 @@ describe('Select', () => {
         select: { text: true },
       })
 
-      expect(Object.keys(res.docs[0])).toStrictEqual(['id', 'text'])
+      assert(res.docs[0])
+
+      expect(res.docs[0]).toStrictEqual({
+        id: res.docs[0].id,
+        text: res.docs[0].text,
+      })
     })
 
     it('should apply select with deleteByID', async () => {
@@ -1455,7 +1701,10 @@ describe('Select', () => {
         select: { text: true },
       })
 
-      expect(Object.keys(res)).toStrictEqual(['id', 'text'])
+      expect(res).toStrictEqual({
+        id: res.id,
+        text: res.text,
+      })
     })
 
     it('should apply select with deleteBulk', async () => {
@@ -1471,7 +1720,12 @@ describe('Select', () => {
         select: { text: true },
       })
 
-      expect(Object.keys(res.docs[0])).toStrictEqual(['id', 'text'])
+      assert(res.docs[0])
+
+      expect(res.docs[0]).toStrictEqual({
+        id: res.docs[0].id,
+        text: res.docs[0].text,
+      })
     })
 
     it('should apply select with duplicate', async () => {
@@ -1483,7 +1737,10 @@ describe('Select', () => {
         select: { text: true },
       })
 
-      expect(Object.keys(res)).toStrictEqual(['id', 'text'])
+      expect(res).toStrictEqual({
+        id: res.id,
+        text: res.text,
+      })
     })
   })
 
@@ -1506,6 +1763,7 @@ describe('Select', () => {
         const res = await restClient
           .GET(`/posts/${postId}`, {
             query: {
+              depth: 0,
               select: {
                 text: true,
               } satisfies Config['collectionsSelect']['posts'],
@@ -1523,6 +1781,7 @@ describe('Select', () => {
         const res = await restClient
           .GET(`/posts/${postId}`, {
             query: {
+              depth: 0,
               select: {
                 number: true,
                 text: true,
@@ -1542,6 +1801,7 @@ describe('Select', () => {
         const res = await restClient
           .GET(`/posts/${postId}`, {
             query: {
+              depth: 0,
               select: {
                 group: true,
               } satisfies Config['collectionsSelect']['posts'],
@@ -1559,6 +1819,7 @@ describe('Select', () => {
         const res = await restClient
           .GET(`/posts/${postId}`, {
             query: {
+              depth: 0,
               select: {
                 group: { text: true },
               } satisfies Config['collectionsSelect']['posts'],
@@ -1569,7 +1830,7 @@ describe('Select', () => {
         expect(res).toMatchObject({
           id: postId,
           group: {
-            text: post.group.text,
+            text: post.group?.text,
           },
         })
       })
@@ -1580,6 +1841,7 @@ describe('Select', () => {
         const res = await restClient
           .GET(`/posts/${postId}`, {
             query: {
+              depth: 0,
               select: {
                 text: false,
               } satisfies Config['collectionsSelect']['posts'],
@@ -1598,6 +1860,7 @@ describe('Select', () => {
         const res = await restClient
           .GET(`/posts/${postId}`, {
             query: {
+              depth: 0,
               select: {
                 number: false,
               } satisfies Config['collectionsSelect']['posts'],
@@ -1616,6 +1879,7 @@ describe('Select', () => {
         const res = await restClient
           .GET(`/posts/${postId}`, {
             query: {
+              depth: 0,
               select: {
                 number: false,
                 text: false,
@@ -1636,6 +1900,7 @@ describe('Select', () => {
         const res = await restClient
           .GET(`/posts/${postId}`, {
             query: {
+              depth: 0,
               select: {
                 group: {
                   text: false,
@@ -1647,7 +1912,7 @@ describe('Select', () => {
 
         const expected = deepCopyObject(post)
 
-        delete expected.group.text
+        delete expected.group?.text
 
         expect(res).toMatchObject(expected)
       })
@@ -1657,16 +1922,66 @@ describe('Select', () => {
   describe('populate / defaultPopulate', () => {
     let homePage: Page
     let aboutPage: Page
-    let expectedHomePage: { id: number | string; slug: string }
+    let expectedHomePage: {
+      array: [
+        {
+          id: string
+          title: string
+        },
+      ]
+      blocks: [
+        {
+          blockType: string
+          id: string
+          title: string
+        },
+      ]
+      id: number | string
+      slug: string
+    }
     let expectedHomePageOverride: { additional: string; id: number | string }
     beforeAll(async () => {
       homePage = await payload.create({
         depth: 0,
         collection: 'pages',
-        data: { content: [], slug: 'home', additional: 'additional-data' },
+        data: {
+          content: [],
+          slug: 'home',
+          array: [
+            {
+              title: 'some-title',
+              other: 'other',
+            },
+          ],
+          blocks: [
+            {
+              blockType: 'some',
+              other: 'other',
+              title: 'some-title',
+            },
+          ],
+          additional: 'additional-data',
+        },
       })
-      expectedHomePage = { id: homePage.id, slug: homePage.slug }
-      expectedHomePageOverride = { id: homePage.id, additional: homePage.additional }
+
+      expectedHomePage = {
+        id: homePage.id,
+        slug: homePage.slug,
+        array: [
+          {
+            id: homePage.array![0]!.id!,
+            title: homePage.array![0]!.title!,
+          },
+        ],
+        blocks: [
+          {
+            blockType: homePage.blocks![0]!.blockType,
+            id: homePage.blocks![0]!.id!,
+            title: homePage.blocks![0]!.title!,
+          },
+        ],
+      }
+      expectedHomePageOverride = { id: homePage.id, additional: homePage.additional! }
       aboutPage = await payload.create({
         depth: 0,
         collection: 'pages',
@@ -1725,19 +2040,11 @@ describe('Select', () => {
     it('local API - should populate with the defaultPopulate select shape', async () => {
       const result = await payload.findByID({ collection: 'pages', depth: 1, id: aboutPage.id })
 
-      const {
-        content: [
-          {
-            link: { doc, docHasManyPoly, docMany, docPoly },
-            richTextSlate: [richTextSlateRel],
-            richTextLexical: {
-              root: {
-                children: [richTextLexicalRel],
-              },
-            },
-          },
-        ],
-      } = result
+      const block = result.content![0]!
+
+      const { doc, docHasManyPoly, docMany, docPoly } = block.link
+      const richTextSlateRel = block.richTextSlate![0]!
+      const richTextLexicalRel = block.richTextLexical!.root.children[0]!
 
       expect(doc).toStrictEqual(expectedHomePage)
       expect(docMany).toStrictEqual([expectedHomePage])
@@ -1878,19 +2185,11 @@ describe('Select', () => {
 
       expect(resultFind).toStrictEqual(result)
 
-      const {
-        content: [
-          {
-            link: { doc, docHasManyPoly, docMany, docPoly },
-            richTextSlate: [richTextSlateRel],
-            richTextLexical: {
-              root: {
-                children: [richTextLexicalRel],
-              },
-            },
-          },
-        ],
-      } = result
+      const block = result.content![0]!
+
+      const { doc, docHasManyPoly, docMany, docPoly } = block.link
+      const richTextSlateRel = block.richTextSlate![0]!
+      const richTextLexicalRel = block.richTextLexical!.root.children[0]!
 
       expect(doc).toStrictEqual(expectedHomePageOverride)
       expect(docMany).toStrictEqual([expectedHomePageOverride])
@@ -1953,20 +2252,69 @@ describe('Select', () => {
       expect(richTextLexicalRel.value).toMatchObject(expectedHomePageOverride)
       expect(richTextSlateRel.value).toMatchObject(expectedHomePageOverride)
     })
+
+    it('should apply populate on depth 2', async () => {
+      const page_1 = await payload.create({
+        collection: 'pages',
+        data: { relatedPage: null, blocks: [{ blockType: 'some' }], slug: 'page-1' },
+      })
+      const page_2 = await payload.create({
+        collection: 'pages',
+        data: { relatedPage: page_1.id, slug: 'page-2' },
+      })
+      const page_3 = await payload.create({
+        collection: 'pages',
+        data: { relatedPage: page_2.id, slug: 'page-3' },
+      })
+      const result = await payload.findByID({
+        collection: 'pages',
+        id: page_3.id,
+        depth: 3,
+        populate: { pages: { slug: true, relatedPage: true } },
+      })
+
+      const relatedPage = result.relatedPage as Page
+
+      expect(relatedPage.id).toBe(page_2.id)
+      expect(relatedPage.relatedPage).toStrictEqual({
+        id: page_1.id,
+        slug: page_1.slug,
+        relatedPage: null,
+      })
+    })
   })
 })
 
-function createPost() {
+async function createPost() {
+  const upload = await payload.create({
+    collection: 'upload',
+    data: {},
+    filePath: path.resolve(dirname, 'image.jpg'),
+  })
+
+  const relation = await payload.create({
+    depth: 0,
+    collection: 'rels',
+    data: {},
+  })
+
   return payload.create({
     collection: 'posts',
     depth: 0,
     data: {
       number: 1,
       text: 'text',
+      select: 'a',
+      selectMany: ['a'],
       group: {
         number: 1,
         text: 'text',
       },
+      hasMany: [relation],
+      hasManyUpload: [upload],
+      hasOne: relation,
+      hasManyPoly: [{ relationTo: 'rels', value: relation }],
+      hasOnePoly: { relationTo: 'rels', value: relation },
       blocks: [
         {
           blockType: 'cta',
@@ -2002,6 +2350,8 @@ function createLocalizedPost() {
     data: {
       number: 1,
       text: 'text',
+      select: 'a',
+      selectMany: ['a'],
       group: {
         number: 1,
         text: 'text',

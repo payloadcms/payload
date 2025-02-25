@@ -33,6 +33,10 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Párrafo',
     label2: 'Texto normal',
   },
+  et: {
+    label: 'Paragrahv',
+    label2: 'Tavaline tekst',
+  },
   fa: {
     label: 'پاراگراف',
     label2: 'متن عادی',
@@ -90,12 +94,12 @@ export const i18n: Partial<GenericLanguages> = {
     label2: 'Text normal',
   },
   rs: {
-    label: 'Paragraf',
-    label2: 'Normalan tekst',
+    label: 'Параграф',
+    label2: 'Oбичан текст',
   },
   'rs-latin': {
     label: 'Paragraf',
-    label2: 'Normalan tekst',
+    label2: 'Običan tekst',
   },
   ru: {
     label: 'Параграф',
@@ -104,6 +108,10 @@ export const i18n: Partial<GenericLanguages> = {
   sk: {
     label: 'Odsek',
     label2: 'Normálny text',
+  },
+  sl: {
+    label: 'Odstavek',
+    label2: 'Navaden besedilo',
   },
   sv: {
     label: 'Stycke',

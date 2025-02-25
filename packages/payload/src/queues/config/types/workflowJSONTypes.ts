@@ -14,6 +14,11 @@ export type WorkflowStep<
    * Each task needs to have a unique ID to track its status
    */
   id: string
+  /**
+   * Specify the number of times that this workflow should be retried if it fails for any reason.
+   *
+   * @default By default, workflows are not retried and `retries` is `0`.
+   */
   retries?: number | RetryConfig
 } & (
   | {

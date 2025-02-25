@@ -16,6 +16,13 @@ type Action =
       type: 'UPDATE_ERROR_COUNT'
     }
   | {
+      errorCount: number
+      formState: FormState
+      index: number
+      type: 'UPDATE_FORM'
+      updatedFields?: Record<string, unknown>
+    }
+  | {
       files: FileList
       initialState: FormState | null
       type: 'ADD_FORMS'
@@ -96,6 +103,25 @@ export function formsManagementReducer(state: State, action: Action): State {
       return {
         ...state,
         forms,
+        totalErrorCount: state.forms.reduce((acc, form) => acc + form.errorCount, 0),
+      }
+    }
+    case 'UPDATE_FORM': {
+      const updatedForms = [...state.forms]
+      updatedForms[action.index].errorCount = action.errorCount
+
+      // Merge the existing formState with the new formState
+      updatedForms[action.index] = {
+        ...updatedForms[action.index],
+        formState: {
+          ...updatedForms[action.index].formState,
+          ...action.formState,
+        },
+      }
+
+      return {
+        ...state,
+        forms: updatedForms,
         totalErrorCount: state.forms.reduce((acc, form) => acc + form.errorCount, 0),
       }
     }

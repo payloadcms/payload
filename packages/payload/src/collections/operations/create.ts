@@ -1,6 +1,6 @@
+// @ts-strict-ignore
 import crypto from 'crypto'
 
-import type { CollectionSlug, JsonObject } from '../../index.js'
 import type {
   Document,
   PayloadRequest,
@@ -13,6 +13,7 @@ import type {
   BeforeOperationHook,
   BeforeValidateHook,
   Collection,
+  DataFromCollectionSlug,
   RequiredDataFromCollectionSlug,
   SelectFromCollectionSlug,
 } from '../config/types.js'
@@ -21,10 +22,12 @@ import { ensureUsernameOrEmail } from '../../auth/ensureUsernameOrEmail.js'
 import executeAccess from '../../auth/executeAccess.js'
 import { sendVerificationEmail } from '../../auth/sendVerificationEmail.js'
 import { registerLocalStrategy } from '../../auth/strategies/local/register.js'
+import { getDuplicateDocumentData } from '../../duplicateDocument/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
+import { type CollectionSlug, type JsonObject } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { uploadFiles } from '../../uploads/uploadFiles.js'
@@ -43,6 +46,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   disableTransaction?: boolean
   disableVerificationEmail?: boolean
   draft?: boolean
+  duplicateFromID?: DataFromCollectionSlug<TSlug>['id']
   overrideAccess?: boolean
   overwriteExistingFiles?: boolean
   populate?: PopulateType
@@ -74,10 +78,8 @@ export const createOperation = async <
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    await args.collection.config.hooks.beforeOperation.reduce(
-      async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
-        await priorHook
-
+    if (args.collection.config.hooks.beforeOperation?.length) {
+      for (const hook of args.collection.config.hooks.beforeOperation) {
         args =
           (await hook({
             args,
@@ -86,9 +88,8 @@ export const createOperation = async <
             operation: 'create',
             req: args.req,
           })) || args
-      },
-      Promise.resolve(),
-    )
+      }
+    }
 
     const {
       autosave = false,
@@ -97,6 +98,7 @@ export const createOperation = async <
       depth,
       disableVerificationEmail,
       draft = false,
+      duplicateFromID,
       overrideAccess,
       overwriteExistingFiles = false,
       populate,
@@ -115,6 +117,23 @@ export const createOperation = async <
 
     const shouldSaveDraft = Boolean(draft && collectionConfig.versions.drafts)
 
+    let duplicatedFromDocWithLocales: JsonObject = {}
+    let duplicatedFromDoc: JsonObject = {}
+
+    if (duplicateFromID) {
+      const duplicateResult = await getDuplicateDocumentData({
+        id: duplicateFromID,
+        collectionConfig,
+        draftArg: shouldSaveDraft,
+        overrideAccess,
+        req,
+        shouldSaveDraft,
+      })
+
+      duplicatedFromDoc = duplicateResult.duplicatedFromDoc
+      duplicatedFromDocWithLocales = duplicateResult.duplicatedFromDocWithLocales
+    }
+
     // /////////////////////////////////////
     // Access
     // /////////////////////////////////////
@@ -131,7 +150,9 @@ export const createOperation = async <
       collection,
       config,
       data,
+      isDuplicating: Boolean(duplicateFromID),
       operation: 'create',
+      originalDoc: duplicatedFromDoc,
       overwriteExistingFiles,
       req,
       throwOnMissingFile:
@@ -148,7 +169,7 @@ export const createOperation = async <
       collection: collectionConfig,
       context: req.context,
       data,
-      doc: {},
+      doc: duplicatedFromDoc,
       global: null,
       operation: 'create',
       overrideAccess,
@@ -159,38 +180,37 @@ export const createOperation = async <
     // beforeValidate - Collections
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.beforeValidate.reduce(
-      async (priorHook: BeforeValidateHook | Promise<void>, hook: BeforeValidateHook) => {
-        await priorHook
-
+    if (collectionConfig.hooks.beforeValidate?.length) {
+      for (const hook of collectionConfig.hooks.beforeValidate) {
         data =
           (await hook({
             collection: collectionConfig,
             context: req.context,
             data,
             operation: 'create',
+            originalDoc: duplicatedFromDoc,
             req,
           })) || data
-      },
-      Promise.resolve(),
-    )
+      }
+    }
 
     // /////////////////////////////////////
     // beforeChange - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      data =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          data,
-          operation: 'create',
-          req,
-        })) || data
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.beforeChange?.length) {
+      for (const hook of collectionConfig.hooks.beforeChange) {
+        data =
+          (await hook({
+            collection: collectionConfig,
+            context: req.context,
+            data,
+            operation: 'create',
+            originalDoc: duplicatedFromDoc,
+            req,
+          })) || data
+      }
+    }
 
     // /////////////////////////////////////
     // beforeChange - Fields
@@ -200,8 +220,8 @@ export const createOperation = async <
       collection: collectionConfig,
       context: req.context,
       data,
-      doc: {},
-      docWithLocales: {},
+      doc: duplicatedFromDoc,
+      docWithLocales: duplicatedFromDocWithLocales,
       global: null,
       operation: 'create',
       req,
@@ -306,17 +326,17 @@ export const createOperation = async <
     // afterRead - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      result =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          doc: result,
-          req,
-        })) || result
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.afterRead?.length) {
+      for (const hook of collectionConfig.hooks.afterRead) {
+        result =
+          (await hook({
+            collection: collectionConfig,
+            context: req.context,
+            doc: result,
+            req,
+          })) || result
+      }
+    }
 
     // /////////////////////////////////////
     // afterChange - Fields
@@ -337,10 +357,8 @@ export const createOperation = async <
     // afterChange - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.afterChange.reduce(
-      async (priorHook: AfterChangeHook | Promise<void>, hook: AfterChangeHook) => {
-        await priorHook
-
+    if (collectionConfig.hooks?.afterChange?.length) {
+      for (const hook of collectionConfig.hooks.afterChange) {
         result =
           (await hook({
             collection: collectionConfig,
@@ -350,9 +368,8 @@ export const createOperation = async <
             previousDoc: {},
             req: args.req,
           })) || result
-      },
-      Promise.resolve(),
-    )
+      }
+    }
 
     // /////////////////////////////////////
     // afterOperation - Collection

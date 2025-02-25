@@ -1,114 +1,108 @@
 'use client'
-import type { ClientField } from 'payload'
+
+import type { FieldDiffClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { getUniqueListBy } from 'payload/shared'
+import { useConfig, useTranslation } from '@payloadcms/ui'
+
+import './index.scss'
+
+import { fieldIsArrayType, fieldIsBlockType } from 'payload/shared'
 import React from 'react'
 
-import type { DiffComponentProps } from '../types.js'
-
-import RenderFieldsToDiff from '../../index.js'
-import Label from '../../Label/index.js'
-import './index.scss'
+import { useSelectedLocales } from '../../../Default/SelectedLocalesContext.js'
+import { DiffCollapser } from '../../DiffCollapser/index.js'
+import { RenderVersionFieldsToDiff } from '../../RenderVersionFieldsToDiff.js'
+import { getFieldsForRowComparison } from '../../utilities/getFieldsForRowComparison.js'
 
 const baseClass = 'iterable-diff'
 
-const Iterable: React.FC<DiffComponentProps> = ({
-  comparison,
-  diffComponents,
+export const Iterable: React.FC<FieldDiffClientProps> = ({
+  baseVersionField,
+  comparisonValue,
   field,
-  fieldPermissions,
-  i18n,
   locale,
-  locales,
-  version,
+  parentIsLocalized,
+  versionValue,
 }) => {
-  const versionRowCount = Array.isArray(version) ? version.length : 0
-  const comparisonRowCount = Array.isArray(comparison) ? comparison.length : 0
+  const { i18n } = useTranslation()
+  const { selectedLocales } = useSelectedLocales()
+  const { config } = useConfig()
+
+  const versionRowCount = Array.isArray(versionValue) ? versionValue.length : 0
+  const comparisonRowCount = Array.isArray(comparisonValue) ? comparisonValue.length : 0
   const maxRows = Math.max(versionRowCount, comparisonRowCount)
+
+  if (!fieldIsArrayType(field) && !fieldIsBlockType(field)) {
+    throw new Error(`Expected field to be an array or blocks type but got: ${field.type}`)
+  }
 
   return (
     <div className={baseClass}>
-      {'label' in field && field.label && typeof field.label !== 'function' && (
-        <Label>
-          {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
-          {getTranslation(field.label, i18n)}
-        </Label>
-      )}
-      {maxRows > 0 && (
-        <React.Fragment>
-          {Array.from(Array(maxRows).keys()).map((row, i) => {
-            const versionRow = version?.[i] || {}
-            const comparisonRow = comparison?.[i] || {}
+      <DiffCollapser
+        comparison={comparisonValue}
+        field={field}
+        isIterable
+        label={
+          'label' in field &&
+          field.label &&
+          typeof field.label !== 'function' && (
+            <span>
+              {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
+              {getTranslation(field.label, i18n)}
+            </span>
+          )
+        }
+        locales={selectedLocales}
+        parentIsLocalized={parentIsLocalized}
+        version={versionValue}
+      >
+        {maxRows > 0 && (
+          <div className={`${baseClass}__rows`}>
+            {Array.from(Array(maxRows).keys()).map((row, i) => {
+              const versionRow = versionValue?.[i] || {}
+              const comparisonRow = comparisonValue?.[i] || {}
 
-            let fields: ClientField[] = []
+              const { fields, versionFields } = getFieldsForRowComparison({
+                baseVersionField,
+                comparisonRow,
+                config,
+                field,
+                row: i,
+                versionRow,
+              })
 
-            if (field.type === 'array' && 'fields' in field) {
-              fields = field.fields
-            }
+              const rowNumber = String(i + 1).padStart(2, '0')
+              const rowLabel = fieldIsArrayType(field) ? `Item ${rowNumber}` : `Block ${rowNumber}`
 
-            if (field.type === 'blocks') {
-              fields = [
-                // {
-                //   name: 'blockType',
-                //   label: i18n.t('fields:blockType'),
-                //   type: 'text',
-                // },
-              ]
-
-              if (versionRow?.blockType === comparisonRow?.blockType) {
-                const matchedBlock = ('blocks' in field &&
-                  field.blocks?.find((block) => block.slug === versionRow?.blockType)) || {
-                  fields: [],
-                }
-
-                fields = [...fields, ...matchedBlock.fields]
-              } else {
-                const matchedVersionBlock = ('blocks' in field &&
-                  field.blocks?.find((block) => block.slug === versionRow?.blockType)) || {
-                  fields: [],
-                }
-
-                const matchedComparisonBlock = ('blocks' in field &&
-                  field.blocks?.find((block) => block.slug === comparisonRow?.blockType)) || {
-                  fields: [],
-                }
-
-                fields = getUniqueListBy<ClientField>(
-                  [...fields, ...matchedVersionBlock.fields, ...matchedComparisonBlock.fields],
-                  'name',
-                )
-              }
-            }
-
-            return (
-              <div className={`${baseClass}__wrap`} key={i}>
-                <RenderFieldsToDiff
-                  comparison={comparisonRow}
-                  diffComponents={diffComponents}
-                  fieldPermissions={fieldPermissions}
-                  fields={fields}
-                  i18n={i18n}
-                  locales={locales}
-                  version={versionRow}
-                />
-              </div>
-            )
-          })}
-        </React.Fragment>
-      )}
-      {maxRows === 0 && (
-        <div className={`${baseClass}__no-rows`}>
-          {i18n.t('version:noRowsFound', {
-            label:
-              'labels' in field && field.labels?.plural
-                ? getTranslation(field.labels.plural, i18n)
-                : i18n.t('general:rows'),
-          })}
-        </div>
-      )}
+              return (
+                <div className={`${baseClass}__row`} key={i}>
+                  <DiffCollapser
+                    comparison={comparisonRow}
+                    fields={fields}
+                    label={rowLabel}
+                    locales={selectedLocales}
+                    parentIsLocalized={parentIsLocalized || field.localized}
+                    version={versionRow}
+                  >
+                    <RenderVersionFieldsToDiff versionFields={versionFields} />
+                  </DiffCollapser>
+                </div>
+              )
+            })}
+          </div>
+        )}
+        {maxRows === 0 && (
+          <div className={`${baseClass}__no-rows`}>
+            {i18n.t('version:noRowsFound', {
+              label:
+                'labels' in field && field.labels?.plural
+                  ? getTranslation(field.labels.plural, i18n)
+                  : i18n.t('general:rows'),
+            })}
+          </div>
+        )}
+      </DiffCollapser>
     </div>
   )
 }
-
-export default Iterable

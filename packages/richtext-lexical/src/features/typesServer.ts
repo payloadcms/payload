@@ -1,4 +1,4 @@
-import type { GenericLanguages, I18nClient } from '@payloadcms/translations'
+import type { GenericLanguages, I18n, I18nClient } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 import type {
   Klass,
@@ -30,23 +30,7 @@ import type { AdapterProps } from '../types.js'
 import type { HTMLConverter } from './converters/html/converter/types.js'
 import type { BaseClientFeatureProps } from './typesClient.js'
 
-export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexicalNode> = ({
-  context,
-  currentDepth,
-  depth,
-  draft,
-  editorPopulationPromises,
-  field,
-  fieldPromises,
-  findMany,
-  flattenLocales,
-  node,
-  overrideAccess,
-  populationPromises,
-  req,
-  showHiddenFields,
-  siblingDoc,
-}: {
+export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexicalNode> = (args: {
   context: RequestContext
   currentDepth: number
   depth: number
@@ -64,6 +48,7 @@ export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexica
   flattenLocales: boolean
   node: T
   overrideAccess: boolean
+  parentIsLocalized: boolean
   populationPromises: Promise<void>[]
   req: PayloadRequest
   showHiddenFields: boolean
@@ -176,6 +161,7 @@ export type AfterChangeNodeHookArgs<T extends SerializedLexicalNode> = {
   operation: 'create' | 'delete' | 'read' | 'update'
   /** The value of the node before any changes. Not available in afterRead hooks */
   originalNode: T
+  previousNode: T
 }
 export type BeforeValidateNodeHookArgs<T extends SerializedLexicalNode> = {
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
@@ -190,7 +176,7 @@ export type BeforeChangeNodeHookArgs<T extends SerializedLexicalNode> = {
    * Only available in `beforeChange` hooks.
    */
   errors: ValidationFieldError[]
-  mergeLocaleActions: (() => Promise<void>)[]
+  mergeLocaleActions: (() => Promise<void> | void)[]
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
   operation: 'create' | 'delete' | 'read' | 'update'
   /** The value of the node before any changes. Not available in afterRead hooks */
@@ -199,6 +185,8 @@ export type BeforeChangeNodeHookArgs<T extends SerializedLexicalNode> = {
    * The original node with locales (not modified by any hooks).
    */
   originalNodeWithLocales?: T
+  previousNode: T
+
   skipValidation: boolean
 }
 
@@ -295,14 +283,7 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
   // @ts-expect-error - TODO: fix this
   componentImports?: Config['admin']['importMap']['generators'][0] | PayloadComponent[]
   generatedTypes?: {
-    modifyOutputSchema: ({
-      collectionIDFieldTypes,
-      config,
-      currentSchema,
-      field,
-      interfaceNameDefinitions,
-      isRequired,
-    }: {
+    modifyOutputSchema: (args: {
       collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
       config?: SanitizedConfig
       /**
@@ -310,6 +291,7 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
        */
       currentSchema: JSONSchema4
       field: RichTextField<SerializedEditorState, AdapterProps>
+      i18n?: I18n
       /**
        * Allows you to define new top-level interfaces that can be re-used in the output schema.
        */
@@ -378,14 +360,7 @@ export type SanitizedServerFeatures = {
   enabledFeatures: string[]
   generatedTypes: {
     modifyOutputSchemas: Array<
-      ({
-        collectionIDFieldTypes,
-        config,
-        currentSchema,
-        field,
-        interfaceNameDefinitions,
-        isRequired,
-      }: {
+      (args: {
         collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
         config?: SanitizedConfig
         /**
@@ -393,6 +368,7 @@ export type SanitizedServerFeatures = {
          */
         currentSchema: JSONSchema4
         field: RichTextField<SerializedEditorState, AdapterProps>
+        i18n?: I18n
         /**
          * Allows you to define new top-level interfaces that can be re-used in the output schema.
          */

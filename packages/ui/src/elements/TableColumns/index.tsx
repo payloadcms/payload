@@ -1,16 +1,14 @@
 'use client'
-import type { ClientCollectionConfig, SanitizedCollectionConfig } from 'payload'
+import type { Column, ListPreferences, SanitizedCollectionConfig } from 'payload'
 
-import React, { createContext, useCallback, useContext } from 'react'
+import React, { createContext, useCallback, useContext, useEffect } from 'react'
 
-import type { ColumnPreferences } from '../../providers/ListQuery/index.js'
 import type { SortColumnProps } from '../SortColumn/index.js'
-import type { Column } from '../Table/index.js'
 
 import { useConfig } from '../../providers/Config/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
-import { abortAndIgnore } from '../../utilities/abortAndIgnore.js'
+import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 
 export interface ITableColumns {
   columns: Column[]
@@ -25,13 +23,9 @@ export const TableColumnContext = createContext<ITableColumns>({} as ITableColum
 
 export const useTableColumns = (): ITableColumns => useContext(TableColumnContext)
 
-export type ListPreferences = {
-  columns: ColumnPreferences
-}
-
 type Props = {
   readonly children: React.ReactNode
-  readonly collectionSlug: string
+  readonly collectionSlug: string | string[]
   readonly columnState: Column[]
   readonly docs: any[]
   readonly enableRowSelections?: boolean
@@ -72,17 +66,20 @@ export const TableColumnsProvider: React.FC<Props> = ({
 
   const { admin: { defaultColumns, useAsTitle } = {}, fields } = getEntityConfig({
     collectionSlug,
-  }) as ClientCollectionConfig
+  })
 
-  const prevCollection = React.useRef<SanitizedCollectionConfig['slug']>(collectionSlug)
-  const { getPreference, setPreference } = usePreferences()
+  const prevCollection = React.useRef<SanitizedCollectionConfig['slug']>(
+    Array.isArray(collectionSlug) ? collectionSlug[0] : collectionSlug,
+  )
+  const { getPreference } = usePreferences()
 
   const [tableColumns, setTableColumns] = React.useState(columnState)
-  const tableStateControllerRef = React.useRef<AbortController>(null)
+  const abortTableStateRef = React.useRef<AbortController>(null)
+  const abortToggleColumnRef = React.useRef<AbortController>(null)
 
   const moveColumn = useCallback(
     async (args: { fromIndex: number; toIndex: number }) => {
-      abortAndIgnore(tableStateControllerRef.current)
+      const controller = handleAbortRef(abortTableStateRef)
 
       const { fromIndex, toIndex } = args
       const withMovedColumn = [...tableColumns]
@@ -90,9 +87,6 @@ export const TableColumnsProvider: React.FC<Props> = ({
       withMovedColumn.splice(toIndex, 0, columnToMove)
 
       setTableColumns(withMovedColumn)
-
-      const controller = new AbortController()
-      tableStateControllerRef.current = controller
 
       const result = await getTableState({
         collectionSlug,
@@ -108,6 +102,8 @@ export const TableColumnsProvider: React.FC<Props> = ({
         setTableColumns(result.state)
         setTable(result.Table)
       }
+
+      abortTableStateRef.current = null
     },
     [
       tableColumns,
@@ -123,7 +119,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
 
   const toggleColumn = useCallback(
     async (column: string) => {
-      abortAndIgnore(tableStateControllerRef.current)
+      const controller = handleAbortRef(abortToggleColumnRef)
 
       const { newColumnState, toggledColumns } = tableColumns.reduce<{
         newColumnState: Column[]
@@ -155,9 +151,6 @@ export const TableColumnsProvider: React.FC<Props> = ({
 
       setTableColumns(newColumnState)
 
-      const controller = new AbortController()
-      tableStateControllerRef.current = controller
-
       const result = await getTableState({
         collectionSlug,
         columns: toggledColumns,
@@ -172,6 +165,8 @@ export const TableColumnsProvider: React.FC<Props> = ({
         setTableColumns(result.state)
         setTable(result.Table)
       }
+
+      abortToggleColumnRef.current = null
     },
     [
       tableColumns,
@@ -204,6 +199,7 @@ export const TableColumnsProvider: React.FC<Props> = ({
 
           return indexOfFirst > indexOfSecond ? 1 : -1
         })
+
       const { state: columnState, Table } = await getTableState({
         collectionSlug,
         columns: activeColumns,
@@ -238,14 +234,15 @@ export const TableColumnsProvider: React.FC<Props> = ({
 
   React.useEffect(() => {
     const sync = async () => {
-      const collectionHasChanged = prevCollection.current !== collectionSlug
+      const defaultCollection = Array.isArray(collectionSlug) ? collectionSlug[0] : collectionSlug
+      const collectionHasChanged = prevCollection.current !== defaultCollection
 
       if (collectionHasChanged || !listPreferences) {
         const currentPreferences = await getPreference<{
-          columns: ColumnPreferences
+          columns: ListPreferences['columns']
         }>(preferenceKey)
 
-        prevCollection.current = collectionSlug
+        prevCollection.current = defaultCollection
 
         if (currentPreferences?.columns) {
           // setTableColumns()
@@ -275,9 +272,15 @@ export const TableColumnsProvider: React.FC<Props> = ({
     sortColumnProps,
   ])
 
-  React.useEffect(() => {
+  useEffect(() => {
+    setTableColumns(columnState)
+  }, [columnState])
+
+  useEffect(() => {
+    const abortTableState = abortTableStateRef.current
+
     return () => {
-      abortAndIgnore(tableStateControllerRef.current)
+      abortAndIgnore(abortTableState)
     }
   }, [])
 

@@ -7,12 +7,15 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
+  FieldPaths,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
+  FieldDiffClientComponent,
+  FieldDiffServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
 } from '../types.js'
@@ -26,17 +29,21 @@ type TextareaFieldBaseClientProps = {
   readonly validate?: TextareaFieldValidation
 }
 
+type TextareaFieldBaseServerProps = Pick<FieldPaths, 'path'>
+
 export type TextareaFieldClientProps = ClientFieldBase<TextareaFieldClientWithoutType> &
   TextareaFieldBaseClientProps
 
 export type TextareaFieldServerProps = ServerFieldBase<
   TextareaField,
   TextareaFieldClientWithoutType
->
+> &
+  TextareaFieldBaseServerProps
 
 export type TextareaFieldServerComponent = FieldServerComponent<
   TextareaField,
-  TextareaFieldClientWithoutType
+  TextareaFieldClientWithoutType,
+  TextareaFieldBaseServerProps
 >
 
 export type TextareaFieldClientComponent = FieldClientComponent<
@@ -67,3 +74,10 @@ export type TextareaFieldErrorServerComponent = FieldErrorServerComponent<
 
 export type TextareaFieldErrorClientComponent =
   FieldErrorClientComponent<TextareaFieldClientWithoutType>
+
+export type TextareaFieldDiffServerComponent = FieldDiffServerComponent<
+  TextareaField,
+  TextareaFieldClient
+>
+
+export type TextareaFieldDiffClientComponent = FieldDiffClientComponent<TextareaFieldClient>

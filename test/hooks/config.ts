@@ -8,15 +8,19 @@ import { APIError } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { AfterOperationCollection } from './collections/AfterOperation/index.js'
+import { BeforeChangeHooks } from './collections/BeforeChange/index.js'
+import { BeforeValidateCollection } from './collections/BeforeValidate/index.js'
 import ChainingHooks from './collections/ChainingHooks/index.js'
 import ContextHooks from './collections/ContextHooks/index.js'
 import { DataHooks } from './collections/Data/index.js'
+import { FieldPaths } from './collections/FieldPaths/index.js'
 import Hooks, { hooksSlug } from './collections/Hook/index.js'
 import NestedAfterReadHooks from './collections/NestedAfterReadHooks/index.js'
 import Relations from './collections/Relations/index.js'
 import TransformHooks from './collections/Transform/index.js'
 import Users, { seedHooksUsers } from './collections/Users/index.js'
 import { DataHooksGlobal } from './globals/Data/index.js'
+
 export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
   admin: {
     importMap: {
@@ -24,6 +28,8 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
     },
   },
   collections: [
+    BeforeChangeHooks,
+    BeforeValidateCollection,
     AfterOperationCollection,
     ContextHooks,
     TransformHooks,
@@ -33,6 +39,7 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
     Relations,
     Users,
     DataHooks,
+    FieldPaths,
   ],
   globals: [DataHooksGlobal],
   endpoints: [
@@ -52,7 +59,6 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
     await payload.create({
       collection: hooksSlug,
       data: {
-        check: true,
         fieldBeforeValidate: false,
         collectionBeforeValidate: false,
         fieldBeforeChange: false,

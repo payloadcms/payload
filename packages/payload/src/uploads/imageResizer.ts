@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { Sharp, Metadata as SharpMetadata, SharpOptions } from 'sharp'
 
 import { fileTypeFromBuffer } from 'file-type'
@@ -173,6 +174,15 @@ const getImageResizeAction = ({
       originalImage.width < targetWidth && originalImage.height < targetHeight
     if (withoutEnlargement === undefined && originalImageIsSmallerXAndY) {
       return 'omit' // prevent image size from being enlarged
+    }
+  }
+
+  if (withoutEnlargement === undefined && (!targetWidth || !targetHeight)) {
+    if (
+      (targetWidth && originalImage.width < targetWidth) ||
+      (targetHeight && originalImage.height < targetHeight)
+    ) {
+      return 'omit'
     }
   }
 
