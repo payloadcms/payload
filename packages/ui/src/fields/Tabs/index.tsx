@@ -64,9 +64,11 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
 
   const tabInfos = useFormFields(([fields]) => {
     return tabs.map((tab, index) => {
+      const id = tabHasName(tab) ? tab.name : tab?.id
+
       return {
         index,
-        passesCondition: fields?.[tab?.id]?.passesCondition ?? true,
+        passesCondition: fields?.[id]?.passesCondition ?? true,
         tab,
       }
     })
