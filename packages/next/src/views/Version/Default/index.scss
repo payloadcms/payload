@@ -1,4 +1,4 @@
-@import '../../../scss/styles.scss';
+@import '~@payloadcms/ui/scss';
 
 @layer payload-default {
   .view-version {
@@ -60,7 +60,6 @@
         flex-direction: column;
         gap: calc(var(--base) / 4);
       }
-
 
       &__restore {
         margin: calc(var(--base) * 0.5) 0 0 0;
