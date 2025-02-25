@@ -238,7 +238,7 @@ export function buildObjectType({
         ...objectTypeConfig,
         [field.name]: {
           type: graphqlResult.types.groupTypes[interfaceName],
-          resolve: (parent, args, context: Context) => {
+          resolve: (parent) => {
             return {
               ...parent[field.name],
               _id: parent._id ?? parent.id,
@@ -667,7 +667,7 @@ export function buildObjectType({
       }
     },
     tabs: (objectTypeConfig: ObjectTypeConfig, field: TabsField) =>
-      (field.tabs as Tab[]).reduce((tabSchema, tab) => {
+      field.tabs.reduce((tabSchema, tab) => {
         if (tabHasName(tab)) {
           const interfaceName =
             tab?.interfaceName || combineParentName(parentName, toWords(tab.name, true))
@@ -696,7 +696,7 @@ export function buildObjectType({
             ...tabSchema,
             [tab.name]: {
               type: graphqlResult.types.groupTypes[interfaceName],
-              resolve(parent, args, context: Context) {
+              resolve(parent) {
                 return {
                   ...parent[tab.name],
                   _id: parent._id ?? parent.id,

@@ -9,12 +9,12 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useFormFields } from '@payloadcms/ui'
 import { tabHasName, toKebabCase } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { useFormFields } from '../../forms/Form/index.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'

@@ -297,7 +297,7 @@ export function buildMutationInputType({
       }
     },
     tabs: (inputObjectTypeConfig: InputObjectTypeConfig, field: TabsField) => {
-      return (field.tabs as Tab[]).reduce((acc, tab) => {
+      return field.tabs.reduce((acc, tab) => {
         if (tabHasName(tab)) {
           const fullName = combineParentName(parentName, toWords(tab.name, true))
           const requiresAtLeastOneField = groupOrTabHasRequiredSubfield(field)

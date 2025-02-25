@@ -53,7 +53,7 @@ const getFlattenedFieldNames = (args: {
     if (field.type === 'tabs') {
       return [
         ...fieldsToUse,
-        ...(field.tabs as Tab[]).reduce((tabFields, tab) => {
+        ...field.tabs.reduce((tabFields, tab) => {
           fieldPrefix = 'name' in tab ? `${prefix}_${tab.name}` : prefix
           return [
             ...tabFields,

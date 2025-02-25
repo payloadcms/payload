@@ -2,7 +2,7 @@
 import type { CollectionPermission, FieldsPermissions, GlobalPermission } from '../auth/types.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { Access } from '../config/types.js'
-import type { Field, FieldAccess, Tab } from '../fields/config/types.js'
+import type { Field, FieldAccess } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { BlockSlug } from '../index.js'
 import type { AllOperations, JsonObject, Payload, PayloadRequest, Where } from '../types/index.js'
