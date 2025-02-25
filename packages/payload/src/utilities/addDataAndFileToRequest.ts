@@ -19,7 +19,8 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
     if (contentType === 'application/json') {
       let data = {}
       try {
-        data = await req.json()
+        const text = await req.text()
+        data = text ? JSON.parse(text) : {}
       } catch (error) {
         req.payload.logger.error(error)
       } finally {
