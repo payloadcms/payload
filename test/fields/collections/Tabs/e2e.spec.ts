@@ -178,7 +178,7 @@ describe('Tabs', () => {
     const href = await firstItem.getAttribute('href')
     await firstItem.click()
 
-    const regex = new RegExp(href.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    const regex = new RegExp(href!.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
 
     await page.waitForURL(regex)
 
