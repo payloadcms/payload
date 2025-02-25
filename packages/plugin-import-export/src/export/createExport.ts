@@ -48,13 +48,9 @@ export const createExport = async (args: CreateExportArgs) => {
 
   const collectionConfig = payload.config.collections.find(({ slug }) => slug === collectionSlug)
   if (!collectionConfig) {
-    throw new Error(`Collection with slug ${collectionSlug} not found`)
+    throw new APIError(`Collection with slug ${collectionSlug} not found`)
   }
   const name = `${nameArg ?? `${getFilename()}-${collectionSlug}`}.${format}`
-
-  if (!fields) {
-    throw new APIError('fields must be defined when exporting')
-  }
 
   const findArgs = {
     collection: collectionSlug,
@@ -63,7 +59,7 @@ export const createExport = async (args: CreateExportArgs) => {
     locale,
     overrideAccess: false,
     page: 0,
-    select: getSelect(fields),
+    select: fields ? getSelect(fields) : undefined,
     sort,
     user,
     where,

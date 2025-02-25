@@ -208,6 +208,32 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].title).toStrictEqual('JSON 0')
     })
 
+    it('should create an export with every field when no fields are defined', async () => {
+      let doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          format: 'json',
+          sort: 'title',
+        },
+      })
+
+      doc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(doc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', doc.filename as string)
+      const data = await readJSON(expectedPath)
+
+      expect(data[0].id).toBeDefined()
+      expect(data[0].title).toBeDefined()
+      expect(data[0].createdAt).toBeDefined()
+      expect(data[0].updatedAt).toBeDefined()
+    })
+
     it('should create jobs task for exports', async () => {
       const doc = await payload.create({
         collection: 'exports-tasks' as CollectionSlug,
