@@ -151,6 +151,7 @@ export function DefaultListView(props: ListViewClientProps) {
       ])
     }
   }, [setStepNav, labels, drawerDepth])
+
   return (
     <Fragment>
       <TableColumnsProvider
