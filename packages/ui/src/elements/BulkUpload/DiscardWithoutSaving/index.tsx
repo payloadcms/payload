@@ -7,6 +7,7 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { FullscreenModal } from '../../FullscreenModal/index.js'
 import { useBulkUpload } from '../index.js'
+import './index.scss'
 
 export const discardBulkUploadModalSlug = 'bulk-upload--discard-without-saving'
 const baseClass = 'leave-without-saving'
