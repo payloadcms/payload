@@ -22,7 +22,7 @@ export const createClientUploadHandler = <T extends Record<string, unknown>>({
     file: File
     serverURL: string
     updateFilename: (value: string) => void
-  }) => Promise<void>
+  }) => Promise<unknown>
 }) => {
   return function ClientUploadHandler({
     children,

@@ -45,7 +45,9 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
       }
 
       if (!req.file && fields?.file && typeof fields?.file === 'string') {
-        const { collectionSlug, filename, mimeType, size } = JSON.parse(fields.file)
+        const { clientUploadContext, collectionSlug, filename, mimeType, size } = JSON.parse(
+          fields.file,
+        )
         const uploadConfig = req.payload.collections[collectionSlug].config.upload
 
         if (!uploadConfig.handlers) {
@@ -57,6 +59,8 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
           const result = await handler(req, {
             doc: null,
             params: {
+              // Maybe pass additional specific to adapters data, then staticHandler can use them.
+              clientUploadContext,
               collection: collectionSlug,
               filename,
             },

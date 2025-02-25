@@ -6,11 +6,14 @@ import React, { useState } from 'react'
 type UploadHandler = (args: {
   file: File
   updateFilename: (filename: string) => void
-}) => Promise<void>
+}) => Promise<unknown>
 
 export type UploadHandlersContext = {
   getUploadHandler: (args: { collectionSlug: UploadCollectionSlug }) => null | UploadHandler
-  setUploadHandler: (args: { collectionSlug: UploadCollectionSlug; handler: UploadHandler }) => void
+  setUploadHandler: (args: {
+    collectionSlug: UploadCollectionSlug
+    handler: UploadHandler
+  }) => unknown
 }
 
 const Context = React.createContext<null | UploadHandlersContext>(null)

@@ -18,9 +18,11 @@ export async function createFormData(
     delete data.file
   }
 
+  let clientUploadContext = null
+
   if (typeof uploadHandler === 'function') {
     let filename = file.name
-    await uploadHandler({
+    clientUploadContext = await uploadHandler({
       file,
       updateFilename: (value) => {
         filename = value
@@ -28,6 +30,7 @@ export async function createFormData(
     })
 
     file = JSON.stringify({
+      clientUploadContext,
       collectionSlug,
       filename,
       mimeType: file.type,

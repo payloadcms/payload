@@ -231,6 +231,7 @@ pnpm add @payloadcms/storage-uploadthing
 - Configure the `collections` object to specify which collections should use uploadthing. The slug _must_ match one of your existing collection slugs and be an `upload` type.
 - Get a token from Uploadthing and set it as `token` in the `options` object.
 - `acl` is optional and defaults to `public-read`.
+- When deploying to Vercel, server uploads are limited with 4.5MB. Set `clientUploads` to `true` to do uploads directly on the client.
 
 ```ts
 export default buildConfig({
@@ -251,13 +252,14 @@ export default buildConfig({
 
 ### Configuration Options#uploadthing-configuration
 
-| Option           | Description                                     | Default       |
-| ---------------- | ----------------------------------------------- | ------------- |
-| `token`          | Token from Uploadthing. Required.               |               |
-| `acl`            | Access control list for files that are uploaded | `public-read` |
-| `logLevel`       | Log level for Uploadthing                       | `info`        |
-| `fetch`          | Custom fetch function                           | `fetch`       |
-| `defaultKeyType` | Default key type for file operations            | `fileKey`     |
+| Option           | Description                                                   | Default       |
+| ---------------- | ------------------------------------------------------------- | ------------- |
+| `token`          | Token from Uploadthing. Required.                             |               |
+| `acl`            | Access control list for files that are uploaded               | `public-read` |
+| `logLevel`       | Log level for Uploadthing                                     | `info`        |
+| `fetch`          | Custom fetch function                                         | `fetch`       |
+| `defaultKeyType` | Default key type for file operations                          | `fileKey`     |
+| `clientUploads`  | Do uploads directly on the client to bypass limits on Vercel. |               |
 
 
 ## Custom Storage Adapters
