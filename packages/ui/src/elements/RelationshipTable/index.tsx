@@ -25,7 +25,6 @@ import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { hoistQueryParamsToAnd } from '../../utilities/mergeListSearchAndWhere.js'
 import { AnimateHeight } from '../AnimateHeight/index.js'
-import './index.scss'
 import { ColumnSelector } from '../ColumnSelector/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
@@ -33,6 +32,7 @@ import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
 import { TableColumnsProvider } from '../TableColumns/index.js'
 import { DrawerLink } from './cells/DrawerLink/index.js'
 import { RelationshipTablePagination } from './Pagination.js'
+import './index.scss'
 
 const baseClass = 'relationship-table'
 
@@ -336,17 +336,9 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                 <TableColumnsProvider
                   collectionSlug={Array.isArray(relationTo) ? relationTo[0] : relationTo}
                   columnState={columnState}
-                  docs={data.docs}
                   LinkedCellOverride={
                     <DrawerLink onDrawerDelete={onDrawerDelete} onDrawerSave={onDrawerSave} />
                   }
-                  preferenceKey={preferenceKey}
-                  renderRowTypes
-                  setTable={setTable}
-                  sortColumnProps={{
-                    appearance: 'condensed',
-                  }}
-                  tableAppearance="condensed"
                 >
                   <AnimateHeight
                     className={`${baseClass}__columns`}

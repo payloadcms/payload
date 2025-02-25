@@ -18,7 +18,7 @@ export type TableColumnsProviderProps = {
   /**
    * @deprecated
    */
-  readonly docs: any[]
+  readonly docs?: any[]
   /**
    * @deprecated
    */
@@ -31,7 +31,7 @@ export type TableColumnsProviderProps = {
   /**
    * @deprecated
    */
-  readonly preferenceKey: string
+  readonly preferenceKey?: string
   /**
    * @deprecated
    */
@@ -39,7 +39,7 @@ export type TableColumnsProviderProps = {
   /**
    * @deprecated
    */
-  readonly setTable: (Table: React.ReactNode) => void
+  readonly setTable?: (Table: React.ReactNode) => void
   /**
    * @deprecated
    */

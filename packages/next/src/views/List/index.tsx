@@ -138,9 +138,9 @@ export const renderListView = async (
 
     const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
 
-    const columns: ColumnPreference[] = (
-      query.columns as { accessor: string; active: string }[]
-    )?.map((column) => ({ accessor: column.accessor, active: column.active === 'true' }))
+    const columns: ColumnPreference[] = query.columns
+      ? (JSON.parse(query.columns as string) as ColumnPreference[])
+      : undefined
 
     const { columnState, Table } = renderTable({
       clientCollectionConfig,
