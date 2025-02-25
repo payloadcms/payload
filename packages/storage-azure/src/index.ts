@@ -32,7 +32,7 @@ export type AzureStorageOptions = {
   baseURL: string
 
   /**
-   * Do uploads directly on the client to bypass limits on Vercel. You must allow CORS PUT method for the bucket to your website.
+   * Do uploads directly on the client to bypass limits on Vercel. You must allow CORS PUT method to your website.
    */
   clientUploads?: ClientUploadsConfig
 
