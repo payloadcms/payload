@@ -1,5 +1,6 @@
 import type {
   AdminViewServerProps,
+  ColumnPreference,
   ListPreferences,
   ListQuery,
   ListViewClientProps,
@@ -137,10 +138,15 @@ export const renderListView = async (
 
     const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
 
+    const columns: ColumnPreference[] = (
+      query.columns as { accessor: string; active: string }[]
+    )?.map((column) => ({ accessor: column.accessor, active: column.active === 'true' }))
+
     const { columnState, Table } = renderTable({
       clientCollectionConfig,
       collectionConfig,
       columnPreferences: listPreferences?.columns,
+      columns,
       customCellProps,
       docs: data.docs,
       drawerSlug,
@@ -203,6 +209,7 @@ export const renderListView = async (
         <Fragment>
           <HydrateAuthProvider permissions={permissions} />
           <ListQueryProvider
+            columns={columnState.map(({ accessor, active }) => ({ accessor, active }))}
             data={data}
             defaultLimit={limit}
             defaultSort={sort}

@@ -4,10 +4,10 @@ import type { I18nClient } from '@payloadcms/translations'
 import type {
   ClientField,
   Column,
+  ColumnPreference,
   DefaultCellComponentProps,
   DefaultServerCellComponentProps,
   Field,
-  ListPreferences,
   PaginatedDocs,
   Payload,
   SanitizedCollectionConfig,
@@ -36,8 +36,8 @@ import { filterFields } from './filterFields.js'
 
 type Args = {
   beforeRows?: Column[]
-  columnPreferences: ListPreferences['columns']
-  columns?: ListPreferences['columns']
+  columnPreferences: ColumnPreference[]
+  columns?: ColumnPreference[]
   customCellProps: DefaultCellComponentProps['customCellProps']
   docs: PaginatedDocs['docs']
   enableRowSelections: boolean

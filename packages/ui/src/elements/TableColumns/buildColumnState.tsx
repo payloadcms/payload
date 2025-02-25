@@ -4,10 +4,10 @@ import type {
   ClientComponentProps,
   ClientField,
   Column,
+  ColumnPreference,
   DefaultCellComponentProps,
   DefaultServerCellComponentProps,
   Field,
-  ListPreferences,
   PaginatedDocs,
   Payload,
   SanitizedCollectionConfig,
@@ -39,8 +39,8 @@ type Args = {
   beforeRows?: Column[]
   clientCollectionConfig: ClientCollectionConfig
   collectionConfig: SanitizedCollectionConfig
-  columnPreferences: ListPreferences['columns']
-  columns?: ListPreferences['columns']
+  columnPreferences: ColumnPreference[]
+  columns?: ColumnPreference[]
   customCellProps: DefaultCellComponentProps['customCellProps']
   docs: PaginatedDocs['docs']
   enableRowSelections: boolean

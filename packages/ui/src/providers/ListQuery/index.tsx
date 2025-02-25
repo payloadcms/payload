@@ -1,5 +1,5 @@
 'use client'
-import type { ListQuery, PaginatedDocs, Sort, Where } from 'payload'
+import type { ColumnPreference, ListQuery, PaginatedDocs, Sort, Where } from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import { isNumber } from 'payload/shared'
@@ -7,6 +7,7 @@ import * as qs from 'qs-esm'
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
+import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 
 type ContextHandlers = {
@@ -20,6 +21,7 @@ type ContextHandlers = {
 export type ListQueryProps = {
   readonly children: React.ReactNode
   readonly collectionSlug?: string
+  readonly columns: ColumnPreference[]
   readonly data: PaginatedDocs
   readonly defaultLimit?: number
   readonly defaultSort?: Sort
@@ -38,10 +40,13 @@ export type ListQueryContext = {
 
 const Context = createContext({} as ListQueryContext)
 
+type ColumnFromQuery = { accessor: string; active: 'false' | 'true' }
+
 export const useListQuery = (): ListQueryContext => useContext(Context)
 
 export const ListQueryProvider: React.FC<ListQueryProps> = ({
   children,
+  columns,
   data,
   defaultLimit,
   defaultSort,
@@ -51,7 +56,25 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   'use no memo'
   const router = useRouter()
   const rawSearchParams = useSearchParams()
-  const searchParams = useMemo(() => parseSearchParams(rawSearchParams), [rawSearchParams])
+  const { startRouteTransition } = useRouteTransition()
+
+  const searchParams = useMemo<ListQuery>(() => {
+    const parsed: ListQuery = Object.entries(parseSearchParams(rawSearchParams)).reduce(
+      (acc, [key, value]) => {
+        if (key === 'columns') {
+          acc[key] = (value as ColumnFromQuery[]).map((c: ColumnFromQuery) => ({
+            accessor: c.accessor,
+            active: c.active === 'true',
+          }))
+        }
+
+        return acc
+      },
+      {},
+    )
+
+    return parsed
+  }, [rawSearchParams])
 
   const { onQueryChange } = useListDrawerContext()
 
@@ -82,6 +105,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       }
 
       const newQuery: ListQuery = {
+        columns: 'columns' in query ? query.columns : columns,
         limit: 'limit' in query ? query.limit : (currentQuery?.limit ?? String(defaultLimit)),
         page,
         search: 'search' in query ? query.search : currentQuery?.search,
@@ -90,7 +114,9 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       }
 
       if (modifySearchParams) {
-        router.replace(`${qs.stringify(newQuery, { addQueryPrefix: true })}`)
+        startRouteTransition(() =>
+          router.replace(`${qs.stringify(newQuery, { addQueryPrefix: true })}`),
+        )
       } else if (
         typeof onQueryChange === 'function' ||
         typeof onQueryChangeFromProps === 'function'
@@ -102,17 +128,15 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       setCurrentQuery(newQuery)
     },
     [
-      currentQuery?.page,
-      currentQuery?.limit,
-      currentQuery?.search,
-      currentQuery?.sort,
-      currentQuery?.where,
+      currentQuery,
+      startRouteTransition,
       defaultLimit,
       defaultSort,
       modifySearchParams,
       onQueryChange,
       onQueryChangeFromProps,
       router,
+      columns,
     ],
   )
 
@@ -171,13 +195,18 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         shouldUpdateQueryString = true
       }
 
+      if (columns && !('columns' in currentQueryRef.current)) {
+        newQuery.columns = columns
+        shouldUpdateQueryString = true
+      }
+
       if (shouldUpdateQueryString) {
         setCurrentQuery(newQuery)
         // Do not use router.replace here to avoid re-rendering on initial load
         window.history.replaceState(null, '', `?${qs.stringify(newQuery)}`)
       }
     }
-  }, [defaultSort, defaultLimit, router, modifySearchParams])
+  }, [defaultSort, defaultLimit, router, modifySearchParams, columns])
 
   return (
     <Context.Provider
