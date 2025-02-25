@@ -23,7 +23,7 @@ export type ClientUploadsAccess = (args: {
 
 export type ClientUploadsConfig =
   | {
-      access?: ClientUploadAccess
+      access?: ClientUploadsAccess
     }
   | boolean
 
