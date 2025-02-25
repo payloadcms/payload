@@ -1,10 +1,10 @@
+import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { UpdateOne } from 'payload'
 
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
 
-import { buildFindManyArgs } from './find/buildFindManyArgs.js'
 import buildQuery from './queries/buildQuery.js'
 import { selectDistinct } from './queries/selectDistinct.js'
 import { upsertRow } from './upsertRow/index.js'
@@ -28,6 +28,7 @@ export const updateOne: UpdateOne = async function updateOne(
     where: whereToUse,
   })
 
+  // selectDistinct will only return if there are joins
   const selectDistinctResult = await selectDistinct({
     adapter: this,
     chainedMethods: [{ args: [1], method: 'limit' }],
@@ -40,22 +41,18 @@ export const updateOne: UpdateOne = async function updateOne(
 
   if (selectDistinctResult?.[0]?.id) {
     idToUpdate = selectDistinctResult?.[0]?.id
-
     // If id wasn't passed but `where` without any joins, retrieve it with findFirst
   } else if (whereArg && !joins.length) {
-    const findManyArgs = buildFindManyArgs({
-      adapter: this,
-      depth: 0,
-      fields: collection.flattenedFields,
-      joinQuery: false,
-      select: {},
-      tableName,
-    })
+    const table = this.tables[tableName]
 
-    findManyArgs.where = where
-
-    const docToUpdate = await db.query[tableName].findFirst(findManyArgs)
-    idToUpdate = docToUpdate?.id
+    const docsToUpdate = await (db as LibSQLDatabase)
+      .select({
+        id: table.id,
+      })
+      .from(table)
+      .where(where)
+      .limit(1)
+    idToUpdate = docsToUpdate?.[0]?.id
   }
 
   const result = await upsertRow({
