@@ -195,17 +195,17 @@ export const buildJoinAggregation = async ({
     const sliceValue = page ? [(page - 1) * limitJoin, limitJoin] : [limitJoin]
 
     aggregate.push({
-      $set: {
-        [`${as}.docs`]: {
-          $slice: [`$${as}.docs`, ...sliceValue],
+      $addFields: {
+        [`${as}.hasNextPage`]: {
+          $gt: [{ $size: `$${as}.docs` }, limitJoin || Number.MAX_VALUE],
         },
       },
     })
 
     aggregate.push({
-      $addFields: {
-        [`${as}.hasNextPage`]: {
-          $gt: [{ $size: `$${as}.docs` }, limitJoin || Number.MAX_VALUE],
+      $set: {
+        [`${as}.docs`]: {
+          $slice: [`$${as}.docs`, ...sliceValue],
         },
       },
     })
