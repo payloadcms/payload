@@ -6,6 +6,7 @@ import React, { useMemo } from 'react'
 
 import type { AddCondition, UpdateCondition, WhereBuilderProps } from './types.js'
 
+import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
@@ -31,7 +32,6 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   const reducedFields = useMemo(() => reduceFields({ fields, i18n }), [fields, i18n])
 
   const { handleWhereChange, query } = useListQuery()
-  const [shouldUpdateQuery, setShouldUpdateQuery] = React.useState(false)
 
   const [conditions, setConditions] = React.useState<Where[]>(() => {
     const whereFromSearch = query.where
@@ -101,7 +101,6 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
         newConditions[orIndex].and[andIndex] = newRowCondition
 
         setConditions(newConditions)
-        setShouldUpdateQuery(true)
       }
     },
     [conditions],
@@ -117,20 +116,21 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
       }
 
       setConditions(newConditions)
-      setShouldUpdateQuery(true)
     },
     [conditions],
   )
 
+  const dispatchChange = useEffectEvent(async (conditions) => {
+    await handleWhereChange({ or: conditions })
+  })
+
   React.useEffect(() => {
-    if (shouldUpdateQuery) {
-      async function handleChange() {
-        await handleWhereChange({ or: conditions })
-        setShouldUpdateQuery(false)
-      }
-      void handleChange()
+    async function handleChange() {
+      await dispatchChange(conditions)
     }
-  }, [conditions, handleWhereChange, shouldUpdateQuery])
+
+    void handleChange()
+  }, [conditions])
 
   return (
     <div className={baseClass}>

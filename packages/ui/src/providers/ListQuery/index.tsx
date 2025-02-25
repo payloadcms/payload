@@ -69,7 +69,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       }
 
       const newQuery: ListQuery = {
-        columns: 'columns' in query ? query.columns : columns,
+        columns: 'columns' in query ? query.columns : currentQuery.columns,
         limit: 'limit' in query ? query.limit : (currentQuery?.limit ?? String(defaultLimit)),
         page,
         search: 'search' in query ? query.search : currentQuery?.search,
@@ -97,7 +97,12 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       setCurrentQuery(newQuery)
     },
     [
-      currentQuery,
+      currentQuery?.columns,
+      currentQuery?.limit,
+      currentQuery?.page,
+      currentQuery?.search,
+      currentQuery?.sort,
+      currentQuery?.where,
       startRouteTransition,
       defaultLimit,
       defaultSort,
@@ -105,7 +110,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       onQueryChange,
       onQueryChangeFromProps,
       router,
-      columns,
     ],
   )
 
