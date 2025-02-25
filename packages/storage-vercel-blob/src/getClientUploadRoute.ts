@@ -32,7 +32,10 @@ export const getClientUploadRoute =
             throw new Forbidden()
           }
 
-          return Promise.resolve({ addRandomSuffix, cacheControlMaxAge })
+          return Promise.resolve({
+            addRandomSuffix,
+            cacheControlMaxAge,
+          })
         },
         onUploadCompleted: async () => {},
         request: req as Request,

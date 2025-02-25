@@ -73,7 +73,7 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
         req.file = {
           name: filename,
           data: Buffer.from(await response.arrayBuffer()),
-          mimetype: mimeType,
+          mimetype: response.headers.get('Content-Type') || mimeType,
           size,
         }
       }
