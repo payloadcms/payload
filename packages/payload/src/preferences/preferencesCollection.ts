@@ -2,6 +2,7 @@
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Access, Config } from '../config/types.js'
 
+import { migrateColumns } from './migrateColumns.js'
 import { deleteHandler } from './requestHandlers/delete.js'
 import { findByIDHandler } from './requestHandlers/findOne.js'
 import { updateHandler } from './requestHandlers/update.js'
@@ -76,6 +77,14 @@ const getPreferencesCollection = (config: Config): CollectionConfig => ({
     {
       name: 'value',
       type: 'json',
+      /**
+       * @todo remove these hooks in v4
+       * See `migrateColumns` for more information
+       */
+      hooks: {
+        afterRead: [({ value }) => migrateColumns(value)],
+        beforeValidate: [({ value }) => migrateColumns(value)],
+      },
       validate: (value) => {
         if (value) {
           try {
