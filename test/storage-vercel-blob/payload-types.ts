@@ -157,6 +157,7 @@ export interface Media {
  */
 export interface MediaWithPrefix {
   id: string;
+  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -294,6 +295,7 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "media-with-prefix_select".
  */
 export interface MediaWithPrefixSelect<T extends boolean = true> {
+  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

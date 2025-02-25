@@ -956,22 +956,34 @@ importers:
 
   packages/plugin-cloud-storage:
     dependencies:
-      find-node-modules:
-        specifier: ^2.1.3
-        version: 2.1.3
-      range-parser:
-        specifier: ^1.2.1
-        version: 1.2.1
-    devDependencies:
       '@payloadcms/ui':
         specifier: workspace:*
         version: link:../ui
-      '@types/find-node-modules':
-        specifier: ^2.1.2
-        version: 2.1.2
+      find-node-modules:
+        specifier: ^2.1.3
+        version: 2.1.3
       payload:
         specifier: workspace:*
         version: link:../payload
+      range-parser:
+        specifier: ^1.2.1
+        version: 1.2.1
+      react:
+        specifier: 19.0.0
+        version: 19.0.0
+      react-dom:
+        specifier: 19.0.0
+        version: 19.0.0(react@19.0.0)
+    devDependencies:
+      '@types/find-node-modules':
+        specifier: ^2.1.2
+        version: 2.1.2
+      '@types/react':
+        specifier: 19.0.1
+        version: 19.0.1
+      '@types/react-dom':
+        specifier: 19.0.1
+        version: 19.0.1
 
   packages/plugin-form-builder:
     dependencies:

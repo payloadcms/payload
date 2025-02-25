@@ -105,7 +105,7 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
         handler: getClientUploadRoute({
           access:
             typeof options.clientUploads === 'object' ? options.clientUploads.access : undefined,
-          addRandomSuffix: options.addRandomSuffix,
+          addRandomSuffix: optionsWithDefaults.addRandomSuffix,
           cacheControlMaxAge: options.cacheControlMaxAge,
           token: options.token,
         }),
@@ -133,7 +133,7 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
 
       incomingConfig.admin.components.providers.push({
         clientProps: {
-          addRandomSuffix: options.addRandomSuffix,
+          addRandomSuffix: optionsWithDefaults.addRandomSuffix,
           baseURL: baseUrl,
           collectionSlug,
           enabled: !!options.clientUploads,
