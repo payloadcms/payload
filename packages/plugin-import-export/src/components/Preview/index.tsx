@@ -1,62 +1,53 @@
 'use client'
 import type { Column } from '@payloadcms/ui'
+import type { ClientField, FieldAffectingDataClient } from 'payload'
 
 import { Table, useConfig, useField } from '@payloadcms/ui'
+import { fieldAffectsData } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 
-import { reduceFields } from '../FieldsToExport/reduceFields.js'
 import { useImportExport } from '../ImportExportProvider/index.js'
 import './index.scss'
 
 const baseClass = 'preview'
 
-interface Field {
-  label?: string
-  value: {
-    name: string
-  }
-}
 export const Preview = () => {
-  const { collection, columnsToExport } = useImportExport()
+  const { collection } = useImportExport()
   const { config } = useConfig()
-  const { value: whereIncoming } = useField({ path: 'where' })
+  const { value: where } = useField({ path: 'where' })
+  const { value: limit } = useField<number>({ path: 'limit' })
+  const { value: fields } = useField<string[]>({ path: 'fields' })
+  const { value: sort } = useField({ path: 'sort' })
+  const { value: draft } = useField({ path: 'draft' })
   const [dataToRender, setDataToRender] = React.useState<any[]>([])
   const [resultCount, setResultCount] = React.useState<any>('')
+  const [columns, setColumns] = React.useState<Column[]>([])
+
   const collectionSlug = typeof collection === 'string' && collection
   const collectionConfig = config.collections.find(
     (collection) => collection.slug === collectionSlug,
   )
-  const reducedFields =
-    collectionConfig && (reduceFields({ fields: collectionConfig.fields }) as any)
-
-  // TODO: this might be causing the table issue, need to check if there is a reusable function anywhere to format columns
-  const columns: Column[] =
-    reducedFields &&
-    reducedFields.map((field: Field) => {
-      const fieldToExport = columnsToExport.find(
-        (column) => typeof column !== 'string' && column.value === field.value.name,
-      )
-      if (fieldToExport) {
-        return {
-          accessor: field.value.name,
-          active: true,
-          field,
-          Heading: field.label || field.value.name,
-          renderedCells: [],
-        }
-      }
-    })
-
-  const whereQuery = qs.stringify(JSON.stringify(whereIncoming), { addQueryPrefix: true })
 
   React.useEffect(() => {
     const fetchData = async () => {
-      if (!collectionSlug || !whereIncoming) {
+      if (!collectionSlug) {
         return
       }
 
       try {
+        const whereQuery = qs.stringify(
+          {
+            depth: 0,
+            draft,
+            limit: limit > 10 ? 10 : limit,
+            sort,
+            where,
+          },
+          {
+            addQueryPrefix: true,
+          },
+        )
         const response = await fetch(`/api/${collectionSlug}${whereQuery}`, {
           headers: {
             'Content-Type': 'application/json',
@@ -66,8 +57,36 @@ export const Preview = () => {
 
         if (response.ok) {
           const data = await response.json()
+          setResultCount(limit && limit < data.totalDocs ? limit : data.totalDocs)
           // TODO: check if this data is in the correct format for the table
-          setResultCount(data.docs.length)
+
+          const filteredFields = (collectionConfig?.fields?.filter((field) => {
+            if (!fieldAffectsData(field)) {
+              return false
+            }
+            if (fields?.length > 0) {
+              return fields.includes(field.name)
+            }
+            return true
+          }) ?? []) as FieldAffectingDataClient[]
+
+          setColumns(
+            filteredFields.map((field) => ({
+              accessor: field.name || '',
+              active: true,
+              field: field as ClientField,
+              Heading: field?.label || field.name,
+              renderedCells: data.docs.map((doc: Record<string, unknown>) => {
+                if (!field.name || !doc[field.name]) {
+                  return null
+                }
+                if (typeof doc[field.name] === 'object') {
+                  return JSON.stringify(doc[field.name])
+                }
+                return String(doc[field.name])
+              }),
+            })) as Column[],
+          )
           setDataToRender(data.docs)
         }
       } catch (error) {
@@ -76,7 +95,7 @@ export const Preview = () => {
     }
 
     void fetchData()
-  }, [collectionSlug, whereIncoming, whereQuery])
+  }, [collectionConfig?.fields, collectionSlug, draft, fields, limit, sort, where])
 
   return (
     <div className={baseClass}>
