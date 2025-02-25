@@ -27,7 +27,9 @@ import {
   customTabViewTitle,
 } from '../../shared.js'
 import {
+  customDocumentControlsSlug,
   customFieldsSlug,
+  customGlobalDocumentControlsSlug,
   customGlobalViews2GlobalSlug,
   customViews2CollectionSlug,
   globalSlug,
@@ -63,6 +65,7 @@ describe('Document View', () => {
   let globalURL: AdminUrlUtil
   let serverURL: string
   let customViewsURL: AdminUrlUtil
+  let customDocumentControlsURL: AdminUrlUtil
   let customFieldsURL: AdminUrlUtil
 
   beforeAll(async ({ browser }, testInfo) => {
@@ -78,6 +81,7 @@ describe('Document View', () => {
     postsUrl = new AdminUrlUtil(serverURL, postsCollectionSlug)
     globalURL = new AdminUrlUtil(serverURL, globalSlug)
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
+    customDocumentControlsURL = new AdminUrlUtil(serverURL, customDocumentControlsSlug)
     customFieldsURL = new AdminUrlUtil(serverURL, customFieldsSlug)
 
     const context = await browser.newContext()
@@ -404,6 +408,38 @@ describe('Document View', () => {
       await expect(
         tabsContent.locator('.field-description', { hasText: `t:${customTabAdminDescription}` }),
       ).toBeVisible()
+    })
+  })
+
+  describe('collection — custom document controls', () => {
+    test('should render status component', async () => {
+      await navigateToDoc(page, postsUrl)
+      const statusComponent = page.locator('.doc-controls__status > .status')
+      await expect(statusComponent).toBeVisible()
+      await expect(statusComponent).toContainText('Status: Draft')
+    })
+
+    test('should render custom status component', async () => {
+      await navigateToDoc(page, customDocumentControlsURL)
+      const statusComponent = page.locator('#custom-status')
+      await expect(statusComponent).toBeVisible()
+      await expect(statusComponent).toContainText('#custom-status')
+    })
+  })
+
+  describe('global — custom document controls', () => {
+    test('should render status component', async () => {
+      await page.goto(globalURL.global(globalSlug))
+      const statusComponent = page.locator('.doc-controls__status > .status')
+      await expect(statusComponent).toBeVisible()
+      await expect(statusComponent).toContainText('Status: Draft')
+    })
+
+    test('should render custom status component', async () => {
+      await page.goto(globalURL.global(customGlobalDocumentControlsSlug))
+      const statusComponent = page.locator('#custom-status')
+      await expect(statusComponent).toBeVisible()
+      await expect(statusComponent).toContainText('#custom-status')
     })
   })
 

@@ -64,7 +64,6 @@ export interface Config {
   auth: {
     users: UserAuthOperations;
   };
-  blocks: {};
   collections: {
     uploads: Upload;
     posts: Post;
@@ -72,6 +71,7 @@ export interface Config {
     'hidden-collection': HiddenCollection;
     'not-in-view-collection': NotInViewCollection;
     'collection-no-api-view': CollectionNoApiView;
+    'custom-document-controls': CustomDocumentControl;
     'custom-views-one': CustomViewsOne;
     'custom-views-two': CustomViewsTwo;
     'custom-fields': CustomField;
@@ -96,6 +96,7 @@ export interface Config {
     'hidden-collection': HiddenCollectionSelect<false> | HiddenCollectionSelect<true>;
     'not-in-view-collection': NotInViewCollectionSelect<false> | NotInViewCollectionSelect<true>;
     'collection-no-api-view': CollectionNoApiViewSelect<false> | CollectionNoApiViewSelect<true>;
+    'custom-document-controls': CustomDocumentControlsSelect<false> | CustomDocumentControlsSelect<true>;
     'custom-views-one': CustomViewsOneSelect<false> | CustomViewsOneSelect<true>;
     'custom-views-two': CustomViewsTwoSelect<false> | CustomViewsTwoSelect<true>;
     'custom-fields': CustomFieldsSelect<false> | CustomFieldsSelect<true>;
@@ -120,6 +121,7 @@ export interface Config {
     'not-in-view-global': NotInViewGlobal;
     'global-no-api-view': GlobalNoApiView;
     global: Global;
+    'custom-global-document-controls': CustomGlobalDocumentControl;
     'custom-global-views-one': CustomGlobalViewsOne;
     'custom-global-views-two': CustomGlobalViewsTwo;
     'group-globals-one': GroupGlobalsOne;
@@ -131,6 +133,7 @@ export interface Config {
     'not-in-view-global': NotInViewGlobalSelect<false> | NotInViewGlobalSelect<true>;
     'global-no-api-view': GlobalNoApiViewSelect<false> | GlobalNoApiViewSelect<true>;
     global: GlobalSelect<false> | GlobalSelect<true>;
+    'custom-global-document-controls': CustomGlobalDocumentControlsSelect<false> | CustomGlobalDocumentControlsSelect<true>;
     'custom-global-views-one': CustomGlobalViewsOneSelect<false> | CustomGlobalViewsOneSelect<true>;
     'custom-global-views-two': CustomGlobalViewsTwoSelect<false> | CustomGlobalViewsTwoSelect<true>;
     'group-globals-one': GroupGlobalsOneSelect<false> | GroupGlobalsOneSelect<true>;
@@ -301,6 +304,17 @@ export interface CollectionNoApiView {
   id: string;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-document-controls".
+ */
+export interface CustomDocumentControl {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -489,6 +503,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'collection-no-api-view';
         value: string | CollectionNoApiView;
+      } | null)
+    | ({
+        relationTo: 'custom-document-controls';
+        value: string | CustomDocumentControl;
       } | null)
     | ({
         relationTo: 'custom-views-one';
@@ -710,6 +728,16 @@ export interface CollectionNoApiViewSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-document-controls_select".
+ */
+export interface CustomDocumentControlsSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "custom-views-one_select".
  */
 export interface CustomViewsOneSelect<T extends boolean = true> {
@@ -926,6 +954,17 @@ export interface Global {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-global-document-controls".
+ */
+export interface CustomGlobalDocumentControl {
+  id: string;
+  title?: string | null;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "custom-global-views-one".
  */
 export interface CustomGlobalViewsOne {
@@ -1010,6 +1049,17 @@ export interface GlobalNoApiViewSelect<T extends boolean = true> {
 export interface GlobalSelect<T extends boolean = true> {
   title?: T;
   sidebarField?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-global-document-controls_select".
+ */
+export interface CustomGlobalDocumentControlsSelect<T extends boolean = true> {
+  title?: T;
   _status?: T;
   updatedAt?: T;
   createdAt?: T;
