@@ -1,5 +1,6 @@
 import type {
   Adapter,
+  ClientUploadsConfig,
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
   GeneratedAdapter,
@@ -33,11 +34,14 @@ export type VercelBlobStorageOptions = {
   /**
    * Cache-Control max-age in seconds
    *
-   * @defaultvalue 365 * 24 * 60 * 60 (1 Year)
+   * @default 365 * 24 * 60 * 60 // (1 Year)
    */
   cacheControlMaxAge?: number
 
-  clientUploads?: boolean
+  /**
+   * Do uploads directly on the client, to bypass limits on Vercel.
+   */
+  clientUploads?: ClientUploadsConfig
 
   /**
    * Collections to apply the Vercel Blob adapter to
@@ -99,6 +103,8 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
 
       incomingConfig.endpoints.push({
         handler: getClientUploadRoute({
+          access:
+            typeof options.clientUploads === 'object' ? options.clientUploads.access : undefined,
           addRandomSuffix: options.addRandomSuffix,
           cacheControlMaxAge: options.cacheControlMaxAge,
           token: options.token,

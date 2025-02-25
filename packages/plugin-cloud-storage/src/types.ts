@@ -16,6 +16,17 @@ export interface File {
   tempFilePath?: string
 }
 
+export type ClientUploadsAccess = (args: {
+  collectionSlug: UploadCollectionSlug
+  req: PayloadRequest
+}) => boolean | Promise<boolean>
+
+export type ClientUploadsConfig =
+  | {
+      access?: ClientUploadAccess
+    }
+  | boolean
+
 export type HandleUpload = (args: {
   collection: CollectionConfig
   data: any

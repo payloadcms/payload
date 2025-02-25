@@ -1,5 +1,6 @@
 import type {
   Adapter,
+  ClientUploadsConfig,
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
   GeneratedAdapter,
@@ -29,7 +30,10 @@ export type S3StorageOptions = {
 
   bucket: string
 
-  clientUploads?: boolean
+  /**
+   * Do uploads directly on the client to bypass limits on Vercel.
+   */
+  clientUploads?: ClientUploadsConfig
   /**
    * Collection options to apply the S3 adapter to.
    */
@@ -83,6 +87,10 @@ export const s3Storage: S3StoragePlugin =
 
       incomingConfig.endpoints.push({
         handler: getGenerateSignedURLHandler({
+          access:
+            typeof s3StorageOptions.clientUploads === 'object'
+              ? s3StorageOptions.clientUploads.access
+              : undefined,
           acl: s3StorageOptions.acl,
           bucket: s3StorageOptions.bucket,
           collections: s3StorageOptions.collections,

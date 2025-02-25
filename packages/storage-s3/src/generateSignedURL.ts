@@ -1,4 +1,5 @@
-import type { PayloadHandler, PayloadRequest, UploadCollectionSlug } from 'payload'
+import type { ClientUploadsAccess } from '@payloadcms/plugin-cloud-storage/types'
+import type { PayloadHandler } from 'payload'
 
 import * as AWS from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
@@ -8,10 +9,7 @@ import { APIError, Forbidden } from 'payload'
 import type { S3StorageOptions } from './index.js'
 
 interface Args {
-  access?: (args: {
-    collectionSlug: UploadCollectionSlug
-    req: PayloadRequest
-  }) => boolean | Promise<boolean>
+  access?: ClientUploadsAccess
   acl?: 'private' | 'public-read'
   bucket: string
   collections: S3StorageOptions['collections']
