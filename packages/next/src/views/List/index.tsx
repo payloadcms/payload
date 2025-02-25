@@ -73,10 +73,15 @@ export const renderListView = async (
 
   const query = queryFromArgs || queryFromReq
 
+  const columns: ColumnPreference[] = query.columns
+    ? (JSON.parse(query.columns as string) as ColumnPreference[])
+    : undefined
+
   const listPreferences = await upsertPreferences<ListPreferences>({
     key: `${collectionSlug}-list`,
     req,
     value: {
+      columns,
       limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
       sort: query?.sort as string,
     },
@@ -137,10 +142,6 @@ export const renderListView = async (
     })
 
     const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
-
-    const columns: ColumnPreference[] = query.columns
-      ? (JSON.parse(query.columns as string) as ColumnPreference[])
-      : undefined
 
     const { columnState, Table } = renderTable({
       clientCollectionConfig,
