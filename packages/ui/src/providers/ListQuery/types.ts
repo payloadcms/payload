@@ -11,7 +11,7 @@ type ContextHandlers = {
 export type ListQueryProps = {
   readonly children: React.ReactNode
   readonly collectionSlug?: string
-  readonly columns: ColumnPreference[]
+  readonly columns?: ColumnPreference[]
   readonly data: PaginatedDocs
   readonly defaultLimit?: number
   readonly defaultSort?: Sort

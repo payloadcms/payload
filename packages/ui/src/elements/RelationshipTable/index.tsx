@@ -326,6 +326,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           {data?.docs && data.docs.length > 0 && (
             <RelationshipProvider>
               <ListQueryProvider
+                columns={columnState.map(({ accessor, active }) => ({ accessor, active }))}
                 data={data}
                 defaultLimit={
                   field.defaultLimit ?? collectionConfig?.admin?.pagination?.defaultLimit
