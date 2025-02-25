@@ -1,9 +1,0 @@
-{
-  "extends": "../../tsconfig.base.json",
-  "references": [
-    { "path": "../payload" },
-    { "path": "../translations" },
-    { "path": "../ui" },
-    { "path": "../next" }
-  ]
-}

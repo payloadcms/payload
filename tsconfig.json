@@ -1,85 +1,62 @@
 {
-  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "composite": false,
-    "noEmit": true,
-    "baseUrl": ".",
-
+    /* Strictness */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "target": "ES2022",
+    "rootDir": "${configDir}/src",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "allowJs": true,
+    "checkJs": false,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "preserve",
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2022"
+    ],
+    "outDir": "${configDir}/dist",
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "emitDeclarationOnly": true,
+    "sourceMap": true,
+    "types": [
+      "node"
+    ],
+    "incremental": true,
+    "isolatedModules": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@payloadcms/ui": [
+        "./packages/ui/src/index.tsx"
+      ],
+      "@payloadcms/next/*": [
+        "./packages/next/src/exports/*.ts"
+      ],
+      "@payloadcms/next": [
+        "./packages/next/src/exports/*"
+      ]
+    },
+    "noEmit": true
   },
-  "references": [
-    {
-      "path": "./packages/create-payload-app"
-    },
-    {
-      "path": "./packages/db-mongodb"
-    },
-    {
-      "path": "./packages/db-postgres"
-    },
-    {
-      "path": "./packages/drizzle"
-    },
-    {
-      "path": "./packages/graphql"
-    },
-    {
-      "path": "./packages/live-preview"
-    },
-    {
-      "path": "./packages/live-preview-react"
-    },
-    {
-      "path": "./packages/live-preview-vue"
-    },
-    {
-      "path": "./packages/next"
-    },
-    {
-      "path": "./packages/payload"
-    },
-    {
-      "path": "./packages/plugin-cloud-storage"
-    },
-    {
-      "path": "./packages/payload-cloud"
-    },
-    {
-      "path": "./packages/plugin-form-builder"
-    },
-    {
-      "path": "./packages/plugin-nested-docs"
-    },
-    {
-      "path": "./packages/plugin-redirects"
-    },
-    {
-      "path": "./packages/plugin-search"
-    },
-    {
-      "path": "./packages/plugin-seo"
-    },
-    {
-      "path": "./packages/plugin-stripe"
-    },
-    {
-      "path": "./packages/plugin-multi-tenant"
-    },
-    {
-      "path": "./packages/richtext-slate"
-    },
-    {
-      "path": "./packages/richtext-lexical"
-    },
-    {
-      "path": "./packages/translations"
-    },
-    {
-      "path": "./packages/ui"
-    },
-  ],
   "include": [
     "${configDir}/src",
-    ".next/types/**/*.ts",
-    "./scripts/**/*.ts",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "${configDir}/dist",
+    "${configDir}/build",
+    "${configDir}/temp",
+    "**/*.spec.ts"
   ]
 }
