@@ -1,5 +1,5 @@
 import type { CreateOptions } from 'mongoose'
-import type { Create, Document } from 'payload'
+import type { Create } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -9,7 +9,7 @@ import { transform } from './utilities/transform.js'
 
 export const create: Create = async function create(
   this: MongooseAdapter,
-  { collection, data, req },
+  { collection, data, req, returning },
 ) {
   const Model = this.collections[collection]
   const options: CreateOptions = {
@@ -33,6 +33,9 @@ export const create: Create = async function create(
     ;[doc] = await Model.create([data], options)
   } catch (error) {
     handleError({ collection, error, req })
+  }
+  if (returning === false) {
+    return null
   }
 
   doc = doc.toObject()
