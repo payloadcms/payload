@@ -50,3 +50,75 @@ You can access Mongoose models as follows:
 - Collection models - `payload.db.collections[myCollectionSlug]`
 - Globals model - `payload.db.globals`
 - Versions model (both collections and globals) - `payload.db.versions[myEntitySlug]`
+
+## Common migration scripts
+
+### Delete field from the database
+
+With the MongoDB adapter, even if you delete a field from your Payload config, the existing field data will still be remained in the database.
+If you want to ensure that the field is fully erased from the database, you can use the following script:
+
+```ts
+// pnpx payload migrate:create --name delete-field
+export async function up({ payload, session }: MigrateUpArgs): Promise<void> {
+  await payload.db.collections.posts.collection.updateMany(
+    {},
+    {
+      $unset: {
+        // delete title field
+        title: true,
+        // nested to array
+        'array.title': true,
+      },
+    },
+    { session },
+  )
+}
+```
+
+### Synchronize indexes
+
+Payload won't automatically replace existing indexes in MongoDB when you change your Payload config.
+For example, changing `index: true` to `unique: true` won't automatically update the index in MongoDB.
+You can use the following script to synchronize indexes: 
+```ts
+// pnpx payload migrate:create --name sync-posts-indexes
+export async function up({ payload, session }: MigrateUpArgs): Promise<void> {
+ await payload.db.collections.posts.syncIndexes()
+}
+```
+<Banner type="warning">
+  Note that this will also drop all indexes that aren't in the payload config.
+  If you have custom indexes that you want to keep, they must be added to the collection schema
+  or you can insert them manually after `syncIndexes` with:
+  `payload.db.collections.posts.collection.createIndex({ title: 1 })`
+</Banner>
+
+### Making field localized and vice versa
+When you change a field to be localized or vice versa, you can use the following script to update the field in the database:
+```ts
+// pnpx payload migrate:create --name make-title-localized
+export async function up({ payload, session }: MigrateUpArgs): Promise<void> {
+  const posts = await payload.db.collections.posts.collection.find({}, { session }).toArray()
+
+  // Make "title" localized
+  await payload.db.collections.posts.collection.bulkWrite(
+    posts.map((post) => ({
+      updateOne: {
+        filter: { _id: post._id },
+        update: { $set: { title: { en: post.title } } },
+      },
+    })),
+  )
+
+  // Make "title" non-localized
+  await payload.db.collections.posts.collection.bulkWrite(
+    posts.map((post) => ({
+      updateOne: {
+        filter: { _id: post._id },
+        update: { $set: { title: post.title.en } },
+      },
+    })),
+  )
+}
+```
