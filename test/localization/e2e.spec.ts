@@ -329,9 +329,9 @@ describe('Localization', () => {
 
       await page.goto(url.list)
 
-      const localeLabel = page
-        .locator('.localizer.app-header__localizer .localizer-button__current-label')
-        
+      const localeLabel = page.locator(
+        '.localizer.app-header__localizer .localizer-button__current-label',
+      )
 
       await expect(localeLabel).not.toHaveText('English')
     })

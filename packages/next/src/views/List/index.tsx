@@ -67,6 +67,8 @@ export const renderListView = async (
     visibleEntities,
   } = initPageResult
 
+  console.log(locale)
+
   if (!permissions?.collections?.[collectionSlug]?.read) {
     throw new Error('not-found')
   }

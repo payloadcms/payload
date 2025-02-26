@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import type { ListQueryProps } from './types.js'
 
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
+import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { ListQueryContext } from './context.js'
@@ -49,8 +50,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       return {}
     }
   })
-
-  const currentQueryRef = React.useRef(currentQuery)
 
   // If the search params change externally, update the current query
   useEffect(() => {
@@ -149,41 +148,46 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     [refineListData],
   )
 
+  const syncQuery = useEffectEvent(() => {
+    let shouldUpdateQueryString = false
+    const newQuery = { ...(currentQuery || {}) }
+
+    // Allow the URL to override the default limit
+    if (isNumber(defaultLimit) && !('limit' in currentQuery)) {
+      newQuery.limit = String(defaultLimit)
+      shouldUpdateQueryString = true
+    }
+
+    // Allow the URL to override the default sort
+    if (defaultSort && !('sort' in currentQuery)) {
+      newQuery.sort = defaultSort
+      shouldUpdateQueryString = true
+    }
+
+    if (columns && !('columns' in currentQuery)) {
+      newQuery.columns = columns
+      shouldUpdateQueryString = true
+    }
+
+    if (shouldUpdateQueryString) {
+      setCurrentQuery(newQuery)
+      // Do not use router.replace here to avoid re-rendering on initial load
+      console.log('EVENT')
+      window.history.replaceState(
+        null,
+        '',
+        `?${qs.stringify({ ...newQuery, columns: JSON.stringify(newQuery.columns) })}`,
+      )
+    }
+  })
+
   // If `defaultLimit` or `defaultSort` are updated externally, update the query
   // I.e. when HMR runs, these properties may be different
   useEffect(() => {
     if (modifySearchParams) {
-      let shouldUpdateQueryString = false
-      const newQuery = { ...(currentQueryRef.current || {}) }
-
-      // Allow the URL to override the default limit
-      if (isNumber(defaultLimit) && !('limit' in currentQueryRef.current)) {
-        newQuery.limit = String(defaultLimit)
-        shouldUpdateQueryString = true
-      }
-
-      // Allow the URL to override the default sort
-      if (defaultSort && !('sort' in currentQueryRef.current)) {
-        newQuery.sort = defaultSort
-        shouldUpdateQueryString = true
-      }
-
-      if (columns && !('columns' in currentQueryRef.current)) {
-        newQuery.columns = columns
-        shouldUpdateQueryString = true
-      }
-
-      if (shouldUpdateQueryString) {
-        setCurrentQuery(newQuery)
-        // Do not use router.replace here to avoid re-rendering on initial load
-        window.history.replaceState(
-          null,
-          '',
-          `?${qs.stringify({ ...newQuery, columns: JSON.stringify(newQuery.columns) })}`,
-        )
-      }
+      syncQuery()
     }
-  }, [defaultSort, defaultLimit, router, modifySearchParams, columns])
+  }, [defaultSort, defaultLimit, modifySearchParams, columns])
 
   return (
     <ListQueryContext.Provider
