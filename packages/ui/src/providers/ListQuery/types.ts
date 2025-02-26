@@ -8,6 +8,8 @@ type ContextHandlers = {
   handleWhereChange?: (where: Where) => Promise<void>
 }
 
+export type OnListQueryChange = (query: ListQuery) => void
+
 export type ListQueryProps = {
   readonly children: React.ReactNode
   readonly collectionSlug?: string
@@ -16,7 +18,7 @@ export type ListQueryProps = {
   readonly defaultLimit?: number
   readonly defaultSort?: Sort
   readonly modifySearchParams?: boolean
-  readonly onQueryChange?: (query: ListQuery) => void
+  readonly onQueryChange?: OnListQueryChange
   readonly preferenceKey?: string
 }
 

@@ -2,7 +2,6 @@
 import type {
   CollectionSlug,
   Column,
-  ColumnPreference,
   JoinFieldClient,
   ListQuery,
   PaginatedDocs,
@@ -124,20 +123,13 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         newQuery.where = hoistQueryParamsToAnd(newQuery.where, filterOptions)
       }
 
-      // map columns from string[] to ColumnPreference[]
-      const defaultColumns: ColumnPreference[] = field.admin.defaultColumns
-        ? field.admin.defaultColumns.map((accessor) => ({
-            [accessor]: true,
-          }))
-        : undefined
-
       const {
         data: newData,
         state: newColumnState,
         Table: NewTable,
       } = await getTableState({
         collectionSlug: relationTo,
-        columns: defaultColumns,
+        columns: query?.columns,
         docs,
         enableRowSelections: false,
         parent,
@@ -154,7 +146,6 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     [
       field.defaultLimit,
       field.defaultSort,
-      field.admin.defaultColumns,
       collectionConfig?.admin?.pagination?.defaultLimit,
       collectionConfig?.defaultSort,
       query,
@@ -214,8 +205,6 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     },
     [data?.docs, renderTable],
   )
-
-  const preferenceKey = `${Array.isArray(relationTo) ? `${parent.collectionSlug}-${parent.joinPath}` : relationTo}-list`
 
   const canCreate =
     allowCreate !== false &&
