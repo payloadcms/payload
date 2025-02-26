@@ -65,7 +65,6 @@ export interface GeneratedAdapter {
    * Additional fields to be injected into the base collection and image sizes
    */
   fields?: Field[]
-
   /**
    * Generates the public URL for a file
    */
@@ -88,9 +87,6 @@ export type GenerateFileURL = (args: {
 
 export interface CollectionOptions {
   adapter: Adapter | null
-  /**
-   * Do uploads on the client to prevent limits on serverless platforms like Vercel.
-   */
   disableLocalStorage?: boolean
   disablePayloadAccessControl?: true
   generateFileURL?: GenerateFileURL
