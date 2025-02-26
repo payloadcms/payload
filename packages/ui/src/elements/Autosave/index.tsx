@@ -111,7 +111,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     }
 
     // Do not autosave if the form is already processing (e.g. if the user clicked the publish button
-    // right before this autosave runs), as parallel updates could ause conflicts
+    // right before this autosave runs), as parallel updates could cause conflicts
     if (isFormProcessing) {
       queueRef.current = []
       return
