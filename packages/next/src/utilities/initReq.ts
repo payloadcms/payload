@@ -47,20 +47,23 @@ const partialReqCache = selectiveCache<PartialResult>('partialReq')
 const reqCache = selectiveCache<Result>('req')
 
 /**
- * Initializes a partial request object. This does not construct the `req` object and does
- * not run access control.
- *
- * The output of this function can be cached across all pages, which is why it is
- * separated from `initReq`.
+ * Initializes a full request object, including the `req` object and access control.
+ * As access control and getting the request locale is dependent on the current URL and
  */
-const initPartialReq = async function ({
+export const initReq = async function ({
   configPromise,
   importMap,
+  key,
+  overrides,
+  urlSuffix,
 }: {
   configPromise: Promise<SanitizedConfig> | SanitizedConfig
   importMap: ImportMap
-}): Promise<PartialResult> {
-  return partialReqCache.get('global', async () => {
+  key: string
+  overrides?: Parameters<typeof createLocalReq>[0]
+  urlSuffix?: string
+}): Promise<Result> {
+  const partialResult = await partialReqCache.get(async () => {
     const config = await configPromise
     const payload = await getPayload({ config, importMap })
     const headers = await getHeaders()
@@ -90,33 +93,9 @@ const initPartialReq = async function ({
       responseHeaders,
       user,
     }
-  })
-}
+  }, 'global')
 
-/**
- * Initializes a full request object, including the `req` object and access control.
- * As access control and getting the request locale is dependent on the current URL and
- * query parameters, this function cannot be cached as often as the partial request object.
- */
-export const initReq = async function ({
-  configPromise,
-  importMap,
-  key,
-  overrides,
-  urlSuffix,
-}: {
-  configPromise: Promise<SanitizedConfig> | SanitizedConfig
-  importMap: ImportMap
-  key: string
-  overrides?: Parameters<typeof createLocalReq>[0]
-  urlSuffix?: string
-}): Promise<Result> {
-  const partialResult = await initPartialReq({
-    configPromise,
-    importMap,
-  })
-
-  return reqCache.get(key, async () => {
+  return reqCache.get(async () => {
     const { cookies, headers, i18n, languageCode, payload, responseHeaders, user } = partialResult
 
     const { req: reqOverrides, ...optionsOverrides } = overrides || {}
@@ -153,5 +132,5 @@ export const initReq = async function ({
       permissions,
       req,
     }
-  })
+  }, key)
 }

@@ -7,7 +7,7 @@ type CachedValue = object
 const globalCacheContainer: Record<
   string,
   <TValue extends object = CachedValue>(
-    key: string,
+    ...args: unknown[]
   ) => {
     value: null | Promise<TValue> | TValue
   }
@@ -22,7 +22,7 @@ const globalCacheContainer: Record<
 export function selectiveCache<TValue extends object = CachedValue>(namespace: string) {
   // Create a stable namespace container if it doesn't exist
   if (!globalCacheContainer[namespace]) {
-    globalCacheContainer[namespace] = cache((key: string) => ({
+    globalCacheContainer[namespace] = cache((...args) => ({
       value: null,
     }))
   }
@@ -34,9 +34,9 @@ export function selectiveCache<TValue extends object = CachedValue>(namespace: s
    * @param factory - A function that produces the value if not cached
    * @returns The cached or newly created value
    */
-  const getCached = async (key: string, factory: () => Promise<TValue>): Promise<TValue> => {
+  const getCached = async (factory: () => Promise<TValue>, ...cacheArgs): Promise<TValue> => {
     const stableObjectFn = globalCacheContainer[namespace]
-    const stableObject = stableObjectFn<TValue>(key)
+    const stableObject = stableObjectFn<TValue>(...cacheArgs)
 
     if (
       stableObject?.value &&
