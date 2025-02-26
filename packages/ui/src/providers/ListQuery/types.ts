@@ -1,4 +1,11 @@
-import type { ColumnPreference, ListQuery, PaginatedDocs, Sort, Where } from 'payload'
+import type {
+  ColumnPreference,
+  ListPreferences,
+  ListQuery,
+  PaginatedDocs,
+  Sort,
+  Where,
+} from 'payload'
 
 type ContextHandlers = {
   handlePageChange?: (page: number) => Promise<void>
@@ -17,8 +24,12 @@ export type ListQueryProps = {
   readonly data: PaginatedDocs
   readonly defaultLimit?: number
   readonly defaultSort?: Sort
+  readonly listPreferences?: ListPreferences
   readonly modifySearchParams?: boolean
   readonly onQueryChange?: OnListQueryChange
+  /**
+   * @deprecated
+   */
   readonly preferenceKey?: string
 }
 

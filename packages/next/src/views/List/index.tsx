@@ -220,6 +220,7 @@ export const renderListView = async (
             data={data}
             defaultLimit={limit}
             defaultSort={sort}
+            listPreferences={listPreferences}
             modifySearchParams={!isInDrawer}
           >
             {RenderServerComponent({

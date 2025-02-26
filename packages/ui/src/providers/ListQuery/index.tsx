@@ -22,6 +22,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   data,
   defaultLimit,
   defaultSort,
+  listPreferences,
   modifySearchParams,
   onQueryChange: onQueryChangeFromProps,
 }) => {
@@ -168,7 +169,9 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       shouldUpdateQueryString = true
     }
 
-    if (columns && !('columns' in currentQuery)) {
+    // Only modify columns if they originated from preferences
+    // We can assume they did if `listPreferences.columns` is defined
+    if (columns && listPreferences?.columns && !('columns' in currentQuery)) {
       newQuery.columns = columns
       shouldUpdateQueryString = true
     }
