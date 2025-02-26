@@ -1,7 +1,7 @@
 'use client'
 import type { PaginatedDocs } from 'payload'
 
-import { useRouter, useSearchParams } from 'next/navigation.js'
+import { useSearchParams } from 'next/navigation.js'
 import {
   extractID,
   type FolderBreadcrumb,
@@ -15,6 +15,7 @@ import { toast } from 'sonner'
 import type { PolymorphicRelationshipValue } from '../../elements/FolderView/types.js'
 
 import { useDrawerDepth } from '../../elements/Drawer/index.js'
+import { useListQuery } from '../../providers/ListQuery/index.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { useConfig } from '../Config/index.js'
 import { useTranslation } from '../Translation/index.js'
@@ -36,6 +37,7 @@ export type FolderContextValue = {
   folderCollectionSlug: string
   folderID?: number | string
   getSelectedItems?: () => PolymorphicRelationshipValue[]
+  hasMoreDocuments: boolean
   isRootFolder?: boolean
   lastSelectedIndex?: number
   moveToFolder: (args: {
@@ -62,6 +64,7 @@ const Context = React.createContext<FolderContextValue>({
   folderCollectionSlug: '',
   folderID: undefined,
   getSelectedItems: () => [],
+  hasMoreDocuments: true,
   isRootFolder: undefined,
   lastSelectedIndex: undefined,
   moveToFolder: () => Promise.resolve(undefined),
@@ -92,7 +95,7 @@ export function FolderProvider({ children, initialData }: Props) {
   const [selectedIndexes, setSelectedIndexes] = React.useState<Set<number>>(() => new Set())
   const searchParams = useSearchParams()
   const drawerDepth = useDrawerDepth()
-  const router = useRouter()
+  const { refineListData } = useListQuery()
   const { t } = useTranslation()
 
   const [activeFolderID, setActiveFolderID] = React.useState<FolderContextValue['folderID']>(
@@ -116,6 +119,9 @@ export function FolderProvider({ children, initialData }: Props) {
     return useAsTitleMap
   })
   const [lastSelectedIndex, setLastSelectedIndex] = React.useState<null | number>()
+  const [hasMoreDocuments, setHasMoreDocuments] = React.useState(() =>
+    Boolean(initialData?.hasMoreDocuments),
+  )
 
   const isRootFolder = React.useMemo(() => {
     return folderBreadcrumbs.length === 1
@@ -162,10 +168,13 @@ export function FolderProvider({ children, initialData }: Props) {
             folderDataRes.items.filter((item) => item.relationTo !== folderCollectionSlug),
           )
         }
+
+        setHasMoreDocuments(folderDataRes.hasMoreDocuments)
       } else {
         setFolderBreadcrumbs([])
         setSubfolders([])
         setDocuments([])
+        setHasMoreDocuments(false)
       }
     },
     [routes.api, serverURL, searchParams],
@@ -176,14 +185,14 @@ export function FolderProvider({ children, initialData }: Props) {
       clearSelections()
       setActiveFolderID(toFolderID)
       if (drawerDepth === 1) {
-        router.push(
-          `${routes.admin}${toFolderID !== folderBreadcrumbs[0].id ? `?folder=${toFolderID}` : ''}`,
-        )
+        await refineListData({
+          folder: toFolderID !== folderBreadcrumbs[0].id ? toFolderID : undefined,
+        })
       } else {
         await populateFolderData({ folderID: toFolderID })
       }
     },
-    [drawerDepth, router, routes.admin, populateFolderData, folderBreadcrumbs, clearSelections],
+    [drawerDepth, populateFolderData, clearSelections, refineListData, folderBreadcrumbs],
   )
 
   const getSelectedItems = React.useCallback(() => {
@@ -443,6 +452,7 @@ export function FolderProvider({ children, initialData }: Props) {
         folderCollectionSlug,
         folderID: activeFolderID,
         getSelectedItems,
+        hasMoreDocuments,
         isRootFolder,
         lastSelectedIndex,
         moveToFolder,

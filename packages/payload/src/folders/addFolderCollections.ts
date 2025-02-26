@@ -1,8 +1,10 @@
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Config } from '../config/types.js'
+import type { TextField } from '../fields/config/types.js'
 
 import { foldersSlug, parentFolderFieldName } from './constants.js'
 import { createFolderCollection } from './createFolderCollection.js'
+import { createBaseFolderSearchField } from './fields/folderSearch.js'
 import { ensureParentFolder } from './hooks/ensureParentFolder.js'
 
 const isDebugEnabled = (collections: CollectionConfig[]) => {
@@ -69,11 +71,27 @@ function adjustFolderEnabledCollection({
   }
   collection.hooks.beforeChange.push(ensureParentFolder)
 
-  collection.fields.push({
-    name: parentFolderFieldName,
-    type: 'relationship',
-    hidden: !debug,
-    index: true,
-    relationTo: foldersSlug,
+  let useAsTitle = collection.admin?.useAsTitle || (collection.upload ? 'filename' : 'id')
+  const titleField = collection.fields.find((field): field is TextField => {
+    if ('name' in field) {
+      useAsTitle = collection.admin?.useAsTitle ?? useAsTitle
+      return field.name === useAsTitle
+    }
+    return false
   })
+
+  collection.fields.push(
+    {
+      name: parentFolderFieldName,
+      type: 'relationship',
+      hidden: !debug,
+      index: true,
+      relationTo: foldersSlug,
+    },
+    {
+      ...createBaseFolderSearchField({ debug, useAsTitle }),
+      access: titleField?.access,
+      localized: titleField?.localized,
+    },
+  )
 }

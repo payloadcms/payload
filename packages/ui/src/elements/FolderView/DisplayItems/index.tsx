@@ -12,8 +12,9 @@ import { FolderFileCard } from '../FolderFileCard/index.js'
 import { FolderFileGrid } from '../FolderFileGrid/index.js'
 import { FolderFileRow } from '../FolderFileRow/index.js'
 import { SimpleTable, TableHeader } from '../SimpleTable/index.js'
+import './index.scss'
 
-const baseClass = 'displayed-items'
+const baseClass = 'display-items'
 
 const getShiftSelection = ({
   selectFromIndex,
@@ -325,7 +326,7 @@ export function DisplayItems(props: Props) {
   return (
     <>
       {viewType === 'grid' ? (
-        <>
+        <div className={baseClass}>
           <FolderFileGrid className={`${baseClass}__subfolders`}>
             {!subfolders || subfolders?.length === 0
               ? null
@@ -435,7 +436,7 @@ export function DisplayItems(props: Props) {
                   })}
             </FolderFileGrid>
           </div>
-        </>
+        </div>
       ) : (
         totalCount > 0 && (
           <SimpleTable

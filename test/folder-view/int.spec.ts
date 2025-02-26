@@ -1,4 +1,4 @@
-import type { Payload, Where } from 'payload'
+import type { Payload } from 'payload'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -34,7 +34,7 @@ describe('folders', () => {
       },
     })
     await payload.delete({
-      collection: 'folders',
+      collection: '_folders',
       depth: 0,
       where: {
         id: {
@@ -47,21 +47,21 @@ describe('folders', () => {
   describe('folder > subfolder querying', () => {
     it('should only create 1 root folder', async () => {
       await payload.create({
-        collection: 'folders',
+        collection: '_folders',
         data: {
           name: 'Folder 1',
         },
       })
 
       await payload.create({
-        collection: 'folders',
+        collection: '_folders',
         data: {
           name: 'Folder 2',
         },
       })
 
       const rootSubfoldersQuery = await payload.find({
-        collection: 'folders',
+        collection: '_folders',
         where: {
           isRoot: {
             equals: true,
@@ -70,26 +70,26 @@ describe('folders', () => {
       })
 
       expect(rootSubfoldersQuery.docs).toHaveLength(1)
-      expect(rootSubfoldersQuery.docs[0].parentFolder).toBe(undefined)
+      expect(rootSubfoldersQuery.docs[0]._parentFolder).toBe(undefined)
     })
 
     it('should populate subfolders for root', async () => {
       await payload.create({
-        collection: 'folders',
+        collection: '_folders',
         data: {
           name: 'Folder 1',
         },
       })
 
       await payload.create({
-        collection: 'folders',
+        collection: '_folders',
         data: {
           name: 'Folder 2',
         },
       })
 
       const rootSubfoldersQuery = await payload.find({
-        collection: 'folders',
+        collection: '_folders',
         where: {
           isRoot: {
             equals: true,
@@ -97,12 +97,12 @@ describe('folders', () => {
         },
       })
 
-      expect(rootSubfoldersQuery.docs[0].documentsAndFolders.docs.length).toBe(2)
+      expect(rootSubfoldersQuery.docs[0].documentsAndFolders.docs).toHaveLength(2)
     })
 
     it('should populate subfolders for folder by ID', async () => {
       const parentFolder = await payload.create({
-        collection: 'folders',
+        collection: '_folders',
         data: {
           name: 'Parent Folder',
         },
@@ -110,7 +110,7 @@ describe('folders', () => {
       const folderIDFromParams = parentFolder.id
 
       await payload.create({
-        collection: 'folders',
+        collection: '_folders',
         data: {
           name: 'Nested 1',
           parentFolder: folderIDFromParams,
@@ -118,7 +118,7 @@ describe('folders', () => {
       })
 
       await payload.create({
-        collection: 'folders',
+        collection: '_folders',
         data: {
           name: 'Nested 2',
           parentFolder: folderIDFromParams,
@@ -126,18 +126,18 @@ describe('folders', () => {
       })
 
       const parentFolderQuery = await payload.findByID({
-        collection: 'folders',
+        collection: '_folders',
         id: folderIDFromParams,
       })
 
-      expect(parentFolderQuery.documentsAndFolders.docs.length).toBe(2)
+      expect(parentFolderQuery.documentsAndFolders.docs).toHaveLength(2)
     })
   })
 
   describe('folder > file querying', () => {
     it.skip('should populate files for folder by ID [POLYMORPHIC NOT IMPLEMENTED]', async () => {
       const parentFolder = await payload.create({
-        collection: 'folders',
+        collection: '_folders',
         data: {
           name: 'Parent Folder',
         },
@@ -148,7 +148,7 @@ describe('folders', () => {
         collection: 'posts',
         data: {
           title: 'Post 1',
-          parentFolder: folderIDFromParams,
+          _parentFolder: folderIDFromParams,
         },
       })
 
@@ -156,21 +156,21 @@ describe('folders', () => {
         collection: 'posts',
         data: {
           title: 'Post 2',
-          parentFolder: folderIDFromParams,
+          _parentFolder: folderIDFromParams,
         },
       })
 
       const parentFolderQuery = await payload.findByID({
-        collection: 'folders',
+        collection: '_folders',
         id: folderIDFromParams,
       })
 
-      expect(parentFolderQuery.documentsAndFolders.docs.length).toBe(2)
+      expect(parentFolderQuery.documentsAndFolders.docs).toHaveLength(2)
     })
 
     it('should populate files for folder [ISOMORPHIC WORKAROUND]', async () => {
       const parentFolder = await payload.create({
-        collection: 'folders',
+        collection: '_folders',
         data: {
           name: 'Parent Folder',
         },
@@ -181,7 +181,7 @@ describe('folders', () => {
         collection: 'posts',
         data: {
           title: 'Post 1',
-          parentFolder: folderIDFromParams,
+          _parentFolder: folderIDFromParams,
         },
       })
 
@@ -189,20 +189,20 @@ describe('folders', () => {
         collection: 'posts',
         data: {
           title: 'Post 2',
-          parentFolder: folderIDFromParams,
+          _parentFolder: folderIDFromParams,
         },
       })
 
       const postsByParentQuery = await payload.find({
         collection: 'posts',
         where: {
-          parentFolder: {
+          _parentFolder: {
             equals: folderIDFromParams,
           },
         },
       })
 
-      expect(postsByParentQuery.docs.length).toBe(2)
+      expect(postsByParentQuery.docs).toHaveLength(2)
     })
   })
 })

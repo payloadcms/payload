@@ -31,6 +31,7 @@ export type FolderEnabledColection = {
 
 export type GetFolderDataResult<DocType = TypeWithID> = {
   breadcrumbs: FolderBreadcrumb[]
+  hasMoreDocuments: boolean
   items: {
     relationTo: string
     value: DocType | number | string

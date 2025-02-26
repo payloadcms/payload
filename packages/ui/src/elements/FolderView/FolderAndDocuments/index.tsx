@@ -5,27 +5,32 @@ import type { FolderInterface } from 'payload/shared'
 import { DndContext, pointerWithin, useDndMonitor } from '@dnd-kit/core'
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
+// import { Pagination, useQueryParams } from '@payloadcms/ui'
 import React from 'react'
 
 import type { PolymorphicRelationshipValue } from '../types.js'
 
 import { GridViewIcon } from '../../../icons/GridView/index.js'
 import { ListViewIcon } from '../../../icons/ListView/index.js'
+import { SearchIcon } from '../../../icons/Search/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useFolder } from '../../../providers/Folders/index.js'
+import { useListQuery } from '../../../providers/ListQuery/index.js'
 import { usePreferences } from '../../../providers/Preferences/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { ConfirmationModal } from '../../ConfirmationModal/index.js'
 import { DocumentDrawer } from '../../DocumentDrawer/index.js'
+import { Pagination } from '../../Pagination/index.js'
 import { Popup, PopupList } from '../../Popup/index.js'
+import { SearchFilter } from '../../SearchFilter/index.js'
 import { FolderBreadcrumbs } from '../Breadcrumbs/index.js'
 import { DisplayItems } from '../DisplayItems/index.js'
 import { DragOverlaySelection } from '../DragOverlaySelection/index.js'
 import { MoveToFolderDrawer } from '../Drawers/MoveToFolder/index.js'
 import { NewFolderDrawer } from '../Drawers/NewFolder/index.js'
-import './index.scss'
 import { RenameFolderDrawer } from '../Drawers/RenameFolder/index.js'
+import './index.scss'
 
 const baseClass = 'folder-and-documents'
 const renameFolderDrawerSlug = 'rename-folder'
@@ -47,6 +52,7 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
     folderCollectionSlug,
     folderID,
     getSelectedItems,
+    hasMoreDocuments,
     isRootFolder,
     lastSelectedIndex,
     moveToFolder,
@@ -64,6 +70,7 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
   const { i18n, t } = useTranslation()
   const { setPreference } = usePreferences()
   const { closeModal, isModalOpen, openModal } = useModal()
+  const { handlePageChange, handleSearchChange, query } = useListQuery()
 
   const [folderToRename, setFolderToRename] = React.useState<FolderInterface>()
   const [isDragging, setIsDragging] = React.useState(false)
@@ -288,8 +295,18 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
               </Popup>
             </div>
 
-            <div className={`${baseClass}__search`}>
-              <p>Search...</p>
+            <div className={`${baseClass}__search-container`}>
+              <div className={`${baseClass}__search-and-icon`}>
+                <SearchIcon />
+                <SearchFilter
+                  handleChange={(search) => {
+                    return void handleSearchChange(search)
+                  }}
+                  // @ts-expect-error @todo: fix types
+                  initialParams={query}
+                  label={'title'}
+                />
+              </div>
               <div className={`${baseClass}__search-actions`}>
                 {selectedIndexes.size > 0 && (
                   <>
@@ -338,68 +355,80 @@ export const FolderAndDocuments = ({ initialDisplayType }: Props) => {
             </div>
           </div>
 
-          <DisplayItems
-            collectionUseAsTitles={collectionUseAsTitles}
-            documents={documents}
-            folderCollectionSlug={folderCollectionSlug}
-            isMovingItems={isDragging}
-            lastSelectedIndex={lastSelectedIndex}
-            RenderDocumentActionGroup={({ document }) => (
-              <PopupList.ButtonGroup>
-                <PopupList.Button
-                  id="action-move-document"
-                  onClick={() => {
-                    onMoveToFolderOpen({ items: [document] })
-                  }}
-                >
-                  {t('general:move')}
-                </PopupList.Button>
-                <PopupList.Button
-                  disabled={isRootFolder}
-                  id="action-delete-document"
-                  onClick={() => onDeleteFolderItemsOpen({ items: [document] })}
-                >
-                  {t('folder:removeFromFolder')}
-                </PopupList.Button>
-              </PopupList.ButtonGroup>
-            )}
-            RenderSubfolderActionGroup={({ subfolder }) => (
-              <PopupList.ButtonGroup>
-                <PopupList.Button
-                  id="action-rename-folder"
-                  onClick={() => {
-                    setFolderToRename(subfolder.value as FolderInterface)
-                    openModal(renameFolderDrawerSlug)
-                  }}
-                >
-                  {t('general:rename')}
-                </PopupList.Button>
-                <PopupList.Button
-                  id="action-move-folder"
-                  onClick={() => {
-                    onMoveToFolderOpen({ items: [subfolder] })
-                  }}
-                >
-                  {t('general:move')}
-                </PopupList.Button>
-                {folderID ? (
+          <div className={`${baseClass}__data`}>
+            <DisplayItems
+              collectionUseAsTitles={collectionUseAsTitles}
+              documents={documents}
+              folderCollectionSlug={folderCollectionSlug}
+              isMovingItems={isDragging}
+              lastSelectedIndex={lastSelectedIndex}
+              RenderDocumentActionGroup={({ document }) => (
+                <PopupList.ButtonGroup>
                   <PopupList.Button
-                    id="action-delete-folder"
-                    onClick={() => onDeleteFolderItemsOpen({ items: [subfolder] })}
+                    id="action-move-document"
+                    onClick={() => {
+                      onMoveToFolderOpen({ items: [document] })
+                    }}
                   >
-                    {t('general:delete')}
+                    {t('general:move')}
                   </PopupList.Button>
-                ) : null}
-              </PopupList.ButtonGroup>
-            )}
-            selectedIndexes={selectedIndexes}
-            selectedItems={getSelectedItems()}
-            setFolderID={setFolderID}
-            setLastSelectedIndex={setLastSelectedIndex}
-            setSelectedIndexes={setSelectedIndexes}
-            subfolders={subfolders}
-            viewType={viewType}
-          />
+                  <PopupList.Button
+                    disabled={isRootFolder}
+                    id="action-delete-document"
+                    onClick={() => onDeleteFolderItemsOpen({ items: [document] })}
+                  >
+                    {t('folder:removeFromFolder')}
+                  </PopupList.Button>
+                </PopupList.ButtonGroup>
+              )}
+              RenderSubfolderActionGroup={({ subfolder }) => (
+                <PopupList.ButtonGroup>
+                  <PopupList.Button
+                    id="action-rename-folder"
+                    onClick={() => {
+                      setFolderToRename(subfolder.value as FolderInterface)
+                      openModal(renameFolderDrawerSlug)
+                    }}
+                  >
+                    {t('general:rename')}
+                  </PopupList.Button>
+                  <PopupList.Button
+                    id="action-move-folder"
+                    onClick={() => {
+                      onMoveToFolderOpen({ items: [subfolder] })
+                    }}
+                  >
+                    {t('general:move')}
+                  </PopupList.Button>
+                  {folderID ? (
+                    <PopupList.Button
+                      id="action-delete-folder"
+                      onClick={() => onDeleteFolderItemsOpen({ items: [subfolder] })}
+                    >
+                      {t('general:delete')}
+                    </PopupList.Button>
+                  ) : null}
+                </PopupList.ButtonGroup>
+              )}
+              selectedIndexes={selectedIndexes}
+              selectedItems={getSelectedItems()}
+              setFolderID={setFolderID}
+              setLastSelectedIndex={setLastSelectedIndex}
+              setSelectedIndexes={setSelectedIndexes}
+              subfolders={subfolders}
+              viewType={viewType}
+            />
+
+            <Pagination
+              hasNextPage={hasMoreDocuments}
+              hasPrevPage={(parseInt(query?.page, 0) || 1) > 1}
+              limit={parseInt(query?.limit, 0) || 10}
+              onChange={(page) => {
+                void handlePageChange(page)
+              }}
+              page={parseInt(query?.page, 0) || 1}
+            />
+          </div>
         </div>
 
         <DragOverlaySelection

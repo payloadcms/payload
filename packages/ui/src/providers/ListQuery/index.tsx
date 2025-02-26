@@ -82,6 +82,8 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       }
 
       const newQuery: ListQuery = {
+        ...currentQuery,
+        ...query,
         limit: 'limit' in query ? query.limit : (currentQuery?.limit ?? String(defaultLimit)),
         page,
         search: 'search' in query ? query.search : currentQuery?.search,
@@ -102,11 +104,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       setCurrentQuery(newQuery)
     },
     [
-      currentQuery?.page,
-      currentQuery?.limit,
-      currentQuery?.search,
-      currentQuery?.sort,
-      currentQuery?.where,
+      currentQuery,
       defaultLimit,
       defaultSort,
       modifySearchParams,
@@ -157,7 +155,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   useEffect(() => {
     if (modifySearchParams) {
       let shouldUpdateQueryString = false
-      const newQuery = { ...(currentQueryRef.current || {}) }
+      const newQuery = { ...(currentQueryRef?.current || {}) }
 
       // Allow the URL to override the default limit
       if (isNumber(defaultLimit) && !('limit' in currentQueryRef.current)) {
@@ -177,7 +175,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         window.history.replaceState(null, '', `?${qs.stringify(newQuery)}`)
       }
     }
-  }, [defaultSort, defaultLimit, router, modifySearchParams])
+  }, [defaultSort, defaultLimit, modifySearchParams])
 
   return (
     <Context.Provider

@@ -6,11 +6,11 @@ import type {
   VisibleEntities,
 } from 'payload'
 
-import { FolderAndDocuments, FolderProvider } from '@payloadcms/ui'
+import { FolderAndDocuments, FolderProvider, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { type groupNavItems, sanitizeID } from '@payloadcms/ui/shared'
 import { redirect } from 'next/navigation.js'
-import { getFolderData, type GetFolderDataResult } from 'payload/shared'
+import { getFolderData, type GetFolderDataResult, isNumber } from 'payload/shared'
 
 import './index.scss'
 
@@ -54,9 +54,14 @@ export const FolderDashboard: React.FC<FolderDashboardProps> = async (props) => 
 
   const searchParamFolderID = searchParams?.folder as string
 
-  const { breadcrumbs, items } = await getFolderData({
+  const docLimit = isNumber(searchParams?.limit) ? parseInt(String(searchParams.limit), 10) : 10
+
+  const { breadcrumbs, hasMoreDocuments, items } = await getFolderData({
+    docLimit,
     folderID: searchParamFolderID,
+    page: isNumber(searchParams?.page) ? parseInt(String(searchParams.page), 10) : 1,
     payload,
+    search: typeof searchParams?.search === 'string' ? searchParams.search : undefined,
   })
 
   const folderID = breadcrumbs[breadcrumbs.length - 1]?.id
@@ -91,47 +96,50 @@ export const FolderDashboard: React.FC<FolderDashboardProps> = async (props) => 
   })) as unknown as { docs: { value: 'grid' | 'list' }[] }
 
   return (
-    <FolderProvider
-      initialData={{
-        breadcrumbs,
-        folderID,
-        items,
-      }}
-    >
-      <div className={baseClass}>
-        <div className={`${baseClass}__wrap`}>
-          {beforeDashboard &&
-            RenderServerComponent({
-              Component: beforeDashboard,
-              importMap: payload.importMap,
-              serverProps: {
-                i18n,
-                locale,
-                params,
-                payload,
-                permissions,
-                searchParams,
-                user,
-              },
-            })}
+    <ListQueryProvider data={undefined} defaultLimit={docLimit} modifySearchParams>
+      <FolderProvider
+        initialData={{
+          breadcrumbs,
+          folderID,
+          hasMoreDocuments,
+          items,
+        }}
+      >
+        <div className={baseClass}>
+          <div className={`${baseClass}__wrap`}>
+            {beforeDashboard &&
+              RenderServerComponent({
+                Component: beforeDashboard,
+                importMap: payload.importMap,
+                serverProps: {
+                  i18n,
+                  locale,
+                  params,
+                  payload,
+                  permissions,
+                  searchParams,
+                  user,
+                },
+              })}
 
-          <FolderAndDocuments initialDisplayType={displayTypePref?.docs[0]?.value} />
-          {afterDashboard &&
-            RenderServerComponent({
-              Component: afterDashboard,
-              importMap: payload.importMap,
-              serverProps: {
-                i18n,
-                locale,
-                params,
-                payload,
-                permissions,
-                searchParams,
-                user,
-              },
-            })}
+            <FolderAndDocuments initialDisplayType={displayTypePref?.docs[0]?.value} />
+            {afterDashboard &&
+              RenderServerComponent({
+                Component: afterDashboard,
+                importMap: payload.importMap,
+                serverProps: {
+                  i18n,
+                  locale,
+                  params,
+                  payload,
+                  permissions,
+                  searchParams,
+                  user,
+                },
+              })}
+          </div>
         </div>
-      </div>
-    </FolderProvider>
+      </FolderProvider>
+    </ListQueryProvider>
   )
 }

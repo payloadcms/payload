@@ -154,6 +154,10 @@
         height: 100%;
       }
 
+      &:has(.thumbnail) {
+        justify-content: stretch;
+      }
+
       img {
         height: 100%;
         width: 100%;

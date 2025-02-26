@@ -1,25 +1,27 @@
 import type { Payload } from '../../types/index.js'
 import type { GetFolderDataResult } from '../types.js'
 
-import { foldersSlug } from '../constants.js'
 import { buildFolderBreadcrumbs } from './buildFolderBreadcrumbs.js'
 import { getFolderDocuments } from './getFolderDocuments.js'
 import { getFolderSubfolders } from './getFolderSubfolders.js'
 
 type Args = {
+  docLimit?: number
   folderID: null | string
+  page?: number
   payload: Payload
+  search?: null | string
 }
 
 export const getFolderData = async ({
+  docLimit,
   folderID: folderIDArg,
+  page,
   payload,
+  search,
 }: Args): Promise<GetFolderDataResult> => {
   const folderID =
     folderIDArg && payload.db.defaultIDType === 'number' ? parseFloat(folderIDArg) : folderIDArg
-  const folderEnabledCollectionSlugs = (payload.config.collections || [])
-    .filter((collection) => collection.admin.enableFolders)
-    .map((collection) => collection.slug)
 
   const breadcrumbs = buildFolderBreadcrumbs({
     folderID,
@@ -36,8 +38,10 @@ export const getFolderData = async ({
   // or should it continue to fetch each collection individually?
   const documents = getFolderDocuments({
     folderID,
+    limit: docLimit,
+    page,
     payload,
-    relationTo: folderEnabledCollectionSlugs,
+    search,
   })
 
   const [resolvedBreadcrumbs, resolvedSubfolders, resolvedDocuments] = await Promise.all([
@@ -49,19 +53,11 @@ export const getFolderData = async ({
   const items: {
     relationTo: string
     value: any
-  }[] = []
-
-  resolvedSubfolders.forEach((subfolder) => {
-    items.push({
-      relationTo: foldersSlug,
-      value: subfolder,
-    })
-  })
-
-  items.push(...resolvedDocuments)
+  }[] = [...resolvedSubfolders, ...(resolvedDocuments?.docs || [])]
 
   return {
     breadcrumbs: resolvedBreadcrumbs,
+    hasMoreDocuments: Boolean(resolvedDocuments?.hasMoreDocuments),
     items,
   }
 }

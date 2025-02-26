@@ -1,7 +1,7 @@
 import type { Where } from '../types/index.js'
 
 export function combineWhereConstraints(
-  constraints: Array<Where>,
+  constraints: Array<undefined | Where>,
   as: 'and' | 'or' = 'and',
 ): Where {
   if (constraints.length === 0) {
@@ -9,7 +9,7 @@ export function combineWhereConstraints(
   }
 
   return {
-    [as]: constraints.filter((constraint) => {
+    [as]: constraints.filter((constraint): constraint is Where => {
       if (constraint && typeof constraint === 'object' && Object.keys(constraint).length > 0) {
         return true
       }

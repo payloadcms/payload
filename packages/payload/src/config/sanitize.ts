@@ -229,7 +229,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   const collectionSlugs = new Set<CollectionSlug>()
 
-  addFolderCollections(configWithDefaults)
+  addFolderCollections(config as unknown as Config)
 
   const validRelationships = [
     ...(config.collections.map((c) => c.slug) ?? []),

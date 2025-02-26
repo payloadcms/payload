@@ -10,15 +10,23 @@ type GetSubfoldersArgs = {
 export const getFolderSubfolders = async ({
   folderID,
   payload,
-}: GetSubfoldersArgs): Promise<FolderInterface[]> => {
+}: GetSubfoldersArgs): Promise<
+  {
+    relationTo: string
+    value: FolderInterface
+  }[]
+> => {
   const currentFolderQuery = await payload.find({
     collection: foldersSlug,
     joins: {
       documentsAndFolders: {
-        limit: 0,
+        limit: 1000,
         sort: 'name',
-        // @todo
-        // add a where constraint to only return subfolder documents
+        where: {
+          relationTo: {
+            equals: foldersSlug,
+          },
+        },
       },
     },
     limit: 1,

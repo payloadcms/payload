@@ -6,9 +6,8 @@
     display: grid;
     grid-template-areas:
       'header'
-      'subfolders'
-      'documents';
-    grid-template-rows: auto auto 1fr;
+      'data';
+    grid-template-rows: auto 1fr;
     height: 100%;
     gap: 1.5rem;
 
@@ -36,13 +35,14 @@
       gap: calc(var(--base) * 0.25);
     }
 
-    &__search {
+    &__search-container {
+      --search-padding: calc(var(--base) / 2);
       display: flex;
       align-items: center;
       justify-content: space-between;
       background-color: var(--theme-elevation-50);
-      padding: calc(var(--base) / 2);
-      padding-left: var(--base);
+      padding-left: var(--search-padding);
+      padding-right: var(--search-padding);
       border-radius: var(--style-radius-s);
       grid-column: 1 / 3;
 
@@ -55,13 +55,27 @@
       }
     }
 
+    &__search-and-icon {
+      display: flex;
+      align-items: center;
+      gap: calc(var(--base) / 2);
+      flex-grow: 1;
+      justify-content: flex-start;
+
+      .search-filter {
+        width: 100%;
+        padding: var(--search-padding);
+        padding-left: 0;
+      }
+    }
+
     &__search-actions {
       display: flex;
       gap: calc(var(--base) * 0.25);
     }
 
-    &__subfolders {
-      grid-area: subfolders;
+    &__data {
+      grid-area: data;
     }
 
     &__list-toggle,
@@ -76,10 +90,6 @@
           background-color: var(--theme-elevation-150);
         }
       }
-    }
-
-    &__documents {
-      grid-area: documents;
     }
 
     &__create-new {
