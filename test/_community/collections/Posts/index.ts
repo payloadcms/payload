@@ -1,13 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import {
-  BlocksFeature,
-  FixedToolbarFeature,
-  InlineToolbarFeature,
-  lexicalEditor,
-  ParagraphFeature,
-  TreeViewFeature,
-} from '@payloadcms/richtext-lexical'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 export const postsSlug = 'posts'
 
@@ -22,35 +15,11 @@ export const PostsCollection: CollectionConfig = {
       type: 'text',
     },
     {
-      name: 'richText',
+      name: 'content',
       type: 'richText',
       editor: lexicalEditor({
-        features: [
-          InlineToolbarFeature(),
-          ParagraphFeature(),
-          FixedToolbarFeature(),
-          BlocksFeature({
-            wrapperBlocks: [
-              {
-                block: {
-                  slug: 'textBlock',
-                  fields: [
-                    {
-                      name: 'text',
-                      type: 'text',
-                    },
-                  ],
-                },
-                createDOM: './collections/Posts/createDOM.js#createDOM',
-              },
-            ],
-          }),
-          TreeViewFeature(),
-        ],
+        features: ({ defaultFeatures }) => [...defaultFeatures],
       }),
     },
   ],
-  versions: {
-    drafts: true,
-  },
 }

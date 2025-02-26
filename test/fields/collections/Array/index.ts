@@ -32,7 +32,13 @@ const ArrayFields: CollectionConfig = {
           type: 'ui',
           admin: {
             components: {
-              Field: './collections/Array/LabelComponent.js#ArrayRowLabel',
+              Field: {
+                path: './collections/Array/LabelComponent.js#ArrayRowLabel',
+                serverProps: {
+                  // While this doesn't do anything, this will reproduce a bug where having server-only props in here will throw a "Functions cannot be passed directly to Client Components" error
+                  someFn: () => 'Hello',
+                },
+              },
             },
           },
         },
@@ -47,6 +53,24 @@ const ArrayFields: CollectionConfig = {
             {
               name: 'text',
               type: 'text',
+            },
+            {
+              name: 'textTwo',
+              label: 'Second text field',
+              type: 'text',
+              required: true,
+              defaultValue: 'default',
+            },
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'textInRow',
+                  type: 'text',
+                  required: true,
+                  defaultValue: 'default',
+                },
+              ],
             },
           ],
           type: 'array',
@@ -188,13 +212,28 @@ const ArrayFields: CollectionConfig = {
       type: 'array',
       fields: [
         {
-          name: 'customField',
+          name: 'customTextField',
           type: 'ui',
           admin: {
             components: {
-              Field: '/collections/Array/CustomField.js#CustomField',
+              Field: '/collections/Array/CustomTextField.js#CustomTextField',
             },
           },
+        },
+      ],
+    },
+    {
+      name: 'customArrayField',
+      type: 'array',
+      admin: {
+        components: {
+          Field: '/collections/Array/CustomArrayField.js#CustomArrayField',
+        },
+      },
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
         },
       ],
     },
@@ -206,6 +245,20 @@ const ArrayFields: CollectionConfig = {
           Field: '/collections/Array/AddRowButton.js',
         },
       },
+    },
+    {
+      name: 'arrayWithLabels',
+      type: 'array',
+      labels: {
+        singular: ({ t }) => t('authentication:account'),
+        plural: ({ t }) => t('authentication:generate'),
+      },
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
     },
   ],
   slug: arrayFieldsSlug,

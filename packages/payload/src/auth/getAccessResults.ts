@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { AllOperations, PayloadRequest } from '../types/index.js'
 import type { Permissions, SanitizedPermissions } from './types.js'
 
@@ -10,14 +11,15 @@ type GetAccessResultsArgs = {
 export async function getAccessResults({
   req,
 }: GetAccessResultsArgs): Promise<SanitizedPermissions> {
-  const results = {} as Permissions
+  const results = {
+    collections: {},
+    globals: {},
+  } as Permissions
   const { payload, user } = req
 
   const isLoggedIn = !!user
   const userCollectionConfig =
-    user && user.collection
-      ? payload.config.collections.find((collection) => collection.slug === user.collection)
-      : null
+    user && user.collection ? payload?.collections?.[user.collection]?.config : null
 
   if (userCollectionConfig && payload.config.admin.user === user?.collection) {
     results.canAccessAdmin = userCollectionConfig.access.admin
@@ -26,6 +28,7 @@ export async function getAccessResults({
   } else {
     results.canAccessAdmin = false
   }
+  const blockPolicies = {}
 
   await Promise.all(
     payload.config.collections.map(async (collection) => {
@@ -45,14 +48,12 @@ export async function getAccessResults({
 
       const collectionPolicy = await getEntityPolicies({
         type: 'collection',
+        blockPolicies,
         entity: collection,
         operations: collectionOperations,
         req,
       })
-      results.collections = {
-        ...results.collections,
-        [collection.slug]: collectionPolicy,
-      }
+      results.collections[collection.slug] = collectionPolicy
     }),
   )
 
@@ -66,14 +67,12 @@ export async function getAccessResults({
 
       const globalPolicy = await getEntityPolicies({
         type: 'global',
+        blockPolicies,
         entity: global,
         operations: globalOperations,
         req,
       })
-      results.globals = {
-        ...results.globals,
-        [global.slug]: globalPolicy,
-      }
+      results.globals[global.slug] = globalPolicy
     }),
   )
 

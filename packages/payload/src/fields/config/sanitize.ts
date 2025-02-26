@@ -1,6 +1,11 @@
+// @ts-strict-ignore
 import { deepMergeSimple } from '@payloadcms/translations/utilities'
 
-import type { CollectionConfig, SanitizedJoins } from '../../collections/config/types.js'
+import type {
+  CollectionConfig,
+  SanitizedJoin,
+  SanitizedJoins,
+} from '../../collections/config/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { Field } from './types.js'
 
@@ -14,10 +19,12 @@ import {
 import { formatLabels, toWords } from '../../utilities/formatLabels.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'
+import { baseTimezoneField } from '../baseFields/timezone/baseField.js'
+import { defaultTimezones } from '../baseFields/timezone/defaultTimezones.js'
 import { setDefaultBeforeDuplicate } from '../setDefaultBeforeDuplicate.js'
 import { validations } from '../validations.js'
 import { sanitizeJoinField } from './sanitizeJoinField.js'
-import { fieldAffectsData, tabHasName } from './types.js'
+import { fieldAffectsData, fieldIsLocalized, tabHasName } from './types.js'
 
 type Args = {
   collectionConfig?: CollectionConfig
@@ -30,6 +37,7 @@ type Args = {
    */
   joins?: SanitizedJoins
   parentIsLocalized: boolean
+  polymorphicJoins?: SanitizedJoin[]
 
   /**
    * If true, a richText field will require an editor property to be set, as the sanitizeFields function will not add it from the payload config if not present.
@@ -56,6 +64,7 @@ export const sanitizeFields = async ({
   joinPath = '',
   joins,
   parentIsLocalized,
+  polymorphicJoins,
   requireFieldLevelRichTextEditor = false,
   richTextSanitizationPromises,
   validRelationships,
@@ -101,7 +110,7 @@ export const sanitizeFields = async ({
     }
 
     if (field.type === 'join') {
-      sanitizeJoinField({ config, field, joinPath, joins })
+      sanitizeJoinField({ config, field, joinPath, joins, parentIsLocalized, polymorphicJoins })
     }
 
     if (field.type === 'relationship' || field.type === 'upload') {
@@ -120,14 +129,14 @@ export const sanitizeFields = async ({
         console.warn(
           `(payload): The "min" property is deprecated for the Relationship field "${field.name}" and will be removed in a future version. Please use "minRows" instead.`,
         )
+        field.minRows = field.min
       }
       if (field.max && !field.maxRows) {
         console.warn(
           `(payload): The "max" property is deprecated for the Relationship field "${field.name}" and will be removed in a future version. Please use "maxRows" instead.`,
         )
+        field.maxRows = field.max
       }
-      field.minRows = field.minRows || field.min
-      field.maxRows = field.maxRows || field.max
     }
 
     if (field.type === 'upload') {
@@ -157,7 +166,12 @@ export const sanitizeFields = async ({
       if (typeof field.localized !== 'undefined') {
         let shouldDisableLocalized = !config.localization
 
-        if (!config.compatibility?.allowLocalizedWithinLocalized && parentIsLocalized) {
+        if (
+          process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized !== 'true' &&
+          parentIsLocalized &&
+          // @todo PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY=true will be the default in 4.0
+          process.env.PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY !== 'true'
+        ) {
           shouldDisableLocalized = true
         }
 
@@ -182,7 +196,7 @@ export const sanitizeFields = async ({
         field.access = {}
       }
 
-      setDefaultBeforeDuplicate(field)
+      setDefaultBeforeDuplicate(field, parentIsLocalized)
     }
 
     if (!field.admin) {
@@ -221,7 +235,14 @@ export const sanitizeFields = async ({
     }
 
     if (field.type === 'blocks' && field.blocks) {
-      for (const block of field.blocks) {
+      if (field.blockReferences && field.blocks?.length) {
+        throw new Error('You cannot have both blockReferences and blocks in the same blocks field')
+      }
+
+      for (const block of field.blockReferences ?? field.blocks) {
+        if (typeof block === 'string') {
+          continue
+        }
         if (block._sanitized === true) {
           continue
         }
@@ -249,7 +270,8 @@ export const sanitizeFields = async ({
           ? `${joinPath ? joinPath + '.' : ''}${field.name}`
           : joinPath,
         joins,
-        parentIsLocalized: parentIsLocalized || field.localized,
+        parentIsLocalized: parentIsLocalized || fieldIsLocalized(field),
+        polymorphicJoins,
         requireFieldLevelRichTextEditor,
         richTextSanitizationPromises,
         validRelationships,
@@ -270,6 +292,7 @@ export const sanitizeFields = async ({
           joinPath: tabHasName(tab) ? `${joinPath ? joinPath + '.' : ''}${tab.name}` : joinPath,
           joins,
           parentIsLocalized: parentIsLocalized || (tabHasName(tab) && tab.localized),
+          polymorphicJoins,
           requireFieldLevelRichTextEditor,
           richTextSanitizationPromises,
           validRelationships,
@@ -287,6 +310,30 @@ export const sanitizeFields = async ({
     }
 
     fields[i] = field
+
+    // Insert our field after assignment
+    if (field.type === 'date' && field.timezone) {
+      const name = field.name + '_tz'
+      const defaultTimezone = config.admin.timezones.defaultTimezone
+
+      const supportedTimezones = config.admin.timezones.supportedTimezones
+
+      const options =
+        typeof supportedTimezones === 'function'
+          ? supportedTimezones({ defaultTimezones })
+          : supportedTimezones
+
+      // Need to set the options here manually so that any database enums are generated correctly
+      // The UI component will import the options from the config
+      const timezoneField = baseTimezoneField({
+        name,
+        defaultValue: defaultTimezone,
+        options,
+        required: field.required,
+      })
+
+      fields.splice(++i, 0, timezoneField)
+    }
   }
 
   return fields

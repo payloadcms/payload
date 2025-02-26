@@ -1,5 +1,4 @@
-import type { ListPreferences } from '@payloadcms/ui'
-import type { ListQuery, PayloadRequest, VisibleEntities } from 'payload'
+import type { ListPreferences, ListQuery, PayloadRequest, VisibleEntities } from 'payload'
 
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { headers as getHeaders } from 'next/headers.js'
@@ -138,11 +137,10 @@ export const renderListHandler = async (args: {
     disableBulkEdit,
     drawerSlug,
     enableRowSelections,
+    i18n,
     importMap: payload.importMap,
     initPageResult: {
-      collectionConfig: payload.config.collections.find(
-        (collection) => collection.slug === collectionSlug,
-      ),
+      collectionConfig: payload?.collections?.[collectionSlug]?.config,
       cookies,
       globalConfig: payload.config.globals.find((global) => global.slug === collectionSlug),
       languageOptions: undefined, // TODO
@@ -155,10 +153,12 @@ export const renderListHandler = async (args: {
     params: {
       segments: ['collections', collectionSlug],
     },
+    payload,
     query,
     redirectAfterDelete,
     redirectAfterDuplicate,
     searchParams: {},
+    viewType: 'list',
   })
 
   return {

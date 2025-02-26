@@ -9,6 +9,15 @@ export const Uploads1: CollectionConfig = {
   slug: 'uploads-1',
   upload: {
     staticDir: path.resolve(dirname, 'uploads'),
+    pasteURL: {
+      allowList: [
+        {
+          protocol: 'http',
+          hostname: 'localhost',
+          port: '4000',
+        },
+      ],
+    },
   },
   fields: [
     {
@@ -17,7 +26,7 @@ export const Uploads1: CollectionConfig = {
       relationTo: 'uploads-2',
       filterOptions: {
         mimeType: {
-          equals: 'image/png',
+          in: ['image/png', 'application/pdf'],
         },
       },
       hasMany: true,

@@ -1,6 +1,6 @@
 'use client'
 
-import { getFieldPaths } from 'payload/shared'
+import { fieldIsHiddenOrDisabled, getFieldPaths } from 'payload/shared'
 import React from 'react'
 
 import type { RenderFieldsProps } from './types.js'
@@ -45,7 +45,7 @@ export const RenderFields: React.FC<RenderFieldsProps> = (props) => {
         {fields.map((field, i) => {
           // For sidebar fields in the main fields array, `field` will be `null`, and visa versa
           // This is to keep the order of the fields consistent and maintain the correct index paths for the main fields (i)
-          if (!field || field?.admin?.disabled) {
+          if (!field || fieldIsHiddenOrDisabled(field)) {
             return null
           }
 
@@ -57,6 +57,7 @@ export const RenderFields: React.FC<RenderFieldsProps> = (props) => {
           // This is different from `admin.readOnly` which is executed based on `operation`
           const hasReadPermission =
             permissions === true ||
+            permissions?.read === true ||
             permissions?.[parentName] === true ||
             ('name' in field &&
               typeof permissions === 'object' &&
@@ -79,6 +80,7 @@ export const RenderFields: React.FC<RenderFieldsProps> = (props) => {
           // If the user does not have access control to begin with, force it to be read-only
           const hasOperationPermission =
             permissions === true ||
+            permissions?.[operation] === true ||
             permissions?.[parentName] === true ||
             ('name' in field &&
               typeof permissions === 'object' &&

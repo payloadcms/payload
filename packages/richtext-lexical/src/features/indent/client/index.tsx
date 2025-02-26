@@ -1,13 +1,21 @@
 'use client'
 
-import { INDENT_CONTENT_COMMAND, OUTDENT_CONTENT_COMMAND } from 'lexical'
+import type { ElementNode, LexicalNode } from 'lexical'
+
+import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin'
+import { $findMatchingParent } from '@lexical/utils'
+import {
+  $isElementNode,
+  $isRangeSelection,
+  INDENT_CONTENT_COMMAND,
+  OUTDENT_CONTENT_COMMAND,
+} from 'lexical'
 
 import type { ToolbarGroup } from '../../toolbars/types.js'
 
 import { IndentDecreaseIcon } from '../../../lexical/ui/icons/IndentDecrease/index.js'
 import { IndentIncreaseIcon } from '../../../lexical/ui/icons/IndentIncrease/index.js'
 import { createClientFeature } from '../../../utilities/createClientFeature.js'
-import { IndentPlugin } from './plugins/index.js'
 import { toolbarIndentGroupWithItems } from './toolbarIndentGroup.js'
 
 const toolbarGroups: ToolbarGroup[] = [
@@ -16,20 +24,37 @@ const toolbarGroups: ToolbarGroup[] = [
       ChildComponent: IndentDecreaseIcon,
       isActive: () => false,
       isEnabled: ({ selection }) => {
-        if (!selection || !selection?.getNodes()?.length) {
+        const nodes = selection?.getNodes()
+        if (!nodes?.length) {
           return false
         }
-        for (const node of selection.getNodes()) {
-          const parent = node.getParentOrThrow()
-          // If at least one node is indented, this should be active
+        let atLeastOneNodeCanOutdent = false
+        const isIndentable = (node: LexicalNode): node is ElementNode =>
+          $isElementNode(node) && node.canIndent()
+        for (const node of nodes) {
+          if (isIndentable(node)) {
+            if (node.getIndent() <= 0) {
+              return false
+            } else {
+              atLeastOneNodeCanOutdent = true
+            }
+          }
+        }
+        if (!atLeastOneNodeCanOutdent && $isRangeSelection(selection)) {
+          const anchorNode = selection.anchor.getNode()
           if (
-            ('__indent' in node && (node.__indent as number) > 0) ||
-            ('__indent' in parent && parent.__indent > 0)
+            $findMatchingParent(anchorNode, (node) => isIndentable(node) && node.getIndent() > 0)
+          ) {
+            return true
+          }
+          const focusNode = selection.focus.getNode()
+          if (
+            $findMatchingParent(focusNode, (node) => isIndentable(node) && node.getIndent() > 0)
           ) {
             return true
           }
         }
-        return false
+        return atLeastOneNodeCanOutdent
       },
       key: 'indentDecrease',
       label: ({ i18n }) => {
@@ -58,7 +83,7 @@ const toolbarGroups: ToolbarGroup[] = [
 export const IndentFeatureClient = createClientFeature({
   plugins: [
     {
-      Component: IndentPlugin,
+      Component: TabIndentationPlugin,
       position: 'normal',
     },
   ],

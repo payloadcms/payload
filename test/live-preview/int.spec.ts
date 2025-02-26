@@ -1,6 +1,11 @@
 import type { Payload } from 'payload'
 
-import { handleMessage, mergeData, traverseRichText } from '@payloadcms/live-preview'
+import {
+  handleMessage,
+  type LivePreviewMessageEvent,
+  mergeData,
+  traverseRichText,
+} from '@payloadcms/live-preview'
 import path from 'path'
 import { getFileByPath } from 'payload'
 import { fieldSchemaToJSON } from 'payload/shared'
@@ -8,6 +13,7 @@ import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Media, Page, Post, Tenant } from './payload-types.js'
+import config from './config.js'
 
 import { Pages } from './collections/Pages.js'
 import { postsSlug, tenantsSlug } from './shared.js'
@@ -15,7 +21,7 @@ import { postsSlug, tenantsSlug } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const schemaJSON = fieldSchemaToJSON(Pages.fields)
+const schemaJSON = fieldSchemaToJSON(Pages.fields, config)
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -97,7 +103,7 @@ describe('Collections - Live Preview', () => {
           type: 'payload-live-preview',
         },
         origin: serverURL,
-      } as MessageEvent,
+      } as MessageEvent as LivePreviewMessageEvent<Page>,
       initialData: {
         title: 'Test Page',
       } as Page,
@@ -118,7 +124,7 @@ describe('Collections - Live Preview', () => {
           type: 'payload-live-preview',
         },
         origin: serverURL,
-      } as MessageEvent,
+      } as MessageEvent as LivePreviewMessageEvent<Page>,
       initialData: {
         title: 'Test Page',
       } as Page,

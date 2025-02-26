@@ -12,22 +12,28 @@ import type {
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
+  FieldDiffClientComponent,
+  FieldDiffServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
 } from '../types.js'
 
 type GroupFieldClientWithoutType = MarkOptional<GroupFieldClient, 'type'>
 
-export type GroupFieldBaseClientProps = FieldPaths & Pick<ServerFieldBase, 'permissions'>
+type GroupFieldBaseServerProps = Pick<FieldPaths, 'path'>
+
+export type GroupFieldBaseClientProps = FieldPaths
 
 export type GroupFieldClientProps = ClientFieldBase<GroupFieldClientWithoutType> &
   GroupFieldBaseClientProps
 
-export type GroupFieldServerProps = ServerFieldBase<GroupField, GroupFieldClientWithoutType>
+export type GroupFieldServerProps = GroupFieldBaseServerProps &
+  ServerFieldBase<GroupField, GroupFieldClientWithoutType>
 
 export type GroupFieldServerComponent = FieldServerComponent<
   GroupField,
-  GroupFieldClientWithoutType
+  GroupFieldClientWithoutType,
+  GroupFieldBaseServerProps
 >
 
 export type GroupFieldClientComponent = FieldClientComponent<
@@ -56,3 +62,7 @@ export type GroupFieldErrorServerComponent = FieldErrorServerComponent<
 >
 
 export type GroupFieldErrorClientComponent = FieldErrorClientComponent<GroupFieldClientWithoutType>
+
+export type GroupFieldDiffServerComponent = FieldDiffServerComponent<GroupField, GroupFieldClient>
+
+export type GroupFieldDiffClientComponent = FieldDiffClientComponent<GroupFieldClient>

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
 import type { Request as graphQLRequest, OperationArgs } from 'graphql-http'
 import type { Logger } from 'pino'
@@ -62,6 +63,9 @@ import type {
   TransformGlobalWithSelect,
 } from './types/index.js'
 import type { TraverseFieldsCallback } from './utilities/traverseFields.js'
+export type { FieldState } from './admin/forms/Form.js'
+import { Cron } from 'croner'
+
 import type { TypeWithVersion } from './versions/types.js'
 
 import { decrypt, encrypt } from './auth/crypto.js'
@@ -71,15 +75,16 @@ import { generateImportMap, type ImportMap } from './bin/generateImportMap/index
 import { checkPayloadDependencies } from './checkPayloadDependencies.js'
 import localOperations from './collections/operations/local/index.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
-import { fieldAffectsData } from './fields/config/types.js'
+import { fieldAffectsData, type FlattenedBlock } from './fields/config/types.js'
 import localGlobalOperations from './globals/operations/local/index.js'
 import { getJobsLocalAPI } from './queues/localAPI.js'
+import { isNextBuild } from './utilities/isNextBuild.js'
 import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 import { traverseFields } from './utilities/traverseFields.js'
 
-export type { FieldState } from './admin/forms/Form.js'
 export type * from './admin/types.js'
+export { default as executeAccess } from './auth/executeAccess.js'
 
 export interface GeneratedTypes {
   authUntyped: {
@@ -101,6 +106,9 @@ export interface GeneratedTypes {
     }
   }
 
+  blocksUntyped: {
+    [slug: string]: JsonObject
+  }
   collectionsJoinsUntyped: {
     [slug: string]: {
       [schemaPath: string]: CollectionSlug
@@ -146,6 +154,11 @@ type ResolveCollectionType<T> = 'collections' extends keyof T
   : // @ts-expect-error
     T['collectionsUntyped']
 
+type ResolveBlockType<T> = 'blocks' extends keyof T
+  ? T['blocks']
+  : // @ts-expect-error
+    T['blocksUntyped']
+
 type ResolveCollectionSelectType<T> = 'collectionsSelect' extends keyof T
   ? T['collectionsSelect']
   : // @ts-expect-error
@@ -168,6 +181,8 @@ type ResolveGlobalSelectType<T> = 'globalsSelect' extends keyof T
 
 // Applying helper types to GeneratedTypes
 export type TypedCollection = ResolveCollectionType<GeneratedTypes>
+
+export type TypedBlock = ResolveBlockType<GeneratedTypes>
 
 export type TypedUploadCollection = NonNever<{
   [K in keyof TypedCollection]:
@@ -192,6 +207,8 @@ export type StringKeyOf<T> = Extract<keyof T, string>
 
 // Define the types for slugs using the appropriate collections and globals
 export type CollectionSlug = StringKeyOf<TypedCollection>
+
+export type BlockSlug = StringKeyOf<TypedBlock>
 
 export type UploadCollectionSlug = StringKeyOf<TypedUploadCollection>
 
@@ -241,6 +258,8 @@ export class BasePayload {
   }
 
   authStrategies: AuthStrategy[]
+
+  blocks: Record<BlockSlug, FlattenedBlock> = {}
 
   collections: Record<CollectionSlug, Collection> = {}
 
@@ -577,9 +596,9 @@ export class BasePayload {
       config: this.config.globals,
     }
 
-    this.config.collections.forEach((collection) => {
+    for (const collection of this.config.collections) {
       let customIDType = undefined
-      const findCustomID: TraverseFieldsCallback = ({ field, next }) => {
+      const findCustomID: TraverseFieldsCallback = ({ field }) => {
         if (
           ['array', 'blocks', 'group'].includes(field.type) ||
           (field.type === 'tab' && 'name' in field)
@@ -590,19 +609,30 @@ export class BasePayload {
         if (!fieldAffectsData(field)) {
           return
         }
+
         if (field.name === 'id') {
           customIDType = field.type
           return true
         }
       }
 
-      traverseFields({ callback: findCustomID, fields: collection.fields })
+      traverseFields({
+        callback: findCustomID,
+        config: this.config,
+        fields: collection.fields,
+        parentIsLocalized: false,
+      })
 
       this.collections[collection.slug] = {
         config: collection,
         customIDType,
       }
-    })
+    }
+
+    this.blocks = this.config.blocks.reduce((blocks, block) => {
+      blocks[block.slug] = block
+      return blocks
+    }, {})
 
     // Generate types on startup
     if (process.env.NODE_ENV !== 'production' && this.config.typescript.autoGenerate !== false) {
@@ -651,6 +681,20 @@ export class BasePayload {
       )
     }
 
+    // Warn if user is deploying to Vercel, and any upload collection is missing a storage adapter
+    if (process.env.VERCEL) {
+      const uploadCollWithoutAdapter = this.config.collections.filter(
+        (c) => c.upload && c.upload.adapter === undefined, // Uploads enabled, but no storage adapter provided
+      )
+
+      if (uploadCollWithoutAdapter.length) {
+        const slugs = uploadCollWithoutAdapter.map((c) => c.slug).join(', ')
+        this.logger.warn(
+          `Collections with uploads enabled require a storage adapter when deploying to Vercel. Collection(s) without storage adapters: ${slugs}. See https://payloadcms.com/docs/upload/storage-adapters for more info.`,
+        )
+      }
+    }
+
     this.sendEmail = this.email['sendEmail']
 
     serverInitTelemetry(this)
@@ -688,13 +732,49 @@ export class BasePayload {
       })
     }
 
-    if (!options.disableOnInit) {
-      if (typeof options.onInit === 'function') {
-        await options.onInit(this)
+    try {
+      if (!options.disableOnInit) {
+        if (typeof options.onInit === 'function') {
+          await options.onInit(this)
+        }
+        if (typeof this.config.onInit === 'function') {
+          await this.config.onInit(this)
+        }
       }
-      if (typeof this.config.onInit === 'function') {
-        await this.config.onInit(this)
-      }
+    } catch (error) {
+      this.logger.error({ err: error }, 'Error running onInit function')
+      throw error
+    }
+
+    if (this.config.jobs.autoRun && !isNextBuild()) {
+      const DEFAULT_CRON = '* * * * *'
+      const DEFAULT_LIMIT = 10
+
+      const cronJobs =
+        typeof this.config.jobs.autoRun === 'function'
+          ? await this.config.jobs.autoRun(this)
+          : this.config.jobs.autoRun
+
+      await Promise.all(
+        cronJobs.map((cronConfig) => {
+          const job = new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
+            if (typeof this.config.jobs.shouldAutoRun === 'function') {
+              const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
+
+              if (!shouldAutoRun) {
+                job.stop()
+
+                return false
+              }
+            }
+
+            await this.jobs.run({
+              limit: cronConfig.limit ?? DEFAULT_LIMIT,
+              queue: cronConfig.queue,
+            })
+          })
+        }),
+      )
     }
 
     return this
@@ -755,6 +835,11 @@ export const reload = async (
     return collections
   }, {})
 
+  payload.blocks = config.blocks.reduce((blocks, block) => {
+    blocks[block.slug] = block
+    return blocks
+  }, {})
+
   payload.globals = {
     config: config.globals,
   }
@@ -806,7 +891,7 @@ export const getPayload = async (
       // will reach `if (cached.reload instanceof Promise) {` which then waits for the first reload to finish.
       cached.reload = new Promise((res) => (resolve = res))
       const config = await options.config
-      await reload(config, cached.payload)
+      await reload(config, cached.payload, !options.importMap)
 
       resolve()
     }
@@ -814,7 +899,6 @@ export const getPayload = async (
     if (cached.reload instanceof Promise) {
       await cached.reload
     }
-
     if (options?.importMap) {
       cached.payload.importMap = options.importMap
     }
@@ -838,8 +922,13 @@ export const getPayload = async (
     ) {
       try {
         const port = process.env.PORT || '3000'
+
+        const path = '/_next/webpack-hmr'
+        // The __NEXT_ASSET_PREFIX env variable is set for both assetPrefix and basePath (tested in Next.js 15.1.6)
+        const prefix = process.env.__NEXT_ASSET_PREFIX ?? ''
+
         cached.ws = new WebSocket(
-          `ws://localhost:${port}${process.env.NEXT_BASE_PATH ?? ''}/_next/webpack-hmr`,
+          process.env.PAYLOAD_HMR_URL_OVERRIDE ?? `ws://localhost:${port}${prefix}${path}`,
         )
 
         cached.ws.onmessage = (event) => {
@@ -861,6 +950,8 @@ export const getPayload = async (
     }
   } catch (e) {
     cached.promise = null
+    // add identifier to error object, so that our error logger in routeError.ts does not attempt to re-initialize getPayload
+    e.payloadInitError = true
     throw e
   }
 
@@ -880,8 +971,8 @@ interface RequestContext {
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 export type { Payload, RequestContext }
-export { default as executeAccess } from './auth/executeAccess.js'
 export { executeAuthStrategies } from './auth/executeAuthStrategies.js'
+export { extractAccessFromPermission } from './auth/extractAccessFromPermission.js'
 export { getAccessResults } from './auth/getAccessResults.js'
 export { getFieldsToSign } from './auth/getFieldsToSign.js'
 export * from './auth/index.js'
@@ -897,6 +988,7 @@ export { registerFirstUserOperation } from './auth/operations/registerFirstUser.
 export { resetPasswordOperation } from './auth/operations/resetPassword.js'
 export { unlockOperation } from './auth/operations/unlock.js'
 export { verifyEmailOperation } from './auth/operations/verifyEmail.js'
+export { JWTAuthentication } from './auth/strategies/jwt.js'
 
 export type {
   AuthStrategyFunction,
@@ -986,6 +1078,7 @@ export {
   createClientConfig,
   serverOnlyAdminConfigProperties,
   serverOnlyConfigProperties,
+  type UnsanitizedClientConfig,
 } from './config/client.js'
 
 export { defaults } from './config/defaults.js'
@@ -994,7 +1087,7 @@ export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
 export { createDatabaseAdapter } from './database/createDatabaseAdapter.js'
 export { defaultBeginTransaction } from './database/defaultBeginTransaction.js'
-export { default as flattenWhereToOperators } from './database/flattenWhereToOperators.js'
+export { flattenWhereToOperators } from './database/flattenWhereToOperators.js'
 export { getLocalizedPaths } from './database/getLocalizedPaths.js'
 export { createMigration } from './database/migrations/createMigration.js'
 export { getMigrations } from './database/migrations/getMigrations.js'
@@ -1049,6 +1142,7 @@ export type {
   FindOneArgs,
   FindVersions,
   FindVersionsArgs,
+  GenerateSchema,
   Init,
   Migration,
   MigrationData,
@@ -1067,6 +1161,7 @@ export type {
   UpdateVersion,
   UpdateVersionArgs,
   Upsert,
+  UpsertArgs,
 } from './database/types.js'
 export type { EmailAdapter as PayloadEmailAdapter, SendEmailOptions } from './email/types.js'
 export {
@@ -1096,8 +1191,8 @@ export {
   ValidationErrorName,
 } from './errors/index.js'
 export type { ValidationFieldError } from './errors/index.js'
-
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
+
 export { baseIDField } from './fields/baseFields/baseIDField.js'
 export {
   createClientField,
@@ -1106,6 +1201,7 @@ export {
   type ServerOnlyFieldProperties,
 } from './fields/config/client.js'
 export { sanitizeFields } from './fields/config/sanitize.js'
+
 export type {
   AdminClient,
   ArrayField,
@@ -1155,6 +1251,7 @@ export type {
   FlattenedBlocksField,
   FlattenedField,
   FlattenedGroupField,
+  FlattenedJoinField,
   FlattenedTabAsField,
   GroupField,
   GroupFieldClient,
@@ -1207,16 +1304,16 @@ export type {
   ValidateOptions,
   ValueWithRelation,
 } from './fields/config/types.js'
-
 export { getDefaultValue } from './fields/getDefaultValue.js'
+
 export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
 export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
 export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
 export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
 export { default as sortableFieldTypes } from './fields/sortableFieldTypes.js'
-
 export { validations } from './fields/validations.js'
+
 export type {
   ArrayFieldValidation,
   BlocksFieldValidation,
@@ -1248,7 +1345,6 @@ export type {
   UploadFieldValidation,
   UsernameFieldValidation,
 } from './fields/validations.js'
-
 export {
   type ClientGlobalConfig,
   createClientGlobalConfig,
@@ -1270,6 +1366,7 @@ export type {
 } from './globals/config/types.js'
 
 export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
+
 export { findOneOperation } from './globals/operations/findOne.js'
 export { findVersionByIDOperation as findVersionByIDOperationGlobal } from './globals/operations/findVersionByID.js'
 export { findVersionsOperation as findVersionsOperationGlobal } from './globals/operations/findVersions.js'
@@ -1277,16 +1374,20 @@ export { restoreVersionOperation as restoreVersionOperationGlobal } from './glob
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
 export type {
   CollapsedPreferences,
+  ColumnPreference,
   DocumentPreferences,
   FieldsPreferences,
   InsideFieldsPreferences,
+  ListPreferences,
   PreferenceRequest,
   PreferenceUpdateRequest,
   TabsPreferences,
 } from './preferences/types.js'
 export type { JobsConfig, RunJobAccess, RunJobAccessArgs } from './queues/config/types/index.js'
 export type {
+  RunInlineTaskFunction,
   RunTaskFunction,
+  RunTaskFunctions,
   TaskConfig,
   TaskHandler,
   TaskHandlerArgs,
@@ -1298,6 +1399,7 @@ export type {
 } from './queues/config/types/taskTypes.js'
 export type {
   BaseJob,
+  JobLog,
   JobTaskStatus,
   RunningJob,
   SingleTaskStatus,
@@ -1305,10 +1407,14 @@ export type {
   WorkflowHandler,
   WorkflowTypes,
 } from './queues/config/types/workflowTypes.js'
+export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
 export type * from './uploads/types.js'
+
+export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
+export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
 export { commitTransaction } from './utilities/commitTransaction.js'
 export {
   configToJSONSchema,
@@ -1318,6 +1424,7 @@ export {
 } from './utilities/configToJSONSchema.js'
 export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'
 export { createLocalReq } from './utilities/createLocalReq.js'
+export { createPayloadRequest } from './utilities/createPayloadRequest.js'
 export {
   deepCopyObject,
   deepCopyObjectComplex,
@@ -1334,6 +1441,7 @@ export {
   type CustomVersionParser,
 } from './utilities/dependencies/dependencyChecker.js'
 export { getDependencies } from './utilities/dependencies/getDependencies.js'
+export type { FieldSchemaJSON } from './utilities/fieldSchemaToJSON.js'
 export {
   findUp,
   findUpSync,
@@ -1346,14 +1454,23 @@ export { formatErrors } from './utilities/formatErrors.js'
 export { formatLabels, formatNames, toWords } from './utilities/formatLabels.js'
 export { getCollectionIDFieldTypes } from './utilities/getCollectionIDFieldTypes.js'
 export { getObjectDotNotation } from './utilities/getObjectDotNotation.js'
+export { getRequestLanguage } from './utilities/getRequestLanguage.js'
+export { handleEndpoints } from './utilities/handleEndpoints.js'
+export { headersWithCors } from './utilities/headersWithCors.js'
 export { initTransaction } from './utilities/initTransaction.js'
 export { isEntityHidden } from './utilities/isEntityHidden.js'
 export { default as isolateObjectProperty } from './utilities/isolateObjectProperty.js'
 export { isPlainObject } from './utilities/isPlainObject.js'
 export { isValidID } from './utilities/isValidID.js'
 export { killTransaction } from './utilities/killTransaction.js'
+export { logError } from './utilities/logError.js'
+export { defaultLoggerOptions } from './utilities/logger.js'
 export { mapAsync } from './utilities/mapAsync.js'
+export { mergeHeaders } from './utilities/mergeHeaders.js'
 export { sanitizeFallbackLocale } from './utilities/sanitizeFallbackLocale.js'
+export { sanitizeJoinParams } from './utilities/sanitizeJoinParams.js'
+export { sanitizePopulateParam } from './utilities/sanitizePopulateParam.js'
+export { sanitizeSelectParam } from './utilities/sanitizeSelectParam.js'
 export { traverseFields } from './utilities/traverseFields.js'
 export type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'
@@ -1363,7 +1480,7 @@ export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
 export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
-
 export { saveVersion } from './versions/saveVersion.js'
+export type { SchedulePublishTaskInput } from './versions/schedule/types.js'
 export type { TypeWithVersion } from './versions/types.js'
 export { deepMergeSimple } from '@payloadcms/translations/utilities'

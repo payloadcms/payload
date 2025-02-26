@@ -18,12 +18,12 @@ By default, all hooks accept the following args:
 
 | Path               | Description                                                                            |
 | ------------------ | -------------------------------------------------------------------------------------- |
-| **`serverURL`** \* | The URL of your Payload server.                                                        |
+| **`serverURL`** * | The URL of your Payload server.                                                        |
 | **`initialData`**  | The initial data of the document. The live data will be merged in as changes are made. |
 | **`depth`**        | The depth of the relationships to fetch. Defaults to `0`.                              |
 | **`apiRoute`**     | The path of your API route as defined in `routes.api`. Defaults to `/api`.             |
 
-_\* An asterisk denotes that a property is required._
+_* An asterisk denotes that a property is required._
 
 And return the following values:
 
@@ -89,7 +89,7 @@ export const PageClient: React.FC<{
 ```
 
 <Banner type="warning">
-  <strong>Reminder:</strong>
+  **Reminder:**
   If you are using [React Server Components](https://react.dev/reference/rsc/server-components), we strongly suggest setting up [server-side Live Preview](./server) instead.
 </Banner>
 
@@ -151,8 +151,8 @@ The `subscribe` function takes the following args:
 
 | Path               | Description                                                                                 |
 | ------------------ | ------------------------------------------------------------------------------------------- |
-| **`callback`** \*  | A callback function that is called with `data` every time a change is made to the document. |
-| **`serverURL`** \* | The URL of your Payload server.                                                             |
+| **`callback`** *  | A callback function that is called with `data` every time a change is made to the document. |
+| **`serverURL`** * | The URL of your Payload server.                                                             |
 | **`initialData`**  | The initial data of the document. The live data will be merged in as changes are made.      |
 | **`depth`**        | The depth of the relationships to fetch. Defaults to `0`.                                   |
 
@@ -239,7 +239,7 @@ export const useLivePreview = <T extends any>(props: {
 
 ## Example
 
-For a working demonstration of this, check out the official [Live Preview Example](https://github.com/payloadcms/payload/tree/main/examples/live-preview/payload). There you will find examples of various front-end frameworks and how to integrate each one of them, including:
+For a working demonstration of this, check out the official [Live Preview Example](https://github.com/payloadcms/payload/tree/main/examples/live-preview). There you will find examples of various front-end frameworks and how to integrate each one of them, including:
 
 - [Next.js App Router](https://github.com/payloadcms/payload/tree/main/examples/live-preview/next-app)
 - [Next.js Pages Router](https://github.com/payloadcms/payload/tree/main/examples/live-preview/next-pages)
@@ -256,18 +256,14 @@ If you are using relationships or uploads in your front-end application, and you
   // ...
   // If your site is running on a different domain than your Payload server,
   // This will allows requests to be made between the two domains
-  cors: {
-    [
-      'http://localhost:3001' // Your front-end application
-    ],
-  },
+  cors: [
+    'http://localhost:3001' // Your front-end application
+  ],
   // If you are protecting resources behind user authentication,
   // This will allow cookies to be sent between the two domains
-  csrf: {
-    [
-      'http://localhost:3001' // Your front-end application
-    ],
-  },
+  csrf: [
+    'http://localhost:3001' // Your front-end application
+  ],
 }
 ```
 

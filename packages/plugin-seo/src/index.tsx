@@ -32,7 +32,7 @@ export const seoPlugin =
         ? [
             MetaImageField({
               hasGenerateFn: typeof pluginConfig?.generateImage === 'function',
-              relationTo: pluginConfig.uploadsCollection,
+              relationTo: pluginConfig.uploadsCollection as string,
             }),
           ]
         : []),

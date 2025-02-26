@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { PaginatedDocs } from '../../database/types.js'
 import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
@@ -87,19 +88,17 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
     // /////////////////////////////////////
     // beforeRead - Collection
     // /////////////////////////////////////
+    const result: PaginatedDocs<TData> = paginatedDocs as unknown as PaginatedDocs<TData>
+    result.docs = (await Promise.all(
+      paginatedDocs.docs.map(async (doc) => {
+        const docRef = doc
+        // Fallback if not selected
+        if (!docRef.version) {
+          ;(docRef as any).version = {}
+        }
 
-    let result = {
-      ...paginatedDocs,
-      docs: await Promise.all(
-        paginatedDocs.docs.map(async (doc) => {
-          const docRef = doc
-          // Fallback if not selected
-          if (!docRef.version) {
-            ;(docRef as any).version = {}
-          }
-          await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
-            await priorHook
-
+        if (collectionConfig.hooks?.beforeRead?.length) {
+          for (const hook of collectionConfig.hooks.beforeRead) {
             docRef.version =
               (await hook({
                 collection: collectionConfig,
@@ -108,55 +107,48 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
                 query: fullWhere,
                 req,
               })) || docRef.version
-          }, Promise.resolve())
+          }
+        }
 
-          return docRef
-        }),
-      ),
-    } as PaginatedDocs<TData>
-
+        return docRef
+      }),
+    )) as TData[]
     // /////////////////////////////////////
     // afterRead - Fields
     // /////////////////////////////////////
 
-    result = {
-      ...result,
-      docs: await Promise.all(
-        result.docs.map(async (data) => ({
-          ...data,
-          version: await afterRead({
-            collection: collectionConfig,
-            context: req.context,
-            depth,
-            doc: data.version,
-            draft: undefined,
-            fallbackLocale,
-            findMany: true,
-            global: null,
-            locale,
-            overrideAccess,
-            populate,
-            req,
-            select: typeof select?.version === 'object' ? select.version : undefined,
-            showHiddenFields,
-          }),
-        })),
-      ),
-    }
+    result.docs = await Promise.all(
+      result.docs.map(async (data) => {
+        data.version = await afterRead({
+          collection: collectionConfig,
+          context: req.context,
+          depth,
+          doc: data.version,
+          draft: undefined,
+          fallbackLocale,
+          findMany: true,
+          global: null,
+          locale,
+          overrideAccess,
+          populate,
+          req,
+          select: typeof select?.version === 'object' ? select.version : undefined,
+          showHiddenFields,
+        })
+        return data
+      }),
+    )
 
     // /////////////////////////////////////
     // afterRead - Collection
     // /////////////////////////////////////
 
-    result = {
-      ...result,
-      docs: await Promise.all(
+    if (collectionConfig.hooks.afterRead?.length) {
+      result.docs = await Promise.all(
         result.docs.map(async (doc) => {
           const docRef = doc
 
-          await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-            await priorHook
-
+          for (const hook of collectionConfig.hooks.afterRead) {
             docRef.version =
               (await hook({
                 collection: collectionConfig,
@@ -166,21 +158,17 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
                 query: fullWhere,
                 req,
               })) || doc.version
-          }, Promise.resolve())
+          }
 
           return docRef
         }),
-      ),
+      )
     }
 
     // /////////////////////////////////////
     // Return results
     // /////////////////////////////////////
-
-    result = {
-      ...result,
-      docs: result.docs.map((doc) => sanitizeInternalFields<TData>(doc)),
-    }
+    result.docs = result.docs.map((doc) => sanitizeInternalFields<TData>(doc))
 
     return result
   } catch (error: unknown) {

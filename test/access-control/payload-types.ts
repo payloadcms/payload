@@ -9,11 +9,11 @@
 export interface Config {
   auth: {
     users: UserAuthOperations;
-    'non-admin-user': NonAdminUserAuthOperations;
+    'public-users': PublicUserAuthOperations;
   };
   collections: {
     users: User;
-    'non-admin-user': NonAdminUser;
+    'public-users': PublicUser;
     posts: Post;
     unrestricted: Unrestricted;
     'relation-restricted': RelationRestricted;
@@ -22,6 +22,7 @@ export interface Config {
     'user-restricted-collection': UserRestrictedCollection;
     'create-not-update-collection': CreateNotUpdateCollection;
     'restricted-versions': RestrictedVersion;
+    'restricted-versions-admin-panel': RestrictedVersionsAdminPanel;
     'sibling-data': SiblingDatum;
     'rely-on-request-headers': RelyOnRequestHeader;
     'doc-level-access': DocLevelAccess;
@@ -40,7 +41,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
-    'non-admin-user': NonAdminUserSelect<false> | NonAdminUserSelect<true>;
+    'public-users': PublicUsersSelect<false> | PublicUsersSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     unrestricted: UnrestrictedSelect<false> | UnrestrictedSelect<true>;
     'relation-restricted': RelationRestrictedSelect<false> | RelationRestrictedSelect<true>;
@@ -49,6 +50,7 @@ export interface Config {
     'user-restricted-collection': UserRestrictedCollectionSelect<false> | UserRestrictedCollectionSelect<true>;
     'create-not-update-collection': CreateNotUpdateCollectionSelect<false> | CreateNotUpdateCollectionSelect<true>;
     'restricted-versions': RestrictedVersionsSelect<false> | RestrictedVersionsSelect<true>;
+    'restricted-versions-admin-panel': RestrictedVersionsAdminPanelSelect<false> | RestrictedVersionsAdminPanelSelect<true>;
     'sibling-data': SiblingDataSelect<false> | SiblingDataSelect<true>;
     'rely-on-request-headers': RelyOnRequestHeadersSelect<false> | RelyOnRequestHeadersSelect<true>;
     'doc-level-access': DocLevelAccessSelect<false> | DocLevelAccessSelect<true>;
@@ -86,8 +88,8 @@ export interface Config {
     | (User & {
         collection: 'users';
       })
-    | (NonAdminUser & {
-        collection: 'non-admin-user';
+    | (PublicUser & {
+        collection: 'public-users';
       });
   jobs: {
     tasks: unknown;
@@ -112,7 +114,7 @@ export interface UserAuthOperations {
     password: string;
   };
 }
-export interface NonAdminUserAuthOperations {
+export interface PublicUserAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -150,9 +152,9 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "non-admin-user".
+ * via the `definition` "public-users".
  */
-export interface NonAdminUser {
+export interface PublicUser {
   id: string;
   updatedAt: string;
   createdAt: string;
@@ -248,6 +250,17 @@ export interface ReadOnlyCollection {
  * via the `definition` "restricted-versions".
  */
 export interface RestrictedVersion {
+  id: string;
+  name?: string | null;
+  hidden?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-versions-admin-panel".
+ */
+export interface RestrictedVersionsAdminPanel {
   id: string;
   name?: string | null;
   hidden?: boolean | null;
@@ -624,8 +637,8 @@ export interface PayloadLockedDocument {
         value: string | User;
       } | null)
     | ({
-        relationTo: 'non-admin-user';
-        value: string | NonAdminUser;
+        relationTo: 'public-users';
+        value: string | PublicUser;
       } | null)
     | ({
         relationTo: 'posts';
@@ -658,6 +671,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'restricted-versions';
         value: string | RestrictedVersion;
+      } | null)
+    | ({
+        relationTo: 'restricted-versions-admin-panel';
+        value: string | RestrictedVersionsAdminPanel;
       } | null)
     | ({
         relationTo: 'sibling-data';
@@ -710,8 +727,8 @@ export interface PayloadLockedDocument {
         value: string | User;
       }
     | {
-        relationTo: 'non-admin-user';
-        value: string | NonAdminUser;
+        relationTo: 'public-users';
+        value: string | PublicUser;
       };
   updatedAt: string;
   createdAt: string;
@@ -728,8 +745,8 @@ export interface PayloadPreference {
         value: string | User;
       }
     | {
-        relationTo: 'non-admin-user';
-        value: string | NonAdminUser;
+        relationTo: 'public-users';
+        value: string | PublicUser;
       };
   key?: string | null;
   value?:
@@ -773,9 +790,9 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "non-admin-user_select".
+ * via the `definition` "public-users_select".
  */
-export interface NonAdminUserSelect<T extends boolean = true> {
+export interface PublicUsersSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -864,6 +881,16 @@ export interface CreateNotUpdateCollectionSelect<T extends boolean = true> {
  * via the `definition` "restricted-versions_select".
  */
 export interface RestrictedVersionsSelect<T extends boolean = true> {
+  name?: T;
+  hidden?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-versions-admin-panel_select".
+ */
+export interface RestrictedVersionsAdminPanelSelect<T extends boolean = true> {
   name?: T;
   hidden?: T;
   updatedAt?: T;

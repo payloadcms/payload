@@ -1,7 +1,9 @@
 import type { TFunction } from '@payloadcms/translations'
 
 import { en } from '@payloadcms/translations/languages/en'
-import httpStatus from 'http-status'
+import { status as httpStatus } from 'http-status'
+
+import type { LabelFunction, StaticLabel } from '../config/types.js'
 
 import { APIError } from './APIError.js'
 
@@ -9,6 +11,7 @@ import { APIError } from './APIError.js'
 export let ValidationErrorName = 'ValidationError'
 
 export type ValidationFieldError = {
+  label?: LabelFunction | StaticLabel
   // The error message to display for this field
   message: string
   path: string
@@ -35,7 +38,7 @@ export class ValidationError extends APIError<{
         : en.translations.error.followingFieldsInvalid_other
 
     super(
-      `${message} ${results.errors.map((f) => f.path).join(', ')}`,
+      `${message} ${results.errors.map((f) => f.label || f.path).join(', ')}`,
       httpStatus.BAD_REQUEST,
       results,
     )

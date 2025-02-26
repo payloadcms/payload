@@ -1,11 +1,11 @@
-import type { EditViewComponent, LivePreviewConfig, PayloadServerReactComponent } from 'payload'
+import type { DocumentViewServerProps, LivePreviewConfig } from 'payload'
 
 import React from 'react'
 
 import './index.scss'
 import { LivePreviewClient } from './index.client.js'
 
-export const LivePreviewView: PayloadServerReactComponent<EditViewComponent> = async (props) => {
+export async function LivePreviewView(props: DocumentViewServerProps) {
   const { doc, initPageResult } = props
 
   const { collectionConfig, globalConfig, locale, req } = initPageResult
@@ -43,9 +43,26 @@ export const LivePreviewView: PayloadServerReactComponent<EditViewComponent> = a
           data: doc,
           globalConfig,
           locale,
+          req,
+          /**
+           * @deprecated
+           * Use `req.payload` instead. This will be removed in the next major version.
+           */
           payload: initPageResult.req.payload,
         })
       : livePreviewConfig?.url
 
-  return <LivePreviewClient breakpoints={breakpoints} initialData={doc} url={url} />
+  return (
+    <LivePreviewClient
+      breakpoints={breakpoints}
+      Description={props.Description}
+      initialData={doc}
+      PreviewButton={props.PreviewButton}
+      PublishButton={props.PublishButton}
+      SaveButton={props.SaveButton}
+      SaveDraftButton={props.SaveDraftButton}
+      Upload={props.Upload}
+      url={url}
+    />
+  )
 }

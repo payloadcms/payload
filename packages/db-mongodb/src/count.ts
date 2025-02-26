@@ -1,18 +1,21 @@
 import type { CountOptions } from 'mongodb'
-import type { Count, PayloadRequest } from 'payload'
+import type { Count } from 'payload'
 
 import { flattenWhereToOperators } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { withSession } from './withSession.js'
+import { buildQuery } from './queries/buildQuery.js'
+import { getSession } from './utilities/getSession.js'
 
 export const count: Count = async function count(
   this: MongooseAdapter,
-  { collection, locale, req = {} as PayloadRequest, where },
+  { collection, locale, req, where },
 ) {
   const Model = this.collections[collection]
-  const options: CountOptions = await withSession(this, req)
+  const options: CountOptions = {
+    session: await getSession(this, req),
+  }
 
   let hasNearConstraint = false
 
@@ -21,9 +24,11 @@ export const count: Count = async function count(
     hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'))
   }
 
-  const query = await Model.buildQuery({
+  const query = await buildQuery({
+    adapter: this,
+    collectionSlug: collection,
+    fields: this.payload.collections[collection].config.flattenedFields,
     locale,
-    payload: this.payload,
     where,
   })
 

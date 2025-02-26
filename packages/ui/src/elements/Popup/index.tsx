@@ -25,6 +25,7 @@ export type PopupProps = {
   disabled?: boolean
   forceOpen?: boolean
   horizontalAlign?: 'center' | 'left' | 'right'
+  id?: string
   initActive?: boolean
   noBackground?: boolean
   onToggleOpen?: (active: boolean) => void
@@ -37,6 +38,7 @@ export type PopupProps = {
 
 export const Popup: React.FC<PopupProps> = (props) => {
   const {
+    id,
     boundingRef,
     button,
     buttonClassName,
@@ -168,7 +170,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     .join(' ')
 
   return (
-    <div className={classes}>
+    <div className={classes} id={id}>
       <div className={`${baseClass}__trigger-wrap`}>
         {showOnHover ? (
           <div

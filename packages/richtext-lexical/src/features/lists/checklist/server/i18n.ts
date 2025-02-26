@@ -25,6 +25,9 @@ export const i18n: Partial<GenericLanguages> = {
   es: {
     label: 'Lista de comprobación',
   },
+  et: {
+    label: '',
+  },
   fa: {
     label: 'لیست بررسی',
   },
@@ -68,10 +71,10 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Listă de verificare',
   },
   rs: {
-    label: 'Lista provere',
+    label: 'Контролна листа',
   },
   'rs-latin': {
-    label: 'Lista provere',
+    label: 'Kontrolna lista',
   },
   ru: {
     label: 'Список Проверки',
@@ -80,7 +83,7 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Kontrolný zoznam',
   },
   sl: {
-    label: 'Seznam preverjanja',
+    label: 'Nimekiri',
   },
   sv: {
     label: 'Kontrollista',

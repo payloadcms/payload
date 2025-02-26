@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { TaskConfig, TaskType } from '../config/types/taskTypes.js'
 import type { BaseJob, JobTaskStatus } from '../config/types/workflowTypes.js'
 
@@ -29,6 +30,11 @@ export const getJobTaskStatus = ({ jobLog }: Args): JobTaskStatus => {
 
       if (loggedJob.state === 'succeeded') {
         newTaskStatus.complete = true
+        // As the task currently saved in taskStatus has likely failed and thus has no
+        // Output data, we need to update it with the new data from the successful task
+        newTaskStatus.output = loggedJob.output
+        newTaskStatus.input = loggedJob.input
+        newTaskStatus.taskSlug = loggedJob.taskSlug
       }
       taskStatus[loggedJob.taskSlug][loggedJob.taskID] = newTaskStatus
     }

@@ -1,14 +1,11 @@
-import {
-  buildVersionGlobalFields,
-  type CreateGlobalVersion,
-  type Document,
-  type PayloadRequest,
-} from 'payload'
+import type { CreateOptions } from 'mongoose'
+
+import { buildVersionGlobalFields, type CreateGlobalVersion } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
-import { withSession } from './withSession.js'
+import { getSession } from './utilities/getSession.js'
+import { transform } from './utilities/transform.js'
 
 export const createGlobalVersion: CreateGlobalVersion = async function createGlobalVersion(
   this: MongooseAdapter,
@@ -18,34 +15,41 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
     globalSlug,
     parent,
     publishedLocale,
-    req = {} as PayloadRequest,
+    req,
     snapshot,
     updatedAt,
     versionData,
   },
 ) {
   const VersionModel = this.versions[globalSlug]
-  const options = await withSession(this, req)
+  const options: CreateOptions = {
+    session: await getSession(this, req),
+  }
 
-  const data = sanitizeRelationshipIDs({
-    config: this.payload.config,
-    data: {
-      autosave,
-      createdAt,
-      latest: true,
-      parent,
-      publishedLocale,
-      snapshot,
-      updatedAt,
-      version: versionData,
-    },
-    fields: buildVersionGlobalFields(
-      this.payload.config,
-      this.payload.config.globals.find((global) => global.slug === globalSlug),
-    ),
+  const data = {
+    autosave,
+    createdAt,
+    latest: true,
+    parent,
+    publishedLocale,
+    snapshot,
+    updatedAt,
+    version: versionData,
+  }
+
+  const fields = buildVersionGlobalFields(
+    this.payload.config,
+    this.payload.config.globals.find((global) => global.slug === globalSlug),
+  )
+
+  transform({
+    adapter: this,
+    data,
+    fields,
+    operation: 'write',
   })
 
-  const [doc] = await VersionModel.create([data], options, req)
+  let [doc] = await VersionModel.create([data], options, req)
 
   await VersionModel.updateMany(
     {
@@ -71,13 +75,14 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
     options,
   )
 
-  const result: Document = JSON.parse(JSON.stringify(doc))
-  const verificationToken = doc._verificationToken
+  doc = doc.toObject()
 
-  // custom id type reset
-  result.id = result._id
-  if (verificationToken) {
-    result._verificationToken = verificationToken
-  }
-  return result
+  transform({
+    adapter: this,
+    data: doc,
+    fields,
+    operation: 'read',
+  })
+
+  return doc
 }

@@ -6,6 +6,11 @@ export { slashMenuBasicGroupWithItems } from '../../features/shared/slashMenu/ba
 export { AlignFeatureClient } from '../../features/align/client/index.js'
 export { BlockquoteFeatureClient } from '../../features/blockquote/client/index.js'
 export { BlocksFeatureClient } from '../../features/blocks/client/index.js'
+export {
+  INSERT_BLOCK_COMMAND,
+  INSERT_INLINE_BLOCK_COMMAND,
+} from '../../features/blocks/client/plugin/commands.js'
+
 export { TestRecorderFeatureClient } from '../../features/debug/testRecorder/client/index.js'
 export { TreeViewFeatureClient } from '../../features/debug/treeView/client/index.js'
 export { BoldFeatureClient } from '../../features/format/bold/feature.client.js'
@@ -136,6 +141,7 @@ export { InlineBlockEditButton } from '../../features/blocks/client/componentInl
 export { InlineBlockRemoveButton } from '../../features/blocks/client/componentInline/components/InlineBlockRemoveButton.js'
 export { InlineBlockLabel } from '../../features/blocks/client/componentInline/components/InlineBlockLabel.js'
 export { InlineBlockContainer } from '../../features/blocks/client/componentInline/components/InlineBlockContainer.js'
+export { useInlineBlockComponentContext } from '../../features/blocks/client/componentInline/index.js'
 export { BlockCollapsible } from '../../features/blocks/client/component/components/BlockCollapsible.js'
 export { BlockEditButton } from '../../features/blocks/client/component/components/BlockEditButton.js'
 export { BlockRemoveButton } from '../../features/blocks/client/component/components/BlockRemoveButton.js'
@@ -144,3 +150,4 @@ export { WrapperBlockEditButton } from '../../features/blocks/client/plugin/wrap
 export { WrapperBlockRemoveButton } from '../../features/blocks/client/plugin/wrapperBlocks/components/WrapperBlockRemoveButton.js'
 export { WrapperBlockLabel } from '../../features/blocks/client/plugin/wrapperBlocks/components/WrapperBlockLabel.js'
 export { WrapperBlockContainer } from '../../features/blocks/client/plugin/wrapperBlocks/components/WrapperBlockContainer.js'
+export { useBlockComponentContext } from '../../features/blocks/client/component/BlockContent.js'

@@ -25,6 +25,9 @@ export const i18n: Partial<GenericLanguages> = {
   es: {
     label: 'Subir',
   },
+  et: {
+    label: 'Lae üles',
+  },
   fa: {
     label: 'بارگذاری',
   },
@@ -68,7 +71,7 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Încarcă',
   },
   rs: {
-    label: 'Otpremi',
+    label: 'Отпреми',
   },
   'rs-latin': {
     label: 'Otpremi',
@@ -80,7 +83,7 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Nahrať',
   },
   sl: {
-    label: 'Prenesi',
+    label: 'Naloži',
   },
   sv: {
     label: 'Ladda upp',

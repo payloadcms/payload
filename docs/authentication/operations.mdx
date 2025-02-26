@@ -269,6 +269,10 @@ const result = await payload.verifyEmail({
 })
 ```
 
+**Note:** the token you need to pass to the `verifyEmail` function is unique to verification and is not the same as the token that you can retrieve from the `forgotPassword` operation. It can be found on the user document, as a hidden `_verificationToken` field. If you'd like to retrieve this token, you can use the Local API's `find` or `findByID` methods, setting `showHiddenFields: true`.
+
+**Note:** if you do not have a `config.serverURL` set, Payload will attempt to create one for you if the user was created via REST or GraphQL by looking at the incoming `req`. But this is not supported if you are creating the user via the Local API's `payload.create()` method. If this applies to you, and you do not have a `serverURL` set, you may want to override your `verify.generateEmailHTML` function to provide a full URL to link the user to a proper verification page.
+
 ## Unlock
 
 If a user locks themselves out and you wish to deliberately unlock them, you can utilize the Unlock operation. The [Admin Panel](../admin/overview) features an Unlock control automatically for all collections that feature max login attempts, but you can programmatically unlock users as well by using the Unlock operation.
@@ -308,7 +312,7 @@ Payload comes with built-in forgot password functionality. Submitting an email a
 
 The link to reset the user's password contains a token which is what allows the user to securely reset their password.
 
-By default, the Forgot Password operations send users to the [Admin Panel](../admin/overview) to reset their password, but you can customize the generated email to send users to the frontend of your app instead by [overriding the email HTML](/docs/authentication/overview#forgot-password).
+By default, the Forgot Password operations send users to the [Admin Panel](../admin/overview) to reset their password, but you can customize the generated email to send users to the frontend of your app instead by [overriding the email HTML](/docs/authentication/email#forgot-password).
 
 **Example REST API Forgot Password**:
 
@@ -344,9 +348,13 @@ const token = await payload.forgotPassword({
 })
 ```
 
+<Banner type="info">
+  **Note:** if you do not have a `config.serverURL` set, Payload will attempt to create one for you if the `forgot-password` operation was triggered via REST or GraphQL by looking at the incoming `req`. But this is not supported if you are calling `payload.forgotPassword()` via the Local API. If you do not have a `serverURL` set, you may want to override your `auth.forgotPassword.generateEmailHTML` function to provide a full URL to link the user to a proper reset-password page.
+</Banner>
+
 <Banner type="success">
-  <strong>Tip:</strong>
-  <br />
+  **Tip:**
+
   You can stop the reset-password email from being sent via using the local API. This is helpful if
   you need to create user accounts programmatically, but not set their password for them. This
   effectively generates a reset password token which you can then use to send to a page you create,

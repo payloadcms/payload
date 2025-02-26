@@ -6,12 +6,15 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
+  FieldPaths,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
+  FieldDiffClientComponent,
+  FieldDiffServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
 } from '../types.js'
@@ -28,17 +31,18 @@ type CheckboxFieldBaseClientProps = {
   readonly validate?: CheckboxFieldValidation
 }
 
+type CheckboxFieldBaseServerProps = Pick<FieldPaths, 'path'>
+
 export type CheckboxFieldClientProps = CheckboxFieldBaseClientProps &
   ClientFieldBase<CheckboxFieldClientWithoutType>
 
-export type CheckboxFieldServerProps = ServerFieldBase<
-  CheckboxField,
-  CheckboxFieldClientWithoutType
->
+export type CheckboxFieldServerProps = CheckboxFieldBaseServerProps &
+  ServerFieldBase<CheckboxField, CheckboxFieldClientWithoutType>
 
 export type CheckboxFieldServerComponent = FieldServerComponent<
   CheckboxField,
-  CheckboxFieldClientWithoutType
+  CheckboxFieldClientWithoutType,
+  CheckboxFieldBaseServerProps
 >
 
 export type CheckboxFieldClientComponent = FieldClientComponent<
@@ -69,3 +73,10 @@ export type CheckboxFieldErrorServerComponent = FieldErrorServerComponent<
 
 export type CheckboxFieldErrorClientComponent =
   FieldErrorClientComponent<CheckboxFieldClientWithoutType>
+
+export type CheckboxFieldDiffServerComponent = FieldDiffServerComponent<
+  CheckboxField,
+  CheckboxFieldClient
+>
+
+export type CheckboxFieldDiffClientComponent = FieldDiffClientComponent<CheckboxFieldClient>

@@ -1,4 +1,5 @@
-import httpStatus from 'http-status'
+// @ts-strict-ignore
+import { status as httpStatus } from 'http-status'
 
 import type { AccessResult } from '../../config/types.js'
 import type { CollectionSlug } from '../../index.js'
@@ -23,6 +24,7 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
+import { deleteScheduledPublishJobs } from '../../versions/deleteScheduledPublishJobs.js'
 import { buildAfterOperation } from './utils.js'
 
 export type Arguments = {
@@ -52,10 +54,8 @@ export const deleteOperation = async <
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    await args.collection.config.hooks.beforeOperation.reduce(
-      async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
-        await priorHook
-
+    if (args.collection.config.hooks?.beforeOperation?.length) {
+      for (const hook of args.collection.config.hooks.beforeOperation) {
         args =
           (await hook({
             args,
@@ -64,9 +64,8 @@ export const deleteOperation = async <
             operation: 'delete',
             req: args.req,
           })) || args
-      },
-      Promise.resolve(),
-    )
+      }
+    }
 
     const {
       collection: { config: collectionConfig },
@@ -145,16 +144,16 @@ export const deleteOperation = async <
         // beforeDelete - Collection
         // /////////////////////////////////////
 
-        await collectionConfig.hooks.beforeDelete.reduce(async (priorHook, hook) => {
-          await priorHook
-
-          return hook({
-            id,
-            collection: collectionConfig,
-            context: req.context,
-            req,
-          })
-        }, Promise.resolve())
+        if (collectionConfig.hooks?.beforeDelete?.length) {
+          for (const hook of collectionConfig.hooks.beforeDelete) {
+            await hook({
+              id,
+              collection: collectionConfig,
+              context: req.context,
+              req,
+            })
+          }
+        }
 
         await deleteAssociatedFiles({
           collectionConfig,
@@ -170,6 +169,18 @@ export const deleteOperation = async <
 
         if (collectionConfig.versions) {
           await deleteCollectionVersions({
+            id,
+            slug: collectionConfig.slug,
+            payload,
+            req,
+          })
+        }
+
+        // /////////////////////////////////////
+        // Delete scheduled posts
+        // /////////////////////////////////////
+        if (collectionConfig.versions?.drafts && collectionConfig.versions.drafts.schedulePublish) {
+          await deleteScheduledPublishJobs({
             id,
             slug: collectionConfig.slug,
             payload,
@@ -215,34 +226,34 @@ export const deleteOperation = async <
         // afterRead - Collection
         // /////////////////////////////////////
 
-        await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-          await priorHook
-
-          result =
-            (await hook({
-              collection: collectionConfig,
-              context: req.context,
-              doc: result || doc,
-              req,
-            })) || result
-        }, Promise.resolve())
+        if (collectionConfig.hooks?.afterRead?.length) {
+          for (const hook of collectionConfig.hooks.afterRead) {
+            result =
+              (await hook({
+                collection: collectionConfig,
+                context: req.context,
+                doc: result || doc,
+                req,
+              })) || result
+          }
+        }
 
         // /////////////////////////////////////
         // afterDelete - Collection
         // /////////////////////////////////////
 
-        await collectionConfig.hooks.afterDelete.reduce(async (priorHook, hook) => {
-          await priorHook
-
-          result =
-            (await hook({
-              id,
-              collection: collectionConfig,
-              context: req.context,
-              doc: result,
-              req,
-            })) || result
-        }, Promise.resolve())
+        if (collectionConfig.hooks?.afterDelete?.length) {
+          for (const hook of collectionConfig.hooks.afterDelete) {
+            result =
+              (await hook({
+                id,
+                collection: collectionConfig,
+                context: req.context,
+                doc: result,
+                req,
+              })) || result
+          }
+        }
 
         // /////////////////////////////////////
         // 8. Return results

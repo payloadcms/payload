@@ -6,12 +6,68 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
+/**
+ * Supported timezones in IANA format.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supportedTimezones".
+ */
+export type SupportedTimezones =
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji';
+
 export interface Config {
   auth: {
     users: UserAuthOperations;
   };
+  blocks: {};
   collections: {
     posts: Post;
+    'error-on-unnamed-fields': ErrorOnUnnamedField;
     'default-values': DefaultValue;
     'relation-a': RelationA;
     'relation-b': RelationB;
@@ -30,6 +86,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
+    'error-on-unnamed-fields': ErrorOnUnnamedFieldsSelect<false> | ErrorOnUnnamedFieldsSelect<true>;
     'default-values': DefaultValuesSelect<false> | DefaultValuesSelect<true>;
     'relation-a': RelationASelect<false> | RelationASelect<true>;
     'relation-b': RelationBSelect<false> | RelationBSelect<true>;
@@ -50,9 +107,13 @@ export interface Config {
   };
   globals: {
     global: Global;
+    'global-2': Global2;
+    'global-3': Global3;
   };
   globalsSelect: {
     global: GlobalSelect<false> | GlobalSelect<true>;
+    'global-2': Global2Select<false> | Global2Select<true>;
+    'global-3': Global3Select<false> | Global3Select<true>;
   };
   locale: 'en' | 'es';
   user: User & {
@@ -88,8 +149,41 @@ export interface UserAuthOperations {
 export interface Post {
   id: string;
   title: string;
+  D1?: {
+    D2?: {
+      D3?: {
+        D4?: string | null;
+      };
+    };
+  };
   hasTransaction?: boolean | null;
   throwAfterChange?: boolean | null;
+  arrayWithIDs?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocksWithIDs?:
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block';
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "error-on-unnamed-fields".
+ */
+export interface ErrorOnUnnamedField {
+  id: string;
+  groupWithinUnnamedTab: {
+    text: string;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -335,6 +429,10 @@ export interface PayloadLockedDocument {
         value: string | Post;
       } | null)
     | ({
+        relationTo: 'error-on-unnamed-fields';
+        value: string | ErrorOnUnnamedField;
+      } | null)
+    | ({
         relationTo: 'default-values';
         value: string | DefaultValue;
       } | null)
@@ -426,8 +524,51 @@ export interface PayloadMigration {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
+  D1?:
+    | T
+    | {
+        D2?:
+          | T
+          | {
+              D3?:
+                | T
+                | {
+                    D4?: T;
+                  };
+            };
+      };
   hasTransaction?: T;
   throwAfterChange?: T;
+  arrayWithIDs?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  blocksWithIDs?:
+    | T
+    | {
+        block?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "error-on-unnamed-fields_select".
+ */
+export interface ErrorOnUnnamedFieldsSelect<T extends boolean = true> {
+  groupWithinUnnamedTab?:
+    | T
+    | {
+        text?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -673,9 +814,49 @@ export interface Global {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-2".
+ */
+export interface Global2 {
+  id: string;
+  text?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-3".
+ */
+export interface Global3 {
+  id: string;
+  text?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global_select".
  */
 export interface GlobalSelect<T extends boolean = true> {
+  text?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-2_select".
+ */
+export interface Global2Select<T extends boolean = true> {
+  text?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-3_select".
+ */
+export interface Global3Select<T extends boolean = true> {
   text?: T;
   updatedAt?: T;
   createdAt?: T;

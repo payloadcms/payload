@@ -1,6 +1,7 @@
 'use client'
 
 import { useModal } from '@faceless-ui/modal'
+import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import React, { useCallback } from 'react'
 import { toast } from 'sonner'
@@ -11,6 +12,7 @@ import { useFormModified } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
+import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { DrawerHeader } from '../BulkUpload/Header/index.js'
@@ -32,11 +34,12 @@ export const CopyLocaleData: React.FC = () => {
   } = useConfig()
   const { code } = useLocale()
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
   const modified = useFormModified()
   const { toggleModal } = useModal()
   const { copyDataFromLocale } = useServerFunctions()
   const router = useRouter()
+  const { startRouteTransition } = useRouteTransition()
 
   const localeOptions =
     (localization &&
@@ -47,7 +50,7 @@ export const CopyLocaleData: React.FC = () => {
 
   const getLocaleLabel = (code: string) => {
     const locale = localization && localization.locales.find((l) => l.code === code)
-    return locale && locale.label ? locale.label : code
+    return locale && locale.label ? getTranslation(locale.label, i18n) : code
   }
 
   const [copying, setCopying] = React.useState(false)
@@ -57,7 +60,6 @@ export const CopyLocaleData: React.FC = () => {
 
   React.useEffect(() => {
     if (fromLocale !== code) {
-      // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
       setFromLocale(code)
     }
   }, [code, fromLocale])
@@ -77,10 +79,14 @@ export const CopyLocaleData: React.FC = () => {
         })
 
         setCopying(false)
-        toggleModal(drawerSlug)
-        router.push(
-          `${serverURL}${admin}/${collectionSlug ? `collections/${collectionSlug}/${id}` : `globals/${globalSlug}`}?locale=${to}`,
+
+        startRouteTransition(() =>
+          router.push(
+            `${serverURL}${admin}/${collectionSlug ? `collections/${collectionSlug}/${id}` : `globals/${globalSlug}`}?locale=${to}`,
+          ),
         )
+
+        toggleModal(drawerSlug)
       } catch (error) {
         toast.error(error.message)
       }
@@ -95,6 +101,7 @@ export const CopyLocaleData: React.FC = () => {
       router,
       serverURL,
       admin,
+      startRouteTransition,
     ],
   )
 

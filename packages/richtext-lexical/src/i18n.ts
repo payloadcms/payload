@@ -49,6 +49,12 @@ export const i18n: Partial<GenericLanguages> = {
     slashMenuListGroupLabel: 'Listas',
     toolbarItemsActive: '{{count}} activo',
   },
+  et: {
+    placeholder: "Alusta kirjutamist või vajuta '/' käskude jaoks...",
+    slashMenuBasicGroupLabel: 'Põhiline',
+    slashMenuListGroupLabel: 'Loendid',
+    toolbarItemsActive: '{{count}} aktiivne',
+  },
   fa: {
     placeholder: "شروع به تایپ کنید، یا برای دستورات '/' را فشار دهید ...",
     slashMenuBasicGroupLabel: 'پایه',
@@ -134,10 +140,10 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} activ',
   },
   rs: {
-    placeholder: "Počnite da kucate, ili pritisnite '/' za komande...",
-    slashMenuBasicGroupLabel: 'Osnovno',
-    slashMenuListGroupLabel: 'Liste',
-    toolbarItemsActive: '{{count}} aktivno',
+    placeholder: "Почните да куцате, или притисните '/' за команде...",
+    slashMenuBasicGroupLabel: 'Основно',
+    slashMenuListGroupLabel: 'Листе',
+    toolbarItemsActive: '{{count}} активно',
   },
   'rs-latin': {
     placeholder: "Počnite da kucate, ili pritisnite '/' za komande...",
@@ -158,10 +164,10 @@ export const i18n: Partial<GenericLanguages> = {
     toolbarItemsActive: '{{count}} aktívne',
   },
   sl: {
-    placeholder: "Začnite tipkati ali pritisnite '/' za ukaze...",
+    placeholder: 'Začnite tipkati ali pritisnite "/" za ukaze...',
     slashMenuBasicGroupLabel: 'Osnovno',
     slashMenuListGroupLabel: 'Seznami',
-    toolbarItemsActive: '{{count}} aktiven',
+    toolbarItemsActive: '{{count}} aktivno',
   },
   sv: {
     placeholder: "Börja skriva, eller tryck på '/' för kommandon...",

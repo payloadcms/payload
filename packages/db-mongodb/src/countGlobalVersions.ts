@@ -1,18 +1,21 @@
 import type { CountOptions } from 'mongodb'
-import type { CountGlobalVersions, PayloadRequest } from 'payload'
+import type { CountGlobalVersions } from 'payload'
 
-import { flattenWhereToOperators } from 'payload'
+import { buildVersionGlobalFields, flattenWhereToOperators } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { withSession } from './withSession.js'
+import { buildQuery } from './queries/buildQuery.js'
+import { getSession } from './utilities/getSession.js'
 
 export const countGlobalVersions: CountGlobalVersions = async function countGlobalVersions(
   this: MongooseAdapter,
-  { global, locale, req = {} as PayloadRequest, where },
+  { global, locale, req, where },
 ) {
   const Model = this.versions[global]
-  const options: CountOptions = await withSession(this, req)
+  const options: CountOptions = {
+    session: await getSession(this, req),
+  }
 
   let hasNearConstraint = false
 
@@ -21,9 +24,14 @@ export const countGlobalVersions: CountGlobalVersions = async function countGlob
     hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'))
   }
 
-  const query = await Model.buildQuery({
+  const query = await buildQuery({
+    adapter: this,
+    fields: buildVersionGlobalFields(
+      this.payload.config,
+      this.payload.globals.config.find((each) => each.slug === global),
+      true,
+    ),
     locale,
-    payload: this.payload,
     where,
   })
 

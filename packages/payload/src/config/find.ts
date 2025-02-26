@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { getTsconfig } from 'get-tsconfig'
 import path from 'path'
 
@@ -67,7 +68,7 @@ export const findConfig = (): string => {
   const { configPath, outPath, rootPath, srcPath } = getTSConfigPaths()
 
   // if configPath is absolute file, not folder, return it
-  if (path.extname(configPath) === '.js' || path.extname(configPath) === '.ts') {
+  if (configPath && (path.extname(configPath) === '.js' || path.extname(configPath) === '.ts')) {
     return configPath
   }
 

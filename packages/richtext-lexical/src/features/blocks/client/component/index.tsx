@@ -12,6 +12,8 @@ import {
   Pill,
   RenderFields,
   SectionTitle,
+  useConfig,
+  useDocumentForm,
   useDocumentInfo,
   useEditDepth,
   useFormSubmitted,
@@ -23,29 +25,40 @@ import { deepCopyObjectSimpleWithoutReactComponents, reduceFieldsToValues } from
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 
 const baseClass = 'lexical-block'
+
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { getTranslation } from '@payloadcms/translations'
 import { $getNodeByKey } from 'lexical'
-import { type BlocksFieldClient, type CollapsedPreferences, type FormState } from 'payload'
+import {
+  type BlocksFieldClient,
+  type ClientBlock,
+  type CollapsedPreferences,
+  type FormState,
+} from 'payload'
 import { v4 as uuid } from 'uuid'
 
 import type { BlockFields } from '../../server/nodes/BlockNode.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
+import './index.scss'
 import { $isBlockNode } from '../nodes/BlocksNode.js'
 import { BlockContent } from './BlockContent.js'
-import './index.scss'
 import { removeEmptyArrayValues } from './removeEmptyArrayValues.js'
 
 type Props = {
-  readonly children?: React.ReactNode
+  /**
+   * Can be modified by the node in order to trigger the re-fetch of the initial state based on the
+   * formData. This is useful when node.setFields() is explicitly called from outside of the form - in
+   * this case, the new field state is likely not reflected in the form state, so we need to re-fetch
+   */
+  readonly cacheBuster: number
   readonly formData: BlockFields
   readonly nodeKey: string
 }
 
 export const BlockComponent: React.FC<Props> = (props) => {
-  const { formData, nodeKey } = props
+  const { cacheBuster, formData, nodeKey } = props
   const submitted = useFormSubmitted()
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
   const {
@@ -59,9 +72,13 @@ export const BlockComponent: React.FC<Props> = (props) => {
     },
     uuid: uuidFromContext,
   } = useEditorConfigContext()
+
+  const { fields: parentDocumentFields } = useDocumentForm()
   const onChangeAbortControllerRef = useRef(new AbortController())
   const editDepth = useEditDepth()
   const [errorCount, setErrorCount] = React.useState(0)
+
+  const { config } = useConfig()
 
   const drawerSlug = formatDrawerSlug({
     slug: `lexical-blocks-create-${uuidFromContext}-${formData.id}`,
@@ -78,8 +95,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
   const { getFormState } = useServerFunctions()
   const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${formData.blockType}.fields`
 
-  const [initialState, setInitialState] = React.useState<false | FormState | undefined>(
-    initialLexicalFormState?.[formData.id]?.formState
+  const [initialState, setInitialState] = React.useState<false | FormState | undefined>(() => {
+    return initialLexicalFormState?.[formData.id]?.formState
       ? {
           ...initialLexicalFormState?.[formData.id]?.formState,
           blockName: {
@@ -89,8 +106,21 @@ export const BlockComponent: React.FC<Props> = (props) => {
             value: formData.blockName,
           },
         }
-      : false,
-  )
+      : false
+  })
+
+  const hasMounted = useRef(false)
+  const prevCacheBuster = useRef(cacheBuster)
+  useEffect(() => {
+    if (hasMounted.current) {
+      if (prevCacheBuster.current !== cacheBuster) {
+        setInitialState(false)
+      }
+      prevCacheBuster.current = cacheBuster
+    } else {
+      hasMounted.current = true
+    }
+  }, [cacheBuster])
 
   const [CustomLabel, setCustomLabel] = React.useState<React.ReactNode | undefined>(
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
@@ -118,7 +148,9 @@ export const BlockComponent: React.FC<Props> = (props) => {
         data: formData,
         docPermissions: { fields: true },
         docPreferences: await getDocPreferences(),
+        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields),
         globalSlug,
+        initialBlockData: formData,
         operation: 'update',
         renderAllFields: true,
         schemaPath: schemaFieldsPath,
@@ -132,6 +164,22 @@ export const BlockComponent: React.FC<Props> = (props) => {
           valid: true,
           value: formData.blockName,
         }
+
+        const newFormStateData: BlockFields = reduceFieldsToValues(
+          deepCopyObjectSimpleWithoutReactComponents(state),
+          true,
+        ) as BlockFields
+
+        // Things like default values may come back from the server => update the node with the new data
+        editor.update(() => {
+          const node = $getNodeByKey(nodeKey)
+          if (node && $isBlockNode(node)) {
+            const newData = newFormStateData
+            newData.blockType = formData.blockType
+
+            node.setFields(newData, true)
+          }
+        })
 
         setInitialState(state)
         setCustomLabel(state._components?.customComponents?.BlockLabel)
@@ -151,10 +199,13 @@ export const BlockComponent: React.FC<Props> = (props) => {
     schemaFieldsPath,
     id,
     formData,
+    editor,
+    nodeKey,
     initialState,
     collectionSlug,
     globalSlug,
     getDocPreferences,
+    parentDocumentFields,
   ])
 
   const [isCollapsed, setIsCollapsed] = React.useState<boolean>(
@@ -165,11 +216,15 @@ export const BlockComponent: React.FC<Props> = (props) => {
 
   const clientSchemaMap = featureClientSchemaMap['blocks']
 
-  const blocksField: BlocksFieldClient = clientSchemaMap[
+  const blocksField: BlocksFieldClient | undefined = clientSchemaMap?.[
     componentMapRenderedBlockPath
-  ][0] as BlocksFieldClient
+  ]?.[0] as BlocksFieldClient
 
-  const clientBlock = blocksField.blocks[0]
+  const clientBlock: ClientBlock | undefined = blocksField.blockReferences
+    ? typeof blocksField?.blockReferences?.[0] === 'string'
+      ? config.blocksMap[blocksField?.blockReferences?.[0]]
+      : blocksField?.blockReferences?.[0]
+    : blocksField?.blocks?.[0]
 
   const { i18n, t } = useTranslation<object, string>()
 
@@ -187,8 +242,10 @@ export const BlockComponent: React.FC<Props> = (props) => {
           fields: true,
         },
         docPreferences: await getDocPreferences(),
+        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields),
         formState: prevFormState,
         globalSlug,
+        initialBlockFormState: prevFormState,
         operation: 'update',
         renderAllFields: submit ? true : false,
         schemaPath: schemaFieldsPath,
@@ -199,7 +256,9 @@ export const BlockComponent: React.FC<Props> = (props) => {
         return prevFormState
       }
 
-      newFormState.blockName = prevFormState.blockName
+      if (prevFormState.blockName) {
+        newFormState.blockName = prevFormState.blockName
+      }
 
       const newFormStateData: BlockFields = reduceFieldsToValues(
         removeEmptyArrayValues({
@@ -214,7 +273,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
           if (node && $isBlockNode(node)) {
             const newData = newFormStateData
             newData.blockType = formData.blockType
-            node.setFields(newData)
+            node.setFields(newData, true)
           }
         })
       }, 0)
@@ -243,6 +302,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       globalSlug,
       schemaFieldsPath,
       formData.blockType,
+      parentDocumentFields,
       editor,
       nodeKey,
     ],
@@ -343,6 +403,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     () =>
       ({
         children,
+        disableBlockName,
         editButton,
         errorCount,
         fieldHasErrors,
@@ -350,6 +411,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         removeButton,
       }: {
         children?: React.ReactNode
+        disableBlockName?: boolean
         editButton?: boolean
         errorCount?: number
         fieldHasErrors?: boolean
@@ -376,12 +438,15 @@ export const BlockComponent: React.FC<Props> = (props) => {
                       className={`${baseClass}__block-pill ${baseClass}__block-pill-${formData?.blockType}`}
                       pillStyle="white"
                     >
-                      {blockDisplayName}
+                      {blockDisplayName ?? formData?.blockType}
                     </Pill>
-                    <SectionTitle
-                      path="blockName"
-                      readOnly={parentLexicalRichTextField?.admin?.readOnly || false}
-                    />
+                    {!disableBlockName && (
+                      <SectionTitle
+                        path="blockName"
+                        readOnly={parentLexicalRichTextField?.admin?.readOnly || false}
+                      />
+                    )}
+
                     {fieldHasErrors && (
                       <ErrorPill count={errorCount ?? 0} i18n={i18n} withMessage />
                     )}
@@ -422,6 +487,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
     ],
   )
 
+  const clientBlockFields = clientBlock?.fields ?? []
+
   const BlockDrawer = useMemo(
     () => () => (
       <EditDepthProvider>
@@ -435,7 +502,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
           {initialState ? (
             <>
               <RenderFields
-                fields={clientBlock.fields}
+                fields={clientBlockFields}
                 forceRender
                 parentIndexPath=""
                 parentPath="" // See Blocks feature path for details as for why this is empty
@@ -454,7 +521,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       drawerSlug,
       blockDisplayName,
       t,
-      clientBlock.fields,
+      clientBlock?.fields,
       schemaFieldsPath,
       permissions,
       // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
@@ -474,17 +541,16 @@ export const BlockComponent: React.FC<Props> = (props) => {
             return await onChange({ formState, submit: true })
           },
         ]}
-        fields={clientBlock.fields}
+        fields={clientBlockFields}
         initialState={initialState}
         onChange={[onChange]}
-        onSubmit={(formState) => {
+        onSubmit={(formState, newData) => {
           // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
-          const newData: any = reduceFieldsToValues(formState)
           newData.blockType = formData.blockType
           editor.update(() => {
             const node = $getNodeByKey(nodeKey)
             if (node && $isBlockNode(node)) {
-              node.setFields(newData)
+              node.setFields(newData as BlockFields, true)
             }
           })
           toggleDrawer()
@@ -499,7 +565,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
           CustomBlock={CustomBlock}
           EditButton={EditButton}
           errorCount={errorCount}
-          formSchema={clientBlock.fields}
+          formSchema={clientBlockFields}
           initialState={initialState}
           nodeKey={nodeKey}
           RemoveButton={RemoveButton}
@@ -510,18 +576,29 @@ export const BlockComponent: React.FC<Props> = (props) => {
     BlockCollapsible,
     BlockDrawer,
     CustomBlock,
+    clientBlockFields,
     RemoveButton,
     EditButton,
     editor,
     errorCount,
     toggleDrawer,
-    clientBlock.fields,
+    clientBlock?.fields,
     // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
     initialState,
     nodeKey,
     onChange,
     submitted,
   ])
+
+  if (!clientBlock) {
+    return (
+      <BlockCollapsible disableBlockName={true} fieldHasErrors={true}>
+        <div className="lexical-block-not-found">
+          Error: Block '{formData.blockType}' not found in the config but exists in the lexical data
+        </div>
+      </BlockCollapsible>
+    )
+  }
 
   return Block
 }

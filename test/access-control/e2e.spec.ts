@@ -9,12 +9,7 @@ import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
-import type {
-  Config,
-  NonAdminUser,
-  ReadOnlyCollection,
-  RestrictedVersion,
-} from './payload-types.js'
+import type { Config, ReadOnlyCollection, RestrictedVersion } from './payload-types.js'
 
 import {
   closeNav,
@@ -34,12 +29,13 @@ import {
   disabledSlug,
   docLevelAccessSlug,
   fullyRestrictedSlug,
-  noAdminAccessEmail,
-  nonAdminUserEmail,
-  nonAdminUserSlug,
+  nonAdminEmail,
+  publicUserEmail,
+  publicUsersSlug,
   readNotUpdateGlobalSlug,
   readOnlyGlobalSlug,
   readOnlySlug,
+  restrictedVersionsAdminPanelSlug,
   restrictedVersionsSlug,
   slug,
   unrestrictedSlug,
@@ -59,7 +55,7 @@ const dirname = path.dirname(filename)
 
 const { beforeAll, describe } = test
 let payload: PayloadTestSDK<Config>
-describe('access control', () => {
+describe('Access Control', () => {
   let page: Page
   let url: AdminUrlUtil
   let restrictedUrl: AdminUrlUtil
@@ -68,6 +64,7 @@ describe('access control', () => {
   let richTextUrl: AdminUrlUtil
   let readOnlyGlobalUrl: AdminUrlUtil
   let restrictedVersionsUrl: AdminUrlUtil
+  let restrictedVersionsAdminPanelUrl: AdminUrlUtil
   let userRestrictedCollectionURL: AdminUrlUtil
   let userRestrictedGlobalURL: AdminUrlUtil
   let disabledFields: AdminUrlUtil
@@ -86,6 +83,7 @@ describe('access control', () => {
     readOnlyCollectionUrl = new AdminUrlUtil(serverURL, readOnlySlug)
     readOnlyGlobalUrl = new AdminUrlUtil(serverURL, readOnlySlug)
     restrictedVersionsUrl = new AdminUrlUtil(serverURL, restrictedVersionsSlug)
+    restrictedVersionsAdminPanelUrl = new AdminUrlUtil(serverURL, restrictedVersionsAdminPanelSlug)
     userRestrictedCollectionURL = new AdminUrlUtil(serverURL, userRestrictedCollectionSlug)
     userRestrictedGlobalURL = new AdminUrlUtil(serverURL, userRestrictedGlobalSlug)
     disabledFields = new AdminUrlUtil(serverURL, disabledSlug)
@@ -234,16 +232,14 @@ describe('access control', () => {
     test('ensure complex collection config fields show up in correct read-only state', async () => {
       const regression1URL = new AdminUrlUtil(serverURL, 'regression1')
       await page.goto(regression1URL.list)
-      // Click on first card
+
       await page.locator('.cell-id a').first().click()
-      // wait for url
       await page.waitForURL(`**/collections/regression1/**`)
 
       await ensureRegression1FieldsHaveCorrectAccess()
 
       // Edit any field
       await page.locator('#field-group1__text').fill('test!')
-      // Save the doc
       await saveDocAndAssert(page)
       await wait(1000)
       // Ensure fields still have the correct readOnly state. When saving the document, permissions are re-evaluated
@@ -280,18 +276,17 @@ describe('access control', () => {
     test('ensure complex collection config fields show up in correct read-only state 2', async () => {
       const regression2URL = new AdminUrlUtil(serverURL, 'regression2')
       await page.goto(regression2URL.list)
-      // Click on first card
+
       await page.locator('.cell-id a').first().click()
-      // wait for url
       await page.waitForURL(`**/collections/regression2/**`)
 
       await ensureRegression2FieldsHaveCorrectAccess()
 
       // Edit any field
       await page.locator('#field-group__text').fill('test!')
-      // Save the doc
       await saveDocAndAssert(page)
       await wait(1000)
+
       // Ensure fields still have the correct readOnly state. When saving the document, permissions are re-evaluated
       await ensureRegression2FieldsHaveCorrectAccess()
     })
@@ -409,7 +404,6 @@ describe('access control', () => {
     test('should not show edit button', async () => {
       const createNotUpdateURL = new AdminUrlUtil(serverURL, createNotUpdateCollectionSlug)
       await page.goto(createNotUpdateURL.create)
-      await page.waitForURL(createNotUpdateURL.create)
       await expect(page.locator('#field-name')).toBeVisible()
       await page.locator('#field-name').fill('name')
       await expect(page.locator('#field-name')).toHaveValue('name')
@@ -452,7 +446,6 @@ describe('access control', () => {
     test('should not show edit button', async () => {
       const createNotUpdateURL = new AdminUrlUtil(serverURL, readNotUpdateGlobalSlug)
       await page.goto(createNotUpdateURL.global(readNotUpdateGlobalSlug))
-      await page.waitForURL(createNotUpdateURL.global(readNotUpdateGlobalSlug))
       await expect(page.locator('#field-name')).toBeVisible()
       await expect(page.locator('#field-name')).toBeDisabled()
       await expect(page.locator('#action-save')).toBeHidden()
@@ -515,7 +508,6 @@ describe('access control', () => {
     describe('global', () => {
       test('should restrict update access based on document field', async () => {
         await page.goto(userRestrictedGlobalURL.global(userRestrictedGlobalSlug))
-        await page.waitForURL(userRestrictedGlobalURL.global(userRestrictedGlobalSlug))
         await expect(page.locator('#field-name')).toBeVisible()
         await expect(page.locator('#field-name')).toHaveValue(devUser.email)
         await expect(page.locator('#field-name')).toBeEnabled()
@@ -533,7 +525,6 @@ describe('access control', () => {
         })
 
         await page.goto(userRestrictedGlobalURL.global(userRestrictedGlobalSlug))
-        await page.waitForURL(userRestrictedGlobalURL.global(userRestrictedGlobalSlug))
         await expect(page.locator('#field-name')).toBeDisabled()
         await expect(page.locator('#action-save')).toBeHidden()
       })
@@ -562,16 +553,26 @@ describe('access control', () => {
 
     beforeAll(async () => {
       existingDoc = await payload.create({
-        collection: restrictedVersionsSlug,
+        collection: restrictedVersionsAdminPanelSlug,
         data: {
           name: 'name',
         },
       })
+
+      await payload.update({
+        collection: restrictedVersionsAdminPanelSlug,
+        id: existingDoc.id,
+        data: {
+          hidden: true,
+        },
+      })
     })
 
-    test('versions sidebar should not show', async () => {
-      await page.goto(restrictedVersionsUrl.edit(existingDoc.id))
-      await expect(page.locator('.versions-count')).toBeHidden()
+    test('versions tab should not show', async () => {
+      await page.goto(restrictedVersionsAdminPanelUrl.edit(existingDoc.id))
+      await page.locator('.doc-tabs__tabs').getByLabel('Versions').click()
+      const rows = page.locator('.versions table tbody tr')
+      await expect(rows).toHaveCount(1)
     })
   })
 
@@ -610,56 +611,55 @@ describe('access control', () => {
   })
 
   describe('admin access', () => {
-    test('should block admin access to admin user', async () => {
-      const adminURL = `${serverURL}/admin`
-      await page.goto(adminURL)
-      await page.waitForURL(adminURL)
+    test('unauthenticated users should not have access to the admin panel', async () => {
+      await page.goto(url.logout)
 
-      await expect(page.locator('.dashboard')).toBeVisible()
+      await expect(page.locator('.payload-toast-container')).toContainText(
+        'You have been logged out successfully.',
+      )
 
-      await page.goto(logoutURL)
-      await page.waitForURL(logoutURL)
+      await expect(page.locator('form.login__form')).toBeVisible()
+
+      await page.goto(url.admin)
+
+      // wait for redirect to login
+      await page.waitForURL(url.login)
+
+      expect(page.url()).toEqual(url.login)
+    })
+
+    test('non-admin users should not have access to the admin panel', async () => {
+      await page.goto(url.logout)
 
       await login({
         data: {
-          email: noAdminAccessEmail,
+          email: nonAdminEmail,
           password: 'test',
         },
         page,
         serverURL,
       })
 
-      await expect(page.locator('.unauthorized')).toBeVisible()
+      await expect(page.locator('.unauthorized .form-header h1')).toHaveText(
+        'Unauthorized, this user does not have access to the admin panel.',
+      )
 
-      // Log back in for the next test
-      await page.goto(logoutURL)
-      await login({
-        data: {
-          email: devUser.email,
-          password: devUser.password,
-        },
-        page,
-        serverURL,
-      })
+      await page.goto(url.logout)
+
+      await expect(page.locator('.payload-toast-container')).toContainText(
+        'You have been logged out successfully.',
+      )
+
+      await expect(page.locator('form.login__form')).toBeVisible()
     })
 
-    test('should block admin access to non-admin user', async () => {
-      const adminURL = `${serverURL}/admin`
-      const unauthorizedURL = `${serverURL}/admin/unauthorized`
-      await page.goto(adminURL)
-      await page.waitForURL(adminURL)
+    test('public users should not have access to access admin', async () => {
+      await page.goto(url.logout)
 
-      await expect(page.locator('.dashboard')).toBeVisible()
-
-      await page.goto(logoutURL)
-      await page.waitForURL(logoutURL)
-
-      const nonAdminUser: {
-        token?: string
-      } & NonAdminUser = await payload.login({
-        collection: nonAdminUserSlug,
+      const user = await payload.login({
+        collection: publicUsersSlug,
         data: {
-          email: nonAdminUserEmail,
+          email: publicUserEmail,
           password: devUser.password,
         },
       })
@@ -667,20 +667,37 @@ describe('access control', () => {
       await context.addCookies([
         {
           name: 'payload-token',
-          url: serverURL,
-          value: nonAdminUser.token,
+          value: user.token,
+          domain: 'localhost',
+          path: '/',
+          httpOnly: true,
+          secure: true,
         },
       ])
 
-      await page.goto(adminURL)
-      await page.waitForURL(unauthorizedURL)
+      await page.reload()
 
-      await expect(page.locator('.unauthorized')).toBeVisible()
+      await page.goto(url.admin)
 
-      // Log back in for the next test
-      await context.clearCookies()
-      await page.goto(logoutURL)
-      await page.waitForURL(logoutURL)
+      // await for redirect to unauthorized
+      await page.waitForURL(/unauthorized$/)
+
+      await expect(page.locator('.unauthorized .form-header h1')).toHaveText(
+        'Unauthorized, this user does not have access to the admin panel.',
+      )
+
+      await page.goto(url.logout)
+
+      await expect(page.locator('.payload-toast-container')).toContainText(
+        'You have been logged out successfully.',
+      )
+
+      await expect(page.locator('form.login__form')).toBeVisible()
+    })
+  })
+
+  describe('read-only from access control', () => {
+    beforeAll(async () => {
       await login({
         data: {
           email: devUser.email,
@@ -690,9 +707,7 @@ describe('access control', () => {
         serverURL,
       })
     })
-  })
 
-  describe('read-only from access control', () => {
     test('should be read-only when update returns false', async () => {
       await page.goto(disabledFields.create)
 

@@ -25,6 +25,9 @@ export const i18n: Partial<GenericLanguages> = {
   es: {
     label: 'Relación',
   },
+  et: {
+    label: 'Seos',
+  },
   fa: {
     label: 'روابط',
   },
@@ -68,10 +71,10 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Relație',
   },
   rs: {
-    label: 'Veza',
+    label: 'Релација',
   },
   'rs-latin': {
-    label: 'Odnos',
+    label: 'Relacija',
   },
   ru: {
     label: 'Отношения',
@@ -80,7 +83,7 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Vzťah',
   },
   sl: {
-    label: 'Razmerje',
+    label: 'Odnos',
   },
   sv: {
     label: 'Relation',

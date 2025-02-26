@@ -1,4 +1,4 @@
-import type { DeleteOne, PayloadRequest } from 'payload'
+import type { DeleteOne } from 'payload'
 
 import { eq } from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'
@@ -9,12 +9,13 @@ import { buildFindManyArgs } from './find/buildFindManyArgs.js'
 import buildQuery from './queries/buildQuery.js'
 import { selectDistinct } from './queries/selectDistinct.js'
 import { transform } from './transform/read/index.js'
+import { getTransaction } from './utilities/getTransaction.js'
 
 export const deleteOne: DeleteOne = async function deleteOne(
   this: DrizzleAdapter,
-  { collection: collectionSlug, req = {} as PayloadRequest, select, where: whereArg },
+  { collection: collectionSlug, req, select, where: whereArg },
 ) {
-  const db = this.sessions[await req?.transactionID]?.db || this.drizzle
+  const db = await getTransaction(this, req)
   const collection = this.payload.collections[collectionSlug].config
 
   const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
@@ -24,7 +25,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
   const { joins, selectFields, where } = buildQuery({
     adapter: this,
     fields: collection.flattenedFields,
-    locale: req.locale,
+    locale: req?.locale,
     tableName,
     where: whereArg,
   })

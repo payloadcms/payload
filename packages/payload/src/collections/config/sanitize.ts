@@ -1,18 +1,27 @@
+// @ts-strict-ignore
 import type { LoginWithUsernameOptions } from '../../auth/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
-import type { CollectionConfig, SanitizedCollectionConfig, SanitizedJoins } from './types.js'
+import type {
+  CollectionConfig,
+  SanitizedCollectionConfig,
+  SanitizedJoin,
+  SanitizedJoins,
+} from './types.js'
 
+import { authCollectionEndpoints } from '../../auth/endpoints/index.js'
 import { getBaseAuthFields } from '../../auth/getAuthFields.js'
 import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import mergeBaseFields from '../../fields/mergeBaseFields.js'
+import { uploadCollectionEndpoints } from '../../uploads/endpoints/index.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { deepMergeWithReactComponents } from '../../utilities/deepMerge.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
 import baseVersionFields from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
+import { defaultCollectionEndpoints } from '../endpoints/index.js'
 import { authDefaults, defaults, loginWithUsernameDefaults } from './defaults.js'
 import { sanitizeAuthFields, sanitizeUploadFields } from './reservedFieldNames.js'
 import { validateUseAsTitle } from './useAsTitle.js'
@@ -25,6 +34,7 @@ export const sanitizeCollection = async (
    * so that you can sanitize them together, after the config has been sanitized.
    */
   richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>,
+  _validRelationships?: string[],
 ): Promise<SanitizedCollectionConfig> => {
   // /////////////////////////////////
   // Make copy of collection config
@@ -36,14 +46,10 @@ export const sanitizeCollection = async (
   // Sanitize fields
   // /////////////////////////////////
 
-  const validRelationships = (config.collections || []).reduce(
-    (acc, c) => {
-      acc.push(c.slug)
-      return acc
-    },
-    [collection.slug],
-  )
+  const validRelationships = _validRelationships ?? config.collections.map((c) => c.slug) ?? []
+
   const joins: SanitizedJoins = {}
+  const polymorphicJoins: SanitizedJoin[] = []
   sanitized.fields = await sanitizeFields({
     collectionConfig: sanitized,
     config,
@@ -51,9 +57,32 @@ export const sanitizeCollection = async (
     joinPath: '',
     joins,
     parentIsLocalized: false,
+    polymorphicJoins,
     richTextSanitizationPromises,
     validRelationships,
   })
+
+  if (sanitized.endpoints !== false) {
+    if (!sanitized.endpoints) {
+      sanitized.endpoints = []
+    }
+
+    if (sanitized.auth) {
+      for (const endpoint of authCollectionEndpoints) {
+        sanitized.endpoints.push(endpoint)
+      }
+    }
+
+    if (sanitized.upload) {
+      for (const endpoint of uploadCollectionEndpoints) {
+        sanitized.endpoints.push(endpoint)
+      }
+    }
+
+    for (const endpoint of defaultCollectionEndpoints) {
+      sanitized.endpoints.push(endpoint)
+    }
+  }
 
   if (sanitized.timestamps !== false) {
     // add default timestamps fields only as needed
@@ -141,6 +170,7 @@ export const sanitizeCollection = async (
     // sanitize fields for reserved names
     sanitizeUploadFields(sanitized.fields, sanitized)
 
+    sanitized.upload.cacheTags = sanitized.upload?.cacheTags ?? true
     sanitized.upload.bulkUpload = sanitized.upload?.bulkUpload ?? true
     sanitized.upload.staticDir = sanitized.upload.staticDir || sanitized.slug
     sanitized.admin.useAsTitle =
@@ -195,6 +225,10 @@ export const sanitizeCollection = async (
       sanitized.auth.loginWithUsername = false
     }
 
+    if (!collection?.admin?.useAsTitle) {
+      sanitized.admin.useAsTitle = sanitized.auth.loginWithUsername ? 'username' : 'email'
+    }
+
     sanitized.fields = mergeBaseFields(sanitized.fields, getBaseAuthFields(sanitized.auth))
   }
 
@@ -207,6 +241,7 @@ export const sanitizeCollection = async (
   const sanitizedConfig = sanitized as SanitizedCollectionConfig
 
   sanitizedConfig.joins = joins
+  sanitizedConfig.polymorphicJoins = polymorphicJoins
 
   sanitizedConfig.flattenedFields = flattenAllFields({ fields: sanitizedConfig.fields })
 

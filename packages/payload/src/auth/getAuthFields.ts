@@ -15,7 +15,11 @@ export const getBaseAuthFields = (authConfig: IncomingAuthType): Field[] => {
     authFields.push(...apiKeyFields)
   }
 
-  if (!authConfig.disableLocalStrategy) {
+  if (
+    !authConfig.disableLocalStrategy ||
+    (typeof authConfig.disableLocalStrategy === 'object' &&
+      authConfig.disableLocalStrategy.enableFields)
+  ) {
     const emailField = { ...emailFieldConfig }
     let usernameField: TextField | undefined
 

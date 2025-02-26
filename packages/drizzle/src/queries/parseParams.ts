@@ -1,34 +1,41 @@
-import type { SQL } from 'drizzle-orm'
+import type { SQL, Table } from 'drizzle-orm'
 import type { FlattenedField, Operator, Where } from 'payload'
 
 import { and, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
 import { PgUUID } from 'drizzle-orm/pg-core'
 import { QueryError } from 'payload'
-import { validOperators } from 'payload/shared'
+import { validOperatorSet } from 'payload/shared'
 
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
 
+import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { buildAndOrConditions } from './buildAndOrConditions.js'
 import { getTableColumnFromPath } from './getTableColumnFromPath.js'
 import { sanitizeQueryValue } from './sanitizeQueryValue.js'
 
 type Args = {
   adapter: DrizzleAdapter
+  aliasTable?: Table
   fields: FlattenedField[]
   joins: BuildQueryJoinAliases
   locale: string
+  parentIsLocalized: boolean
   selectFields: Record<string, GenericColumn>
+  selectLocale?: boolean
   tableName: string
   where: Where
 }
 
 export function parseParams({
   adapter,
+  aliasTable,
   fields,
   joins,
   locale,
+  parentIsLocalized,
   selectFields,
+  selectLocale,
   tableName,
   where,
 }: Args): SQL {
@@ -49,10 +56,13 @@ export function parseParams({
         if (Array.isArray(condition)) {
           const builtConditions = buildAndOrConditions({
             adapter,
+            aliasTable,
             fields,
             joins,
             locale,
+            parentIsLocalized,
             selectFields,
+            selectLocale,
             tableName,
             where: condition,
           })
@@ -66,7 +76,7 @@ export function parseParams({
           const pathOperators = where[relationOrPath]
           if (typeof pathOperators === 'object') {
             for (let operator of Object.keys(pathOperators)) {
-              if (validOperators.includes(operator as Operator)) {
+              if (validOperatorSet.has(operator as Operator)) {
                 const val = where[relationOrPath][operator]
 
                 const {
@@ -80,12 +90,15 @@ export function parseParams({
                   table,
                 } = getTableColumnFromPath({
                   adapter,
+                  aliasTable,
                   collectionPath: relationOrPath,
                   fields,
                   joins,
                   locale,
+                  parentIsLocalized,
                   pathSegments: relationOrPath.replace(/__/g, '.').split('.'),
                   selectFields,
+                  selectLocale,
                   tableName,
                   value: val,
                 })
@@ -148,6 +161,7 @@ export function parseParams({
                     like: { operator: 'like', wildcard: '%' },
                     not_equals: { operator: '<>', wildcard: '' },
                     not_in: { operator: 'not in', wildcard: '' },
+                    not_like: { operator: 'not like', wildcard: '%' },
                   }
 
                   let formattedValue = val
@@ -162,11 +176,15 @@ export function parseParams({
                     formattedValue = ''
                   }
 
-                  constraints.push(
-                    sql.raw(
-                      `${table[columnName].name}${jsonQuery} ${operatorKeys[operator].operator} ${formattedValue}`,
-                    ),
-                  )
+                  let jsonQuerySelector = `${table[columnName].name}${jsonQuery}`
+
+                  if (adapter.name === 'sqlite' && operator === 'not_like') {
+                    jsonQuerySelector = `COALESCE(${table[columnName].name}${jsonQuery}, '')`
+                  }
+
+                  const rawSQLQuery = `${jsonQuerySelector} ${operatorKeys[operator].operator} ${formattedValue}`
+
+                  constraints.push(sql.raw(rawSQLQuery))
 
                   break
                 }
@@ -257,12 +275,18 @@ export function parseParams({
                   break
                 }
 
+                const resolvedColumn =
+                  rawColumn ||
+                  (aliasTable && tableName === getNameFromDrizzleTable(table)
+                    ? aliasTable[columnName]
+                    : table[columnName])
+
                 if (queryOperator === 'not_equals' && queryValue !== null) {
                   constraints.push(
                     or(
-                      isNull(rawColumn || table[columnName]),
+                      isNull(resolvedColumn),
                       /* eslint-disable @typescript-eslint/no-explicit-any */
-                      ne<any>(rawColumn || table[columnName], queryValue),
+                      ne<any>(resolvedColumn, queryValue),
                     ),
                   )
                   break
@@ -284,12 +308,12 @@ export function parseParams({
                 }
 
                 if (operator === 'equals' && queryValue === null) {
-                  constraints.push(isNull(rawColumn || table[columnName]))
+                  constraints.push(isNull(resolvedColumn))
                   break
                 }
 
                 if (operator === 'not_equals' && queryValue === null) {
-                  constraints.push(isNotNull(rawColumn || table[columnName]))
+                  constraints.push(isNotNull(resolvedColumn))
                   break
                 }
 
@@ -304,12 +328,22 @@ export function parseParams({
 
                     case 'near': {
                       const [lng, lat, maxDistance, minDistance] = queryValue as number[]
+                      const geoConstraints: SQL[] = []
 
-                      let constraint = sql`ST_DWithin(ST_Transform(${table[columnName]}, 3857), ST_Transform(ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326), 3857), ${maxDistance})`
-                      if (typeof minDistance === 'number' && !Number.isNaN(minDistance)) {
-                        constraint = sql`${constraint} AND ST_Distance(ST_Transform(${table[columnName]}, 3857), ST_Transform(ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326), 3857)) >= ${minDistance}`
+                      if (typeof maxDistance === 'number' && !Number.isNaN(maxDistance)) {
+                        geoConstraints.push(
+                          sql`ST_DWithin(ST_Transform(${table[columnName]}, 3857), ST_Transform(ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326), 3857), ${maxDistance})`,
+                        )
                       }
-                      constraints.push(constraint)
+
+                      if (typeof minDistance === 'number' && !Number.isNaN(minDistance)) {
+                        geoConstraints.push(
+                          sql`ST_Distance(ST_Transform(${table[columnName]}, 3857), ST_Transform(ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326), 3857)) >= ${minDistance}`,
+                        )
+                      }
+                      if (geoConstraints.length) {
+                        constraints.push(and(...geoConstraints))
+                      }
                       break
                     }
 
@@ -326,9 +360,7 @@ export function parseParams({
                   break
                 }
 
-                constraints.push(
-                  adapter.operators[queryOperator](rawColumn || table[columnName], queryValue),
-                )
+                constraints.push(adapter.operators[queryOperator](resolvedColumn, queryValue))
               }
             }
           }

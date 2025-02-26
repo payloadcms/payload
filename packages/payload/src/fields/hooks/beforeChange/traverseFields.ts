@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { ValidationFieldError } from '../../../errors/index.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
@@ -8,6 +9,10 @@ import type { Field, TabAsField } from '../../config/types.js'
 import { promise } from './promise.js'
 
 type Args = {
+  /**
+   * Data of the nearest parent block. If no parent block exists, this will be the `undefined`
+   */
+  blockData?: JsonObject
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   data: JsonObject
@@ -23,11 +28,16 @@ type Args = {
   fields: (Field | TabAsField)[]
   global: null | SanitizedGlobalConfig
   id?: number | string
-  mergeLocaleActions: (() => Promise<void>)[]
+  mergeLocaleActions: (() => Promise<void> | void)[]
   operation: Operation
-  path: (number | string)[]
+  parentIndexPath: string
+  /**
+   * @todo make required in v4.0
+   */
+  parentIsLocalized?: boolean
+  parentPath: string
+  parentSchemaPath: string
   req: PayloadRequest
-  schemaPath: string[]
   siblingData: JsonObject
   /**
    * The original siblingData (not modified by any hooks)
@@ -50,6 +60,7 @@ type Args = {
  */
 export const traverseFields = async ({
   id,
+  blockData,
   collection,
   context,
   data,
@@ -60,9 +71,11 @@ export const traverseFields = async ({
   global,
   mergeLocaleActions,
   operation,
-  path,
+  parentIndexPath,
+  parentIsLocalized,
+  parentPath,
+  parentSchemaPath,
   req,
-  schemaPath,
   siblingData,
   siblingDoc,
   siblingDocWithLocales,
@@ -74,6 +87,7 @@ export const traverseFields = async ({
     promises.push(
       promise({
         id,
+        blockData,
         collection,
         context,
         data,
@@ -85,12 +99,15 @@ export const traverseFields = async ({
         global,
         mergeLocaleActions,
         operation,
-        parentPath: path,
-        parentSchemaPath: schemaPath,
+        parentIndexPath,
+        parentIsLocalized,
+        parentPath,
+        parentSchemaPath,
         req,
         siblingData,
         siblingDoc,
         siblingDocWithLocales,
+        siblingFields: fields,
         skipValidation,
       }),
     )

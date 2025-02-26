@@ -2,18 +2,28 @@
 import type { EditorState, SerializedEditorState } from 'lexical'
 import type { Validate } from 'payload'
 
-import { FieldLabel, useEditDepth, useField, withCondition } from '@payloadcms/ui'
+import {
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+  RenderCustomComponent,
+  useEditDepth,
+  useEffectEvent,
+  useField,
+} from '@payloadcms/ui'
 import { mergeFieldStyles } from '@payloadcms/ui/shared'
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 
 import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
-import type { LexicalRichTextFieldProps } from '../types.js'
 
-import { LexicalProvider } from '../lexical/LexicalProvider.js'
 import '../lexical/theme/EditorTheme.scss'
 import './bundled.css'
 import './index.scss'
+
+import type { LexicalRichTextFieldProps } from '../types.js'
+
+import { LexicalProvider } from '../lexical/LexicalProvider.js'
 
 const baseClass = 'rich-text-lexical'
 
@@ -27,7 +37,7 @@ const RichTextComponent: React.FC<
     field,
     field: {
       name,
-      admin: { className, readOnly: readOnlyFromAdmin } = {},
+      admin: { className, description, readOnly: readOnlyFromAdmin } = {},
       label,
       localized,
       required,
@@ -71,13 +81,37 @@ const RichTextComponent: React.FC<
 
   const disabled = readOnlyFromProps || formProcessing || formInitializing
 
+  const [isSmallWidthViewport, setIsSmallWidthViewport] = useState<boolean>(false)
+  const [rerenderProviderKey, setRerenderProviderKey] = useState<Date>()
+
+  const prevInitialValueRef = React.useRef<SerializedEditorState | undefined>(initialValue)
+  const prevValueRef = React.useRef<SerializedEditorState | undefined>(value)
+
+  useEffect(() => {
+    const updateViewPortWidth = () => {
+      const isNextSmallWidthViewport = window.matchMedia('(max-width: 768px)').matches
+
+      if (isNextSmallWidthViewport !== isSmallWidthViewport) {
+        setIsSmallWidthViewport(isNextSmallWidthViewport)
+      }
+    }
+    updateViewPortWidth()
+    window.addEventListener('resize', updateViewPortWidth)
+
+    return () => {
+      window.removeEventListener('resize', updateViewPortWidth)
+    }
+  }, [isSmallWidthViewport])
+
   const classes = [
     baseClass,
     'field-type',
     className,
     showError && 'error',
     disabled && `${baseClass}--read-only`,
-    editorConfig?.admin?.hideGutter !== true ? `${baseClass}--show-gutter` : null,
+    editorConfig?.admin?.hideGutter !== true && !isSmallWidthViewport
+      ? `${baseClass}--show-gutter`
+      : null,
   ]
     .filter(Boolean)
     .join(' ')
@@ -86,17 +120,47 @@ const RichTextComponent: React.FC<
 
   const handleChange = useCallback(
     (editorState: EditorState) => {
-      setValue(editorState.toJSON())
+      const newState = editorState.toJSON()
+      prevValueRef.current = newState
+      setValue(newState)
     },
     [setValue],
   )
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
 
+  const handleInitialValueChange = useEffectEvent(
+    (initialValue: SerializedEditorState | undefined) => {
+      // Object deep equality check here, as re-mounting the editor if
+      // the new value is the same as the old one is not necessary
+      if (
+        prevValueRef.current !== value &&
+        JSON.stringify(prevValueRef.current) !== JSON.stringify(value)
+      ) {
+        prevInitialValueRef.current = initialValue
+        prevValueRef.current = value
+        setRerenderProviderKey(new Date())
+      }
+    },
+  )
+
+  useEffect(() => {
+    // Needs to trigger for object reference changes - otherwise,
+    // reacting to the same initial value change twice will cause
+    // the second change to be ignored, even though the value has changed.
+    // That's because initialValue is not kept up-to-date
+    if (!Object.is(initialValue, prevInitialValueRef.current)) {
+      handleInitialValueChange(initialValue)
+    }
+  }, [initialValue])
+
   return (
     <div className={classes} key={pathWithEditDepth} style={styles}>
-      {Error}
-      {Label || <FieldLabel label={label} localized={localized} required={required} />}
+      <RenderCustomComponent
+        CustomComponent={Error}
+        Fallback={<FieldError path={path} showError={showError} />}
+      />
+      {Label || <FieldLabel label={label} localized={localized} path={path} required={required} />}
       <div className={`${baseClass}__wrap`}>
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
           {BeforeInput}
@@ -104,7 +168,8 @@ const RichTextComponent: React.FC<
             composerKey={pathWithEditDepth}
             editorConfig={editorConfig}
             fieldProps={props}
-            key={JSON.stringify({ initialValue, path })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010)
+            isSmallWidthViewport={isSmallWidthViewport}
+            key={JSON.stringify({ path, rerenderProviderKey })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010)
             onChange={handleChange}
             readOnly={disabled}
             value={value}
@@ -112,6 +177,10 @@ const RichTextComponent: React.FC<
           {AfterInput}
         </ErrorBoundary>
         {Description}
+        <RenderCustomComponent
+          CustomComponent={Description}
+          Fallback={<FieldDescription description={description} path={path} />}
+        />
       </div>
     </div>
   )
@@ -128,4 +197,4 @@ function fallbackRender({ error }: { error: Error }) {
   )
 }
 
-export const RichText: typeof RichTextComponent = withCondition(RichTextComponent)
+export const RichText: typeof RichTextComponent = RichTextComponent

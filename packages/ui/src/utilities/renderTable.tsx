@@ -1,24 +1,28 @@
 import type {
   ClientCollectionConfig,
+  ClientConfig,
+  ClientField,
   CollectionConfig,
+  Column,
+  ColumnPreference,
   Field,
   ImportMap,
   PaginatedDocs,
   Payload,
+  SanitizedCollectionConfig,
 } from 'payload'
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
-
-// eslint-disable-next-line payload/no-imports-from-exports-dir
-import type { Column } from '../exports/client/index.js'
-import type { ColumnPreferences } from '../providers/ListQuery/index.js'
+import { fieldAffectsData, fieldIsHiddenOrDisabled, flattenTopLevelFields } from 'payload/shared'
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import { buildColumnState } from '../elements/TableColumns/buildColumnState.js'
+import { buildPolymorphicColumnState } from '../elements/TableColumns/buildPolymorphicColumnState.js'
 import { filterFields } from '../elements/TableColumns/filterFields.js'
 import { getInitialColumns } from '../elements/TableColumns/getInitialColumns.js'
+
 // eslint-disable-next-line payload/no-imports-from-exports-dir
-import { Pill, Table } from '../exports/client/index.js'
+import { Pill, SelectAll, SelectRow, Table } from '../exports/client/index.js'
 
 export const renderFilters = (
   fields: Field[],
@@ -26,6 +30,10 @@ export const renderFilters = (
 ): Map<string, React.ReactNode> =>
   fields.reduce(
     (acc, field) => {
+      if (fieldIsHiddenOrDisabled(field)) {
+        return acc
+      }
+
       if ('name' in field && field.admin?.components?.Filter) {
         acc.set(
           field.name,
@@ -42,27 +50,31 @@ export const renderFilters = (
   )
 
 export const renderTable = ({
+  clientCollectionConfig,
+  clientConfig,
   collectionConfig,
+  collections,
   columnPreferences,
   columns: columnsFromArgs,
   customCellProps,
   docs,
   enableRowSelections,
-  fields,
   i18n,
   payload,
   renderRowTypes,
   tableAppearance,
   useAsTitle,
 }: {
-  collectionConfig: ClientCollectionConfig
-  columnPreferences: ColumnPreferences
-  columns?: ColumnPreferences
+  clientCollectionConfig?: ClientCollectionConfig
+  clientConfig?: ClientConfig
+  collectionConfig?: SanitizedCollectionConfig
+  collections?: string[]
+  columnPreferences: ColumnPreference[]
+  columns?: ColumnPreference[]
   customCellProps?: Record<string, any>
   docs: PaginatedDocs['docs']
   drawerSlug?: string
   enableRowSelections: boolean
-  fields: Field[]
   i18n: I18nClient
   payload: Payload
   renderRowTypes?: boolean
@@ -72,39 +84,117 @@ export const renderTable = ({
   columnState: Column[]
   Table: React.ReactNode
 } => {
-  const columns =
-    columnsFromArgs ||
-    getInitialColumns(filterFields(fields), useAsTitle, collectionConfig?.admin?.defaultColumns)
+  // Ensure that columns passed as args comply with the field config, i.e. `hidden`, `disableListColumn`, etc.
 
-  const columnState = buildColumnState({
-    beforeRows: renderRowTypes
-      ? [
-          {
-            accessor: 'collection',
-            active: true,
-            field: null,
-            Heading: i18n.t('version:type'),
-            renderedCells: docs.map((_, i) => (
-              <Pill key={i}>{getTranslation(collectionConfig.labels.singular, i18n)}</Pill>
-            )),
-          },
-        ]
-      : undefined,
-    collectionConfig,
-    columnPreferences,
-    columns,
-    enableRowSelections,
-    fields,
-    i18n,
-    // sortColumnProps,
-    customCellProps,
-    docs,
-    payload,
-    useAsTitle,
-  })
+  let columnState: Column[]
+
+  if (collections) {
+    const fields: ClientField[] = []
+    for (const collection of collections) {
+      const config = clientConfig.collections.find((each) => each.slug === collection)
+
+      for (const field of filterFields(config.fields)) {
+        if (fieldAffectsData(field)) {
+          if (fields.some((each) => fieldAffectsData(each) && each.name === field.name)) {
+            continue
+          }
+        }
+
+        fields.push(field)
+      }
+    }
+
+    const columns = columnsFromArgs
+      ? columnsFromArgs?.filter((column) =>
+          flattenTopLevelFields(fields, true)?.some(
+            (field) => 'name' in field && column[field.name],
+          ),
+        )
+      : getInitialColumns(fields, useAsTitle, [])
+
+    columnState = buildPolymorphicColumnState({
+      columnPreferences,
+      columns,
+      enableRowSelections,
+      fields,
+      i18n,
+      // sortColumnProps,
+      customCellProps,
+      docs,
+      payload,
+      useAsTitle,
+    })
+  } else {
+    const columns = columnsFromArgs
+      ? columnsFromArgs?.filter((column) =>
+          flattenTopLevelFields(clientCollectionConfig.fields, true)?.some(
+            (field) => 'name' in field && field.name in column,
+          ),
+        )
+      : getInitialColumns(
+          filterFields(clientCollectionConfig.fields),
+          useAsTitle,
+          clientCollectionConfig?.admin?.defaultColumns,
+        )
+
+    columnState = buildColumnState({
+      clientCollectionConfig,
+      collectionConfig,
+      columnPreferences,
+      columns,
+      enableRowSelections,
+      i18n,
+      // sortColumnProps,
+      customCellProps,
+      docs,
+      payload,
+      useAsTitle,
+    })
+  }
+
+  const columnsToUse = [...columnState]
+
+  if (renderRowTypes) {
+    columnsToUse.unshift({
+      accessor: 'collection',
+      active: true,
+      field: {
+        admin: {
+          disabled: true,
+        },
+        hidden: true,
+      },
+      Heading: i18n.t('version:type'),
+      renderedCells: docs.map((doc, i) => (
+        <Pill key={i}>
+          {getTranslation(
+            collections
+              ? payload.collections[doc.relationTo].config.labels.singular
+              : clientCollectionConfig.labels.singular,
+            i18n,
+          )}
+        </Pill>
+      )),
+    } as Column)
+  }
+
+  if (enableRowSelections) {
+    columnsToUse.unshift({
+      accessor: '_select',
+      active: true,
+      field: {
+        admin: {
+          disabled: true,
+        },
+        hidden: true,
+      },
+      Heading: <SelectAll />,
+      renderedCells: docs.map((_, i) => <SelectRow key={i} rowData={docs[i]} />),
+    } as Column)
+  }
 
   return {
     columnState,
-    Table: <Table appearance={tableAppearance} columns={columnState} data={docs} />,
+    Table: <Table appearance={tableAppearance} columns={columnsToUse} data={docs} />,
   }
 }

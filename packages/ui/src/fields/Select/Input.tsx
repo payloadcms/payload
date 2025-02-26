@@ -30,6 +30,7 @@ export type SelectInputProps = {
   readonly localized?: boolean
   readonly name: string
   readonly onChange?: ReactSelectAdapterProps['onChange']
+  readonly onInputChange?: ReactSelectAdapterProps['onInputChange']
   readonly options?: OptionObject[]
   readonly path: string
   readonly readOnly?: boolean
@@ -54,6 +55,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
     Label,
     localized,
     onChange,
+    onInputChange,
     options,
     path,
     readOnly,
@@ -81,6 +83,9 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
       label: matchingOption ? getTranslation(matchingOption.label, i18n) : value,
       value: matchingOption?.value ?? value,
     }
+  } else {
+    // If value is not present then render nothing, allowing select fields to reset to their initial 'Select an option' state
+    valueToRender = null
   }
 
   return (
@@ -115,6 +120,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
           isMulti={hasMany}
           isSortable={isSortable}
           onChange={onChange}
+          onInputChange={onInputChange}
           options={options.map((option) => ({
             ...option,
             label: getTranslation(option.label, i18n),

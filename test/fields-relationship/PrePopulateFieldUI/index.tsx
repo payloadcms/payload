@@ -2,7 +2,7 @@
 import { useField } from '@payloadcms/ui'
 import * as React from 'react'
 
-import { collection1Slug } from '../collectionSlugs.js'
+import { collection1Slug } from '../slugs.js'
 
 export const PrePopulateFieldUI: React.FC<{
   hasMany?: boolean
@@ -19,7 +19,7 @@ export const PrePopulateFieldUI: React.FC<{
       )
       const json = await res.json()
       if (hasMany) {
-        const docIds = json.docs.map((doc) => {
+        const docIDs = json.docs.map((doc) => {
           if (hasMultipleRelations) {
             return {
               relationTo: collection1Slug,
@@ -29,7 +29,7 @@ export const PrePopulateFieldUI: React.FC<{
 
           return doc.id
         })
-        setValue(docIds)
+        setValue(docIDs)
       } else {
         // value that does not appear in first 10 docs fetch
         setValue(json.docs[6].id)

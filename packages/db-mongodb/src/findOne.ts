@@ -1,27 +1,31 @@
-import type { MongooseQueryOptions, QueryOptions } from 'mongoose'
-import type { Document, FindOne, PayloadRequest } from 'payload'
+import type { AggregateOptions, QueryOptions } from 'mongoose'
+import type { FindOne } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildQuery } from './queries/buildQuery.js'
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
-import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
-import { withSession } from './withSession.js'
+import { getSession } from './utilities/getSession.js'
+import { transform } from './utilities/transform.js'
 
 export const findOne: FindOne = async function findOne(
   this: MongooseAdapter,
-  { collection, joins, locale, req = {} as PayloadRequest, select, where },
+  { collection, joins, locale, req, select, where },
 ) {
   const Model = this.collections[collection]
   const collectionConfig = this.payload.collections[collection].config
-  const options: MongooseQueryOptions = {
-    ...(await withSession(this, req)),
+  const session = await getSession(this, req)
+  const options: AggregateOptions & QueryOptions = {
     lean: true,
+    session,
   }
 
-  const query = await Model.buildQuery({
+  const query = await buildQuery({
+    adapter: this,
+    collectionSlug: collection,
+    fields: collectionConfig.flattenedFields,
     locale,
-    payload: this.payload,
     where,
   })
 
@@ -44,7 +48,7 @@ export const findOne: FindOne = async function findOne(
 
   let doc
   if (aggregate) {
-    ;[doc] = await Model.aggregate(aggregate, options)
+    ;[doc] = await Model.aggregate(aggregate, { session })
   } else {
     ;(options as Record<string, unknown>).projection = projection
     doc = await Model.findOne(query, {}, options)
@@ -54,11 +58,7 @@ export const findOne: FindOne = async function findOne(
     return null
   }
 
-  let result: Document = JSON.parse(JSON.stringify(doc))
+  transform({ adapter: this, data: doc, fields: collectionConfig.fields, operation: 'read' })
 
-  // custom id type reset
-  result.id = result._id
-  result = sanitizeInternalFields(result)
-
-  return result
+  return doc
 }
