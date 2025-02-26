@@ -604,7 +604,7 @@ describe('lexicalBlocks', () => {
         async () => {
           await blockGroupTextField.fill('')
         },
-        { allowedNumberOfRequests: 3 },
+        { allowedNumberOfRequests: 3, minimumNumberOfRequests: 2 },
       )
 
       await saveDocAndAssert(page)
@@ -628,7 +628,7 @@ describe('lexicalBlocks', () => {
         async () => {
           await blockTextField.fill('')
         },
-        { allowedNumberOfRequests: 3 },
+        { allowedNumberOfRequests: 3, minimumNumberOfRequests: 2 },
       )
 
       await saveDocAndAssert(page)

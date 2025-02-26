@@ -26,6 +26,7 @@
     }
   ],
   "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": {
       "import": "./src/index.ts",
