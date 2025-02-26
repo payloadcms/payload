@@ -42,7 +42,7 @@ export const RootLayout = async ({
     req: {
       payload: { config },
     },
-  } = await initReq({ configPromise, importMap, key: 'RootLayout' })
+  } = await initReq({ configPromise, importMap })
 
   const theme = getRequestTheme({
     config,

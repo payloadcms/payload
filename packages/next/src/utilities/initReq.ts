@@ -19,9 +19,10 @@ import {
   getRequestLanguage,
   parseCookies,
 } from 'payload'
+import * as qs from 'qs-esm'
+import { cache } from 'react'
 
 import { getRequestLocale } from './getRequestLocale.js'
-import { selectiveCache } from './selectiveCache.js'
 
 type Result = {
   cookies: Map<string, string>
@@ -31,18 +32,68 @@ type Result = {
   permissions: SanitizedPermissions
   req: PayloadRequest
 }
+const cachedInitI18n = cache(async (config: SanitizedConfig, languageCode: AcceptedLanguages) => {
+  return await initI18n({
+    config: config.i18n,
+    context: 'client',
+    language: languageCode,
+  })
+})
 
-type PartialResult = {
-  i18n: I18nClient
-  languageCode: AcceptedLanguages
-  payload: Payload
-  responseHeaders: Headers
-  user: null | User
-}
+const cachedExecuteAuthStrategies = cache(
+  async (headers: Awaited<ReturnType<typeof getHeaders>>, payload: Payload) => {
+    return await executeAuthStrategies({
+      headers,
+      payload,
+    })
+  },
+)
 
-// Create cache instances for different parts of our application
-const partialReqCache = selectiveCache<PartialResult>('partialReq')
-const reqCache = selectiveCache<Result>('req')
+const cachedCreateLocalReq = cache(
+  async (
+    fallbackLocale: false | string,
+    headers: Awaited<ReturnType<typeof getHeaders>>,
+    i18n: I18n,
+    queryString: string | undefined,
+    responseHeaders: Headers,
+    url: string,
+    user: null | User,
+    payload: Payload,
+  ) => {
+    return await createLocalReq(
+      {
+        fallbackLocale,
+        req: {
+          headers,
+          host: headers.get('host'),
+          i18n,
+          query: queryString
+            ? qs.parse(queryString, {
+                depth: 10,
+                ignoreQueryPrefix: true,
+              })
+            : undefined,
+          responseHeaders,
+          url,
+          user,
+        },
+      },
+      payload,
+    )
+  },
+)
+
+const cachedGetRequestLocale = cache(async (req: PayloadRequest) => {
+  return await getRequestLocale({
+    req,
+  })
+})
+
+const cachedGetAccessResults = cache(async (req: PayloadRequest) => {
+  return await getAccessResults({
+    req,
+  })
+})
 
 /**
  * Initializes a full request object, including the `req` object and access control.
@@ -51,83 +102,54 @@ const reqCache = selectiveCache<Result>('req')
 export const initReq = async function ({
   configPromise,
   importMap,
-  key,
   overrides,
   urlSuffix,
 }: {
   configPromise: Promise<SanitizedConfig> | SanitizedConfig
   importMap: ImportMap
-  key: string
-  overrides?: Parameters<typeof createLocalReq>[0]
+  overrides?: {
+    fallbackLocale?: false | string
+    queryString?: string
+  }
   urlSuffix?: string
 }): Promise<Result> {
   const headers = await getHeaders()
   const cookies = parseCookies(headers)
 
-  const partialResult = await partialReqCache.get(async () => {
-    const config = await configPromise
-    const payload = await getPayload({ config, importMap })
-    const languageCode = getRequestLanguage({
-      config,
-      cookies,
-      headers,
-    })
-    const i18n: I18nClient = await initI18n({
-      config: config.i18n,
-      context: 'client',
-      language: languageCode,
-    })
+  const config = await configPromise
+  const payload = await getPayload({ config, importMap })
+  const languageCode = getRequestLanguage({
+    config,
+    cookies,
+    headers,
+  })
 
-    const { responseHeaders, user } = await executeAuthStrategies({
-      headers,
-      payload,
-    })
+  const i18n: I18nClient = await cachedInitI18n(config, languageCode)
 
-    return {
-      i18n,
-      languageCode,
-      payload,
-      responseHeaders,
-      user,
-    }
-  }, 'global')
+  const { responseHeaders, user } = await cachedExecuteAuthStrategies(headers, payload)
 
-  return reqCache.get(async () => {
-    const { i18n, languageCode, payload, responseHeaders, user } = partialResult
+  const req = await cachedCreateLocalReq(
+    overrides?.fallbackLocale,
+    headers,
+    i18n as I18n,
+    overrides?.queryString,
+    responseHeaders,
+    `${payload.config.serverURL}${urlSuffix || ''}`,
+    user,
+    payload,
+  )
 
-    const { req: reqOverrides, ...optionsOverrides } = overrides || {}
-    const req = await createLocalReq(
-      {
-        req: {
-          headers,
-          host: headers.get('host'),
-          i18n: i18n as I18n,
-          responseHeaders,
-          url: `${payload.config.serverURL}${urlSuffix || ''}`,
-          user,
-          ...(reqOverrides || {}),
-        },
-        ...(optionsOverrides || {}),
-      },
-      payload,
-    )
+  const locale = await cachedGetRequestLocale(req)
+  req.locale = locale?.code
 
-    const locale = await getRequestLocale({
-      req,
-    })
-    req.locale = locale?.code
+  const permissions = await cachedGetAccessResults(req)
 
-    const permissions = await getAccessResults({
-      req,
-    })
-
-    return {
-      cookies,
-      headers,
-      languageCode,
-      locale,
-      permissions,
-      req,
-    }
-  }, key)
+  return {
+    cookies,
+    headers,
+    languageCode,
+    locale,
+    permissions,
+    req,
+  }
 }

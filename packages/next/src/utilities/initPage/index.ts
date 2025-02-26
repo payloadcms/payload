@@ -31,15 +31,9 @@ export const initPage = async ({
   } = await initReq({
     configPromise,
     importMap,
-    key: useLayoutReq ? 'RootLayout' : 'initPage',
     overrides: {
       fallbackLocale: false,
-      req: {
-        query: qs.parse(queryString, {
-          depth: 10,
-          ignoreQueryPrefix: true,
-        }),
-      },
+      queryString,
     },
     urlSuffix: `${route}${searchParams ? queryString : ''}`,
   })

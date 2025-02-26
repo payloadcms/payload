@@ -16,7 +16,6 @@ export const handleServerFunctions: ServerFunctionHandler = async (args) => {
   const { req } = await initReq({
     configPromise,
     importMap,
-    key: 'RootLayout',
   })
 
   const augmentedArgs: Parameters<ServerFunction>[0] = {
