@@ -19,9 +19,9 @@ import {
   getRequestLanguage,
   parseCookies,
 } from 'payload'
-import { cache } from 'react'
 
 import { getRequestLocale } from './getRequestLocale.js'
+import { selectiveCache } from './selectiveCache.js'
 
 type Result = {
   cookies: Map<string, string>
@@ -42,32 +42,9 @@ type PartialResult = {
   user: null | User
 }
 
-/**
- * Stable object to cache the partial request object across all pages
- */
-const getPartialInitReqContainer = cache(function (): {
-  reqResult: false | PartialResult | Promise<PartialResult>
-} {
-  return {
-    reqResult: false,
-  }
-})
-
-/**
- * Stable object to cache the request object across all pages with the same key
- */
-const getInitReqContainer = cache(function (
-  /**
-   * The key is solely used to control caching behavior
-   */
-  key: string,
-): {
-  reqResult: false | Promise<Result> | Result
-} {
-  return {
-    reqResult: false,
-  }
-})
+// Create cache instances for different parts of our application
+const partialReqCache = selectiveCache<PartialResult>('partialReq')
+const reqCache = selectiveCache<Result>('req')
 
 /**
  * Initializes a partial request object. This does not construct the `req` object and does
@@ -83,45 +60,28 @@ const initPartialReq = async function ({
   configPromise: Promise<SanitizedConfig> | SanitizedConfig
   importMap: ImportMap
 }): Promise<PartialResult> {
-  const partialReqContainer = getPartialInitReqContainer()
-
-  if (
-    partialReqContainer?.reqResult &&
-    'then' in partialReqContainer.reqResult &&
-    typeof partialReqContainer?.reqResult?.then === 'function'
-  ) {
-    return await partialReqContainer.reqResult
-  }
-
-  partialReqContainer.reqResult = (async () => {
+  return partialReqCache.get('global', async () => {
     const config = await configPromise
     const payload = await getPayload({ config, importMap })
-
     const headers = await getHeaders()
     const cookies = parseCookies(headers)
-
     const languageCode = getRequestLanguage({
       config,
       cookies,
       headers,
     })
-
     const i18n: I18nClient = await initI18n({
       config: config.i18n,
       context: 'client',
       language: languageCode,
     })
 
-    /**
-     * Cannot simply call `payload.auth` here, as we need the user to get the locale, and we need the locale to get the access results
-     * I.e. the `payload.auth` function would call `getAccessResults` without a fully-formed `req` object
-     */
     const { responseHeaders, user } = await executeAuthStrategies({
       headers,
       payload,
     })
 
-    const result: PartialResult = {
+    return {
       cookies,
       headers,
       i18n,
@@ -130,13 +90,7 @@ const initPartialReq = async function ({
       responseHeaders,
       user,
     }
-
-    return result
-  })()
-
-  partialReqContainer.reqResult = await partialReqContainer.reqResult
-
-  return partialReqContainer.reqResult
+  })
 }
 
 /**
@@ -157,25 +111,15 @@ export const initReq = async function ({
   overrides?: Parameters<typeof createLocalReq>[0]
   urlSuffix?: string
 }): Promise<Result> {
-  const { cookies, headers, i18n, languageCode, payload, responseHeaders, user } =
-    await initPartialReq({
-      configPromise,
-      importMap,
-    })
+  const partialResult = await initPartialReq({
+    configPromise,
+    importMap,
+  })
 
-  const reqContainer = getInitReqContainer(key)
+  return reqCache.get(key, async () => {
+    const { cookies, headers, i18n, languageCode, payload, responseHeaders, user } = partialResult
 
-  if (
-    reqContainer?.reqResult &&
-    'then' in reqContainer.reqResult &&
-    typeof reqContainer?.reqResult?.then === 'function'
-  ) {
-    return await reqContainer.reqResult
-  }
-
-  reqContainer.reqResult = (async () => {
     const { req: reqOverrides, ...optionsOverrides } = overrides || {}
-
     const req = await createLocalReq(
       {
         req: {
@@ -195,14 +139,13 @@ export const initReq = async function ({
     const locale = await getRequestLocale({
       req,
     })
-
     req.locale = locale?.code
 
     const permissions = await getAccessResults({
       req,
     })
 
-    const result: Result = {
+    return {
       cookies,
       headers,
       languageCode,
@@ -210,11 +153,5 @@ export const initReq = async function ({
       permissions,
       req,
     }
-
-    return result
-  })()
-
-  reqContainer.reqResult = await reqContainer.reqResult
-
-  return reqContainer.reqResult
+  })
 }
