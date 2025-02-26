@@ -134,6 +134,34 @@ describe('Array', () => {
     await expect(page.locator('#field-items #items-row-0 .row-label')).toContainText('Item 01')
   })
 
+  test('should show correct labels for array rows in toast error', async () => {
+    await page.goto(url.create)
+    const nestedArrayField = page.locator('#field-nestedArrayWithLabels >> .array-field__add-row')
+    await nestedArrayField.click()
+    const firstChildArrayField = page.locator(
+      '#field-nestedArrayWithLabels__0__firstChildArray >> .array-field__add-row',
+    )
+    await firstChildArrayField.click()
+    const secondChildArrayField = page.locator(
+      '#field-nestedArrayWithLabels__0__firstChildArray__0__secondChildArray >> .array-field__add-row',
+    )
+    await secondChildArrayField.click()
+    const childWithoutLabelField = page.locator(
+      '#field-nestedArrayWithLabels__0__firstChildArray__0__secondChildArray__0__childWithoutLabel >> .array-field__add-row',
+    )
+    await childWithoutLabelField.click()
+
+    const customTextLabel = page.locator(
+      '#field-nestedArrayWithLabels__0__firstChildArray__0__secondChildArray__0__childWithoutLabel__0__text',
+    )
+    await customTextLabel.fill('')
+
+    await page.click('#action-save')
+    await expect(page.locator('.payload-toast-container')).toContainText(
+      'The following field is invalid: Nested Array With Labels 1 > First Child Array 1 > Second Child Array 1 > Child Without Label 1 > Custom Text Label',
+    )
+  })
+
   test('ensure functions passed to array field labels property are respected', async () => {
     await page.goto(url.create)
 
