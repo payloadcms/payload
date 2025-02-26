@@ -2,6 +2,7 @@
 import type {
   CollectionSlug,
   Column,
+  ColumnPreference,
   JoinFieldClient,
   ListQuery,
   PaginatedDocs,
@@ -123,13 +124,20 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         newQuery.where = hoistQueryParamsToAnd(newQuery.where, filterOptions)
       }
 
+      // map columns from string[] to ColumnPreference[]
+      const defaultColumns: ColumnPreference[] = field.admin.defaultColumns
+        ? field.admin.defaultColumns.map((accessor) => ({
+            [accessor]: true,
+          }))
+        : undefined
+
       const {
         data: newData,
         state: newColumnState,
         Table: NewTable,
       } = await getTableState({
         collectionSlug: relationTo,
-        columns: query?.columns,
+        columns: query?.columns || defaultColumns,
         docs,
         enableRowSelections: false,
         parent,
