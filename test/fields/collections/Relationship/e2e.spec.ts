@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test'
 import { addListFilter } from 'helpers/e2e/addListFilter.js'
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
-import { openListFilters } from 'helpers/e2e/openListFilters.js'
+import { openCreateDocDrawer, openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -16,8 +16,6 @@ import {
   ensureCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
-  openCreateDocDrawer,
-  openDocDrawer,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
 } from '../../../helpers.js'
@@ -78,7 +76,7 @@ describe('relationship', () => {
 
   test('should create inline relationship within field with many relations', async () => {
     await page.goto(url.create)
-    await openCreateDocDrawer(page, '#field-relationship')
+    await openCreateDocDrawer({ page, fieldSelector: '#field-relationship' })
     await page
       .locator('#field-relationship .relationship-add-new__relation-button--text-fields')
       .click()
@@ -321,10 +319,10 @@ describe('relationship', () => {
     // Mimic real user behavior by typing into the field with spaces and backspaces
     // Explicitly use both `down` and `type` to cover edge cases
 
-    await openDocDrawer(
+    await openDocDrawer({
       page,
-      '#field-relationshipHasMany button.relationship--multi-value-label__drawer-toggler',
-    )
+      selector: '#field-relationshipHasMany button.relationship--multi-value-label__drawer-toggler',
+    })
 
     await page.locator('[id^=doc-drawer_text-fields_1_] #field-text').click()
     await page.keyboard.down('1')
@@ -408,7 +406,10 @@ describe('relationship', () => {
         .locator('#field-relationship .relationship--single-value')
         .textContent()
 
-      await openDocDrawer(page, '#field-relationship .relationship--single-value__drawer-toggler')
+      await openDocDrawer({
+        page,
+        selector: '#field-relationship .relationship--single-value__drawer-toggler',
+      })
       const drawer1Content = page.locator('[id^=doc-drawer_text-fields_1_] .drawer__content')
       const originalDrawerID = await drawer1Content.locator('.id-label').textContent()
       await openDocControls(drawer1Content)
@@ -464,7 +465,10 @@ describe('relationship', () => {
         }),
       ).toBeVisible()
 
-      await openDocDrawer(page, '#field-relationship .relationship--single-value__drawer-toggler')
+      await openDocDrawer({
+        page,
+        selector: '#field-relationship .relationship--single-value__drawer-toggler',
+      })
       const drawer1Content = page.locator('[id^=doc-drawer_text-fields_1_] .drawer__content')
       const originalID = await drawer1Content.locator('.id-label').textContent()
       const originalText = 'Text'
@@ -522,10 +526,10 @@ describe('relationship', () => {
         }),
       ).toBeVisible()
 
-      await openDocDrawer(
+      await openDocDrawer({
         page,
-        '#field-relationship button.relationship--single-value__drawer-toggler',
-      )
+        selector: '#field-relationship button.relationship--single-value__drawer-toggler',
+      })
 
       const drawer1Content = page.locator('[id^=doc-drawer_text-fields_1_] .drawer__content')
       const originalID = await drawer1Content.locator('.id-label').textContent()

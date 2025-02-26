@@ -4,6 +4,7 @@ import type { GeneratedTypes } from 'helpers/sdk/types.js'
 import { expect, test } from '@playwright/test'
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
+import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import { upsertPrefs } from 'helpers/e2e/upsertPrefs.js'
 import { RESTClient } from 'helpers/rest.js'
 import path from 'path'
@@ -17,7 +18,6 @@ import {
   closeLocaleSelector,
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
-  openDocDrawer,
   openLocaleSelector,
   saveDocAndAssert,
   throttleTest,
@@ -351,7 +351,7 @@ describe('Localization', () => {
       const drawerToggler =
         '#field-relationMultiRelationTo .relationship--single-value__drawer-toggler'
       await expect(page.locator(drawerToggler)).toBeEnabled()
-      await openDocDrawer(page, drawerToggler)
+      await openDocDrawer({ page, selector: drawerToggler })
       await expect(page.locator('.doc-drawer__header-text')).toContainText('spanish-relation2')
       await page.locator('.doc-drawer__header-close').click()
     })

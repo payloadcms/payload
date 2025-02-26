@@ -75,11 +75,17 @@ export const renderListView = async (
 
   let columns: ColumnPreference[]
 
+  // Columns from `req.query` are a string, so we need to parse them
+  // Otherwise, columns from args are already in JSON format
   if (query.columns) {
-    try {
-      columns = JSON.parse(query?.columns as string) as ColumnPreference[]
-    } catch (error) {
-      console.error('Error parsing columns from URL:', error) // eslint-disable-line no-console
+    if (typeof query.columns === 'string') {
+      try {
+        columns = JSON.parse(query?.columns) as ColumnPreference[]
+      } catch (error) {
+        console.error('Error parsing columns from URL:', error) // eslint-disable-line no-console
+      }
+    } else {
+      columns = query.columns as ColumnPreference[]
     }
   }
 

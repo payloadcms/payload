@@ -11,7 +11,6 @@ import {
   exactText,
   getRoutes,
   initPageConsoleErrorCatch,
-  openDocDrawer,
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
@@ -36,6 +35,8 @@ import { goToFirstCell } from 'helpers/e2e/navigateToDoc.js'
 import { openListColumns } from 'helpers/e2e/openListColumns.js'
 import { openListFilters } from 'helpers/e2e/openListFilters.js'
 import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
+import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
+import { closeListDrawer } from 'helpers/e2e/toggleListDrawer.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -870,18 +871,13 @@ describe('List View', () => {
       await expect(page.locator('table thead tr th').nth(1)).toHaveText('Number')
     })
 
-    test('should render drawer columns in order', async () => {
-      // Re-order columns like done in the previous test
-      await createPost()
+    test('should render list drawer columns in order', async () => {
       await reorderColumns(page, { fromColumn: 'Number', toColumn: 'ID' })
 
       await page.reload()
 
-      await createPost()
       await page.goto(postsUrl.create)
-
-      await openDocDrawer(page, '.rich-text .list-drawer__toggler')
-
+      await openDocDrawer({ page, selector: '.rich-text .list-drawer__toggler' })
       const listDrawer = page.locator('[id^=list-drawer_1_]')
       await expect(listDrawer).toBeVisible()
 
@@ -891,17 +887,17 @@ describe('List View', () => {
 
       // select the "Post" collection
       await collectionSelector.click()
+
       await page
         .locator('[id^=list-drawer_1_] .list-header__select-collection.react-select .rs__option', {
           hasText: exactText('Post'),
         })
         .click()
 
-      // open the column controls
-      const columnSelector = page.locator('[id^=list-drawer_1_] .list-controls__toggle-columns')
-      await columnSelector.click()
-      // wait until the column toggle UI is visible and fully expanded
-      await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
+      await openListColumns(page, {
+        columnContainerSelector: '.list-controls__columns',
+        togglerSelector: '[id^=list-drawer_1_] .list-controls__toggle-columns',
+      })
 
       // ensure that the columns are in the correct order
       await expect(
@@ -911,33 +907,77 @@ describe('List View', () => {
       ).toHaveText('Number')
     })
 
+    test('should toggle columns in list drawer', async () => {
+      await page.goto(postsUrl.create)
+
+      // Open the drawer
+      await openDocDrawer({ page, selector: '.rich-text .list-drawer__toggler' })
+      const listDrawer = page.locator('[id^=list-drawer_1_]')
+      await expect(listDrawer).toBeVisible()
+
+      await openListColumns(page, {
+        columnContainerSelector: '.list-controls__columns',
+        togglerSelector: '[id^=list-drawer_1_] .list-controls__toggle-columns',
+      })
+
+      await toggleColumn(page, {
+        togglerSelector: '[id^=list-drawer_1_] .list-controls__toggle-columns',
+        columnContainerSelector: '.list-controls__columns',
+        columnLabel: 'ID',
+        targetState: 'off',
+      })
+
+      await closeListDrawer({ page })
+
+      await openDocDrawer({ page, selector: '.rich-text .list-drawer__toggler' })
+
+      await openListColumns(page, {
+        columnContainerSelector: '.list-controls__columns',
+        togglerSelector: '[id^=list-drawer_1_] .list-controls__toggle-columns',
+      })
+
+      const columnContainer = page.locator('.list-controls__columns').first()
+
+      const column = columnContainer.locator(`.column-selector .column-selector__column`, {
+        hasText: exactText('ID'),
+      })
+
+      await expect(column).not.toHaveClass(/column-selector__column--active/)
+    })
+
+    test('should not save preferences when navigating straight to a URL with columns', async () => {})
+
     test('should retain preferences when changing drawer collections', async () => {
       await page.goto(postsUrl.create)
 
       // Open the drawer
-      await openDocDrawer(page, '.rich-text .list-drawer__toggler')
+      await openDocDrawer({ page, selector: '.rich-text .list-drawer__toggler' })
       const listDrawer = page.locator('[id^=list-drawer_1_]')
       await expect(listDrawer).toBeVisible()
+
+      await openListColumns(page, {
+        columnContainerSelector: '.list-controls__columns',
+        togglerSelector: '[id^=list-drawer_1_] .list-controls__toggle-columns',
+      })
 
       const collectionSelector = page.locator(
         '[id^=list-drawer_1_] .list-header__select-collection.react-select',
       )
-      const columnSelector = page.locator('[id^=list-drawer_1_] .list-controls__toggle-columns')
 
-      // open the column controls
-      await columnSelector.click()
       // wait until the column toggle UI is visible and fully expanded
       await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
 
       // deselect the "id" column
-      await page
-        .locator('[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column', {
-          hasText: exactText('ID'),
-        })
-        .click()
+      await toggleColumn(page, {
+        togglerSelector: '[id^=list-drawer_1_] .list-controls__toggle-columns',
+        columnContainerSelector: '.list-controls__columns',
+        columnLabel: 'ID',
+        targetState: 'off',
+      })
 
       // select the "Post" collection
       await collectionSelector.click()
+
       await page
         .locator('[id^=list-drawer_1_] .list-header__select-collection.react-select .rs__option', {
           hasText: exactText('Post'),
@@ -945,14 +985,17 @@ describe('List View', () => {
         .click()
 
       // deselect the "number" column
-      await page
-        .locator('[id^=list-drawer_1_] .list-controls .column-selector .column-selector__column', {
-          hasText: exactText('Number'),
-        })
-        .click()
+
+      await toggleColumn(page, {
+        togglerSelector: '[id^=list-drawer_1_] .list-controls__toggle-columns',
+        columnContainerSelector: '.list-controls__columns',
+        columnLabel: 'Number',
+        targetState: 'off',
+      })
 
       // select the "User" collection again
       await collectionSelector.click()
+
       await page
         .locator('[id^=list-drawer_1_] .list-header__select-collection.react-select .rs__option', {
           hasText: exactText('User'),
