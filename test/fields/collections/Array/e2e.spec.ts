@@ -158,7 +158,7 @@ describe('Array', () => {
 
     await page.click('#action-save')
     await expect(page.locator('.payload-toast-container')).toContainText(
-      'The following field is invalid: Nested Array With Labels 1 > First Child Array 1 > Second Child Array 1 > Child Without Label 1 > Custom Text Label',
+      'The following field is invalid: Parent Array Label 1 > First Child Array Label 1 > Second Child Array Label 1 > Child Without Label 1 > Custom Text Label',
     )
   })
 

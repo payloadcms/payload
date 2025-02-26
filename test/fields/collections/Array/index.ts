@@ -263,10 +263,7 @@ const ArrayFields: CollectionConfig = {
     {
       name: 'nestedArrayWithLabels',
       type: 'array',
-      labels: {
-        singular: 'Nested Array With Labels',
-        plural: 'Nested Arrays With Labels',
-      },
+      label: 'Parent Array Label',
       fields: [
         {
           name: 'firstChildArray',

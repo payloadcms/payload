@@ -18,12 +18,7 @@ export function getParentLabels(
       break
     }
 
-    let fieldLabel = field.label ?? field.name
-    if (field.labels && typeof field.labels === 'object' && field.labels.singular) {
-      fieldLabel = field.labels.singular
-    }
-
-    labels.push(fieldLabel)
+    labels.push(field.label ?? segment)
 
     // Loop the nested fields if they exist
     if (field.fields) {
