@@ -1,7 +1,11 @@
+import { generateKeyBetween } from 'fractional-indexing'
+
 // @ts-strict-ignore
 import type { LoginWithUsernameOptions } from '../../auth/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
+import type { Field } from '../../fields/config/types.js'
 import type {
+  BeforeChangeHook,
   CollectionConfig,
   SanitizedCollectionConfig,
   SanitizedJoin,
@@ -237,6 +241,52 @@ export const sanitizeCollection = async (
   }
 
   validateUseAsTitle(sanitized)
+
+  const FIELD_NAME = 'payload-order'
+
+  // Add order field if enableCustomOrder is true
+  if (collection.enableCustomOrder) {
+    const orderField: Field = {
+      name: FIELD_NAME,
+      type: 'text',
+      admin: {
+        disableBulkEdit: true,
+        hidden: true,
+      },
+      index: true,
+      label: 'Order',
+    }
+
+    sanitized.fields.unshift(orderField)
+
+    // Add hooks to handle order values
+    if (!sanitized.hooks) {
+      sanitized.hooks = {}
+    }
+    if (!sanitized.hooks.beforeChange) {
+      sanitized.hooks.beforeChange = []
+    }
+
+    const orderBeforeChange: BeforeChangeHook = async ({ data, operation, req }) => {
+      // Only set _order on create, not on update (unless explicitly provided)
+      if (operation === 'create') {
+        // Find the last document to place this one after
+        const lastDoc = await req.payload.find({
+          collection: sanitized.slug,
+          depth: 0,
+          limit: 1,
+          sort: `-${FIELD_NAME}`,
+        })
+
+        const lastOrderValue = lastDoc.docs[0]?.[FIELD_NAME] || null
+        data[FIELD_NAME] = generateKeyBetween(lastOrderValue, null)
+      }
+
+      return data
+    }
+
+    sanitized.hooks.beforeChange.push(orderBeforeChange)
+  }
 
   const sanitizedConfig = sanitized as SanitizedCollectionConfig
 
