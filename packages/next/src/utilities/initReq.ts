@@ -33,8 +33,6 @@ type Result = {
 }
 
 type PartialResult = {
-  cookies: Map<string, string>
-  headers: Awaited<ReturnType<typeof getHeaders>>
   i18n: I18nClient
   languageCode: AcceptedLanguages
   payload: Payload
@@ -63,11 +61,12 @@ export const initReq = async function ({
   overrides?: Parameters<typeof createLocalReq>[0]
   urlSuffix?: string
 }): Promise<Result> {
+  const headers = await getHeaders()
+  const cookies = parseCookies(headers)
+
   const partialResult = await partialReqCache.get(async () => {
     const config = await configPromise
     const payload = await getPayload({ config, importMap })
-    const headers = await getHeaders()
-    const cookies = parseCookies(headers)
     const languageCode = getRequestLanguage({
       config,
       cookies,
@@ -85,8 +84,6 @@ export const initReq = async function ({
     })
 
     return {
-      cookies,
-      headers,
       i18n,
       languageCode,
       payload,
@@ -96,7 +93,7 @@ export const initReq = async function ({
   }, 'global')
 
   return reqCache.get(async () => {
-    const { cookies, headers, i18n, languageCode, payload, responseHeaders, user } = partialResult
+    const { i18n, languageCode, payload, responseHeaders, user } = partialResult
 
     const { req: reqOverrides, ...optionsOverrides } = overrides || {}
     const req = await createLocalReq(
