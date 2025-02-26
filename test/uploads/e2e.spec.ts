@@ -65,6 +65,9 @@ let uploadsOne: AdminUrlUtil
 let uploadsTwo: AdminUrlUtil
 let customUploadFieldURL: AdminUrlUtil
 let hideFileInputOnCreateURL: AdminUrlUtil
+let consoleErrorsFromPage: string[] = []
+let collectErrorsFromPage: () => boolean
+let stopCollectingErrorsFromPage: () => boolean
 
 describe('Uploads', () => {
   let page: Page
@@ -99,7 +102,14 @@ describe('Uploads', () => {
     const context = await browser.newContext()
     page = await context.newPage()
 
-    initPageConsoleErrorCatch(page, { ignoreCORS: true })
+    const { consoleErrors, collectErrors, stopCollectingErrors } = initPageConsoleErrorCatch(page, {
+      ignoreCORS: true,
+    })
+
+    consoleErrorsFromPage = consoleErrors
+    collectErrorsFromPage = collectErrors
+    stopCollectingErrorsFromPage = stopCollectingErrors
+
     await ensureCompilationIsDone({ page, serverURL })
   })
 
@@ -742,6 +752,55 @@ describe('Uploads', () => {
       expect(itemCount).toEqual(2)
 
       await saveDocAndAssert(page)
+    })
+
+    test('should bulk upload non-image files without page errors', async () => {
+      // Enable collection ONLY for this test
+      collectErrorsFromPage()
+
+      // Navigate to the upload creation page
+      await page.goto(uploadsOne.create)
+      await page.waitForURL(uploadsOne.create)
+
+      // Upload single file
+      await page.setInputFiles(
+        '.file-field input[type="file"]',
+        path.resolve(dirname, './image.png'),
+      )
+      const filename = page.locator('.file-field__filename')
+      await expect(filename).toHaveValue('image.png')
+
+      const bulkUploadButton = page.locator('#field-hasManyUpload button', {
+        hasText: exactText('Create New'),
+      })
+      await bulkUploadButton.click()
+
+      const bulkUploadModal = page.locator('#bulk-upload-drawer-slug-1')
+      await expect(bulkUploadModal).toBeVisible()
+
+      await page.setInputFiles('#bulk-upload-drawer-slug-1 .dropzone input[type="file"]', [
+        path.resolve(dirname, './test-pdf.pdf'),
+      ])
+
+      await page
+        .locator('.bulk-upload--file-manager .render-fields #field-prefix')
+        .fill('prefix-one')
+      const saveButton = page.locator('.bulk-upload--actions-bar__saveButtons button')
+      await saveButton.click()
+
+      await page.waitForSelector('#field-hasManyUpload .upload--has-many__dragItem')
+      const itemCount = await page
+        .locator('#field-hasManyUpload .upload--has-many__dragItem')
+        .count()
+      expect(itemCount).toEqual(1)
+
+      await saveDocAndAssert(page)
+
+      // Assert no console errors occurred for this test only
+      expect(consoleErrorsFromPage).toEqual([])
+
+      // Reset global behavior for other tests
+      stopCollectingErrorsFromPage()
     })
 
     test('should apply field value to all bulk upload files after edit many', async () => {

@@ -3,6 +3,7 @@
 import type { Data, DocumentSlots, FormState, SanitizedDocumentPermissions } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
+import { isImage } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 import { toast } from 'sonner'
@@ -122,7 +123,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         const file = formsRef.current[i].formState.file.value as File
 
         // Skip if already processed
-        if (processedFiles.current.has(file) || !file) {
+        if (processedFiles.current.has(file) || !file || !isImage(file.type)) {
           continue
         }
         processedFiles.current.add(file)
