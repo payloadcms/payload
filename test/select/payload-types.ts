@@ -74,6 +74,7 @@ export interface Config {
     points: Point;
     upload: Upload;
     rels: Rel;
+    'custom-ids': CustomId;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -89,6 +90,7 @@ export interface Config {
     points: PointsSelect<false> | PointsSelect<true>;
     upload: UploadSelect<false> | UploadSelect<true>;
     rels: RelsSelect<false> | RelsSelect<true>;
+    'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -445,6 +447,16 @@ export interface Point {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-ids".
+ */
+export interface CustomId {
+  id: number;
+  text?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -498,6 +510,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'rels';
         value: string | Rel;
+      } | null)
+    | ({
+        relationTo: 'custom-ids';
+        value: number | CustomId;
       } | null)
     | ({
         relationTo: 'users';
@@ -841,6 +857,16 @@ export interface UploadSelect<T extends boolean = true> {
  * via the `definition` "rels_select".
  */
 export interface RelsSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-ids_select".
+ */
+export interface CustomIdsSelect<T extends boolean = true> {
+  id?: T;
+  text?: T;
   updatedAt?: T;
   createdAt?: T;
 }

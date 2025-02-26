@@ -37,7 +37,7 @@ import {
   updateOne,
   updateVersion,
 } from '@payloadcms/drizzle'
-import { like } from 'drizzle-orm'
+import { like, notLike } from 'drizzle-orm'
 import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
 import { fileURLToPath } from 'url'
 
@@ -81,6 +81,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       ...operatorMap,
       contains: like,
       like,
+      not_like: notLike,
     } as unknown as Operators
 
     return createDatabaseAdapter<SQLiteAdapter>({

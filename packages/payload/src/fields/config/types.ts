@@ -1373,6 +1373,7 @@ export type Block = {
     }
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>
+    group?: Record<string, string> | string
     jsx?: PayloadComponent
   }
   /** Extension point to add your custom data. Server only. */
@@ -1401,7 +1402,7 @@ export type Block = {
 }
 
 export type ClientBlock = {
-  admin?: Pick<Block['admin'], 'custom'>
+  admin?: Pick<Block['admin'], 'custom' | 'group'>
   fields: ClientField[]
   labels?: LabelsClient
 } & Pick<Block, 'imageAltText' | 'imageURL' | 'jsx' | 'slug'>

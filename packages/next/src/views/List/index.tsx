@@ -160,7 +160,7 @@ export const renderListView = async (
     const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
 
     const resolvedFilterOptions = await resolveAllFilterOptions({
-      collectionConfig,
+      fields: collectionConfig.fields,
       req,
     })
 

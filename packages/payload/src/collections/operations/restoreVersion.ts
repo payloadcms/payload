@@ -165,17 +165,17 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
     // afterRead - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      result =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          doc: result,
-          req,
-        })) || result
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.afterRead?.length) {
+      for (const hook of collectionConfig.hooks.afterRead) {
+        result =
+          (await hook({
+            collection: collectionConfig,
+            context: req.context,
+            doc: result,
+            req,
+          })) || result
+      }
+    }
 
     // /////////////////////////////////////
     // afterChange - Fields
@@ -196,19 +196,19 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
     // afterChange - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      result =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          doc: result,
-          operation: 'update',
-          previousDoc: prevDocWithLocales,
-          req,
-        })) || result
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.afterChange?.length) {
+      for (const hook of collectionConfig.hooks.afterChange) {
+        result =
+          (await hook({
+            collection: collectionConfig,
+            context: req.context,
+            doc: result,
+            operation: 'update',
+            previousDoc: prevDocWithLocales,
+            req,
+          })) || result
+      }
+    }
 
     return result
   } catch (error: unknown) {

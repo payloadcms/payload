@@ -4,8 +4,7 @@ import type { CreateGlobal } from 'payload'
 import type { MongooseAdapter } from './index.js'
 
 import { getSession } from './utilities/getSession.js'
-import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
-import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
+import { transform } from './utilities/transform.js'
 
 export const createGlobal: CreateGlobal = async function createGlobal(
   this: MongooseAdapter,
@@ -13,26 +12,28 @@ export const createGlobal: CreateGlobal = async function createGlobal(
 ) {
   const Model = this.globals
 
-  const global = sanitizeRelationshipIDs({
-    config: this.payload.config,
-    data: {
-      globalType: slug,
-      ...data,
-    },
+  transform({
+    adapter: this,
+    data,
     fields: this.payload.config.globals.find((globalConfig) => globalConfig.slug === slug).fields,
+    globalSlug: slug,
+    operation: 'write',
   })
 
   const options: CreateOptions = {
     session: await getSession(this, req),
   }
 
-  let [result] = (await Model.create([global], options)) as any
+  let [result] = (await Model.create([data], options)) as any
 
-  result = JSON.parse(JSON.stringify(result))
+  result = result.toObject()
 
-  // custom id type reset
-  result.id = result._id
-  result = sanitizeInternalFields(result)
+  transform({
+    adapter: this,
+    data: result,
+    fields: this.payload.config.globals.find((globalConfig) => globalConfig.slug === slug).fields,
+    operation: 'read',
+  })
 
   return result
 }

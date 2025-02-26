@@ -389,6 +389,7 @@ export const etTranslations: DefaultTranslationsObject = {
     isLike: 'on sarnane',
     isNotEqualTo: 'ei võrdu',
     isNotIn: 'ei ole hulgas',
+    isNotLike: 'ei ole nagu',
     near: 'lähedal',
     within: 'vahemikus',
   },

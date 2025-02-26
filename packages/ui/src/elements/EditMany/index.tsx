@@ -1,15 +1,16 @@
 'use client'
 import type { ClientCollectionConfig, FieldWithPathClient } from 'payload'
 
+import { useModal } from '@faceless-ui/modal'
 import React, { useState } from 'react'
 
 import { useAuth } from '../../providers/Auth/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import './index.scss'
-import { Drawer, DrawerToggler } from '../Drawer/index.js'
+import { Drawer } from '../Drawer/index.js'
 import { EditManyDrawerContent } from './DrawerContent.js'
+import './index.scss'
 
 export const baseClass = 'edit-many'
 
@@ -23,6 +24,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
   } = props
 
   const { permissions } = useAuth()
+  const { openModal } = useModal()
 
   const { selectAll } = useSelection()
   const { t } = useTranslation()
@@ -39,16 +41,17 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
 
   return (
     <div className={baseClass}>
-      <DrawerToggler
+      <button
         aria-label={t('general:edit')}
         className={`${baseClass}__toggle`}
         onClick={() => {
+          openModal(drawerSlug)
           setSelected([])
         }}
-        slug={drawerSlug}
+        type="button"
       >
         {t('general:edit')}
-      </DrawerToggler>
+      </button>
       <EditDepthProvider>
         <Drawer Header={null} slug={drawerSlug}>
           <EditManyDrawerContent

@@ -388,6 +388,7 @@ export const thTranslations: DefaultTranslationsObject = {
     isLike: 'เหมือน',
     isNotEqualTo: 'ไม่เท่ากับ',
     isNotIn: 'ไม่ได้อยู่ใน',
+    isNotLike: 'ไม่เหมือน',
     near: 'ใกล้',
     within: 'ภายใน',
   },

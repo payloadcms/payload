@@ -392,6 +392,7 @@ export const slTranslations: DefaultTranslationsObject = {
     isLike: 'je podobno',
     isNotEqualTo: 'ni enako',
     isNotIn: 'ni v',
+    isNotLike: 'ni podobno',
     near: 'blizu',
     within: 'znotraj',
   },

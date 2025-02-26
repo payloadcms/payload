@@ -403,6 +403,7 @@ export const frTranslations: DefaultTranslationsObject = {
     isLike: 'est comme',
     isNotEqualTo: 'n’est pas égal à',
     isNotIn: 'n’est pas dans',
+    isNotLike: "n'est pas comme",
     near: 'proche',
     within: 'dans',
   },

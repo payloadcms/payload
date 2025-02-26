@@ -392,6 +392,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     isLike: 'схоже',
     isNotEqualTo: 'не дорівнює',
     isNotIn: 'не в',
+    isNotLike: 'не такий як',
     near: 'поруч',
     within: 'в межах',
   },

@@ -111,6 +111,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     [
       serverFunction,
       closeModal,
+      allowCreate,
       drawerSlug,
       isOpen,
       enableRowSelections,
@@ -130,6 +131,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       if (typeof onSelect === 'function') {
         onSelect({
           collectionSlug: selectedOption.value,
+          doc,
           docID: doc.id,
         })
       }

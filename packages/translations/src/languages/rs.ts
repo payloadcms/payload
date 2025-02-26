@@ -393,6 +393,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     isLike: 'је као',
     isNotEqualTo: 'није једнако',
     isNotIn: 'није у',
+    isNotLike: 'nije kao',
     near: 'близу',
     within: 'unutar',
   },

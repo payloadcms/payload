@@ -394,6 +394,7 @@ export const caTranslations: DefaultTranslationsObject = {
     isLike: 'és semblant a',
     isNotEqualTo: 'no és igual a',
     isNotIn: 'no està en',
+    isNotLike: 'no és com',
     near: 'a prop de',
     within: 'dins de',
   },

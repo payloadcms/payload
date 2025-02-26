@@ -64,7 +64,6 @@ export interface Config {
   auth: {
     users: UserAuthOperations;
   };
-  blocks: {};
   collections: {
     relation: Relation;
     audio: Audio;
