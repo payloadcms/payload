@@ -246,7 +246,6 @@ describe('Localization', () => {
       })
 
       await page.goto(url.edit(id))
-      await page.waitForURL(`**${url.edit(id)}`)
       await openDocControls(page)
       await page.locator('#action-duplicate').click()
       await expect(page.locator('.payload-toast-container')).toContainText('successfully')
@@ -262,7 +261,6 @@ describe('Localization', () => {
 
     test('should duplicate localized checkbox correctly', async () => {
       await page.goto(url.create)
-      await page.waitForURL(url.create)
       await changeLocale(page, defaultLocale)
       await fillValues({ description, title: englishTitle })
       await page.locator('#field-localizedCheckbox').click()
@@ -329,9 +327,9 @@ describe('Localization', () => {
 
       await page.goto(url.list)
 
-      const localeLabel = page
-        .locator('.localizer.app-header__localizer .localizer-button__current-label')
-        
+      const localeLabel = page.locator(
+        '.localizer.app-header__localizer .localizer-button__current-label',
+      )
 
       await expect(localeLabel).not.toHaveText('English')
     })

@@ -212,17 +212,14 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
                   <React.Fragment>
                     {canSchedulePublish && (
                       <PopupList.ButtonGroup key="schedule-publish">
-                        <PopupList.Button
-                          id="schedule-publish"
-                          onClick={() => [toggleModal(drawerSlug), close()]}
-                        >
+                        <PopupList.Button onClick={() => [toggleModal(drawerSlug), close()]}>
                           {t('version:schedulePublish')}
                         </PopupList.Button>
                       </PopupList.ButtonGroup>
                     )}
                     {localization && canPublish && (
                       <PopupList.ButtonGroup>
-                        <PopupList.Button onClick={secondaryPublish}>
+                        <PopupList.Button id="publish-locale" onClick={secondaryPublish}>
                           {secondaryLabel}
                         </PopupList.Button>
                       </PopupList.ButtonGroup>
