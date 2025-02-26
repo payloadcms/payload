@@ -448,7 +448,7 @@ export const buildJoinAggregation = async ({
             },
             {
               $addFields: {
-                [`${as}.totalDocs`]: { $first: `$${as}.totalDocs.result` },
+                [`${as}.totalDocs`]: { $ifNull: [{ $first: `$${as}.totalDocs.result` }, 0] },
               },
             },
           )
