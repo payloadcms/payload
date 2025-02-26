@@ -276,7 +276,7 @@ export default async function MyServerComponent({
 
 But, the Payload Config is [non-serializable](https://react.dev/reference/rsc/use-client#serializable-types) by design. It is full of custom validation functions and more. This means that the Payload Config, in its entirety, cannot be passed directly to Client Components.
 
-For this reason, Payload creates a Client Config and passes it into the Config Provider. This is a serializable version of the Payload Config that can be accessed from any Client Component via the [`useConfig`](../admin/hooks#useconfig) hook:
+For this reason, Payload creates a Client Config and passes it into the Config Provider. This is a serializable version of the Payload Config that can be accessed from any Client Component via the [`useConfig`](../admin/react-hooks#useconfig) hook:
 
 ```tsx
 'use client'
@@ -375,7 +375,7 @@ export function MyClientComponent() {
 ```
 
 <Banner type="success">
-  See the [Hooks](../admin/hooks) documentation for a full list of available hooks.
+  See the [Hooks](../admin/react-hooks) documentation for a full list of available hooks.
 </Banner>
 
 ### Getting the Current Locale
@@ -422,12 +422,12 @@ function Greeting() {
 ```
 
 <Banner type="success">
-  See the [Hooks](../admin/hooks) documentation for a full list of available hooks.
+  See the [Hooks](../admin/react-hooks) documentation for a full list of available hooks.
 </Banner>
 
 ### Using Hooks
 
-To make it easier to [build your Custom Components](#building-custom-components), you can use [Payload's built-in React Hooks](../admin/hooks) in any Client Component. For example, you might want to interact with one of Payload's many React Contexts. To do this, you can use one of the many hooks available depending on your needs.
+To make it easier to [build your Custom Components](#building-custom-components), you can use [Payload's built-in React Hooks](../admin/react-hooks) in any Client Component. For example, you might want to interact with one of Payload's many React Contexts. To do this, you can use one of the many hooks available depending on your needs.
 
 ```tsx
 'use client'
@@ -444,7 +444,7 @@ export function MyClientComponent() {
 ```
 
 <Banner type="success">
-  See the [Hooks](../admin/hooks) documentation for a full list of available hooks.
+  See the [Hooks](../admin/react-hooks) documentation for a full list of available hooks.
 </Banner>
 
 ### Adding Styles

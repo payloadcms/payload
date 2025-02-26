@@ -1,7 +1,11 @@
 import type { BrowserContext, Page } from '@playwright/test'
+import type { GeneratedTypes } from 'helpers/sdk/types.js'
 
 import { expect, test } from '@playwright/test'
+import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
+import { upsertPrefs } from 'helpers/e2e/upsertPrefs.js'
+import { RESTClient } from 'helpers/rest.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -31,11 +35,6 @@ import {
   spanishLocale,
   withRequiredLocalizedFields,
 } from './shared.js'
-import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
-
-import { upsertPrefs } from 'helpers/e2e/upsertPrefs.js'
-import { RESTClient } from 'helpers/rest.js'
-import { GeneratedTypes } from 'helpers/sdk/types.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -119,16 +118,16 @@ describe('Localization', () => {
 
       await expect(page.locator('.localizer .popup')).toHaveClass(/popup--active/)
 
-      const activeOption = await page.locator(
+      const activeOption = page.locator(
         `.localizer .popup.popup--active .popup-button-list__button--selected`,
       )
 
       await expect(activeOption).toBeVisible()
       const tagName = await activeOption.evaluate((node) => node.tagName)
-      await expect(tagName).not.toBe('A')
+      expect(tagName).not.toBe('A')
       await expect(activeOption).not.toHaveAttribute('href')
-      await expect(tagName).not.toBe('BUTTON')
-      await expect(tagName).toBe('DIV')
+      expect(tagName).not.toBe('BUTTON')
+      expect(tagName).toBe('DIV')
     })
   })
 
@@ -140,7 +139,7 @@ describe('Localization', () => {
       const createNewButtonLocator =
         '.collection-list a[href="/admin/collections/cannot-create-default-locale/create"]'
 
-      await expect(page.locator(createNewButtonLocator)).not.toBeVisible()
+      await expect(page.locator(createNewButtonLocator)).toBeHidden()
       await changeLocale(page, spanishLocale)
       await expect(page.locator(createNewButtonLocator).first()).toBeVisible()
       await page.goto(urlCannotCreateDefaultLocale.create)
@@ -330,11 +329,11 @@ describe('Localization', () => {
 
       await page.goto(url.list)
 
-      const localeLabel = await page
+      const localeLabel = page
         .locator('.localizer.app-header__localizer .localizer-button__current-label')
-        .innerText()
+        
 
-      expect(localeLabel).not.toEqual('English')
+      await expect(localeLabel).not.toHaveText('English')
     })
   })
 
@@ -351,7 +350,7 @@ describe('Localization', () => {
       await navigateToDoc(page, urlRelationshipLocalized)
       const drawerToggler =
         '#field-relationMultiRelationTo .relationship--single-value__drawer-toggler'
-      expect(page.locator(drawerToggler)).toBeEnabled()
+      await expect(page.locator(drawerToggler)).toBeEnabled()
       await openDocDrawer(page, drawerToggler)
       await expect(page.locator('.doc-drawer__header-text')).toContainText('spanish-relation2')
       await page.locator('.doc-drawer__header-close').click()
@@ -518,7 +517,7 @@ describe('Localization', () => {
 
       // only throttle test after initial load to avoid timeouts
       const cdpSession = await throttleTest({
-        page: page,
+        page,
         context,
         delay: 'Fast 4G',
       })
@@ -540,6 +539,13 @@ describe('Localization', () => {
 
       await cdpSession.detach()
     })
+  })
+
+  test('should use label in search filter when string or object', async () => {
+    await page.goto(url.list)
+    const searchInput = page.locator('.search-filter__input')
+    await expect(searchInput).toBeVisible()
+    await expect(searchInput).toHaveAttribute('placeholder', 'Search by Full title')
   })
 })
 

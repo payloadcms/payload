@@ -35,10 +35,8 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    await args.collection.config.hooks.beforeOperation.reduce(
-      async (priorHook: BeforeOperationHook | Promise<void>, hook: BeforeOperationHook) => {
-        await priorHook
-
+    if (args.collection.config.hooks?.beforeOperation?.length) {
+      for (const hook of args.collection.config.hooks.beforeOperation) {
         args =
           (await hook({
             args,
@@ -47,9 +45,8 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
             operation: 'refresh',
             req: args.req,
           })) || args
-      },
-      Promise.resolve(),
-    )
+      }
+    }
 
     // /////////////////////////////////////
     // Refresh
@@ -122,18 +119,18 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
     // After Refresh - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.afterRefresh.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      result =
-        (await hook({
-          collection: args.collection?.config,
-          context: args.req.context,
-          exp: result.exp,
-          req: args.req,
-          token: result.refreshedToken,
-        })) || result
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.afterRefresh?.length) {
+      for (const hook of collectionConfig.hooks.afterRefresh) {
+        result =
+          (await hook({
+            collection: args.collection?.config,
+            context: args.req.context,
+            exp: result.exp,
+            req: args.req,
+            token: result.refreshedToken,
+          })) || result
+      }
+    }
 
     // /////////////////////////////////////
     // afterOperation - Collection

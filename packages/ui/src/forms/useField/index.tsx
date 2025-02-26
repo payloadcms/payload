@@ -27,7 +27,7 @@ import {
 /**
  * Get and set the value of a form field.
  *
- * @see https://payloadcms.com/docs/admin/hooks#usefield
+ * @see https://payloadcms.com/docs/admin/react-hooks#usefield
  */
 export const useField = <TValue,>(options: Options): FieldType<TValue> => {
   const { disableFormData = false, hasRows, path, validate } = options

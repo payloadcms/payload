@@ -377,6 +377,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     isLike: 'is als',
     isNotEqualTo: 'is niet gelijk aan',
     isNotIn: 'zit er niet in',
+    isNotLike: 'is niet zoals',
     near: 'nabij',
     within: 'binnen',
   },

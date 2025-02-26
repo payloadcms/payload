@@ -32,7 +32,7 @@ type Args = {
   fieldIndex: number
   global: null | SanitizedGlobalConfig
   id?: number | string
-  mergeLocaleActions: (() => Promise<void>)[]
+  mergeLocaleActions: (() => Promise<void> | void)[]
   operation: Operation
   parentIndexPath: string
   parentIsLocalized: boolean
@@ -109,10 +109,8 @@ export const promise = async ({
 
     // Execute hooks
     if (field.hooks?.beforeChange) {
-      await field.hooks.beforeChange.reduce(async (priorHook, currentHook) => {
-        await priorHook
-
-        const hookedValue = await currentHook({
+      for (const hook of field.hooks.beforeChange) {
+        const hookedValue = await hook({
           blockData,
           collection,
           context,
@@ -136,7 +134,7 @@ export const promise = async ({
         if (hookedValue !== undefined) {
           siblingData[field.name] = hookedValue
         }
-      }, Promise.resolve())
+      }
     }
 
     // Validate
@@ -193,28 +191,20 @@ export const promise = async ({
 
     // Push merge locale action if applicable
     if (localization && fieldShouldBeLocalized({ field, parentIsLocalized })) {
-      mergeLocaleActions.push(async () => {
-        const localeData = await localization.localeCodes.reduce(
-          async (localizedValuesPromise: Promise<JsonObject>, locale) => {
-            const localizedValues = await localizedValuesPromise
-            const fieldValue =
-              locale === req.locale
-                ? siblingData[field.name]
-                : siblingDocWithLocales?.[field.name]?.[locale]
+      mergeLocaleActions.push(() => {
+        const localeData = {}
 
-            // const result = await localizedValues
-            // update locale value if it's not undefined
-            if (typeof fieldValue !== 'undefined') {
-              return {
-                ...localizedValues,
-                [locale]: fieldValue,
-              }
-            }
+        for (const locale of localization.localeCodes) {
+          const fieldValue =
+            locale === req.locale
+              ? siblingData[field.name]
+              : siblingDocWithLocales?.[field.name]?.[locale]
 
-            return localizedValuesPromise
-          },
-          Promise.resolve({}),
-        )
+          // update locale value if it's not undefined
+          if (typeof fieldValue !== 'undefined') {
+            localeData[locale] = fieldValue
+          }
+        }
 
         // If there are locales with data, set the data
         if (Object.keys(localeData).length > 0) {
@@ -424,10 +414,8 @@ export const promise = async ({
       const editor: RichTextAdapter = field?.editor
 
       if (editor?.hooks?.beforeChange?.length) {
-        await editor.hooks.beforeChange.reduce(async (priorHook, currentHook) => {
-          await priorHook
-
-          const hookedValue = await currentHook({
+        for (const hook of editor.hooks.beforeChange) {
+          const hookedValue = await hook({
             collection,
             context,
             data,
@@ -454,7 +442,7 @@ export const promise = async ({
           if (hookedValue !== undefined) {
             siblingData[field.name] = hookedValue
           }
-        }, Promise.resolve())
+        }
       }
 
       break

@@ -75,10 +75,8 @@ export const promise = async ({
   if (fieldAffectsData(field)) {
     // Execute hooks
     if (field.hooks?.afterChange) {
-      await field.hooks.afterChange.reduce(async (priorHook, currentHook) => {
-        await priorHook
-
-        const hookedValue = await currentHook({
+      for (const hook of field.hooks.afterChange) {
+        const hookedValue = await hook({
           blockData,
           collection,
           context,
@@ -102,7 +100,7 @@ export const promise = async ({
         if (hookedValue !== undefined) {
           siblingDoc[field.name] = hookedValue
         }
-      }, Promise.resolve())
+      }
     }
   }
 
@@ -242,17 +240,15 @@ export const promise = async ({
         throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
       }
 
-      if (typeof field?.editor === 'function') {
+      if (typeof field.editor === 'function') {
         throw new Error('Attempted to access unsanitized rich text editor.')
       }
 
-      const editor: RichTextAdapter = field?.editor
+      const editor: RichTextAdapter = field.editor
 
       if (editor?.hooks?.afterChange?.length) {
-        await editor.hooks.afterChange.reduce(async (priorHook, currentHook) => {
-          await priorHook
-
-          const hookedValue = await currentHook({
+        for (const hook of editor.hooks.afterChange) {
+          const hookedValue = await hook({
             collection,
             context,
             data,
@@ -275,7 +271,7 @@ export const promise = async ({
           if (hookedValue !== undefined) {
             siblingDoc[field.name] = hookedValue
           }
-        }, Promise.resolve())
+        }
       }
       break
     }

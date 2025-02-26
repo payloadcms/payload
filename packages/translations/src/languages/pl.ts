@@ -373,6 +373,7 @@ export const plTranslations: DefaultTranslationsObject = {
     isLike: 'jest jak',
     isNotEqualTo: 'nie jest równe',
     isNotIn: 'nie ma go w',
+    isNotLike: 'nie jest jak',
     near: 'blisko',
     within: 'w ciągu',
   },

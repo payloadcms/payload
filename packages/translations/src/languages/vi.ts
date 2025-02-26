@@ -372,6 +372,7 @@ export const viTranslations: DefaultTranslationsObject = {
     isLike: 'gần giống',
     isNotEqualTo: 'không bằng',
     isNotIn: 'không có trong',
+    isNotLike: 'không giống như',
     near: 'gần',
     within: 'trong',
   },

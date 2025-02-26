@@ -362,6 +362,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     isLike: '就像',
     isNotEqualTo: '不等於',
     isNotIn: '不在',
+    isNotLike: '不像',
     near: '附近',
     within: '在...之內',
   },

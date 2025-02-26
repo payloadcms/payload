@@ -255,6 +255,25 @@ export async function buildSearchParam({
         return result
       }
 
+      if (formattedOperator === 'not_like' && typeof formattedValue === 'string') {
+        const words = formattedValue.split(' ')
+
+        const result = {
+          value: {
+            $and: words.map((word) => ({
+              [path]: {
+                $not: {
+                  $options: 'i',
+                  $regex: word.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&'),
+                },
+              },
+            })),
+          },
+        }
+
+        return result
+      }
+
       // Some operators like 'near' need to define a full query
       // so if there is no operator key, just return the value
       if (!operatorKey) {

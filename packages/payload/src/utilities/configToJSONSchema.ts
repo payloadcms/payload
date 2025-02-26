@@ -15,7 +15,6 @@ import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import { MissingEditorProp } from '../errors/MissingEditorProp.js'
 import { fieldAffectsData } from '../fields/config/types.js'
 import { generateJobsJSONSchemas } from '../queues/config/generateJobsJSONSchemas.js'
-import { deepCopyObject } from './deepCopyObject.js'
 import { toWords } from './formatLabels.js'
 import { getCollectionIDFieldTypes } from './getCollectionIDFieldTypes.js'
 
@@ -719,7 +718,7 @@ export function fieldsToJSONSchema(
 // This function is part of the public API and is exported through payload/utilities
 export function entityToJSONSchema(
   config: SanitizedConfig,
-  incomingEntity: SanitizedCollectionConfig | SanitizedGlobalConfig,
+  entity: SanitizedCollectionConfig | SanitizedGlobalConfig,
   interfaceNameDefinitions: Map<string, JSONSchema4>,
   defaultIDType: 'number' | 'text',
   collectionIDFieldTypes?: { [key: string]: 'number' | 'string' },
@@ -729,25 +728,30 @@ export function entityToJSONSchema(
     collectionIDFieldTypes = getCollectionIDFieldTypes({ config, defaultIDType })
   }
 
-  const entity: SanitizedCollectionConfig | SanitizedGlobalConfig = deepCopyObject(incomingEntity)
   const title = entity.typescript?.interface
     ? entity.typescript.interface
     : singular(toWords(entity.slug, true))
 
+  let mutableFields = [...entity.flattenedFields]
+
   const idField: FieldAffectingData = { name: 'id', type: defaultIDType as 'text', required: true }
-  const customIdField = entity.flattenedFields.find(
-    (field) => field.name === 'id',
-  ) as FieldAffectingData
+  const customIdField = mutableFields.find((field) => field.name === 'id') as FieldAffectingData
 
   if (customIdField && customIdField.type !== 'group' && customIdField.type !== 'tab') {
-    customIdField.required = true
+    mutableFields = mutableFields.map((field) => {
+      if (field === customIdField) {
+        return { ...field, required: true }
+      }
+
+      return field
+    })
   } else {
-    entity.flattenedFields.unshift(idField)
+    mutableFields.unshift(idField)
   }
 
   // mark timestamp fields required
   if ('timestamps' in entity && entity.timestamps !== false) {
-    entity.flattenedFields = entity.flattenedFields.map((field) => {
+    mutableFields = mutableFields.map((field) => {
       if (field.name === 'createdAt' || field.name === 'updatedAt') {
         return {
           ...field,
@@ -765,7 +769,7 @@ export function entityToJSONSchema(
       (typeof entity.auth?.disableLocalStrategy === 'object' &&
         entity.auth.disableLocalStrategy.enableFields))
   ) {
-    entity.flattenedFields.push({
+    mutableFields.push({
       name: 'password',
       type: 'text',
     })
@@ -777,7 +781,7 @@ export function entityToJSONSchema(
     title,
     ...fieldsToJSONSchema(
       collectionIDFieldTypes,
-      entity.flattenedFields,
+      mutableFields,
       interfaceNameDefinitions,
       config,
       i18n,
@@ -1152,40 +1156,42 @@ export function configToJSONSchema(
       )
     : {}
 
-  const blocksDefinition: JSONSchema4 = {
+  const blocksDefinition: JSONSchema4 | undefined = {
     type: 'object',
     additionalProperties: false,
     properties: {},
     required: [],
   }
-  for (const block of config.blocks) {
-    const blockFieldSchemas = fieldsToJSONSchema(
-      collectionIDFieldTypes,
-      block.flattenedFields,
-      interfaceNameDefinitions,
-      config,
-      i18n,
-    )
+  if (config?.blocks?.length) {
+    for (const block of config.blocks) {
+      const blockFieldSchemas = fieldsToJSONSchema(
+        collectionIDFieldTypes,
+        block.flattenedFields,
+        interfaceNameDefinitions,
+        config,
+        i18n,
+      )
 
-    const blockSchema: JSONSchema4 = {
-      type: 'object',
-      additionalProperties: false,
-      properties: {
-        ...blockFieldSchemas.properties,
-        blockType: {
-          const: block.slug,
+      const blockSchema: JSONSchema4 = {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          ...blockFieldSchemas.properties,
+          blockType: {
+            const: block.slug,
+          },
         },
-      },
-      required: ['blockType', ...blockFieldSchemas.required],
-    }
+        required: ['blockType', ...blockFieldSchemas.required],
+      }
 
-    const interfaceName = block.interfaceName ?? block.slug
-    interfaceNameDefinitions.set(interfaceName, blockSchema)
+      const interfaceName = block.interfaceName ?? block.slug
+      interfaceNameDefinitions.set(interfaceName, blockSchema)
 
-    blocksDefinition.properties[block.slug] = {
-      $ref: `#/definitions/${interfaceName}`,
+      blocksDefinition.properties[block.slug] = {
+        $ref: `#/definitions/${interfaceName}`,
+      }
+      ;(blocksDefinition.required as string[]).push(block.slug)
     }
-    ;(blocksDefinition.required as string[]).push(block.slug)
   }
 
   let jsonSchema: JSONSchema4 = {
@@ -1225,6 +1231,7 @@ export function configToJSONSchema(
     ],
     title: 'Config',
   }
+
   if (jobsSchemas.definitions?.size) {
     for (const [key, value] of jobsSchemas.definitions) {
       jsonSchema.definitions[key] = value

@@ -375,6 +375,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     isLike: 'yra panašu',
     isNotEqualTo: 'nelygu',
     isNotIn: 'nėra',
+    isNotLike: 'nėra panašus',
     near: 'šalia',
     within: 'viduje',
   },

@@ -371,6 +371,7 @@ export const koTranslations: DefaultTranslationsObject = {
     isLike: '유사',
     isNotEqualTo: '같지 않음',
     isNotIn: '포함되지 않음',
+    isNotLike: '같지 않다',
     near: '근처',
     within: '내에서',
   },

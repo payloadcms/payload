@@ -391,9 +391,13 @@ export async function switchTab(page: Page, selector: string) {
  *
  * Useful to prevent the e2e test from passing when, for example, there are react missing key prop errors
  * @param page
+ * @param options
  */
 export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: boolean }) {
   const { ignoreCORS = false } = options || {} // Default to not ignoring CORS errors
+  const consoleErrors: string[] = []
+
+  let shouldCollectErrors = false
 
   page.on('console', (msg) => {
     if (
@@ -435,6 +439,21 @@ export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: b
       console.log(`Ignoring expected network error: ${msg.text()}`)
     }
   })
+
+  // Capture uncaught errors that do not appear in the console
+  page.on('pageerror', (error) => {
+    if (shouldCollectErrors) {
+      consoleErrors.push(`Page error: ${error.message}`)
+    } else {
+      throw new Error(`Page error: ${error.message}`)
+    }
+  })
+
+  return {
+    consoleErrors,
+    collectErrors: () => (shouldCollectErrors = true), // Enable collection of errors for specific tests
+    stopCollectingErrors: () => (shouldCollectErrors = false), // Disable collection of errors after the test
+  }
 }
 
 export function describeIfInCIOrHasLocalstack(): jest.Describe {

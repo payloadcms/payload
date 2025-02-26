@@ -374,6 +374,7 @@ export const svTranslations: DefaultTranslationsObject = {
     isLike: 'är som',
     isNotEqualTo: 'är inte lika med',
     isNotIn: 'är inte med',
+    isNotLike: 'är inte som',
     near: 'nära',
     within: 'inom',
   },
