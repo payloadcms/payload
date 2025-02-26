@@ -628,7 +628,8 @@ export const traverseFields = ({
                 sql`${db
                   .select(selectFields as any)
                   .from(newAliasTable)
-                  .where(subQueryWhere)}`,
+                  .where(subQueryWhere)
+                  .as(`${subQueryAlias}_count_subquery`)}`,
               )}`.as(`${subQueryAlias}_count`)
           }
 
