@@ -488,8 +488,6 @@ export const Form: React.FC<FormProps> = (props) => {
 
       let file = data?.file
 
-      // throw new Error()
-
       if (file) {
         delete data.file
       }

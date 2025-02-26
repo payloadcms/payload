@@ -55,22 +55,32 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
         }
 
         let response: null | Response = null
+        let error: unknown
+
         for (const handler of uploadConfig.handlers) {
-          const result = await handler(req, {
-            doc: null,
-            params: {
-              // Maybe pass additional specific to adapters data, then staticHandler can use them.
-              clientUploadContext,
-              collection: collectionSlug,
-              filename,
-            },
-          })
-          if (result) {
-            response = result
+          try {
+            const result = await handler(req, {
+              doc: null,
+              params: {
+                clientUploadContext, // Pass additional specific to adapters context returned from UploadHandler, then staticHandler can use them.
+                collection: collectionSlug,
+                filename,
+              },
+            })
+            if (result) {
+              response = result
+            }
+            // If we couldn't get the file from that handler, save the error and try other.
+          } catch (err) {
+            error = err
           }
         }
 
         if (!response) {
+          if (error) {
+            payload.logger.error(error)
+          }
+
           throw new APIError('Expected response from the upload handler.')
         }
 

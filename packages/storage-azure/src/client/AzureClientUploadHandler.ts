@@ -2,8 +2,8 @@
 import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
 
 export const AzureClientUploadHandler = createClientUploadHandler({
-  handler: async ({ apiRoute, collectionSlug, file, serverURL }) => {
-    const response = await fetch(`${serverURL}${apiRoute}/storage-azure-generate-signed-url`, {
+  handler: async ({ apiRoute, collectionSlug, file, serverHandlerPath, serverURL }) => {
+    const response = await fetch(`${serverURL}${apiRoute}${serverHandlerPath}`, {
       body: JSON.stringify({
         collectionSlug,
         filename: file.name,
@@ -20,7 +20,7 @@ export const AzureClientUploadHandler = createClientUploadHandler({
       headers: {
         'Content-Length': file.size.toString(),
         'Content-Type': file.type,
-        // requried for azure
+        // Required for azure
         'x-ms-blob-type': 'BlockBlob',
       },
       method: 'PUT',

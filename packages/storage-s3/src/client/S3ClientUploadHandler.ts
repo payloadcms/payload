@@ -2,8 +2,8 @@
 import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
 
 export const S3ClientUploadHandler = createClientUploadHandler({
-  handler: async ({ apiRoute, collectionSlug, file, serverURL }) => {
-    const response = await fetch(`${serverURL}${apiRoute}/storage-s3-generate-signed-url`, {
+  handler: async ({ apiRoute, collectionSlug, file, serverHandlerPath, serverURL }) => {
+    const response = await fetch(`${serverURL}${apiRoute}${serverHandlerPath}`, {
       body: JSON.stringify({
         collectionSlug,
         filename: file.name,

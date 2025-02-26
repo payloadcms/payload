@@ -24,6 +24,23 @@ export const initClientUploads = <ExtraProps extends Record<string, unknown>, T>
       config.endpoints = []
     }
 
+    /**
+     * Tracks how many times the same handler was already applied.
+     * This allows to apply the same plugin multiple times, for example
+     * to use different buckets for different collections.
+     */
+    let handlerCount = 0
+
+    for (const endpoint of config.endpoints) {
+      if (endpoint.path === serverHandlerPath) {
+        handlerCount++
+      }
+    }
+
+    if (handlerCount) {
+      serverHandlerPath = `${serverHandlerPath}-${handlerCount}`
+    }
+
     config.endpoints.push({
       handler: serverHandler,
       method: 'post',
@@ -51,6 +68,7 @@ export const initClientUploads = <ExtraProps extends Record<string, unknown>, T>
         collectionSlug,
         enabled,
         extra: extraClientHandlerProps ? extraClientHandlerProps(collection) : undefined,
+        serverHandlerPath,
       },
       path: clientHandler,
     })

@@ -3,10 +3,10 @@ import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/clie
 import { genUploader } from 'uploadthing/client'
 
 export const UploadthingClientUploadHandler = createClientUploadHandler({
-  handler: async ({ apiRoute, collectionSlug, file, serverURL }) => {
+  handler: async ({ apiRoute, collectionSlug, file, serverHandlerPath, serverURL }) => {
     const { uploadFiles } = genUploader({
       package: 'storage-uploadthing',
-      url: `${serverURL}${apiRoute}/storage-uploadthing-client-upload-route?collectionSlug=${collectionSlug}`,
+      url: `${serverURL}${apiRoute}${serverHandlerPath}?collectionSlug=${collectionSlug}`,
     })
 
     const res = await uploadFiles('uploader', {

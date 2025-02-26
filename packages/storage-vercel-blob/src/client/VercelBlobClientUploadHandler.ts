@@ -15,6 +15,7 @@ export const VercelBlobClientUploadHandler =
       collectionSlug,
       extra: { addRandomSuffix, baseURL, prefix = '' },
       file,
+      serverHandlerPath,
       serverURL,
       updateFilename,
     }) => {
@@ -22,7 +23,7 @@ export const VercelBlobClientUploadHandler =
         access: 'public',
         clientPayload: collectionSlug,
         contentType: file.type,
-        handleUploadUrl: `${serverURL}${apiRoute}/vercel-blob-client-upload-route`,
+        handleUploadUrl: `${serverURL}${apiRoute}$${serverHandlerPath}`,
       })
 
       // Update filename with suffix from returned url
