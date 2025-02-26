@@ -521,6 +521,8 @@ describe('General', () => {
 
     test('should render protected nested custom view', async () => {
       await page.goto(`${serverURL}${adminRoutes.routes.admin}${protectedCustomNestedViewPath}`)
+
+      // wait for redirect to unauthorized page
       await page.waitForURL(`**${adminRoutes.routes.admin}/unauthorized`)
       await expect(page.locator('.unauthorized')).toBeVisible()
 

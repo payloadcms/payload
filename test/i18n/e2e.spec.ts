@@ -49,7 +49,6 @@ describe('i18n', () => {
 
   test('ensure i18n labels and useTranslation hooks display correct translation', async () => {
     await page.goto(serverURL + '/admin')
-    await page.waitForURL(serverURL + '/admin')
 
     await expect(
       page.locator('.componentWithDefaultI18n .componentWithDefaultI18nValidT'),
