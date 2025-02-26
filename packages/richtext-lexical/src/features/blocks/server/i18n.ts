@@ -27,10 +27,10 @@ export const i18n: Partial<GenericLanguages> = {
   },
   bg: {
     inlineBlocks: {
-      create: 'Създайте {{етикет}}',
-      edit: 'Редактирай {{етикет}}',
+      create: 'Създайте {{label}}',
+      edit: 'Редактирай {{label}}',
       label: 'Вградени блокове',
-      remove: 'Премахнете {{етикет}}',
+      remove: 'Премахнете {{label}}',
     },
     label: 'Блокове',
     wrapperBlocks: {
@@ -39,7 +39,7 @@ export const i18n: Partial<GenericLanguages> = {
   },
   cs: {
     inlineBlocks: {
-      create: 'Vytvořte {{štítek}}',
+      create: 'Vytvořte {{label}}',
       edit: 'Upravit {{label}}',
       label: 'Inline bloky',
       remove: 'Odstraňte {{label}}',
@@ -87,8 +87,8 @@ export const i18n: Partial<GenericLanguages> = {
   },
   es: {
     inlineBlocks: {
-      create: 'Crear {{etiqueta}}',
-      edit: 'Editar {{etiqueta}}',
+      create: 'Crear {{label}}',
+      edit: 'Editar {{label}}',
       label: 'Bloques en línea',
       remove: 'Eliminar {{label}}',
     },
@@ -301,9 +301,9 @@ export const i18n: Partial<GenericLanguages> = {
   ru: {
     inlineBlocks: {
       create: 'Создать {{label}}',
-      edit: 'Изменить {{метка}}',
+      edit: 'Изменить {{label}}',
       label: 'Встроенные блоки',
-      remove: 'Удалить {{метка}}',
+      remove: 'Удалить {{label}}',
     },
     label: 'Блоки',
     wrapperBlocks: {
@@ -325,23 +325,14 @@ export const i18n: Partial<GenericLanguages> = {
   sl: {
     inlineBlocks: {
       create: 'Ustvari {{label}}',
-      edit: 'Uredi {{oznako}}',
-      label: 'Vrstični bloki',
-      remove: 'Odstrani {{oznaka}}',
-    },
-    label: 'Bloki',
-    wrapperBlocks: {
-      label: 'Ovojni bloki',
-    },
-  },
-  sl: {
-    inlineBlocks: {
-      create: 'Ustvari {{oznaka}}',
       edit: 'Uredi {{label}}',
       label: 'Vrstični bloki',
       remove: 'Odstrani {{label}}',
     },
     label: 'Bloki',
+    wrapperBlocks: {
+      label: 'Ovojni bloki',
+    },
   },
   sv: {
     inlineBlocks: {

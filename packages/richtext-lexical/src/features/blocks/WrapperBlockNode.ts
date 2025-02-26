@@ -55,43 +55,49 @@ export function getWrapperBlockNode(domMap: DOMMap) {
       this.__fields = fields
     }
 
-    static clone(node: WrapperBlockNode): WrapperBlockNode {
+    static override clone(node: WrapperBlockNode): WrapperBlockNode {
       return new this({
         fields: node.__fields,
         key: node.__key,
       })
     }
 
-    static getType(): string {
+    static override getType(): string {
       return 'wrapperBlock'
     }
 
-    static importDOM(): DOMConversionMap<HTMLDivElement> | null {
+    static override importDOM(): DOMConversionMap<HTMLDivElement> | null {
       return {}
     }
 
-    static importJSON(serializedNode: SerializedWrapperBlockNode): WrapperBlockNode {
+    static override importJSON(serializedNode: SerializedWrapperBlockNode): WrapperBlockNode {
       const node = $createWrapperBlockNode(serializedNode.fields)
       return node
     }
 
-    canBeEmpty(): false {
+    override canBeEmpty(): false {
       return false
     }
 
-    canInsertTextAfter(): false {
+    override canInsertTextAfter(): false {
       return false
     }
 
-    canInsertTextBefore(): false {
+    override canInsertTextBefore(): false {
       return false
     }
 
-    createDOM(_config: EditorConfig, _editor: LexicalEditor): HTMLElement {
-      return domMap[this.__fields.blockType]({ editor: _editor, editorConfig: _config, node: this })
+    override createDOM(_config: EditorConfig, _editor: LexicalEditor): HTMLElement {
+      const domMapEntry = domMap[this.__fields.blockType]
+
+      if (!domMapEntry) {
+        throw new Error(`No DOM map entry for block type ${this.__fields.blockType}`)
+      }
+
+      return domMapEntry({ editor: _editor, editorConfig: _config, node: this })
     }
 
-    exportDOM(): DOMExportOutput {
+    override exportDOM(): DOMExportOutput {
       const element = document.createElement('span')
       element.classList.add('wrapper-block-container')
 
@@ -100,7 +106,7 @@ export function getWrapperBlockNode(domMap: DOMMap) {
       return { element }
     }
 
-    exportJSON(): SerializedWrapperBlockNode {
+    override exportJSON(): SerializedWrapperBlockNode {
       return {
         ...super.exportJSON(),
         type: 'wrapperBlock',
@@ -109,7 +115,7 @@ export function getWrapperBlockNode(domMap: DOMMap) {
       }
     }
 
-    extractWithChild(
+    override extractWithChild(
       child: LexicalNode,
       selection: BaseSelection,
       destination: 'clone' | 'html',
@@ -131,7 +137,10 @@ export function getWrapperBlockNode(domMap: DOMMap) {
     getFields(): WrapperBlockFields {
       return this.getLatest().__fields
     }
-    insertNewAfter(selection: RangeSelection, restoreSelection = true): ElementNodeType | null {
+    override insertNewAfter(
+      selection: RangeSelection,
+      restoreSelection = true,
+    ): ElementNodeType | null {
       const element = this.getParentOrThrow().insertNewAfter(selection, restoreSelection)
       if ($isElementNode(element)) {
         const wrapperBlockNode = $createWrapperBlockNode(this.__fields)
@@ -141,7 +150,7 @@ export function getWrapperBlockNode(domMap: DOMMap) {
       return null
     }
 
-    isInline(): true {
+    override isInline(): true {
       return true
     }
 
@@ -152,7 +161,7 @@ export function getWrapperBlockNode(domMap: DOMMap) {
       writable.__fields = fieldsCopy
     }
 
-    updateDOM(
+    override updateDOM(
       prevNode: WrapperBlockNode,
       anchor: HTMLAnchorElement,
       config: EditorConfig,

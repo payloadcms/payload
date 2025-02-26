@@ -62,9 +62,9 @@ export const WrapperBlocksPlugin: PluginComponentWithAnchor<
               if ($isWrapperBlockNode(parent)) {
                 const children = parent.getChildren()
 
-                for (let i = 0; i < children.length; i += 1) {
-                  parent.insertBefore(children[i])
-                }
+                children.forEach((child) => {
+                  parent.insertBefore(child)
+                })
 
                 parent.remove()
               }
@@ -105,9 +105,7 @@ export const WrapperBlocksPlugin: PluginComponentWithAnchor<
               if (wrapperBlockNode !== null) {
                 const children = node.getChildren()
 
-                for (let i = 0; i < children.length; i += 1) {
-                  wrapperBlockNode.append(children[i])
-                }
+                wrapperBlockNode.append(...children)
               }
 
               node.remove()

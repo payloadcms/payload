@@ -201,11 +201,18 @@ export function BlockEditor({
 
         const clientSchemaMap = featureClientSchemaMap['blocks']
 
+        if (!clientSchemaMap) {
+          throw new Error('No client schema map found')
+        }
+
         const blocksField: BlocksFieldClient = clientSchemaMap[
           componentMapRenderedBlockPath
-        ][0] as BlocksFieldClient
+        ]?.[0] as BlocksFieldClient
 
-        const clientBlock = blocksField.blocks[0]
+        const clientBlock = blocksField?.blocks?.[0]
+        if (!clientBlock) {
+          throw new Error('No client block found')
+        }
         setClientBlock(clientBlock)
 
         loadInitialState({ formData: data, schemaFieldsPath: schemaFieldsPath_ })
