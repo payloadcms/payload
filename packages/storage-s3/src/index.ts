@@ -4,7 +4,7 @@ import type {
   CollectionOptions,
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
-import type { Config, Plugin, UploadCollectionSlug } from 'payload'
+import type { Config, PayloadRequest, Plugin, UploadCollectionSlug } from 'payload'
 
 import * as AWS from '@aws-sdk/client-s3'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
@@ -32,12 +32,21 @@ export type S3StorageOptions = {
    * Collection options to apply the S3 adapter to.
    */
   collections: Partial<Record<UploadCollectionSlug, Omit<CollectionOptions, 'adapter'> | true>>
+
   /**
    * AWS S3 client configuration. Highly dependent on your AWS setup.
    *
    * [AWS.S3ClientConfig Docs](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/s3clientconfig.html)
    */
   config: AWS.S3ClientConfig
+
+  /**
+   * Response headers configuration.
+   * Can be used to replace default or append custom headers to the response.
+   *
+   * @default undefined
+   */
+  getResponseHeaders?: (args: { headers: HeadersInit, req: PayloadRequest }) => Headers | Promise<Headers>
 
   /**
    * Whether or not to disable local storage
@@ -102,7 +111,12 @@ export const s3Storage: S3StoragePlugin =
     })(config)
   }
 
-function s3StorageInternal({ acl, bucket, config = {} }: S3StorageOptions): Adapter {
+function s3StorageInternal({
+  acl,
+  bucket,
+  getResponseHeaders,
+  config = {}
+}: S3StorageOptions): Adapter {
   return ({ collection, prefix }): GeneratedAdapter => {
     let storageClient: AWS.S3 | null = null
     const getStorageClient: () => AWS.S3 = () => {
@@ -124,7 +138,7 @@ function s3StorageInternal({ acl, bucket, config = {} }: S3StorageOptions): Adap
         getStorageClient,
         prefix,
       }),
-      staticHandler: getHandler({ bucket, collection, getStorageClient }),
+      staticHandler: getHandler({ bucket, collection, getStorageClient, getResponseHeaders }),
     }
   }
 }
