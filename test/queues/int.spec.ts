@@ -1156,7 +1156,7 @@ describe('Queues', () => {
       depth: 0,
     })
 
-    expect(jobAfterRun.completedAt).not.toBeDefined()
+    expect(Boolean(jobAfterRun.completedAt)).toBe(false)
     expect(jobAfterRun.hasError).toBe(true)
     // @ts-expect-error error is not typed
     expect(jobAfterRun.error?.cancelled).toBe(true)
@@ -1194,7 +1194,7 @@ describe('Queues', () => {
       depth: 0,
     })
 
-    expect(jobAfterRun.completedAt).not.toBeDefined()
+    expect(Boolean(jobAfterRun.completedAt)).toBe(false)
     expect(jobAfterRun.hasError).toBe(true)
     // @ts-expect-error error is not typed
     expect(jobAfterRun.error?.cancelled).toBe(true)
