@@ -259,7 +259,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           processing: false,
         })
 
-        return
+        throw new Error(errorMessage)
       }
 
       let output: object = {}

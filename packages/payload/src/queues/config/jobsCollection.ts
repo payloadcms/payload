@@ -221,6 +221,18 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
           return doc
         },
       ],
+      beforeChange: [
+        ({ data }) => {
+          if (data?.error?.cancelled) {
+            data.processing = false
+            data.hasError = true
+            delete data.completedAt
+            delete data.waitUntil
+            data.state = 'failed'
+          }
+          return data
+        },
+      ],
     },
     lockDocuments: false,
   }
