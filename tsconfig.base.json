@@ -66,7 +66,15 @@
         "./packages/plugin-multi-tenant/src/exports/client.ts"
       ],
       "@payloadcms/plugin-multi-tenant": ["./packages/plugin-multi-tenant/src/index.ts"],
-      "@payloadcms/next": ["./packages/next/src/exports/*"]
+      "@payloadcms/next": ["./packages/next/src/exports/*"],
+      "@payloadcms/storage-s3/client": ["./packages/storage-s3/src/exports/client.ts"],
+      "@payloadcms/storage-vercel-blob/client": [
+        "./packages/storage-vercel-blob/src/exports/client.ts"
+      ],
+      "@payloadcms/storage-gcs/client": ["./packages/storage-gcs/src/exports/client.ts"],
+      "@payloadcms/storage-uploadthing/client": [
+        "./packages/storage-uploadthing/src/exports/client.ts"
+      ]
     }
   },
   "include": ["${configDir}/src"],
