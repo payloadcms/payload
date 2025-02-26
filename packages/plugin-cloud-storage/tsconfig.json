@@ -5,5 +5,5 @@
     "strict": false,
     "noUncheckedIndexedAccess": false,
   },
-  "references": [{ "path": "../payload" }]
+  "references": [{ "path": "../payload" }, { "path": "../ui" }]
 }

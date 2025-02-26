@@ -1,6 +1,7 @@
 import type { StorageOptions } from '@google-cloud/storage'
 import type {
   Adapter,
+  ClientUploadsConfig,
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
   GeneratedAdapter,
@@ -10,6 +11,7 @@ import type { Config, Plugin, UploadCollectionSlug } from 'payload'
 import { Storage } from '@google-cloud/storage'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 
+import { getGenerateSignedURLHandler } from './generateSignedURL.js'
 import { getGenerateURL } from './generateURL.js'
 import { getHandleDelete } from './handleDelete.js'
 import { getHandleUpload } from './handleUpload.js'
@@ -22,6 +24,10 @@ export interface GcsStorageOptions {
    * The name of the bucket to use.
    */
   bucket: string
+  /**
+   * Do uploads directly on the client to bypass limits on Vercel. You must allow CORS PUT method for the bucket to your website.
+   */
+  clientUploads?: ClientUploadsConfig
   /**
    * Collection options to apply the S3 adapter to.
    */
@@ -50,7 +56,60 @@ export const gcsStorage: GcsStoragePlugin =
       return incomingConfig
     }
 
-    const adapter = gcsStorageInternal(gcsStorageOptions)
+    let storageClient: null | Storage = null
+
+    const getStorageClient = (): Storage => {
+      if (storageClient) {
+        return storageClient
+      }
+      storageClient = new Storage(gcsStorageOptions.options)
+
+      return storageClient
+    }
+
+    const adapter = gcsStorageInternal(getStorageClient, gcsStorageOptions)
+
+    if (gcsStorageOptions.clientUploads) {
+      if (!incomingConfig.endpoints) {
+        incomingConfig.endpoints = []
+      }
+
+      incomingConfig.endpoints.push({
+        handler: getGenerateSignedURLHandler({
+          access:
+            typeof gcsStorageOptions.clientUploads === 'object'
+              ? gcsStorageOptions.clientUploads.access
+              : undefined,
+          bucket: gcsStorageOptions.bucket,
+          collections: gcsStorageOptions.collections,
+          getStorageClient,
+        }),
+        method: 'post',
+        path: '/storage-gcs-generate-signed-url',
+      })
+    }
+
+    if (!incomingConfig.admin) {
+      incomingConfig.admin = {}
+    }
+
+    if (!incomingConfig.admin.components) {
+      incomingConfig.admin.components = {}
+    }
+
+    if (!incomingConfig.admin.components.providers) {
+      incomingConfig.admin.components.providers = []
+    }
+
+    for (const collectionSlug in gcsStorageOptions.collections) {
+      incomingConfig.admin.components.providers.push({
+        clientProps: {
+          collectionSlug,
+          enabled: !!gcsStorageOptions.clientUploads,
+        },
+        path: '@payloadcms/storage-gcs/client#GcsClientUploadHandler',
+      })
+    }
 
     // Add adapter to each collection option object
     const collectionsWithAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
@@ -89,18 +148,11 @@ export const gcsStorage: GcsStoragePlugin =
     })(config)
   }
 
-function gcsStorageInternal({ acl, bucket, options }: GcsStorageOptions): Adapter {
+function gcsStorageInternal(
+  getStorageClient: () => Storage,
+  { acl, bucket }: GcsStorageOptions,
+): Adapter {
   return ({ collection, prefix }): GeneratedAdapter => {
-    let storageClient: null | Storage = null
-
-    const getStorageClient = (): Storage => {
-      if (storageClient) {
-        return storageClient
-      }
-      storageClient = new Storage(options)
-      return storageClient
-    }
-
     return {
       name: 'gcs',
       generateURL: getGenerateURL({ bucket, getStorageClient }),

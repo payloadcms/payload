@@ -84,7 +84,7 @@ export type CreateFormData = (
    * @default true
    */
   options?: { mergeOverrideData?: boolean },
-) => FormData
+) => FormData | Promise<FormData>
 export type GetFields = () => FormState
 export type GetField = (path: string) => FormField
 export type GetData = () => Data
