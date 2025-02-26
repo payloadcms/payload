@@ -452,8 +452,12 @@ export const traverseFields = <T extends Record<string, unknown>>({
 
       if (count) {
         const countPath = `${fieldName}_count`
-        if (typeof table[countPath] === 'number') {
-          fieldResult.totalDocs = table[countPath]
+        if (typeof table[countPath] !== 'undefined') {
+          let value = Number(table[countPath])
+          if (Number.isNaN(value)) {
+            value = 0
+          }
+          fieldResult.totalDocs = value
         }
       }
 
