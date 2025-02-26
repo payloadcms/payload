@@ -506,8 +506,8 @@ export const traverseFields = ({
       }
 
       if (field.type === 'date' && fieldName === 'updatedAt') {
-        // let the db handle this
-        formattedValue = new Date().toISOString()
+        // let the db handle this if not provided
+        formattedValue = value || new Date().toISOString()
       }
 
       if (typeof formattedValue !== 'undefined') {
