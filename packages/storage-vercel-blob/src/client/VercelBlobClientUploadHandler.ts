@@ -23,7 +23,7 @@ export const VercelBlobClientUploadHandler =
         access: 'public',
         clientPayload: collectionSlug,
         contentType: file.type,
-        handleUploadUrl: `${serverURL}${apiRoute}$${serverHandlerPath}`,
+        handleUploadUrl: `${serverURL}${apiRoute}${serverHandlerPath}`,
       })
 
       // Update filename with suffix from returned url
