@@ -10,6 +10,7 @@ import { updatePostStep1, updatePostStep2 } from './runners/updatePost.js'
 import { clearAndSeedEverything } from './seed.js'
 import { externalWorkflow } from './workflows/externalWorkflow.js'
 import { inlineTaskTestWorkflow } from './workflows/inlineTaskTest.js'
+import { longRunningWorkflow } from './workflows/longRunning.js'
 import { noRetriesSetWorkflow } from './workflows/noRetriesSet.js'
 import { retries0Workflow } from './workflows/retries0.js'
 import { retriesBackoffTestWorkflow } from './workflows/retriesBackoffTest.js'
@@ -340,6 +341,7 @@ export default buildConfigWithDefaults({
       retriesBackoffTestWorkflow,
       subTaskWorkflow,
       subTaskFailsWorkflow,
+      longRunningWorkflow,
     ],
   },
   editor: lexicalEditor(),

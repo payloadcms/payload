@@ -232,7 +232,6 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
             data.hasError = true
             delete data.completedAt
             delete data.waitUntil
-            data.state = 'failed'
           }
           return data
         },
