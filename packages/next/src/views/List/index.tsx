@@ -67,17 +67,21 @@ export const renderListView = async (
     visibleEntities,
   } = initPageResult
 
-  console.log(locale)
-
   if (!permissions?.collections?.[collectionSlug]?.read) {
     throw new Error('not-found')
   }
 
   const query = queryFromArgs || queryFromReq
 
-  const columns: ColumnPreference[] = query.columns
-    ? (JSON.parse(query.columns as string) as ColumnPreference[])
-    : undefined
+  let columns: ColumnPreference[]
+
+  if (query.columns) {
+    try {
+      columns = JSON.parse(query?.columns as string) as ColumnPreference[]
+    } catch (error) {
+      console.error('Error parsing columns from URL:', error) // eslint-disable-line no-console
+    }
+  }
 
   const listPreferences = await upsertPreferences<ListPreferences>({
     key: `${collectionSlug}-list`,

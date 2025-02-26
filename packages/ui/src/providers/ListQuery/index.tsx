@@ -35,7 +35,11 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     const result: ListQuery = parsed
 
     if (parsed.columns) {
-      result.columns = JSON.parse(parsed.columns as string) as ColumnPreference[]
+      try {
+        result.columns = JSON.parse(parsed.columns as string) as ColumnPreference[]
+      } catch (error) {
+        console.error('Error parsing columns from URL:', error) // eslint-disable-line no-console
+      }
     }
 
     return result
