@@ -52,7 +52,7 @@ The plugin accepts an object with the following properties:
 
 ```ts
 type MultiTenantPluginConfig<ConfigTypes = unknown> = {
-/**
+  /**
    * After a tenant is deleted, the plugin will attempt to clean up related documents
    * - removing documents with the tenant ID
    * - removing the tenant from users
@@ -158,6 +158,16 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
         rowFields?: never
         tenantFieldAccess?: never
       }
+  /**
+   * Customize tenant selector label
+   *
+   * Either a string or an object where the keys are locales and the values are the string labels
+   */
+  tenantSelectorLabel?:
+    | Partial<{
+        [key in AcceptedLanguages]?: string
+      }>
+    | string
   /**
    * The slug for the tenant collection
    *
