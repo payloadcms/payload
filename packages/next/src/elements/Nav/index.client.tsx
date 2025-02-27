@@ -53,7 +53,7 @@ export const DefaultNavClient: React.FC<{
 
               if (activeCollection) {
                 return (
-                  <div className={`${baseClass}__link active`} key={i}>
+                  <div className={`${baseClass}__link active`} id={id} key={i}>
                     <div className={`${baseClass}__link-indicator`} />
                     {Label}
                   </div>

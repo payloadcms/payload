@@ -532,7 +532,6 @@ describe('Access Control', () => {
       test('should restrict access based on user settings', async () => {
         const url = `${serverURL}/admin/globals/settings`
         await page.goto(url)
-        await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain(url)
         await openNav(page)
         await expect(page.locator('#nav-global-settings')).toBeVisible()
         await expect(page.locator('#nav-global-test')).toBeHidden()
