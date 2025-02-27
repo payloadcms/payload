@@ -1,14 +1,14 @@
 'use client'
-import type {
-  CollectionSlug,
-  Column,
-  JoinFieldClient,
-  ListQuery,
-  PaginatedDocs,
-  Where,
-} from 'payload'
-
 import { getTranslation } from '@payloadcms/translations'
+import {
+  type CollectionSlug,
+  type Column,
+  type JoinFieldClient,
+  type ListQuery,
+  type PaginatedDocs,
+  type Where,
+} from 'payload'
+import { transformColumnsToPreferences } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
@@ -137,7 +137,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         Table: NewTable,
       } = await getTableState({
         collectionSlug: relationTo,
-        columns: query?.columns || defaultColumns,
+        columns: transformColumnsToPreferences(query?.columns) || defaultColumns,
         docs,
         enableRowSelections: false,
         parent,
@@ -323,7 +323,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           {data?.docs && data.docs.length > 0 && (
             <RelationshipProvider>
               <ListQueryProvider
-                columns={columnState.map(({ accessor, active }) => ({ [accessor]: active }))}
+                columns={transformColumnsToPreferences(columnState)}
                 data={data}
                 defaultLimit={
                   field.defaultLimit ?? collectionConfig?.admin?.pagination?.defaultLimit

@@ -1,19 +1,18 @@
-import type {
-  AdminViewServerProps,
-  ColumnPreference,
-  ListPreferences,
-  ListQuery,
-  ListViewClientProps,
-  ListViewServerPropsOnly,
-  Where,
-} from 'payload'
-
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
 import { formatAdminURL, mergeListSearchAndWhere } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
-import { isNumber } from 'payload/shared'
+import {
+  type AdminViewServerProps,
+  type ColumnPreference,
+  type ListPreferences,
+  type ListQuery,
+  type ListViewClientProps,
+  type ListViewServerPropsOnly,
+  type Where,
+} from 'payload'
+import { isNumber, transformColumnsToPreferences } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { renderListViewSlots } from './renderListViewSlots.js'
@@ -83,24 +82,12 @@ export const renderListView = async (
 
   const query = queryFromArgs || queryFromReq
 
-  let columns: ColumnPreference[]
+  const columns: ColumnPreference[] = transformColumnsToPreferences(
+    query?.columns as ColumnPreference[] | string,
+  )
 
   const isReferral = Boolean(__payloadListView.lastKnownURL)
   __payloadListView.lastKnownURL = req.url
-
-  // Columns from `req.query` are a string, so we need to parse them
-  // Otherwise, columns from args are already in JSON format
-  if (query.columns) {
-    if (typeof query.columns === 'string') {
-      try {
-        columns = JSON.parse(query?.columns) as ColumnPreference[]
-      } catch (error) {
-        console.error('Error parsing columns from URL:', error) // eslint-disable-line no-console
-      }
-    } else {
-      columns = query.columns as ColumnPreference[]
-    }
-  }
 
   let listPreferences: ListPreferences | undefined
 
@@ -239,7 +226,7 @@ export const renderListView = async (
         <Fragment>
           <HydrateAuthProvider permissions={permissions} />
           <ListQueryProvider
-            columns={columnState.map(({ accessor, active }) => ({ [accessor]: active }))}
+            columns={columnState.map(({ accessor, active }) => ({ accessor, active }))}
             data={data}
             defaultLimit={limit}
             defaultSort={sort}

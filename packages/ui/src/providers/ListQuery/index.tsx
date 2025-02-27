@@ -1,8 +1,7 @@
 'use client'
-import type { ColumnPreference, ListQuery, Where } from 'payload'
-
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import { isNumber } from 'payload/shared'
+import { type ListQuery, type Where } from 'payload'
+import { isNumber, transformColumnsToURLParams } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
@@ -31,20 +30,10 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   const rawSearchParams = useSearchParams()
   const { startRouteTransition } = useRouteTransition()
 
-  const searchParams = useMemo<ListQuery>(() => {
-    const parsed = parseSearchParams(rawSearchParams)
-    const result: ListQuery = parsed
-
-    if (parsed.columns && typeof parsed.columns === 'string') {
-      try {
-        result.columns = JSON.parse(parsed.columns) as ColumnPreference[]
-      } catch (error) {
-        console.error('Error parsing columns from URL:', error) // eslint-disable-line no-console
-      }
-    }
-
-    return result
-  }, [rawSearchParams])
+  const searchParams = useMemo<ListQuery>(
+    () => parseSearchParams(rawSearchParams),
+    [rawSearchParams],
+  )
 
   const { onQueryChange } = useListDrawerContext()
 
@@ -172,7 +161,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     // Only modify columns if they originated from preferences
     // We can assume they did if `listPreferences.columns` is defined
     if (columns && listPreferences?.columns && !('columns' in currentQuery)) {
-      newQuery.columns = columns
+      newQuery.columns = transformColumnsToURLParams(columns)
       shouldUpdateQueryString = true
     }
 

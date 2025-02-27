@@ -1,6 +1,6 @@
 'use client'
-import type { Column } from 'payload'
-
+import { type Column } from 'payload'
+import { transformColumnsToURLParams } from 'payload/shared'
 import React, { startTransition, useCallback } from 'react'
 
 import type { TableColumnsProviderProps } from './types.js'
@@ -43,7 +43,7 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
       })
 
       await refineListData({
-        columns: newColumnState.map((col) => ({ [col.accessor]: col.active })),
+        columns: transformColumnsToURLParams(newColumnState),
       })
     },
     [refineListData, columnState, setOptimisticColumnState],
@@ -61,7 +61,7 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
       })
 
       await refineListData({
-        columns: newColumnState.map((col) => ({ [col.accessor]: col.active })),
+        columns: transformColumnsToURLParams(newColumnState),
       })
     },
     [columnState, refineListData, setOptimisticColumnState],
@@ -72,12 +72,11 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
       const newColumnState = currentQuery.columns
 
       columns.forEach((colName) => {
-        const colIndex = newColumnState.findIndex((c) => colName in c)
+        const colIndex = newColumnState.findIndex((c) => colName === c)
 
-        if (colIndex !== undefined) {
-          newColumnState[colIndex] = {
-            [colName]: true,
-          }
+        // ensure the name does not begin with a `-` which denotes an inactive column
+        if (colIndex !== undefined && newColumnState[colIndex][0] === '-') {
+          newColumnState[colIndex] = colName.slice(1)
         }
       })
 
