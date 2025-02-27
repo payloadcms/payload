@@ -21,7 +21,7 @@ FROM base AS runner
 
 RUN npm install -g @remix-run/serve@latest
 WORKDIR /app
-COPY --from=builder /app/apps/website/build/ ./build
+COPY --from=builder /app/website/build/ ./build
 
 # We need to install sharp again to avoid copying node_modules into the final image.
 # Sharp can't be bundled into the server file since it will throw an
@@ -30,8 +30,8 @@ RUN npm install sharp@0.32.6
 
 # These files are required by Payload to avoid file opening errors
 # https://github.com/payloadcms/payload/issues/11276
-COPY --from=builder /app/apps/website/package.json ./package.json
-COPY --from=builder /app/apps/payload/src/payload.config.ts ./payload.config.ts
+COPY --from=builder /app/website/package.json ./package.json
+COPY --from=builder /app/payload/src/payload.config.ts ./payload.config.ts
 ENV PAYLOAD_CONFIG_PATH=./payload.config.ts
 
 EXPOSE 3000
