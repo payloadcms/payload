@@ -5,6 +5,7 @@ import type { Column } from 'payload'
 import React from 'react'
 
 import './index.scss'
+import { ORDER_FIELD_NAME } from '../../utilities/renderTable.js'
 import { DraggableSortableItem } from '../DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
 
@@ -16,7 +17,10 @@ export type Props = {
   readonly data: Record<string, unknown>[]
 }
 
-export const Table: React.FC<Props> = ({ appearance, columns, data }) => {
+export const Table: React.FC<Props> = ({ appearance, columns, data: initialData }) => {
+  // Convert data to state to handle optimistic updates
+  const [data, setData] = React.useState(initialData)
+
   const activeColumns = columns?.filter((col) => col?.active)
 
   if (!activeColumns || activeColumns.length === 0) {
@@ -29,10 +33,23 @@ export const Table: React.FC<Props> = ({ appearance, columns, data }) => {
     }
 
     const movedId = data[moveFromIndex].id as string
-
-    // Get the IDs of the items before and after the drop position
     const beforeId = moveToIndex > 0 ? (data[moveToIndex - 1]?.id as string) : undefined
     const afterId = moveToIndex < data.length - 1 ? (data[moveToIndex]?.id as string) : undefined
+
+    // Store the original data for rollback
+    const previousData = [...data]
+
+    // Optimistically update the UI
+    setData((currentData) => {
+      const newData = [...currentData]
+      const beforeOrder = newData[moveToIndex - 1][ORDER_FIELD_NAME]
+      console.log('beforeOrder', beforeOrder)
+      newData[moveFromIndex] = {
+        ...newData[moveFromIndex],
+        [ORDER_FIELD_NAME]: `${beforeOrder}_pending`,
+      }
+      return newData
+    })
 
     try {
       // Assuming we're in the context of a collection
@@ -51,11 +68,11 @@ export const Table: React.FC<Props> = ({ appearance, columns, data }) => {
       if (!response.ok) {
         throw new Error('Failed to reorder')
       }
-
-      // Optionally refresh the data or update the UI
     } catch (error) {
       console.error('Error reordering:', error)
-      // Handle error (show notification, etc.)
+      // Rollback to previous state if the request fails
+      setData(previousData)
+      // Optionally show an error notification
     }
   }
 
