@@ -2,6 +2,7 @@ import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloa
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
 import { formatAdminURL, mergeListSearchAndWhere } from '@payloadcms/ui/shared'
+import { cookies as getCookies } from 'next/headers.js'
 import { notFound } from 'next/navigation.js'
 import {
   type AdminViewServerProps,
@@ -19,16 +20,6 @@ import { renderListViewSlots } from './renderListViewSlots.js'
 import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
 
 export { generateListMetadata } from './meta.js'
-
-const __payloadListView = {
-  lastKnownURL: undefined,
-}
-
-declare global {
-  interface Window {
-    __payloadListView: string
-  }
-}
 
 type RenderListViewArgs = {
   customCellProps?: Record<string, any>
@@ -86,22 +77,19 @@ export const renderListView = async (
     query?.columns as ColumnPreference[] | string,
   )
 
-  const isReferral = Boolean(__payloadListView.lastKnownURL)
-  __payloadListView.lastKnownURL = req.url
-
-  let listPreferences: ListPreferences | undefined
-
-  if (!isReferral) {
-    listPreferences = await upsertPreferences<ListPreferences>({
-      key: `${collectionSlug}-list`,
-      req,
-      value: {
-        columns,
-        limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
-        sort: query?.sort as string,
-      },
-    })
-  }
+  /**
+   * @todo: find a pattern to only set preferences on hard navigation, i.e. direct links, page refresh, etc.
+   * This could potentially be done by injecting a `sessionID` into the params, or setting a `payload-session` cookie
+   */
+  const listPreferences = await upsertPreferences<ListPreferences>({
+    key: `${collectionSlug}-list`,
+    req,
+    value: {
+      columns,
+      limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
+      sort: query?.sort as string,
+    },
+  })
 
   const {
     routes: { admin: adminRoute },
