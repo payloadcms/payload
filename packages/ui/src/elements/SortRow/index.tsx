@@ -1,5 +1,4 @@
 'use client'
-import type { ClientUser } from 'payload'
 
 import React from 'react'
 
@@ -8,15 +7,9 @@ import './index.scss'
 
 const baseClass = 'sort-row'
 
-export const SortRow: React.FC<{
-  rowData: {
-    _isLocked?: boolean
-    _userEditing?: ClientUser
-    id: string
-  }
-}> = () => {
+export const SortRow = () => {
   return (
-    <div className={baseClass}>
+    <div className={baseClass} role="button" tabIndex={0}>
       <DragHandleIcon className={`${baseClass}__icon`} />
     </div>
   )
