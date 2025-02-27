@@ -29,6 +29,7 @@ export function initLexicalFeatures(args: Args): {
   ).sort((a, b) => a[1].order - b[1].order)
 
   const featureClientSchemaMap: FeatureClientSchemaMap = {}
+
   /**
    * All modules added to the import map, keyed by the provided key, if feature.componentImports with type object is used
    */
