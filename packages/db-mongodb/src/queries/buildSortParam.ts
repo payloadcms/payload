@@ -6,7 +6,7 @@ import { getLocalizedSortProperty } from './getLocalizedSortProperty.js'
 type Args = {
   config: SanitizedConfig
   fields: FlattenedField[]
-  locale: string
+  locale?: string
   parentIsLocalized?: boolean
   sort: Sort
   timestamps: boolean
@@ -39,7 +39,7 @@ export const buildSortParam = ({
     sort = [sort]
   }
 
-  const sorting = sort.reduce<PaginateOptions['sort']>((acc, item) => {
+  const sorting = sort.reduce<Record<string, string>>((acc, item) => {
     let sortProperty: string
     let sortDirection: SortDirection
     if (item.indexOf('-') === 0) {

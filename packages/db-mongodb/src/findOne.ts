@@ -1,20 +1,22 @@
 import type { AggregateOptions, QueryOptions } from 'mongoose'
-import type { FindOne } from 'payload'
+
+import { type FindOne } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
 import { buildQuery } from './queries/buildQuery.js'
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 import { transform } from './utilities/transform.js'
 
 export const findOne: FindOne = async function findOne(
   this: MongooseAdapter,
-  { collection, joins, locale, req, select, where },
+  { collection: collectionSlug, joins, locale, req, select, where = {} },
 ) {
-  const Model = this.collections[collection]
-  const collectionConfig = this.payload.collections[collection].config
+  const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
+
   const session = await getSession(this, req)
   const options: AggregateOptions & QueryOptions = {
     lean: true,
@@ -23,7 +25,7 @@ export const findOne: FindOne = async function findOne(
 
   const query = await buildQuery({
     adapter: this,
-    collectionSlug: collection,
+    collectionSlug,
     fields: collectionConfig.flattenedFields,
     locale,
     where,
@@ -37,7 +39,7 @@ export const findOne: FindOne = async function findOne(
 
   const aggregate = await buildJoinAggregation({
     adapter: this,
-    collection,
+    collection: collectionSlug,
     collectionConfig,
     joins,
     limit: 1,

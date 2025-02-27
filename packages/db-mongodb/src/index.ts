@@ -11,6 +11,7 @@ import type {
   BaseDatabaseAdapter,
   CollectionSlug,
   DatabaseAdapterObj,
+  Migration,
   Payload,
   TypeWithID,
   TypeWithVersion,
@@ -107,11 +108,7 @@ export interface Args {
    * typed as any to avoid dependency
    */
   mongoMemoryServer?: MongoMemoryReplSet
-  prodMigrations?: {
-    down: (args: MigrateDownArgs) => Promise<void>
-    name: string
-    up: (args: MigrateUpArgs) => Promise<void>
-  }[]
+  prodMigrations?: Migration[]
   transactionOptions?: false | TransactionOptions
 
   /** The URL to connect to MongoDB or false to start payload and prevent connecting */
