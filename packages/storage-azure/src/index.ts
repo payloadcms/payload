@@ -64,21 +64,19 @@ type AzureStoragePlugin = (azureStorageArgs: AzureStorageOptions) => Plugin
 export const azureStorage: AzureStoragePlugin =
   (azureStorageOptions: AzureStorageOptions) =>
   (incomingConfig: Config): Config => {
-    if (azureStorageOptions.enabled === false) {
-      return incomingConfig
-    }
-
     const getStorageClient = () =>
       getStorageClientFunc({
         connectionString: azureStorageOptions.connectionString,
         containerName: azureStorageOptions.containerName,
       })
 
+    const isPluginDisabled = azureStorageOptions.enabled === false
+
     initClientUploads({
       clientHandler: '@payloadcms/storage-azure/client#AzureClientUploadHandler',
       collections: azureStorageOptions.collections,
       config: incomingConfig,
-      enabled: !!azureStorageOptions.clientUploads,
+      enabled: !isPluginDisabled && Boolean(azureStorageOptions.clientUploads),
       serverHandler: getGenerateSignedURLHandler({
         access:
           typeof azureStorageOptions.clientUploads === 'object'
@@ -90,6 +88,10 @@ export const azureStorage: AzureStoragePlugin =
       }),
       serverHandlerPath: '/storage-azure-generate-signed-url',
     })
+
+    if (isPluginDisabled) {
+      return incomingConfig
+    }
 
     const adapter = azureStorageInternal(getStorageClient, azureStorageOptions)
 
