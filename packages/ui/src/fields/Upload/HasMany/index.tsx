@@ -67,7 +67,7 @@ export function UploadComponentHasMany(props: Props) {
       >
         {fileDocs.map(({ relationTo, value }, index) => {
           const id = String(value.id)
-          const url: string = value.thumbnailURL || value.url
+          const url: string = value.url
           let src: string
 
           if (url) {

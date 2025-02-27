@@ -29,7 +29,7 @@ export function UploadComponentHasOne(props: Props) {
   const { relationTo, value } = fileDoc
   const id = String(value?.id)
 
-  const url: string = value.thumbnailURL || value.url
+  const url: string = value.url
   let src: string
 
   try {
