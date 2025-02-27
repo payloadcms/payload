@@ -6,9 +6,12 @@ import { defaults } from './defaults.js'
 import { tenantField } from './fields/tenantField/index.js'
 import { tenantsArrayField } from './fields/tenantsArrayField/index.js'
 import { addTenantCleanup } from './hooks/afterTenantDelete.js'
+import { filterDocumentsBySelectedTenant } from './list-filters/filterDocumentsBySelectedTenant.js'
+import { filterTenantsBySelectedTenant } from './list-filters/filterTenantsBySelectedTenant.js'
+import { filterUsersBySelectedTenant } from './list-filters/filterUsersBySelectedTenant.js'
 import { addCollectionAccess } from './utilities/addCollectionAccess.js'
 import { addFilterOptionsToFields } from './utilities/addFilterOptionsToFields.js'
-import { withTenantListFilter } from './utilities/withTenantListFilter.js'
+import { combineListFilters } from './utilities/combineListFilters.js'
 
 export const multiTenantPlugin =
   <ConfigType>(pluginConfig: MultiTenantPluginConfig<ConfigType>) =>
@@ -97,6 +100,23 @@ export const multiTenantPlugin =
       userHasAccessToAllTenants,
     })
 
+    if (pluginConfig.useUsersTenantFilter !== false) {
+      if (!adminUsersCollection.admin) {
+        adminUsersCollection.admin = {}
+      }
+
+      adminUsersCollection.admin.baseListFilter = combineListFilters({
+        baseListFilter: adminUsersCollection.admin?.baseListFilter,
+        customFilter: (args) =>
+          filterUsersBySelectedTenant({
+            req: args.req,
+            tenantsArrayFieldName,
+            tenantsArrayTenantFieldName,
+            tenantsCollectionSlug,
+          }),
+      })
+    }
+
     let tenantCollection: CollectionConfig | undefined
 
     const [collectionSlugs, globalCollectionSlugs] = Object.keys(pluginConfig.collections).reduce<
@@ -135,6 +155,25 @@ export const multiTenantPlugin =
             tenantsArrayFieldName,
             tenantsArrayTenantFieldName,
             userHasAccessToAllTenants,
+          })
+        }
+
+        if (pluginConfig.useTenantsListFilter !== false) {
+          /**
+           * Add list filter to tenants collection
+           * - filter by selected tenant
+           */
+          if (!collection.admin) {
+            collection.admin = {}
+          }
+
+          collection.admin.baseListFilter = combineListFilters({
+            baseListFilter: collection.admin?.baseListFilter,
+            customFilter: (args) =>
+              filterTenantsBySelectedTenant({
+                req: args.req,
+                tenantsCollectionSlug,
+              }),
           })
         }
 
@@ -195,10 +234,15 @@ export const multiTenantPlugin =
           if (!collection.admin) {
             collection.admin = {}
           }
-          collection.admin.baseListFilter = withTenantListFilter({
+
+          collection.admin.baseListFilter = combineListFilters({
             baseListFilter: collection.admin?.baseListFilter,
-            tenantFieldName,
-            tenantsCollectionSlug,
+            customFilter: (args) =>
+              filterDocumentsBySelectedTenant({
+                req: args.req,
+                tenantFieldName,
+                tenantsCollectionSlug,
+              }),
           })
         }
 

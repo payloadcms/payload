@@ -125,6 +125,14 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    * Opt out of adding access constraints to the tenants collection
    */
   useTenantsCollectionAccess?: boolean
+  /**
+   * Opt out including the baseListFilter to filter tenants by selected tenant
+   */
+  useTenantsListFilter?: boolean
+  /**
+   * Opt out including the baseListFilter to filter users by selected tenant
+   */
+  useUsersTenantFilter?: boolean
 }
 
 export type Tenant<IDType = number | string> = {
