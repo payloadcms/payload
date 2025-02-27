@@ -1,15 +1,15 @@
 import type { PayloadRequest, Where } from 'payload'
 
 import { SELECT_ALL } from '../constants.js'
-import { getCollectionIDType } from './getCollectionIDType.js'
-import { getTenantFromCookie } from './getTenantFromCookie.js'
+import { getCollectionIDType } from '../utilities/getCollectionIDType.js'
+import { getTenantFromCookie } from '../utilities/getTenantFromCookie.js'
 
 type Args = {
   req: PayloadRequest
   tenantFieldName: string
   tenantsCollectionSlug: string
 }
-export const getTenantListFilter = ({
+export const filterDocumentsBySelectedTenant = ({
   req,
   tenantFieldName,
   tenantsCollectionSlug,

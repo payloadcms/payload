@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto'
 import path from 'path'
 import { deepCopyObject, type Payload } from 'payload'
 import { assert } from 'ts-essentials'
@@ -75,6 +76,21 @@ describe('Select', () => {
         })
       })
 
+      it('customID - should select only id as default', async () => {
+        const { id } = await createCustomID()
+
+        const res = await payload.findByID({
+          collection: 'custom-ids',
+          id,
+          select: {},
+          depth: 0,
+        })
+
+        expect(res).toStrictEqual({
+          id,
+        })
+      })
+
       it('should select only number', async () => {
         const res = await payload.findByID({
           collection: 'posts',
@@ -88,6 +104,24 @@ describe('Select', () => {
         expect(res).toStrictEqual({
           id: postId,
           number: post.number,
+        })
+      })
+
+      it('customID - should select only text', async () => {
+        const { id, text } = await createCustomID()
+
+        const res = await payload.findByID({
+          collection: 'custom-ids',
+          id,
+          select: {
+            text: true,
+          },
+          depth: 0,
+        })
+
+        expect(res).toStrictEqual({
+          id,
+          text,
         })
       })
 
@@ -444,6 +478,25 @@ describe('Select', () => {
         delete expected['text']
 
         expect(res).toStrictEqual(expected)
+      })
+
+      it('customID - should exclude text', async () => {
+        const { id, createdAt, updatedAt } = await createCustomID()
+
+        const res = await payload.findByID({
+          collection: 'custom-ids',
+          id,
+          select: {
+            text: false,
+          },
+          depth: 0,
+        })
+
+        expect(res).toStrictEqual({
+          id,
+          createdAt,
+          updatedAt,
+        })
       })
 
       it('should exclude number', async () => {
@@ -2427,4 +2480,10 @@ function createVersionedPost() {
 
 function createPoint() {
   return payload.create({ collection: 'points', data: { text: 'some', point: [10, 20] } })
+}
+
+let id = 1
+
+function createCustomID() {
+  return payload.create({ collection: 'custom-ids', data: { id: id++, text: randomUUID() } })
 }

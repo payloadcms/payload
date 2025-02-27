@@ -494,7 +494,6 @@ describe('Relationship Field', () => {
   test.skip('should open document drawer from read-only relationships', async () => {
     const editURL = url.edit(docWithExistingRelations.id)
     await page.goto(editURL)
-    await page.waitForURL(editURL)
 
     await openDocDrawer(
       page,

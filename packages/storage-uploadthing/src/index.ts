@@ -1,5 +1,6 @@
 import type {
   Adapter,
+  ClientUploadsConfig,
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
   GeneratedAdapter,
@@ -8,14 +9,22 @@ import type { Config, Field, Plugin, UploadCollectionSlug } from 'payload'
 import type { UTApiOptions } from 'uploadthing/types'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
-import { UTApi } from 'uploadthing/server'
+import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
+import { createRouteHandler } from 'uploadthing/next'
+import { createUploadthing, UTApi } from 'uploadthing/server'
 
 import { generateURL } from './generateURL.js'
+import { getClientUploadRoute } from './getClientUploadRoute.js'
 import { getHandleDelete } from './handleDelete.js'
 import { getHandleUpload } from './handleUpload.js'
 import { getHandler } from './staticHandler.js'
 
 export type UploadthingStorageOptions = {
+  /**
+   * Do uploads directly on the client, to bypass limits on Vercel.
+   */
+  clientUploads?: ClientUploadsConfig
+
   /**
    * Collection options to apply the adapter to.
    */
@@ -57,6 +66,22 @@ export const uploadthingStorage: UploadthingPlugin =
     }
 
     const adapter = uploadthingInternal(uploadthingStorageOptions)
+
+    initClientUploads({
+      clientHandler: '@payloadcms/storage-uploadthing/client#UploadthingClientUploadHandler',
+      collections: uploadthingStorageOptions.collections,
+      config: incomingConfig,
+      enabled: !!uploadthingStorageOptions.clientUploads,
+      serverHandler: getClientUploadRoute({
+        access:
+          typeof uploadthingStorageOptions.clientUploads === 'object'
+            ? uploadthingStorageOptions.clientUploads.access
+            : undefined,
+        acl: uploadthingStorageOptions.options.acl || 'public-read',
+        token: uploadthingStorageOptions.options.token,
+      }),
+      serverHandlerPath: '/storage-uploadthing-client-upload-route',
+    })
 
     // Add adapter to each collection option object
     const collectionsWithAdapter: CloudStoragePluginOptions['collections'] = Object.entries(

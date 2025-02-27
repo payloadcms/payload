@@ -98,7 +98,7 @@ describe('relationship', () => {
 
   test('should create nested inline relationships', async () => {
     await page.goto(url.create)
-    await page.waitForURL(`**/${url.create}`)
+
     // Open first modal
     await openCreateDocDrawer(page, '#field-relationToSelf')
 
@@ -157,29 +157,36 @@ describe('relationship', () => {
 
   test('should hide relationship add new button', async () => {
     await page.goto(url.create)
-    await page.waitForURL(url.create)
+
     const locator1 = page.locator(
       '#relationWithAllowEditToFalse-add-new .relationship-add-new__add-button',
     )
+
     await expect(locator1).toHaveCount(1)
+
     // expect the button to not exist in the field
     const locator2 = page.locator(
       '#relationWithAllowCreateToFalse-add-new .relationship-add-new__add-button',
     )
+
     await expect(locator2).toHaveCount(0)
   })
 
   test('should hide relationship edit button', async () => {
     await page.goto(url.create)
-    await page.waitForURL(url.create)
+
     const locator1 = page
       .locator('#field-relationWithAllowEditToFalse')
       .getByLabel('Edit dev@payloadcms.com')
+
     await expect(locator1).toHaveCount(0)
+
     const locator2 = page
       .locator('#field-relationWithAllowCreateToFalse')
       .getByLabel('Edit dev@payloadcms.com')
+
     await expect(locator2).toHaveCount(1)
+
     // The reason why I check for locator 1 again is that I've noticed that sometimes
     // the default value does not appear after the first locator is tested. IDK why.
     await expect(locator1).toHaveCount(0)
@@ -235,7 +242,6 @@ describe('relationship', () => {
   // TODO: React-Select not loading things sometimes. Fix later
   test.skip('should display `hasMany` polymorphic relationships', async () => {
     await page.goto(url.create)
-    await page.waitForURL(url.create)
     const field = page.locator('#field-relationHasManyPolymorphic')
     await field.click()
 
@@ -271,7 +277,6 @@ describe('relationship', () => {
 
   test('should populate relationship dynamic default value', async () => {
     await page.goto(url.create)
-    await page.waitForURL(url.create)
     await expect(
       page.locator('#field-relationWithDynamicDefault .relationship--single-value__text'),
     ).toContainText('dev@payloadcms.com')
@@ -291,7 +296,7 @@ describe('relationship', () => {
   // Related issue: https://github.com/payloadcms/payload/issues/2815
   test('should edit document in relationship drawer', async () => {
     await page.goto(url.create)
-    await page.waitForURL(`**/${url.create}`)
+
     // First fill out the relationship field, as it's required
     await openCreateDocDrawer(page, '#field-relationship')
     await page
@@ -578,7 +583,7 @@ describe('relationship', () => {
 
   test('should fail min rows validation when rows are present', async () => {
     await page.goto(url.create)
-    await page.waitForURL(url.create)
+
     // First fill out the relationship field, as it's required
     await openCreateDocDrawer(page, '#field-relationship')
     await page.locator('#field-relationship .value-container').click()
@@ -601,7 +606,6 @@ describe('relationship', () => {
 
   test('should sort relationship options by sortOptions property (ID in ascending order)', async () => {
     await page.goto(url.create)
-    await page.waitForURL(url.create)
 
     const field = page.locator('#field-relationship')
     await field.click()
@@ -615,7 +619,6 @@ describe('relationship', () => {
 
   test('should sort relationHasManyPolymorphic options by sortOptions property: text-fields collection (items in descending order)', async () => {
     await page.goto(url.create)
-    await page.waitForURL(url.create)
 
     const field = page.locator('#field-relationHasManyPolymorphic')
 
@@ -637,7 +640,6 @@ describe('relationship', () => {
     await createRelationshipFieldDoc({ value: textDoc.id, relationTo: 'text-fields' })
 
     await page.goto(url.list)
-    await page.waitForURL(new RegExp(url.list))
 
     await addListFilter({
       page,

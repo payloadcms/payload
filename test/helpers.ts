@@ -103,6 +103,7 @@ export async function ensureCompilationIsDone({
       )
 
       await page.goto(adminURL)
+
       await page.waitForURL(
         readyURL ??
           (noAutoLogin ? `${adminURL + (adminURL.endsWith('/') ? '' : '/')}login` : adminURL),
@@ -205,7 +206,6 @@ export async function login(args: LoginArgs): Promise<void> {
   })
 
   await page.goto(loginRoute)
-  await page.waitForURL(loginRoute)
   await wait(500)
   await page.fill('#field-email', data.email)
   await page.fill('#field-password', data.password)
