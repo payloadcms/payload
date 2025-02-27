@@ -65,6 +65,9 @@ let uploadsOne: AdminUrlUtil
 let uploadsTwo: AdminUrlUtil
 let customUploadFieldURL: AdminUrlUtil
 let hideFileInputOnCreateURL: AdminUrlUtil
+let consoleErrorsFromPage: string[] = []
+let collectErrorsFromPage: () => boolean
+let stopCollectingErrorsFromPage: () => boolean
 
 describe('Uploads', () => {
   let page: Page
@@ -99,7 +102,14 @@ describe('Uploads', () => {
     const context = await browser.newContext()
     page = await context.newPage()
 
-    initPageConsoleErrorCatch(page, { ignoreCORS: true })
+    const { consoleErrors, collectErrors, stopCollectingErrors } = initPageConsoleErrorCatch(page, {
+      ignoreCORS: true,
+    })
+
+    consoleErrorsFromPage = consoleErrors
+    collectErrorsFromPage = collectErrors
+    stopCollectingErrorsFromPage = stopCollectingErrors
+
     await ensureCompilationIsDone({ page, serverURL })
   })
 
@@ -158,7 +168,6 @@ describe('Uploads', () => {
     ).docs[0]
 
     await page.goto(relationURL.edit(relationDoc.id))
-    await page.waitForURL(relationURL.edit(relationDoc.id))
 
     const filename = page.locator('.upload-relationship-details__filename a').nth(0)
     await expect(filename).toContainText('image.png')
@@ -388,7 +397,6 @@ describe('Uploads', () => {
       ).docs[0]
 
       await page.goto(audioURL.edit(audioDoc.id))
-      await page.waitForURL(audioURL.edit(audioDoc.id))
 
       // remove the selection and open the list drawer
       await wait(500) // flake workaround
@@ -434,7 +442,6 @@ describe('Uploads', () => {
       ).docs[0]
 
       await page.goto(audioURL.edit(audioDoc.id))
-      await page.waitForURL(audioURL.edit(audioDoc.id))
 
       // remove the selection and open the list drawer
       await wait(500) // flake workaround
@@ -555,7 +562,6 @@ describe('Uploads', () => {
 
   test('should detect correct mimeType', async () => {
     await page.goto(mediaURL.create)
-    await page.waitForURL(mediaURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
     await saveDocAndAssert(page)
 
@@ -572,7 +578,6 @@ describe('Uploads', () => {
 
   test('should upload image with metadata', async () => {
     await page.goto(withMetadataURL.create)
-    await page.waitForURL(withMetadataURL.create)
 
     const fileChooserPromise = page.waitForEvent('filechooser')
     await page.getByText('Select a file').click()
@@ -600,7 +605,6 @@ describe('Uploads', () => {
 
   test('should upload image without metadata', async () => {
     await page.goto(withoutMetadataURL.create)
-    await page.waitForURL(withoutMetadataURL.create)
 
     const fileChooserPromise = page.waitForEvent('filechooser')
     await page.getByText('Select a file').click()
@@ -628,7 +632,6 @@ describe('Uploads', () => {
 
   test('should only upload image with metadata if jpeg mimetype', async () => {
     await page.goto(withOnlyJPEGMetadataURL.create)
-    await page.waitForURL(withOnlyJPEGMetadataURL.create)
 
     const fileChooserPromiseForJPEG = page.waitForEvent('filechooser')
     await page.getByText('Select a file').click()
@@ -655,7 +658,6 @@ describe('Uploads', () => {
     expect(acceptableFileSizesForJPEG).toContain(jpegMediaDoc.sizes.sizeThree.filesize)
 
     await page.goto(withOnlyJPEGMetadataURL.create)
-    await page.waitForURL(withOnlyJPEGMetadataURL.create)
 
     const fileChooserPromiseForWEBP = page.waitForEvent('filechooser')
     await page.getByText('Select a file').click()
@@ -698,7 +700,6 @@ describe('Uploads', () => {
     test('should bulk upload multiple files', async () => {
       // Navigate to the upload creation page
       await page.goto(uploadsOne.create)
-      await page.waitForURL(uploadsOne.create)
 
       // Upload single file
       await page.setInputFiles(
@@ -745,6 +746,54 @@ describe('Uploads', () => {
       expect(itemCount).toEqual(2)
 
       await saveDocAndAssert(page)
+    })
+
+    test('should bulk upload non-image files without page errors', async () => {
+      // Enable collection ONLY for this test
+      collectErrorsFromPage()
+
+      // Navigate to the upload creation page
+      await page.goto(uploadsOne.create)
+
+      // Upload single file
+      await page.setInputFiles(
+        '.file-field input[type="file"]',
+        path.resolve(dirname, './image.png'),
+      )
+      const filename = page.locator('.file-field__filename')
+      await expect(filename).toHaveValue('image.png')
+
+      const bulkUploadButton = page.locator('#field-hasManyUpload button', {
+        hasText: exactText('Create New'),
+      })
+      await bulkUploadButton.click()
+
+      const bulkUploadModal = page.locator('#bulk-upload-drawer-slug-1')
+      await expect(bulkUploadModal).toBeVisible()
+
+      await page.setInputFiles('#bulk-upload-drawer-slug-1 .dropzone input[type="file"]', [
+        path.resolve(dirname, './test-pdf.pdf'),
+      ])
+
+      await page
+        .locator('.bulk-upload--file-manager .render-fields #field-prefix')
+        .fill('prefix-one')
+      const saveButton = page.locator('.bulk-upload--actions-bar__saveButtons button')
+      await saveButton.click()
+
+      await page.waitForSelector('#field-hasManyUpload .upload--has-many__dragItem')
+      const itemCount = await page
+        .locator('#field-hasManyUpload .upload--has-many__dragItem')
+        .count()
+      expect(itemCount).toEqual(1)
+
+      await saveDocAndAssert(page)
+
+      // Assert no console errors occurred for this test only
+      expect(consoleErrorsFromPage).toEqual([])
+
+      // Reset global behavior for other tests
+      stopCollectingErrorsFromPage()
     })
 
     test('should apply field value to all bulk upload files after edit many', async () => {
@@ -802,7 +851,6 @@ describe('Uploads', () => {
     test('should remove validation errors from bulk upload files after correction in edit many drawer', async () => {
       // Navigate to the upload creation page
       await page.goto(uploadsOne.create)
-      await page.waitForURL(uploadsOne.create)
 
       // Upload single file
       await page.setInputFiles(
@@ -954,7 +1002,6 @@ describe('Uploads', () => {
       const createFocalCrop = async (page: Page, position: 'bottom-right' | 'top-left') => {
         const { dragX, dragY, focalX, focalY } = positions[position]
         await page.goto(mediaURL.create)
-        await page.waitForURL(mediaURL.create)
         // select and upload file
         const fileChooserPromise = page.waitForEvent('filechooser')
         await page.getByText('Select a file').click()
@@ -1014,7 +1061,6 @@ describe('Uploads', () => {
     test('should update image alignment based on focal point', async () => {
       const updateFocalPosition = async (page: Page) => {
         await page.goto(focalOnlyURL.create)
-        await page.waitForURL(focalOnlyURL.create)
         // select and upload file
         const fileChooserPromise = page.waitForEvent('filechooser')
         await page.getByText('Select a file').click()
@@ -1051,7 +1097,6 @@ describe('Uploads', () => {
 
     test('should resize image after crop if resizeOptions defined', async () => {
       await page.goto(animatedTypeMediaURL.create)
-      await page.waitForURL(animatedTypeMediaURL.create)
 
       const fileChooserPromise = page.waitForEvent('filechooser')
       await page.getByText('Select a file').click()
@@ -1125,14 +1170,11 @@ describe('Uploads', () => {
 
   test('should hide file input when disableCreateFileInput is true on collection create', async () => {
     await page.goto(hideFileInputOnCreateURL.create)
-    await page.waitForURL(hideFileInputOnCreateURL.create)
-
     await expect(page.locator('.file-field__upload')).toBeHidden()
   })
 
   test('should hide bulk upload from list view when disableCreateFileInput is true', async () => {
     await page.goto(hideFileInputOnCreateURL.list)
-
     await expect(page.locator('.list-header')).not.toContainText('Bulk Upload')
   })
 

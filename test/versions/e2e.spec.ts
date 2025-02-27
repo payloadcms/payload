@@ -311,7 +311,6 @@ describe('Versions', () => {
 
     test('should restore version with correct data', async () => {
       await page.goto(url.create)
-      await page.waitForURL(url.create)
       await page.locator('#field-title').fill('v1')
       await page.locator('#field-description').fill('hello')
       await saveDocAndAssert(page)
@@ -322,7 +321,6 @@ describe('Versions', () => {
       const row2 = page.locator('tbody .row-2')
       const versionID = await row2.locator('.cell-id').textContent()
       await page.goto(`${savedDocURL}/versions/${versionID}`)
-      await page.waitForURL(`${savedDocURL}/versions/${versionID}`)
       await expect(page.locator('.render-field-diffs')).toBeVisible()
       await page.locator('.restore-version__button').click()
       await page.locator('button:has-text("Confirm")').click()
@@ -481,7 +479,6 @@ describe('Versions', () => {
 
     test('collection - should update updatedAt', async () => {
       await page.goto(url.create)
-      await page.waitForURL(`**/${url.create}`)
 
       // fill out doc in english
       await page.locator('#field-title').fill('title')
@@ -535,7 +532,6 @@ describe('Versions', () => {
     test('global - should autosave', async () => {
       const url = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
       await page.goto(url.global(autoSaveGlobalSlug))
-      await page.waitForURL(`**/${autoSaveGlobalSlug}`)
       const titleField = page.locator('#field-title')
       await titleField.fill('global title')
       await waitForAutoSaveToRunAndComplete(page)
@@ -577,7 +573,6 @@ describe('Versions', () => {
       const englishTitle = 'english title'
 
       await page.goto(url.create)
-      await page.waitForURL(`**/${url.create}`)
 
       // fill out doc in english
       await page.locator('#field-title').fill(englishTitle)
@@ -640,7 +635,6 @@ describe('Versions', () => {
 
     test('should save versions with custom IDs', async () => {
       await page.goto(customIDURL.create)
-      await page.waitForURL(`${customIDURL.create}`)
       await page.locator('#field-id').fill('custom')
       await page.locator('#field-title').fill('title')
       await saveDocAndAssert(page)
@@ -792,7 +786,6 @@ describe('Versions', () => {
 
     test('should schedule publish', async () => {
       await page.goto(url.create)
-      await page.waitForURL(url.create)
       await page.locator('#field-title').fill('scheduled publish')
       await page.locator('#field-description').fill('scheduled publish description')
 
@@ -1220,14 +1213,12 @@ describe('Versions', () => {
     async function navigateToVersionDiff() {
       const versionURL = `${serverURL}/admin/collections/${draftCollectionSlug}/${postID}/versions/${versionID}`
       await page.goto(versionURL)
-      await page.waitForURL(versionURL)
       await expect(page.locator('.render-field-diffs').first()).toBeVisible()
     }
 
     async function navigateToVersionFieldsDiff() {
       const versionURL = `${serverURL}/admin/collections/${diffCollectionSlug}/${diffID}/versions/${versionDiffID}`
       await page.goto(versionURL)
-      await page.waitForURL(versionURL)
       await expect(page.locator('.render-field-diffs').first()).toBeVisible()
     }
 

@@ -111,7 +111,6 @@ describe('List View', () => {
     // delete all posts created by the seed
     await deleteAllPosts()
     await page.goto(postsUrl.list)
-    await page.waitForURL((url) => url.toString().startsWith(postsUrl.list))
     await expect(page.locator(tableRowLocator)).toBeHidden()
 
     await createPost({ title: 'post1' })
@@ -256,7 +255,6 @@ describe('List View', () => {
 
       // prefill search with "a" from the query param
       await page.goto(`${postsUrl.list}?search=dennis`)
-      await page.waitForURL(new RegExp(`${postsUrl.list}\\?search=dennis`))
 
       // input should be filled out, list should filter
       await expect(page.locator('.search-filter__input')).toHaveValue('dennis')
@@ -267,7 +265,6 @@ describe('List View', () => {
       const { id } = await createPost()
       const url = `${postsUrl.list}?limit=10&page=1&search=${id}`
       await page.goto(url)
-      await page.waitForURL(url)
       const tableItems = page.locator(tableRowLocator)
       await expect(tableItems).toHaveCount(1)
     })
@@ -276,7 +273,6 @@ describe('List View', () => {
       const { id } = await createGeo()
       const url = `${geoUrl.list}?limit=10&page=1&search=${id}`
       await page.goto(url)
-      await page.waitForURL(url)
       const tableItems = page.locator(tableRowLocator)
       await expect(tableItems).toHaveCount(1)
     })
@@ -297,7 +293,6 @@ describe('List View', () => {
     test('search should persist through browser back button', async () => {
       const url = `${postsUrl.list}?limit=10&page=1&search=post1`
       await page.goto(url)
-      await page.waitForURL(url)
       await expect(page.locator('#search-filter-input')).toHaveValue('post1')
       await goToFirstCell(page, postsUrl)
       await page.goBack()
@@ -308,7 +303,6 @@ describe('List View', () => {
     test('search should not persist between navigation', async () => {
       const url = `${postsUrl.list}?limit=10&page=1&search=test`
       await page.goto(url)
-      await page.waitForURL(url)
 
       await expect(page.locator('#search-filter-input')).toHaveValue('test')
 
@@ -317,7 +311,6 @@ describe('List View', () => {
 
       const uploadsUrl = await page.locator('#nav-uploads').getAttribute('href')
       await page.goto(serverURL + uploadsUrl)
-      await page.waitForURL(serverURL + uploadsUrl)
 
       await expect(page.locator('#search-filter-input')).toHaveValue('')
     })
@@ -350,7 +343,6 @@ describe('List View', () => {
 
     test('should respect base list filters', async () => {
       await page.goto(baseListFiltersUrl.list)
-      await page.waitForURL((url) => url.toString().startsWith(baseListFiltersUrl.list))
       await expect(page.locator(tableRowLocator)).toHaveCount(1)
     })
 

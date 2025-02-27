@@ -103,6 +103,7 @@ export async function ensureCompilationIsDone({
       )
 
       await page.goto(adminURL)
+
       await page.waitForURL(
         readyURL ??
           (noAutoLogin ? `${adminURL + (adminURL.endsWith('/') ? '' : '/')}login` : adminURL),
@@ -205,7 +206,6 @@ export async function login(args: LoginArgs): Promise<void> {
   })
 
   await page.goto(loginRoute)
-  await page.waitForURL(loginRoute)
   await wait(500)
   await page.fill('#field-email', data.email)
   await page.fill('#field-password', data.password)
@@ -375,9 +375,13 @@ export async function switchTab(page: Page, selector: string) {
  *
  * Useful to prevent the e2e test from passing when, for example, there are react missing key prop errors
  * @param page
+ * @param options
  */
 export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: boolean }) {
   const { ignoreCORS = false } = options || {} // Default to not ignoring CORS errors
+  const consoleErrors: string[] = []
+
+  let shouldCollectErrors = false
 
   page.on('console', (msg) => {
     if (
@@ -419,6 +423,21 @@ export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: b
       console.log(`Ignoring expected network error: ${msg.text()}`)
     }
   })
+
+  // Capture uncaught errors that do not appear in the console
+  page.on('pageerror', (error) => {
+    if (shouldCollectErrors) {
+      consoleErrors.push(`Page error: ${error.message}`)
+    } else {
+      throw new Error(`Page error: ${error.message}`)
+    }
+  })
+
+  return {
+    consoleErrors,
+    collectErrors: () => (shouldCollectErrors = true), // Enable collection of errors for specific tests
+    stopCollectingErrors: () => (shouldCollectErrors = false), // Disable collection of errors after the test
+  }
 }
 
 export function describeIfInCIOrHasLocalstack(): jest.Describe {

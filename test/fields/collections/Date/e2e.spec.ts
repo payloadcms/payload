@@ -122,7 +122,6 @@ describe('Date', () => {
       })
       test('create EST day only date', async () => {
         await page.goto(url.create)
-        await page.waitForURL(`**/${url.create}`)
         const dateField = page.locator('#field-default input')
 
         // enter date in default date field
@@ -167,7 +166,6 @@ describe('Date', () => {
 
       test('create PDT day only date', async () => {
         await page.goto(url.create)
-        await page.waitForURL(`**/${url.create}`)
         const dateField = page.locator('#field-default input')
 
         // enter date in default date field
@@ -212,7 +210,6 @@ describe('Date', () => {
 
       test('create ST day only date', async () => {
         await page.goto(url.create)
-        await page.waitForURL(`**/${url.create}`)
         const dateField = page.locator('#field-default input')
 
         // enter date in default date field

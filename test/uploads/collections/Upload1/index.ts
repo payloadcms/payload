@@ -26,7 +26,7 @@ export const Uploads1: CollectionConfig = {
       relationTo: 'uploads-2',
       filterOptions: {
         mimeType: {
-          equals: 'image/png',
+          in: ['image/png', 'application/pdf'],
         },
       },
       hasMany: true,
