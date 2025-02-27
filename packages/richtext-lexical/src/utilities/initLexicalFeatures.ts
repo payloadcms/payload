@@ -89,7 +89,6 @@ export function initLexicalFeatures(args: Args): {
           featureClientSchemaMap[featureKey][key] = 'fields' in entry ? entry.fields : [entry]
         }
       }
-
       if (
         resolvedFeature.componentImports &&
         typeof resolvedFeature.componentImports === 'object'
