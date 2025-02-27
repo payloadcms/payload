@@ -28,8 +28,6 @@ export const Logout: React.FC<{
     routes: { admin: adminRoute },
   } = config
 
-  const basePath = process.env.NEXT_BASE_PATH ?? ''
-
   const props = {
     'aria-label': t('authentication:logOut'),
     className: `${baseClass}__log-out`,
@@ -43,7 +41,6 @@ export const Logout: React.FC<{
       {...props}
       href={formatAdminURL({
         adminRoute,
-        basePath,
         path: logoutRoute,
       })}
     >
