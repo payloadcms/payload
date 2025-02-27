@@ -80,9 +80,13 @@ export const multiTenantPlugin =
         if (!incomingConfig.i18n.translations) {
           incomingConfig.i18n.translations = {}
         }
-        if (!incomingConfig.i18n.translations[locale]) {
+        if (!(locale in incomingConfig.i18n.translations)) {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-expect-error
           incomingConfig.i18n.translations[locale] = {}
         }
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
         if (!('multiTenant' in incomingConfig.i18n.translations[locale])) {
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-expect-error
@@ -125,6 +129,7 @@ export const multiTenantPlugin =
     }
 
     addCollectionAccess({
+      adminUsersSlug: adminUsersCollection.slug,
       collection: adminUsersCollection,
       fieldName: `${tenantsArrayFieldName}.${tenantsArrayTenantFieldName}`,
       tenantsArrayFieldName,
@@ -182,6 +187,7 @@ export const multiTenantPlugin =
            * - constrains access a users assigned tenants
            */
           addCollectionAccess({
+            adminUsersSlug: adminUsersCollection.slug,
             collection,
             fieldName: 'id',
             tenantsArrayFieldName,
@@ -284,6 +290,7 @@ export const multiTenantPlugin =
            * Add access control constraint to tenant enabled collection
            */
           addCollectionAccess({
+            adminUsersSlug: adminUsersCollection.slug,
             collection,
             fieldName: tenantFieldName,
             tenantsArrayFieldName,
