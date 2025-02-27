@@ -198,6 +198,7 @@ describe('Text', () => {
     await toggleColumn(page, {
       targetState: 'on',
       columnLabel: 'Text en',
+      columnName: 'text',
     })
 
     const textCell = page.locator('.row-1 .cell-i18nText')

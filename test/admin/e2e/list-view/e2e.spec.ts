@@ -35,7 +35,7 @@ import { addListFilter } from 'helpers/e2e/addListFilter.js'
 import { goToFirstCell } from 'helpers/e2e/navigateToDoc.js'
 import { openListColumns } from 'helpers/e2e/openListColumns.js'
 import { openListFilters } from 'helpers/e2e/openListFilters.js'
-import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
+import { ensureColumnIsInURL, toggleColumn } from 'helpers/e2e/toggleColumn.js'
 import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import { closeListDrawer } from 'helpers/e2e/toggleListDrawer.js'
 import path from 'path'
@@ -849,12 +849,16 @@ describe('List View', () => {
       const numberOfColumns = await page.locator(columnCountLocator).count()
       await expect(page.locator('.column-selector')).toBeVisible()
       await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
-      await toggleColumn(page, { columnLabel: 'ID', targetState: 'off' })
+
+      await toggleColumn(page, { columnLabel: 'ID', columnName: 'id', targetState: 'off' })
+
       await page.locator('#heading-id').waitFor({ state: 'detached' })
       await page.locator('.cell-id').first().waitFor({ state: 'detached' })
       await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns - 1)
       await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('Number')
-      await toggleColumn(page, { columnLabel: 'ID', targetState: 'on' })
+
+      await toggleColumn(page, { columnLabel: 'ID', columnName: 'id', targetState: 'on' })
+
       await expect(page.locator('.cell-id').first()).toBeVisible()
       await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns)
       await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
@@ -927,6 +931,7 @@ describe('List View', () => {
         columnContainerSelector: '.list-controls__columns',
         columnLabel: 'ID',
         targetState: 'off',
+        expectURLChange: false,
       })
 
       await closeListDrawer({ page })
@@ -973,6 +978,7 @@ describe('List View', () => {
         columnContainerSelector: '.list-controls__columns',
         columnLabel: 'ID',
         targetState: 'off',
+        expectURLChange: false,
       })
 
       // select the "Post" collection
@@ -984,13 +990,12 @@ describe('List View', () => {
         })
         .click()
 
-      // deselect the "number" column
-
       await toggleColumn(page, {
         togglerSelector: '[id^=list-drawer_1_] .list-controls__toggle-columns',
         columnContainerSelector: '.list-controls__columns',
         columnLabel: 'Number',
         targetState: 'off',
+        expectURLChange: false,
       })
 
       // select the "User" collection again
@@ -1190,7 +1195,9 @@ describe('List View', () => {
 
     test('should sort with existing filters', async () => {
       await page.goto(postsUrl.list)
-      await toggleColumn(page, { columnLabel: 'ID', targetState: 'off' })
+
+      await toggleColumn(page, { columnLabel: 'ID', targetState: 'off', columnName: 'id' })
+
       await page.locator('#heading-id').waitFor({ state: 'detached' })
       await page.locator('#heading-title button.sort-column__asc').click()
       await page.waitForURL(/sort=title/)
@@ -1224,7 +1231,8 @@ describe('List View', () => {
       await page.waitForURL(/sort=title/)
 
       // enable a column that is _not_ part of this collection's default columns
-      await toggleColumn(page, { columnLabel: 'Status', targetState: 'on' })
+      await toggleColumn(page, { columnLabel: 'Status', targetState: 'on', columnName: '_status' })
+
       await page.locator('#heading-_status').waitFor({ state: 'visible' })
 
       const columnAfterSort = page.locator(

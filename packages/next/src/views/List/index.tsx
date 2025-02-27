@@ -77,8 +77,9 @@ export const renderListView = async (
   )
 
   /**
-   * @todo: find a pattern to only set preferences on hard navigation, i.e. direct links, page refresh, etc.
-   * This could potentially be done by injecting a `sessionID` into the params, or setting a `payload-session` cookie
+   * @todo: find a pattern to avoid setting preferences on hard navigation, i.e. direct links, page refresh, etc.
+   * This will ensure that prefs are only updated when explicitly set by the user
+   * This could potentially be done by injecting a `sessionID` into the params and comparing it against a session cookie
    */
   const listPreferences = await upsertPreferences<ListPreferences>({
     key: `${collectionSlug}-list`,
