@@ -1,6 +1,6 @@
 'use client'
 import { type Column } from 'payload'
-import { transformColumnsToURLParams } from 'payload/shared'
+import { transformColumnsToSearchParams } from 'payload/shared'
 import React, { startTransition, useCallback } from 'react'
 
 import type { TableColumnsProviderProps } from './types.js'
@@ -43,7 +43,7 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
       })
 
       await refineListData({
-        columns: transformColumnsToURLParams(newColumnState),
+        columns: transformColumnsToSearchParams(newColumnState),
       })
     },
     [refineListData, columnState, setOptimisticColumnState],
@@ -61,7 +61,7 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
       })
 
       await refineListData({
-        columns: transformColumnsToURLParams(newColumnState),
+        columns: transformColumnsToSearchParams(newColumnState),
       })
     },
     [columnState, refineListData, setOptimisticColumnState],

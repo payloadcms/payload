@@ -1,7 +1,7 @@
 'use client'
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import { type ListQuery, type Where } from 'payload'
-import { isNumber, transformColumnsToURLParams } from 'payload/shared'
+import { isNumber, transformColumnsToSearchParams } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
@@ -161,7 +161,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     // Only modify columns if they originated from preferences
     // We can assume they did if `listPreferences.columns` is defined
     if (columns && listPreferences?.columns && !('columns' in currentQuery)) {
-      newQuery.columns = transformColumnsToURLParams(columns)
+      newQuery.columns = transformColumnsToSearchParams(columns)
       shouldUpdateQueryString = true
     }
 

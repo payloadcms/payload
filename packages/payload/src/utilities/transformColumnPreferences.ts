@@ -41,7 +41,7 @@ export const transformColumnsToPreferences = (
  * This is useful for storing the columns in the URL, where it appears as a simple comma delimited array of strings
  * The `-` prefix is used to indicate that the column is inactive
  */
-export const transformColumnsToURLParams = (
+export const transformColumnsToSearchParams = (
   columns: Column[] | ColumnPreference[],
 ): ColumnsFromURL => {
   return columns.map((col) => (col.active ? col.accessor : `-${col.accessor}`))

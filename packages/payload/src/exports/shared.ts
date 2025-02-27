@@ -90,7 +90,7 @@ export { default as toKebabCase } from '../utilities/toKebabCase.js'
 
 export {
   transformColumnsToPreferences,
-  transformColumnsToURLParams,
+  transformColumnsToSearchParams,
 } from '../utilities/transformColumnPreferences.js'
 
 export { unflatten } from '../utilities/unflatten.js'
