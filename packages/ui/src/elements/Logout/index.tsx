@@ -28,21 +28,17 @@ export const Logout: React.FC<{
     routes: { admin: adminRoute },
   } = config
 
-  const props = {
-    'aria-label': t('authentication:logOut'),
-    className: `${baseClass}__log-out`,
-    prefetch: Link ? false : undefined,
-    tabIndex,
-    title: t('authentication:logOut'),
-  }
-
   return (
     <Link
-      {...props}
+      aria-label={t('authentication:logOut')}
+      className={`${baseClass}__log-out`}
       href={formatAdminURL({
         adminRoute,
         path: logoutRoute,
       })}
+      prefetch={false}
+      tabIndex={tabIndex}
+      title={t('authentication:logOut')}
     >
       <LogOutIcon />
     </Link>

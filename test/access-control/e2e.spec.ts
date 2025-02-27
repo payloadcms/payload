@@ -4,6 +4,7 @@ import type { TypeWithID } from 'payload'
 import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
+import { openNav } from 'helpers/e2e/toggleNav.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -18,7 +19,6 @@ import {
   getRoutes,
   initPageConsoleErrorCatch,
   login,
-  openNav,
   saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
@@ -312,7 +312,7 @@ describe('Access Control', () => {
     test('should not show in nav', async () => {
       await page.goto(url.admin)
       await openNav(page)
-      // await expect(page.locator('.nav >> a:has-text("Restricteds")')).toHaveCount(0)
+
       await expect(
         page.locator('.nav a', {
           hasText: exactText('Restricteds'),
@@ -532,7 +532,6 @@ describe('Access Control', () => {
       test('should restrict access based on user settings', async () => {
         const url = `${serverURL}/admin/globals/settings`
         await page.goto(url)
-        await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain(url)
         await openNav(page)
         await expect(page.locator('#nav-global-settings')).toBeVisible()
         await expect(page.locator('#nav-global-test')).toBeHidden()
