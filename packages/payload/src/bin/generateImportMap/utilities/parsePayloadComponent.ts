@@ -11,14 +11,14 @@ export function parsePayloadComponent(PayloadComponent: PayloadComponent): {
   const pathAndMaybeExport =
     typeof PayloadComponent === 'string' ? PayloadComponent : PayloadComponent.path
 
-  let path: string
-  let exportName: string
+  let path: string | undefined = pathAndMaybeExport
+  let exportName: string | undefined = 'default'
 
-  if (pathAndMaybeExport.includes('#')) {
-    ;[path, exportName] = pathAndMaybeExport.split('#', 2) as [string, string]
-  } else {
-    path = pathAndMaybeExport
-    exportName = 'default'
+  const lastHashIndex = pathAndMaybeExport?.lastIndexOf('#') ?? -1
+
+  if (lastHashIndex > 0) {
+    exportName = pathAndMaybeExport.substring(lastHashIndex + 1)
+    path = pathAndMaybeExport.substring(0, lastHashIndex)
   }
 
   if (typeof PayloadComponent === 'object' && PayloadComponent.exportName) {
