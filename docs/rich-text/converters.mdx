@@ -33,19 +33,61 @@ In our website template [you have an example](https://github.com/payloadcms/payl
   The JSX converter expects the input data to be fully populated. When fetching data, ensure the `depth` setting is high enough, to ensure that lexical nodes such as uploads are populated.
 </Banner>
 
-### Converting Lexical Blocks to JSX
+### Converting internal links
 
-In order to convert lexical blocks or inline blocks to JSX, you will have to pass the converter for your block to the RichText component. This converter is not included by default, as Payload doesn't know how to render your custom blocks.
+By default, Payload doesn't know how to convert **internal** links to JSX, as it doesn't know what the corresponding URL of the internal link is. You'll notice that you get a "found internal link, but internalDocToHref is not provided" error in the console when you try to render content with internal links.
+
+To fix this, you need to pass the `internalDocToHref` prop to `LinkJSXConverter`. This prop is a function that received the link node and returns the URL of the document.
 
 ```tsx
-import React from 'react'
-import {
-  type JSXConvertersFunction,
-  RichText,
-} from '@payloadcms/richtext-lexical/react'
+import type { DefaultNodeTypes, SerializedLinkNode } from '@payloadcms/richtext-lexical'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
-const jsxConverters: JSXConvertersFunction = ({ defaultConverters }) => ({
+import {
+  type JSXConvertersFunction,
+  LinkJSXConverter,
+  RichText,
+} from '@payloadcms/richtext-lexical/react'
+import React from 'react'
+
+const internalDocToHref = ({ linkNode }: { linkNode: SerializedLinkNode }) => {
+  const { relationTo, value } = linkNode.fields.doc!
+  if (typeof value !== 'object') {
+    throw new Error('Expected value to be an object')
+  }
+  const slug = value.slug
+  return relationTo === 'posts' ? `/posts/${slug}` : `/${slug}`
+}
+
+const jsxConverters: JSXConvertersFunction<DefaultNodeTypes> = ({ defaultConverters }) => ({
+  ...defaultConverters,
+  ...LinkJSXConverter({ internalDocToHref }),
+})
+
+export const MyComponent: React.FC<{
+  lexicalData: SerializedEditorState
+}> = ({ lexicalData }) => {
+  return <RichText converters={jsxConverters} data={lexicalData} />
+}
+```
+
+### Converting Lexical Blocks to JSX
+
+In order to convert lexical blocks or inline blocks to JSX, you will have to pass the converter for your block to the `RichText` component. This converter is not included by default, as Payload doesn't know how to render your custom blocks.
+
+```tsx
+'use client'
+import type { MyInlineBlock, MyTextBlock } from '@/payload-types'
+import type { DefaultNodeTypes, SerializedBlockNode } from '@payloadcms/richtext-lexical'
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+
+import { type JSXConvertersFunction, RichText } from '@payloadcms/richtext-lexical/react'
+import React from 'react'
+
+// For full type safety, add your custom blocks to the NodeTypes.
+type NodeTypes = DefaultNodeTypes | SerializedBlockNode<MyInlineBlock | MyTextBlock>
+
+const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) => ({
   ...defaultConverters,
   blocks: {
     // myTextBlock is the slug of the block
@@ -57,13 +99,57 @@ const jsxConverters: JSXConvertersFunction = ({ defaultConverters }) => ({
   },
 })
 
-export const MyComponent = ({ lexicalData }) => {
-  return (
-    <RichText
-      converters={jsxConverters}
-      data={lexicalData.lexicalWithBlocks as SerializedEditorState}
-    />
-  )
+export const MyComponent: React.FC<{
+  lexicalData: SerializedEditorState
+}> = ({ lexicalData }) => {
+  return <RichText converters={jsxConverters} data={lexicalData} />
+}
+```
+
+### Overriding default JSX Converters
+
+You can override the default JSX converters by passing passing your custom converter, keyed to the node type, to the `converters` prop / the converters function.
+
+Example - overriding the upload node converter to render a custom component:
+
+```tsx
+'use client'
+import type { DefaultNodeTypes, SerializedUploadNode } from '@payloadcms/richtext-lexical'
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+
+import { type JSXConvertersFunction, RichText } from '@payloadcms/richtext-lexical/react'
+import Image from 'next/image'
+import React from 'react'
+
+type NodeTypes = DefaultNodeTypes
+
+// Custom upload converter component that uses next/image
+const CustomUploadComponent: React.FC<{
+  node: SerializedUploadNode
+}> = ({ node }) => {
+  if (node.relationTo === 'uploads') {
+    const uploadDoc = node.value
+    if (typeof uploadDoc !== 'object') {
+      return null
+    }
+    const { alt, height, url, width } = uploadDoc
+    return <Image alt={alt} height={height} src={url} width={width} />
+  }
+
+  return null
+}
+
+const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) => ({
+  ...defaultConverters,
+  upload: ({ node }) => {
+    return <CustomUploadComponent node={node} />
+  },
+})
+
+export const MyComponent: React.FC<{
+  lexicalData: SerializedEditorState
+}> = ({ lexicalData }) => {
+  return <RichText converters={jsxConverters} data={lexicalData} />
 }
 ```
 
