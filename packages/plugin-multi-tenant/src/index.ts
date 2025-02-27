@@ -1,3 +1,4 @@
+import type { AcceptedLanguages } from '@payloadcms/translations'
 import type { CollectionConfig, Config } from 'payload'
 
 import type { MultiTenantPluginConfig } from './types.js'
@@ -36,6 +37,7 @@ export const multiTenantPlugin =
       pluginConfig?.tenantsArrayField?.arrayFieldName || defaults.tenantsArrayFieldName
     const tenantsArrayTenantFieldName =
       pluginConfig?.tenantsArrayField?.arrayTenantFieldName || defaults.tenantsArrayTenantFieldName
+    let tenantSelectorLabel = pluginConfig.tenantSelectorLabel || defaults.tenantSelectorLabel
 
     /**
      * Add defaults for admin properties
@@ -61,6 +63,36 @@ export const multiTenantPlugin =
     }
     if (!incomingConfig.collections) {
       incomingConfig.collections = []
+    }
+
+    /**
+     * Add tenant selector localized labels
+     */
+    if (pluginConfig.tenantSelectorLabel && typeof pluginConfig.tenantSelectorLabel === 'object') {
+      if (!incomingConfig.i18n) {
+        incomingConfig.i18n = {}
+      }
+      Object.entries(pluginConfig.tenantSelectorLabel).forEach(([_locale, label]) => {
+        const locale = _locale as AcceptedLanguages
+        if (!incomingConfig.i18n) {
+          incomingConfig.i18n = {}
+        }
+        if (!incomingConfig.i18n.translations) {
+          incomingConfig.i18n.translations = {}
+        }
+        if (!incomingConfig.i18n.translations[locale]) {
+          incomingConfig.i18n.translations[locale] = {}
+        }
+        if (!('multiTenant' in incomingConfig.i18n.translations[locale])) {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-expect-error
+          incomingConfig.i18n.translations[locale].multiTenant = {}
+        }
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
+        incomingConfig.i18n.translations[locale].multiTenant.selectorLabel = label
+        tenantSelectorLabel = 'multiTenant:selectorLabel'
+      })
     }
 
     /**
@@ -229,7 +261,8 @@ export const multiTenantPlugin =
 
         if (pluginConfig.collections[collection.slug]?.useBaseListFilter !== false) {
           /**
-           * Collection baseListFilter with selected tenant constraint (if selected)
+           * Add list filter to enabled collections
+           * - filters results by selected tenant
            */
           if (!collection.admin) {
             collection.admin = {}
@@ -295,6 +328,9 @@ export const multiTenantPlugin =
      * Add tenant selector to admin UI
      */
     incomingConfig.admin.components.beforeNavLinks.push({
+      clientProps: {
+        label: tenantSelectorLabel,
+      },
       path: '@payloadcms/plugin-multi-tenant/client#TenantSelector',
     })
 
