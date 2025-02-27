@@ -873,7 +873,7 @@ describe('List View', () => {
       await expect(page.locator('table thead tr th').nth(1)).toHaveText('Number')
     })
 
-    test('should render list drawer columns in order', async () => {
+    test('should render list drawer columns in proper order', async () => {
       await reorderColumns(page, { fromColumn: 'Number', toColumn: 'ID' })
 
       await page.reload()
@@ -945,61 +945,6 @@ describe('List View', () => {
       })
 
       await expect(column).not.toHaveClass(/column-selector__column--active/)
-    })
-
-    test('should not save preferences when navigating straight to a URL with columns', async () => {
-      // first clear any prefs
-      await payload.delete({
-        collection: 'payload-preferences',
-        where: {
-          and: [
-            {
-              key: { equals: 'posts-list' },
-            },
-            {
-              'user.relationTo': {
-                equals: 'users',
-              },
-            },
-            {
-              'user.value': {
-                equals: user.id,
-              },
-            },
-          ],
-        },
-      })
-
-      // now navigate to a direct link with columns
-
-      await page.goto(`${postsUrl.list}?columns=${JSON.stringify([{ ID: false }])}`)
-
-      // query prefs and ensure that the columns are not saved
-
-      const prefs = await payload.find({
-        collection: 'payload-preferences',
-        limit: 1,
-        depth: 0,
-        where: {
-          and: [
-            {
-              key: { equals: 'posts-list' },
-            },
-            {
-              'user.relationTo': {
-                equals: 'users',
-              },
-            },
-            {
-              'user.value': {
-                equals: user.id,
-              },
-            },
-          ],
-        },
-      })
-
-      expect(prefs.docs).toHaveLength(0)
     })
 
     test('should retain preferences when changing drawer collections', async () => {

@@ -2,7 +2,6 @@ import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloa
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
 import { formatAdminURL, mergeListSearchAndWhere } from '@payloadcms/ui/shared'
-import { cookies as getCookies } from 'next/headers.js'
 import { notFound } from 'next/navigation.js'
 import {
   type AdminViewServerProps,
