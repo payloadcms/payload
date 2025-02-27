@@ -23,11 +23,43 @@ export const Table: React.FC<Props> = ({ appearance, columns, data }) => {
     return <div>No columns selected</div>
   }
 
-  const handleDragEnd = ({ moveFromIndex, moveToIndex }) => {
-    console.log('Moved row from', moveFromIndex, 'to', moveToIndex)
+  const handleDragEnd = async ({ moveFromIndex, moveToIndex }) => {
+    if (moveFromIndex === moveToIndex) {
+      return
+    }
+
+    const movedId = data[moveFromIndex].id as string
+
+    // Get the IDs of the items before and after the drop position
+    const beforeId = moveToIndex > 0 ? (data[moveToIndex - 1]?.id as string) : undefined
+    const afterId = moveToIndex < data.length - 1 ? (data[moveToIndex]?.id as string) : undefined
+
+    try {
+      // Assuming we're in the context of a collection
+      const collectionSlug = window.location.pathname.split('/').filter(Boolean)[2]
+      const response = await fetch(`/api/${collectionSlug}/reorder`, {
+        body: JSON.stringify({
+          betweenIds: [beforeId, afterId],
+          docIds: [movedId],
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to reorder')
+      }
+
+      // Optionally refresh the data or update the UI
+    } catch (error) {
+      console.error('Error reordering:', error)
+      // Handle error (show notification, etc.)
+    }
   }
 
-  const rowIds = data.map((row) => row.id || String(Math.random()))
+  const rowIds = data.map((row) => row.id || String(Math.random())) as string[]
 
   return (
     <div
@@ -35,7 +67,7 @@ export const Table: React.FC<Props> = ({ appearance, columns, data }) => {
         .filter(Boolean)
         .join(' ')}
     >
-      <DraggableSortable dragHandleSelector=".sort-row" ids={rowIds} onDragEnd={handleDragEnd}>
+      <DraggableSortable ids={rowIds} onDragEnd={handleDragEnd}>
         <table cellPadding="0" cellSpacing="0">
           <thead>
             <tr>
