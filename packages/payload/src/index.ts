@@ -1374,7 +1374,6 @@ export { restoreVersionOperation as restoreVersionOperationGlobal } from './glob
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
 export type {
   CollapsedPreferences,
-  ColumnPreference,
   DocumentPreferences,
   FieldsPreferences,
   InsideFieldsPreferences,
