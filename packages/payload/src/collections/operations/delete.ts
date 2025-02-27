@@ -195,6 +195,7 @@ export const deleteOperation = async <
         await payload.db.deleteOne({
           collection: collectionConfig.slug,
           req,
+          returning: false,
           where: {
             id: {
               equals: id,
