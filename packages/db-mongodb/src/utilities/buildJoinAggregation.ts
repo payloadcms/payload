@@ -18,13 +18,13 @@ type BuildJoinAggregationArgs = {
   adapter: MongooseAdapter
   collection: CollectionSlug
   collectionConfig: SanitizedCollectionConfig
-  joins: JoinQuery
+  joins?: JoinQuery
   // the number of docs to get at the top collection level
   limit?: number
-  locale: string
+  locale?: string
   projection?: Record<string, true>
   // the where clause for the top collection
-  query?: Where
+  query?: Record<string, unknown>
   /** whether the query is from drafts */
   versions?: boolean
 }

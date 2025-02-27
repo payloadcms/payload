@@ -5,8 +5,8 @@ import { fieldAffectsData, fieldIsPresentationalOnly, fieldShouldBeLocalized } f
 type Args = {
   config: SanitizedConfig
   fields: FlattenedField[]
-  locale: string
-  parentIsLocalized: boolean
+  locale?: string
+  parentIsLocalized?: boolean
   result?: string
   segments: string[]
 }

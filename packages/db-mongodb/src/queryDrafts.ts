@@ -9,15 +9,31 @@ import { buildQuery } from './queries/buildQuery.js'
 import { buildSortParam } from './queries/buildSortParam.js'
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 import { transform } from './utilities/transform.js'
 
 export const queryDrafts: QueryDrafts = async function queryDrafts(
   this: MongooseAdapter,
-  { collection, joins, limit, locale, page, pagination, req, select, sort: sortArg, where },
+  {
+    collection: collectionSlug,
+    joins,
+    limit,
+    locale,
+    page,
+    pagination,
+    req,
+    select,
+    sort: sortArg,
+    where = {},
+  },
 ) {
-  const VersionModel = this.versions[collection]
-  const collectionConfig = this.payload.collections[collection].config
+  const { collectionConfig, Model } = getCollection({
+    adapter: this,
+    collectionSlug,
+    versions: true,
+  })
+
   const options: QueryOptions = {
     session: await getSession(this, req),
   }
@@ -88,24 +104,25 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     // the correct indexed field
     paginationOptions.useCustomCountFn = () => {
       return Promise.resolve(
-        VersionModel.countDocuments(versionQuery, {
+        Model.countDocuments(versionQuery, {
           hint: { _id: 1 },
         }),
       )
     }
   }
 
-  if (limit > 0) {
+  if (limit && limit > 0) {
     paginationOptions.limit = limit
     // limit must also be set here, it's ignored when pagination is false
-    paginationOptions.options.limit = limit
+     
+    paginationOptions.options!.limit = limit
   }
 
   let result
 
   const aggregate = await buildJoinAggregation({
     adapter: this,
-    collection,
+    collection: collectionSlug,
     collectionConfig,
     joins,
     locale,
@@ -116,12 +133,9 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
 
   // build join aggregation
   if (aggregate) {
-    result = await VersionModel.aggregatePaginate(
-      VersionModel.aggregate(aggregate),
-      paginationOptions,
-    )
+    result = await Model.aggregatePaginate(Model.aggregate(aggregate), paginationOptions)
   } else {
-    result = await VersionModel.paginate(versionQuery, paginationOptions)
+    result = await Model.paginate(versionQuery, paginationOptions)
   }
 
   transform({
