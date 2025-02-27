@@ -170,7 +170,12 @@ describe('Text', () => {
       user: client.user,
       key: 'text-fields-list',
       value: {
-        columns: [{ disableListColumnText: true }],
+        columns: [
+          {
+            accessor: 'disableListColumnText',
+            active: true,
+          },
+        ],
       },
     })
 

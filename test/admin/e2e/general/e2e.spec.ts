@@ -9,7 +9,6 @@ import {
   exactText,
   getRoutes,
   initPageConsoleErrorCatch,
-  openNav,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
   // throttleTest,
@@ -51,6 +50,7 @@ let payload: PayloadTestSDK<Config>
 
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
+import { openNav } from 'helpers/e2e/toggleNav.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -406,6 +406,15 @@ describe('General', () => {
       await expect(link).toBeHidden()
     })
 
+    test('should disable active nav item', async () => {
+      await page.goto(postsUrl.list)
+      await openNav(page)
+      const activeItem = page.locator('.nav .nav__link.active')
+      await expect(activeItem).toBeVisible()
+      const tagName = await activeItem.evaluate((el) => el.tagName.toLowerCase())
+      expect(tagName).toBe('div')
+    })
+
     test('breadcrumbs — should navigate from list to dashboard', async () => {
       await page.goto(postsUrl.list)
       await page.locator(`.step-nav a[href="${adminRoutes.routes.admin}"]`).click()
@@ -521,6 +530,8 @@ describe('General', () => {
 
     test('should render protected nested custom view', async () => {
       await page.goto(`${serverURL}${adminRoutes.routes.admin}${protectedCustomNestedViewPath}`)
+
+      // wait for redirect to unauthorized page
       await page.waitForURL(`**${adminRoutes.routes.admin}/unauthorized`)
       await expect(page.locator('.unauthorized')).toBeVisible()
 

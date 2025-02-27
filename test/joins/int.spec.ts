@@ -186,6 +186,36 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.group.relatedPosts.docs[0].title).toStrictEqual('test 9')
   })
 
+  it('should count joins', async () => {
+    let categoryWithPosts = await payload.findByID({
+      id: category.id,
+      joins: {
+        'group.relatedPosts': {
+          sort: '-title',
+          count: true,
+        },
+      },
+      collection: categoriesSlug,
+    })
+
+    expect(categoryWithPosts.group.relatedPosts?.totalDocs).toBe(15)
+
+    // With limit 1
+    categoryWithPosts = await payload.findByID({
+      id: category.id,
+      joins: {
+        'group.relatedPosts': {
+          sort: '-title',
+          count: true,
+          limit: 1,
+        },
+      },
+      collection: categoriesSlug,
+    })
+
+    expect(categoryWithPosts.group.relatedPosts?.totalDocs).toBe(15)
+  })
+
   it('should populate relationships in joins', async () => {
     const { docs } = await payload.find({
       limit: 1,
@@ -1302,6 +1332,39 @@ describe('Joins Field', () => {
 
       expect(parent.children?.docs).toHaveLength(1)
       expect(parent.children.docs[0]?.value.title).toBe('doc-2')
+
+      // counting
+      parent = await payload.findByID({
+        collection: 'multiple-collections-parents',
+        id: parent.id,
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+          },
+        },
+      })
+
+      expect(parent.children?.totalDocs).toBe(2)
+
+      // counting filtered
+      parent = await payload.findByID({
+        collection: 'multiple-collections-parents',
+        id: parent.id,
+        depth: 1,
+        joins: {
+          children: {
+            count: true,
+            where: {
+              relationTo: {
+                equals: 'multiple-collections-2',
+              },
+            },
+          },
+        },
+      })
+
+      expect(parent.children?.totalDocs).toBe(1)
     })
   })
 })

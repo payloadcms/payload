@@ -73,7 +73,6 @@ describe('JSON', () => {
   test('should create', async () => {
     const input = '{"foo": "bar"}'
     await page.goto(url.create)
-    await page.waitForURL(url.create)
     const jsonCodeEditor = page.locator('.json-field .code-editor').first()
     await expect(() => expect(jsonCodeEditor).toBeVisible()).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
@@ -90,7 +89,6 @@ describe('JSON', () => {
     const input = '{"foo.with.periods": "bar"}'
 
     await page.goto(url.create)
-    await page.waitForURL(url.create)
     const jsonCodeEditor = page.locator('.group-field .json-field .code-editor').first()
     await expect(() => expect(jsonCodeEditor).toBeVisible()).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
