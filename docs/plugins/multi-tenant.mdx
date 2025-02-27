@@ -52,7 +52,7 @@ The plugin accepts an object with the following properties:
 
 ```ts
 type MultiTenantPluginConfig<ConfigTypes = unknown> = {
-/**
+  /**
    * After a tenant is deleted, the plugin will attempt to clean up related documents
    * - removing documents with the tenant ID
    * - removing the tenant from users
@@ -176,6 +176,14 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    * Opt out of adding access constraints to the tenants collection
    */
   useTenantsCollectionAccess?: boolean
+  /**
+   * Opt out including the baseListFilter to filter tenants by selected tenant
+   */
+  useTenantsListFilter?: boolean
+  /**
+   * Opt out including the baseListFilter to filter users by selected tenant
+   */
+  useUsersTenantFilter?: boolean
 }
 ```
 
