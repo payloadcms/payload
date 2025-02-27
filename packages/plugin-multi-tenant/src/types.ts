@@ -152,7 +152,9 @@ export type Tenant<IDType = number | string> = {
 }
 
 export type UserWithTenantsField = {
-  tenants: {
-    tenant: number | string | Tenant
-  }[]
+  tenants?:
+    | {
+        tenant: number | string | Tenant
+      }[]
+    | null
 } & User

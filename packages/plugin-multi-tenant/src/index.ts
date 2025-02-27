@@ -81,8 +81,6 @@ export const multiTenantPlugin =
           incomingConfig.i18n.translations = {}
         }
         if (!(locale in incomingConfig.i18n.translations)) {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-expect-error
           incomingConfig.i18n.translations[locale] = {}
         }
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
