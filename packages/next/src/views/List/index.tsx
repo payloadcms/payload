@@ -214,7 +214,7 @@ export const renderListView = async (
         <Fragment>
           <HydrateAuthProvider permissions={permissions} />
           <ListQueryProvider
-            columns={columnState.map(({ accessor, active }) => ({ accessor, active }))}
+            columns={transformColumnsToPreferences(columnState)}
             data={data}
             defaultLimit={limit}
             defaultSort={sort}

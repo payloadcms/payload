@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test'
+import type { User as PayloadUser } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import { mapAsync } from 'payload'
@@ -35,7 +36,8 @@ import { addListFilter } from 'helpers/e2e/addListFilter.js'
 import { goToFirstCell } from 'helpers/e2e/navigateToDoc.js'
 import { openListColumns } from 'helpers/e2e/openListColumns.js'
 import { openListFilters } from 'helpers/e2e/openListFilters.js'
-import { ensureColumnIsInURL, toggleColumn } from 'helpers/e2e/toggleColumn.js'
+import { deletePreferences } from 'helpers/e2e/preferences.js'
+import { toggleColumn, waitForColumnInURL } from 'helpers/e2e/toggleColumn.js'
 import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import { closeListDrawer } from 'helpers/e2e/toggleListDrawer.js'
 import path from 'path'
@@ -60,7 +62,7 @@ describe('List View', () => {
   let customViewsUrl: AdminUrlUtil
   let with300DocumentsUrl: AdminUrlUtil
   let withListViewUrl: AdminUrlUtil
-  let user: User
+  let user: any
 
   let serverURL: string
   let adminRoutes: ReturnType<typeof getRoutes>
@@ -842,11 +844,11 @@ describe('List View', () => {
       ).toBeVisible()
     })
 
-    test('should toggle columns', async () => {
-      const columnCountLocator = 'table > thead > tr > th'
-      await createPost()
+    test('should toggle columns and effect table', async () => {
+      const tableHeaders = 'table > thead > tr > th'
+
       await openListColumns(page, {})
-      const numberOfColumns = await page.locator(columnCountLocator).count()
+      const numberOfColumns = await page.locator(tableHeaders).count()
       await expect(page.locator('.column-selector')).toBeVisible()
       await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
 
@@ -854,26 +856,69 @@ describe('List View', () => {
 
       await page.locator('#heading-id').waitFor({ state: 'detached' })
       await page.locator('.cell-id').first().waitFor({ state: 'detached' })
-      await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns - 1)
+      await expect(page.locator(tableHeaders)).toHaveCount(numberOfColumns - 1)
       await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('Number')
 
       await toggleColumn(page, { columnLabel: 'ID', columnName: 'id', targetState: 'on' })
 
       await expect(page.locator('.cell-id').first()).toBeVisible()
-      await expect(page.locator(columnCountLocator)).toHaveCount(numberOfColumns)
+      await expect(page.locator(tableHeaders)).toHaveCount(numberOfColumns)
       await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
+
+      await toggleColumn(page, { columnLabel: 'ID', columnName: 'id', targetState: 'off' })
+    })
+
+    test('should toggle columns and save to preferences', async () => {
+      const tableHeaders = 'table > thead > tr > th'
+      const numberOfColumns = await page.locator(tableHeaders).count()
+
+      await toggleColumn(page, { columnLabel: 'ID', columnName: 'id', targetState: 'off' })
+
+      await page.reload()
+
+      await expect(page.locator('#heading-id')).toBeHidden()
+      await expect(page.locator('.cell-id').first()).toBeHidden()
+      await expect(page.locator(tableHeaders)).toHaveCount(numberOfColumns - 1)
+      await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('Number')
+    })
+
+    test('should inject preferred columns into URL search params on load', async () => {
+      await toggleColumn(page, { columnLabel: 'ID', columnName: 'id', targetState: 'off' })
+
+      // reload to ensure the columns were stored and loaded from preferences
+      await page.reload()
+
+      // The `columns` search params _should_ contain "-id"
+      await waitForColumnInURL({ page, columnName: 'id', state: 'off' })
+
+      expect(true).toBe(true)
+    })
+
+    test('should not inject default columns into URL search params on load', async () => {
+      // clear preferences first, ensure that they don't automatically populate in the URL on load
+      await deletePreferences({
+        payload,
+        key: `${postsCollectionSlug}.list`,
+        user,
+      })
+
+      // wait for the URL search params to populate
+      await page.waitForURL(/posts\?/)
+
+      // The `columns` search params should _not_ appear in the URL
+      expect(page.url()).not.toMatch(/columns=/)
     })
 
     test('should drag to reorder columns and save to preferences', async () => {
-      await createPost()
-
       await reorderColumns(page, { fromColumn: 'Number', toColumn: 'ID' })
 
-      // reload to ensure the preferred order was stored in the database
+      // reload to ensure the columns were stored and loaded from preferences
       await page.reload()
+
       await expect(
         page.locator('.list-controls .column-selector .column-selector__column').first(),
       ).toHaveText('Number')
+
       await expect(page.locator('table thead tr th').nth(1)).toHaveText('Number')
     })
 
@@ -1215,13 +1260,10 @@ describe('List View', () => {
     })
 
     test('should sort without resetting column preferences', async () => {
-      await payload.delete({
-        collection: 'payload-preferences',
-        where: {
-          key: {
-            equals: `${postsCollectionSlug}.list`,
-          },
-        },
+      await deletePreferences({
+        key: `${postsCollectionSlug}.list`,
+        payload,
+        user,
       })
 
       await page.goto(postsUrl.list)

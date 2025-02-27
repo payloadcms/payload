@@ -4,8 +4,8 @@ import type { GeneratedTypes } from 'helpers/sdk/types.js'
 import { expect, test } from '@playwright/test'
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
+import { upsertPreferences } from 'helpers/e2e/preferences.js'
 import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
-import { upsertPrefs } from 'helpers/e2e/upsertPrefs.js'
 import { RESTClient } from 'helpers/rest.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -318,7 +318,7 @@ describe('Localization', () => {
     })
 
     test('should not render default locale in locale selector when prefs are not default', async () => {
-      await upsertPrefs<Config, GeneratedTypes<any>>({
+      await upsertPreferences<Config, GeneratedTypes<any>>({
         payload,
         user: client.user,
         key: 'locale',

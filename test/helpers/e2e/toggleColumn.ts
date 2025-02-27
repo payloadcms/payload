@@ -38,10 +38,10 @@ export const toggleColumn = async (
 
   await expect(column).toBeVisible()
 
-  if (
-    (isActiveBeforeClick && targetState === 'off') ||
-    (!isActiveBeforeClick && targetState === 'on')
-  ) {
+  const requiresToggle =
+    (isActiveBeforeClick && targetState === 'off') || (!isActiveBeforeClick && targetState === 'on')
+
+  if (requiresToggle) {
     await column.click()
   }
 
@@ -53,8 +53,8 @@ export const toggleColumn = async (
     await expect(column).toHaveClass(/column-selector__column--active/)
   }
 
-  if (expectURLChange && columnName) {
-    await waitForColumnInURL({ page, columnName: columnLabel, state: targetState })
+  if (expectURLChange && columnName && requiresToggle) {
+    await waitForColumnInURL({ page, columnName, state: targetState })
   }
 
   return column
@@ -69,6 +69,8 @@ export const waitForColumnInURL = async ({
   page: Page
   state: 'off' | 'on'
 }): Promise<void> => {
+  await page.waitForURL(/.*\?.*/)
+
   const identifier = `${state === 'off' ? '-' : ''}${columnName}`
 
   // Test that the identifier is in the URL
