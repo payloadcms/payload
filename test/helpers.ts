@@ -255,16 +255,20 @@ export async function saveDocAndAssert(
   }
 }
 
-export async function openNav(page: Page): Promise<void> {
-  // check to see if the nav is already open and if not, open it
-  // use the `--nav-open` modifier class to check if the nav is open
-  // this will prevent clicking nav links that are bleeding off the screen
-  if (await page.locator('.template-default.template-default--nav-open').isVisible()) {
-    return
-  }
-  // playwright: get first element with .nav-toggler which is VISIBLE (not hidden), could be 2 elements with .nav-toggler on mobile and desktop but only one is visible
-  await page.locator('.nav-toggler >> visible=true').click()
-  await expect(page.locator('.template-default.template-default--nav-open')).toBeVisible()
+export async function openDocDrawer(page: Page, selector: string): Promise<void> {
+  await wait(500) // wait for parent form state to initialize
+  await page.locator(selector).click()
+  await wait(500) // wait for drawer form state to initialize
+}
+
+export async function openCreateDocDrawer(page: Page, fieldSelector: string): Promise<void> {
+  await wait(500) // wait for parent form state to initialize
+  const relationshipField = page.locator(fieldSelector)
+  await expect(relationshipField.locator('input')).toBeEnabled()
+  const addNewButton = relationshipField.locator('.relationship-add-new__add-button')
+  await expect(addNewButton).toBeVisible()
+  await addNewButton.click()
+  await wait(500) // wait for drawer form state to initialize
 }
 
 export async function closeNav(page: Page): Promise<void> {

@@ -78,6 +78,7 @@ export const buildJoinAggregation = async ({
     }
 
     const {
+      count = false,
       limit: limitJoin = join.field.defaultLimit ?? 10,
       page,
       sort: sortJoin = join.field.defaultSort || collectionConfig.defaultSort,
@@ -121,6 +122,28 @@ export const buildJoinAggregation = async ({
       const alias = `${as}.docs.${collectionSlug}`
       aliases.push(alias)
 
+      const basePipeline = [
+        {
+          $addFields: {
+            relationTo: {
+              $literal: collectionSlug,
+            },
+          },
+        },
+        {
+          $match: {
+            $and: [
+              {
+                $expr: {
+                  $eq: [`$${join.field.on}`, '$$root_id_'],
+                },
+              },
+              $match,
+            ],
+          },
+        },
+      ]
+
       aggregate.push({
         $lookup: {
           as: alias,
@@ -129,25 +152,7 @@ export const buildJoinAggregation = async ({
             root_id_: '$_id',
           },
           pipeline: [
-            {
-              $addFields: {
-                relationTo: {
-                  $literal: collectionSlug,
-                },
-              },
-            },
-            {
-              $match: {
-                $and: [
-                  {
-                    $expr: {
-                      $eq: [`$${join.field.on}`, '$$root_id_'],
-                    },
-                  },
-                  $match,
-                ],
-              },
-            },
+            ...basePipeline,
             {
               $sort: {
                 [sortProperty]: sortDirection,
@@ -169,6 +174,24 @@ export const buildJoinAggregation = async ({
           ],
         },
       })
+
+      if (count) {
+        aggregate.push({
+          $lookup: {
+            as: `${as}.totalDocs.${alias}`,
+            from: adapter.collections[collectionSlug].collection.name,
+            let: {
+              root_id_: '$_id',
+            },
+            pipeline: [
+              ...basePipeline,
+              {
+                $count: 'result',
+              },
+            ],
+          },
+        })
+      }
     }
 
     aggregate.push({
@@ -178,6 +201,23 @@ export const buildJoinAggregation = async ({
         },
       },
     })
+
+    if (count) {
+      aggregate.push({
+        $addFields: {
+          [`${as}.totalDocs`]: {
+            $add: aliases.map((alias) => ({
+              $ifNull: [
+                {
+                  $first: `$${as}.totalDocs.${alias}.result`,
+                },
+                0,
+              ],
+            })),
+          },
+        },
+      })
+    }
 
     aggregate.push({
       $set: {
@@ -222,6 +262,7 @@ export const buildJoinAggregation = async ({
       }
 
       const {
+        count,
         limit: limitJoin = join.field.defaultLimit ?? 10,
         page,
         sort: sortJoin = join.field.defaultSort || collectionConfig.defaultSort,
@@ -274,6 +315,31 @@ export const buildJoinAggregation = async ({
         polymorphicSuffix = '.value'
       }
 
+      const addTotalDocsAggregation = (as: string, foreignField: string) =>
+        aggregate.push(
+          {
+            $lookup: {
+              as: `${as}.totalDocs`,
+              foreignField,
+              from: adapter.collections[slug].collection.name,
+              localField: versions ? 'parent' : '_id',
+              pipeline: [
+                {
+                  $match,
+                },
+                {
+                  $count: 'result',
+                },
+              ],
+            },
+          },
+          {
+            $addFields: {
+              [`${as}.totalDocs`]: { $ifNull: [{ $first: `$${as}.totalDocs.result` }, 0] },
+            },
+          },
+        )
+
       if (adapter.payload.config.localization && locale === 'all') {
         adapter.payload.config.localization.localeCodes.forEach((code) => {
           const as = `${versions ? `version.${join.joinPath}` : join.joinPath}${code}`
@@ -304,6 +370,7 @@ export const buildJoinAggregation = async ({
               },
             },
           )
+
           if (limitJoin > 0) {
             aggregate.push({
               $addFields: {
@@ -312,6 +379,10 @@ export const buildJoinAggregation = async ({
                 },
               },
             })
+          }
+
+          if (count) {
+            addTotalDocsAggregation(as, `${join.field.on}${code}${polymorphicSuffix}`)
           }
         })
       } else {
@@ -359,6 +430,11 @@ export const buildJoinAggregation = async ({
             },
           },
         )
+
+        if (count) {
+          addTotalDocsAggregation(as, foreignField)
+        }
+
         if (limitJoin > 0) {
           aggregate.push({
             $addFields: {

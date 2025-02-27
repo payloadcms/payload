@@ -15,6 +15,11 @@ const DocumentFormContext = createContext({} as Context)
 const FormWatchContext = createContext({} as Context)
 const SubmittedContext = createContext(false)
 const ProcessingContext = createContext(false)
+/**
+ * If the form has started processing in the background (e.g.
+ * if autosave is running), this will be true.
+ */
+const BackgroundProcessingContext = createContext(false)
 const ModifiedContext = createContext(false)
 const InitializingContext = createContext(false)
 const FormFieldsContext = createSelectorContext<FormFieldsContextType>([{}, () => null])
@@ -36,6 +41,11 @@ const useDocumentForm = (): Context => useContext(DocumentFormContext)
 const useWatchForm = (): Context => useContext(FormWatchContext)
 const useFormSubmitted = (): boolean => useContext(SubmittedContext)
 const useFormProcessing = (): boolean => useContext(ProcessingContext)
+/**
+ * If the form has started processing in the background (e.g.
+ * if autosave is running), this will be true.
+ */
+const useFormBackgroundProcessing = (): boolean => useContext(BackgroundProcessingContext)
 const useFormModified = (): boolean => useContext(ModifiedContext)
 const useFormInitializing = (): boolean => useContext(InitializingContext)
 
@@ -56,6 +66,7 @@ const useFormFields = <Value = unknown>(
 const useAllFormFields = (): FormFieldsContextType => useFullContext(FormFieldsContext)
 
 export {
+  BackgroundProcessingContext,
   DocumentFormContext,
   FormContext,
   FormFieldsContext,
@@ -67,6 +78,7 @@ export {
   useAllFormFields,
   useDocumentForm,
   useForm,
+  useFormBackgroundProcessing,
   useFormFields,
   useFormInitializing,
   useFormModified,
