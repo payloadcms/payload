@@ -6,15 +6,16 @@ import React, { useMemo } from 'react'
 
 import type { AddCondition, UpdateCondition, WhereBuilderProps } from './types.js'
 
+import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import { Condition } from './Condition/index.js'
 import fieldTypes from './field-types.js'
 import { reduceFields } from './reduceFields.js'
+import './index.scss'
 import { transformWhereQuery } from './transformWhereQuery.js'
 import validateWhereQuery from './validateWhereQuery.js'
-import './index.scss'
 
 const baseClass = 'where-builder'
 
@@ -122,15 +123,16 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
     [conditions],
   )
 
-  React.useEffect(() => {
+  const handleChange = useEffectEvent(async (conditions: Where[]) => {
     if (shouldUpdateQuery) {
-      async function handleChange() {
-        await handleWhereChange({ or: conditions })
-        setShouldUpdateQuery(false)
-      }
-      void handleChange()
+      await handleWhereChange({ or: conditions })
+      setShouldUpdateQuery(false)
     }
-  }, [conditions, handleWhereChange, shouldUpdateQuery])
+  })
+
+  React.useEffect(() => {
+    void handleChange(conditions)
+  }, [conditions])
 
   return (
     <div className={baseClass}>
