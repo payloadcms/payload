@@ -2,7 +2,7 @@
 import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
 
 export const AzureClientUploadHandler = createClientUploadHandler({
-  handler: async ({ apiRoute, collectionSlug, file, serverHandlerPath, serverURL }) => {
+  handler: async ({ apiRoute, collectionSlug, file, prefix, serverHandlerPath, serverURL }) => {
     const response = await fetch(`${serverURL}${apiRoute}${serverHandlerPath}`, {
       body: JSON.stringify({
         collectionSlug,
@@ -25,5 +25,7 @@ export const AzureClientUploadHandler = createClientUploadHandler({
       },
       method: 'PUT',
     })
+
+    return { prefix }
   },
 })

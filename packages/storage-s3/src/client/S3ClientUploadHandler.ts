@@ -2,7 +2,7 @@
 import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
 
 export const S3ClientUploadHandler = createClientUploadHandler({
-  handler: async ({ apiRoute, collectionSlug, file, serverHandlerPath, serverURL }) => {
+  handler: async ({ apiRoute, collectionSlug, file, prefix, serverHandlerPath, serverURL }) => {
     const response = await fetch(`${serverURL}${apiRoute}${serverHandlerPath}`, {
       body: JSON.stringify({
         collectionSlug,
@@ -20,5 +20,7 @@ export const S3ClientUploadHandler = createClientUploadHandler({
       headers: { 'Content-Length': file.size.toString(), 'Content-Type': file.type },
       method: 'PUT',
     })
+
+    return { prefix }
   },
 })
