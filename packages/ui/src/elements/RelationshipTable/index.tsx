@@ -2,7 +2,6 @@
 import type {
   CollectionSlug,
   Column,
-  ColumnPreference,
   JoinFieldClient,
   ListQuery,
   PaginatedDocs,
@@ -26,6 +25,7 @@ import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { hoistQueryParamsToAnd } from '../../utilities/mergeListSearchAndWhere.js'
 import { AnimateHeight } from '../AnimateHeight/index.js'
+import './index.scss'
 import { ColumnSelector } from '../ColumnSelector/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
@@ -33,7 +33,6 @@ import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
 import { TableColumnsProvider } from '../TableColumns/index.js'
 import { DrawerLink } from './cells/DrawerLink/index.js'
 import { RelationshipTablePagination } from './Pagination.js'
-import './index.scss'
 
 const baseClass = 'relationship-table'
 
@@ -124,10 +123,11 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         newQuery.where = hoistQueryParamsToAnd(newQuery.where, filterOptions)
       }
 
-      // map columns from string[] to ColumnPreference[]
-      const defaultColumns: ColumnPreference[] = field.admin.defaultColumns
+      // map columns from string[] to ListPreferences['columns']
+      const defaultColumns = field.admin.defaultColumns
         ? field.admin.defaultColumns.map((accessor) => ({
-            [accessor]: true,
+            accessor,
+            active: true,
           }))
         : undefined
 

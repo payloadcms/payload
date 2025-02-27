@@ -1,7 +1,7 @@
 import type { ImportMap } from '../../bin/generateImportMap/index.js'
 import type { SanitizedConfig } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
-import type { CollectionSlug, ColumnPreference } from '../../index.js'
+import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../types/index.js'
 
 export type DefaultServerFunctionArgs = {
@@ -50,7 +50,7 @@ export type ListQuery = {
 
 export type BuildTableStateArgs = {
   collectionSlug: string | string[]
-  columns?: ColumnPreference[]
+  columns?: { accessor: string; active: boolean }[]
   docs?: PaginatedDocs['docs']
   enableRowSelections?: boolean
   parent?: {
