@@ -21,6 +21,16 @@ import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
 
 export { generateListMetadata } from './meta.js'
 
+const __payloadListView = {
+  lastKnownURL: undefined,
+}
+
+declare global {
+  interface Window {
+    __payloadListView: string
+  }
+}
+
 type RenderListViewArgs = {
   customCellProps?: Record<string, any>
   disableBulkDelete?: boolean
@@ -75,6 +85,9 @@ export const renderListView = async (
 
   let columns: ColumnPreference[]
 
+  const isReferral = Boolean(__payloadListView.lastKnownURL)
+  __payloadListView.lastKnownURL = req.url
+
   // Columns from `req.query` are a string, so we need to parse them
   // Otherwise, columns from args are already in JSON format
   if (query.columns) {
@@ -89,15 +102,19 @@ export const renderListView = async (
     }
   }
 
-  const listPreferences = await upsertPreferences<ListPreferences>({
-    key: `${collectionSlug}-list`,
-    req,
-    value: {
-      columns,
-      limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
-      sort: query?.sort as string,
-    },
-  })
+  let listPreferences: ListPreferences | undefined
+
+  if (!isReferral) {
+    listPreferences = await upsertPreferences<ListPreferences>({
+      key: `${collectionSlug}-list`,
+      req,
+      value: {
+        columns,
+        limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
+        sort: query?.sort as string,
+      },
+    })
+  }
 
   const {
     routes: { admin: adminRoute },

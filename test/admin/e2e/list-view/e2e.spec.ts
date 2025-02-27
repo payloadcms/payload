@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test'
 import { mapAsync } from 'payload'
 import * as qs from 'qs-esm'
 
-import type { Config, Geo, Post } from '../../payload-types.js'
+import type { Config, Geo, Post, User } from '../../payload-types.js'
 
 import {
   ensureCompilationIsDone,
@@ -30,6 +30,7 @@ const description = 'Description'
 
 let payload: PayloadTestSDK<Config>
 
+import { devUser } from 'credentials.js'
 import { addListFilter } from 'helpers/e2e/addListFilter.js'
 import { goToFirstCell } from 'helpers/e2e/navigateToDoc.js'
 import { openListColumns } from 'helpers/e2e/openListColumns.js'
@@ -59,6 +60,7 @@ describe('List View', () => {
   let customViewsUrl: AdminUrlUtil
   let with300DocumentsUrl: AdminUrlUtil
   let withListViewUrl: AdminUrlUtil
+  let user: User
 
   let serverURL: string
   let adminRoutes: ReturnType<typeof getRoutes>
@@ -88,6 +90,14 @@ describe('List View', () => {
     await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
 
     adminRoutes = getRoutes({ customAdminRoutes })
+
+    user = await payload.login({
+      collection: 'users',
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+      },
+    })
   })
 
   beforeEach(async () => {
@@ -945,7 +955,60 @@ describe('List View', () => {
       await expect(column).not.toHaveClass(/column-selector__column--active/)
     })
 
-    test('should not save preferences when navigating straight to a URL with columns', async () => {})
+    test('should not save preferences when navigating straight to a URL with columns', async () => {
+      // first clear any prefs
+      await payload.delete({
+        collection: 'payload-preferences',
+        where: {
+          and: [
+            {
+              key: { equals: 'posts-list' },
+            },
+            {
+              'user.relationTo': {
+                equals: 'users',
+              },
+            },
+            {
+              'user.value': {
+                equals: user.id,
+              },
+            },
+          ],
+        },
+      })
+
+      // now navigate to a direct link with columns
+
+      await page.goto(`${postsUrl.list}?columns=${JSON.stringify([{ ID: false }])}`)
+
+      // query prefs and ensure that the columns are not saved
+
+      const prefs = await payload.find({
+        collection: 'payload-preferences',
+        limit: 1,
+        depth: 0,
+        where: {
+          and: [
+            {
+              key: { equals: 'posts-list' },
+            },
+            {
+              'user.relationTo': {
+                equals: 'users',
+              },
+            },
+            {
+              'user.value': {
+                equals: user.id,
+              },
+            },
+          ],
+        },
+      })
+
+      expect(prefs.docs).toHaveLength(0)
+    })
 
     test('should retain preferences when changing drawer collections', async () => {
       await page.goto(postsUrl.create)
