@@ -18,11 +18,11 @@ import { fieldAffectsData, fieldIsHiddenOrDisabled, flattenTopLevelFields } from
 import type { Column } from '../exports/client/index.js'
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
+import { SortRow } from '../elements/SortRow/index.js'
 import { buildColumnState } from '../elements/TableColumns/buildColumnState.js'
 import { buildPolymorphicColumnState } from '../elements/TableColumns/buildPolymorphicColumnState.js'
 import { filterFields } from '../elements/TableColumns/filterFields.js'
 import { getInitialColumns } from '../elements/TableColumns/getInitialColumns.js'
-
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import { Pill, SelectAll, SelectRow, Table } from '../exports/client/index.js'
 
@@ -192,6 +192,25 @@ export const renderTable = ({
       },
       Heading: <SelectAll />,
       renderedCells: docs.map((_, i) => <SelectRow key={i} rowData={docs[i]} />),
+    } as Column)
+  }
+
+  // Add drag handle column if documents have payload-order field
+  const ORDER_FIELD_NAME = 'payload-order'
+  const showDragHandle = docs.length > 0 && ORDER_FIELD_NAME in docs[0]
+
+  if (showDragHandle) {
+    columnsToUse.unshift({
+      accessor: '_dragHandle',
+      active: true,
+      field: {
+        admin: {
+          disabled: true,
+        },
+        hidden: true,
+      },
+      Heading: '', // Empty header
+      renderedCells: docs.map((_, i) => <SortRow key={i} rowData={docs[i]} />),
     } as Column)
   }
 

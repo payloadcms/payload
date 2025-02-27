@@ -1,8 +1,8 @@
-import { generateKeyBetween } from 'fractional-indexing'
+import { generateKeyBetween, generateNKeysBetween } from 'fractional-indexing'
 
 // @ts-strict-ignore
 import type { LoginWithUsernameOptions } from '../../auth/types.js'
-import type { Config, SanitizedConfig } from '../../config/types.js'
+import type { Config, Endpoint, PayloadHandler, SanitizedConfig } from '../../config/types.js'
 import type { Field } from '../../fields/config/types.js'
 import type {
   BeforeChangeHook,
@@ -242,12 +242,14 @@ export const sanitizeCollection = async (
 
   validateUseAsTitle(sanitized)
 
-  const FIELD_NAME = 'payload-order'
+  // duplicated in the UI package too. Don't change one without changing the other.
+  const ORDER_FIELD_NAME = 'payload-order'
 
-  // Add order field if enableCustomOrder is true
+  // Enable custom order
   if (collection.enableCustomOrder) {
+    // 1. Add field
     const orderField: Field = {
-      name: FIELD_NAME,
+      name: ORDER_FIELD_NAME,
       type: 'text',
       admin: {
         disableBulkEdit: true,
@@ -259,7 +261,7 @@ export const sanitizeCollection = async (
 
     sanitized.fields.unshift(orderField)
 
-    // Add hooks to handle order values
+    // 2. Add hook
     if (!sanitized.hooks) {
       sanitized.hooks = {}
     }
@@ -267,7 +269,7 @@ export const sanitizeCollection = async (
       sanitized.hooks.beforeChange = []
     }
 
-    const orderBeforeChange: BeforeChangeHook = async ({ data, operation, req }) => {
+    const orderBeforeChangeHook: BeforeChangeHook = async ({ data, operation, req }) => {
       // Only set _order on create, not on update (unless explicitly provided)
       if (operation === 'create') {
         // Find the last document to place this one after
@@ -275,17 +277,97 @@ export const sanitizeCollection = async (
           collection: sanitized.slug,
           depth: 0,
           limit: 1,
-          sort: `-${FIELD_NAME}`,
+          sort: `-${ORDER_FIELD_NAME}`,
         })
 
-        const lastOrderValue = lastDoc.docs[0]?.[FIELD_NAME] || null
-        data[FIELD_NAME] = generateKeyBetween(lastOrderValue, null)
+        const lastOrderValue = lastDoc.docs[0]?.[ORDER_FIELD_NAME] || null
+        data[ORDER_FIELD_NAME] = generateKeyBetween(lastOrderValue, null)
       }
 
       return data
     }
 
-    sanitized.hooks.beforeChange.push(orderBeforeChange)
+    sanitized.hooks.beforeChange.push(orderBeforeChangeHook)
+
+    // 3. Add endpoint
+    const moveBetweenHandler: PayloadHandler = async (req) => {
+      const body = await req.json()
+      const { betweenIds, docIds } = body as {
+        betweenIds: [string | undefined, string | undefined] // tuple [beforeId, afterId]
+        docIds: string[] // array of docIds to be moved between the two reference points
+      }
+
+      if (!Array.isArray(docIds) || docIds.length === 0) {
+        return new Response(JSON.stringify({ error: 'Invalid or empty docIds array' }), {
+          headers: { 'Content-Type': 'application/json' },
+          status: 400,
+        })
+      }
+
+      if (!Array.isArray(betweenIds) || betweenIds.length !== 2) {
+        return new Response(
+          JSON.stringify({ error: 'betweenIds must be a tuple of two elements' }),
+          {
+            headers: { 'Content-Type': 'application/json' },
+            status: 400,
+          },
+        )
+      }
+
+      const [beforeId, afterId] = betweenIds
+
+      // Fetch the order values of the documents we're inserting between
+      let beforeOrderValue = null
+      let afterOrderValue = null
+
+      // TODO: maybe the endpoint can receive directly the order values?
+      if (beforeId) {
+        const beforeDoc = await req.payload.findByID({
+          id: beforeId,
+          collection: sanitized.slug,
+        })
+        beforeOrderValue = beforeDoc?.[ORDER_FIELD_NAME] || null
+      }
+
+      if (afterId) {
+        const afterDoc = await req.payload.findByID({
+          id: afterId,
+          collection: sanitized.slug,
+        })
+        afterOrderValue = afterDoc?.[ORDER_FIELD_NAME] || null
+      }
+
+      const orderValues = generateNKeysBetween(beforeOrderValue, afterOrderValue, docIds.length)
+
+      // Update each document with its new order value
+      const updatePromises = docIds.map((id, index) => {
+        return req.payload.update({
+          id,
+          collection: sanitized.slug,
+          data: {
+            [ORDER_FIELD_NAME]: orderValues[index],
+          },
+        })
+      })
+
+      const results = await Promise.all(updatePromises)
+
+      return new Response(JSON.stringify({ results, success: true }), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 200,
+      })
+    }
+
+    const moveBetweenEndpoint: Endpoint = {
+      handler: moveBetweenHandler,
+      method: 'post',
+      path: '/reorder',
+    }
+
+    if (!sanitized.endpoints) {
+      sanitized.endpoints = []
+    }
+    sanitized.endpoints.push(moveBetweenEndpoint)
   }
 
   const sanitizedConfig = sanitized as SanitizedCollectionConfig
