@@ -98,7 +98,7 @@ describe('relationship', () => {
     await page.goto(url.create)
 
     // Open first modal
-    await openCreateDocDrawer(page, '#field-relationToSelf')
+    await openCreateDocDrawer({ page, fieldSelector: '#field-relationToSelf' })
 
     // Fill first modal's required relationship field
     await page.locator('[id^=doc-drawer_relationship-fields_1_] #field-relationship').click()
@@ -296,7 +296,7 @@ describe('relationship', () => {
     await page.goto(url.create)
 
     // First fill out the relationship field, as it's required
-    await openCreateDocDrawer(page, '#field-relationship')
+    await openCreateDocDrawer({ page, fieldSelector: '#field-relationship' })
     await page
       .locator('#field-relationship .relationship-add-new__relation-button--text-fields')
       .click()
@@ -311,7 +311,7 @@ describe('relationship', () => {
 
     // Create a new doc for the `relationshipHasMany` field
     await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('create')
-    await openCreateDocDrawer(page, '#field-relationshipHasMany')
+    await openCreateDocDrawer({ page, fieldSelector: '#field-relationshipHasMany' })
     const value = 'Hello, world!'
     await page.locator('.drawer__content #field-text').fill(value)
 
@@ -363,7 +363,7 @@ describe('relationship', () => {
   test('should save using hotkey in document drawer', async () => {
     await page.goto(url.create)
     // First fill out the relationship field, as it's required
-    await openCreateDocDrawer(page, '#field-relationship')
+    await openCreateDocDrawer({ page, fieldSelector: '#field-relationship' })
     await page.locator('#field-relationship .value-container').click()
     await wait(500)
     // Select "Seeded text document" relationship
@@ -577,7 +577,7 @@ describe('relationship', () => {
   test.skip('should bypass min rows validation when no rows present and field is not required', async () => {
     await page.goto(url.create)
     // First fill out the relationship field, as it's required
-    await openCreateDocDrawer(page, '#field-relationship')
+    await openCreateDocDrawer({ page, fieldSelector: '#field-relationship' })
     await page.locator('#field-relationship .value-container').click()
     await page.getByText('Seeded text document', { exact: true }).click()
 
@@ -589,7 +589,7 @@ describe('relationship', () => {
     await page.goto(url.create)
 
     // First fill out the relationship field, as it's required
-    await openCreateDocDrawer(page, '#field-relationship')
+    await openCreateDocDrawer({ page, fieldSelector: '#field-relationship' })
     await page.locator('#field-relationship .value-container').click()
     await page.getByText('Seeded text document', { exact: true }).click()
 
