@@ -66,13 +66,7 @@ export const DefaultNavClient: React.FC<{
               }
 
               return (
-                <Link
-                  className={`${baseClass}__link`}
-                  href={href}
-                  id={id}
-                  key={i}
-                  prefetch={Link ? false : undefined}
-                >
+                <Link className={`${baseClass}__link`} href={href} id={id} key={i} prefetch={false}>
                   {Content}
                 </Link>
               )
