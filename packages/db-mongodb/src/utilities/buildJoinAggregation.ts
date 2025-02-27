@@ -315,6 +315,31 @@ export const buildJoinAggregation = async ({
         polymorphicSuffix = '.value'
       }
 
+      const addTotalDocsAggregation = (as: string, foreignField: string) =>
+        aggregate.push(
+          {
+            $lookup: {
+              as: `${as}.totalDocs`,
+              foreignField,
+              from: adapter.collections[slug].collection.name,
+              localField: versions ? 'parent' : '_id',
+              pipeline: [
+                {
+                  $match,
+                },
+                {
+                  $count: 'result',
+                },
+              ],
+            },
+          },
+          {
+            $addFields: {
+              [`${as}.totalDocs`]: { $ifNull: [{ $first: `$${as}.totalDocs.result` }, 0] },
+            },
+          },
+        )
+
       if (adapter.payload.config.localization && locale === 'all') {
         adapter.payload.config.localization.localeCodes.forEach((code) => {
           const as = `${versions ? `version.${join.joinPath}` : join.joinPath}${code}`
@@ -357,29 +382,7 @@ export const buildJoinAggregation = async ({
           }
 
           if (count) {
-            aggregate.push(
-              {
-                $lookup: {
-                  as: `${as}.totalDocs`,
-                  foreignField: `${join.field.on}${code}${polymorphicSuffix}`,
-                  from: adapter.collections[slug].collection.name,
-                  localField: versions ? 'parent' : '_id',
-                  pipeline: [
-                    {
-                      $match,
-                    },
-                    {
-                      $count: 'result',
-                    },
-                  ],
-                },
-              },
-              {
-                $addFields: {
-                  [`${as}.totalDocs`]: { $ifNull: [{ $first: `$${as}.totalDocs.result` }, 0] },
-                },
-              },
-            )
+            addTotalDocsAggregation(as, `${join.field.on}${code}${polymorphicSuffix}`)
           }
         })
       } else {
@@ -429,29 +432,7 @@ export const buildJoinAggregation = async ({
         )
 
         if (count) {
-          aggregate.push(
-            {
-              $lookup: {
-                as: `${as}.totalDocs`,
-                foreignField,
-                from: adapter.collections[slug].collection.name,
-                localField: versions ? 'parent' : '_id',
-                pipeline: [
-                  {
-                    $match,
-                  },
-                  {
-                    $count: 'result',
-                  },
-                ],
-              },
-            },
-            {
-              $addFields: {
-                [`${as}.totalDocs`]: { $ifNull: [{ $first: `$${as}.totalDocs.result` }, 0] },
-              },
-            },
-          )
+          addTotalDocsAggregation(as, foreignField)
         }
 
         if (limitJoin > 0) {
