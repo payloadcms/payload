@@ -45,7 +45,6 @@ describe('@payloadcms/plugin-multi-tenant', () => {
         data: {
           name: 'tenant1',
           domain: 'tenant1.com',
-          slug: 'tenant1',
         },
       })
 
