@@ -16,6 +16,7 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
     parent,
     publishedLocale,
     req,
+    returning,
     snapshot,
     updatedAt,
     versionData,
@@ -74,6 +75,10 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
     { $unset: { latest: 1 } },
     options,
   )
+
+  if (returning === false) {
+    return null
+  }
 
   doc = doc.toObject()
 
