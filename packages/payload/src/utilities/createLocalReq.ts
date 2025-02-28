@@ -23,7 +23,7 @@ function getRequestContext(
   }
 }
 
-const attachFakeURLProperties = (req: Partial<PayloadRequest>) => {
+const attachFakeURLProperties = (req: Partial<PayloadRequest>, urlSuffix?: string) => {
   /**
    * *NOTE*
    * If no URL is provided, the local API was called outside
@@ -38,13 +38,20 @@ const attachFakeURLProperties = (req: Partial<PayloadRequest>) => {
       return urlObject
     }
 
-    const fallbackURL = `http://${req.host || 'localhost'}`
+    const fallbackURL = `http://${req.host || 'localhost'}${urlSuffix || ''}`
 
-    const urlToUse = req?.url || req.payload.config?.serverURL || fallbackURL
+    const urlToUse =
+      req?.url || req.payload.config?.serverURL
+        ? `${req.payload.config.serverURL}${urlSuffix || ''}`
+        : fallbackURL
 
     try {
       urlObject = new URL(urlToUse)
     } catch (_err) {
+      req.payload.logger.error(
+        `Failed to create URL object from URL: ${urlToUse}, falling back to ${fallbackURL}`,
+      )
+
       urlObject = new URL(fallbackURL)
     }
 
@@ -85,13 +92,14 @@ type CreateLocalReq = (
     fallbackLocale?: false | TypedLocale
     locale?: string
     req?: Partial<PayloadRequest>
+    urlSuffix?: string
     user?: User
   },
   payload: Payload,
 ) => Promise<PayloadRequest>
 
 export const createLocalReq: CreateLocalReq = async (
-  { context, fallbackLocale, locale: localeArg, req = {} as PayloadRequest, user },
+  { context, fallbackLocale, locale: localeArg, req = {} as PayloadRequest, urlSuffix, user },
   payload,
 ) => {
   const localization = payload.config?.localization
@@ -131,7 +139,7 @@ export const createLocalReq: CreateLocalReq = async (
   req.routeParams = req?.routeParams || {}
   req.query = req?.query || {}
 
-  attachFakeURLProperties(req)
+  attachFakeURLProperties(req, urlSuffix)
 
   return req as PayloadRequest
 }

@@ -1,8 +1,7 @@
 import type { InitPageResult, VisibleEntities } from 'payload'
 
-import { headers as getHeaders } from 'next/headers.js'
 import { notFound } from 'next/navigation.js'
-import { getPayload, isEntityHidden, parseCookies } from 'payload'
+import { isEntityHidden } from 'payload'
 import * as qs from 'qs-esm'
 
 import type { Args } from './types.js'
@@ -40,8 +39,8 @@ export const initPage = async ({
           ignoreQueryPrefix: true,
         }),
       },
+      urlSuffix: `${route}${searchParams ? queryString : ''}`,
     },
-    urlSuffix: `${route}${searchParams ? queryString : ''}`,
   })
 
   const {
