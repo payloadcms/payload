@@ -58,6 +58,7 @@ export const NotFoundPage = async ({
     redirectUnauthenticatedUser: true,
     route: formatAdminURL({ adminRoute, path: '/not-found' }),
     searchParams,
+    useLayoutReq: true,
   })
 
   const params = await paramsPromise

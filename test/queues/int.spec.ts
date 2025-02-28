@@ -1128,4 +1128,69 @@ describe('Queues', () => {
     // @ts-expect-error
     expect(jobAfterRun.input.amountTask1Retried).toBe(0)
   })
+
+  it('can tasks throw error', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    const job = await payload.jobs.queue({
+      task: 'ThrowError',
+      input: {},
+    })
+
+    await payload.jobs.run()
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    expect(jobAfterRun.hasError).toBe(true)
+    expect(jobAfterRun.log?.length).toBe(1)
+    expect(jobAfterRun.log[0].error.message).toBe('failed')
+    expect(jobAfterRun.log[0].state).toBe('failed')
+  })
+
+  it('can tasks return error', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    const job = await payload.jobs.queue({
+      task: 'ReturnError',
+      input: {},
+    })
+
+    await payload.jobs.run()
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    expect(jobAfterRun.hasError).toBe(true)
+    expect(jobAfterRun.log?.length).toBe(1)
+    expect(jobAfterRun.log[0].error.message).toBe('failed')
+    expect(jobAfterRun.log[0].state).toBe('failed')
+  })
+
+  it('can tasks return error with custom error message', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    const job = await payload.jobs.queue({
+      task: 'ReturnCustomError',
+      input: {
+        errorMessage: 'custom error message',
+      },
+    })
+
+    await payload.jobs.run()
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    expect(jobAfterRun.hasError).toBe(true)
+    expect(jobAfterRun.log?.length).toBe(1)
+    expect(jobAfterRun.log[0].error.message).toBe('custom error message')
+    expect(jobAfterRun.log[0].state).toBe('failed')
+  })
 })
