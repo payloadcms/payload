@@ -140,7 +140,7 @@ export const find: Find = async function find(
       pagination: paginationOptions.pagination,
       projection: paginationOptions.projection,
       query,
-      session: paginationOptions.options?.session,
+      session: paginationOptions.options?.session ?? undefined,
       sort: paginationOptions.sort as object,
       useEstimatedCount: paginationOptions.useEstimatedCount,
     })

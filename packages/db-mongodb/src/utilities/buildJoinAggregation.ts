@@ -19,8 +19,8 @@ type BuildJoinAggregationArgs = {
   adapter: MongooseAdapter
   collection: CollectionSlug
   collectionConfig: SanitizedCollectionConfig
-  joins: JoinQuery
-  locale: string
+  joins?: JoinQuery
+  locale?: string
   projection?: Record<string, true>
   // the where clause for the top collection
   query?: Record<string, unknown>
