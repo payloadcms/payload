@@ -53,13 +53,11 @@ export const initReq = async function ({
   importMap,
   key,
   overrides,
-  urlSuffix,
 }: {
   configPromise: Promise<SanitizedConfig> | SanitizedConfig
   importMap: ImportMap
   key: string
   overrides?: Parameters<typeof createLocalReq>[0]
-  urlSuffix?: string
 }): Promise<Result> {
   const headers = await getHeaders()
   const cookies = parseCookies(headers)
