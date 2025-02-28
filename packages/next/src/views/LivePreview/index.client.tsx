@@ -387,7 +387,7 @@ const PreviewView: React.FC<Props> = ({
             ? documentLockStateRef.current?.user?.id === user?.id
             : documentLockStateRef.current?.user === user?.id
         ) {
-          void unlockDocument(id, collectionSlug ?? globalSlug)
+          void unlockDocument()
           setDocumentIsLocked(false)
           setCurrentEditor(null)
         }

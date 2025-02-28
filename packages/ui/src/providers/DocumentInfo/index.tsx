@@ -144,35 +144,37 @@ const DocumentInfo: React.FC<
     }
   }
 
-  const unlockDocument = useCallback(
-    async (docID: number | string, slug: string) => {
-      try {
-        const isGlobal = slug === globalSlug
+  const unlockDocument = useCallback(async () => {
+    if (!id || (!collectionSlug && !globalSlug)) {
+      return
+    }
 
-        const query = isGlobal
-          ? `where[globalSlug][equals]=${slug}`
-          : `where[document.value][equals]=${docID}&where[document.relationTo][equals]=${slug}`
+    try {
+      const isGlobal = Boolean(globalSlug)
+      const slug = globalSlug || collectionSlug
 
-        const request = await requests.get(`${serverURL}${api}/payload-locked-documents?${query}`)
+      const query = isGlobal
+        ? `where[globalSlug][equals]=${slug}`
+        : `where[document.value][equals]=${id}&where[document.relationTo][equals]=${slug}`
 
-        const { docs } = await request.json()
+      const request = await requests.get(`${serverURL}${api}/payload-locked-documents?${query}`)
 
-        if (docs.length > 0) {
-          const lockID = docs[0].id
-          await requests.delete(`${serverURL}${api}/payload-locked-documents/${lockID}`, {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          })
-          setDocumentIsLocked(false)
-        }
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Failed to unlock the document', error)
+      const { docs } = await request.json()
+
+      if (docs.length > 0) {
+        const lockID = docs[0].id
+        await requests.delete(`${serverURL}${api}/payload-locked-documents/${lockID}`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+        setDocumentIsLocked(false)
       }
-    },
-    [serverURL, api, globalSlug],
-  )
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to unlock the document', error)
+    }
+  }, [api, collectionSlug, globalSlug, id, serverURL])
 
   const updateDocumentEditor = useCallback(
     async (docID: number | string, slug: string, user: ClientUser | number | string) => {
