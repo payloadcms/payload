@@ -37,9 +37,13 @@ export function UploadComponentHasOne(props: Props) {
 
   try {
     src = new URL(fullSizeUrl, serverURL).toString()
-    thumbnailSrc = new URL(thumbnailUrl, serverURL).toString()
   } catch {
     src = `${serverURL}${fullSizeUrl}`
+  }
+
+  try {
+    thumbnailSrc = new URL(thumbnailUrl, serverURL).toString()
+  } catch {
     thumbnailSrc = `${serverURL}${thumbnailUrl}`
   }
 
