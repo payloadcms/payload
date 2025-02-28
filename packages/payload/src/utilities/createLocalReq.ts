@@ -26,22 +26,26 @@ function getRequestContext(
 const attachFakeURLProperties = (req: Partial<PayloadRequest>) => {
   /**
    * *NOTE*
-   * If no URL is provided, the local API was called directly outside
+   * If no URL is provided, the local API was called outside
    * the context of a request. Therefore we create a fake URL object.
-   * `ts-expect-error` is used below for properties that are 'read-only'
-   * since they do not exist yet we can safely ignore the error.
+   * `ts-expect-error` is used below for properties that are 'read-only'.
+   * Since they do not exist yet we can safely ignore the error.
    */
-  let urlObject
+  let urlObject: undefined | URL
 
   function getURLObject() {
     if (urlObject) {
       return urlObject
     }
-    const urlToUse = req?.url || req.payload.config?.serverURL || 'http://localhost'
+
+    const fallbackURL = `http://${req.host || 'localhost'}`
+
+    const urlToUse = req?.url || req.payload.config?.serverURL || fallbackURL
+
     try {
       urlObject = new URL(urlToUse)
-    } catch (error) {
-      urlObject = new URL('http://localhost')
+    } catch (_err) {
+      urlObject = new URL(fallbackURL)
     }
 
     return urlObject
@@ -50,20 +54,25 @@ const attachFakeURLProperties = (req: Partial<PayloadRequest>) => {
   if (!req.host) {
     req.host = getURLObject().host
   }
+
   if (!req.protocol) {
     req.protocol = getURLObject().protocol
   }
+
   if (!req.pathname) {
     req.pathname = getURLObject().pathname
   }
+
   if (!req.searchParams) {
     // @ts-expect-error eslint-disable-next-line no-param-reassign
     req.searchParams = getURLObject().searchParams
   }
+
   if (!req.origin) {
     // @ts-expect-error eslint-disable-next-line no-param-reassign
     req.origin = getURLObject().origin
   }
+
   if (!req?.url) {
     // @ts-expect-error eslint-disable-next-line no-param-reassign
     req.url = getURLObject().href
