@@ -318,3 +318,6 @@ test/databaseAdapter.js
 /media-with-relation-preview
 /media-without-relation-preview
 /media-without-cache-tags
+test/.localstack
+test/google-cloud-storage
+test/azurestoragedata/
