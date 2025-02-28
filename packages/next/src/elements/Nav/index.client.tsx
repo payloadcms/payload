@@ -62,7 +62,7 @@ export const DefaultNavClient: React.FC<{
 
               return (
                 <Link
-                  className={`${baseClass}__link ${isActive && 'active'}`}
+                  className={[`${baseClass}__link`, isActive && 'active'].filter(Boolean).join(' ')}
                   href={href}
                   id={id}
                   key={i}
