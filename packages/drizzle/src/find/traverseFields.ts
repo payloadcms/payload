@@ -2,7 +2,7 @@ import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { SQLiteSelectBase } from 'drizzle-orm/sqlite-core'
 import type { FlattenedField, JoinQuery, SelectMode, SelectType, Where } from 'payload'
 
-import { and, asc, desc, eq, or, sql } from 'drizzle-orm'
+import { and, asc, count, desc, eq, or, sql } from 'drizzle-orm'
 import { fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
@@ -386,6 +386,7 @@ export const traverseFields = ({
         }
 
         const {
+          count: shouldCount = false,
           limit: limitArg = field.defaultLimit ?? 10,
           page,
           sort = field.defaultSort,
@@ -478,6 +479,13 @@ export const traverseFields = ({
 
           if (where && Object.keys(where).length > 0) {
             sqlWhere = and(sqlWhere, buildSQLWhere(where, subQueryAlias))
+          }
+
+          if (shouldCount) {
+            currentArgs.extras[`${columnName}_count`] = sql`${db
+              .select({ count: count() })
+              .from(sql`${currentQuery.as(subQueryAlias)}`)
+              .where(sqlWhere)}`.as(`${columnName}_count`)
           }
 
           currentQuery = currentQuery.orderBy(sortOrder(sql`"sortPath"`)) as SQLSelect
@@ -610,6 +618,20 @@ export const traverseFields = ({
               .where(subQueryWhere)
               .orderBy(() => orderBy.map(({ column, order }) => order(column))),
           }).as(subQueryAlias)
+
+          if (shouldCount) {
+            currentArgs.extras[`${columnName}_count`] = sql`${db
+              .select({
+                count: count(),
+              })
+              .from(
+                sql`${db
+                  .select(selectFields as any)
+                  .from(newAliasTable)
+                  .where(subQueryWhere)
+                  .as(`${subQueryAlias}_count_subquery`)}`,
+              )}`.as(`${subQueryAlias}_count`)
+          }
 
           currentArgs.extras[columnName] = sql`${db
             .select({

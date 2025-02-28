@@ -1,6 +1,7 @@
 import type { FlattenedBlock, FlattenedField, JoinQuery, SanitizedConfig } from 'payload'
 
 import { fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
+import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from '../../types.js'
 import type { BlocksMap } from '../../utilities/createBlocksMap.js'
@@ -398,7 +399,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
     }
 
     if (field.type === 'join') {
-      const { limit = field.defaultLimit ?? 10 } =
+      const { count, limit = field.defaultLimit ?? 10 } =
         joinQuery?.[`${fieldPrefix.replaceAll('_', '.')}${field.name}`] || {}
 
       // raw hasMany results from SQLite
@@ -407,8 +408,8 @@ export const traverseFields = <T extends Record<string, unknown>>({
       }
 
       let fieldResult:
-        | { docs: unknown[]; hasNextPage: boolean }
-        | Record<string, { docs: unknown[]; hasNextPage: boolean }>
+        | { docs: unknown[]; hasNextPage: boolean; totalDocs?: number }
+        | Record<string, { docs: unknown[]; hasNextPage: boolean; totalDocs?: number }>
       if (Array.isArray(fieldData)) {
         if (isLocalized && adapter.payload.config.localization) {
           fieldResult = fieldData.reduce(
@@ -446,6 +447,17 @@ export const traverseFields = <T extends Record<string, unknown>>({
             ),
             hasNextPage,
           }
+        }
+      }
+
+      if (count) {
+        const countPath = `${fieldName}_count`
+        if (typeof table[countPath] !== 'undefined') {
+          let value = Number(table[countPath])
+          if (Number.isNaN(value)) {
+            value = 0
+          }
+          fieldResult.totalDocs = value
         }
       }
 
@@ -607,6 +619,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
             deletions,
             fieldPrefix: groupFieldPrefix,
             fields: field.flattenedFields,
+            joinQuery,
             numbers,
             parentIsLocalized: parentIsLocalized || field.localized,
             path: `${sanitizedPath}${field.name}`,

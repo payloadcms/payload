@@ -171,19 +171,19 @@ export const updateDocument = async <
   // beforeValidate - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
-    await priorHook
-
-    data =
-      (await hook({
-        collection: collectionConfig,
-        context: req.context,
-        data,
-        operation: 'update',
-        originalDoc,
-        req,
-      })) || data
-  }, Promise.resolve())
+  if (collectionConfig.hooks?.beforeValidate?.length) {
+    for (const hook of collectionConfig.hooks.beforeValidate) {
+      data =
+        (await hook({
+          collection: collectionConfig,
+          context: req.context,
+          data,
+          operation: 'update',
+          originalDoc,
+          req,
+        })) || data
+    }
+  }
 
   // /////////////////////////////////////
   // Write files to local storage
@@ -197,19 +197,19 @@ export const updateDocument = async <
   // beforeChange - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.beforeChange.reduce(async (priorHook, hook) => {
-    await priorHook
-
-    data =
-      (await hook({
-        collection: collectionConfig,
-        context: req.context,
-        data,
-        operation: 'update',
-        originalDoc,
-        req,
-      })) || data
-  }, Promise.resolve())
+  if (collectionConfig.hooks?.beforeChange?.length) {
+    for (const hook of collectionConfig.hooks.beforeChange) {
+      data =
+        (await hook({
+          collection: collectionConfig,
+          context: req.context,
+          data,
+          operation: 'update',
+          originalDoc,
+          req,
+        })) || data
+    }
+  }
 
   // /////////////////////////////////////
   // beforeChange - Fields
@@ -338,17 +338,17 @@ export const updateDocument = async <
   // afterRead - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-    await priorHook
-
-    result =
-      (await hook({
-        collection: collectionConfig,
-        context: req.context,
-        doc: result,
-        req,
-      })) || result
-  }, Promise.resolve())
+  if (collectionConfig.hooks?.afterRead?.length) {
+    for (const hook of collectionConfig.hooks.afterRead) {
+      result =
+        (await hook({
+          collection: collectionConfig,
+          context: req.context,
+          doc: result,
+          req,
+        })) || result
+    }
+  }
 
   // /////////////////////////////////////
   // afterChange - Fields
@@ -369,19 +369,19 @@ export const updateDocument = async <
   // afterChange - Collection
   // /////////////////////////////////////
 
-  await collectionConfig.hooks.afterChange.reduce(async (priorHook, hook) => {
-    await priorHook
-
-    result =
-      (await hook({
-        collection: collectionConfig,
-        context: req.context,
-        doc: result,
-        operation: 'update',
-        previousDoc: originalDoc,
-        req,
-      })) || result
-  }, Promise.resolve())
+  if (collectionConfig.hooks?.afterChange?.length) {
+    for (const hook of collectionConfig.hooks.afterChange) {
+      result =
+        (await hook({
+          collection: collectionConfig,
+          context: req.context,
+          doc: result,
+          operation: 'update',
+          previousDoc: originalDoc,
+          req,
+        })) || result
+    }
+  }
 
   return result as TransformCollectionWithSelect<TSlug, TSelect>
 }

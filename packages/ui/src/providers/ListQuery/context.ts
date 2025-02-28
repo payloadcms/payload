@@ -1,13 +1,11 @@
 import { createContext, useContext } from 'react'
 
-import type { ListQueryContext } from './types.js'
+import type { IListQueryContext } from './types.js'
 
-const ListQueryModifiedContext = createContext(false)
+export const ListQueryContext = createContext({} as IListQueryContext)
 
-const useListQueryModified = (): boolean => useContext(ListQueryModifiedContext)
+export const useListQuery = (): IListQueryContext => useContext(ListQueryContext)
 
-const ListQueryContext = createContext({} as ListQueryContext)
+export const ListQueryModifiedContext = createContext(false)
 
-const useListQuery = (): ListQueryContext => useContext(ListQueryContext)
-
-export { ListQueryContext, ListQueryModifiedContext, useListQuery, useListQueryModified }
+export const useListQueryModified = (): boolean => useContext(ListQueryModifiedContext)

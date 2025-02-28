@@ -1,15 +1,11 @@
-import type { ListQuery, PaginatedDocs, Sort, Where } from 'payload'
-
-export type ListQueryProviderProps = {
-  readonly children: React.ReactNode
-  readonly collectionSlug?: string
-  readonly data: PaginatedDocs
-  readonly defaultLimit?: number
-  readonly defaultSort?: Sort
-  readonly modifySearchParams?: boolean
-  readonly onQueryChange?: (query: ListQuery) => void
-  readonly preferenceKey?: string
-}
+import type {
+  ColumnPreference,
+  ListPreferences,
+  ListQuery,
+  PaginatedDocs,
+  Sort,
+  Where,
+} from 'payload'
 
 type ContextHandlers = {
   handlePageChange?: (page: number) => Promise<void>
@@ -19,7 +15,25 @@ type ContextHandlers = {
   handleWhereChange?: (where: Where) => Promise<void>
 }
 
-export type ListQueryContext = {
+export type OnListQueryChange = (query: ListQuery) => void
+
+export type ListQueryProps = {
+  readonly children: React.ReactNode
+  readonly collectionSlug?: string
+  readonly columns?: ColumnPreference[]
+  readonly data: PaginatedDocs
+  readonly defaultLimit?: number
+  readonly defaultSort?: Sort
+  readonly listPreferences?: ListPreferences
+  readonly modifySearchParams?: boolean
+  readonly onQueryChange?: OnListQueryChange
+  /**
+   * @deprecated
+   */
+  readonly preferenceKey?: string
+}
+
+export type IListQueryContext = {
   data: PaginatedDocs
   defaultLimit?: number
   defaultSort?: Sort

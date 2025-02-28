@@ -1,8 +1,8 @@
 import type { PayloadTestSDK } from 'helpers/sdk/index.js'
 import type { GeneratedTypes } from 'helpers/sdk/types.js'
-import type { TypedUser } from 'payload'
+import type { TypedUser, User } from 'payload'
 
-export const upsertPrefs = async <
+export const upsertPreferences = async <
   TConfig extends GeneratedTypes<any>,
   TGeneratedTypes extends GeneratedTypes<any>,
 >({
@@ -69,5 +69,30 @@ export const upsertPrefs = async <
     }
   } catch (e) {
     console.error('Error upserting prefs', e)
+  }
+}
+
+export const deletePreferences = async <TConfig extends GeneratedTypes<any>>({
+  payload,
+  user,
+  key,
+}: {
+  key: string
+  payload: PayloadTestSDK<TConfig>
+  user: User
+}): Promise<void> => {
+  try {
+    await payload.delete({
+      collection: 'payload-preferences',
+      where: {
+        and: [
+          { key: { equals: key } },
+          { 'user.value': { equals: user.id } },
+          { 'user.relationTo': { equals: user.collection } },
+        ],
+      },
+    })
+  } catch (e) {
+    console.error('Error deleting prefs', e)
   }
 }

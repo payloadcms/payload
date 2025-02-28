@@ -8,7 +8,7 @@ import { transform } from './utilities/transform.js'
 
 export const createGlobal: CreateGlobal = async function createGlobal(
   this: MongooseAdapter,
-  { slug, data, req },
+  { slug, data, req, returning },
 ) {
   const Model = this.globals
 
@@ -25,6 +25,9 @@ export const createGlobal: CreateGlobal = async function createGlobal(
   }
 
   let [result] = (await Model.create([data], options)) as any
+  if (returning === false) {
+    return null
+  }
 
   result = result.toObject()
 

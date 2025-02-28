@@ -27,6 +27,7 @@ type Props = {
   readonly onRemove: () => void
   readonly reloadDoc: ReloadDoc
   readonly src: string
+  readonly thumbnailSrc: string
   readonly withMeta?: boolean
   readonly x?: number
   readonly y?: number
@@ -45,6 +46,7 @@ export function RelationshipContent(props: Props) {
     onRemove,
     reloadDoc,
     src,
+    thumbnailSrc,
     withMeta = true,
     x,
     y,
@@ -86,7 +88,7 @@ export function RelationshipContent(props: Props) {
           alt={alt}
           className={`${baseClass}__thumbnail`}
           filename={filename}
-          fileSrc={src}
+          fileSrc={thumbnailSrc}
           size="small"
         />
         <div className={`${baseClass}__details`}>

@@ -34,6 +34,7 @@ import { ServerFunctionsProvider } from '../ServerFunctions/index.js'
 import { ThemeProvider } from '../Theme/index.js'
 import { ToastContainer } from '../ToastContainer/index.js'
 import { TranslationProvider } from '../Translation/index.js'
+import { UploadHandlersProvider } from '../UploadHandlers/index.js'
 
 type Props = {
   readonly children: React.ReactNode
@@ -106,7 +107,9 @@ export const RootProvider: React.FC<Props> = ({
                                       <LoadingOverlayProvider>
                                         <DocumentEventsProvider>
                                           <NavProvider initialIsOpen={isNavOpen}>
-                                            {children}
+                                            <UploadHandlersProvider>
+                                              {children}
+                                            </UploadHandlersProvider>
                                           </NavProvider>
                                         </DocumentEventsProvider>
                                       </LoadingOverlayProvider>

@@ -51,6 +51,7 @@ export {
   deepCopyObjectSimple,
   deepCopyObjectSimpleWithoutReactComponents,
 } from '../utilities/deepCopyObject.js'
+
 export {
   deepMerge,
   deepMergeWithCombinedArrays,
@@ -89,6 +90,11 @@ export { reduceFieldsToValues } from '../utilities/reduceFieldsToValues.js'
 export { setsAreEqual } from '../utilities/setsAreEqual.js'
 
 export { default as toKebabCase } from '../utilities/toKebabCase.js'
+
+export {
+  transformColumnsToPreferences,
+  transformColumnsToSearchParams,
+} from '../utilities/transformColumnPreferences.js'
 
 export { transformWhereQuery } from '../utilities/transformWhereQuery.js'
 

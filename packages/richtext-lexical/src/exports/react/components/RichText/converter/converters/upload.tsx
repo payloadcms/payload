@@ -1,4 +1,4 @@
-import type { FileSizeImproved } from 'payload'
+import type { FileData, FileSizeImproved, TypeWithID } from 'payload'
 
 import type { UploadDataImproved } from '../../../../../../features/upload/server/nodes/UploadNode.js'
 import type { SerializedUploadNode } from '../../../../../../nodeTypes.js'
@@ -7,21 +7,21 @@ import type { JSXConverters } from '../types.js'
 export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
   upload: ({ node }) => {
     // TO-DO (v4): SerializedUploadNode should use UploadData_P4
-    const uploadDocument = node as UploadDataImproved
-    if (typeof uploadDocument?.value !== 'object') {
+    const uploadNode = node as UploadDataImproved
+    if (typeof uploadNode.value !== 'object') {
       return null
     }
 
-    const value = uploadDocument.value
-    const url = value.url
+    const uploadDoc = uploadNode.value as FileData & TypeWithID
+    const url = uploadDoc.url
 
     /**
      * If the upload is not an image, return a link to the upload
      */
-    if (!value.mimeType.startsWith('image')) {
+    if (!uploadDoc.mimeType.startsWith('image')) {
       return (
         <a href={url} rel="noopener noreferrer">
-          {value.filename}
+          {uploadDoc.filename}
         </a>
       )
     }
@@ -29,8 +29,10 @@ export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
     /**
      * If the upload is a simple image with no different sizes, return a simple img tag
      */
-    if (!Object.keys(value.sizes).length) {
-      return <img alt={value.filename} height={value.height} src={url} width={value.width} />
+    if (!Object.keys(uploadDoc.sizes).length) {
+      return (
+        <img alt={uploadDoc.filename} height={uploadDoc.height} src={url} width={uploadDoc.width} />
+      )
     }
 
     /**
@@ -39,8 +41,8 @@ export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
     const pictureJSX: React.ReactNode[] = []
 
     // Iterate through each size in the data.sizes object
-    for (const size in value.sizes) {
-      const imageSize = value.sizes[size] as FileSizeImproved
+    for (const size in uploadDoc.sizes) {
+      const imageSize = uploadDoc.sizes[size] as FileSizeImproved
 
       // Skip if any property of the size object is null
       if (
@@ -69,11 +71,11 @@ export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
     // Add the default img tag
     pictureJSX.push(
       <img
-        alt={value?.filename}
-        height={value?.height}
+        alt={uploadDoc?.filename}
+        height={uploadDoc?.height}
         key={'image'}
         src={url}
-        width={value?.width}
+        width={uploadDoc?.width}
       />,
     )
     return <picture>{pictureJSX}</picture>

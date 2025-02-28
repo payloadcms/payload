@@ -2,12 +2,10 @@ import { createContext, useContext } from 'react'
 
 import type { ITableColumns } from './types.js'
 
-const TableColumnsModifiedContext = createContext(false)
+export const TableColumnContext = createContext<ITableColumns>({} as ITableColumns)
 
-const useColumnsModified = (): boolean => useContext(TableColumnsModifiedContext)
+export const useTableColumns = (): ITableColumns => useContext(TableColumnContext)
 
-const TableColumnContext = createContext<ITableColumns>({} as ITableColumns)
+export const TableColumnsModifiedContext = createContext(false)
 
-const useTableColumns = (): ITableColumns => useContext(TableColumnContext)
-
-export { TableColumnContext, TableColumnsModifiedContext, useColumnsModified, useTableColumns }
+export const useColumnsModified = (): boolean => useContext(TableColumnsModifiedContext)

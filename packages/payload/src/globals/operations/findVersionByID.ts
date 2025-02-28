@@ -102,17 +102,17 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     // beforeRead - Collection
     // /////////////////////////////////////
 
-    await globalConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      result =
-        (await hook({
-          context: req.context,
-          doc: result.version,
-          global: globalConfig,
-          req,
-        })) || result.version
-    }, Promise.resolve())
+    if (globalConfig.hooks?.beforeRead?.length) {
+      for (const hook of globalConfig.hooks.beforeRead) {
+        result =
+          (await hook({
+            context: req.context,
+            doc: result.version,
+            global: globalConfig,
+            req,
+          })) || result.version
+      }
+    }
 
     // /////////////////////////////////////
     // afterRead - Fields
@@ -139,18 +139,18 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     // afterRead - Global
     // /////////////////////////////////////
 
-    await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      result.version =
-        (await hook({
-          context: req.context,
-          doc: result.version,
-          global: globalConfig,
-          query: findGlobalVersionsArgs.where,
-          req,
-        })) || result.version
-    }, Promise.resolve())
+    if (globalConfig.hooks?.afterRead?.length) {
+      for (const hook of globalConfig.hooks.afterRead) {
+        result.version =
+          (await hook({
+            context: req.context,
+            doc: result.version,
+            global: globalConfig,
+            query: findGlobalVersionsArgs.where,
+            req,
+          })) || result.version
+      }
+    }
 
     return result
   } catch (error: unknown) {

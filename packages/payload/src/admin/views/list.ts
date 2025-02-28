@@ -45,8 +45,14 @@ export type ListViewClientProps = {
   disableListFilters?: boolean
   enableRowSelections?: boolean
   hasCreatePermission: boolean
+  /**
+   * @deprecated
+   */
   listPreferences?: ListPreferences
   newDocumentURL: string
+  /**
+   * @deprecated
+   */
   preferenceKey?: string
   renderedFilters?: Map<string, React.ReactNode>
   resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
