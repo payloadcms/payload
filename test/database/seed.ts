@@ -11,7 +11,7 @@ import { collectionSlugs } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-export const seed = async (_payload: Payload) => {
+export const _seed = async (_payload: Payload) => {
   await _payload.create({
     collection: 'users',
     data: {
@@ -21,11 +21,6 @@ export const seed = async (_payload: Payload) => {
   })
 }
 
-export async function clearAndSeedEverything(_payload: Payload) {
-  return await seedDB({
-    _payload,
-    collectionSlugs,
-    seedFunction: seed,
-    snapshotKey: 'databaseTest',
-  })
+export async function seed(_payload: Payload) {
+  return await _seed(_payload)
 }

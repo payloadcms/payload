@@ -28,7 +28,7 @@ import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { isMongoose } from '../helpers/isMongoose.js'
 import removeFiles from '../helpers/removeFiles.js'
-import { clearAndSeedEverything } from './seed.js'
+import { seed } from './seed.js'
 import { errorOnUnnamedFieldsSlug, postsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -47,16 +47,8 @@ describe('database', () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, restClient } = await initPayloadInt(dirname))
     payload.db.migrationDir = path.join(dirname, './migrations')
-  })
 
-  afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
-  })
-
-  beforeEach(async () => {
-    await clearAndSeedEverything(payload)
+    await seed(payload)
 
     await restClient.login({
       slug: 'users',
@@ -73,6 +65,12 @@ describe('database', () => {
 
     user = loginResult.user
     token = loginResult.token
+  })
+
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
   })
 
   describe('id type', () => {
@@ -799,7 +797,7 @@ describe('database', () => {
 
       describe('disableTransaction', () => {
         let disabledTransactionPost
-        beforeEach(async () => {
+        beforeAll(async () => {
           disabledTransactionPost = await payload.create({
             collection,
             data: {
@@ -890,6 +888,15 @@ describe('database', () => {
     })
 
     it('ensure updateMany updates all docs', async () => {
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
       await payload.create({
         collection: postsSlug,
         data: {

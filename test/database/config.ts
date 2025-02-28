@@ -8,7 +8,7 @@ import { v4 as uuid } from 'uuid'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { clearAndSeedEverything } from './seed.js'
+import { seed } from './seed.js'
 import {
   customIDsSlug,
   customSchemaSlug,
@@ -602,7 +602,7 @@ export default buildConfigWithDefaults({
   },
   onInit: async (payload) => {
     if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
-      await clearAndSeedEverything(payload)
+      await seed(payload)
     }
   },
   typescript: {
