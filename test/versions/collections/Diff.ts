@@ -16,6 +16,17 @@ export const Diff: CollectionConfig = {
       ],
     },
     {
+      name: 'arrayLocalized',
+      type: 'array',
+      localized: true,
+      fields: [
+        {
+          name: 'textInArrayLocalized',
+          type: 'text',
+        },
+      ],
+    },
+    {
       name: 'blocks',
       type: 'blocks',
       blocks: [

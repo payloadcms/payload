@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
@@ -7,6 +8,10 @@ import type { Field, TabAsField } from '../../config/types.js'
 import { promise } from './promise.js'
 
 type Args<T> = {
+  /**
+   * Data of the nearest parent block. If no parent block exists, this will be the `undefined`
+   */
+  blockData?: JsonObject
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   data: T
@@ -20,6 +25,10 @@ type Args<T> = {
   operation: 'create' | 'update'
   overrideAccess: boolean
   parentIndexPath: string
+  /**
+   * @todo make required in v4.0
+   */
+  parentIsLocalized?: boolean
   parentPath: string
   parentSchemaPath: string
   req: PayloadRequest
@@ -32,6 +41,7 @@ type Args<T> = {
 
 export const traverseFields = async <T>({
   id,
+  blockData,
   collection,
   context,
   data,
@@ -41,6 +51,7 @@ export const traverseFields = async <T>({
   operation,
   overrideAccess,
   parentIndexPath,
+  parentIsLocalized,
   parentPath,
   parentSchemaPath,
   req,
@@ -53,6 +64,7 @@ export const traverseFields = async <T>({
     promises.push(
       promise({
         id,
+        blockData,
         collection,
         context,
         data,
@@ -63,11 +75,13 @@ export const traverseFields = async <T>({
         operation,
         overrideAccess,
         parentIndexPath,
+        parentIsLocalized,
         parentPath,
         parentSchemaPath,
         req,
         siblingData,
         siblingDoc,
+        siblingFields: fields,
       }),
     )
   })

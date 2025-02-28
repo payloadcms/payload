@@ -13,9 +13,11 @@ export const TableJSXConverter: JSXConverters<
       nodes: node.children,
     })
     return (
-      <table className="lexical-table" style={{ borderCollapse: 'collapse' }}>
-        <tbody>{children}</tbody>
-      </table>
+      <div className="lexical-table-container">
+        <table className="lexical-table" style={{ borderCollapse: 'collapse' }}>
+          <tbody>{children}</tbody>
+        </table>
+      </div>
     )
   },
   tablecell: ({ node, nodesToJSX }) => {

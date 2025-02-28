@@ -1,0 +1,76 @@
+import type { Config, PayloadHandler } from 'payload'
+
+export const initClientUploads = <ExtraProps extends Record<string, unknown>, T>({
+  clientHandler,
+  collections,
+  config,
+  enabled,
+  extraClientHandlerProps,
+  serverHandler,
+  serverHandlerPath,
+}: {
+  /** Path to clientHandler component */
+  clientHandler: string
+  collections: Record<string, T>
+  config: Config
+  enabled: boolean
+  /** extra props to pass to the client handler */
+  extraClientHandlerProps?: (collection: T) => ExtraProps
+  serverHandler: PayloadHandler
+  serverHandlerPath: string
+}) => {
+  if (enabled) {
+    if (!config.endpoints) {
+      config.endpoints = []
+    }
+
+    /**
+     * Tracks how many times the same handler was already applied.
+     * This allows to apply the same plugin multiple times, for example
+     * to use different buckets for different collections.
+     */
+    let handlerCount = 0
+
+    for (const endpoint of config.endpoints) {
+      if (endpoint.path === serverHandlerPath) {
+        handlerCount++
+      }
+    }
+
+    if (handlerCount) {
+      serverHandlerPath = `${serverHandlerPath}-${handlerCount}`
+    }
+
+    config.endpoints.push({
+      handler: serverHandler,
+      method: 'post',
+      path: serverHandlerPath,
+    })
+  }
+
+  if (!config.admin) {
+    config.admin = {}
+  }
+
+  if (!config.admin.components) {
+    config.admin.components = {}
+  }
+
+  if (!config.admin.components.providers) {
+    config.admin.components.providers = []
+  }
+
+  for (const collectionSlug in collections) {
+    const collection = collections[collectionSlug]
+
+    config.admin.components.providers.push({
+      clientProps: {
+        collectionSlug,
+        enabled,
+        extra: extraClientHandlerProps ? extraClientHandlerProps(collection) : undefined,
+        serverHandlerPath,
+      },
+      path: clientHandler,
+    })
+  }
+}

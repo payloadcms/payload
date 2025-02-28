@@ -80,6 +80,12 @@ export default buildConfigWithDefaults({
       path: '/config',
     },
   ],
+  bin: [
+    {
+      scriptPath: path.resolve(dirname, 'customScript.ts'),
+      key: 'start-server',
+    },
+  ],
   globals: [
     {
       slug: 'my-global',
@@ -107,13 +113,17 @@ export default buildConfigWithDefaults({
     },
   ],
   onInit: async (payload) => {
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: devUser.email,
-        password: devUser.password,
-      },
-    })
+    const { totalDocs } = await payload.count({ collection: 'users' })
+
+    if (totalDocs === 0) {
+      await payload.create({
+        collection: 'users',
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+    }
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

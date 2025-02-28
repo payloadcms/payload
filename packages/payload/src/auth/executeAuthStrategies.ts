@@ -1,32 +1,21 @@
 import type { AuthStrategyFunctionArgs, AuthStrategyResult } from './index.js'
-
-import { mergeHeaders } from '../utilities/mergeHeaders.js'
-
 export const executeAuthStrategies = async (
   args: AuthStrategyFunctionArgs,
 ): Promise<AuthStrategyResult> => {
-  return args.payload.authStrategies.reduce(
-    async (accumulatorPromise, strategy) => {
-      const result: AuthStrategyResult = await accumulatorPromise
-      if (!result.user) {
-        // add the configured AuthStrategy `name` to the strategy function args
-        args.strategyName = strategy.name
+  let result: AuthStrategyResult = { user: null }
 
-        const authenticateResult = await strategy.authenticate(args)
-        if (result.responseHeaders) {
-          return {
-            ...authenticateResult,
-            responseHeaders: mergeHeaders(
-              result.responseHeaders || new Headers(),
-              authenticateResult.responseHeaders || new Headers(),
-            ),
-          }
-        } else {
-          return authenticateResult
-        }
-      }
+  if (!args.payload.authStrategies?.length) {
+    return result
+  }
+
+  for (const strategy of args.payload.authStrategies) {
+    // add the configured AuthStrategy `name` to the strategy function args
+    args.strategyName = strategy.name
+
+    result = await strategy.authenticate(args)
+    if (result.user) {
       return result
-    },
-    Promise.resolve({ user: null }),
-  )
+    }
+  }
+  return result
 }

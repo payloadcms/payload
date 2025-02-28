@@ -1,16 +1,17 @@
-import type { QueryOptions } from 'mongoose'
+import type { MongooseUpdateQueryOptions } from 'mongoose'
 
 import { buildVersionCollectionFields, type UpdateVersion } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildQuery } from './queries/buildQuery.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { getSession } from './utilities/getSession.js'
-import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
+import { transform } from './utilities/transform.js'
 
 export const updateVersion: UpdateVersion = async function updateVersion(
   this: MongooseAdapter,
-  { id, collection, locale, options: optionsArgs = {}, req, select, versionData, where },
+  { id, collection, locale, options: optionsArgs = {}, req, returning, select, versionData, where },
 ) {
   const VersionModel = this.versions[collection]
   const whereToUse = where || { id: { equals: id } }
@@ -19,44 +20,45 @@ export const updateVersion: UpdateVersion = async function updateVersion(
     this.payload.collections[collection].config,
   )
 
-  const options: QueryOptions = {
+  const flattenedFields = buildVersionCollectionFields(
+    this.payload.config,
+    this.payload.collections[collection].config,
+    true,
+  )
+
+  const options: MongooseUpdateQueryOptions = {
     ...optionsArgs,
     lean: true,
     new: true,
     projection: buildProjectionFromSelect({
       adapter: this,
-      fields: buildVersionCollectionFields(
-        this.payload.config,
-        this.payload.collections[collection].config,
-        true,
-      ),
+      fields: flattenedFields,
       select,
     }),
     session: await getSession(this, req),
   }
 
-  const query = await VersionModel.buildQuery({
+  const query = await buildQuery({
+    adapter: this,
+    fields: flattenedFields,
     locale,
-    payload: this.payload,
     where: whereToUse,
   })
 
-  const sanitizedData = sanitizeRelationshipIDs({
-    config: this.payload.config,
-    data: versionData,
-    fields,
-  })
+  transform({ adapter: this, data: versionData, fields, operation: 'write' })
 
-  const doc = await VersionModel.findOneAndUpdate(query, sanitizedData, options)
-
-  const result = JSON.parse(JSON.stringify(doc))
-
-  const verificationToken = doc._verificationToken
-
-  // custom id type reset
-  result.id = result._id
-  if (verificationToken) {
-    result._verificationToken = verificationToken
+  if (returning === false) {
+    await VersionModel.updateOne(query, versionData, options)
+    return null
   }
-  return result
+
+  const doc = await VersionModel.findOneAndUpdate(query, versionData, options)
+
+  if (!doc) {
+    return null
+  }
+
+  transform({ adapter: this, data: doc, fields, operation: 'write' })
+
+  return doc
 }

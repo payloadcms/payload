@@ -1,5 +1,6 @@
 import type {
   Adapter,
+  ClientUploadsConfig,
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
   GeneratedAdapter,
@@ -7,8 +8,12 @@ import type {
 import type { Config, Plugin, UploadCollectionSlug } from 'payload'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
+import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
+
+import type { VercelBlobClientUploadHandlerExtra } from './client/VercelBlobClientUploadHandler.js'
 
 import { getGenerateUrl } from './generateURL.js'
+import { getClientUploadRoute } from './getClientUploadRoute.js'
 import { getHandleDelete } from './handleDelete.js'
 import { getHandleUpload } from './handleUpload.js'
 import { getStaticHandler } from './staticHandler.js'
@@ -32,9 +37,14 @@ export type VercelBlobStorageOptions = {
   /**
    * Cache-Control max-age in seconds
    *
-   * @defaultvalue 365 * 24 * 60 * 60 (1 Year)
+   * @default 365 * 24 * 60 * 60 // (1 Year)
    */
   cacheControlMaxAge?: number
+
+  /**
+   * Do uploads directly on the client, to bypass limits on Vercel.
+   */
+  clientUploads?: ClientUploadsConfig
 
   /**
    * Collections to apply the Vercel Blob adapter to
@@ -90,6 +100,29 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
     }
 
     const baseUrl = `https://${storeId}.${optionsWithDefaults.access}.blob.vercel-storage.com`
+
+    initClientUploads<
+      VercelBlobClientUploadHandlerExtra,
+      VercelBlobStorageOptions['collections'][string]
+    >({
+      clientHandler: '@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler',
+      collections: options.collections,
+      config: incomingConfig,
+      enabled: !!options.clientUploads,
+      extraClientHandlerProps: (collection) => ({
+        addRandomSuffix: !!optionsWithDefaults.addRandomSuffix,
+        baseURL: baseUrl,
+        prefix: (typeof collection === 'object' && collection.prefix) || '',
+      }),
+      serverHandler: getClientUploadRoute({
+        access:
+          typeof options.clientUploads === 'object' ? options.clientUploads.access : undefined,
+        addRandomSuffix: optionsWithDefaults.addRandomSuffix,
+        cacheControlMaxAge: options.cacheControlMaxAge,
+        token: options.token,
+      }),
+      serverHandlerPath: '/vercel-blob-client-upload-route',
+    })
 
     const adapter = vercelBlobStorageInternal({ ...optionsWithDefaults, baseUrl })
 

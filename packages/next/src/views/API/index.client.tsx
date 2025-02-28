@@ -8,6 +8,7 @@ import {
   MinimizeMaximizeIcon,
   NumberField,
   SetDocumentStepNav,
+  toast,
   useConfig,
   useDocumentInfo,
   useLocale,
@@ -15,7 +16,6 @@ import {
 } from '@payloadcms/ui'
 import { useSearchParams } from 'next/navigation.js'
 import * as React from 'react'
-import { toast } from 'sonner'
 
 import './index.scss'
 import { LocaleSelector } from './LocaleSelector/index.js'

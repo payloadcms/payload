@@ -1,9 +1,27 @@
-import type { BulkOperationResult, PaginatedDocs, SelectType, TypeWithVersion } from 'payload'
+import type {
+  BulkOperationResult,
+  JoinQuery,
+  PaginatedDocs,
+  SelectType,
+  TypeWithVersion,
+  Where,
+} from 'payload'
 
 import payload from 'payload'
 import { describe, expect, test } from 'tstyche'
 
-import type { Menu, Post, User } from './payload-types.js'
+import type {
+  Menu,
+  MyRadioOptions,
+  MySelectOptions,
+  Post,
+  SupportedTimezones,
+  User,
+} from './payload-types.js'
+
+const asType = <T>() => {
+  return '' as T
+}
 
 describe('Types testing', () => {
   test('payload.find', () => {
@@ -76,5 +94,55 @@ describe('Types testing', () => {
     expect(payload.findGlobalVersionByID({ id: 'id', slug: 'menu' })).type.toBe<
       Promise<TypeWithVersion<Menu>>
     >()
+  })
+
+  describe('select', () => {
+    test('should include only ID if select is an empty object', () => {
+      expect(payload.findByID({ collection: 'posts', id: 'id', select: {} })).type.toBe<
+        Promise<{ id: Post['id'] }>
+      >()
+    })
+
+    test('should include only title and ID', () => {
+      expect(
+        payload.findByID({ collection: 'posts', id: 'id', select: { title: true } }),
+      ).type.toBe<Promise<{ id: Post['id']; title?: Post['title'] }>>()
+    })
+
+    test('should exclude title', () => {
+      expect(
+        payload.findByID({ collection: 'posts', id: 'id', select: { title: false } }),
+      ).type.toBe<Promise<Omit<Post, 'title'>>>()
+    })
+  })
+
+  describe('joins', () => {
+    test('join query for pages should have type never as pages does not define any joins', () => {
+      expect(asType<JoinQuery<'pages'>>()).type.toBe<never>()
+    })
+
+    test('join query for pages-categories should be defined with the relatedPages key', () => {
+      expect(asType<JoinQuery<'pages-categories'>>()).type.toBeAssignableWith<{
+        relatedPages?: {
+          limit?: number
+          sort?: string
+          where?: Where
+        }
+      }>()
+    })
+  })
+
+  describe('generated types', () => {
+    test('has SupportedTimezones', () => {
+      expect<SupportedTimezones>().type.toBeAssignableTo<string>()
+    })
+
+    test('has global generated options interface based on select field', () => {
+      expect(asType<Post['selectField']>()).type.toBe<MySelectOptions>()
+    })
+
+    test('has global generated options interface based on radio field', () => {
+      expect(asType<Post['radioField']>()).type.toBe<MyRadioOptions>()
+    })
   })
 })

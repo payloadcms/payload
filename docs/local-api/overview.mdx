@@ -345,8 +345,7 @@ const result = await payload.login({
     email: 'dev@payloadcms.com',
     password: 'rip',
   },
-  req: req, // pass a Request object to be provided to all hooks
-  res: res, // used to automatically set an HTTP-only auth cookie
+  req: req, // optional, pass a Request object to be provided to all hooks
   depth: 2,
   locale: 'en',
   fallbackLocale: false,
@@ -384,8 +383,7 @@ const result = await payload.resetPassword({
     password: req.body.password, // the new password to set
     token: 'afh3o2jf2p3f...', // the token generated from the forgotPassword operation
   },
-  req: req, // pass a Request object to be provided to all hooks
-  res: res, // used to automatically set an HTTP-only auth cookie
+  req: req, // optional, pass a Request object to be provided to all hooks
 })
 ```
 
@@ -399,7 +397,7 @@ const result = await payload.unlock({
     // required
     email: 'dev@payloadcms.com',
   },
-  req: req, // pass a Request object to be provided to all hooks
+  req: req, // optional, pass a Request object to be provided to all hooks
   overrideAccess: true,
 })
 ```

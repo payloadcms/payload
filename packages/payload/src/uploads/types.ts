@@ -12,6 +12,16 @@ export type FileSize = {
   width: null | number
 }
 
+// TODO: deprecate in Payload v4.
+/**
+ * FileSizeImproved is a more precise type, and will replace FileSize in Payload v4.
+ * This type is for internal use only as it will be deprecated in the future.
+ * @internal
+ */
+export type FileSizeImproved = {
+  url: null | string
+} & FileSize
+
 export type FileSizes = {
   [size: string]: FileSize
 }
@@ -168,9 +178,17 @@ export type UploadConfig = {
     req: PayloadRequest,
     args: {
       doc: TypeWithID
-      params: { collection: string; filename: string }
+      params: { clientUploadContext?: unknown; collection: string; filename: string }
     },
   ) => Promise<Response> | Promise<void> | Response | void)[]
+  /**
+   * Set to `true` to prevent the admin UI from showing file inputs during document creation, useful for programmatic file generation.
+   */
+  hideFileInputOnCreate?: boolean
+  /**
+   * Set to `true` to prevent the admin UI having a way to remove an existing file while editing.
+   */
+  hideRemoveFile?: boolean
   imageSizes?: ImageSize[]
   /**
    * Restrict mimeTypes in the file picker. Array of valid mime types or mimetype wildcards

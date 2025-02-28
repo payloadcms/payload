@@ -33,6 +33,7 @@ import {
   rollbackTransaction,
   updateGlobal,
   updateGlobalVersion,
+  updateMany,
   updateOne,
   updateVersion,
 } from '@payloadcms/drizzle'
@@ -185,6 +186,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       rollbackTransaction,
       updateGlobal,
       updateGlobalVersion,
+      updateMany,
       updateOne,
       updateVersion,
       upsert: updateOne,

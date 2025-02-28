@@ -1,6 +1,7 @@
 'use client'
 import type { JSONFieldClientComponent } from 'payload'
 
+import { type OnMount } from '@monaco-editor/react'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { CodeEditor } from '../../elements/CodeEditor/index.js'
@@ -11,8 +12,8 @@ import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
-import './index.scss'
 import { fieldBaseClass } from '../shared/index.js'
+import './index.scss'
 
 const baseClass = 'json-field'
 
@@ -30,10 +31,9 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
     readOnly,
     validate,
   } = props
-
-  const [stringValue, setStringValue] = useState<string>()
   const [jsonError, setJsonError] = useState<string>()
-  const [hasLoadedValue, setHasLoadedValue] = useState(false)
+  const inputChangeFromRef = React.useRef<'system' | 'user'>('system')
+  const [editorKey, setEditorKey] = useState<string>('')
 
   const memoizedValidate = useCallback(
     (value, options) => {
@@ -55,23 +55,35 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
     validate: memoizedValidate,
   })
 
-  const handleMount = useCallback(
+  const [initialStringValue, setInitialStringValue] = useState<string | undefined>(() =>
+    (value || initialValue) !== undefined
+      ? JSON.stringify(value ?? initialValue, null, 2)
+      : undefined,
+  )
+
+  const handleMount = useCallback<OnMount>(
     (editor, monaco) => {
       if (!jsonSchema) {
         return
       }
 
-      const existingSchemas = monaco.languages.json.jsonDefaults.diagnosticsOptions.schemas || []
-      const modelUri = monaco.Uri.parse(jsonSchema.uri)
-
-      const model = monaco.editor.createModel(JSON.stringify(value, null, 2), 'json', modelUri)
       monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
         enableSchemaRequest: true,
-        schemas: [...existingSchemas, jsonSchema],
+        schemas: [
+          ...(monaco.languages.json.jsonDefaults.diagnosticsOptions.schemas || []),
+          jsonSchema,
+        ],
         validate: true,
       })
 
-      editor.setModel(model)
+      const uri = jsonSchema.uri
+      const newUri = uri.includes('?')
+        ? `${uri}&${crypto.randomUUID()}`
+        : `${uri}?${crypto.randomUUID()}`
+
+      editor.setModel(
+        monaco.editor.createModel(JSON.stringify(value, null, 2), 'json', monaco.Uri.parse(newUri)),
+      )
     },
     [jsonSchema, value],
   )
@@ -81,7 +93,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
       if (readOnly) {
         return
       }
-      setStringValue(val)
+      inputChangeFromRef.current = 'user'
 
       try {
         setValue(val ? JSON.parse(val) : null)
@@ -91,20 +103,21 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
         setJsonError(e)
       }
     },
-    [readOnly, setValue, setStringValue],
+    [readOnly, setValue],
   )
 
   useEffect(() => {
-    if (hasLoadedValue || value === undefined) {
-      return
+    if (inputChangeFromRef.current === 'system') {
+      setInitialStringValue(
+        (value || initialValue) !== undefined
+          ? JSON.stringify(value ?? initialValue, null, 2)
+          : undefined,
+      )
+      setEditorKey(new Date().toString())
     }
 
-    setStringValue(
-      value || initialValue ? JSON.stringify(value ? value : initialValue, null, 2) : '',
-    )
-
-    setHasLoadedValue(true)
-  }, [initialValue, value, hasLoadedValue])
+    inputChangeFromRef.current = 'system'
+  }, [initialValue, value])
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
 
@@ -135,12 +148,16 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
         {BeforeInput}
         <CodeEditor
           defaultLanguage="json"
+          key={editorKey}
           maxHeight={maxHeight}
           onChange={handleChange}
           onMount={handleMount}
           options={editorOptions}
           readOnly={readOnly}
-          value={stringValue}
+          value={initialStringValue}
+          wrapperProps={{
+            id: `field-${path?.replace(/\./g, '__')}`,
+          }}
         />
         {AfterInput}
       </div>

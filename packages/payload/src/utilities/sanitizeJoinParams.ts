@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { JoinQuery } from '../types/index.js'
 
 import { isNumber } from './isNumber.js'
@@ -26,7 +27,9 @@ export const sanitizeJoinParams = (
       joinQuery[schemaPath] = false
     } else {
       joinQuery[schemaPath] = {
+        count: joins[schemaPath].count === 'true',
         limit: isNumber(joins[schemaPath]?.limit) ? Number(joins[schemaPath].limit) : undefined,
+        page: isNumber(joins[schemaPath]?.page) ? Number(joins[schemaPath].page) : undefined,
         sort: joins[schemaPath]?.sort ? joins[schemaPath].sort : undefined,
         where: joins[schemaPath]?.where ? joins[schemaPath].where : undefined,
       }

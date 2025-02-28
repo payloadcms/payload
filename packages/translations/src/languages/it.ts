@@ -273,6 +273,7 @@ export const itTranslations: DefaultTranslationsObject = {
     locale: 'Locale',
     locales: 'Localizzazioni',
     menu: 'Menù',
+    moreOptions: 'Più opzioni',
     moveDown: 'Sposta sotto',
     moveUp: 'Sposta sopra',
     newPassword: 'Nuova Password',
@@ -333,6 +334,7 @@ export const itTranslations: DefaultTranslationsObject = {
     takeOver: 'Prendi il controllo',
     thisLanguage: 'Italiano',
     time: 'Tempo',
+    timezone: 'Fuso orario',
     titleDeleted: '{{label}} {{title}} eliminato con successo.',
     true: 'Vero',
     unauthorized: 'Non autorizzato',
@@ -375,6 +377,7 @@ export const itTranslations: DefaultTranslationsObject = {
     isLike: 'è come',
     isNotEqualTo: 'non è uguale a',
     isNotIn: 'non è in',
+    isNotLike: 'non è come',
     near: 'vicino',
     within: "all'interno",
   },
@@ -427,6 +430,7 @@ export const itTranslations: DefaultTranslationsObject = {
     requiresTwoNumbers: 'Questo campo richiede due numeri.',
     shorterThanMax:
       'Questo valore deve essere inferiore alla lunghezza massima di {{maxLength}} caratteri.',
+    timezoneRequired: 'È richiesto un fuso orario.',
     trueOrFalse: "Questo campo può essere solo uguale a 'true' o 'false'.",
     username:
       'Inserisci un nome utente valido. Può contenere lettere, numeri, trattini, punti e underscore.',

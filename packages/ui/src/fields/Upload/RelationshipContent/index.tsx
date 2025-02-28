@@ -62,7 +62,7 @@ export function RelationshipContent(props: Props) {
 
   function generateMetaText(mimeType: string, size: number): string {
     const sections: string[] = []
-    if (mimeType?.includes('image')) {
+    if (size) {
       sections.push(formatFilesize(size))
     }
 
