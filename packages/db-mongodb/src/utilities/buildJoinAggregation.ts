@@ -45,9 +45,18 @@ export const buildJoinAggregation = async ({
     return
   }
 
-  const joinConfig = adapter.payload.collections[collection].config.joins
+  const joinConfig = adapter.payload.collections[collection]?.config?.joins
+
+  if (!joinConfig) {
+    throw new APIError(`Could not retrieve sanitized join config for ${collection}.`)
+  }
+
   const aggregate: PipelineStage[] = []
-  const polymorphicJoinsConfig = adapter.payload.collections[collection].config.polymorphicJoins
+  const polymorphicJoinsConfig = adapter.payload.collections[collection]?.config?.polymorphicJoins
+
+  if (!polymorphicJoinsConfig) {
+    throw new APIError(`Could not retrieve sanitized polymorphic joins config for ${collection}.`)
+  }
 
   for (const join of polymorphicJoinsConfig) {
     if (projection && !projection[join.joinPath]) {
