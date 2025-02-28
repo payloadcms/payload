@@ -15,13 +15,14 @@ export const executeAuthStrategies = async (
     args.strategyName = strategy.name
 
     const authResult = await strategy.authenticate(args)
-    if (result.responseHeaders) {
-      result.responseHeaders = mergeHeaders(
+    if (authResult.responseHeaders) {
+      authResult.responseHeaders = mergeHeaders(
         result.responseHeaders || new Headers(),
         authResult.responseHeaders || new Headers(),
       )
     }
     result = authResult
+
     if (result.user) {
       return result
     }
