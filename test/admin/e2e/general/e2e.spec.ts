@@ -409,7 +409,7 @@ describe('General', () => {
     test('should disable active nav item', async () => {
       await page.goto(postsUrl.list)
       await openNav(page)
-      const activeItem = page.locator('.nav .nav__link.active')
+      const activeItem = page.locator('.nav .nav__link:has(.nav__link-indicator)')
       await expect(activeItem).toBeVisible()
       const tagName = await activeItem.evaluate((el) => el.tagName.toLowerCase())
       expect(tagName).toBe('div')
@@ -418,7 +418,7 @@ describe('General', () => {
     test('should keep active nav item enabled in the edit view', async () => {
       await page.goto(postsUrl.create)
       await openNav(page)
-      const activeItem = page.locator('.nav .nav__link.active')
+      const activeItem = page.locator('.nav .nav__link:has(.nav__link-indicator)')
       await expect(activeItem).toBeVisible()
       const tagName = await activeItem.evaluate((el) => el.tagName.toLowerCase())
       expect(tagName).toBe('a')
