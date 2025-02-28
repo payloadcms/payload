@@ -13,19 +13,17 @@ export function getParentLabels(
     }
 
     // Find the field that matches the current path segment
-    const field = currentFields.find((f) => f.name === segment)
+    const field = currentFields?.find((f) => {
+      if (f.name === segment || f.slug === segment) {return f}
+    })
+
     if (!field) {
       break
     }
 
     labels.push(field.label ?? segment)
 
-    // Loop the nested fields if they exist
-    if (field.fields) {
-      currentFields = field.fields
-    } else {
-      break
-    }
+    currentFields = field.fields ?? field.blocks ?? []
   }
 
   return labels
