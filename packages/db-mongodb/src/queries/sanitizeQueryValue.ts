@@ -15,7 +15,7 @@ type SanitizeQueryValueArgs = {
   hasCustomID: boolean
   locale?: string
   operator: string
-  parentIsLocalized?: boolean
+  parentIsLocalized: boolean
   path: string
   payload: Payload
   val: any

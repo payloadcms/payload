@@ -20,7 +20,7 @@ export async function parseParams({
   fields: FlattenedField[]
   globalSlug?: string
   locale?: string
-  parentIsLocalized?: boolean
+  parentIsLocalized: boolean
   payload: Payload
   where: Where
 }): Promise<Record<string, unknown>> {

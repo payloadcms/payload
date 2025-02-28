@@ -6,7 +6,7 @@ type Args = {
   config: SanitizedConfig
   fields: FlattenedField[]
   locale?: string
-  parentIsLocalized?: boolean
+  parentIsLocalized: boolean
   result?: string
   segments: string[]
 }
@@ -41,7 +41,9 @@ export const getLocalizedSortProperty = ({
     const remainingSegments = [...segments]
     let localizedSegment = matchedField.name
 
-    if (fieldShouldBeLocalized({ field: matchedField, parentIsLocalized })) {
+    if (
+      fieldShouldBeLocalized({ field: matchedField, parentIsLocalized: parentIsLocalized ?? false })
+    ) {
       // Check to see if next segment is a locale
       if (segments.length > 0 && remainingSegments[0]) {
         const nextSegmentIsLocale = config.localization.localeCodes.includes(remainingSegments[0])
@@ -66,7 +68,7 @@ export const getLocalizedSortProperty = ({
     ) {
       nextFields = matchedField.flattenedFields
       if (!nextParentIsLocalized) {
-        nextParentIsLocalized = matchedField.localized
+        nextParentIsLocalized = matchedField.localized ?? false
       }
     }
 

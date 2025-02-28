@@ -1889,7 +1889,7 @@ export function fieldShouldBeLocalized({
   parentIsLocalized,
 }: {
   field: ClientField | ClientTab | Field | Tab
-  parentIsLocalized?: boolean
+  parentIsLocalized: boolean
 }): boolean {
   return (
     'localized' in field &&

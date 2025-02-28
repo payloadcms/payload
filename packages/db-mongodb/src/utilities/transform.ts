@@ -234,7 +234,7 @@ export const transform = ({
   fields,
   globalSlug,
   operation,
-  parentIsLocalized,
+  parentIsLocalized = false,
   validateRelationships = true,
 }: Args) => {
   if (Array.isArray(data)) {

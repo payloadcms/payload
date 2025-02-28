@@ -22,7 +22,7 @@ export const buildSortParam = ({
   config,
   fields,
   locale,
-  parentIsLocalized,
+  parentIsLocalized = false,
   sort,
   timestamps,
 }: Args): Record<string, string> => {

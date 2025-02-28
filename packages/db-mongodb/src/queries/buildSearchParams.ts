@@ -43,7 +43,7 @@ export async function buildSearchParam({
   incomingPath: string
   locale?: string
   operator: string
-  parentIsLocalized?: boolean
+  parentIsLocalized: boolean
   payload: Payload
   val: unknown
 }): Promise<SearchParam | undefined> {
