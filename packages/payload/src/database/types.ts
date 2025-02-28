@@ -314,9 +314,14 @@ export type UpdateGlobalVersionArgs<T = TypeWithID> = {
 /**
  * @todo type as Promise<TypeWithVersion<T> | null> in 4.0
  */
-export type UpdateGlobalVersion = <T extends TypeWithID = TypeWithID>(
-  args: UpdateGlobalVersionArgs<T>,
-) => Promise<TypeWithVersion<T>>
+export type UpdateGlobalVersion = {
+  <T extends TypeWithID = TypeWithID>(
+    args: { returning: false } & UpdateGlobalVersionArgs<T>,
+  ): Promise<void>
+  <T extends TypeWithID = TypeWithID>(
+    args: { returning: true } & UpdateGlobalVersionArgs<T>,
+  ): Promise<TypeWithVersion<T>>
+}
 
 export type FindGlobal = <T extends Record<string, unknown> = any>(
   args: FindGlobalArgs,
@@ -333,9 +338,14 @@ export type CreateGlobalArgs<T extends Record<string, unknown> = any> = {
   returning?: boolean
   slug: string
 }
-export type CreateGlobal = <T extends Record<string, unknown> = any>(
-  args: CreateGlobalArgs<T>,
-) => Promise<T>
+export type CreateGlobal = {
+  <T extends Record<string, unknown> = any>(
+    args: { returning: false } & CreateGlobalArgs<T>,
+  ): Promise<void>
+  <T extends Record<string, unknown> = any>(
+    args: { returning: true } & CreateGlobalArgs<T>,
+  ): Promise<T>
+}
 
 export type UpdateGlobalArgs<T extends Record<string, unknown> = any> = {
   data: T
@@ -353,13 +363,18 @@ export type UpdateGlobalArgs<T extends Record<string, unknown> = any> = {
   select?: SelectType
   slug: string
 }
+
 /**
  * @todo type as Promise<T | null> in 4.0
  */
-export type UpdateGlobal = <T extends Record<string, unknown> = any>(
-  args: UpdateGlobalArgs<T>,
-) => Promise<T>
-// export type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
+export type UpdateGlobal = {
+  <T extends Record<string, unknown> = any>(
+    args: { returning: false } & UpdateGlobalArgs<T>,
+  ): Promise<void>
+  <T extends Record<string, unknown> = any>(
+    args: { returning: true } & UpdateGlobalArgs<T>,
+  ): Promise<T>
+}
 
 export type FindGlobalVersions = <T = TypeWithID>(
   args: FindGlobalVersionsArgs,
@@ -395,9 +410,14 @@ export type CreateVersionArgs<T = TypeWithID> = {
   versionData: T
 }
 
-export type CreateVersion = <T extends TypeWithID = TypeWithID>(
-  args: CreateVersionArgs<T>,
-) => Promise<TypeWithVersion<T>>
+export type CreateVersion = {
+  <T extends TypeWithID = TypeWithID>(
+    args: { returning: false } & CreateVersionArgs<T>,
+  ): Promise<void>
+  <T extends TypeWithID = TypeWithID>(
+    args: { returning: true } & CreateVersionArgs<T>,
+  ): Promise<TypeWithVersion<T>>
+}
 
 export type CreateGlobalVersionArgs<T = TypeWithID> = {
   autosave: boolean
@@ -419,9 +439,14 @@ export type CreateGlobalVersionArgs<T = TypeWithID> = {
   versionData: T
 }
 
-export type CreateGlobalVersion = <T extends TypeWithID = TypeWithID>(
-  args: CreateGlobalVersionArgs<T>,
-) => Promise<TypeWithVersion<T>>
+export type CreateGlobalVersion = {
+  <T extends TypeWithID = TypeWithID>(
+    args: { returning: false } & CreateGlobalVersionArgs<T>,
+  ): Promise<void>
+  <T extends TypeWithID = TypeWithID>(
+    args: { returning: true } & CreateGlobalVersionArgs<T>,
+  ): Promise<TypeWithVersion<T>>
+}
 
 export type DeleteVersions = (args: DeleteVersionsArgs) => Promise<void>
 
@@ -455,9 +480,14 @@ export type UpdateVersionArgs<T = TypeWithID> = {
 /**
  * @todo type as Promise<TypeWithVersion<T> | null> in 4.0
  */
-export type UpdateVersion = <T extends TypeWithID = TypeWithID>(
-  args: UpdateVersionArgs<T>,
-) => Promise<TypeWithVersion<T>>
+export type UpdateVersion = {
+  <T extends TypeWithID = TypeWithID>(
+    args: { returning: false } & UpdateVersionArgs<T>,
+  ): Promise<void>
+  <T extends TypeWithID = TypeWithID>(
+    args: { returning: true } & UpdateVersionArgs<T>,
+  ): Promise<TypeWithVersion<T>>
+}
 
 export type CreateArgs = {
   collection: CollectionSlug
@@ -474,7 +504,10 @@ export type CreateArgs = {
   select?: SelectType
 }
 
-export type Create = (args: CreateArgs) => Promise<Document>
+export type Create = {
+  (args: { returning: false } & CreateArgs): Promise<void>
+  (args: { returning: true } & CreateArgs): Promise<Document>
+}
 
 export type UpdateOneArgs = {
   collection: CollectionSlug
@@ -508,7 +541,10 @@ export type UpdateOneArgs = {
 /**
  * @todo type as Promise<Document | null> in 4.0
  */
-export type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
+export type UpdateOne = {
+  (args: { returning: false } & UpdateOneArgs): Promise<void>
+  (args: { returning: true } & UpdateOneArgs): Promise<Document>
+}
 
 export type UpsertArgs = {
   collection: CollectionSlug
@@ -526,7 +562,10 @@ export type UpsertArgs = {
   where: Where
 }
 
-export type Upsert = (args: UpsertArgs) => Promise<Document>
+export type Upsert = {
+  (args: { returning: false } & UpsertArgs): Promise<void>
+  (args: { returning: true } & UpsertArgs): Promise<Document>
+}
 
 export type DeleteOneArgs = {
   collection: CollectionSlug
@@ -545,7 +584,10 @@ export type DeleteOneArgs = {
 /**
  * @todo type as Promise<Document | null> in 4.0
  */
-export type DeleteOne = (args: DeleteOneArgs) => Promise<Document>
+export type DeleteOne = {
+  (args: { returning: false } & DeleteOneArgs): Promise<void>
+  (args: { returning?: true } & DeleteOneArgs): Promise<Document>
+}
 
 export type DeleteManyArgs = {
   collection: CollectionSlug
