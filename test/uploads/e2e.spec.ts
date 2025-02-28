@@ -696,6 +696,72 @@ describe('Uploads', () => {
     await expect(clientText).toHaveText('This text was rendered on the client')
   })
 
+  test('should show original image url on a single upload card for an upload with adminThumbnail defined', async () => {
+    await page.goto(uploadsOne.create)
+
+    const singleThumbnailButton = page.locator('#field-singleThumbnailUpload button', {
+      hasText: exactText('Create New'),
+    })
+
+    await singleThumbnailButton.click()
+
+    const singleThumbnailModal = page.locator('[id^="doc-drawer_admin-thumbnail-size"]')
+    await expect(singleThumbnailModal).toBeVisible()
+
+    await page.setInputFiles(
+      '[id^="doc-drawer_admin-thumbnail-size"] input[type="file"]',
+      path.resolve(dirname, './test-image.png'),
+    )
+    const filename = page.locator('[id^="doc-drawer_admin-thumbnail-size"] .file-field__filename')
+    await expect(filename).toHaveValue('test-image.png')
+
+    await page.waitForSelector('[id^="doc-drawer_admin-thumbnail-size"] #action-save')
+    await page.locator('[id^="doc-drawer_admin-thumbnail-size"] #action-save').click()
+
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+
+    const href = await page.locator('#field-singleThumbnailUpload a').getAttribute('href')
+
+    // Ensure the URL starts correctly
+    expect(href).toMatch(/^\/api\/admin-thumbnail-size\/file\/test-image(-\d+)?\.png$/i)
+
+    // Ensure no "-100x100" or any similar suffix
+    expect(href).not.toMatch(/-\d+x\d+\.png$/)
+  })
+
+  test('should show original image url on a hasMany upload card for an upload with adminThumbnail defined', async () => {
+    await page.goto(uploadsOne.create)
+
+    const hasManyThumbnailButton = page.locator('#field-hasManyThumbnailUpload button', {
+      hasText: exactText('Create New'),
+    })
+    await hasManyThumbnailButton.click()
+
+    const hasManyThumbnailModal = page.locator('#bulk-upload-drawer-slug-1')
+    await expect(hasManyThumbnailModal).toBeVisible()
+
+    await page.setInputFiles('#bulk-upload-drawer-slug-1 .dropzone input[type="file"]', [
+      path.resolve(dirname, './test-image.png'),
+    ])
+
+    const saveButton = page.locator('.bulk-upload--actions-bar__saveButtons button')
+    await saveButton.click()
+
+    await page.waitForSelector('#field-hasManyThumbnailUpload .upload--has-many__dragItem')
+    const itemCount = await page
+      .locator('#field-hasManyThumbnailUpload .upload--has-many__dragItem')
+      .count()
+    expect(itemCount).toEqual(1)
+
+    await page.waitForSelector('#field-hasManyThumbnailUpload .upload--has-many__dragItem a')
+    const href = await page
+      .locator('#field-hasManyThumbnailUpload .upload--has-many__dragItem a')
+      .getAttribute('href')
+
+    expect(href).toMatch(/^\/api\/admin-thumbnail-size\/file\/test-image(-\d+)?\.png$/i)
+    expect(href).not.toMatch(/-\d+x\d+\.png$/)
+  })
+
   describe('bulk uploads', () => {
     test('should bulk upload multiple files', async () => {
       // Navigate to the upload creation page
