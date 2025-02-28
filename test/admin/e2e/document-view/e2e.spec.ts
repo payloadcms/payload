@@ -11,7 +11,6 @@ import {
   ensureCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
-  openNav,
   saveDocAndAssert,
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
@@ -46,6 +45,7 @@ const description = 'Description'
 let payload: PayloadTestSDK<Config>
 
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
+import { openNav } from 'helpers/e2e/toggleNav.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 

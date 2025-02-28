@@ -861,7 +861,7 @@ describe('Versions', () => {
       const publishOptions = page.locator('.doc-controls__controls .popup')
       await publishOptions.click()
 
-      const publishSpecificLocale = page.locator('.popup-button-list button').first()
+      const publishSpecificLocale = page.locator('#publish-locale')
       await expect(publishSpecificLocale).toContainText('English')
       await publishSpecificLocale.click()
 

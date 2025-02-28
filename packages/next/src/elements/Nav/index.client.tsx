@@ -44,23 +44,26 @@ export const DefaultNavClient: React.FC<{
                 id = `nav-global-${slug}`
               }
 
-              const LinkElement = Link || 'a'
               const activeCollection =
                 pathname.startsWith(href) && ['/', undefined].includes(pathname[href.length])
 
+              const Label = (
+                <span className={`${baseClass}__link-label`}>{getTranslation(label, i18n)}</span>
+              )
+
+              if (activeCollection) {
+                return (
+                  <div className={`${baseClass}__link active`} id={id} key={i}>
+                    <div className={`${baseClass}__link-indicator`} />
+                    {Label}
+                  </div>
+                )
+              }
+
               return (
-                <LinkElement
-                  className={[`${baseClass}__link`, activeCollection && `active`]
-                    .filter(Boolean)
-                    .join(' ')}
-                  href={href}
-                  id={id}
-                  key={i}
-                  prefetch={Link ? false : undefined}
-                >
-                  {activeCollection && <div className={`${baseClass}__link-indicator`} />}
-                  <span className={`${baseClass}__link-label`}>{getTranslation(label, i18n)}</span>
-                </LinkElement>
+                <Link className={`${baseClass}__link`} href={href} id={id} key={i} prefetch={false}>
+                  {Label}
+                </Link>
               )
             })}
           </NavGroup>

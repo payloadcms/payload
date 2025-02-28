@@ -16,6 +16,7 @@ import type {
   TypeWithVersion,
   UpdateGlobalArgs,
   UpdateGlobalVersionArgs,
+  UpdateManyArgs,
   UpdateOneArgs,
   UpdateVersionArgs,
 } from 'payload'
@@ -53,6 +54,7 @@ import { commitTransaction } from './transactions/commitTransaction.js'
 import { rollbackTransaction } from './transactions/rollbackTransaction.js'
 import { updateGlobal } from './updateGlobal.js'
 import { updateGlobalVersion } from './updateGlobalVersion.js'
+import { updateMany } from './updateMany.js'
 import { updateOne } from './updateOne.js'
 import { updateVersion } from './updateVersion.js'
 import { upsert } from './upsert.js'
@@ -160,6 +162,7 @@ declare module 'payload' {
     updateGlobalVersion: <T extends TypeWithID = TypeWithID>(
       args: { options?: QueryOptions } & UpdateGlobalVersionArgs<T>,
     ) => Promise<TypeWithVersion<T>>
+
     updateOne: (args: { options?: QueryOptions } & UpdateOneArgs) => Promise<Document>
     updateVersion: <T extends TypeWithID = TypeWithID>(
       args: { options?: QueryOptions } & UpdateVersionArgs<T>,
@@ -200,6 +203,7 @@ export function mongooseAdapter({
       mongoMemoryServer,
       sessions: {},
       transactionOptions: transactionOptions === false ? undefined : transactionOptions,
+      updateMany,
       url,
       versions: {},
       // DatabaseAdapter

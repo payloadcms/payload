@@ -248,6 +248,11 @@ export type Context = {
   }) => void
   replaceState: (state: FormState) => void
   reset: Reset
+  /**
+   * If the form has started processing in the background (e.g.
+   * if autosave is running), this will be true.
+   */
+  setBackgroundProcessing: SetProcessing
   setDisabled: (disabled: boolean) => void
   setIsValid: (processing: boolean) => void
   setModified: SetModified

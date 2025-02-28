@@ -4,10 +4,10 @@ import type { I18nClient } from '@payloadcms/translations'
 import type {
   ClientField,
   Column,
-  ColumnPreference,
   DefaultCellComponentProps,
   DefaultServerCellComponentProps,
   Field,
+  ListPreferences,
   PaginatedDocs,
   Payload,
   SanitizedCollectionConfig,
@@ -36,8 +36,8 @@ import { filterFields } from './filterFields.js'
 
 type Args = {
   beforeRows?: Column[]
-  columnPreferences: ColumnPreference[]
-  columns?: ColumnPreference[]
+  columnPreferences: ListPreferences['columns']
+  columns?: ListPreferences['columns']
   customCellProps: DefaultCellComponentProps['customCellProps']
   docs: PaginatedDocs['docs']
   enableRowSelections: boolean
@@ -92,8 +92,8 @@ export const buildPolymorphicColumnState = (args: Args): Column[] => {
 
   const sortFieldMap = (fieldMap, sortTo) =>
     fieldMap?.sort((a, b) => {
-      const aIndex = sortTo.findIndex((column) => 'name' in a && a.name in column)
-      const bIndex = sortTo.findIndex((column) => 'name' in b && b.name in column)
+      const aIndex = sortTo.findIndex((column) => 'name' in a && column.accessor === a.name)
+      const bIndex = sortTo.findIndex((column) => 'name' in b && column.accessor === b.name)
 
       if (aIndex === -1 && bIndex === -1) {
         return 0
@@ -127,12 +127,18 @@ export const buildPolymorphicColumnState = (args: Args): Column[] => {
       (f) => 'name' in field && 'name' in f && f.name === field.name,
     )
 
+    const columnPreference = columnPreferences?.find(
+      (preference) => field && 'name' in field && preference.accessor === field.name,
+    )
+
     let active = false
 
-    if (columnPreferences) {
-      active = 'name' in field && columnPreferences?.some((col) => col?.[field.name])
+    if (columnPreference) {
+      active = columnPreference.active
     } else if (columns && Array.isArray(columns) && columns.length > 0) {
-      active = 'name' in field && columns.some((col) => col?.[field.name])
+      active = columns.find(
+        (column) => field && 'name' in field && column.accessor === field.name,
+      )?.active
     } else if (activeColumnsIndices.length < 4) {
       active = true
     }

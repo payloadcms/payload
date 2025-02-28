@@ -1,4 +1,4 @@
-import type { QueryOptions } from 'mongoose'
+import type { MongooseUpdateQueryOptions } from 'mongoose'
 import type { UpdateOne } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
@@ -11,12 +11,22 @@ import { transform } from './utilities/transform.js'
 
 export const updateOne: UpdateOne = async function updateOne(
   this: MongooseAdapter,
-  { id, collection, data, locale, options: optionsArgs = {}, req, select, where: whereArg },
+  {
+    id,
+    collection,
+    data,
+    locale,
+    options: optionsArgs = {},
+    req,
+    returning,
+    select,
+    where: whereArg,
+  },
 ) {
   const where = id ? { id: { equals: id } } : whereArg
   const Model = this.collections[collection]
   const fields = this.payload.collections[collection].config.fields
-  const options: QueryOptions = {
+  const options: MongooseUpdateQueryOptions = {
     ...optionsArgs,
     lean: true,
     new: true,
@@ -41,7 +51,12 @@ export const updateOne: UpdateOne = async function updateOne(
   transform({ adapter: this, data, fields, operation: 'write' })
 
   try {
-    result = await Model.findOneAndUpdate(query, data, options)
+    if (returning === false) {
+      await Model.updateOne(query, data, options)
+      return null
+    } else {
+      result = await Model.findOneAndUpdate(query, data, options)
+    }
   } catch (error) {
     handleError({ collection, error, req })
   }
