@@ -145,6 +145,7 @@ export type JoinQuery<TSlug extends CollectionSlug = string> =
         | Partial<{
             [K in keyof TypedCollectionJoins[TSlug]]:
               | {
+                  count?: boolean
                   limit?: number
                   page?: number
                   sort?: string

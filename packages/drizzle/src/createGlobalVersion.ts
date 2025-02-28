@@ -21,6 +21,7 @@ export async function createGlobalVersion<T extends TypeWithID>(
     snapshot,
     updatedAt,
     versionData,
+    returning,
   }: CreateGlobalVersionArgs,
 ) {
   const db = await getTransaction(this, req)
@@ -45,6 +46,7 @@ export async function createGlobalVersion<T extends TypeWithID>(
     req,
     select,
     tableName,
+    ignoreResult: returning === false ? 'idOnly' : false,
   })
 
   const table = this.tables[tableName]
@@ -57,6 +59,10 @@ export async function createGlobalVersion<T extends TypeWithID>(
           WHERE ${table.id} != ${result.id};
         `,
     })
+  }
+
+  if (returning === false) {
+    return null
   }
 
   return result

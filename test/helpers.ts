@@ -103,6 +103,7 @@ export async function ensureCompilationIsDone({
       )
 
       await page.goto(adminURL)
+
       await page.waitForURL(
         readyURL ??
           (noAutoLogin ? `${adminURL + (adminURL.endsWith('/') ? '' : '/')}login` : adminURL),
@@ -205,7 +206,6 @@ export async function login(args: LoginArgs): Promise<void> {
   })
 
   await page.goto(loginRoute)
-  await page.waitForURL(loginRoute)
   await wait(500)
   await page.fill('#field-email', data.email)
   await page.fill('#field-password', data.password)
@@ -253,18 +253,6 @@ export async function saveDocAndAssert(
   } else {
     await expect(page.locator('.payload-toast-container .toast-error')).toBeVisible()
   }
-}
-
-export async function openNav(page: Page): Promise<void> {
-  // check to see if the nav is already open and if not, open it
-  // use the `--nav-open` modifier class to check if the nav is open
-  // this will prevent clicking nav links that are bleeding off the screen
-  if (await page.locator('.template-default.template-default--nav-open').isVisible()) {
-    return
-  }
-  // playwright: get first element with .nav-toggler which is VISIBLE (not hidden), could be 2 elements with .nav-toggler on mobile and desktop but only one is visible
-  await page.locator('.nav-toggler >> visible=true').click()
-  await expect(page.locator('.template-default.template-default--nav-open')).toBeVisible()
 }
 
 export async function openDocDrawer(page: Page, selector: string): Promise<void> {

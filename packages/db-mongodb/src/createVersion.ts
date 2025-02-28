@@ -16,6 +16,7 @@ export const createVersion: CreateVersion = async function createVersion(
     parent,
     publishedLocale,
     req,
+    returning,
     snapshot,
     updatedAt,
     versionData,
@@ -85,6 +86,10 @@ export const createVersion: CreateVersion = async function createVersion(
     { $unset: { latest: 1 } },
     options,
   )
+
+  if (returning === false) {
+    return null
+  }
 
   doc = doc.toObject()
 

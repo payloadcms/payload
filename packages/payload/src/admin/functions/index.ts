@@ -3,6 +3,7 @@ import type { SanitizedConfig } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
 import type { CollectionSlug, ColumnPreference } from '../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../types/index.js'
+import type { ColumnsFromURL } from '../../utilities/transformColumnPreferences.js'
 
 export type DefaultServerFunctionArgs = {
   importMap: ImportMap
@@ -38,6 +39,11 @@ export type ServerFunctionHandler = (
 ) => Promise<unknown>
 
 export type ListQuery = {
+  /*
+   * This is an of strings, i.e. `['title', '-slug']`
+   * Use `transformColumnsToPreferences` to convert it back and forth
+   */
+  columns?: ColumnsFromURL
   limit?: string
   page?: string
   /*

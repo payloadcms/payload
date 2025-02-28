@@ -1,15 +1,14 @@
 'use client'
-import type {
-  CollectionSlug,
-  Column,
-  ColumnPreference,
-  JoinFieldClient,
-  ListQuery,
-  PaginatedDocs,
-  Where,
-} from 'payload'
-
 import { getTranslation } from '@payloadcms/translations'
+import {
+  type CollectionSlug,
+  type Column,
+  type JoinFieldClient,
+  type ListQuery,
+  type PaginatedDocs,
+  type Where,
+} from 'payload'
+import { transformColumnsToPreferences } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
@@ -26,6 +25,7 @@ import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { hoistQueryParamsToAnd } from '../../utilities/mergeListSearchAndWhere.js'
 import { AnimateHeight } from '../AnimateHeight/index.js'
+import './index.scss'
 import { ColumnSelector } from '../ColumnSelector/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
@@ -33,7 +33,6 @@ import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
 import { TableColumnsProvider } from '../TableColumns/index.js'
 import { DrawerLink } from './cells/DrawerLink/index.js'
 import { RelationshipTablePagination } from './Pagination.js'
-import './index.scss'
 
 const baseClass = 'relationship-table'
 
@@ -124,10 +123,11 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         newQuery.where = hoistQueryParamsToAnd(newQuery.where, filterOptions)
       }
 
-      // map columns from string[] to ColumnPreference[]
-      const defaultColumns: ColumnPreference[] = field.admin.defaultColumns
+      // map columns from string[] to ListPreferences['columns']
+      const defaultColumns = field.admin.defaultColumns
         ? field.admin.defaultColumns.map((accessor) => ({
-            [accessor]: true,
+            accessor,
+            active: true,
           }))
         : undefined
 
@@ -137,7 +137,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         Table: NewTable,
       } = await getTableState({
         collectionSlug: relationTo,
-        columns: defaultColumns,
+        columns: transformColumnsToPreferences(query?.columns) || defaultColumns,
         docs,
         enableRowSelections: false,
         parent,
@@ -154,7 +154,6 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     [
       field.defaultLimit,
       field.defaultSort,
-      field.admin.defaultColumns,
       collectionConfig?.admin?.pagination?.defaultLimit,
       collectionConfig?.defaultSort,
       query,
@@ -214,8 +213,6 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     },
     [data?.docs, renderTable],
   )
-
-  const preferenceKey = `${Array.isArray(relationTo) ? `${parent.collectionSlug}-${parent.joinPath}` : relationTo}-list`
 
   const canCreate =
     allowCreate !== false &&
@@ -326,6 +323,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           {data?.docs && data.docs.length > 0 && (
             <RelationshipProvider>
               <ListQueryProvider
+                columns={transformColumnsToPreferences(columnState)}
                 data={data}
                 defaultLimit={
                   field.defaultLimit ?? collectionConfig?.admin?.pagination?.defaultLimit
@@ -336,17 +334,9 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                 <TableColumnsProvider
                   collectionSlug={Array.isArray(relationTo) ? relationTo[0] : relationTo}
                   columnState={columnState}
-                  docs={data.docs}
                   LinkedCellOverride={
                     <DrawerLink onDrawerDelete={onDrawerDelete} onDrawerSave={onDrawerSave} />
                   }
-                  preferenceKey={preferenceKey}
-                  renderRowTypes
-                  setTable={setTable}
-                  sortColumnProps={{
-                    appearance: 'condensed',
-                  }}
-                  tableAppearance="condensed"
                 >
                   <AnimateHeight
                     className={`${baseClass}__columns`}

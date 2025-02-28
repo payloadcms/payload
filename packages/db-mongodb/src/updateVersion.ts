@@ -1,4 +1,4 @@
-import type { QueryOptions } from 'mongoose'
+import type { MongooseUpdateQueryOptions } from 'mongoose'
 
 import { buildVersionCollectionFields, type UpdateVersion } from 'payload'
 
@@ -11,7 +11,7 @@ import { transform } from './utilities/transform.js'
 
 export const updateVersion: UpdateVersion = async function updateVersion(
   this: MongooseAdapter,
-  { id, collection, locale, options: optionsArgs = {}, req, select, versionData, where },
+  { id, collection, locale, options: optionsArgs = {}, req, returning, select, versionData, where },
 ) {
   const VersionModel = this.versions[collection]
   const whereToUse = where || { id: { equals: id } }
@@ -26,7 +26,7 @@ export const updateVersion: UpdateVersion = async function updateVersion(
     true,
   )
 
-  const options: QueryOptions = {
+  const options: MongooseUpdateQueryOptions = {
     ...optionsArgs,
     lean: true,
     new: true,
@@ -46,6 +46,11 @@ export const updateVersion: UpdateVersion = async function updateVersion(
   })
 
   transform({ adapter: this, data: versionData, fields, operation: 'write' })
+
+  if (returning === false) {
+    await VersionModel.updateOne(query, versionData, options)
+    return null
+  }
 
   const doc = await VersionModel.findOneAndUpdate(query, versionData, options)
 

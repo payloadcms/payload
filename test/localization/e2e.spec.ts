@@ -4,7 +4,8 @@ import type { GeneratedTypes } from 'helpers/sdk/types.js'
 import { expect, test } from '@playwright/test'
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
-import { upsertPrefs } from 'helpers/e2e/upsertPrefs.js'
+import { upsertPreferences } from 'helpers/e2e/preferences.js'
+import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import { RESTClient } from 'helpers/rest.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -17,7 +18,6 @@ import {
   closeLocaleSelector,
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
-  openDocDrawer,
   openLocaleSelector,
   saveDocAndAssert,
   throttleTest,
@@ -246,7 +246,6 @@ describe('Localization', () => {
       })
 
       await page.goto(url.edit(id))
-      await page.waitForURL(`**${url.edit(id)}`)
       await openDocControls(page)
       await page.locator('#action-duplicate').click()
       await expect(page.locator('.payload-toast-container')).toContainText('successfully')
@@ -262,7 +261,6 @@ describe('Localization', () => {
 
     test('should duplicate localized checkbox correctly', async () => {
       await page.goto(url.create)
-      await page.waitForURL(url.create)
       await changeLocale(page, defaultLocale)
       await fillValues({ description, title: englishTitle })
       await page.locator('#field-localizedCheckbox').click()
@@ -320,7 +318,7 @@ describe('Localization', () => {
     })
 
     test('should not render default locale in locale selector when prefs are not default', async () => {
-      await upsertPrefs<Config, GeneratedTypes<any>>({
+      await upsertPreferences<Config, GeneratedTypes<any>>({
         payload,
         user: client.user,
         key: 'locale',
@@ -329,9 +327,9 @@ describe('Localization', () => {
 
       await page.goto(url.list)
 
-      const localeLabel = page
-        .locator('.localizer.app-header__localizer .localizer-button__current-label')
-        
+      const localeLabel = page.locator(
+        '.localizer.app-header__localizer .localizer-button__current-label',
+      )
 
       await expect(localeLabel).not.toHaveText('English')
     })
@@ -351,7 +349,7 @@ describe('Localization', () => {
       const drawerToggler =
         '#field-relationMultiRelationTo .relationship--single-value__drawer-toggler'
       await expect(page.locator(drawerToggler)).toBeEnabled()
-      await openDocDrawer(page, drawerToggler)
+      await openDocDrawer({ page, selector: drawerToggler })
       await expect(page.locator('.doc-drawer__header-text')).toContainText('spanish-relation2')
       await page.locator('.doc-drawer__header-close').click()
     })
