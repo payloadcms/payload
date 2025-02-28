@@ -61,7 +61,13 @@ export const DefaultNavClient: React.FC<{
               }
 
               return (
-                <Link className={`${baseClass}__link`} href={href} id={id} key={i} prefetch={false}>
+                <Link
+                  className={`${baseClass}__link ${isActive && 'active'}`}
+                  href={href}
+                  id={id}
+                  key={i}
+                  prefetch={false}
+                >
                   {isActive && <div className={`${baseClass}__link-indicator`} />}
                   {Label}
                 </Link>

@@ -415,6 +415,15 @@ describe('General', () => {
       expect(tagName).toBe('div')
     })
 
+    test('should keep active nav item enabled in the edit view', async () => {
+      await page.goto(postsUrl.create)
+      await openNav(page)
+      const activeItem = page.locator('.nav .nav__link.active')
+      await expect(activeItem).toBeVisible()
+      const tagName = await activeItem.evaluate((el) => el.tagName.toLowerCase())
+      expect(tagName).toBe('a')
+    })
+
     test('breadcrumbs — should navigate from list to dashboard', async () => {
       await page.goto(postsUrl.list)
       await page.locator(`.step-nav a[href="${adminRoutes.routes.admin}"]`).click()
