@@ -889,17 +889,70 @@ describe('database', () => {
       expect(result.point).toEqual([5, 10])
     })
 
-    /*
     it('ensure updateMany updates all docs', async () => {
-      const result = await payload.create({
-        collection: 'default-values',
+      await payload.create({
+        collection: postsSlug,
         data: {
-          point: [5, 10],
+          title: 'notupdated',
         },
       })
 
-      expect(result.point).toEqual([5, 10])
-    })*/
+      // Create 5 posts
+      for (let i = 0; i < 5; i++) {
+        await payload.create({
+          collection: postsSlug,
+          data: {
+            title: `v1 ${i}`,
+          },
+        })
+      }
+
+      const result = await payload.db.updateMany({
+        collection: postsSlug,
+        data: {
+          title: 'updated',
+        },
+        where: {
+          title: {
+            not_equals: 'notupdated',
+          },
+        },
+      })
+
+      expect(result?.length).toBe(5)
+      expect(result?.[0]?.title).toBe('updated')
+      expect(result?.[4]?.title).toBe('updated')
+
+      // Ensure all posts minus the one we don't want updated are updated
+      const { docs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        where: {
+          title: {
+            equals: 'updated',
+          },
+        },
+      })
+
+      expect(docs).toHaveLength(5)
+      expect(docs?.[0]?.title).toBe('updated')
+      expect(docs?.[4]?.title).toBe('updated')
+
+      const { docs: notUpdatedDocs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        where: {
+          title: {
+            not_equals: 'updated',
+          },
+        },
+      })
+
+      expect(notUpdatedDocs).toHaveLength(1)
+      expect(notUpdatedDocs?.[0]?.title).toBe('notupdated')
+    })
   })
 
   describe('Error Handler', () => {
