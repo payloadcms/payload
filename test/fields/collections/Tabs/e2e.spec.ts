@@ -61,7 +61,7 @@ describe('Tabs', () => {
     if (client) {
       await client.logout()
     }
-    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
+    client = new RESTClient({ defaultSlug: 'users', serverURL })
     await client.login()
 
     await ensureCompilationIsDone({ page, serverURL })
@@ -73,7 +73,6 @@ describe('Tabs', () => {
     const jsonValue = '{ "foo": "bar"}'
 
     await page.goto(url.create)
-    await page.waitForURL(url.create)
 
     await switchTab(page, '.tabs-field__tab-button:has-text("Tab with Row")')
     await page.locator('#field-textInRow').fill(textInRowValue)

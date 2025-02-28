@@ -9,7 +9,7 @@ A plugin for [Payload](https://github.com/payloadcms/payload) to easily manage m
 ## Installation
 
 ```bash
-pnpm add @payloadcms/plugin-multi-tenant@beta
+pnpm add @payloadcms/plugin-multi-tenant
 ```
 
 ## Plugin Types

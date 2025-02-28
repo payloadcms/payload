@@ -1,15 +1,15 @@
 import type { CollectionConfig } from 'payload'
 
 import { ensureUniqueSlug } from './hooks/ensureUniqueSlug'
-import { superAdminOrTeanantAdminAccess } from '@/collections/Pages/access/superAdminOrTenantAdmin'
+import { superAdminOrTenantAdminAccess } from '@/collections/Pages/access/superAdminOrTenantAdmin'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
   access: {
-    create: superAdminOrTeanantAdminAccess,
-    delete: superAdminOrTeanantAdminAccess,
+    create: superAdminOrTenantAdminAccess,
+    delete: superAdminOrTenantAdminAccess,
     read: () => true,
-    update: superAdminOrTeanantAdminAccess,
+    update: superAdminOrTenantAdminAccess,
   },
   admin: {
     useAsTitle: 'title',

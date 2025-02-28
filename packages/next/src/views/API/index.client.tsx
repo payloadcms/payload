@@ -1,7 +1,5 @@
 'use client'
 
-import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
-
 import {
   CheckboxField,
   CopyToClipboard,
@@ -10,6 +8,7 @@ import {
   MinimizeMaximizeIcon,
   NumberField,
   SetDocumentStepNav,
+  toast,
   useConfig,
   useDocumentInfo,
   useLocale,
@@ -17,7 +16,6 @@ import {
 } from '@payloadcms/ui'
 import { useSearchParams } from 'next/navigation.js'
 import * as React from 'react'
-import { toast } from 'sonner'
 
 import './index.scss'
 import { LocaleSelector } from './LocaleSelector/index.js'
@@ -41,8 +39,8 @@ export const APIViewClient: React.FC = () => {
     getEntityConfig,
   } = useConfig()
 
-  const collectionConfig = getEntityConfig({ collectionSlug }) as ClientCollectionConfig
-  const globalConfig = getEntityConfig({ globalSlug }) as ClientGlobalConfig
+  const collectionConfig = getEntityConfig({ collectionSlug })
+  const globalConfig = getEntityConfig({ globalSlug })
 
   const localeOptions =
     localization &&

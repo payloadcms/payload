@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { MarkRequired } from 'ts-essentials'
 
 import type { PayloadRequest } from '../types/index.js'

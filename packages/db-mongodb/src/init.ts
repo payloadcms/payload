@@ -2,7 +2,6 @@ import type { PaginateOptions } from 'mongoose'
 import type { Init, SanitizedCollectionConfig } from 'payload'
 
 import mongoose from 'mongoose'
-import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2'
 import paginate from 'mongoose-paginate-v2'
 import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
 
@@ -12,7 +11,7 @@ import type { CollectionModel } from './types.js'
 import { buildCollectionSchema } from './models/buildCollectionSchema.js'
 import { buildGlobalModel } from './models/buildGlobalModel.js'
 import { buildSchema } from './models/buildSchema.js'
-import { getBuildQueryPlugin } from './queries/buildQuery.js'
+import { getBuildQueryPlugin } from './queries/getBuildQueryPlugin.js'
 import { getDBName } from './utilities/getDBName.js'
 
 export const init: Init = function init(this: MongooseAdapter) {
@@ -26,15 +25,19 @@ export const init: Init = function init(this: MongooseAdapter) {
 
       const versionCollectionFields = buildVersionCollectionFields(this.payload.config, collection)
 
-      const versionSchema = buildSchema(this.payload, versionCollectionFields, {
-        disableUnique: true,
-        draftsEnabled: true,
-        indexSortableFields: this.payload.config.indexSortableFields,
-        options: {
-          minimize: false,
-          timestamps: false,
+      const versionSchema = buildSchema({
+        buildSchemaOptions: {
+          disableUnique: true,
+          draftsEnabled: true,
+          indexSortableFields: this.payload.config.indexSortableFields,
+          options: {
+            minimize: false,
+            timestamps: false,
+          },
+          ...schemaOptions,
         },
-        ...schemaOptions,
+        configFields: versionCollectionFields,
+        payload: this.payload,
       })
 
       versionSchema.plugin<any, PaginateOptions>(paginate, { useEstimatedCount: true }).plugin(
@@ -44,10 +47,6 @@ export const init: Init = function init(this: MongooseAdapter) {
         }),
       )
 
-      if (Object.keys(collection.joins).length > 0) {
-        versionSchema.plugin(mongooseAggregatePaginate)
-      }
-
       const versionCollectionName =
         this.autoPluralization === true && !collection.dbName ? undefined : versionModelName
 
@@ -55,14 +54,14 @@ export const init: Init = function init(this: MongooseAdapter) {
         versionModelName,
         versionSchema,
         versionCollectionName,
-      ) as CollectionModel
+      ) as unknown as CollectionModel
     }
 
     const modelName = getDBName({ config: collection })
     const collectionName =
       this.autoPluralization === true && !collection.dbName ? undefined : modelName
 
-    this.collections[collection.slug] = mongoose.model(
+    this.collections[collection.slug] = mongoose.model<any>(
       modelName,
       schema,
       collectionName,
@@ -77,14 +76,18 @@ export const init: Init = function init(this: MongooseAdapter) {
 
       const versionGlobalFields = buildVersionGlobalFields(this.payload.config, global)
 
-      const versionSchema = buildSchema(this.payload, versionGlobalFields, {
-        disableUnique: true,
-        draftsEnabled: true,
-        indexSortableFields: this.payload.config.indexSortableFields,
-        options: {
-          minimize: false,
-          timestamps: false,
+      const versionSchema = buildSchema({
+        buildSchemaOptions: {
+          disableUnique: true,
+          draftsEnabled: true,
+          indexSortableFields: this.payload.config.indexSortableFields,
+          options: {
+            minimize: false,
+            timestamps: false,
+          },
         },
+        configFields: versionGlobalFields,
+        payload: this.payload,
       })
 
       versionSchema.plugin<any, PaginateOptions>(paginate, { useEstimatedCount: true }).plugin(
@@ -93,7 +96,7 @@ export const init: Init = function init(this: MongooseAdapter) {
         }),
       )
 
-      this.versions[global.slug] = mongoose.model(
+      this.versions[global.slug] = mongoose.model<any>(
         versionModelName,
         versionSchema,
         versionModelName,

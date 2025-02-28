@@ -44,3 +44,31 @@ const createdJob = await payload.jobs.queue({
   },
 })
 ```
+
+#### Cancelling Jobs
+
+Payload allows you to cancel jobs that are either queued or currently running. When cancelling a running job, the current task will finish executing, but no subsequent tasks will run. This happens because the job checks its cancellation status between tasks.
+
+##### Cancel a Single Job
+
+To cancel a specific job, use the `payload.jobs.cancelByID` method with the job's ID:
+
+```ts
+await payload.jobs.cancelByID({
+  id: createdJob.id,
+})
+```
+
+##### Cancel Multiple Jobs
+
+To cancel multiple jobs at once, use the `payload.jobs.cancel` method with a `Where` query:
+
+```ts
+await payload.jobs.cancel({
+  where: {
+    workflowSlug: {
+      equals: 'createPost',
+    },
+  },
+})
+```

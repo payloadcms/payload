@@ -5,5 +5,5 @@ import { SelectField } from '@payloadcms/ui'
 import React from 'react'
 
 export const CustomSelectFieldClient: SelectFieldClientComponent = (props) => {
-  return <SelectField field={props?.field} path={props?.path} />
+  return <SelectField {...props} />
 }

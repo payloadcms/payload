@@ -5,11 +5,13 @@ import { flattenWhereToOperators } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildQuery } from './queries/buildQuery.js'
 import { buildSortParam } from './queries/buildSortParam.js'
+import { aggregatePaginate } from './utilities/aggregatePaginate.js'
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { getSession } from './utilities/getSession.js'
-import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
+import { transform } from './utilities/transform.js'
 
 export const find: Find = async function find(
   this: MongooseAdapter,
@@ -50,9 +52,11 @@ export const find: Find = async function find(
     })
   }
 
-  const query = await Model.buildQuery({
+  const query = await buildQuery({
+    adapter: this,
+    collectionSlug: collection,
+    fields: this.payload.collections[collection].config.flattenedFields,
     locale,
-    payload: this.payload,
     where,
   })
 
@@ -125,18 +129,30 @@ export const find: Find = async function find(
   })
   // build join aggregation
   if (aggregate) {
-    result = await Model.aggregatePaginate(Model.aggregate(aggregate), paginationOptions)
+    result = await aggregatePaginate({
+      adapter: this,
+      collation: paginationOptions.collation,
+      joinAggregation: aggregate,
+      limit: paginationOptions.limit,
+      Model,
+      page: paginationOptions.page,
+      pagination: paginationOptions.pagination,
+      projection: paginationOptions.projection,
+      query,
+      session: paginationOptions.options?.session,
+      sort: paginationOptions.sort as object,
+      useEstimatedCount: paginationOptions.useEstimatedCount,
+    })
   } else {
     result = await Model.paginate(query, paginationOptions)
   }
 
-  const docs = JSON.parse(JSON.stringify(result.docs))
+  transform({
+    adapter: this,
+    data: result.docs,
+    fields: this.payload.collections[collection].config.fields,
+    operation: 'read',
+  })
 
-  return {
-    ...result,
-    docs: docs.map((doc) => {
-      doc.id = doc._id
-      return sanitizeInternalFields(doc)
-    }),
-  }
+  return result
 }

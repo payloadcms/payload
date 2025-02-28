@@ -1,9 +1,9 @@
+// @ts-strict-ignore
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, PayloadRequest, PopulateType, SelectType } from '../../../types/index.js'
 
-import { deepCopyObjectSimple } from '../../../utilities/deepCopyObject.js'
 import { getSelectMode } from '../../../utilities/getSelectMode.js'
 import { traverseFields } from './traverseFields.js'
 
@@ -84,19 +84,39 @@ export async function afterRead<T extends JsonObject>(args: Args<T>): Promise<T>
     global,
     locale,
     overrideAccess,
-    path: [],
+    parentIndexPath: '',
+    parentIsLocalized: false,
+    parentPath: '',
+    parentSchemaPath: '',
     populate,
     populationPromises,
     req,
-    schemaPath: [],
     select,
     selectMode: select ? getSelectMode(select) : undefined,
     showHiddenFields,
     siblingDoc: incomingDoc,
   })
 
-  await Promise.all(fieldPromises)
-  await Promise.all(populationPromises)
+  /**
+   * Await all field and population promises in parallel.
+   * A field promise is able to add more field promises to the fieldPromises array, which will not be
+   * awaited in the first run.
+   * This is why we need to loop again to process the new field promises, until there are no more field promises left.
+   */
+  let iterations = 0
+  while (fieldPromises.length > 0 || populationPromises.length > 0) {
+    const currentFieldPromises = fieldPromises.splice(0, fieldPromises.length)
+    const currentPopulationPromises = populationPromises.splice(0, populationPromises.length)
 
+    await Promise.all(currentFieldPromises)
+    await Promise.all(currentPopulationPromises)
+
+    iterations++
+    if (iterations >= 100) {
+      throw new Error(
+        'Infinite afterRead promise loop detected. A hook is likely adding field promises in an infinitely recursive way.',
+      )
+    }
+  }
   return incomingDoc
 }

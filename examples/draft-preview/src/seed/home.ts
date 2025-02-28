@@ -1,4 +1,4 @@
-import type { Page } from '../payload-types'
+import type { Page } from '@payload-types'
 
 // Used for pre-seeded content so that the homepage is not empty
 // @ts-expect-error: Page type is not fully compatible with the provided object structure

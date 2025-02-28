@@ -1,18 +1,18 @@
-import type { AdminViewProps } from 'payload'
+import type { AdminViewServerProps, ServerProps } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
 import { Logo } from '../../elements/Logo/index.js'
-import './index.scss'
 import { LoginForm } from './LoginForm/index.js'
+import './index.scss'
 
 export { generateLoginMetadata } from './meta.js'
 
 export const loginBaseClass = 'login'
 
-export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, searchParams }) => {
+export function LoginView({ initPageResult, params, searchParams }: AdminViewServerProps) {
   const { locale, permissions, req } = initPageResult
 
   const {
@@ -24,7 +24,6 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
 
   const {
     admin: { components: { afterLogin, beforeLogin } = {}, user: userSlug },
-    collections,
     routes: { admin },
   } = config
 
@@ -32,7 +31,7 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
     redirect((searchParams.redirect as string) || admin)
   }
 
-  const collectionConfig = collections.find(({ slug }) => slug === userSlug)
+  const collectionConfig = payload?.collections?.[userSlug]?.config
 
   const prefillAutoLogin =
     typeof config.admin?.autoLogin === 'object' && config.admin?.autoLogin.prefillOnly
@@ -76,9 +75,8 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
           permissions,
           searchParams,
           user,
-        },
+        } satisfies ServerProps,
       })}
-
       {!collectionConfig?.auth?.disableLocalStrategy && (
         <LoginForm
           prefillEmail={prefillEmail}
@@ -98,7 +96,7 @@ export const LoginView: React.FC<AdminViewProps> = ({ initPageResult, params, se
           permissions,
           searchParams,
           user,
-        },
+        } satisfies ServerProps,
       })}
     </Fragment>
   )

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { I18n, TFunction } from '@payloadcms/translations'
 import type DataLoader from 'dataloader'
 import type { URL } from 'url'
@@ -83,7 +84,7 @@ type PayloadRequestData = {
    * use either:
    *  1. `const data = await req.json()`
    *
-   *  2. import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
+   *  2. import { addDataAndFileToRequest } from 'payload'
    *    `await addDataAndFileToRequest(req)`
    * */
   data?: JsonObject
@@ -144,7 +145,9 @@ export type JoinQuery<TSlug extends CollectionSlug = string> =
         | Partial<{
             [K in keyof TypedCollectionJoins[TSlug]]:
               | {
+                  count?: boolean
                   limit?: number
+                  page?: number
                   sort?: string
                   where?: Where
                 }
@@ -239,3 +242,5 @@ export type TransformGlobalWithSelect<
   : DataFromGlobalSlug<TSlug>
 
 export type PopulateType = Partial<TypedCollectionSelect>
+
+export type ResolvedFilterOptions = { [collection: string]: Where }

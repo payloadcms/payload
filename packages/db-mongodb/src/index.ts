@@ -16,6 +16,7 @@ import type {
   TypeWithVersion,
   UpdateGlobalArgs,
   UpdateGlobalVersionArgs,
+  UpdateManyArgs,
   UpdateOneArgs,
   UpdateVersionArgs,
 } from 'payload'
@@ -53,6 +54,7 @@ import { commitTransaction } from './transactions/commitTransaction.js'
 import { rollbackTransaction } from './transactions/rollbackTransaction.js'
 import { updateGlobal } from './updateGlobal.js'
 import { updateGlobalVersion } from './updateGlobalVersion.js'
+import { updateMany } from './updateMany.js'
 import { updateOne } from './updateOne.js'
 import { updateVersion } from './updateVersion.js'
 import { upsert } from './upsert.js'
@@ -90,7 +92,10 @@ export interface Args {
 
   /** Extra configuration options */
   connectOptions?: {
-    /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */
+    /**
+     * Set false to disable $facet aggregation in non-supporting databases, Defaults to true
+     * @deprecated Payload doesn't use `$facet` anymore anywhere.
+     */
     useFacet?: boolean
   } & ConnectOptions
   /** Set to true to disable hinting to MongoDB to use 'id' as index. This is currently done when counting documents for pagination. Disabling this optimization might fix some problems with AWS DocumentDB. Defaults to false */
@@ -160,6 +165,7 @@ declare module 'payload' {
     updateGlobalVersion: <T extends TypeWithID = TypeWithID>(
       args: { options?: QueryOptions } & UpdateGlobalVersionArgs<T>,
     ) => Promise<TypeWithVersion<T>>
+
     updateOne: (args: { options?: QueryOptions } & UpdateOneArgs) => Promise<Document>
     updateVersion: <T extends TypeWithID = TypeWithID>(
       args: { options?: QueryOptions } & UpdateVersionArgs<T>,
@@ -200,6 +206,7 @@ export function mongooseAdapter({
       mongoMemoryServer,
       sessions: {},
       transactionOptions: transactionOptions === false ? undefined : transactionOptions,
+      updateMany,
       url,
       versions: {},
       // DatabaseAdapter

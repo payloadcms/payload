@@ -1,16 +1,16 @@
-import type { DocumentTabConfig, DocumentTabProps } from 'payload'
+import type { DocumentTabConfig, DocumentTabServerProps, ServerProps } from 'payload'
 import type React from 'react'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { Fragment } from 'react'
 
-import './index.scss'
 import { DocumentTabLink } from './TabLink.js'
+import './index.scss'
 
 export const baseClass = 'doc-tab'
 
 export const DocumentTab: React.FC<
-  { readonly Pill_Component?: React.FC } & DocumentTabConfig & DocumentTabProps
+  { readonly Pill_Component?: React.FC } & DocumentTabConfig & DocumentTabServerProps
 > = (props) => {
   const {
     apiURL,
@@ -27,6 +27,7 @@ export const DocumentTab: React.FC<
     Pill,
     Pill_Component,
   } = props
+
   const { config } = payload
   const { routes } = config
 
@@ -83,7 +84,7 @@ export const DocumentTab: React.FC<
                   i18n,
                   payload,
                   permissions,
-                },
+                } satisfies ServerProps,
               })}
             </Fragment>
           ) : null}

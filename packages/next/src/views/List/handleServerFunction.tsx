@@ -137,11 +137,10 @@ export const renderListHandler = async (args: {
     disableBulkEdit,
     drawerSlug,
     enableRowSelections,
+    i18n,
     importMap: payload.importMap,
     initPageResult: {
-      collectionConfig: payload.config.collections.find(
-        (collection) => collection.slug === collectionSlug,
-      ),
+      collectionConfig: payload?.collections?.[collectionSlug]?.config,
       cookies,
       globalConfig: payload.config.globals.find((global) => global.slug === collectionSlug),
       languageOptions: undefined, // TODO
@@ -154,6 +153,7 @@ export const renderListHandler = async (args: {
     params: {
       segments: ['collections', collectionSlug],
     },
+    payload,
     query,
     redirectAfterDelete,
     redirectAfterDuplicate,

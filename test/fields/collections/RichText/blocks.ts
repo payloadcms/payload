@@ -10,7 +10,7 @@ export const TextBlock: Block = {
       required: true,
     },
   ],
-  slug: 'text',
+  slug: 'textRequired',
 }
 
 export const UploadAndRichTextBlock: Block = {

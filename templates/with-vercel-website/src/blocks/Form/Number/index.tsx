@@ -9,24 +9,28 @@ import { Error } from '../Error'
 import { Width } from '../Width'
 export const Number: React.FC<
   TextField & {
-    errors: Partial<
-      FieldErrorsImpl<{
-        [x: string]: any
-      }>
-    >
+    errors: Partial<FieldErrorsImpl>
     register: UseFormRegister<FieldValues>
   }
-> = ({ name, defaultValue, errors, label, register, required: requiredFromProps, width }) => {
+> = ({ name, defaultValue, errors, label, register, required, width }) => {
   return (
     <Width width={width}>
-      <Label htmlFor={name}>{label}</Label>
+      <Label htmlFor={name}>
+        {label}
+
+        {required && (
+          <span className="required">
+            * <span className="sr-only">(required)</span>
+          </span>
+        )}
+      </Label>
       <Input
         defaultValue={defaultValue}
         id={name}
         type="number"
-        {...register(name, { required: requiredFromProps })}
+        {...register(name, { required })}
       />
-      {requiredFromProps && errors[name] && <Error />}
+      {errors[name] && <Error />}
     </Width>
   )
 }

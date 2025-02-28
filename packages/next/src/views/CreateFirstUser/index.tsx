@@ -1,4 +1,4 @@
-import type { AdminViewProps } from 'payload'
+import type { AdminViewServerProps } from 'payload'
 
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import React from 'react'
@@ -11,21 +11,21 @@ import './index.scss'
 
 export { generateCreateFirstUserMetadata } from './meta.js'
 
-export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageResult }) => {
+export async function CreateFirstUserView({ initPageResult }: AdminViewServerProps) {
   const {
     locale,
     req,
     req: {
       payload: {
+        collections,
         config: {
           admin: { user: userSlug },
         },
-        config,
       },
     },
   } = initPageResult
 
-  const collectionConfig = config.collections?.find((collection) => collection?.slug === userSlug)
+  const collectionConfig = collections?.[userSlug]?.config
   const { auth: authOptions } = collectionConfig
   const loginWithUsername = authOptions.loginWithUsername
 
@@ -63,6 +63,7 @@ export const CreateFirstUserView: React.FC<AdminViewProps> = async ({ initPageRe
     renderAllFields: true,
     req,
     schemaPath: collectionConfig.slug,
+    skipValidation: true,
   })
 
   return (

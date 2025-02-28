@@ -17,7 +17,6 @@ if (!process.env.ROOT_DIR) {
   process.env.ROOT_DIR = dirname
 }
 
-// eslint-disable-next-line no-restricted-exports
 export default buildConfig({
   admin: {
     autoLogin: devUser,

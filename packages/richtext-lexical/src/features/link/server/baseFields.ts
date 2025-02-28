@@ -4,8 +4,11 @@ import type {
   RadioField,
   SanitizedConfig,
   TextField,
+  TextFieldSingleValidation,
   User,
 } from 'payload'
+
+import type { LinkFields } from '../nodes/types.js'
 
 import { validateUrl, validateUrlMinimal } from '../../../lexical/utils/url.js'
 
@@ -80,15 +83,14 @@ export const getBaseFields = (
       },
       label: ({ t }) => t('fields:enterURL'),
       required: true,
-      // @ts-expect-error - TODO: fix this
-      validate: (value: string, options) => {
-        if (options?.siblingData?.linkType === 'internal') {
+      validate: ((value: string, options) => {
+        if ((options?.siblingData as LinkFields)?.linkType === 'internal') {
           return // no validation needed, as no url should exist for internal links
         }
         if (!validateUrlMinimal(value)) {
           return 'Invalid URL'
         }
-      },
+      }) as TextFieldSingleValidation,
     },
   ]
 
@@ -99,14 +101,16 @@ export const getBaseFields = (
       value: 'internal',
     })
     ;(baseFields[2] as TextField).admin = {
-      condition: ({ linkType }) => linkType !== 'internal',
+      condition: (_data, _siblingData) => {
+        return _siblingData.linkType !== 'internal'
+      },
     }
 
     baseFields.push({
       name: 'doc',
       admin: {
-        condition: ({ linkType }) => {
-          return linkType === 'internal'
+        condition: (_data, _siblingData) => {
+          return _siblingData.linkType === 'internal'
         },
       },
       // when admin.hidden is a function we need to dynamically call hidden with the user to know if the collection should be shown

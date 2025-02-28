@@ -1,6 +1,6 @@
 import type { MarkOptional } from 'ts-essentials'
 
-import type { ArrayField, ArrayFieldClient, ClientField } from '../../fields/config/types.js'
+import type { ArrayField, ArrayFieldClient } from '../../fields/config/types.js'
 import type { ArrayFieldValidation } from '../../fields/validations.js'
 import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../forms/Error.js'
 import type {
@@ -13,6 +13,8 @@ import type {
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
+  FieldDiffClientComponent,
+  FieldDiffServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
 } from '../types.js'
@@ -53,7 +55,6 @@ export type ArrayFieldDescriptionServerComponent = FieldDescriptionServerCompone
   ArrayField,
   ArrayFieldClientWithoutType
 >
-
 export type ArrayFieldDescriptionClientComponent =
   FieldDescriptionClientComponent<ArrayFieldClientWithoutType>
 
@@ -61,5 +62,7 @@ export type ArrayFieldErrorServerComponent = FieldErrorServerComponent<
   ArrayField,
   ArrayFieldClientWithoutType
 >
-
 export type ArrayFieldErrorClientComponent = FieldErrorClientComponent<ArrayFieldClientWithoutType>
+
+export type ArrayFieldDiffServerComponent = FieldDiffServerComponent<ArrayField, ArrayFieldClient>
+export type ArrayFieldDiffClientComponent = FieldDiffClientComponent<ArrayFieldClient>
