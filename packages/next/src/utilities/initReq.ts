@@ -61,6 +61,7 @@ export const initReq = cache(async function (
         host: headers.get('host'),
         i18n: i18n as I18n,
         responseHeaders,
+        url: `${payload.config.serverURL}`,
         user,
         ...(reqOverrides || {}),
       },
