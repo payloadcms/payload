@@ -133,7 +133,7 @@ export type MongooseAdapter = {
     [slug: string]: CollectionModel
   }
 } & Args &
-  BaseDatabaseAdapter
+  Omit<BaseDatabaseAdapter, 'sessions'>
 
 declare module 'payload' {
   export interface DatabaseAdapter
