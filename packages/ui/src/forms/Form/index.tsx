@@ -66,6 +66,7 @@ export const Form: React.FC<FormProps> = (props) => {
     disableSuccessStatus,
     disableValidationOnSubmit,
     // fields: fieldsFromProps = collection?.fields || global?.fields,
+    el,
     handleResponse,
     initialState, // fully formed initial field state
     isDocumentForm,
@@ -783,8 +784,10 @@ export const Form: React.FC<FormProps> = (props) => {
       }
     : {}
 
+  const El: 'form' = (el as unknown as 'form') || 'form'
+
   return (
-    <form
+    <El
       action={typeof action === 'function' ? void action : action}
       className={classes}
       method={method}
@@ -816,7 +819,7 @@ export const Form: React.FC<FormProps> = (props) => {
           </FormWatchContext.Provider>
         </FormContext.Provider>
       </DocumentFormContextComponent>
-    </form>
+    </El>
   )
 }
 
