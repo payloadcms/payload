@@ -10,6 +10,7 @@ import type { Config, Plugin, UploadCollectionSlug } from 'payload'
 
 import { Storage } from '@google-cloud/storage'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
+import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
 
 import { getGenerateSignedURLHandler } from './generateSignedURL.js'
 import { getGenerateURL } from './generateURL.js'
@@ -52,10 +53,6 @@ type GcsStoragePlugin = (gcsStorageArgs: GcsStorageOptions) => Plugin
 export const gcsStorage: GcsStoragePlugin =
   (gcsStorageOptions: GcsStorageOptions) =>
   (incomingConfig: Config): Config => {
-    if (gcsStorageOptions.enabled === false) {
-      return incomingConfig
-    }
-
     let storageClient: null | Storage = null
 
     const getStorageClient = (): Storage => {
@@ -69,46 +66,27 @@ export const gcsStorage: GcsStoragePlugin =
 
     const adapter = gcsStorageInternal(getStorageClient, gcsStorageOptions)
 
-    if (gcsStorageOptions.clientUploads) {
-      if (!incomingConfig.endpoints) {
-        incomingConfig.endpoints = []
-      }
+    const isPluginDisabled = gcsStorageOptions.enabled === false
 
-      incomingConfig.endpoints.push({
-        handler: getGenerateSignedURLHandler({
-          access:
-            typeof gcsStorageOptions.clientUploads === 'object'
-              ? gcsStorageOptions.clientUploads.access
-              : undefined,
-          bucket: gcsStorageOptions.bucket,
-          collections: gcsStorageOptions.collections,
-          getStorageClient,
-        }),
-        method: 'post',
-        path: '/storage-gcs-generate-signed-url',
-      })
-    }
+    initClientUploads({
+      clientHandler: '@payloadcms/storage-gcs/client#GcsClientUploadHandler',
+      collections: gcsStorageOptions.collections,
+      config: incomingConfig,
+      enabled: !isPluginDisabled && Boolean(gcsStorageOptions.enabled),
+      serverHandler: getGenerateSignedURLHandler({
+        access:
+          typeof gcsStorageOptions.clientUploads === 'object'
+            ? gcsStorageOptions.clientUploads.access
+            : undefined,
+        bucket: gcsStorageOptions.bucket,
+        collections: gcsStorageOptions.collections,
+        getStorageClient,
+      }),
+      serverHandlerPath: '/storage-gcs-generate-signed-url',
+    })
 
-    if (!incomingConfig.admin) {
-      incomingConfig.admin = {}
-    }
-
-    if (!incomingConfig.admin.components) {
-      incomingConfig.admin.components = {}
-    }
-
-    if (!incomingConfig.admin.components.providers) {
-      incomingConfig.admin.components.providers = []
-    }
-
-    for (const collectionSlug in gcsStorageOptions.collections) {
-      incomingConfig.admin.components.providers.push({
-        clientProps: {
-          collectionSlug,
-          enabled: !!gcsStorageOptions.clientUploads,
-        },
-        path: '@payloadcms/storage-gcs/client#GcsClientUploadHandler',
-      })
+    if (isPluginDisabled) {
+      return incomingConfig
     }
 
     // Add adapter to each collection option object
