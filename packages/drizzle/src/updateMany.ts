@@ -71,6 +71,7 @@ export const updateMany: UpdateMany = async function updateMany(
 
   const results = []
 
+  // TODO: We need to batch this to reduce the amount of db calls. This can get very slow if we are updating a lot of rows.
   for (const idToUpdate of idsToUpdate) {
     const result = await upsertRow({
       id: idToUpdate,
