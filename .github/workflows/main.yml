@@ -191,8 +191,6 @@ jobs:
       AWS_SECRET_ACCESS_KEY: localstack
       AWS_REGION: us-east-1
       COSMOSDB_CONNECTION_STRING: ${{ secrets.COSMOSDB_CONNECTION_STRING }}
-      COSMOSDB_DATABASE_NAME: ${{ vars.COSMOSDB_DATABASE_NAME }}
-      COSMOSDB_CONTAINER_NAME: ${{ vars.COSMOSDB_CONTAINER_NAME }}
 
     services:
       postgres:

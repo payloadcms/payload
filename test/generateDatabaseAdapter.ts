@@ -77,14 +77,8 @@ export const allDatabaseAdapters: Record<string, string> = {
 
   export const databaseAdapter = mongooseAdapter({
     ensureIndexes: true,
-    url:
-      process.env.COSMOSDB_CONNECTION_STRING ||
-      process.env.MONGODB_MEMORY_SERVER_URI ||
-      process.env.DATABASE_URI ||
-      'mongodb://127.0.0.1/payloadtests',
-    collation: {
-      strength: 1,
-    },
+    transactionOptions: false,
+    url: process.env.COSMOSDB_CONNECTION_STRING
     options: {
       tls: true,
       tlsCAFile: process.env.COSMOSDB_CA_CERT || '/usr/local/share/ca-certificates/cosmos_emulator.cert',
