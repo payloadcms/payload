@@ -145,6 +145,8 @@ export interface BaseDatabaseAdapter {
 
   updateGlobalVersion: UpdateGlobalVersion
 
+  updateMany: UpdateMany
+
   updateOne: UpdateOne
 
   updateVersion: UpdateVersion
@@ -509,6 +511,29 @@ export type UpdateOneArgs = {
  * @todo type as Promise<Document | null> in 4.0
  */
 export type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
+
+export type UpdateManyArgs = {
+  collection: CollectionSlug
+  data: Record<string, unknown>
+  draft?: boolean
+  joins?: JoinQuery
+  locale?: string
+  /**
+   * Additional database adapter specific options to pass to the query
+   */
+  options?: Record<string, unknown>
+  req?: Partial<PayloadRequest>
+  /**
+   * If true, returns the updated documents
+   *
+   * @default true
+   */
+  returning?: boolean
+  select?: SelectType
+  where: Where
+}
+
+export type UpdateMany = (args: UpdateManyArgs) => Promise<Document[] | null>
 
 export type UpsertArgs = {
   collection: CollectionSlug
