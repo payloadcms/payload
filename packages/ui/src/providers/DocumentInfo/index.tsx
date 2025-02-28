@@ -149,17 +149,15 @@ const DocumentInfo: React.FC<
       try {
         const isGlobal = slug === globalSlug
 
-        const query = isGlobal
-          ? {
-              'where[globalSlug][equals]': slug,
-            }
-          : {
-              'where[document.relationTo][equals]': slug,
-              'where[document.value][equals]': docID,
-            }
-
         const request = await requests.get(`${serverURL}${api}/payload-locked-documents`, {
-          params: query,
+          params: isGlobal
+            ? {
+                'where[globalSlug][equals]': slug,
+              }
+            : {
+                'where[document.relationTo][equals]': slug,
+                'where[document.value][equals]': docID,
+              },
         })
 
         const { docs } = await request.json()
@@ -186,18 +184,16 @@ const DocumentInfo: React.FC<
       try {
         const isGlobal = slug === globalSlug
 
-        const query = isGlobal
-          ? {
-              'where[globalSlug][equals]': slug,
-            }
-          : {
-              'where[document.relationTo][equals]': slug,
-              'where[document.value][equals]': docID,
-            }
-
         // Check if the document is already locked
         const request = await requests.get(`${serverURL}${api}/payload-locked-documents`, {
-          params: query,
+          params: isGlobal
+            ? {
+                'where[globalSlug][equals]': slug,
+              }
+            : {
+                'where[document.relationTo][equals]': slug,
+                'where[document.value][equals]': docID,
+              },
         })
 
         const { docs } = await request.json()
