@@ -18,7 +18,6 @@ export const RenderFields: React.FC<RenderFieldsProps> = (props) => {
   const {
     className,
     fields,
-    filter,
     forceRender,
     margins,
     parentIndexPath,

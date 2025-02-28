@@ -20,7 +20,6 @@ import type {
   SanitizedCollectionConfig,
   SanitizedConfig,
   SelectField,
-  Tab,
   TabsField,
   TextareaField,
   TextField,

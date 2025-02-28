@@ -1,4 +1,4 @@
-import type { Block, Field, Tab } from 'payload'
+import type { Block, Field } from 'payload'
 
 import { InvalidConfiguration } from 'payload'
 import {

@@ -21,7 +21,6 @@ import type {
   RowField,
   SanitizedConfig,
   SelectField,
-  Tab,
   TabsField,
   TextareaField,
   TextField,
