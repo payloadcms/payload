@@ -1165,8 +1165,6 @@ describe('Queues', () => {
       id: job.id,
     })
 
-    console.log(jobAfterRun.log[1])
-
     expect(jobAfterRun.hasError).toBe(true)
     expect(jobAfterRun.log?.length).toBe(1)
     expect(jobAfterRun.log[0].error.message).toBe('failed')
@@ -1189,8 +1187,6 @@ describe('Queues', () => {
       collection: 'payload-jobs',
       id: job.id,
     })
-
-    console.log(jobAfterRun.log[1])
 
     expect(jobAfterRun.hasError).toBe(true)
     expect(jobAfterRun.log?.length).toBe(1)

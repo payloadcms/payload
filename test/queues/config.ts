@@ -323,6 +323,44 @@ export default buildConfigWithDefaults({
         ],
         handler: path.resolve(dirname, 'runners/externalTask.ts') + '#externalTaskHandler',
       } as TaskConfig<'ExternalTask'>,
+      {
+        retries: 0,
+        slug: 'ThrowError',
+        inputSchema: [],
+        outputSchema: [],
+        handler: () => {
+          throw new Error('failed')
+        },
+      } as TaskConfig<'ThrowError'>,
+      {
+        retries: 0,
+        slug: 'ReturnError',
+        inputSchema: [],
+        outputSchema: [],
+        handler: () => {
+          return {
+            state: 'failed',
+          }
+        },
+      } as TaskConfig<'ReturnError'>,
+      {
+        retries: 0,
+        slug: 'ReturnCustomError',
+        inputSchema: [
+          {
+            name: 'errorMessage',
+            type: 'text',
+            required: true,
+          },
+        ],
+        outputSchema: [],
+        handler: ({ input }) => {
+          return {
+            state: 'failed',
+            errorMessage: input.errorMessage,
+          }
+        },
+      } as TaskConfig<'ReturnCustomError'>,
     ],
     workflows: [
       updatePostWorkflow,
