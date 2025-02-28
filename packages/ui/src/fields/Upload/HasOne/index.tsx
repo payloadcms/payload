@@ -32,10 +32,12 @@ export function UploadComponentHasOne(props: Props) {
   let src: string
   let thumbnailSrc: string
 
-  try {
-    src = new URL(value.url, serverURL).toString()
-  } catch {
-    src = `${serverURL}${value.url}`
+  if (value.url) {
+    try {
+      src = new URL(value.url, serverURL).toString()
+    } catch {
+      src = `${serverURL}${value.url}`
+    }
   }
 
   if (value.thumbnailURL) {
@@ -44,8 +46,6 @@ export function UploadComponentHasOne(props: Props) {
     } catch {
       thumbnailSrc = `${serverURL}${value.thumbnailURL}`
     }
-  } else {
-    thumbnailSrc = src
   }
 
   return (
@@ -62,7 +62,7 @@ export function UploadComponentHasOne(props: Props) {
         onRemove={onRemove}
         reloadDoc={reloadDoc}
         src={src}
-        thumbnailSrc={thumbnailSrc}
+        thumbnailSrc={thumbnailSrc || src}
         x={value?.width as number}
         y={value?.height as number}
       />

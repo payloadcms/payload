@@ -67,14 +67,15 @@ export function UploadComponentHasMany(props: Props) {
       >
         {fileDocs.map(({ relationTo, value }, index) => {
           const id = String(value.id)
-
           let src: string
           let thumbnailSrc: string
 
-          try {
-            src = new URL(value.url, serverURL).toString()
-          } catch {
-            src = `${serverURL}${value.url}`
+          if (value.url) {
+            try {
+              src = new URL(value.url, serverURL).toString()
+            } catch {
+              src = `${serverURL}${value.url}`
+            }
           }
 
           if (value.thumbnailURL) {
@@ -83,8 +84,6 @@ export function UploadComponentHasMany(props: Props) {
             } catch {
               thumbnailSrc = `${serverURL}${value.thumbnailURL}`
             }
-          } else {
-            thumbnailSrc = src
           }
 
           return (
@@ -127,7 +126,7 @@ export function UploadComponentHasMany(props: Props) {
                       onRemove={() => removeItem(index)}
                       reloadDoc={reloadDoc}
                       src={src}
-                      thumbnailSrc={thumbnailSrc}
+                      thumbnailSrc={thumbnailSrc || src}
                       withMeta={false}
                       x={value?.width as number}
                       y={value?.height as number}
