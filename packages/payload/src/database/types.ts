@@ -319,7 +319,7 @@ export type UpdateGlobalVersion = {
     args: { returning: false } & UpdateGlobalVersionArgs<T>,
   ): Promise<void>
   <T extends TypeWithID = TypeWithID>(
-    args: { returning: true } & UpdateGlobalVersionArgs<T>,
+    args: { returning?: true } & UpdateGlobalVersionArgs<T>,
   ): Promise<TypeWithVersion<T>>
 }
 
@@ -343,7 +343,7 @@ export type CreateGlobal = {
     args: { returning: false } & CreateGlobalArgs<T>,
   ): Promise<void>
   <T extends Record<string, unknown> = any>(
-    args: { returning: true } & CreateGlobalArgs<T>,
+    args: { returning?: true } & CreateGlobalArgs<T>,
   ): Promise<T>
 }
 
@@ -372,7 +372,7 @@ export type UpdateGlobal = {
     args: { returning: false } & UpdateGlobalArgs<T>,
   ): Promise<void>
   <T extends Record<string, unknown> = any>(
-    args: { returning: true } & UpdateGlobalArgs<T>,
+    args: { returning?: true } & UpdateGlobalArgs<T>,
   ): Promise<T>
 }
 
@@ -415,7 +415,7 @@ export type CreateVersion = {
     args: { returning: false } & CreateVersionArgs<T>,
   ): Promise<void>
   <T extends TypeWithID = TypeWithID>(
-    args: { returning: true } & CreateVersionArgs<T>,
+    args: { returning?: true } & CreateVersionArgs<T>,
   ): Promise<TypeWithVersion<T>>
 }
 
@@ -444,7 +444,7 @@ export type CreateGlobalVersion = {
     args: { returning: false } & CreateGlobalVersionArgs<T>,
   ): Promise<void>
   <T extends TypeWithID = TypeWithID>(
-    args: { returning: true } & CreateGlobalVersionArgs<T>,
+    args: { returning?: true } & CreateGlobalVersionArgs<T>,
   ): Promise<TypeWithVersion<T>>
 }
 
@@ -485,7 +485,7 @@ export type UpdateVersion = {
     args: { returning: false } & UpdateVersionArgs<T>,
   ): Promise<void>
   <T extends TypeWithID = TypeWithID>(
-    args: { returning: true } & UpdateVersionArgs<T>,
+    args: { returning?: true } & UpdateVersionArgs<T>,
   ): Promise<TypeWithVersion<T>>
 }
 
@@ -506,7 +506,7 @@ export type CreateArgs = {
 
 export type Create = {
   (args: { returning: false } & CreateArgs): Promise<void>
-  (args: { returning: true } & CreateArgs): Promise<Document>
+  (args: { returning?: true } & CreateArgs): Promise<Document>
 }
 
 export type UpdateOneArgs = {
@@ -543,7 +543,7 @@ export type UpdateOneArgs = {
  */
 export type UpdateOne = {
   (args: { returning: false } & UpdateOneArgs): Promise<void>
-  (args: { returning: true } & UpdateOneArgs): Promise<Document>
+  (args: { returning?: true } & UpdateOneArgs): Promise<Document>
 }
 
 export type UpsertArgs = {
@@ -564,7 +564,7 @@ export type UpsertArgs = {
 
 export type Upsert = {
   (args: { returning: false } & UpsertArgs): Promise<void>
-  (args: { returning: true } & UpsertArgs): Promise<Document>
+  (args: { returning?: true } & UpsertArgs): Promise<Document>
 }
 
 export type DeleteOneArgs = {
