@@ -5,18 +5,20 @@ import type { MongooseAdapter } from './index.js'
 
 import { buildQuery } from './queries/buildQuery.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 import { transform } from './utilities/transform.js'
 
 export const deleteOne: DeleteOne = async function deleteOne(
   this: MongooseAdapter,
-  { collection, req, returning, select, where },
+  { collection: collectionSlug, req, returning, select, where },
 ) {
-  const Model = this.collections[collection]
+  const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
+
   const options: MongooseUpdateQueryOptions = {
     projection: buildProjectionFromSelect({
       adapter: this,
-      fields: this.payload.collections[collection].config.flattenedFields,
+      fields: collectionConfig.flattenedFields,
       select,
     }),
     session: await getSession(this, req),
@@ -24,8 +26,8 @@ export const deleteOne: DeleteOne = async function deleteOne(
 
   const query = await buildQuery({
     adapter: this,
-    collectionSlug: collection,
-    fields: this.payload.collections[collection].config.flattenedFields,
+    collectionSlug,
+    fields: collectionConfig.flattenedFields,
     where,
   })
 
@@ -43,7 +45,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
   transform({
     adapter: this,
     data: doc,
-    fields: this.payload.collections[collection].config.fields,
+    fields: collectionConfig.fields,
     operation: 'read',
   })
 

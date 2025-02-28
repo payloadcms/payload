@@ -1129,7 +1129,6 @@ describe('Queues', () => {
     expect(jobAfterRun.input.amountTask1Retried).toBe(0)
   })
 
-
   it('ensure jobs can be cancelled using payload.jobs.cancelByID', async () => {
     payload.config.jobs.deleteJobOnComplete = false
 
@@ -1201,7 +1200,7 @@ describe('Queues', () => {
     expect(jobAfterRun.error?.cancelled).toBe(true)
     expect(jobAfterRun.processing).toBe(false)
   })
-  
+
   it('can tasks throw error', async () => {
     payload.config.jobs.deleteJobOnComplete = false
 

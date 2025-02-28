@@ -8,15 +8,31 @@ import type { MongooseAdapter } from './index.js'
 import { buildQuery } from './queries/buildQuery.js'
 import { buildSortParam } from './queries/buildSortParam.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 import { transform } from './utilities/transform.js'
 
 export const findVersions: FindVersions = async function findVersions(
   this: MongooseAdapter,
-  { collection, limit, locale, page, pagination, req = {}, select, skip, sort: sortArg, where },
+  {
+    collection: collectionSlug,
+    limit,
+    locale,
+    page,
+    pagination,
+    req = {},
+    select,
+    skip,
+    sort: sortArg,
+    where = {},
+  },
 ) {
-  const Model = this.versions[collection]
-  const collectionConfig = this.payload.collections[collection].config
+  const { collectionConfig, Model } = getCollection({
+    adapter: this,
+    collectionSlug,
+    versions: true,
+  })
+
   const session = await getSession(this, req)
   const options: QueryOptions = {
     limit,
@@ -92,10 +108,11 @@ export const findVersions: FindVersions = async function findVersions(
     }
   }
 
-  if (limit >= 0) {
+  if (limit && limit >= 0) {
     paginationOptions.limit = limit
     // limit must also be set here, it's ignored when pagination is false
-    paginationOptions.options.limit = limit
+     
+    paginationOptions.options!.limit = limit
 
     // Disable pagination if limit is 0
     if (limit === 0) {
