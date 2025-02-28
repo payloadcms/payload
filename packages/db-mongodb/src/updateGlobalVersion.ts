@@ -1,4 +1,4 @@
-import type { QueryOptions } from 'mongoose'
+import type { MongooseUpdateQueryOptions } from 'mongoose'
 
 import { buildVersionGlobalFields, type TypeWithID, type UpdateGlobalVersionArgs } from 'payload'
 
@@ -17,6 +17,7 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     locale,
     options: optionsArgs = {},
     req,
+    returning,
     select,
     versionData,
     where,
@@ -28,7 +29,7 @@ export async function updateGlobalVersion<T extends TypeWithID>(
   const currentGlobal = this.payload.config.globals.find((global) => global.slug === globalSlug)
   const fields = buildVersionGlobalFields(this.payload.config, currentGlobal)
   const flattenedFields = buildVersionGlobalFields(this.payload.config, currentGlobal, true)
-  const options: QueryOptions = {
+  const options: MongooseUpdateQueryOptions = {
     ...optionsArgs,
     lean: true,
     new: true,
@@ -48,6 +49,11 @@ export async function updateGlobalVersion<T extends TypeWithID>(
   })
 
   transform({ adapter: this, data: versionData, fields, operation: 'write' })
+
+  if (returning === false) {
+    await VersionModel.updateOne(query, versionData, options)
+    return null
+  }
 
   const doc = await VersionModel.findOneAndUpdate(query, versionData, options)
 
