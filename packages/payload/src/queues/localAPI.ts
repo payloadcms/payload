@@ -142,17 +142,22 @@ export const getJobsLocalAPI = (payload: Payload) => ({
       })
     }
 
-    await payload.update({
+    await payload.db.updateMany({
       collection: 'payload-jobs',
       data: {
+        completedAt: null,
         error: {
           cancelled: true,
         },
         hasError: true,
         processing: false,
-      } as BaseJob,
-      depth: 0,
-      overrideAccess: args.overrideAccess !== false,
+        waitUntil: null,
+      } as Partial<
+        {
+          completedAt: null
+          waitUntil: null
+        } & BaseJob
+      >,
       req: newReq,
       where: { and },
     })
@@ -165,18 +170,21 @@ export const getJobsLocalAPI = (payload: Payload) => ({
   }): Promise<void> => {
     const newReq: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
 
-    await payload.update({
+    await payload.db.updateOne({
       id: args.id,
       collection: 'payload-jobs',
       data: {
+        completedAt: null,
         error: {
           cancelled: true,
         },
         hasError: true,
         processing: false,
-      } as BaseJob,
-      depth: 0,
-      overrideAccess: args.overrideAccess !== false,
+        waitUntil: null,
+      } as {
+        completedAt: null
+        waitUntil: null
+      } & BaseJob,
       req: newReq,
     })
   },
