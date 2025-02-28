@@ -145,17 +145,17 @@ export async function VersionView(props: DocumentViewServerProps) {
 
   let selectedLocales: OptionObject[] = []
   if (localization) {
-    let locales: Locale[] = localization.locales
-
+    let locales: Locale[] = []
     if (localeCodesFromParams) {
       for (const code of localeCodesFromParams) {
         const locale = localization.locales.find((locale) => locale.code === code)
         if (!locale) {
           continue
         }
-
         locales.push(locale)
       }
+    } else {
+      locales = localization.locales
     }
 
     if (localization.filterAvailableLocales) {
