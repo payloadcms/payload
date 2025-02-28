@@ -31,7 +31,7 @@
       }
     ],
     "paths": {
-      "@payload-config": ["./test/admin/config.ts"],
+      "@payload-config": ["./test/_community/config.ts"],
       "@payloadcms/live-preview": ["./packages/live-preview/src"],
       "@payloadcms/live-preview-react": ["./packages/live-preview-react/src/index.ts"],
       "@payloadcms/live-preview-vue": ["./packages/live-preview-vue/src/index.ts"],
