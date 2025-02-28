@@ -91,7 +91,7 @@ export async function handleTaskFailed({
     : {
         message:
           taskHandlerResult.state === 'failed'
-            ? (taskHandlerResult?.errorMessage ?? taskHandlerResult.state)
+            ? (taskHandlerResult.errorMessage ?? taskHandlerResult.state)
             : 'failed',
       }
 
