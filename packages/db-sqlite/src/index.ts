@@ -34,6 +34,7 @@ import {
   rollbackTransaction,
   updateGlobal,
   updateGlobalVersion,
+  updateMany,
   updateOne,
   updateVersion,
 } from '@payloadcms/drizzle'
@@ -120,6 +121,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       tableNameMap: new Map<string, string>(),
       tables: {},
       transactionOptions: args.transactionOptions || undefined,
+      updateMany,
       versionsSuffix: args.versionsSuffix || '_v',
 
       // DatabaseAdapter
