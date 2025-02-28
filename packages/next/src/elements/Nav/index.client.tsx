@@ -44,17 +44,19 @@ export const DefaultNavClient: React.FC<{
                 id = `nav-global-${slug}`
               }
 
-              const activeCollection =
-                pathname.startsWith(href) && ['/', undefined].includes(pathname[href.length])
+              const isActive = pathname.startsWith(href)
 
               const Label = (
-                <span className={`${baseClass}__link-label`}>{getTranslation(label, i18n)}</span>
+                <>
+                  {isActive && <div className={`${baseClass}__link-indicator`} />}
+                  <span className={`${baseClass}__link-label`}>{getTranslation(label, i18n)}</span>
+                </>
               )
 
-              if (activeCollection) {
+              // If the URL matches the link exactly
+              if (pathname === href) {
                 return (
-                  <div className={`${baseClass}__link active`} id={id} key={i}>
-                    <div className={`${baseClass}__link-indicator`} />
+                  <div className={`${baseClass}__link`} id={id} key={i}>
                     {Label}
                   </div>
                 )

@@ -2,7 +2,6 @@ import type { PaginateOptions } from 'mongoose'
 import type { Init, SanitizedCollectionConfig } from 'payload'
 
 import mongoose from 'mongoose'
-import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2'
 import paginate from 'mongoose-paginate-v2'
 import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
 
@@ -48,10 +47,6 @@ export const init: Init = function init(this: MongooseAdapter) {
         }),
       )
 
-      if (Object.keys(collection.joins).length > 0) {
-        versionSchema.plugin(mongooseAggregatePaginate)
-      }
-
       const versionCollectionName =
         this.autoPluralization === true && !collection.dbName ? undefined : versionModelName
 
@@ -59,14 +54,14 @@ export const init: Init = function init(this: MongooseAdapter) {
         versionModelName,
         versionSchema,
         versionCollectionName,
-      ) as CollectionModel
+      ) as unknown as CollectionModel
     }
 
     const modelName = getDBName({ config: collection })
     const collectionName =
       this.autoPluralization === true && !collection.dbName ? undefined : modelName
 
-    this.collections[collection.slug] = mongoose.model(
+    this.collections[collection.slug] = mongoose.model<any>(
       modelName,
       schema,
       collectionName,
@@ -101,7 +96,7 @@ export const init: Init = function init(this: MongooseAdapter) {
         }),
       )
 
-      this.versions[global.slug] = mongoose.model(
+      this.versions[global.slug] = mongoose.model<any>(
         versionModelName,
         versionSchema,
         versionModelName,

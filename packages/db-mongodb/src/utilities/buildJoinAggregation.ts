@@ -19,10 +19,8 @@ type BuildJoinAggregationArgs = {
   adapter: MongooseAdapter
   collection: CollectionSlug
   collectionConfig: SanitizedCollectionConfig
-  joins?: JoinQuery
-  // the number of docs to get at the top collection level
-  limit?: number
-  locale?: string
+  joins: JoinQuery
+  locale: string
   projection?: Record<string, true>
   // the where clause for the top collection
   query?: Record<string, unknown>
@@ -35,10 +33,8 @@ export const buildJoinAggregation = async ({
   collection,
   collectionConfig,
   joins,
-  limit,
   locale,
   projection,
-  query,
   versions,
 }: BuildJoinAggregationArgs): Promise<PipelineStage[] | undefined> => {
   if (
@@ -49,35 +45,9 @@ export const buildJoinAggregation = async ({
     return
   }
 
-  const joinConfig = adapter.payload.collections[collection]?.config?.joins
-
-  if (!joinConfig) {
-    throw new APIError(`Could not retrieve sanitized join config for ${collection}.`)
-  }
-
-  const polymorphicJoinsConfig = adapter.payload.collections[collection]?.config?.polymorphicJoins
-
-  if (!polymorphicJoinsConfig) {
-    throw new APIError(`Could not retrieve sanitized polymorphic joins config for ${collection}.`)
-  }
-
-  const aggregate: PipelineStage[] = [
-    {
-      $sort: { createdAt: -1 },
-    },
-  ]
-
-  if (query) {
-    aggregate.push({
-      $match: query,
-    })
-  }
-
-  if (limit) {
-    aggregate.push({
-      $limit: limit,
-    })
-  }
+  const joinConfig = adapter.payload.collections[collection].config.joins
+  const aggregate: PipelineStage[] = []
+  const polymorphicJoinsConfig = adapter.payload.collections[collection].config.polymorphicJoins
 
   for (const join of polymorphicJoinsConfig) {
     if (projection && !projection[join.joinPath]) {
@@ -470,10 +440,6 @@ export const buildJoinAggregation = async ({
         }
       }
     }
-  }
-
-  if (projection) {
-    aggregate.push({ $project: projection })
   }
 
   return aggregate

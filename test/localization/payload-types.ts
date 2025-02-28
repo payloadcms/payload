@@ -70,6 +70,7 @@ export interface Config {
     'blocks-fields': BlocksField;
     'nested-arrays': NestedArray;
     'nested-field-tables': NestedFieldTable;
+    'localized-drafts': LocalizedDraft;
     users: User;
     'localized-posts': LocalizedPost;
     'no-localized-fields': NoLocalizedField;
@@ -94,6 +95,7 @@ export interface Config {
     'blocks-fields': BlocksFieldsSelect<false> | BlocksFieldsSelect<true>;
     'nested-arrays': NestedArraysSelect<false> | NestedArraysSelect<true>;
     'nested-field-tables': NestedFieldTablesSelect<false> | NestedFieldTablesSelect<true>;
+    'localized-drafts': LocalizedDraftsSelect<false> | LocalizedDraftsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
     'no-localized-fields': NoLocalizedFieldsSelect<false> | NoLocalizedFieldsSelect<true>;
@@ -315,6 +317,17 @@ export interface NestedFieldTable {
     | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-drafts".
+ */
+export interface LocalizedDraft {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -696,6 +709,10 @@ export interface PayloadLockedDocument {
         value: string | NestedFieldTable;
       } | null)
     | ({
+        relationTo: 'localized-drafts';
+        value: string | LocalizedDraft;
+      } | null)
+    | ({
         relationTo: 'users';
         value: string | User;
       } | null)
@@ -923,6 +940,16 @@ export interface NestedFieldTablesSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-drafts_select".
+ */
+export interface LocalizedDraftsSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

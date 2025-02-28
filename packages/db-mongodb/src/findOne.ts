@@ -5,6 +5,7 @@ import { type FindOne } from 'payload'
 import type { MongooseAdapter } from './index.js'
 
 import { buildQuery } from './queries/buildQuery.js'
+import { aggregatePaginate } from './utilities/aggregatePaginate.js'
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { getCollection } from './utilities/getEntity.js'
@@ -42,7 +43,6 @@ export const findOne: FindOne = async function findOne(
     collection: collectionSlug,
     collectionConfig,
     joins,
-    limit: 1,
     locale,
     projection,
     query,
@@ -50,7 +50,17 @@ export const findOne: FindOne = async function findOne(
 
   let doc
   if (aggregate) {
-    ;[doc] = await Model.aggregate(aggregate, { session })
+    const { docs } = await aggregatePaginate({
+      adapter: this,
+      joinAggregation: aggregate,
+      limit: 1,
+      Model,
+      pagination: false,
+      projection,
+      query,
+      session,
+    })
+    doc = docs[0]
   } else {
     ;(options as Record<string, unknown>).projection = projection
     doc = await Model.findOne(query, {}, options)

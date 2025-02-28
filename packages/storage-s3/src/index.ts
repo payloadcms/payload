@@ -67,10 +67,6 @@ type S3StoragePlugin = (storageS3Args: S3StorageOptions) => Plugin
 export const s3Storage: S3StoragePlugin =
   (s3StorageOptions: S3StorageOptions) =>
   (incomingConfig: Config): Config => {
-    if (s3StorageOptions.enabled === false) {
-      return incomingConfig
-    }
-
     let storageClient: AWS.S3 | null = null
 
     const getStorageClient: () => AWS.S3 = () => {
@@ -81,11 +77,13 @@ export const s3Storage: S3StoragePlugin =
       return storageClient
     }
 
+    const isPluginDisabled = s3StorageOptions.enabled === false
+
     initClientUploads({
       clientHandler: '@payloadcms/storage-s3/client#S3ClientUploadHandler',
       collections: s3StorageOptions.collections,
       config: incomingConfig,
-      enabled: !!s3StorageOptions.clientUploads,
+      enabled: !isPluginDisabled && Boolean(s3StorageOptions.clientUploads),
       serverHandler: getGenerateSignedURLHandler({
         access:
           typeof s3StorageOptions.clientUploads === 'object'
@@ -98,6 +96,10 @@ export const s3Storage: S3StoragePlugin =
       }),
       serverHandlerPath: '/storage-s3-generate-signed-url',
     })
+
+    if (isPluginDisabled) {
+      return incomingConfig
+    }
 
     const adapter = s3StorageInternal(getStorageClient, s3StorageOptions)
 

@@ -7,6 +7,7 @@ import type { MongooseAdapter } from './index.js'
 
 import { buildQuery } from './queries/buildQuery.js'
 import { buildSortParam } from './queries/buildSortParam.js'
+import { aggregatePaginate } from './utilities/aggregatePaginate.js'
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { getCollection } from './utilities/getEntity.js'
@@ -114,7 +115,7 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   if (limit && limit > 0) {
     paginationOptions.limit = limit
     // limit must also be set here, it's ignored when pagination is false
-     
+
     paginationOptions.options!.limit = limit
   }
 
@@ -133,7 +134,20 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
 
   // build join aggregation
   if (aggregate) {
-    result = await Model.aggregatePaginate(Model.aggregate(aggregate), paginationOptions)
+    result = await aggregatePaginate({
+      adapter: this,
+      collation: paginationOptions.collation,
+      joinAggregation: aggregate,
+      limit: paginationOptions.limit,
+      Model,
+      page: paginationOptions.page,
+      pagination: paginationOptions.pagination,
+      projection: paginationOptions.projection,
+      query: versionQuery,
+      session: paginationOptions.options?.session ?? undefined,
+      sort: paginationOptions.sort as object,
+      useEstimatedCount: paginationOptions.useEstimatedCount,
+    })
   } else {
     result = await Model.paginate(versionQuery, paginationOptions)
   }
