@@ -6,11 +6,13 @@ import React from 'react'
 
 import './index.scss'
 import { useListQuery } from '../../providers/ListQuery/index.js'
-// import { ORDER_FIELD_NAME } from '../../utilities/renderTable.js'
 import { DraggableSortableItem } from '../DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
 
 const baseClass = 'table'
+
+// if you change this, you need to change it in a couple of places where it's duplicated
+const ORDER_FIELD_NAME = 'payload-order'
 
 export type Props = {
   readonly appearance?: 'condensed' | 'default'
@@ -24,10 +26,9 @@ export const Table: React.FC<Props> = ({ appearance, columns, data: initialData 
 
   // Force re-sort when data changes
   React.useEffect(() => {
-    // console.log('data', data)
     if (query.sort) {
       void handleSortChange(query.sort as string).catch((error) => {
-        console.error('Error re-sorting:', error)
+        throw error
       })
     }
   }, [data, handleSortChange, query.sort])
@@ -47,19 +48,22 @@ export const Table: React.FC<Props> = ({ appearance, columns, data: initialData 
     const newBeforeRow = moveToIndex > moveFromIndex ? data[moveToIndex] : data[moveToIndex - 1]
     const newAfterRow = moveToIndex > moveFromIndex ? data[moveToIndex + 1] : data[moveToIndex]
 
-    console.log(
-      `moving ${data[moveFromIndex]?.text} between ${newBeforeRow?.text} and ${newAfterRow?.text}`,
-    )
+    // To debug:
+    // console.log(
+    //   `moving ${data[moveFromIndex]?.text} between ${newBeforeRow?.text} and ${newAfterRow?.text}`,
+    // )
 
     // Store the original data for rollback
     const previousData = [...data]
 
-    // Update only the payload-order value
+    // TODO: this optimistic update is not working (the table is not re-rendered)
+    // you can't debug it commenting the try block. Every move needs to be followed by
+    // a refresh of the page to see the changes.
     setData((currentData) => {
       const newData = [...currentData]
       newData[moveFromIndex] = {
         ...newData[moveFromIndex],
-        'payload-order': `${newBeforeRow?.['payload-order']}_pending`,
+        [ORDER_FIELD_NAME]: `${newBeforeRow?.[ORDER_FIELD_NAME]}_pending`,
       }
       // move from index to moveToIndex
       newData.splice(moveToIndex, 0, newData.splice(moveFromIndex, 1)[0])
@@ -85,22 +89,9 @@ export const Table: React.FC<Props> = ({ appearance, columns, data: initialData 
         throw new Error('Failed to reorder')
       }
 
-      // Set the payload_order of the moved element with the response from the endpoint
-      const result = await response.json()
-      const updatedDoc = result.results[0] // Get the first (and only) updated document
-
-      // setData((currentData) => {
-      //   const newData = [...currentData]
-      //   const movedItemIndex = newData.findIndex((item) => item.id === movedId)
-      //   if (movedItemIndex !== -1) {
-      //     newData[movedItemIndex] = {
-      //       ...newData[movedItemIndex],
-      //       'payload-order': updatedDoc['payload-order'],
-      //     }
-      //   }
-      //   return newData
-      // })
+      // no need to update the data here, the data is updated in the useListQuery provider
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error reordering:', error)
       // Rollback to previous state if the request fails
       setData(previousData)
