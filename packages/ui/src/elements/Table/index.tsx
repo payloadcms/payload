@@ -5,7 +5,8 @@ import type { Column } from 'payload'
 import React from 'react'
 
 import './index.scss'
-import { ORDER_FIELD_NAME } from '../../utilities/renderTable.js'
+import { useListQuery } from '../../providers/ListQuery/index.js'
+// import { ORDER_FIELD_NAME } from '../../utilities/renderTable.js'
 import { DraggableSortableItem } from '../DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
 
@@ -14,12 +15,22 @@ const baseClass = 'table'
 export type Props = {
   readonly appearance?: 'condensed' | 'default'
   readonly columns?: Column[]
-  readonly data: Record<string, unknown>[]
+  readonly data: { [key: string]: unknown; id: string; 'payload-order': string }[]
 }
 
 export const Table: React.FC<Props> = ({ appearance, columns, data: initialData }) => {
-  // Convert data to state to handle optimistic updates
+  const { handleSortChange, query } = useListQuery()
   const [data, setData] = React.useState(initialData)
+
+  // Force re-sort when data changes
+  React.useEffect(() => {
+    // console.log('data', data)
+    if (query.sort) {
+      void handleSortChange(query.sort as string).catch((error) => {
+        console.error('Error re-sorting:', error)
+      })
+    }
+  }, [data, handleSortChange, query.sort])
 
   const activeColumns = columns?.filter((col) => col?.active)
 
@@ -32,22 +43,27 @@ export const Table: React.FC<Props> = ({ appearance, columns, data: initialData 
       return
     }
 
-    const movedId = data[moveFromIndex].id as string
-    const beforeId = moveToIndex > 0 ? (data[moveToIndex - 1]?.id as string) : undefined
-    const afterId = moveToIndex < data.length - 1 ? (data[moveToIndex]?.id as string) : undefined
+    const movedId = data[moveFromIndex].id
+    const newBeforeRow = moveToIndex > moveFromIndex ? data[moveToIndex] : data[moveToIndex - 1]
+    const newAfterRow = moveToIndex > moveFromIndex ? data[moveToIndex + 1] : data[moveToIndex]
+
+    console.log(
+      `moving ${data[moveFromIndex]?.text} between ${newBeforeRow?.text} and ${newAfterRow?.text}`,
+    )
 
     // Store the original data for rollback
     const previousData = [...data]
 
-    // Optimistically update the UI
+    // Update only the payload-order value
     setData((currentData) => {
       const newData = [...currentData]
-      const beforeOrder = newData[moveToIndex - 1][ORDER_FIELD_NAME]
-      console.log('beforeOrder', beforeOrder)
       newData[moveFromIndex] = {
         ...newData[moveFromIndex],
-        [ORDER_FIELD_NAME]: `${beforeOrder}_pending`,
+        'payload-order': `${newBeforeRow?.['payload-order']}_pending`,
       }
+      // move from index to moveToIndex
+      newData.splice(moveToIndex, 0, newData.splice(moveFromIndex, 1)[0])
+
       return newData
     })
 
@@ -56,7 +72,7 @@ export const Table: React.FC<Props> = ({ appearance, columns, data: initialData 
       const collectionSlug = window.location.pathname.split('/').filter(Boolean)[2]
       const response = await fetch(`/api/${collectionSlug}/reorder`, {
         body: JSON.stringify({
-          betweenIds: [beforeId, afterId],
+          betweenIds: [newBeforeRow?.id, newAfterRow?.id],
           docIds: [movedId],
         }),
         headers: {
@@ -68,6 +84,22 @@ export const Table: React.FC<Props> = ({ appearance, columns, data: initialData 
       if (!response.ok) {
         throw new Error('Failed to reorder')
       }
+
+      // Set the payload_order of the moved element with the response from the endpoint
+      const result = await response.json()
+      const updatedDoc = result.results[0] // Get the first (and only) updated document
+
+      // setData((currentData) => {
+      //   const newData = [...currentData]
+      //   const movedItemIndex = newData.findIndex((item) => item.id === movedId)
+      //   if (movedItemIndex !== -1) {
+      //     newData[movedItemIndex] = {
+      //       ...newData[movedItemIndex],
+      //       'payload-order': updatedDoc['payload-order'],
+      //     }
+      //   }
+      //   return newData
+      // })
     } catch (error) {
       console.error('Error reordering:', error)
       // Rollback to previous state if the request fails
@@ -76,7 +108,7 @@ export const Table: React.FC<Props> = ({ appearance, columns, data: initialData 
     }
   }
 
-  const rowIds = data.map((row) => row.id || String(Math.random())) as string[]
+  const rowIds = data.map((row) => row.id || String(Math.random()))
 
   return (
     <div
