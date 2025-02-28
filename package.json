@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.20.0",
+  "version": "3.25.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -117,7 +117,7 @@
   "devDependencies": {
     "@jest/globals": "29.7.0",
     "@libsql/client": "0.14.0",
-    "@next/bundle-analyzer": "15.1.5",
+    "@next/bundle-analyzer": "15.2.0",
     "@payloadcms/db-postgres": "workspace:*",
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/eslint-plugin": "workspace:*",
@@ -126,14 +126,14 @@
     "@sentry/nextjs": "^8.33.1",
     "@sentry/node": "^8.33.1",
     "@swc-node/register": "1.10.9",
-    "@swc/cli": "0.5.1",
+    "@swc/cli": "0.6.0",
     "@swc/jest": "0.2.37",
     "@types/fs-extra": "^11.0.2",
     "@types/jest": "29.5.12",
     "@types/minimist": "1.2.5",
     "@types/node": "22.5.4",
-    "@types/react": "19.0.1",
-    "@types/react-dom": "19.0.1",
+    "@types/react": "19.0.10",
+    "@types/react-dom": "19.0.4",
     "@types/shelljs": "0.8.15",
     "chalk": "^4.1.2",
     "comment-json": "^4.2.3",
@@ -153,7 +153,7 @@
     "lint-staged": "15.2.7",
     "minimist": "1.2.8",
     "mongodb-memory-server": "^10",
-    "next": "15.1.5",
+    "next": "15.2.0",
     "open": "^10.1.0",
     "p-limit": "^5.0.0",
     "playwright": "1.50.0",
@@ -166,16 +166,12 @@
     "shelljs": "0.8.5",
     "slash": "3.0.0",
     "sort-package-json": "^2.10.0",
-    "swc-plugin-transform-remove-imports": "2.0.0",
+    "swc-plugin-transform-remove-imports": "3.1.0",
     "tempy": "1.0.1",
     "tstyche": "^3.1.1",
     "tsx": "4.19.2",
     "turbo": "^2.3.3",
     "typescript": "5.7.3"
-  },
-  "peerDependencies": {
-    "react": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020",
-    "react-dom": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020"
   },
   "packageManager": "pnpm@9.7.1",
   "engines": {

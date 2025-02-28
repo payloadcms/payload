@@ -1,4 +1,4 @@
-import type { Data, Field, PayloadRequest, TabAsField, User } from 'payload'
+import type { Data, Field, FlattenedBlock, PayloadRequest, TabAsField, User } from 'payload'
 
 import { getDefaultValue } from 'payload'
 import { fieldAffectsData, tabHasName } from 'payload/shared'
@@ -80,8 +80,12 @@ export const defaultValuePromise = async <T>({
       if (Array.isArray(rows)) {
         const promises = []
         rows.forEach((row) => {
-          const blockTypeToMatch = row.blockType
-          const block = field.blocks.find((blockType) => blockType.slug === blockTypeToMatch)
+          const blockTypeToMatch: string = row.blockType
+          const block =
+            req.payload.blocks[blockTypeToMatch] ??
+            ((field.blockReferences ?? field.blocks).find(
+              (blockType) => typeof blockType !== 'string' && blockType.slug === blockTypeToMatch,
+            ) as FlattenedBlock | undefined)
 
           if (block) {
             row.blockType = blockTypeToMatch

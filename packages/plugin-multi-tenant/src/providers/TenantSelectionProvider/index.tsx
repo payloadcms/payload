@@ -33,7 +33,7 @@ export const TenantSelectionProvider = async ({
     })
     tenantOptions = docs.map((doc) => ({
       label: String(doc[useAsTitle]),
-      value: String(doc.id),
+      value: doc.id,
     }))
   } catch (_) {
     // user likely does not have access
@@ -42,15 +42,17 @@ export const TenantSelectionProvider = async ({
   const cookies = await getCookies()
   let tenantCookie = cookies.get('payload-tenant')?.value
   let initialValue = undefined
-  const isValidTenantCookie =
-    (tenantOptions.length > 1 && tenantCookie === SELECT_ALL) ||
-    tenantOptions.some((option) => option.value === tenantCookie)
 
-  if (isValidTenantCookie) {
-    initialValue = tenantCookie
+  if (tenantOptions.length > 1 && tenantCookie === SELECT_ALL) {
+    initialValue = SELECT_ALL
   } else {
-    tenantCookie = undefined
-    initialValue = tenantOptions.length > 1 ? SELECT_ALL : tenantOptions[0]?.value
+    const matchingOption = tenantOptions.find((option) => String(option.value) === tenantCookie)
+    if (matchingOption) {
+      initialValue = matchingOption.value
+    } else {
+      tenantCookie = undefined
+      initialValue = tenantOptions.length > 1 ? SELECT_ALL : tenantOptions[0]?.value
+    }
   }
 
   return (

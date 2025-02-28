@@ -55,7 +55,7 @@ describe('Radio', () => {
     if (client) {
       await client.logout()
     }
-    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
+    client = new RESTClient({ defaultSlug: 'users', serverURL })
     await client.login()
     await ensureCompilationIsDone({ page, serverURL })
   })
@@ -85,7 +85,6 @@ describe('Radio', () => {
     })
 
     await page.goto(url.create)
-    await page.waitForURL(url.create)
 
     await page.locator('#field-text').fill('test')
     await page.locator('#field-uniqueText').fill(uniqueText)

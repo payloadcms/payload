@@ -9,7 +9,7 @@ import { getTransaction } from './utilities/getTransaction.js'
 
 export const create: Create = async function create(
   this: DrizzleAdapter,
-  { collection: collectionSlug, data, req, select },
+  { collection: collectionSlug, data, req, select, returning },
 ) {
   const db = await getTransaction(this, req)
   const collection = this.payload.collections[collectionSlug].config
@@ -25,7 +25,12 @@ export const create: Create = async function create(
     req,
     select,
     tableName,
+    ignoreResult: returning === false,
   })
+
+  if (returning === false) {
+    return null
+  }
 
   return result
 }

@@ -101,7 +101,7 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
                   req,
                   showHiddenFields,
                 })
-                return `<table class="lexical-table" style="border-collapse: collapse;">${childrenText}</table>`
+                return `<div class="lexical-table-container"><table class="lexical-table" style="border-collapse: collapse;">${childrenText}</table></div>`
               },
               nodeTypes: [TableNode.getType()],
             },

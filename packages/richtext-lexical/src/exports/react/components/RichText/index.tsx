@@ -11,7 +11,6 @@ import type { JSXConverters } from './converter/types.js'
 
 import { defaultJSXConverters } from './converter/defaultConverters.js'
 import { convertLexicalToJSX } from './converter/index.js'
-import './index.css'
 
 export type JSXConvertersFunction<
   T extends { [key: string]: any; type?: string } =

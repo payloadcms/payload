@@ -91,17 +91,17 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
     // beforeValidate - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      await hook({
-        collection: args.collection?.config,
-        context: req.context,
-        data: user,
-        operation: 'update',
-        req,
-      })
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.beforeValidate?.length) {
+      for (const hook of collectionConfig.hooks.beforeValidate) {
+        await hook({
+          collection: args.collection?.config,
+          context: req.context,
+          data: user,
+          operation: 'update',
+          req,
+        })
+      }
+    }
 
     // /////////////////////////////////////
     // Update new password

@@ -7,6 +7,60 @@
  */
 
 /**
+ * Supported timezones in IANA format.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supportedTimezones".
+ */
+export type SupportedTimezones =
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji'
+  | 'America/Monterrey';
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "BlockColumns".
  */
@@ -27,6 +81,11 @@ export interface Config {
   auth: {
     users: UserAuthOperations;
   };
+  blocks: {
+    ConfigBlockTest: ConfigBlockTest;
+    localizedTextReference: LocalizedTextReference;
+    localizedTextReference2: LocalizedTextReference2;
+  };
   collections: {
     'lexical-fields': LexicalField;
     'lexical-migrate-fields': LexicalMigrateField;
@@ -34,6 +93,7 @@ export interface Config {
     lexicalObjectReferenceBug: LexicalObjectReferenceBug;
     users: User;
     LexicalInBlock: LexicalInBlock;
+    'lexical-access-control': LexicalAccessControl;
     'select-versions-fields': SelectVersionsField;
     'array-fields': ArrayField;
     'block-fields': BlockField;
@@ -80,6 +140,7 @@ export interface Config {
     lexicalObjectReferenceBug: LexicalObjectReferenceBugSelect<false> | LexicalObjectReferenceBugSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     LexicalInBlock: LexicalInBlockSelect<false> | LexicalInBlockSelect<true>;
+    'lexical-access-control': LexicalAccessControlSelect<false> | LexicalAccessControlSelect<true>;
     'select-versions-fields': SelectVersionsFieldsSelect<false> | SelectVersionsFieldsSelect<true>;
     'array-fields': ArrayFieldsSelect<false> | ArrayFieldsSelect<true>;
     'block-fields': BlockFieldsSelect<false> | BlockFieldsSelect<true>;
@@ -153,6 +214,36 @@ export interface UserAuthOperations {
     email: string;
     password: string;
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ConfigBlockTest".
+ */
+export interface ConfigBlockTest {
+  deduplicatedText?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'ConfigBlockTest';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localizedTextReference".
+ */
+export interface LocalizedTextReference {
+  text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'localizedTextReference';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localizedTextReference2".
+ */
+export interface LocalizedTextReference2 {
+  text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'localizedTextReference2';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -456,11 +547,36 @@ export interface LexicalInBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-access-control".
+ */
+export interface LexicalAccessControl {
+  id: string;
+  title?: string | null;
+  richText?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "select-versions-fields".
  */
 export interface SelectVersionsField {
   id: string;
-  hasMany?: ('a' | 'b' | 'c')[] | null;
+  hasMany?: ('a' | 'b' | 'c' | 'd')[] | null;
   array?:
     | {
         hasManyArr?: ('a' | 'b' | 'c')[] | null;
@@ -469,7 +585,7 @@ export interface SelectVersionsField {
     | null;
   blocks?:
     | {
-        hasManyArr?: ('a' | 'b' | 'c')[] | null;
+        hasManyBlocks?: ('a' | 'b' | 'c')[] | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'block';
@@ -477,6 +593,7 @@ export interface SelectVersionsField {
     | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -567,6 +684,12 @@ export interface ArrayField {
         id?: string | null;
       }[]
     | null;
+  arrayWithLabels?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -591,7 +714,7 @@ export interface BlockField {
         text?: string | null;
         id?: string | null;
         blockName?: string | null;
-        blockType: 'text';
+        blockType: 'textInI18nBlock';
       }[]
     | null;
   blocksWithLocalizedArray?:
@@ -672,7 +795,7 @@ export interface BlockField {
         blockTitle?: string | null;
         id?: string | null;
         blockName?: string | null;
-        blockType: 'block';
+        blockType: 'blockWithMinRows';
       }[]
     | null;
   customBlocks?:
@@ -698,6 +821,49 @@ export interface BlockField {
         blockName?: string | null;
         blockType: 'relationships';
       }[]
+    | null;
+  blockWithLabels?:
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'text';
+      }[]
+    | null;
+  deduplicatedBlocks?: ConfigBlockTest[] | null;
+  deduplicatedBlocks2?: ConfigBlockTest[] | null;
+  localizedReferencesLocalizedBlock?: LocalizedTextReference[] | null;
+  localizedReferences?: LocalizedTextReference2[] | null;
+  /**
+   * The purpose of this field is to test Block groups.
+   */
+  groupedBlocks?:
+    | (
+        | {
+            text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockWithGroupOne';
+          }
+        | {
+            text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockWithGroupTwo';
+          }
+        | {
+            text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockWithLocalizedGroup';
+          }
+        | {
+            text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockWithoutGroup';
+          }
+      )[]
     | null;
   updatedAt: string;
   createdAt: string;
@@ -738,14 +904,9 @@ export interface SubBlocksBlock {
             text: string;
             id?: string | null;
             blockName?: string | null;
-            blockType: 'text';
+            blockType: 'textRequired';
           }
-        | {
-            number: number;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'number';
-          }
+        | NumberBlock
       )[]
     | null;
   id?: string | null;
@@ -799,14 +960,9 @@ export interface LocalizedSubBlocksBlock {
             text: string;
             id?: string | null;
             blockName?: string | null;
-            blockType: 'text';
+            blockType: 'textRequired';
           }
-        | {
-            number: number;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'number';
-          }
+        | NumberBlock
       )[]
     | null;
   id?: string | null;
@@ -853,6 +1009,7 @@ export interface TextField {
   fieldWithDefaultValue?: string | null;
   dependentOnFieldWithDefaultValue?: string | null;
   hasMany?: string[] | null;
+  readOnlyHasMany?: string[] | null;
   validatesHasMany?: string[] | null;
   localizedHasMany?: string[] | null;
   withMinRows?: string[] | null;
@@ -869,7 +1026,7 @@ export interface TextField {
         texts?: string[] | null;
         id?: string | null;
         blockName?: string | null;
-        blockType: 'block';
+        blockType: 'blockWithText';
       }[]
     | null;
   updatedAt: string;
@@ -1038,6 +1195,29 @@ export interface DateField {
   dayOnly?: string | null;
   dayAndTime?: string | null;
   monthOnly?: string | null;
+  defaultWithTimezone?: string | null;
+  defaultWithTimezone_tz?: SupportedTimezones;
+  /**
+   * This date here should be required.
+   */
+  dayAndTimeWithTimezone: string;
+  dayAndTimeWithTimezone_tz: SupportedTimezones;
+  timezoneBlocks?:
+    | {
+        dayAndTime?: string | null;
+        dayAndTime_tz?: SupportedTimezones;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'dateBlock';
+      }[]
+    | null;
+  timezoneArray?:
+    | {
+        dayAndTime?: string | null;
+        dayAndTime_tz?: SupportedTimezones;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1294,6 +1474,15 @@ export interface JsonField {
       | boolean
       | null;
   };
+  customJSON?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1326,7 +1515,7 @@ export interface NumberField {
         numbers?: number[] | null;
         id?: string | null;
         blockName?: string | null;
-        blockType: 'block';
+        blockType: 'blockWithNumber';
       }[]
     | null;
   updatedAt: string;
@@ -1528,7 +1717,7 @@ export interface RichTextField {
               | null;
             id?: string | null;
             blockName?: string | null;
-            blockType: 'richTextBlock';
+            blockType: 'richTextBlockSlate';
           }
       )[]
     | null;
@@ -1831,6 +2020,10 @@ export interface PayloadLockedDocument {
         value: string | LexicalInBlock;
       } | null)
     | ({
+        relationTo: 'lexical-access-control';
+        value: string | LexicalAccessControl;
+      } | null)
+    | ({
         relationTo: 'select-versions-fields';
         value: string | SelectVersionsField;
       } | null)
@@ -2106,6 +2299,16 @@ export interface LexicalInBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-access-control_select".
+ */
+export interface LexicalAccessControlSelect<T extends boolean = true> {
+  title?: T;
+  richText?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "select-versions-fields_select".
  */
 export interface SelectVersionsFieldsSelect<T extends boolean = true> {
@@ -2122,13 +2325,14 @@ export interface SelectVersionsFieldsSelect<T extends boolean = true> {
         block?:
           | T
           | {
-              hasManyArr?: T;
+              hasManyBlocks?: T;
               id?: T;
               blockName?: T;
             };
       };
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2221,6 +2425,12 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
         text?: T;
         id?: T;
       };
+  arrayWithLabels?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2272,7 +2482,7 @@ export interface BlockFieldsSelect<T extends boolean = true> {
   i18nBlocks?:
     | T
     | {
-        text?:
+        textInI18nBlock?:
           | T
           | {
               text?: T;
@@ -2365,7 +2575,7 @@ export interface BlockFieldsSelect<T extends boolean = true> {
   blocksWithMinRows?:
     | T
     | {
-        block?:
+        blockWithMinRows?:
           | T
           | {
               blockTitle?: T;
@@ -2402,6 +2612,53 @@ export interface BlockFieldsSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  blockWithLabels?:
+    | T
+    | {
+        text?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  deduplicatedBlocks?: T | {};
+  deduplicatedBlocks2?: T | {};
+  localizedReferencesLocalizedBlock?: T | {};
+  localizedReferences?: T | {};
+  groupedBlocks?:
+    | T
+    | {
+        blockWithGroupOne?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        blockWithGroupTwo?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        blockWithLocalizedGroup?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        blockWithoutGroup?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2432,20 +2689,14 @@ export interface SubBlocksBlockSelect<T extends boolean = true> {
   subBlocks?:
     | T
     | {
-        text?:
+        textRequired?:
           | T
           | {
               text?: T;
               id?: T;
               blockName?: T;
             };
-        number?:
-          | T
-          | {
-              number?: T;
-              id?: T;
-              blockName?: T;
-            };
+        number?: T | NumberBlockSelect<T>;
       };
   id?: T;
   blockName?: T;
@@ -2487,20 +2738,14 @@ export interface LocalizedSubBlocksBlockSelect<T extends boolean = true> {
   subBlocks?:
     | T
     | {
-        text?:
+        textRequired?:
           | T
           | {
               text?: T;
               id?: T;
               blockName?: T;
             };
-        number?:
-          | T
-          | {
-              number?: T;
-              id?: T;
-              blockName?: T;
-            };
+        number?: T | NumberBlockSelect<T>;
       };
   id?: T;
   blockName?: T;
@@ -2670,6 +2915,29 @@ export interface DateFieldsSelect<T extends boolean = true> {
   dayOnly?: T;
   dayAndTime?: T;
   monthOnly?: T;
+  defaultWithTimezone?: T;
+  defaultWithTimezone_tz?: T;
+  dayAndTimeWithTimezone?: T;
+  dayAndTimeWithTimezone_tz?: T;
+  timezoneBlocks?:
+    | T
+    | {
+        dateBlock?:
+          | T
+          | {
+              dayAndTime?: T;
+              dayAndTime_tz?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  timezoneArray?:
+    | T
+    | {
+        dayAndTime?: T;
+        dayAndTime_tz?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2906,6 +3174,7 @@ export interface JsonFieldsSelect<T extends boolean = true> {
     | {
         jsonWithinGroup?: T;
       };
+  customJSON?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2935,7 +3204,7 @@ export interface NumberFieldsSelect<T extends boolean = true> {
   blocks?:
     | T
     | {
-        block?:
+        blockWithNumber?:
           | T
           | {
               numbers?: T;
@@ -3023,7 +3292,7 @@ export interface RichTextFieldsSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
-        richTextBlock?:
+        richTextBlockSlate?:
           | T
           | {
               text?: T;
@@ -3200,6 +3469,7 @@ export interface TextFieldsSelect<T extends boolean = true> {
   fieldWithDefaultValue?: T;
   dependentOnFieldWithDefaultValue?: T;
   hasMany?: T;
+  readOnlyHasMany?: T;
   validatesHasMany?: T;
   localizedHasMany?: T;
   withMinRows?: T;
@@ -3214,7 +3484,7 @@ export interface TextFieldsSelect<T extends boolean = true> {
   blocks?:
     | T
     | {
-        block?:
+        blockWithText?:
           | T
           | {
               texts?: T;

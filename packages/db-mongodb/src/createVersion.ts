@@ -1,12 +1,11 @@
 import type { CreateOptions } from 'mongoose'
 
-import { Types } from 'mongoose'
-import { buildVersionCollectionFields, type CreateVersion, type Document } from 'payload'
+import { buildVersionCollectionFields, type CreateVersion } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
 import { getSession } from './utilities/getSession.js'
-import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
+import { transform } from './utilities/transform.js'
 
 export const createVersion: CreateVersion = async function createVersion(
   this: MongooseAdapter,
@@ -17,6 +16,7 @@ export const createVersion: CreateVersion = async function createVersion(
     parent,
     publishedLocale,
     req,
+    returning,
     snapshot,
     updatedAt,
     versionData,
@@ -27,25 +27,30 @@ export const createVersion: CreateVersion = async function createVersion(
     session: await getSession(this, req),
   }
 
-  const data = sanitizeRelationshipIDs({
-    config: this.payload.config,
-    data: {
-      autosave,
-      createdAt,
-      latest: true,
-      parent,
-      publishedLocale,
-      snapshot,
-      updatedAt,
-      version: versionData,
-    },
-    fields: buildVersionCollectionFields(
-      this.payload.config,
-      this.payload.collections[collectionSlug].config,
-    ),
+  const data = {
+    autosave,
+    createdAt,
+    latest: true,
+    parent,
+    publishedLocale,
+    snapshot,
+    updatedAt,
+    version: versionData,
+  }
+
+  const fields = buildVersionCollectionFields(
+    this.payload.config,
+    this.payload.collections[collectionSlug].config,
+  )
+
+  transform({
+    adapter: this,
+    data,
+    fields,
+    operation: 'write',
   })
 
-  const [doc] = await VersionModel.create([data], options, req)
+  let [doc] = await VersionModel.create([data], options, req)
 
   const parentQuery = {
     $or: [
@@ -55,13 +60,6 @@ export const createVersion: CreateVersion = async function createVersion(
         },
       },
     ],
-  }
-  if (data.parent instanceof Types.ObjectId) {
-    parentQuery.$or.push({
-      parent: {
-        $eq: data.parent.toString(),
-      },
-    })
   }
 
   await VersionModel.updateMany(
@@ -89,13 +87,18 @@ export const createVersion: CreateVersion = async function createVersion(
     options,
   )
 
-  const result: Document = JSON.parse(JSON.stringify(doc))
-  const verificationToken = doc._verificationToken
-
-  // custom id type reset
-  result.id = result._id
-  if (verificationToken) {
-    result._verificationToken = verificationToken
+  if (returning === false) {
+    return null
   }
-  return result
+
+  doc = doc.toObject()
+
+  transform({
+    adapter: this,
+    data: doc,
+    fields,
+    operation: 'read',
+  })
+
+  return doc
 }

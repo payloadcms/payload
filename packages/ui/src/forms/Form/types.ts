@@ -37,6 +37,13 @@ export type FormProps = {
     errorToast: (value: string) => void,
   ) => void
   initialState?: FormState
+  /**
+   * Determines if this Form is the main, top-level Form of a document. If set to true, the
+   * Form's children will be wrapped in a DocumentFormContext, which lets you access this document
+   * Form's data and fields from any child component - even if that child component is wrapped in a child
+   * Form (e.g. a lexical block).
+   */
+  isDocumentForm?: boolean
   isInitializing?: boolean
   log?: boolean
   onChange?: ((args: { formState: FormState; submitted?: boolean }) => Promise<FormState>)[]
@@ -77,7 +84,7 @@ export type CreateFormData = (
    * @default true
    */
   options?: { mergeOverrideData?: boolean },
-) => FormData
+) => FormData | Promise<FormData>
 export type GetFields = () => FormState
 export type GetField = (path: string) => FormField
 export type GetData = () => Data
@@ -220,6 +227,11 @@ export type Context = {
   getFields: GetFields
   getSiblingData: GetSiblingData
   initializing: boolean
+  /**
+   * Tracks wether the form state passes validation.
+   * For example the state could be submitted but invalid as field errors have been returned.
+   */
+  isValid: boolean
   removeFieldRow: ({ path, rowIndex }: { path: string; rowIndex: number }) => void
   replaceFieldRow: ({
     blockType,
@@ -236,7 +248,13 @@ export type Context = {
   }) => void
   replaceState: (state: FormState) => void
   reset: Reset
+  /**
+   * If the form has started processing in the background (e.g.
+   * if autosave is running), this will be true.
+   */
+  setBackgroundProcessing: SetProcessing
   setDisabled: (disabled: boolean) => void
+  setIsValid: (processing: boolean) => void
   setModified: SetModified
   setProcessing: SetProcessing
   setSubmitted: SetSubmitted

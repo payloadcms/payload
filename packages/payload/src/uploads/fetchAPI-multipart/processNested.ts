@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { isSafeFromPollution } from './utilities.js'
 
 export const processNested = function (data) {

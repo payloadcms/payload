@@ -3,6 +3,7 @@ import type { DeleteMany } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { buildQuery } from './queries/buildQuery.js'
 import { getSession } from './utilities/getSession.js'
 
 export const deleteMany: DeleteMany = async function deleteMany(
@@ -14,8 +15,10 @@ export const deleteMany: DeleteMany = async function deleteMany(
     session: await getSession(this, req),
   }
 
-  const query = await Model.buildQuery({
-    payload: this.payload,
+  const query = await buildQuery({
+    adapter: this,
+    collectionSlug: collection,
+    fields: this.payload.collections[collection].config.flattenedFields,
     where,
   })
 

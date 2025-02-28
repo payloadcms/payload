@@ -257,10 +257,19 @@ const DocumentInfo: React.FC<
   )
 
   const incrementVersionCount = useCallback(() => {
+    const newCount = versionCount + 1
     if (collectionConfig && collectionConfig.versions) {
-      setVersionCount(Math.min(versionCount + 1, collectionConfig.versions.maxPerDoc))
+      if (collectionConfig.versions.maxPerDoc > 0) {
+        setVersionCount(Math.min(newCount, collectionConfig.versions.maxPerDoc))
+      } else {
+        setVersionCount(newCount)
+      }
     } else if (globalConfig && globalConfig.versions) {
-      setVersionCount(Math.min(versionCount + 1, globalConfig.versions.max))
+      if (globalConfig.versions.max > 0) {
+        setVersionCount(Math.min(newCount, globalConfig.versions.max))
+      } else {
+        setVersionCount(newCount)
+      }
     }
   }, [collectionConfig, globalConfig, versionCount])
 

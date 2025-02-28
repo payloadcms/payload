@@ -16,7 +16,16 @@ import { getTransaction } from './utilities/getTransaction.js'
 
 export async function updateVersion<T extends TypeWithID>(
   this: DrizzleAdapter,
-  { id, collection, locale, req, select, versionData, where: whereArg }: UpdateVersionArgs<T>,
+  {
+    id,
+    collection,
+    locale,
+    req,
+    select,
+    versionData,
+    where: whereArg,
+    returning,
+  }: UpdateVersionArgs<T>,
 ) {
   const db = await getTransaction(this, req)
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
@@ -47,7 +56,12 @@ export async function updateVersion<T extends TypeWithID>(
     select,
     tableName,
     where,
+    ignoreResult: returning === false,
   })
+
+  if (returning === false) {
+    return null
+  }
 
   return result
 }

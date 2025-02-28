@@ -77,6 +77,13 @@ export type JobsConfig = {
    */
   jobsCollectionOverrides?: (args: { defaultJobsCollection: CollectionConfig }) => CollectionConfig
   /**
+   * A function that will be executed before Payload picks up jobs which are configured by the `jobs.autorun` function.
+   * If this function returns true, jobs will be queried and picked up. If it returns false, jobs will not be run.
+   * @param payload
+   * @returns boolean
+   */
+  shouldAutoRun?: (payload: Payload) => boolean | Promise<boolean>
+  /**
    * Define all possible tasks here
    */
   tasks: TaskConfig<any>[]

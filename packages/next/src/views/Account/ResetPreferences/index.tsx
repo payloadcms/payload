@@ -1,11 +1,9 @@
 'use client'
 import type { User } from 'payload'
 
-import { Button, LoadingOverlay, toast, useModal, useTranslation } from '@payloadcms/ui'
+import { Button, ConfirmationModal, toast, useModal, useTranslation } from '@payloadcms/ui'
 import * as qs from 'qs-esm'
-import { Fragment, useCallback, useState } from 'react'
-
-import { ConfirmResetModal } from './ConfirmResetModal/index.js'
+import { Fragment, useCallback } from 'react'
 
 const confirmResetModalSlug = 'confirm-reset-modal'
 
@@ -16,13 +14,10 @@ export const ResetPreferences: React.FC<{
   const { openModal } = useModal()
   const { t } = useTranslation()
 
-  const [loading, setLoading] = useState(false)
-
   const handleResetPreferences = useCallback(async () => {
-    if (!user || loading) {
+    if (!user) {
       return
     }
-    setLoading(true)
 
     const stringifiedQuery = qs.stringify(
       {
@@ -55,12 +50,10 @@ export const ResetPreferences: React.FC<{
       } else {
         toast.error(message)
       }
-    } catch (e) {
+    } catch (_err) {
       // swallow error
-    } finally {
-      setLoading(false)
     }
-  }, [apiRoute, loading, user])
+  }, [apiRoute, user])
 
   return (
     <Fragment>
@@ -69,8 +62,13 @@ export const ResetPreferences: React.FC<{
           {t('general:resetPreferences')}
         </Button>
       </div>
-      <ConfirmResetModal onConfirm={handleResetPreferences} slug={confirmResetModalSlug} />
-      {loading && <LoadingOverlay loadingText={t('general:resettingPreferences')} />}
+      <ConfirmationModal
+        body={t('general:resetPreferencesDescription')}
+        confirmingLabel={t('general:resettingPreferences')}
+        heading={t('general:resetPreferences')}
+        modalSlug={confirmResetModalSlug}
+        onConfirm={handleResetPreferences}
+      />
     </Fragment>
   )
 }
