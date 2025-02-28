@@ -1129,6 +1129,79 @@ describe('Queues', () => {
     expect(jobAfterRun.input.amountTask1Retried).toBe(0)
   })
 
+
+  it('ensure jobs can be cancelled using payload.jobs.cancelByID', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    const job = await payload.jobs.queue({
+      workflow: 'longRunning',
+      input: {},
+    })
+    void payload.jobs.run().catch((_ignored) => {})
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
+    // Should be in processing - cancel job
+    await payload.jobs.cancelByID({
+      id: job.id,
+    })
+
+    // Wait 4 seconds. This ensures that the job has enough time to finish
+    // if it hadn't been cancelled. That way we can be sure that the job was
+    // actually cancelled.
+    await new Promise((resolve) => setTimeout(resolve, 4000))
+
+    // Ensure job is not completed and cancelled
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+      depth: 0,
+    })
+
+    expect(Boolean(jobAfterRun.completedAt)).toBe(false)
+    expect(jobAfterRun.hasError).toBe(true)
+    // @ts-expect-error error is not typed
+    expect(jobAfterRun.error?.cancelled).toBe(true)
+    expect(jobAfterRun.processing).toBe(false)
+  })
+
+  it('ensure jobs can be cancelled using payload.jobs.cancel', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    const job = await payload.jobs.queue({
+      workflow: 'longRunning',
+      input: {},
+    })
+    void payload.jobs.run().catch((_ignored) => {})
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
+    // Cancel all jobs
+    await payload.jobs.cancel({
+      where: {
+        id: {
+          exists: true,
+        },
+      },
+    })
+
+    // Wait 4 seconds. This ensures that the job has enough time to finish
+    // if it hadn't been cancelled. That way we can be sure that the job was
+    // actually cancelled.
+    await new Promise((resolve) => setTimeout(resolve, 4000))
+
+    // Ensure job is not completed and cancelled
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+      depth: 0,
+    })
+
+    expect(Boolean(jobAfterRun.completedAt)).toBe(false)
+    expect(jobAfterRun.hasError).toBe(true)
+    // @ts-expect-error error is not typed
+    expect(jobAfterRun.error?.cancelled).toBe(true)
+    expect(jobAfterRun.processing).toBe(false)
+  })
+  
   it('can tasks throw error', async () => {
     payload.config.jobs.deleteJobOnComplete = false
 

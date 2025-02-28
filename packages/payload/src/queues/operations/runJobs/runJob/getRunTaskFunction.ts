@@ -264,7 +264,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           processing: false,
         })
 
-        return
+        throw new Error(errorMessage)
       }
 
       let maxRetries: number | undefined = finalRetriesConfig?.attempts
