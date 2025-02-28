@@ -887,7 +887,7 @@ describe('database', () => {
       expect(result.point).toEqual([5, 10])
     })
 
-    it('ensure updateMany updates all docs', async () => {
+    it('ensure updateMany updates all docs and respects where query', async () => {
       await payload.db.deleteMany({
         collection: postsSlug,
         where: {
