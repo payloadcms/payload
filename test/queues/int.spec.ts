@@ -1129,6 +1129,7 @@ describe('Queues', () => {
     expect(jobAfterRun.input.amountTask1Retried).toBe(0)
   })
 
+
   it('ensure jobs can be cancelled using payload.jobs.cancelByID', async () => {
     payload.config.jobs.deleteJobOnComplete = false
 
@@ -1199,5 +1200,70 @@ describe('Queues', () => {
     // @ts-expect-error error is not typed
     expect(jobAfterRun.error?.cancelled).toBe(true)
     expect(jobAfterRun.processing).toBe(false)
+  })
+  
+  it('can tasks throw error', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    const job = await payload.jobs.queue({
+      task: 'ThrowError',
+      input: {},
+    })
+
+    await payload.jobs.run()
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    expect(jobAfterRun.hasError).toBe(true)
+    expect(jobAfterRun.log?.length).toBe(1)
+    expect(jobAfterRun.log[0].error.message).toBe('failed')
+    expect(jobAfterRun.log[0].state).toBe('failed')
+  })
+
+  it('can tasks return error', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    const job = await payload.jobs.queue({
+      task: 'ReturnError',
+      input: {},
+    })
+
+    await payload.jobs.run()
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    expect(jobAfterRun.hasError).toBe(true)
+    expect(jobAfterRun.log?.length).toBe(1)
+    expect(jobAfterRun.log[0].error.message).toBe('failed')
+    expect(jobAfterRun.log[0].state).toBe('failed')
+  })
+
+  it('can tasks return error with custom error message', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    const job = await payload.jobs.queue({
+      task: 'ReturnCustomError',
+      input: {
+        errorMessage: 'custom error message',
+      },
+    })
+
+    await payload.jobs.run()
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    expect(jobAfterRun.hasError).toBe(true)
+    expect(jobAfterRun.log?.length).toBe(1)
+    expect(jobAfterRun.log[0].error.message).toBe('custom error message')
+    expect(jobAfterRun.log[0].state).toBe('failed')
   })
 })
