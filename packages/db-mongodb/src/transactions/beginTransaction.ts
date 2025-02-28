@@ -21,12 +21,13 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
   const id = uuid()
 
   if (!this.sessions[id]) {
+    // @ts-expect-error BaseDatabaseAdapter and MongoosAdapter (that extends Base) sessions aren't compatible.
     this.sessions[id] = client.startSession()
   }
-  if (this.sessions[id].inTransaction()) {
+  if (this.sessions[id]?.inTransaction()) {
     this.payload.logger.warn('beginTransaction called while transaction already exists')
   } else {
-    this.sessions[id].startTransaction(options || (this.transactionOptions as TransactionOptions))
+    this.sessions[id]?.startTransaction(options || (this.transactionOptions as TransactionOptions))
   }
 
   return id
