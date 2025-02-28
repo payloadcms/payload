@@ -145,9 +145,13 @@ export function t<
 
 const initTFunction: InitTFunction = (args) => {
   const { config, language, translations } = args
-  const mergedTranslations = config?.translations?.[language]
-    ? deepMergeSimple<DefaultTranslationsObject>(translations, config?.translations?.[language])
-    : translations
+  const mergedTranslations =
+    language && config?.translations?.[language as keyof typeof config.translations]
+      ? deepMergeSimple<DefaultTranslationsObject>(
+          translations,
+          config.translations[language as keyof typeof config.translations]!,
+        )
+      : translations
 
   return {
     t: (key, vars) => {
