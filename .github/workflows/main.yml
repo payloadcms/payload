@@ -211,7 +211,6 @@ jobs:
           - 8081:8081
         env:
           PROTOCOL: https
-        if: matrix.database == 'cosmosdb'
 
     steps:
       - uses: actions/checkout@v4
@@ -251,13 +250,20 @@ jobs:
           echo "POSTGRES_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres" >> $GITHUB_ENV
         if: matrix.database == 'supabase'
 
-      - name: Export Cosmos DB Emulator Certificate
+      - name: Set up CosmosDB Emulator (only for CosmosDB tests)
+        if: matrix.database == 'cosmosdb'
         run: |
-          sudo apt update && sudo apt install -y openssl
-          openssl s_client -connect localhost:8081 </dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > cosmos_emulator.cert
+          echo "Waiting for CosmosDB Emulator to be ready..."
+          until curl -k https://localhost:8081/_explorer/emulator.pem; do sleep 5; done
+          curl -k https://localhost:8081/_explorer/emulator.pem > cosmos_emulator.cert
           sudo cp cosmos_emulator.cert /usr/local/share/ca-certificates/
           sudo update-ca-certificates
-        if: matrix.database == 'cosmosdb'
+
+      - name: Run tests
+        run: npm test
+        env:
+          COSMOSDB_CONNECTION_STRING: 'mongodb://localhost:10255/?ssl=true&replicaSet=globaldb&retrywrites=false'
+          COSMOSDB_CA_CERT: '/usr/local/share/ca-certificates/cosmos_emulator.cert'
 
       - name: Integration Tests
         run: pnpm test:int
