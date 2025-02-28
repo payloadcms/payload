@@ -4,7 +4,6 @@
     "composite": false,
     "noEmit": true,
     "baseUrl": ".",
-
   },
   "references": [
     {

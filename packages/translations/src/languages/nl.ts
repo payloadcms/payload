@@ -175,6 +175,17 @@ export const nlTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Blok togglen',
     uploadNewLabel: 'Upload nieuw(e) {{label}}',
   },
+  folder: {
+    deleteConfirmation:
+      'Geneste mappen zullen worden verwijderd. Geneste documenten worden verplaatst naar de dichtstbijzijnde bovenliggende map. Weet u het zeker?',
+    deleteFolder: 'Verwijder map',
+    folderName: 'Mapnaam',
+    moveFolder: 'Verplaats Map',
+    newFolder: 'Nieuwe Map',
+    removeFromFolder: 'Verwijderen uit map',
+    renameFolder: 'Hernoem Map',
+    selectFolder: 'Selecteer Map',
+  },
   general: {
     aboutToDelete:
       'U staat op het punt om {{label}} <1>{{title}}</1> te verwijderen. Weet u het zeker?',
@@ -263,6 +274,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     globals: 'Globalen',
     goBack: 'Ga terug',
     isEditing: 'is aan het bewerken',
+    item: 'artikel',
+    items: 'artikelen',
     language: 'Taal',
     lastModified: 'Laatst gewijzigd',
     leaveAnyway: 'Toch weggaan',
@@ -274,8 +287,14 @@ export const nlTranslations: DefaultTranslationsObject = {
     locales: 'Landinstellingen',
     menu: 'Menu',
     moreOptions: 'Meer opties',
+    move: 'Verplaatsen',
+    moveConfirm:
+      'U staat op het punt om {{count}} {{label}} te verplaatsen naar <1>{{destination}}</1>. Weet u het zeker?',
+    moveCount: 'Verplaats {{count}} {{label}}',
     moveDown: 'Verplaats naar beneden',
     moveUp: 'Verplaats naar boven',
+    moving: 'Verhuizen',
+    movingCount: 'Verplaatsen {{count}} {{label}}',
     newPassword: 'Nieuw wachtwoord',
     next: 'Volgende',
     noDateSelected: 'Geen datum geselecteerd',
@@ -303,6 +322,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     reindex: 'Herindexeren',
     reindexingAll: 'Bezig met het opnieuw indexeren van alle {{collections}}.',
     remove: 'Verwijderen',
+    rename: 'Hernoemen',
     reset: 'Resetten',
     resetPreferences: 'Voorkeuren resetten',
     resetPreferencesDescription:

@@ -1502,6 +1502,9 @@ importers:
       '@dnd-kit/sortable':
         specifier: 7.0.2
         version: 7.0.2(@dnd-kit/core@6.0.8(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)
+      '@dnd-kit/utilities':
+        specifier: 3.2.2
+        version: 3.2.2(react@19.0.0)
       '@faceless-ui/modal':
         specifier: 3.0.0-beta.2
         version: 3.0.0-beta.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)

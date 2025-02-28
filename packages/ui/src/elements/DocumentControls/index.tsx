@@ -22,6 +22,7 @@ import { Button } from '../Button/index.js'
 import { CopyLocaleData } from '../CopyLocaleData/index.js'
 import { DeleteDocument } from '../DeleteDocument/index.js'
 import { DuplicateDocument } from '../DuplicateDocument/index.js'
+import { MoveDocToFolder } from '../FolderView/MoveDocToFolder/index.js'
 import { Gutter } from '../Gutter/index.js'
 import { Locked } from '../Locked/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
@@ -141,6 +142,13 @@ export const DocumentControls: React.FC<{
     <Gutter className={baseClass}>
       <div className={`${baseClass}__wrapper`}>
         <div className={`${baseClass}__content`}>
+          <div className={`${baseClass}__meta-icons`}>
+            {user && readOnlyForIncomingUser && (
+              <Locked className={`${baseClass}__locked-controls`} user={user} />
+            )}
+            {collectionConfig?.admin.enableFolders && <MoveDocToFolder />}
+          </div>
+
           <ul className={`${baseClass}__meta`}>
             {collectionConfig && !isEditing && !isAccountView && (
               <li className={`${baseClass}__list-item`}>
@@ -154,9 +162,7 @@ export const DocumentControls: React.FC<{
                 </p>
               </li>
             )}
-            {user && readOnlyForIncomingUser && (
-              <Locked className={`${baseClass}__locked-controls`} user={user} />
-            )}
+
             {(collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts) && (
               <Fragment>
                 {(globalConfig || (collectionConfig && isEditing)) && (

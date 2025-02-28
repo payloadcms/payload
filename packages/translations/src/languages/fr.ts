@@ -179,6 +179,17 @@ export const frTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Bloc bascule',
     uploadNewLabel: 'Téléverser un(e) nouveau ou nouvelle {{label}}',
   },
+  folder: {
+    deleteConfirmation:
+      'Les dossiers imbriqués seront supprimés. Les documents imbriqués seront déplacés vers le dossier parent le plus proche. Êtes-vous sûr ?',
+    deleteFolder: 'Supprimer le dossier',
+    folderName: 'Nom du dossier',
+    moveFolder: 'Déplacer le dossier',
+    newFolder: 'Nouveau Dossier',
+    removeFromFolder: 'Retirer du dossier',
+    renameFolder: 'Renommer le dossier',
+    selectFolder: 'Sélectionnez le dossier',
+  },
   general: {
     aboutToDelete:
       'Vous êtes sur le point de supprimer ce ou cette {{label}} <1>{{title}}</1>. Êtes-vous sûr ?',
@@ -267,6 +278,8 @@ export const frTranslations: DefaultTranslationsObject = {
     globals: 'Globals(es)',
     goBack: 'Retourner',
     isEditing: 'est en train de modifier',
+    item: 'article',
+    items: 'articles',
     language: 'Langue',
     lastModified: 'Dernière modification',
     leaveAnyway: 'Quitter quand même',
@@ -278,8 +291,14 @@ export const frTranslations: DefaultTranslationsObject = {
     locales: 'Paramètres régionaux',
     menu: 'Menu',
     moreOptions: "Plus d'options",
+    move: 'Déplacez-vous',
+    moveConfirm:
+      'Vous êtes sur le point de déplacer {{count}} {{label}} vers <1>{{destination}}</1>. Êtes-vous sûr ?',
+    moveCount: 'Déplacez {{count}} {{label}}',
     moveDown: 'Déplacer vers le bas',
     moveUp: 'Déplacer vers le haut',
+    moving: 'Déménagement',
+    movingCount: 'Déplacement de {{count}} {{label}}',
     newPassword: 'Nouveau mot de passe',
     next: 'Prochain',
     noDateSelected: 'Aucune date sélectionnée',
@@ -307,6 +326,7 @@ export const frTranslations: DefaultTranslationsObject = {
     reindex: 'Réindexer',
     reindexingAll: 'Réindexation de toutes les {{collections}}.',
     remove: 'Retirer',
+    rename: 'Renommer',
     reset: 'Réinitialiser',
     resetPreferences: 'Réinitialiser les préférences',
     resetPreferencesDescription:

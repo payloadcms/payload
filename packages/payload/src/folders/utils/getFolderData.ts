@@ -1,0 +1,63 @@
+import type { Payload } from '../../types/index.js'
+import type { GetFolderDataResult } from '../types.js'
+
+import { buildFolderBreadcrumbs } from './buildFolderBreadcrumbs.js'
+import { getFolderDocuments } from './getFolderDocuments.js'
+import { getFolderSubfolders } from './getFolderSubfolders.js'
+
+type Args = {
+  docLimit?: number
+  folderID: null | string
+  page?: number
+  payload: Payload
+  search?: null | string
+}
+
+export const getFolderData = async ({
+  docLimit,
+  folderID: folderIDArg,
+  page,
+  payload,
+  search,
+}: Args): Promise<GetFolderDataResult> => {
+  const folderID =
+    folderIDArg && payload.db.defaultIDType === 'number' ? parseFloat(folderIDArg) : folderIDArg
+
+  const breadcrumbs = buildFolderBreadcrumbs({
+    folderID,
+    payload,
+  })
+
+  const subfolders = getFolderSubfolders({
+    folderID,
+    payload,
+  })
+
+  // [?] @todo
+  // should this query fetch using the join on the folderID
+  // or should it continue to fetch each collection individually?
+  const documents = getFolderDocuments({
+    folderID,
+    limit: docLimit,
+    page,
+    payload,
+    search,
+  })
+
+  const [resolvedBreadcrumbs, resolvedSubfolders, resolvedDocuments] = await Promise.all([
+    breadcrumbs,
+    subfolders,
+    documents,
+  ])
+
+  const items: {
+    relationTo: string
+    value: any
+  }[] = [...resolvedSubfolders, ...(resolvedDocuments?.docs || [])]
+
+  return {
+    breadcrumbs: resolvedBreadcrumbs,
+    hasMoreDocuments: Boolean(resolvedDocuments?.hasMoreDocuments),
+    items,
+  }
+}

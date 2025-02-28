@@ -73,6 +73,7 @@ export function DefaultEditView({
     isEditing,
     isInitializing,
     lastUpdateTime,
+    redirectAfterCreate = true,
     redirectAfterDelete,
     redirectAfterDuplicate,
     savedDocumentData,
@@ -254,7 +255,7 @@ export function DefaultEditView({
         })
       }
 
-      if (!isEditing && depth < 2) {
+      if (!isEditing && depth < 2 && redirectAfterCreate) {
         // Redirect to the same locale if it's been set
         const redirectRoute = formatAdminURL({
           adminRoute,
@@ -306,6 +307,7 @@ export function DefaultEditView({
       incrementVersionCount,
       updateSavedDocumentData,
       onSaveFromContext,
+      redirectAfterCreate,
       isEditing,
       depth,
       getDocPermissions,

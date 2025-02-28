@@ -1,0 +1,33 @@
+@import '../../../scss/styles.scss';
+
+@layer payload-default {
+  .nav--nav-open + div .folder-file-grid {    
+    @include large-break {
+      --cols: 4;
+    }
+
+    @include mid-break {
+      --cols: 2;
+    }
+
+    @include small-break {
+      --cols: 2;
+    }
+  }
+
+  .folder-file-grid {
+    --cols: 5;
+    --gap: var(--base);
+    gap: var(--gap);
+    display: grid;
+    grid-template-columns: repeat(var(--cols), 1fr);
+
+    @include mid-break {
+      --cols: 3;
+    }
+
+    @include small-break {
+      --cols: 2;
+    }
+  }
+}
