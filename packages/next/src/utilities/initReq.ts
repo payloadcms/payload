@@ -53,13 +53,11 @@ export const initReq = async function ({
   importMap,
   key,
   overrides,
-  urlSuffix,
 }: {
   configPromise: Promise<SanitizedConfig> | SanitizedConfig
   importMap: ImportMap
   key: string
   overrides?: Parameters<typeof createLocalReq>[0]
-  urlSuffix?: string
 }): Promise<Result> {
   const headers = await getHeaders()
   const cookies = parseCookies(headers)
@@ -96,6 +94,7 @@ export const initReq = async function ({
     const { i18n, languageCode, payload, responseHeaders, user } = partialResult
 
     const { req: reqOverrides, ...optionsOverrides } = overrides || {}
+
     const req = await createLocalReq(
       {
         req: {
@@ -103,7 +102,6 @@ export const initReq = async function ({
           host: headers.get('host'),
           i18n: i18n as I18n,
           responseHeaders,
-          url: `${payload.config.serverURL}${urlSuffix || ''}`,
           user,
           ...(reqOverrides || {}),
         },
@@ -115,6 +113,7 @@ export const initReq = async function ({
     const locale = await getRequestLocale({
       req,
     })
+
     req.locale = locale?.code
 
     const permissions = await getAccessResults({
