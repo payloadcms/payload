@@ -121,6 +121,11 @@
       }
     }
 
+    &__link:has(.nav__link-indicator) {
+      font-weight: 600;
+      padding-left: 0;
+    }
+
     &__link-indicator {
       position: absolute;
       display: block;
