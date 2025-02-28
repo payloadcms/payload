@@ -17,6 +17,7 @@ import {
   changeLocale,
   closeLocaleSelector,
   ensureCompilationIsDone,
+  findTableRow,
   initPageConsoleErrorCatch,
   openLocaleSelector,
   saveDocAndAssert,
@@ -30,6 +31,7 @@ import { richTextSlug } from './collections/RichText/index.js'
 import {
   defaultLocale,
   englishTitle,
+  localizedDraftsSlug,
   localizedPostsSlug,
   relationshipLocalizedSlug,
   spanishLocale,
@@ -53,6 +55,7 @@ let url: AdminUrlUtil
 let urlWithRequiredLocalizedFields: AdminUrlUtil
 let urlRelationshipLocalized: AdminUrlUtil
 let urlCannotCreateDefaultLocale: AdminUrlUtil
+let urlPostsWithDrafts: AdminUrlUtil
 
 const title = 'english title'
 const spanishTitle = 'spanish title'
@@ -76,6 +79,7 @@ describe('Localization', () => {
     richTextURL = new AdminUrlUtil(serverURL, richTextSlug)
     urlWithRequiredLocalizedFields = new AdminUrlUtil(serverURL, withRequiredLocalizedFields)
     urlCannotCreateDefaultLocale = new AdminUrlUtil(serverURL, 'cannot-create-default-locale')
+    urlPostsWithDrafts = new AdminUrlUtil(serverURL, localizedDraftsSlug)
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -109,6 +113,21 @@ describe('Localization', () => {
       await expect(page.locator('.localizer.app-header__localizer')).toBeVisible()
       await page.locator('.localizer >> button').first().click()
       await expect(page.locator('.localizer .popup.popup--active')).not.toContainText('FILTERED')
+    })
+
+    test('should filter version locale selector with filterAvailableLocales', async () => {
+      await page.goto(urlPostsWithDrafts.create)
+      await page.locator('#field-title').fill('title')
+      await page.locator('#action-save').click()
+
+      await page.locator('text=Versions').click()
+      const firstVersion = findTableRow(page, 'Current Published Version')
+      await firstVersion.locator('a').click()
+
+      await expect(page.locator('.select-version-locales__label')).toBeVisible()
+      await expect(page.locator('.select-version-locales .react-select')).not.toContainText(
+        'FILTERED',
+      )
     })
 
     test('should disable control for active locale', async () => {
