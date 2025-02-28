@@ -1,4 +1,3 @@
-import type { Model } from 'mongoose'
 import type { Collection, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
 
 import { APIError } from 'payload'
