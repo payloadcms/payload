@@ -4,8 +4,12 @@ export const postsSlug = 'posts'
 
 export const PostsCollection: CollectionConfig = {
   slug: postsSlug,
+  enableCustomOrder: true,
   admin: {
     useAsTitle: 'text',
+    components: {
+      beforeList: ['/Seed#Seed'],
+    },
   },
   fields: [
     {
