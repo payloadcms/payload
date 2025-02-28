@@ -1,7 +1,5 @@
 'use client'
 import type {
-  ClientCollectionConfig,
-  ClientGlobalConfig,
   ClientUser,
   SanitizedCollectionConfig,
   SanitizedCollectionPermission,

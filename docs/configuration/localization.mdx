@@ -77,11 +77,12 @@ export default buildConfig({
 
 The following options are available:
 
-| Option         | Description                                                                                                                    |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| **`locales`**  | Array of all the languages that you would like to support. [More details](#locales)                                            |
-| **`defaultLocale`** | Required string that matches one of the locale codes from the array provided. By default, if no locale is specified, documents will be returned in this locale. |
-| **`fallback`** | Boolean enabling "fallback" locale functionality. If a document is requested in a locale, but a field does not have a localized value corresponding to the requested locale, then if this property is enabled, the document will automatically fall back to the fallback locale value. If this property is not enabled, the value will not be populated unless a fallback is explicitly provided in the request. True by default. |
+| Option                       | Description                                                                                                                                                                                                                                                                                                                                                                                                                       |
+|------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **`locales`**                | Array of all the languages that you would like to support. [More details](#locales)                                                                                                                                                                                                                                                                                                                                               |
+| **`defaultLocale`**          | Required string that matches one of the locale codes from the array provided. By default, if no locale is specified, documents will be returned in this locale.                                                                                                                                                                                                                                                                   |
+| **`fallback`**               | Boolean enabling "fallback" locale functionality. If a document is requested in a locale, but a field does not have a localized value corresponding to the requested locale, then if this property is enabled, the document will automatically fall back to the fallback locale value. If this property is not enabled, the value will not be populated unless a fallback is explicitly provided in the request. True by default. |
+| **`filterAvailableLocales`** | A function that is called with the array of `locales` and the `req`,  it should return locales to show in admin UI selector. [See more](#filter-available-options).                                                                                                                                                                                                                                                                         |
 
 ### Locales
 
@@ -99,6 +100,35 @@ The locale codes do not need to be in any specific format. It's up to you to def
 | **`fallbackLocale`** | The code for this language to fallback to when properties of a document are not present.                                       |
 
 _* An asterisk denotes that a property is required._
+
+#### Filter Available Options
+In some projects you may want to filter the available locales shown in the admin UI selector. You can do this by providing a `filterAvailableLocales` function in your Payload Config. This is called on the server side and is passed the array of locales. This means that you can determine what locales are visible in the localizer selection menu at the top of the admin panel. You could do this per user, or implement a function that scopes these to tenants and more. Here is an example using request headers in a multi-tenant application:
+
+```ts
+// ... rest of payload config
+localization: {
+  defaultLocale: 'en',
+  locales: ['en', 'es'],
+  filterAvailableLocales: async ({ req, locales }) => {
+    if (getTenantFromCookie(req.headers, 'text')) {
+      const fullTenant = await req.payload.findByID({
+        id: getTenantFromCookie(req.headers, 'text') as string,
+        collection: 'tenants',
+        req,
+      })
+      if (fullTenant && fullTenant.supportedLocales?.length) {
+        return locales.filter((locale) => {
+          return fullTenant.supportedLocales?.includes(locale.code as 'en' | 'es')
+        })
+      }
+    }
+    return locales
+  },
+}
+```
+
+Since the filtering happens at the root level of the application and its result is not calculated every time you navigate to a new page, you may want to call `router.refresh` in a custom component that watches when values that affect the result change. In the example above, you would want to do this when `supportedLocales` changes on the tenant document.
+
 
 ## Field Localization
 

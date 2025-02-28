@@ -1,5 +1,7 @@
+import type { ContainerClient } from '@azure/storage-blob'
 import type {
   Adapter,
+  ClientUploadsConfig,
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
   GeneratedAdapter,
@@ -7,7 +9,9 @@ import type {
 import type { Config, Plugin, UploadCollectionSlug } from 'payload'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
+import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
 
+import { getGenerateSignedURLHandler } from './generateSignedURL.js'
 import { getGenerateURL } from './generateURL.js'
 import { getHandleDelete } from './handleDelete.js'
 import { getHandleUpload } from './handleUpload.js'
@@ -26,6 +30,11 @@ export type AzureStorageOptions = {
    * Base URL for the Azure Blob storage account
    */
   baseURL: string
+
+  /**
+   * Do uploads directly on the client to bypass limits on Vercel. You must allow CORS PUT method to your website.
+   */
+  clientUploads?: ClientUploadsConfig
 
   /**
    * Collection options to apply the Azure Blob adapter to.
@@ -59,7 +68,30 @@ export const azureStorage: AzureStoragePlugin =
       return incomingConfig
     }
 
-    const adapter = azureStorageInternal(azureStorageOptions)
+    const getStorageClient = () =>
+      getStorageClientFunc({
+        connectionString: azureStorageOptions.connectionString,
+        containerName: azureStorageOptions.containerName,
+      })
+
+    initClientUploads({
+      clientHandler: '@payloadcms/storage-azure/client#AzureClientUploadHandler',
+      collections: azureStorageOptions.collections,
+      config: incomingConfig,
+      enabled: !!azureStorageOptions.clientUploads,
+      serverHandler: getGenerateSignedURLHandler({
+        access:
+          typeof azureStorageOptions.clientUploads === 'object'
+            ? azureStorageOptions.clientUploads.access
+            : undefined,
+        collections: azureStorageOptions.collections,
+        containerName: azureStorageOptions.containerName,
+        getStorageClient,
+      }),
+      serverHandlerPath: '/storage-azure-generate-signed-url',
+    })
+
+    const adapter = azureStorageInternal(getStorageClient, azureStorageOptions)
 
     // Add adapter to each collection option object
     const collectionsWithAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
@@ -98,19 +130,15 @@ export const azureStorage: AzureStoragePlugin =
     })(config)
   }
 
-function azureStorageInternal({
-  allowContainerCreate,
-  baseURL,
-  connectionString,
-  containerName,
-}: AzureStorageOptions): Adapter {
+function azureStorageInternal(
+  getStorageClient: () => ContainerClient,
+  { allowContainerCreate, baseURL, connectionString, containerName }: AzureStorageOptions,
+): Adapter {
   const createContainerIfNotExists = () => {
     void getStorageClientFunc({ connectionString, containerName }).createIfNotExists({
       access: 'blob',
     })
   }
-
-  const getStorageClient = () => getStorageClientFunc({ connectionString, containerName })
 
   return ({ collection, prefix }): GeneratedAdapter => {
     return {

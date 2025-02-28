@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { BaseJob, RunningJobFromTask } from './config/types/workflowTypes.js'
 
 import {

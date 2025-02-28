@@ -64,7 +64,7 @@ export default buildConfigWithDefaults({
       searchOverrides: {
         access: {
           // Used for int test
-          delete: ({ req: { user } }) => user.email === devUser.email,
+          delete: ({ req: { user } }) => user?.email === devUser.email,
         },
         fields: ({ defaultFields }) => [
           ...defaultFields,

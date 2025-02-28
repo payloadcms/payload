@@ -13,7 +13,6 @@ export const goToCollectionLivePreview = async (
 ): Promise<void> => {
   await navigateToDoc(page, urlUtil)
   await page.goto(`${page.url()}/preview`)
-  await page.waitForURL(`**/preview`)
 }
 
 export const goToGlobalLivePreview = async (
@@ -24,7 +23,6 @@ export const goToGlobalLivePreview = async (
   const global = new AdminUrlUtil(serverURL, slug)
   const previewURL = `${global.global(slug)}/preview`
   await page.goto(previewURL)
-  await page.waitForURL(previewURL)
 }
 
 export const selectLivePreviewBreakpoint = async (page: Page, breakpointLabel: string) => {
