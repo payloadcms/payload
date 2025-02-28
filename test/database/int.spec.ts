@@ -28,6 +28,7 @@ import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { isMongoose } from '../helpers/isMongoose.js'
 import removeFiles from '../helpers/removeFiles.js'
+import { clearAndSeedEverything } from './seed.js'
 import { errorOnUnnamedFieldsSlug, postsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -62,6 +63,26 @@ describe('database', () => {
     if (typeof payload.db.destroy === 'function') {
       await payload.db.destroy()
     }
+  })
+
+  beforeEach(async () => {
+    await clearAndSeedEverything(payload)
+
+    await restClient.login({
+      slug: 'users',
+      credentials: devUser,
+    })
+
+    const loginResult = await payload.login({
+      collection: 'users',
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+      },
+    })
+
+    user = loginResult.user
+    token = loginResult.token
   })
 
   describe('id type', () => {
@@ -876,6 +897,18 @@ describe('database', () => {
 
       expect(result.point).toEqual([5, 10])
     })
+
+    /*
+    it('ensure updateMany updates all docs', async () => {
+      const result = await payload.create({
+        collection: 'default-values',
+        data: {
+          point: [5, 10],
+        },
+      })
+
+      expect(result.point).toEqual([5, 10])
+    })*/
   })
 
   describe('Error Handler', () => {
