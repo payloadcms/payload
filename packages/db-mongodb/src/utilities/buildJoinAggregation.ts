@@ -19,8 +19,6 @@ type BuildJoinAggregationArgs = {
   collection: CollectionSlug
   collectionConfig: SanitizedCollectionConfig
   joins: JoinQuery
-  // the number of docs to get at the top collection level
-  limit?: number
   locale: string
   projection?: Record<string, true>
   // the where clause for the top collection
@@ -34,10 +32,8 @@ export const buildJoinAggregation = async ({
   collection,
   collectionConfig,
   joins,
-  limit,
   locale,
   projection,
-  query,
   versions,
 }: BuildJoinAggregationArgs): Promise<PipelineStage[] | undefined> => {
   if (
@@ -49,24 +45,8 @@ export const buildJoinAggregation = async ({
   }
 
   const joinConfig = adapter.payload.collections[collection].config.joins
+  const aggregate: PipelineStage[] = []
   const polymorphicJoinsConfig = adapter.payload.collections[collection].config.polymorphicJoins
-  const aggregate: PipelineStage[] = [
-    {
-      $sort: { createdAt: -1 },
-    },
-  ]
-
-  if (query) {
-    aggregate.push({
-      $match: query,
-    })
-  }
-
-  if (limit) {
-    aggregate.push({
-      $limit: limit,
-    })
-  }
 
   for (const join of polymorphicJoinsConfig) {
     if (projection && !projection[join.joinPath]) {
@@ -446,10 +426,6 @@ export const buildJoinAggregation = async ({
         }
       }
     }
-  }
-
-  if (projection) {
-    aggregate.push({ $project: projection })
   }
 
   return aggregate

@@ -92,7 +92,10 @@ export interface Args {
 
   /** Extra configuration options */
   connectOptions?: {
-    /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */
+    /**
+     * Set false to disable $facet aggregation in non-supporting databases, Defaults to true
+     * @deprecated Payload doesn't use `$facet` anymore anywhere.
+     */
     useFacet?: boolean
   } & ConnectOptions
   /** Set to true to disable hinting to MongoDB to use 'id' as index. This is currently done when counting documents for pagination. Disabling this optimization might fix some problems with AWS DocumentDB. Defaults to false */
