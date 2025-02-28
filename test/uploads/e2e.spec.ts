@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -12,7 +13,6 @@ import {
   ensureCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
-  openDocDrawer,
   saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
@@ -381,7 +381,7 @@ describe('Uploads', () => {
     await page.locator('#field-versionedImage .icon--x').click()
 
     // choose from existing
-    await openDocDrawer(page, '#field-versionedImage .upload__listToggler')
+    await openDocDrawer({ page, selector: '#field-versionedImage .upload__listToggler' })
 
     await expect(page.locator('.row-3 .cell-title')).toContainText('draft')
   })
@@ -402,12 +402,15 @@ describe('Uploads', () => {
       await wait(500) // flake workaround
       await page.locator('#field-audio .upload-relationship-details__remove').click()
 
-      await openDocDrawer(page, '#field-audio .upload__listToggler')
+      await openDocDrawer({ page, selector: '#field-audio .upload__listToggler' })
 
       const listDrawer = page.locator('[id^=list-drawer_1_]')
       await expect(listDrawer).toBeVisible()
 
-      await openDocDrawer(page, 'button.list-drawer__create-new-button.doc-drawer__toggler')
+      await openDocDrawer({
+        page,
+        selector: 'button.list-drawer__create-new-button.doc-drawer__toggler',
+      })
       await expect(page.locator('[id^=doc-drawer_media_1_]')).toBeVisible()
 
       // upload an image and try to select it
@@ -444,7 +447,7 @@ describe('Uploads', () => {
       await wait(500) // flake workaround
       await page.locator('#field-audio .upload-relationship-details__remove').click()
 
-      await openDocDrawer(page, '.upload__listToggler')
+      await openDocDrawer({ page, selector: '.upload__listToggler' })
 
       const listDrawer = page.locator('[id^=list-drawer_1_]')
       await expect(listDrawer).toBeVisible()

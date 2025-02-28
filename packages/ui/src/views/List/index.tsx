@@ -49,9 +49,7 @@ export function DefaultListView(props: ListViewClientProps) {
     enableRowSelections,
     hasCreatePermission: hasCreatePermissionFromProps,
     listMenuItems,
-    listPreferences,
     newDocumentURL,
-    preferenceKey,
     renderedFilters,
     resolvedFilterOptions,
     Table: InitialTable,
@@ -153,15 +151,7 @@ export function DefaultListView(props: ListViewClientProps) {
   }, [setStepNav, labels, drawerDepth])
   return (
     <Fragment>
-      <TableColumnsProvider
-        collectionSlug={collectionSlug}
-        columnState={columnState}
-        docs={docs}
-        enableRowSelections={enableRowSelections}
-        listPreferences={listPreferences}
-        preferenceKey={preferenceKey}
-        setTable={setTable}
-      >
+      <TableColumnsProvider collectionSlug={collectionSlug} columnState={columnState}>
         <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
           <SelectionProvider docs={docs} totalDocs={data.totalDocs} user={user}>
             {BeforeList}
