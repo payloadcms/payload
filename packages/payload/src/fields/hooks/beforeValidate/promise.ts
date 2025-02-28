@@ -32,6 +32,7 @@ type Args<T> = {
   operation: 'create' | 'update'
   overrideAccess: boolean
   parentIndexPath: string
+  parentIsLocalized: boolean
   parentPath: string
   parentSchemaPath: string
   req: PayloadRequest
@@ -63,6 +64,7 @@ export const promise = async <T>({
   operation,
   overrideAccess,
   parentIndexPath,
+  parentIsLocalized,
   parentPath,
   parentSchemaPath,
   req,
@@ -271,12 +273,27 @@ export const promise = async <T>({
       }
     }
 
+    if (typeof siblingData[field.name] === 'undefined') {
+      // If no incoming data, but existing document data is found, merge it in
+      if (typeof siblingDoc[field.name] !== 'undefined') {
+        siblingData[field.name] = cloneDataFromOriginalDoc(siblingDoc[field.name])
+
+        // Otherwise compute default value
+      } else if (typeof field.defaultValue !== 'undefined') {
+        siblingData[field.name] = await getDefaultValue({
+          defaultValue: field.defaultValue,
+          locale: req.locale,
+          req,
+          user: req.user,
+          value: siblingData[field.name],
+        })
+      }
+    }
+
     // Execute hooks
     if (field.hooks?.beforeValidate) {
-      await field.hooks.beforeValidate.reduce(async (priorHook, currentHook) => {
-        await priorHook
-
-        const hookedValue = await currentHook({
+      for (const hook of field.hooks.beforeValidate) {
+        const hookedValue = await hook({
           blockData,
           collection,
           context,
@@ -300,7 +317,7 @@ export const promise = async <T>({
         if (hookedValue !== undefined) {
           siblingData[field.name] = hookedValue
         }
-      }, Promise.resolve())
+      }
     }
 
     // Execute access control
@@ -311,23 +328,6 @@ export const promise = async <T>({
 
       if (!result) {
         delete siblingData[field.name]
-      }
-    }
-
-    if (typeof siblingData[field.name] === 'undefined') {
-      // If no incoming data, but existing document data is found, merge it in
-      if (typeof siblingDoc[field.name] !== 'undefined') {
-        siblingData[field.name] = cloneDataFromOriginalDoc(siblingDoc[field.name])
-
-        // Otherwise compute default value
-      } else if (typeof field.defaultValue !== 'undefined') {
-        siblingData[field.name] = await getDefaultValue({
-          defaultValue: field.defaultValue,
-          locale: req.locale,
-          req,
-          user: req.user,
-          value: siblingData[field.name],
-        })
       }
     }
   }
@@ -354,6 +354,7 @@ export const promise = async <T>({
               operation,
               overrideAccess,
               parentIndexPath: '',
+              parentIsLocalized: parentIsLocalized || field.localized,
               parentPath: path + '.' + rowIndex,
               parentSchemaPath: schemaPath,
               req,
@@ -400,6 +401,7 @@ export const promise = async <T>({
                 operation,
                 overrideAccess,
                 parentIndexPath: '',
+                parentIsLocalized: parentIsLocalized || field.localized,
                 parentPath: path + '.' + rowIndex,
                 parentSchemaPath: schemaPath + '.' + block.slug,
                 req,
@@ -430,6 +432,7 @@ export const promise = async <T>({
         operation,
         overrideAccess,
         parentIndexPath: indexPath,
+        parentIsLocalized,
         parentPath,
         parentSchemaPath: schemaPath,
         req,
@@ -464,6 +467,7 @@ export const promise = async <T>({
         operation,
         overrideAccess,
         parentIndexPath: '',
+        parentIsLocalized: parentIsLocalized || field.localized,
         parentPath: path,
         parentSchemaPath: schemaPath,
         req,
@@ -486,10 +490,8 @@ export const promise = async <T>({
       const editor: RichTextAdapter = field?.editor
 
       if (editor?.hooks?.beforeValidate?.length) {
-        await editor.hooks.beforeValidate.reduce(async (priorHook, currentHook) => {
-          await priorHook
-
-          const hookedValue = await currentHook({
+        for (const hook of editor.hooks.beforeValidate) {
+          const hookedValue = await hook({
             collection,
             context,
             data,
@@ -499,6 +501,7 @@ export const promise = async <T>({
             operation,
             originalDoc: doc,
             overrideAccess,
+            parentIsLocalized,
             path: pathSegments,
             previousSiblingDoc: siblingDoc,
             previousValue: siblingData[field.name],
@@ -511,7 +514,7 @@ export const promise = async <T>({
           if (hookedValue !== undefined) {
             siblingData[field.name] = hookedValue
           }
-        }, Promise.resolve())
+        }
       }
       break
     }
@@ -550,6 +553,7 @@ export const promise = async <T>({
         operation,
         overrideAccess,
         parentIndexPath: isNamedTab ? '' : indexPath,
+        parentIsLocalized: parentIsLocalized || field.localized,
         parentPath: isNamedTab ? path : parentPath,
         parentSchemaPath: schemaPath,
         req,
@@ -573,6 +577,7 @@ export const promise = async <T>({
         operation,
         overrideAccess,
         parentIndexPath: indexPath,
+        parentIsLocalized,
         parentPath: path,
         parentSchemaPath: schemaPath,
         req,

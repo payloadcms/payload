@@ -615,7 +615,12 @@ export class BasePayload {
         }
       }
 
-      traverseFields({ callback: findCustomID, config: this.config, fields: collection.fields })
+      traverseFields({
+        callback: findCustomID,
+        config: this.config,
+        fields: collection.fields,
+        parentIsLocalized: false,
+      })
 
       this.collections[collection.slug] = {
         config: collection,
@@ -917,8 +922,12 @@ export const getPayload = async (
       try {
         const port = process.env.PORT || '3000'
 
+        const path = '/_next/webpack-hmr'
+        // The __NEXT_ASSET_PREFIX env variable is set for both assetPrefix and basePath (tested in Next.js 15.1.6)
+        const prefix = process.env.__NEXT_ASSET_PREFIX ?? ''
+
         cached.ws = new WebSocket(
-          `ws://localhost:${port}${process.env.NEXT_BASE_PATH ?? ''}/_next/webpack-hmr`,
+          process.env.PAYLOAD_HMR_URL_OVERRIDE ?? `ws://localhost:${port}${prefix}${path}`,
         )
 
         cached.ws.onmessage = (event) => {
@@ -962,6 +971,7 @@ interface RequestContext {
 export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 export type { Payload, RequestContext }
 export { executeAuthStrategies } from './auth/executeAuthStrategies.js'
+export { extractAccessFromPermission } from './auth/extractAccessFromPermission.js'
 export { getAccessResults } from './auth/getAccessResults.js'
 export { getFieldsToSign } from './auth/getFieldsToSign.js'
 export * from './auth/index.js'
@@ -978,6 +988,7 @@ export { resetPasswordOperation } from './auth/operations/resetPassword.js'
 export { unlockOperation } from './auth/operations/unlock.js'
 export { verifyEmailOperation } from './auth/operations/verifyEmail.js'
 export { JWTAuthentication } from './auth/strategies/jwt.js'
+
 export type {
   AuthStrategyFunction,
   AuthStrategyFunctionArgs,
@@ -998,8 +1009,8 @@ export type {
 } from './auth/types.js'
 
 export { generateImportMap } from './bin/generateImportMap/index.js'
-
 export type { ImportMap } from './bin/generateImportMap/index.js'
+
 export { genImportMapIterateFields } from './bin/generateImportMap/iterateFields.js'
 
 export {
@@ -1046,7 +1057,6 @@ export type {
   TypeWithID,
   TypeWithTimestamps,
 } from './collections/config/types.js'
-
 export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
 export { countOperation } from './collections/operations/count.js'
 export { createOperation } from './collections/operations/create.js'
@@ -1069,8 +1079,8 @@ export {
   serverOnlyConfigProperties,
   type UnsanitizedClientConfig,
 } from './config/client.js'
-export { defaults } from './config/defaults.js'
 
+export { defaults } from './config/defaults.js'
 export { sanitizeConfig } from './config/sanitize.js'
 export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
@@ -1101,6 +1111,7 @@ export type {
   Connect,
   Count,
   CountArgs,
+  CountGlobalVersionArgs,
   CountGlobalVersions,
   CountVersions,
   Create,
@@ -1145,6 +1156,8 @@ export type {
   UpdateGlobalArgs,
   UpdateGlobalVersion,
   UpdateGlobalVersionArgs,
+  UpdateMany,
+  UpdateManyArgs,
   UpdateOne,
   UpdateOneArgs,
   UpdateVersion,
@@ -1240,6 +1253,7 @@ export type {
   FlattenedBlocksField,
   FlattenedField,
   FlattenedGroupField,
+  FlattenedJoinField,
   FlattenedTabAsField,
   GroupField,
   GroupFieldClient,
@@ -1362,6 +1376,7 @@ export { restoreVersionOperation as restoreVersionOperationGlobal } from './glob
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
 export type {
   CollapsedPreferences,
+  ColumnPreference,
   DocumentPreferences,
   FieldsPreferences,
   InsideFieldsPreferences,
@@ -1399,8 +1414,8 @@ export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
 export type * from './uploads/types.js'
-
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
+
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
 export { commitTransaction } from './utilities/commitTransaction.js'
 export {

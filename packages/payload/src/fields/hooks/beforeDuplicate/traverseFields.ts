@@ -17,6 +17,7 @@ type Args<T> = {
   id?: number | string
   overrideAccess: boolean
   parentIndexPath: string
+  parentIsLocalized: boolean
   parentPath: string
   parentSchemaPath: string
   req: PayloadRequest
@@ -32,6 +33,7 @@ export const traverseFields = async <T>({
   fields,
   overrideAccess,
   parentIndexPath,
+  parentIsLocalized,
   parentPath,
   parentSchemaPath,
   req,
@@ -51,6 +53,7 @@ export const traverseFields = async <T>({
         fieldIndex,
         overrideAccess,
         parentIndexPath,
+        parentIsLocalized,
         parentPath,
         parentSchemaPath,
         req,

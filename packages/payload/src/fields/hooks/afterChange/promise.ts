@@ -24,6 +24,7 @@ type Args = {
   global: null | SanitizedGlobalConfig
   operation: 'create' | 'update'
   parentIndexPath: string
+  parentIsLocalized: boolean
   parentPath: string
   parentSchemaPath: string
   previousDoc: JsonObject
@@ -48,6 +49,7 @@ export const promise = async ({
   global,
   operation,
   parentIndexPath,
+  parentIsLocalized,
   parentPath,
   parentSchemaPath,
   previousDoc,
@@ -72,10 +74,8 @@ export const promise = async ({
   if (fieldAffectsData(field)) {
     // Execute hooks
     if (field.hooks?.afterChange) {
-      await field.hooks.afterChange.reduce(async (priorHook, currentHook) => {
-        await priorHook
-
-        const hookedValue = await currentHook({
+      for (const hook of field.hooks.afterChange) {
+        const hookedValue = await hook({
           blockData,
           collection,
           context,
@@ -99,7 +99,7 @@ export const promise = async ({
         if (hookedValue !== undefined) {
           siblingDoc[field.name] = hookedValue
         }
-      }, Promise.resolve())
+      }
     }
   }
 
@@ -122,6 +122,7 @@ export const promise = async ({
               global,
               operation,
               parentIndexPath: '',
+              parentIsLocalized: parentIsLocalized || field.localized,
               parentPath: path + '.' + rowIndex,
               parentSchemaPath: schemaPath,
               previousDoc,
@@ -165,6 +166,7 @@ export const promise = async ({
                 global,
                 operation,
                 parentIndexPath: '',
+                parentIsLocalized: parentIsLocalized || field.localized,
                 parentPath: path + '.' + rowIndex,
                 parentSchemaPath: schemaPath + '.' + block.slug,
                 previousDoc,
@@ -195,6 +197,7 @@ export const promise = async ({
         global,
         operation,
         parentIndexPath: indexPath,
+        parentIsLocalized,
         parentPath,
         parentSchemaPath: schemaPath,
         previousDoc,
@@ -218,6 +221,7 @@ export const promise = async ({
         global,
         operation,
         parentIndexPath: '',
+        parentIsLocalized: parentIsLocalized || field.localized,
         parentPath: path,
         parentSchemaPath: schemaPath,
         previousDoc,
@@ -235,17 +239,15 @@ export const promise = async ({
         throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
       }
 
-      if (typeof field?.editor === 'function') {
+      if (typeof field.editor === 'function') {
         throw new Error('Attempted to access unsanitized rich text editor.')
       }
 
-      const editor: RichTextAdapter = field?.editor
+      const editor: RichTextAdapter = field.editor
 
       if (editor?.hooks?.afterChange?.length) {
-        await editor.hooks.afterChange.reduce(async (priorHook, currentHook) => {
-          await priorHook
-
-          const hookedValue = await currentHook({
+        for (const hook of editor.hooks.afterChange) {
+          const hookedValue = await hook({
             collection,
             context,
             data,
@@ -254,6 +256,7 @@ export const promise = async ({
             indexPath: indexPathSegments,
             operation,
             originalDoc: doc,
+            parentIsLocalized,
             path: pathSegments,
             previousDoc,
             previousSiblingDoc,
@@ -267,7 +270,7 @@ export const promise = async ({
           if (hookedValue !== undefined) {
             siblingDoc[field.name] = hookedValue
           }
-        }, Promise.resolve())
+        }
       }
       break
     }
@@ -295,6 +298,7 @@ export const promise = async ({
         global,
         operation,
         parentIndexPath: isNamedTab ? '' : indexPath,
+        parentIsLocalized: parentIsLocalized || field.localized,
         parentPath: isNamedTab ? path : parentPath,
         parentSchemaPath: schemaPath,
         previousDoc,
@@ -318,6 +322,7 @@ export const promise = async ({
         global,
         operation,
         parentIndexPath: indexPath,
+        parentIsLocalized,
         parentPath: path,
         parentSchemaPath: schemaPath,
         previousDoc,

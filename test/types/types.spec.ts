@@ -10,7 +10,14 @@ import type {
 import payload from 'payload'
 import { describe, expect, test } from 'tstyche'
 
-import type { Menu, Post, User } from './payload-types.js'
+import type {
+  Menu,
+  MyRadioOptions,
+  MySelectOptions,
+  Post,
+  SupportedTimezones,
+  User,
+} from './payload-types.js'
 
 const asType = <T>() => {
   return '' as T
@@ -122,6 +129,20 @@ describe('Types testing', () => {
           where?: Where
         }
       }>()
+    })
+  })
+
+  describe('generated types', () => {
+    test('has SupportedTimezones', () => {
+      expect<SupportedTimezones>().type.toBeAssignableTo<string>()
+    })
+
+    test('has global generated options interface based on select field', () => {
+      expect(asType<Post['selectField']>()).type.toBe<MySelectOptions>()
+    })
+
+    test('has global generated options interface based on radio field', () => {
+      expect(asType<Post['radioField']>()).type.toBe<MyRadioOptions>()
     })
   })
 })

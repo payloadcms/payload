@@ -17,6 +17,7 @@ type Args = {
   globalConfig?: SanitizedGlobalConfig
   operator: string
   overrideAccess: boolean
+  parentIsLocalized?: boolean
   path: string
   policies: EntityPolicies
   req: PayloadRequest
@@ -34,6 +35,7 @@ export async function validateSearchParam({
   globalConfig,
   operator,
   overrideAccess,
+  parentIsLocalized,
   path: incomingPath,
   policies,
   req,
@@ -50,9 +52,12 @@ export async function validateSearchParam({
   let paths: PathToQuery[] = []
   const { slug } = collectionConfig || globalConfig
 
+  const blockPolicies = {}
+
   if (globalConfig && !policies.globals[slug]) {
     policies.globals[slug] = await getEntityPolicies({
       type: 'global',
+      blockPolicies,
       entity: globalConfig,
       operations: ['read'],
       req,
@@ -67,6 +72,7 @@ export async function validateSearchParam({
       incomingPath: sanitizedPath,
       locale: req.locale,
       overrideAccess,
+      parentIsLocalized,
       payload: req.payload,
     })
   }
@@ -100,6 +106,7 @@ export async function validateSearchParam({
           if (!policies.collections[collectionSlug]) {
             policies.collections[collectionSlug] = await getEntityPolicies({
               type: 'collection',
+              blockPolicies,
               entity: req.payload.collections[collectionSlug].config,
               operations: ['read'],
               req: isolateObjectProperty(req, 'transactionID'),

@@ -2,11 +2,11 @@ import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { IndexDirection, IndexOptions } from 'mongoose'
 
 import path from 'path'
-import { type PaginatedDocs, type Payload, reload, ValidationError } from 'payload'
+import { type PaginatedDocs, type Payload, reload } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-import type { GroupField, RichTextField } from './payload-types.js'
+import type { BlockField, GroupField, RichTextField } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
@@ -154,6 +154,68 @@ describe('Fields', () => {
         where: {
           hasMany: {
             in: ['one'],
+          },
+        },
+      })
+
+      const hitResult = docs.find(({ id: findID }) => hit.id === findID)
+      const missResult = docs.find(({ id: findID }) => miss.id === findID)
+
+      expect(hitResult).toBeDefined()
+      expect(missResult).toBeFalsy()
+    })
+
+    it('should query like on value', async () => {
+      const miss = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'dog',
+        },
+      })
+
+      const hit = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'cat',
+        },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'text-fields',
+        where: {
+          text: {
+            like: 'cat',
+          },
+        },
+      })
+
+      const hitResult = docs.find(({ id: findID }) => hit.id === findID)
+      const missResult = docs.find(({ id: findID }) => miss.id === findID)
+
+      expect(hitResult).toBeDefined()
+      expect(missResult).toBeFalsy()
+    })
+
+    it('should query not_like on value', async () => {
+      const hit = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'dog',
+        },
+      })
+
+      const miss = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'cat',
+        },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'text-fields',
+        where: {
+          text: {
+            not_like: 'cat',
           },
         },
       })
@@ -2562,6 +2624,32 @@ describe('Fields', () => {
 
       expect(result.blocksWithLocalizedArray[0].array[0].text).toEqual('localized')
     })
+
+    it('ensure localized field within block reference is saved correctly', async () => {
+      const blockFields = await payload.find({
+        collection: 'block-fields',
+        locale: 'all',
+      })
+
+      const doc: BlockField = blockFields.docs[0] as BlockField
+
+      expect(doc?.localizedReferences?.[0]?.blockType).toEqual('localizedTextReference2')
+      expect(doc?.localizedReferences?.[0]?.text).toEqual({ en: 'localized text' })
+    })
+
+    it('ensure localized property is stripped from localized field within localized block reference', async () => {
+      const blockFields = await payload.find({
+        collection: 'block-fields',
+        locale: 'all',
+      })
+
+      const doc: any = blockFields.docs[0]
+
+      expect(doc?.localizedReferencesLocalizedBlock?.en?.[0]?.blockType).toEqual(
+        'localizedTextReference',
+      )
+      expect(doc?.localizedReferencesLocalizedBlock?.en?.[0]?.text).toEqual('localized text')
+    })
   })
 
   describe('collapsible', () => {
@@ -2678,6 +2766,20 @@ describe('Fields', () => {
           collection: 'json-fields',
           where: {
             'json.foo': { like: 'bar' },
+          },
+        })
+
+        const docIDs = docs.map(({ id }) => id)
+
+        expect(docIDs).toContain(fooBar.id)
+        expect(docIDs).not.toContain(bazBar.id)
+      })
+
+      it('should query nested properties - not_like', async () => {
+        const { docs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.baz': { not_like: 'bar' },
           },
         })
 

@@ -84,7 +84,7 @@ export type CreateFormData = (
    * @default true
    */
   options?: { mergeOverrideData?: boolean },
-) => FormData
+) => FormData | Promise<FormData>
 export type GetFields = () => FormState
 export type GetField = (path: string) => FormField
 export type GetData = () => Data
@@ -227,6 +227,11 @@ export type Context = {
   getFields: GetFields
   getSiblingData: GetSiblingData
   initializing: boolean
+  /**
+   * Tracks wether the form state passes validation.
+   * For example the state could be submitted but invalid as field errors have been returned.
+   */
+  isValid: boolean
   removeFieldRow: ({ path, rowIndex }: { path: string; rowIndex: number }) => void
   replaceFieldRow: ({
     blockType,
@@ -243,7 +248,13 @@ export type Context = {
   }) => void
   replaceState: (state: FormState) => void
   reset: Reset
+  /**
+   * If the form has started processing in the background (e.g.
+   * if autosave is running), this will be true.
+   */
+  setBackgroundProcessing: SetProcessing
   setDisabled: (disabled: boolean) => void
+  setIsValid: (processing: boolean) => void
   setModified: SetModified
   setProcessing: SetProcessing
   setSubmitted: SetSubmitted

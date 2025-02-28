@@ -13,7 +13,11 @@ import { initReq } from './initReq.js'
 export const handleServerFunctions: ServerFunctionHandler = async (args) => {
   const { name: fnKey, args: fnArgs, config: configPromise, importMap } = args
 
-  const { req } = await initReq(configPromise)
+  const { req } = await initReq({
+    configPromise,
+    importMap,
+    key: 'RootLayout',
+  })
 
   const augmentedArgs: Parameters<ServerFunction>[0] = {
     ...fnArgs,

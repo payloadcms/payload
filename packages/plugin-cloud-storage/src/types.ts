@@ -16,6 +16,17 @@ export interface File {
   tempFilePath?: string
 }
 
+export type ClientUploadsAccess = (args: {
+  collectionSlug: UploadCollectionSlug
+  req: PayloadRequest
+}) => boolean | Promise<boolean>
+
+export type ClientUploadsConfig =
+  | {
+      access?: ClientUploadsAccess
+    }
+  | boolean
+
 export type HandleUpload = (args: {
   collection: CollectionConfig
   data: any
@@ -43,7 +54,10 @@ export type GenerateURL = (args: {
 
 export type StaticHandler = (
   req: PayloadRequest,
-  args: { doc?: TypeWithID; params: { collection: string; filename: string } },
+  args: {
+    doc?: TypeWithID
+    params: { clientUploadContext?: unknown; collection: string; filename: string }
+  },
 ) => Promise<Response> | Response
 
 export interface GeneratedAdapter {

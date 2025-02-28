@@ -86,6 +86,7 @@ export interface Config {
     'deep-nested': DeepNested;
     relations: Relation1;
     items: Item;
+    blocks: Block;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -117,6 +118,7 @@ export interface Config {
     'deep-nested': DeepNestedSelect<false> | DeepNestedSelect<true>;
     relations: RelationsSelect<false> | RelationsSelect<true>;
     items: ItemsSelect<false> | ItemsSelect<true>;
+    blocks: BlocksSelect<false> | BlocksSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -466,6 +468,23 @@ export interface Item {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks".
+ */
+export interface Block {
+  id: string;
+  blocks?:
+    | {
+        director?: (string | null) | Director;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'some';
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -550,6 +569,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'items';
         value: string | Item;
+      } | null)
+    | ({
+        relationTo: 'blocks';
+        value: string | Block;
       } | null)
     | ({
         relationTo: 'users';
@@ -837,6 +860,25 @@ export interface RelationsSelect<T extends boolean = true> {
 export interface ItemsSelect<T extends boolean = true> {
   status?: T;
   relation?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks_select".
+ */
+export interface BlocksSelect<T extends boolean = true> {
+  blocks?:
+    | T
+    | {
+        some?:
+          | T
+          | {
+              director?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }

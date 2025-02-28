@@ -12,7 +12,7 @@ import type {
 import type { Block, Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
-import { fieldAffectsData, tabHasName } from '../../config/types.js'
+import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../../config/types.js'
 import { getDefaultValue } from '../../getDefaultValue.js'
 import { getFieldPathsModified as getFieldPaths } from '../../getFieldPaths.js'
 import { relationshipPopulationPromise } from './relationshipPopulationPromise.js'
@@ -42,6 +42,10 @@ type Args = {
   locale: null | string
   overrideAccess: boolean
   parentIndexPath: string
+  /**
+   * @todo make required in v4.0
+   */
+  parentIsLocalized?: boolean
   parentPath: string
   parentSchemaPath: string
   populate?: PopulateType
@@ -82,6 +86,7 @@ export const promise = async ({
   locale,
   overrideAccess,
   parentIndexPath,
+  parentIsLocalized,
   parentPath,
   parentSchemaPath,
   populate,
@@ -117,7 +122,7 @@ export const promise = async ({
   }
 
   // Strip unselected fields
-  if (fieldAffectsData(field) && select && selectMode) {
+  if (fieldAffectsData(field) && select && selectMode && path !== 'id') {
     if (selectMode === 'include') {
       if (!select[field.name]) {
         delete siblingDoc[field.name]
@@ -138,7 +143,7 @@ export const promise = async ({
     fieldAffectsData(field) &&
     typeof siblingDoc[field.name] === 'object' &&
     siblingDoc[field.name] !== null &&
-    field.localized &&
+    fieldShouldBeLocalized({ field, parentIsLocalized }) &&
     locale !== 'all' &&
     req.payload.config.localization
 
@@ -231,18 +236,17 @@ export const promise = async ({
   if (fieldAffectsData(field)) {
     // Execute hooks
     if (triggerHooks && field.hooks?.afterRead) {
-      await field.hooks.afterRead.reduce(async (priorHook, currentHook) => {
-        await priorHook
-
+      for (const hook of field.hooks.afterRead) {
         const shouldRunHookOnAllLocales =
-          field.localized &&
+          fieldShouldBeLocalized({ field, parentIsLocalized }) &&
           (locale === 'all' || !flattenLocales) &&
           typeof siblingDoc[field.name] === 'object'
 
         if (shouldRunHookOnAllLocales) {
-          const hookPromises = Object.entries(siblingDoc[field.name]).map(([locale, value]) =>
-            (async () => {
-              const hookedValue = await currentHook({
+          const localesAndValues = Object.entries(siblingDoc[field.name])
+          await Promise.all(
+            localesAndValues.map(async ([localeKey, value]) => {
+              const hookedValue = await hook({
                 blockData,
                 collection,
                 context,
@@ -267,14 +271,12 @@ export const promise = async ({
               })
 
               if (hookedValue !== undefined) {
-                siblingDoc[field.name][locale] = hookedValue
+                siblingDoc[field.name][localeKey] = hookedValue
               }
-            })(),
+            }),
           )
-
-          await Promise.all(hookPromises)
         } else {
-          const hookedValue = await currentHook({
+          const hookedValue = await hook({
             blockData,
             collection,
             context,
@@ -302,7 +304,7 @@ export const promise = async ({
             siblingDoc[field.name] = hookedValue
           }
         }
-      }, Promise.resolve())
+      }
     }
 
     // Execute access control
@@ -351,6 +353,7 @@ export const promise = async ({
           field,
           locale,
           overrideAccess,
+          parentIsLocalized,
           populate,
           req,
           showHiddenFields,
@@ -392,6 +395,7 @@ export const promise = async ({
             locale,
             overrideAccess,
             parentIndexPath: '',
+            parentIsLocalized: parentIsLocalized || field.localized,
             parentPath: path + '.' + rowIndex,
             parentSchemaPath: schemaPath,
             populate,
@@ -426,6 +430,7 @@ export const promise = async ({
                 locale,
                 overrideAccess,
                 parentIndexPath: '',
+                parentIsLocalized: parentIsLocalized || field.localized,
                 parentPath: path + '.' + rowIndex,
                 parentSchemaPath: schemaPath,
                 populate,
@@ -510,6 +515,7 @@ export const promise = async ({
               locale,
               overrideAccess,
               parentIndexPath: '',
+              parentIsLocalized: parentIsLocalized || field.localized,
               parentPath: path + '.' + rowIndex,
               parentSchemaPath: schemaPath + '.' + block.slug,
               populate,
@@ -554,6 +560,7 @@ export const promise = async ({
                   locale,
                   overrideAccess,
                   parentIndexPath: '',
+                  parentIsLocalized: parentIsLocalized || field.localized,
                   parentPath: path + '.' + rowIndex,
                   parentSchemaPath: schemaPath + '.' + block.slug,
                   populate,
@@ -594,6 +601,7 @@ export const promise = async ({
         locale,
         overrideAccess,
         parentIndexPath: indexPath,
+        parentIsLocalized,
         parentPath,
         parentSchemaPath: schemaPath,
         populate,
@@ -636,6 +644,7 @@ export const promise = async ({
         locale,
         overrideAccess,
         parentIndexPath: '',
+        parentIsLocalized: parentIsLocalized || field.localized,
         parentPath: path,
         parentSchemaPath: schemaPath,
         populate,
@@ -664,18 +673,18 @@ export const promise = async ({
       const editor: RichTextAdapter = field?.editor
 
       if (editor?.hooks?.afterRead?.length) {
-        await editor.hooks.afterRead.reduce(async (priorHook, currentHook) => {
-          await priorHook
-
+        for (const hook of editor.hooks.afterRead) {
           const shouldRunHookOnAllLocales =
-            field.localized &&
+            fieldShouldBeLocalized({ field, parentIsLocalized }) &&
             (locale === 'all' || !flattenLocales) &&
             typeof siblingDoc[field.name] === 'object'
 
           if (shouldRunHookOnAllLocales) {
-            const hookPromises = Object.entries(siblingDoc[field.name]).map(([locale, value]) =>
-              (async () => {
-                const hookedValue = await currentHook({
+            const localesAndValues = Object.entries(siblingDoc[field.name])
+
+            await Promise.all(
+              localesAndValues.map(async ([locale, value]) => {
+                const hookedValue = await hook({
                   collection,
                   context,
                   currentDepth,
@@ -693,6 +702,7 @@ export const promise = async ({
                   operation: 'read',
                   originalDoc: doc,
                   overrideAccess,
+                  parentIsLocalized,
                   path: pathSegments,
                   populate,
                   populationPromises,
@@ -708,12 +718,10 @@ export const promise = async ({
                 if (hookedValue !== undefined) {
                   siblingDoc[field.name][locale] = hookedValue
                 }
-              })(),
+              }),
             )
-
-            await Promise.all(hookPromises)
           } else {
-            const hookedValue = await currentHook({
+            const hookedValue = await hook({
               collection,
               context,
               currentDepth,
@@ -731,6 +739,7 @@ export const promise = async ({
               operation: 'read',
               originalDoc: doc,
               overrideAccess,
+              parentIsLocalized,
               path: pathSegments,
               populate,
               populationPromises,
@@ -747,7 +756,7 @@ export const promise = async ({
               siblingDoc[field.name] = hookedValue
             }
           }
-        }, Promise.resolve())
+        }
       }
       break
     }
@@ -789,6 +798,7 @@ export const promise = async ({
         locale,
         overrideAccess,
         parentIndexPath: isNamedTab ? '' : indexPath,
+        parentIsLocalized: parentIsLocalized || field.localized,
         parentPath: isNamedTab ? path : parentPath,
         parentSchemaPath: schemaPath,
         populate,
@@ -823,6 +833,7 @@ export const promise = async ({
         locale,
         overrideAccess,
         parentIndexPath: indexPath,
+        parentIsLocalized,
         parentPath: path,
         parentSchemaPath: schemaPath,
         populate,

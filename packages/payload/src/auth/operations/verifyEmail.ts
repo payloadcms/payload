@@ -48,6 +48,7 @@ export const verifyEmailOperation = async (args: Args): Promise<boolean> => {
         _verified: true,
       },
       req,
+      returning: false,
     })
 
     if (shouldCommit) {
