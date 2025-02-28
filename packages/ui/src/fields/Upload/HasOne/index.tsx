@@ -29,22 +29,23 @@ export function UploadComponentHasOne(props: Props) {
   const { relationTo, value } = fileDoc
   const id = String(value?.id)
 
-  const fullSizeUrl: string = value.url
-  const thumbnailUrl: string = value.thumbnailURL || value.url
-
   let src: string
   let thumbnailSrc: string
 
   try {
-    src = new URL(fullSizeUrl, serverURL).toString()
+    src = new URL(value.url, serverURL).toString()
   } catch {
-    src = `${serverURL}${fullSizeUrl}`
+    src = `${serverURL}${value.url}`
   }
 
-  try {
-    thumbnailSrc = new URL(thumbnailUrl, serverURL).toString()
-  } catch {
-    thumbnailSrc = `${serverURL}${thumbnailUrl}`
+  if (value.thumbnailURL) {
+    try {
+      thumbnailSrc = new URL(value.thumbnailURL, serverURL).toString()
+    } catch {
+      thumbnailSrc = `${serverURL}${value.thumbnailURL}`
+    }
+  } else {
+    thumbnailSrc = src
   }
 
   return (
