@@ -799,12 +799,13 @@ describe('database', () => {
 
       describe('disableTransaction', () => {
         let disabledTransactionPost
-        beforeAll(async () => {
+        beforeEach(async () => {
           disabledTransactionPost = await payload.create({
             collection,
             data: {
               title,
             },
+            depth: 0,
             disableTransaction: true,
           })
         })
