@@ -3,6 +3,7 @@ import type { ListPreset } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
+import { select, transformColumnsToSearchParams } from 'payload/shared'
 import { Fragment, useCallback, useState } from 'react'
 
 import { ChevronIcon } from '../../icons/Chevron/index.js'
@@ -25,10 +26,14 @@ export function ListPresets({ activePreset: initialPreset }: { activePreset: Lis
   const { i18n, t } = useTranslation()
   const { openModal } = useModal()
 
-  const [selectedFilter, setSelectedFilter] = useState<ListPreset>(initialPreset)
+  const [selectedPreset, setSelectedPreset] = useState<ListPreset>(initialPreset)
   const [documentEditID, setDocumentEditID] = useState<number | string>(null)
 
-  const { modified: listQueryModified, setModified: setQueryModified } = useListQuery()
+  const {
+    modified: listQueryModified,
+    refineListData,
+    setModified: setQueryModified,
+  } = useListQuery()
   const { modified: columnsModified, setModified: setColumnsModified } = useTableColumns()
 
   const hasModified = listQueryModified || columnsModified
@@ -47,6 +52,18 @@ export function ListPresets({ activePreset: initialPreset }: { activePreset: Lis
     // handle delete
   }, [])
 
+  const handleChange = useCallback(
+    async (preset: ListPreset) => {
+      setSelectedPreset(preset)
+
+      await refineListData({
+        columns: transformColumnsToSearchParams(preset.columns),
+        where: preset.where,
+      })
+    },
+    [refineListData],
+  )
+
   return (
     <Fragment>
       <div className={baseClass}>
@@ -57,16 +74,16 @@ export function ListPresets({ activePreset: initialPreset }: { activePreset: Lis
           }}
           type="button"
         >
-          {selectedFilter ? (
+          {selectedPreset ? (
             <div
               className={`${baseClass}__select__clear`}
               onClick={(e) => {
                 e.stopPropagation()
-                setSelectedFilter(undefined)
+                setSelectedPreset(undefined)
               }}
               onKeyDown={(e) => {
                 e.stopPropagation()
-                setSelectedFilter(undefined)
+                setSelectedPreset(undefined)
               }}
               role="button"
               tabIndex={0}
@@ -75,7 +92,7 @@ export function ListPresets({ activePreset: initialPreset }: { activePreset: Lis
             </div>
           ) : null}
           <div className={`${baseClass}__select__label`}>
-            {selectedFilter?.title || 'Select preset'}
+            {selectedPreset?.title || 'Select preset'}
           </div>
         </button>
         <Popup
@@ -86,7 +103,7 @@ export function ListPresets({ activePreset: initialPreset }: { activePreset: Lis
           verticalAlign="bottom"
         >
           <PopupList.ButtonGroup>
-            {selectedFilter && hasModified ? (
+            {selectedPreset && hasModified ? (
               <Fragment>
                 <PopupList.Button
                   onClick={() => {
@@ -109,17 +126,17 @@ export function ListPresets({ activePreset: initialPreset }: { activePreset: Lis
               </Fragment>
             ) : null}
             <PopupList.Button onClick={() => openListDrawer()}>Create new preset</PopupList.Button>
-            {selectedFilter ? (
+            {selectedPreset ? (
               <PopupList.Button
                 onClick={() => {
-                  setDocumentEditID(selectedFilter.id)
+                  setDocumentEditID(select.id)
                   openEditDrawer()
                 }}
               >
                 {t('general:edit')}
               </PopupList.Button>
             ) : null}
-            {selectedFilter ? (
+            {selectedPreset ? (
               <PopupList.Button onClick={() => openModal(confirmDeleteModalSlug)}>
                 {t('general:delete')}
               </PopupList.Button>
@@ -129,20 +146,20 @@ export function ListPresets({ activePreset: initialPreset }: { activePreset: Lis
       </div>
       <ListDrawer
         disableListFilters
-        onSelect={({ doc }) => {
+        onSelect={async ({ doc }) => {
           closeListDrawer()
-          setSelectedFilter(doc as ListPreset)
+          await handleChange(doc as ListPreset)
         }}
       />
       <DocumentDrawer
         onDelete={() => {
-          setSelectedFilter(undefined)
+          setSelectedPreset(undefined)
         }}
-        onDuplicate={(doc) => {
-          setSelectedFilter(doc)
+        onDuplicate={async ({ doc }) => {
+          await handleChange(doc as ListPreset)
         }}
-        onSave={(doc) => {
-          setSelectedFilter(doc)
+        onSave={async ({ doc }) => {
+          await handleChange(doc as ListPreset)
         }}
       />
       <ConfirmationModal
@@ -154,8 +171,8 @@ export function ListPresets({ activePreset: initialPreset }: { activePreset: Lis
             i18nKey="general:aboutToDelete"
             t={t}
             variables={{
-              label: getTranslation(selectedFilter?.title, i18n),
-              title: selectedFilter?.title,
+              label: getTranslation(selectedPreset?.title, i18n),
+              title: selectedPreset?.title,
             }}
           />
         }

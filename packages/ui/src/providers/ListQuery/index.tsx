@@ -50,31 +50,30 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     }
   })
 
-  // If the search params change externally, update the current query
-  useEffect(() => {
-    if (modifySearchParams) {
-      setCurrentQuery(searchParams)
-    }
-  }, [searchParams, modifySearchParams])
-
   const refineListData = useCallback(
     // eslint-disable-next-line @typescript-eslint/require-await
-    async (query: ListQuery) => {
+    async (incomingQuery: ListQuery) => {
       setModified(true)
 
-      let page = 'page' in query ? query.page : currentQuery?.page
+      let page = 'page' in incomingQuery ? incomingQuery.page : currentQuery?.page
 
-      if ('where' in query || 'search' in query) {
+      if ('where' in incomingQuery || 'search' in incomingQuery) {
         page = '1'
       }
 
       const newQuery: ListQuery = {
-        columns: 'columns' in query ? query.columns : currentQuery.columns,
-        limit: 'limit' in query ? query.limit : (currentQuery?.limit ?? String(defaultLimit)),
+        columns: 'columns' in incomingQuery ? incomingQuery.columns : currentQuery.columns,
+        limit:
+          'limit' in incomingQuery
+            ? incomingQuery.limit
+            : (currentQuery?.limit ?? String(defaultLimit)),
         page,
-        search: 'search' in query ? query.search : currentQuery?.search,
-        sort: 'sort' in query ? query.sort : ((currentQuery?.sort as string) ?? defaultSort),
-        where: 'where' in query ? query.where : currentQuery?.where,
+        search: 'search' in incomingQuery ? incomingQuery.search : currentQuery?.search,
+        sort:
+          'sort' in incomingQuery
+            ? incomingQuery.sort
+            : ((currentQuery?.sort as string) ?? defaultSort),
+        where: 'where' in incomingQuery ? incomingQuery.where : currentQuery?.where,
       }
 
       if (modifySearchParams) {
@@ -190,6 +189,13 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       syncQuery()
     }
   }, [defaultSort, defaultLimit, modifySearchParams, columns])
+
+  // If the search params change externally, update the current query
+  useEffect(() => {
+    if (modifySearchParams) {
+      void refineListData(searchParams)
+    }
+  }, [searchParams, modifySearchParams, refineListData])
 
   return (
     <ListQueryContext.Provider
