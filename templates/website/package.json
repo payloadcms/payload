@@ -63,7 +63,7 @@
     "copyfiles": "^2.4.1",
     "eslint": "^9.16.0",
     "eslint-config-next": "15.1.5",
-    "postcss": "^8.4.38",
+    "postcss": "^8.5.3",
     "prettier": "^3.4.2",
     "tailwindcss": "^4.0.9",
     "typescript": "5.7.3"
