@@ -2,6 +2,7 @@ import js from '@eslint/js'
 import tseslint from 'typescript-eslint'
 import perfectionist from 'eslint-plugin-perfectionist'
 import { configs as regexpPluginConfigs } from 'eslint-plugin-regexp'
+import unusedImports from 'eslint-plugin-unused-imports'
 import eslintConfigPrettier from 'eslint-config-prettier'
 import payloadPlugin from '@payloadcms/eslint-plugin'
 import reactExtends from './configs/react/index.mjs'
@@ -51,6 +52,18 @@ const baseRules = {
     },
   ],*/
   'payload/no-jsx-import-statements': 'error',
+
+  '@typescript-eslint/no-unused-vars': 'off',
+  'unused-imports/no-unused-imports': 'warn',
+  'unused-imports/no-unused-vars': [
+    'warn',
+    {
+      vars: 'all',
+      varsIgnorePattern: '^_',
+      args: 'after-used',
+      argsIgnorePattern: '^_',
+    },
+  ],
 }
 
 const reactA11yRules = {
@@ -135,6 +148,7 @@ export const rootEslintConfig = [
     },
     plugins: {
       'import-x': importX,
+      'unused-imports': unusedImports,
     },
   },
   {
