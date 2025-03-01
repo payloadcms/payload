@@ -45,13 +45,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     }
   })
 
-  // If the search params change externally, update the current query
-  useEffect(() => {
-    if (modifySearchParams) {
-      setCurrentQuery(searchParams)
-    }
-  }, [searchParams, modifySearchParams])
-
   const refineListData = useCallback(
     // eslint-disable-next-line @typescript-eslint/require-await
     async (query: ListQuery) => {
@@ -183,6 +176,13 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       syncQuery()
     }
   }, [defaultSort, defaultLimit, modifySearchParams, columns])
+
+  // If the search params change externally, update the current query
+  useEffect(() => {
+    if (modifySearchParams) {
+      void refineListData(searchParams)
+    }
+  }, [searchParams, modifySearchParams, refineListData])
 
   return (
     <ListQueryContext.Provider
