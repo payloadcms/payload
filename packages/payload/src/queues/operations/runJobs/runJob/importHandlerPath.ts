@@ -3,7 +3,16 @@ import { pathToFileURL } from 'url'
 
 export async function importHandlerPath<T>(path: string): Promise<T> {
   let runner: T
-  const [runnerPath, runnerImportName] = path.split('#')
+  let runnerPath: string
+  let runnerImportName: string | undefined
+
+  const runnerImportSplitIndex = path?.lastIndexOf('#') ?? -1;
+  if (runnerImportSplitIndex > 0) {
+    runnerPath = path.substring(0, runnerImportSplitIndex)
+    runnerImportName = path.substring(runnerImportSplitIndex + 1)
+  } else {
+    runnerPath = path
+  }
 
   let runnerModule
   try {
