@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { OutputInfo, Sharp, SharpOptions } from 'sharp'
 
 import { fileTypeFromBuffer } from 'file-type'

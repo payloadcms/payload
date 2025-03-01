@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { BaseDatabaseAdapter } from '../types.js'
 
 import { commitTransaction } from '../../utilities/commitTransaction.js'

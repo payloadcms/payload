@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { PayloadHandler } from '../../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'

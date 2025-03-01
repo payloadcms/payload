@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 /**
  * Taken from https://github.com/sindresorhus/env-paths/blob/main/index.js
  *

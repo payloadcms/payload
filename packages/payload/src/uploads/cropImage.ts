@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { SharpOptions } from 'sharp'
 
 import type { SanitizedConfig } from '../config/types.js'

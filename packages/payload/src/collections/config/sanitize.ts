@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { LoginWithUsernameOptions } from '../../auth/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type {

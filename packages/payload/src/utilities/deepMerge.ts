@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import deepMerge from 'deepmerge'
 
 import { isPlainObject } from './isPlainObject.js'

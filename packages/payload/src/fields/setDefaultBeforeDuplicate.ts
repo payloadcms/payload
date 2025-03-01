@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 // default beforeDuplicate hook for required and unique fields
 import { type FieldAffectingData, type FieldHook, fieldShouldBeLocalized } from './config/types.js'
 
