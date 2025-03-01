@@ -1,6 +1,6 @@
 export const extractPathAndExportName = (
   pathAndMaybeExport: string,
-  defaultExport: string,
+  defaultExport: string = 'default',
 ): { exportName: string; path: string } => {
   let path = pathAndMaybeExport
   let exportName = defaultExport
