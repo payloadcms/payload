@@ -374,6 +374,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     isLike: 'é como',
     isNotEqualTo: 'não é igual a',
     isNotIn: 'não está em',
+    isNotLike: 'não é como',
     near: 'perto',
     within: 'dentro',
   },

@@ -64,18 +64,18 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      args =
-        (await hook({
-          args,
-          collection: args.collection?.config,
-          context: args.req.context,
-          operation: 'forgotPassword',
-          req: args.req,
-        })) || args
-    }, Promise.resolve())
+    if (args.collection.config.hooks?.beforeOperation?.length) {
+      for (const hook of args.collection.config.hooks.beforeOperation) {
+        args =
+          (await hook({
+            args,
+            collection: args.collection?.config,
+            context: args.req.context,
+            operation: 'forgotPassword',
+            req: args.req,
+          })) || args
+      }
+    }
 
     const {
       collection: { config: collectionConfig },
@@ -190,10 +190,11 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
     // afterForgotPassword - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.afterForgotPassword.reduce(async (priorHook, hook) => {
-      await priorHook
-      await hook({ args, collection: args.collection?.config, context: req.context })
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.afterForgotPassword?.length) {
+      for (const hook of collectionConfig.hooks.afterForgotPassword) {
+        await hook({ args, collection: args.collection?.config, context: req.context })
+      }
+    }
 
     // /////////////////////////////////////
     // afterOperation - Collection

@@ -288,11 +288,13 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
     throw new Error(`Error fetching data from locale "${toLocale}"`)
   }
 
+  const { id, ...fromLocaleDataWithoutID } = fromLocaleData.value
+
   return globalSlug
     ? await payload.updateGlobal({
         slug: globalSlug,
         data: overrideData
-          ? fromLocaleData.value
+          ? fromLocaleDataWithoutID
           : mergeData(
               fromLocaleData.value,
               toLocaleData.value,
@@ -309,7 +311,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
         id: docID,
         collection: collectionSlug,
         data: overrideData
-          ? fromLocaleData.value
+          ? fromLocaleDataWithoutID
           : mergeData(
               fromLocaleData.value,
               toLocaleData.value,

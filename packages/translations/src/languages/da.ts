@@ -372,6 +372,7 @@ export const daTranslations: DefaultTranslationsObject = {
     isLike: 'Ligner',
     isNotEqualTo: 'Er ikke lig med',
     isNotIn: 'Er ikke i',
+    isNotLike: 'er ikke som',
     near: 'Tæt på',
     within: 'Inden for',
   },

@@ -1112,6 +1112,7 @@ export type {
   Connect,
   Count,
   CountArgs,
+  CountGlobalVersionArgs,
   CountGlobalVersions,
   CountVersions,
   Create,
@@ -1156,6 +1157,8 @@ export type {
   UpdateGlobalArgs,
   UpdateGlobalVersion,
   UpdateGlobalVersionArgs,
+  UpdateMany,
+  UpdateManyArgs,
   UpdateOne,
   UpdateOneArgs,
   UpdateVersion,
@@ -1374,6 +1377,7 @@ export { restoreVersionOperation as restoreVersionOperationGlobal } from './glob
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
 export type {
   CollapsedPreferences,
+  ColumnPreference,
   DocumentPreferences,
   FieldsPreferences,
   InsideFieldsPreferences,
@@ -1411,8 +1415,8 @@ export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
 export type * from './uploads/types.js'
-
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
+
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
 export { commitTransaction } from './utilities/commitTransaction.js'
 export {

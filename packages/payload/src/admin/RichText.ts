@@ -88,7 +88,7 @@ export type BeforeChangeRichTextHookArgs<
 
   errors?: ValidationFieldError[]
   /** Only available in `beforeChange` field hooks */
-  mergeLocaleActions?: (() => Promise<void>)[]
+  mergeLocaleActions?: (() => Promise<void> | void)[]
   /** A string relating to which operation the field type is currently executing within. */
   operation?: 'create' | 'delete' | 'read' | 'update'
   /** The sibling data of the document before changes being applied. */

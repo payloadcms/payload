@@ -221,6 +221,21 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
           return doc
         },
       ],
+      /**
+       * If another update comes in after a job as already been cancelled, we need to make sure that update doesn't
+       * change the state of the job.
+       */
+      beforeChange: [
+        ({ data, originalDoc }) => {
+          if (originalDoc?.error?.cancelled) {
+            data.processing = false
+            data.hasError = true
+            delete data.completedAt
+            delete data.waitUntil
+          }
+          return data
+        },
+      ],
     },
     lockDocuments: false,
   }

@@ -179,10 +179,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       }))
     } else {
       // is Locale[], so convert to string[] for localeCodes
-      config.localization.localeCodes = config.localization.locales.reduce((locales, locale) => {
-        locales.push(locale.code)
-        return locales
-      }, [] as string[])
+      config.localization.localeCodes = config.localization.locales.map((locale) => locale.code)
 
       config.localization.locales = (
         config.localization as LocalizationConfigWithLabels

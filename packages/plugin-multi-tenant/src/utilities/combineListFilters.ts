@@ -1,19 +1,16 @@
 import type { BaseListFilter, Where } from 'payload'
 
-import { getTenantListFilter } from './getTenantListFilter.js'
-
 type Args = {
   baseListFilter?: BaseListFilter
-  tenantFieldName: string
-  tenantsCollectionSlug: string
+  customFilter: BaseListFilter
 }
 /**
  * Combines a base list filter with a tenant list filter
  *
  * Combines where constraints inside of an AND operator
  */
-export const withTenantListFilter =
-  ({ baseListFilter, tenantFieldName, tenantsCollectionSlug }: Args): BaseListFilter =>
+export const combineListFilters =
+  ({ baseListFilter, customFilter }: Args): BaseListFilter =>
   async (args) => {
     const filterConstraints = []
 
@@ -25,14 +22,10 @@ export const withTenantListFilter =
       }
     }
 
-    const tenantListFilter = getTenantListFilter({
-      req: args.req,
-      tenantFieldName,
-      tenantsCollectionSlug,
-    })
+    const customFilterResult = await customFilter(args)
 
-    if (tenantListFilter) {
-      filterConstraints.push(tenantListFilter)
+    if (customFilterResult) {
+      filterConstraints.push(customFilterResult)
     }
 
     if (filterConstraints.length) {

@@ -1,9 +1,8 @@
-import type { CreateOptions } from 'mongoose'
-
 import { buildVersionGlobalFields, type CreateGlobalVersion } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { getGlobal } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 import { transform } from './utilities/transform.js'
 
@@ -16,13 +15,15 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
     parent,
     publishedLocale,
     req,
+    returning,
     snapshot,
     updatedAt,
     versionData,
   },
 ) {
-  const VersionModel = this.versions[globalSlug]
-  const options: CreateOptions = {
+  const { globalConfig, Model } = getGlobal({ adapter: this, globalSlug, versions: true })
+
+  const options = {
     session: await getSession(this, req),
   }
 
@@ -37,10 +38,7 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
     version: versionData,
   }
 
-  const fields = buildVersionGlobalFields(
-    this.payload.config,
-    this.payload.config.globals.find((global) => global.slug === globalSlug),
-  )
+  const fields = buildVersionGlobalFields(this.payload.config, globalConfig)
 
   transform({
     adapter: this,
@@ -49,9 +47,9 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
     operation: 'write',
   })
 
-  let [doc] = await VersionModel.create([data], options, req)
+  let [doc] = await Model.create([data], options, req)
 
-  await VersionModel.updateMany(
+  await Model.updateMany(
     {
       $and: [
         {
@@ -74,6 +72,10 @@ export const createGlobalVersion: CreateGlobalVersion = async function createGlo
     { $unset: { latest: 1 } },
     options,
   )
+
+  if (returning === false) {
+    return null
+  }
 
   doc = doc.toObject()
 

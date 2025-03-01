@@ -371,6 +371,7 @@ export const faTranslations: DefaultTranslationsObject = {
     isLike: 'مانند این است',
     isNotEqualTo: 'برابر نیست',
     isNotIn: 'در این نیست',
+    isNotLike: 'مانند نیست',
     near: 'نزدیک',
     within: 'در داخل',
   },
