@@ -12,19 +12,13 @@ import {
 
 import type { FeatureProviderServer, ResolvedServerFeatureMap } from './features/typesServer.js'
 import type { SanitizedServerEditorConfig } from './lexical/config/types.js'
-import type {
-  AdapterProps,
-  LexicalEditorProps,
-  LexicalRichTextAdapter,
-  LexicalRichTextAdapterProvider,
-} from './types.js'
+import type { AdapterProps, LexicalEditorProps, LexicalRichTextAdapterProvider } from './types.js'
 
 import { getDefaultSanitizedEditorConfig } from './getDefaultSanitizedEditorConfig.js'
 import { i18n } from './i18n.js'
-import { defaultEditorConfig, defaultEditorFeatures } from './lexical/config/server/default.js'
-import { loadFeatures } from './lexical/config/server/loader.js'
-import { sanitizeServerFeatures } from './lexical/config/server/sanitize.js'
+import { defaultEditorFeatures } from './lexical/config/server/default.js'
 import { populateLexicalPopulationPromises } from './populateGraphQL/populateLexicalPopulationPromises.js'
+import { featuresInputToEditorConfig } from './utilities/editorConfigFactory.js'
 import { getGenerateImportMap } from './utilities/generateImportMap.js'
 import { getGenerateSchemaMap } from './utilities/generateSchemaMap.js'
 import { recurseNodeTree } from './utilities/recurseNodeTree.js'
@@ -34,7 +28,7 @@ let checkedDependencies = false
 
 export const lexicalTargetVersion = '0.21.0'
 
-export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapterProvider {
+export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapterProvider {
   if (
     process.env.NODE_ENV !== 'production' &&
     process.env.PAYLOAD_DISABLE_DEPENDENCY_CHECKER !== 'true' &&
@@ -66,7 +60,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
     let resolvedFeatureMap: ResolvedServerFeatureMap
 
     let finalSanitizedEditorConfig: SanitizedServerEditorConfig // For server only
-    if (!props || (!props.features && !props.lexical)) {
+    if (!args || (!args.features && !args.lexical)) {
       finalSanitizedEditorConfig = await getDefaultSanitizedEditorConfig({
         config,
         parentIsLocalized,
@@ -76,41 +70,16 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
 
       resolvedFeatureMap = finalSanitizedEditorConfig.resolvedFeatureMap
     } else {
-      if (props.features && typeof props.features === 'function') {
-        const rootEditor = config.editor
-        let rootEditorFeatures: FeatureProviderServer<unknown, unknown, unknown>[] = []
-        if (typeof rootEditor === 'object' && 'features' in rootEditor) {
-          rootEditorFeatures = (rootEditor as LexicalRichTextAdapter).features
-        }
-        features = props.features({
-          defaultFeatures: defaultEditorFeatures,
-          rootFeatures: rootEditorFeatures,
-        })
-      } else {
-        features = props.features as FeatureProviderServer<unknown, unknown, unknown>[]
-      }
-
-      if (!features) {
-        features = defaultEditorFeatures
-      }
-
-      const lexical = props.lexical ?? defaultEditorConfig.lexical
-
-      resolvedFeatureMap = await loadFeatures({
+      const result = await featuresInputToEditorConfig({
         config,
+        features: args?.features,
         isRoot,
+        lexical: args?.lexical,
         parentIsLocalized,
-        unSanitizedEditorConfig: {
-          features,
-          lexical,
-        },
       })
-
-      finalSanitizedEditorConfig = {
-        features: sanitizeServerFeatures(resolvedFeatureMap),
-        lexical: props.lexical,
-        resolvedFeatureMap,
-      }
+      finalSanitizedEditorConfig = result.sanitizedConfig
+      features = result.features
+      resolvedFeatureMap = result.resolvedFeatureMap
     }
 
     const featureI18n = finalSanitizedEditorConfig.features.i18n
@@ -128,7 +97,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       CellComponent: {
         path: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell',
         serverProps: {
-          admin: props?.admin,
+          admin: args?.admin,
           sanitizedEditorConfig: finalSanitizedEditorConfig,
         },
       },
@@ -137,7 +106,7 @@ export function lexicalEditor(props?: LexicalEditorProps): LexicalRichTextAdapte
       FieldComponent: {
         path: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalField',
         serverProps: {
-          admin: props?.admin,
+          admin: args?.admin,
           sanitizedEditorConfig: finalSanitizedEditorConfig,
         },
       },
@@ -1055,6 +1024,7 @@ export type { LexicalEditorProps, LexicalFieldAdminProps, LexicalRichTextAdapter
 
 export { createServerFeature } from './utilities/createServerFeature.js'
 
+export { editorConfigFactory } from './utilities/editorConfigFactory.js'
 export type { FieldsDrawerProps } from './utilities/fieldsDrawer/Drawer.js'
 export { extractPropsFromJSXPropsString } from './utilities/jsx/extractPropsFromJSXPropsString.js'
 export {
@@ -1063,4 +1033,5 @@ export {
   objectToFrontmatter,
   propsToJSXString,
 } from './utilities/jsx/jsx.js'
+
 export { upgradeLexicalData } from './utilities/upgradeLexicalData/index.js'
