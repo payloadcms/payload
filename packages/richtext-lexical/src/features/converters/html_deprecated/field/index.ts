@@ -84,6 +84,9 @@ export const consolidateHTMLConverters = ({
   return filteredConverters
 }
 
+/**
+ * @deprecated - will be removed in 4.0
+ */
 export const lexicalHTML: (
   /**
    * A string which matches the lexical field name you want to convert to HTML.
