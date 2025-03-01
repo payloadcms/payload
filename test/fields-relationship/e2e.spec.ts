@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 import { addListFilter } from 'helpers/e2e/addListFilter.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
+import { openCreateDocDrawer, openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -19,13 +20,7 @@ import type {
   VersionedRelationshipField,
 } from './payload-types.js'
 
-import {
-  ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
-  openCreateDocDrawer,
-  openDocDrawer,
-  saveDocAndAssert,
-} from '../helpers.js'
+import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { trackNetworkRequests } from '../helpers/e2e/trackNetworkRequests.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
@@ -495,10 +490,11 @@ describe('Relationship Field', () => {
     const editURL = url.edit(docWithExistingRelations.id)
     await page.goto(editURL)
 
-    await openDocDrawer(
+    await openDocDrawer({
       page,
-      '#field-relationshipReadOnly button.relationship--single-value__drawer-toggler.doc-drawer__toggler',
-    )
+      selector:
+        '#field-relationshipReadOnly button.relationship--single-value__drawer-toggler.doc-drawer__toggler',
+    })
 
     const documentDrawer = page.locator('[id^=doc-drawer_relation-one_1_]')
     await expect(documentDrawer).toBeVisible()
@@ -506,7 +502,7 @@ describe('Relationship Field', () => {
 
   test('should open document drawer and append newly created docs onto the parent field', async () => {
     await page.goto(url.edit(docWithExistingRelations.id))
-    await openCreateDocDrawer(page, '#field-relationshipHasMany')
+    await openCreateDocDrawer({ page, fieldSelector: '#field-relationshipHasMany' })
     const documentDrawer = page.locator('[id^=doc-drawer_relation-one_1_]')
     await expect(documentDrawer).toBeVisible()
     const drawerField = documentDrawer.locator('#field-name')
@@ -532,10 +528,10 @@ describe('Relationship Field', () => {
     const saveButton = page.locator('#action-save')
     await expect(saveButton).toBeDisabled()
 
-    await openDocDrawer(
+    await openDocDrawer({
       page,
-      '#field-relationship button.relationship--single-value__drawer-toggler ',
-    )
+      selector: '#field-relationship button.relationship--single-value__drawer-toggler',
+    })
 
     const field = page.locator('#field-name')
     await field.fill('Updated')

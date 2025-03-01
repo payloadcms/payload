@@ -80,15 +80,15 @@ type VercelBlobStoragePlugin = (vercelBlobStorageOpts: VercelBlobStorageOptions)
 export const vercelBlobStorage: VercelBlobStoragePlugin =
   (options: VercelBlobStorageOptions) =>
   (incomingConfig: Config): Config => {
-    // If the plugin is disabled or no token is provided, do not enable the plugin
-    if (options.enabled === false || !options.token) {
-      return incomingConfig
-    }
-
     // Parse storeId from token
-    const storeId = options.token.match(/^vercel_blob_rw_([a-z\d]+)_[a-z\d]+$/i)?.[1]?.toLowerCase()
+    const storeId = options.token
+      ?.match(/^vercel_blob_rw_([a-z\d]+)_[a-z\d]+$/i)?.[1]
+      ?.toLowerCase()
 
-    if (!storeId) {
+    const isPluginDisabled = options.enabled === false || !options.token
+
+    // Don't throw if the plugin is disabled
+    if (!storeId && !isPluginDisabled) {
       throw new Error(
         'Invalid token format for Vercel Blob adapter. Should be vercel_blob_rw_<store_id>_<random_string>.',
       )
@@ -108,7 +108,7 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
       clientHandler: '@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler',
       collections: options.collections,
       config: incomingConfig,
-      enabled: !!options.clientUploads,
+      enabled: !isPluginDisabled && Boolean(options.clientUploads),
       extraClientHandlerProps: (collection) => ({
         addRandomSuffix: !!optionsWithDefaults.addRandomSuffix,
         baseURL: baseUrl,
@@ -119,10 +119,15 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
           typeof options.clientUploads === 'object' ? options.clientUploads.access : undefined,
         addRandomSuffix: optionsWithDefaults.addRandomSuffix,
         cacheControlMaxAge: options.cacheControlMaxAge,
-        token: options.token,
+        token: options.token ?? '',
       }),
       serverHandlerPath: '/vercel-blob-client-upload-route',
     })
+
+    // If the plugin is disabled or no token is provided, do not enable the plugin
+    if (isPluginDisabled) {
+      return incomingConfig
+    }
 
     const adapter = vercelBlobStorageInternal({ ...optionsWithDefaults, baseUrl })
 

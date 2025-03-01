@@ -63,11 +63,23 @@ export const initClientUploads = <ExtraProps extends Record<string, unknown>, T>
   for (const collectionSlug in collections) {
     const collection = collections[collectionSlug]
 
+    let prefix: string | undefined
+
+    if (
+      collection &&
+      typeof collection === 'object' &&
+      'prefix' in collection &&
+      typeof collection.prefix === 'string'
+    ) {
+      prefix = collection.prefix
+    }
+
     config.admin.components.providers.push({
       clientProps: {
         collectionSlug,
         enabled,
         extra: extraClientHandlerProps ? extraClientHandlerProps(collection) : undefined,
+        prefix,
         serverHandlerPath,
       },
       path: clientHandler,

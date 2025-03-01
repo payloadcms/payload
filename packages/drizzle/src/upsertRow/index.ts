@@ -428,6 +428,10 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     }
   }
 
+  if (ignoreResult === 'idOnly') {
+    return { id: insertedRow.id } as T
+  }
+
   if (ignoreResult) {
     return data as T
   }

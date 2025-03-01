@@ -1,3 +1,4 @@
+import type { AcceptedLanguages } from '@payloadcms/translations'
 import type { ArrayField, CollectionSlug, Field, RelationshipField, User } from 'payload'
 
 export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
@@ -108,6 +109,16 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
         tenantFieldAccess?: never
       }
   /**
+   * Customize tenant selector label
+   *
+   * Either a string or an object where the keys are locales and the values are the string labels
+   */
+  tenantSelectorLabel?:
+    | Partial<{
+        [key in AcceptedLanguages]?: string
+      }>
+    | string
+  /**
    * The slug for the tenant collection
    *
    * @default 'tenants'
@@ -141,7 +152,9 @@ export type Tenant<IDType = number | string> = {
 }
 
 export type UserWithTenantsField = {
-  tenants: {
-    tenant: number | string | Tenant
-  }[]
+  tenants?:
+    | {
+        tenant: number | string | Tenant
+      }[]
+    | null
 } & User

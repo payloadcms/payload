@@ -12,7 +12,17 @@ import { getTransaction } from './utilities/getTransaction.js'
 
 export const updateOne: UpdateOne = async function updateOne(
   this: DrizzleAdapter,
-  { id, collection: collectionSlug, data, joins: joinQuery, locale, req, select, where: whereArg },
+  {
+    id,
+    collection: collectionSlug,
+    data,
+    joins: joinQuery,
+    locale,
+    req,
+    returning,
+    select,
+    where: whereArg,
+  },
 ) {
   const db = await getTransaction(this, req)
   const collection = this.payload.collections[collectionSlug].config
@@ -61,12 +71,17 @@ export const updateOne: UpdateOne = async function updateOne(
     data,
     db,
     fields: collection.flattenedFields,
+    ignoreResult: returning === false,
     joinQuery,
     operation: 'update',
     req,
     select,
     tableName,
   })
+
+  if (returning === false) {
+    return null
+  }
 
   return result
 }

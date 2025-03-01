@@ -36,6 +36,7 @@ import { useUploadHandlers } from '../../providers/UploadHandlers/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 import { requests } from '../../utilities/api.js'
 import {
+  BackgroundProcessingContext,
   DocumentFormContext,
   FormContext,
   FormFieldsContext,
@@ -65,6 +66,7 @@ export const Form: React.FC<FormProps> = (props) => {
     disableSuccessStatus,
     disableValidationOnSubmit,
     // fields: fieldsFromProps = collection?.fields || global?.fields,
+    el,
     handleResponse,
     initialState, // fully formed initial field state
     isDocumentForm,
@@ -105,6 +107,8 @@ export const Form: React.FC<FormProps> = (props) => {
   const [isValid, setIsValid] = useState(true)
   const [initializing, setInitializing] = useState(initializingFromProps)
   const [processing, setProcessing] = useState(false)
+  const [backgroundProcessing, setBackgroundProcessing] = useState(false)
+
   const [submitted, setSubmitted] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   const contextRef = useRef({} as FormContextType)
@@ -653,6 +657,8 @@ export const Form: React.FC<FormProps> = (props) => {
   contextRef.current.createFormData = createFormData
   contextRef.current.setModified = setModified
   contextRef.current.setProcessing = setProcessing
+  contextRef.current.setBackgroundProcessing = setBackgroundProcessing
+
   contextRef.current.setSubmitted = setSubmitted
   contextRef.current.setIsValid = setIsValid
   contextRef.current.disabled = disabled
@@ -778,8 +784,10 @@ export const Form: React.FC<FormProps> = (props) => {
       }
     : {}
 
+  const El: 'form' = (el as unknown as 'form') || 'form'
+
   return (
-    <form
+    <El
       action={typeof action === 'function' ? void action : action}
       className={classes}
       method={method}
@@ -798,18 +806,20 @@ export const Form: React.FC<FormProps> = (props) => {
             <SubmittedContext.Provider value={submitted}>
               <InitializingContext.Provider value={!isMounted || (isMounted && initializing)}>
                 <ProcessingContext.Provider value={processing}>
-                  <ModifiedContext.Provider value={modified}>
-                    <FormFieldsContext.Provider value={fieldsReducer}>
-                      {children}
-                    </FormFieldsContext.Provider>
-                  </ModifiedContext.Provider>
+                  <BackgroundProcessingContext.Provider value={backgroundProcessing}>
+                    <ModifiedContext.Provider value={modified}>
+                      <FormFieldsContext.Provider value={fieldsReducer}>
+                        {children}
+                      </FormFieldsContext.Provider>
+                    </ModifiedContext.Provider>
+                  </BackgroundProcessingContext.Provider>
                 </ProcessingContext.Provider>
               </InitializingContext.Provider>
             </SubmittedContext.Provider>
           </FormWatchContext.Provider>
         </FormContext.Provider>
       </DocumentFormContextComponent>
-    </form>
+    </El>
   )
 }
 

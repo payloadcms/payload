@@ -123,6 +123,7 @@ export interface Config {
       retriesBackoffTest: WorkflowRetriesBackoffTest;
       subTask: WorkflowSubTask;
       subTaskFails: WorkflowSubTaskFails;
+      longRunning: WorkflowLongRunning;
     };
   };
 }
@@ -308,6 +309,7 @@ export interface PayloadJob {
         | 'retriesBackoffTest'
         | 'subTask'
         | 'subTaskFails'
+        | 'longRunning'
       )
     | null;
   taskSlug?:
@@ -717,6 +719,13 @@ export interface WorkflowSubTaskFails {
   input: {
     message: string;
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowLongRunning".
+ */
+export interface WorkflowLongRunning {
+  input?: unknown;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

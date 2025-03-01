@@ -29,13 +29,23 @@ export function UploadComponentHasOne(props: Props) {
   const { relationTo, value } = fileDoc
   const id = String(value?.id)
 
-  const url: string = value.thumbnailURL || value.url
   let src: string
+  let thumbnailSrc: string
 
-  try {
-    src = new URL(url, serverURL).toString()
-  } catch {
-    src = `${serverURL}${url}`
+  if (value.url) {
+    try {
+      src = new URL(value.url, serverURL).toString()
+    } catch {
+      src = `${serverURL}${value.url}`
+    }
+  }
+
+  if (value.thumbnailURL) {
+    try {
+      thumbnailSrc = new URL(value.thumbnailURL, serverURL).toString()
+    } catch {
+      thumbnailSrc = `${serverURL}${value.thumbnailURL}`
+    }
   }
 
   return (
@@ -52,6 +62,7 @@ export function UploadComponentHasOne(props: Props) {
         onRemove={onRemove}
         reloadDoc={reloadDoc}
         src={src}
+        thumbnailSrc={thumbnailSrc || src}
         x={value?.width as number}
         y={value?.height as number}
       />
