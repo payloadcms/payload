@@ -27,7 +27,7 @@ import type {
 import type { ServerEditorConfig } from '../lexical/config/types.js'
 import type { Transformer } from '../packages/@lexical/markdown/index.js'
 import type { AdapterProps } from '../types.js'
-import type { HTMLConverter } from './converters/html/converter/types.js'
+import type { HTMLConverter } from './converters/html_deprecated/converter/types.js'
 import type { BaseClientFeatureProps } from './typesClient.js'
 
 export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexicalNode> = (args: {
@@ -221,8 +221,13 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
   /**
    * Allows you to define how a node can be serialized into different formats. Currently, only supports html.
    * Markdown converters are defined in `markdownTransformers` and not here.
+   *
+   * @deprecated - will be removed in 4.0
    */
   converters?: {
+    /**
+     * @deprecated - will be removed in 4.0
+     */
     html?: HTMLConverter<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>
   }
   /**
