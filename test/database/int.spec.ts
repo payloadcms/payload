@@ -22,11 +22,14 @@ import {
 } from 'payload'
 import { fileURLToPath } from 'url'
 
+import type { Global2 } from './payload-types.js'
+
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { isMongoose } from '../helpers/isMongoose.js'
 import removeFiles from '../helpers/removeFiles.js'
-import { postsSlug } from './shared.js'
+import { seed } from './seed.js'
+import { errorOnUnnamedFieldsSlug, postsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -41,8 +44,16 @@ process.env.PAYLOAD_CONFIG_PATH = path.join(dirname, 'config.ts')
 
 describe('database', () => {
   beforeAll(async () => {
+    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, restClient } = await initPayloadInt(dirname))
     payload.db.migrationDir = path.join(dirname, './migrations')
+
+    await seed(payload)
+
+    await restClient.login({
+      slug: 'users',
+      credentials: devUser,
+    })
 
     const loginResult = await payload.login({
       collection: 'users',
@@ -792,6 +803,7 @@ describe('database', () => {
             data: {
               title,
             },
+            depth: 0,
             disableTransaction: true,
           })
         })
@@ -874,6 +886,80 @@ describe('database', () => {
 
       expect(result.point).toEqual([5, 10])
     })
+
+    it('ensure updateMany updates all docs and respects where query', async () => {
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      await payload.create({
+        collection: postsSlug,
+        data: {
+          title: 'notupdated',
+        },
+      })
+
+      // Create 5 posts
+      for (let i = 0; i < 5; i++) {
+        await payload.create({
+          collection: postsSlug,
+          data: {
+            title: `v1 ${i}`,
+          },
+        })
+      }
+
+      const result = await payload.db.updateMany({
+        collection: postsSlug,
+        data: {
+          title: 'updated',
+        },
+        where: {
+          title: {
+            not_equals: 'notupdated',
+          },
+        },
+      })
+
+      expect(result?.length).toBe(5)
+      expect(result?.[0]?.title).toBe('updated')
+      expect(result?.[4]?.title).toBe('updated')
+
+      // Ensure all posts minus the one we don't want updated are updated
+      const { docs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        where: {
+          title: {
+            equals: 'updated',
+          },
+        },
+      })
+
+      expect(docs).toHaveLength(5)
+      expect(docs?.[0]?.title).toBe('updated')
+      expect(docs?.[4]?.title).toBe('updated')
+
+      const { docs: notUpdatedDocs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        where: {
+          title: {
+            not_equals: 'updated',
+          },
+        },
+      })
+
+      expect(notUpdatedDocs).toHaveLength(1)
+      expect(notUpdatedDocs?.[0]?.title).toBe('notupdated')
+    })
   })
 
   describe('Error Handler', () => {
@@ -892,10 +978,10 @@ describe('database', () => {
         errorMessage = e.message
       }
 
-      await expect(errorMessage).toBe('The following field is invalid: Title')
+      expect(errorMessage).toBe('The following field is invalid: Title')
     })
 
-    it('should return proper deeply nested field validation errors', async () => {
+    it('should return validation errors in response', async () => {
       try {
         await payload.create({
           collection: postsSlug,
@@ -912,13 +998,29 @@ describe('database', () => {
           },
         })
       } catch (e: any) {
-        await expect(e.message).toMatch(
+        expect(e.message).toMatch(
           payload.db.name === 'mongoose'
             ? 'posts validation failed: D1.D2.D3.D4: Cast to string failed for value "{}" (type Object) at path "D4"'
             : payload.db.name === 'sqlite'
               ? 'SQLite3 can only bind numbers, strings, bigints, buffers, and null'
               : '',
         )
+      }
+    })
+
+    it('should return validation errors with proper field paths for unnamed fields', async () => {
+      try {
+        await payload.create({
+          collection: errorOnUnnamedFieldsSlug,
+          data: {
+            groupWithinUnnamedTab: {
+              // @ts-expect-error
+              text: undefined,
+            },
+          },
+        })
+      } catch (e: any) {
+        expect(e.data?.errors?.[0]?.path).toBe('groupWithinUnnamedTab.text')
       }
     })
   })
@@ -1340,5 +1442,112 @@ describe('database', () => {
     await payload.delete({ id, collection: postsSlug })
     const { id: id_2 } = await payload.create({ collection: postsSlug, data: { title: 'ASD' } })
     expect(id_2).not.toBe(id)
+  })
+
+  it('payload.db.createGlobal should have globalType, updatedAt, createdAt fields', async () => {
+    const timestamp = Date.now()
+    let result = (await payload.db.createGlobal({
+      slug: 'global-2',
+      data: { text: 'this is global-2' },
+    })) as { globalType: string } & Global2
+
+    expect(result.text).toBe('this is global-2')
+    expect(result.globalType).toBe('global-2')
+    expect(timestamp).toBeLessThanOrEqual(new Date(result.createdAt as string).getTime())
+    expect(timestamp).toBeLessThanOrEqual(new Date(result.updatedAt as string).getTime())
+
+    const createdAt = new Date(result.createdAt as string).getTime()
+
+    result = (await payload.db.updateGlobal({
+      slug: 'global-2',
+      data: { text: 'this is global-2 but updated' },
+    })) as { globalType: string } & Global2
+
+    expect(result.text).toBe('this is global-2 but updated')
+    expect(result.globalType).toBe('global-2')
+    expect(createdAt).toEqual(new Date(result.createdAt as string).getTime())
+    expect(createdAt).toBeLessThan(new Date(result.updatedAt as string).getTime())
+  })
+
+  it('payload.updateGlobal should have globalType, updatedAt, createdAt fields', async () => {
+    const timestamp = Date.now()
+    let result = (await payload.updateGlobal({
+      slug: 'global-3',
+      data: { text: 'this is global-3' },
+    })) as { globalType: string } & Global2
+
+    expect(result.text).toBe('this is global-3')
+    expect(result.globalType).toBe('global-3')
+    expect(timestamp).toBeLessThanOrEqual(new Date(result.createdAt as string).getTime())
+    expect(timestamp).toBeLessThanOrEqual(new Date(result.updatedAt as string).getTime())
+
+    const createdAt = new Date(result.createdAt as string).getTime()
+
+    result = (await payload.updateGlobal({
+      slug: 'global-3',
+      data: { text: 'this is global-3 but updated' },
+    })) as { globalType: string } & Global2
+
+    expect(result.text).toBe('this is global-3 but updated')
+    expect(result.globalType).toBe('global-3')
+    expect(createdAt).toEqual(new Date(result.createdAt as string).getTime())
+    expect(createdAt).toBeLessThan(new Date(result.updatedAt as string).getTime())
+  })
+
+  it('should group where conditions with AND', async () => {
+    // create 2 docs
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'post 1',
+      },
+    })
+
+    const doc2 = await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'post 2',
+      },
+    })
+
+    const query1 = await payload.find({
+      collection: postsSlug,
+      where: {
+        id: {
+          // where order, `in` last
+          not_in: [],
+          in: [doc2.id],
+        },
+      },
+    })
+
+    const query2 = await payload.find({
+      collection: postsSlug,
+      where: {
+        id: {
+          // where order, `in` first
+          in: [doc2.id],
+          not_in: [],
+        },
+      },
+    })
+
+    const query3 = await payload.find({
+      collection: postsSlug,
+      where: {
+        and: [
+          {
+            id: {
+              in: [doc2.id],
+              not_in: [],
+            },
+          },
+        ],
+      },
+    })
+
+    expect(query1.totalDocs).toEqual(1)
+    expect(query2.totalDocs).toEqual(1)
+    expect(query3.totalDocs).toEqual(1)
   })
 })

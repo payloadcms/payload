@@ -42,8 +42,9 @@ export const createMigration: CreateMigration = async function createMigration({
   const migrationFileContent = migrationTemplate(predefinedMigration)
 
   const [yyymmdd, hhmmss] = new Date().toISOString().split('T')
-  const formattedDate = yyymmdd.replace(/\D/g, '')
-  const formattedTime = hhmmss.split('.')[0].replace(/\D/g, '')
+
+  const formattedDate = yyymmdd!.replace(/\D/g, '')
+  const formattedTime = hhmmss!.split('.')[0]!.replace(/\D/g, '')
 
   const timestamp = `${formattedDate}_${formattedTime}`
 

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { DeepPartial } from 'ts-essentials'
 
 import { status as httpStatus } from 'http-status'
@@ -61,18 +62,18 @@ export const updateOperation = async <
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      args =
-        (await hook({
-          args,
-          collection: args.collection.config,
-          context: args.req.context,
-          operation: 'update',
-          req: args.req,
-        })) || args
-    }, Promise.resolve())
+    if (args.collection.config.hooks?.beforeOperation?.length) {
+      for (const hook of args.collection.config.hooks.beforeOperation) {
+        args =
+          (await hook({
+            args,
+            collection: args.collection.config,
+            context: args.req.context,
+            operation: 'update',
+            req: args.req,
+          })) || args
+      }
+    }
 
     const {
       collection: { config: collectionConfig },

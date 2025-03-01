@@ -12,10 +12,12 @@ import { MenuItems } from './collections/MenuItems.js'
 import { Tenants } from './collections/Tenants.js'
 import { Users } from './collections/Users/index.js'
 import { seed } from './seed/index.js'
+import { menuItemsSlug, menuSlug } from './shared.js'
 
 export default buildConfigWithDefaults({
-  collections: [Tenants, Users, Menu, MenuItems],
+  collections: [Tenants, Users, MenuItems, Menu],
   admin: {
+    autoLogin: false,
     importMap: {
       baseDir: path.resolve(dirname),
     },
@@ -30,27 +32,16 @@ export default buildConfigWithDefaults({
   plugins: [
     multiTenantPlugin<ConfigType>({
       userHasAccessToAllTenants: (user) => Boolean(user.roles?.includes('admin')),
-      tenantsArrayField: {
-        rowFields: [
-          {
-            name: 'roles',
-            type: 'select',
-            options: [
-              { label: 'Admin', value: 'admin' },
-              { label: 'User', value: 'user' },
-            ],
-          },
-        ],
-      },
       tenantField: {
         access: {},
       },
       collections: {
-        'menu-items': {},
-        menu: {
+        [menuItemsSlug]: {},
+        [menuSlug]: {
           isGlobal: true,
         },
       },
+      tenantSelectorLabel: 'Sites',
     }),
   ],
   typescript: {

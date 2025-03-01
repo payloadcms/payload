@@ -2,11 +2,11 @@ import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { IndexDirection, IndexOptions } from 'mongoose'
 
 import path from 'path'
-import { type PaginatedDocs, type Payload, reload, ValidationError } from 'payload'
+import { type PaginatedDocs, type Payload, reload } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
-import type { GroupField, RichTextField } from './payload-types.js'
+import type { BlockField, GroupField, RichTextField } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
@@ -30,6 +30,7 @@ import { clearAndSeedEverything } from './seed.js'
 import {
   arrayFieldsSlug,
   blockFieldsSlug,
+  collapsibleFieldsSlug,
   groupFieldsSlug,
   relationshipFieldsSlug,
   tabsFieldsSlug,
@@ -164,6 +165,68 @@ describe('Fields', () => {
       expect(missResult).toBeFalsy()
     })
 
+    it('should query like on value', async () => {
+      const miss = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'dog',
+        },
+      })
+
+      const hit = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'cat',
+        },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'text-fields',
+        where: {
+          text: {
+            like: 'cat',
+          },
+        },
+      })
+
+      const hitResult = docs.find(({ id: findID }) => hit.id === findID)
+      const missResult = docs.find(({ id: findID }) => miss.id === findID)
+
+      expect(hitResult).toBeDefined()
+      expect(missResult).toBeFalsy()
+    })
+
+    it('should query not_like on value', async () => {
+      const hit = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'dog',
+        },
+      })
+
+      const miss = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'cat',
+        },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'text-fields',
+        where: {
+          text: {
+            not_like: 'cat',
+          },
+        },
+      })
+
+      const hitResult = docs.find(({ id: findID }) => hit.id === findID)
+      const missResult = docs.find(({ id: findID }) => miss.id === findID)
+
+      expect(hitResult).toBeDefined()
+      expect(missResult).toBeFalsy()
+    })
+
     it('should query hasMany within an array', async () => {
       const docFirst = await payload.create({
         collection: 'text-fields',
@@ -257,7 +320,7 @@ describe('Fields', () => {
           text: 'required',
           blocks: [
             {
-              blockType: 'block',
+              blockType: 'blockWithText',
               texts: ['text_1', 'text_2'],
             },
           ],
@@ -270,7 +333,7 @@ describe('Fields', () => {
           text: 'required',
           blocks: [
             {
-              blockType: 'block',
+              blockType: 'blockWithText',
               texts: ['text_other', 'text_2'],
             },
           ],
@@ -487,7 +550,7 @@ describe('Fields', () => {
   })
 
   describe('rows', () => {
-    it('show proper validation error message on text field within row field', async () => {
+    it('should show proper validation error message on text field within row field', async () => {
       await expect(async () =>
         payload.create({
           collection: 'row-fields',
@@ -676,6 +739,64 @@ describe('Fields', () => {
       })
 
       expect(upd.array[0].group.selectHasMany).toStrictEqual(['six'])
+    })
+
+    it('should work with versions', async () => {
+      const base = await payload.create({
+        collection: 'select-versions-fields',
+        data: { hasMany: ['a', 'b'] },
+      })
+
+      expect(base.hasMany).toStrictEqual(['a', 'b'])
+
+      const array = await payload.create({
+        collection: 'select-versions-fields',
+        data: { array: [{ hasManyArr: ['a', 'b'] }] },
+        draft: true,
+      })
+
+      expect(array.array[0]?.hasManyArr).toStrictEqual(['a', 'b'])
+
+      const block = await payload.create({
+        collection: 'select-versions-fields',
+        data: { blocks: [{ blockType: 'block', hasManyBlocks: ['a', 'b'] }] },
+      })
+
+      expect(block.blocks[0]?.hasManyBlocks).toStrictEqual(['a', 'b'])
+    })
+
+    it('should work with autosave', async () => {
+      let data = await payload.create({
+        collection: 'select-versions-fields',
+        data: { hasMany: ['a', 'b', 'c'] },
+      })
+      expect(data.hasMany).toStrictEqual(['a', 'b', 'c'])
+
+      data = await payload.update({
+        id: data.id,
+        collection: 'select-versions-fields',
+        data: { hasMany: ['a'] },
+        draft: true,
+      })
+      expect(data.hasMany).toStrictEqual(['a'])
+
+      data = await payload.update({
+        id: data.id,
+        collection: 'select-versions-fields',
+        data: { hasMany: ['a', 'b', 'c', 'd'] },
+        draft: true,
+        autosave: true,
+      })
+      expect(data.hasMany).toStrictEqual(['a', 'b', 'c', 'd'])
+
+      data = await payload.update({
+        id: data.id,
+        collection: 'select-versions-fields',
+        data: { hasMany: ['a'] },
+        draft: true,
+        autosave: true,
+      })
+      expect(data.hasMany).toStrictEqual(['a'])
     })
   })
 
@@ -916,7 +1037,7 @@ describe('Fields', () => {
       data: {
         blocks: [
           {
-            blockType: 'block',
+            blockType: 'blockWithNumber',
             numbers: [10, 30],
           },
         ],
@@ -928,7 +1049,7 @@ describe('Fields', () => {
       data: {
         blocks: [
           {
-            blockType: 'block',
+            blockType: 'blockWithNumber',
             numbers: [10, 40],
           },
         ],
@@ -1677,7 +1798,7 @@ describe('Fields', () => {
       expect(res.id).toBe(doc.id)
     })
 
-    it('show proper validation error on text field in nested array', async () => {
+    it('should show proper validation error on text field in nested array', async () => {
       await expect(async () =>
         payload.create({
           collection,
@@ -1697,7 +1818,7 @@ describe('Fields', () => {
       ).rejects.toThrow('The following field is invalid: Items 1 > SubArray 1 > Second text field')
     })
 
-    it('show proper validation error on text field in row field in nested array', async () => {
+    it('should show proper validation error on text field in row field in nested array', async () => {
       await expect(async () =>
         payload.create({
           collection,
@@ -2503,13 +2624,39 @@ describe('Fields', () => {
 
       expect(result.blocksWithLocalizedArray[0].array[0].text).toEqual('localized')
     })
+
+    it('ensure localized field within block reference is saved correctly', async () => {
+      const blockFields = await payload.find({
+        collection: 'block-fields',
+        locale: 'all',
+      })
+
+      const doc: BlockField = blockFields.docs[0] as BlockField
+
+      expect(doc?.localizedReferences?.[0]?.blockType).toEqual('localizedTextReference2')
+      expect(doc?.localizedReferences?.[0]?.text).toEqual({ en: 'localized text' })
+    })
+
+    it('ensure localized property is stripped from localized field within localized block reference', async () => {
+      const blockFields = await payload.find({
+        collection: 'block-fields',
+        locale: 'all',
+      })
+
+      const doc: any = blockFields.docs[0]
+
+      expect(doc?.localizedReferencesLocalizedBlock?.en?.[0]?.blockType).toEqual(
+        'localizedTextReference',
+      )
+      expect(doc?.localizedReferencesLocalizedBlock?.en?.[0]?.text).toEqual('localized text')
+    })
   })
 
   describe('collapsible', () => {
-    it('show proper validation error message for fields nested in collapsible', async () => {
+    it('should show proper validation error message for fields nested in collapsible', async () => {
       await expect(async () =>
         payload.create({
-          collection: 'collapsible-fields',
+          collection: collapsibleFieldsSlug,
           data: {
             text: 'required',
             group: {
@@ -2619,6 +2766,20 @@ describe('Fields', () => {
           collection: 'json-fields',
           where: {
             'json.foo': { like: 'bar' },
+          },
+        })
+
+        const docIDs = docs.map(({ id }) => id)
+
+        expect(docIDs).toContain(fooBar.id)
+        expect(docIDs).not.toContain(bazBar.id)
+      })
+
+      it('should query nested properties - not_like', async () => {
+        const { docs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.baz': { not_like: 'bar' },
           },
         })
 

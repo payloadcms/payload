@@ -49,6 +49,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
       return password(value, {
         name: 'password',
         type: 'text',
+        blockData: {},
         data: {},
         event: 'onChange',
         preferences: { fields: {} },

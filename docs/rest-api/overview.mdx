@@ -578,7 +578,7 @@ Each endpoint object needs to have:
 | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`path`**    | A string for the endpoint route after the collection or globals slug                                                                                                                                                                                       |
 | **`method`**  | The lowercase HTTP verb to use: 'get', 'head', 'post', 'put', 'delete', 'connect' or 'options'                                                                                                                                                             |
-| **`handler`** | A function or array of functions to be called with **req**, **res** and **next** arguments. [Next.js](https://nextjs.org/docs/app/building-your-application/routing/route-handlers)                                                                                          |
+| **`handler`** | A function that accepts **req** - `PayloadRequest` object which contains [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) properties, currently authenticated `user` and the Local API instance `payload`.                          |
 | **`root`**    | When `true`, defines the endpoint on the root Next.js app, bypassing Payload handlers and the `routes.api` subpath. Note: this only applies to top-level endpoints of your Payload Config, endpoints defined on `collections` or `globals` cannot be root. |
 | **`custom`**  | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                  |
 
@@ -663,7 +663,7 @@ Data is not automatically appended to the request. You can read the body data by
 Or you could use our helper function that mutates the request and appends data and file if found.
 
 ```ts
-import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
+import { addDataAndFileToRequest } from 'payload'
 
 // custom endpoint example
 {
@@ -689,7 +689,7 @@ import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
 The locale and the fallback locale are not automatically appended to custom endpoint requests. If you would like to add them you can use this helper function.
 
 ```ts
-import { addLocalesToRequestFromData } from '@payloadcms/next/utilities'
+import { addLocalesToRequestFromData } from 'payload'
 
 // custom endpoint example
 {
@@ -699,6 +699,31 @@ import { addLocalesToRequestFromData } from '@payloadcms/next/utilities'
     await addLocalesToRequestFromData(req)
     // you now can access req.locale & req.fallbackLocale
     return Response.json({ message: 'success' })
+  }
+}
+```
+
+`headersWithCors`
+
+By default, custom endpoints don't handle CORS headers in responses. The `headersWithCors` function checks the Payload config and sets the appropriate CORS headers in the response accordingly.
+
+```ts
+import { headersWithCors } from 'payload'
+
+// custom endpoint example
+{
+  path: '/:id/tracking',
+  method: 'post',
+  handler: async (req) => {
+    return Response.json(
+      { message: 'success' },
+      {
+        headers: headersWithCors({
+          headers: new Headers(),
+          req,
+        })
+      },
+    )
   }
 }
 ```

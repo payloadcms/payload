@@ -1,6 +1,6 @@
 'use client'
 import { useWindowInfo } from '@faceless-ui/window-info'
-import { clearAllBodyScrollLocks, disableBodyScroll, enableBodyScroll } from 'body-scroll-lock'
+import { usePathname } from 'next/navigation.js'
 import React, { useEffect, useRef } from 'react'
 
 import { usePreferences } from '../../providers/Preferences/index.js'
@@ -41,6 +41,8 @@ export const NavProvider: React.FC<{
     breakpoints: { l: largeBreak, m: midBreak, s: smallBreak },
   } = useWindowInfo()
 
+  const pathname = usePathname()
+
   const { getPreference } = usePreferences()
   const navRef = useRef(null)
 
@@ -65,17 +67,22 @@ export const NavProvider: React.FC<{
     }
   }, [largeBreak, getPreference, setNavOpen])
 
-  // TODO: on smaller screens where the nav is a modal
+  // on smaller screens where the nav is a modal
   // close the nav when the user navigates away
+  useEffect(() => {
+    if (smallBreak === true) {
+      setNavOpen(false)
+    }
+  }, [pathname])
 
   // on open and close, lock the body scroll
   // do not do this on desktop, the sidebar is not a modal
   useEffect(() => {
     if (navRef.current) {
       if (navOpen && midBreak) {
-        disableBodyScroll(navRef.current)
+        navRef.current.style.overscrollBehavior = 'contain'
       } else {
-        enableBodyScroll(navRef.current)
+        navRef.current.style.overscrollBehavior = 'auto'
       }
     }
   }, [navOpen, midBreak])
@@ -97,7 +104,9 @@ export const NavProvider: React.FC<{
   // when the component unmounts, clear all body scroll locks
   useEffect(() => {
     return () => {
-      clearAllBodyScrollLocks()
+      if (navRef.current) {
+        navRef.current.style.overscrollBehavior = 'auto'
+      }
     }
   }, [])
 

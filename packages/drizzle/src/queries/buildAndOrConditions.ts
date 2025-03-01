@@ -12,6 +12,7 @@ export function buildAndOrConditions({
   fields,
   joins,
   locale,
+  parentIsLocalized,
   selectFields,
   selectLocale,
   tableName,
@@ -24,6 +25,7 @@ export function buildAndOrConditions({
   globalSlug?: string
   joins: BuildQueryJoinAliases
   locale?: string
+  parentIsLocalized: boolean
   selectFields: Record<string, GenericColumn>
   selectLocale?: boolean
   tableName: string
@@ -42,6 +44,7 @@ export function buildAndOrConditions({
         fields,
         joins,
         locale,
+        parentIsLocalized,
         selectFields,
         selectLocale,
         tableName,

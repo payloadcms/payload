@@ -1,4 +1,5 @@
 'use client'
+import type { ListDrawerProps } from '@payloadcms/ui'
 import type { LexicalEditor } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
@@ -77,14 +78,14 @@ const UploadDrawerComponent: React.FC<Props> = ({ enabledCollectionSlugs }) => {
     )
   }, [editor, openListDrawer])
 
-  const onSelect = useCallback(
-    ({ collectionSlug, docID }: { collectionSlug: string; docID: number | string }) => {
+  const onSelect = useCallback<NonNullable<ListDrawerProps['onSelect']>>(
+    ({ collectionSlug, doc }) => {
       closeListDrawer()
       insertUpload({
         editor,
         relationTo: collectionSlug,
         replaceNodeKey,
-        value: docID,
+        value: doc.id,
       })
     },
     [editor, closeListDrawer, replaceNodeKey],

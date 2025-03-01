@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
@@ -83,11 +84,13 @@ export async function afterRead<T extends JsonObject>(args: Args<T>): Promise<T>
     global,
     locale,
     overrideAccess,
-    path: [],
+    parentIndexPath: '',
+    parentIsLocalized: false,
+    parentPath: '',
+    parentSchemaPath: '',
     populate,
     populationPromises,
     req,
-    schemaPath: [],
     select,
     selectMode: select ? getSelectMode(select) : undefined,
     showHiddenFields,

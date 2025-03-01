@@ -1,6 +1,7 @@
+// @ts-strict-ignore
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { Payload } from '../index.js'
+import type { CreateGlobalVersionArgs, CreateVersionArgs, Payload } from '../index.js'
 import type { PayloadRequest, SelectType } from '../types/index.js'
 
 import { deepCopyObjectSimple } from '../index.js'
@@ -158,10 +159,11 @@ export const saveVersion = async ({
         const updatedArgs = {
           ...createVersionArgs,
           createdAt: snapshotDate,
+          returning: false,
           snapshot: true,
           updatedAt: snapshotDate,
           versionData: snapshotData,
-        } as any
+        } as CreateGlobalVersionArgs & CreateVersionArgs
 
         if (collection) {
           await payload.db.createVersion(updatedArgs)

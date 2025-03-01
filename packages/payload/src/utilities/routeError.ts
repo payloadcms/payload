@@ -22,6 +22,19 @@ export const routeError = async ({
   err: APIError
   req: PayloadRequest | Request
 }) => {
+  if ('payloadInitError' in err && err.payloadInitError === true) {
+    // do not attempt initializing Payload if the error is due to a failed initialization. Otherwise,
+    // it will cause an infinite loop of initialization attempts and endless error responses, without
+    // actually logging the error, as the error logging code will never be reached.
+    console.error(err)
+    return Response.json(
+      {
+        message: 'There was an error initializing Payload',
+      },
+      { status: httpStatus.INTERNAL_SERVER_ERROR },
+    )
+  }
+
   let payload = incomingReq && 'payload' in incomingReq && incomingReq?.payload
 
   if (!payload) {
@@ -37,6 +50,12 @@ export const routeError = async ({
     }
   }
 
+  let response = formatErrors(err)
+
+  let status = err.status || httpStatus.INTERNAL_SERVER_ERROR
+
+  logError({ err, payload })
+
   const req = incomingReq as PayloadRequest
 
   req.payload = payload
@@ -47,15 +66,9 @@ export const routeError = async ({
 
   const { config } = payload
 
-  let response = formatErrors(err)
-
-  let status = err.status || httpStatus.INTERNAL_SERVER_ERROR
-
-  logError({ err, payload })
-
   // Internal server errors can contain anything, including potentially sensitive data.
   // Therefore, error details will be hidden from the response unless `config.debug` is `true`
-  if (!config.debug && status === httpStatus.INTERNAL_SERVER_ERROR) {
+  if (!config.debug && !err.isPublic && status === httpStatus.INTERNAL_SERVER_ERROR) {
     response = formatErrors(new APIError('Something went wrong.'))
   }
 

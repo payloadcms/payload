@@ -62,9 +62,12 @@ export const Users: CollectionConfig = {
           })
 
           return {
-            // Send the user back to authenticate,
+            // Send the user with the collection slug back to authenticate,
             // or send null if no user should be authenticated
-            user: usersQuery.docs[0] || null,
+            user: usersQuery.docs[0] ? {
+              collection: 'users'
+              ...usersQuery.docs[0],
+            } : null,
 
             // Optionally, you can return headers
             // that you'd like Payload to set here when

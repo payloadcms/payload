@@ -74,6 +74,15 @@ export const CustomFields: CollectionConfig = {
       },
     },
     {
+      name: 'customSelectInput',
+      type: 'text',
+      admin: {
+        components: {
+          Field: '/collections/CustomFields/fields/Select/CustomInput.js#CustomInput',
+        },
+      },
+    },
+    {
       name: 'relationshipFieldWithBeforeAfterInputs',
       type: 'relationship',
       admin: {

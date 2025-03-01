@@ -283,6 +283,7 @@ jobs:
           - fields-relationship
           - fields__collections__Array
           - fields__collections__Blocks
+          - fields__collections__Blocks#config.blockreferences.ts
           - fields__collections__Checkbox
           - fields__collections__Collapsible
           - fields__collections__ConditionalLogic
@@ -293,6 +294,7 @@ jobs:
           - fields__collections__JSON
           - fields__collections__Lexical__e2e__main
           - fields__collections__Lexical__e2e__blocks
+          - fields__collections__Lexical__e2e__blocks#config.blockreferences.ts
           - fields__collections__Number
           - fields__collections__Point
           - fields__collections__Radio
@@ -360,6 +362,12 @@ jobs:
       - name: Setup Playwright - Dependencies-only
         if: steps.cache-playwright-browsers.outputs.cache-hit == 'true'
         run: pnpm exec playwright install-deps chromium
+
+      - name: E2E Tests
+        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e:prod:ci ${{ matrix.suite }}
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}.json
+          NEXT_TELEMETRY_DISABLED: 1
 
       - uses: actions/upload-artifact@v4
         if: always()
@@ -447,14 +455,6 @@ jobs:
           psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "SELECT version();"
           echo "POSTGRES_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
         if: matrix.database == 'postgres'
-
-      # Login to Docker Hub in order to up rate-limit
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-        if: matrix.database == 'mongodb'
 
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.11.0

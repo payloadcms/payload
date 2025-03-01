@@ -19,8 +19,11 @@ export const defaultESLintIgnores = [
   '**/build/',
   '**/node_modules/',
   '**/temp/',
-  '**/*.spec.ts',
+  'packages/**/*.spec.ts',
   'next-env.d.ts',
+  '**/app',
+  'src/**/*.spec.ts',
+  '**/jest.setup.js',
 ]
 
 /** @typedef {import('eslint').Linter.Config} Config */
@@ -28,10 +31,7 @@ export const defaultESLintIgnores = [
 export const rootParserOptions = {
   sourceType: 'module',
   ecmaVersion: 'latest',
-  projectService: {
-    maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: 40,
-    allowDefaultProject: ['scripts/*.ts', '*.js', '*.mjs', '*.d.ts'],
-  },
+  projectService: true,
 }
 
 /** @type {Config[]} */
