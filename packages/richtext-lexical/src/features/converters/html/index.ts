@@ -7,6 +7,7 @@ import type {
   HTMLConverter,
   HTMLConverters,
   HTMLConvertersFunction,
+  HTMLPopulateFn,
   ProvidedCSS,
   SerializedLexicalNodeWithParent,
 } from './types.js'
@@ -33,16 +34,18 @@ export type ConvertLexicalToHTMLArgs = {
    * If true, disables text alignment globally. If an array, disables for specific node `type` values.
    */
   disableTextAlign?: boolean | string[]
+  populate?: HTMLPopulateFn
 }
 
-export function convertLexicalToHTML({
+export async function convertLexicalToHTML({
   className,
   converters,
   data,
   disableContainer,
   disableIndent,
   disableTextAlign,
-}: ConvertLexicalToHTMLArgs): string {
+  populate,
+}: ConvertLexicalToHTMLArgs): Promise<string> {
   if (hasText(data)) {
     let finalConverters: HTMLConverters = {}
     if (converters) {
@@ -55,13 +58,16 @@ export function convertLexicalToHTML({
       finalConverters = defaultHTMLConverters
     }
 
-    const html = convertLexicalNodesToHTML({
-      converters: finalConverters,
-      disableIndent,
-      disableTextAlign,
-      nodes: data?.root?.children,
-      parent: data?.root,
-    }).join('')
+    const html = (
+      await convertLexicalNodesToHTML({
+        converters: finalConverters,
+        disableIndent,
+        disableTextAlign,
+        nodes: data?.root?.children,
+        parent: data?.root,
+        populate,
+      })
+    ).join('')
 
     if (disableContainer) {
       return html
@@ -76,22 +82,28 @@ export function convertLexicalToHTML({
   }
 }
 
-export function convertLexicalNodesToHTML({
+export async function convertLexicalNodesToHTML({
   converters,
   disableIndent,
   disableTextAlign,
   nodes,
   parent,
+  populate,
 }: {
   converters: HTMLConverters
   disableIndent?: boolean | string[]
   disableTextAlign?: boolean | string[]
   nodes: SerializedLexicalNode[]
   parent: SerializedLexicalNodeWithParent
-}): string[] {
+  populate?: HTMLPopulateFn
+}): Promise<string[]> {
   const unknownConverter: HTMLConverter<any> = converters.unknown as HTMLConverter<any>
 
-  const htmlArray: string[] = nodes.map((node, i) => {
+  const htmlArray: string[] = []
+
+  let i = -1
+  for (const node of nodes) {
+    i++
     let converterForNode: HTMLConverter<any> | undefined
     if (node.type === 'block') {
       converterForNode = converters?.blocks?.[(node as SerializedBlockNode)?.fields?.blockType]
@@ -167,12 +179,14 @@ export function convertLexicalNodesToHTML({
       if (converterForNode) {
         const converted =
           typeof converterForNode === 'function'
-            ? converterForNode({
+            ? await converterForNode({
                 childIndex: i,
                 converters,
                 node,
-                nodesToHTML: (args) => {
-                  return convertLexicalNodesToHTML({
+                populate,
+
+                nodesToHTML: async (args) => {
+                  return await convertLexicalNodesToHTML({
                     converters: args.converters ?? converters,
                     disableIndent: args.disableIndent ?? disableIndent,
                     disableTextAlign: args.disableTextAlign ?? disableTextAlign,
@@ -181,6 +195,7 @@ export function convertLexicalNodesToHTML({
                       ...node,
                       parent,
                     },
+                    populate,
                   })
                 },
                 parent,
@@ -193,12 +208,12 @@ export function convertLexicalNodesToHTML({
         nodeHTML = '<span>unknown node</span>'
       }
 
-      return nodeHTML
+      htmlArray.push(nodeHTML)
     } catch (error) {
       console.error('Error converting lexical node to HTML:', error, 'node:', node)
-      return ''
+      htmlArray.push('')
     }
-  })
+  }
 
   return htmlArray.filter(Boolean)
 }

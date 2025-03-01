@@ -1,13 +1,18 @@
 import type { SerializedAutoLinkNode, SerializedLinkNode } from '../../../../nodeTypes.js'
-import type { HTMLConverters } from '../types.js'
+import type { HTMLConverters, HTMLPopulateFn } from '../types.js'
 
 export const LinkHTMLConverter: (args: {
-  internalDocToHref?: (args: { linkNode: SerializedLinkNode }) => string
+  internalDocToHref?: (args: {
+    linkNode: SerializedLinkNode
+    populate?: HTMLPopulateFn
+  }) => Promise<string> | string
 }) => HTMLConverters<SerializedAutoLinkNode | SerializedLinkNode> = ({ internalDocToHref }) => ({
-  autolink: ({ node, nodesToHTML, providedStyleTag }) => {
-    const children = nodesToHTML({
-      nodes: node.children,
-    }).join('')
+  autolink: async ({ node, nodesToHTML, providedStyleTag }) => {
+    const children = (
+      await nodesToHTML({
+        nodes: node.children,
+      })
+    ).join('')
 
     const rel: string | undefined = node.fields.newTab ? 'noopener noreferrer' : undefined
     const target: string | undefined = node.fields.newTab ? '_blank' : undefined
@@ -18,10 +23,12 @@ export const LinkHTMLConverter: (args: {
       </a>
     )`
   },
-  link: ({ node, nodesToHTML, providedStyleTag }) => {
-    const children = nodesToHTML({
-      nodes: node.children,
-    }).join('')
+  link: async ({ node, nodesToHTML, populate, providedStyleTag }) => {
+    const children = (
+      await nodesToHTML({
+        nodes: node.children,
+      })
+    ).join('')
 
     const rel: string | undefined = node.fields.newTab ? 'noopener noreferrer' : undefined
     const target: string | undefined = node.fields.newTab ? '_blank' : undefined
@@ -29,7 +36,7 @@ export const LinkHTMLConverter: (args: {
     let href: string = node.fields.url ?? ''
     if (node.fields.linkType === 'internal') {
       if (internalDocToHref) {
-        href = internalDocToHref({ linkNode: node })
+        href = await internalDocToHref({ linkNode: node, populate })
       } else {
         console.error(
           'Lexical => HTML converter: Link converter: found internal link, but internalDocToHref is not provided',

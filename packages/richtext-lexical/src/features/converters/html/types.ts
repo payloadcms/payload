@@ -1,10 +1,21 @@
 import type { SerializedLexicalNode } from 'lexical'
+import type { SelectType, TypeWithID } from 'payload'
 
 import type {
   DefaultNodeTypes,
   SerializedBlockNode,
   SerializedInlineBlockNode,
 } from '../../../nodeTypes.js'
+export type HTMLPopulateArguments = {
+  collectionSlug: string
+  id: number | string
+  select?: SelectType
+}
+
+export type HTMLPopulateFn = <TData extends object = TypeWithID>(
+  args: HTMLPopulateArguments,
+) => Promise<TData | undefined>
+
 export type HTMLConverter<T extends { [key: string]: any; type?: string } = SerializedLexicalNode> =
 
     | ((args: {
@@ -17,11 +28,12 @@ export type HTMLConverter<T extends { [key: string]: any; type?: string } = Seri
           disableTextAlign?: boolean | string[]
           nodes: SerializedLexicalNode[]
           parent?: SerializedLexicalNodeWithParent
-        }) => string[]
+        }) => Promise<string[]>
         parent: SerializedLexicalNodeWithParent
+        populate?: HTMLPopulateFn
         providedCSSString: string
         providedStyleTag: string
-      }) => string)
+      }) => Promise<string> | string)
     | string
 
 export type ProvidedCSS = {

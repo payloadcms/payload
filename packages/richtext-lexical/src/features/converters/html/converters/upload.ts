@@ -1,27 +1,35 @@
-import type { FileSizeImproved } from 'payload'
+import type { FileData, FileSizeImproved, TypeWithID } from 'payload'
 
 import type { SerializedUploadNode } from '../../../../nodeTypes.js'
 import type { UploadDataImproved } from '../../../upload/server/nodes/UploadNode.js'
 import type { HTMLConverters } from '../types.js'
 
 export const UploadHTMLConverter: HTMLConverters<SerializedUploadNode> = {
-  upload: ({ node, providedStyleTag }) => {
+  upload: async ({ node, populate, providedStyleTag }) => {
     const uploadNode = node as UploadDataImproved
 
-    // If there's no valid upload data, return an empty string
-    if (typeof uploadNode?.value !== 'object') {
+    let uploadDoc: (FileData & TypeWithID) | undefined = undefined
+
+    // If there's no valid upload data, populate return an empty string
+    if (uploadNode.value !== 'object') {
+      if (!populate) {
+        return ''
+      }
+      uploadDoc = await populate<FileData & TypeWithID>({
+        id: uploadNode.value as number | string,
+        collectionSlug: uploadNode.relationTo,
+      })
+    }
+    if (!uploadDoc) {
       return ''
     }
 
-    const uploadDoc = uploadNode.value
     const url = uploadDoc.url
 
     // 1) If upload is NOT an image, return a link
     if (!uploadDoc.mimeType.startsWith('image')) {
       return `<a${providedStyleTag} href="${url}" rel="noopener noreferrer">${uploadDoc.filename}</a$>`
     }
-
-    console.log('uploadDoc', uploadDoc)
 
     // 2) If image has no different sizes, return a simple <img />
     if (!uploadDoc.sizes || !Object.keys(uploadDoc.sizes).length) {

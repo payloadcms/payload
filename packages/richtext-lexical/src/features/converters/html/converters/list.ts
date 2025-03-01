@@ -4,19 +4,23 @@ import type { SerializedListItemNode, SerializedListNode } from '../../../../nod
 import type { HTMLConverters } from '../types.js'
 
 export const ListHTMLConverter: HTMLConverters<SerializedListItemNode | SerializedListNode> = {
-  list: ({ node, nodesToHTML, providedStyleTag }) => {
-    const children = nodesToHTML({
-      nodes: node.children,
-    }).join('')
+  list: async ({ node, nodesToHTML, providedStyleTag }) => {
+    const children = (
+      await nodesToHTML({
+        nodes: node.children,
+      })
+    ).join('')
 
     return `<${node.tag}${providedStyleTag} class="list-${node.listType}">${children}</${node.tag}>`
   },
-  listitem: ({ node, nodesToHTML, parent, providedCSSString }) => {
+  listitem: async ({ node, nodesToHTML, parent, providedCSSString }) => {
     const hasSubLists = node.children.some((child) => child.type === 'list')
 
-    const children = nodesToHTML({
-      nodes: node.children,
-    }).join('')
+    const children = (
+      await nodesToHTML({
+        nodes: node.children,
+      })
+    ).join('')
 
     if ('listType' in parent && parent?.listType === 'check') {
       const uuid = uuidv4()

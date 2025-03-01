@@ -899,18 +899,19 @@ export {
   ServerBlockNode,
 } from './features/blocks/server/nodes/BlocksNode.js'
 
+export { getHTMLPopulateFn } from './features/converters/html/htmlPopulateFn.js'
 export { LinebreakHTMLConverter } from './features/converters/html_deprecated/converter/converters/linebreak.js'
+
 export { ParagraphHTMLConverter } from './features/converters/html_deprecated/converter/converters/paragraph.js'
 
 export { TabHTMLConverter } from './features/converters/html_deprecated/converter/converters/tab.js'
-
 export { TextHTMLConverter } from './features/converters/html_deprecated/converter/converters/text.js'
 export { defaultHTMLConverters } from './features/converters/html_deprecated/converter/defaultConverters.js'
+
 export {
   convertLexicalNodesToHTML,
   convertLexicalToHTML,
 } from './features/converters/html_deprecated/converter/index.js'
-
 export type { HTMLConverter } from './features/converters/html_deprecated/converter/types.js'
 export {
   consolidateHTMLConverters,
@@ -925,43 +926,43 @@ export { TreeViewFeature } from './features/debug/treeView/server/index.js'
 export { EXPERIMENTAL_TableFeature } from './features/experimental_table/server/index.js'
 export { BoldFeature } from './features/format/bold/feature.server.js'
 export { InlineCodeFeature } from './features/format/inlineCode/feature.server.js'
-export { ItalicFeature } from './features/format/italic/feature.server.js'
 
+export { ItalicFeature } from './features/format/italic/feature.server.js'
 export { StrikethroughFeature } from './features/format/strikethrough/feature.server.js'
 export { SubscriptFeature } from './features/format/subscript/feature.server.js'
 export { SuperscriptFeature } from './features/format/superscript/feature.server.js'
 export { UnderlineFeature } from './features/format/underline/feature.server.js'
 export { HeadingFeature, type HeadingFeatureProps } from './features/heading/server/index.js'
 export { HorizontalRuleFeature } from './features/horizontalRule/server/index.js'
+
 export { IndentFeature } from './features/indent/server/index.js'
 
 export { AutoLinkNode } from './features/link/nodes/AutoLinkNode.js'
-
 export { LinkNode } from './features/link/nodes/LinkNode.js'
 export type { LinkFields } from './features/link/nodes/types.js'
 export { LinkFeature, type LinkFeatureServerProps } from './features/link/server/index.js'
 export { ChecklistFeature } from './features/lists/checklist/server/index.js'
 export { OrderedListFeature } from './features/lists/orderedList/server/index.js'
+
 export { UnorderedListFeature } from './features/lists/unorderedList/server/index.js'
 
 export type {
   SlateNode,
   SlateNodeConverter,
 } from './features/migrations/slateToLexical/converter/types.js'
-
 export { ParagraphFeature } from './features/paragraph/server/index.js'
 export {
   RelationshipFeature,
   type RelationshipFeatureProps,
 } from './features/relationship/server/index.js'
+
 export {
   type RelationshipData,
   RelationshipServerNode,
 } from './features/relationship/server/nodes/RelationshipNode.js'
-
 export { FixedToolbarFeature } from './features/toolbars/fixed/server/index.js'
-export { InlineToolbarFeature } from './features/toolbars/inline/server/index.js'
 
+export { InlineToolbarFeature } from './features/toolbars/inline/server/index.js'
 export type { ToolbarGroup, ToolbarGroupItem } from './features/toolbars/types.js'
 export type {
   BaseClientFeatureProps,
@@ -976,6 +977,7 @@ export type {
   SanitizedClientFeatures,
   SanitizedPlugin,
 } from './features/typesClient.js'
+
 export type {
   AfterChangeNodeHook,
   AfterChangeNodeHookArgs,
@@ -1001,37 +1003,36 @@ export type {
 export { createNode } from './features/typeUtilities.js' // Only useful in feature.server.ts
 
 export { UploadFeature } from './features/upload/server/feature.server.js'
-
 export type { UploadFeatureProps } from './features/upload/server/feature.server.js'
-export { type UploadData, UploadServerNode } from './features/upload/server/nodes/UploadNode.js'
 
+export { type UploadData, UploadServerNode } from './features/upload/server/nodes/UploadNode.js'
 export type { EditorConfigContextType } from './lexical/config/client/EditorConfigProvider.js'
+
 export {
   defaultEditorConfig,
   defaultEditorFeatures,
   defaultEditorLexicalConfig,
 } from './lexical/config/server/default.js'
-
 export { loadFeatures, sortFeaturesForOptimalLoading } from './lexical/config/server/loader.js'
+
 export {
   sanitizeServerEditorConfig,
   sanitizeServerFeatures,
 } from './lexical/config/server/sanitize.js'
-
 export type {
   ClientEditorConfig,
   SanitizedClientEditorConfig,
   SanitizedServerEditorConfig,
   ServerEditorConfig,
 } from './lexical/config/types.js'
-export { getEnabledNodes, getEnabledNodesFromServerNodes } from './lexical/nodes/index.js'
 export type { AdapterProps }
+
+export { getEnabledNodes, getEnabledNodesFromServerNodes } from './lexical/nodes/index.js'
 
 export type {
   SlashMenuGroup,
   SlashMenuItem,
 } from './lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
-
 export {
   DETAIL_TYPE_TO_DETAIL,
   DOUBLE_LINE_BREAK,
@@ -1046,18 +1047,18 @@ export {
   TEXT_TYPE_TO_FORMAT,
   TEXT_TYPE_TO_MODE,
 } from './lexical/utils/nodeFormat.js'
+
 export { sanitizeUrl, validateUrl } from './lexical/utils/url.js'
 
 export type * from './nodeTypes.js'
 
 export { $convertFromMarkdownString } from './packages/@lexical/markdown/index.js'
-
 export { defaultRichTextValue } from './populateGraphQL/defaultValue.js'
 export { populate } from './populateGraphQL/populate.js'
+
 export type { LexicalEditorProps, LexicalFieldAdminProps, LexicalRichTextAdapter } from './types.js'
 
 export { createServerFeature } from './utilities/createServerFeature.js'
-
 export type { FieldsDrawerProps } from './utilities/fieldsDrawer/Drawer.js'
 export { extractPropsFromJSXPropsString } from './utilities/jsx/extractPropsFromJSXPropsString.js'
 export {
@@ -1066,4 +1067,5 @@ export {
   objectToFrontmatter,
   propsToJSXString,
 } from './utilities/jsx/jsx.js'
+
 export { upgradeLexicalData } from './utilities/upgradeLexicalData/index.js'
