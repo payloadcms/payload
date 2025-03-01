@@ -1,1 +1,46 @@
-@import "./payload.css";
+@layer theme {
+    @import 'tailwindcss/theme.css';
+  }
+  
+  @layer base {
+    .twp {
+      @import 'tailwindcss/preflight.css';
+    }
+  
+    .no-twp {
+      *,
+      ::after,
+      ::before,
+      ::backdrop,
+      ::file-selector-button {
+        all: revert-layer;
+      }
+    }
+  }
+  
+  @layer components;
+  
+  @layer utilities {
+    @import 'tailwindcss/utilities.css';
+  }
+
+  
+.collection-list .table {
+  display: block;
+}
+
+.collection-edit .btn--style-primary {
+  height: 32px;
+}
+
+@media (width <= 1024px) {
+  .collection-list .table {
+      width: 100%;
+      left: 0;
+      padding-left: 0;
+  }
+
+  .collection-list .table:after {
+      padding-right: 0;
+  }
+}
