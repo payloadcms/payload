@@ -136,6 +136,35 @@
   }
 }
 
+@utility container {
+  max-width: 100%;
+  margin-inline: auto;
+
+  padding-inline: 1rem;
+
+  @variant sm {
+    padding-inline: 1rem;
+    max-width: 40rem;
+  }
+  @variant md {
+    padding-inline: 2rem;
+    max-width: 48rem;
+  }
+  @variant lg {
+    padding-inline: 2rem;
+    max-width: 64rem;
+  }
+  @variant xl {
+    padding-inline: 2rem;
+    max-width: 80rem;
+  }
+  @variant 2xl {
+    padding-inline: 2rem;
+    max-width: 86rem;
+  }
+}
+
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
