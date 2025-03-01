@@ -24,6 +24,14 @@ export const editorConfigFactory = {
       parentIsLocalized: args.parentIsLocalized ?? false,
     })
   },
+  /**
+   * If you have instantiated a lexical editor and are accessing it outside a field (=> this is the unsanitized editor),
+   * you can extract the editor config from it.
+   * This is common if you define the editor in a re-usable module scope variable and pass it to the richText field.
+   *
+   * This is the least efficient way to get the editor config, and not recommended. It is recommended to extract the `features` arg
+   * into a separate variable and use `fromFeatures` instead.
+   */
   fromEditor: async (args: {
     config: SanitizedConfig
     editor: LexicalRichTextAdapterProvider
@@ -40,6 +48,9 @@ export const editorConfigFactory = {
     const sanitizedServerEditorConfig: SanitizedServerEditorConfig = lexicalAdapter.editorConfig
     return sanitizedServerEditorConfig
   },
+  /**
+   * Create a new editor config - behaves just like instantiating a new `lexicalEditor`
+   */
   fromFeatures: async (args: {
     config: SanitizedConfig
     features?: FeaturesInput
