@@ -47,6 +47,7 @@ export function DefaultEditView({
   PublishButton,
   SaveButton,
   SaveDraftButton,
+  Status,
   Upload: CustomUpload,
 }: DocumentViewClientProps) {
   const {
@@ -511,6 +512,7 @@ export function DefaultEditView({
               PublishButton,
               SaveButton,
               SaveDraftButton,
+              Status,
             }}
             data={savedDocumentData}
             disableActions={disableActions}
