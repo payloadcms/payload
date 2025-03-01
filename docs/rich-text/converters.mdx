@@ -74,20 +74,28 @@ To convert Lexical Blocks or Inline Blocks to JSX, pass the converter for your b
 
 ```tsx
 'use client'
-import type { MyInlineBlock, MyTextBlock } from '@/payload-types'
-import type { DefaultNodeTypes, SerializedBlockNode } from '@payloadcms/richtext-lexical'
+import type { MyInlineBlock, MyNumberBlock, MyTextBlock } from '@/payload-types'
+import type {
+  DefaultNodeTypes,
+  SerializedBlockNode,
+  SerializedInlineBlockNode,
+} from '@payloadcms/richtext-lexical'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
 import { type JSXConvertersFunction, RichText } from '@payloadcms/richtext-lexical/react'
 import React from 'react'
 
 // Extend the default node types with your custom blocks for full type safety
-type NodeTypes = DefaultNodeTypes | SerializedBlockNode<MyInlineBlock | MyTextBlock>
+type NodeTypes =
+  | DefaultNodeTypes
+  | SerializedBlockNode<MyNumberBlock | MyTextBlock>
+  | SerializedInlineBlockNode<MyInlineBlock>
 
 const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) => ({
   ...defaultConverters,
   blocks: {
     // Each key should match your block's slug
+    myNumberBlock: ({ node }) => <div>{node.fields.number}</div>,
     myTextBlock: ({ node }) => <div style={{ backgroundColor: 'red' }}>{node.fields.text}</div>,
   },
   inlineBlocks: {
@@ -163,7 +171,7 @@ If you don't have a React-based frontend, or if you need to send the content to 
 
 If you wish to convert JSON to HTML ad-hoc, use the `convertLexicalToHTML` function exported from `@payloadcms/richtext-lexical/html`:
 
-```ts
+```tsx
 'use client'
 
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
@@ -175,6 +183,59 @@ export const MyComponent = ({ data }: { data: SerializedEditorState }) => {
   const [html, setHTML] = useState<null | string>(null)
   useEffect(() => {
     void convertLexicalToHTML({
+      data,
+    }).then((html) => {
+      setHTML(html)
+    })
+  }, [data])
+
+  return html && <div dangerouslySetInnerHTML={{ __html: html }} />
+}
+```
+
+### Converting Lexical Blocks
+
+```tsx
+'use client'
+
+import type { MyInlineBlock, MyTextBlock } from '@/payload-types'
+import type {
+  DefaultNodeTypes,
+  SerializedBlockNode,
+  SerializedInlineBlockNode,
+} from '@payloadcms/richtext-lexical'
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+
+import {
+  convertLexicalToHTML,
+  type HTMLConvertersFunction,
+} from '@payloadcms/richtext-lexical/html'
+import React, { useEffect, useState } from 'react'
+
+type NodeTypes =
+  | DefaultNodeTypes
+  | SerializedBlockNode<MyTextBlock>
+  | SerializedInlineBlockNode<MyInlineBlock>
+
+const htmlConverters: HTMLConvertersFunction<NodeTypes> = ({ defaultConverters }) => ({
+  ...defaultConverters,
+  blocks: {
+    // Each key should match your block's slug
+    myTextBlock: ({ node, providedCSSString }) =>
+      `<div style="background-color: red;${providedCSSString}">${node.fields.text}</div>`,
+  },
+  inlineBlocks: {
+    // Each key should match your inline block's slug
+    myInlineBlock: ({ node, providedStyleTag }) =>
+      `<span${providedStyleTag}>${node.fields.text}</span$>`,
+  },
+})
+
+export const MyComponent = ({ data }: { data: SerializedEditorState }) => {
+  const [html, setHTML] = useState<null | string>(null)
+  useEffect(() => {
+    void convertLexicalToHTML({
+      converters: htmlConverters,
       data,
     }).then((html) => {
       setHTML(html)
