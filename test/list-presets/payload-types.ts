@@ -213,7 +213,7 @@ export interface PayloadListPreset {
       roles?: ('admin' | 'user')[] | null;
     };
   };
-  where:
+  where?:
     | {
         [k: string]: unknown;
       }

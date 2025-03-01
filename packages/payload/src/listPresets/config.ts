@@ -39,7 +39,6 @@ export const getListPresetsConfig = (config: Config): CollectionConfig => ({
           },
         ],
       },
-      required: true,
     },
     {
       name: 'columns',

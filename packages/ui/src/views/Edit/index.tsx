@@ -73,6 +73,7 @@ export function DefaultEditView({
     isEditing,
     isInitializing,
     lastUpdateTime,
+    redirectAfterCreate,
     redirectAfterDelete,
     redirectAfterDuplicate,
     savedDocumentData,
@@ -254,7 +255,7 @@ export function DefaultEditView({
         })
       }
 
-      if (!isEditing && depth < 2) {
+      if (!isEditing && depth < 2 && redirectAfterCreate !== false) {
         // Redirect to the same locale if it's been set
         const redirectRoute = formatAdminURL({
           adminRoute,
@@ -323,6 +324,7 @@ export function DefaultEditView({
       schemaPathSegments,
       isLockingEnabled,
       setDocumentIsLocked,
+      startRouteTransition,
     ],
   )
 

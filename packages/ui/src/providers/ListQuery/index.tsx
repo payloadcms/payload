@@ -17,6 +17,7 @@ export { useListQuery } from './context.js'
 
 export const ListQueryProvider: React.FC<ListQueryProps> = ({
   children,
+  collectionSlug,
   columns,
   data,
   defaultLimit,
@@ -190,16 +191,10 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     }
   }, [defaultSort, defaultLimit, modifySearchParams, columns])
 
-  // If the search params change externally, update the current query
-  useEffect(() => {
-    if (modifySearchParams) {
-      void refineListData(searchParams)
-    }
-  }, [searchParams, modifySearchParams, refineListData])
-
   return (
     <ListQueryContext.Provider
       value={{
+        collectionSlug,
         data,
         handlePageChange,
         handlePerPageChange,

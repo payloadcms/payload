@@ -24,6 +24,7 @@
       padding: 0 calc(var(--base) / 2);
       display: flex;
       align-items: center;
+      border-left: 1px solid var(--theme-elevation-150);
     }
 
     &__select__clear {

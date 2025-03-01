@@ -22,11 +22,11 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   drawerSlug,
   Header,
   initialData,
-  initialState,
   onDelete: onDeleteFromProps,
   onDuplicate: onDuplicateFromProps,
   onSave: onSaveFromProps,
   overrideEntityVisibility = true,
+  redirectAfterCreate,
   redirectAfterDelete,
   redirectAfterDuplicate,
 }) => {
@@ -62,6 +62,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
             initialData,
             locale,
             overrideEntityVisibility,
+            redirectAfterCreate,
             redirectAfterDelete: redirectAfterDelete !== undefined ? redirectAfterDelete : false,
             redirectAfterDuplicate:
               redirectAfterDuplicate !== undefined ? redirectAfterDuplicate : false,

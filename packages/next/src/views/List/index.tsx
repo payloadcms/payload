@@ -232,6 +232,7 @@ export const renderListView = async (
         <Fragment>
           <HydrateAuthProvider permissions={permissions} />
           <ListQueryProvider
+            collectionSlug={collectionSlug}
             columns={transformColumnsToPreferences(columnState)}
             data={data}
             defaultLimit={limit}

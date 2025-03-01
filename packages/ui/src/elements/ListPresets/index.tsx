@@ -3,7 +3,11 @@ import type { ListPreset } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { select, transformColumnsToSearchParams } from 'payload/shared'
+import {
+  select,
+  transformColumnsToPreferences,
+  transformColumnsToSearchParams,
+} from 'payload/shared'
 import { Fragment, useCallback, useState } from 'react'
 
 import { ChevronIcon } from '../../icons/Chevron/index.js'
@@ -30,10 +34,13 @@ export function ListPresets({ activePreset: initialPreset }: { activePreset: Lis
   const [documentEditID, setDocumentEditID] = useState<number | string>(null)
 
   const {
+    collectionSlug,
     modified: listQueryModified,
+    query,
     refineListData,
     setModified: setQueryModified,
   } = useListQuery()
+
   const { modified: columnsModified, setModified: setColumnsModified } = useTableColumns()
 
   const hasModified = listQueryModified || columnsModified
@@ -125,7 +132,14 @@ export function ListPresets({ activePreset: initialPreset }: { activePreset: Lis
                 </PopupList.Button>
               </Fragment>
             ) : null}
-            <PopupList.Button onClick={() => openListDrawer()}>Create new preset</PopupList.Button>
+            <PopupList.Button
+              onClick={() => {
+                setDocumentEditID(null)
+                openEditDrawer()
+              }}
+            >
+              Create new preset
+            </PopupList.Button>
             {selectedPreset ? (
               <PopupList.Button
                 onClick={() => {
@@ -152,6 +166,15 @@ export function ListPresets({ activePreset: initialPreset }: { activePreset: Lis
         }}
       />
       <DocumentDrawer
+        initialData={
+          !documentEditID
+            ? {
+                columns: transformColumnsToPreferences(query.columns),
+                relatedCollection: collectionSlug,
+                where: query.where,
+              }
+            : undefined
+        }
         onDelete={() => {
           setSelectedPreset(undefined)
         }}
@@ -161,6 +184,7 @@ export function ListPresets({ activePreset: initialPreset }: { activePreset: Lis
         onSave={async ({ doc }) => {
           await handleChange(doc as ListPreset)
         }}
+        redirectAfterCreate={false}
       />
       <ConfirmationModal
         body={
