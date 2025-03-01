@@ -18,8 +18,10 @@ const preferenceAccess: Access = ({ req }) => {
   }
 }
 
-const getPreferencesCollection = (config: Config): CollectionConfig => ({
-  slug: 'payload-preferences',
+export const preferencesCollectionSlug = 'payload-preferences'
+
+export const getPreferencesCollection = (config: Config): CollectionConfig => ({
+  slug: preferencesCollectionSlug,
   access: {
     delete: preferenceAccess,
     read: preferenceAccess,
@@ -91,5 +93,3 @@ const getPreferencesCollection = (config: Config): CollectionConfig => ({
   ],
   lockDocuments: false,
 })
-
-export default getPreferencesCollection

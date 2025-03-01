@@ -1,8 +1,9 @@
 'use client'
-import type { ClientCollectionConfig, ResolvedFilterOptions, Where } from 'payload'
+import type { ClientCollectionConfig, ListPreset, ResolvedFilterOptions, Where } from 'payload'
 
 import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
+import { validateWhereQuery } from 'payload/shared'
 import React, { useEffect, useRef, useState } from 'react'
 
 import { Popup, PopupList } from '../../elements/Popup/index.js'
@@ -11,19 +12,21 @@ import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { Dots } from '../../icons/Dots/index.js'
 import { SearchIcon } from '../../icons/Search/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
+import { useTableColumns } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { AnimateHeight } from '../AnimateHeight/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
+import { ListPresets } from '../ListPresets/index.js'
 import { Pill } from '../Pill/index.js'
 import { SearchFilter } from '../SearchFilter/index.js'
 import { WhereBuilder } from '../WhereBuilder/index.js'
-import validateWhereQuery from '../WhereBuilder/validateWhereQuery.js'
 import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched.js'
 import './index.scss'
 
 const baseClass = 'list-controls'
 
 export type ListControlsProps = {
+  readonly activePreset?: ListPreset
   readonly beforeActions?: React.ReactNode[]
   readonly collectionConfig: ClientCollectionConfig
   readonly collectionSlug: string
@@ -37,6 +40,7 @@ export type ListControlsProps = {
    * These are now handled by the `ListSelection` component
    */
   readonly disableBulkEdit?: boolean
+  readonly disableListFilters?: boolean
   readonly enableColumns?: boolean
   readonly enableSort?: boolean
   readonly handleSearchChange?: (search: string) => void
@@ -54,18 +58,23 @@ export type ListControlsProps = {
  */
 export const ListControls: React.FC<ListControlsProps> = (props) => {
   const {
+    activePreset,
     beforeActions,
     collectionConfig,
     collectionSlug,
+    disableListFilters,
     enableColumns = true,
     enableSort = false,
     listMenuItems,
     renderedFilters,
     resolvedFilterOptions,
   } = props
+
   const { handleSearchChange, query } = useListQuery()
+
   const titleField = useUseTitleField(collectionConfig)
   const { i18n, t } = useTranslation()
+
   const {
     breakpoints: { s: smallBreak },
   } = useWindowInfo()
@@ -138,69 +147,72 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__wrap`}>
-        <SearchIcon />
-        <SearchFilter
-          fieldName={titleField && 'name' in titleField ? titleField?.name : null}
-          handleChange={(search) => {
-            return void handleSearchChange(search)
-          }}
-          // @ts-expect-error @todo: fix types
-          initialParams={query}
-          key={collectionSlug}
-          label={searchLabelTranslated.current}
-        />
-        <div className={`${baseClass}__buttons`}>
-          <div className={`${baseClass}__buttons-wrap`}>
-            {!smallBreak && <React.Fragment>{beforeActions && beforeActions}</React.Fragment>}
-            {enableColumns && (
+        <div className={`${baseClass}__search-wrap`}>
+          <SearchIcon />
+          <SearchFilter
+            fieldName={titleField && 'name' in titleField ? titleField?.name : null}
+            handleChange={(search) => {
+              return void handleSearchChange(search)
+            }}
+            // @ts-expect-error @todo: fix types
+            initialParams={query}
+            key={collectionSlug}
+            label={searchLabelTranslated.current}
+          />
+          <div className={`${baseClass}__buttons`}>
+            <div className={`${baseClass}__buttons-wrap`}>
+              {!smallBreak && <React.Fragment>{beforeActions && beforeActions}</React.Fragment>}
+              {enableColumns && (
+                <Pill
+                  aria-controls={`${baseClass}-columns`}
+                  aria-expanded={visibleDrawer === 'columns'}
+                  className={`${baseClass}__toggle-columns`}
+                  icon={<ChevronIcon direction={visibleDrawer === 'columns' ? 'up' : 'down'} />}
+                  onClick={() =>
+                    setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)
+                  }
+                  pillStyle="light"
+                >
+                  {t('general:columns')}
+                </Pill>
+              )}
               <Pill
-                aria-controls={`${baseClass}-columns`}
-                aria-expanded={visibleDrawer === 'columns'}
-                className={`${baseClass}__toggle-columns`}
-                icon={<ChevronIcon direction={visibleDrawer === 'columns' ? 'up' : 'down'} />}
-                onClick={() =>
-                  setVisibleDrawer(visibleDrawer !== 'columns' ? 'columns' : undefined)
-                }
+                aria-controls={`${baseClass}-where`}
+                aria-expanded={visibleDrawer === 'where'}
+                className={`${baseClass}__toggle-where`}
+                icon={<ChevronIcon direction={visibleDrawer === 'where' ? 'up' : 'down'} />}
+                onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
                 pillStyle="light"
               >
-                {t('general:columns')}
+                {t('general:filters')}
               </Pill>
-            )}
-            <Pill
-              aria-controls={`${baseClass}-where`}
-              aria-expanded={visibleDrawer === 'where'}
-              className={`${baseClass}__toggle-where`}
-              icon={<ChevronIcon direction={visibleDrawer === 'where' ? 'up' : 'down'} />}
-              onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
-              pillStyle="light"
-            >
-              {t('general:filters')}
-            </Pill>
-            {enableSort && (
-              <Pill
-                aria-controls={`${baseClass}-sort`}
-                aria-expanded={visibleDrawer === 'sort'}
-                className={`${baseClass}__toggle-sort`}
-                icon={<ChevronIcon />}
-                onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : undefined)}
-                pillStyle="light"
-              >
-                {t('general:sort')}
-              </Pill>
-            )}
-            {listMenuItems && (
-              <Popup
-                button={<Dots ariaLabel={t('general:moreOptions')} />}
-                className={`${baseClass}__popup`}
-                horizontalAlign="right"
-                size="large"
-                verticalAlign="bottom"
-              >
-                <PopupList.ButtonGroup>{listMenuItems.map((item) => item)}</PopupList.ButtonGroup>
-              </Popup>
-            )}
+              {enableSort && (
+                <Pill
+                  aria-controls={`${baseClass}-sort`}
+                  aria-expanded={visibleDrawer === 'sort'}
+                  className={`${baseClass}__toggle-sort`}
+                  icon={<ChevronIcon />}
+                  onClick={() => setVisibleDrawer(visibleDrawer !== 'sort' ? 'sort' : undefined)}
+                  pillStyle="light"
+                >
+                  {t('general:sort')}
+                </Pill>
+              )}
+              {listMenuItems && (
+                <Popup
+                  button={<Dots ariaLabel={t('general:moreOptions')} />}
+                  className={`${baseClass}__popup`}
+                  horizontalAlign="right"
+                  size="large"
+                  verticalAlign="bottom"
+                >
+                  <PopupList.ButtonGroup>{listMenuItems}</PopupList.ButtonGroup>
+                </Popup>
+              )}
+            </div>
           </div>
         </div>
+        {!disableListFilters && <ListPresets activePreset={activePreset} />}
       </div>
       {enableColumns && (
         <AnimateHeight

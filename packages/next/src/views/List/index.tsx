@@ -1,18 +1,20 @@
+import type {
+  AdminViewServerProps,
+  ColumnPreference,
+  ListPreferences,
+  ListPreset,
+  ListQuery,
+  ListViewClientProps,
+  ListViewServerPropsOnly,
+  Where,
+} from 'payload'
+
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
-import { formatAdminURL, mergeListSearchAndWhere } from '@payloadcms/ui/shared'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
-import {
-  type AdminViewServerProps,
-  type ColumnPreference,
-  type ListPreferences,
-  type ListQuery,
-  type ListViewClientProps,
-  type ListViewServerPropsOnly,
-  type Where,
-} from 'payload'
-import { isNumber, transformColumnsToPreferences } from 'payload/shared'
+import { isNumber, mergeListSearchAndWhere, transformColumnsToPreferences } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { renderListViewSlots } from './renderListViewSlots.js'
@@ -24,6 +26,7 @@ type RenderListViewArgs = {
   customCellProps?: Record<string, any>
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
+  disableListFilters?: boolean
   drawerSlug?: string
   enableRowSelections: boolean
   overrideEntityVisibility?: boolean
@@ -40,6 +43,7 @@ export const renderListView = async (
     customCellProps,
     disableBulkDelete,
     disableBulkEdit,
+    disableListFilters,
     drawerSlug,
     enableRowSelections,
     initPageResult,
@@ -127,6 +131,20 @@ export const renderListView = async (
           and: [where, baseListFilter].filter(Boolean),
         }
       }
+    }
+
+    let activePreset: ListPreset | undefined
+
+    try {
+      activePreset = (await payload.findByID({
+        id: listPreferences?.listPresets?.[collectionSlug],
+        collection: 'payload-list-presets',
+        depth: 0,
+        overrideAccess: false,
+        user,
+      })) as ListPreset
+    } catch (_err) {
+      // swallow error
     }
 
     const data = await payload.find({
@@ -224,10 +242,12 @@ export const renderListView = async (
             {RenderServerComponent({
               clientProps: {
                 ...listViewSlots,
+                activePreset,
                 collectionSlug,
                 columnState,
                 disableBulkDelete,
                 disableBulkEdit,
+                disableListFilters,
                 enableRowSelections,
                 hasCreatePermission,
                 listPreferences,

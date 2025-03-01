@@ -3,6 +3,7 @@ import type {
   SanitizedCollectionConfig,
 } from '../../collections/config/types.js'
 import type { ServerProps } from '../../config/types.js'
+import type { ListPreset } from '../../listPresets/types.js'
 import type { ListPreferences } from '../../preferences/types.js'
 import type { ResolvedFilterOptions } from '../../types/index.js'
 import type { Column } from '../elements/Table.js'
@@ -35,11 +36,13 @@ export type ListViewServerPropsOnly = {
 export type ListViewServerProps = ListViewClientProps & ListViewServerPropsOnly
 
 export type ListViewClientProps = {
+  activePreset?: ListPreset
   beforeActions?: React.ReactNode[]
   collectionSlug: SanitizedCollectionConfig['slug']
   columnState: Column[]
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
+  disableListFilters?: boolean
   enableRowSelections?: boolean
   hasCreatePermission: boolean
   /**

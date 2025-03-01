@@ -45,7 +45,6 @@ export { validOperators, validOperatorSet } from '../types/constants.js'
 export { formatFilesize } from '../uploads/formatFilesize.js'
 
 export { isImage } from '../uploads/isImage.js'
-
 export {
   deepCopyObject,
   deepCopyObjectComplex,
@@ -59,7 +58,6 @@ export {
   deepMergeWithReactComponents,
   deepMergeWithSourceArrays,
 } from '../utilities/deepMerge.js'
-
 export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON.js'
 
 export { flattenAllFields } from '../utilities/flattenAllFields.js'
@@ -82,6 +80,11 @@ export {
   isReactServerComponentOrFunction,
 } from '../utilities/isReactComponent.js'
 
+export {
+  hoistQueryParamsToAnd,
+  mergeListSearchAndWhere,
+} from '../utilities/mergeListSearchAndWhere.js'
+
 export { reduceFieldsToValues } from '../utilities/reduceFieldsToValues.js'
 
 export { setsAreEqual } from '../utilities/setsAreEqual.js'
@@ -93,8 +96,11 @@ export {
   transformColumnsToSearchParams,
 } from '../utilities/transformColumnPreferences.js'
 
+export { transformWhereQuery } from '../utilities/transformWhereQuery.js'
+
 export { unflatten } from '../utilities/unflatten.js'
 export { validateMimeType } from '../utilities/validateMimeType.js'
+export { validateWhereQuery } from '../utilities/validateWhereQuery.js'
 export { wait } from '../utilities/wait.js'
 export { default as wordBoundariesRegex } from '../utilities/wordBoundariesRegex.js'
 export { versionDefaults } from '../versions/defaults.js'
