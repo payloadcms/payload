@@ -251,9 +251,17 @@ export const MyComponent = ({ data }: { data: SerializedEditorState }) => {
 To add HTML generation directly within the collection, follow the example below:
 
 ```ts
+import type { HTMLConvertersFunction } from '@payloadcms/richtext-lexical/html'
+import type { MyTextBlock } from '@/payload-types.js'
 import type { CollectionConfig } from 'payload'
 
-import { lexicalEditor, lexicalHTMLField } from '@payloadcms/richtext-lexical'
+import {
+  BlocksFeature,
+  type DefaultNodeTypes,
+  lexicalEditor,
+  lexicalHTMLField,
+  type SerializedBlockNode,
+} from '@payloadcms/richtext-lexical'
 
 const Pages: CollectionConfig = {
   slug: 'pages',
@@ -266,6 +274,41 @@ const Pages: CollectionConfig = {
     lexicalHTMLField({
       htmlFieldName: 'nameOfYourRichTextField_html',
       lexicalFieldName: 'nameOfYourRichTextField',
+    }),
+    {
+      name: 'customRichText',
+      type: 'richText',
+      editor: lexicalEditor({
+        features: ({ defaultFeatures }) => [
+          ...defaultFeatures,
+          BlocksFeature({
+            blocks: [
+              {
+                interfaceName: 'MyTextBlock',
+                slug: 'myTextBlock',
+                fields: [
+                  {
+                    name: 'text',
+                    type: 'text',
+                  },
+                ],
+              },
+            ],
+          }),
+        ],
+      }),
+    },
+    lexicalHTMLField({
+      htmlFieldName: 'customRichText_html',
+      lexicalFieldName: 'customRichText',
+      // can pass in additional converters or override default ones
+      converters: (({ defaultConverters }) => ({
+        ...defaultConverters,
+        blocks: {
+          myTextBlock: ({ node, providedCSSString }) =>
+            `<div style="background-color: red;${providedCSSString}">${node.fields.text}</div>`,
+        },
+      })) as HTMLConvertersFunction<DefaultNodeTypes | SerializedBlockNode<MyTextBlock>>,
     }),
   ],
 }
