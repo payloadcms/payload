@@ -346,48 +346,73 @@ A headless editor can perform such conversions outside of the main editor instan
 
 ```ts
 import { createHeadlessEditor } from '@payloadcms/richtext-lexical/lexical/headless'
-import { getEnabledNodes, sanitizeServerEditorConfig } from '@payloadcms/richtext-lexical'
+import { getEnabledNodes, editorConfigFactory } from '@payloadcms/richtext-lexical'
 
-const yourEditorConfig // <= your editor config here
 const payloadConfig // <= your Payload Config here
 
 const headlessEditor = createHeadlessEditor({
   nodes: getEnabledNodes({
-    editorConfig: sanitizeServerEditorConfig(yourEditorConfig, payloadConfig),
+    editorConfig: await editorConfigFactory.default({config: payloadConfig})
   }),
 })
 ```
 
 ### Getting the editor config
 
-As you can see, you need to provide an editor config in order to create a headless editor. This is because the editor config is used to determine which nodes & features are enabled, and which converters are used.
+You need to provide an editor config in order to create a headless editor. This is because the editor config is used to determine which nodes & features are enabled, and which converters are used.
 
-To get the editor config, simply import the default editor config and adjust it - just like you did inside of the `editor: lexicalEditor({})` property:
+To get the editor config, import the `editorConfigFactory` factory - this factory provides a variety of ways to get the editor config, depending on your use case.
 
 ```ts
-import { defaultEditorConfig, defaultEditorFeatures } from '@payloadcms/richtext-lexical' // <= make sure this package is installed
+import type { SanitizedConfig } from 'payload'
 
-const yourEditorConfig = defaultEditorConfig
+import {
+  editorConfigFactory,
+  FixedToolbarFeature,
+  lexicalEditor,
+} from '@payloadcms/richtext-lexical'
 
-// If you made changes to the features of the field's editor config, you should also make those changes here:
-yourEditorConfig.features = [
-  ...defaultEditorFeatures,
-  // Add your custom features here
-]
+// Your config needs to be available in order to retrieve the default editor config
+const config: SanitizedConfig = {} as SanitizedConfig
+
+// Version 1 - use the default editor config
+const yourEditorConfig = await editorConfigFactory.default({ config })
+
+// Version 2 - if you have access to a lexical fields, you can extract the editor config from it
+const yourEditorConfig2 = editorConfigFactory.fromField({
+  field: collectionConfig.fields[1],
+})
+
+// Version 3 - create a new editor config - behaves just like instantiating a new `lexicalEditor`
+const yourEditorConfig3 = await editorConfigFactory.fromFeatures({
+  config,
+  features: ({ defaultFeatures }) => [...defaultFeatures, FixedToolbarFeature()],
+})
+
+// Version 4 - if you have instantiated a lexical editor and are accessing it outside a field (=> this is the unsanitized editor),
+// you can extract the editor config from it.
+// This is common if you define the editor in a re-usable module scope variable and pass it to the richText field.
+// This is the least efficient way to get the editor config, and not recommended. It is recommended to extract the `features` arg
+// into a separate variable and use `fromFeatures` instead.
+const editor = lexicalEditor({
+  features: ({ defaultFeatures }) => [...defaultFeatures, FixedToolbarFeature()],
+})
+
+const yourEditorConfig4 = await editorConfigFactory.fromEditor({
+  config,
+  editor,
+})
 ```
 
-### Getting the editor config from an existing field
+### Example - Getting the editor config from an existing field
 
 If you have access to the sanitized collection config, you can get access to the lexical sanitized editor config & features, as every lexical richText field returns it. Here is an example how you can get it from another field's afterRead hook:
 
 ```ts
 import type { CollectionConfig, RichTextField } from 'payload'
+
+import { editorConfigFactory, getEnabledNodes, lexicalEditor } from '@payloadcms/richtext-lexical'
 import { createHeadlessEditor } from '@payloadcms/richtext-lexical/lexical/headless'
-import type { LexicalRichTextAdapter, SanitizedServerEditorConfig } from '@payloadcms/richtext-lexical'
-import {
-  getEnabledNodes,
-  lexicalEditor
-} from '@payloadcms/richtext-lexical'
 
 export const MyCollection: CollectionConfig = {
   slug: 'slug',
@@ -397,20 +422,18 @@ export const MyCollection: CollectionConfig = {
       type: 'text',
       hooks: {
         afterRead: [
-          ({ value, collection }) => {
-            const otherRichTextField: RichTextField = collection.fields.find(
+          ({ siblingFields, value }) => {
+            const field: RichTextField = siblingFields.find(
               (field) => 'name' in field && field.name === 'richText',
             ) as RichTextField
 
-            const lexicalAdapter: LexicalRichTextAdapter =
-              otherRichTextField.editor as LexicalRichTextAdapter
-
-            const sanitizedServerEditorConfig: SanitizedServerEditorConfig =
-              lexicalAdapter.editorConfig
+            const editorConfig = editorConfigFactory.fromField({
+              field,
+            })
 
             const headlessEditor = createHeadlessEditor({
               nodes: getEnabledNodes({
-                editorConfig: sanitizedServerEditorConfig,
+                editorConfig,
               }),
             })
 
@@ -424,11 +447,9 @@ export const MyCollection: CollectionConfig = {
     {
       name: 'richText',
       type: 'richText',
-      editor: lexicalEditor({
-        features,
-      }),
-    }
-  ]
+      editor: lexicalEditor(),
+    },
+  ],
 }
 ```
 
@@ -479,14 +500,14 @@ This has been taken from the [lexical serialization & deserialization docs](http
 Convert markdown content to the Lexical editor format with the following:
 
 ```ts
-import { sanitizeServerEditorConfig, $convertFromMarkdownString } from '@payloadcms/richtext-lexical'
+import { $convertFromMarkdownString, editorConfigFactory } from '@payloadcms/richtext-lexical'
 
-const yourSanitizedEditorConfig = sanitizeServerEditorConfig(yourEditorConfig, payloadConfig) // <= your editor config & Payload Config here
+const yourEditorConfig = await editorConfigFactory.default({ config })
 const markdown = `# Hello World`
 
 headlessEditor.update(
   () => {
-    $convertFromMarkdownString(markdown, yourSanitizedEditorConfig.features.markdownTransformers)
+    $convertFromMarkdownString(markdown, yourEditorConfig.features.markdownTransformers)
   },
   { discrete: true },
 )
@@ -505,11 +526,12 @@ Export content from the Lexical editor into Markdown format using these steps:
 Here's the code for it:
 
 ```ts
-import { $convertToMarkdownString } from '@payloadcms/richtext-lexical/lexical/markdown'
-import { sanitizeServerEditorConfig } from '@payloadcms/richtext-lexical'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
-const yourSanitizedEditorConfig = sanitizeServerEditorConfig(yourEditorConfig, payloadConfig) // <= your editor config & Payload Config here
+import { editorConfigFactory } from '@payloadcms/richtext-lexical'
+import { $convertToMarkdownString } from '@payloadcms/richtext-lexical/lexical/markdown'
+
+const yourEditorConfig = await editorConfigFactory.default({ config })
 const yourEditorState: SerializedEditorState // <= your current editor state here
 
 // Import editor state into your headless editor
@@ -518,7 +540,7 @@ try {
     () => {
       headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState))
     },
-    { discrete: true },  // This should commit the editor state immediately
+    { discrete: true }, // This should commit the editor state immediately
   )
 } catch (e) {
   logger.error({ err: e }, 'ERROR parsing editor state')
@@ -527,7 +549,7 @@ try {
 // Export to markdown
 let markdown: string
 headlessEditor.getEditorState().read(() => {
-  markdown = $convertToMarkdownString(yourSanitizedEditorConfig?.features?.markdownTransformers)
+  markdown = $convertToMarkdownString(yourEditorConfig?.features?.markdownTransformers)
 })
 ```
 
@@ -542,19 +564,20 @@ Here's the code for it:
 
 ```ts
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+
 import { $getRoot } from '@payloadcms/richtext-lexical/lexical'
 
 const yourEditorState: SerializedEditorState // <= your current editor state here
 
 // Import editor state into your headless editor
 try {
-    headlessEditor.update(
+  headlessEditor.update(
     () => {
       headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState))
     },
-    { discrete: true },  // This should commit the editor state immediately
+    { discrete: true }, // This should commit the editor state immediately
   )
-  } catch (e) {
+} catch (e) {
   logger.error({ err: e }, 'ERROR parsing editor state')
 }
 
