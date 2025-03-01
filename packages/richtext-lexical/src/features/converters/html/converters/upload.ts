@@ -11,15 +11,18 @@ export const UploadHTMLConverter: HTMLConverters<SerializedUploadNode> = {
     let uploadDoc: (FileData & TypeWithID) | undefined = undefined
 
     // If there's no valid upload data, populate return an empty string
-    if (uploadNode.value !== 'object') {
+    if (typeof uploadNode.value !== 'object') {
       if (!populate) {
         return ''
       }
       uploadDoc = await populate<FileData & TypeWithID>({
-        id: uploadNode.value as number | string,
+        id: uploadNode.value,
         collectionSlug: uploadNode.relationTo,
       })
+    } else {
+      uploadDoc = uploadNode.value as unknown as FileData & TypeWithID
     }
+
     if (!uploadDoc) {
       return ''
     }

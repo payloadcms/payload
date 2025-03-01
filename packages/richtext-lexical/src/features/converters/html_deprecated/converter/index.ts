@@ -7,6 +7,9 @@ import type { HTMLConverter, SerializedLexicalNodeWithParent } from './types.js'
 
 import { hasText } from '../../../../validate/hasText.js'
 
+/**
+ * @deprecated - will be removed in 4.0
+ */
 export type ConvertLexicalToHTMLArgs = {
   converters: HTMLConverter[]
   currentDepth?: number
@@ -86,6 +89,9 @@ export async function convertLexicalToHTML({
   return ''
 }
 
+/**
+ * @deprecated - will be removed in 4.0
+ */
 export async function convertLexicalNodesToHTML({
   converters,
   currentDepth,
