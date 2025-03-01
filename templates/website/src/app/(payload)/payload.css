@@ -57,7 +57,7 @@
     --chart-5: 340 75% 55%;
 }
 
-collection-edit .collection-list .table {
+.collection-list .table {
   display: block;
 }
 
@@ -67,7 +67,6 @@ collection-edit .collection-list .table {
 
 @media (width <= 1024px) {
   .collection-list .table {
-      display: flex;
       width: 100%;
       left: 0;
       padding-left: 0;
