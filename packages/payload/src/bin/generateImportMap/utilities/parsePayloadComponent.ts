@@ -1,6 +1,8 @@
 // @ts-strict-ignore
 import type { PayloadComponent } from '../../../config/types.js'
 
+import { extractPathAndExportName } from '../../utilities/extractPathAndExportName.js'
+
 export function parsePayloadComponent(PayloadComponent: PayloadComponent): {
   exportName: string
   path: string
@@ -12,16 +14,12 @@ export function parsePayloadComponent(PayloadComponent: PayloadComponent): {
   const pathAndMaybeExport =
     typeof PayloadComponent === 'string' ? PayloadComponent : PayloadComponent.path
 
-  let path = pathAndMaybeExport
-  let exportName = 'default'
+  const { exportName: possibleExport, path } = extractPathAndExportName(
+    pathAndMaybeExport,
+    'default',
+  )
 
-  const lastHashIndex = pathAndMaybeExport?.lastIndexOf('#') ?? -1
-
-  if (lastHashIndex > 0) {
-    exportName = pathAndMaybeExport.substring(lastHashIndex + 1)
-    path = pathAndMaybeExport.substring(0, lastHashIndex)
-  }
-
+  let exportName = possibleExport
   if (typeof PayloadComponent === 'object' && PayloadComponent.exportName) {
     exportName = PayloadComponent.exportName
   }
