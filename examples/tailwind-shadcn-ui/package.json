@@ -35,7 +35,7 @@
     "@types/react-dom": "^18.2.21",
     "autoprefixer": "^10.4.19",
     "dotenv": "^16.4.5",
-    "postcss": "^8.5.1",
+    "postcss": "^8.5.3",
     "tailwindcss": "^4.0.9",
     "tsx": "^4.7.1",
     "typescript": "^5.4.2"
