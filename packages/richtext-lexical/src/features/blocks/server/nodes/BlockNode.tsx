@@ -17,7 +17,7 @@ import ObjectID from 'bson-objectid'
 
 type BaseBlockFields<TBlockFields extends JsonObject = JsonObject> = {
   /** Block form data */
-  blockName: string
+  blockName?: string
   blockType: string
 } & TBlockFields
 

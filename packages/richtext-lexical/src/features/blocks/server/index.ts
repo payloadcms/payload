@@ -5,22 +5,28 @@ import type {
   Config,
   FieldSchemaMap,
   FlattenedBlocksField,
+  PayloadComponent,
 } from 'payload'
 
 import { fieldsToJSONSchema, flattenAllFields, sanitizeFields } from 'payload'
 
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { createNode } from '../../typeUtilities.js'
+import { type DOMMap, getWrapperBlockNode } from '../WrapperBlockNode.js'
 import { blockPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
 import { getBlockMarkdownTransformers } from './markdownTransformer.js'
-import { ServerBlockNode } from './nodes/BlocksNode.js'
-import { ServerInlineBlockNode } from './nodes/InlineBlocksNode.js'
+import { ServerBlockNode } from './nodes/BlockNode.js'
+import { ServerInlineBlockNode } from './nodes/InlineBlockNode.js'
 import { blockValidationHOC } from './validate.js'
 
 export type BlocksFeatureProps = {
   blocks?: (Block | BlockSlug)[] | Block[]
   inlineBlocks?: (Block | BlockSlug)[] | Block[]
+  wrapperBlocks?: Array<{
+    block: Block | BlockSlug
+    createDOM: PayloadComponent
+  }>
 }
 
 export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatureProps>({
@@ -40,6 +46,14 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
           name: 'lexical_inline_blocks',
           type: 'blocks',
           blockReferences: _props.inlineBlocks ?? [],
+          blocks: [],
+        },
+        {
+          name: 'lexical_wrapper_blocks',
+          type: 'blocks',
+          blockReferences: _props.wrapperBlocks
+            ? _props.wrapperBlocks.map((wrapperBlock) => wrapperBlock.block)
+            : [],
           blocks: [],
         },
       ],
@@ -74,8 +88,31 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
       inlineBlockConfigs.push(block)
     }
 
+    const domMap: DOMMap = {}
+
+    const wrappedBlockSlugsAndCreateDOMs: {
+      [blockSlug: string]: PayloadComponent
+    } = {}
+
+    const wrapperBlockConfigs: Block[] = []
+    for (const wrapperBlock of _props.wrapperBlocks ?? []) {
+      const block =
+        typeof wrapperBlock.block === 'string'
+          ? _config?.blocks?.find((b) => b.slug === wrapperBlock.block)
+          : wrapperBlock.block
+      if (!block) {
+        throw new Error(
+          `Block not found for slug: ${typeof wrapperBlock.block === 'string' ? wrapperBlock.block : wrapperBlock.block?.slug}`,
+        )
+      }
+      wrapperBlockConfigs.push(block)
+
+      wrappedBlockSlugsAndCreateDOMs[block.slug] = wrapperBlock.createDOM
+    }
+
     return {
       ClientFeature: '@payloadcms/richtext-lexical/client#BlocksFeatureClient',
+      componentImports: wrappedBlockSlugsAndCreateDOMs,
       generatedTypes: {
         modifyOutputSchema: ({
           collectionIDFieldTypes,
@@ -113,6 +150,17 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
                   flattenedFields: flattenAllFields({ fields: block.fields }),
                 }
               }),
+            })
+          }
+
+          if (wrapperBlockConfigs?.length) {
+            fields.push({
+              name: field?.name + '_lexical_wrapper_blocks',
+              type: 'blocks',
+              blocks: wrapperBlockConfigs.map((wrapperBlock) => ({
+                ...wrapperBlock,
+                flattenedFields: flattenAllFields({ fields: wrapperBlock.fields }),
+              })),
             })
           }
 
@@ -195,6 +243,33 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
           }
         }
 
+        if (wrapperBlockConfigs?.length) {
+          for (const block of wrapperBlockConfigs) {
+            const blockFields = [...block.fields]
+
+            if (block?.admin?.components) {
+              blockFields.unshift({
+                name: `_components`,
+                type: 'ui',
+                admin: {
+                  components: {
+                    Block: block.admin?.components?.Block,
+                    BlockLabel: block.admin?.components?.Label,
+                  },
+                },
+              })
+            }
+            schemaMap.set(`lexical_wrapper_blocks.${block.slug}.fields`, {
+              fields: blockFields,
+            })
+            schemaMap.set(`lexical_wrapper_blocks.${block.slug}`, {
+              name: `lexical_wrapper_blocks_${block.slug}`,
+              type: 'blocks',
+              blocks: [block],
+            })
+          }
+        }
+
         return schemaMap
       },
       i18n,
@@ -259,6 +334,36 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
           graphQLPopulationPromises: [blockPopulationPromiseHOC(inlineBlockConfigs)],
           node: ServerInlineBlockNode,
           validations: [blockValidationHOC(inlineBlockConfigs)],
+        }),
+        createNode({
+          // @ts-expect-error - TODO: fix this
+          getSubFields: ({ node }) => {
+            if (!node) {
+              if (wrapperBlockConfigs?.length) {
+                return [
+                  {
+                    name: 'lexical_wrapper_blocks',
+                    type: 'blocks',
+                    blocks: wrapperBlockConfigs,
+                  },
+                ]
+              }
+              return []
+            }
+
+            const blockType = node.fields.blockType
+
+            const block = wrapperBlockConfigs?.find(
+              (wrapperBlock) => wrapperBlock.slug === blockType,
+            )
+            return block?.fields
+          },
+          getSubFieldsData: ({ node }) => {
+            return node?.fields
+          },
+          graphQLPopulationPromises: [blockPopulationPromiseHOC(wrapperBlockConfigs)],
+          node: getWrapperBlockNode(domMap).WrapperBlockNode,
+          validations: [blockValidationHOC(wrapperBlockConfigs)],
         }),
       ],
       sanitizedServerFeatureProps: _props,

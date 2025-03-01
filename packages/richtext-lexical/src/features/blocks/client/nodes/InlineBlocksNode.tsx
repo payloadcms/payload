@@ -7,9 +7,9 @@ import React, { type JSX } from 'react'
 import type {
   InlineBlockFields,
   SerializedInlineBlockNode,
-} from '../../server/nodes/InlineBlocksNode.js'
+} from '../../server/nodes/InlineBlockNode.js'
 
-import { ServerInlineBlockNode } from '../../server/nodes/InlineBlocksNode.js'
+import { ServerInlineBlockNode } from '../../server/nodes/InlineBlockNode.js'
 
 const InlineBlockComponent = React.lazy(() =>
   import('../componentInline/index.js').then((module) => ({

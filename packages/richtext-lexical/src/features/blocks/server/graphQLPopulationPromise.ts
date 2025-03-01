@@ -1,16 +1,19 @@
 import type { Block } from 'payload'
 
 import type { PopulationPromise } from '../../typesServer.js'
-import type { SerializedInlineBlockNode } from '../server/nodes/InlineBlocksNode.js'
-import type { SerializedBlockNode } from './nodes/BlocksNode.js'
+import type { SerializedInlineBlockNode } from '../server/nodes/InlineBlockNode.js'
+import type { SerializedWrapperBlockNode } from '../WrapperBlockNode.js'
+import type { SerializedBlockNode } from './nodes/BlockNode.js'
 
 import { recursivelyPopulateFieldsForGraphQL } from '../../../populateGraphQL/recursivelyPopulateFieldsForGraphQL.js'
 
 export const blockPopulationPromiseHOC = (
   blocks: Block[],
-): PopulationPromise<SerializedBlockNode | SerializedInlineBlockNode> => {
+): PopulationPromise<
+  SerializedBlockNode | SerializedInlineBlockNode | SerializedWrapperBlockNode
+> => {
   const blockPopulationPromise: PopulationPromise<
-    SerializedBlockNode | SerializedInlineBlockNode
+    SerializedBlockNode | SerializedInlineBlockNode | SerializedWrapperBlockNode
   > = ({
     context,
     currentDepth,
