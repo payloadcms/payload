@@ -899,7 +899,9 @@ export {
   ServerBlockNode,
 } from './features/blocks/server/nodes/BlocksNode.js'
 
-export { getHTMLPopulateFn } from './features/converters/html/htmlPopulateFn.js'
+export { getHTMLPopulateFn } from './features/converters/html/field/htmlPopulateFn.js'
+
+export { lexicalHTMLField } from './features/converters/html/field/index.js'
 export { LinebreakHTMLConverter } from './features/converters/html_deprecated/converter/converters/linebreak.js'
 
 export { ParagraphHTMLConverter } from './features/converters/html_deprecated/converter/converters/paragraph.js'

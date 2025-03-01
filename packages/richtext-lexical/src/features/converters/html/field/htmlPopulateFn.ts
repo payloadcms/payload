@@ -1,8 +1,8 @@
 import { createLocalReq, type Payload, type PayloadRequest } from 'payload'
 
-import type { HTMLPopulateFn } from './types.js'
+import type { HTMLPopulateFn } from '../types.js'
 
-import { populate } from '../../../populateGraphQL/populate.js'
+import { populate } from '../../../../populateGraphQL/populate.js'
 
 export const getHTMLPopulateFn: (
   args: {

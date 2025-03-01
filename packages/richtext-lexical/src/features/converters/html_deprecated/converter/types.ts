@@ -1,6 +1,9 @@
 import type { SerializedLexicalNode } from 'lexical'
 import type { PayloadRequest } from 'payload'
 
+/**
+ * @deprecated - will be removed in 4.0
+ */
 export type HTMLConverter<T extends SerializedLexicalNode = SerializedLexicalNode> = {
   converter: (args: {
     childIndex: number

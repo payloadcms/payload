@@ -221,8 +221,13 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
   /**
    * Allows you to define how a node can be serialized into different formats. Currently, only supports html.
    * Markdown converters are defined in `markdownTransformers` and not here.
+   *
+   * @deprecated - will be removed in 4.0
    */
   converters?: {
+    /**
+     * @deprecated - will be removed in 4.0
+     */
     html?: HTMLConverter<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>
   }
   /**
