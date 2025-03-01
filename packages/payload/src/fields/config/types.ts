@@ -1364,6 +1364,7 @@ export type Block = {
    */
   _sanitized?: boolean
   admin?: {
+    blockName?: boolean
     components?: {
       /**
        * This will replace the entire block component, including the block header / collapsible.
@@ -1402,7 +1403,7 @@ export type Block = {
 }
 
 export type ClientBlock = {
-  admin?: Pick<Block['admin'], 'custom' | 'group'>
+  admin?: Pick<Block['admin'], 'blockName' | 'custom' | 'group'>
   fields: ClientField[]
   labels?: LabelsClient
 } & Pick<Block, 'imageAltText' | 'imageURL' | 'jsx' | 'slug'>

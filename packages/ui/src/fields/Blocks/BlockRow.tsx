@@ -155,7 +155,9 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
                   >
                     {getTranslation(block.labels.singular, i18n)}
                   </Pill>
-                  <SectionTitle path={`${path}.blockName`} readOnly={readOnly} />
+                  {block.admin.blockName && (
+                    <SectionTitle path={`${path}.blockName`} readOnly={readOnly} />
+                  )}
                   {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
                 </Fragment>
               )}

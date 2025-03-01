@@ -362,4 +362,71 @@ describe('sanitizeFields', () => {
       expect(sanitizedFields).toStrictEqual([])
     })
   })
+  describe('blocks', () => {
+    it('should maintain admin.blockName false after sanitization', async () => {
+      const fields: Field[] = [
+        {
+          name: 'noLabelBlock',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'number',
+              admin: {
+                blockName: false,
+              },
+              fields: [
+                {
+                  name: 'testNumber',
+                  type: 'number',
+                },
+              ],
+            },
+          ],
+          label: false,
+        },
+      ]
+      const sanitizedField = (
+        await sanitizeFields({
+          config,
+          fields,
+          validRelationships: [],
+        })
+      )[0] as BlocksField
+
+      const sanitizedBlock = sanitizedField.blocks[0]
+
+      expect(sanitizedBlock.admin?.blockName).toStrictEqual(false)
+    })
+    it('should default admin.blockName to true after sanitization', async () => {
+      const fields: Field[] = [
+        {
+          name: 'noLabelBlock',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'number',
+              fields: [
+                {
+                  name: 'testNumber',
+                  type: 'number',
+                },
+              ],
+            },
+          ],
+          label: false,
+        },
+      ]
+      const sanitizedField = (
+        await sanitizeFields({
+          config,
+          fields,
+          validRelationships: [],
+        })
+      )[0] as BlocksField
+
+      const sanitizedBlock = sanitizedField.blocks[0]
+
+      expect(sanitizedBlock.admin?.blockName).toStrictEqual(true)
+    })
+  })
 })

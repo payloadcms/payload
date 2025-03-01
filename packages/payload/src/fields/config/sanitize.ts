@@ -258,6 +258,14 @@ export const sanitizeFields = async ({
           richTextSanitizationPromises,
           validRelationships,
         })
+
+        if (!block?.admin?.blockName) {
+          block.admin = {
+            ...block.admin,
+            blockName:
+              typeof block?.admin?.blockName === 'undefined' ? true : block.admin.blockName,
+          }
+        }
       }
     }
 
