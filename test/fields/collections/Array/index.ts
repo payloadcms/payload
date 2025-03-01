@@ -260,6 +260,39 @@ const ArrayFields: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'nestedArrayWithLabels',
+      type: 'array',
+      label: 'Parent Array Label',
+      fields: [
+        {
+          name: 'firstChildArray',
+          type: 'array',
+          label: 'First Child Array Label',
+          fields: [
+            {
+              name: 'secondChildArray',
+              type: 'array',
+              label: 'Second Child Array Label',
+              fields: [
+                {
+                  name: 'childWithoutLabel',
+                  type: 'array',
+                  fields: [
+                    {
+                      name: 'text',
+                      label: 'Custom Text Label',
+                      type: 'text',
+                      required: true,
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
   slug: arrayFieldsSlug,
   versions: true,
