@@ -164,6 +164,30 @@
   }
 }
 
+@utility prose {
+  --tw-prose-body: var(--text);
+  --tw-prose-headings: var(--text);
+
+  h1 {
+    font-weight: normal;
+    margin-bottom: 0.25em;
+    font-size: 2.5rem;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  @variant md {
+    h1 {
+      font-size: 3.5rem;
+    }
+    h2 {
+      font-size: 1.5rem;
+    }
+  }
+}
 
 @layer base {
   * {
