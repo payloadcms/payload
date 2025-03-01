@@ -1,4 +1,3 @@
-
 ---
 title: Button
 label: Button
@@ -57,7 +56,10 @@ Then, use the Button component in your custom component:
 
 _* An asterisk denotes that a property is required._
 
-## Example
+## Examples
+
+
+### Using as a regular button
 
 In this example, we have a simple custom component that uses the Button component:
 
@@ -66,10 +68,97 @@ In this example, we have a simple custom component that uses the Button componen
 import React from 'react'
 import { Button } from '@payloadcms/ui'
 
-export function CustomComponent() {
+export function RegularButtonExample() {
   return (
-    <Button onClick={() => alert('Hello!')}>
-      Click me!
+    <Button onClick={() => alert('Clicked!')}>
+      Regular Button
+    </Button>
+  )
+}
+```
+
+### Using as a link or anchor
+
+![Button as a link or anchor](https://i.imgur.com/OJ3IgGW.png)
+
+```tsx
+'use client'
+import React from 'react'
+import { Button } from '@payloadcms/ui'
+
+export function AnchorButtonExample() {
+  return (
+    <>
+      <Button
+        el="anchor"
+        url="https://www.example.com"
+        buttonStyle="secondary"
+        newTab
+        icon="link"
+      >
+        External Link
+      </Button>
+      <Button
+        el="link"
+        to="/some-page"
+        buttonStyle="primary"
+      >
+        Internal Link
+      </Button>
+    </>
+  )
+}
+```
+
+### Additional Usage Examples
+
+Below is an example illustrating how to use different styles and props:
+
+![Button with different styles](https://i.imgur.com/jXiM50j.png)
+
+```tsx
+'use client'
+import React from 'react'
+import { Button } from '@payloadcms/ui'
+
+export function AnotherExample() {
+  return (
+    <div style={{ display: 'flex', gap: '1rem' }}>
+      <Button buttonStyle="error" onClick={() => alert('Error!')}>
+        Error Button
+      </Button>
+      <Button buttonStyle="secondary" icon="plus" onClick={() => alert('Added!')}>
+        Add
+      </Button>
+    </div>
+  )
+}
+```
+
+You can even combine icons, tooltips, and submenu popups together:
+
+![Button with icon, tooltip, and submenu popup](https://i.imgur.com/LRBX6z2.png)
+
+```tsx
+'use client'
+import React from 'react'
+import { Button } from '@payloadcms/ui'
+
+export function ComplexExample() {
+  return (
+    <Button
+      icon="edit"
+      tooltip="Edit this item"
+      SubMenuPopupContent={({ close }) => (
+        <div style={{ padding: 10 }}>
+          <p>Edit options</p>
+          <Button onClick={close} type="button">
+            Close
+          </Button>
+        </div>
+      )}
+    >
+      Edit
     </Button>
   )
 }
