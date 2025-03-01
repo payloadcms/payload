@@ -63,6 +63,7 @@ jobs:
             richtext-\*
             richtext-lexical
             richtext-slate
+            sdk
             storage-\*
             storage-azure
             storage-gcs

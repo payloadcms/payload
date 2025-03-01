@@ -44,6 +44,7 @@
     "build:releaser": "turbo build --filter \"@tools/releaser\"",
     "build:richtext-lexical": "turbo build --filter \"@payloadcms/richtext-lexical\"",
     "build:richtext-slate": "turbo build --filter \"@payloadcms/richtext-slate\"",
+    "build:sdk": "turbo build --filter \"@payloadcms/sdk\"",
     "build:storage-azure": "turbo build --filter \"@payloadcms/storage-azure\"",
     "build:storage-gcs": "turbo build --filter \"@payloadcms/storage-gcs\"",
     "build:storage-s3": "turbo build --filter \"@payloadcms/storage-s3\"",
