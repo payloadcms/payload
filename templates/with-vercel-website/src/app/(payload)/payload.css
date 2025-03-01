@@ -71,9 +71,7 @@
       left: 0;
       padding-left: 0;
   }
-}
 
-@media (width <= 1024px) {
   .collection-list .table:after {
       padding-right: 0;
   }
