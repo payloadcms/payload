@@ -69,6 +69,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
             ? incomingQuery.limit
             : (currentQuery?.limit ?? String(defaultLimit)),
         page,
+        preset: 'preset' in incomingQuery ? incomingQuery.preset : currentQuery?.preset,
         search: 'search' in incomingQuery ? incomingQuery.search : currentQuery?.search,
         sort:
           'sort' in incomingQuery

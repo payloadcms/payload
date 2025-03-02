@@ -31,6 +31,8 @@ type RenderListViewArgs = {
   enableRowSelections: boolean
   overrideEntityVisibility?: boolean
   query: ListQuery
+  redirectAfterDelete?: boolean
+  redirectAfterDuplicate?: boolean
 } & AdminViewServerProps
 
 export const renderListView = async (
@@ -86,13 +88,18 @@ export const renderListView = async (
    * This could potentially be done by injecting a `sessionID` into the params and comparing it against a session cookie
    */
   const listPreferences = await upsertPreferences<ListPreferences>({
-    key: `${collectionSlug}-list`,
-    req,
-    value: {
+    customMerge: (existingValue) => ({
+      ...existingValue,
       columns,
       limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
+      presets: {
+        ...(existingValue.presets || {}),
+        [collectionSlug]: query?.preset as string,
+      },
       sort: query?.sort as string,
-    },
+    }),
+    key: `${collectionSlug}-list`,
+    req,
   })
 
   const {
@@ -137,7 +144,7 @@ export const renderListView = async (
 
     try {
       activePreset = (await payload.findByID({
-        id: listPreferences?.listPresets?.[collectionSlug],
+        id: listPreferences?.presets?.[collectionSlug],
         collection: 'payload-list-presets',
         depth: 0,
         overrideAccess: false,

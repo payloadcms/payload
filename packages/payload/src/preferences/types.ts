@@ -37,7 +37,7 @@ export type ColumnPreference = {
 export type ListPreferences = {
   columns?: ColumnPreference[]
   limit?: number
-  listPresets?: {
+  presets?: {
     [key: CollectionSlug]: DefaultDocumentIDType
   }
   sort?: string

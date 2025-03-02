@@ -30,6 +30,10 @@
       border-radius: 0;
     }
 
+    &__modified {
+      color: var(--theme-elevation-500);
+    }
+
     &__buttons-wrap {
       display: flex;
       align-items: center;

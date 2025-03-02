@@ -46,6 +46,7 @@ export type ListQuery = {
   columns?: ColumnsFromURL
   limit?: string
   page?: string
+  preset?: number | string
   /*
     When provided, is automatically injected into the `where` object
   */

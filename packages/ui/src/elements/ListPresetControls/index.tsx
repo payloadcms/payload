@@ -26,11 +26,10 @@ const baseClass = 'list-presets'
 
 const confirmDeleteModalSlug = 'confirm-delete-filter'
 
-export function ListPresets({ activePreset: initialPreset }: { activePreset: ListPreset }) {
+export function ListPresetControls({ activePreset }: { activePreset: ListPreset }) {
   const { i18n, t } = useTranslation()
   const { openModal } = useModal()
 
-  const [selectedPreset, setSelectedPreset] = useState<ListPreset>(initialPreset)
   const [documentEditID, setDocumentEditID] = useState<number | string>(null)
 
   const {
@@ -61,10 +60,9 @@ export function ListPresets({ activePreset: initialPreset }: { activePreset: Lis
 
   const handleChange = useCallback(
     async (preset: ListPreset) => {
-      setSelectedPreset(preset)
-
       await refineListData({
         columns: transformColumnsToSearchParams(preset.columns),
+        preset: preset.id,
         where: preset.where,
       })
     },
@@ -81,16 +79,16 @@ export function ListPresets({ activePreset: initialPreset }: { activePreset: Lis
           }}
           type="button"
         >
-          {selectedPreset ? (
+          {activePreset ? (
             <div
               className={`${baseClass}__select__clear`}
               onClick={(e) => {
                 e.stopPropagation()
-                setSelectedPreset(undefined)
+                // setSelectedPreset(undefined)
               }}
               onKeyDown={(e) => {
                 e.stopPropagation()
-                setSelectedPreset(undefined)
+                // setSelectedPreset(undefined)
               }}
               role="button"
               tabIndex={0}
@@ -99,7 +97,7 @@ export function ListPresets({ activePreset: initialPreset }: { activePreset: Lis
             </div>
           ) : null}
           <div className={`${baseClass}__select__label`}>
-            {selectedPreset?.title || 'Select preset'}
+            {activePreset?.title || 'Select preset'}
           </div>
         </button>
         <Popup
@@ -110,7 +108,7 @@ export function ListPresets({ activePreset: initialPreset }: { activePreset: Lis
           verticalAlign="bottom"
         >
           <PopupList.ButtonGroup>
-            {selectedPreset && hasModified ? (
+            {activePreset && hasModified ? (
               <Fragment>
                 <PopupList.Button
                   onClick={() => {
@@ -140,20 +138,21 @@ export function ListPresets({ activePreset: initialPreset }: { activePreset: Lis
             >
               Create new preset
             </PopupList.Button>
-            {selectedPreset ? (
-              <PopupList.Button
-                onClick={() => {
-                  setDocumentEditID(select.id)
-                  openEditDrawer()
-                }}
-              >
-                {t('general:edit')}
-              </PopupList.Button>
-            ) : null}
-            {selectedPreset ? (
-              <PopupList.Button onClick={() => openModal(confirmDeleteModalSlug)}>
-                {t('general:delete')}
-              </PopupList.Button>
+            {activePreset ? (
+              <Fragment>
+                <PopupList.Button onClick={() => openModal(confirmDeleteModalSlug)}>
+                  {t('general:delete')}
+                </PopupList.Button>
+
+                <PopupList.Button
+                  onClick={() => {
+                    setDocumentEditID(select.id)
+                    openEditDrawer()
+                  }}
+                >
+                  {t('general:edit')}
+                </PopupList.Button>
+              </Fragment>
             ) : null}
           </PopupList.ButtonGroup>
         </Popup>
@@ -176,7 +175,7 @@ export function ListPresets({ activePreset: initialPreset }: { activePreset: Lis
             : undefined
         }
         onDelete={() => {
-          setSelectedPreset(undefined)
+          // setSelectedPreset(undefined)
         }}
         onDuplicate={async ({ doc }) => {
           await handleChange(doc as ListPreset)
@@ -195,8 +194,8 @@ export function ListPresets({ activePreset: initialPreset }: { activePreset: Lis
             i18nKey="general:aboutToDelete"
             t={t}
             variables={{
-              label: getTranslation(selectedPreset?.title, i18n),
-              title: selectedPreset?.title,
+              label: getTranslation(activePreset?.title, i18n),
+              title: activePreset?.title,
             }}
           />
         }

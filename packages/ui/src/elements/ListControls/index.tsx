@@ -12,11 +12,10 @@ import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { Dots } from '../../icons/Dots/index.js'
 import { SearchIcon } from '../../icons/Search/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
-import { useTableColumns } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { AnimateHeight } from '../AnimateHeight/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
-import { ListPresets } from '../ListPresets/index.js'
+import { ListPresetControls } from '../ListPresetControls/index.js'
 import { Pill } from '../Pill/index.js'
 import { SearchFilter } from '../SearchFilter/index.js'
 import { WhereBuilder } from '../WhereBuilder/index.js'
@@ -70,7 +69,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     resolvedFilterOptions,
   } = props
 
-  const { handleSearchChange, query } = useListQuery()
+  const { handleSearchChange, modified, query } = useListQuery()
 
   const titleField = useUseTitleField(collectionConfig)
   const { i18n, t } = useTranslation()
@@ -159,6 +158,9 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
             key={collectionSlug}
             label={searchLabelTranslated.current}
           />
+          {activePreset && modified ? (
+            <div className={`${baseClass}__modified`}>Modified</div>
+          ) : null}
           <div className={`${baseClass}__buttons`}>
             <div className={`${baseClass}__buttons-wrap`}>
               {!smallBreak && <React.Fragment>{beforeActions && beforeActions}</React.Fragment>}
@@ -212,7 +214,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
             </div>
           </div>
         </div>
-        {!disableListFilters && <ListPresets activePreset={activePreset} />}
+        {!disableListFilters && <ListPresetControls activePreset={activePreset} />}
       </div>
       {enableColumns && (
         <AnimateHeight
