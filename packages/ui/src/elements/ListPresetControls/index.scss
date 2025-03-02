@@ -7,16 +7,35 @@
     border-radius: var(--style-radius-m);
     padding-left: calc(var(--base) / 2);
 
+    &__select__clear,
     &__select {
-      width: calc(var(--base) * 6);
+      margin: 0;
+      background: transparent;
+      appearance: none;
+      border: 0;
+      padding: 0;
+      cursor: pointer;
+      font-size: inherit;
+      color: var(--theme-elevation-500);
+      color: inherit;
+      line-height: inherit;
+    }
+
+    &__select {
       text-align: left;
       display: flex;
       align-items: center;
+      padding-right: calc(var(--base) / 2);
+      width: calc(var(--base) * 6);
 
-      &__label {
+      &__label-text {
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
+      }
+
+      &__clear {
+        flex-shrink: 0;
       }
     }
 
@@ -31,20 +50,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-    }
-
-    &__select__clear,
-    &__select {
-      margin: 0;
-      background: transparent;
-      appearance: none;
-      border: 0;
-      padding: 0;
-      cursor: pointer;
-      font-size: inherit;
-      color: var(--theme-elevation-500);
-      color: inherit;
-      line-height: inherit;
     }
   }
 }

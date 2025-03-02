@@ -10,8 +10,9 @@ import {
 } from 'payload/shared'
 import { Fragment, useCallback, useState } from 'react'
 
-import { ChevronIcon } from '../../icons/Chevron/index.js'
+import { Dots } from '../../icons/Dots/index.js'
 import { XIcon } from '../../icons/X/index.js'
+import { useConfig } from '../../providers/Config/index.js'
 import { useListQuery } from '../../providers/ListQuery/context.js'
 import { useTableColumns } from '../../providers/TableColumns/context.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -29,6 +30,12 @@ const confirmDeleteModalSlug = 'confirm-delete-filter'
 export function ListPresetControls({ activePreset }: { activePreset: ListPreset }) {
   const { i18n, t } = useTranslation()
   const { openModal } = useModal()
+
+  const {
+    config: {
+      routes: { api: apiRoute },
+    },
+  } = useConfig()
 
   const [documentEditID, setDocumentEditID] = useState<DefaultDocumentIDType>(null)
 
@@ -54,9 +61,21 @@ export function ListPresetControls({ activePreset }: { activePreset: ListPreset 
       collectionSlugs: ['payload-list-presets'],
     })
 
-  const handleDelete = useCallback(() => {
-    // handle delete
-  }, [])
+  const resetPreset = useCallback(async () => {
+    await refineListData({
+      columns: undefined,
+      preset: undefined,
+      where: undefined,
+    })
+  }, [refineListData])
+
+  const handleDelete = useCallback(async () => {
+    await fetch(`${apiRoute}/payload-list-presets/${activePreset.id}`, {
+      method: 'DELETE',
+    })
+
+    await resetPreset()
+  }, [activePreset?.id, apiRoute, resetPreset])
 
   const handleChange = useCallback(
     async (preset: ListPreset) => {
@@ -84,21 +103,11 @@ export function ListPresetControls({ activePreset }: { activePreset: ListPreset 
               className={`${baseClass}__select__clear`}
               onClick={async (e) => {
                 e.stopPropagation()
-
-                await refineListData({
-                  columns: undefined,
-                  preset: undefined,
-                  where: undefined,
-                })
+                await resetPreset()
               }}
               onKeyDown={async (e) => {
                 e.stopPropagation()
-
-                await refineListData({
-                  columns: undefined,
-                  preset: undefined,
-                  where: undefined,
-                })
+                await resetPreset()
               }}
               role="button"
               tabIndex={0}
@@ -106,12 +115,12 @@ export function ListPresetControls({ activePreset }: { activePreset: ListPreset 
               <XIcon />
             </div>
           ) : null}
-          <div className={`${baseClass}__select__label`}>
+          <div className={`${baseClass}__select__label-text`}>
             {activePreset?.title || 'Select preset'}
           </div>
         </button>
         <Popup
-          button={<ChevronIcon ariaLabel={t('general:moreOptions')} direction="down" />}
+          button={<Dots noBackground orientation="horizontal" />}
           className={`${baseClass}__popup`}
           horizontalAlign="right"
           size="large"
@@ -153,7 +162,6 @@ export function ListPresetControls({ activePreset }: { activePreset: ListPreset 
                 <PopupList.Button onClick={() => openModal(confirmDeleteModalSlug)}>
                   {t('general:delete')}
                 </PopupList.Button>
-
                 <PopupList.Button
                   onClick={() => {
                     setDocumentEditID(select.id)
@@ -204,7 +212,7 @@ export function ListPresetControls({ activePreset }: { activePreset: ListPreset 
             i18nKey="general:aboutToDelete"
             t={t}
             variables={{
-              label: getTranslation(activePreset?.title, i18n),
+              label: getTranslation('List Preset', i18n),
               title: activePreset?.title,
             }}
           />
