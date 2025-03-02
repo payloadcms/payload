@@ -455,7 +455,7 @@ export const MyCollection: CollectionConfig = {
 
 ## HTML => Lexical
 
-If you have access to the Payload Config and the lexical editor config, you can convert HTML to the lexical editor format with the following:
+If you have access to the Payload Config and the lexical editor config, you can convert HTML to the lexical editor state with the following:
 
 ```ts
 import { convertHTMLToLexical, editorConfigFactory } from '@payloadcms/richtext-lexical'
@@ -466,7 +466,7 @@ const html = convertHTMLToLexical({
   editorConfig: await editorConfigFactory.default({
     config, // <= make sure you have access to your Payload Config
   }),
-  html: '<p>hello</p>',
+  html: '<p>text</p>',
   JSDOM, // pass the JSDOM import. As it's a relatively large package, richtext-lexical does not include it by default.
 })
 ```
