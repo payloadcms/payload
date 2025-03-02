@@ -11,7 +11,8 @@ export const ListPresetsAccessField: GroupFieldServerComponent = ({ data }) => {
   return (
     <p>
       {operations.reduce((acc, operation, index) => {
-        const operationData = (data as JSON)[operation]
+        const operationData = (data as JSON)?.[operation]
+
         if (operationData && operationData.constraint) {
           acc.push(
             <Fragment key={operation}>

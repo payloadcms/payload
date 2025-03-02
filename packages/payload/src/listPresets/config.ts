@@ -71,6 +71,9 @@ export const getListPresetsConfig = (config: Config): CollectionConfig => ({
     {
       name: 'relatedCollection',
       type: 'select',
+      admin: {
+        hidden: true,
+      },
       options: config.collections
         ? config.collections.map((collection) => ({
             label: collection.labels?.plural || collection.slug,

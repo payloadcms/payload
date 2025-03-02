@@ -6,9 +6,11 @@ import React from 'react'
 export const ListPresetsColumnsCell: React.FC<DefaultCellComponentProps> = ({ cellData }) => {
   return (
     <div>
-      {transformColumnsToSearchParams(cellData)
-        .map((column) => toWords(column))
-        .join(', ')}
+      {cellData
+        ? transformColumnsToSearchParams(cellData)
+            .map((column) => toWords(column))
+            .join(', ')
+        : 'No columns selected'}
     </div>
   )
 }

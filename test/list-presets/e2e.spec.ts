@@ -10,7 +10,12 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
 import type { Config } from './payload-types.js'
 
-import { ensureCompilationIsDone, exactText, initPageConsoleErrorCatch } from '../helpers.js'
+import {
+  ensureCompilationIsDone,
+  exactText,
+  initPageConsoleErrorCatch,
+  saveDocAndAssert,
+} from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -27,7 +32,7 @@ let payload: PayloadTestSDK<Config>
 let serverURL: string
 let everyoneID: string | undefined
 
-describe('Shared Filters', () => {
+describe('List Presets', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
@@ -205,6 +210,29 @@ describe('Shared Filters', () => {
 
   test.skip('can save for everyone', () => {
     // select a filter, make a change to the filters, click "save for everyone", and ensure the changes are saved
+  })
+
+  test('can create new preset', async () => {
+    await page.goto(pagesUrl.list)
+    await openPresetsDropdown({ page })
+
+    await page
+      .locator('.list-presets .popup-button-list__button', {
+        hasText: exactText('Create new preset'),
+      })
+      .click()
+
+    const modal = page.locator('[id^=doc-drawer_payload-list-presets_0_]')
+    await expect(modal).toBeVisible()
+    await modal.locator('input[name="title"]').fill('New Preset')
+    await saveDocAndAssert(page)
+    await expect(modal).toBeHidden()
+
+    await expect(
+      page.locator('button.list-presets__select', {
+        hasText: exactText('New Preset'),
+      }),
+    ).toBeVisible()
   })
 })
 

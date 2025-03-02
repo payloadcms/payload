@@ -11,7 +11,8 @@ export const ListPresetsAccessCell: React.FC<DefaultCellComponentProps> = ({ cel
   return (
     <p>
       {operations.reduce((acc, operation, index) => {
-        const operationData = (cellData as JSON)[operation]
+        const operationData = (cellData as JSON)?.[operation]
+
         if (operationData && operationData.constraint) {
           acc.push(
             <Fragment key={operation}>

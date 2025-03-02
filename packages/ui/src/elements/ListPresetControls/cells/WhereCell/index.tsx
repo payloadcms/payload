@@ -19,5 +19,5 @@ const transformWhereToNaturalLanguage = (where: Where): string => {
 }
 
 export const ListPresetsWhereCell: React.FC<DefaultCellComponentProps> = ({ cellData }) => {
-  return <div>{transformWhereToNaturalLanguage(cellData)}</div>
+  return <div>{cellData ? transformWhereToNaturalLanguage(cellData) : 'No where query'}</div>
 }

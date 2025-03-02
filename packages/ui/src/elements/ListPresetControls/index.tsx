@@ -51,10 +51,11 @@ export function ListPresetControls({ activePreset }: { activePreset: ListPreset 
 
   const hasModified = listQueryModified || columnsModified
 
-  const [DocumentDrawer, , { openDrawer: openEditDrawer }] = useDocumentDrawer({
-    id: documentEditID,
-    collectionSlug: 'payload-list-presets',
-  })
+  const [DocumentDrawer, , { closeDrawer: closeEditDrawer, openDrawer: openEditDrawer }] =
+    useDocumentDrawer({
+      id: documentEditID,
+      collectionSlug: 'payload-list-presets',
+    })
 
   const [ListDrawer, , { closeDrawer: closeListDrawer, openDrawer: openListDrawer }] =
     useListDrawer({
@@ -80,7 +81,7 @@ export function ListPresetControls({ activePreset }: { activePreset: ListPreset 
   const handleChange = useCallback(
     async (preset: ListPreset) => {
       await refineListData({
-        columns: transformColumnsToSearchParams(preset.columns),
+        columns: preset.columns ? transformColumnsToSearchParams(preset.columns) : undefined,
         preset: preset.id,
         where: preset.where,
       })
@@ -199,6 +200,10 @@ export function ListPresetControls({ activePreset }: { activePreset: ListPreset 
           await handleChange(doc as ListPreset)
         }}
         onSave={async ({ doc }) => {
+          if (!documentEditID) {
+            closeEditDrawer()
+          }
+
           await handleChange(doc as ListPreset)
         }}
         redirectAfterCreate={false}
