@@ -338,8 +338,8 @@ export const UploadFeature: FeatureProviderProviderServer<
 
 Lexical provides a seamless way to perform conversions between various other formats:
 
-- HTML to Lexical (or, importing HTML into the lexical editor)
-- Markdown to Lexical (or, importing Markdown into the lexical editor)
+- HTML to Lexical
+- Markdown to Lexical
 - Lexical to Markdown
 
 A headless editor can perform such conversions outside of the main editor instance. Follow this method to initiate a headless editor:
@@ -455,45 +455,21 @@ export const MyCollection: CollectionConfig = {
 
 ## HTML => Lexical
 
-Once you have your headless editor instance, you can use it to convert HTML to Lexical:
+If you have access to the Payload Config and the lexical editor config, you can convert HTML to the lexical editor state with the following:
 
 ```ts
-import { $generateNodesFromDOM } from '@payloadcms/richtext-lexical/lexical/html'
-import { $getRoot, $getSelection } from '@payloadcms/richtext-lexical/lexical'
+import { convertHTMLToLexical, editorConfigFactory } from '@payloadcms/richtext-lexical'
+// Make sure you have jsdom and @types/jsdom installed
 import { JSDOM } from 'jsdom'
 
-headlessEditor.update(
-  () => {
-    // In a headless environment you can use a package such as JSDom to parse the HTML string.
-    const dom = new JSDOM(htmlString)
-
-    // Once you have the DOM instance it's easy to generate LexicalNodes.
-    const nodes = $generateNodesFromDOM(headlessEditor, dom.window.document)
-
-    // Select the root
-    $getRoot().select()
-
-    // Insert them at a selection.
-    const selection = $getSelection()
-    selection.insertNodes(nodes)
-  },
-  { discrete: true },
-)
-
-// Do this if you then want to get the editor JSON
-const editorJSON = headlessEditor.getEditorState().toJSON()
+const html = convertHTMLToLexical({
+  editorConfig: await editorConfigFactory.default({
+    config, // <= make sure you have access to your Payload Config
+  }),
+  html: '<p>text</p>',
+  JSDOM, // pass the JSDOM import. As it's a relatively large package, richtext-lexical does not include it by default.
+})
 ```
-
-Functions prefixed with a `$` can only be run inside an `editor.update()` or `editorState.read()` callback.
-
-This has been taken from the [lexical serialization & deserialization docs](https://lexical.dev/docs/concepts/serialization#html---lexical).
-
-<Banner type="success">
-  **Note:**
-
-  Using the `discrete: true` flag ensures instant updates to the editor state. If
-  immediate reading of the updated state isn't necessary, you can omit the flag.
-</Banner>
 
 ## Markdown => Lexical
 
@@ -515,6 +491,17 @@ headlessEditor.update(
 // Do this if you then want to get the editor JSON
 const editorJSON = headlessEditor.getEditorState().toJSON()
 ```
+
+Functions prefixed with a `$` can only be run inside an `editor.update()` or `editorState.read()` callback.
+
+This has been taken from the [lexical serialization & deserialization docs](https://lexical.dev/docs/concepts/serialization#html---lexical).
+
+<Banner type="success">
+  **Note:**
+
+  Using the `discrete: true` flag ensures instant updates to the editor state. If
+  immediate reading of the updated state isn't necessary, you can omit the flag.
+</Banner>
 
 ## Lexical => Markdown
 
@@ -564,7 +551,6 @@ Here's the code for it:
 
 ```ts
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
-
 import { $getRoot } from '@payloadcms/richtext-lexical/lexical'
 
 const yourEditorState: SerializedEditorState // <= your current editor state here
