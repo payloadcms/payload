@@ -11,7 +11,7 @@ export const getListPresetsConfig = (config: Config): CollectionConfig => ({
   slug: listPresetsCollectionSlug,
   access: getAccess(config),
   admin: {
-    // hidden: true, // uncomment this when ready
+    hidden: true,
     useAsTitle: 'title',
   },
   fields: [
@@ -25,6 +25,12 @@ export const getListPresetsConfig = (config: Config): CollectionConfig => ({
       name: 'where',
       type: 'json',
       // hidden: true, // uncomment this when ready
+      admin: {
+        components: {
+          Cell: '@payloadcms/ui#ListPresetsWhereCell',
+          Field: '@payloadcms/ui#ListPresetsWhereField',
+        },
+      },
       hooks: {
         beforeValidate: [
           ({ data }) => {
@@ -44,6 +50,12 @@ export const getListPresetsConfig = (config: Config): CollectionConfig => ({
       name: 'columns',
       type: 'json',
       // hidden: true, // uncomment this when ready
+      admin: {
+        components: {
+          Cell: '@payloadcms/ui#ListPresetsColumnsCell',
+          Field: '@payloadcms/ui#ListPresetsColumnsField',
+        },
+      },
       validate: (value) => {
         if (value) {
           try {
@@ -68,5 +80,9 @@ export const getListPresetsConfig = (config: Config): CollectionConfig => ({
       required: true,
     },
   ],
+  labels: {
+    plural: 'List Presets',
+    singular: 'List Preset',
+  },
   lockDocuments: false,
 })

@@ -8,6 +8,12 @@ const operations = ['delete', 'read', 'update'] as const
 export const getConstraints = (config: Config): Field => ({
   name: 'access',
   type: 'group',
+  admin: {
+    components: {
+      Cell: '@payloadcms/ui#ListPresetsAccessCell',
+      Field: '@payloadcms/ui#ListPresetsAccessField',
+    },
+  },
   fields: operations.map((operation) => ({
     name: operation,
     type: 'group',
