@@ -1,10 +1,7 @@
 import type { Page } from '@playwright/test'
-import type { ColumnPreference, Where } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import * as path from 'path'
-import { transformColumnsToSearchParams, transformWhereQuery } from 'payload/shared'
-import * as qs from 'qs-esm'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../helpers/sdk/index.js'
@@ -19,6 +16,10 @@ import {
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { expectURLParams } from './helpers/expectURLParams.js'
+import { openListPresetDrawer } from './helpers/openListPresetDrawer.js'
+import { openPresetsDropdown } from './helpers/openPresetsDropdown.js'
+import { clearSelectedPreset, selectPreset } from './helpers/togglePreset.js'
 import { seedData } from './seed.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -235,72 +236,3 @@ describe('List Presets', () => {
     ).toBeVisible()
   })
 })
-
-async function expectURLParams({
-  page,
-  columns,
-  where,
-  presetID,
-}: {
-  columns: ColumnPreference[]
-  page: Page
-  presetID: string | undefined
-  where: Where
-}) {
-  const escapedColumns = encodeURIComponent(JSON.stringify(transformColumnsToSearchParams(columns)))
-
-  // TODO: can't get columns to encode correctly
-  // const whereQuery = qs.stringify(transformWhereQuery(where))
-  // const encodedWhere = encodeURIComponent(whereQuery)
-
-  const regex = new RegExp(`(?=.*columns=${escapedColumns})(?=.*preset=${presetID})`)
-
-  await page.waitForURL(regex)
-}
-
-async function openListPresetDrawer({ page }: { page: Page }) {
-  await page.click('button.list-presets__select')
-}
-
-async function selectPreset({ page, presetTitle }: { page: Page; presetTitle: string }) {
-  await openListPresetDrawer({ page })
-  const modal = page.locator('[id^=list-drawer_0_]')
-  await expect(modal).toBeVisible()
-
-  await modal
-    .locator('tbody tr td button', {
-      hasText: exactText(presetTitle),
-    })
-    .click()
-
-  await expect(
-    page.locator('button.list-presets__select', {
-      hasText: exactText(presetTitle),
-    }),
-  ).toBeVisible()
-}
-
-async function openPresetsDropdown({ page }: { page: Page }) {
-  const listPresetsControl = page.locator('.list-presets')
-  await listPresetsControl.locator('button.popup-button').click()
-  await expect(listPresetsControl.locator('.popup .popup__content')).toBeVisible()
-}
-
-async function clearSelectedPreset({ page }: { page: Page }) {
-  const listPresetsControl = page.locator('.list-presets')
-  const clearButton = listPresetsControl.locator('.list-presets__select__clear')
-
-  if (await clearButton.isVisible()) {
-    await clearButton.click()
-  }
-
-  const regex = /columns=/
-  await page.waitForURL((url) => !regex.test(url.search))
-  await expect(page.locator('.list-presets__select__clear')).toBeHidden()
-
-  await expect(
-    page.locator('button.list-presets__select', {
-      hasText: exactText('Select preset'),
-    }),
-  ).toBeVisible()
-}
