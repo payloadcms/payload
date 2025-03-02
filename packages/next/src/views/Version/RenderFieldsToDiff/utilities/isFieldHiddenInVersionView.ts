@@ -1,8 +1,14 @@
-import type { ClientField } from 'payload'
+import type { ClientField, Field } from 'payload'
 
-import { fieldIsID } from 'payload/shared'
+import { fieldIsID, fieldIsPresentationalOnly } from 'payload/shared'
 
-export function isFieldHiddenInVersionView(field: ClientField) {
+export function isFieldHiddenInVersionView(field: ClientField | Field) {
+  // Presentational fields (like UI fields) are not supposed to appear in the
+  // version view. This narrows the type of field to avoid type errors.
+  if (fieldIsPresentationalOnly(field)) {
+    return true
+  }
+
   // Don't render id fields
   if (fieldIsID(field)) {
     return true

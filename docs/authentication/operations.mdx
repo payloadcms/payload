@@ -312,7 +312,7 @@ Payload comes with built-in forgot password functionality. Submitting an email a
 
 The link to reset the user's password contains a token which is what allows the user to securely reset their password.
 
-By default, the Forgot Password operations send users to the [Admin Panel](../admin/overview) to reset their password, but you can customize the generated email to send users to the frontend of your app instead by [overriding the email HTML](/docs/authentication/overview#forgot-password).
+By default, the Forgot Password operations send users to the [Admin Panel](../admin/overview) to reset their password, but you can customize the generated email to send users to the frontend of your app instead by [overriding the email HTML](/docs/authentication/email#forgot-password).
 
 **Example REST API Forgot Password**:
 
@@ -348,7 +348,9 @@ const token = await payload.forgotPassword({
 })
 ```
 
-**Note:** if you do not have a `config.serverURL` set, Payload will attempt to create one for you if the `forgot-password` operation was triggered via REST or GraphQL by looking at the incoming `req`. But this is not supported if you are calling `payload.forgotPassword()` via the Local API. If you do not have a `serverURL` set, you may want to override your `auth.forgotPassword.generateEmailHTML` function to provide a full URL to link the user to a proper reset-password page.
+<Banner type="info">
+  **Note:** if you do not have a `config.serverURL` set, Payload will attempt to create one for you if the `forgot-password` operation was triggered via REST or GraphQL by looking at the incoming `req`. But this is not supported if you are calling `payload.forgotPassword()` via the Local API. If you do not have a `serverURL` set, you may want to override your `auth.forgotPassword.generateEmailHTML` function to provide a full URL to link the user to a proper reset-password page.
+</Banner>
 
 <Banner type="success">
   **Tip:**

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { AccessResult } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
 import type { CollectionSlug, JoinQuery } from '../../index.js'
@@ -62,18 +63,18 @@ export const findOperation = async <
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      args =
-        (await hook({
-          args,
-          collection: args.collection.config,
-          context: args.req.context,
-          operation: 'read',
-          req: args.req,
-        })) || args
-    }, Promise.resolve())
+    if (args.collection.config.hooks?.beforeOperation?.length) {
+      for (const hook of args.collection.config.hooks.beforeOperation) {
+        args =
+          (await hook({
+            args,
+            collection: args.collection.config,
+            context: args.req.context,
+            operation: 'read',
+            req: args.req,
+          })) || args
+      }
+    }
 
     const {
       collection: { config: collectionConfig },
@@ -239,7 +240,7 @@ export const findOperation = async <
           doc._isLocked = !!lockedDoc
           doc._userEditing = lockedDoc ? lockedDoc?.user?.value : null
         }
-      } catch (error) {
+      } catch (_err) {
         for (const doc of result.docs) {
           doc._isLocked = false
           doc._userEditing = null
@@ -256,9 +257,7 @@ export const findOperation = async <
         result.docs.map(async (doc) => {
           let docRef = doc
 
-          await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
-            await priorHook
-
+          for (const hook of collectionConfig.hooks.beforeRead) {
             docRef =
               (await hook({
                 collection: collectionConfig,
@@ -267,7 +266,7 @@ export const findOperation = async <
                 query: fullWhere,
                 req,
               })) || docRef
-          }, Promise.resolve())
+          }
 
           return docRef
         }),
@@ -309,9 +308,7 @@ export const findOperation = async <
         result.docs.map(async (doc) => {
           let docRef = doc
 
-          await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-            await priorHook
-
+          for (const hook of collectionConfig.hooks.afterRead) {
             docRef =
               (await hook({
                 collection: collectionConfig,
@@ -321,7 +318,7 @@ export const findOperation = async <
                 query: fullWhere,
                 req,
               })) || doc
-          }, Promise.resolve())
+          }
 
           return docRef
         }),

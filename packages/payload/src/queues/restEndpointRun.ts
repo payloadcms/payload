@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { Endpoint, SanitizedConfig } from '../config/types.js'
 
 import { runJobs, type RunJobsArgs } from './operations/runJobs/index.js'

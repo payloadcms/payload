@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import type { PayloadComponent, SanitizedConfig } from '../../config/types.js'
 import type { Block, Field, Tab } from '../../fields/config/types.js'
@@ -46,7 +47,7 @@ export function genImportMapIterateFields({
         addToImportMap,
         baseDir,
         config,
-        fields: field.blocks,
+        fields: field.blocks.filter((block) => typeof block !== 'string'),
         importMap,
         imports,
       })
@@ -110,5 +111,7 @@ export function genImportMapIterateFields({
 
     hasKey(field?.admin?.components, 'RowLabel') &&
       addToImportMap(field?.admin?.components?.RowLabel)
+
+    hasKey(field?.admin?.components, 'Diff') && addToImportMap(field?.admin?.components?.Diff)
   }
 }

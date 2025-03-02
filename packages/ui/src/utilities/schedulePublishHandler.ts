@@ -7,6 +7,7 @@ export type SchedulePublishHandlerArgs = {
    */
   deleteID?: number | string
   req: PayloadRequest
+  timezone?: string
 } & SchedulePublishTaskInput
 
 export const schedulePublishHandler = async ({
@@ -17,6 +18,7 @@ export const schedulePublishHandler = async ({
   global,
   locale,
   req,
+  timezone,
 }: SchedulePublishHandlerArgs) => {
   const { i18n, payload, user } = req
 
@@ -57,6 +59,7 @@ export const schedulePublishHandler = async ({
         doc,
         global,
         locale,
+        timezone,
         user: user.id,
       },
       task: 'schedulePublish',

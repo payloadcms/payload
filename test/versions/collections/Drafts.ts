@@ -141,12 +141,19 @@ const DraftPosts: CollectionConfig = {
         disabled: true,
       },
     },
+    {
+      name: 'adminHiddenInVersionViewField',
+      type: 'text',
+      admin: {
+        hiddenInVersionView: true,
+      },
+    },
   ],
   versions: {
     drafts: {
       schedulePublish: true,
     },
-    maxPerDoc: 35,
+    maxPerDoc: 0,
   },
 }
 

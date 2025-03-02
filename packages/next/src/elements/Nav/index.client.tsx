@@ -4,9 +4,8 @@ import type { groupNavItems } from '@payloadcms/ui/shared'
 import type { NavPreferences } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { NavGroup, useConfig, useTranslation } from '@payloadcms/ui'
+import { Link, NavGroup, useConfig, useTranslation } from '@payloadcms/ui'
 import { EntityType, formatAdminURL } from '@payloadcms/ui/shared'
-import LinkWithDefault from 'next/link.js'
 import { usePathname } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
@@ -45,26 +44,28 @@ export const DefaultNavClient: React.FC<{
                 id = `nav-global-${slug}`
               }
 
-              const Link = (LinkWithDefault.default ||
-                LinkWithDefault) as typeof LinkWithDefault.default
+              const isActive = pathname.startsWith(href)
 
-              const LinkElement = Link || 'a'
-              const activeCollection =
-                pathname.startsWith(href) && ['/', undefined].includes(pathname[href.length])
+              const Label = (
+                <>
+                  {isActive && <div className={`${baseClass}__link-indicator`} />}
+                  <span className={`${baseClass}__link-label`}>{getTranslation(label, i18n)}</span>
+                </>
+              )
+
+              // If the URL matches the link exactly
+              if (pathname === href) {
+                return (
+                  <div className={`${baseClass}__link`} id={id} key={i}>
+                    {Label}
+                  </div>
+                )
+              }
 
               return (
-                <LinkElement
-                  className={[`${baseClass}__link`, activeCollection && `active`]
-                    .filter(Boolean)
-                    .join(' ')}
-                  href={href}
-                  id={id}
-                  key={i}
-                  prefetch={Link ? false : undefined}
-                >
-                  {activeCollection && <div className={`${baseClass}__link-indicator`} />}
-                  <span className={`${baseClass}__link-label`}>{getTranslation(label, i18n)}</span>
-                </LinkElement>
+                <Link className={`${baseClass}__link`} href={href} id={id} key={i} prefetch={false}>
+                  {Label}
+                </Link>
               )
             })}
           </NavGroup>

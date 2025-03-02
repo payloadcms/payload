@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { getTranslation, type I18n } from '@payloadcms/translations'
 
 import type { LabelFunction, StaticLabel } from '../config/types.js'

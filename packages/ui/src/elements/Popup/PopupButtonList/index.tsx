@@ -1,12 +1,10 @@
 'use client'
 import type { LinkProps } from 'next/link.js'
 
-import LinkImport from 'next/link.js'
 import * as React from 'react'
 
+import { Link } from '../../Link/index.js'
 import './index.scss'
-
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 const baseClass = 'popup-button-list'
 
