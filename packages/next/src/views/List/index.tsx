@@ -1,6 +1,7 @@
 import type {
   AdminViewServerProps,
   ColumnPreference,
+  DefaultDocumentIDType,
   ListPreferences,
   ListPreset,
   ListQuery,
@@ -88,18 +89,14 @@ export const renderListView = async (
    * This could potentially be done by injecting a `sessionID` into the params and comparing it against a session cookie
    */
   const listPreferences = await upsertPreferences<ListPreferences>({
-    customMerge: (existingValue) => ({
-      ...existingValue,
-      columns,
-      limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
-      presets: {
-        ...(existingValue.presets || {}),
-        [collectionSlug]: query?.preset as string,
-      },
-      sort: query?.sort as string,
-    }),
     key: `${collectionSlug}-list`,
     req,
+    value: {
+      columns,
+      limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
+      preset: (query?.preset as DefaultDocumentIDType) || null,
+      sort: query?.sort as string,
+    },
   })
 
   const {
@@ -142,16 +139,18 @@ export const renderListView = async (
 
     let activePreset: ListPreset | undefined
 
-    try {
-      activePreset = (await payload.findByID({
-        id: listPreferences?.presets?.[collectionSlug],
-        collection: 'payload-list-presets',
-        depth: 0,
-        overrideAccess: false,
-        user,
-      })) as ListPreset
-    } catch (_err) {
-      // swallow error
+    if (listPreferences?.preset) {
+      try {
+        activePreset = (await payload.findByID({
+          id: listPreferences?.preset,
+          collection: 'payload-list-presets',
+          depth: 0,
+          overrideAccess: false,
+          user,
+        })) as ListPreset
+      } catch (_err) {
+        // swallow error
+      }
     }
 
     const data = await payload.find({

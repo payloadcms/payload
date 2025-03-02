@@ -1,4 +1,4 @@
-import type { CollectionSlug, DefaultDocumentIDType } from '../index.js'
+import type { DefaultDocumentIDType } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 
 export type PreferenceRequest = {
@@ -37,8 +37,6 @@ export type ColumnPreference = {
 export type ListPreferences = {
   columns?: ColumnPreference[]
   limit?: number
-  presets?: {
-    [key: CollectionSlug]: DefaultDocumentIDType
-  }
+  preset?: DefaultDocumentIDType
   sort?: string
 }

@@ -1,5 +1,5 @@
 'use client'
-import type { ListPreset } from 'payload'
+import type { DefaultDocumentIDType, ListPreset } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -30,7 +30,7 @@ export function ListPresetControls({ activePreset }: { activePreset: ListPreset 
   const { i18n, t } = useTranslation()
   const { openModal } = useModal()
 
-  const [documentEditID, setDocumentEditID] = useState<number | string>(null)
+  const [documentEditID, setDocumentEditID] = useState<DefaultDocumentIDType>(null)
 
   const {
     collectionSlug,
@@ -82,13 +82,23 @@ export function ListPresetControls({ activePreset }: { activePreset: ListPreset 
           {activePreset ? (
             <div
               className={`${baseClass}__select__clear`}
-              onClick={(e) => {
+              onClick={async (e) => {
                 e.stopPropagation()
-                // setSelectedPreset(undefined)
+
+                await refineListData({
+                  columns: undefined,
+                  preset: undefined,
+                  where: undefined,
+                })
               }}
-              onKeyDown={(e) => {
+              onKeyDown={async (e) => {
                 e.stopPropagation()
-                // setSelectedPreset(undefined)
+
+                await refineListData({
+                  columns: undefined,
+                  preset: undefined,
+                  where: undefined,
+                })
               }}
               role="button"
               tabIndex={0}
