@@ -1,9 +1,8 @@
-import type { CreateOptions } from 'mongoose'
-
 import { buildVersionCollectionFields, type CreateVersion } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 import { transform } from './utilities/transform.js'
 
@@ -22,8 +21,13 @@ export const createVersion: CreateVersion = async function createVersion(
     versionData,
   },
 ) {
-  const VersionModel = this.versions[collectionSlug]
-  const options: CreateOptions = {
+  const { collectionConfig, Model } = getCollection({
+    adapter: this,
+    collectionSlug,
+    versions: true,
+  })
+
+  const options = {
     session: await getSession(this, req),
   }
 
@@ -38,10 +42,7 @@ export const createVersion: CreateVersion = async function createVersion(
     version: versionData,
   }
 
-  const fields = buildVersionCollectionFields(
-    this.payload.config,
-    this.payload.collections[collectionSlug].config,
-  )
+  const fields = buildVersionCollectionFields(this.payload.config, collectionConfig)
 
   transform({
     adapter: this,
@@ -50,7 +51,7 @@ export const createVersion: CreateVersion = async function createVersion(
     operation: 'write',
   })
 
-  let [doc] = await VersionModel.create([data], options, req)
+  let [doc] = await Model.create([data], options, req)
 
   const parentQuery = {
     $or: [
@@ -62,7 +63,7 @@ export const createVersion: CreateVersion = async function createVersion(
     ],
   }
 
-  await VersionModel.updateMany(
+  await Model.updateMany(
     {
       $and: [
         {

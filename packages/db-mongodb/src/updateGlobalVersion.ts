@@ -6,6 +6,7 @@ import type { MongooseAdapter } from './index.js'
 
 import { buildQuery } from './queries/buildQuery.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { getGlobal } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 import { transform } from './utilities/transform.js'
 
@@ -23,12 +24,11 @@ export async function updateGlobalVersion<T extends TypeWithID>(
     where,
   }: UpdateGlobalVersionArgs<T>,
 ) {
-  const VersionModel = this.versions[globalSlug]
+  const { globalConfig, Model } = getGlobal({ adapter: this, globalSlug, versions: true })
   const whereToUse = where || { id: { equals: id } }
 
-  const currentGlobal = this.payload.config.globals.find((global) => global.slug === globalSlug)
-  const fields = buildVersionGlobalFields(this.payload.config, currentGlobal)
-  const flattenedFields = buildVersionGlobalFields(this.payload.config, currentGlobal, true)
+  const fields = buildVersionGlobalFields(this.payload.config, globalConfig)
+  const flattenedFields = buildVersionGlobalFields(this.payload.config, globalConfig, true)
   const options: MongooseUpdateQueryOptions = {
     ...optionsArgs,
     lean: true,
@@ -51,11 +51,11 @@ export async function updateGlobalVersion<T extends TypeWithID>(
   transform({ adapter: this, data: versionData, fields, operation: 'write' })
 
   if (returning === false) {
-    await VersionModel.updateOne(query, versionData, options)
+    await Model.updateOne(query, versionData, options)
     return null
   }
 
-  const doc = await VersionModel.findOneAndUpdate(query, versionData, options)
+  const doc = await Model.findOneAndUpdate(query, versionData, options)
 
   if (!doc) {
     return null

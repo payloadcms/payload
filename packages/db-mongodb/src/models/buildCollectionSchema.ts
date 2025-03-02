@@ -28,7 +28,7 @@ export const buildCollectionSchema = (
   })
 
   if (Array.isArray(collection.upload.filenameCompoundIndex)) {
-    const indexDefinition: Record<string, 1> = collection.upload.filenameCompoundIndex.reduce(
+    const indexDefinition = collection.upload.filenameCompoundIndex.reduce<Record<string, 1>>(
       (acc, index) => {
         acc[index] = 1
         return acc

@@ -31,7 +31,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
 
   const { handleWhereChange, query } = useListQuery()
 
-  const conditions = React.useMemo(() => {
+  const conditions = useMemo(() => {
     const whereFromSearch = query.where
 
     if (whereFromSearch) {

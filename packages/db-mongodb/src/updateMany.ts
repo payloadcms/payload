@@ -5,16 +5,25 @@ import type { MongooseAdapter } from './index.js'
 
 import { buildQuery } from './queries/buildQuery.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 import { handleError } from './utilities/handleError.js'
 import { transform } from './utilities/transform.js'
 
 export const updateMany: UpdateMany = async function updateMany(
   this: MongooseAdapter,
-  { collection, data, locale, options: optionsArgs = {}, req, returning, select, where },
+  {
+    collection: collectionSlug,
+    data,
+    locale,
+    options: optionsArgs = {},
+    req,
+    returning,
+    select,
+    where,
+  },
 ) {
-  const Model = this.collections[collection]
-  const fields = this.payload.collections[collection].config.fields
+  const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
 
   const options: MongooseUpdateQueryOptions = {
     ...optionsArgs,
@@ -22,7 +31,7 @@ export const updateMany: UpdateMany = async function updateMany(
     new: true,
     projection: buildProjectionFromSelect({
       adapter: this,
-      fields: this.payload.collections[collection].config.flattenedFields,
+      fields: collectionConfig.flattenedFields,
       select,
     }),
     session: await getSession(this, req),
@@ -30,18 +39,18 @@ export const updateMany: UpdateMany = async function updateMany(
 
   const query = await buildQuery({
     adapter: this,
-    collectionSlug: collection,
-    fields: this.payload.collections[collection].config.flattenedFields,
+    collectionSlug,
+    fields: collectionConfig.flattenedFields,
     locale,
     where,
   })
 
-  transform({ adapter: this, data, fields, operation: 'write' })
+  transform({ adapter: this, data, fields: collectionConfig.fields, operation: 'write' })
 
   try {
     await Model.updateMany(query, data, options)
   } catch (error) {
-    handleError({ collection, error, req })
+    handleError({ collection: collectionSlug, error, req })
   }
 
   if (returning === false) {
@@ -53,7 +62,7 @@ export const updateMany: UpdateMany = async function updateMany(
   transform({
     adapter: this,
     data: result,
-    fields,
+    fields: collectionConfig.fields,
     operation: 'read',
   })
 

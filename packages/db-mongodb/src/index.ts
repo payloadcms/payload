@@ -11,6 +11,7 @@ import type {
   BaseDatabaseAdapter,
   CollectionSlug,
   DatabaseAdapterObj,
+  Migration,
   Payload,
   TypeWithID,
   TypeWithVersion,
@@ -110,11 +111,7 @@ export interface Args {
    * typed as any to avoid dependency
    */
   mongoMemoryServer?: MongoMemoryReplSet
-  prodMigrations?: {
-    down: (args: MigrateDownArgs) => Promise<void>
-    name: string
-    up: (args: MigrateUpArgs) => Promise<void>
-  }[]
+  prodMigrations?: Migration[]
   transactionOptions?: false | TransactionOptions
 
   /** The URL to connect to MongoDB or false to start payload and prevent connecting */
@@ -181,7 +178,7 @@ export function mongooseAdapter({
   collectionsSchemaOptions = {},
   connectOptions,
   disableIndexHints = false,
-  ensureIndexes,
+  ensureIndexes = false,
   migrationDir: migrationDirArg,
   mongoMemoryServer,
   prodMigrations,
@@ -198,11 +195,14 @@ export function mongooseAdapter({
       // Mongoose-specific
       autoPluralization,
       collections: {},
+      // @ts-expect-error initialize without a connection
       connection: undefined,
       connectOptions: connectOptions || {},
       disableIndexHints,
       ensureIndexes,
+      // @ts-expect-error don't have globals model yet
       globals: undefined,
+      // @ts-expect-error Should not be required
       mongoMemoryServer,
       sessions: {},
       transactionOptions: transactionOptions === false ? undefined : transactionOptions,

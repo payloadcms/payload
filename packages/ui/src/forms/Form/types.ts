@@ -26,6 +26,10 @@ export type FormProps = {
    */
   disableValidationOnSubmit?: boolean
   /**
+   * If you don't want the form to be a <form> element, you can pass a string here to use as the wrapper element.
+   */
+  el?: string
+  /**
    * By default, the form will get the field schema (not data) from the current document. If you pass this in, you can override that behavior.
    * This is very useful for sub-forms, where the form's field schema is not necessarily the field schema of the current document (e.g. for the Blocks
    * feature of the Lexical Rich Text field)
