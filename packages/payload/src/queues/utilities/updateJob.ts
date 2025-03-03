@@ -2,6 +2,7 @@ import type { PayloadRequest, Where } from '../../types/index.js'
 import type { BaseJob } from '../config/types/workflowTypes.js'
 
 import { jobAfterRead } from '../config/jobsCollection.js'
+import { sanitizeUpdateData } from './sanitizeUpdateData.js'
 
 type RunJobArgs = {
   data: Partial<BaseJob>
@@ -37,7 +38,7 @@ export async function updateJob({
   const updatedJob = (await req.payload.db.updateOne({
     id,
     collection: 'payload-jobs',
-    data,
+    data: sanitizeUpdateData({ data }),
     req: disableTransaction === true ? undefined : req,
     returning,
   })) as BaseJob
@@ -88,7 +89,7 @@ export async function updateJobs({
 
   const updatedJobs = (await req.payload.db.updateMany({
     collection: 'payload-jobs',
-    data,
+    data: sanitizeUpdateData({ data }),
     limit,
     req: disableTransaction === true ? undefined : req,
     returning,
