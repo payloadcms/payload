@@ -1257,7 +1257,7 @@ describe('Versions', () => {
 
       // Expect iterable change count to be visible
       const iterableChangeCount = blocksDiff.locator('.diff-collapser__field-change-count').first()
-      await expect(iterableChangeCount).toHaveText('2 changed fields')
+      await expect(iterableChangeCount).toHaveText('1 changed field')
 
       // Expect iterable rows to be visible
       const blocksDiffRows = blocksDiff.locator('.iterable-diff__rows')
@@ -1271,7 +1271,7 @@ describe('Versions', () => {
       const firstBlocksDiffRowChangeCount = firstBlocksDiffRow
         .locator('.diff-collapser__field-change-count')
         .first()
-      await expect(firstBlocksDiffRowChangeCount).toHaveText('2 changed fields')
+      await expect(firstBlocksDiffRowChangeCount).toHaveText('1 changed field')
 
       // Expect collapser content to be visible
       const diffCollapserContent = blocksDiffRows.locator('.diff-collapser__content')
@@ -1547,6 +1547,43 @@ describe('Versions', () => {
       await expect(upload.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
         String(uploadDocs?.docs?.[1]?.id),
       )
+    })
+
+    describe('hidden and disabled fields', () => {
+      test('should not render fields with hidden: true', async () => {
+        await navigateToVersionFieldsDiff()
+
+        // Fields with hidden should be hidden everywhere
+        const hiddenField = page.locator('[data-field-path="hidden"]')
+        await expect(hiddenField).toBeHidden()
+      })
+
+      test('should render fields with admin.hidden: true', async () => {
+        await navigateToVersionFieldsDiff()
+
+        // Fields with admin.hidden should be hidden in the edit view, but
+        // visible in the version view
+        const adminHiddenField = page.locator('[data-field-path="adminHidden"]')
+        await expect(adminHiddenField).toBeVisible()
+      })
+
+      test('should not render fields with admin.disabled: true', async () => {
+        await navigateToVersionFieldsDiff()
+
+        // Fields with admin.disabled should be hidden everywhere in the Admin UI
+        const adminDisabledField = page.locator('[data-field-path="adminDisabled"]')
+        await expect(adminDisabledField).toBeHidden()
+      })
+
+      test('should not render fields with admin.hiddenInVersionView: true', async () => {
+        await navigateToVersionFieldsDiff()
+
+        // Fields with admin.hiddenInVersionView should be hidden in the version view
+        const adminHiddenInVersionViewView = page.locator(
+          '[data-field-path="adminHiddenInVersionView"]',
+        )
+        await expect(adminHiddenInVersionViewView).toBeHidden()
+      })
     })
   })
 

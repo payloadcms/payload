@@ -22,6 +22,7 @@ import { fieldIsID, fieldShouldBeLocalized, getUniqueListBy, tabHasName } from '
 import { diffMethods } from './fields/diffMethods.js'
 import { diffComponents } from './fields/index.js'
 import { getFieldPathsModified } from './utilities/getFieldPathsModified.js'
+import { isFieldHiddenInVersionView } from './utilities/isFieldHiddenInVersionView.js'
 
 export type BuildVersionFieldsArgs = {
   clientSchemaMap: ClientFieldSchemaMap
@@ -77,7 +78,8 @@ export const buildVersionFields = ({
   let fieldIndex = -1
   for (const field of fields) {
     fieldIndex++
-    if (fieldIsID(field)) {
+
+    if (isFieldHiddenInVersionView(field)) {
       continue
     }
 
