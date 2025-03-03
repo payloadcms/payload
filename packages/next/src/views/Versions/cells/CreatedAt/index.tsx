@@ -7,6 +7,7 @@ type CreatedAtCellProps = {
   collectionSlug?: string
   docID?: number | string
   globalSlug?: string
+  modifiedOnly?: boolean
   rowData?: {
     id: number | string
     updatedAt: Date | number | string
@@ -17,6 +18,7 @@ export const CreatedAtCell: React.FC<CreatedAtCellProps> = ({
   collectionSlug,
   docID,
   globalSlug,
+  modifiedOnly,
   rowData: { id, updatedAt } = {},
 }) => {
   const {
@@ -33,7 +35,7 @@ export const CreatedAtCell: React.FC<CreatedAtCellProps> = ({
   if (collectionSlug) {
     to = formatAdminURL({
       adminRoute,
-      path: `/collections/${collectionSlug}/${docID}/versions/${id}`,
+      path: `/collections/${collectionSlug}/${docID}/versions/${id}${modifiedOnly ? '?modifiedOnly=true' : ''}`,
     })
   }
 

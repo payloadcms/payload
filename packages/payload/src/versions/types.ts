@@ -57,6 +57,10 @@ export type IncomingCollectionVersions = {
    * @default 100
    */
   maxPerDoc?: number
+  /**
+   * Whether or not to only view the modified content by default when opening the version view.
+   */
+  showModifiedOnlyByDefault?: boolean
 }
 
 export interface SanitizedCollectionVersions extends Omit<IncomingCollectionVersions, 'drafts'> {
@@ -72,6 +76,10 @@ export interface SanitizedCollectionVersions extends Omit<IncomingCollectionVers
    * @default 100
    */
   maxPerDoc: number
+  /**
+   * Whether or not to only view the modified content by default when opening the version view.
+   */
+  showModifiedOnlyByDefault: boolean
 }
 
 export type IncomingGlobalVersions = {
