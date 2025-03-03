@@ -8,6 +8,7 @@ import {
   getLexicalFieldsCollection,
   lexicalBlocks,
   lexicalInlineBlocks,
+  lexicalWrapperBlocks,
 } from './collections/Lexical/index.js'
 import { lexicalFieldsSlug } from './slugs.js'
 
@@ -27,6 +28,13 @@ export default buildConfigWithDefaults({
         inlineBlocks: lexicalInlineBlocks.map((block) =>
           typeof block === 'string' ? block : block.slug,
         ) as BlockSlug[],
+        wrapperBlocks: lexicalWrapperBlocks.map((wrapperBlock) => ({
+          createDOM: wrapperBlock.createDOM,
+          block:
+            typeof wrapperBlock.block === 'string'
+              ? wrapperBlock.block
+              : (wrapperBlock.block.slug as unknown as BlockSlug),
+        })),
       })
     }
     return collection
