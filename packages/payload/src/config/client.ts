@@ -17,6 +17,7 @@ import {
 } from '../collections/config/client.js'
 import { createClientBlocks } from '../fields/config/client.js'
 import { type ClientGlobalConfig, createClientGlobalConfigs } from '../globals/config/client.js'
+
 export type ServerOnlyRootProperties = keyof Pick<
   SanitizedConfig,
   | 'bin'
@@ -31,6 +32,7 @@ export type ServerOnlyRootProperties = keyof Pick<
   | 'hooks'
   | 'i18n'
   | 'jobs'
+  | 'listPresets'
   | 'logger'
   | 'onInit'
   | 'plugins'
@@ -83,6 +85,7 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   'graphQL',
   'jobs',
   'logger',
+  'listPresets',
   // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
 ]
 

@@ -328,9 +328,9 @@ export type CollectionAdminOptions = {
    */
   description?: EntityDescription
   /**
-   * Disable the ability to save List Presets on this collection
+   * Opt-in to enable list presets for this collection
    */
-  disableListPresets?: boolean
+  enableListPresets?: boolean
   enableRichTextLink?: boolean
   enableRichTextRelationship?: boolean
   /**

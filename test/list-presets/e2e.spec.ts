@@ -205,7 +205,7 @@ describe('List Presets', () => {
     // TODO: change the title, close the drawer, and ensure the changes are applied
   })
 
-  test('should not display list presets when admin.disableListPresets is true', async () => {
+  test('should not display list presets when admin.enableListPresets is not true', async () => {
     // go to users list view and ensure the list presets select is not visible
     const usersURL = new AdminUrlUtil(serverURL, 'users')
     await page.goto(usersURL.list)

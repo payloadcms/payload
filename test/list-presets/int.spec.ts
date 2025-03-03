@@ -359,7 +359,7 @@ describe('Shared Filters', () => {
     })
   })
 
-  it.skip('should disable list presets when the collection is set to "disableListPresets"', async () => {
+  it.skip('should disable list presets when "enabledListPresets" is not true on the collection', async () => {
     try {
       const result = await payload.create({
         collection: 'payload-list-presets',

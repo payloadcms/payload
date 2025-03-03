@@ -35,7 +35,7 @@ export const getConstraints = (config: Config): Field => ({
             label: 'Specific Users',
             value: 'specificUsers',
           },
-          ...(config?.admin?.listPresets?.constraints?.[operation]?.map(
+          ...(config?.listPresets?.constraints?.[operation]?.map(
             (option: ListPresetConstraint) => ({
               label: option.label,
               value: option.value,
@@ -65,7 +65,7 @@ export const getConstraints = (config: Config): Field => ({
         },
         relationTo: 'users',
       },
-      ...(config.admin?.listPresets?.constraints?.[operation]?.reduce(
+      ...(config?.listPresets?.constraints?.[operation]?.reduce(
         (acc: Field[], option: ListPresetConstraint) => {
           option.fields.forEach((field, index) => {
             acc.push({ ...field })

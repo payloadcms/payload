@@ -6,6 +6,7 @@ export const Pages: CollectionConfig = {
   slug: pagesSlug,
   admin: {
     useAsTitle: 'text',
+    enableListPresets: true,
   },
   lockDocuments: false,
   fields: [

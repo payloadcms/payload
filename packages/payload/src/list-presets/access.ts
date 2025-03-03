@@ -16,8 +16,8 @@ export const getAccess = (config: Config): Record<Operation, Access> =>
         //   return false
         // }
 
-        const userDefinedAccess = config?.admin?.listPresets?.access?.[operation]
-          ? await config?.admin?.listPresets?.access?.[operation](args)
+        const userDefinedAccess = config?.listPresets?.access?.[operation]
+          ? await config?.listPresets?.access?.[operation](args)
           : undefined
 
         if (typeof userDefinedAccess === 'boolean') {
