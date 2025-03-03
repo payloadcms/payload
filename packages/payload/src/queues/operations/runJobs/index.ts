@@ -106,31 +106,38 @@ export const runJobs = async ({
   // the same job being picked up by another worker
   const jobsQuery: {
     docs: BaseJob[]
-  } = {
-    docs: id
-      ? [
-          await updateJob({
-            id,
-            data: {
-              processing: true,
-            },
-            depth: req.payload.config.jobs.depth,
-            disableTransaction: true,
-            req,
-            returning: true,
-          }),
-        ]
-      : ((await updateJobs({
-          data: {
-            processing: true,
-          },
-          depth: req.payload.config.jobs.depth,
-          disableTransaction: true,
-          limit,
-          req,
-          returning: true,
-          where,
-        })) ?? []),
+  } = { docs: [] }
+
+  if (id) {
+    // Only one job to run
+    jobsQuery.docs = [
+      await updateJob({
+        id,
+        data: {
+          processing: true,
+        },
+        depth: req.payload.config.jobs.depth,
+        disableTransaction: true,
+        req,
+        returning: true,
+      }),
+    ]
+  } else {
+    const updatedDocs = await updateJobs({
+      data: {
+        processing: true,
+      },
+      depth: req.payload.config.jobs.depth,
+      disableTransaction: true,
+      limit,
+      req,
+      returning: true,
+      where,
+    })
+
+    if (updatedDocs) {
+      jobsQuery.docs = updatedDocs
+    }
   }
 
   /**

@@ -73,26 +73,27 @@ export const getJobsLocalAPI = (payload: Payload) => ({
       data.taskSlug = args.task as string
     }
 
-    const resultingDoc =
-      payload?.config?.jobs?.depth || payload?.config?.jobs?.runHooks
-        ? await payload.create({
-            collection: 'payload-jobs',
-            data,
-            depth: payload.config.jobs.depth ?? 0,
-            req: args.req,
-          })
-        : jobAfterRead({
-            config: payload.config,
-            doc: await payload.db.create({
-              collection: 'payload-jobs',
-              data,
-              req: args.req,
-            }),
-          })
-
-    return resultingDoc as TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']
+    type ReturnType = TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']
       ? RunningJob<TTaskOrWorkflowSlug>
       : RunningJobFromTask<TTaskOrWorkflowSlug> // Type assertion is still needed here
+
+    if (payload?.config?.jobs?.depth || payload?.config?.jobs?.runHooks) {
+      return (await payload.create({
+        collection: 'payload-jobs',
+        data,
+        depth: payload.config.jobs.depth ?? 0,
+        req: args.req,
+      })) as ReturnType
+    } else {
+      return jobAfterRead({
+        config: payload.config,
+        doc: await payload.db.create({
+          collection: 'payload-jobs',
+          data,
+          req: args.req,
+        }),
+      }) as unknown as ReturnType
+    }
   },
 
   run: async (args?: {
