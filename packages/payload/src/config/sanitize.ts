@@ -26,7 +26,7 @@ import {
   type GlobalSlug,
   sanitizeFields,
 } from '../index.js'
-import { getListPresetsConfig, listPresetsCollectionSlug } from '../listPresets/config.js'
+import { getListPresetsConfig, listPresetsCollectionSlug } from '../list-presets/config.js'
 import {
   getLockedDocumentsCollection,
   lockedDocumentsCollectionSlug,

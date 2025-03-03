@@ -48,7 +48,7 @@ import type {
   RequestContext,
   TypedUser,
 } from '../index.js'
-import type { ListFilterConstraints } from '../listPresets/types.js'
+import type { ListPresetConstraints } from '../list-presets/types.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -883,10 +883,10 @@ export type Config = {
         update?: Access
       }
       constraints: {
-        create?: ListFilterConstraints
-        delete?: ListFilterConstraints
-        read?: ListFilterConstraints
-        update?: ListFilterConstraints
+        create?: ListPresetConstraints
+        delete?: ListPresetConstraints
+        read?: ListPresetConstraints
+        update?: ListPresetConstraints
       }
     }
     livePreview?: {

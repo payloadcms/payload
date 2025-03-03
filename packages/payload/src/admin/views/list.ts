@@ -3,7 +3,7 @@ import type {
   SanitizedCollectionConfig,
 } from '../../collections/config/types.js'
 import type { ServerProps } from '../../config/types.js'
-import type { ListPreset } from '../../listPresets/types.js'
+import type { ListPreset } from '../../list-presets/types.js'
 import type { ListPreferences } from '../../preferences/types.js'
 import type { ResolvedFilterOptions } from '../../types/index.js'
 import type { Column } from '../elements/Table.js'
