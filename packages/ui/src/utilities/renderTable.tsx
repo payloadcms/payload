@@ -171,16 +171,6 @@ export const renderTable = ({
         hidden: true,
       },
       Heading: i18n.t('version:type'),
-      renderedCells: docs.map((doc, i) => (
-        <Pill key={i}>
-          {getTranslation(
-            collections
-              ? payload.collections[doc.relationTo].config.labels.singular
-              : clientCollectionConfig.labels.singular,
-            i18n,
-          )}
-        </Pill>
-      )),
     } as Column)
   }
 
@@ -195,14 +185,12 @@ export const renderTable = ({
         hidden: true,
       },
       Heading: <SelectAll />,
-      renderedCells: docs.map((_, i) => <SelectRow key={i} rowData={docs[i]} />),
     } as Column)
   }
 
   const isSortable = docs.length > 0 && ORDER_FIELD_NAME in docs[0]
 
   if (isSortable) {
-    // show drag handle
     columnsToUse.unshift({
       accessor: '_dragHandle',
       active: true,
@@ -213,18 +201,7 @@ export const renderTable = ({
         hidden: true,
       },
       Heading: '', // Empty header
-      renderedCells: docs.map((_, i) => <SortRow key={i} />),
     } as Column)
-
-    // show order as integer
-    // const orderColumn = columnsToUse.find((column) => column.accessor === ORDER_FIELD_NAME)
-    // if (orderColumn) {
-    //   const cells = docs.map((doc, i) => (
-    //     <React.Fragment key={i}>{doc.orderAsInteger}</React.Fragment>
-    //   ))
-    //   // @ts-expect-error - renderedCells is read-only
-    //   orderColumn.renderedCells = cells
-    // }
   }
 
   return {
