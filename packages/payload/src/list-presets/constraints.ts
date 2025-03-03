@@ -13,6 +13,7 @@ export const getConstraints = (config: Config): Field => ({
     components: {
       Cell: '@payloadcms/ui#ListPresetsAccessCell',
     },
+    condition: (data) => Boolean(data?.isShared),
   },
   fields: operations.map((operation) => ({
     name: operation,
@@ -100,7 +101,8 @@ export const getConstraints = (config: Config): Field => ({
             dataToReturn[operation] = {}
           }
 
-          if (!dataToReturn.access[operation]?.constraint) {
+          // If there is no default constraint for this operation, or if the list preset is not shared, set the constraint to 'onlyMe'
+          if (!dataToReturn.access[operation]?.constraint || !data?.isShared) {
             dataToReturn.access[operation] = {
               ...dataToReturn.access[operation],
               constraint: 'onlyMe',

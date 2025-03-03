@@ -38,12 +38,22 @@ export const getAccess = (config: Config): Record<Operation, Access> =>
                   },
                 },
                 {
-                  [`access.${operation}.constraint`]: {
-                    in: ['onlyMe', 'specificUsers'],
-                  },
+                  or: [
+                    {
+                      [`access.${operation}.constraint`]: {
+                        in: ['onlyMe', 'specificUsers'],
+                      },
+                    },
+                    {
+                      isShared: {
+                        not_equals: true,
+                      },
+                    },
+                  ],
                 },
               ],
             },
+
             {
               [`access.${operation}.constraint`]: {
                 equals: 'everyone',

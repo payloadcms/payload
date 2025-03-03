@@ -20,6 +20,11 @@ export const getListPresetsConfig = (config: Config): CollectionConfig => ({
       type: 'text',
       required: true,
     },
+    {
+      name: 'isShared',
+      type: 'checkbox',
+      defaultValue: false,
+    },
     getConstraints(config),
     {
       name: 'where',
