@@ -150,9 +150,5 @@ export const importDateFNSLocale = async (locale: string): Promise<Locale> => {
       break
   }
 
-  if (result.default) {
-    return result.default
-  }
-
   return result as Locale
 }
