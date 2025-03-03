@@ -1,12 +1,12 @@
-import type { MigrateUpArgs } from '@payloadcms/db-mongodb'
+import { Config } from 'payload'
 
-export async function up({ payload }: MigrateUpArgs): Promise<void> {
+export const seed: NonNullable<Config['onInit']> = async (payload): Promise<void> => {
   const tenant1 = await payload.create({
     collection: 'tenants',
     data: {
       name: 'Tenant 1',
       slug: 'gold',
-      domain: 'gold.test',
+      domain: 'gold.localhost',
     },
   })
 
@@ -15,7 +15,7 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
     data: {
       name: 'Tenant 2',
       slug: 'silver',
-      domain: 'silver.test',
+      domain: 'silver.localhost',
     },
   })
 
@@ -24,7 +24,7 @@ export async function up({ payload }: MigrateUpArgs): Promise<void> {
     data: {
       name: 'Tenant 3',
       slug: 'bronze',
-      domain: 'bronze.test',
+      domain: 'bronze.localhost',
     },
   })
 
