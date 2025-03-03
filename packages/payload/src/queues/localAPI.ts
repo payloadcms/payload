@@ -82,12 +82,12 @@ export const getJobsLocalAPI = (payload: Payload) => ({
             req: args.req,
           })
         : jobAfterRead({
+            config: payload.config,
             doc: await payload.db.create({
               collection: 'payload-jobs',
               data,
               req: args.req,
             }),
-            req: args.req,
           })
 
     return resultingDoc as TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']

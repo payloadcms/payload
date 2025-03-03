@@ -47,8 +47,8 @@ export async function updateJob({
   }
 
   return jobAfterRead({
+    config: req.payload.config,
     doc: updatedJob,
-    req,
   })
 }
 
@@ -101,8 +101,8 @@ export async function updateJobs({
 
   return updatedJobs.map((updatedJob) => {
     return jobAfterRead({
+      config: req.payload.config,
       doc: updatedJob,
-      req,
     })
   })
 }
