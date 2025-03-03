@@ -258,13 +258,6 @@ export const sanitizeFields = async ({
           richTextSanitizationPromises,
           validRelationships,
         })
-
-        if (block?.admin?.disableBlockName) {
-          block.admin = {
-            ...block.admin,
-            disableBlockName: Boolean(block?.admin?.disableBlockName),
-          }
-        }
       }
     }
 

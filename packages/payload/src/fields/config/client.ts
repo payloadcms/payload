@@ -126,10 +126,12 @@ export const createClientBlocks = ({
       clientBlock.jsx = jsxResolved
     }
 
-    if (!clientBlock?.admin?.disableBlockName) {
-      clientBlock.admin = {
-        ...clientBlock.admin,
-        disableBlockName: Boolean(block?.admin?.disableBlockName),
+    if (block?.admin?.disableBlockName) {
+      // Check for existing admin object, this way we don't have to spread it in
+      if (clientBlock.admin) {
+        clientBlock.admin.disableBlockName = block.admin.disableBlockName
+      } else {
+        clientBlock.admin = { disableBlockName: block.admin.disableBlockName }
       }
     }
 
