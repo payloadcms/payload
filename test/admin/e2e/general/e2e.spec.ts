@@ -39,6 +39,7 @@ import {
   notInViewCollectionSlug,
   postsCollectionSlug,
   settingsGlobalSlug,
+  uploadTwoCollectionSlug,
 } from '../../slugs.js'
 
 const { beforeAll, beforeEach, describe } = test
@@ -73,6 +74,7 @@ describe('General', () => {
   let disableDuplicateURL: AdminUrlUtil
   let serverURL: string
   let adminRoutes: ReturnType<typeof getRoutes>
+  let uploadsTwo: AdminUrlUtil
 
   beforeAll(async ({ browser }, testInfo) => {
     const prebuild = false // Boolean(process.env.CI)
@@ -90,6 +92,7 @@ describe('General', () => {
     globalURL = new AdminUrlUtil(serverURL, globalSlug)
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
     disableDuplicateURL = new AdminUrlUtil(serverURL, disableDuplicateSlug)
+    uploadsTwo = new AdminUrlUtil(serverURL, uploadTwoCollectionSlug)
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -422,6 +425,18 @@ describe('General', () => {
       await expect(activeItem).toBeVisible()
       const tagName = await activeItem.evaluate((el) => el.tagName.toLowerCase())
       expect(tagName).toBe('a')
+    })
+
+    test('should only have one nav item active at a time', async () => {
+      await page.goto(uploadsTwo.list)
+      await openNav(page)
+
+      // Locate all nav items inside the nav group that contain .nav__link-indicator
+      const activeNavItems = page.locator(
+        '.nav-group__content .nav__link:has(.nav__link-indicator)',
+      )
+
+      await expect(activeNavItems).toHaveCount(1)
     })
 
     test('breadcrumbs — should navigate from list to dashboard', async () => {
