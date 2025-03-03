@@ -9,6 +9,12 @@ type RunJobArgs = {
   depth?: number
   disableTransaction?: boolean
   id: number | string
+  /**
+   * If you only pass partial job data, this will need to be true.
+   * Setting it to true will perform an additional fetch before the update, to merge the data,
+   * if mongodb is not used.
+   */
+  partial: boolean
   req: PayloadRequest
   returning?: boolean
 }
@@ -17,6 +23,7 @@ export async function updateJob({
   data,
   depth,
   disableTransaction,
+  partial,
   req,
   returning,
 }: RunJobArgs): Promise<BaseJob | null> {
@@ -35,22 +42,46 @@ export async function updateJob({
     return result as BaseJob
   }
 
+  let updateData = sanitizeUpdateData({ data })
+
+  if (partial && !req.payload.db.meta?.supportsPartialData) {
+    // update updateData
+    const currentJob = await req.payload.db.findOne({
+      collection: 'payload-jobs',
+      req: disableTransaction === true ? undefined : req,
+      where: {
+        id: {
+          equals: id,
+        },
+      },
+    })
+
+    if (currentJob) {
+      updateData = {
+        ...currentJob,
+        ...updateData,
+      }
+    }
+  }
+
   const updatedJob = (await req.payload.db.updateOne({
     id,
     collection: 'payload-jobs',
-    data: sanitizeUpdateData({ data }),
+    data: updateData,
     req: disableTransaction === true ? undefined : req,
-    returning,
+    returning: true,
   })) as BaseJob
 
   if (returning === false) {
     return null
   }
 
-  return jobAfterRead({
+  const res = jobAfterRead({
     config: req.payload.config,
     doc: updatedJob,
   })
+
+  return res
 }
 
 type RunJobsArgs = {
@@ -58,6 +89,12 @@ type RunJobsArgs = {
   depth?: number
   disableTransaction?: boolean
   limit?: number
+  /**
+   * If you only pass partial job data, this will need to be true.
+   * Setting it to true will perform an additional fetch before the update, to merge the data,
+   * if mongodb is not used.
+   */
+  partial: boolean
   req: PayloadRequest
   returning?: boolean
   where: Where
@@ -67,6 +104,7 @@ export async function updateJobs({
   depth,
   disableTransaction,
   limit,
+  partial,
   req,
   returning,
   where,
@@ -87,23 +125,54 @@ export async function updateJobs({
     return result.docs as BaseJob[]
   }
 
-  const updatedJobs = (await req.payload.db.updateMany({
-    collection: 'payload-jobs',
-    data: sanitizeUpdateData({ data }),
-    limit,
-    req: disableTransaction === true ? undefined : req,
-    returning,
-    where,
-  })) as BaseJob[]
+  let updatedJobs = []
+
+  if (partial && !req.payload.db.meta?.supportsPartialData) {
+    const jobsToUpdate = await req.payload.db.find({
+      collection: 'payload-jobs',
+      limit,
+      req: disableTransaction === true ? undefined : req,
+      where,
+    })
+    if (!jobsToUpdate?.docs) {
+      return null
+    }
+
+    for (const job of jobsToUpdate.docs) {
+      const updateData = {
+        ...job,
+        ...data,
+      }
+      const updatedJob = await req.payload.db.updateOne({
+        id: job.id,
+        collection: 'payload-jobs',
+        data: sanitizeUpdateData({ data: updateData }),
+        req: disableTransaction === true ? undefined : req,
+        returning,
+      })
+      updatedJobs.push(updatedJob)
+    }
+  } else {
+    updatedJobs = (await req.payload.db.updateMany({
+      collection: 'payload-jobs',
+      data: sanitizeUpdateData({ data }),
+      limit,
+      req: disableTransaction === true ? undefined : req,
+      returning,
+      where,
+    })) as BaseJob[]
+  }
 
   if (returning === false || !updatedJobs?.length) {
     return null
   }
 
-  return updatedJobs.map((updatedJob) => {
+  const res = updatedJobs.map((updatedJob) => {
     return jobAfterRead({
       config: req.payload.config,
       doc: updatedJob,
     })
   })
+
+  return res
 }
