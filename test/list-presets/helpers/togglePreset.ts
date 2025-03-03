@@ -1,0 +1,43 @@
+import type { Page } from '@playwright/test'
+
+import { expect } from '@playwright/test'
+import { exactText } from 'helpers.js'
+
+import { openListPresetDrawer } from './openListPresetDrawer.js'
+
+export async function selectPreset({ page, presetTitle }: { page: Page; presetTitle: string }) {
+  await openListPresetDrawer({ page })
+  const modal = page.locator('[id^=list-drawer_0_]')
+  await expect(modal).toBeVisible()
+
+  await modal
+    .locator('tbody tr td button', {
+      hasText: exactText(presetTitle),
+    })
+    .click()
+
+  await expect(
+    page.locator('button.list-presets__select', {
+      hasText: exactText(presetTitle),
+    }),
+  ).toBeVisible()
+}
+
+export async function clearSelectedPreset({ page }: { page: Page }) {
+  const listPresetsControl = page.locator('.list-presets')
+  const clearButton = listPresetsControl.locator('.list-presets__select__clear')
+
+  if (await clearButton.isVisible()) {
+    await clearButton.click()
+  }
+
+  const regex = /columns=/
+  await page.waitForURL((url) => !regex.test(url.search))
+  await expect(page.locator('.list-presets__select__clear')).toBeHidden()
+
+  await expect(
+    page.locator('button.list-presets__select', {
+      hasText: exactText('Select preset'),
+    }),
+  ).toBeVisible()
+}

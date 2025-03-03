@@ -2,8 +2,10 @@
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Config } from '../config/types.js'
 
+export const lockedDocumentsCollectionSlug = 'payload-locked-documents'
+
 export const getLockedDocumentsCollection = (config: Config): CollectionConfig => ({
-  slug: 'payload-locked-documents',
+  slug: lockedDocumentsCollectionSlug,
   admin: {
     hidden: true,
   },

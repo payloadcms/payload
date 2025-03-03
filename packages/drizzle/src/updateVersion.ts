@@ -21,10 +21,10 @@ export async function updateVersion<T extends TypeWithID>(
     collection,
     locale,
     req,
+    returning,
     select,
     versionData,
     where: whereArg,
-    returning,
   }: UpdateVersionArgs<T>,
 ) {
   const db = await getTransaction(this, req)
@@ -50,13 +50,13 @@ export async function updateVersion<T extends TypeWithID>(
     data: versionData,
     db,
     fields,
+    ignoreResult: returning === false,
     joinQuery: false,
     operation: 'update',
     req,
     select,
     tableName,
     where,
-    ignoreResult: returning === false,
   })
 
   if (returning === false) {

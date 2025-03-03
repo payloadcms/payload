@@ -26,9 +26,13 @@ import {
   type GlobalSlug,
   sanitizeFields,
 } from '../index.js'
-import { getLockedDocumentsCollection } from '../lockedDocuments/lockedDocumentsCollection.js'
-import getPreferencesCollection from '../preferences/preferencesCollection.js'
-import { getDefaultJobsCollection } from '../queues/config/jobsCollection.js'
+import { getListPresetsConfig, listPresetsCollectionSlug } from '../list-presets/config.js'
+import {
+  getLockedDocumentsCollection,
+  lockedDocumentsCollectionSlug,
+} from '../lockedDocuments/config.js'
+import { getPreferencesCollection, preferencesCollectionSlug } from '../preferences/config.js'
+import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/jobsCollection.js'
 import { flattenBlock } from '../utilities/flattenAllFields.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
 import { defaults } from './defaults.js'
@@ -221,15 +225,17 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   const richTextSanitizationPromises: Array<(config: SanitizedConfig) => Promise<void>> = []
 
   const schedulePublishCollections: CollectionSlug[] = []
+
   const schedulePublishGlobals: GlobalSlug[] = []
 
   const collectionSlugs = new Set<CollectionSlug>()
 
   const validRelationships = [
     ...(config.collections.map((c) => c.slug) ?? []),
-    'payload-jobs',
-    'payload-locked-documents',
-    'payload-preferences',
+    jobsCollectionSlug,
+    lockedDocumentsCollectionSlug,
+    preferencesCollectionSlug,
+    listPresetsCollectionSlug,
   ]
 
   /**
@@ -237,6 +243,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
    * to be populated with the sanitized blocks
    */
   config.blocks = []
+
   if (incomingConfig.blocks?.length) {
     for (const block of incomingConfig.blocks) {
       const sanitizedBlock = block
@@ -251,6 +258,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       sanitizedBlock.labels = !sanitizedBlock.labels
         ? formatLabels(sanitizedBlock.slug)
         : sanitizedBlock.labels
+
       sanitizedBlock.fields = await sanitizeFields({
         config: config as unknown as Config,
         existingFieldNames: new Set(),
@@ -350,6 +358,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       validRelationships,
     ),
   )
+
   configWithDefaults.collections.push(
     await sanitizeCollection(
       config as unknown as Config,
@@ -358,6 +367,16 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       validRelationships,
     ),
   )
+
+  configWithDefaults.collections.push(
+    await sanitizeCollection(
+      config as unknown as Config,
+      getListPresetsConfig(config as unknown as Config),
+      richTextSanitizationPromises,
+      validRelationships,
+    ),
+  )
+
   configWithDefaults.collections.push(
     await sanitizeCollection(
       config as unknown as Config,
@@ -400,9 +419,11 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   }
 
   const promises: Promise<void>[] = []
+
   for (const sanitizeFunction of richTextSanitizationPromises) {
     promises.push(sanitizeFunction(config as SanitizedConfig))
   }
+
   await Promise.all(promises)
 
   return config as SanitizedConfig

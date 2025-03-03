@@ -1,13 +1,15 @@
 import type { Column, ListPreferences } from 'payload'
 
-import type { SortColumnProps } from '../SortColumn/index.js'
+import type { SortColumnProps } from '../../elements/SortColumn/index.js'
 
 export interface ITableColumns {
   columns: Column[]
   LinkedCellOverride?: React.ReactNode
+  modified: boolean
   moveColumn: (args: { fromIndex: number; toIndex: number }) => Promise<void>
   resetColumnsState: () => Promise<void>
   setActiveColumns: (columns: string[]) => Promise<void>
+  setModified: (modified: boolean) => void
   toggleColumn: (column: string) => Promise<void>
 }
 

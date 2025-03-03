@@ -1,18 +1,21 @@
+import type {
+  AdminViewServerProps,
+  ColumnPreference,
+  DefaultDocumentIDType,
+  ListPreferences,
+  ListPreset,
+  ListQuery,
+  ListViewClientProps,
+  ListViewServerPropsOnly,
+  Where,
+} from 'payload'
+
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
-import { formatAdminURL, mergeListSearchAndWhere } from '@payloadcms/ui/shared'
+import { formatAdminURL } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
-import {
-  type AdminViewServerProps,
-  type ColumnPreference,
-  type ListPreferences,
-  type ListQuery,
-  type ListViewClientProps,
-  type ListViewServerPropsOnly,
-  type Where,
-} from 'payload'
-import { isNumber, transformColumnsToPreferences } from 'payload/shared'
+import { isNumber, mergeListSearchAndWhere, transformColumnsToPreferences } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { renderListViewSlots } from './renderListViewSlots.js'
@@ -24,10 +27,13 @@ type RenderListViewArgs = {
   customCellProps?: Record<string, any>
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
+  disableListPresets?: boolean
   drawerSlug?: string
   enableRowSelections: boolean
   overrideEntityVisibility?: boolean
   query: ListQuery
+  redirectAfterDelete?: boolean
+  redirectAfterDuplicate?: boolean
 } & AdminViewServerProps
 
 export const renderListView = async (
@@ -40,6 +46,7 @@ export const renderListView = async (
     customCellProps,
     disableBulkDelete,
     disableBulkEdit,
+    disableListPresets,
     drawerSlug,
     enableRowSelections,
     initPageResult,
@@ -87,6 +94,7 @@ export const renderListView = async (
     value: {
       columns,
       limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
+      preset: (query?.preset as DefaultDocumentIDType) || null,
       sort: query?.sort as string,
     },
   })
@@ -126,6 +134,22 @@ export const renderListView = async (
         where = {
           and: [where, baseListFilter].filter(Boolean),
         }
+      }
+    }
+
+    let activePreset: ListPreset | undefined
+
+    if (listPreferences?.preset) {
+      try {
+        activePreset = (await payload.findByID({
+          id: listPreferences?.preset,
+          collection: 'payload-list-presets',
+          depth: 0,
+          overrideAccess: false,
+          user,
+        })) as ListPreset
+      } catch (_err) {
+        // swallow error
       }
     }
 
@@ -214,6 +238,7 @@ export const renderListView = async (
         <Fragment>
           <HydrateAuthProvider permissions={permissions} />
           <ListQueryProvider
+            collectionSlug={collectionSlug}
             columns={transformColumnsToPreferences(columnState)}
             data={data}
             defaultLimit={limit}
@@ -224,10 +249,12 @@ export const renderListView = async (
             {RenderServerComponent({
               clientProps: {
                 ...listViewSlots,
+                activePreset,
                 collectionSlug,
                 columnState,
                 disableBulkDelete,
                 disableBulkEdit,
+                disableListPresets,
                 enableRowSelections,
                 hasCreatePermission,
                 listPreferences,

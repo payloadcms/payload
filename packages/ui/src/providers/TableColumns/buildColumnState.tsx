@@ -24,15 +24,15 @@ import {
 } from 'payload/shared'
 import React from 'react'
 
-import type { SortColumnProps } from '../SortColumn/index.js'
+import type { SortColumnProps } from '../../elements/SortColumn/index.js'
 
+import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import {
   RenderCustomComponent,
   RenderDefaultCell,
   SortColumn,
   // eslint-disable-next-line payload/no-imports-from-exports-dir
 } from '../../exports/client/index.js'
-import { RenderServerComponent } from '../RenderServerComponent/index.js'
 import { filterFields } from './filterFields.js'
 
 type Args = {
