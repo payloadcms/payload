@@ -362,4 +362,71 @@ describe('sanitizeFields', () => {
       expect(sanitizedFields).toStrictEqual([])
     })
   })
+  describe('blocks', () => {
+    it('should maintain admin.blockName true after sanitization', async () => {
+      const fields: Field[] = [
+        {
+          name: 'noLabelBlock',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'number',
+              admin: {
+                disableBlockName: true,
+              },
+              fields: [
+                {
+                  name: 'testNumber',
+                  type: 'number',
+                },
+              ],
+            },
+          ],
+          label: false,
+        },
+      ]
+      const sanitizedField = (
+        await sanitizeFields({
+          config,
+          fields,
+          validRelationships: [],
+        })
+      )[0] as BlocksField
+
+      const sanitizedBlock = sanitizedField.blocks[0]
+
+      expect(sanitizedBlock.admin?.disableBlockName).toStrictEqual(true)
+    })
+    it('should default admin.disableBlockName to true after sanitization', async () => {
+      const fields: Field[] = [
+        {
+          name: 'noLabelBlock',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'number',
+              fields: [
+                {
+                  name: 'testNumber',
+                  type: 'number',
+                },
+              ],
+            },
+          ],
+          label: false,
+        },
+      ]
+      const sanitizedField = (
+        await sanitizeFields({
+          config,
+          fields,
+          validRelationships: [],
+        })
+      )[0] as BlocksField
+
+      const sanitizedBlock = sanitizedField.blocks[0]
+
+      expect(sanitizedBlock.admin?.disableBlockName).toStrictEqual(undefined)
+    })
+  })
 })

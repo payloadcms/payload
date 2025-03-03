@@ -80,6 +80,8 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
 
   const fieldHasErrors = hasSubmitted && errorCount > 0
 
+  const showBlockName = !block.admin?.disableBlockName
+
   const classNames = [
     `${baseClass}__row`,
     fieldHasErrors ? `${baseClass}__row--has-errors` : `${baseClass}__row--no-errors`,
@@ -155,7 +157,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
                   >
                     {getTranslation(block.labels.singular, i18n)}
                   </Pill>
-                  <SectionTitle path={`${path}.blockName`} readOnly={readOnly} />
+                  {showBlockName && <SectionTitle path={`${path}.blockName`} readOnly={readOnly} />}
                   {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
                 </Fragment>
               )}

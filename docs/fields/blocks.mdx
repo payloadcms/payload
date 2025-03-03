@@ -84,6 +84,7 @@ The Blocks Field inherits all of the default options from the base [Field Admin 
 | **`group`**         | Text or localization object used to group this Block in the Blocks Drawer. |
 | **`initCollapsed`** | Set the initial collapsed state                                            |
 | **`isSortable`**    | Disable order sorting by setting this value to `false`                     |
+| **`disableBlockName`**    | Hide the blockName field by setting this value to `true`                     |
 
 #### Customizing the way your block is rendered in Lexical
 
@@ -165,7 +166,7 @@ The `blockType` is saved as the slug of the block that has been selected.
 
 **`blockName`**
 
-The Admin Panel provides each block with a `blockName` field which optionally allows editors to label their blocks for better editability and readability.
+The Admin Panel provides each block with a `blockName` field which optionally allows editors to label their blocks for better editability and readability. This can be visually hidden via `admin.disableBlockName`.
 
 ## Example
 
