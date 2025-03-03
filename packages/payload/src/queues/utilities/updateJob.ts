@@ -80,7 +80,7 @@ export async function updateJobs({
       req,
       where,
     })
-    if (returning === false) {
+    if (returning === false || !result) {
       return null
     }
     return result.docs as BaseJob[]
@@ -95,7 +95,7 @@ export async function updateJobs({
     where,
   })) as BaseJob[]
 
-  if (returning === false) {
+  if (returning === false || !updatedJobs?.length) {
     return null
   }
 

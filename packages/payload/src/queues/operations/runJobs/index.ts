@@ -120,7 +120,7 @@ export const runJobs = async ({
             returning: true,
           }),
         ]
-      : await updateJobs({
+      : ((await updateJobs({
           data: {
             processing: true,
           },
@@ -130,7 +130,7 @@ export const runJobs = async ({
           req,
           returning: true,
           where,
-        }),
+        })) ?? []),
   }
 
   /**
