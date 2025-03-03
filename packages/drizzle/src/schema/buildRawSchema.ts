@@ -52,6 +52,7 @@ export const buildRawSchema = ({
 
     buildTable({
       adapter,
+      compoundIndexes: collection.indexes,
       disableNotNull: !!collection?.versions?.drafts,
       disableUnique: false,
       fields: collection.flattenedFields,
@@ -70,6 +71,10 @@ export const buildRawSchema = ({
 
       buildTable({
         adapter,
+        compoundIndexes: collection.indexes.map(({ fields, unique }) => ({
+          fields: fields.map(({ field, path }) => ({ field, path: `version.${path}` })),
+          unique, // handled later with disableUnique
+        })),
         disableNotNull: !!collection.versions?.drafts,
         disableUnique: true,
         fields: versionFields,

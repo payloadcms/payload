@@ -1,5 +1,6 @@
-import type { CompoundIndex, FlattenedField } from 'payload'
+import type { FlattenedField, SanitizedCompoundIndex } from 'payload'
 
+import { InvalidConfiguration } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type {
@@ -33,7 +34,7 @@ type Args = {
   baseIndexes?: Record<string, RawIndex>
   buildNumbers?: boolean
   buildRelationships?: boolean
-  compoundIndexes: CompoundIndex[]
+  compoundIndexes?: SanitizedCompoundIndex[]
   disableNotNull: boolean
   disableRelsTableUnique?: boolean
   disableUnique: boolean
@@ -120,7 +121,6 @@ export const buildTable = ({
   } = traverseFields({
     adapter,
     columns,
-    compoundIndexes,
     disableNotNull,
     disableRelsTableUnique,
     disableUnique,
@@ -269,6 +269,59 @@ export const buildTable = ({
       }
     })
     adapter.rawRelations[localeTableName] = localeRelations
+  }
+
+  if (compoundIndexes) {
+    for (const index of compoundIndexes) {
+      let someLocalized: boolean | null = null
+      const columns: string[] = []
+
+      const getTableToUse = () => {
+        if (someLocalized) {
+          return localesTable
+        }
+
+        return table
+      }
+
+      for (const field of index.fields) {
+        const isLocalized = field.field.localized ?? false
+
+        if (someLocalized === null) {
+          someLocalized = isLocalized
+        }
+
+        if (someLocalized !== isLocalized) {
+          throw new InvalidConfiguration(
+            `Compound indexes within localized and non localized fields are not supported in SQL. Expected ${field.path} to be ${someLocalized ? 'non' : ''} localized.`,
+          )
+        }
+
+        const columnPath = field.path.replaceAll('.', '_')
+
+        if (!getTableToUse().columns[columnPath]) {
+          throw new InvalidConfiguration(
+            `Column ${columnPath} for compound index on ${field.path} was not found in the ${getTableToUse().name} table.`,
+          )
+        }
+
+        columns.push(columnPath)
+      }
+
+      let name = columns.join('_')
+      // truncate against the limit, buildIndexName will handle collisions
+      if (name.length > 63) {
+        name = 'compound_index'
+      }
+
+      const indexName = buildIndexName({ name, adapter })
+
+      getTableToUse().indexes[indexName] = {
+        name: indexName,
+        on: columns,
+        unique: disableUnique ? false : index.unique,
+      }
+    }
   }
 
   if (isRoot) {

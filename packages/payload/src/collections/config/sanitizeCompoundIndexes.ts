@@ -22,6 +22,10 @@ export const sanitizeCompoundIndexes = ({
         throw new InvalidConfiguration(`Field ${path} was not found`)
       }
 
+      if (['array', 'blocks', 'group', 'tab'].includes(field.type)) {
+        throw new InvalidConfiguration(`Compound index on ${field.type} cannot be set.`)
+      }
+
       sanitized.fields.push({ field, path })
     }
 

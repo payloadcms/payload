@@ -32,7 +32,6 @@ type Args = {
   adapter: DrizzleAdapter
   columnPrefix?: string
   columns: Record<string, RawColumn>
-  compoundIndexes: CompoundIndex[]
   disableNotNull: boolean
   disableRelsTableUnique?: boolean
   disableUnique?: boolean
@@ -73,7 +72,6 @@ export const traverseFields = ({
   adapter,
   columnPrefix,
   columns,
-  compoundIndexes,
   disableNotNull,
   disableRelsTableUnique,
   disableUnique = false,
