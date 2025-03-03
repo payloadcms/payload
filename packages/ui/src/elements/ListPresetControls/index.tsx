@@ -177,7 +177,7 @@ export function ListPresetControls({ activePreset }: { activePreset: ListPreset 
         </Popup>
       </div>
       <ListDrawer
-        disableListFilters
+        disableListPresets
         onSelect={async ({ doc }) => {
           closeListDrawer()
           await handleChange(doc as ListPreset)

@@ -43,6 +43,12 @@ describe('Shared Filters', () => {
       ?.then((result) => result.user)
   })
 
+  afterAll(async () => {
+    if (typeof payload.db.destroy === 'function') {
+      await payload.db.destroy()
+    }
+  })
+
   describe('default access control', () => {
     it('should respect access when set to "specificUsers"', async () => {
       const filterDoc = await payload.create({
@@ -353,6 +359,24 @@ describe('Shared Filters', () => {
     })
   })
 
+  it.skip('should disable list presets when the collection is set to "disableListPresets"', async () => {
+    try {
+      const result = await payload.create({
+        collection: 'payload-list-presets',
+        user,
+        data: {
+          title: 'Disabled List Presets',
+          relatedCollection: 'users',
+        },
+      })
+
+      // TODO: this test always passes because this expect throws an error which is caught and passes
+      expect(result).toBeFalsy()
+    } catch (error) {
+      expect(error).toBeDefined()
+    }
+  })
+
   describe('Where object formatting', () => {
     it('transforms "where" query objects into the "and" / "or" format', async () => {
       const result = await payload.create({
@@ -391,11 +415,5 @@ describe('Shared Filters', () => {
         ],
       })
     })
-  })
-
-  afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
   })
 })

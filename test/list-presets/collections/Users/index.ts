@@ -7,6 +7,7 @@ export const Users: CollectionConfig = {
   slug: usersSlug,
   admin: {
     useAsTitle: 'name',
+    disableListPresets: true,
   },
   auth: true,
   fields: [

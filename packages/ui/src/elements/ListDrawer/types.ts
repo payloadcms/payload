@@ -7,7 +7,7 @@ import type { ListDrawerContextProps } from './Provider.js'
 export type ListDrawerProps = {
   readonly allowCreate?: boolean
   readonly collectionSlugs: SanitizedCollectionConfig['slug'][]
-  readonly disableListFilters?: boolean
+  readonly disableListPresets?: boolean
   readonly drawerSlug?: string
   readonly enableRowSelections?: boolean
   readonly filterOptions?: FilterOptionsResult

@@ -47,7 +47,7 @@ export function DefaultListView(props: ListViewClientProps) {
     Description,
     disableBulkDelete,
     disableBulkEdit,
-    disableListFilters,
+    disableListPresets,
     enableRowSelections,
     hasCreatePermission: hasCreatePermissionFromProps,
     listMenuItems,
@@ -194,7 +194,9 @@ export function DefaultListView(props: ListViewClientProps) {
                 }
                 collectionConfig={collectionConfig}
                 collectionSlug={collectionSlug}
-                disableListFilters={disableListFilters}
+                disableListPresets={
+                  collectionConfig?.admin?.disableListPresets || disableListPresets
+                }
                 listMenuItems={listMenuItems}
                 renderedFilters={renderedFilters}
                 resolvedFilterOptions={resolvedFilterOptions}

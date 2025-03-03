@@ -11,6 +11,11 @@ export const getAccess = (config: Config): Record<Operation, Access> =>
       acc[operation] = async (args) => {
         const { req } = args
 
+        // TODO: wire this up when `collectionSlug` is available
+        // if (config?.collections?.[collectionSlug]?.admin.disableListPresets) {
+        //   return false
+        // }
+
         const userDefinedAccess = config?.admin?.listPresets?.access?.[operation]
           ? await config?.admin?.listPresets?.access?.[operation](args)
           : undefined

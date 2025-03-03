@@ -1,4 +1,5 @@
 import type { Field } from '../fields/config/types.js'
+import type { CollectionSlug } from '../index.js'
 import type { ListPreferences } from '../preferences/types.js'
 import type { Where } from '../types/index.js'
 
@@ -6,6 +7,7 @@ import type { Where } from '../types/index.js'
 export type ListPreset = {
   columns: ListPreferences['columns']
   id: number | string
+  relatedCollection: CollectionSlug
   title: string
   where: Where
 }

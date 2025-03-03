@@ -11,6 +11,7 @@ export const getListPresetsConfig = (config: Config): CollectionConfig => ({
   slug: listPresetsCollectionSlug,
   access: getAccess(config),
   admin: {
+    disableListPresets: true,
     hidden: true,
     useAsTitle: 'title',
   },

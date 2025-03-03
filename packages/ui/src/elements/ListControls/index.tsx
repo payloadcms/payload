@@ -39,7 +39,7 @@ export type ListControlsProps = {
    * These are now handled by the `ListSelection` component
    */
   readonly disableBulkEdit?: boolean
-  readonly disableListFilters?: boolean
+  readonly disableListPresets?: boolean
   readonly enableColumns?: boolean
   readonly enableSort?: boolean
   readonly handleSearchChange?: (search: string) => void
@@ -61,7 +61,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     beforeActions,
     collectionConfig,
     collectionSlug,
-    disableListFilters,
+    disableListPresets,
     enableColumns = true,
     enableSort = false,
     listMenuItems,
@@ -214,7 +214,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
             </div>
           </div>
         </div>
-        {!disableListFilters && <ListPresetControls activePreset={activePreset} />}
+        {!disableListPresets && <ListPresetControls activePreset={activePreset} />}
       </div>
       {enableColumns && (
         <AnimateHeight

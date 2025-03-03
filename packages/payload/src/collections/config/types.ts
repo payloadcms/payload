@@ -327,6 +327,10 @@ export type CollectionAdminOptions = {
    * Custom description for collection. This will also be used as JSDoc for the generated types
    */
   description?: EntityDescription
+  /**
+   * Disable the ability to save List Presets on this collection
+   */
+  disableListPresets?: boolean
   enableRichTextLink?: boolean
   enableRichTextRelationship?: boolean
   /**
