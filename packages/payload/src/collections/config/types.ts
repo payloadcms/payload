@@ -460,6 +460,16 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
     refresh?: RefreshHook[]
   }
   /**
+   * Define compound indexes for this collection.
+   * This can be used to either speed up querying/sorting by 2 or more fields at the same time or
+   * to ensure uniqueness between several fields.
+   * Specify field paths
+   * @example
+   * ['title', 'group.name']
+   * @default []
+   */
+  indexes?: CompoundIndex[]
+  /**
    * Label configuration
    */
   labels?: {
@@ -537,12 +547,15 @@ export interface SanitizedCollectionConfig
   auth: Auth
   endpoints: Endpoint[] | false
   fields: Field[]
-
   /**
    * Fields in the database schema structure
    * Rows / collapsible / tabs w/o name `fields` merged to top, UIs are excluded
    */
   flattenedFields: FlattenedField[]
+
+  /**
+   * TODO: jsdoc
+   */
 
   /**
    * Object of collections to join 'Join Fields object keyed by collection
@@ -553,6 +566,8 @@ export interface SanitizedCollectionConfig
    * List of all polymorphic join fields
    */
   polymorphicJoins: SanitizedJoin[]
+
+  sanitizedIndexes: SanitizedCompoundIndex[]
 
   slug: CollectionSlug
   upload: SanitizedUploadConfig
@@ -596,4 +611,19 @@ export type TypeWithTimestamps = {
   createdAt: string
   id: number | string
   updatedAt: string
+}
+
+export type CompoundIndex = {
+  fields: string[]
+  unique?: boolean
+}
+
+export type SanitizedCompoundIndex = {
+  fields: {
+    field: FlattenedField
+    localizedPath: string
+    path: string
+    pathHasLocalized: boolean
+  }[]
+  unique: boolean
 }
