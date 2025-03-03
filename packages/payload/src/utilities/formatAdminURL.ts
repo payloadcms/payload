@@ -2,7 +2,7 @@ import type { Config } from '../config/types.js'
 
 /** Will read the `routes.admin` config and appropriately handle `"/"` admin paths */
 export const formatAdminURL = (args: {
-  adminRoute: Config['routes']['admin']
+  adminRoute: NonNullable<Config['routes']>['admin']
   basePath?: string
   path: `/${string}` | null
   serverURL?: Config['serverURL']
