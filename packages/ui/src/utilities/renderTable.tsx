@@ -13,6 +13,7 @@ import type {
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
 import { fieldAffectsData, fieldIsHiddenOrDisabled, flattenTopLevelFields } from 'payload/shared'
+import React from 'react'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import type { Column } from '../exports/client/index.js'
@@ -23,6 +24,7 @@ import { buildColumnState } from '../elements/TableColumns/buildColumnState.js'
 import { buildPolymorphicColumnState } from '../elements/TableColumns/buildPolymorphicColumnState.js'
 import { filterFields } from '../elements/TableColumns/filterFields.js'
 import { getInitialColumns } from '../elements/TableColumns/getInitialColumns.js'
+
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import { Pill, SelectAll, SelectRow, Table } from '../exports/client/index.js'
 
@@ -197,9 +199,10 @@ export const renderTable = ({
     } as Column)
   }
 
-  const showDragHandle = docs.length > 0 && ORDER_FIELD_NAME in docs[0]
+  const isSortable = docs.length > 0 && ORDER_FIELD_NAME in docs[0]
 
-  if (showDragHandle) {
+  if (isSortable) {
+    // show drag handle
     columnsToUse.unshift({
       accessor: '_dragHandle',
       active: true,
@@ -210,8 +213,18 @@ export const renderTable = ({
         hidden: true,
       },
       Heading: '', // Empty header
-      renderedCells: docs.map((_, i) => <SortRow key={i} rowData={docs[i]} />),
+      renderedCells: docs.map((_, i) => <SortRow key={i} />),
     } as Column)
+
+    // show order as integer
+    const orderColumn = columnsToUse.find((column) => column.accessor === ORDER_FIELD_NAME)
+    if (orderColumn) {
+      const cells = docs.map((doc, i) => (
+        <React.Fragment key={i}>{doc.orderAsInteger}</React.Fragment>
+      ))
+      // @ts-expect-error - renderedCells is read-only
+      orderColumn.renderedCells = cells
+    }
   }
 
   return {
