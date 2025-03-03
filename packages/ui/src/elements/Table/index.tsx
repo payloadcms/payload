@@ -12,12 +12,12 @@ import { DraggableSortable } from '../DraggableSortable/index.js'
 const baseClass = 'table'
 
 // if you change this, you need to change it in a couple of places where it's duplicated
-const ORDER_FIELD_NAME = 'payload-order'
+const ORDER_FIELD_NAME = '_order'
 
 export type Props = {
   readonly appearance?: 'condensed' | 'default'
   readonly columns?: Column[]
-  readonly data: { [key: string]: unknown; id: string; 'payload-order': string }[]
+  readonly data: { [key: string]: unknown; id: string; [ORDER_FIELD_NAME]: string }[]
 }
 
 export const Table: React.FC<Props> = ({ appearance, columns, data: initialData }) => {

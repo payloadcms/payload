@@ -51,8 +51,7 @@ export const renderFilters = (
     new Map() as Map<string, React.ReactNode>,
   )
 
-// Add drag handle column if documents have payload-order field
-export const ORDER_FIELD_NAME = 'payload-order'
+export const ORDER_FIELD_NAME = '_order'
 
 export const renderTable = ({
   clientCollectionConfig,

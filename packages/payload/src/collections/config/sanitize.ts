@@ -243,7 +243,7 @@ export const sanitizeCollection = async (
   validateUseAsTitle(sanitized)
 
   // duplicated in the UI package too. Don't change one without changing the other.
-  const ORDER_FIELD_NAME = 'payload-order'
+  const ORDER_FIELD_NAME = '_order'
 
   // Enable custom order
   if (collection.enableCustomOrder) {
