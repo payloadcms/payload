@@ -1,8 +1,6 @@
 'use client'
 import type { ListPreset } from 'payload'
 
-import { Fragment } from 'react'
-
 import { XIcon } from '../../../icons/X/index.js'
 import { Pill } from '../../Pill/index.js'
 import './index.scss'
@@ -19,37 +17,30 @@ export function ActiveListPreset({
   resetPreset: () => Promise<void>
 }) {
   return (
-    <Fragment>
-      <div className={baseClass}>
-        <Pill
-          className={`${baseClass}__select`}
-          onClick={() => {
-            openPresetListDrawer()
+    <Pill
+      className={baseClass}
+      onClick={() => {
+        openPresetListDrawer()
+      }}
+    >
+      <div className={`${baseClass}__label-text`}>{activePreset?.title || 'Select preset'}</div>
+      {activePreset ? (
+        <div
+          className={`${baseClass}__clear`}
+          onClick={async (e) => {
+            e.stopPropagation()
+            await resetPreset()
           }}
-          pillStyle="dark"
+          onKeyDown={async (e) => {
+            e.stopPropagation()
+            await resetPreset()
+          }}
+          role="button"
+          tabIndex={0}
         >
-          <div className={`${baseClass}__select__label-text`}>
-            {activePreset?.title || 'Select preset'}
-          </div>
-          {activePreset ? (
-            <div
-              className={`${baseClass}__select__clear`}
-              onClick={async (e) => {
-                e.stopPropagation()
-                await resetPreset()
-              }}
-              onKeyDown={async (e) => {
-                e.stopPropagation()
-                await resetPreset()
-              }}
-              role="button"
-              tabIndex={0}
-            >
-              <XIcon />
-            </div>
-          ) : null}
-        </Pill>
-      </div>
-    </Fragment>
+          <XIcon />
+        </div>
+      ) : null}
+    </Pill>
   )
 }
