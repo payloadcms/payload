@@ -18,7 +18,7 @@ export function ActiveListPreset({
 }) {
   return (
     <Pill
-      className={baseClass}
+      className={[baseClass, activePreset && `${baseClass}--active`].filter(Boolean).join(' ')}
       onClick={() => {
         openPresetListDrawer()
       }}
