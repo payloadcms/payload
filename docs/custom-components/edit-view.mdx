@@ -114,6 +114,7 @@ The following options are available:
 | `PublishButton`      | A button that publishes the current document. [More details](#PublishButton).                                                                                                                                  |
 | `PreviewButton`      | A button that previews the current document. [More details](#PreviewButton).                                                                                                                                  |
 | `Description`        | A description of the Collection. [More details](#Description).                                                                                                                                  |
+| `Status`             | A component that represents the collection or global status. [More details](#Status).                                                                                                                                  |
 | `Upload`             | A file upload component. [More details](#Upload).                                                                                                                                  |
 
 #### Globals
@@ -419,6 +420,29 @@ export function MyDescriptionComponent(props: ViewDescriptionClientProps) {
       This is a custom description component (Client)
     </div>
   )
+}
+```
+
+### Status
+
+The `Status` property allows you to render a component that represents the collection or global status in the Edit View.
+
+To add an `Status` component, use the `components.edit.Status` property in your [Collection Config](../configuration/collections):
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const MyCollection: CollectionConfig = {
+  // ...
+  admin: {
+    components: {
+      edit: {
+        // highlight-start
+        Status: '/path/to/MyStatusComponent',
+        // highlight-end
+      }
+    },
+  },
 }
 ```
 
