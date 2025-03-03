@@ -719,8 +719,8 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const executeOnChange = useEffectEvent(async (submitted: boolean) => {
     if (Array.isArray(onChange)) {
-      let revalidatedFormState: FormState = contextRef.current.fields
-
+      const stateAtStartOfChange: FormState = contextRef.current.fields
+      let revalidatedFormState = stateAtStartOfChange
       for (const onChangeFn of onChange) {
         // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
         revalidatedFormState = await onChangeFn({
@@ -730,6 +730,12 @@ export const Form: React.FC<FormProps> = (props) => {
       }
 
       if (!revalidatedFormState) {
+        return
+      }
+      // NOTE: to prevent race conditions, only replace state with the derived state from the server
+      // if the form state has not changed since the start of executeOnChange.
+      // Otherwise newer state data will be overwritten by the REPLACE_STATE dispatch.
+      if (contextRef.current.fields !== stateAtStartOfChange) {
         return
       }
 
