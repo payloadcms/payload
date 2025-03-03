@@ -60,6 +60,7 @@ export const runJob = async ({
     const errorJSON = hasFinalError
       ? {
           name: err.name,
+          cancelled: err.message === 'Job cancelled',
           message: err.message,
           stack: err.stack,
         }

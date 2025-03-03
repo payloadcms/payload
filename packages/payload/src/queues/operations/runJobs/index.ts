@@ -159,8 +159,8 @@ export const runJobs = async ({
   if (jobsQuery?.docs?.length) {
     req.payload.logger.info({
       msg: `Running ${jobsQuery.docs.length} jobs.`,
-      newJobs,
-      retryingJobs: existingJobs,
+      new: newJobs?.length,
+      retrying: existingJobs?.length,
     })
   }
   const jobsToDelete: (number | string)[] | undefined = req.payload.config.jobs.deleteJobOnComplete
