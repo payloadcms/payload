@@ -23,6 +23,10 @@
           margin-inline: calc(var(--base) / 4);
         }
       }
+
+      &:not(:has(*)) {
+        display: none;
+      }
     }
 
     @include mid-break {
