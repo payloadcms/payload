@@ -21,8 +21,10 @@ export function getUpdateJobFunction(job: BaseJob, req: PayloadRequest): UpdateJ
       job[key] = updatedJob[key]
     }
 
-    if ((updatedJob.error as any)?.cancelled) {
-      throw new Error('Job cancelled')
+    if ((updatedJob.error as Record<string, unknown>)?.cancelled) {
+      const cancelledError = new Error('Job cancelled') as { cancelled: boolean } & Error
+      cancelledError.cancelled = true
+      throw cancelledError
     }
 
     return updatedJob
