@@ -4,7 +4,7 @@ import type { Config } from '../config/types.js'
 export const formatAdminURL = (args: {
   adminRoute: Config['routes']['admin']
   basePath?: string
-  path: string
+  path: `/${string}` | null
   serverURL?: Config['serverURL']
 }): string => {
   const { adminRoute, basePath = '', path, serverURL } = args
