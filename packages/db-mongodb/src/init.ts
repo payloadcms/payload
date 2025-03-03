@@ -6,7 +6,7 @@ import paginate from 'mongoose-paginate-v2'
 import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
-import type { CollectionModel } from './types.js'
+import type { CollectionModel, GlobalModel } from './types.js'
 
 import { buildCollectionSchema } from './models/buildCollectionSchema.js'
 import { buildGlobalModel } from './models/buildGlobalModel.js'
@@ -16,7 +16,7 @@ import { getDBName } from './utilities/getDBName.js'
 
 export const init: Init = function init(this: MongooseAdapter) {
   this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
-    const schemaOptions = this.collectionsSchemaOptions[collection.slug]
+    const schemaOptions = this.collectionsSchemaOptions?.[collection.slug]
 
     const schema = buildCollectionSchema(collection, this.payload, schemaOptions)
 
@@ -68,7 +68,7 @@ export const init: Init = function init(this: MongooseAdapter) {
     ) as CollectionModel
   })
 
-  this.globals = buildGlobalModel(this.payload)
+  this.globals = buildGlobalModel(this.payload) as GlobalModel
 
   this.payload.config.globals.forEach((global) => {
     if (global.versions) {

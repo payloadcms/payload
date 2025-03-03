@@ -45,13 +45,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     }
   })
 
-  // If the search params change externally, update the current query
-  useEffect(() => {
-    if (modifySearchParams) {
-      setCurrentQuery(searchParams)
-    }
-  }, [searchParams, modifySearchParams])
-
   const refineListData = useCallback(
     // eslint-disable-next-line @typescript-eslint/require-await
     async (query: ListQuery) => {

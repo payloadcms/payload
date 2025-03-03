@@ -234,12 +234,12 @@ export const transform = ({
   fields,
   globalSlug,
   operation,
-  parentIsLocalized,
+  parentIsLocalized = false,
   validateRelationships = true,
 }: Args) => {
   if (Array.isArray(data)) {
-    for (let i = 0; i < data.length; i++) {
-      transform({ adapter, data: data[i], fields, globalSlug, operation, validateRelationships })
+    for (const item of data) {
+      transform({ adapter, data: item, fields, globalSlug, operation, validateRelationships })
     }
     return
   }
@@ -262,14 +262,16 @@ export const transform = ({
     data.globalType = globalSlug
   }
 
-  const sanitize: TraverseFieldsCallback = ({ field, ref }) => {
-    if (!ref || typeof ref !== 'object') {
+  const sanitize: TraverseFieldsCallback = ({ field, ref: incomingRef }) => {
+    if (!incomingRef || typeof incomingRef !== 'object') {
       return
     }
 
-    if (field.type === 'date' && operation === 'read' && ref[field.name]) {
+    const ref = incomingRef as Record<string, unknown>
+
+    if (field.type === 'date' && operation === 'read' && field.name in ref && ref[field.name]) {
       if (config.localization && fieldShouldBeLocalized({ field, parentIsLocalized })) {
-        const fieldRef = ref[field.name]
+        const fieldRef = ref[field.name] as Record<string, unknown>
         if (!fieldRef || typeof fieldRef !== 'object') {
           return
         }
@@ -284,7 +286,7 @@ export const transform = ({
       } else {
         sanitizeDate({
           field,
-          ref: ref as Record<string, unknown>,
+          ref,
           value: ref[field.name],
         })
       }
@@ -302,13 +304,13 @@ export const transform = ({
       // handle localized relationships
       if (config.localization && fieldShouldBeLocalized({ field, parentIsLocalized })) {
         const locales = config.localization.locales
-        const fieldRef = ref[field.name]
+        const fieldRef = ref[field.name] as Record<string, unknown>
         if (typeof fieldRef !== 'object') {
           return
         }
 
         for (const { code } of locales) {
-          const value = ref[field.name][code]
+          const value = fieldRef[code]
           if (value) {
             sanitizeRelationship({
               config,
@@ -328,7 +330,7 @@ export const transform = ({
           field,
           locale: undefined,
           operation,
-          ref: ref as Record<string, unknown>,
+          ref,
           validateRelationships,
           value: ref[field.name],
         })

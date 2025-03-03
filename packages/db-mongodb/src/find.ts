@@ -10,13 +10,14 @@ import { buildSortParam } from './queries/buildSortParam.js'
 import { aggregatePaginate } from './utilities/aggregatePaginate.js'
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 import { transform } from './utilities/transform.js'
 
 export const find: Find = async function find(
   this: MongooseAdapter,
   {
-    collection,
+    collection: collectionSlug,
     joins = {},
     limit = 0,
     locale,
@@ -26,11 +27,10 @@ export const find: Find = async function find(
     req,
     select,
     sort: sortArg,
-    where,
+    where = {},
   },
 ) {
-  const Model = this.collections[collection]
-  const collectionConfig = this.payload.collections[collection].config
+  const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
 
   const session = await getSession(this, req)
 
@@ -54,8 +54,8 @@ export const find: Find = async function find(
 
   const query = await buildQuery({
     adapter: this,
-    collectionSlug: collection,
-    fields: this.payload.collections[collection].config.flattenedFields,
+    collectionSlug,
+    fields: collectionConfig.flattenedFields,
     locale,
     where,
   })
@@ -109,7 +109,8 @@ export const find: Find = async function find(
   if (limit >= 0) {
     paginationOptions.limit = limit
     // limit must also be set here, it's ignored when pagination is false
-    paginationOptions.options.limit = limit
+
+    paginationOptions.options!.limit = limit
 
     // Disable pagination if limit is 0
     if (limit === 0) {
@@ -121,7 +122,7 @@ export const find: Find = async function find(
 
   const aggregate = await buildJoinAggregation({
     adapter: this,
-    collection,
+    collection: collectionSlug,
     collectionConfig,
     joins,
     locale,
@@ -139,7 +140,7 @@ export const find: Find = async function find(
       pagination: paginationOptions.pagination,
       projection: paginationOptions.projection,
       query,
-      session: paginationOptions.options?.session,
+      session: paginationOptions.options?.session ?? undefined,
       sort: paginationOptions.sort as object,
       useEstimatedCount: paginationOptions.useEstimatedCount,
     })
@@ -150,7 +151,7 @@ export const find: Find = async function find(
   transform({
     adapter: this,
     data: result.docs,
-    fields: this.payload.collections[collection].config.fields,
+    fields: collectionConfig.fields,
     operation: 'read',
   })
 

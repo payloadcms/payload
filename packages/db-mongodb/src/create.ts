@@ -3,15 +3,17 @@ import type { Create } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
+import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 import { handleError } from './utilities/handleError.js'
 import { transform } from './utilities/transform.js'
 
 export const create: Create = async function create(
   this: MongooseAdapter,
-  { collection, data, req, returning },
+  { collection: collectionSlug, data, req, returning },
 ) {
-  const Model = this.collections[collection]
+  const { collectionConfig, customIDType, Model } = getCollection({ adapter: this, collectionSlug })
+
   const options: CreateOptions = {
     session: await getSession(this, req),
   }
@@ -21,18 +23,18 @@ export const create: Create = async function create(
   transform({
     adapter: this,
     data,
-    fields: this.payload.collections[collection].config.fields,
+    fields: collectionConfig.fields,
     operation: 'write',
   })
 
-  if (this.payload.collections[collection].customIDType) {
+  if (customIDType) {
     data._id = data.id
   }
 
   try {
     ;[doc] = await Model.create([data], options)
   } catch (error) {
-    handleError({ collection, error, req })
+    handleError({ collection: collectionSlug, error, req })
   }
   if (returning === false) {
     return null
@@ -43,7 +45,7 @@ export const create: Create = async function create(
   transform({
     adapter: this,
     data: doc,
-    fields: this.payload.collections[collection].config.fields,
+    fields: collectionConfig.fields,
     operation: 'read',
   })
 

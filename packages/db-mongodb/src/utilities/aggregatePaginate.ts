@@ -82,16 +82,18 @@ export const aggregatePaginate = async ({
   const totalPages =
     pagination !== false && typeof limit === 'number' && limit !== 0 ? Math.ceil(count / limit) : 1
 
-  const hasPrevPage = pagination !== false && page > 1
-  const hasNextPage = pagination !== false && totalPages > page
+  const hasPrevPage = typeof page === 'number' && pagination !== false && page > 1
+  const hasNextPage = typeof page === 'number' && pagination !== false && totalPages > page
   const pagingCounter =
-    pagination !== false && typeof limit === 'number' ? (page - 1) * limit + 1 : 1
+    typeof page === 'number' && pagination !== false && typeof limit === 'number'
+      ? (page - 1) * limit + 1
+      : 1
 
   const result: PaginatedDocs = {
     docs,
     hasNextPage,
     hasPrevPage,
-    limit,
+    limit: limit ?? 0,
     nextPage: hasNextPage ? page + 1 : null,
     page,
     pagingCounter,
