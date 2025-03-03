@@ -16,6 +16,7 @@ export const updateMany: UpdateMany = async function updateMany(
     collection: collectionSlug,
     data,
     joins: joinQuery,
+    limit,
     locale,
     req,
     returning,
@@ -55,12 +56,21 @@ export const updateMany: UpdateMany = async function updateMany(
 
     const table = this.tables[tableName]
 
-    const docsToUpdate = await _db
-      .select({
-        id: table.id,
-      })
-      .from(table)
-      .where(where)
+    const docsToUpdate =
+      typeof limit === 'number' && limit > 0
+        ? await _db
+            .select({
+              id: table.id,
+            })
+            .from(table)
+            .where(where)
+            .limit(limit)
+        : await _db
+            .select({
+              id: table.id,
+            })
+            .from(table)
+            .where(where)
 
     idsToUpdate = docsToUpdate?.map((doc) => doc.id)
   }
