@@ -1,8 +1,9 @@
-import type { FieldHook } from 'payload'
+import type { FieldHook, Where } from 'payload'
 
 import { ValidationError } from 'payload'
 
 import { getUserTenantIDs } from '../../../utilities/getUserTenantIDs'
+import { extractID } from '@/utilities/extractID'
 
 export const ensureUniqueUsername: FieldHook = async ({ data, originalDoc, req, value }) => {
   // if value is unchanged, skip validation
@@ -10,26 +11,30 @@ export const ensureUniqueUsername: FieldHook = async ({ data, originalDoc, req, 
     return value
   }
 
-  const incomingTenantID = typeof data?.tenant === 'object' ? data.tenant.id : data?.tenant
-  const currentTenantID =
-    typeof originalDoc?.tenant === 'object' ? originalDoc.tenant.id : originalDoc?.tenant
+  const constraints: Where[] = [
+    {
+      username: {
+        equals: value,
+      },
+    },
+  ]
+
+  const incomingTenantID = extractID(data?.tenant)
+  const currentTenantID = extractID(originalDoc?.tenant)
   const tenantIDToMatch = incomingTenantID || currentTenantID
+
+  if (tenantIDToMatch) {
+    constraints.push({
+      'tenants.tenant': {
+        equals: tenantIDToMatch,
+      },
+    })
+  }
 
   const findDuplicateUsers = await req.payload.find({
     collection: 'users',
     where: {
-      and: [
-        {
-          'tenants.tenant': {
-            equals: tenantIDToMatch,
-          },
-        },
-        {
-          username: {
-            equals: value,
-          },
-        },
-      ],
+      and: constraints,
     },
   })
 
