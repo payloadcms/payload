@@ -10,7 +10,6 @@ export const retriesTestWorkflow: WorkflowConfig<'retriesTest'> = {
     },
   ],
   handler: async ({ job, tasks, req }) => {
-    console.log('222')
     const updatedJob = await req.payload.update({
       collection: 'payload-jobs',
       data: {
