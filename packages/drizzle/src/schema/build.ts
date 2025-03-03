@@ -308,6 +308,10 @@ export const buildTable = ({
         columns.push(columnPath)
       }
 
+      if (someLocalized) {
+        columns.push('_locale')
+      }
+
       let name = columns.join('_')
       // truncate against the limit, buildIndexName will handle collisions
       if (name.length > 63) {
