@@ -431,11 +431,20 @@ describe('General', () => {
       await page.goto(uploadsTwo.list)
       await openNav(page)
 
-      // Locate all nav items inside the nav group that contain .nav__link-indicator
+      // Locate "uploads" and "uploads-two" nav items
+      const uploadsNavItem = page.locator('.nav-group__content #nav-uploads')
+      const uploadsTwoNavItem = page.locator('.nav-group__content #nav-uploads-two')
+
+      // Ensure both exist before continuing
+      await expect(uploadsNavItem).toBeVisible()
+      await expect(uploadsTwoNavItem).toBeVisible()
+
+      // Locate all nav items containing the nav__link-indicator
       const activeNavItems = page.locator(
-        '.nav-group__content .nav__link:has(.nav__link-indicator)',
+        '.nav-group__content .nav__link:has(.nav__link-indicator), .nav-group__content div.nav__link:has(.nav__link-indicator)',
       )
 
+      // Expect exactly one nav item to have the indicator
       await expect(activeNavItems).toHaveCount(1)
     })
 
