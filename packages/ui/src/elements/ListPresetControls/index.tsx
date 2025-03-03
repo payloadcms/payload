@@ -9,6 +9,7 @@ import {
   transformColumnsToSearchParams,
 } from 'payload/shared'
 import { Fragment, useCallback, useState } from 'react'
+import { toast } from 'sonner'
 
 import { Dots } from '../../icons/Dots/index.js'
 import { XIcon } from '../../icons/X/index.js'
@@ -20,8 +21,8 @@ import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { useListDrawer } from '../ListDrawer/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
-import { Translation } from '../Translation/index.js'
 import './index.scss'
+import { Translation } from '../Translation/index.js'
 
 const baseClass = 'list-presets'
 
@@ -35,7 +36,10 @@ export function ListPresetControls({ activePreset }: { activePreset: ListPreset 
     config: {
       routes: { api: apiRoute },
     },
+    getEntityConfig,
   } = useConfig()
+
+  const presetConfig = getEntityConfig({ collectionSlug: 'payload-list-presets' })
 
   const [documentEditID, setDocumentEditID] = useState<DefaultDocumentIDType>(null)
 
@@ -71,12 +75,37 @@ export function ListPresetControls({ activePreset }: { activePreset: ListPreset 
   }, [refineListData])
 
   const handleDelete = useCallback(async () => {
-    await fetch(`${apiRoute}/payload-list-presets/${activePreset.id}`, {
-      method: 'DELETE',
-    })
+    try {
+      await fetch(`${apiRoute}/payload-list-presets/${activePreset.id}`, {
+        method: 'DELETE',
+      }).then(async (res) => {
+        try {
+          const json = await res.json()
 
-    await resetPreset()
-  }, [activePreset?.id, apiRoute, resetPreset])
+          if (res.status < 400) {
+            toast.success(
+              t('general:titleDeleted', {
+                label: getTranslation(presetConfig.labels.singular, i18n),
+                title: activePreset.title,
+              }),
+            )
+
+            await resetPreset()
+          } else {
+            if (json.errors) {
+              json.errors.forEach((error) => toast.error(error.message))
+            } else {
+              toast.error(t('error:deletingTitle', { title: activePreset.title }))
+            }
+          }
+        } catch (_err) {
+          toast.error(t('error:deletingTitle', { title: activePreset.title }))
+        }
+      })
+    } catch (_err) {
+      toast.error(t('error:deletingTitle', { title: activePreset.title }))
+    }
+  }, [apiRoute, activePreset?.id, activePreset?.title, t, presetConfig, i18n, resetPreset])
 
   const handleChange = useCallback(
     async (preset: ListPreset) => {
