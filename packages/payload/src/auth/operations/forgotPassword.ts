@@ -14,6 +14,7 @@ import { buildAfterOperation } from '../../collections/operations/utils.js'
 import { APIError } from '../../errors/index.js'
 import { Forbidden } from '../../index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getLoginOptions } from '../getLoginOptions.js'
@@ -155,9 +156,13 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
         config.serverURL !== null && config.serverURL !== ''
           ? config.serverURL
           : `${protocol}//${req.headers.get('host')}`
-
+      const forgotURL = formatAdminURL({
+        adminRoute: config.routes.admin,
+        path: `${config.admin.routes.reset}/${token}`,
+        serverURL,
+      })
       let html = `${req.t('authentication:youAreReceivingResetPassword')}
-    <a href="${serverURL}${config.routes.admin}${config.admin.routes.reset}/${token}">${serverURL}${config.routes.admin}${config.admin.routes.reset}/${token}</a>
+    <a href="${forgotURL}">${forgotURL}</a>
     ${req.t('authentication:youDidNotRequestPassword')}`
 
       if (typeof collectionConfig.auth.forgotPassword?.generateEmailHTML === 'function') {
