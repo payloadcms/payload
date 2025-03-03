@@ -466,6 +466,8 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * Under the hood, a field with {@link https://observablehq.com/@dgreensp/implementing-fractional-indexing|fractional indexing} is used to optimize inserts and reorderings.
    *
    * @default false
+   *
+   * @experimental There may be frequent breaking changes to this API
    */
   isSortable?: boolean
   /**
