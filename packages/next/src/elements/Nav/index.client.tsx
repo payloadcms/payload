@@ -45,9 +45,7 @@ export const DefaultNavClient: React.FC<{
               }
 
               const isActive =
-                pathname === href ||
-                pathname.startsWith(`${href}/`) ||
-                pathname.startsWith(`${href}?`)
+                pathname.startsWith(href) && ['/', undefined].includes(pathname[href.length])
 
               const Label = (
                 <>
