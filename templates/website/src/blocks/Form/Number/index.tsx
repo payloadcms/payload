@@ -30,7 +30,7 @@ export const Number: React.FC<
         type="number"
         {...register(name, { required })}
       />
-      {errors[name] && <Error />}
+      {errors[name] && <Error name={name} />}
     </Width>
   )
 }
