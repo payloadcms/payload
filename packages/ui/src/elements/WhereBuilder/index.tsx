@@ -1,5 +1,5 @@
 'use client'
-import type { Operator, Where } from 'payload'
+import type { Operator } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useMemo } from 'react'
@@ -32,7 +32,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
 
   const { handleWhereChange, query } = useListQuery()
 
-  const [conditions, setConditions] = React.useState<Where[]>(() => {
+  const conditions = useMemo(() => {
     const whereFromSearch = query.where
 
     if (whereFromSearch) {
@@ -51,7 +51,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
     }
 
     return []
-  })
+  }, [query.where])
 
   const addCondition: AddCondition = React.useCallback(
     async ({ andIndex, field, orIndex, relation }) => {
@@ -77,8 +77,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
         })
       }
 
-      setConditions(newConditions)
-      await handleWhereChange({ or: conditions })
+      await handleWhereChange({ or: newConditions })
     },
     [conditions, handleWhereChange],
   )
@@ -100,8 +99,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
         const newConditions = [...conditions]
         newConditions[orIndex].and[andIndex] = newRowCondition
 
-        setConditions(newConditions)
-        await handleWhereChange({ or: conditions })
+        await handleWhereChange({ or: newConditions })
       }
     },
     [conditions, handleWhereChange],
@@ -116,8 +114,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
         newConditions.splice(orIndex, 1)
       }
 
-      setConditions(newConditions)
-      await handleWhereChange({ or: conditions })
+      await handleWhereChange({ or: newConditions })
     },
     [conditions, handleWhereChange],
   )
