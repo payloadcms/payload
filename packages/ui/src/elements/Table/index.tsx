@@ -7,12 +7,8 @@ import './index.scss'
 import React from 'react'
 
 import { useListQuery } from '../../providers/ListQuery/index.js'
-import { useTranslation } from '../../providers/Translation/index.js'
 import { DraggableSortableItem } from '../DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
-import { Pill } from '../Pill/index.js'
-import { SelectRow } from '../SelectRow/index.js'
-import { SortRow } from '../SortRow/index.js'
 
 const baseClass = 'table'
 
@@ -28,13 +24,10 @@ export type Props = {
   readonly data: { [key: string]: unknown; id: string; [ORDER_FIELD_NAME]: string }[]
 }
 
-export const Table: React.FC<Props> = ({ appearance, columns: columnsFromProps }) => {
+export const Table: React.FC<Props> = ({ appearance, columns }) => {
   const { handleSortChange, query } = useListQuery()
   const { data: paginatedDocs } = useListQuery()
   const [data, setData] = React.useState(paginatedDocs.docs)
-  const [columns, setColumns] = React.useState(columnsFromProps)
-
-  console.log('columns', columns, paginatedDocs)
 
   // Force re-sort when data changes
   React.useEffect(() => {
@@ -148,16 +141,14 @@ export const Table: React.FC<Props> = ({ appearance, columns: columnsFromProps }
                         return (
                           <td className={`cell-${accessor}`} key={colIndex}>
                             <div {...attributes} {...listeners}>
-                              <Cell col={col} rowIndex={rowIndex} />
-                              {/* {col.renderedCells[rowIndex]} */}
+                              {col.renderedCells[rowIndex]}
                             </div>
                           </td>
                         )
                       }
                       return (
                         <td className={`cell-${accessor}`} key={colIndex}>
-                          <Cell col={col} rowIndex={rowIndex} />
-                          {/* {col.renderedCells[rowIndex]} */}
+                          {col.renderedCells[rowIndex]}
                         </td>
                       )
                     })}
@@ -171,38 +162,3 @@ export const Table: React.FC<Props> = ({ appearance, columns: columnsFromProps }
     </div>
   )
 }
-
-// ... existing code ...
-
-const Cell: React.FC<{ col: Column; rowIndex: number }> = ({ col, rowIndex }) => {
-  const { data } = useListQuery()
-  const { accessor } = col
-  const { i18n } = useTranslation()
-
-  if (accessor === 'collection') {
-    const doc = data.docs[rowIndex]
-    return (
-      <Pill>
-        {/* {getTranslation(
-          collections ? payload.collections[doc.relationTo].config.labels.singular :
-          clientCollectionConfig.labels.singular,
-          i18n,
-        )} */}
-      </Pill>
-    )
-  }
-
-  if (accessor === '_select') {
-    return <SelectRow rowData={data.docs[rowIndex]} />
-  }
-
-  if (accessor === '_dragHandle') {
-    return <SortRow />
-  }
-
-  // For all other columns, render the value from the data
-  const cellData = data.docs[rowIndex][accessor]
-  return <>{cellData}</>
-}
-
-// ... existing code ...
