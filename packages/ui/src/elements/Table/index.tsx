@@ -2,9 +2,10 @@
 
 import type { Column } from 'payload'
 
+import './index.scss'
+
 import React from 'react'
 
-import './index.scss'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { DraggableSortableItem } from '../DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
@@ -17,12 +18,16 @@ const ORDER_FIELD_NAME = '_order'
 export type Props = {
   readonly appearance?: 'condensed' | 'default'
   readonly columns?: Column[]
+  /**
+   * TODO: remove in payload v4. We are using the paginatedDocs from the useListQuery provider
+   */
   readonly data: { [key: string]: unknown; id: string; [ORDER_FIELD_NAME]: string }[]
 }
 
-export const Table: React.FC<Props> = ({ appearance, columns, data: initialData }) => {
+export const Table: React.FC<Props> = ({ appearance, columns }) => {
   const { handleSortChange, query } = useListQuery()
-  const [data, setData] = React.useState(initialData)
+  const { data: paginatedDocs } = useListQuery()
+  const [data, setData] = React.useState(paginatedDocs.docs)
 
   // Force re-sort when data changes
   React.useEffect(() => {

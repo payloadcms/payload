@@ -217,14 +217,14 @@ export const renderTable = ({
     } as Column)
 
     // show order as integer
-    const orderColumn = columnsToUse.find((column) => column.accessor === ORDER_FIELD_NAME)
-    if (orderColumn) {
-      const cells = docs.map((doc, i) => (
-        <React.Fragment key={i}>{doc.orderAsInteger}</React.Fragment>
-      ))
-      // @ts-expect-error - renderedCells is read-only
-      orderColumn.renderedCells = cells
-    }
+    // const orderColumn = columnsToUse.find((column) => column.accessor === ORDER_FIELD_NAME)
+    // if (orderColumn) {
+    //   const cells = docs.map((doc, i) => (
+    //     <React.Fragment key={i}>{doc.orderAsInteger}</React.Fragment>
+    //   ))
+    //   // @ts-expect-error - renderedCells is read-only
+    //   orderColumn.renderedCells = cells
+    // }
   }
 
   return {

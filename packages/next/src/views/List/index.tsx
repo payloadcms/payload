@@ -135,18 +135,6 @@ export const renderListView = async (
       where: where || {},
     })
 
-    // if you change this, you need to change it in a couple of places where it's duplicated
-    const ORDER_FIELD_NAME = '_order'
-    const isSortable = data.docs[0]?.[ORDER_FIELD_NAME] !== undefined
-    if (isSortable) {
-      // add orderAsInteger to the docs using limit and page
-      const startIndex = (page - 1) * limit
-      data.docs = data.docs.map((doc, index) => ({
-        ...doc,
-        orderAsInteger: startIndex + index + 1,
-      }))
-    }
-
     const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
 
     const { columnState, Table } = renderTable({
