@@ -7,6 +7,7 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { formatAdminURL } from 'payload/shared'
 import React, { Fragment, useEffect } from 'react'
 
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
@@ -15,7 +16,6 @@ import { useFormInitializing, useFormProcessing } from '../../forms/Form/context
 import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { formatDate } from '../../utilities/formatDate.js'
 import { Autosave } from '../Autosave/index.js'
 import { Button } from '../Button/index.js'

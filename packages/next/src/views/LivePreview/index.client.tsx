@@ -35,13 +35,13 @@ import {
 } from '@payloadcms/ui'
 import {
   abortAndIgnore,
-  formatAdminURL,
   handleAbortRef,
   handleBackToDashboard,
   handleGoBack,
   handleTakeOver,
 } from '@payloadcms/ui/shared'
 import { useRouter, useSearchParams } from 'next/navigation.js'
+import { formatAdminURL } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
 import { useLivePreviewContext } from './Context/context.js'

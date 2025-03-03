@@ -5,8 +5,8 @@ import type React from 'react'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useConfig, useLocale, useStepNav, useTranslation } from '@payloadcms/ui'
-import { formatAdminURL, formatDate } from '@payloadcms/ui/shared'
-import { fieldAffectsData } from 'payload/shared'
+import { formatDate } from '@payloadcms/ui/shared'
+import { fieldAffectsData, formatAdminURL } from 'payload/shared'
 import { useEffect } from 'react'
 
 export const SetStepNav: React.FC<{

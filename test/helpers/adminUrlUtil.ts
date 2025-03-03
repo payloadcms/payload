@@ -71,7 +71,7 @@ export class AdminUrlUtil {
 
   collection(slug: string): string {
     return formatAdminURL({
-      adminRoute: this.routes.admin,
+      adminRoute: this.routes?.admin,
       path: `/collections/${slug}`,
       serverURL: this.serverURL,
     })
@@ -83,7 +83,7 @@ export class AdminUrlUtil {
 
   global(slug: string): string {
     return formatAdminURL({
-      adminRoute: this.routes.admin,
+      adminRoute: this.routes?.admin,
       path: `/globals/${slug}`,
       serverURL: this.serverURL,
     })

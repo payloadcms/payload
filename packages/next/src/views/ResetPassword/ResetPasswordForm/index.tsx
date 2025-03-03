@@ -9,9 +9,9 @@ import {
   useConfig,
   useTranslation,
 } from '@payloadcms/ui'
-import { formatAdminURL } from '@payloadcms/ui/shared'
 import { useRouter } from 'next/navigation.js'
 import { type FormState } from 'payload'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 type Args = {

@@ -11,8 +11,9 @@ import {
   useRouteTransition,
   useTranslation,
 } from '@payloadcms/ui'
-import { formatAdminURL, requests } from '@payloadcms/ui/shared'
+import { requests } from '@payloadcms/ui/shared'
 import { useRouter } from 'next/navigation.js'
+import { formatAdminURL } from 'payload/shared'
 import React, { Fragment, useCallback, useState } from 'react'
 
 import type { Props } from './types.js'

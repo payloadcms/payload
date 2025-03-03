@@ -2,7 +2,7 @@ import type { I18n } from '@payloadcms/translations'
 import type { Metadata } from 'next'
 import type { AdminViewServerProps, ImportMap, SanitizedConfig } from 'payload'
 
-import { formatAdminURL } from '@payloadcms/ui/shared'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import { DefaultTemplate } from '../../templates/Default/index.js'
