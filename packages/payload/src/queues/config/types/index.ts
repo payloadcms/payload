@@ -68,7 +68,11 @@ export type JobsConfig = {
   /**
    * Specify depth for retrieving jobs from the queue.
    * This should be as low as possible in order for job retrieval
-   * to be as efficient as possible. Defaults to 0.
+   * to be as efficient as possible. Setting it to anything higher than
+   * 0 will drastically affect performance, as less efficient database
+   * queries will be used.
+   *
+   * @default 0
    */
   depth?: number
   /**
@@ -76,6 +80,15 @@ export type JobsConfig = {
    * a new collection.
    */
   jobsCollectionOverrides?: (args: { defaultJobsCollection: CollectionConfig }) => CollectionConfig
+  /**
+   * By default, the job system uses direct database calls for optimal performance.
+   * If you added custom hooks to your jobs collection, you can set this to true to
+   * use the standard Payload API for all job operations. This is discouraged, as it will
+   * drastically affect performance.
+   *
+   * @default false
+   */
+  runHooks?: boolean
   /**
    * A function that will be executed before Payload picks up jobs which are configured by the `jobs.autorun` function.
    * If this function returns true, jobs will be queried and picked up. If it returns false, jobs will not be run.

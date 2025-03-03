@@ -108,6 +108,9 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       initializing,
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
+      meta: {
+        supportsPartialData: false,
+      },
       operators,
       prodMigrations: args.prodMigrations,
       push: args.push,
