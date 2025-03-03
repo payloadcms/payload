@@ -6,16 +6,73 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
+/**
+ * Supported timezones in IANA format.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supportedTimezones".
+ */
+export type SupportedTimezones =
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji';
+
 export interface Config {
   auth: {
     users: UserAuthOperations;
   };
+  blocks: {};
   collections: {
     'disable-publish': DisablePublish;
     posts: Post;
     'autosave-posts': AutosavePost;
+    'autosave-with-validate-posts': AutosaveWithValidatePost;
     'draft-posts': DraftPost;
     'draft-with-max-posts': DraftWithMaxPost;
+    'draft-with-validate-posts': DraftWithValidatePost;
     'localized-posts': LocalizedPost;
     'version-posts': VersionPost;
     'custom-ids': CustomId;
@@ -32,8 +89,10 @@ export interface Config {
     'disable-publish': DisablePublishSelect<false> | DisablePublishSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     'autosave-posts': AutosavePostsSelect<false> | AutosavePostsSelect<true>;
+    'autosave-with-validate-posts': AutosaveWithValidatePostsSelect<false> | AutosaveWithValidatePostsSelect<true>;
     'draft-posts': DraftPostsSelect<false> | DraftPostsSelect<true>;
     'draft-with-max-posts': DraftWithMaxPostsSelect<false> | DraftWithMaxPostsSelect<true>;
+    'draft-with-validate-posts': DraftWithValidatePostsSelect<false> | DraftWithValidatePostsSelect<true>;
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
     'version-posts': VersionPostsSelect<false> | VersionPostsSelect<true>;
     'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
@@ -168,6 +227,17 @@ export interface DraftPost {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave-with-validate-posts".
+ */
+export interface AutosaveWithValidatePost {
+  id: string;
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "draft-with-max-posts".
  */
 export interface DraftWithMaxPost {
@@ -186,6 +256,17 @@ export interface DraftWithMaxPost {
       }[]
     | null;
   relation?: (string | null) | DraftWithMaxPost;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-with-validate-posts".
+ */
+export interface DraftWithValidatePost {
+  id: string;
+  title: string;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -443,12 +524,20 @@ export interface PayloadLockedDocument {
         value: string | AutosavePost;
       } | null)
     | ({
+        relationTo: 'autosave-with-validate-posts';
+        value: string | AutosaveWithValidatePost;
+      } | null)
+    | ({
         relationTo: 'draft-posts';
         value: string | DraftPost;
       } | null)
     | ({
         relationTo: 'draft-with-max-posts';
         value: string | DraftWithMaxPost;
+      } | null)
+    | ({
+        relationTo: 'draft-with-validate-posts';
+        value: string | DraftWithValidatePost;
       } | null)
     | ({
         relationTo: 'localized-posts';
@@ -554,6 +643,16 @@ export interface AutosavePostsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave-with-validate-posts_select".
+ */
+export interface AutosaveWithValidatePostsSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "draft-posts_select".
  */
 export interface DraftPostsSelect<T extends boolean = true> {
@@ -601,6 +700,16 @@ export interface DraftWithMaxPostsSelect<T extends boolean = true> {
             };
       };
   relation?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-with-validate-posts_select".
+ */
+export interface DraftWithValidatePostsSelect<T extends boolean = true> {
+  title?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

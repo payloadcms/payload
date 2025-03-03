@@ -3,7 +3,7 @@ import type { BatchLoadFn } from 'dataloader'
 
 import DataLoader from 'dataloader'
 
-import type { PayloadRequest, SelectType } from '../types/index.js'
+import type { PayloadRequest, PopulateType, SelectType } from '../types/index.js'
 import type { TypeWithID } from './config/types.js'
 
 import { isValidID } from '../utilities/isValidID.js'
@@ -44,7 +44,9 @@ const batchAndLoadDocs =
     *
     **/
 
-    const batchByFindArgs = keys.reduce((batches, key) => {
+    const batchByFindArgs = {}
+
+    for (const key of keys) {
       const [
         transactionID,
         collection,
@@ -57,6 +59,7 @@ const batchAndLoadDocs =
         showHiddenFields,
         draft,
         select,
+        populate,
       ] = JSON.parse(key)
 
       const batchKeyArray = [
@@ -70,32 +73,22 @@ const batchAndLoadDocs =
         showHiddenFields,
         draft,
         select,
+        populate,
       ]
 
       const batchKey = JSON.stringify(batchKeyArray)
 
       const idType = payload.collections?.[collection].customIDType || payload.db.defaultIDType
-
-      let sanitizedID: number | string = id
-
-      if (idType === 'number') {
-        sanitizedID = parseFloat(id)
-      }
+      const sanitizedID = idType === 'number' ? parseFloat(id) : id
 
       if (isValidID(sanitizedID, idType)) {
-        return {
-          ...batches,
-          [batchKey]: [...(batches[batchKey] || []), sanitizedID],
-        }
+        batchByFindArgs[batchKey] = [...(batchByFindArgs[batchKey] || []), sanitizedID]
       }
-      return batches
-    }, {})
+    }
 
     // Run find requests one after another, so as to not hang transactions
 
-    await Object.entries(batchByFindArgs).reduce(async (priorFind, [batchKey, ids]) => {
-      await priorFind
-
+    for (const [batchKey, ids] of Object.entries(batchByFindArgs)) {
       const [
         transactionID,
         collection,
@@ -107,6 +100,7 @@ const batchAndLoadDocs =
         showHiddenFields,
         draft,
         select,
+        populate,
       ] = JSON.parse(batchKey)
 
       req.transactionID = transactionID
@@ -121,6 +115,7 @@ const batchAndLoadDocs =
         locale,
         overrideAccess: Boolean(overrideAccess),
         pagination: false,
+        populate,
         req,
         select,
         showHiddenFields: Boolean(showHiddenFields),
@@ -133,8 +128,7 @@ const batchAndLoadDocs =
 
       // For each returned doc, find index in original keys
       // Inject doc within docs array if index exists
-
-      result.docs.forEach((doc) => {
+      for (const doc of result.docs) {
         const docKey = createDataloaderCacheKey({
           collectionSlug: collection,
           currentDepth,
@@ -144,6 +138,7 @@ const batchAndLoadDocs =
           fallbackLocale,
           locale,
           overrideAccess,
+          populate,
           select,
           showHiddenFields,
           transactionID: req.transactionID,
@@ -153,8 +148,8 @@ const batchAndLoadDocs =
         if (docsIndex > -1) {
           docs[docsIndex] = doc
         }
-      })
-    }, Promise.resolve())
+      }
+    }
 
     // Return docs array,
     // which has now been injected with all fetched docs
@@ -173,6 +168,7 @@ type CreateCacheKeyArgs = {
   fallbackLocale: string
   locale: string
   overrideAccess: boolean
+  populate?: PopulateType
   select?: SelectType
   showHiddenFields: boolean
   transactionID: number | Promise<number | string> | string
@@ -186,6 +182,7 @@ export const createDataloaderCacheKey = ({
   fallbackLocale,
   locale,
   overrideAccess,
+  populate,
   select,
   showHiddenFields,
   transactionID,
@@ -202,4 +199,5 @@ export const createDataloaderCacheKey = ({
     showHiddenFields,
     draft,
     select,
+    populate,
   ])

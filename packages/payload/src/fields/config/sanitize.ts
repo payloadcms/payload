@@ -1,7 +1,11 @@
 // @ts-strict-ignore
 import { deepMergeSimple } from '@payloadcms/translations/utilities'
 
-import type { CollectionConfig, SanitizedJoins } from '../../collections/config/types.js'
+import type {
+  CollectionConfig,
+  SanitizedJoin,
+  SanitizedJoins,
+} from '../../collections/config/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { Field } from './types.js'
 
@@ -33,6 +37,7 @@ type Args = {
    */
   joins?: SanitizedJoins
   parentIsLocalized: boolean
+  polymorphicJoins?: SanitizedJoin[]
 
   /**
    * If true, a richText field will require an editor property to be set, as the sanitizeFields function will not add it from the payload config if not present.
@@ -59,6 +64,7 @@ export const sanitizeFields = async ({
   joinPath = '',
   joins,
   parentIsLocalized,
+  polymorphicJoins,
   requireFieldLevelRichTextEditor = false,
   richTextSanitizationPromises,
   validRelationships,
@@ -104,7 +110,7 @@ export const sanitizeFields = async ({
     }
 
     if (field.type === 'join') {
-      sanitizeJoinField({ config, field, joinPath, joins })
+      sanitizeJoinField({ config, field, joinPath, joins, parentIsLocalized, polymorphicJoins })
     }
 
     if (field.type === 'relationship' || field.type === 'upload') {
@@ -160,7 +166,12 @@ export const sanitizeFields = async ({
       if (typeof field.localized !== 'undefined') {
         let shouldDisableLocalized = !config.localization
 
-        if (!config.compatibility?.allowLocalizedWithinLocalized && parentIsLocalized) {
+        if (
+          process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized !== 'true' &&
+          parentIsLocalized &&
+          // @todo PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY=true will be the default in 4.0
+          process.env.PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY !== 'true'
+        ) {
           shouldDisableLocalized = true
         }
 
@@ -185,7 +196,7 @@ export const sanitizeFields = async ({
         field.access = {}
       }
 
-      setDefaultBeforeDuplicate(field)
+      setDefaultBeforeDuplicate(field, parentIsLocalized)
     }
 
     if (!field.admin) {
@@ -260,6 +271,7 @@ export const sanitizeFields = async ({
           : joinPath,
         joins,
         parentIsLocalized: parentIsLocalized || fieldIsLocalized(field),
+        polymorphicJoins,
         requireFieldLevelRichTextEditor,
         richTextSanitizationPromises,
         validRelationships,
@@ -280,6 +292,7 @@ export const sanitizeFields = async ({
           joinPath: tabHasName(tab) ? `${joinPath ? joinPath + '.' : ''}${tab.name}` : joinPath,
           joins,
           parentIsLocalized: parentIsLocalized || (tabHasName(tab) && tab.localized),
+          polymorphicJoins,
           requireFieldLevelRichTextEditor,
           richTextSanitizationPromises,
           validRelationships,

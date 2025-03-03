@@ -38,6 +38,8 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
     validate,
   } = props
 
+  const pickerAppearance = datePickerProps?.pickerAppearance || 'default'
+
   // Get the user timezone so we can adjust the displayed value against it
   const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
@@ -59,7 +61,7 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
     setValue,
     showError,
     value,
-  } = useField<Date>({
+  } = useField<string>({
     path,
     validate: memoizedValidate,
   })
@@ -67,7 +69,11 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
   const timezonePath = path + '_tz'
   const timezoneField = useFormFields(([fields, _]) => fields?.[timezonePath])
   const supportedTimezones = config.admin.timezones.supportedTimezones
-
+  /**
+   * Date appearance doesn't include timestamps,
+   * which means we need to pin the time to always 12:00 for the selected date
+   */
+  const isDateOnly = ['dayOnly', 'default', 'monthOnly'].includes(pickerAppearance)
   const selectedTimezone = timezoneField?.value as string
 
   // The displayed value should be the original value, adjusted to the user's timezone
@@ -99,15 +105,28 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
       if (!readOnly) {
         if (timezone && selectedTimezone && incomingDate) {
           // Create TZDate instances for the selected timezone
-          const tzDateWithUTC = TZDate.tz(selectedTimezone)
+          const TZDateWithSelectedTz = TZDate.tz(selectedTimezone)
 
-          // Creates a TZDate instance for the user's timezone  — this is default behaviour of TZDate as it wraps the Date constructor
-          const dateToUserTz = new TZDate(incomingDate)
+          if (isDateOnly) {
+            // We need to offset this hardcoded hour offset from the DatePicker elemenent
+            // this can be removed in 4.0 when we remove the hardcoded offset as it is a breaking change
+            // const tzOffset = incomingDate.getTimezoneOffset() / 60
+            const incomingOffset = incomingDate.getTimezoneOffset() / 60
+            const originalHour = incomingDate.getHours() + incomingOffset
+            incomingDate.setHours(originalHour)
 
-          // Transpose the date to the selected timezone
-          const dateWithTimezone = transpose(dateToUserTz, tzDateWithUTC)
+            // Convert the original date as picked into the desired timezone.
+            const dateToSelectedTz = transpose(incomingDate, TZDateWithSelectedTz)
 
-          setValue(dateWithTimezone.toISOString() || null)
+            setValue(dateToSelectedTz.toISOString() || null)
+          } else {
+            // Creates a TZDate instance for the user's timezone  — this is default behaviour of TZDate as it wraps the Date constructor
+            const dateToUserTz = new TZDate(incomingDate)
+            // Transpose the date to the selected timezone
+            const dateWithTimezone = transpose(dateToUserTz, TZDateWithSelectedTz)
+
+            setValue(dateWithTimezone.toISOString() || null)
+          }
         } else {
           setValue(incomingDate?.toISOString() || null)
         }
@@ -173,7 +192,6 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
             selectedTimezone={selectedTimezone}
           />
         )}
-
         {AfterInput}
       </div>
       <RenderCustomComponent

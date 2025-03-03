@@ -36,6 +36,10 @@ import { defaults } from './defaults.js'
 const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig> => {
   const sanitizedConfig = { ...configToSanitize }
 
+  if (configToSanitize?.compatibility?.allowLocalizedWithinLocalized) {
+    process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized = 'true'
+  }
+
   // default logging level will be 'error' if not provided
   sanitizedConfig.loggingLevels = {
     Forbidden: 'info',
@@ -175,10 +179,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       }))
     } else {
       // is Locale[], so convert to string[] for localeCodes
-      config.localization.localeCodes = config.localization.locales.reduce((locales, locale) => {
-        locales.push(locale.code)
-        return locales
-      }, [] as string[])
+      config.localization.localeCodes = config.localization.locales.map((locale) => locale.code)
 
       config.localization.locales = (
         config.localization as LocalizationConfigWithLabels

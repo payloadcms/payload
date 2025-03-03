@@ -49,6 +49,7 @@ export const beforeValidate = async <T extends JsonObject>({
     operation,
     overrideAccess,
     parentIndexPath: '',
+    parentIsLocalized: false,
     parentPath: '',
     parentSchemaPath: '',
     req,

@@ -59,8 +59,6 @@ export function AppHeader({ CustomAvatar, CustomIcon }: Props) {
     }
   }, [Actions])
 
-  const LinkElement = Link || 'a'
-
   const ActionComponents = Actions ? Object.values(Actions) : []
 
   return (
@@ -95,15 +93,15 @@ export function AppHeader({ CustomAvatar, CustomIcon }: Props) {
             {localization && (
               <LocalizerLabel ariaLabel="invisible" className={`${baseClass}__localizer-spacing`} />
             )}
-            <LinkElement
+            <Link
               aria-label={t('authentication:account')}
               className={`${baseClass}__account`}
               href={formatAdminURL({ adminRoute, path: accountRoute })}
-              prefetch={Link ? false : undefined}
+              prefetch={false}
               tabIndex={0}
             >
               <RenderCustomComponent CustomComponent={CustomAvatar} Fallback={<Account />} />
-            </LinkElement>
+            </Link>
           </div>
         </div>
       </div>

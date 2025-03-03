@@ -32,9 +32,11 @@ import { useOperation } from '../../providers/Operation/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { useUploadHandlers } from '../../providers/UploadHandlers/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 import { requests } from '../../utilities/api.js'
 import {
+  BackgroundProcessingContext,
   DocumentFormContext,
   FormContext,
   FormFieldsContext,
@@ -64,6 +66,7 @@ export const Form: React.FC<FormProps> = (props) => {
     disableSuccessStatus,
     disableValidationOnSubmit,
     // fields: fieldsFromProps = collection?.fields || global?.fields,
+    el,
     handleResponse,
     initialState, // fully formed initial field state
     isDocumentForm,
@@ -90,14 +93,22 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const { getFormState } = useServerFunctions()
   const { startRouteTransition } = useRouteTransition()
+  const { getUploadHandler } = useUploadHandlers()
 
   const { config } = useConfig()
 
   const [disabled, setDisabled] = useState(disabledFromProps || false)
   const [isMounted, setIsMounted] = useState(false)
   const [modified, setModified] = useState(false)
+  /**
+   * Tracks wether the form state passes validation.
+   * For example the state could be submitted but invalid as field errors have been returned.
+   */
+  const [isValid, setIsValid] = useState(true)
   const [initializing, setInitializing] = useState(initializingFromProps)
   const [processing, setProcessing] = useState(false)
+  const [backgroundProcessing, setBackgroundProcessing] = useState(false)
+
   const [submitted, setSubmitted] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   const contextRef = useRef({} as FormContextType)
@@ -176,6 +187,8 @@ export const Form: React.FC<FormProps> = (props) => {
     if (!dequal(contextRef.current.fields, validatedFieldState)) {
       dispatchFields({ type: 'REPLACE_STATE', state: validatedFieldState })
     }
+
+    setIsValid(isValid)
 
     return isValid
   }, [collectionSlug, config, dispatchFields, id, operation, t, user, documentForm])
@@ -257,6 +270,8 @@ export const Form: React.FC<FormProps> = (props) => {
           ([, field]) => field.valid !== false,
         )
 
+        setIsValid(isValid)
+
         if (!isValid) {
           setProcessing(false)
           setSubmitted(true)
@@ -268,6 +283,7 @@ export const Form: React.FC<FormProps> = (props) => {
       const isValid =
         skipValidation || disableValidationOnSubmit ? true : await contextRef.current.validateForm()
 
+      setIsValid(isValid)
       // If not valid, prevent submission
       if (!isValid) {
         errorToast(t('error:correctInvalidFields'))
@@ -309,7 +325,7 @@ export const Form: React.FC<FormProps> = (props) => {
         return
       }
 
-      const formData = contextRef.current.createFormData(overrides, {
+      const formData = await contextRef.current.createFormData(overrides, {
         mergeOverrideData: Boolean(typeof overridesFromArgs !== 'function'),
       })
 
@@ -408,6 +424,8 @@ export const Form: React.FC<FormProps> = (props) => {
               [[], []],
             )
 
+            setIsValid(false)
+
             dispatchFields({
               type: 'ADD_SERVER_ERRORS',
               errors: fieldErrors,
@@ -434,6 +452,7 @@ export const Form: React.FC<FormProps> = (props) => {
     },
     [
       beforeSubmit,
+      startRouteTransition,
       action,
       disableSuccessStatus,
       disableValidationOnSubmit,
@@ -467,34 +486,58 @@ export const Form: React.FC<FormProps> = (props) => {
     [],
   )
 
-  const createFormData = useCallback<CreateFormData>((overrides, { mergeOverrideData = true }) => {
-    let data = reduceFieldsToValues(contextRef.current.fields, true)
+  const createFormData = useCallback<CreateFormData>(
+    async (overrides, { mergeOverrideData = true }) => {
+      let data = reduceFieldsToValues(contextRef.current.fields, true)
 
-    const file = data?.file
+      let file = data?.file
 
-    if (file) {
-      delete data.file
-    }
-
-    if (mergeOverrideData) {
-      data = {
-        ...data,
-        ...overrides,
+      if (file) {
+        delete data.file
       }
-    } else {
-      data = overrides
-    }
 
-    const dataToSerialize = {
-      _payload: JSON.stringify(data),
-      file,
-    }
+      if (mergeOverrideData) {
+        data = {
+          ...data,
+          ...overrides,
+        }
+      } else {
+        data = overrides
+      }
 
-    // nullAsUndefineds is important to allow uploads and relationship fields to clear themselves
-    const formData = serialize(dataToSerialize, { indices: true, nullsAsUndefineds: false })
+      const handler = getUploadHandler({ collectionSlug })
 
-    return formData
-  }, [])
+      if (typeof handler === 'function') {
+        let clientUploadContext = null
+        let filename = file.name
+        clientUploadContext = await handler({
+          file,
+          updateFilename: (value) => {
+            filename = value
+          },
+        })
+
+        file = JSON.stringify({
+          clientUploadContext,
+          collectionSlug,
+          filename,
+          mimeType: file.type,
+          size: file.size,
+        })
+      }
+
+      const dataToSerialize = {
+        _payload: JSON.stringify(data),
+        file,
+      }
+
+      // nullAsUndefineds is important to allow uploads and relationship fields to clear themselves
+      const formData = serialize(dataToSerialize, { indices: true, nullsAsUndefineds: false })
+
+      return formData
+    },
+    [collectionSlug, getUploadHandler],
+  )
 
   const reset = useCallback(
     async (data: unknown) => {
@@ -614,7 +657,10 @@ export const Form: React.FC<FormProps> = (props) => {
   contextRef.current.createFormData = createFormData
   contextRef.current.setModified = setModified
   contextRef.current.setProcessing = setProcessing
+  contextRef.current.setBackgroundProcessing = setBackgroundProcessing
+
   contextRef.current.setSubmitted = setSubmitted
+  contextRef.current.setIsValid = setIsValid
   contextRef.current.disabled = disabled
   contextRef.current.setDisabled = setDisabled
   contextRef.current.formRef = formRef
@@ -626,6 +672,7 @@ export const Form: React.FC<FormProps> = (props) => {
   contextRef.current.replaceFieldRow = replaceFieldRow
   contextRef.current.uuid = uuid
   contextRef.current.initializing = initializing
+  contextRef.current.isValid = isValid
 
   useEffect(() => {
     setIsMounted(true)
@@ -737,8 +784,10 @@ export const Form: React.FC<FormProps> = (props) => {
       }
     : {}
 
+  const El: 'form' = (el as unknown as 'form') || 'form'
+
   return (
-    <form
+    <El
       action={typeof action === 'function' ? void action : action}
       className={classes}
       method={method}
@@ -757,18 +806,20 @@ export const Form: React.FC<FormProps> = (props) => {
             <SubmittedContext.Provider value={submitted}>
               <InitializingContext.Provider value={!isMounted || (isMounted && initializing)}>
                 <ProcessingContext.Provider value={processing}>
-                  <ModifiedContext.Provider value={modified}>
-                    <FormFieldsContext.Provider value={fieldsReducer}>
-                      {children}
-                    </FormFieldsContext.Provider>
-                  </ModifiedContext.Provider>
+                  <BackgroundProcessingContext.Provider value={backgroundProcessing}>
+                    <ModifiedContext.Provider value={modified}>
+                      <FormFieldsContext.Provider value={fieldsReducer}>
+                        {children}
+                      </FormFieldsContext.Provider>
+                    </ModifiedContext.Provider>
+                  </BackgroundProcessingContext.Provider>
                 </ProcessingContext.Provider>
               </InitializingContext.Provider>
             </SubmittedContext.Provider>
           </FormWatchContext.Provider>
         </FormContext.Provider>
       </DocumentFormContextComponent>
-    </form>
+    </El>
   )
 }
 

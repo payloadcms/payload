@@ -87,6 +87,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
         const { List: ViewResult } = (await serverFunction({
           name: 'render-list',
           args: {
+            allowCreate,
             collectionSlug: slug,
             disableBulkDelete: true,
             disableBulkEdit: true,
@@ -110,6 +111,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     [
       serverFunction,
       closeModal,
+      allowCreate,
       drawerSlug,
       isOpen,
       enableRowSelections,
@@ -129,6 +131,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       if (typeof onSelect === 'function') {
         onSelect({
           collectionSlug: selectedOption.value,
+          doc,
           docID: doc.id,
         })
       }
@@ -160,6 +163,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 
   return (
     <ListDrawerContextProvider
+      allowCreate={allowCreate}
       createNewDrawerSlug={documentDrawerSlug}
       DocumentDrawerToggler={DocumentDrawerToggler}
       drawerSlug={drawerSlug}

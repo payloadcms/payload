@@ -125,10 +125,8 @@ export const buildAfterOperation = async <
 
   let newResult = result as OperationResult<TOperationGeneric, O>
 
-  await args.collection.config.hooks.afterOperation.reduce(
-    async (priorHook, hook: AfterOperationHook<TOperationGeneric>) => {
-      await priorHook
-
+  if (args.collection.config.hooks?.afterOperation?.length) {
+    for (const hook of args.collection.config.hooks.afterOperation) {
       const hookResult = await hook({
         args,
         collection,
@@ -140,9 +138,8 @@ export const buildAfterOperation = async <
       if (hookResult !== undefined) {
         newResult = hookResult as OperationResult<TOperationGeneric, O>
       }
-    },
-    Promise.resolve(),
-  )
+    }
+  }
 
   return newResult
 }

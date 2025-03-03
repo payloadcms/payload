@@ -3,8 +3,8 @@ import type { GeneratedTypes } from 'helpers/sdk/types.js'
 
 import { expect, test } from '@playwright/test'
 import { openListColumns } from 'helpers/e2e/openListColumns.js'
+import { upsertPreferences } from 'helpers/e2e/preferences.js'
 import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
-import { upsertPrefs } from 'helpers/e2e/upsertPrefs.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -165,7 +165,7 @@ describe('Text', () => {
   })
 
   test('should respect admin.disableListColumn despite preferences', async () => {
-    await upsertPrefs<Config, GeneratedTypes<any>>({
+    await upsertPreferences<Config, GeneratedTypes<any>>({
       payload,
       user: client.user,
       key: 'text-fields-list',
@@ -198,6 +198,7 @@ describe('Text', () => {
     await toggleColumn(page, {
       targetState: 'on',
       columnLabel: 'Text en',
+      columnName: 'localizedText',
     })
 
     const textCell = page.locator('.row-1 .cell-i18nText')

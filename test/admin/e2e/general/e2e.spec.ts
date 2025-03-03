@@ -9,9 +9,9 @@ import {
   exactText,
   getRoutes,
   initPageConsoleErrorCatch,
-  openNav,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
+  // throttleTest,
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
@@ -50,6 +50,7 @@ let payload: PayloadTestSDK<Config>
 
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
+import { openNav } from 'helpers/e2e/toggleNav.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -100,6 +101,12 @@ describe('General', () => {
   })
 
   beforeEach(async () => {
+    // await throttleTest({
+    //   page,
+    //   context,
+    //   delay: 'Fast 4G',
+    // })
+
     await reInitializeDB({
       serverURL,
       snapshotKey: 'adminTests',
@@ -399,6 +406,24 @@ describe('General', () => {
       await expect(link).toBeHidden()
     })
 
+    test('should disable active nav item', async () => {
+      await page.goto(postsUrl.list)
+      await openNav(page)
+      const activeItem = page.locator('.nav .nav__link:has(.nav__link-indicator)')
+      await expect(activeItem).toBeVisible()
+      const tagName = await activeItem.evaluate((el) => el.tagName.toLowerCase())
+      expect(tagName).toBe('div')
+    })
+
+    test('should keep active nav item enabled in the edit view', async () => {
+      await page.goto(postsUrl.create)
+      await openNav(page)
+      const activeItem = page.locator('.nav .nav__link:has(.nav__link-indicator)')
+      await expect(activeItem).toBeVisible()
+      const tagName = await activeItem.evaluate((el) => el.tagName.toLowerCase())
+      expect(tagName).toBe('a')
+    })
+
     test('breadcrumbs — should navigate from list to dashboard', async () => {
       await page.goto(postsUrl.list)
       await page.locator(`.step-nav a[href="${adminRoutes.routes.admin}"]`).click()
@@ -514,6 +539,8 @@ describe('General', () => {
 
     test('should render protected nested custom view', async () => {
       await page.goto(`${serverURL}${adminRoutes.routes.admin}${protectedCustomNestedViewPath}`)
+
+      // wait for redirect to unauthorized page
       await page.waitForURL(`**${adminRoutes.routes.admin}/unauthorized`)
       await expect(page.locator('.unauthorized')).toBeVisible()
 
@@ -704,7 +731,7 @@ describe('General', () => {
       await page.goto(postsUrl.edit(id))
       await openDocControls(page)
       await page.locator('#action-delete').click()
-      await page.locator('#confirm-delete').click()
+      await page.locator(`[id=delete-${id}] #confirm-action`).click()
       await expect(page.locator(`text=Post "${title}" successfully deleted.`)).toBeVisible()
       expect(page.url()).toContain(postsUrl.list)
     })
@@ -715,31 +742,38 @@ describe('General', () => {
       await page.goto(postsUrl.list)
       await page.locator('input#select-all').check()
       await page.locator('.delete-documents__toggle').click()
-      await page.locator('#confirm-delete').click()
+      await page.locator('#delete-posts #confirm-action').click()
 
       await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
         'Deleted 3 Posts successfully.',
       )
 
-      await expect(page.locator('.collection-list__no-results')).toBeVisible()
+      // Poll until router has refreshed
+      await expect.poll(() => page.locator('.collection-list__no-results').isVisible()).toBeTruthy()
     })
 
     test('should bulk delete with filters and across pages', async () => {
       await deleteAllPosts()
-      await Promise.all([createPost({ title: 'Post 1' }), createPost({ title: 'Post 2' })])
+
+      Array.from({ length: 6 }).forEach(async (_, i) => {
+        await createPost({ title: `Post ${i + 1}` })
+      })
+
       await page.goto(postsUrl.list)
-      await page.locator('#search-filter-input').fill('Post 1')
-      await expect(page.locator('.table table > tbody > tr')).toHaveCount(1)
+      await page.locator('#search-filter-input').fill('Post')
+      await page.waitForURL(/search=Post/)
+      await expect(page.locator('.table table > tbody > tr')).toHaveCount(5)
       await page.locator('input#select-all').check()
-      await page.locator('button.list-selection__button').click()
+      await page.locator('button#select-all-across-pages').click()
       await page.locator('.delete-documents__toggle').click()
-      await page.locator('#confirm-delete').click()
+      await page.locator('#delete-posts #confirm-action').click()
 
       await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
-        'Deleted 1 Post successfully.',
+        'Deleted 6 Posts successfully.',
       )
 
-      await expect(page.locator('.table table > tbody > tr')).toHaveCount(1)
+      // Poll until router has refreshed
+      await expect.poll(() => page.locator('.table table > tbody > tr').count()).toBe(0)
     })
 
     test('should bulk update', async () => {
@@ -835,17 +869,30 @@ describe('General', () => {
       expect(updatedPost.docs[0].defaultValueField).toBe('not the default value')
     })
 
+    test('should not show "select all across pages" button if already selected all', async () => {
+      await deleteAllPosts()
+      await createPost({ title: `Post 1` })
+      await page.goto(postsUrl.list)
+      await page.locator('input#select-all').check()
+      await expect(page.locator('button#select-all-across-pages')).toBeHidden()
+    })
+
     test('should bulk update with filters and across pages', async () => {
       // First, delete all posts created by the seed
       await deleteAllPosts()
-      const post1Title = 'Post 1'
-      await Promise.all([createPost({ title: post1Title }), createPost({ title: 'Post 2' })])
-      const updatedPostTitle = `${post1Title} (Updated)`
+
+      Array.from({ length: 6 }).forEach(async (_, i) => {
+        await createPost({ title: `Post ${i + 1}` })
+      })
+
       await page.goto(postsUrl.list)
-      await page.locator('#search-filter-input').fill('Post 1')
-      await expect(page.locator('.table table > tbody > tr')).toHaveCount(1)
+      await page.locator('#search-filter-input').fill('Post')
+      await page.waitForURL(/search=Post/)
+      await expect(page.locator('.table table > tbody > tr')).toHaveCount(5)
+
       await page.locator('input#select-all').check()
-      await page.locator('button.list-selection__button').click()
+      await page.locator('button#select-all-across-pages').click()
+
       await page.locator('.edit-many__toggle').click()
       await page.locator('.field-select .rs__control').click()
 
@@ -857,15 +904,35 @@ describe('General', () => {
       await titleOption.click()
       const titleInput = page.locator('#field-title')
       await expect(titleInput).toBeVisible()
-      await titleInput.fill(updatedPostTitle)
+      const updatedTitle = `Post (Updated)`
+      await titleInput.fill(updatedTitle)
 
       await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
       await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
-        'Updated 1 Post successfully.',
+        'Updated 6 Posts successfully.',
       )
 
-      await expect(page.locator('.table table > tbody > tr')).toHaveCount(1)
-      await expect(page.locator('.row-1 .cell-title')).toContainText(updatedPostTitle)
+      // Poll until router has refreshed
+      await expect.poll(() => page.locator('.table table > tbody > tr').count()).toBe(5)
+      await expect(page.locator('.row-1 .cell-title')).toContainText(updatedTitle)
+    })
+
+    test('should update selection state after deselecting item following select all', async () => {
+      await deleteAllPosts()
+
+      Array.from({ length: 6 }).forEach(async (_, i) => {
+        await createPost({ title: `Post ${i + 1}` })
+      })
+
+      await page.goto(postsUrl.list)
+      await page.locator('input#select-all').check()
+      await page.locator('button#select-all-across-pages').click()
+
+      // Deselect the first row
+      await page.locator('.row-1 input').click()
+
+      // eslint-disable-next-line jest-dom/prefer-checked
+      await expect(page.locator('input#select-all')).not.toHaveAttribute('checked', '')
     })
 
     test('should save globals', async () => {
@@ -903,7 +970,9 @@ describe('General', () => {
       await expect(modalContainer).toBeVisible()
 
       // Click the "Leave anyway" button
-      await page.locator('.leave-without-saving__controls .btn--style-primary').click()
+      await page
+        .locator('#leave-without-saving .confirmation-modal__controls .btn--style-primary')
+        .click()
 
       // Assert that the class on the modal container changes to 'payload__modal-container--exitDone'
       await expect(modalContainer).toHaveClass(/payload__modal-container--exitDone/)

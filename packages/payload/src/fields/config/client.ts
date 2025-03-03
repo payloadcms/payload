@@ -107,9 +107,13 @@ export const createClientBlocks = ({
       clientBlock.imageURL = block.imageURL
     }
 
-    if (block.admin?.custom) {
-      clientBlock.admin = {
-        custom: block.admin.custom,
+    if (block.admin?.custom || block.admin?.group) {
+      clientBlock.admin = {}
+      if (block.admin.custom) {
+        clientBlock.admin.custom = block.admin.custom
+      }
+      if (block.admin.group) {
+        clientBlock.admin.group = block.admin.group
       }
     }
 
@@ -311,7 +315,7 @@ export const createClientField = ({
       const field = clientField as JoinFieldClient
 
       field.targetField = {
-        relationTo: field.targetField.relationTo,
+        relationTo: field.targetField?.relationTo,
       }
 
       break

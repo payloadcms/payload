@@ -7,7 +7,12 @@ import type { DraftPost } from './payload-types.js'
 import { devUser } from '../credentials.js'
 import { executePromises } from '../helpers/executePromises.js'
 import { titleToDelete } from './shared.js'
-import { diffCollectionSlug, draftCollectionSlug, mediaCollectionSlug } from './slugs.js'
+import {
+  autosaveWithValidateCollectionSlug,
+  diffCollectionSlug,
+  draftCollectionSlug,
+  mediaCollectionSlug,
+} from './slugs.js'
 import { textToLexicalJSON } from './textToLexicalJSON.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -118,6 +123,13 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     depth: 0,
     overrideAccess: true,
     draft: true,
+  })
+
+  await _payload.create({
+    collection: autosaveWithValidateCollectionSlug,
+    data: {
+      title: 'Initial seeded title',
+    },
   })
 
   const diffDoc = await _payload.create({

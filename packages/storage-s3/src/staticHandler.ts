@@ -35,9 +35,9 @@ const streamToBuffer = async (readableStream: any) => {
 }
 
 export const getHandler = ({ bucket, collection, getStorageClient }: Args): StaticHandler => {
-  return async (req, { params: { filename } }) => {
+  return async (req, { params: { clientUploadContext, filename } }) => {
     try {
-      const prefix = await getFilePrefix({ collection, filename, req })
+      const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
 
       const key = path.posix.join(prefix, filename)
 
