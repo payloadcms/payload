@@ -517,6 +517,7 @@ export type UpdateManyArgs = {
   data: Record<string, unknown>
   draft?: boolean
   joins?: JoinQuery
+  limit?: number
   locale?: string
   /**
    * Additional database adapter specific options to pass to the query
