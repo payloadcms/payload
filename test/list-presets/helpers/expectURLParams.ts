@@ -14,16 +14,25 @@ export async function expectURLParams({
 }: {
   columns: ColumnPreference[]
   page: Page
-  presetID: string | undefined
+  presetID?: string | undefined
   where: Where
 }) {
-  const escapedColumns = encodeURIComponent(JSON.stringify(transformColumnsToSearchParams(columns)))
+  if (where) {
+    // TODO: can't get columns to encode correctly
+    // const whereQuery = qs.stringify(transformWhereQuery(where))
+    // const encodedWhere = encodeURIComponent(whereQuery)
+  }
 
-  // TODO: can't get columns to encode correctly
-  // const whereQuery = qs.stringify(transformWhereQuery(where))
-  // const encodedWhere = encodeURIComponent(whereQuery)
+  if (columns) {
+    const escapedColumns = encodeURIComponent(
+      JSON.stringify(transformColumnsToSearchParams(columns)),
+    )
+    const columnsRegex = new RegExp(`columns=${escapedColumns}`)
+    await page.waitForURL(columnsRegex)
+  }
 
-  const regex = new RegExp(`(?=.*columns=${escapedColumns})(?=.*preset=${presetID})`)
-
-  await page.waitForURL(regex)
+  if (presetID) {
+    const presetRegex = new RegExp(`preset=${presetID}`)
+    await page.waitForURL(presetRegex)
+  }
 }

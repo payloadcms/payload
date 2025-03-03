@@ -207,6 +207,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                   button={<Dots ariaLabel={t('general:moreOptions')} />}
                   className={`${baseClass}__popup`}
                   horizontalAlign="right"
+                  id="list-menu"
                   size="large"
                   verticalAlign="bottom"
                 >

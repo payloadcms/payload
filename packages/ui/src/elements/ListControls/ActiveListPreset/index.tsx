@@ -19,6 +19,7 @@ export function ActiveListPreset({
   return (
     <Pill
       className={[baseClass, activePreset && `${baseClass}--active`].filter(Boolean).join(' ')}
+      id="select-preset"
       onClick={() => {
         openPresetListDrawer()
       }}
@@ -27,6 +28,7 @@ export function ActiveListPreset({
       {activePreset ? (
         <div
           className={`${baseClass}__clear`}
+          id="clear-preset"
           onClick={async (e) => {
             e.stopPropagation()
             await resetPreset()

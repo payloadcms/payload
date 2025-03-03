@@ -64,6 +64,7 @@ const DraggablePill: React.FC<PillProps> = (props) => {
 
 const StaticPill: React.FC<PillProps> = (props) => {
   const {
+    id,
     alignIcon = 'right',
     'aria-checked': ariaChecked,
     'aria-controls': ariaControls,
@@ -115,6 +116,7 @@ const StaticPill: React.FC<PillProps> = (props) => {
       aria-label={ariaLabel}
       className={classes}
       href={to || null}
+      id={id}
       onClick={onClick}
       type={Element === 'button' ? 'button' : undefined}
     >

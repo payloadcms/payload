@@ -17,15 +17,15 @@ export async function selectPreset({ page, presetTitle }: { page: Page; presetTi
     .click()
 
   await expect(
-    page.locator('button.list-presets__select', {
+    page.locator('button#select-preset', {
       hasText: exactText(presetTitle),
     }),
   ).toBeVisible()
 }
 
 export async function clearSelectedPreset({ page }: { page: Page }) {
-  const listPresetsControl = page.locator('.list-presets')
-  const clearButton = listPresetsControl.locator('.list-presets__select__clear')
+  const listPresetsControl = page.locator('button#select-preset')
+  const clearButton = listPresetsControl.locator('#clear-preset')
 
   if (await clearButton.isVisible()) {
     await clearButton.click()
@@ -33,10 +33,10 @@ export async function clearSelectedPreset({ page }: { page: Page }) {
 
   const regex = /columns=/
   await page.waitForURL((url) => !regex.test(url.search))
-  await expect(page.locator('.list-presets__select__clear')).toBeHidden()
+  await expect(listPresetsControl.locator('#clear-preset')).toBeHidden()
 
   await expect(
-    page.locator('button.list-presets__select', {
+    page.locator('button#select-preset', {
       hasText: exactText('Select preset'),
     }),
   ).toBeVisible()

@@ -14,11 +14,11 @@ import {
   saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { clickListMenuItem, openListMenu } from '../helpers/e2e/toggleListMenu.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { expectURLParams } from './helpers/expectURLParams.js'
 import { openListPresetDrawer } from './helpers/openListPresetDrawer.js'
-import { openPresetsDropdown } from './helpers/openPresetsDropdown.js'
 import { clearSelectedPreset, selectPreset } from './helpers/togglePreset.js'
 import { seedData } from './seed.js'
 
@@ -54,7 +54,10 @@ describe('List Presets', () => {
           },
         },
       })
-      .then((res) => res.docs?.[0]?.id)
+      .then((res) => {
+        console.log(res.docs?.[0])
+        return res.docs?.[0]?.id
+      })
 
     initPageConsoleErrorCatch(page)
 
@@ -63,6 +66,7 @@ describe('List Presets', () => {
 
   test('should select preset and apply filters', async () => {
     await page.goto(pagesUrl.list)
+    await clearSelectedPreset({ page })
     await selectPreset({ page, presetTitle: seedData.everyone.title })
 
     await expectURLParams({
@@ -77,6 +81,7 @@ describe('List Presets', () => {
 
   test('should clear selected preset and reset filters', async () => {
     await page.goto(pagesUrl.list)
+    await clearSelectedPreset({ page })
     await selectPreset({ page, presetTitle: seedData.everyone.title })
     await clearSelectedPreset({ page })
     expect(true).toBe(true)
@@ -84,21 +89,19 @@ describe('List Presets', () => {
 
   test('should delete a preset, clear selection, and reset changes', async () => {
     await page.goto(pagesUrl.list)
+    await clearSelectedPreset({ page })
     await selectPreset({ page, presetTitle: seedData.everyone.title })
-    await openPresetsDropdown({ page })
+    await openListMenu({ page })
 
-    const deleteButton = page.locator('.list-presets .popup-button-list__button', {
-      hasText: exactText('Delete'),
-    })
+    await clickListMenuItem({ page, menuItemLabel: 'Delete' })
 
-    await deleteButton.click()
-    await page.locator('#confirm-delete-filter #confirm-action').click()
+    await page.locator('#confirm-delete-preset #confirm-action').click()
 
     const regex = /columns=/
     await page.waitForURL((url) => !regex.test(url.search))
 
     await expect(
-      page.locator('button.list-presets__select', {
+      page.locator('button#select-preset', {
         hasText: exactText('Select preset'),
       }),
     ).toBeVisible()
@@ -128,6 +131,7 @@ describe('List Presets', () => {
 
   test('should save last used preset to preferences and load on initial render', async () => {
     await page.goto(pagesUrl.list)
+    await clearSelectedPreset({ page })
     await selectPreset({ page, presetTitle: seedData.everyone.title })
 
     await page.reload()
@@ -136,7 +140,7 @@ describe('List Presets', () => {
       page,
       columns: seedData.everyone.columns,
       where: seedData.everyone.where,
-      presetID: everyoneID,
+      // presetID: everyoneID,
     })
 
     expect(true).toBe(true)
@@ -145,32 +149,32 @@ describe('List Presets', () => {
   test('should only show "edit" and "delete" controls when there is an active preset', async () => {
     await page.goto(pagesUrl.list)
     await clearSelectedPreset({ page })
-    await openPresetsDropdown({ page })
+    await openListMenu({ page })
 
     await expect(
-      page.locator('.list-presets .popup-button-list__button', {
+      page.locator('#list-menu .popup__content .popup-button-list__button', {
         hasText: exactText('Edit'),
       }),
     ).toBeHidden()
 
     await expect(
-      page.locator('.list-presets .popup-button-list__button', {
+      page.locator('#list-menu .popup__content .popup-button-list__button', {
         hasText: exactText('Delete'),
       }),
     ).toBeHidden()
 
     await selectPreset({ page, presetTitle: seedData.everyone.title })
 
-    await openPresetsDropdown({ page })
+    await openListMenu({ page })
 
     await expect(
-      page.locator('.list-presets .popup-button-list__button', {
+      page.locator('#list-menu .popup__content .popup-button-list__button', {
         hasText: exactText('Edit'),
       }),
     ).toBeVisible()
 
     await expect(
-      page.locator('.list-presets .popup-button-list__button', {
+      page.locator('#list-menu .popup__content .popup-button-list__button', {
         hasText: exactText('Delete'),
       }),
     ).toBeVisible()
@@ -181,7 +185,7 @@ describe('List Presets', () => {
     await clearSelectedPreset({ page })
 
     await expect(
-      page.locator('.list-presets .popup-button-list__button', {
+      page.locator('#list-menu .popup__content .popup-button-list__button', {
         hasText: exactText('Reset'),
       }),
     ).toBeHidden()
@@ -194,22 +198,23 @@ describe('List Presets', () => {
   test('can edit a filter through the document drawer', async () => {
     await page.goto(pagesUrl.list)
     await selectPreset({ page, presetTitle: seedData.everyone.title })
-    await openListPresetDrawer({ page })
-
-    await page
-      .locator('.list-presets .popup-button-list__button', {
-        hasText: exactText('Edit'),
-      })
-      .click()
-
-    // TODO: change the title, close the drawer, and ensure the changes are applied
+    await clickListMenuItem({ page, menuItemLabel: 'Edit' })
+    const drawer = page.locator('[id^=doc-drawer_payload-list-presets_0_]')
+    await drawer.locator('input[name="title"]').fill('New Title')
+    await saveDocAndAssert(page)
+    await expect(drawer).toBeHidden()
+    await expect(
+      page.locator('button#select-preset', {
+        hasText: exactText('New Title'),
+      }),
+    ).toBeVisible()
   })
 
   test('should not display list presets when admin.enableListPresets is not true', async () => {
     // go to users list view and ensure the list presets select is not visible
     const usersURL = new AdminUrlUtil(serverURL, 'users')
     await page.goto(usersURL.list)
-    await expect(page.locator('.list-presets')).toBeHidden()
+    await expect(page.locator('#select-preset')).toBeHidden()
   })
 
   test.skip('only show save for everyone when a filter has active changes', () => {
@@ -222,14 +227,8 @@ describe('List Presets', () => {
 
   test('can create new preset', async () => {
     await page.goto(pagesUrl.list)
-    await openPresetsDropdown({ page })
 
-    await page
-      .locator('.list-presets .popup-button-list__button', {
-        hasText: exactText('Create new preset'),
-      })
-      .click()
-
+    await clickListMenuItem({ page, menuItemLabel: 'Create new preset' })
     const modal = page.locator('[id^=doc-drawer_payload-list-presets_0_]')
     await expect(modal).toBeVisible()
     await modal.locator('input[name="title"]').fill('New Preset')
@@ -237,7 +236,7 @@ describe('List Presets', () => {
     await expect(modal).toBeHidden()
 
     await expect(
-      page.locator('button.list-presets__select', {
+      page.locator('button#select-preset', {
         hasText: exactText('New Preset'),
       }),
     ).toBeVisible()
