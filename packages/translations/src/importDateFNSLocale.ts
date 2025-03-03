@@ -150,5 +150,11 @@ export const importDateFNSLocale = async (locale: string): Promise<Locale> => {
       break
   }
 
+  // @ts-expect-error - I'm not sure if this is still necessary.
+  if (result?.default) {
+    // @ts-expect-error - I'm not sure if this is still necessary.
+    return result.default
+  }
+
   return result as Locale
 }
