@@ -48,11 +48,12 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
   const { handleSearchChange, query } = useListQuery()
 
   const {
+    CreateNewPresetDrawer,
     DeletePresetModal,
+    EditPresetDrawer,
     hasModifiedPreset,
     listPresetMenuItems,
     openPresetListDrawer,
-    PresetDocumentDrawer,
     PresetListDrawer,
     resetPreset,
   } = useListPresets({
@@ -241,7 +242,8 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
         </AnimateHeight>
       </div>
       {PresetListDrawer}
-      {PresetDocumentDrawer}
+      {EditPresetDrawer}
+      {CreateNewPresetDrawer}
       {DeletePresetModal}
     </Fragment>
   )

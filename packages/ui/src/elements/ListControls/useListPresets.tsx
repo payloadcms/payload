@@ -1,9 +1,9 @@
-import type { CollectionSlug, DefaultDocumentIDType, ListPreset } from 'payload'
+import type { CollectionSlug, ListPreset } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { transformColumnsToPreferences, transformColumnsToSearchParams } from 'payload/shared'
-import { Fragment, useCallback, useState } from 'react'
+import { Fragment, useCallback } from 'react'
 import { toast } from 'sonner'
 
 import { useConfig } from '../../providers/Config/index.js'
@@ -25,17 +25,23 @@ export const useListPresets = ({
   activePreset: ListPreset
   collectionSlug: CollectionSlug
 }): {
+  CreateNewPresetDrawer: React.ReactNode
   DeletePresetModal: React.ReactNode
+  EditPresetDrawer: React.ReactNode
   hasModifiedPreset: boolean
   listPresetMenuItems: React.ReactNode
   openPresetListDrawer: () => void
-  PresetDocumentDrawer: React.ReactNode
   PresetListDrawer: React.ReactNode
   resetPreset: () => Promise<void>
 } => {
-  const { modified: listQueryModified, query, refineListData } = useListQuery()
+  const {
+    modified: listQueryModified,
+    query,
+    refineListData,
+    setModified: setQueryModified,
+  } = useListQuery()
+
   const { i18n, t } = useTranslation()
-  const [listPresetDocumentID, setListPresetDocumentID] = useState<DefaultDocumentIDType>(null)
   const { openModal } = useModal()
 
   const { modified: columnsModified, setModified: setColumnsModified } = useTableColumns()
@@ -51,12 +57,16 @@ export const useListPresets = ({
 
   const presetConfig = getEntityConfig({ collectionSlug: 'payload-list-presets' })
 
+  const [PresetDocumentDrawer, , { openDrawer: openDocumentDrawer }] = useDocumentDrawer({
+    id: activePreset?.id,
+    collectionSlug: 'payload-list-presets',
+  })
+
   const [
-    PresetDocumentDrawer,
+    CreateNewPresetDrawer,
     ,
-    { closeDrawer: closeListPresetDocumentDrawer, openDrawer: openListPresetDocumentDrawer },
+    { closeDrawer: closeCreateNewDrawer, openDrawer: openCreateNewDrawer },
   ] = useDocumentDrawer({
-    id: listPresetDocumentID,
     collectionSlug: 'payload-list-presets',
   })
 
@@ -118,6 +128,20 @@ export const useListPresets = ({
   }, [apiRoute, activePreset?.id, activePreset?.title, t, presetConfig, i18n, resetListPreset])
 
   return {
+    CreateNewPresetDrawer: (
+      <CreateNewPresetDrawer
+        initialData={{
+          columns: transformColumnsToPreferences(query.columns),
+          relatedCollection: collectionSlug,
+          where: query.where,
+        }}
+        onSave={async ({ doc }) => {
+          closeCreateNewDrawer()
+          await handlePresetChange(doc as ListPreset)
+        }}
+        redirectAfterCreate={false}
+      />
+    ),
     DeletePresetModal: (
       <ConfirmationModal
         body={
@@ -139,6 +163,19 @@ export const useListPresets = ({
         onConfirm={handleDeletePreset}
       />
     ),
+    EditPresetDrawer: (
+      <PresetDocumentDrawer
+        onDelete={() => {
+          // setSelectedPreset(undefined)
+        }}
+        onDuplicate={async ({ doc }) => {
+          await handlePresetChange(doc as ListPreset)
+        }}
+        onSave={async ({ doc }) => {
+          await handlePresetChange(doc as ListPreset)
+        }}
+      />
+    ),
     hasModifiedPreset: hasModified,
     listPresetMenuItems: (
       <Fragment key="preset-menu-items">
@@ -147,8 +184,8 @@ export const useListPresets = ({
             <PopupList.Button
               onClick={() => {
                 // TODO: reset query and columns
-                // setQueryModified(false)
-                // setColumnsModified(false)
+                setQueryModified(false)
+                setColumnsModified(false)
               }}
             >
               {t('general:reset')}
@@ -156,8 +193,8 @@ export const useListPresets = ({
             <PopupList.Button
               onClick={() => {
                 // TODO: save query and columns
-                // setQueryModified(false)
-                // setColumnsModified(false)
+                setQueryModified(false)
+                setColumnsModified(false)
               }}
             >
               Save For Everyone
@@ -166,8 +203,7 @@ export const useListPresets = ({
         ) : null}
         <PopupList.Button
           onClick={() => {
-            setListPresetDocumentID(null)
-            openListPresetDocumentDrawer()
+            openCreateNewDrawer()
           }}
         >
           Create new preset
@@ -179,8 +215,7 @@ export const useListPresets = ({
             </PopupList.Button>
             <PopupList.Button
               onClick={() => {
-                // setListPresetDocumentID(select.id)
-                openListPresetDocumentDrawer()
+                openDocumentDrawer()
               }}
             >
               {t('general:edit')}
@@ -190,33 +225,6 @@ export const useListPresets = ({
       </Fragment>
     ),
     openPresetListDrawer: openListDrawer,
-    PresetDocumentDrawer: (
-      <PresetDocumentDrawer
-        initialData={
-          !listPresetDocumentID
-            ? {
-                columns: transformColumnsToPreferences(query.columns),
-                relatedCollection: collectionSlug,
-                where: query.where,
-              }
-            : undefined
-        }
-        onDelete={() => {
-          // setSelectedPreset(undefined)
-        }}
-        onDuplicate={async ({ doc }) => {
-          await handlePresetChange(doc as ListPreset)
-        }}
-        onSave={async ({ doc }) => {
-          if (!listPresetDocumentID) {
-            closeListPresetDocumentDrawer()
-          }
-
-          await handlePresetChange(doc as ListPreset)
-        }}
-        redirectAfterCreate={false}
-      />
-    ),
     PresetListDrawer: (
       <ListDrawer
         disableListPresets

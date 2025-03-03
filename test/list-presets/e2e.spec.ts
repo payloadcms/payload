@@ -192,17 +192,22 @@ describe('List Presets', () => {
   })
 
   test('should reset active changes', () => {
-    // select a filter, make a change to the filters, click "reset", and ensure the changes are reverted
+    // select a preset, make a change to the presets, click "reset", and ensure the changes are reverted
   })
 
-  test('can edit a filter through the document drawer', async () => {
+  test('can edit a preset through the document drawer', async () => {
     await page.goto(pagesUrl.list)
     await selectPreset({ page, presetTitle: seedData.everyone.title })
     await clickListMenuItem({ page, menuItemLabel: 'Edit' })
+
     const drawer = page.locator('[id^=doc-drawer_payload-list-presets_0_]')
+    const titleValue = drawer.locator('input[name="title"]')
+    await expect(titleValue).toHaveValue(seedData.everyone.title)
     await drawer.locator('input[name="title"]').fill('New Title')
+
     await saveDocAndAssert(page)
     await expect(drawer).toBeHidden()
+
     await expect(
       page.locator('button#select-preset', {
         hasText: exactText('New Title'),
@@ -217,12 +222,12 @@ describe('List Presets', () => {
     await expect(page.locator('#select-preset')).toBeHidden()
   })
 
-  test.skip('only show save for everyone when a filter has active changes', () => {
-    // select a filter, make a change to the filters, and ensure the "save for everyone" button is visible
+  test.skip('only show save for everyone when a preset has active changes', () => {
+    // select a preset, make a change to the presets, and ensure the "save for everyone" button is visible
   })
 
   test.skip('can save for everyone', () => {
-    // select a filter, make a change to the filters, click "save for everyone", and ensure the changes are saved
+    // select a preset, make a change to the presets, click "save for everyone", and ensure the changes are saved
   })
 
   test('can create new preset', async () => {
