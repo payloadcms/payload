@@ -21,22 +21,32 @@ export interface FileCellProps
 export const FileCell: React.FC<FileCellProps> = ({
   cellData: filename,
   collectionConfig,
+  field,
   rowData,
 }) => {
-  return (
-    <div className={baseClass}>
-      <Thumbnail
-        className={`${baseClass}__thumbnail`}
-        collectionSlug={collectionConfig?.slug}
-        doc={{
-          ...rowData,
-          filename,
-        }}
-        fileSrc={rowData?.thumbnailURL || rowData?.url}
-        size="small"
-        uploadConfig={collectionConfig?.upload}
-      />
-      <span className={`${baseClass}__filename`}>{String(filename)}</span>
-    </div>
-  )
+  const previewAllowed =
+    'displayPreview' in field && field.displayPreview
+      ? field.displayPreview
+      : collectionConfig.upload && collectionConfig.upload.displayPreview
+
+  if (previewAllowed) {
+    return (
+      <div className={baseClass}>
+        <Thumbnail
+          className={`${baseClass}__thumbnail`}
+          collectionSlug={collectionConfig?.slug}
+          doc={{
+            ...rowData,
+            filename,
+          }}
+          fileSrc={rowData?.thumbnailURL || rowData?.url}
+          size="small"
+          uploadConfig={collectionConfig?.upload}
+        />
+        <span className={`${baseClass}__filename`}>{String(filename)}</span>
+      </div>
+    )
+  } else {
+    return <>{String(filename)}</>
+  }
 }
