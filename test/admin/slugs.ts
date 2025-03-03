@@ -12,6 +12,8 @@ export const notInViewCollectionSlug = 'not-in-view-collection'
 export const noApiViewCollectionSlug = 'collection-no-api-view'
 export const disableDuplicateSlug = 'disable-duplicate'
 export const uploadCollectionSlug = 'uploads'
+
+export const uploadTwoCollectionSlug = 'uploads-two'
 export const customFieldsSlug = 'custom-fields'
 
 export const listDrawerSlug = 'with-list-drawer'
