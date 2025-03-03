@@ -97,6 +97,8 @@ export const seed = async (_payload: Payload) => {
       () =>
         _payload.create({
           collection: 'payload-list-presets',
+          user: devUser,
+          overrideAccess: false,
           data: {
             title: 'Specific Users',
             where: {
@@ -126,6 +128,8 @@ export const seed = async (_payload: Payload) => {
       () =>
         _payload.create({
           collection: 'payload-list-presets',
+          user: devUser,
+          overrideAccess: false,
           data: {
             title: seedData.everyone.title,
             where: seedData.everyone.where,
@@ -137,6 +141,8 @@ export const seed = async (_payload: Payload) => {
       () =>
         _payload.create({
           collection: 'payload-list-presets',
+          user: devUser,
+          overrideAccess: false,
           data: {
             title: seedData.onlyMe.title,
             where: seedData.onlyMe.where,
