@@ -1,10 +1,11 @@
 'use client'
-import type { ClientCollectionConfig, ListPreset, ResolvedFilterOptions, Where } from 'payload'
 
 import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
 import { validateWhereQuery } from 'payload/shared'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { Fragment, useEffect, useRef, useState } from 'react'
+
+import type { ListControlsProps } from './types.js'
 
 import { Popup, PopupList } from '../../elements/Popup/index.js'
 import { useUseTitleField } from '../../hooks/useUseAsTitle.js'
@@ -15,40 +16,15 @@ import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { AnimateHeight } from '../AnimateHeight/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
-import { ListPresetControls } from '../ListPresetControls/index.js'
 import { Pill } from '../Pill/index.js'
 import { SearchFilter } from '../SearchFilter/index.js'
 import { WhereBuilder } from '../WhereBuilder/index.js'
+import { ActiveListPreset } from './ActiveListPreset/index.js'
 import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched.js'
+import { useListPresets } from './useListPresets.js'
 import './index.scss'
 
 const baseClass = 'list-controls'
-
-export type ListControlsProps = {
-  readonly activePreset?: ListPreset
-  readonly beforeActions?: React.ReactNode[]
-  readonly collectionConfig: ClientCollectionConfig
-  readonly collectionSlug: string
-  /**
-   * @deprecated
-   * These are now handled by the `ListSelection` component
-   */
-  readonly disableBulkDelete?: boolean
-  /**
-   * @deprecated
-   * These are now handled by the `ListSelection` component
-   */
-  readonly disableBulkEdit?: boolean
-  readonly disableListPresets?: boolean
-  readonly enableColumns?: boolean
-  readonly enableSort?: boolean
-  readonly handleSearchChange?: (search: string) => void
-  readonly handleSortChange?: (sort: string) => void
-  readonly handleWhereChange?: (where: Where) => void
-  readonly listMenuItems?: React.ReactNode[]
-  readonly renderedFilters?: Map<string, React.ReactNode>
-  readonly resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
-}
 
 /**
  * The ListControls component is used to render the controls (search, filter, where)
@@ -64,12 +40,25 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     disableListPresets,
     enableColumns = true,
     enableSort = false,
-    listMenuItems,
+    listMenuItems: listMenuItemsFromProps,
     renderedFilters,
     resolvedFilterOptions,
   } = props
 
-  const { handleSearchChange, modified, query } = useListQuery()
+  const { handleSearchChange, query } = useListQuery()
+
+  const {
+    DeletePresetModal,
+    hasModifiedPreset,
+    listPresetMenuItems,
+    openPresetListDrawer,
+    PresetDocumentDrawer,
+    PresetListDrawer,
+    resetPreset,
+  } = useListPresets({
+    activePreset,
+    collectionSlug,
+  })
 
   const titleField = useUseTitleField(collectionConfig)
   const { i18n, t } = useTranslation()
@@ -143,10 +132,16 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     }
   }, [t, listSearchableFields, i18n, searchLabel])
 
+  const listMenuItems = listMenuItemsFromProps || []
+
+  if (collectionConfig?.admin?.enableListPresets && !disableListPresets) {
+    listMenuItems.push(listPresetMenuItems)
+  }
+
   return (
-    <div className={baseClass}>
-      <div className={`${baseClass}__wrap`}>
-        <div className={`${baseClass}__search-wrap`}>
+    <Fragment>
+      <div className={baseClass}>
+        <div className={`${baseClass}__wrap`}>
           <SearchIcon />
           <SearchFilter
             fieldName={titleField && 'name' in titleField ? titleField?.name : null}
@@ -158,7 +153,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
             key={collectionSlug}
             label={searchLabelTranslated.current}
           />
-          {activePreset && modified ? (
+          {activePreset && hasModifiedPreset ? (
             <div className={`${baseClass}__modified`}>Modified</div>
           ) : null}
           <div className={`${baseClass}__buttons`}>
@@ -200,7 +195,14 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                   {t('general:sort')}
                 </Pill>
               )}
-              {listMenuItems && (
+              {!disableListPresets && (
+                <ActiveListPreset
+                  activePreset={activePreset}
+                  openPresetListDrawer={openPresetListDrawer}
+                  resetPreset={resetPreset}
+                />
+              )}
+              {listMenuItems && Array.isArray(listMenuItems) && listMenuItems.length > 0 && (
                 <Popup
                   button={<Dots ariaLabel={t('general:moreOptions')} />}
                   className={`${baseClass}__popup`}
@@ -214,44 +216,32 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
             </div>
           </div>
         </div>
-        {!disableListPresets && <ListPresetControls activePreset={activePreset} />}
+        {enableColumns && (
+          <AnimateHeight
+            className={`${baseClass}__columns`}
+            height={visibleDrawer === 'columns' ? 'auto' : 0}
+            id={`${baseClass}-columns`}
+          >
+            <ColumnSelector collectionSlug={collectionConfig.slug} />
+          </AnimateHeight>
+        )}
+        <AnimateHeight
+          className={`${baseClass}__where`}
+          height={visibleDrawer === 'where' ? 'auto' : 0}
+          id={`${baseClass}-where`}
+        >
+          <WhereBuilder
+            collectionPluralLabel={collectionConfig?.labels?.plural}
+            collectionSlug={collectionConfig.slug}
+            fields={collectionConfig?.fields}
+            renderedFilters={renderedFilters}
+            resolvedFilterOptions={resolvedFilterOptions}
+          />
+        </AnimateHeight>
       </div>
-      {enableColumns && (
-        <AnimateHeight
-          className={`${baseClass}__columns`}
-          height={visibleDrawer === 'columns' ? 'auto' : 0}
-          id={`${baseClass}-columns`}
-        >
-          <ColumnSelector collectionSlug={collectionConfig.slug} />
-        </AnimateHeight>
-      )}
-      <AnimateHeight
-        className={`${baseClass}__where`}
-        height={visibleDrawer === 'where' ? 'auto' : 0}
-        id={`${baseClass}-where`}
-      >
-        <WhereBuilder
-          collectionPluralLabel={collectionConfig?.labels?.plural}
-          collectionSlug={collectionConfig.slug}
-          fields={collectionConfig?.fields}
-          renderedFilters={renderedFilters}
-          resolvedFilterOptions={resolvedFilterOptions}
-        />
-      </AnimateHeight>
-      {enableSort && (
-        <AnimateHeight
-          className={`${baseClass}__sort`}
-          height={visibleDrawer === 'sort' ? 'auto' : 0}
-          id={`${baseClass}-sort`}
-        >
-          <p>Sort Complex</p>
-          {/* <SortComplex
-            collection={collection}
-            handleChange={handleSortChange}
-            modifySearchQuery={modifySearchQuery}
-          /> */}
-        </AnimateHeight>
-      )}
-    </div>
+      {PresetListDrawer}
+      {PresetDocumentDrawer}
+      {DeletePresetModal}
+    </Fragment>
   )
 }

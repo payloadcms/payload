@@ -73,10 +73,7 @@
       background: var(--theme-elevation-0);
 
       &.pill--has-action {
-        &:hover {
-          background: var(--theme-elevation-100);
-        }
-
+        &:hover,
         &:active {
           background: var(--theme-elevation-100);
         }
@@ -85,10 +82,7 @@
 
     &--style-light {
       &.pill--has-action {
-        &:hover {
-          background: var(--theme-elevation-100);
-        }
-
+        &:hover,
         &:active {
           background: var(--theme-elevation-100);
         }
