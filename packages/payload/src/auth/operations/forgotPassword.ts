@@ -155,9 +155,9 @@ export const forgotPasswordOperation = async <TSlug extends CollectionSlug>(
         config.serverURL !== null && config.serverURL !== ''
           ? config.serverURL
           : `${protocol}//${req.headers.get('host')}`
-
+      const adminRoute = config.routes.admin === '/' ? '' : config.routes.admin;
       let html = `${req.t('authentication:youAreReceivingResetPassword')}
-    <a href="${serverURL}${config.routes.admin}${config.admin.routes.reset}/${token}">${serverURL}${config.routes.admin}${config.admin.routes.reset}/${token}</a>
+    <a href="${serverURL}${adminRoute}${config.admin.routes.reset}/${token}">${serverURL}${adminRoute}${config.admin.routes.reset}/${token}</a>
     ${req.t('authentication:youDidNotRequestPassword')}`
 
       if (typeof collectionConfig.auth.forgotPassword?.generateEmailHTML === 'function') {
