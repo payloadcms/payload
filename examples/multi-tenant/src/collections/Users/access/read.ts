@@ -19,7 +19,7 @@ export const readAccess: Access<User> = ({ req, id }) => {
   const superAdmin = isSuperAdmin(req.user)
   const selectedTenant = getTenantFromCookie(
     req.headers,
-    getCollectionIDType({ payload: req.payload, collectionSlug: 'users' }),
+    getCollectionIDType({ payload: req.payload, collectionSlug: 'tenants' }),
   )
   const adminTenantAccessIDs = getUserTenantIDs(req.user, 'tenant-admin')
 

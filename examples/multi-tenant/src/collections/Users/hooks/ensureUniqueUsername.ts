@@ -4,6 +4,8 @@ import { ValidationError } from 'payload'
 
 import { getUserTenantIDs } from '../../../utilities/getUserTenantIDs'
 import { extractID } from '@/utilities/extractID'
+import { getTenantFromCookie } from '@payloadcms/plugin-multi-tenant/utilities'
+import { getCollectionIDType } from '@/utilities/getCollectionIDType'
 
 export const ensureUniqueUsername: FieldHook = async ({ data, originalDoc, req, value }) => {
   // if value is unchanged, skip validation
@@ -19,14 +21,15 @@ export const ensureUniqueUsername: FieldHook = async ({ data, originalDoc, req, 
     },
   ]
 
-  const incomingTenantID = extractID(data?.tenant)
-  const currentTenantID = extractID(originalDoc?.tenant)
-  const tenantIDToMatch = incomingTenantID || currentTenantID
+  const selectedTenant = getTenantFromCookie(
+    req.headers,
+    getCollectionIDType({ payload: req.payload, collectionSlug: 'tenants' }),
+  )
 
-  if (tenantIDToMatch) {
+  if (selectedTenant) {
     constraints.push({
       'tenants.tenant': {
-        equals: tenantIDToMatch,
+        equals: selectedTenant,
       },
     })
   }
@@ -44,7 +47,8 @@ export const ensureUniqueUsername: FieldHook = async ({ data, originalDoc, req, 
     // provide a more specific error message
     if (req.user.roles?.includes('super-admin') || tenantIDs.length > 1) {
       const attemptedTenantChange = await req.payload.findByID({
-        id: tenantIDToMatch,
+        // @ts-ignore - selectedTenant will match DB ID type
+        id: selectedTenant,
         collection: 'tenants',
       })
 
