@@ -28,7 +28,6 @@ export { ListPresetsWhereCell } from '../../elements/ListPresetControls/cells/Wh
 export { ListPresetsAccessCell } from '../../elements/ListPresetControls/cells/AccessCell/index.js'
 export { ListPresetsColumnsField } from '../../elements/ListPresetControls/fields/ColumnsField/index.js'
 export { ListPresetsWhereField } from '../../elements/ListPresetControls/fields/WhereField/index.js'
-export { ListPresetsAccessField } from '../../elements/ListPresetControls/fields/AccessField/index.js'
 export { ConfirmationModal } from '../../elements/ConfirmationModal/index.js'
 export type { OnCancel } from '../../elements/ConfirmationModal/index.js'
 export { Link } from '../../elements/Link/index.js'

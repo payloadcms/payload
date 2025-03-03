@@ -1,5 +1,6 @@
 import type { Config } from '../config/types.js'
 import type { Field } from '../fields/config/types.js'
+import type { ListPresetConstraint } from './types.js'
 
 import { fieldAffectsData } from '../fields/config/types.js'
 
@@ -11,7 +12,6 @@ export const getConstraints = (config: Config): Field => ({
   admin: {
     components: {
       Cell: '@payloadcms/ui#ListPresetsAccessCell',
-      Field: '@payloadcms/ui#ListPresetsAccessField',
     },
   },
   fields: operations.map((operation) => ({
@@ -35,10 +35,12 @@ export const getConstraints = (config: Config): Field => ({
             label: 'Specific Users',
             value: 'specificUsers',
           },
-          ...(config?.admin?.listPresets?.constraints?.[operation]?.map((option) => ({
-            label: option.label,
-            value: option.value,
-          })) || []),
+          ...(config?.admin?.listPresets?.constraints?.[operation]?.map(
+            (option: ListPresetConstraint) => ({
+              label: option.label,
+              value: option.value,
+            }),
+          ) || []),
         ],
       },
       {
@@ -63,20 +65,24 @@ export const getConstraints = (config: Config): Field => ({
         },
         relationTo: 'users',
       },
-      ...(config.admin?.listPresets?.constraints?.[operation]?.reduce((acc, option) => {
-        option.fields.forEach((field, index) => {
-          acc.push({ ...field })
+      ...(config.admin?.listPresets?.constraints?.[operation]?.reduce(
+        (acc: Field[], option: ListPresetConstraint) => {
+          option.fields.forEach((field, index) => {
+            acc.push({ ...field })
 
-          if (fieldAffectsData(field)) {
-            acc[index].admin = {
-              ...(acc[index]?.admin || {}),
-              condition: (data) => Boolean(data?.access?.[operation]?.constraint === option.value),
+            if (fieldAffectsData(field)) {
+              acc[index].admin = {
+                ...(acc[index]?.admin || {}),
+                condition: (data) =>
+                  Boolean(data?.access?.[operation]?.constraint === option.value),
+              }
             }
-          }
-        })
+          })
 
-        return acc
-      }, [] as Field[]) || []),
+          return acc
+        },
+        [] as Field[],
+      ) || []),
     ],
   })),
   hooks: {

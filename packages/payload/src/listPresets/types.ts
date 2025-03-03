@@ -10,8 +10,10 @@ export type ListPreset = {
   where: Where
 }
 
-export type ListPresetConstraints = {
+export type ListPresetConstraint = {
   fields: Field[]
   label: string
   value: string
-}[]
+}
+
+export type ListPresetConstraints = ListPresetConstraint[]
