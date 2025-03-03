@@ -1,6 +1,7 @@
 'use client'
 
-import { PopupList, useConfig, useDocumentDrawer } from '@payloadcms/ui'
+import { getTranslation } from '@payloadcms/translations'
+import { PopupList, useConfig, useDocumentDrawer, useTranslation } from '@payloadcms/ui'
 import React, { useEffect } from 'react'
 
 import { useImportExport } from '../ImportExportProvider/index.js'
@@ -13,6 +14,7 @@ export const ExportListMenuItem: React.FC<{
   exportCollectionSlug: string
 }> = ({ collectionSlug, exportCollectionSlug }) => {
   const { getEntityConfig } = useConfig()
+  const { i18n } = useTranslation()
   const currentCollectionConfig = getEntityConfig({ collectionSlug })
 
   const [DocumentDrawer, DocumentDrawerToggler] = useDocumentDrawer({
@@ -27,7 +29,9 @@ export const ExportListMenuItem: React.FC<{
 
   return (
     <PopupList.Button className={baseClass}>
-      <DocumentDrawerToggler>Export</DocumentDrawerToggler>
+      <DocumentDrawerToggler>
+        Export {getTranslation(currentCollectionConfig.labels.plural, i18n)}
+      </DocumentDrawerToggler>
       <DocumentDrawer />
     </PopupList.Button>
   )
