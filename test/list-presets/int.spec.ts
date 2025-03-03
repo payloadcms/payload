@@ -51,8 +51,9 @@ describe('Shared Filters', () => {
 
   describe('default access control', () => {
     it('should respect access when set to "specificUsers"', async () => {
-      const filterDoc = await payload.create({
+      const presetForSpecificUsers = await payload.create({
         collection: listPresetsCollectionSlug,
+        user,
         data: {
           title: 'Specific Users',
           where: {
@@ -60,7 +61,6 @@ describe('Shared Filters', () => {
               equals: 'example page',
             },
           },
-          user,
           access: {
             read: {
               constraint: 'specificUsers',
@@ -75,33 +75,33 @@ describe('Shared Filters', () => {
         },
       })
 
-      const resultWithUser = await payload.findByID({
+      const foundPresetWithUser1 = await payload.findByID({
         collection: listPresetsCollectionSlug,
         depth: 0,
         user,
         overrideAccess: false,
-        id: filterDoc.id,
+        id: presetForSpecificUsers.id,
       })
 
-      expect(resultWithUser.id).toBe(filterDoc.id)
+      expect(foundPresetWithUser1.id).toBe(presetForSpecificUsers.id)
 
       try {
-        const resultWithUser2 = await payload.findByID({
+        const foundPresetWithUser2 = await payload.findByID({
           collection: listPresetsCollectionSlug,
           depth: 0,
           user: user2,
           overrideAccess: false,
-          id: filterDoc.id,
+          id: presetForSpecificUsers.id,
         })
 
-        expect(resultWithUser2).toBeFalsy()
+        expect(foundPresetWithUser2).toBeFalsy()
       } catch (error) {
         expect(error).toBeDefined()
       }
 
-      const resultUpdatedByUser = await payload.update({
+      const presetUpdatedByUser1 = await payload.update({
         collection: listPresetsCollectionSlug,
-        id: filterDoc.id,
+        id: presetForSpecificUsers.id,
         user,
         overrideAccess: false,
         data: {
@@ -109,12 +109,12 @@ describe('Shared Filters', () => {
         },
       })
 
-      expect(resultUpdatedByUser.title).toBe('Specific Users (Updated)')
+      expect(presetUpdatedByUser1.title).toBe('Specific Users (Updated)')
 
       try {
-        const resultWithUser2 = await payload.update({
+        const presetUpdatedByUser2 = await payload.update({
           collection: listPresetsCollectionSlug,
-          id: filterDoc.id,
+          id: presetForSpecificUsers.id,
           user: user2,
           overrideAccess: false,
           data: {
@@ -122,7 +122,7 @@ describe('Shared Filters', () => {
           },
         })
 
-        expect(resultWithUser2).toBeFalsy()
+        expect(presetUpdatedByUser2).toBeFalsy()
       } catch (error) {
         expect(error).toBeDefined()
         // swallow error
@@ -131,7 +131,7 @@ describe('Shared Filters', () => {
 
     it('should respect access when set to "onlyMe"', async () => {
       // create a new doc so that the creating user is the owner
-      const filterDoc = await payload.create({
+      const presetForOnlyMe = await payload.create({
         collection: listPresetsCollectionSlug,
         user,
         data: {
@@ -153,34 +153,34 @@ describe('Shared Filters', () => {
         },
       })
 
-      const resultWithUser = await payload.findByID({
+      const foundPresetWithUser1 = await payload.findByID({
         collection: listPresetsCollectionSlug,
         depth: 0,
         user,
         overrideAccess: false,
-        id: filterDoc.id,
+        id: presetForOnlyMe.id,
       })
 
-      expect(resultWithUser.id).toBe(filterDoc.id)
+      expect(foundPresetWithUser1.id).toBe(presetForOnlyMe.id)
 
       try {
-        const resultWithUser2 = await payload.findByID({
+        const foundPresetWithUser2 = await payload.findByID({
           collection: listPresetsCollectionSlug,
           depth: 0,
           user: user2,
           overrideAccess: false,
-          id: filterDoc.id,
+          id: presetForOnlyMe.id,
         })
 
-        expect(resultWithUser2).toBeFalsy()
+        expect(foundPresetWithUser2).toBeFalsy()
       } catch (error) {
         expect(error).toBeDefined()
         // swallow error
       }
 
-      const resultUpdatedByUser = await payload.update({
+      const presetUpdatedByUser1 = await payload.update({
         collection: listPresetsCollectionSlug,
-        id: filterDoc.id,
+        id: presetForOnlyMe.id,
         user,
         overrideAccess: false,
         data: {
@@ -188,12 +188,12 @@ describe('Shared Filters', () => {
         },
       })
 
-      expect(resultUpdatedByUser.title).toBe('Only Me (Updated)')
+      expect(presetUpdatedByUser1.title).toBe('Only Me (Updated)')
 
       try {
-        const resultWithUser2 = await payload.update({
+        const presetUpdatedByUser2 = await payload.update({
           collection: listPresetsCollectionSlug,
-          id: filterDoc.id,
+          id: presetForOnlyMe.id,
           user: user2,
           overrideAccess: false,
           data: {
@@ -201,7 +201,7 @@ describe('Shared Filters', () => {
           },
         })
 
-        expect(resultWithUser2).toBeFalsy()
+        expect(presetUpdatedByUser2).toBeFalsy()
       } catch (error) {
         expect(error).toBeDefined()
         // swallow error
@@ -209,7 +209,7 @@ describe('Shared Filters', () => {
     })
 
     it('should respect access when set to "everyone"', async () => {
-      const filterDoc = await payload.create({
+      const presetForEveryone = await payload.create({
         collection: listPresetsCollectionSlug,
         user,
         data: {
@@ -231,29 +231,29 @@ describe('Shared Filters', () => {
         },
       })
 
-      const resultWithUser = await payload.findByID({
+      const foundPresetWithUser1 = await payload.findByID({
         collection: listPresetsCollectionSlug,
         depth: 0,
         user,
         overrideAccess: false,
-        id: filterDoc.id,
+        id: presetForEveryone.id,
       })
 
-      expect(resultWithUser.id).toBe(filterDoc.id)
+      expect(foundPresetWithUser1.id).toBe(presetForEveryone.id)
 
-      const resultWithUser2 = await payload.findByID({
+      const foundPresetWithUser2 = await payload.findByID({
         collection: listPresetsCollectionSlug,
         depth: 0,
         user: user2,
         overrideAccess: false,
-        id: filterDoc.id,
+        id: presetForEveryone.id,
       })
 
-      expect(resultWithUser2.id).toBe(filterDoc.id)
+      expect(foundPresetWithUser2.id).toBe(presetForEveryone.id)
 
-      const resultUpdatedByUser = await payload.update({
+      const presetUpdatedByUser1 = await payload.update({
         collection: listPresetsCollectionSlug,
-        id: filterDoc.id,
+        id: presetForEveryone.id,
         user,
         overrideAccess: false,
         data: {
@@ -261,11 +261,11 @@ describe('Shared Filters', () => {
         },
       })
 
-      expect(resultUpdatedByUser.title).toBe('Everyone (Update 1)')
+      expect(presetUpdatedByUser1.title).toBe('Everyone (Update 1)')
 
-      const resultUpdatedByUser2 = await payload.update({
+      const presetUpdatedByUser2 = await payload.update({
         collection: listPresetsCollectionSlug,
-        id: filterDoc.id,
+        id: presetForEveryone.id,
         user: user2,
         overrideAccess: false,
         data: {
@@ -273,13 +273,13 @@ describe('Shared Filters', () => {
         },
       })
 
-      expect(resultUpdatedByUser2.title).toBe('Everyone (Update 2)')
+      expect(presetUpdatedByUser2.title).toBe('Everyone (Update 2)')
     })
   })
 
   describe('user-defined access control', () => {
     it('should respect access when set to "specificRoles"', async () => {
-      const adminOnlyFilter = await payload.create({
+      const presetForSpecificRoles = await payload.create({
         collection: listPresetsCollectionSlug,
         user,
         data: {
@@ -303,34 +303,34 @@ describe('Shared Filters', () => {
         },
       })
 
-      const resultWithUser = await payload.findByID({
+      const foundPresetWithUser1 = await payload.findByID({
         collection: listPresetsCollectionSlug,
         depth: 0,
         user,
         overrideAccess: false,
-        id: adminOnlyFilter.id,
+        id: presetForSpecificRoles.id,
       })
 
-      expect(resultWithUser.id).toBe(adminOnlyFilter.id)
+      expect(foundPresetWithUser1.id).toBe(presetForSpecificRoles.id)
 
       try {
-        const resultWithUser2 = await payload.findByID({
+        const foundPresetWithUser2 = await payload.findByID({
           collection: listPresetsCollectionSlug,
           depth: 0,
           user: user2,
           overrideAccess: false,
-          id: adminOnlyFilter.id,
+          id: presetForSpecificRoles.id,
         })
 
-        expect(resultWithUser2).toBeFalsy()
+        expect(foundPresetWithUser2).toBeFalsy()
       } catch (error) {
         expect(error).toBeDefined()
         // swallow error
       }
 
-      const resultUpdatedByUser = await payload.update({
+      const presetUpdatedByUser1 = await payload.update({
         collection: listPresetsCollectionSlug,
-        id: adminOnlyFilter.id,
+        id: presetForSpecificRoles.id,
         user,
         overrideAccess: false,
         data: {
@@ -338,12 +338,12 @@ describe('Shared Filters', () => {
         },
       })
 
-      expect(resultUpdatedByUser.title).toBe('Specific Roles (Updated)')
+      expect(presetUpdatedByUser1.title).toBe('Specific Roles (Updated)')
 
       try {
-        const resultUpdatedByUser2 = await payload.update({
+        const presetUpdatedByUser2 = await payload.update({
           collection: listPresetsCollectionSlug,
-          id: adminOnlyFilter.id,
+          id: presetForSpecificRoles.id,
           user: user2,
           overrideAccess: false,
           data: {
@@ -351,7 +351,7 @@ describe('Shared Filters', () => {
           },
         })
 
-        expect(resultUpdatedByUser2).toBeFalsy()
+        expect(presetUpdatedByUser2).toBeFalsy()
       } catch (error) {
         expect(error).toBeDefined()
         // swallow error
@@ -370,7 +370,7 @@ describe('Shared Filters', () => {
         },
       })
 
-      // TODO: this test always passes because this expect throws an error which is caught and passes
+      // TODO: this test always passes because this expect throws an error which is caught and passes the 'catch' block
       expect(result).toBeFalsy()
     } catch (error) {
       expect(error).toBeDefined()

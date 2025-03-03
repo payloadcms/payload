@@ -92,19 +92,23 @@ export const getConstraints = (config: Config): Field => ({
 
         // ensure all operations have a constraint
         operations.forEach((operation) => {
-          if (!dataToReturn[operation]) {
+          if (!dataToReturn.access) {
+            dataToReturn.access = {}
+          }
+
+          if (!dataToReturn.access?.[operation]) {
             dataToReturn[operation] = {}
           }
 
-          if (!dataToReturn[operation]?.constraint) {
-            dataToReturn[operation] = {
-              ...dataToReturn[operation],
+          if (!dataToReturn.access[operation]?.constraint) {
+            dataToReturn.access[operation] = {
+              ...dataToReturn.access[operation],
               constraint: 'onlyMe',
             }
           }
         })
 
-        return dataToReturn
+        return dataToReturn.access
       },
     ],
   },

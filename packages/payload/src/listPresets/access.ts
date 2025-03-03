@@ -28,43 +28,35 @@ export const getAccess = (config: Config): Record<Operation, Access> =>
           return false
         }
 
-        const constraints = {
+        const constraints: Where = {
           or: [
             {
               and: [
                 {
-                  access: {
-                    [operation]: {
-                      users: {
-                        in: [req.user.id],
-                      },
-                    },
+                  [`access.${operation}.users`]: {
+                    in: [req.user.id],
                   },
                 },
                 {
-                  access: {
-                    [operation]: {
-                      constraint: {
-                        in: ['onlyMe', 'specificUsers'],
-                      },
-                    },
+                  [`access.${operation}.constraint`]: {
+                    in: ['onlyMe', 'specificUsers'],
                   },
                 },
               ],
             },
             {
-              access: {
-                [operation]: {
-                  constraint: {
-                    equals: 'everyone',
-                  },
-                },
+              [`access.${operation}.constraint`]: {
+                equals: 'everyone',
               },
             },
           ],
-        } satisfies Where
+        }
 
         if (typeof userDefinedAccess === 'object') {
+          if (!constraints.or) {
+            constraints.or = []
+          }
+
           constraints.or.push(userDefinedAccess)
         }
 
