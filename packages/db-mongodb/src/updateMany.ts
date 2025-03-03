@@ -50,7 +50,11 @@ export const updateMany: UpdateMany = async function updateMany(
 
   try {
     if (typeof limit === 'number') {
-      const documentsToUpdate = await Model.find(query, {}, { ...options, limit })
+      const documentsToUpdate = await Model.find(
+        query,
+        {},
+        { ...options, limit, projection: { _id: 1 } },
+      )
       if (documentsToUpdate.length === 0) {
         return null
       }
