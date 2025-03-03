@@ -73,7 +73,8 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
   const searchLabel =
     (titleField &&
       getTranslation(
-        'label' in titleField && typeof titleField.label === 'string'
+        'label' in titleField &&
+          (typeof titleField.label === 'string' || typeof titleField.label === 'object')
           ? titleField.label
           : 'name' in titleField
             ? titleField.name

@@ -1190,7 +1190,7 @@ describe('lexicalBlocks', () => {
       // Ensure radio button option1 of radioButtonBlock2 (the default option) is still selected
       await expect(
         radioButtonBlock2.locator('.radio-input:has-text("Option 1")').first(),
-      ).toBeChecked()
+      ).toHaveClass(/radio-input--is-selected/)
 
       // Click radio button option3 of radioButtonBlock2
       await radioButtonBlock2
@@ -1201,7 +1201,7 @@ describe('lexicalBlocks', () => {
       // Ensure previously clicked option2 of radioButtonBlock1 is still selected
       await expect(
         radioButtonBlock1.locator('.radio-input:has-text("Option 2")').first(),
-      ).toBeChecked()
+      ).toHaveClass(/radio-input--is-selected/)
 
       /**
        * Now save and check the actual data. radio button block 1 should have option2 selected and radio button block 2 should have option3 selected

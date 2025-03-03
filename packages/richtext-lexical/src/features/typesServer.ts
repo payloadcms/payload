@@ -176,7 +176,7 @@ export type BeforeChangeNodeHookArgs<T extends SerializedLexicalNode> = {
    * Only available in `beforeChange` hooks.
    */
   errors: ValidationFieldError[]
-  mergeLocaleActions: (() => Promise<void>)[]
+  mergeLocaleActions: (() => Promise<void> | void)[]
   /** A string relating to which operation the field type is currently executing within. Useful within beforeValidate, beforeChange, and afterChange hooks to differentiate between create and update operations. */
   operation: 'create' | 'delete' | 'read' | 'update'
   /** The value of the node before any changes. Not available in afterRead hooks */
@@ -280,8 +280,18 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
    * This determines what props will be available on the Client.
    */
   clientFeatureProps?: ClientFeatureProps
-  // @ts-expect-error - TODO: fix this
-  componentImports?: Config['admin']['importMap']['generators'][0] | PayloadComponent[]
+  /**
+   * Adds payload components to the importMap.
+   *
+   * If an object is provided, the imported components will automatically be made available to the client feature, keyed by the object's keys.
+   */
+  componentImports?:
+    | {
+        [key: string]: PayloadComponent
+      }
+    // @ts-expect-error - TODO: fix this
+    | Config['admin']['importMap']['generators'][0]
+    | PayloadComponent[]
   generatedTypes?: {
     modifyOutputSchema: (args: {
       collectionIDFieldTypes: { [key: string]: 'number' | 'string' }

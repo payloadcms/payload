@@ -1,19 +1,21 @@
-import type { CollectionConfig, PayloadRequest, ResolvedFilterOptions } from 'payload'
+import type { Field, PayloadRequest, ResolvedFilterOptions } from 'payload'
 
 import { resolveFilterOptions } from '@payloadcms/ui/rsc'
-import { fieldIsHiddenOrDisabled } from 'payload/shared'
+import { fieldHasSubFields, fieldIsHiddenOrDisabled } from 'payload/shared'
 
 export const resolveAllFilterOptions = async ({
-  collectionConfig,
+  fields,
   req,
+  result,
 }: {
-  collectionConfig: CollectionConfig
+  fields: Field[]
   req: PayloadRequest
+  result?: Map<string, ResolvedFilterOptions>
 }): Promise<Map<string, ResolvedFilterOptions>> => {
-  const resolvedFilterOptions = new Map<string, ResolvedFilterOptions>()
+  const resolvedFilterOptions = !result ? new Map<string, ResolvedFilterOptions>() : result
 
   await Promise.all(
-    collectionConfig.fields.map(async (field) => {
+    fields.map(async (field) => {
       if (fieldIsHiddenOrDisabled(field)) {
         return
       }
@@ -28,7 +30,28 @@ export const resolveAllFilterOptions = async ({
           siblingData: {}, // use empty object to prevent breaking queries when accessing properties of data
           user: req.user,
         })
+
         resolvedFilterOptions.set(field.name, options)
+      }
+
+      if (fieldHasSubFields(field)) {
+        await resolveAllFilterOptions({
+          fields: field.fields,
+          req,
+          result: resolvedFilterOptions,
+        })
+      }
+
+      if (field.type === 'tabs') {
+        await Promise.all(
+          field.tabs.map((tab) =>
+            resolveAllFilterOptions({
+              fields: tab.fields,
+              req,
+              result: resolvedFilterOptions,
+            }),
+          ),
+        )
       }
     }),
   )

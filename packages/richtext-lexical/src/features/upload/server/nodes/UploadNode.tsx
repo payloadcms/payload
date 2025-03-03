@@ -25,24 +25,36 @@ import * as React from 'react'
 export type UploadData<TUploadExtraFieldsData extends JsonObject = JsonObject> = {
   [TCollectionSlug in CollectionSlug]: {
     fields: TUploadExtraFieldsData
-    // Every lexical node that has sub-fields needs to have a unique ID. This is the ID of this upload node, not the ID of the linked upload document
+    /**
+     * Every lexical node that has sub-fields needs to have a unique ID. This is the ID of this upload node, not the ID of the linked upload document
+     */
     id: string
     relationTo: TCollectionSlug
-    // Value can be just the document ID, or the full, populated document
+    /**
+     * Value can be just the document ID, or the full, populated document
+     */
     value: DataFromCollectionSlug<TCollectionSlug> | number | string
   }
 }[CollectionSlug]
 
 /**
- * @todo Replace UploadData with UploadDataImproved
+ * UploadDataImproved is a more precise type, and will replace UploadData in Payload v4.
+ * This type is for internal use only as it will be deprecated in the future.
+ * @internal
+ *
+ * @todo Replace UploadData with UploadDataImproved in 4.0
  */
 export type UploadDataImproved<TUploadExtraFieldsData extends JsonObject = JsonObject> = {
   [TCollectionSlug in UploadCollectionSlug]: {
     fields: TUploadExtraFieldsData
-    // Every lexical node that has sub-fields needs to have a unique ID. This is the ID of this upload node, not the ID of the linked upload document
+    /**
+     * Every lexical node that has sub-fields needs to have a unique ID. This is the ID of this upload node, not the ID of the linked upload document
+     */
     id: string
     relationTo: TCollectionSlug
-    // Value can be just the document ID, or the full, populated document
+    /**
+     * Value can be just the document ID, or the full, populated document
+     */
     value: number | string | TypedUploadCollection[TCollectionSlug]
   }
 }[UploadCollectionSlug]

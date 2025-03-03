@@ -21,9 +21,10 @@ import {
 import { relationsSlug } from './collections/Relations/index.js'
 import { transformSlug } from './collections/Transform/index.js'
 import { hooksUsersSlug } from './collections/Users/index.js'
-import { beforeValidateSlug, fieldPathsSlug } from './shared.js'
+import { valueHooksSlug } from './collections/Value/index.js'
 import { HooksConfig } from './config.js'
 import { dataHooksGlobalSlug } from './globals/Data/index.js'
+import { beforeValidateSlug, fieldPathsSlug } from './shared.js'
 
 let restClient: NextRESTClient
 let payload: Payload
@@ -611,6 +612,24 @@ describe('Hooks', () => {
           schemaPath: ['_index-3', 'namedTab', 'fieldWithinNamedTab'],
         }),
       })
+    })
+
+    it('should assign value properly when missing in data', async () => {
+      const doc = await payload.create({
+        collection: valueHooksSlug,
+        data: {
+          slug: 'test',
+        },
+      })
+
+      const updatedDoc = await payload.update({
+        id: doc.id,
+        collection: valueHooksSlug,
+        data: {},
+      })
+
+      expect(updatedDoc.beforeValidate_value).toEqual('test')
+      expect(updatedDoc.beforeChange_value).toEqual('test')
     })
   })
 
