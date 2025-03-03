@@ -74,12 +74,6 @@ const typescriptRules = {
   '@typescript-eslint/no-explicit-any': 'warn',
   // Type-aware any rules end
 
-  // TODO: While it's not the most important rule, it's a good rule, but I
-  // have to disable it because it seems that eslint and typescript are out
-  // of sync. Eslint says that `!` is unnecessary when typescript requires it.
-  // This needs to be fixed and this rule restored, but I can't find the cause at the moment.
-  '@typescript-eslint/no-unnecessary-type-assertion': 'off',
-
   // ts-expect preferred over ts-ignore. It will error if the expected error is no longer present.
   '@typescript-eslint/ban-ts-comment': 'warn', // Recommended over deprecated @typescript-eslint/prefer-ts-expect-error: https://github.com/typescript-eslint/typescript-eslint/issues/8333. Set to warn to ease migration.
   // By default, it errors for unused variables. This is annoying, warnings are enough.
