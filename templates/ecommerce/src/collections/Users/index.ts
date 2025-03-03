@@ -48,6 +48,7 @@ export const Users: CollectionConfig = {
         `
       },
     },
+    tokenExpiration: 1209600,
   },
   endpoints: [
     {

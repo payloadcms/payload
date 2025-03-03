@@ -125,6 +125,9 @@ export const Products: CollectionConfig = {
               type: 'group',
               admin: {
                 condition: (data, siblingData) => Boolean(siblingData.enableVariants),
+                // components: {
+                //   Field: '@/collections/Products/ui/Variants/ProductVariants#ProductVariants',
+                // },
               },
               fields: [
                 {
@@ -133,24 +136,20 @@ export const Products: CollectionConfig = {
                   admin: {
                     components: {
                       RowLabel: '@/collections/Products/ui/RowLabels/KeyLabel#KeyLabel',
+                      Field: '@/collections/Products/ui/Variants/VariantOptions#VariantOptions',
                     },
                     initCollapsed: true,
                   },
                   fields: [
                     {
-                      type: 'row',
-                      fields: [
-                        {
-                          name: 'label',
-                          type: 'text',
-                          required: true,
-                        },
-                        {
-                          name: 'slug',
-                          type: 'text',
-                          required: true,
-                        },
-                      ],
+                      name: 'label',
+                      type: 'text',
+                      required: true,
+                    },
+                    {
+                      name: 'slug',
+                      type: 'text',
+                      required: true,
                     },
                     {
                       name: 'values',
@@ -163,19 +162,14 @@ export const Products: CollectionConfig = {
                       },
                       fields: [
                         {
-                          type: 'row',
-                          fields: [
-                            {
-                              name: 'label',
-                              type: 'text',
-                              required: true,
-                            },
-                            {
-                              name: 'slug',
-                              type: 'text',
-                              required: true,
-                            },
-                          ],
+                          name: 'label',
+                          type: 'text',
+                          required: true,
+                        },
+                        {
+                          name: 'slug',
+                          type: 'text',
+                          required: true,
                         },
                       ],
                     },
@@ -202,7 +196,7 @@ export const Products: CollectionConfig = {
                       type: 'array',
                       admin: {
                         components: {
-                          Field: '@/collections/Products/ui/VariantSelect#VariantSelect',
+                          Field: '@/collections/Products/ui/Variants/VariantSelect#VariantSelect',
                         },
                       },
                       fields: [
@@ -259,10 +253,13 @@ export const Products: CollectionConfig = {
                   required: true,
                   minRows: 1,
                   validate: (value, { siblingData }) => {
+                    // @ts-expect-error
                     if (siblingData.variants.length) {
+                      // @ts-expect-error
                       const hasDuplicate = siblingData.variants.some(
                         (variant: ProductVariant, index) => {
                           // Check this against other variants
+                          // @ts-expect-error
                           const dedupedArray = [...siblingData.variants].filter(
                             (_, i) => i !== index,
                           )
@@ -386,7 +383,7 @@ export const Products: CollectionConfig = {
   },
   versions: {
     drafts: {
-      autosave: true,
+      autosave: false,
     },
     maxPerDoc: 50,
   },

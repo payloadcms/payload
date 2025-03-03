@@ -9,9 +9,11 @@ import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { LinkFeatureClient as LinkFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { OptionLabel as OptionLabel_2a854a70840417c0380b8c55437dba4b } from '@/collections/Products/ui/RowLabels/OptionLabel'
+import { VariantOptions as VariantOptions_a0e2456fee3ce2ca80137b4fecc61f43 } from '@/collections/Products/ui/Variants/VariantOptions'
 import { KeyLabel as KeyLabel_5cfa349e0a6907ae2ad53190ba896137 } from '@/collections/Products/ui/RowLabels/KeyLabel'
-import { VariantSelect as VariantSelect_69de406736b5647ab0dda949697d5591 } from '@/collections/Products/ui/VariantSelect'
+import { VariantSelect as VariantSelect_1a0e4d1b7199c27e35f9ba7c7b6c50ab } from '@/collections/Products/ui/Variants/VariantSelect'
 import { VariantLabel as VariantLabel_4328c5fb4d789fba8b97b71b57a7d333 } from '@/collections/Products/ui/RowLabels/VariantLabel'
+import { ProductVariants as ProductVariants_8ea9726ca3ee966cff4c93fdacbdfdd0 } from '@/collections/Products/ui/Variants/ProductVariants'
 import { OverviewComponent as OverviewComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { MetaTitleComponent as MetaTitleComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { MetaImageComponent as MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
@@ -45,12 +47,16 @@ export const importMap = {
     LinkFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   '@/collections/Products/ui/RowLabels/OptionLabel#OptionLabel':
     OptionLabel_2a854a70840417c0380b8c55437dba4b,
+  '@/collections/Products/ui/Variants/VariantOptions#VariantOptions':
+    VariantOptions_a0e2456fee3ce2ca80137b4fecc61f43,
   '@/collections/Products/ui/RowLabels/KeyLabel#KeyLabel':
     KeyLabel_5cfa349e0a6907ae2ad53190ba896137,
-  '@/collections/Products/ui/VariantSelect#VariantSelect':
-    VariantSelect_69de406736b5647ab0dda949697d5591,
+  '@/collections/Products/ui/Variants/VariantSelect#VariantSelect':
+    VariantSelect_1a0e4d1b7199c27e35f9ba7c7b6c50ab,
   '@/collections/Products/ui/RowLabels/VariantLabel#VariantLabel':
     VariantLabel_4328c5fb4d789fba8b97b71b57a7d333,
+  '@/collections/Products/ui/Variants/ProductVariants#ProductVariants':
+    ProductVariants_8ea9726ca3ee966cff4c93fdacbdfdd0,
   '@payloadcms/plugin-seo/client#OverviewComponent':
     OverviewComponent_a8a977ebc872c5d5ea7ee689724c0860,
   '@payloadcms/plugin-seo/client#MetaTitleComponent':

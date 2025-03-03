@@ -1,10 +1,10 @@
 'use client'
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import type { TextFieldClientProps } from 'payload'
 
 import { toKebabCase } from '@/utilities/toKebabCase'
 import { getTranslation } from '@payloadcms/translations'
-import { useField, useForm, useTranslation } from '@payloadcms/ui'
+import { useField, useForm, useFormModified, useTranslation } from '@payloadcms/ui'
 import { sortOptionsByKey } from '@/collections/Products/utilities/sortOptionsByKey'
 
 import type { RadioGroupProps, Option, OptionKey } from '../types'
@@ -18,17 +18,49 @@ export const VariantSelect: React.FC<TextFieldClientProps> = (props) => {
     path,
   } = props
 
-  const { setValue } = useField({ path })
-  const { getDataByPath } = useForm()
+  const { getDataByPath, dispatchFields, setModified } = useForm()
+  const modified = useFormModified()
 
   const options: NonNullable<Product['variants']>['options'] = getDataByPath('variants.options')
-  const values = getDataByPath<Option[]>(path)
+  const values = useMemo(() => {
+    return getDataByPath<Option[]>(path)
+  }, [getDataByPath, path, modified])
+
+  const setArray = useCallback(
+    (incomingValues: { label: string; slug: string }[]) => {
+      // setValue(null)
+
+      // setValue(incomingValues)
+
+      dispatchFields({
+        type: 'REPLACE_ROW',
+        path,
+        rowIndex: 1,
+        subFieldState: {
+          label: {
+            value: 'Large',
+          },
+          slug: {
+            value: 'xlarge',
+          },
+        },
+      })
+
+      setModified(true)
+    },
+    [dispatchFields, path, setModified],
+  )
+
+  console.log({ values })
 
   const { i18n } = useTranslation()
 
   return (
     <div className={classes.container}>
       <p style={{ marginBottom: '0' }}>{typeof label === 'string' ? label : 'Product'}</p>
+      <div>{JSON.stringify(values)}</div>
+      {/* <div>{JSON.stringify(rows)}</div> */}
+      <div>{JSON.stringify(path)}</div>
       <div className={classes.groupsContainer}>
         {options?.length &&
           options.map((option) => {
@@ -46,7 +78,7 @@ export const VariantSelect: React.FC<TextFieldClientProps> = (props) => {
                     group={option}
                     options={option.values}
                     path={path}
-                    setValue={setValue}
+                    setValue={setArray}
                     values={values}
                   />
                 </div>
@@ -70,21 +102,44 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
 
   const handleOnChange = useCallback(
     (e) => {
-      const selectedOption = options.find((option) => option.slug === e.target.value) as OptionKey
+      e.preventDefault()
+      const selectedOption = [...options].find((option) => {
+        if (option.slug === e.target.value) {
+          // console.log({ found: option, e: e.target.value, slug: option.slug })
+          return true
+        }
+      }) as OptionKey
+
+      // console.log({ options, selectedOption, e: e.target.value, values })
 
       if (!selectedOption) return
 
+      if (!values || !values.length) {
+        const newValue = [selectedOption]
+
+        const sortedValues = sortOptionsByKey(newValue, fullArray)
+
+        setValue(sortedValues)
+        return
+      }
+
       const filteredValues =
-        values?.filter((value) => {
+        [...values].filter((value) => {
           const isIncluded = options.find((option) => option.slug === value.slug)
 
-          return !isIncluded
+          return !Boolean(isIncluded)
         }) ?? []
 
       const newValue = [...filteredValues, selectedOption]
+      // console.log({ filteredValues, newValue, selectedOption, e: e.target.value, options })
 
-      const sortedValues = sortOptionsByKey(newValue, fullArray)
+      const sortedValues = sortOptionsByKey(newValue, fullArray) /* .map((v) => ({
+        slug: v.slug,
+        label: v.label,
+      })) */
 
+      console.log({ sortedValues: sortedValues, newValue })
+      // setValue(null)
       setValue(sortedValues)
     },
     [options, values, fullArray, setValue],
@@ -110,7 +165,10 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
               type="radio"
               value={item.slug}
             />
-            <label htmlFor={id}>{getTranslation(item.label, i18n)}</label>
+
+            <label htmlFor={id}>
+              {item.slug} {getTranslation(item.label, i18n)}
+            </label>
           </div>
         )
       })}
