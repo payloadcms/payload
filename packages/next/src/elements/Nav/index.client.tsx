@@ -44,7 +44,10 @@ export const DefaultNavClient: React.FC<{
                 id = `nav-global-${slug}`
               }
 
-              const isActive = pathname.startsWith(href)
+              const isActive =
+                pathname === href ||
+                pathname.startsWith(`${href}/`) ||
+                pathname.startsWith(`${href}?`)
 
               const Label = (
                 <>
