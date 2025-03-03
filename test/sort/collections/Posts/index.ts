@@ -4,7 +4,7 @@ export const postsSlug = 'posts'
 
 export const PostsCollection: CollectionConfig = {
   slug: postsSlug,
-  enableCustomOrder: true,
+  isSortable: true,
   admin: {
     useAsTitle: 'text',
     components: {

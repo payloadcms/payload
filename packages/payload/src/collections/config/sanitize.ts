@@ -246,7 +246,7 @@ export const sanitizeCollection = async (
   const ORDER_FIELD_NAME = '_order'
 
   // Enable custom order
-  if (collection.enableCustomOrder) {
+  if (collection.isSortable) {
     // 1. Add field
     const orderField: Field = {
       name: ORDER_FIELD_NAME,

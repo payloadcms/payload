@@ -410,15 +410,6 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    */
   disableDuplicate?: boolean
   /**
-   * If true, enables custom ordering for the collection, and documents in the listView can be reordered via drag and drop.
-   * New documents are inserted at the end of the list according to this parameter.
-   *
-   * Under the hood, a field with {@link https://observablehq.com/@dgreensp/implementing-fractional-indexing|fractional indexing} is used to optimize inserts and reorderings.
-   *
-   * @default false
-   */
-  enableCustomOrder?: boolean
-  /**
    * Custom rest api endpoints, set false to disable all rest endpoints for this collection.
    */
   endpoints?: false | Omit<Endpoint, 'root'>[]
@@ -468,6 +459,15 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
      */
     refresh?: RefreshHook[]
   }
+  /**
+   * If true, enables custom ordering for the collection, and documents in the listView can be reordered via drag and drop.
+   * New documents are inserted at the end of the list according to this parameter.
+   *
+   * Under the hood, a field with {@link https://observablehq.com/@dgreensp/implementing-fractional-indexing|fractional indexing} is used to optimize inserts and reorderings.
+   *
+   * @default false
+   */
+  isSortable?: boolean
   /**
    * Label configuration
    */
