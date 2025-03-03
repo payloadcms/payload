@@ -21,6 +21,7 @@ export type PayloadAdminBarProps = {
   adminPath?: string
   apiPath?: string
   collection?: string
+  authCollection?: string
   collectionLabels?: {
     singular?: string,
     plural?: string
@@ -78,6 +79,7 @@ export const PayloadAdminBar: React.FC<PayloadAdminBarProps> = (props) => {
     cmsURL = 'http://localhost:8000',
     apiPath = '/api',
     adminPath = '/admin',
+    authCollection = 'users',
     collection,
     collectionLabels,
     id,
@@ -104,7 +106,7 @@ export const PayloadAdminBar: React.FC<PayloadAdminBarProps> = (props) => {
   useEffect(() => {
     const fetchMe = async () => {
       try {
-        const meRequest = await fetch(`${cmsURL}${apiPath}/users/me`, {
+        const meRequest = await fetch(`${cmsURL}${apiPath}/${authCollection}/me`, {
           method: 'get',
           credentials: 'include',
         });
@@ -194,7 +196,7 @@ export const PayloadAdminBar: React.FC<PayloadAdminBarProps> = (props) => {
           {logo || 'Payload CMS'}
         </a>
         <a
-          href={`${cmsURL}${adminPath}/collections/users/${userID}`}
+          href={`${cmsURL}${adminPath}/collections/${authCollection}/${userID}`}
           target="_blank"
           rel="noopener noreferrer"
           className={classNames?.user}
