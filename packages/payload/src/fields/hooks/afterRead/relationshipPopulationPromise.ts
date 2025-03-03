@@ -22,6 +22,7 @@ type PopulateArgs = {
   showHiddenFields: boolean
 }
 
+// TODO: this function is mess, refactor logic
 const populate = async ({
   currentDepth,
   data,
@@ -41,14 +42,24 @@ const populate = async ({
   const dataToUpdate = dataReference
   let relation
   if (field.type === 'join') {
-    relation = field.collection
+    relation = Array.isArray(field.collection) ? data.relationTo : field.collection
   } else {
     relation = Array.isArray(field.relationTo) ? (data.relationTo as string) : field.relationTo
   }
+
   const relatedCollection = req.payload.collections[relation]
 
   if (relatedCollection) {
-    let id = field.type !== 'join' && Array.isArray(field.relationTo) ? data.value : data
+    let id: unknown
+
+    if (field.type === 'join' && Array.isArray(field.collection)) {
+      id = data.value
+    } else if (field.type !== 'join' && Array.isArray(field.relationTo)) {
+      id = data.value
+    } else {
+      id = data
+    }
+
     let relationshipValue
     const shouldPopulate = depth && currentDepth <= depth
 
@@ -90,11 +101,19 @@ const populate = async ({
       if (field.type !== 'join' && Array.isArray(field.relationTo)) {
         dataToUpdate[field.name][key][index].value = relationshipValue
       } else {
-        dataToUpdate[field.name][key][index] = relationshipValue
+        if (field.type === 'join' && Array.isArray(field.collection)) {
+          dataToUpdate[field.name][key][index].value = relationshipValue
+        } else {
+          dataToUpdate[field.name][key][index] = relationshipValue
+        }
       }
     } else if (typeof index === 'number' || typeof key === 'string') {
       if (field.type === 'join') {
-        dataToUpdate[field.name].docs[index ?? key] = relationshipValue
+        if (!Array.isArray(field.collection)) {
+          dataToUpdate[field.name].docs[index ?? key] = relationshipValue
+        } else {
+          dataToUpdate[field.name].docs[index ?? key].value = relationshipValue
+        }
       } else if (Array.isArray(field.relationTo)) {
         dataToUpdate[field.name][index ?? key].value = relationshipValue
       } else {
@@ -103,7 +122,11 @@ const populate = async ({
     } else if (field.type !== 'join' && Array.isArray(field.relationTo)) {
       dataToUpdate[field.name].value = relationshipValue
     } else {
-      dataToUpdate[field.name] = relationshipValue
+      if (field.type === 'join' && Array.isArray(field.collection)) {
+        dataToUpdate[field.name].value = relationshipValue
+      } else {
+        dataToUpdate[field.name] = relationshipValue
+      }
     }
   }
 }
@@ -185,7 +208,10 @@ export const relationshipPopulationPromise = async ({
           if (relatedDoc) {
             await populate({
               currentDepth,
-              data: relatedDoc?.id ? relatedDoc.id : relatedDoc,
+              data:
+                !(field.type === 'join' && Array.isArray(field.collection)) && relatedDoc?.id
+                  ? relatedDoc.id
+                  : relatedDoc,
               dataReference: resultingDoc,
               depth: populateDepth,
               draft,

@@ -28,6 +28,7 @@ export async function getAccessResults({
   } else {
     results.canAccessAdmin = false
   }
+  const blockPolicies = {}
 
   await Promise.all(
     payload.config.collections.map(async (collection) => {
@@ -47,6 +48,7 @@ export async function getAccessResults({
 
       const collectionPolicy = await getEntityPolicies({
         type: 'collection',
+        blockPolicies,
         entity: collection,
         operations: collectionOperations,
         req,
@@ -65,6 +67,7 @@ export async function getAccessResults({
 
       const globalPolicy = await getEntityPolicies({
         type: 'global',
+        blockPolicies,
         entity: global,
         operations: globalOperations,
         req,

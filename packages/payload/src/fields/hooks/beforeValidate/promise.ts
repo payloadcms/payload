@@ -274,12 +274,27 @@ export const promise = async <T>({
       }
     }
 
+    if (typeof siblingData[field.name] === 'undefined') {
+      // If no incoming data, but existing document data is found, merge it in
+      if (typeof siblingDoc[field.name] !== 'undefined') {
+        siblingData[field.name] = cloneDataFromOriginalDoc(siblingDoc[field.name])
+
+        // Otherwise compute default value
+      } else if (typeof field.defaultValue !== 'undefined') {
+        siblingData[field.name] = await getDefaultValue({
+          defaultValue: field.defaultValue,
+          locale: req.locale,
+          req,
+          user: req.user,
+          value: siblingData[field.name],
+        })
+      }
+    }
+
     // Execute hooks
     if (field.hooks?.beforeValidate) {
-      await field.hooks.beforeValidate.reduce(async (priorHook, currentHook) => {
-        await priorHook
-
-        const hookedValue = await currentHook({
+      for (const hook of field.hooks.beforeValidate) {
+        const hookedValue = await hook({
           blockData,
           collection,
           context,
@@ -303,7 +318,7 @@ export const promise = async <T>({
         if (hookedValue !== undefined) {
           siblingData[field.name] = hookedValue
         }
-      }, Promise.resolve())
+      }
     }
 
     // Execute access control
@@ -314,23 +329,6 @@ export const promise = async <T>({
 
       if (!result) {
         delete siblingData[field.name]
-      }
-    }
-
-    if (typeof siblingData[field.name] === 'undefined') {
-      // If no incoming data, but existing document data is found, merge it in
-      if (typeof siblingDoc[field.name] !== 'undefined') {
-        siblingData[field.name] = cloneDataFromOriginalDoc(siblingDoc[field.name])
-
-        // Otherwise compute default value
-      } else if (typeof field.defaultValue !== 'undefined') {
-        siblingData[field.name] = await getDefaultValue({
-          defaultValue: field.defaultValue,
-          locale: req.locale,
-          req,
-          user: req.user,
-          value: siblingData[field.name],
-        })
       }
     }
   }
@@ -493,10 +491,8 @@ export const promise = async <T>({
       const editor: RichTextAdapter = field?.editor
 
       if (editor?.hooks?.beforeValidate?.length) {
-        await editor.hooks.beforeValidate.reduce(async (priorHook, currentHook) => {
-          await priorHook
-
-          const hookedValue = await currentHook({
+        for (const hook of editor.hooks.beforeValidate) {
+          const hookedValue = await hook({
             collection,
             context,
             data,
@@ -519,7 +515,7 @@ export const promise = async <T>({
           if (hookedValue !== undefined) {
             siblingData[field.name] = hookedValue
           }
-        }, Promise.resolve())
+        }
       }
       break
     }

@@ -8,7 +8,21 @@ import { v4 as uuid } from 'uuid'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { errorOnUnnamedFieldsSlug, postsSlug } from './shared.js'
+import { seed } from './seed.js'
+import {
+  customIDsSlug,
+  customSchemaSlug,
+  defaultValuesSlug,
+  errorOnUnnamedFieldsSlug,
+  fakeCustomIDsSlug,
+  fieldsPersistanceSlug,
+  pgMigrationSlug,
+  placesSlug,
+  postsSlug,
+  relationASlug,
+  relationBSlug,
+  relationshipsMigrationSlug,
+} from './shared.js'
 
 const defaultValueField: TextField = {
   name: 'defaultValue',
@@ -183,7 +197,7 @@ export default buildConfigWithDefaults({
       ],
     },
     {
-      slug: 'default-values',
+      slug: defaultValuesSlug,
       fields: [
         {
           name: 'title',
@@ -222,7 +236,7 @@ export default buildConfigWithDefaults({
       ],
     },
     {
-      slug: 'relation-a',
+      slug: relationASlug,
       fields: [
         {
           name: 'title',
@@ -239,7 +253,7 @@ export default buildConfigWithDefaults({
       },
     },
     {
-      slug: 'relation-b',
+      slug: relationBSlug,
       fields: [
         {
           name: 'title',
@@ -261,7 +275,7 @@ export default buildConfigWithDefaults({
       },
     },
     {
-      slug: 'pg-migrations',
+      slug: pgMigrationSlug,
       fields: [
         {
           name: 'relation1',
@@ -329,7 +343,7 @@ export default buildConfigWithDefaults({
       versions: true,
     },
     {
-      slug: 'custom-schema',
+      slug: customSchemaSlug,
       dbName: 'customs',
       fields: [
         {
@@ -404,7 +418,7 @@ export default buildConfigWithDefaults({
       },
     },
     {
-      slug: 'places',
+      slug: placesSlug,
       fields: [
         {
           name: 'country',
@@ -417,7 +431,7 @@ export default buildConfigWithDefaults({
       ],
     },
     {
-      slug: 'fields-persistance',
+      slug: fieldsPersistanceSlug,
       fields: [
         {
           name: 'text',
@@ -475,7 +489,7 @@ export default buildConfigWithDefaults({
       ],
     },
     {
-      slug: 'custom-ids',
+      slug: customIDsSlug,
       fields: [
         {
           name: 'id',
@@ -502,7 +516,7 @@ export default buildConfigWithDefaults({
       versions: { drafts: true },
     },
     {
-      slug: 'fake-custom-ids',
+      slug: fakeCustomIDsSlug,
       fields: [
         {
           name: 'title',
@@ -535,7 +549,7 @@ export default buildConfigWithDefaults({
       ],
     },
     {
-      slug: 'relationships-migration',
+      slug: relationshipsMigrationSlug,
       fields: [
         {
           type: 'relationship',
@@ -587,13 +601,9 @@ export default buildConfigWithDefaults({
     locales: ['en', 'es'],
   },
   onInit: async (payload) => {
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: devUser.email,
-        password: devUser.password,
-      },
-    })
+    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
+      await seed(payload)
+    }
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

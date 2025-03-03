@@ -22,6 +22,8 @@ export type ListHeaderProps = {
   className?: string
   collectionConfig: ClientCollectionConfig
   Description?: React.ReactNode
+  disableBulkDelete?: boolean
+  disableBulkEdit?: boolean
   hasCreatePermission: boolean
   i18n: I18nClient
   isBulkUploadEnabled: boolean
@@ -35,6 +37,8 @@ const DefaultListHeader: React.FC<ListHeaderProps> = ({
   className,
   collectionConfig,
   Description,
+  disableBulkDelete,
+  disableBulkEdit,
   hasCreatePermission,
   i18n,
   isBulkUploadEnabled,
@@ -72,7 +76,12 @@ const DefaultListHeader: React.FC<ListHeaderProps> = ({
         </>
       )}
       {!smallBreak && (
-        <ListSelection label={getTranslation(collectionConfig?.labels?.plural, i18n)} />
+        <ListSelection
+          collectionConfig={collectionConfig}
+          disableBulkDelete={disableBulkDelete}
+          disableBulkEdit={disableBulkEdit}
+          label={getTranslation(collectionConfig?.labels?.plural, i18n)}
+        />
       )}
       {Description}
     </header>

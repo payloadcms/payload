@@ -1,19 +1,19 @@
 import type { Config } from 'payload'
 
 import { devUser } from '../../credentials.js'
-import { menuItemsSlug, menuSlug, usersSlug } from '../shared.js'
+import { menuItemsSlug, menuSlug, tenantsSlug, usersSlug } from '../shared.js'
 
 export const seed: Config['onInit'] = async (payload) => {
   // create tenants
   const blueDogTenant = await payload.create({
-    collection: 'tenants',
+    collection: tenantsSlug,
     data: {
       name: 'Blue Dog',
       domain: 'bluedog.com',
     },
   })
   const steelCatTenant = await payload.create({
-    collection: 'tenants',
+    collection: tenantsSlug,
     data: {
       name: 'Steel Cat',
       domain: 'steelcat.com',

@@ -9,8 +9,6 @@ import React, { Fragment, useEffect, useState } from 'react'
 
 import { useBulkUpload } from '../../elements/BulkUpload/index.js'
 import { Button } from '../../elements/Button/index.js'
-import { DeleteMany } from '../../elements/DeleteMany/index.js'
-import { EditMany } from '../../elements/EditMany/index.js'
 import { Gutter } from '../../elements/Gutter/index.js'
 import { ListControls } from '../../elements/ListControls/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
@@ -18,13 +16,11 @@ import { ListSelection } from '../../elements/ListSelection/index.js'
 import { useModal } from '../../elements/Modal/index.js'
 import { Pagination } from '../../elements/Pagination/index.js'
 import { PerPage } from '../../elements/PerPage/index.js'
-import { PublishMany } from '../../elements/PublishMany/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { SelectMany } from '../../elements/SelectMany/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
 import { TableColumnsProvider } from '../../elements/TableColumns/index.js'
-import { UnpublishMany } from '../../elements/UnpublishMany/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -51,11 +47,9 @@ export function DefaultListView(props: ListViewClientProps) {
     disableBulkDelete,
     disableBulkEdit,
     enableRowSelections,
-    hasCreatePermission,
+    hasCreatePermission: hasCreatePermissionFromProps,
     listMenuItems,
-    listPreferences,
     newDocumentURL,
-    preferenceKey,
     renderedFilters,
     resolvedFilterOptions,
     Table: InitialTable,
@@ -63,7 +57,17 @@ export function DefaultListView(props: ListViewClientProps) {
 
   const [Table, setTable] = useState(InitialTable)
 
-  const { createNewDrawerSlug, drawerSlug: listDrawerSlug, onBulkSelect } = useListDrawerContext()
+  const {
+    allowCreate,
+    createNewDrawerSlug,
+    drawerSlug: listDrawerSlug,
+    onBulkSelect,
+  } = useListDrawerContext()
+
+  const hasCreatePermission =
+    allowCreate !== undefined
+      ? allowCreate && hasCreatePermissionFromProps
+      : hasCreatePermissionFromProps
 
   useEffect(() => {
     if (InitialTable) {
@@ -145,18 +149,9 @@ export function DefaultListView(props: ListViewClientProps) {
       ])
     }
   }, [setStepNav, labels, drawerDepth])
-
   return (
     <Fragment>
-      <TableColumnsProvider
-        collectionSlug={collectionSlug}
-        columnState={columnState}
-        docs={docs}
-        enableRowSelections={enableRowSelections}
-        listPreferences={listPreferences}
-        preferenceKey={preferenceKey}
-        setTable={setTable}
-      >
+      <TableColumnsProvider collectionSlug={collectionSlug} columnState={columnState}>
         <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
           <SelectionProvider docs={docs} totalDocs={data.totalDocs} user={user}>
             {BeforeList}
@@ -176,6 +171,8 @@ export function DefaultListView(props: ListViewClientProps) {
                     />
                   </div>
                 }
+                disableBulkDelete={disableBulkDelete}
+                disableBulkEdit={disableBulkEdit}
                 hasCreatePermission={hasCreatePermission}
                 i18n={i18n}
                 isBulkUploadEnabled={isBulkUploadEnabled && !upload.hideFileInputOnCreate}
@@ -194,8 +191,6 @@ export function DefaultListView(props: ListViewClientProps) {
                 }
                 collectionConfig={collectionConfig}
                 collectionSlug={collectionSlug}
-                disableBulkDelete={disableBulkDelete}
-                disableBulkEdit={disableBulkEdit}
                 listMenuItems={listMenuItems}
                 renderedFilters={renderedFilters}
                 resolvedFilterOptions={resolvedFilterOptions}
@@ -258,6 +253,9 @@ export function DefaultListView(props: ListViewClientProps) {
                       {smallBreak && (
                         <div className={`${baseClass}__list-selection`}>
                           <ListSelection
+                            collectionConfig={collectionConfig}
+                            disableBulkDelete={disableBulkDelete}
+                            disableBulkEdit={disableBulkEdit}
                             label={getTranslation(collectionConfig.labels.plural, i18n)}
                           />
                           <div className={`${baseClass}__list-selection-actions`}>
@@ -269,14 +267,6 @@ export function DefaultListView(props: ListViewClientProps) {
                                   ]
                                 : [<SelectMany key="select-many" onClick={onBulkSelect} />]
                               : beforeActions}
-                            {!disableBulkEdit && (
-                              <Fragment>
-                                <EditMany collection={collectionConfig} />
-                                <PublishMany collection={collectionConfig} />
-                                <UnpublishMany collection={collectionConfig} />
-                              </Fragment>
-                            )}
-                            {!disableBulkDelete && <DeleteMany collection={collectionConfig} />}
                           </div>
                         </div>
                       )}

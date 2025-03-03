@@ -18,6 +18,7 @@ import { hu } from './hu.js'
 import { it } from './it.js'
 import { ja } from './ja.js'
 import { ko } from './ko.js'
+import { lt } from './lt.js'
 import { my } from './my.js'
 import { nb } from './nb.js'
 import { nl } from './nl.js'
@@ -56,6 +57,7 @@ export const translations = {
   it,
   ja,
   ko,
+  lt,
   my,
   nb,
   nl,

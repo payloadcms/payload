@@ -77,6 +77,7 @@ export interface Config {
     'user-restricted-collection': UserRestrictedCollection;
     'create-not-update-collection': CreateNotUpdateCollection;
     'restricted-versions': RestrictedVersion;
+    'restricted-versions-admin-panel': RestrictedVersionsAdminPanel;
     'sibling-data': SiblingDatum;
     'rely-on-request-headers': RelyOnRequestHeader;
     'doc-level-access': DocLevelAccess;
@@ -104,6 +105,7 @@ export interface Config {
     'user-restricted-collection': UserRestrictedCollectionSelect<false> | UserRestrictedCollectionSelect<true>;
     'create-not-update-collection': CreateNotUpdateCollectionSelect<false> | CreateNotUpdateCollectionSelect<true>;
     'restricted-versions': RestrictedVersionsSelect<false> | RestrictedVersionsSelect<true>;
+    'restricted-versions-admin-panel': RestrictedVersionsAdminPanelSelect<false> | RestrictedVersionsAdminPanelSelect<true>;
     'sibling-data': SiblingDataSelect<false> | SiblingDataSelect<true>;
     'rely-on-request-headers': RelyOnRequestHeadersSelect<false> | RelyOnRequestHeadersSelect<true>;
     'doc-level-access': DocLevelAccessSelect<false> | DocLevelAccessSelect<true>;
@@ -303,6 +305,17 @@ export interface ReadOnlyCollection {
  * via the `definition` "restricted-versions".
  */
 export interface RestrictedVersion {
+  id: string;
+  name?: string | null;
+  hidden?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-versions-admin-panel".
+ */
+export interface RestrictedVersionsAdminPanel {
   id: string;
   name?: string | null;
   hidden?: boolean | null;
@@ -715,6 +728,10 @@ export interface PayloadLockedDocument {
         value: string | RestrictedVersion;
       } | null)
     | ({
+        relationTo: 'restricted-versions-admin-panel';
+        value: string | RestrictedVersionsAdminPanel;
+      } | null)
+    | ({
         relationTo: 'sibling-data';
         value: string | SiblingDatum;
       } | null)
@@ -919,6 +936,16 @@ export interface CreateNotUpdateCollectionSelect<T extends boolean = true> {
  * via the `definition` "restricted-versions_select".
  */
 export interface RestrictedVersionsSelect<T extends boolean = true> {
+  name?: T;
+  hidden?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-versions-admin-panel_select".
+ */
+export interface RestrictedVersionsAdminPanelSelect<T extends boolean = true> {
   name?: T;
   hidden?: T;
   updatedAt?: T;

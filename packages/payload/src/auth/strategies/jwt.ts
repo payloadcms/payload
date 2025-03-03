@@ -54,6 +54,8 @@ async function autoLogin({
     await payload.find({
       collection: collection.config.slug,
       depth: isGraphQL ? 0 : collection.config.auth.depth,
+      limit: 1,
+      pagination: false,
       where,
     })
   ).docs[0]

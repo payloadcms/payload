@@ -1130,6 +1130,36 @@ describe('Relationships', () => {
       })
     })
 
+    it('should allow querying within block nesting', async () => {
+      const director = await payload.create({
+        collection: 'directors',
+        data: { name: 'Test Director' },
+      })
+
+      const director_false = await payload.create({
+        collection: 'directors',
+        data: { name: 'False Director' },
+      })
+
+      const doc = await payload.create({
+        collection: 'blocks',
+        data: { blocks: [{ blockType: 'some', director: director.id }] },
+      })
+
+      await payload.create({
+        collection: 'blocks',
+        data: { blocks: [{ blockType: 'some', director: director_false.id }] },
+      })
+
+      const result = await payload.find({
+        collection: 'blocks',
+        where: { 'blocks.director.name': { equals: 'Test Director' } },
+      })
+
+      expect(result.totalDocs).toBe(1)
+      expect(result.docs[0]!.id).toBe(doc.id)
+    })
+
     describe('Nested Querying Separate Collections', () => {
       let director: Director
 

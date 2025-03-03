@@ -125,6 +125,7 @@ export const renderField: RenderFieldMethod = ({
             clientProps,
             Component: fieldConfig.admin.components.RowLabel,
             importMap: req.payload.importMap,
+            key: `${rowIndex}`,
             serverProps: {
               ...serverProps,
               rowLabel: `${getTranslation(fieldConfig.labels.singular, req.i18n)} ${String(
@@ -161,6 +162,7 @@ export const renderField: RenderFieldMethod = ({
             clientProps,
             Component: blockConfig.admin.components.Label,
             importMap: req.payload.importMap,
+            key: `${rowIndex}`,
             serverProps: {
               ...serverProps,
               blockType: row.blockType,

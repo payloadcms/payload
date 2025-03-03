@@ -460,6 +460,27 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'blocks',
+      fields: [
+        {
+          type: 'blocks',
+          name: 'blocks',
+          blocks: [
+            {
+              slug: 'some',
+              fields: [
+                {
+                  type: 'relationship',
+                  relationTo: 'directors',
+                  name: 'director',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     await payload.create({

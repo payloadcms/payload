@@ -834,6 +834,37 @@ export interface BlockField {
   deduplicatedBlocks2?: ConfigBlockTest[] | null;
   localizedReferencesLocalizedBlock?: LocalizedTextReference[] | null;
   localizedReferences?: LocalizedTextReference2[] | null;
+  /**
+   * The purpose of this field is to test Block groups.
+   */
+  groupedBlocks?:
+    | (
+        | {
+            text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockWithGroupOne';
+          }
+        | {
+            text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockWithGroupTwo';
+          }
+        | {
+            text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockWithLocalizedGroup';
+          }
+        | {
+            text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockWithoutGroup';
+          }
+      )[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1443,6 +1474,15 @@ export interface JsonField {
       | boolean
       | null;
   };
+  customJSON?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2587,6 +2627,38 @@ export interface BlockFieldsSelect<T extends boolean = true> {
   deduplicatedBlocks2?: T | {};
   localizedReferencesLocalizedBlock?: T | {};
   localizedReferences?: T | {};
+  groupedBlocks?:
+    | T
+    | {
+        blockWithGroupOne?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        blockWithGroupTwo?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        blockWithLocalizedGroup?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        blockWithoutGroup?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3102,6 +3174,7 @@ export interface JsonFieldsSelect<T extends boolean = true> {
     | {
         jsonWithinGroup?: T;
       };
+  customJSON?: T;
   updatedAt?: T;
   createdAt?: T;
 }

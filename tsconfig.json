@@ -41,6 +41,9 @@
       "path": "./packages/plugin-cloud-storage"
     },
     {
+      "path": "./packages/storage-s3"
+    },
+    {
       "path": "./packages/payload-cloud"
     },
     {

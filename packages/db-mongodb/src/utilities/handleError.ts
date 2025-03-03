@@ -9,7 +9,7 @@ export const handleError = ({
   req,
 }: {
   collection?: string
-  error: Error
+  error: unknown
   global?: string
   req?: Partial<PayloadRequest>
 }) => {
@@ -18,14 +18,20 @@ export const handleError = ({
   }
 
   // Handle uniqueness error from MongoDB
-  if ('code' in error && error.code === 11000 && 'keyValue' in error && error.keyValue) {
+  if (
+    'code' in error &&
+    error.code === 11000 &&
+    'keyValue' in error &&
+    error.keyValue &&
+    typeof error.keyValue === 'object'
+  ) {
     throw new ValidationError(
       {
         collection,
         errors: [
           {
             message: req?.t ? req.t('error:valueMustBeUnique') : 'Value must be unique',
-            path: Object.keys(error.keyValue)[0],
+            path: Object.keys(error.keyValue)[0] ?? '',
           },
         ],
         global,
@@ -34,5 +40,6 @@ export const handleError = ({
     )
   }
 
+  // eslint-disable-next-line @typescript-eslint/only-throw-error
   throw error
 }

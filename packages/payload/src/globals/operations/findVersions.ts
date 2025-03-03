@@ -126,15 +126,12 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
     // afterRead - Global
     // /////////////////////////////////////
 
-    result = {
-      ...result,
-      docs: await Promise.all(
+    if (globalConfig.hooks?.afterRead?.length) {
+      result.docs = await Promise.all(
         result.docs.map(async (doc) => {
           const docRef = doc
 
-          await globalConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-            await priorHook
-
+          for (const hook of globalConfig.hooks.afterRead) {
             docRef.version =
               (await hook({
                 context: req.context,
@@ -144,11 +141,11 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
                 query: fullWhere,
                 req,
               })) || doc.version
-          }, Promise.resolve())
+          }
 
           return docRef
         }),
-      ),
+      )
     }
 
     // /////////////////////////////////////

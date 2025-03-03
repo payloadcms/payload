@@ -377,6 +377,7 @@ export const roTranslations: DefaultTranslationsObject = {
     isLike: 'este ca',
     isNotEqualTo: 'nu este egal cu',
     isNotIn: 'nu este în',
+    isNotLike: 'nu este ca',
     near: 'în apropiere de',
     within: 'înăuntru',
   },

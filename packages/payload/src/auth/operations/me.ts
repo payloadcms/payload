@@ -86,17 +86,17 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
   // After Me - Collection
   // /////////////////////////////////////
 
-  await collection.config.hooks.afterMe.reduce(async (priorHook, hook) => {
-    await priorHook
-
-    result =
-      (await hook({
-        collection: collection?.config,
-        context: req.context,
-        req,
-        response: result,
-      })) || result
-  }, Promise.resolve())
+  if (collection.config.hooks?.afterMe?.length) {
+    for (const hook of collection.config.hooks.afterMe) {
+      result =
+        (await hook({
+          collection: collection?.config,
+          context: req.context,
+          req,
+          response: result,
+        })) || result
+    }
+  }
 
   return result
 }

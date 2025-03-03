@@ -14,7 +14,7 @@ export { generateVerifyMetadata } from './meta.js'
 export async function Verify({ initPageResult, params, searchParams }: AdminViewServerProps) {
   // /:collectionSlug/verify/:token
 
-  const [collectionSlug, token] = params.segments
+  const [collectionSlug, verify, token] = params.segments
   const { locale, permissions, req } = initPageResult
 
   const {
