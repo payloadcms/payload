@@ -1,22 +1,26 @@
 import type { SerializedEditorState } from 'lexical'
-import type { Field, FieldAffectingData, PayloadRequest, RichTextField } from 'payload'
+import type { Field } from 'payload'
 
-import type { SanitizedServerEditorConfig } from '../../../../lexical/config/types.js'
-import type { AdapterProps, LexicalRichTextAdapter } from '../../../../types.js'
-import type { HTMLConverter } from '../converter/types.js'
-import type { HTMLConverterFeatureProps } from '../index.js'
+import type { HTMLConverters, HTMLConvertersFunction } from '../types.js'
 
-import { defaultHTMLConverters } from '../converter/defaultConverters.js'
-import { convertLexicalToHTML } from '../converter/index.js'
+import { convertLexicalToHTML } from '../index.js'
+import { getHTMLPopulateFn } from './htmlPopulateFn.js'
 
-type Props = {
+type Args = {
+  converters?: HTMLConverters | HTMLConvertersFunction
   /**
    * Whether the lexicalHTML field should be hidden in the admin panel
    *
    * @default true
    */
   hidden?: boolean
-  name: string
+  htmlFieldName: string
+  /**
+   * A string which matches the lexical field name you want to convert to HTML.
+   *
+   * This has to be a sibling field of this lexicalHTML field - otherwise, it won't be able to find the lexical field.
+   **/
+  lexicalFieldName: string
   /**
    * Whether the HTML should be stored in the database
    *
@@ -26,75 +30,15 @@ type Props = {
 }
 
 /**
- * Combines the default HTML converters with HTML converters found in the features, and with HTML converters configured in the htmlConverter feature.
  *
- * @param editorConfig
+ * Field that converts a sibling lexical field to HTML
+ *
+ * @todo will be renamed to lexicalHTML in 4.0, replacing the deprecated `lexicalHTML` converter
  */
-export const consolidateHTMLConverters = ({
-  editorConfig,
-}: {
-  editorConfig: SanitizedServerEditorConfig
-}): HTMLConverter[] => {
-  const htmlConverterFeature = editorConfig.resolvedFeatureMap.get('htmlConverter')
-  const htmlConverterFeatureProps: HTMLConverterFeatureProps =
-    htmlConverterFeature?.sanitizedServerFeatureProps
-
-  const defaultConvertersWithConvertersFromFeatures = [...defaultHTMLConverters]
-
-  for (const converter of editorConfig.features.converters.html) {
-    defaultConvertersWithConvertersFromFeatures.push(converter)
-  }
-
-  const finalConverters =
-    htmlConverterFeatureProps?.converters &&
-    typeof htmlConverterFeatureProps?.converters === 'function'
-      ? htmlConverterFeatureProps.converters({
-          defaultConverters: defaultConvertersWithConvertersFromFeatures,
-        })
-      : (htmlConverterFeatureProps?.converters as HTMLConverter[]) ||
-        defaultConvertersWithConvertersFromFeatures
-
-  // filter converters by nodeTypes. The last converter in the list wins. If there are multiple converters for the same nodeType, the last one will be used and the node types will be removed from
-  // previous converters. If previous converters do not have any nodeTypes left, they will be removed from the list.
-  // This guarantees that user-added converters which are added after the default ones will always have precedence
-  const foundNodeTypes: string[] = []
-  const filteredConverters: HTMLConverter[] = []
-  for (const converter of finalConverters.reverse()) {
-    if (!converter.nodeTypes?.length) {
-      continue
-    }
-    const newConverter: HTMLConverter = {
-      converter: converter.converter,
-      nodeTypes: [...converter.nodeTypes],
-    }
-    newConverter.nodeTypes = newConverter.nodeTypes.filter((nodeType) => {
-      if (foundNodeTypes.includes(nodeType)) {
-        return false
-      }
-      foundNodeTypes.push(nodeType)
-      return true
-    })
-
-    if (newConverter.nodeTypes.length) {
-      filteredConverters.push(newConverter)
-    }
-  }
-
-  return filteredConverters
-}
-
-export const lexicalHTML: (
-  /**
-   * A string which matches the lexical field name you want to convert to HTML.
-   *
-   * This has to be a SIBLING field of this lexicalHTML field - otherwise, it won't be able to find the lexical field.
-   **/
-  lexicalFieldName: string,
-  props: Props,
-) => Field = (lexicalFieldName, props) => {
-  const { name = 'lexicalHTML', hidden = true, storeInDB = false } = props
+export const lexicalHTMLField: (args: Args) => Field = (args) => {
+  const { converters, hidden = true, htmlFieldName, lexicalFieldName, storeInDB = false } = args
   return {
-    name,
+    name: htmlFieldName,
     type: 'code',
     admin: {
       editorOptions: {
@@ -108,63 +52,30 @@ export const lexicalHTML: (
           currentDepth,
           depth,
           draft,
-          field,
           overrideAccess,
           req,
           showHiddenFields,
           siblingData,
-          siblingFields,
         }) => {
-          if (!siblingFields) {
-            throw new Error(
-              `Could not find sibling fields of current lexicalHTML field with name ${field?.name}`,
-            )
-          }
-
-          const lexicalField: RichTextField<SerializedEditorState, AdapterProps> =
-            siblingFields.find(
-              (field) => 'name' in field && field.name === lexicalFieldName,
-            ) as RichTextField<SerializedEditorState, AdapterProps>
-
           const lexicalFieldData: SerializedEditorState = siblingData[lexicalFieldName]
 
           if (!lexicalFieldData) {
             return ''
           }
 
-          if (!lexicalField) {
-            throw new Error(
-              'You cannot use the lexicalHTML field because the referenced lexical field was not found',
-            )
-          }
-
-          const config = (lexicalField?.editor as LexicalRichTextAdapter)?.editorConfig
-
-          if (!config) {
-            throw new Error(
-              'The linked lexical field does not have an editorConfig. This is needed for the lexicalHTML field.',
-            )
-          }
-
-          if (!config?.resolvedFeatureMap?.has('htmlConverter')) {
-            throw new Error(
-              'You cannot use the lexicalHTML field because the linked lexical field does not have a HTMLConverterFeature',
-            )
-          }
-
-          const finalConverters = consolidateHTMLConverters({
-            editorConfig: config,
+          const htmlPopulateFn = await getHTMLPopulateFn({
+            currentDepth: currentDepth ?? 0,
+            depth: depth ?? req.payload.config.defaultDepth,
+            draft: draft ?? false,
+            overrideAccess: overrideAccess ?? false,
+            req,
+            showHiddenFields: showHiddenFields ?? false,
           })
 
           return await convertLexicalToHTML({
-            converters: finalConverters,
-            currentDepth,
+            converters,
             data: lexicalFieldData,
-            depth,
-            draft,
-            overrideAccess,
-            req,
-            showHiddenFields,
+            populate: htmlPopulateFn,
           })
         },
       ],
@@ -173,7 +84,7 @@ export const lexicalHTML: (
           if (storeInDB) {
             return value
           }
-          delete siblingData[name]
+          delete siblingData[htmlFieldName]
           return null
         },
       ],

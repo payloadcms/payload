@@ -13,7 +13,7 @@ import { sanitizeFields } from 'payload'
 import type { ClientProps } from '../client/index.js'
 
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
-import { convertLexicalNodesToHTML } from '../../converters/html/converter/index.js'
+import { convertLexicalNodesToHTML } from '../../converters/html_deprecated/converter/index.js'
 import { createNode } from '../../typeUtilities.js'
 import { LinkMarkdownTransformer } from '../markdownTransformer.js'
 import { AutoLinkNode } from '../nodes/AutoLinkNode.js'

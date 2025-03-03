@@ -35,6 +35,11 @@
       "types": "./src/exports/react/index.ts",
       "default": "./src/exports/react/index.ts"
     },
+    "./html": {
+      "import": "./src/exports/html/index.ts",
+      "types": "./src/exports/html/index.ts",
+      "default": "./src/exports/html/index.ts"
+    },
     "./rsc": {
       "import": "./src/exports/server/rsc.ts",
       "types": "./src/exports/server/rsc.ts",
@@ -420,6 +425,11 @@
         "import": "./dist/exports/react/index.js",
         "types": "./dist/exports/react/index.d.ts",
         "default": "./dist/exports/react/index.js"
+      },
+      "./html": {
+        "import": "./dist/exports/html/index.js",
+        "types": "./dist/exports/html/index.d.ts",
+        "default": "./dist/exports/html/index.js"
       },
       "./rsc": {
         "import": "./dist/exports/server/rsc.js",
