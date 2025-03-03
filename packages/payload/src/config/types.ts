@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type {
   DefaultTranslationKeys,
   DefaultTranslationsObject,

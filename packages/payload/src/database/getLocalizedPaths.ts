@@ -1,7 +1,6 @@
 import type { Payload } from '../index.js'
 import type { PathToQuery } from './queryValidation/types.js'
 
-// @ts-strict-ignore
 import {
   type Field,
   fieldShouldBeLocalized,

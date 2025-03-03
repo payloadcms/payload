@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Access, Config } from '../config/types.js'
 

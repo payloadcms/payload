@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { DeepPartial } from 'ts-essentials'
 
 import type { CollectionSlug, TypedLocale } from '../../..//index.js'

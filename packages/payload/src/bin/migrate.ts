@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { ParsedArgs } from 'minimist'
 
 import type { SanitizedConfig } from '../config/types.js'

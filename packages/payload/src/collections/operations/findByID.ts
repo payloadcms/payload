@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { FindOneArgs } from '../../database/types.js'
 import type { CollectionSlug, JoinQuery } from '../../index.js'
 import type {

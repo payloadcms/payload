@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import type { PayloadComponent, SanitizedConfig } from '../../config/types.js'
 import type { Block, Field, Tab } from '../../fields/config/types.js'
