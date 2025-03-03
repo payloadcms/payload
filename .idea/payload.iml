@@ -80,6 +80,7 @@
       <excludeFolder url="file://$MODULE_DIR$/packages/drizzle/dist" />
       <excludeFolder url="file://$MODULE_DIR$/packages/db-sqlite/.turbo" />
       <excludeFolder url="file://$MODULE_DIR$/packages/db-sqlite/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/plugin-import-export/dist" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
