@@ -57,7 +57,7 @@ export const updateMany: UpdateMany = async function updateMany(
     const table = this.tables[tableName]
 
     const docsToUpdate =
-      typeof limit === 'number'
+      typeof limit === 'number' && limit > 0
         ? await _db
             .select({
               id: table.id,
