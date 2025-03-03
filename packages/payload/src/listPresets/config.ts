@@ -38,11 +38,13 @@ export const getListPresetsConfig = (config: Config): CollectionConfig => ({
             // transform the "where" query here so that the client-side doesn't have to
             if (data?.where) {
               if (validateWhereQuery(data.where)) {
-                return data
+                return data.where
               } else {
                 return transformWhereQuery(data.where)
               }
             }
+
+            return data?.where
           },
         ],
       },
