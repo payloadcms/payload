@@ -1550,33 +1550,28 @@ describe('Versions', () => {
     })
 
     describe('hidden and disabled fields', () => {
+      test('should not render fields with hidden: true', async () => {
+        await navigateToVersionFieldsDiff()
+
+        // Fields with hidden should be hidden everywhere
+        const hiddenField = page.locator('[data-field-path="hidden"]')
+        await expect(hiddenField).toBeHidden()
+      })
+
       test('should render fields with admin.hidden: true', async () => {
         await navigateToVersionFieldsDiff()
 
         // Fields with admin.hidden should be hidden in the edit view, but
         // visible in the version view
-        const adminHiddenField = page.getByText('Admin Hidden Field', {
-          exact: true,
-        })
+        const adminHiddenField = page.locator('[data-field-path="adminHidden"]')
         await expect(adminHiddenField).toBeVisible()
-      })
-      test('should not render fields with hidden: true', async () => {
-        await navigateToVersionFieldsDiff()
-
-        // Fields with hidden should be hidden everywhere
-        const hiddenField = page.getByText('Hidden Field', {
-          exact: true,
-        })
-        await expect(hiddenField).toBeHidden()
       })
 
       test('should not render fields with admin.disabled: true', async () => {
         await navigateToVersionFieldsDiff()
 
         // Fields with admin.disabled should be hidden everywhere in the Admin UI
-        const adminDisabledField = page.getByText('Admin Disabled Field', {
-          exact: true,
-        })
+        const adminDisabledField = page.locator('[data-field-path="adminDisabled"]')
         await expect(adminDisabledField).toBeHidden()
       })
 
@@ -1584,9 +1579,9 @@ describe('Versions', () => {
         await navigateToVersionFieldsDiff()
 
         // Fields with admin.hiddenInVersionView should be hidden in the version view
-        const adminHiddenInVersionViewView = page.getByText('Admin Hidden In Version View Field', {
-          exact: true,
-        })
+        const adminHiddenInVersionViewView = page.locator(
+          '[data-field-path="adminHiddenInVersionView"]',
+        )
         await expect(adminHiddenInVersionViewView).toBeHidden()
       })
     })
