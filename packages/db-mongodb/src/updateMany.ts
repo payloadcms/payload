@@ -49,7 +49,7 @@ export const updateMany: UpdateMany = async function updateMany(
   transform({ adapter: this, data, fields: collectionConfig.fields, operation: 'write' })
 
   try {
-    if (typeof limit === 'number') {
+    if (typeof limit === 'number' && limit > 0) {
       const documentsToUpdate = await Model.find(
         query,
         {},
