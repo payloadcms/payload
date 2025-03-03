@@ -1058,6 +1058,7 @@ export type {
   TypeWithID,
   TypeWithTimestamps,
 } from './collections/config/types.js'
+export type { CompoundIndex } from './collections/config/types.js'
 export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
 export { countOperation } from './collections/operations/count.js'
 export { createOperation } from './collections/operations/create.js'
@@ -1073,6 +1074,7 @@ export { restoreVersionOperation } from './collections/operations/restoreVersion
 export { updateOperation } from './collections/operations/update.js'
 export { updateByIDOperation } from './collections/operations/updateByID.js'
 export { buildConfig } from './config/build.js'
+
 export {
   type ClientConfig,
   createClientConfig,
@@ -1080,7 +1082,6 @@ export {
   serverOnlyConfigProperties,
   type UnsanitizedClientConfig,
 } from './config/client.js'
-
 export { defaults } from './config/defaults.js'
 export { sanitizeConfig } from './config/sanitize.js'
 export type * from './config/types.js'
@@ -1194,8 +1195,8 @@ export {
   ValidationErrorName,
 } from './errors/index.js'
 export type { ValidationFieldError } from './errors/index.js'
-export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 
+export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 export { baseIDField } from './fields/baseFields/baseIDField.js'
 export {
   createClientField,
@@ -1203,8 +1204,8 @@ export {
   type ServerOnlyFieldAdminProperties,
   type ServerOnlyFieldProperties,
 } from './fields/config/client.js'
-export { sanitizeFields } from './fields/config/sanitize.js'
 
+export { sanitizeFields } from './fields/config/sanitize.js'
 export type {
   AdminClient,
   ArrayField,
@@ -1307,16 +1308,16 @@ export type {
   ValidateOptions,
   ValueWithRelation,
 } from './fields/config/types.js'
-export { getDefaultValue } from './fields/getDefaultValue.js'
 
+export { getDefaultValue } from './fields/getDefaultValue.js'
 export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
 export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
 export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
 export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
 export { default as sortableFieldTypes } from './fields/sortableFieldTypes.js'
-export { validations } from './fields/validations.js'
 
+export { validations } from './fields/validations.js'
 export type {
   ArrayFieldValidation,
   BlocksFieldValidation,
@@ -1348,6 +1349,7 @@ export type {
   UploadFieldValidation,
   UsernameFieldValidation,
 } from './fields/validations.js'
+
 export {
   type ClientGlobalConfig,
   createClientGlobalConfig,
@@ -1369,7 +1371,6 @@ export type {
 } from './globals/config/types.js'
 
 export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
-
 export { findOneOperation } from './globals/operations/findOne.js'
 export { findVersionByIDOperation as findVersionByIDOperationGlobal } from './globals/operations/findVersionByID.js'
 export { findVersionsOperation as findVersionsOperationGlobal } from './globals/operations/findVersions.js'
@@ -1415,8 +1416,8 @@ export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
 export type * from './uploads/types.js'
-export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
 
+export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
 export { commitTransaction } from './utilities/commitTransaction.js'
 export {

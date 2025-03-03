@@ -1550,4 +1550,20 @@ describe('database', () => {
     expect(query2.totalDocs).toEqual(1)
     expect(query3.totalDocs).toEqual(1)
   })
+
+  describe('Compound Indexes', () => {
+    it('should throw a unique error', async () => {
+      await payload.create({ collection: 'compound-indexes', data: { one: '1', two: '2' } })
+
+      // does not fail
+      await payload.create({ collection: 'compound-indexes', data: { one: '1', two: '3' } })
+      // does not fail
+      await payload.create({ collection: 'compound-indexes', data: { one: '-1', two: '2' } })
+
+      // fails
+      await expect(
+        payload.create({ collection: 'compound-indexes', data: { one: '1', two: '2' } }),
+      ).rejects.toBeTruthy()
+    })
+  })
 })

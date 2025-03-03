@@ -460,6 +460,10 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
     refresh?: RefreshHook[]
   }
   /**
+   * TODO: jsdoc
+   */
+  indexes?: CompoundIndex[]
+  /**
    * Label configuration
    */
   labels?: {
@@ -532,17 +536,21 @@ export type SanitizedJoins = {
 export interface SanitizedCollectionConfig
   extends Omit<
     DeepRequired<CollectionConfig>,
-    'auth' | 'endpoints' | 'fields' | 'slug' | 'upload' | 'versions'
+    'auth' | 'endpoints' | 'fields' | 'indexes' | 'slug' | 'upload' | 'versions'
   > {
   auth: Auth
   endpoints: Endpoint[] | false
   fields: Field[]
-
   /**
    * Fields in the database schema structure
    * Rows / collapsible / tabs w/o name `fields` merged to top, UIs are excluded
    */
   flattenedFields: FlattenedField[]
+
+  /**
+   * TODO: jsdoc
+   */
+  indexes: SanitizedCompoundIndex[]
 
   /**
    * Object of collections to join 'Join Fields object keyed by collection
@@ -596,4 +604,14 @@ export type TypeWithTimestamps = {
   createdAt: string
   id: number | string
   updatedAt: string
+}
+
+export type CompoundIndex = {
+  fields: string[]
+  unique?: boolean
+}
+
+export type SanitizedCompoundIndex = {
+  fields: { field: FlattenedField; path: string }[]
+  unique: boolean
 }

@@ -1,4 +1,4 @@
-import type { FlattenedField } from 'payload'
+import type { CompoundIndex, FlattenedField } from 'payload'
 
 import toSnakeCase from 'to-snake-case'
 
@@ -33,6 +33,7 @@ type Args = {
   baseIndexes?: Record<string, RawIndex>
   buildNumbers?: boolean
   buildRelationships?: boolean
+  compoundIndexes: CompoundIndex[]
   disableNotNull: boolean
   disableRelsTableUnique?: boolean
   disableUnique: boolean
@@ -68,6 +69,7 @@ export const buildTable = ({
   baseColumns = {},
   baseForeignKeys = {},
   baseIndexes = {},
+  compoundIndexes,
   disableNotNull,
   disableRelsTableUnique = false,
   disableUnique = false,
@@ -118,6 +120,7 @@ export const buildTable = ({
   } = traverseFields({
     adapter,
     columns,
+    compoundIndexes,
     disableNotNull,
     disableRelsTableUnique,
     disableUnique,
