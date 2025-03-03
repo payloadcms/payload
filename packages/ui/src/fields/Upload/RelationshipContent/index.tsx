@@ -10,6 +10,7 @@ import type { ReloadDoc } from '../types.js'
 import { Button } from '../../../elements/Button/index.js'
 import { useDocumentDrawer } from '../../../elements/DocumentDrawer/index.js'
 import { ThumbnailComponent } from '../../../elements/Thumbnail/index.js'
+import { useConfig } from '../../../providers/Config/index.js'
 import './index.scss'
 
 const baseClass = 'upload-relationship-details'
@@ -52,6 +53,12 @@ export function RelationshipContent(props: Props) {
     y,
   } = props
 
+  const { config } = useConfig()
+  const collectionConfig =
+    'collections' in config
+      ? config.collections.find((collection) => collection.slug === collectionSlug)
+      : undefined
+
   const [DocumentDrawer, _, { openDrawer }] = useDocumentDrawer({
     id: src ? id : undefined,
     collectionSlug,
@@ -80,17 +87,20 @@ export function RelationshipContent(props: Props) {
   }
 
   const metaText = withMeta ? generateMetaText(mimeType, byteSize) : ''
+  const previewAllowed = collectionConfig.upload.displayPreview
 
   return (
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
       <div className={`${baseClass}__imageAndDetails`}>
-        <ThumbnailComponent
-          alt={alt}
-          className={`${baseClass}__thumbnail`}
-          filename={filename}
-          fileSrc={thumbnailSrc}
-          size="small"
-        />
+        {previewAllowed && (
+          <ThumbnailComponent
+            alt={alt}
+            className={`${baseClass}__thumbnail`}
+            filename={filename}
+            fileSrc={thumbnailSrc}
+            size="small"
+          />
+        )}
         <div className={`${baseClass}__details`}>
           <p className={`${baseClass}__filename`}>
             {src ? (
