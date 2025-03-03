@@ -363,7 +363,7 @@ describe('sanitizeFields', () => {
     })
   })
   describe('blocks', () => {
-    it('should maintain admin.blockName false after sanitization', async () => {
+    it('should maintain admin.blockName true after sanitization', async () => {
       const fields: Field[] = [
         {
           name: 'noLabelBlock',
@@ -372,7 +372,7 @@ describe('sanitizeFields', () => {
             {
               slug: 'number',
               admin: {
-                blockName: false,
+                disableBlockName: true,
               },
               fields: [
                 {
@@ -395,9 +395,9 @@ describe('sanitizeFields', () => {
 
       const sanitizedBlock = sanitizedField.blocks[0]
 
-      expect(sanitizedBlock.admin?.blockName).toStrictEqual(false)
+      expect(sanitizedBlock.admin?.disableBlockName).toStrictEqual(true)
     })
-    it('should default admin.blockName to true after sanitization', async () => {
+    it('should default admin.disableBlockName to true after sanitization', async () => {
       const fields: Field[] = [
         {
           name: 'noLabelBlock',
@@ -426,7 +426,7 @@ describe('sanitizeFields', () => {
 
       const sanitizedBlock = sanitizedField.blocks[0]
 
-      expect(sanitizedBlock.admin?.blockName).toStrictEqual(true)
+      expect(sanitizedBlock.admin?.disableBlockName).toStrictEqual(undefined)
     })
   })
 })

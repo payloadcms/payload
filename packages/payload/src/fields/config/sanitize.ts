@@ -259,11 +259,10 @@ export const sanitizeFields = async ({
           validRelationships,
         })
 
-        if (!block?.admin?.blockName) {
+        if (block?.admin?.disableBlockName) {
           block.admin = {
             ...block.admin,
-            blockName:
-              typeof block?.admin?.blockName === 'undefined' ? true : block.admin.blockName,
+            disableBlockName: Boolean(block?.admin?.disableBlockName),
           }
         }
       }
