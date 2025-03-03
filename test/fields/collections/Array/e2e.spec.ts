@@ -44,6 +44,9 @@ describe('Array', () => {
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
 
+    // Needed for clipboard copy/paste tests
+    await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+
     await ensureCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {
@@ -141,6 +144,81 @@ describe('Array', () => {
     await expect(arrayWithLabelsField.locator('.array-field__add-row')).toHaveText('Add Account')
   })
 
+  test('should copy and paste field', async () => {
+    await page.goto(url.create)
+    const arrayField = page.locator('#field-items')
+    const row = arrayField.locator('#items-row-0')
+    const rowTextInput = row.locator('#field-items__0__text')
+
+    const textVal = 'row one copy'
+    await rowTextInput.fill(textVal)
+
+    const clipboardPopup = arrayField.locator('.clipboard-action__popup.array-field__header-action')
+    const clipboardPopupBtn = clipboardPopup.locator('button').first()
+    await clipboardPopupBtn.click()
+    const copyBtn = clipboardPopup
+      .locator('.popup-button-list button')
+      .filter({ hasText: 'Copy Field' })
+    await expect(copyBtn).toBeVisible()
+    await copyBtn.click()
+    const copySuccessToast = page.locator('.payload-toast-item.toast-success')
+    await expect(copySuccessToast).toBeVisible()
+
+    await page.reload()
+    await expect(rowTextInput).toHaveValue('row one')
+    await expect(clipboardPopupBtn).toBeVisible()
+    await clipboardPopupBtn.click()
+    const pasteBtn = clipboardPopup
+      .locator('.popup-button-list button')
+      .filter({ hasText: 'Paste Field' })
+      .first()
+    await expect(pasteBtn).toBeVisible()
+    await pasteBtn.click()
+    await expect(rowTextInput).toHaveValue(textVal)
+  })
+
+  test('should prevent pasting into array with different fields', async () => {
+    await page.goto(url.create)
+    const arrayFieldOne = page.locator('#field-items')
+    const clipboardPopup = arrayFieldOne.locator(
+      '.clipboard-action__popup.array-field__header-action',
+    )
+    const clipboardPopupBtn = clipboardPopup.locator('button').first()
+    await clipboardPopupBtn.click()
+    const copyBtn = clipboardPopup
+      .locator('.popup-button-list button')
+      .filter({ hasText: 'Copy Field' })
+    await expect(copyBtn).toBeVisible()
+    await copyBtn.click()
+    const copySuccessToast = page.locator('.payload-toast-item.toast-success')
+    await expect(copySuccessToast).toBeVisible()
+
+    const arrayFieldTwo = page.locator('#field-collapsedArray')
+    const addRowBtn = arrayFieldTwo.locator('button.array-field__add-row')
+    await expect(addRowBtn).toBeVisible()
+    await addRowBtn.click()
+    const row = arrayFieldTwo.locator('#collapsedArray-row-0')
+    const rowTextInput = row.locator('#field-collapsedArray__0__text')
+    const textVal = 'row one original'
+    await rowTextInput.fill(textVal)
+
+    const clipboardPopupTwo = arrayFieldTwo.locator(
+      '.clipboard-action__popup.array-field__header-action',
+    )
+    const clipboardPopupBtnTwo = clipboardPopupTwo.locator('button').first()
+    await clipboardPopupBtnTwo.click()
+    const pasteBtn = clipboardPopupTwo
+      .locator('.popup-button-list button')
+      .filter({ hasText: 'Paste Field' })
+      .first()
+    await expect(pasteBtn).toBeVisible()
+    await pasteBtn.click()
+
+    const pasteErrorToast = page.locator('.payload-toast-item.toast-error')
+    await expect(pasteErrorToast).toBeVisible()
+    await expect(rowTextInput).toHaveValue(textVal)
+  })
+
   describe('row manipulation', () => {
     test('should add, remove and duplicate rows', async () => {
       const assertText0 = 'array row 1'
@@ -227,6 +305,32 @@ describe('Array', () => {
       await expect(
         page.locator('#field-potentiallyEmptyArray__0__groupInRow__textInGroupInRow'),
       ).toHaveValue(`${assertGroupText3} duplicate`)
+    })
+
+    test('should copy and paste rows', async () => {
+      await page.goto(url.create)
+      const arrayField = page.locator('#field-items')
+      const rowOne = arrayField.locator('#items-row-0')
+      const rowOneTextInput = rowOne.locator('#field-items__0__text')
+      const rowOneText = (await rowOneTextInput.textContent()) as string
+
+      const arrayActionsBtnRowOne = rowOne.locator('.popup.array-actions button.popup-button')
+      await arrayActionsBtnRowOne.click()
+      const copyRowBtn = rowOne.locator('button.array-actions__copy')
+      await expect(copyRowBtn).toBeVisible()
+      await copyRowBtn.click()
+      const copySuccessToast = page.locator('.payload-toast-item.toast-success')
+      await expect(copySuccessToast).toBeVisible()
+
+      const rowTwo = arrayField.locator('#items-row-1')
+      const arrayActionsBtnRowTwo = rowTwo.locator('.popup.array-actions button.popup-button')
+      await arrayActionsBtnRowTwo.click()
+      const pasteRowBtn = rowTwo.locator('button.array-actions__paste')
+      await expect(pasteRowBtn).toBeVisible()
+      await pasteRowBtn.click()
+      const rowTwoTextInput = rowTwo.locator('#field-items__1__text')
+      await expect(rowTwoTextInput).toBeVisible()
+      await expect(rowTwoTextInput).toHaveText(rowOneText)
     })
   })
 

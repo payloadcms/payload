@@ -3,9 +3,18 @@ import type { BlocksFieldClientComponent, ClientBlock } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback } from 'react'
+import { toast } from 'sonner'
+
+import type { ClipboardPasteData } from '../../elements/ClipboardAction/types.js'
 
 import { Banner } from '../../elements/Banner/index.js'
 import { Button } from '../../elements/Button/index.js'
+import { clipboardCopy, clipboardPaste } from '../../elements/ClipboardAction/clipboardUtilities.js'
+import {
+  getFormStateFromClipboardRows,
+  getSubFieldStateFromClipboardRow,
+} from '../../elements/ClipboardAction/getFormStateFromClipboardRows.js'
+import { ClipboardAction } from '../../elements/ClipboardAction/index.js'
 import { DraggableSortableItem } from '../../elements/DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../../elements/DraggableSortable/index.js'
 import { DrawerToggler } from '../../elements/Drawer/index.js'
@@ -22,13 +31,13 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { scrollToID } from '../../utilities/scrollToID.js'
+import './index.scss'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { BlockRow } from './BlockRow.js'
 import { BlocksDrawer } from './BlocksDrawer/index.js'
-import './index.scss'
 
 const baseClass = 'blocks-field'
 
@@ -38,6 +47,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   const {
     field: {
       name,
+      type,
       admin: { className, description, isSortable = true } = {},
       blockReferences,
       blocks,
@@ -59,7 +69,16 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   const minRows = (minRowsProp ?? required) ? 1 : 0
 
   const { setDocFieldPreferences } = useDocumentInfo()
-  const { addFieldRow, dispatchFields, setModified } = useForm()
+  const {
+    addFieldRow,
+    dispatchFields,
+    getDataByPath,
+    getField,
+    getFields,
+    replaceFieldRow,
+    replaceState,
+    setModified,
+  } = useForm()
   const { code: locale } = useLocale()
   const {
     config: { localization },
@@ -183,6 +202,69 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     [dispatchFields, path, rows, setDocFieldPreferences],
   )
 
+  const copyRow = useCallback(
+    async (rowIndex: number) => {
+      const clipboardResult = await clipboardCopy({
+        type,
+        blocks,
+        getDataToCopy: () => getDataByPath(`${path}.${rowIndex}`),
+        path,
+        t,
+      })
+
+      if (typeof clipboardResult === 'string') {
+        toast.error(clipboardResult)
+      } else {
+        toast.success(t('general:copied'))
+      }
+    },
+    [blocks, getDataByPath, path, t, type],
+  )
+
+  const pasteRow = useCallback(
+    async (rowIndex: number) => {
+      const rowId = getField(path).rows[rowIndex].id
+
+      const pasteArgs = {
+        onPaste: ({ data: dataFromClipboard }) => {
+          const subFieldState = getSubFieldStateFromClipboardRow({
+            dataFromClipboard,
+            rowId,
+          })
+          replaceFieldRow({
+            path,
+            rowIndex,
+            schemaPath,
+            subFieldState,
+          })
+        },
+        path,
+        schemaBlocks: blocks,
+        t,
+      }
+
+      const clipboardResult = await clipboardPaste(pasteArgs)
+
+      if (typeof clipboardResult === 'string') {
+        toast.error(clipboardResult)
+      }
+    },
+    [blocks, getField, path, replaceFieldRow, schemaPath, t],
+  )
+
+  const pasteBlocks = useCallback(
+    (clipboard: ClipboardPasteData) => {
+      const newState = getFormStateFromClipboardRows({
+        dataFromClipboard: clipboard.data,
+        formState: { ...getFields() },
+        path,
+      })
+      replaceState(newState)
+      setModified(true)
+    },
+    [getFields, path, replaceState, setModified],
+  )
+
   const hasMaxRows = maxRows && rows.length >= maxRows
 
   const fieldErrorCount = errorPaths.length
@@ -224,28 +306,41 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
               <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />
             )}
           </div>
-          {rows.length > 0 && (
-            <ul className={`${baseClass}__header-actions`}>
-              <li>
-                <button
-                  className={`${baseClass}__header-action`}
-                  onClick={() => toggleCollapseAll(true)}
-                  type="button"
-                >
-                  {t('fields:collapseAll')}
-                </button>
-              </li>
-              <li>
-                <button
-                  className={`${baseClass}__header-action`}
-                  onClick={() => toggleCollapseAll(false)}
-                  type="button"
-                >
-                  {t('fields:showAll')}
-                </button>
-              </li>
-            </ul>
-          )}
+          <ul className={`${baseClass}__header-actions`}>
+            {rows.length > 0 && (
+              <Fragment>
+                <li>
+                  <button
+                    className={`${baseClass}__header-action`}
+                    onClick={() => toggleCollapseAll(true)}
+                    type="button"
+                  >
+                    {t('fields:collapseAll')}
+                  </button>
+                </li>
+                <li>
+                  <button
+                    className={`${baseClass}__header-action`}
+                    onClick={() => toggleCollapseAll(false)}
+                    type="button"
+                  >
+                    {t('fields:showAll')}
+                  </button>
+                </li>
+              </Fragment>
+            )}
+            <li>
+              <ClipboardAction
+                blocks={blocks}
+                className={`${baseClass}__header-action`}
+                disableCopy={!(rows?.length > 0)}
+                getDataToCopy={() => getDataByPath(path)}
+                onPaste={pasteBlocks}
+                path={path}
+                type={type}
+              />
+            </li>
+          </ul>
         </div>
         <RenderCustomComponent
           CustomComponent={Description}
@@ -283,6 +378,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                       addRow={addRow}
                       block={blockConfig}
                       blocks={blockReferences ?? blocks}
+                      copyRow={copyRow}
                       duplicateRow={duplicateRow}
                       errorCount={rowErrorCount}
                       fields={blockConfig.fields}
@@ -293,6 +389,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                       labels={labels}
                       moveRow={moveRow}
                       parentPath={path}
+                      pasteRow={pasteRow}
                       path={rowPath}
                       permissions={permissions}
                       readOnly={readOnly}
