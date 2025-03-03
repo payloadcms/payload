@@ -5,8 +5,9 @@ import type { NavPreferences } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { Link, NavGroup, useConfig, useTranslation } from '@payloadcms/ui'
-import { EntityType, formatAdminURL } from '@payloadcms/ui/shared'
+import { EntityType } from '@payloadcms/ui/shared'
 import { usePathname } from 'next/navigation.js'
+import { formatAdminURL } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 const baseClass = 'nav'
