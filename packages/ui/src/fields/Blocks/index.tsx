@@ -2,7 +2,7 @@
 import type { BlocksFieldClientComponent, ClientBlock } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { Fragment, useCallback } from 'react'
+import React, { Fragment, useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 
 import type { ClipboardPasteData } from '../../elements/ClipboardAction/types.js'
@@ -101,6 +101,23 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
 
     return true
   })()
+
+  const clientBlocks = useMemo(() => {
+    if (!blockReferences) {
+      return blocks
+    }
+
+    const resolvedBlocks: ClientBlock[] = []
+    for (const blockReference of blockReferences) {
+      const block =
+        typeof blockReference === 'string' ? config.blocksMap[blockReference] : blockReference
+      if (block) {
+        resolvedBlocks.push(block)
+      }
+    }
+
+    return resolvedBlocks
+  }, [blockReferences, blocks, config.blocksMap])
 
   const memoizedValidate = useCallback(
     (value, options) => {
@@ -206,7 +223,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     async (rowIndex: number) => {
       const clipboardResult = await clipboardCopy({
         type,
-        blocks,
+        blocks: clientBlocks,
         getDataToCopy: () => getDataByPath(`${path}.${rowIndex}`),
         path,
         t,
@@ -218,7 +235,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         toast.success(t('general:copied'))
       }
     },
-    [blocks, getDataByPath, path, t, type],
+    [clientBlocks, getDataByPath, path, t, type],
   )
 
   const pasteRow = useCallback(
@@ -239,7 +256,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
           })
         },
         path,
-        schemaBlocks: blocks,
+        schemaBlocks: clientBlocks,
         t,
       }
 
@@ -249,7 +266,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         toast.error(clipboardResult)
       }
     },
-    [blocks, getField, path, replaceFieldRow, schemaPath, t],
+    [clientBlocks, getField, path, replaceFieldRow, schemaPath, t],
   )
 
   const pasteBlocks = useCallback(
@@ -331,7 +348,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
             )}
             <li>
               <ClipboardAction
-                blocks={blocks}
+                blocks={clientBlocks} // here
                 className={`${baseClass}__header-action`}
                 disableCopy={!(rows?.length > 0)}
                 getDataToCopy={() => getDataByPath(path)}
@@ -358,10 +375,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
           {rows.map((row, i) => {
             const { blockType, isLoading } = row
             const blockConfig: ClientBlock =
-              config.blocksMap[blockType] ??
-              ((blockReferences ?? blocks).find(
-                (block) => typeof block !== 'string' && block.slug === blockType,
-              ) as ClientBlock)
+              config.blocksMap[blockType] ?? clientBlocks.find((block) => block.slug === blockType)
 
             if (blockConfig) {
               const rowPath = `${path}.${i}`
