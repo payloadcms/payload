@@ -53,9 +53,7 @@ export const defaults: Partial<CollectionConfig> = {
   versions: false,
 }
 
-export const mergeCollectionConfigWithDefaults = (
-  collection: CollectionConfig,
-): CollectionConfig => {
+export const addDefaultsToCollectionConfig = (collection: CollectionConfig): CollectionConfig => {
   collection.access = {
     create: defaultAccess,
     delete: defaultAccess,
@@ -128,7 +126,7 @@ export const authDefaults: IncomingAuthType = {
   verify: false,
 }
 
-export const mergeAuthConfigWithDefaults = (auth: IncomingAuthType): IncomingAuthType => {
+export const addDefaultsToAuthConfig = (auth: IncomingAuthType): IncomingAuthType => {
   auth.cookies = {
     sameSite: 'Lax',
     secure: false,
@@ -141,6 +139,11 @@ export const mergeAuthConfigWithDefaults = (auth: IncomingAuthType): IncomingAut
   auth.maxLoginAttempts = auth.maxLoginAttempts ?? 5
   auth.tokenExpiration = auth.tokenExpiration ?? 7200
   auth.verify = auth.verify ?? false
+  auth.strategies = auth.strategies ?? []
+
+  if (!auth.disableLocalStrategy && auth.verify === true) {
+    auth.verify = {}
+  }
 
   return auth
 }
@@ -154,7 +157,7 @@ export const loginWithUsernameDefaults: LoginWithUsernameOptions = {
   requireUsername: true,
 }
 
-export const mergeLoginWithUsernameConfigWithDefaults = (
+export const addDefaultsToLoginWithUsernameConfig = (
   loginWithUsername: LoginWithUsernameOptions,
 ): LoginWithUsernameOptions =>
   ({

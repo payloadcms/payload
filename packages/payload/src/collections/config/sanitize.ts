@@ -21,9 +21,9 @@ import baseVersionFields from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
 import { defaultCollectionEndpoints } from '../endpoints/index.js'
 import {
-  mergeAuthConfigWithDefaults,
-  mergeCollectionConfigWithDefaults,
-  mergeLoginWithUsernameConfigWithDefaults,
+  addDefaultsToAuthConfig,
+  addDefaultsToCollectionConfig,
+  addDefaultsToLoginWithUsernameConfig,
 } from './defaults.js'
 import { sanitizeAuthFields, sanitizeUploadFields } from './reservedFieldNames.js'
 import { validateUseAsTitle } from './useAsTitle.js'
@@ -42,7 +42,7 @@ export const sanitizeCollection = async (
   // Make copy of collection config
   // /////////////////////////////////
 
-  const sanitized: CollectionConfig = mergeCollectionConfigWithDefaults(collection)
+  const sanitized: CollectionConfig = addDefaultsToCollectionConfig(collection)
 
   // /////////////////////////////////
   // Sanitize fields
@@ -192,26 +192,18 @@ export const sanitizeCollection = async (
     // sanitize fields for reserved names
     sanitizeAuthFields(sanitized.fields, sanitized)
 
-    sanitized.auth = mergeAuthConfigWithDefaults(
+    sanitized.auth = addDefaultsToAuthConfig(
       typeof sanitized.auth === 'boolean' ? {} : sanitized.auth,
     )
-
-    if (!sanitized.auth.disableLocalStrategy && sanitized.auth.verify === true) {
-      sanitized.auth.verify = {}
-    }
 
     // disable duplicate for auth enabled collections by default
     sanitized.disableDuplicate = sanitized.disableDuplicate ?? true
 
-    if (!sanitized.auth.strategies) {
-      sanitized.auth.strategies = []
-    }
-
     if (sanitized.auth.loginWithUsername) {
       if (sanitized.auth.loginWithUsername === true) {
-        sanitized.auth.loginWithUsername = mergeLoginWithUsernameConfigWithDefaults({})
+        sanitized.auth.loginWithUsername = addDefaultsToLoginWithUsernameConfig({})
       } else {
-        const loginWithUsernameWithDefaults = mergeLoginWithUsernameConfigWithDefaults(
+        const loginWithUsernameWithDefaults = addDefaultsToLoginWithUsernameConfig(
           sanitized.auth.loginWithUsername,
         )
 

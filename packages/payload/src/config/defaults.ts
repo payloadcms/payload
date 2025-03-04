@@ -73,7 +73,7 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
   upload: {},
 }
 
-export const mergeConfigWithDefaults = (config: Config): Config => {
+export const addDefaultsToConfig = (config: Config): Config => {
   config.admin = {
     avatar: 'gravatar',
     components: {},
