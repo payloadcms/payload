@@ -370,6 +370,11 @@ export type CollectionAdminOptions = {
 /** Manage all aspects of a data collection */
 export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   /**
+   * Do not set this property manually. This is set to true during sanitization, to avoid
+   * sanitizing the same collection multiple times.
+   */
+  _sanitized?: boolean
+  /**
    * Access control
    */
   access?: {
