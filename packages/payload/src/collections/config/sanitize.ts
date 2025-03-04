@@ -38,6 +38,10 @@ export const sanitizeCollection = async (
   richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>,
   _validRelationships?: string[],
 ): Promise<SanitizedCollectionConfig> => {
+  if (collection._sanitized) {
+    return collection as SanitizedCollectionConfig
+  }
+  collection._sanitized = true
   // /////////////////////////////////
   // Make copy of collection config
   // /////////////////////////////////
