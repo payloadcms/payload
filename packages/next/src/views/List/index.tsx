@@ -13,9 +13,13 @@ import type {
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
-import { formatAdminURL } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
-import { isNumber, mergeListSearchAndWhere, transformColumnsToPreferences } from 'payload/shared'
+import {
+  formatAdminURL,
+  isNumber,
+  mergeListSearchAndWhere,
+  transformColumnsToPreferences,
+} from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { renderListViewSlots } from './renderListViewSlots.js'

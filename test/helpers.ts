@@ -17,15 +17,17 @@ import { setTimeout } from 'timers/promises'
 import { devUser } from './credentials.js'
 import { POLL_TOPASS_TIMEOUT } from './playwright.config.js'
 
+type AdminRoutes = NonNullable<Config['admin']>['routes']
+
 type FirstRegisterArgs = {
-  customAdminRoutes?: Config['admin']['routes']
+  customAdminRoutes?: AdminRoutes
   customRoutes?: Config['routes']
   page: Page
   serverURL: string
 }
 
 type LoginArgs = {
-  customAdminRoutes?: Config['admin']['routes']
+  customAdminRoutes?: AdminRoutes
   customRoutes?: Config['routes']
   data?: {
     email: string
@@ -78,16 +80,14 @@ export async function ensureCompilationIsDone({
   noAutoLogin,
   readyURL,
 }: {
-  customAdminRoutes?: Config['admin']['routes']
+  customAdminRoutes?: AdminRoutes
   customRoutes?: Config['routes']
   noAutoLogin?: boolean
   page: Page
   readyURL?: string
   serverURL: string
 }): Promise<void> {
-  const {
-    routes: { admin: adminRoute },
-  } = getRoutes({ customAdminRoutes, customRoutes })
+  const { routes: { admin: adminRoute } = {} } = getRoutes({ customAdminRoutes, customRoutes })
 
   const adminURL = `${serverURL}${adminRoute}`
 
@@ -170,9 +170,7 @@ export async function throttleTest({
 export async function firstRegister(args: FirstRegisterArgs): Promise<void> {
   const { customAdminRoutes, customRoutes, page, serverURL } = args
 
-  const {
-    routes: { admin: adminRoute },
-  } = getRoutes({ customAdminRoutes, customRoutes })
+  const { routes: { admin: adminRoute } = {} } = getRoutes({ customAdminRoutes, customRoutes })
 
   await page.goto(`${serverURL}${adminRoute}`)
   await page.fill('#field-email', devUser.email)
@@ -187,10 +185,8 @@ export async function login(args: LoginArgs): Promise<void> {
   const { customAdminRoutes, customRoutes, data = devUser, page, serverURL } = args
 
   const {
-    admin: {
-      routes: { createFirstUser, login: incomingLoginRoute },
-    },
-    routes: { admin: incomingAdminRoute },
+    admin: { routes: { createFirstUser, login: incomingLoginRoute } = {} },
+    routes: { admin: incomingAdminRoute } = {},
   } = getRoutes({ customAdminRoutes, customRoutes })
 
   const adminRoute = formatAdminURL({ serverURL, adminRoute: incomingAdminRoute, path: '' })
@@ -462,8 +458,6 @@ export function describeIfInCIOrHasLocalstack(): jest.Describe {
   return describe
 }
 
-type AdminRoutes = Config['admin']['routes']
-
 export function getRoutes({
   customAdminRoutes,
   customRoutes,
@@ -477,7 +471,7 @@ export function getRoutes({
   routes: Config['routes']
 } {
   let routes = defaults.routes
-  let adminRoutes = defaults.admin.routes
+  let adminRoutes = defaults.admin?.routes
 
   if (customAdminRoutes) {
     adminRoutes = {

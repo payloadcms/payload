@@ -3,6 +3,7 @@
 import type { ClientUser, DocumentViewClientProps, FormState } from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
+import { formatAdminURL } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { FormProps } from '../../forms/Form/index.js'
@@ -27,7 +28,6 @@ import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
-import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { handleBackToDashboard } from '../../utilities/handleBackToDashboard.js'
 import { handleGoBack } from '../../utilities/handleGoBack.js'
 import { handleTakeOver } from '../../utilities/handleTakeOver.js'

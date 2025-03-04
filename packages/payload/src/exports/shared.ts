@@ -63,11 +63,13 @@ export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON.js'
 export { flattenAllFields } from '../utilities/flattenAllFields.js'
 
 export { default as flattenTopLevelFields } from '../utilities/flattenTopLevelFields.js'
+export { formatAdminURL } from '../utilities/formatAdminURL.js'
 export { formatLabels, toWords } from '../utilities/formatLabels.js'
 export { getDataByPath } from '../utilities/getDataByPath.js'
 
 export { getSelectMode } from '../utilities/getSelectMode.js'
 export { getSiblingData } from '../utilities/getSiblingData.js'
+
 export { getUniqueListBy } from '../utilities/getUniqueListBy.js'
 
 export { isNextBuild } from '../utilities/isNextBuild.js'
