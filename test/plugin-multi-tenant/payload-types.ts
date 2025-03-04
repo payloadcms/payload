@@ -6,27 +6,84 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
+/**
+ * Supported timezones in IANA format.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supportedTimezones".
+ */
+export type SupportedTimezones =
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji';
+
 export interface Config {
   auth: {
     users: UserAuthOperations;
   };
+  blocks: {};
   collections: {
-    users: User;
     tenants: Tenant;
-    posts: Post;
-    links: Link;
-    'navigation-global': NavigationGlobal;
+    users: User;
+    'food-items': FoodItem;
+    'food-menu': FoodMenu;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    tenants: {
+      users: 'users';
+    };
+  };
   collectionsSelect: {
-    users: UsersSelect<false> | UsersSelect<true>;
     tenants: TenantsSelect<false> | TenantsSelect<true>;
-    posts: PostsSelect<false> | PostsSelect<true>;
-    links: LinksSelect<false> | LinksSelect<true>;
-    'navigation-global': NavigationGlobalSelect<false> | NavigationGlobalSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
+    'food-items': FoodItemsSelect<false> | FoodItemsSelect<true>;
+    'food-menu': FoodMenuSelect<false> | FoodMenuSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -65,6 +122,21 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tenants".
+ */
+export interface Tenant {
+  id: string;
+  name: string;
+  domain: string;
+  users?: {
+    docs?: (string | User)[] | null;
+    hasNextPage?: boolean | null;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -73,7 +145,6 @@ export interface User {
   tenants?:
     | {
         tenant: string | Tenant;
-        roles?: ('admin' | 'user') | null;
         id?: string | null;
       }[]
     | null;
@@ -90,50 +161,34 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tenants".
+ * via the `definition` "food-items".
  */
-export interface Tenant {
+export interface FoodItem {
   id: string;
+  tenant?: (string | null) | Tenant;
   name: string;
-  slug: string;
-  domain: string;
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
+ * via the `definition` "food-menu".
  */
-export interface Post {
+export interface FoodMenu {
   id: string;
   tenant?: (string | null) | Tenant;
   title: string;
-  excerpt?: string | null;
-  slug?: string | null;
-  relatedLinks?: (string | null) | Link;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "links".
- */
-export interface Link {
-  id: string;
-  tenant?: (string | null) | Tenant;
-  title?: string | null;
-  url?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "navigation-global".
- */
-export interface NavigationGlobal {
-  id: string;
-  tenant?: (string | null) | Tenant;
-  title?: string | null;
+  description?: string | null;
+  menuItems?:
+    | {
+        /**
+         * Automatically filtered by selected tenant
+         */
+        menuItem: string | FoodItem;
+        active?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -145,24 +200,20 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
-        relationTo: 'users';
-        value: string | User;
-      } | null)
-    | ({
         relationTo: 'tenants';
         value: string | Tenant;
       } | null)
     | ({
-        relationTo: 'posts';
-        value: string | Post;
+        relationTo: 'users';
+        value: string | User;
       } | null)
     | ({
-        relationTo: 'links';
-        value: string | Link;
+        relationTo: 'food-items';
+        value: string | FoodItem;
       } | null)
     | ({
-        relationTo: 'navigation-global';
-        value: string | NavigationGlobal;
+        relationTo: 'food-menu';
+        value: string | FoodMenu;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -208,6 +259,17 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tenants_select".
+ */
+export interface TenantsSelect<T extends boolean = true> {
+  name?: T;
+  domain?: T;
+  users?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -216,7 +278,6 @@ export interface UsersSelect<T extends boolean = true> {
     | T
     | {
         tenant?: T;
-        roles?: T;
         id?: T;
       };
   updatedAt?: T;
@@ -231,46 +292,29 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tenants_select".
+ * via the `definition` "food-items_select".
  */
-export interface TenantsSelect<T extends boolean = true> {
+export interface FoodItemsSelect<T extends boolean = true> {
+  tenant?: T;
   name?: T;
-  slug?: T;
-  domain?: T;
   updatedAt?: T;
   createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts_select".
+ * via the `definition` "food-menu_select".
  */
-export interface PostsSelect<T extends boolean = true> {
+export interface FoodMenuSelect<T extends boolean = true> {
   tenant?: T;
   title?: T;
-  excerpt?: T;
-  slug?: T;
-  relatedLinks?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "links_select".
- */
-export interface LinksSelect<T extends boolean = true> {
-  tenant?: T;
-  title?: T;
-  url?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "navigation-global_select".
- */
-export interface NavigationGlobalSelect<T extends boolean = true> {
-  tenant?: T;
-  title?: T;
+  description?: T;
+  menuItems?:
+    | T
+    | {
+        menuItem?: T;
+        active?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }

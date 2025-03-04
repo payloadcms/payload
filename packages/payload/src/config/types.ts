@@ -1,6 +1,8 @@
+// @ts-strict-ignore
 import type {
   DefaultTranslationKeys,
   DefaultTranslationsObject,
+  I18n,
   I18nClient,
   I18nOptions,
   TFunction,
@@ -15,12 +17,13 @@ import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
-import type { DocumentTabConfig, RichTextAdapter } from '../admin/types.js'
 import type {
-  AdminViewConfig,
-  ServerSideEditViewProps,
-  VisibleEntities,
-} from '../admin/views/types.js'
+  DocumentSubViewTypes,
+  DocumentTabConfig,
+  DocumentViewServerProps,
+  RichTextAdapter,
+} from '../admin/types.js'
+import type { AdminViewConfig, ViewTypes, VisibleEntities } from '../admin/views/index.js'
 import type { SanitizedPermissions } from '../auth/index.js'
 import type {
   AddToImportMap,
@@ -37,7 +40,14 @@ import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { ErrorName } from '../errors/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { JobsConfig, Payload, RequestContext, TypedUser } from '../index.js'
+import type {
+  Block,
+  FlattenedBlock,
+  JobsConfig,
+  Payload,
+  RequestContext,
+  TypedUser,
+} from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -371,7 +381,7 @@ export type Endpoint = {
   root?: never
 }
 
-export type EditViewComponent = PayloadComponent<ServerSideEditViewProps>
+export type EditViewComponent = PayloadComponent<DocumentViewServerProps>
 
 export type EditViewConfig = {
   meta?: MetaConfig
@@ -395,20 +405,20 @@ export type EditViewConfig = {
     }
 )
 
-type ClientProps = {
-  readonly [key: string]: unknown
-}
+export type Params = { [key: string]: string | string[] | undefined }
 
 export type ServerProps = {
+  readonly documentSubViewType?: DocumentSubViewTypes
   readonly i18n: I18nClient
   readonly locale?: Locale
-  readonly params?: { [key: string]: string | string[] | undefined }
+  readonly params?: Params
   readonly payload: Payload
   readonly permissions?: SanitizedPermissions
-  readonly searchParams?: { [key: string]: string | string[] | undefined }
+  readonly searchParams?: Params
   readonly user?: TypedUser
+  readonly viewType?: ViewTypes
   readonly visibleEntities?: VisibleEntities
-} & ClientProps
+}
 
 export const serverProps: (keyof ServerProps)[] = [
   'payload',
@@ -419,6 +429,32 @@ export const serverProps: (keyof ServerProps)[] = [
   'searchParams',
   'permissions',
 ]
+
+export type Timezone = {
+  label: string
+  value: string
+}
+
+type SupportedTimezonesFn = (args: { defaultTimezones: Timezone[] }) => Timezone[]
+
+type TimezonesConfig = {
+  /**
+   * The default timezone to use for the admin panel.
+   */
+  defaultTimezone?: string
+  /**
+   * Provide your own list of supported timezones for the admin panel
+   *
+   * Values should be IANA timezone names, eg. `America/New_York`
+   *
+   * We use `@date-fns/tz` to handle timezones
+   */
+  supportedTimezones?: SupportedTimezonesFn | Timezone[]
+}
+
+type SanitizedTimezoneConfig = {
+  supportedTimezones: Timezone[]
+} & Omit<TimezonesConfig, 'supportedTimezones'>
 
 export type CustomComponent<TAdditionalProps extends object = Record<string, any>> =
   PayloadComponent<ServerProps & TAdditionalProps, TAdditionalProps>
@@ -450,12 +486,28 @@ export type BaseLocalizationConfig = {
    * @example `"en"`
    */
   defaultLocale: string
+  /**
+   * Change the locale used by the default Publish button.
+   * If set to `all`, all locales will be published.
+   * If set to `active`, only the locale currently being edited will be published.
+   * The non-default option will be available via the secondary button.
+   * @default 'all'
+   */
+  defaultLocalePublishOption?: 'active' | 'all'
   /** Set to `true` to let missing values in localised fields fall back to the values in `defaultLocale`
    *
    * If false, then no requests will fallback unless a fallbackLocale is specified in the request.
    * @default true
    */
   fallback?: boolean
+  /**
+   * Define a function to filter the locales made available in Payload admin UI
+   * based on user.
+   */
+  filterAvailableLocales?: (args: {
+    locales: Locale[]
+    req: PayloadRequest
+  }) => Locale[] | Promise<Locale[]>
 }
 
 export type LocalizationConfigWithNoLabels = Prettify<
@@ -709,7 +761,7 @@ export type Config = {
     /**
      * Add extra and/or replace built-in components with custom components
      *
-     * @see https://payloadcms.com/docs/admin/components
+     * @see https://payloadcms.com/docs/admin/custom-components/overview
      */
     components?: {
       /**
@@ -858,11 +910,16 @@ export type Config = {
      * @default 'all' // The theme can be configured by users
      */
     theme?: 'all' | 'dark' | 'light'
+    /**
+     * Configure timezone related settings for the admin panel.
+     */
+    timezones?: TimezonesConfig
     /** The slug of a Collection that you want to be used to log in to the Admin dashboard. */
     user?: string
   }
   /** Custom Payload bin scripts can be injected via the config. */
   bin?: BinScriptConfig[]
+  blocks?: Block[]
   /**
    * Manage the datamodel of your application
    *
@@ -879,6 +936,8 @@ export type Config = {
      * to `true` only if you have an existing Payload database from pre-3.0
      * that you would like to maintain without migrating. This is only
      * relevant for MongoDB databases.
+     *
+     * @todo Remove in v4
      */
     allowLocalizedWithinLocalized: true
   }
@@ -890,12 +949,12 @@ export type Config = {
   cookiePrefix?: string
   /** Either a whitelist array of URLS to allow CORS requests from, or a wildcard string ('*') to accept incoming requests from any domain. */
   cors?: '*' | CORSConfig | string[]
+
   /** A whitelist array of URLs to allow Payload cookies to be accepted from as a form of CSRF protection. */
   csrf?: string[]
 
   /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
-
   /** Pass in a database adapter for use on this project. */
   db: DatabaseAdapterResult
   /** Enable to expose more detailed error information. */
@@ -1109,7 +1168,16 @@ export type Config = {
      * Allows you to modify the base JSON schema that is generated during generate:types. This JSON schema will be used
      * to generate the TypeScript interfaces.
      */
-    schema?: Array<(args: { jsonSchema: JSONSchema4 }) => JSONSchema4>
+    schema?: Array<
+      (args: {
+        collectionIDFieldTypes: {
+          [key: string]: 'number' | 'string'
+        }
+        config: SanitizedConfig
+        i18n: I18n
+        jsonSchema: JSONSchema4
+      }) => JSONSchema4
+    >
   }
   /**
    * Customize the handling of incoming file uploads for collections that have uploads enabled.
@@ -1118,6 +1186,10 @@ export type Config = {
 }
 
 export type SanitizedConfig = {
+  admin: {
+    timezones: SanitizedTimezoneConfig
+  } & DeepRequired<Config['admin']>
+  blocks?: FlattenedBlock[]
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */
   editor?: RichTextAdapter<any, any, any>
@@ -1142,7 +1214,15 @@ export type SanitizedConfig = {
   // E.g. in packages/ui/src/graphics/Account/index.tsx in getComponent, if avatar.Component is casted to what it's supposed to be,
   // the result type is different
   DeepRequired<Config>,
-  'collections' | 'editor' | 'endpoint' | 'globals' | 'i18n' | 'localization' | 'upload'
+  | 'admin'
+  | 'blocks'
+  | 'collections'
+  | 'editor'
+  | 'endpoint'
+  | 'globals'
+  | 'i18n'
+  | 'localization'
+  | 'upload'
 >
 
 export type EditConfig = EditConfigWithoutRoot | EditConfigWithRoot

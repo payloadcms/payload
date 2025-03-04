@@ -4,6 +4,7 @@ import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { CustomID } from './collections/CustomID/index.js'
 import { DeepPostsCollection } from './collections/DeepPosts/index.js'
 import { LocalizedPostsCollection } from './collections/LocalizedPosts/index.js'
 import { Pages } from './collections/Pages/index.js'
@@ -34,6 +35,7 @@ export default buildConfigWithDefaults({
       slug: 'rels',
       fields: [],
     },
+    CustomID,
   ],
   globals: [
     {

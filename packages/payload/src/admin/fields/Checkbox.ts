@@ -13,6 +13,8 @@ import type {
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
+  FieldDiffClientComponent,
+  FieldDiffServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
 } from '../types.js'
@@ -71,3 +73,10 @@ export type CheckboxFieldErrorServerComponent = FieldErrorServerComponent<
 
 export type CheckboxFieldErrorClientComponent =
   FieldErrorClientComponent<CheckboxFieldClientWithoutType>
+
+export type CheckboxFieldDiffServerComponent = FieldDiffServerComponent<
+  CheckboxField,
+  CheckboxFieldClient
+>
+
+export type CheckboxFieldDiffClientComponent = FieldDiffClientComponent<CheckboxFieldClient>

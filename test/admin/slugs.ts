@@ -12,7 +12,11 @@ export const notInViewCollectionSlug = 'not-in-view-collection'
 export const noApiViewCollectionSlug = 'collection-no-api-view'
 export const disableDuplicateSlug = 'disable-duplicate'
 export const uploadCollectionSlug = 'uploads'
+
+export const uploadTwoCollectionSlug = 'uploads-two'
 export const customFieldsSlug = 'custom-fields'
+
+export const listDrawerSlug = 'with-list-drawer'
 export const collectionSlugs = [
   usersCollectionSlug,
   customViews1CollectionSlug,
@@ -27,6 +31,7 @@ export const collectionSlugs = [
   noApiViewCollectionSlug,
   customFieldsSlug,
   disableDuplicateSlug,
+  listDrawerSlug,
 ]
 
 export const customGlobalViews1GlobalSlug = 'custom-global-views-one'
@@ -48,3 +53,4 @@ export const globalSlugs = [
   hiddenGlobalSlug,
   noApiViewGlobalSlug,
 ]
+export const with300DocumentsSlug = 'with300documents'

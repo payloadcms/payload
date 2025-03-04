@@ -1,9 +1,9 @@
+// @ts-strict-ignore
 import type { DeepPartial } from 'ts-essentials'
 
-import httpStatus from 'http-status'
+import { status as httpStatus } from 'http-status'
 
 import type { AccessResult } from '../../config/types.js'
-import type { CollectionSlug } from '../../index.js'
 import type { PayloadRequest, PopulateType, SelectType, Where } from '../../types/index.js'
 import type {
   BulkOperationResult,
@@ -17,6 +17,7 @@ import executeAccess from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { APIError } from '../../errors/index.js'
+import { type CollectionSlug, deepCopyObjectSimple } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -61,18 +62,18 @@ export const updateOperation = async <
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      args =
-        (await hook({
-          args,
-          collection: args.collection.config,
-          context: args.req.context,
-          operation: 'update',
-          req: args.req,
-        })) || args
-    }, Promise.resolve())
+    if (args.collection.config.hooks?.beforeOperation?.length) {
+      for (const hook of args.collection.config.hooks.beforeOperation) {
+        args =
+          (await hook({
+            args,
+            collection: args.collection.config,
+            context: args.req.context,
+            operation: 'update',
+            req: args.req,
+          })) || args
+      }
+    }
 
     const {
       collection: { config: collectionConfig },
@@ -191,7 +192,7 @@ export const updateOperation = async <
           autosave: false,
           collectionConfig,
           config,
-          data,
+          data: deepCopyObjectSimple(data),
           depth,
           docWithLocales,
           draftArg,

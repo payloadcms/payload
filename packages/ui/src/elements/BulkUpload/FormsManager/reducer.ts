@@ -1,4 +1,4 @@
-import type { FormFieldWithoutComponents, FormState } from 'payload'
+import type { FormState } from 'payload'
 
 export type State = {
   activeIndex: number
@@ -14,6 +14,13 @@ type Action =
       count: number
       index: number
       type: 'UPDATE_ERROR_COUNT'
+    }
+  | {
+      errorCount: number
+      formState: FormState
+      index: number
+      type: 'UPDATE_FORM'
+      updatedFields?: Record<string, unknown>
     }
   | {
       files: FileList
@@ -96,6 +103,25 @@ export function formsManagementReducer(state: State, action: Action): State {
       return {
         ...state,
         forms,
+        totalErrorCount: state.forms.reduce((acc, form) => acc + form.errorCount, 0),
+      }
+    }
+    case 'UPDATE_FORM': {
+      const updatedForms = [...state.forms]
+      updatedForms[action.index].errorCount = action.errorCount
+
+      // Merge the existing formState with the new formState
+      updatedForms[action.index] = {
+        ...updatedForms[action.index],
+        formState: {
+          ...updatedForms[action.index].formState,
+          ...action.formState,
+        },
+      }
+
+      return {
+        ...state,
+        forms: updatedForms,
         totalErrorCount: state.forms.reduce((acc, form) => acc + form.errorCount, 0),
       }
     }

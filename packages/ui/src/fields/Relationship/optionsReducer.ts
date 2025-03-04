@@ -70,6 +70,7 @@ export const optionsReducer = (state: OptionGroup[], action: Action): OptionGrou
         ) {
           loadedIDs.push({ id, relationTo: relation })
           newSubOptions.push({
+            allowEdit: false,
             label: `${i18n.t('general:untitled')} - ID: ${id}`,
             relationTo: relation,
             value: id,

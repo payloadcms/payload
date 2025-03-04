@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import fs from 'fs'
 import sizeOfImport from 'image-size'
 import { promisify } from 'util'

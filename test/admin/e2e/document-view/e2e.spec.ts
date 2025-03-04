@@ -11,7 +11,6 @@ import {
   ensureCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
-  openNav,
   saveDocAndAssert,
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
@@ -21,6 +20,7 @@ import {
   customEditLabel,
   customNestedTabViewPath,
   customNestedTabViewTitle,
+  customTabAdminDescription,
   customTabLabel,
   customTabViewPath,
   customTabViewTitle,
@@ -45,6 +45,7 @@ const description = 'Description'
 let payload: PayloadTestSDK<Config>
 
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
+import { openNav } from 'helpers/e2e/toggleNav.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -145,7 +146,6 @@ describe('Document View', () => {
     test('collection — should render preview button when `admin.preview` is set', async () => {
       const collectionWithPreview = new AdminUrlUtil(serverURL, postsCollectionSlug)
       await page.goto(collectionWithPreview.create)
-      await page.waitForURL(collectionWithPreview.create)
       await page.locator('#field-title').fill(title)
       await saveDocAndAssert(page)
       await expect(page.locator('.btn.preview-btn')).toBeVisible()
@@ -154,7 +154,6 @@ describe('Document View', () => {
     test('collection — should not render preview button when `admin.preview` is not set', async () => {
       const collectionWithoutPreview = new AdminUrlUtil(serverURL, group1Collection1Slug)
       await page.goto(collectionWithoutPreview.create)
-      await page.waitForURL(collectionWithoutPreview.create)
       await page.locator('#field-title').fill(title)
       await saveDocAndAssert(page)
       await expect(page.locator('.btn.preview-btn')).toBeHidden()
@@ -189,6 +188,13 @@ describe('Document View', () => {
       await saveDocAndAssert(page)
       await expect(page.locator('#field-title')).toBeEnabled()
     })
+
+    test('should thread proper event argument to validation functions', async () => {
+      await page.goto(postsUrl.create)
+      await page.locator('#field-title').fill(title)
+      await page.locator('#field-validateUsingEvent').fill('Not allowed')
+      await saveDocAndAssert(page, '#action-save', 'error')
+    })
   })
 
   describe('document titles', () => {
@@ -214,7 +220,6 @@ describe('Document View', () => {
       const { id } = await createPost()
       const postURL = postsUrl.edit(id)
       await page.goto(postURL)
-      await page.waitForURL(postURL)
       await wait(500)
       await page.locator('#field-title')?.fill('')
       await expect(page.locator('.doc-header__title.render-title:has-text("ID:")')).toBeVisible()
@@ -223,7 +228,6 @@ describe('Document View', () => {
 
     test('global — should render custom, localized label', async () => {
       await page.goto(globalURL.global(globalSlug))
-      await page.waitForURL(globalURL.global(globalSlug))
       await openNav(page)
       const label = 'My Global Label'
       const globalLabel = page.locator(`#nav-global-global`)
@@ -239,7 +243,6 @@ describe('Document View', () => {
 
     test('global — should render simple label strings', async () => {
       await page.goto(postsUrl.admin)
-      await page.waitForURL(postsUrl.admin)
       await openNav(page)
       const label = 'Group Globals 1'
       const globalLabel = page.locator(`#nav-global-group-globals-one`)
@@ -251,7 +254,6 @@ describe('Document View', () => {
 
     test('global — should render slug in sentence case as fallback', async () => {
       await page.goto(postsUrl.admin)
-      await page.waitForURL(postsUrl.admin)
       await openNav(page)
       const label = 'Group Globals Two'
       const globalLabel = page.locator(`#nav-global-group-globals-two`)
@@ -266,9 +268,7 @@ describe('Document View', () => {
     test('List drawer should not effect underlying breadcrumbs', async () => {
       await navigateToDoc(page, postsUrl)
 
-      expect(await page.locator('.step-nav.app-header__step-nav a').nth(1).innerText()).toBe(
-        'Posts',
-      )
+      await expect(page.locator('.step-nav.app-header__step-nav a').nth(1)).toHaveText('Posts')
 
       await page.locator('#field-upload button.upload__listToggler').click()
       await expect(page.locator('[id^=list-drawer_1_]')).toBeVisible()
@@ -278,9 +278,7 @@ describe('Document View', () => {
         page.locator('.step-nav.app-header__step-nav .step-nav__last'),
       ).not.toContainText('Uploads')
 
-      expect(await page.locator('.step-nav.app-header__step-nav a').nth(1).innerText()).toBe(
-        'Posts',
-      )
+      await expect(page.locator('.step-nav.app-header__step-nav a').nth(1)).toHaveText('Posts')
     })
   })
 
@@ -307,7 +305,6 @@ describe('Document View', () => {
 
       const customNestedTabViewURL = `${pageURL}${customNestedTabViewPath}`
       await page.goto(customNestedTabViewURL)
-      await page.waitForURL(customNestedTabViewURL)
       await expect(page.locator('h1#custom-view-title')).toContainText(customNestedTabViewTitle)
     })
 
@@ -378,30 +375,49 @@ describe('Document View', () => {
     })
   })
 
+  describe('descriptions', () => {
+    test('should render tab admin description', async () => {
+      await page.goto(postsUrl.create)
+
+      const tabsContent = page.locator('.tabs-field__content-wrap')
+      await expect(tabsContent.locator('.field-description')).toHaveText(customTabAdminDescription)
+    })
+
+    test('should render tab admin description as a translation function', async () => {
+      await page.goto(postsUrl.create)
+
+      const secondTab = page.locator('.tabs-field__tab-button').nth(1)
+      await secondTab.click()
+
+      await wait(500)
+
+      const tabsContent = page.locator('.tabs-field__content-wrap')
+      await expect(
+        tabsContent.locator('.field-description', { hasText: `t:${customTabAdminDescription}` }),
+      ).toBeVisible()
+    })
+  })
+
   describe('custom fields', () => {
     test('should render custom field component', async () => {
       await page.goto(customFieldsURL.create)
-      await page.waitForURL(customFieldsURL.create)
       await expect(page.locator('#field-customTextClientField')).toBeVisible()
     })
 
     test('renders custom label component', async () => {
       await page.goto(customFieldsURL.create)
-      await page.waitForURL(customFieldsURL.create)
       await expect(page.locator('#custom-client-field-label')).toBeVisible()
       await expect(page.locator('#custom-server-field-label')).toBeVisible()
     })
 
     test('renders custom field description text', async () => {
       await page.goto(customFieldsURL.create)
-      await page.waitForURL(customFieldsURL.create)
       await expect(page.locator('#custom-client-field-description')).toBeVisible()
       await expect(page.locator('#custom-server-field-description')).toBeVisible()
     })
 
     test('custom server components should receive field props', async () => {
       await page.goto(customFieldsURL.create)
-      await page.waitForURL(customFieldsURL.create)
       await expect(
         page.locator('#custom-server-field-label', {
           hasText: exactText('Label: the max length of this field is: 100'),
@@ -417,12 +433,13 @@ describe('Document View', () => {
 
     test('custom client components should receive field props', async () => {
       await page.goto(customFieldsURL.create)
-      await page.waitForURL(customFieldsURL.create)
+
       await expect(
         page.locator('#custom-client-field-label', {
           hasText: exactText('Label: the max length of this field is: 100'),
         }),
       ).toBeVisible()
+
       await expect(
         page.locator('#custom-client-field-description', {
           hasText: exactText('Description: the max length of this field is: 100'),
@@ -430,10 +447,27 @@ describe('Document View', () => {
       ).toBeVisible()
     })
 
+    test('custom select input can have its value cleared', async () => {
+      await page.goto(customFieldsURL.create)
+      await expect(page.locator('#field-customSelectInput')).toBeVisible()
+
+      await page.locator('#field-customSelectInput .rs__control').click()
+      await page.locator('#field-customSelectInput .rs__option').first().click()
+
+      await expect(page.locator('#field-customSelectInput .rs__single-value')).toHaveText(
+        'Option 1',
+      )
+
+      await page.locator('.clear-value').click()
+      await expect(page.locator('#field-customSelectInput .rs__placeholder')).toHaveText(
+        'Select a value',
+      )
+    })
+
     describe('field descriptions', () => {
       test('should render static field description', async () => {
         await page.goto(customFieldsURL.create)
-        await page.waitForURL(customFieldsURL.create)
+
         await expect(page.locator('.field-description-descriptionAsString')).toContainText(
           'Static field description.',
         )
@@ -441,7 +475,6 @@ describe('Document View', () => {
 
       test('should render functional field description', async () => {
         await page.goto(customFieldsURL.create)
-        await page.waitForURL(customFieldsURL.create)
         await page.locator('#field-descriptionAsFunction').fill('functional')
         await expect(page.locator('.field-description-descriptionAsFunction')).toContainText(
           'Function description',
@@ -451,7 +484,6 @@ describe('Document View', () => {
 
     test('should render component field description', async () => {
       await page.goto(customFieldsURL.create)
-      await page.waitForURL(customFieldsURL.create)
       await page.locator('#field-descriptionAsComponent').fill('component')
       await expect(page.locator('.field-description-descriptionAsComponent')).toContainText(
         'Component description: descriptionAsComponent - component',
@@ -460,7 +492,6 @@ describe('Document View', () => {
 
     test('should render custom error component', async () => {
       await page.goto(customFieldsURL.create)
-      await page.waitForURL(customFieldsURL.create)
       const input = page.locator('input[id="field-customTextClientField"]')
       await input.fill('ab')
       await expect(input).toHaveValue('ab')
@@ -492,10 +523,18 @@ describe('Document View', () => {
     describe('select field', () => {
       test('should render custom select options', async () => {
         await page.goto(customFieldsURL.create)
-        await page.waitForURL(customFieldsURL.create)
         await page.locator('#field-customSelectField .rs__control').click()
         await expect(page.locator('#field-customSelectField .rs__option')).toHaveCount(2)
       })
+    })
+  })
+
+  describe('publish button', () => {
+    test('should show publish active locale button with defaultLocalePublishOption', async () => {
+      await navigateToDoc(page, postsUrl)
+      const publishButton = page.locator('#action-save')
+      await expect(publishButton).toBeVisible()
+      await expect(publishButton).toContainText('Publish in English')
     })
   })
 })

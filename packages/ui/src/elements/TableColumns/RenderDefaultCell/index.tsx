@@ -5,8 +5,8 @@ import React from 'react'
 
 import { useListDrawerContext } from '../../../elements/ListDrawer/Provider.js'
 import { DefaultCell } from '../../Table/DefaultCell/index.js'
-import { useTableColumns } from '../index.js'
 import './index.scss'
+import { useTableColumns } from '../index.js'
 
 const baseClass = 'default-cell'
 
@@ -24,7 +24,10 @@ export const RenderDefaultCell: React.FC<{
   const { drawerSlug, onSelect } = useListDrawerContext()
   const { LinkedCellOverride } = useTableColumns()
 
-  const propsToPass = { ...clientProps, columnIndex }
+  const propsToPass: DefaultCellComponentProps = {
+    ...clientProps,
+    columnIndex,
+  }
 
   if (isLinkedColumn && drawerSlug) {
     propsToPass.className = `${baseClass}__first-cell`
@@ -33,6 +36,7 @@ export const RenderDefaultCell: React.FC<{
       if (typeof onSelect === 'function') {
         onSelect({
           collectionSlug: rowColl,
+          doc: rowData,
           docID: rowData.id as string,
         })
       }

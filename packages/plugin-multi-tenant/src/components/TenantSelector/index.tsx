@@ -1,15 +1,18 @@
 'use client'
 import type { ReactSelectOption } from '@payloadcms/ui'
-
-import { SelectInput } from '@payloadcms/ui'
-import React from 'react'
+import type { ViewTypes } from 'payload'
 
 import './index.scss'
+
+import { SelectInput, useTranslation } from '@payloadcms/ui'
+import React from 'react'
+
 import { SELECT_ALL } from '../../constants.js'
 import { useTenantSelection } from '../../providers/TenantSelectionProvider/index.client.js'
 
-export const TenantSelector = () => {
+export const TenantSelector = ({ label, viewType }: { label: string; viewType?: ViewTypes }) => {
   const { options, selectedTenantID, setTenant } = useTenantSelection()
+  const { t } = useTranslation()
 
   const handleChange = React.useCallback(
     (option: ReactSelectOption | ReactSelectOption[]) => {
@@ -29,7 +32,8 @@ export const TenantSelector = () => {
   return (
     <div className="tenant-selector">
       <SelectInput
-        label="Tenant"
+        isClearable={viewType === 'list'}
+        label={t(label as any)}
         name="setTenant"
         onChange={handleChange}
         options={options}
@@ -38,7 +42,7 @@ export const TenantSelector = () => {
           selectedTenantID
             ? selectedTenantID === SELECT_ALL
               ? undefined
-              : String(selectedTenantID)
+              : (selectedTenantID as string)
             : undefined
         }
       />

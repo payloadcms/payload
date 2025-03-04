@@ -16,7 +16,7 @@ Just import the `migrateSlateToLexical` function we provide, pass it the `payloa
 
 IMPORTANT: This will overwrite all slate data. We recommend doing the following first:
 1. Take a backup of your entire database. If anything goes wrong and you do not have a backup, you are on your own and will not receive any support.
-2. Make every richText field a lexical editor. This script will only convert lexical richText fields with old Slate data
+2. Make every richText field a lexical editor. This script will only convert lexical richText fields with old Slate data.
 3. Add the SlateToLexicalFeature (as seen below) first, and test it out by loading up the Admin Panel, to see if the migrator works as expected. You might have to build some custom converters for some fields first in order to convert custom Slate nodes. The SlateToLexicalFeature is where the converters are stored. Only fields with this feature added will be migrated.
 4. If this works as expected, add the `disableHooks: true` prop everywhere you're initializing `SlateToLexicalFeature`. Example: `SlateToLexicalFeature({ disableHooks: true })`. Once you did that, you're ready to run the migration script.
 
@@ -67,7 +67,7 @@ If you have custom Slate nodes, create a custom converter for them. Here's the U
 
 ```ts
 import type { SerializedUploadNode } from '../uploadNode'
-import type { SlateNodeConverter } from '@payloadcms/richtext-lexical/migrate'
+import type { SlateNodeConverter } from '@payloadcms/richtext-lexical'
 
 export const SlateUploadConverter: SlateNodeConverter = {
   converter({ slateNode }) {
@@ -90,7 +90,7 @@ export const SlateUploadConverter: SlateNodeConverter = {
 
 It's pretty simple: You get a Slate node as input, and you return the lexical node. The `nodeTypes` array is used to determine which Slate nodes this converter can handle.
 
-When using a migration script, you can add your custom converters to the `converters` property of the `convertSlateToLexical` props, as seen in the example above
+When using a migration script, you can add your custom converters to the `converters` property of the `convertSlateToLexical` props, as seen in the example above.
 
 When using the `SlateToLexicalFeature`, you can add your custom converters to the `converters` property of the `SlateToLexicalFeature` props:
 

@@ -10,7 +10,7 @@ import { BlocksDrawer } from './BlocksDrawer/index.js'
 
 export const RowActions: React.FC<{
   readonly addRow: (rowIndex: number, blockType: string) => Promise<void> | void
-  readonly blocks: ClientBlock[]
+  readonly blocks: (ClientBlock | string)[]
   readonly blockType: string
   readonly duplicateRow: (rowIndex: number, blockType: string) => void
   readonly fields: ClientField[]

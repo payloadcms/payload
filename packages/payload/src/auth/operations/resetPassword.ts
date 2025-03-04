@@ -1,4 +1,4 @@
-import httpStatus from 'http-status'
+import { status as httpStatus } from 'http-status'
 
 import type { Collection } from '../../collections/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
@@ -91,17 +91,17 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
     // beforeValidate - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      await hook({
-        collection: args.collection?.config,
-        context: req.context,
-        data: user,
-        operation: 'update',
-        req,
-      })
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.beforeValidate?.length) {
+      for (const hook of collectionConfig.hooks.beforeValidate) {
+        await hook({
+          collection: args.collection?.config,
+          context: req.context,
+          data: user,
+          operation: 'update',
+          req,
+        })
+      }
+    }
 
     // /////////////////////////////////////
     // Update new password

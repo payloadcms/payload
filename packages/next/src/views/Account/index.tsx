@@ -1,4 +1,4 @@
-import type { AdminViewProps } from 'payload'
+import type { AdminViewServerProps, DocumentViewServerPropsOnly } from 'payload'
 
 import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
@@ -18,11 +18,7 @@ import { Settings } from './Settings/index.js'
 
 export { generateAccountMetadata } from './meta.js'
 
-export const Account: React.FC<AdminViewProps> = async ({
-  initPageResult,
-  params,
-  searchParams,
-}) => {
+export async function Account({ initPageResult, params, searchParams }: AdminViewServerProps) {
   const {
     languageOptions,
     locale,
@@ -42,7 +38,7 @@ export const Account: React.FC<AdminViewProps> = async ({
     serverURL,
   } = config
 
-  const collectionConfig = config.collections.find((collection) => collection.slug === userSlug)
+  const collectionConfig = payload?.collections?.[userSlug]?.config
 
   if (collectionConfig && user?.id) {
     // Fetch the data required for the view
@@ -88,6 +84,7 @@ export const Account: React.FC<AdminViewProps> = async ({
       renderAllFields: true,
       req,
       schemaPath: collectionConfig.slug,
+      skipValidation: true,
     })
 
     // Fetch document lock state
@@ -152,6 +149,7 @@ export const Account: React.FC<AdminViewProps> = async ({
             Fallback: EditView,
             importMap: payload.importMap,
             serverProps: {
+              doc: data,
               i18n,
               initPageResult,
               locale,
@@ -161,7 +159,7 @@ export const Account: React.FC<AdminViewProps> = async ({
               routeSegments: [],
               searchParams,
               user,
-            },
+            } satisfies DocumentViewServerPropsOnly,
           })}
           <AccountClient />
         </EditDepthProvider>

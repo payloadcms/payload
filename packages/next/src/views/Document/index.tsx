@@ -1,4 +1,11 @@
-import type { AdminViewProps, Data, PayloadComponent, ServerSideEditViewProps } from 'payload'
+import type {
+  AdminViewServerProps,
+  Data,
+  DocumentViewClientProps,
+  DocumentViewServerProps,
+  DocumentViewServerPropsOnly,
+  PayloadComponent,
+} from 'payload'
 
 import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
@@ -29,6 +36,7 @@ export const generateMetadata: GenerateEditViewMetadata = async (args) => getMet
 // called on-demand from document drawers
 export const renderDocument = async ({
   disableActions,
+  documentSubViewType,
   drawerSlug,
   importMap,
   initialData,
@@ -38,9 +46,11 @@ export const renderDocument = async ({
   redirectAfterDelete,
   redirectAfterDuplicate,
   searchParams,
+  viewType,
 }: {
+  drawerSlug?: string
   overrideEntityVisibility?: boolean
-} & AdminViewProps): Promise<{
+} & AdminViewServerProps): Promise<{
   data: Data
   Document: React.ReactNode
 }> => {
@@ -72,9 +82,9 @@ export const renderDocument = async ({
   let isEditing = getIsEditing({ id: idFromArgs, collectionSlug, globalSlug })
 
   let RootViewOverride: PayloadComponent
-  let CustomView: ViewFromConfig<ServerSideEditViewProps>
-  let DefaultView: ViewFromConfig<ServerSideEditViewProps>
-  let ErrorView: ViewFromConfig<AdminViewProps>
+  let CustomView: ViewFromConfig<DocumentViewServerProps>
+  let DefaultView: ViewFromConfig<DocumentViewServerProps>
+  let ErrorView: ViewFromConfig<AdminViewServerProps>
 
   let apiURL: string
 
@@ -155,10 +165,11 @@ export const renderDocument = async ({
       renderAllFields: true,
       req,
       schemaPath: collectionSlug || globalSlug,
+      skipValidation: true,
     }),
   ])
 
-  const serverProps: ServerSideEditViewProps = {
+  const documentViewServerProps: DocumentViewServerPropsOnly = {
     doc,
     i18n,
     initPageResult,
@@ -180,9 +191,11 @@ export const renderDocument = async ({
     }
 
     const params = new URLSearchParams()
+
     if (collectionConfig.versions?.drafts) {
       params.append('draft', 'true')
     }
+
     if (locale?.code) {
       params.append('locale', locale.code)
     }
@@ -316,7 +329,12 @@ export const renderDocument = async ({
     req,
   })
 
-  const clientProps = { formState, ...documentSlots }
+  const clientProps: DocumentViewClientProps = {
+    formState,
+    ...documentSlots,
+    documentSubViewType,
+    viewType,
+  }
 
   return {
     data: doc,
@@ -360,7 +378,7 @@ export const renderDocument = async ({
                 clientProps,
                 Component: ErrorView.ComponentConfig || ErrorView.Component,
                 importMap,
-                serverProps,
+                serverProps: documentViewServerProps,
               })
             : RenderServerComponent({
                 clientProps,
@@ -370,7 +388,7 @@ export const renderDocument = async ({
                     ? CustomView?.ComponentConfig || CustomView?.Component
                     : DefaultView?.ComponentConfig || DefaultView?.Component,
                 importMap,
-                serverProps,
+                serverProps: documentViewServerProps,
               })}
         </EditDepthProvider>
       </DocumentInfoProvider>
@@ -378,16 +396,16 @@ export const renderDocument = async ({
   }
 }
 
-export const Document: React.FC<AdminViewProps> = async (args) => {
+export async function Document(props: AdminViewServerProps) {
   try {
-    const { Document: RenderedDocument } = await renderDocument(args)
+    const { Document: RenderedDocument } = await renderDocument(props)
     return RenderedDocument
   } catch (error) {
     if (error?.message === 'NEXT_REDIRECT') {
       throw error
     }
 
-    logError({ err: error, payload: args.initPageResult.req.payload })
+    logError({ err: error, payload: props.initPageResult.req.payload })
 
     if (error.message === 'not-found') {
       notFound()

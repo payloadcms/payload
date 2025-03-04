@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 export const timestamp = (label) => {
   if (!process.env.PAYLOAD_TIME) {
     process.env.PAYLOAD_TIME = String(new Date().getTime())
