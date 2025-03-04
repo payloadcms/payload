@@ -82,20 +82,13 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
   const updateDataOptimistically = useCallback(
     (updateFn: (currentData: PaginatedDocs) => PaginatedDocs) => {
-      console.log('updateDataOptimistically called')
       setCurrentData((prev) => {
         const updated = updateFn(prev)
-        console.log('ListQueryProvider - data updated optimistically:', updated)
         return updated
       })
     },
     [],
   )
-
-  // Log whenever currentData changes
-  useEffect(() => {
-    console.log('ListQueryProvider - currentData changed:', currentData)
-  }, [currentData])
 
   const refineListData = useCallback(
     // eslint-disable-next-line @typescript-eslint/require-await

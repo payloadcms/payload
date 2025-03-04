@@ -4,7 +4,7 @@ import type { Column } from 'payload'
 
 import './index.scss'
 
-import React from 'react'
+import React, { useEffect } from 'react'
 
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { DraggableSortableItem } from '../DraggableSortable/DraggableSortableItem/index.js'
@@ -39,8 +39,14 @@ export const Table: React.FC<Props> = ({
   // Use the data from ListQueryProvider if available, otherwise use the props
   const data = listQueryData?.docs || initialData
 
+  // The key re-render mechanism - essential for the solution
+  const [renderKey, setRenderKey] = React.useState(0)
+  useEffect(() => {
+    setRenderKey((prev) => prev + 1)
+  }, [data])
+
   // Force re-sort when data changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (query?.sort) {
       void handleSortChange(query.sort as string).catch((error) => {
         throw error
@@ -167,12 +173,6 @@ export const Table: React.FC<Props> = ({
   }
 
   const rowIds = data.map((row) => row.id || String(Math.random()))
-
-  // The key re-render mechanism - essential for the solution
-  const [renderKey, setRenderKey] = React.useState(0)
-  React.useEffect(() => {
-    setRenderKey((prev) => prev + 1)
-  }, [data])
 
   return (
     <div
