@@ -49,7 +49,7 @@ export const SortBy: SelectFieldClientComponent = (props) => {
   }, [value, fieldOptions])
 
   useEffect(() => {
-    if (id || !query.sort || value) {
+    if (id || !query?.sort || value) {
       return
     }
 

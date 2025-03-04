@@ -47,18 +47,23 @@ export const importExportPlugin =
       if (!collection.admin) {
         collection.admin = { components: { listMenuItems: [] } }
       }
-      if (!collection.admin.components) {
-        collection.admin.components = { listMenuItems: [] }
+      const components = collection.admin.components || {}
+      if (!components.listMenuItems) {
+        components.listMenuItems = []
       }
-      if (!collection.admin.components.listMenuItems) {
-        collection.admin.components.listMenuItems = []
+      if (!components.edit) {
+        components.edit = {}
       }
-      collection.admin.components.listMenuItems.push({
+      if (!components.edit.SaveButton) {
+        components.edit.SaveButton = '@payloadcms/plugin-import-export/rsc#ExportSaveButton'
+      }
+      components.listMenuItems.push({
         clientProps: {
           exportCollectionSlug: exportCollection.slug,
         },
         path: '@payloadcms/plugin-import-export/rsc#ExportListMenuItem',
       })
+      collection.admin.components = components
     })
 
     config.i18n = deepMergeSimple(translations, config.i18n?.translations ?? {})
