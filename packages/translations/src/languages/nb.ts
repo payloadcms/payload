@@ -343,6 +343,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Kommende hendelser',
     updatedAt: 'Oppdatert',
     updatedCountSuccessfully: 'Oppdaterte {{count}} {{label}} vellykket.',
+    updatedLabelSuccessfully: 'Oppdatert {{label}} vellykket.',
     updatedSuccessfully: 'Oppdatert.',
     updateForEveryone: 'Oppdatering for alle',
     updating: 'Oppdatering',

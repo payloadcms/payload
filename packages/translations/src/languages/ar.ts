@@ -339,6 +339,7 @@ export const arTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'الأحداث القادمة',
     updatedAt: 'تم التحديث في',
     updatedCountSuccessfully: 'تم تحديث {{count}} {{label}} بنجاح.',
+    updatedLabelSuccessfully: 'تم تحديث {{label}} بنجاح.',
     updatedSuccessfully: 'تم التحديث بنجاح.',
     updateForEveryone: 'تحديث للجميع',
     updating: 'جار التحديث',

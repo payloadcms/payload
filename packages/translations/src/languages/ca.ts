@@ -343,6 +343,7 @@ export const caTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Esdeveniments programats',
     updatedAt: 'Actualitzat el',
     updatedCountSuccessfully: 'Actualitzat {{count}} {{label}} correctament.',
+    updatedLabelSuccessfully: 'Actualitzat {{label}} amb èxit.',
     updatedSuccessfully: 'Actualitzat amb exit.',
     updateForEveryone: 'Actualització per a tothom',
     updating: 'Actualitzant',

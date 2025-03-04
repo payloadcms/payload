@@ -343,6 +343,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Próximos Eventos',
     updatedAt: 'Atualizado Em',
     updatedCountSuccessfully: 'Atualizado {{count}} {{label}} com sucesso.',
+    updatedLabelSuccessfully: '{{label}} atualizado com sucesso.',
     updatedSuccessfully: 'Atualizado com sucesso.',
     updateForEveryone: 'Atualização para todos',
     updating: 'Atualizando',

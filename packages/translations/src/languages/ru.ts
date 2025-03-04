@@ -346,6 +346,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Предстоящие события',
     updatedAt: 'Дата правки',
     updatedCountSuccessfully: 'Обновлено {{count}} {{label}} успешно.',
+    updatedLabelSuccessfully: 'Успешно обновлено {{label}}.',
     updatedSuccessfully: 'Успешно Обновлено.',
     updateForEveryone: 'Обновление для всех',
     updating: 'Обновление',

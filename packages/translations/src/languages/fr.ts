@@ -352,6 +352,7 @@ export const frTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Événements à venir',
     updatedAt: 'Modifié le',
     updatedCountSuccessfully: '{{count}} {{label}} mis à jour avec succès.',
+    updatedLabelSuccessfully: '{{label}} mis à jour avec succès.',
     updatedSuccessfully: 'Mis à jour avec succès.',
     updateForEveryone: 'Mise à jour pour tout le monde',
     updating: 'Mise à jour',

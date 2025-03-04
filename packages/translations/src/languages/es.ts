@@ -347,6 +347,7 @@ export const esTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Próximos Eventos',
     updatedAt: 'Fecha de modificado',
     updatedCountSuccessfully: '{{count}} {{label}} actualizado con éxito.',
+    updatedLabelSuccessfully: 'Actualizado {{label}} con éxito.',
     updatedSuccessfully: 'Actualizado con éxito.',
     updateForEveryone: 'Actualización para todos',
     updating: 'Actualizando',

@@ -345,6 +345,7 @@ export const huTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Közelgő események',
     updatedAt: 'Frissítve:',
     updatedCountSuccessfully: '{{count}} {{label}} sikeresen frissítve.',
+    updatedLabelSuccessfully: 'A(z) {{label}} sikeresen frissült.',
     updatedSuccessfully: 'Sikeresen frissítve.',
     updateForEveryone: 'Frissítés mindenkinek',
     updating: 'Frissítés',

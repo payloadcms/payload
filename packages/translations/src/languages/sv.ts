@@ -343,6 +343,7 @@ export const svTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Kommande händelser',
     updatedAt: 'Uppdaterades Vid',
     updatedCountSuccessfully: 'Uppdaterade {{count}} {{label}} framgångsrikt.',
+    updatedLabelSuccessfully: 'Uppdaterade {{label}} framgångsrikt.',
     updatedSuccessfully: 'Uppdaterades framgångsrikt.',
     updateForEveryone: 'Uppdatering för alla',
     updating: 'Uppdatering',

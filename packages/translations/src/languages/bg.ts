@@ -342,6 +342,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Предстоящи събития',
     updatedAt: 'Обновен на',
     updatedCountSuccessfully: 'Обновени {{count}} {{label}} успешно.',
+    updatedLabelSuccessfully: 'Успешно обновихме {{label}}.',
     updatedSuccessfully: 'Обновен успешно.',
     updateForEveryone: 'Актуализация за всички',
     updating: 'Обновява се',

@@ -338,6 +338,7 @@ export const thTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'กิจกรรมที่จะถึง',
     updatedAt: 'แก้ไขเมื่อ',
     updatedCountSuccessfully: 'อัปเดต {{count}} {{label}} เรียบร้อยแล้ว',
+    updatedLabelSuccessfully: 'อัปเดต {{label}} สำเร็จแล้ว',
     updatedSuccessfully: 'แก้ไขสำเร็จ',
     updateForEveryone: 'อัปเดตสำหรับทุกคน',
     updating: 'กำลังอัปเดต',

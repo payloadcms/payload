@@ -346,6 +346,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Aankomende Evenementen',
     updatedAt: 'Aangepast op',
     updatedCountSuccessfully: '{{count}} {{label}} succesvol bijgewerkt.',
+    updatedLabelSuccessfully: 'Met succes {{label}} bijgewerkt.',
     updatedSuccessfully: 'Succesvol aangepast.',
     updateForEveryone: 'Update voor iedereen',
     updating: 'Bijwerken',

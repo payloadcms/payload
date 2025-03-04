@@ -331,6 +331,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     upcomingEvents: '即將來臨的活動',
     updatedAt: '更新於',
     updatedCountSuccessfully: '已成功更新 {{count}} 個 {{label}}。',
+    updatedLabelSuccessfully: '成功更新了{{label}}。',
     updatedSuccessfully: '更新成功。',
     updateForEveryone: '給所有人的更新',
     updating: '更新中',

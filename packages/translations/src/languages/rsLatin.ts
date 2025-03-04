@@ -343,6 +343,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Predstojeći događaji',
     updatedAt: 'Ažurirano u',
     updatedCountSuccessfully: 'Uspešno ažurirano {{count}} {{label}}.',
+    updatedLabelSuccessfully: 'Uspešno ažurirano {{label}}.',
     updatedSuccessfully: 'Uspešno ažurirano.',
     updateForEveryone: 'Ažuriranje za sve',
     updating: 'Ažuriranje',

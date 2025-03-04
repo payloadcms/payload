@@ -341,6 +341,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Майбутні події',
     updatedAt: 'Змінено',
     updatedCountSuccessfully: 'Успішно оновлено {{count}} {{label}}.',
+    updatedLabelSuccessfully: 'Успішно оновлено {{label}}.',
     updatedSuccessfully: 'Успішно відредаговано.',
     updateForEveryone: 'Оновлення для всіх',
     updating: 'оновлення',

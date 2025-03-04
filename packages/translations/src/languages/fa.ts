@@ -340,6 +340,7 @@ export const faTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'رویدادهای آینده',
     updatedAt: 'بروز شده در',
     updatedCountSuccessfully: 'تعداد {{count}} با عنوان {{label}} با موفقیت بروزرسانی شدند.',
+    updatedLabelSuccessfully: 'به روزرسانی {{label}} با موفقیت انجام شد.',
     updatedSuccessfully: 'با موفقیت به‌روز شد.',
     updateForEveryone: 'بروزرسانی برای همه',
     updating: 'در حال به‌روزرسانی',

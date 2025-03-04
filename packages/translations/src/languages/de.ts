@@ -348,6 +348,7 @@ export const deTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Bevorstehende Veranstaltungen',
     updatedAt: 'Aktualisiert am',
     updatedCountSuccessfully: '{{count}} {{label}} erfolgreich aktualisiert.',
+    updatedLabelSuccessfully: '{{Etikett}} erfolgreich aktualisiert.',
     updatedSuccessfully: 'Erfolgreich aktualisiert.',
     updateForEveryone: 'Aktualisierung für alle',
     updating: 'Aktualisierung',

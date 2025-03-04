@@ -342,6 +342,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Nadolazeći događaji',
     updatedAt: 'Ažurirano u',
     updatedCountSuccessfully: 'Uspješno ažurirano {{count}} {{label}}.',
+    updatedLabelSuccessfully: 'Uspješno ažurirano {{oznaka}}.',
     updatedSuccessfully: 'Uspješno ažurirano.',
     updateForEveryone: 'Ažuriranje za sve',
     updating: 'Ažuriranje',

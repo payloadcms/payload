@@ -347,6 +347,7 @@ export const myTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'လာမည့် အစီအစဉ်များ',
     updatedAt: 'ပြင်ဆင်ခဲ့သည့်အချိန်',
     updatedCountSuccessfully: '{{count}} {{label}} ကို အောင်မြင်စွာ အပ်ဒိတ်လုပ်ခဲ့သည်။',
+    updatedLabelSuccessfully: 'Berjaya mengemas kini {{label}}.',
     updatedSuccessfully: 'အပ်ဒိတ်လုပ်ပြီးပါပြီ။',
     updateForEveryone: 'အားလုံးအတွက် အပြောင်းအလဲ',
     updating: 'ပြင်ဆင်ရန်',

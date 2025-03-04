@@ -341,6 +341,7 @@ export const slTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Prihajajoči dogodki',
     updatedAt: 'Posodobljeno',
     updatedCountSuccessfully: 'Uspešno posodobljeno {{count}} {{label}}.',
+    updatedLabelSuccessfully: '{{label}} uspešno posodobljen.',
     updatedSuccessfully: 'Uspešno posodobljeno.',
     updateForEveryone: 'Posodobitev za vse',
     updating: 'Posodabljanje',

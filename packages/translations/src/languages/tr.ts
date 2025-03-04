@@ -347,6 +347,7 @@ export const trTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Yaklaşan Etkinlikler',
     updatedAt: 'Güncellenme tarihi',
     updatedCountSuccessfully: '{{count}} {{label}} başarıyla güncellendi.',
+    updatedLabelSuccessfully: '{{label}} başarıyla güncellendi.',
     updatedSuccessfully: 'Başarıyla güncellendi.',
     updateForEveryone: 'Herkes için güncelleme',
     updating: 'Güncelleniyor',

@@ -344,6 +344,7 @@ export const azTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Gələcək Tədbirlər',
     updatedAt: 'Yeniləndiyi tarix',
     updatedCountSuccessfully: '{{count}} {{label}} uğurla yeniləndi.',
+    updatedLabelSuccessfully: '{{label}} uğurla yeniləndi.',
     updatedSuccessfully: 'Uğurla yeniləndi.',
     updateForEveryone: 'Hər kəs üçün yeniləmə',
     updating: 'Yenilənir',

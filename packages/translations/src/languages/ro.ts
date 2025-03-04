@@ -346,6 +346,7 @@ export const roTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Evenimente viitoare',
     updatedAt: 'Actualizat la',
     updatedCountSuccessfully: 'Actualizate {{count}} {{label}} cu succes.',
+    updatedLabelSuccessfully: '{{eticheta}} actualizată cu succes.',
     updatedSuccessfully: 'Actualizat cu succes.',
     updateForEveryone: 'Actualizare pentru toată lumea',
     updating: 'Actualizare',

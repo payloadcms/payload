@@ -340,6 +340,7 @@ export const koTranslations: DefaultTranslationsObject = {
     upcomingEvents: '다가오는 이벤트',
     updatedAt: '업데이트 일시',
     updatedCountSuccessfully: '{{count}}개의 {{label}}을(를) 업데이트했습니다.',
+    updatedLabelSuccessfully: '{{label}}이(가) 성공적으로 업데이트되었습니다.',
     updatedSuccessfully: '성공적으로 업데이트되었습니다.',
     updateForEveryone: '모두를 위한 업데이트',
     updating: '업데이트 중',

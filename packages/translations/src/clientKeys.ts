@@ -280,6 +280,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:unsavedChangesDuplicate',
   'general:untitled',
   'general:updatedAt',
+  'general:updatedLabelSuccessfully',
   'general:updatedCountSuccessfully',
   'general:updateForEveryone',
   'general:updatedSuccessfully',

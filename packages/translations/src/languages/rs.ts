@@ -342,6 +342,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Predstojeći događaji',
     updatedAt: 'Ажурирано у',
     updatedCountSuccessfully: 'Успешно ажурирано {{count}} {{label}}.',
+    updatedLabelSuccessfully: 'Uspešno ažurirano {{label}}.',
     updatedSuccessfully: 'Успешно ажурирано.',
     updateForEveryone: 'Ažuriranje za sve',
     updating: 'Ажурирање',

@@ -341,6 +341,7 @@ export const daTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Kommende Begivenheder',
     updatedAt: 'Opdateret ved',
     updatedCountSuccessfully: 'Opdateret {{count}} {{label}} successfully.',
+    updatedLabelSuccessfully: 'Opdaterede {{label}} med succes.',
     updatedSuccessfully: 'Opdateret.',
     updateForEveryone: 'Opdatering for alle',
     updating: 'Opdaterer',

@@ -339,6 +339,7 @@ export const etTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Eelseisvad sündmused',
     updatedAt: 'Uuendatud',
     updatedCountSuccessfully: 'Uuendatud {{count}} {{label}} edukalt.',
+    updatedLabelSuccessfully: 'Uuendas {{silt}} edukalt.',
     updatedSuccessfully: 'Edukalt uuendatud.',
     updateForEveryone: 'Uuendus kõigile',
     updating: 'Uuendamine',

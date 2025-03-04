@@ -343,6 +343,7 @@ export const skTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Nadchádzajúce udalosti',
     updatedAt: 'Aktualizované v',
     updatedCountSuccessfully: 'Úspešne aktualizované {{count}} {{label}}.',
+    updatedLabelSuccessfully: 'Úspešne aktualizované {{label}}.',
     updatedSuccessfully: 'Úspešne aktualizované.',
     updateForEveryone: 'Aktualizácia pre všetkých',
     updating: 'Aktualizácia',

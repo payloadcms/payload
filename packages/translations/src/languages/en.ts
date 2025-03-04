@@ -343,6 +343,7 @@ export const enTranslations = {
     upcomingEvents: 'Upcoming Events',
     updatedAt: 'Updated At',
     updatedCountSuccessfully: 'Updated {{count}} {{label}} successfully.',
+    updatedLabelSuccessfully: 'Updated {{label}} successfully.',
     updatedSuccessfully: 'Updated successfully.',
     updateForEveryone: 'Update for everyone',
     updating: 'Updating',

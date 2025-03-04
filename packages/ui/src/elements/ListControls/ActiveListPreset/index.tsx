@@ -18,7 +18,7 @@ export function ActiveListPreset({
   openPresetListDrawer: () => void
   resetPreset: () => Promise<void>
 }) {
-  const { i18n, t } = useTranslation()
+  const { t } = useTranslation()
 
   return (
     <Pill

@@ -134,6 +134,10 @@ export const useListPresets = ({
           columns: transformColumnsToPreferences(query.columns),
           where: query.where,
         }),
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         method: 'PATCH',
       }).then(async (res) => {
         try {
@@ -141,7 +145,7 @@ export const useListPresets = ({
 
           if (res.status < 400) {
             toast.success(
-              t('general:updatedCountSuccessfully', {
+              t('general:updatedLabelSuccessfully', {
                 label: getTranslation(presetConfig?.labels?.singular, i18n),
               }),
             )

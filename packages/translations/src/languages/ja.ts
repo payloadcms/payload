@@ -342,6 +342,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     upcomingEvents: '今後のイベント',
     updatedAt: '更新日',
     updatedCountSuccessfully: '{{count}}つの{{label}}を正常に更新しました。',
+    updatedLabelSuccessfully: '{{label}}の更新に成功しました。',
     updatedSuccessfully: '更新成功。',
     updateForEveryone: '皆様への更新情報',
     updating: '更新中',

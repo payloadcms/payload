@@ -335,6 +335,7 @@ export const heTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'אירועים קרובים',
     updatedAt: 'עודכן בתאריך',
     updatedCountSuccessfully: 'עודכן {{count}} {{label}} בהצלחה.',
+    updatedLabelSuccessfully: 'עודכן {{label}} בהצלחה.',
     updatedSuccessfully: 'עודכן בהצלחה.',
     updateForEveryone: 'עדכון לכולם',
     updating: 'מעדכן',
