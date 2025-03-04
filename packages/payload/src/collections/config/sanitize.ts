@@ -257,6 +257,8 @@ export const sanitizeCollection = async (
       },
       index: true,
       label: 'Order',
+      required: true,
+      unique: true,
     }
 
     sanitized.fields.unshift(orderField)
