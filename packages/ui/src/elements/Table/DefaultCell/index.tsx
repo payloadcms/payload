@@ -2,11 +2,12 @@
 import type { DefaultCellComponentProps, UploadFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { fieldAffectsData, fieldIsID, formatAdminURL } from 'payload/shared'
-import React from 'react' // TODO: abstract this out to support all routers
+import { fieldAffectsData, fieldIsID } from 'payload/shared'
+import React, { Fragment } from 'react' // TODO: abstract this out to support all routers
 
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { formatAdminURL } from '../../../utilities/formatAdminURL.js'
 import { Link } from '../../Link/index.js'
 import { CodeCell } from './fields/Code/index.js'
 import { cellComponents } from './fields/index.js'
@@ -17,7 +18,6 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     className: classNameFromProps,
     collectionSlug,
     field,
-    field: { admin },
     link,
     onClick: onClickFromProps,
     rowData,
@@ -34,11 +34,12 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
 
   const collectionConfig = getEntityConfig({ collectionSlug })
 
-  const classNameFromConfigContext = admin && 'className' in admin ? admin.className : undefined
+  const classNameFromConfigContext =
+    field && field.admin && 'className' in field.admin ? field.admin.className : undefined
 
   const className =
     classNameFromProps ||
-    (field.admin && 'className' in field.admin ? field.admin.className : null) ||
+    (field && field.admin && 'className' in field.admin ? field.admin.className : null) ||
     classNameFromConfigContext
 
   const onClick = onClickFromProps
@@ -96,12 +97,34 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     )
   }
 
+  let displayedValue = cellData
+
+  if (field?.type === 'select' && Array.isArray(field.options)) {
+    const selectedOption = field.options.find((opt) =>
+      typeof opt == 'object' ? opt?.value === cellData : opt === cellData,
+    )
+
+    if (selectedOption) {
+      displayedValue =
+        typeof selectedOption === 'object' &&
+        'label' in selectedOption &&
+        React.isValidElement(selectedOption.label)
+          ? selectedOption.label // Render JSX directly
+          : typeof selectedOption === 'object' && 'label' in selectedOption
+            ? selectedOption.label || cellData // Fallback to string label or raw value
+            : selectedOption // If selectedOption is a string, use it directly
+    }
+  }
+
   const DefaultCellComponent: React.FC<DefaultCellComponentProps> =
     typeof cellData !== 'undefined' && cellComponents[field.type]
 
   let CellComponent: React.ReactNode = null
 
-  if (DefaultCellComponent) {
+  // Handle JSX labels before using DefaultCellComponent
+  if (React.isValidElement(displayedValue)) {
+    CellComponent = displayedValue
+  } else if (DefaultCellComponent) {
     CellComponent = <DefaultCellComponent cellData={cellData} rowData={rowData} {...props} />
   } else if (!DefaultCellComponent) {
     // DefaultCellComponent does not exist for certain field types like `text`
@@ -125,13 +148,21 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     } else {
       return (
         <WrapElement {...wrapElementProps}>
-          {(cellData === '' || typeof cellData === 'undefined' || cellData === null) &&
+          {(displayedValue === '' ||
+            typeof displayedValue === 'undefined' ||
+            displayedValue === null) &&
             i18n.t('general:noLabel', {
               label: getTranslation(('label' in field ? field.label : null) || 'data', i18n),
             })}
-          {typeof cellData === 'string' && cellData}
-          {typeof cellData === 'number' && cellData}
-          {typeof cellData === 'object' && cellData !== null && JSON.stringify(cellData)}
+          {typeof displayedValue === 'string' && displayedValue}
+          {typeof displayedValue === 'number' && displayedValue}
+          {typeof displayedValue === 'object' && displayedValue !== null && (
+            <Fragment>
+              {React.isValidElement(displayedValue)
+                ? displayedValue
+                : JSON.stringify(displayedValue)}
+            </Fragment>
+          )}
         </WrapElement>
       )
     }

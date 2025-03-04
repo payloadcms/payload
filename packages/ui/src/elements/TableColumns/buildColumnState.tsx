@@ -27,6 +27,7 @@ import React from 'react'
 import type { SortColumnProps } from '../SortColumn/index.js'
 
 import {
+  DefaultCell,
   RenderCustomComponent,
   RenderDefaultCell,
   SortColumn,
@@ -245,6 +246,20 @@ export const buildColumnState = (args: Args): Column[] => {
               rowData: doc,
             }
 
+            const isSelectOptionLabelReactElement = (cellClientProps) => {
+              const { cellData, field } = cellClientProps
+
+              if (field?.type === 'select' && Array.isArray(field?.options)) {
+                const matchingOption = field.options.find((option) => option.value === cellData)
+
+                if (matchingOption && React.isValidElement(matchingOption.label)) {
+                  return true
+                }
+              }
+
+              return false
+            }
+
             let CustomCell = null
 
             if (_field?.type === 'richText') {
@@ -269,6 +284,15 @@ export const buildColumnState = (args: Args): Column[] => {
                 Component: _field.editor.CellComponent,
                 importMap: payload.importMap,
                 serverProps: cellServerProps,
+              })
+            } else if (
+              isSelectOptionLabelReactElement(cellClientProps) &&
+              cellClientProps.cellData
+            ) {
+              CustomCell = RenderServerComponent({
+                clientProps: cellClientProps,
+                Component: DefaultCell,
+                importMap: payload.importMap,
               })
             } else {
               const CustomCellComponent = _field?.admin?.components?.Cell
