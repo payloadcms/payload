@@ -15,7 +15,7 @@ import { getFieldPathsModified as getFieldPaths } from '../../getFieldPaths.js'
 import { getExistingRowDoc } from './getExistingRowDoc.js'
 import { traverseFields } from './traverseFields.js'
 
-function concatParentLabel(parentLabel: string, label: string): string {
+function buildFieldLabel(parentLabel: string, label: string): string {
   const capitalizedLabel = label.charAt(0).toUpperCase() + label.slice(1)
   return parentLabel ? `${parentLabel} > ${capitalizedLabel}` : capitalizedLabel
 }
@@ -33,13 +33,18 @@ type Args = {
   errors: ValidationFieldError[]
   field: Field | TabAsField
   fieldIndex: number
+  /**
+   * Built up labels of parent fields
+   *
+   * @example "Group Field > Tab Field > Text Field"
+   */
+  fieldLabelPath: string
   global: null | SanitizedGlobalConfig
   id?: number | string
   mergeLocaleActions: (() => Promise<void> | void)[]
   operation: Operation
   parentIndexPath: string
   parentIsLocalized: boolean
-  parentLabel: string
   parentPath: string
   parentSchemaPath: string
   req: PayloadRequest
@@ -69,12 +74,12 @@ export const promise = async ({
   errors,
   field,
   fieldIndex,
+  fieldLabelPath,
   global,
   mergeLocaleActions,
   operation,
   parentIndexPath,
   parentIsLocalized,
-  parentLabel,
   parentPath,
   parentSchemaPath,
   req,
@@ -178,8 +183,8 @@ export const promise = async ({
       })
 
       if (typeof validationResult === 'string') {
-        const fieldLabel = concatParentLabel(
-          parentLabel,
+        const fieldLabel = buildFieldLabel(
+          fieldLabelPath,
           getTranslatedLabel(field?.label || field?.name, req.i18n),
         )
 
@@ -234,16 +239,16 @@ export const promise = async ({
               doc,
               docWithLocales,
               errors,
+              fieldLabelPath: buildFieldLabel(
+                fieldLabelPath,
+                `${getTranslatedLabel(field?.label || field?.name, req.i18n)} ${rowIndex + 1}`,
+              ),
               fields: field.fields,
               global,
               mergeLocaleActions,
               operation,
               parentIndexPath: '',
               parentIsLocalized: parentIsLocalized || field.localized,
-              parentLabel: concatParentLabel(
-                parentLabel,
-                `${getTranslatedLabel(field?.label || field?.name, req.i18n)} ${rowIndex + 1}`,
-              ),
               parentPath: path + '.' + rowIndex,
               parentSchemaPath: schemaPath,
               req,
@@ -296,16 +301,16 @@ export const promise = async ({
                 doc,
                 docWithLocales,
                 errors,
+                fieldLabelPath: buildFieldLabel(
+                  fieldLabelPath,
+                  `${getTranslatedLabel(field?.label || field?.name, req.i18n)} ${rowIndex + 1}`,
+                ),
                 fields: block.fields,
                 global,
                 mergeLocaleActions,
                 operation,
                 parentIndexPath: '',
                 parentIsLocalized: parentIsLocalized || field.localized,
-                parentLabel: concatParentLabel(
-                  parentLabel,
-                  `${getTranslatedLabel(field?.label || field?.name, req.i18n)} ${rowIndex + 1}`,
-                ),
                 parentPath: path + '.' + rowIndex,
                 parentSchemaPath: schemaPath + '.' + block.slug,
                 req,
@@ -339,13 +344,13 @@ export const promise = async ({
         doc,
         docWithLocales,
         errors,
+        fieldLabelPath: buildFieldLabel(fieldLabelPath, fieldLabel),
         fields: field.fields,
         global,
         mergeLocaleActions,
         operation,
         parentIndexPath: indexPath,
         parentIsLocalized,
-        parentLabel: concatParentLabel(parentLabel, fieldLabel),
         parentPath,
         parentSchemaPath: schemaPath,
         req,
@@ -380,16 +385,16 @@ export const promise = async ({
         doc,
         docWithLocales,
         errors,
+        fieldLabelPath: buildFieldLabel(
+          fieldLabelPath,
+          getTranslatedLabel(field?.label || field?.name, req.i18n),
+        ),
         fields: field.fields,
         global,
         mergeLocaleActions,
         operation,
         parentIndexPath: '',
         parentIsLocalized: parentIsLocalized || field.localized,
-        parentLabel: concatParentLabel(
-          parentLabel,
-          getTranslatedLabel(field?.label || field?.name, req.i18n),
-        ),
         parentPath: path,
         parentSchemaPath: schemaPath,
         req,
@@ -441,6 +446,10 @@ export const promise = async ({
             docWithLocales,
             errors,
             field,
+            fieldLabelPath: buildFieldLabel(
+              fieldLabelPath,
+              getTranslatedLabel(field?.label || field?.name, req.i18n),
+            ),
             global,
             indexPath: indexPathSegments,
             mergeLocaleActions,
@@ -501,16 +510,16 @@ export const promise = async ({
         doc,
         docWithLocales,
         errors,
+        fieldLabelPath: buildFieldLabel(
+          fieldLabelPath,
+          getTranslatedLabel(field?.label || field?.name, req.i18n),
+        ),
         fields: field.fields,
         global,
         mergeLocaleActions,
         operation,
         parentIndexPath: isNamedTab ? '' : indexPath,
         parentIsLocalized: parentIsLocalized || field.localized,
-        parentLabel: concatParentLabel(
-          parentLabel,
-          getTranslatedLabel(field?.label || field?.name, req.i18n),
-        ),
         parentPath: isNamedTab ? path : parentPath,
         parentSchemaPath: schemaPath,
         req,
@@ -533,16 +542,16 @@ export const promise = async ({
         doc,
         docWithLocales,
         errors,
+        fieldLabelPath: buildFieldLabel(
+          fieldLabelPath,
+          getTranslatedLabel(field?.label || '', req.i18n),
+        ),
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
         global,
         mergeLocaleActions,
         operation,
         parentIndexPath: indexPath,
         parentIsLocalized,
-        parentLabel: concatParentLabel(
-          parentLabel,
-          getTranslatedLabel(field?.label || '', req.i18n),
-        ),
         parentPath: path,
         parentSchemaPath: schemaPath,
         req,
