@@ -11,4 +11,13 @@
       padding: var(--base);
     }
   }
+
+  .list-preset-where-field {
+    .pill {
+      &--style-always-white {
+        background: var(--theme-elevation-250);
+        color: var(--theme-elevation-1000);
+      }
+    }
+  }
 }
