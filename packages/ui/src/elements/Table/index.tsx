@@ -4,49 +4,21 @@ import type { Column } from 'payload'
 
 import './index.scss'
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { DraggableSortableItem } from '../DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
-import { SelectRow } from '../SelectRow/index.js'
-import { SortRow } from '../SortRow/index.js'
 
 const baseClass = 'table'
 
 // if you change this, you need to change it in a couple of places where it's duplicated
 const ORDER_FIELD_NAME = '_order'
 
-export type CellProps = {
-  column: Column
-  rowData: { [key: string]: unknown; id: string }
-  rowIndex: number
-}
-
-export const Cell: React.FC<CellProps> = ({ column, rowData }) => {
-  const { accessor } = column
-
-  // Handle special columns
-  if (accessor === '_select') {
-    return <SelectRow rowData={rowData} />
-  }
-
-  if (accessor === '_dragHandle') {
-    return <SortRow />
-  }
-
-  // For regular data columns, render the value
-  const value = accessor ? rowData[accessor] : null
-  return <>{value}</>
-}
-
 export type Props = {
   readonly appearance?: 'condensed' | 'default'
   readonly columns?: Column[]
-  /**
-   * TODO: remove in payload v4. We are using the paginatedDocs from the useListQuery provider
-   */
-  readonly data: { [key: string]: unknown; id: string; [ORDER_FIELD_NAME]: string }[]
+  readonly data: { [key: string]: unknown; id: string }[]
   readonly onDragEnd?: (data: { moveFromIndex: number; moveToIndex: number }) => void
 }
 
@@ -61,11 +33,8 @@ export const Table: React.FC<Props> = ({
   // Use the data from ListQueryProvider if available, otherwise use the props
   const data = listQueryData?.docs || initialData
 
-  // The key re-render mechanism - essential for the solution
-  const [renderKey, setRenderKey] = React.useState(0)
-  useEffect(() => {
-    setRenderKey((prev) => prev + 1)
-  }, [data])
+  // The original order of ids as they were in the server-rendered cells
+  const [originalIds] = useState(() => initialData.map((item) => String(item.id)))
 
   // Force re-sort when data changes
   useEffect(() => {
@@ -87,20 +56,11 @@ export const Table: React.FC<Props> = ({
       return
     }
 
-    const movedId = data[moveFromIndex].id
-    const newBeforeRow = moveToIndex > moveFromIndex ? data[moveToIndex] : data[moveToIndex - 1]
-    const newAfterRow = moveToIndex > moveFromIndex ? data[moveToIndex + 1] : data[moveToIndex]
-
     // Only update optimistically if we have the function available from ListQueryProvider
     if (updateDataOptimistically) {
       updateDataOptimistically((currentData) => {
         const newData = { ...currentData }
         const newDocs = [...currentData.docs]
-
-        newDocs[moveFromIndex] = {
-          ...newDocs[moveFromIndex],
-          [ORDER_FIELD_NAME]: `${newBeforeRow?.[ORDER_FIELD_NAME]}_pending`,
-        }
 
         // Move the item in the array
         newDocs.splice(moveToIndex, 0, newDocs.splice(moveFromIndex, 1)[0])
@@ -114,41 +74,27 @@ export const Table: React.FC<Props> = ({
     if (propOnDragEnd) {
       propOnDragEnd({ moveFromIndex, moveToIndex })
     }
-
-    //   try {
-    //     // Assuming we're in the context of a collection
-    //     const collectionSlug = window.location.pathname.split('/').filter(Boolean)[2]
-    //     const response = await fetch(`/api/${collectionSlug}/reorder`, {
-    //       body: JSON.stringify({
-    //         betweenIds: [newBeforeRow?.id, newAfterRow?.id],
-    //         docIds: [movedId],
-    //       }),
-    //       headers: {
-    //         'Content-Type': 'application/json',
-    //       },
-    //       method: 'POST',
-    //     })
-
-    //     if (!response.ok) {
-    //       throw new Error('Failed to reorder')
-    //     }
-
-    //     // no need to update the data here, the data is updated in the useListQuery provider
-    //   } catch (error) {
-    //     // eslint-disable-next-line no-console
-    //     console.error('Error reordering:', error)
-    //     // API call failed, let the future refresh handle resetting the data
-    //   }
   }
 
   const rowIds = data.map((row) => row.id || String(Math.random()))
+  const isSortable = data.length > 0 && ORDER_FIELD_NAME in data[0]
+
+  // Get the cell at the correct position by mapping through original order
+  const getCellForRow = (renderedCells, currentRowId) => {
+    // Find where in the original array this id was
+    const originalIndex = originalIds.findIndex((id) => id === currentRowId)
+
+    // If found, return the corresponding cell, otherwise return null
+    return originalIndex >= 0 && originalIndex < renderedCells.length
+      ? renderedCells[originalIndex]
+      : null
+  }
 
   return (
     <div
       className={[baseClass, appearance && `${baseClass}--appearance-${appearance}`]
         .filter(Boolean)
         .join(' ')}
-      key={renderKey}
     >
       <DraggableSortable ids={rowIds} onDragEnd={handleDragEnd}>
         <table cellPadding="0" cellSpacing="0">
@@ -175,18 +121,24 @@ export const Table: React.FC<Props> = ({
                   >
                     {activeColumns.map((col, colIndex) => {
                       const { accessor } = col
-                      if (accessor === '_dragHandle') {
+
+                      // Get cell by matching ids from original order
+                      const cell = getCellForRow(col.renderedCells, String(row.id))
+
+                      // For drag handles, wrap in div with drag attributes
+                      if (isSortable && accessor === '_dragHandle') {
                         return (
                           <td className={`cell-${accessor}`} key={colIndex}>
                             <div {...attributes} {...listeners}>
-                              <Cell column={col} rowData={row} rowIndex={rowIndex} />
+                              {cell}
                             </div>
                           </td>
                         )
                       }
+
                       return (
                         <td className={`cell-${accessor}`} key={colIndex}>
-                          <Cell column={col} rowData={row} rowIndex={rowIndex} />
+                          {cell}
                         </td>
                       )
                     })}

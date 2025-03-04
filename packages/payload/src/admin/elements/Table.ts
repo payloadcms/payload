@@ -6,4 +6,5 @@ export type Column = {
   readonly CustomLabel?: React.ReactNode
   readonly field: ClientField
   readonly Heading: React.ReactNode
+  readonly renderedCells: React.ReactNode[]
 }

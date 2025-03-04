@@ -18,13 +18,13 @@ import { fieldAffectsData, fieldIsHiddenOrDisabled, flattenTopLevelFields } from
 import type { Column } from '../exports/client/index.js'
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
+import { SortRow } from '../elements/SortRow/index.js'
 import { buildColumnState } from '../elements/TableColumns/buildColumnState.js'
 import { buildPolymorphicColumnState } from '../elements/TableColumns/buildPolymorphicColumnState.js'
 import { filterFields } from '../elements/TableColumns/filterFields.js'
 import { getInitialColumns } from '../elements/TableColumns/getInitialColumns.js'
-
 // eslint-disable-next-line payload/no-imports-from-exports-dir
-import { SelectAll, Table } from '../exports/client/index.js'
+import { Pill, SelectAll, SelectRow, Table } from '../exports/client/index.js'
 
 const ORDER_FIELD_NAME = '_order'
 
@@ -146,7 +146,11 @@ export const renderTable = ({
       collectionConfig,
       columnPreferences,
       columns,
+      enableRowSelections,
       i18n,
+      // sortColumnProps,
+      customCellProps,
+      docs,
       payload,
       useAsTitle,
     })
@@ -163,6 +167,16 @@ export const renderTable = ({
         hidden: true,
       },
       Heading: i18n.t('version:type'),
+      renderedCells: docs.map((doc, i) => (
+        <Pill key={i}>
+          {getTranslation(
+            collections
+              ? payload.collections[doc.relationTo].config.labels.singular
+              : clientCollectionConfig.labels.singular,
+            i18n,
+          )}
+        </Pill>
+      )),
     } as Column)
   }
 
@@ -177,6 +191,7 @@ export const renderTable = ({
         hidden: true,
       },
       Heading: <SelectAll />,
+      renderedCells: docs.map((_, i) => <SelectRow key={i} rowData={docs[i]} />),
     } as Column)
   }
 
@@ -188,6 +203,7 @@ export const renderTable = ({
       active: true,
       field: {},
       Heading: '',
+      renderedCells: docs.map((_, i) => <SortRow key={i} />),
     } as Column)
   }
 

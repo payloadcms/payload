@@ -4,14 +4,18 @@ import type {
   ClientComponentProps,
   ClientField,
   Column,
+  DefaultCellComponentProps,
+  DefaultServerCellComponentProps,
   Field,
   ListPreferences,
+  PaginatedDocs,
   Payload,
   SanitizedCollectionConfig,
   ServerComponentProps,
   StaticLabel,
 } from 'payload'
 
+import { MissingEditorProp } from 'payload'
 import {
   fieldIsHiddenOrDisabled,
   fieldIsID,
@@ -23,6 +27,8 @@ import React from 'react'
 import type { SortColumnProps } from '../SortColumn/index.js'
 
 import {
+  RenderCustomComponent,
+  RenderDefaultCell,
   SortColumn,
   // eslint-disable-next-line payload/no-imports-from-exports-dir
 } from '../../exports/client/index.js'
@@ -35,6 +41,10 @@ type Args = {
   collectionConfig: SanitizedCollectionConfig
   columnPreferences: ListPreferences['columns']
   columns?: ListPreferences['columns']
+  customCellProps: DefaultCellComponentProps['customCellProps']
+  docs: PaginatedDocs['docs']
+  enableRowSelections: boolean
+  enableRowTypes?: boolean
   i18n: I18nClient
   payload: Payload
   sortColumnProps?: Partial<SortColumnProps>
@@ -48,6 +58,9 @@ export const buildColumnState = (args: Args): Column[] => {
     collectionConfig,
     columnPreferences,
     columns,
+    customCellProps,
+    docs,
+    enableRowSelections,
     i18n,
     payload,
     sortColumnProps,
@@ -192,12 +205,102 @@ export const buildColumnState = (args: Args): Column[] => {
       />
     )
 
+    const baseCellClientProps: DefaultCellComponentProps = {
+      cellData: undefined,
+      collectionSlug: clientCollectionConfig.slug,
+      customCellProps,
+      field,
+      rowData: undefined,
+    }
+
     const column: Column = {
       accessor: 'name' in field ? field.name : undefined,
       active,
       CustomLabel,
       field,
       Heading,
+      renderedCells: active
+        ? docs.map((doc, i) => {
+            const isLinkedColumn = index === activeColumnsIndices[0]
+
+            const cellClientProps: DefaultCellComponentProps = {
+              ...baseCellClientProps,
+              cellData: 'name' in field ? doc[field.name] : undefined,
+              link: isLinkedColumn,
+              rowData: doc,
+            }
+
+            const cellServerProps: DefaultServerCellComponentProps = {
+              cellData: cellClientProps.cellData,
+              className: baseCellClientProps.className,
+              collectionConfig,
+              collectionSlug: collectionConfig.slug,
+              columnIndex: baseCellClientProps.columnIndex,
+              customCellProps: baseCellClientProps.customCellProps,
+              field: _field,
+              i18n,
+              link: cellClientProps.link,
+              onClick: baseCellClientProps.onClick,
+              payload,
+              rowData: doc,
+            }
+
+            let CustomCell = null
+
+            if (_field?.type === 'richText') {
+              if (!_field?.editor) {
+                throw new MissingEditorProp(_field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+              }
+
+              if (typeof _field?.editor === 'function') {
+                throw new Error('Attempted to access unsanitized rich text editor.')
+              }
+
+              if (!_field.admin) {
+                _field.admin = {}
+              }
+
+              if (!_field.admin.components) {
+                _field.admin.components = {}
+              }
+
+              CustomCell = RenderServerComponent({
+                clientProps: cellClientProps,
+                Component: _field.editor.CellComponent,
+                importMap: payload.importMap,
+                serverProps: cellServerProps,
+              })
+            } else {
+              const CustomCellComponent = _field?.admin?.components?.Cell
+
+              if (CustomCellComponent) {
+                CustomCell = RenderServerComponent({
+                  clientProps: cellClientProps,
+                  Component: CustomCellComponent,
+                  importMap: payload.importMap,
+                  serverProps: cellServerProps,
+                })
+              } else {
+                CustomCell = undefined
+              }
+            }
+
+            return (
+              <RenderCustomComponent
+                CustomComponent={CustomCell}
+                Fallback={
+                  <RenderDefaultCell
+                    clientProps={cellClientProps}
+                    columnIndex={index}
+                    enableRowSelections={enableRowSelections}
+                    isLinkedColumn={isLinkedColumn}
+                  />
+                }
+                key={`${i}-${index}`}
+              />
+            )
+          })
+        : [],
     }
 
     acc.push(column)
