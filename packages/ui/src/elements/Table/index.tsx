@@ -9,7 +9,6 @@ import React, { useEffect } from 'react'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { DraggableSortableItem } from '../DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
-import { Pill } from '../Pill/index.js'
 import { SelectRow } from '../SelectRow/index.js'
 import { SortRow } from '../SortRow/index.js'
 
@@ -17,6 +16,29 @@ const baseClass = 'table'
 
 // if you change this, you need to change it in a couple of places where it's duplicated
 const ORDER_FIELD_NAME = '_order'
+
+export type CellProps = {
+  column: Column
+  rowData: { [key: string]: unknown; id: string }
+  rowIndex: number
+}
+
+export const Cell: React.FC<CellProps> = ({ column, rowData }) => {
+  const { accessor } = column
+
+  // Handle special columns
+  if (accessor === '_select') {
+    return <SelectRow rowData={rowData} />
+  }
+
+  if (accessor === '_dragHandle') {
+    return <SortRow />
+  }
+
+  // For regular data columns, render the value
+  const value = accessor ? rowData[accessor] : null
+  return <>{value}</>
+}
 
 export type Props = {
   readonly appearance?: 'condensed' | 'default'
@@ -58,59 +80,6 @@ export const Table: React.FC<Props> = ({
 
   if (!activeColumns || activeColumns.length === 0) {
     return <div>No columns selected</div>
-  }
-
-  // Dynamically render cells based on current data
-  const columnsWithDynamicCells = activeColumns.map((column) => {
-    // Keep special columns like '_select' or '_dragHandle' as is
-    if (
-      column.accessor === '_select' ||
-      column.accessor === '_dragHandle' ||
-      column.accessor === 'collection'
-    ) {
-      return column
-    }
-
-    // For other columns, dynamically generate cells based on current data
-    return {
-      ...column,
-      renderedCells: data.map((doc, rowIndex) => {
-        if (column.renderedCells && column.renderedCells[rowIndex]) {
-          const Cell = column.renderedCells[rowIndex]
-          return React.isValidElement(Cell)
-            ? React.cloneElement(Cell, { data: doc, rowData: doc })
-            : Cell
-        }
-
-        // Fallback for columns without custom renderers
-        return doc[column.accessor] || null
-      }),
-    }
-  })
-
-  // Add special columns as needed
-  const finalColumns = [...columnsWithDynamicCells]
-
-  // Add row selection column if needed (this would normally be in the original columns)
-  const hasSelectionColumn = columns.some((col) => col.accessor === '_select')
-  if (!hasSelectionColumn && finalColumns.find((col) => col.accessor === '_select')) {
-    finalColumns.unshift({
-      accessor: '_select',
-      active: true,
-      Heading: 'Select',
-      renderedCells: data.map((doc, i) => <SelectRow key={i} rowData={doc} />),
-    } as Column)
-  }
-
-  // Add drag handle if data is sortable
-  const isSortable = data.length > 0 && ORDER_FIELD_NAME in data[0]
-  if (isSortable && !finalColumns.find((col) => col.accessor === '_dragHandle')) {
-    finalColumns.unshift({
-      accessor: '_dragHandle',
-      active: true,
-      Heading: '',
-      renderedCells: data.map((_, i) => <SortRow key={i} />),
-    } as Column)
   }
 
   const handleDragEnd = async ({ moveFromIndex, moveToIndex }) => {
@@ -185,7 +154,7 @@ export const Table: React.FC<Props> = ({
         <table cellPadding="0" cellSpacing="0">
           <thead>
             <tr>
-              {finalColumns.map((col, i) => (
+              {activeColumns.map((col, i) => (
                 <th id={`heading-${col.accessor}`} key={i}>
                   {col.Heading}
                 </th>
@@ -204,20 +173,20 @@ export const Table: React.FC<Props> = ({
                       transition,
                     }}
                   >
-                    {finalColumns.map((col, colIndex) => {
+                    {activeColumns.map((col, colIndex) => {
                       const { accessor } = col
                       if (accessor === '_dragHandle') {
                         return (
                           <td className={`cell-${accessor}`} key={colIndex}>
                             <div {...attributes} {...listeners}>
-                              {col.renderedCells[rowIndex]}
+                              <Cell column={col} rowData={row} rowIndex={rowIndex} />
                             </div>
                           </td>
                         )
                       }
                       return (
                         <td className={`cell-${accessor}`} key={colIndex}>
-                          {col.renderedCells[rowIndex]}
+                          <Cell column={col} rowData={row} rowIndex={rowIndex} />
                         </td>
                       )
                     })}

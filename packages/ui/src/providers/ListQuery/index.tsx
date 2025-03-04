@@ -76,7 +76,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
   // Update internal data when the prop changes (e.g. after an API request completes)
   useEffect(() => {
-    console.log('ListQueryProvider - data prop changed:', data)
     setCurrentData(data)
   }, [data])
 

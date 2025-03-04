@@ -22,8 +22,11 @@ import { buildColumnState } from '../elements/TableColumns/buildColumnState.js'
 import { buildPolymorphicColumnState } from '../elements/TableColumns/buildPolymorphicColumnState.js'
 import { filterFields } from '../elements/TableColumns/filterFields.js'
 import { getInitialColumns } from '../elements/TableColumns/getInitialColumns.js'
+
 // eslint-disable-next-line payload/no-imports-from-exports-dir
-import { Pill, SelectAll, SelectRow, Table } from '../exports/client/index.js'
+import { SelectAll, Table } from '../exports/client/index.js'
+
+const ORDER_FIELD_NAME = '_order'
 
 export const renderFilters = (
   fields: Field[],
@@ -143,24 +146,14 @@ export const renderTable = ({
       collectionConfig,
       columnPreferences,
       columns,
-      enableRowSelections,
       i18n,
-      // sortColumnProps,
-      customCellProps,
-      docs,
       payload,
       useAsTitle,
     })
   }
 
-  const columnsToUse = columnState.map((column) => {
-    // Remove all renderedCells since they'll be created dynamically in the Table component
-    const { renderedCells, ...columnWithoutCells } = column
-    return columnWithoutCells
-  })
-
   if (renderRowTypes) {
-    columnsToUse.unshift({
+    columnState.unshift({
       accessor: 'collection',
       active: true,
       field: {
@@ -170,21 +163,11 @@ export const renderTable = ({
         hidden: true,
       },
       Heading: i18n.t('version:type'),
-      renderedCells: docs.map((doc, i) => (
-        <Pill key={i}>
-          {getTranslation(
-            collections
-              ? payload.collections[doc.relationTo].config.labels.singular
-              : clientCollectionConfig.labels.singular,
-            i18n,
-          )}
-        </Pill>
-      )),
     } as Column)
   }
 
   if (enableRowSelections) {
-    columnsToUse.unshift({
+    columnState.unshift({
       accessor: '_select',
       active: true,
       field: {
@@ -194,12 +177,22 @@ export const renderTable = ({
         hidden: true,
       },
       Heading: <SelectAll />,
-      renderedCells: docs.map((_, i) => <SelectRow key={i} rowData={docs[i]} />),
+    } as Column)
+  }
+
+  // Add drag handle if data is sortable
+  const isSortable = docs.length > 0 && ORDER_FIELD_NAME in docs[0]
+  if (isSortable && !columnState.find((col) => col.accessor === '_dragHandle')) {
+    columnState.unshift({
+      accessor: '_dragHandle',
+      active: true,
+      field: {},
+      Heading: '',
     } as Column)
   }
 
   return {
     columnState,
-    Table: <Table appearance={tableAppearance} columns={columnsToUse} data={docs} />,
+    Table: <Table appearance={tableAppearance} columns={columnState} data={docs} />,
   }
 }
