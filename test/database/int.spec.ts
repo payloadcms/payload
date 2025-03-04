@@ -960,6 +960,183 @@ describe('database', () => {
       expect(notUpdatedDocs).toHaveLength(1)
       expect(notUpdatedDocs?.[0]?.title).toBe('notupdated')
     })
+
+    it('ensure updateMany respects limit', async () => {
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      // Create 11 posts
+      for (let i = 0; i < 11; i++) {
+        await payload.create({
+          collection: postsSlug,
+          data: {
+            title: 'not updated',
+          },
+        })
+      }
+
+      const result = await payload.db.updateMany({
+        collection: postsSlug,
+        data: {
+          title: 'updated',
+        },
+        limit: 5,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      expect(result?.length).toBe(5)
+      expect(result?.[0]?.title).toBe('updated')
+      expect(result?.[4]?.title).toBe('updated')
+
+      // Ensure all posts minus the one we don't want updated are updated
+      const { docs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        where: {
+          title: {
+            equals: 'updated',
+          },
+        },
+      })
+
+      expect(docs).toHaveLength(5)
+      expect(docs?.[0]?.title).toBe('updated')
+      expect(docs?.[4]?.title).toBe('updated')
+
+      const { docs: notUpdatedDocs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        where: {
+          title: {
+            equals: 'not updated',
+          },
+        },
+      })
+
+      expect(notUpdatedDocs).toHaveLength(6)
+      expect(notUpdatedDocs?.[0]?.title).toBe('not updated')
+      expect(notUpdatedDocs?.[5]?.title).toBe('not updated')
+    })
+
+    it('ensure updateMany correctly handles 0 limit', async () => {
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      // Create 5 posts
+      for (let i = 0; i < 5; i++) {
+        await payload.create({
+          collection: postsSlug,
+          data: {
+            title: 'not updated',
+          },
+        })
+      }
+
+      const result = await payload.db.updateMany({
+        collection: postsSlug,
+        data: {
+          title: 'updated',
+        },
+        limit: 0,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      expect(result?.length).toBe(5)
+      expect(result?.[0]?.title).toBe('updated')
+      expect(result?.[4]?.title).toBe('updated')
+
+      // Ensure all posts are updated. limit: 0 should mean unlimited
+      const { docs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        where: {
+          title: {
+            equals: 'updated',
+          },
+        },
+      })
+
+      expect(docs).toHaveLength(5)
+      expect(docs?.[0]?.title).toBe('updated')
+      expect(docs?.[4]?.title).toBe('updated')
+    })
+
+    it('ensure updateMany correctly handles -1 limit', async () => {
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      // Create 5 posts
+      for (let i = 0; i < 5; i++) {
+        await payload.create({
+          collection: postsSlug,
+          data: {
+            title: 'not updated',
+          },
+        })
+      }
+
+      const result = await payload.db.updateMany({
+        collection: postsSlug,
+        data: {
+          title: 'updated',
+        },
+        limit: -1,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      expect(result?.length).toBe(5)
+      expect(result?.[0]?.title).toBe('updated')
+      expect(result?.[4]?.title).toBe('updated')
+
+      // Ensure all posts are updated. limit: -1 should mean unlimited
+      const { docs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        where: {
+          title: {
+            equals: 'updated',
+          },
+        },
+      })
+
+      expect(docs).toHaveLength(5)
+      expect(docs?.[0]?.title).toBe('updated')
+      expect(docs?.[4]?.title).toBe('updated')
+    })
   })
 
   describe('Error Handler', () => {
