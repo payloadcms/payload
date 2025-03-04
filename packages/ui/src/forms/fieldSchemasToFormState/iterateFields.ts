@@ -118,12 +118,17 @@ export const iterateFields = async ({
       parentSchemaPath,
     })
 
+    const pathSegments = path ? path.split('.') : []
+
     if (!skipConditionChecks) {
       try {
         passesCondition = Boolean(
           (field?.admin?.condition
             ? Boolean(
-                field.admin.condition(fullData || {}, data || {}, { blockData, user: req.user }),
+                field.admin.condition(fullData || {}, pathSegments, data || {}, {
+                  blockData,
+                  user: req.user,
+                }),
               )
             : true) && parentPassesCondition,
         )
