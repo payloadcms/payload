@@ -18,7 +18,7 @@ const ORDER_FIELD_NAME = '_order'
 export type Props = {
   readonly appearance?: 'condensed' | 'default'
   readonly columns?: Column[]
-  readonly data: { [key: string]: unknown; id: string }[]
+  readonly data: { [key: string]: unknown; id: string; [ORDER_FIELD_NAME]?: string }[]
   readonly onDragEnd?: (data: { moveFromIndex: number; moveToIndex: number }) => void
 }
 
@@ -28,15 +28,23 @@ export const Table: React.FC<Props> = ({
   data: initialData,
   onDragEnd: propOnDragEnd,
 }) => {
-  const { data: listQueryData, handleSortChange, query, updateDataOptimistically } = useListQuery()
-
+  const { data: listQueryData, handleSortChange, query } = useListQuery()
+  const [idToOriginalIndex, setIdToOriginalIndex] = useState(
+    () => new Map(initialData.map((item, index) => [String(item.id), index])),
+  )
   // Use the data from ListQueryProvider if available, otherwise use the props
-  const data = listQueryData?.docs || initialData
+  const serverData = listQueryData?.docs || initialData
 
-  // The original order of ids as they were in the server-rendered cells
-  const [originalIds] = useState(() => initialData.map((item) => String(item.id)))
+  // Local state to track the current order of rows
+  const [localData, setLocalData] = useState(serverData)
 
-  // Force re-sort when data changes
+  // Update local data when server data changes
+  useEffect(() => {
+    setLocalData(serverData)
+    setIdToOriginalIndex(new Map(serverData.map((item, index) => [String(item.id), index])))
+  }, [serverData])
+
+  // Force re-sort when query sort changes
   useEffect(() => {
     if (query?.sort) {
       void handleSortChange(query.sort as string).catch((error) => {
@@ -56,38 +64,42 @@ export const Table: React.FC<Props> = ({
       return
     }
 
-    // Only update optimistically if we have the function available from ListQueryProvider
-    if (updateDataOptimistically) {
-      updateDataOptimistically((currentData) => {
-        const newData = { ...currentData }
-        const newDocs = [...currentData.docs]
+    // Update local state to reorder the rows
+    setLocalData((currentData) => {
+      const newData = [...currentData]
 
-        // Move the item in the array
-        newDocs.splice(moveToIndex, 0, newDocs.splice(moveFromIndex, 1)[0])
+      // Move the item in the array
+      newData.splice(moveToIndex, 0, newData.splice(moveFromIndex, 1)[0])
 
-        newData.docs = newDocs
-        return newData
-      })
-    }
+      return newData
+    })
 
-    // Call the prop onDragEnd if provided
+    // Still call the prop onDragEnd if provided - for server updates
     if (propOnDragEnd) {
       propOnDragEnd({ moveFromIndex, moveToIndex })
     }
   }
 
-  const rowIds = data.map((row) => row.id || String(Math.random()))
-  const isSortable = data.length > 0 && ORDER_FIELD_NAME in data[0]
+  const rowIds = localData.map((row) => row.id || String(Math.random()))
+  const isSortable = localData.length > 0 && ORDER_FIELD_NAME in localData[0]
 
-  // Get the cell at the correct position by mapping through original order
+  // Get the correct cell for a given row ID
   const getCellForRow = (renderedCells, currentRowId) => {
-    // Find where in the original array this id was
-    const originalIndex = originalIds.findIndex((id) => id === currentRowId)
+    const originalIndex = idToOriginalIndex.get(currentRowId)
 
-    // If found, return the corresponding cell, otherwise return null
-    return originalIndex >= 0 && originalIndex < renderedCells.length
-      ? renderedCells[originalIndex]
-      : null
+    // If we have a mapping for this ID, return the corresponding cell
+    if (originalIndex !== undefined && originalIndex < renderedCells.length) {
+      return renderedCells[originalIndex]
+    }
+
+    // Fallback: if not found in map, try to find in the current data
+    // This happens when new data is added that wasn't in the original server render
+    const currentIndex = serverData.findIndex((row) => String(row.id) === currentRowId)
+    if (currentIndex >= 0 && currentIndex < renderedCells.length) {
+      return renderedCells[currentIndex]
+    }
+
+    return null
   }
 
   return (
@@ -108,7 +120,7 @@ export const Table: React.FC<Props> = ({
             </tr>
           </thead>
           <tbody>
-            {data.map((row, rowIndex) => (
+            {localData.map((row, rowIndex) => (
               <DraggableSortableItem id={rowIds[rowIndex]} key={rowIds[rowIndex]}>
                 {({ attributes, listeners, setNodeRef, transform, transition }) => (
                   <tr

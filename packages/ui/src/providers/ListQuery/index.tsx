@@ -34,7 +34,6 @@ export type ListQueryContext = {
   defaultSort?: Sort
   query: ListQuery
   refineListData: (args: ListQuery) => Promise<void>
-  updateDataOptimistically: (updateFn: (currentData: PaginatedDocs) => PaginatedDocs) => void
 } & ContextHandlers
 
 const Context = createContext({} as ListQueryContext)
@@ -56,7 +55,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
   const { onQueryChange } = useListDrawerContext()
 
-  const [currentData, setCurrentData] = useState<PaginatedDocs>(data)
   const [currentQuery, setCurrentQuery] = useState<ListQuery>(() => {
     if (modifySearchParams) {
       return searchParams
@@ -73,21 +71,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       setCurrentQuery(searchParams)
     }
   }, [searchParams, modifySearchParams])
-
-  // Update internal data when the prop changes (e.g. after an API request completes)
-  useEffect(() => {
-    setCurrentData(data)
-  }, [data])
-
-  const updateDataOptimistically = useCallback(
-    (updateFn: (currentData: PaginatedDocs) => PaginatedDocs) => {
-      setCurrentData((prev) => {
-        const updated = updateFn(prev)
-        return updated
-      })
-    },
-    [],
-  )
 
   const refineListData = useCallback(
     // eslint-disable-next-line @typescript-eslint/require-await
@@ -199,7 +182,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   return (
     <Context.Provider
       value={{
-        data: currentData,
+        data,
         handlePageChange,
         handlePerPageChange,
         handleSearchChange,
@@ -207,7 +190,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         handleWhereChange,
         query: currentQuery,
         refineListData,
-        updateDataOptimistically,
       }}
     >
       {children}
