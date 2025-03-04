@@ -1,5 +1,4 @@
 // @ts-strict-ignore
-import type { LoginWithUsernameOptions } from '../../auth/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type {
   CollectionConfig,
@@ -16,13 +15,16 @@ import { fieldAffectsData } from '../../fields/config/types.js'
 import mergeBaseFields from '../../fields/mergeBaseFields.js'
 import { uploadCollectionEndpoints } from '../../uploads/endpoints/index.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
-import { deepMergeWithReactComponents } from '../../utilities/deepMerge.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
 import baseVersionFields from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
 import { defaultCollectionEndpoints } from '../endpoints/index.js'
-import { authDefaults, defaults, loginWithUsernameDefaults } from './defaults.js'
+import {
+  addDefaultsToAuthConfig,
+  addDefaultsToCollectionConfig,
+  addDefaultsToLoginWithUsernameConfig,
+} from './defaults.js'
 import { sanitizeAuthFields, sanitizeUploadFields } from './reservedFieldNames.js'
 import { validateUseAsTitle } from './useAsTitle.js'
 
@@ -36,11 +38,15 @@ export const sanitizeCollection = async (
   richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>,
   _validRelationships?: string[],
 ): Promise<SanitizedCollectionConfig> => {
+  if (collection._sanitized) {
+    return collection as SanitizedCollectionConfig
+  }
+  collection._sanitized = true
   // /////////////////////////////////
   // Make copy of collection config
   // /////////////////////////////////
 
-  const sanitized: CollectionConfig = deepMergeWithReactComponents(defaults, collection)
+  const sanitized: CollectionConfig = addDefaultsToCollectionConfig(collection)
 
   // /////////////////////////////////
   // Sanitize fields
@@ -190,30 +196,20 @@ export const sanitizeCollection = async (
     // sanitize fields for reserved names
     sanitizeAuthFields(sanitized.fields, sanitized)
 
-    sanitized.auth = deepMergeWithReactComponents(
-      authDefaults,
-      typeof sanitized.auth === 'object' ? sanitized.auth : {},
+    sanitized.auth = addDefaultsToAuthConfig(
+      typeof sanitized.auth === 'boolean' ? {} : sanitized.auth,
     )
-
-    if (!sanitized.auth.disableLocalStrategy && sanitized.auth.verify === true) {
-      sanitized.auth.verify = {}
-    }
 
     // disable duplicate for auth enabled collections by default
     sanitized.disableDuplicate = sanitized.disableDuplicate ?? true
 
-    if (!sanitized.auth.strategies) {
-      sanitized.auth.strategies = []
-    }
-
     if (sanitized.auth.loginWithUsername) {
       if (sanitized.auth.loginWithUsername === true) {
-        sanitized.auth.loginWithUsername = loginWithUsernameDefaults
+        sanitized.auth.loginWithUsername = addDefaultsToLoginWithUsernameConfig({})
       } else {
-        const loginWithUsernameWithDefaults = {
-          ...loginWithUsernameDefaults,
-          ...sanitized.auth.loginWithUsername,
-        } as LoginWithUsernameOptions
+        const loginWithUsernameWithDefaults = addDefaultsToLoginWithUsernameConfig(
+          sanitized.auth.loginWithUsername,
+        )
 
         // if allowEmailLogin is false, requireUsername must be true
         if (loginWithUsernameWithDefaults.allowEmailLogin === false) {
