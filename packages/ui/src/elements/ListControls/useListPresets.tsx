@@ -3,7 +3,7 @@ import type { CollectionSlug, ListPreset } from 'payload'
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { transformColumnsToPreferences, transformColumnsToSearchParams } from 'payload/shared'
-import { Fragment, useCallback } from 'react'
+import { act, Fragment, useCallback } from 'react'
 import { toast } from 'sonner'
 
 import { useConfig } from '../../providers/Config/index.js'
@@ -127,6 +127,53 @@ export const useListPresets = ({
     }
   }, [apiRoute, activePreset?.id, activePreset?.title, t, presetConfig, i18n, resetListPreset])
 
+  const saveCurrentChanges = useCallback(async () => {
+    try {
+      await fetch(`${apiRoute}/payload-list-presets/${activePreset.id}`, {
+        body: JSON.stringify({
+          columns: transformColumnsToPreferences(query.columns),
+          where: query.where,
+        }),
+        method: 'PATCH',
+      }).then(async (res) => {
+        try {
+          const json = await res.json()
+
+          if (res.status < 400) {
+            toast.success(
+              t('general:updatedCountSuccessfully', {
+                label: getTranslation(presetConfig?.labels?.singular, i18n),
+              }),
+            )
+
+            setQueryModified(false)
+            setColumnsModified(false)
+          } else {
+            if (json.errors) {
+              json.errors.forEach((error) => toast.error(error.message))
+            } else {
+              toast.error(t('error:unknown'))
+            }
+          }
+        } catch (_err) {
+          toast.error(t('error:unknown'))
+        }
+      })
+    } catch (_err) {
+      toast.error(t('error:unknown'))
+    }
+  }, [
+    apiRoute,
+    activePreset?.id,
+    query.columns,
+    query.where,
+    t,
+    presetConfig?.labels?.singular,
+    i18n,
+    setQueryModified,
+    setColumnsModified,
+  ])
+
   return {
     CreateNewPresetDrawer: (
       <CreateNewPresetDrawer
@@ -152,7 +199,7 @@ export const useListPresets = ({
             i18nKey="general:aboutToDelete"
             t={t}
             variables={{
-              label: getTranslation('List Preset', i18n),
+              label: getTranslation(t('general:preset'), i18n),
               title: activePreset?.title,
             }}
           />
@@ -191,13 +238,11 @@ export const useListPresets = ({
               {t('general:reset')}
             </PopupList.Button>
             <PopupList.Button
-              onClick={() => {
-                // TODO: save query and columns
-                setQueryModified(false)
-                setColumnsModified(false)
+              onClick={async () => {
+                await saveCurrentChanges()
               }}
             >
-              Save For Everyone
+              {activePreset.isShared ? t('general:updateForEveryone') : t('general:save')}
             </PopupList.Button>
           </Fragment>
         ) : null}
@@ -206,7 +251,9 @@ export const useListPresets = ({
             openCreateNewDrawer()
           }}
         >
-          Create new preset
+          {t('general:createNewLabel', {
+            label: t('general:preset'),
+          })}
         </PopupList.Button>
         {activePreset ? (
           <Fragment>

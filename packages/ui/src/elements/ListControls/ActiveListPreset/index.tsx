@@ -3,6 +3,7 @@ import type { ListPreset } from 'payload'
 
 import { PeopleIcon } from '../../../icons/People/index.js'
 import { XIcon } from '../../../icons/X/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
 import { Pill } from '../../Pill/index.js'
 import './index.scss'
 
@@ -17,6 +18,8 @@ export function ActiveListPreset({
   openPresetListDrawer: () => void
   resetPreset: () => Promise<void>
 }) {
+  const { i18n, t } = useTranslation()
+
   return (
     <Pill
       className={[baseClass, activePreset && `${baseClass}--active`].filter(Boolean).join(' ')}
@@ -27,7 +30,9 @@ export function ActiveListPreset({
       pillStyle={activePreset ? 'always-white' : 'light'}
     >
       {activePreset?.isShared && <PeopleIcon className={`${baseClass}__shared`} />}
-      <div className={`${baseClass}__label-text`}>{activePreset?.title || 'Select preset'}</div>
+      <div className={`${baseClass}__label-text`}>
+        {activePreset?.title || t('general:selectLabel', { label: t('general:preset') })}
+      </div>
       {activePreset ? (
         <div
           className={`${baseClass}__clear`}
