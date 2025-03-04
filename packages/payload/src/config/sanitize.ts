@@ -278,46 +278,57 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   ) {
     let defaultJobsCollection = getDefaultJobsCollection(config as unknown as Config)
 
-    if (typeof configWithDefaults.jobs.jobsCollectionOverrides === 'function') {
-      defaultJobsCollection = configWithDefaults.jobs.jobsCollectionOverrides({
+    if (defaultJobsCollection) {
+      if (typeof configWithDefaults.jobs.jobsCollectionOverrides === 'function') {
+        defaultJobsCollection = configWithDefaults.jobs.jobsCollectionOverrides({
+          defaultJobsCollection,
+        })
+      }
+      const sanitizedJobsCollection = await sanitizeCollection(
+        config as unknown as Config,
         defaultJobsCollection,
-      })
+        richTextSanitizationPromises,
+        validRelationships,
+      )
+
+      configWithDefaults.collections.push(sanitizedJobsCollection)
     }
-
-    const sanitizedJobsCollection = await sanitizeCollection(
-      config as unknown as Config,
-      defaultJobsCollection,
-      richTextSanitizationPromises,
-      validRelationships,
-    )
-
-    configWithDefaults.collections.push(sanitizedJobsCollection)
   }
 
-  configWithDefaults.collections.push(
-    await sanitizeCollection(
-      config as unknown as Config,
-      getLockedDocumentsCollection(config as unknown as Config),
-      richTextSanitizationPromises,
-      validRelationships,
-    ),
-  )
-  configWithDefaults.collections.push(
-    await sanitizeCollection(
-      config as unknown as Config,
-      getPreferencesCollection(config as unknown as Config),
-      richTextSanitizationPromises,
-      validRelationships,
-    ),
-  )
-  configWithDefaults.collections.push(
-    await sanitizeCollection(
-      config as unknown as Config,
-      migrationsCollection,
-      richTextSanitizationPromises,
-      validRelationships,
-    ),
-  )
+  const lockedDocumentsCollection = getLockedDocumentsCollection(config as unknown as Config)
+  if (lockedDocumentsCollection) {
+    configWithDefaults.collections.push(
+      await sanitizeCollection(
+        config as unknown as Config,
+        getLockedDocumentsCollection(config as unknown as Config),
+        richTextSanitizationPromises,
+        validRelationships,
+      ),
+    )
+  }
+
+  const preferencesCollection = getPreferencesCollection(config as unknown as Config)
+  if (preferencesCollection) {
+    configWithDefaults.collections.push(
+      await sanitizeCollection(
+        config as unknown as Config,
+        getPreferencesCollection(config as unknown as Config),
+        richTextSanitizationPromises,
+        validRelationships,
+      ),
+    )
+  }
+
+  if (migrationsCollection) {
+    configWithDefaults.collections.push(
+      await sanitizeCollection(
+        config as unknown as Config,
+        migrationsCollection,
+        richTextSanitizationPromises,
+        validRelationships,
+      ),
+    )
+  }
 
   if (config.serverURL !== '') {
     config.csrf.push(config.serverURL)
