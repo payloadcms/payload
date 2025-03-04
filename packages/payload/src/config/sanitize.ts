@@ -31,7 +31,7 @@ import getPreferencesCollection from '../preferences/preferencesCollection.js'
 import { getDefaultJobsCollection } from '../queues/config/jobsCollection.js'
 import { flattenBlock } from '../utilities/flattenAllFields.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
-import { defaults } from './defaults.js'
+import { mergeConfigWithDefaults } from './defaults.js'
 
 const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig> => {
   const sanitizedConfig = { ...configToSanitize }
@@ -100,55 +100,7 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
 }
 
 export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedConfig> => {
-  const configWithDefaults = {
-    ...defaults,
-    ...incomingConfig,
-    admin: {
-      ...defaults.admin,
-      ...incomingConfig?.admin,
-      meta: {
-        ...defaults.admin.meta,
-        ...incomingConfig?.admin?.meta,
-      },
-      routes: {
-        ...defaults.admin.routes,
-        ...incomingConfig?.admin?.routes,
-      },
-    },
-    graphQL: {
-      ...defaults.graphQL,
-      ...incomingConfig?.graphQL,
-    },
-    jobs: {
-      ...defaults.jobs,
-      ...incomingConfig?.jobs,
-      access: {
-        ...defaults.jobs.access,
-        ...incomingConfig?.jobs?.access,
-      },
-      tasks: incomingConfig?.jobs?.tasks || [],
-      workflows: incomingConfig?.jobs?.workflows || [],
-    },
-    routes: {
-      ...defaults.routes,
-      ...incomingConfig?.routes,
-    },
-    typescript: {
-      ...defaults.typescript,
-      ...incomingConfig?.typescript,
-    },
-  }
-
-  if (!configWithDefaults?.serverURL) {
-    configWithDefaults.serverURL = ''
-  }
-
-  if (process.env.NEXT_BASE_PATH) {
-    if (!incomingConfig?.routes?.api) {
-      // check for incomingConfig, as configWithDefaults will always have a default value for routes.api
-      configWithDefaults.routes.api = process.env.NEXT_BASE_PATH + '/api'
-    }
-  }
+  const configWithDefaults = mergeConfigWithDefaults(incomingConfig)
 
   const config: Partial<SanitizedConfig> = sanitizeAdminConfig(configWithDefaults)
 

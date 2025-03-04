@@ -62,7 +62,7 @@ export const mergeCollectionConfigWithDefaults = (
     read: defaultAccess,
     unlock: defaultAccess,
     update: defaultAccess,
-    ...collection.access,
+    ...(collection.access || {}),
   }
 
   collection.admin = {
@@ -70,13 +70,13 @@ export const mergeCollectionConfigWithDefaults = (
     custom: {},
     enableRichTextLink: true,
     enableRichTextRelationship: true,
+    useAsTitle: 'id',
+    ...(collection.admin || {}),
     pagination: {
       defaultLimit: 10,
       limits: [5, 10, 25, 50, 100],
-      ...collection.admin?.pagination,
+      ...(collection.admin?.pagination || {}),
     },
-    useAsTitle: 'id',
-    ...collection.admin,
   }
 
   collection.auth = collection.auth ?? false
@@ -102,7 +102,7 @@ export const mergeCollectionConfigWithDefaults = (
     beforeValidate: [],
     me: [],
     refresh: [],
-    ...collection.hooks,
+    ...(collection.hooks || {}),
   }
 
   collection.timestamps = collection.timestamps ?? true
@@ -132,7 +132,7 @@ export const mergeAuthConfigWithDefaults = (auth: IncomingAuthType): IncomingAut
   auth.cookies = {
     sameSite: 'Lax',
     secure: false,
-    ...auth.cookies,
+    ...(auth.cookies || {}),
   }
 
   auth.forgotPassword = auth.forgotPassword ?? {}
@@ -161,5 +161,5 @@ export const mergeLoginWithUsernameConfigWithDefaults = (
     allowEmailLogin: false,
     requireEmail: false,
     requireUsername: true,
-    ...loginWithUsername,
+    ...(loginWithUsername || {}),
   }) as LoginWithUsernameOptions
