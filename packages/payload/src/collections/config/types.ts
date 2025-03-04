@@ -554,10 +554,6 @@ export interface SanitizedCollectionConfig
   flattenedFields: FlattenedField[]
 
   /**
-   * TODO: jsdoc
-   */
-
-  /**
    * Object of collections to join 'Join Fields object keyed by collection
    */
   joins: SanitizedJoins
