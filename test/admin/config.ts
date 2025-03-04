@@ -184,6 +184,7 @@ export default buildConfigWithDefaults({
   },
   localization: {
     defaultLocalePublishOption: 'active',
+    disableCopyToLocale: ['posts'],
     defaultLocale: 'en',
     locales: [
       {

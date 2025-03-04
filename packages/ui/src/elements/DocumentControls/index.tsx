@@ -137,6 +137,13 @@ export const DocumentControls: React.FC<{
     (collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
     (globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave)
 
+  const disableCopyToLocale = !!(
+    localization &&
+    (localization.disableCopyToLocale === true ||
+      (Array.isArray(localization.disableCopyToLocale) &&
+        localization.disableCopyToLocale.includes(slug)))
+  )
+
   return (
     <Gutter className={baseClass}>
       <div className={`${baseClass}__wrapper`}>
@@ -263,7 +270,7 @@ export const DocumentControls: React.FC<{
               verticalAlign="bottom"
             >
               <PopupList.ButtonGroup>
-                {localization && <CopyLocaleData />}
+                {!disableCopyToLocale && <CopyLocaleData />}
                 {hasCreatePermission && (
                   <React.Fragment>
                     {!disableCreate && (
