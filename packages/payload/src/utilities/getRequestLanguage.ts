@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { AcceptedLanguages } from '@payloadcms/translations'
 import type { ReadonlyRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies.js'
 

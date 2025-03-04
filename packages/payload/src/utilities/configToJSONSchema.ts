@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { JSONSchema4, JSONSchema4TypeName } from 'json-schema'
 
 import pluralize from 'pluralize'

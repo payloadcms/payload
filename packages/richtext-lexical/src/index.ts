@@ -241,7 +241,6 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
                     originalNode: originalNodeIDMap[id],
                     parentRichTextFieldPath: path,
                     parentRichTextFieldSchemaPath: schemaPath,
-
                     previousNode: previousNodeIDMap[id]!,
                     req,
                   })
@@ -520,7 +519,6 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
                     originalNodeWithLocales: originalNodeWithLocalesIDMap[id],
                     parentRichTextFieldPath: path,
                     parentRichTextFieldSchemaPath: schemaPath,
-
                     previousNode: previousNodeIDMap[id]!,
                     req,
                     skipValidation: skipValidation!,
@@ -740,7 +738,6 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
               if (subFieldFn && subFieldDataFn) {
                 const subFields = subFieldFn({ node, req })
                 const nodeSiblingData = subFieldDataFn({ node, req }) ?? {}
-
                 const nodeSiblingDoc = subFieldDataFn({ node: originalNodeIDMap[id]!, req }) ?? {}
 
                 if (subFields?.length) {

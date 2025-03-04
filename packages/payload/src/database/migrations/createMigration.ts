@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import fs from 'fs'
 
 import type { CreateMigration } from '../types.js'

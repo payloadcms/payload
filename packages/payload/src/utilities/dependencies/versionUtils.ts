@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { CustomVersionParser } from './dependencyChecker.js'
 
 export function parseVersion(version: string): { parts: number[]; preReleases: string[] } {

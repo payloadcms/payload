@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 const toKebabCase = (string) =>
   string
     .replace(/([a-z])([A-Z])/g, '$1-$2')
