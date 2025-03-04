@@ -19,7 +19,6 @@ export { Props }
 
 export const DraggableSortable: React.FC<Props> = (props) => {
   const { children, className, ids, onDragEnd } = props
-
   const id = useId()
 
   const { setNodeRef } = useDroppable({
@@ -47,11 +46,14 @@ export const DraggableSortable: React.FC<Props> = (props) => {
         return
       }
 
+      const moveFromIndex = ids.findIndex((_id) => _id === active.id)
+      const moveToIndex = ids.findIndex((_id) => _id === over.id)
+
       if (typeof onDragEnd === 'function') {
         onDragEnd({
           event,
-          moveFromIndex: ids.findIndex((_id) => _id === active.id),
-          moveToIndex: ids.findIndex((_id) => _id === over.id),
+          moveFromIndex,
+          moveToIndex,
         })
       }
     },
