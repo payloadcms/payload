@@ -5,6 +5,7 @@
     .stroke {
       stroke: currentColor;
       stroke-width: $style-stroke-width;
+      fill: none;
     }
   }
 }

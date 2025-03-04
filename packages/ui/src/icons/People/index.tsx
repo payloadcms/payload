@@ -2,9 +2,11 @@ import React from 'react'
 
 import './index.scss'
 
-export const PeopleIcon: React.FC = () => (
+export const PeopleIcon: React.FC<{
+  className: string
+}> = ({ className }) => (
   <svg
-    className="icon icon--people"
+    className={['icon', 'icon--people', className].filter(Boolean).join(' ')}
     height="14"
     viewBox="0 0 16 14"
     width="16"

@@ -117,9 +117,9 @@ export const getListPresetsConfig = (config: Config): CollectionConfig => ({
   hooks: {
     beforeValidate: [
       ({ data, operation }) => {
-        if (operation === 'create' || operation === 'update') {
-          const typedData = data as ListPreset
+        const typedData = data as ListPreset
 
+        if (operation === 'create' || operation === 'update') {
           // Ensure all operations have a constraint
           operations.forEach((operation) => {
             if (!typedData.access) {
@@ -147,15 +147,11 @@ export const getListPresetsConfig = (config: Config): CollectionConfig => ({
               (operation) => operation.constraint !== 'onlyMe',
             )
 
-            if (someOperationsAreShared) {
-              typedData.isShared = true
-            }
+            typedData.isShared = someOperationsAreShared
           }
-
-          return typedData
         }
 
-        return data
+        return typedData
       },
     ],
   },

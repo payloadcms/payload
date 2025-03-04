@@ -17,7 +17,6 @@ export function ActiveListPreset({
   openPresetListDrawer: () => void
   resetPreset: () => Promise<void>
 }) {
-  console.log('activePreset', activePreset)
   return (
     <Pill
       className={[baseClass, activePreset && `${baseClass}--active`].filter(Boolean).join(' ')}
@@ -27,7 +26,7 @@ export function ActiveListPreset({
       }}
       pillStyle={activePreset ? 'always-white' : 'light'}
     >
-      {activePreset?.isShared && <PeopleIcon />}
+      {activePreset?.isShared && <PeopleIcon className={`${baseClass}__shared`} />}
       <div className={`${baseClass}__label-text`}>{activePreset?.title || 'Select preset'}</div>
       {activePreset ? (
         <div
