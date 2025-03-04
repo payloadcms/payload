@@ -1,10 +1,13 @@
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Config } from '../config/types.js'
+import type { Option } from '../fields/config/types.js'
 
 import { transformWhereQuery } from '../utilities/transformWhereQuery.js'
 import { validateWhereQuery } from '../utilities/validateWhereQuery.js'
 import { getAccess } from './access.js'
 import { getConstraints } from './constraints.js'
+import { type ListPreset, operations } from './types.js'
+
 export const listPresetsCollectionSlug = 'payload-list-presets'
 
 export const getListPresetsConfig = (config: Config): CollectionConfig => ({
@@ -24,6 +27,22 @@ export const getListPresetsConfig = (config: Config): CollectionConfig => ({
       name: 'isShared',
       type: 'checkbox',
       defaultValue: false,
+      validate: (isShared, { data }) => {
+        const typedData = data as ListPreset
+
+        // ensure the `isShared` is only true if all constraints are 'onlyMe'
+        if (typedData?.access) {
+          const someOperationsAreShared = Object.values(typedData.access).some(
+            (operation) => operation.constraint !== 'onlyMe',
+          )
+
+          if (!isShared && someOperationsAreShared) {
+            return 'If any constraint is not "onlyMe", the preset must be shared'
+          }
+        }
+
+        return true
+      },
     },
     getConstraints(config),
     {
@@ -82,14 +101,64 @@ export const getListPresetsConfig = (config: Config): CollectionConfig => ({
         hidden: true,
       },
       options: config.collections
-        ? config.collections.map((collection) => ({
-            label: collection.labels?.plural || collection.slug,
-            value: collection.slug,
-          }))
+        ? config.collections.reduce((acc, collection) => {
+            if (collection.enableListPresets) {
+              acc.push({
+                label: collection.labels?.plural || collection.slug,
+                value: collection.slug,
+              })
+            }
+            return acc
+          }, [] as Option[])
         : [],
       required: true,
     },
   ],
+  hooks: {
+    beforeValidate: [
+      ({ data, operation }) => {
+        if (operation === 'create' || operation === 'update') {
+          const typedData = data as ListPreset
+
+          // Ensure all operations have a constraint
+          operations.forEach((operation) => {
+            if (!typedData.access) {
+              // @ts-expect-error expect missing properties while building up the object
+              typedData.access = {}
+            }
+
+            if (!typedData.access?.[operation]) {
+              // @ts-expect-error expect missing properties while building up the object
+              typedData[operation] = {}
+            }
+
+            // If there is no default constraint for this operation, or if the list preset is not shared, set the constraint to 'onlyMe'
+            if (!typedData.access[operation]?.constraint || !data?.isShared) {
+              typedData.access[operation] = {
+                ...typedData.access[operation],
+                constraint: 'onlyMe',
+              }
+            }
+          })
+
+          // If at least one constraint is not `onlyMe` then `isShared` must be true
+          if (typedData?.access) {
+            const someOperationsAreShared = Object.values(typedData.access).some(
+              (operation) => operation.constraint !== 'onlyMe',
+            )
+
+            if (someOperationsAreShared) {
+              typedData.isShared = true
+            }
+          }
+
+          return typedData
+        }
+
+        return data
+      },
+    ],
+  },
   labels: {
     plural: 'List Presets',
     singular: 'List Preset',

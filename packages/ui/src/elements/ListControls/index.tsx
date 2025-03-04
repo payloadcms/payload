@@ -135,7 +135,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
 
   const listMenuItems = listMenuItemsFromProps || []
 
-  if (collectionConfig?.admin?.enableListPresets && !disableListPresets) {
+  if (collectionConfig?.enableListPresets && !disableListPresets) {
     listMenuItems.push(listPresetMenuItems)
   }
 

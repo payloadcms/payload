@@ -1,10 +1,8 @@
 import type { Config } from '../config/types.js'
 import type { Field } from '../fields/config/types.js'
-import type { ListPresetConstraint } from './types.js'
 
 import { fieldAffectsData } from '../fields/config/types.js'
-
-const operations = ['delete', 'read', 'update'] as const
+import { type ListPresetConstraint, operations } from './types.js'
 
 export const getConstraints = (config: Config): Field => ({
   name: 'access',
@@ -93,32 +91,4 @@ export const getConstraints = (config: Config): Field => ({
       ) || []),
     ],
   })),
-  hooks: {
-    beforeChange: [
-      ({ data }) => {
-        const dataToReturn = { ...data }
-
-        // ensure all operations have a constraint
-        operations.forEach((operation) => {
-          if (!dataToReturn.access) {
-            dataToReturn.access = {}
-          }
-
-          if (!dataToReturn.access?.[operation]) {
-            dataToReturn[operation] = {}
-          }
-
-          // If there is no default constraint for this operation, or if the list preset is not shared, set the constraint to 'onlyMe'
-          if (!dataToReturn.access[operation]?.constraint || !data?.isShared) {
-            dataToReturn.access[operation] = {
-              ...dataToReturn.access[operation],
-              constraint: 'onlyMe',
-            }
-          }
-        })
-
-        return dataToReturn.access
-      },
-    ],
-  },
 })

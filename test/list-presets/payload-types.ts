@@ -197,6 +197,7 @@ export interface PayloadPreference {
 export interface PayloadListPreset {
   id: string;
   title: string;
+  isShared?: boolean | null;
   access?: {
     delete?: {
       constraint?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
@@ -301,6 +302,7 @@ export interface PayloadPreferencesSelect<T extends boolean = true> {
  */
 export interface PayloadListPresetsSelect<T extends boolean = true> {
   title?: T;
+  isShared?: T;
   access?:
     | T
     | {

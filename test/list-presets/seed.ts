@@ -101,6 +101,7 @@ export const seed = async (_payload: Payload) => {
           overrideAccess: false,
           data: {
             title: 'Specific Users',
+            isShared: true,
             where: {
               text: {
                 equals: 'example page',
@@ -131,6 +132,7 @@ export const seed = async (_payload: Payload) => {
           user: devUser,
           overrideAccess: false,
           data: {
+            isShared: true,
             title: seedData.everyone.title,
             where: seedData.everyone.where,
             access: seedData.everyone.access as any,
@@ -145,6 +147,7 @@ export const seed = async (_payload: Payload) => {
           overrideAccess: false,
           data: {
             title: seedData.onlyMe.title,
+            isShared: false,
             where: seedData.onlyMe.where,
             access: seedData.onlyMe.access as any,
             columns: seedData.onlyMe.columns,

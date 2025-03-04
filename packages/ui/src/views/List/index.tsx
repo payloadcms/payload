@@ -195,7 +195,7 @@ export function DefaultListView(props: ListViewClientProps) {
                 collectionConfig={collectionConfig}
                 collectionSlug={collectionSlug}
                 disableListPresets={
-                  collectionConfig?.admin?.enableListPresets !== true || disableListPresets
+                  collectionConfig?.enableListPresets !== true || disableListPresets
                 }
                 listMenuItems={listMenuItems}
                 renderedFilters={renderedFilters}

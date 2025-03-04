@@ -327,10 +327,6 @@ export type CollectionAdminOptions = {
    * Custom description for collection. This will also be used as JSDoc for the generated types
    */
   description?: EntityDescription
-  /**
-   * Opt-in to enable list presets for this collection
-   */
-  enableListPresets?: boolean
   enableRichTextLink?: boolean
   enableRichTextRelationship?: boolean
   /**
@@ -413,6 +409,10 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * When true, do not show the "Duplicate" button while editing documents within this collection and prevent `duplicate` from all APIs
    */
   disableDuplicate?: boolean
+  /**
+   * Opt-in to enable list presets for this collection
+   */
+  enableListPresets?: boolean
   /**
    * Custom rest api endpoints, set false to disable all rest endpoints for this collection.
    */
