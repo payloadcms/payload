@@ -437,9 +437,6 @@ export const Form: React.FC<FormProps> = (props) => {
               ) : (
                 t('error:unknown')
               ),
-              {
-                duration: 100000,
-              },
             )
 
             return

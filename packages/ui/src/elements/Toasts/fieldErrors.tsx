@@ -29,13 +29,16 @@ function groupSimilarPaths(items: string[]): string[] {
 
 export function FieldErrorsToast({ errors, t }) {
   const [groupedErrors] = React.useState(() => groupSimilarPaths(errors))
+  const [errorMessage] = React.useState(() => {
+    return t('error:followingFieldsInvalid', { count: errors.length }).replace(
+      ':',
+      errors.length > 1 ? ` (${errors.length}):` : ':',
+    )
+  })
 
   return (
     <div>
-      {t('error:followingFieldsInvalid', { count: errors.length }).replace(
-        ':',
-        ` (${errors.length}):`,
-      )}
+      {errorMessage}
       <ul>
         {groupedErrors.map((error, index) => {
           return <li key={index}>{error.replaceAll(' > ', ' → ')}</li>
