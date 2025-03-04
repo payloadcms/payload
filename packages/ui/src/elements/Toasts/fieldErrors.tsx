@@ -2,48 +2,73 @@
 
 import React from 'react'
 
-function groupSimilarPaths(items: string[]): string[] {
+function groupSimilarErrors(items: string[]): string[] {
   const result: string[] = []
 
   for (const item of items) {
-    const parts = item.split(' > ')
-    let inserted = false
+    if (item) {
+      const parts = item.split(' → ')
+      let inserted = false
 
-    // Find a place where a similar path exists
-    for (let i = 0; i < result.length; i++) {
-      if (result[i].startsWith(parts[0])) {
-        result.splice(i + 1, 0, item)
-        inserted = true
-        break
+      // Find a place where a similar path exists
+      for (let i = 0; i < result.length; i++) {
+        if (result[i].startsWith(parts[0])) {
+          result.splice(i + 1, 0, item)
+          inserted = true
+          break
+        }
       }
-    }
 
-    // If no similar path was found, add to the end
-    if (!inserted) {
-      result.push(item)
+      // If no similar path was found, add to the end
+      if (!inserted) {
+        result.push(item)
+      }
     }
   }
 
   return result
 }
 
-export function FieldErrorsToast({ errors, t }) {
-  const [groupedErrors] = React.useState(() => groupSimilarPaths(errors))
-  const [errorMessage] = React.useState(() => {
-    return t('error:followingFieldsInvalid', { count: errors.length }).replace(
-      ':',
-      errors.length > 1 ? ` (${errors.length}):` : ':',
-    )
-  })
+function createErrorsFromMessage(message: string): {
+  errors?: string[]
+  message: string
+} {
+  const [intro, errorsString] = message.split(':')
+  const errors = (errorsString || '')
+    .split(',')
+    .map((error) => error.replaceAll(' > ', ' → ').trim())
+
+  if (errors.length === 0) {
+    return {
+      message: intro,
+    }
+  }
+
+  if (errors.length === 1) {
+    return {
+      message: `${intro}: ${errors[0]}`,
+    }
+  }
+
+  return {
+    errors: groupSimilarErrors(errors),
+    message: `${intro} (${errors.length}):`,
+  }
+}
+
+export function FieldErrorsToast({ errorMessage }) {
+  const [{ errors, message }] = React.useState(() => createErrorsFromMessage(errorMessage))
 
   return (
     <div>
-      {errorMessage}
-      <ul>
-        {groupedErrors.map((error, index) => {
-          return <li key={index}>{error.replaceAll(' > ', ' → ')}</li>
-        })}
-      </ul>
+      {message}
+      {Array.isArray(errors) && errors.length > 0 ? (
+        <ul>
+          {errors.map((error, index) => {
+            return <li key={index}>{error.replaceAll(' > ', ' → ')}</li>
+          })}
+        </ul>
+      ) : null}
     </div>
   )
 }

@@ -431,13 +431,9 @@ export const Form: React.FC<FormProps> = (props) => {
               errors: fieldErrors,
             })
 
-            errorToast(
-              fieldErrors.length ? (
-                <FieldErrorsToast errors={fieldErrors.map((e) => e.label)} t={t} />
-              ) : (
-                t('error:unknown')
-              ),
-            )
+            nonFieldErrors.forEach((err) => {
+              errorToast(<FieldErrorsToast errorMessage={err.message || t('error:unknown')} />)
+            })
 
             return
           }
