@@ -60,6 +60,7 @@ export const beforeChange = async <T extends JsonObject>({
     operation,
     parentIndexPath: '',
     parentIsLocalized: false,
+    parentLabel: '',
     parentPath: '',
     parentSchemaPath: '',
     req,

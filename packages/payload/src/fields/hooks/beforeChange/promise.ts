@@ -9,12 +9,16 @@ import type { Block, Field, TabAsField, Validate } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
-import { getLabelFromPath } from '../../../utilities/getLabelFromPath.js'
 import { getTranslatedLabel } from '../../../utilities/getTranslatedLabel.js'
 import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../../config/types.js'
 import { getFieldPathsModified as getFieldPaths } from '../../getFieldPaths.js'
 import { getExistingRowDoc } from './getExistingRowDoc.js'
 import { traverseFields } from './traverseFields.js'
+
+function concatParentLabel(parentLabel: string, label: string): string {
+  const capitalizedLabel = label.charAt(0).toUpperCase() + label.slice(1)
+  return parentLabel ? `${parentLabel} > ${capitalizedLabel}` : capitalizedLabel
+}
 
 type Args = {
   /**
@@ -35,6 +39,7 @@ type Args = {
   operation: Operation
   parentIndexPath: string
   parentIsLocalized: boolean
+  parentLabel: string
   parentPath: string
   parentSchemaPath: string
   req: PayloadRequest
@@ -69,6 +74,7 @@ export const promise = async ({
   operation,
   parentIndexPath,
   parentIsLocalized,
+  parentLabel,
   parentPath,
   parentSchemaPath,
   req,
@@ -172,13 +178,10 @@ export const promise = async ({
       })
 
       if (typeof validationResult === 'string') {
-        const label = getTranslatedLabel(field?.label || field?.name, req.i18n)
-        const parentPathSegments = parentPath ? parentPath.split('.') : []
-
-        const fieldLabel =
-          Array.isArray(parentPathSegments) && parentPathSegments.length > 0
-            ? getLabelFromPath(parentPathSegments.concat(label))
-            : label
+        const fieldLabel = concatParentLabel(
+          parentLabel,
+          getTranslatedLabel(field?.label || field?.name, req.i18n),
+        )
 
         errors.push({
           label: fieldLabel,
@@ -237,6 +240,10 @@ export const promise = async ({
               operation,
               parentIndexPath: '',
               parentIsLocalized: parentIsLocalized || field.localized,
+              parentLabel: concatParentLabel(
+                parentLabel,
+                `${getTranslatedLabel(field?.label || field?.name, req.i18n)} ${rowIndex + 1}`,
+              ),
               parentPath: path + '.' + rowIndex,
               parentSchemaPath: schemaPath,
               req,
@@ -295,6 +302,10 @@ export const promise = async ({
                 operation,
                 parentIndexPath: '',
                 parentIsLocalized: parentIsLocalized || field.localized,
+                parentLabel: concatParentLabel(
+                  parentLabel,
+                  `${getTranslatedLabel(field?.label || field?.name, req.i18n)} ${rowIndex + 1}`,
+                ),
                 parentPath: path + '.' + rowIndex,
                 parentSchemaPath: schemaPath + '.' + block.slug,
                 req,
@@ -315,6 +326,10 @@ export const promise = async ({
 
     case 'collapsible':
     case 'row': {
+      let fieldLabel: string = field.type
+      if (field.type === 'collapsible' && field?.label) {
+        fieldLabel = getTranslatedLabel(field?.label || field?.type, req.i18n)
+      }
       await traverseFields({
         id,
         blockData,
@@ -330,6 +345,7 @@ export const promise = async ({
         operation,
         parentIndexPath: indexPath,
         parentIsLocalized,
+        parentLabel: concatParentLabel(parentLabel, fieldLabel),
         parentPath,
         parentSchemaPath: schemaPath,
         req,
@@ -370,6 +386,10 @@ export const promise = async ({
         operation,
         parentIndexPath: '',
         parentIsLocalized: parentIsLocalized || field.localized,
+        parentLabel: concatParentLabel(
+          parentLabel,
+          getTranslatedLabel(field?.label || field?.name, req.i18n),
+        ),
         parentPath: path,
         parentSchemaPath: schemaPath,
         req,
@@ -487,6 +507,10 @@ export const promise = async ({
         operation,
         parentIndexPath: isNamedTab ? '' : indexPath,
         parentIsLocalized: parentIsLocalized || field.localized,
+        parentLabel: concatParentLabel(
+          parentLabel,
+          getTranslatedLabel(field?.label || field?.name, req.i18n),
+        ),
         parentPath: isNamedTab ? path : parentPath,
         parentSchemaPath: schemaPath,
         req,
@@ -515,6 +539,10 @@ export const promise = async ({
         operation,
         parentIndexPath: indexPath,
         parentIsLocalized,
+        parentLabel: concatParentLabel(
+          parentLabel,
+          getTranslatedLabel(field?.label || '', req.i18n),
+        ),
         parentPath: path,
         parentSchemaPath: schemaPath,
         req,

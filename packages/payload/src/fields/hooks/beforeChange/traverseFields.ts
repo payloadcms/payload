@@ -35,6 +35,7 @@ type Args = {
    * @todo make required in v4.0
    */
   parentIsLocalized?: boolean
+  parentLabel: string
   parentPath: string
   parentSchemaPath: string
   req: PayloadRequest
@@ -73,6 +74,7 @@ export const traverseFields = async ({
   operation,
   parentIndexPath,
   parentIsLocalized,
+  parentLabel,
   parentPath,
   parentSchemaPath,
   req,
@@ -101,6 +103,7 @@ export const traverseFields = async ({
         operation,
         parentIndexPath,
         parentIsLocalized,
+        parentLabel,
         parentPath,
         parentSchemaPath,
         req,
