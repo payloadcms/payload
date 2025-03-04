@@ -331,10 +331,6 @@ export const promise = async ({
 
     case 'collapsible':
     case 'row': {
-      let fieldLabel: string = field.type
-      if (field.type === 'collapsible' && field?.label) {
-        fieldLabel = getTranslatedLabel(field?.label || field?.type, req.i18n)
-      }
       await traverseFields({
         id,
         blockData,
@@ -344,7 +340,13 @@ export const promise = async ({
         doc,
         docWithLocales,
         errors,
-        fieldLabelPath: buildFieldLabel(fieldLabelPath, fieldLabel),
+        fieldLabelPath:
+          field.type === 'row'
+            ? fieldLabelPath
+            : buildFieldLabel(
+                fieldLabelPath,
+                getTranslatedLabel(field?.label || field?.type, req.i18n),
+              ),
         fields: field.fields,
         global,
         mergeLocaleActions,
