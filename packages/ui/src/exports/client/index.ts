@@ -22,12 +22,15 @@ export { useEffectEvent } from '../../hooks/useEffectEvent.js'
 
 export { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 
-// elements
+// list preset elements
 export { ListPresetsColumnsCell } from '../../elements/ListPresets/cells/ColumnsCell/index.js'
 export { ListPresetsWhereCell } from '../../elements/ListPresets/cells/WhereCell/index.js'
 export { ListPresetsAccessCell } from '../../elements/ListPresets/cells/AccessCell/index.js'
 export { ListPresetsColumnsField } from '../../elements/ListPresets/fields/ColumnsField/index.js'
 export { ListPresetsWhereField } from '../../elements/ListPresets/fields/WhereField/index.js'
+export { ListPresetsAccessLabel } from '../../elements/ListPresets/fields/AccessLabel/index.js'
+
+// elements
 export { ConfirmationModal } from '../../elements/ConfirmationModal/index.js'
 export type { OnCancel } from '../../elements/ConfirmationModal/index.js'
 export { Link } from '../../elements/Link/index.js'

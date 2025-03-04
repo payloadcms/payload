@@ -23,6 +23,7 @@ export function ActiveListPreset({
       onClick={() => {
         openPresetListDrawer()
       }}
+      pillStyle={activePreset ? 'always-white' : 'light'}
     >
       <div className={`${baseClass}__label-text`}>{activePreset?.title || 'Select preset'}</div>
       {activePreset ? (

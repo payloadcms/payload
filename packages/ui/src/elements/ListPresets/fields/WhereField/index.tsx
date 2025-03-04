@@ -1,25 +1,73 @@
 'use client'
 import type { JSONFieldClientComponent, Where } from 'payload'
 
+import { getTranslation } from '@payloadcms/translations'
 import { toWords } from 'payload/shared'
 import React from 'react'
 
 import { FieldLabel } from '../../../../fields/FieldLabel/index.js'
 import { useField } from '../../../../forms/useField/index.js'
+import { useConfig } from '../../../../providers/Config/index.js'
+import { useListQuery } from '../../../../providers/ListQuery/index.js'
+import { useTranslation } from '../../../../providers/Translation/index.js'
+import { Pill } from '../../../Pill/index.js'
+import './index.scss'
 
 /** @todo: improve this */
-const transformWhereToNaturalLanguage = (where: Where): string => {
-  if (where && where.or && where.or.length > 0 && where.or[0].and && where.or[0].and.length > 0) {
-    const orQuery = where.or[0]
-    const andQuery = orQuery.and[0]
-    const key = Object.keys(andQuery)[0]
-    const operator = Object.keys(andQuery[key])[0]
-    const value = andQuery[key][operator]
-
-    return `${toWords(key)} ${operator} ${toWords(value)}`
+const transformWhereToNaturalLanguage = (
+  where: Where,
+  collectionLabel: string,
+): React.ReactNode => {
+  if (!where) {
+    return null
   }
 
-  return ''
+  const renderCondition = (condition: any): React.ReactNode => {
+    const key = Object.keys(condition)[0]
+    const operator = Object.keys(condition[key])[0]
+    const value = condition[key][operator]
+
+    return (
+      <Pill pillStyle="always-white">
+        <b>{toWords(key)}</b> {operator} <b>{toWords(value)}</b>
+      </Pill>
+    )
+  }
+
+  const renderWhere = (where: Where, collectionLabel: string): React.ReactNode => {
+    if (where.or && where.or.length > 0) {
+      return (
+        <div className="or-condition">
+          {where.or.map((orCondition, orIndex) => (
+            <React.Fragment key={orIndex}>
+              {orCondition.and && orCondition.and.length > 0 ? (
+                <div className="and-condition">
+                  {orIndex === 0 && (
+                    <span className="label">{`Filter ${collectionLabel} where `}</span>
+                  )}
+                  {orIndex > 0 && <span className="label"> or </span>}
+                  {orCondition.and.map((andCondition, andIndex) => (
+                    <React.Fragment key={andIndex}>
+                      {renderCondition(andCondition)}
+                      {andIndex < orCondition.and.length - 1 && (
+                        <span className="label"> and </span>
+                      )}
+                    </React.Fragment>
+                  ))}
+                </div>
+              ) : (
+                renderCondition(orCondition)
+              )}
+            </React.Fragment>
+          ))}
+        </div>
+      )
+    }
+
+    return renderCondition(where)
+  }
+
+  return renderWhere(where, collectionLabel)
 }
 
 export const ListPresetsWhereField: JSONFieldClientComponent = ({
@@ -27,11 +75,24 @@ export const ListPresetsWhereField: JSONFieldClientComponent = ({
   path,
 }) => {
   const { value } = useField({ path })
+  const { collectionSlug } = useListQuery()
+  const { getEntityConfig } = useConfig()
+
+  const collectionConfig = getEntityConfig({ collectionSlug })
+
+  const { i18n } = useTranslation()
 
   return (
-    <div>
-      <FieldLabel label={label} path={path} required={required} />
-      {value ? transformWhereToNaturalLanguage(value as Where) : 'No where query'}
+    <div className="field-type list-preset-where-field">
+      <FieldLabel as="h3" label={label} path={path} required={required} />
+      <div className="value-wrapper">
+        {value
+          ? transformWhereToNaturalLanguage(
+              value as Where,
+              getTranslation(collectionConfig.labels.plural, i18n),
+            )
+          : 'No where query'}
+      </div>
     </div>
   )
 }

@@ -5,13 +5,6 @@
     &.pill {
       max-width: 150px;
       overflow: hidden;
-      background: var(--theme-elevation-150);
-      color: var(--theme-elevation-1000);
-
-      &:hover,
-      &:active {
-        background: var(--theme-elevation-100);
-      }
     }
 
     .pill__label {
@@ -22,35 +15,6 @@
       text-overflow: ellipsis;
       overflow: hidden;
       white-space: nowrap;
-    }
-
-    &--active {
-      &.pill {
-        background: var(--theme-elevation-750);
-        color: var(--theme-elevation-0);
-
-        &:hover,
-        &:active {
-          background: var(--theme-elevation-850);
-        }
-      }
-    }
-  }
-
-  html[data-theme='light'] {
-    .active-list-preset {
-      &--active {
-        &.pill {
-          background: var(--theme-elevation-0);
-          color: var(--theme-elevation-800);
-          border: 1px solid var(--theme-elevation-100);
-
-          &:hover,
-          &:active {
-            background: var(--theme-elevation-100);
-          }
-        }
-      }
     }
   }
 }

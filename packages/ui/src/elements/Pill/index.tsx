@@ -20,7 +20,15 @@ export type PillProps = {
   icon?: React.ReactNode
   id?: string
   onClick?: () => void
-  pillStyle?: 'dark' | 'error' | 'light' | 'light-gray' | 'success' | 'warning' | 'white'
+  pillStyle?:
+    | 'always-white'
+    | 'dark'
+    | 'error'
+    | 'light'
+    | 'light-gray'
+    | 'success'
+    | 'warning'
+    | 'white'
   rounded?: boolean
   size?: 'medium' | 'small'
   to?: string

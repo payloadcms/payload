@@ -18,11 +18,18 @@ export const getConstraints = (config: Config): Field => ({
   fields: operations.map((operation) => ({
     name: operation,
     type: 'group',
+    admin: {
+      components: {
+        Label: '@payloadcms/ui#ListPresetsAccessLabel',
+      },
+      hideGutter: true,
+    },
     fields: [
       {
         name: 'constraint',
         type: 'select',
         defaultValue: 'onlyMe',
+        label: false,
         options: [
           {
             label: 'Everyone',
