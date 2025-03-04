@@ -211,13 +211,13 @@ export async function writeImportMap({
 }) {
   let importMapFilePath: string | undefined = undefined
 
-  if (config?.admin?.importMap?.importMapLocation?.length) {
-    if (!fs.existsSync(config.admin.importMap.importMapLocation)) {
+  if (config?.admin?.importMap?.importMapFile?.length) {
+    if (!fs.existsSync(config.admin.importMap.importMapFile)) {
       throw new Error(
-        `Could not find the import map file at ${config.admin.importMap.importMapLocation}`,
+        `Could not find the import map file at ${config.admin.importMap.importMapFile}`,
       )
     }
-    importMapFilePath = config.admin.importMap.importMapLocation
+    importMapFilePath = config.admin.importMap.importMapFile
   } else {
     const appLocation = path.resolve(rootDir, `app/(payload)${config.routes.admin}/`, fileName)
     const srcAppLocation = path.resolve(

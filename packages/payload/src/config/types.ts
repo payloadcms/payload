@@ -874,10 +874,10 @@ export type Config = {
         }) => void
       >
       /**
-       * If Payload cannot find the import map location automatically, you
-       * can manually provide it here.
+       * If Payload cannot find the import map file location automatically,
+       * you can manually provide it here.
        */
-      importMapLocation?: string
+      importMapFile?: string
     }
     livePreview?: {
       collections?: string[]
