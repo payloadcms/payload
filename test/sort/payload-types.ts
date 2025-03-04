@@ -124,7 +124,7 @@ export interface UserAuthOperations {
  */
 export interface Post {
   id: string;
-  _order?: string | null;
+  _order: string;
   text?: string | null;
   number?: number | null;
   number2?: number | null;
