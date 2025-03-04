@@ -7,11 +7,13 @@ import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../../elements/DocumentDrawer/types.js'
+import type { ListDrawerProps } from '../../elements/ListDrawer/types.js'
 import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
 import type { GetResults, Option, Value } from './types.js'
 
 import { AddNewRelation } from '../../elements/AddNewRelation/index.js'
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
+import { useListDrawer } from '../../elements/ListDrawer/index.js'
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
@@ -119,6 +121,74 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     id: currentlyOpenRelationship.id,
     collectionSlug: currentlyOpenRelationship.collectionSlug,
   })
+
+  const [ListDrawer, , { closeDrawer: closeListDrawer, openDrawer: openListDrawer }] =
+    useListDrawer({
+      collectionSlugs: Array.isArray(relationTo) ? relationTo : [relationTo],
+      filterOptions,
+    })
+
+  const onListBulkSelect = useCallback<NonNullable<ListDrawerProps['onBulkSelect']>>(
+    (docs) => {
+      const selectedDocIDs = []
+
+      for (const [id, isSelected] of docs) {
+        if (isSelected) {
+          selectedDocIDs.push(id)
+        }
+      }
+
+      // Format the selections similar to how the existing setValue works
+      const formattedSelections = selectedDocIDs.map((id) => {
+        if (hasMultipleRelations) {
+          return {
+            relationTo: currentlyOpenRelationship.collectionSlug,
+            value: id,
+          }
+        }
+        return id
+      })
+
+      // If hasMany, append to existing values, otherwise replace
+      if (hasMany) {
+        const existingValues = Array.isArray(value) ? value : []
+        setValue([...existingValues, ...formattedSelections])
+      } else {
+        setValue(formattedSelections[0]) // Take first selection for single relation
+      }
+
+      closeListDrawer()
+    },
+    [
+      hasMany,
+      hasMultipleRelations,
+      currentlyOpenRelationship.collectionSlug,
+      value,
+      setValue,
+      closeListDrawer,
+    ],
+  )
+
+  const onListSelect = useCallback<NonNullable<ListDrawerProps['onSelect']>>(
+    ({ collectionSlug, doc }) => {
+      const formattedSelection = hasMultipleRelations
+        ? {
+            relationTo: collectionSlug,
+            value: doc.id,
+          }
+        : doc.id
+
+      if (hasMany) {
+        const existingValues = Array.isArray(value) ? value : []
+        setValue([...existingValues, formattedSelection])
+      } else {
+        setValue(formattedSelection)
+      }
+
+      closeListDrawer()
+    },
+    [hasMany, hasMultipleRelations, setValue, closeListDrawer, value],
+  )
 
   const openDrawerWhenRelationChanges = useRef(false)
 
@@ -569,6 +639,8 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
 
+  const selectionType: 'drawer' | 'dropdown' = 'drawer'
+
   return (
     <div
       className={[
@@ -601,10 +673,18 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
           <div className={`${baseClass}__wrap`}>
             <ReactSelect
               backspaceRemovesValue={!isDrawerOpen}
-              components={{
-                MultiValueLabel,
-                SingleValue,
-              }}
+              components={
+                selectionType === 'drawer'
+                  ? {
+                      DropdownIndicator: null,
+                      MultiValueLabel,
+                      SingleValue,
+                    }
+                  : {
+                      MultiValueLabel,
+                      SingleValue,
+                    }
+              }
               customProps={{
                 disableKeyDown: isDrawerOpen,
                 disableMouseDown: isDrawerOpen,
@@ -621,9 +701,11 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
                   ? `${option.relationTo}_${option.value}`
                   : (option.value as string)
               }}
-              isLoading={isLoading}
+              isLoading={selectionType === 'drawer' ? false : isLoading}
               isMulti={hasMany}
+              isSearchable={selectionType === 'drawer' ? false : undefined}
               isSortable={isSortable}
+              menuIsOpen={selectionType === 'drawer' ? false : menuIsOpen}
               onChange={
                 !readOnly
                   ? (selected) => {
@@ -660,19 +742,22 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
                 setMenuIsOpen(false)
               }}
               onMenuOpen={() => {
-                setMenuIsOpen(true)
-
-                if (!hasLoadedFirstPageRef.current) {
-                  setIsLoading(true)
-                  void getResults({
-                    filterOptions,
-                    lastLoadedPage: {},
-                    onSuccess: () => {
-                      hasLoadedFirstPageRef.current = true
-                      setIsLoading(false)
-                    },
-                    value: initialValue,
-                  })
+                if (selectionType === 'drawer') {
+                  openListDrawer()
+                } else {
+                  setMenuIsOpen(true)
+                  if (!hasLoadedFirstPageRef.current) {
+                    setIsLoading(true)
+                    void getResults({
+                      filterOptions,
+                      lastLoadedPage: {},
+                      onSuccess: () => {
+                        hasLoadedFirstPageRef.current = true
+                        setIsLoading(false)
+                      },
+                      value: initialValue,
+                    })
+                  }
                 }
               }}
               onMenuScrollToBottom={() => {
@@ -710,6 +795,12 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       {currentlyOpenRelationship.collectionSlug && currentlyOpenRelationship.hasReadPermission && (
         <DocumentDrawer onDelete={onDelete} onDuplicate={onDuplicate} onSave={onSave} />
       )}
+      <ListDrawer
+        allowCreate={false}
+        enableRowSelections={hasMany}
+        onBulkSelect={onListBulkSelect}
+        onSelect={onListSelect}
+      />
     </div>
   )
 }
