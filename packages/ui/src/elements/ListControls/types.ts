@@ -1,7 +1,12 @@
-import type { ClientCollectionConfig, ListPreset, ResolvedFilterOptions, Where } from 'payload'
+import type {
+  ClientCollectionConfig,
+  ListPreset,
+  ResolvedFilterOptions,
+  SanitizedCollectionPermission,
+  Where,
+} from 'payload'
 
 export type ListControlsProps = {
-  readonly activePreset?: ListPreset
   readonly beforeActions?: React.ReactNode[]
   readonly collectionConfig: ClientCollectionConfig
   readonly collectionSlug: string
@@ -22,6 +27,8 @@ export type ListControlsProps = {
   readonly handleSortChange?: (sort: string) => void
   readonly handleWhereChange?: (where: Where) => void
   readonly listMenuItems?: React.ReactNode[]
+  readonly listPreset?: ListPreset
+  readonly listPresetPermissions?: SanitizedCollectionPermission
   readonly renderedFilters?: Map<string, React.ReactNode>
   readonly resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
 }

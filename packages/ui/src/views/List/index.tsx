@@ -36,7 +36,6 @@ const baseClass = 'collection-list'
 
 export function DefaultListView(props: ListViewClientProps) {
   const {
-    activePreset,
     AfterList,
     AfterListTable,
     beforeActions,
@@ -51,6 +50,8 @@ export function DefaultListView(props: ListViewClientProps) {
     enableRowSelections,
     hasCreatePermission: hasCreatePermissionFromProps,
     listMenuItems,
+    listPreset,
+    listPresetPermissions,
     newDocumentURL,
     renderedFilters,
     resolvedFilterOptions,
@@ -184,7 +185,6 @@ export function DefaultListView(props: ListViewClientProps) {
                 t={t}
               />
               <ListControls
-                activePreset={activePreset}
                 beforeActions={
                   enableRowSelections && typeof onBulkSelect === 'function'
                     ? beforeActions
@@ -198,6 +198,8 @@ export function DefaultListView(props: ListViewClientProps) {
                   collectionConfig?.enableListPresets !== true || disableListPresets
                 }
                 listMenuItems={listMenuItems}
+                listPreset={listPreset}
+                listPresetPermissions={listPresetPermissions}
                 renderedFilters={renderedFilters}
                 resolvedFilterOptions={resolvedFilterOptions}
               />

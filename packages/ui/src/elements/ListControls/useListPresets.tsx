@@ -1,9 +1,9 @@
-import type { CollectionSlug, ListPreset } from 'payload'
+import type { CollectionSlug, ListPreset, SanitizedCollectionPermission } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { transformColumnsToPreferences, transformColumnsToSearchParams } from 'payload/shared'
-import { act, Fragment, useCallback } from 'react'
+import { Fragment, useCallback } from 'react'
 import { toast } from 'sonner'
 
 import { useConfig } from '../../providers/Config/index.js'
@@ -18,12 +18,16 @@ import { Translation } from '../Translation/index.js'
 
 const confirmDeletePresetModalSlug = 'confirm-delete-preset'
 
+const listPresetsSlug = 'payload-list-presets'
+
 export const useListPresets = ({
   activePreset,
   collectionSlug,
+  listPresetPermissions,
 }: {
   activePreset: ListPreset
   collectionSlug: CollectionSlug
+  listPresetPermissions: SanitizedCollectionPermission
 }): {
   CreateNewPresetDrawer: React.ReactNode
   DeletePresetModal: React.ReactNode
@@ -55,11 +59,11 @@ export const useListPresets = ({
     getEntityConfig,
   } = useConfig()
 
-  const presetConfig = getEntityConfig({ collectionSlug: 'payload-list-presets' })
+  const presetConfig = getEntityConfig({ collectionSlug: listPresetsSlug })
 
   const [PresetDocumentDrawer, , { openDrawer: openDocumentDrawer }] = useDocumentDrawer({
     id: activePreset?.id,
-    collectionSlug: 'payload-list-presets',
+    collectionSlug: listPresetsSlug,
   })
 
   const [
@@ -67,12 +71,12 @@ export const useListPresets = ({
     ,
     { closeDrawer: closeCreateNewDrawer, openDrawer: openCreateNewDrawer },
   ] = useDocumentDrawer({
-    collectionSlug: 'payload-list-presets',
+    collectionSlug: listPresetsSlug,
   })
 
   const [ListDrawer, , { closeDrawer: closeListDrawer, openDrawer: openListDrawer }] =
     useListDrawer({
-      collectionSlugs: ['payload-list-presets'],
+      collectionSlugs: [listPresetsSlug],
     })
 
   const handlePresetChange = useCallback(
@@ -96,7 +100,7 @@ export const useListPresets = ({
 
   const handleDeletePreset = useCallback(async () => {
     try {
-      await fetch(`${apiRoute}/payload-list-presets/${activePreset.id}`, {
+      await fetch(`${apiRoute}/${listPresetsSlug}/${activePreset.id}`, {
         method: 'DELETE',
       }).then(async (res) => {
         try {
@@ -241,13 +245,15 @@ export const useListPresets = ({
             >
               {t('general:reset')}
             </PopupList.Button>
-            <PopupList.Button
-              onClick={async () => {
-                await saveCurrentChanges()
-              }}
-            >
-              {activePreset.isShared ? t('general:updateForEveryone') : t('general:save')}
-            </PopupList.Button>
+            {listPresetPermissions.update ? (
+              <PopupList.Button
+                onClick={async () => {
+                  await saveCurrentChanges()
+                }}
+              >
+                {activePreset.isShared ? t('general:updateForEveryone') : t('general:save')}
+              </PopupList.Button>
+            ) : null}
           </Fragment>
         ) : null}
         <PopupList.Button
@@ -259,7 +265,7 @@ export const useListPresets = ({
             label: t('general:preset'),
           })}
         </PopupList.Button>
-        {activePreset ? (
+        {activePreset && listPresetPermissions.delete ? (
           <Fragment>
             <PopupList.Button onClick={() => openModal(confirmDeletePresetModalSlug)}>
               {t('general:delete')}

@@ -1,3 +1,4 @@
+import type { SanitizedCollectionPermission } from '../../auth/types.js'
 import type {
   CollectionAdminOptions,
   SanitizedCollectionConfig,
@@ -36,7 +37,6 @@ export type ListViewServerPropsOnly = {
 export type ListViewServerProps = ListViewClientProps & ListViewServerPropsOnly
 
 export type ListViewClientProps = {
-  activePreset?: ListPreset
   beforeActions?: React.ReactNode[]
   collectionSlug: SanitizedCollectionConfig['slug']
   columnState: Column[]
@@ -49,6 +49,8 @@ export type ListViewClientProps = {
    * @deprecated
    */
   listPreferences?: ListPreferences
+  listPreset?: ListPreset
+  listPresetPermissions?: SanitizedCollectionPermission
   newDocumentURL: string
   /**
    * @deprecated

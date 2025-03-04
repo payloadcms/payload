@@ -7,6 +7,7 @@ import type {
   ListQuery,
   ListViewClientProps,
   ListViewServerPropsOnly,
+  SanitizedCollectionPermission,
   Where,
 } from 'payload'
 
@@ -22,6 +23,7 @@ import {
 } from 'payload/shared'
 import React, { Fragment } from 'react'
 
+import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
 import { renderListViewSlots } from './renderListViewSlots.js'
 import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
 
@@ -141,19 +143,29 @@ export const renderListView = async (
       }
     }
 
-    let activePreset: ListPreset | undefined
+    let listPreset: ListPreset | undefined
+    let listPresetPermissions: SanitizedCollectionPermission | undefined
 
     if (listPreferences?.preset) {
       try {
-        activePreset = (await payload.findByID({
+        listPreset = (await payload.findByID({
           id: listPreferences?.preset,
           collection: 'payload-list-presets',
           depth: 0,
           overrideAccess: false,
           user,
         })) as ListPreset
-      } catch (_err) {
-        // swallow error
+
+        if (listPreset) {
+          listPresetPermissions = await getDocumentPermissions({
+            id: listPreset.id,
+            collectionConfig: config.collections.find((c) => c.slug === 'payload-list-presets'),
+            data: listPreset,
+            req,
+          })?.then(({ docPermissions }) => docPermissions)
+        }
+      } catch (err) {
+        req.payload.logger.error(`Error fetching list preset or preset permissions: ${err}`)
       }
     }
 
@@ -253,7 +265,6 @@ export const renderListView = async (
             {RenderServerComponent({
               clientProps: {
                 ...listViewSlots,
-                activePreset,
                 collectionSlug,
                 columnState,
                 disableBulkDelete,
@@ -262,6 +273,8 @@ export const renderListView = async (
                 enableRowSelections,
                 hasCreatePermission,
                 listPreferences,
+                listPreset,
+                listPresetPermissions,
                 newDocumentURL,
                 renderedFilters,
                 resolvedFilterOptions,

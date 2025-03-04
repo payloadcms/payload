@@ -232,7 +232,7 @@ export interface PayloadListPreset {
     | number
     | boolean
     | null;
-  relatedCollection: 'pages' | 'users' | 'payload-locked-documents' | 'payload-preferences';
+  relatedCollection: 'pages';
   updatedAt: string;
   createdAt: string;
 }

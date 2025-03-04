@@ -33,7 +33,6 @@ const baseClass = 'list-controls'
  */
 export const ListControls: React.FC<ListControlsProps> = (props) => {
   const {
-    activePreset,
     beforeActions,
     collectionConfig,
     collectionSlug,
@@ -41,6 +40,8 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     enableColumns = true,
     enableSort = false,
     listMenuItems: listMenuItemsFromProps,
+    listPreset: activePreset,
+    listPresetPermissions,
     renderedFilters,
     resolvedFilterOptions,
   } = props
@@ -59,6 +60,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
   } = useListPresets({
     activePreset,
     collectionSlug,
+    listPresetPermissions,
   })
 
   const titleField = useUseTitleField(collectionConfig)
