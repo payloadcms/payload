@@ -1,0 +1,30 @@
+---
+title: List Presets
+label: Overview
+order: 10
+desc: List presets allow you to save and share filters, columns, and sort orders for your collections.
+keywords:
+---
+
+List presets allow you to save and share filters, columns, and sort orders for your [Collections](../configuration/collections). This is useful for reusing common or complex filtering patterns for Collections.
+
+## Enabling List Presets
+
+Within the [Admin Panel](../admin/overview), List Presets are applied to the List View. Here you can create, edit, delete, and share presets. Once saved, these presets are available for future use by you and your team.
+
+To enable List Presets on a Collection, use the `admin.enableListPresets` property in your [Collection Config](../configuration/collections).
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const MyCollection: CollectionConfig = {
+  // ...
+  admin: {
+    // highlight-start
+    enableListPresets: true,
+    // highlight-end
+  },
+}
+```
+
+When enabled, the List View will display a new icon within the List Controls, and new dropdown menu items in the top right corner. This menu allows you to select and manage your presets.

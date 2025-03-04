@@ -71,6 +71,7 @@ The following options are available:
 | `graphQL`          | Manage GraphQL-related properties for this collection. [More](#graphql)                                                                                                                                              |
 | `hooks`            | Entry point for Hooks. [More details](../hooks/overview#collection-hooks).                                                                                                                                           |
 | `labels`           | Singular and plural labels for use in identifying this Collection throughout Payload. Auto-generated from slug if not defined.                                                                                       |
+| `listPresets`     | Enable list presets for this Collection. [More details](../list-presets/overview).                                                                                                                                   |
 | `lockDocuments`    | Enables or disables document locking. By default, document locking is enabled. Set to an object to configure, or set to `false` to disable locking. [More details](../admin/locked-documents).                       |
 | `slug` *          | Unique, URL-friendly string that will act as an identifier for this Collection.                                                                                                                                      |
 | `timestamps`       | Set to false to disable documents' automatically generated `createdAt` and `updatedAt` timestamps.                                                                                                                   |
@@ -78,7 +79,6 @@ The following options are available:
 | `upload`           | Specify options if you would like this Collection to support file uploads. For more, consult the [Uploads](../upload/overview) documentation.                                                                        |
 | `versions`         | Set to true to enable default options, or configure with object properties. [More details](../versions/overview#collection-config).                                                                                  |
 | `defaultPopulate`  | Specify which fields to select when this Collection is populated from another document. [More Details](../queries/select#defaultpopulate-collection-config-property).                                                |
-
 _* An asterisk denotes that a property is required._
 
 ### Fields
