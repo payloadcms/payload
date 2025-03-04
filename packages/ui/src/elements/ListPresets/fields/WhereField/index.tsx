@@ -25,7 +25,18 @@ const transformWhereToNaturalLanguage = (
   const renderCondition = (condition: any): React.ReactNode => {
     const key = Object.keys(condition)[0]
     const operator = Object.keys(condition[key])[0]
-    const value = condition[key][operator]
+    let value = condition[key][operator]
+
+    // TODO: this is not right, but works for now at least.
+    // Ideally we look up iterate _fields_ so we know the type of the field
+    // Currently, we're only iterating over the `where` field's value, so we don't know the type
+    if (typeof value === 'object') {
+      try {
+        value = new Date(value).toLocaleDateString()
+      } catch (_err) {
+        value = 'Unknown error has occurred'
+      }
+    }
 
     return (
       <Pill pillStyle="always-white">
