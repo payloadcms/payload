@@ -8,14 +8,6 @@ import { flattenObject } from './flattenObject.js'
 import { getFilename } from './getFilename.js'
 import { getSelect } from './getSelect.js'
 
-const streamToBuffer = async (readableStream: any) => {
-  const chunks = []
-  for await (const chunk of readableStream) {
-    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk)
-  }
-  return Buffer.concat(chunks)
-}
-
 type Export = {
   collectionSlug: string
   exportsCollection: string
@@ -57,11 +49,9 @@ export const createExport = async (args: CreateExportArgs) => {
       user,
       where,
     },
-    input,
     req: { locale: localeArg, payload },
     req,
   } = args
-
   const locale = localeInput ?? localeArg
   const collectionConfig = payload.config.collections.find(({ slug }) => slug === collectionSlug)
   if (!collectionConfig) {
@@ -69,7 +59,7 @@ export const createExport = async (args: CreateExportArgs) => {
   }
 
   const name = `${nameArg ?? `${getFilename()}-${collectionSlug}`}.${format}`
-  const isCsv = format === 'csv'
+  const isCSV = format === 'csv'
 
   const findArgs = {
     collection: collectionSlug,
@@ -87,33 +77,34 @@ export const createExport = async (args: CreateExportArgs) => {
   let result: PaginatedDocs = { hasNextPage: true } as PaginatedDocs
 
   if (download) {
-    const stream = new Readable({ read() {} })
-    let isFirstBatch = true
+    const encoder = new TextEncoder()
+    const stream = new Readable({
+      async read() {
+        let result = await payload.find(findArgs)
+        let isFirstBatch = true
 
-    while (result.hasNextPage) {
-      findArgs.page += 1
-      result = await payload.find(findArgs)
+        while (result.docs.length > 0) {
+          const csvInput = result.docs.map((doc) => flattenObject(doc))
+          const csvString = stringify(csvInput, { header: isFirstBatch })
+          this.push(encoder.encode(csvString))
+          isFirstBatch = false
 
-      if (isCsv) {
-        const csvInput = result.docs.map((doc) => flattenObject(doc))
-        const csvString = stringify(csvInput, { header: isFirstBatch })
-        stream.push(csvString)
-        isFirstBatch = false
-      } else {
-        const jsonInput = result.docs.map((doc) => JSON.stringify(doc))
-        stream.push(jsonInput.join(',\n') + '\n')
-      }
-    }
+          if (!result.hasNextPage) {
+            this.push(null) // End the stream
+            break
+          }
 
-    stream.push(null) // End the stream
+          findArgs.page += 1
+          result = await payload.find(findArgs)
+        }
+      },
+    })
 
-    // **Create and return Response**
-    return new Response(await streamToBuffer(stream), {
-      headers: new Headers({
+    return new Response(stream as any, {
+      headers: {
         'Content-Disposition': `attachment; filename="${name}"`,
-        'Content-Type': isCsv ? 'text/csv' : 'application/json',
-      }),
-      status: 200,
+        'Content-Type': isCSV ? 'text/csv' : 'application/json',
+      },
     })
   }
 
@@ -124,7 +115,7 @@ export const createExport = async (args: CreateExportArgs) => {
     findArgs.page += 1
     result = await payload.find(findArgs)
 
-    if (isCsv) {
+    if (isCSV) {
       const csvInput = result.docs.map((doc) => flattenObject(doc))
       outputData.push(stringify(csvInput, { header: isFirstBatch }))
       isFirstBatch = false
@@ -140,7 +131,7 @@ export const createExport = async (args: CreateExportArgs) => {
     req.file = {
       name,
       data: buffer,
-      mimetype: isCsv ? 'text/csv' : 'application/json',
+      mimetype: isCSV ? 'text/csv' : 'application/json',
       size: buffer.length,
     }
   } else {
@@ -151,7 +142,7 @@ export const createExport = async (args: CreateExportArgs) => {
       file: {
         name,
         data: buffer,
-        mimetype: isCsv ? 'text/csv' : 'application/json',
+        mimetype: isCSV ? 'text/csv' : 'application/json',
         size: buffer.length,
       },
       user,
