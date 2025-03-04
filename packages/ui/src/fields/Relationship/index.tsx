@@ -128,47 +128,6 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       filterOptions,
     })
 
-  const onListBulkSelect = useCallback<NonNullable<ListDrawerProps['onBulkSelect']>>(
-    (docs) => {
-      const selectedDocIDs = []
-
-      for (const [id, isSelected] of docs) {
-        if (isSelected) {
-          selectedDocIDs.push(id)
-        }
-      }
-
-      // Format the selections similar to how the existing setValue works
-      const formattedSelections = selectedDocIDs.map((id) => {
-        if (hasMultipleRelations) {
-          return {
-            relationTo: currentlyOpenRelationship.collectionSlug,
-            value: id,
-          }
-        }
-        return id
-      })
-
-      // If hasMany, append to existing values, otherwise replace
-      if (hasMany) {
-        const existingValues = Array.isArray(value) ? value : []
-        setValue([...existingValues, ...formattedSelections])
-      } else {
-        setValue(formattedSelections[0]) // Take first selection for single relation
-      }
-
-      closeListDrawer()
-    },
-    [
-      hasMany,
-      hasMultipleRelations,
-      currentlyOpenRelationship.collectionSlug,
-      value,
-      setValue,
-      closeListDrawer,
-    ],
-  )
-
   const onListSelect = useCallback<NonNullable<ListDrawerProps['onSelect']>>(
     ({ collectionSlug, doc }) => {
       const formattedSelection = hasMultipleRelations
@@ -795,12 +754,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       {currentlyOpenRelationship.collectionSlug && currentlyOpenRelationship.hasReadPermission && (
         <DocumentDrawer onDelete={onDelete} onDuplicate={onDuplicate} onSave={onSave} />
       )}
-      <ListDrawer
-        allowCreate={false}
-        enableRowSelections={hasMany}
-        onBulkSelect={onListBulkSelect}
-        onSelect={onListSelect}
-      />
+      <ListDrawer allowCreate={false} enableRowSelections={false} onSelect={onListSelect} />
     </div>
   )
 }
