@@ -1,5 +1,6 @@
 import type {
   CollectionAfterChangeHook,
+  CollectionBeforeChangeHook,
   CollectionBeforeOperationHook,
   CollectionConfig,
   Config,
@@ -8,6 +9,7 @@ import type {
 import type { CollectionOverride, ImportExportPluginConfig } from './types.js'
 
 import { createExport } from './export/createExport.js'
+import { download } from './export/download.js'
 import { getFields } from './export/getFields.js'
 
 export const getExportCollection = ({
@@ -32,6 +34,13 @@ export const getExportCollection = ({
       useAsTitle: 'name',
     },
     disableDuplicate: true,
+    endpoints: [
+      {
+        handler: download,
+        method: 'post',
+        path: 'download',
+      },
+    ],
     fields: getFields(config),
     hooks: {
       afterChange,

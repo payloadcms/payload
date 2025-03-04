@@ -25,6 +25,10 @@ type Export = {
 }
 
 export type CreateExportArgs = {
+  /**
+   * If true, do not create files just return buffer stream
+   */
+  download?: boolean
   input: Export
   req: PayloadRequest
   user?: User
@@ -32,6 +36,7 @@ export type CreateExportArgs = {
 
 export const createExport = async (args: CreateExportArgs) => {
   const {
+    download,
     input: {
       id,
       name: nameArg,
@@ -55,6 +60,8 @@ export const createExport = async (args: CreateExportArgs) => {
     throw new APIError(`Collection with slug ${collectionSlug} not found`)
   }
   const name = `${nameArg ?? `${getFilename()}-${collectionSlug}`}.${format}`
+  const outputData: string[] = []
+  const buffer = Buffer.from(format === 'json' ? `[${outputData.join(',')}]` : outputData.join(''))
 
   const findArgs = {
     collection: collectionSlug,
@@ -70,8 +77,6 @@ export const createExport = async (args: CreateExportArgs) => {
   }
 
   let result: PaginatedDocs = { hasNextPage: true } as PaginatedDocs
-  const outputData: string[] = []
-
   let isFirstBatch = true
 
   while (result.hasNextPage) {
@@ -95,8 +100,6 @@ export const createExport = async (args: CreateExportArgs) => {
     }
   }
 
-  const buffer = Buffer.from(format === 'json' ? `[${outputData.join(',')}]` : outputData.join(''))
-
   // when `disableJobsQueue` is true, the export is created synchronously in a beforeOperation hook
   if (!id) {
     req.file = {
@@ -116,6 +119,7 @@ export const createExport = async (args: CreateExportArgs) => {
         mimetype: format === 'json' ? 'application/json' : `text/${format}`,
         size: buffer.length,
       },
+      user,
     })
   }
 }
