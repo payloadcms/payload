@@ -5,7 +5,6 @@ const dirname = path.dirname(filename)
 import { importExportPlugin } from '@payloadcms/plugin-import-export'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
 import { Pages } from './collections/Pages.js'
 import { Users } from './collections/Users.js'
 import { seed } from './seed/index.js'

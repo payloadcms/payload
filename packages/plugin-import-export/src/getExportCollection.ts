@@ -38,7 +38,7 @@ export const getExportCollection = ({
       {
         handler: download,
         method: 'post',
-        path: 'download',
+        path: '/download',
       },
     ],
     fields: getFields(config),

@@ -1,12 +1,20 @@
 import type { PaginatedDocs, PayloadRequest, Sort, User, Where } from 'payload'
 
-import { Buffer } from 'buffer'
 import { stringify } from 'csv-stringify/sync'
 import { APIError } from 'payload'
+import { Readable } from 'stream'
 
 import { flattenObject } from './flattenObject.js'
 import { getFilename } from './getFilename.js'
 import { getSelect } from './getSelect.js'
+
+const streamToBuffer = async (readableStream: any) => {
+  const chunks = []
+  for await (const chunk of readableStream) {
+    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk)
+  }
+  return Buffer.concat(chunks)
+}
 
 type Export = {
   collectionSlug: string
@@ -26,7 +34,7 @@ type Export = {
 
 export type CreateExportArgs = {
   /**
-   * If true, do not create files just return buffer stream
+   * If true, stream the file instead of saving it
    */
   download?: boolean
   input: Export
@@ -49,19 +57,19 @@ export const createExport = async (args: CreateExportArgs) => {
       user,
       where,
     },
+    input,
     req: { locale: localeArg, payload },
     req,
   } = args
 
   const locale = localeInput ?? localeArg
-
   const collectionConfig = payload.config.collections.find(({ slug }) => slug === collectionSlug)
   if (!collectionConfig) {
     throw new APIError(`Collection with slug ${collectionSlug} not found`)
   }
+
   const name = `${nameArg ?? `${getFilename()}-${collectionSlug}`}.${format}`
-  const outputData: string[] = []
-  const buffer = Buffer.from(format === 'json' ? `[${outputData.join(',')}]` : outputData.join(''))
+  const isCsv = format === 'csv'
 
   const findArgs = {
     collection: collectionSlug,
@@ -77,35 +85,62 @@ export const createExport = async (args: CreateExportArgs) => {
   }
 
   let result: PaginatedDocs = { hasNextPage: true } as PaginatedDocs
+
+  if (download) {
+    const stream = new Readable({ read() {} })
+    let isFirstBatch = true
+
+    while (result.hasNextPage) {
+      findArgs.page += 1
+      result = await payload.find(findArgs)
+
+      if (isCsv) {
+        const csvInput = result.docs.map((doc) => flattenObject(doc))
+        const csvString = stringify(csvInput, { header: isFirstBatch })
+        stream.push(csvString)
+        isFirstBatch = false
+      } else {
+        const jsonInput = result.docs.map((doc) => JSON.stringify(doc))
+        stream.push(jsonInput.join(',\n') + '\n')
+      }
+    }
+
+    stream.push(null) // End the stream
+
+    // **Create and return Response**
+    return new Response(await streamToBuffer(stream), {
+      headers: new Headers({
+        'Content-Disposition': `attachment; filename="${name}"`,
+        'Content-Type': isCsv ? 'text/csv' : 'application/json',
+      }),
+      status: 200,
+    })
+  }
+
+  const outputData: string[] = []
   let isFirstBatch = true
 
   while (result.hasNextPage) {
-    findArgs.page = findArgs.page + 1
+    findArgs.page += 1
     result = await payload.find(findArgs)
 
-    if (format === 'csv') {
+    if (isCsv) {
       const csvInput = result.docs.map((doc) => flattenObject(doc))
-
-      const csvString = stringify(csvInput, {
-        header: isFirstBatch, // Only include header in the first batch
-      })
-
-      outputData.push(csvString)
+      outputData.push(stringify(csvInput, { header: isFirstBatch }))
       isFirstBatch = false
-    }
-
-    if (format === 'json') {
+    } else {
       const jsonInput = result.docs.map((doc) => JSON.stringify(doc))
       outputData.push(jsonInput.join(',\n'))
     }
   }
 
-  // when `disableJobsQueue` is true, the export is created synchronously in a beforeOperation hook
+  const buffer = Buffer.from(format === 'json' ? `[${outputData.join(',')}]` : outputData.join(''))
+
   if (!id) {
     req.file = {
       name,
       data: buffer,
-      mimetype: format === 'json' ? 'application/json' : `text/${format}`,
+      mimetype: isCsv ? 'text/csv' : 'application/json',
       size: buffer.length,
     }
   } else {
@@ -116,7 +151,7 @@ export const createExport = async (args: CreateExportArgs) => {
       file: {
         name,
         data: buffer,
-        mimetype: format === 'json' ? 'application/json' : `text/${format}`,
+        mimetype: isCsv ? 'text/csv' : 'application/json',
         size: buffer.length,
       },
       user,
