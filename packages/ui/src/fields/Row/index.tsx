@@ -26,7 +26,7 @@ const RowFieldComponent: RowFieldClientComponent = (props) => {
     <RowProvider>
       <div
         className={[fieldBaseClass, baseClass, className].filter(Boolean).join(' ')}
-        style={style ?? undefined}
+        style={style || undefined}
       >
         <RenderFields
           className={`${baseClass}__fields`}
