@@ -22,8 +22,6 @@ export const sanitizeGlobal = async (
   richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>,
   _validRelationships?: string[],
 ): Promise<SanitizedGlobalConfig> => {
-  const { collections } = config
-
   global.label = global.label || toWords(global.slug)
 
   // /////////////////////////////////

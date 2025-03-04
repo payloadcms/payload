@@ -16,7 +16,6 @@ import { fieldAffectsData } from '../../fields/config/types.js'
 import mergeBaseFields from '../../fields/mergeBaseFields.js'
 import { uploadCollectionEndpoints } from '../../uploads/endpoints/index.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
-import { deepMergeWithReactComponents } from '../../utilities/deepMerge.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
 import baseVersionFields from '../../versions/baseFields.js'
@@ -40,7 +39,26 @@ export const sanitizeCollection = async (
   // Make copy of collection config
   // /////////////////////////////////
 
-  const sanitized: CollectionConfig = deepMergeWithReactComponents(defaults, collection)
+  const sanitized: CollectionConfig = {
+    ...defaults,
+    ...collection,
+    access: {
+      ...defaults.access,
+      ...collection?.access,
+    },
+    admin: {
+      ...defaults?.admin,
+      ...collection?.admin,
+      pagination: {
+        ...defaults?.admin?.pagination,
+        ...collection?.admin?.pagination,
+      },
+    },
+    hooks: {
+      ...defaults.hooks,
+      ...collection?.hooks,
+    },
+  }
 
   // /////////////////////////////////
   // Sanitize fields
@@ -190,10 +208,16 @@ export const sanitizeCollection = async (
     // sanitize fields for reserved names
     sanitizeAuthFields(sanitized.fields, sanitized)
 
-    sanitized.auth = deepMergeWithReactComponents(
-      authDefaults,
-      typeof sanitized.auth === 'object' ? sanitized.auth : {},
-    )
+    sanitized.auth = {
+      ...authDefaults,
+      ...(typeof sanitized.auth === 'object' ? sanitized.auth : {}),
+      cookies: {
+        ...authDefaults.cookies,
+        ...(typeof sanitized.auth === 'object' && typeof sanitized.auth?.cookies === 'object'
+          ? sanitized.auth.cookies
+          : {}),
+      },
+    }
 
     if (!sanitized.auth.disableLocalStrategy && sanitized.auth.verify === true) {
       sanitized.auth.verify = {}
