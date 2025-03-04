@@ -95,7 +95,7 @@ export const promise = async ({
   const indexPathSegments = indexPath ? indexPath.split('-').filter(Boolean)?.map(Number) : []
 
   const passesCondition = field.admin?.condition
-    ? Boolean(field.admin.condition(data, pathSegments, siblingData, { blockData, user: req.user }))
+    ? Boolean(field.admin.condition(data, siblingData, { blockData, user: req.user }, pathSegments))
     : true
   let skipValidationFromHere = skipValidation || !passesCondition
 

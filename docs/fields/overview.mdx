@@ -515,9 +515,9 @@ All Description Functions receive the following arguments:
 You can show and hide fields based on what other fields are doing by utilizing conditional logic on a field by field basis. The `condition` property on a field's admin config accepts a function which takes four arguments:
 
 - `data` - the entire document's data that is currently being edited
-- `path` - the path to the field in the schema.
 - `siblingData` - only the fields that are direct siblings to the field with the condition
 - `{ user }` - the final argument is an object containing the currently authenticated user
+- `path` - the path to the field in the schema.
 
 The `condition` function should return a boolean that will control if the field should be displayed or not.
 
@@ -536,7 +536,7 @@ The `condition` function should return a boolean that will control if the field 
       type: 'text',
       admin: {
         // highlight-start
-        condition: (data, path, siblingData, { user }) => {
+        condition: (data, siblingData, { user }, path) => {
           if (data.enableGreeting) {
             return true
           } else {

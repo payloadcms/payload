@@ -259,10 +259,6 @@ export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
    */
   data: Partial<TData>,
   /**
-   * The path of the field, e.g. ["group", "myArray", 1, "textField"]. The path is the schemaPath but with indexes and would be used in the context of field data, not field schemas.
-   */
-  path: (number | string)[],
-  /**
    * Immediately adjacent data to this field. For example, if this is a `group` field, then `siblingData` will be the other fields within the group.
    */
   siblingData: Partial<TSiblingData>,
@@ -276,6 +272,10 @@ export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
     blockData: Partial<TData>
     user: PayloadRequest['user']
   },
+  /**
+   * The path of the field, e.g. ["group", "myArray", 1, "textField"]. The path is the schemaPath but with indexes and would be used in the context of field data, not field schemas.
+   */
+  path: (number | string)[],
 ) => boolean
 
 export type FilterOptionsProps<TData = any> = {
