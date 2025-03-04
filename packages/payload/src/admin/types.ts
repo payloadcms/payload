@@ -575,7 +575,20 @@ export type {
 
 export type { LanguageOptions } from './LanguageOptions.js'
 
-export type { RichTextAdapter, RichTextAdapterProvider, RichTextHooks } from './RichText.js'
+export type {
+  AfterChangeRichTextHook,
+  AfterChangeRichTextHookArgs,
+  AfterReadRichTextHook,
+  AfterReadRichTextHookArgs,
+  BaseRichTextHookArgs,
+  BeforeChangeRichTextHook,
+  BeforeChangeRichTextHookArgs,
+  BeforeValidateRichTextHook,
+  BeforeValidateRichTextHookArgs,
+  RichTextAdapter,
+  RichTextAdapterProvider,
+  RichTextHooks,
+} from './RichText.js'
 
 export type {
   DocumentSubViewTypes,
