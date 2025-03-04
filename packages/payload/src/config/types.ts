@@ -881,22 +881,46 @@ export type Config = {
     /** Base meta data to use for the Admin Panel. Included properties are titleSuffix, ogImage, and favicon. */
     meta?: MetaConfig
     routes?: {
-      /** The route for the account page. */
-      account?: string
-      /** The route for the create first user page. */
-      createFirstUser?: string
-      /** The route for the forgot password page. */
-      forgot?: string
-      /** The route the user will be redirected to after being inactive for too long. */
-      inactivity?: string
-      /** The route for the login page. */
-      login?: string
-      /** The route for the logout page. */
-      logout?: string
-      /** The route for the reset password page. */
-      reset?: string
-      /** The route for the unauthorized page. */
-      unauthorized?: string
+      /** The route for the account page.
+       *
+       * @default '/account'
+       */
+      account?: `/${string}`
+      /** The route for the create first user page.
+       *
+       * @default '/create-first-user'
+       */
+      createFirstUser?: `/${string}`
+      /** The route for the forgot password page.
+       *
+       * @default '/forgot'
+       */
+      forgot?: `/${string}`
+      /** The route the user will be redirected to after being inactive for too long.
+       *
+       * @default '/logout-inactivity'
+       */
+      inactivity?: `/${string}`
+      /** The route for the login page.
+       *
+       * @default '/login'
+       */
+      login?: `/${string}`
+      /** The route for the logout page.
+       *
+       * @default '/logout'
+       */
+      logout?: `/${string}`
+      /** The route for the reset password page.
+       *
+       * @default '/reset'
+       */
+      reset?: `/${string}`
+      /** The route for the unauthorized page.
+       *
+       * @default '/unauthorized'
+       */
+      unauthorized?: `/${string}`
     }
     /**
      * Suppresses React hydration mismatch warnings during the hydration of the root <html> tag.

@@ -19,6 +19,7 @@ import { CollectionNoApiView } from './collections/NoApiView.js'
 import { CollectionNotInView } from './collections/NotInView.js'
 import { Posts } from './collections/Posts.js'
 import { UploadCollection } from './collections/Upload.js'
+import { UploadTwoCollection } from './collections/UploadTwo.js'
 import { Users } from './collections/Users.js'
 import { with300Documents } from './collections/With300Documents.js'
 import { CustomGlobalViews1 } from './globals/CustomViews1.js'
@@ -40,6 +41,7 @@ import {
   protectedCustomNestedViewPath,
   publicCustomViewPath,
 } from './shared.js'
+
 export default buildConfigWithDefaults({
   admin: {
     importMap: {
@@ -141,6 +143,7 @@ export default buildConfigWithDefaults({
   },
   collections: [
     UploadCollection,
+    UploadTwoCollection,
     Posts,
     Users,
     CollectionHidden,
