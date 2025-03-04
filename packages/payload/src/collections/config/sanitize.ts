@@ -350,9 +350,9 @@ export const sanitizeCollection = async (
         })
       })
 
-      const results = await Promise.all(updatePromises)
+      await Promise.all(updatePromises)
 
-      return new Response(JSON.stringify({ results, success: true }), {
+      return new Response(JSON.stringify({ orderValues, success: true }), {
         headers: { 'Content-Type': 'application/json' },
         status: 200,
       })

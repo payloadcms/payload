@@ -5,6 +5,7 @@ import type { Column } from 'payload'
 import './index.scss'
 
 import React, { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { DraggableSortableItem } from '../DraggableSortable/DraggableSortableItem/index.js'
@@ -49,14 +50,49 @@ export const Table: React.FC<Props> = ({ appearance = 'default', columns, data: 
       return
     }
 
+    // Store the original data for rollback
+    const previousData = [...localData]
+
     // Update local state to reorder the rows
     setLocalData((currentData) => {
       const newData = [...currentData]
-
       // Move the item in the array
       newData.splice(moveToIndex, 0, newData.splice(moveFromIndex, 1)[0])
       return newData
     })
+
+    try {
+      const movedId = localData[moveFromIndex].id
+      const newBeforeRow =
+        moveToIndex > moveFromIndex ? localData[moveToIndex] : localData[moveToIndex - 1]
+      const newAfterRow =
+        moveToIndex > moveFromIndex ? localData[moveToIndex + 1] : localData[moveToIndex]
+
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
+      // Assuming we're in the context of a collection
+      const collectionSlug = window.location.pathname.split('/').filter(Boolean)[2]
+      const response = await fetch(`/api/${collectionSlug}/reorder`, {
+        body: JSON.stringify({
+          betweenIds: [newBeforeRow?.id, newAfterRow?.id],
+          docIds: [movedId],
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to reorder')
+      }
+
+      // no need to update the data here, the data is updated in the useListQuery provider
+    } catch (_error) {
+      // Rollback to previous state if the request fails
+      setLocalData(previousData)
+      toast.error('Failed to reorder')
+    }
   }
 
   const rowIds = localData.map((row) => row.id)
