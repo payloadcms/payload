@@ -12,17 +12,14 @@ import { DraggableSortable } from '../DraggableSortable/index.js'
 
 const baseClass = 'table'
 
-// if you change this, you need to change it in a couple of places where it's duplicated
-const ORDER_FIELD_NAME = '_order'
-
 export type Props = {
   readonly appearance?: 'condensed' | 'default'
   readonly columns?: Column[]
-  readonly data: { [key: string]: unknown; id: string; [ORDER_FIELD_NAME]?: string }[]
+  readonly data: { [key: string]: unknown; id: string }[]
 }
 
 export const Table: React.FC<Props> = ({ appearance = 'default', columns, data: initialData }) => {
-  const { data: listQueryData, handleSortChange, query } = useListQuery()
+  const { data: listQueryData } = useListQuery()
   const [idToOriginalIndex, setIdToOriginalIndex] = useState(
     () => new Map(initialData.map((item, index) => [String(item.id), index])),
   )
@@ -37,15 +34,6 @@ export const Table: React.FC<Props> = ({ appearance = 'default', columns, data: 
     setLocalData(serverData)
     setIdToOriginalIndex(new Map(serverData.map((item, index) => [String(item.id), index])))
   }, [serverData])
-
-  // Force re-sort when query sort changes
-  useEffect(() => {
-    if (query?.sort) {
-      void handleSortChange(query.sort as string).catch((error) => {
-        throw error
-      })
-    }
-  }, [handleSortChange, query?.sort])
 
   const activeColumns = columns?.filter((col) => col?.active)
 
@@ -72,8 +60,7 @@ export const Table: React.FC<Props> = ({ appearance = 'default', columns, data: 
     })
   }
 
-  const rowIds = localData.map((row) => row.id || String(Math.random()))
-  const isSortable = localData.length > 0 && ORDER_FIELD_NAME in localData[0]
+  const rowIds = localData.map((row) => row.id)
 
   // Get the correct cell for a given row ID
   const getCellForRow = (renderedCells, currentRowId) => {
@@ -130,7 +117,7 @@ export const Table: React.FC<Props> = ({ appearance = 'default', columns, data: 
                       const cell = getCellForRow(col.renderedCells, String(row.id))
 
                       // For drag handles, wrap in div with drag attributes
-                      if (isSortable && accessor === '_dragHandle') {
+                      if (accessor === '_dragHandle') {
                         return (
                           <td className={`cell-${accessor}`} key={colIndex}>
                             <div {...attributes} {...listeners}>
