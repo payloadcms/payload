@@ -117,18 +117,17 @@ export const getListPresetsConfig = (config: Config): CollectionConfig => ({
   hooks: {
     beforeValidate: [
       ({ data, operation }) => {
-        const typedData = data as ListPreset
+        // TODO: type this
+        const typedData = data as any
 
         if (operation === 'create' || operation === 'update') {
           // Ensure all operations have a constraint
           operations.forEach((operation) => {
             if (!typedData.access) {
-              // @ts-expect-error expect missing properties while building up the object
               typedData.access = {}
             }
 
             if (!typedData.access?.[operation]) {
-              // @ts-expect-error expect missing properties while building up the object
               typedData[operation] = {}
             }
 
@@ -144,7 +143,8 @@ export const getListPresetsConfig = (config: Config): CollectionConfig => ({
           // If at least one constraint is not `onlyMe` then `isShared` must be true
           if (typedData?.access) {
             const someOperationsAreShared = Object.values(typedData.access).some(
-              (operation) => operation.constraint !== 'onlyMe',
+              // TODO: remove the `any` here
+              (operation: any) => operation.constraint !== 'onlyMe',
             )
 
             typedData.isShared = someOperationsAreShared
