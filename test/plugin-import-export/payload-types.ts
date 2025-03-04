@@ -148,6 +148,7 @@ export interface User {
 export interface Page {
   id: string;
   title: string;
+  localized?: string | null;
   group?: {
     value?: string | null;
     ignore?: string | null;
@@ -458,6 +459,7 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
+  localized?: T;
   group?:
     | T
     | {

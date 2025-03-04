@@ -22,6 +22,11 @@ export const Pages: CollectionConfig = {
       required: true,
     },
     {
+      name: 'localized',
+      type: 'text',
+      localized: true,
+    },
+    {
       name: 'group',
       type: 'group',
       fields: [

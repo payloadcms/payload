@@ -15,6 +15,7 @@ type Export = {
   format: 'csv' | 'json'
   globals?: string[]
   id: number | string
+  locale?: string
   name: string
   slug: string
   sort: Sort
@@ -38,13 +39,16 @@ export const createExport = async (args: CreateExportArgs) => {
       exportsCollection,
       fields,
       format,
+      locale: localeInput,
       sort,
       user,
       where,
     },
-    req: { locale, payload },
+    req: { locale: localeArg, payload },
     req,
   } = args
+
+  const locale = localeInput ?? localeArg
 
   const collectionConfig = payload.config.collections.find(({ slug }) => slug === collectionSlug)
   if (!collectionConfig) {

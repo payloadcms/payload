@@ -26,6 +26,24 @@ export const seed = async (payload: Payload): Promise<boolean> => {
       })
     }
     for (let i = 0; i < 5; i++) {
+      const doc = await payload.create({
+        collection: 'pages',
+        data: {
+          title: `Localized ${i}`,
+          localized: 'en test',
+        },
+        locale: 'en',
+      })
+      await payload.update({
+        collection: 'pages',
+        id: doc.id,
+        data: {
+          localized: 'es test',
+        },
+        locale: 'es',
+      })
+    }
+    for (let i = 0; i < 5; i++) {
       await payload.create({
         collection: 'pages',
         data: {

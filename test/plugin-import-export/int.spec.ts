@@ -66,6 +66,63 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].updatedAt).toBeDefined()
     })
 
+    it('should create a file for collection csv from one locale', async () => {
+      let doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          fields: ['id', 'localized'],
+          locale: 'en',
+          format: 'csv',
+          where: {
+            title: { contains: 'Localized ' },
+          },
+        },
+      })
+
+      doc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(doc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', doc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      expect(data[0].id).toBeDefined()
+      expect(data[0].localized).toStrictEqual('en test')
+    })
+
+    it('should create a file for collection csv from multiple locales', async () => {
+      let doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          fields: ['id', 'localized'],
+          locale: 'all',
+          format: 'csv',
+          where: {
+            title: { contains: 'Localized ' },
+          },
+        },
+      })
+
+      doc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(doc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', doc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      expect(data[0].id).toBeDefined()
+      expect(data[0].localized_en).toStrictEqual('en test')
+      expect(data[0].localized_es).toStrictEqual('es test')
+    })
+
     it('should create a file for collection csv from array', async () => {
       let doc = await payload.create({
         collection: 'exports',
