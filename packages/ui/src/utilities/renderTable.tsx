@@ -201,7 +201,12 @@ export const renderTable = ({
     columnState.unshift({
       accessor: '_dragHandle',
       active: true,
-      field: {},
+      field: {
+        admin: {
+          disabled: true,
+        },
+        hidden: true,
+      },
       Heading: '',
       renderedCells: docs.map((_, i) => <SortRow key={i} />),
     } as Column)

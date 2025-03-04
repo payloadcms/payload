@@ -55,7 +55,10 @@ export const Table: React.FC<Props> = ({
 
   const activeColumns = columns?.filter((col) => col?.active)
 
-  if (!activeColumns || activeColumns.length === 0) {
+  if (
+    !activeColumns ||
+    activeColumns.filter((col) => !['_dragHandle', '_select'].includes(col.accessor)).length === 0
+  ) {
     return <div>No columns selected</div>
   }
 
