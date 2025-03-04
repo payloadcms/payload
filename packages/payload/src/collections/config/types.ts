@@ -465,7 +465,7 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * to ensure uniqueness between several fields.
    * Specify field paths
    * @example
-   * ['title', 'group.name']
+   * [{ unique: true, fields: ['title', 'group.name'] }]
    * @default []
    */
   indexes?: CompoundIndex[]
