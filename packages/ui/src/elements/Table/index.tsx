@@ -129,6 +129,14 @@ export const Table: React.FC<Props> = ({ appearance = 'default', columns, data: 
                     {activeColumns.map((col, colIndex) => {
                       const { accessor } = col
 
+                      if (col.accessor === '_order') {
+                        return (
+                          <td className={`cell-${accessor}`} key={colIndex}>
+                            {(listQueryData.page - 1) * listQueryData.limit + rowIndex + 1}
+                          </td>
+                        )
+                      }
+
                       // Use the cellMap to find which index in the renderedCells to use
                       const cell = col.renderedCells[cellMap[row.id]]
 
