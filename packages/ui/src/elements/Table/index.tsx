@@ -19,15 +19,9 @@ export type Props = {
   readonly appearance?: 'condensed' | 'default'
   readonly columns?: Column[]
   readonly data: { [key: string]: unknown; id: string; [ORDER_FIELD_NAME]?: string }[]
-  readonly onDragEnd?: (data: { moveFromIndex: number; moveToIndex: number }) => void
 }
 
-export const Table: React.FC<Props> = ({
-  appearance = 'default',
-  columns,
-  data: initialData,
-  onDragEnd: propOnDragEnd,
-}) => {
+export const Table: React.FC<Props> = ({ appearance = 'default', columns, data: initialData }) => {
   const { data: listQueryData, handleSortChange, query } = useListQuery()
   const [idToOriginalIndex, setIdToOriginalIndex] = useState(
     () => new Map(initialData.map((item, index) => [String(item.id), index])),
@@ -76,11 +70,6 @@ export const Table: React.FC<Props> = ({
 
       return newData
     })
-
-    // Still call the prop onDragEnd if provided - for server updates
-    if (propOnDragEnd) {
-      propOnDragEnd({ moveFromIndex, moveToIndex })
-    }
   }
 
   const rowIds = localData.map((row) => row.id || String(Math.random()))
