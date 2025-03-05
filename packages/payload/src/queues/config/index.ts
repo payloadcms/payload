@@ -5,6 +5,8 @@ import type { Field } from '../../fields/config/types.js'
 import { runJobsEndpoint } from '../restEndpointRun.js'
 import { getJobTaskStatus } from '../utilities/getJobTaskStatus.js'
 
+export const jobsCollectionSlug = 'payload-jobs'
+
 export const getDefaultJobsCollection: (config: Config) => CollectionConfig | null = (config) => {
   const workflowSlugs: Set<string> = new Set()
   const taskSlugs: Set<string> = new Set(['inline'])
@@ -91,7 +93,7 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
   }
 
   const jobsCollection: CollectionConfig = {
-    slug: 'payload-jobs',
+    slug: jobsCollectionSlug,
     admin: {
       group: 'System',
       hidden: true,
