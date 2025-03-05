@@ -328,7 +328,24 @@ export const promise = async <T>({
         : await field.access[operation]({ id, blockData, data, doc, req, siblingData })
 
       if (!result) {
-        delete siblingData[field.name]
+        // No access, but existing document data is found, merge it in
+        if (typeof siblingDoc[field.name] !== 'undefined') {
+          siblingData[field.name] = cloneDataFromOriginalDoc(siblingDoc[field.name])
+  
+        // Fallback to the default value
+        } else if (typeof field.defaultValue !== 'undefined') {
+          siblingData[field.name] = await getDefaultValue({
+            defaultValue: field.defaultValue,
+            locale: req.locale,
+            req,
+            user: req.user,
+            value: siblingData[field.name],
+          })
+        
+        // If there is no previous value, and no default value, remove the field
+        } else {
+          delete siblingData[field.name]
+        }
       }
     }
   }
