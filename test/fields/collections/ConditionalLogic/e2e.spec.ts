@@ -161,7 +161,7 @@ describe('Conditional Logic', () => {
 
   test('should not render fields when adding array or blocks rows until form state returns', async () => {
     await page.goto(url.create)
-    const addRowButton = page.locator('.array-field__add-row')
+    const addRowButton = page.locator('#field-arrayWithConditionalField .array-field__add-row')
     const fieldWithConditionSelector = 'input#field-arrayWithConditionalField__0__textWithCondition'
     await addRowButton.click()
 
