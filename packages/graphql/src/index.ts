@@ -1,5 +1,5 @@
 import type { OperationArgs } from 'graphql-http'
-import type { Field, GraphQLInfo, SanitizedConfig } from 'payload'
+import type { GraphQLInfo, SanitizedConfig } from 'payload'
 
 import * as GraphQL from 'graphql'
 
@@ -14,42 +14,8 @@ import { buildLocaleInputType } from './schema/buildLocaleInputType.js'
 import { buildPoliciesType } from './schema/buildPoliciesType.js'
 import { initCollections } from './schema/initCollections.js'
 import { initGlobals } from './schema/initGlobals.js'
-import { formatName } from './utilities/formatName.js'
+import { sanitizeFieldNames } from './utilities/sanitizeFieldNames.js'
 import { wrapCustomFields } from './utilities/wrapCustomResolver.js'
-
-export const sanitizeFieldNames = (fields: Field[]): Field[] => {
-  return fields.map((field) => {
-    if ('name' in field) {
-      field.name = formatName(field.name)
-    }
-
-    if (
-      field.type === 'row' ||
-      field.type === 'array' ||
-      field.type === 'collapsible' ||
-      field.type === 'group'
-    ) {
-      field.fields = sanitizeFieldNames(field.fields)
-    }
-
-    if (field.type === 'blocks') {
-      field.blocks.forEach((block) => {
-        block.fields = sanitizeFieldNames(block.fields)
-      })
-    }
-
-    if (field.type === 'tabs') {
-      field.tabs.forEach((tab) => {
-        if ('name' in tab) {
-          tab.name = formatName(tab.name)
-        }
-        tab.fields = sanitizeFieldNames(tab.fields)
-      })
-    }
-
-    return field
-  })
-}
 
 export function configToSchema(config: SanitizedConfig): {
   schema: GraphQL.GraphQLSchema
@@ -60,7 +26,6 @@ export function configToSchema(config: SanitizedConfig): {
 
     return collection
   })
-
   config.globals = (config.globals || []).map((global) => {
     global.fields = sanitizeFieldNames(global.fields)
 
