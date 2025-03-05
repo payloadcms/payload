@@ -1,4 +1,5 @@
 'use client'
+import type { DefaultNodeTypes, SerializedBlockNode } from '@payloadcms/richtext-lexical'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
 import { getRestPopulateFn } from '@payloadcms/richtext-lexical/client'
@@ -6,11 +7,17 @@ import {
   convertLexicalToHTML,
   type HTMLConvertersFunction,
 } from '@payloadcms/richtext-lexical/html'
+import {
+  convertLexicalToHTMLAsync,
+  type HTMLConvertersFunctionAsync,
+} from '@payloadcms/richtext-lexical/html-async'
 import { type JSXConvertersFunction, RichText } from '@payloadcms/richtext-lexical/react'
 import { useConfig, useDocumentInfo, usePayloadAPI } from '@payloadcms/ui'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
-const jsxConverters: JSXConvertersFunction = ({ defaultConverters }) => ({
+const jsxConverters: JSXConvertersFunction<DefaultNodeTypes | SerializedBlockNode<any>> = ({
+  defaultConverters,
+}) => ({
   ...defaultConverters,
   blocks: {
     myTextBlock: ({ node }) => <div style={{ backgroundColor: 'red' }}>{node.fields.text}</div>,
@@ -20,7 +27,21 @@ const jsxConverters: JSXConvertersFunction = ({ defaultConverters }) => ({
   },
 })
 
-const htmlConverters: HTMLConvertersFunction = ({ defaultConverters }) => ({
+const htmlConverters: HTMLConvertersFunction<DefaultNodeTypes | SerializedBlockNode<any>> = ({
+  defaultConverters,
+}) => ({
+  ...defaultConverters,
+  blocks: {
+    myTextBlock: ({ node }) => `<div style="background-color: red;">${node.fields.text}</div>`,
+    relationshipBlock: () => {
+      return `<p>Test</p>`
+    },
+  },
+})
+
+const htmlConvertersAsync: HTMLConvertersFunctionAsync<
+  DefaultNodeTypes | SerializedBlockNode<any>
+> = ({ defaultConverters }) => ({
   ...defaultConverters,
   blocks: {
     myTextBlock: ({ node }) => `<div style="background-color: red;">${node.fields.text}</div>`,
@@ -52,22 +73,23 @@ export const LexicalRendered: React.FC = () => {
     },
   })
 
-  const [html, setHTML] = useState<null | string>(null)
-  const [htmlFromUnpopulatedData, setHtmlFromUnpopulatedData] = useState<null | string>(null)
+  const html: null | string = useMemo(() => {
+    if (!data.lexicalWithBlocks) {
+      return null
+    }
 
-  useEffect(() => {
-    void convertLexicalToHTML({
+    return convertLexicalToHTML({
       converters: htmlConverters,
       data: data.lexicalWithBlocks as SerializedEditorState,
-    }).then((html) => {
-      setHTML(html)
     })
   }, [data.lexicalWithBlocks])
 
+  const [htmlFromUnpopulatedData, setHtmlFromUnpopulatedData] = useState<null | string>(null)
+
   useEffect(() => {
     async function convert() {
-      const html = await convertLexicalToHTML({
-        converters: htmlConverters,
+      const html = await convertLexicalToHTMLAsync({
+        converters: htmlConvertersAsync,
         data: unpopulatedData.lexicalWithBlocks as SerializedEditorState,
         populate: await getRestPopulateFn({
           apiURL: `${serverURL}${api}`,

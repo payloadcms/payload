@@ -1,12 +1,14 @@
-import type { SerializedAutoLinkNode, SerializedLinkNode } from '../../../../nodeTypes.js'
-import type { HTMLConverters, HTMLPopulateFn } from '../types.js'
+import type { SerializedAutoLinkNode, SerializedLinkNode } from '../../../../../nodeTypes.js'
+import type { HTMLConvertersAsync, HTMLPopulateFn } from '../types.js'
 
-export const LinkHTMLConverter: (args: {
+export const LinkHTMLConverterAsync: (args: {
   internalDocToHref?: (args: {
     linkNode: SerializedLinkNode
     populate?: HTMLPopulateFn
   }) => Promise<string> | string
-}) => HTMLConverters<SerializedAutoLinkNode | SerializedLinkNode> = ({ internalDocToHref }) => ({
+}) => HTMLConvertersAsync<SerializedAutoLinkNode | SerializedLinkNode> = ({
+  internalDocToHref,
+}) => ({
   autolink: async ({ node, nodesToHTML, providedStyleTag }) => {
     const children = (
       await nodesToHTML({

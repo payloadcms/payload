@@ -1,9 +1,9 @@
-import type { SerializedParagraphNode } from '../../../../nodeTypes.js'
+import type { SerializedParagraphNode } from '../../../../../nodeTypes.js'
 import type { HTMLConverters } from '../types.js'
 
 export const ParagraphHTMLConverter: HTMLConverters<SerializedParagraphNode> = {
-  paragraph: async ({ node, nodesToHTML, providedStyleTag }) => {
-    const children = await nodesToHTML({
+  paragraph: ({ node, nodesToHTML, providedStyleTag }) => {
+    const children = nodesToHTML({
       nodes: node.children,
     })
 

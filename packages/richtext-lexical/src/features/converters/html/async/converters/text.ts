@@ -1,9 +1,9 @@
-import type { SerializedTextNode } from '../../../../nodeTypes.js'
-import type { HTMLConverters } from '../types.js'
+import type { SerializedTextNode } from '../../../../../nodeTypes.js'
+import type { HTMLConvertersAsync } from '../types.js'
 
-import { NodeFormat } from '../../../../lexical/utils/nodeFormat.js'
+import { NodeFormat } from '../../../../../lexical/utils/nodeFormat.js'
 
-export const TextHTMLConverter: HTMLConverters<SerializedTextNode> = {
+export const TextHTMLConverterAsync: HTMLConvertersAsync<SerializedTextNode> = {
   text: ({ node }) => {
     let text = node.text
 

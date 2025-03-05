@@ -1,7 +1,7 @@
-import type { SerializedHeadingNode } from '../../../../nodeTypes.js'
-import type { HTMLConverters } from '../types.js'
+import type { SerializedHeadingNode } from '../../../../../nodeTypes.js'
+import type { HTMLConvertersAsync } from '../types.js'
 
-export const HeadingHTMLConverter: HTMLConverters<SerializedHeadingNode> = {
+export const HeadingHTMLConverterAsync: HTMLConvertersAsync<SerializedHeadingNode> = {
   heading: async ({ node, nodesToHTML, providedStyleTag }) => {
     const children = (
       await nodesToHTML({

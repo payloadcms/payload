@@ -1,4 +1,4 @@
-import type { DefaultNodeTypes } from '../../../nodeTypes.js'
+import type { DefaultNodeTypes } from '../../../../nodeTypes.js'
 import type { HTMLConverters } from './types.js'
 
 import { BlockquoteHTMLConverter } from './converters/blockquote.js'

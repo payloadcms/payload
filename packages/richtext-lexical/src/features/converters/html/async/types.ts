@@ -5,7 +5,8 @@ import type {
   DefaultNodeTypes,
   SerializedBlockNode,
   SerializedInlineBlockNode,
-} from '../../../nodeTypes.js'
+} from '../../../../nodeTypes.js'
+import type { SerializedLexicalNodeWithParent } from '../shared/types.js'
 export type HTMLPopulateArguments = {
   collectionSlug: string
   id: number | string
@@ -16,32 +17,28 @@ export type HTMLPopulateFn = <TData extends object = TypeWithID>(
   args: HTMLPopulateArguments,
 ) => Promise<TData | undefined>
 
-export type HTMLConverter<T extends { [key: string]: any; type?: string } = SerializedLexicalNode> =
+export type HTMLConverterAsync<
+  T extends { [key: string]: any; type?: string } = SerializedLexicalNode,
+> =
+  | ((args: {
+      childIndex: number
+      converters: HTMLConvertersAsync
+      node: T
+      nodesToHTML: (args: {
+        converters?: HTMLConvertersAsync
+        disableIndent?: boolean | string[]
+        disableTextAlign?: boolean | string[]
+        nodes: SerializedLexicalNode[]
+        parent?: SerializedLexicalNodeWithParent
+      }) => Promise<string[]>
+      parent: SerializedLexicalNodeWithParent
+      populate?: HTMLPopulateFn
+      providedCSSString: string
+      providedStyleTag: string
+    }) => Promise<string> | string)
+  | string
 
-    | ((args: {
-        childIndex: number
-        converters: HTMLConverters
-        node: T
-        nodesToHTML: (args: {
-          converters?: HTMLConverters
-          disableIndent?: boolean | string[]
-          disableTextAlign?: boolean | string[]
-          nodes: SerializedLexicalNode[]
-          parent?: SerializedLexicalNodeWithParent
-        }) => Promise<string[]>
-        parent: SerializedLexicalNodeWithParent
-        populate?: HTMLPopulateFn
-        providedCSSString: string
-        providedStyleTag: string
-      }) => Promise<string> | string)
-    | string
-
-export type ProvidedCSS = {
-  'padding-inline-start'?: string
-  'text-align'?: string
-}
-
-export type HTMLConverters<
+export type HTMLConvertersAsync<
   T extends { [key: string]: any; type?: string } =
     | DefaultNodeTypes
     | SerializedBlockNode<{ blockName?: null | string; blockType: string }> // need these to ensure types for blocks and inlineBlocks work if no generics are provided
@@ -49,12 +46,12 @@ export type HTMLConverters<
 > = {
   [key: string]:
     | {
-        [blockSlug: string]: HTMLConverter<any>
+        [blockSlug: string]: HTMLConverterAsync<any>
       }
-    | HTMLConverter<any>
+    | HTMLConverterAsync<any>
     | undefined
 } & {
-  [nodeType in Exclude<NonNullable<T['type']>, 'block' | 'inlineBlock'>]?: HTMLConverter<
+  [nodeType in Exclude<NonNullable<T['type']>, 'block' | 'inlineBlock'>]?: HTMLConverterAsync<
     Extract<T, { type: nodeType }>
   >
 } & {
@@ -66,7 +63,7 @@ export type HTMLConverters<
           : never
         : never,
       string
-    >]?: HTMLConverter<
+    >]?: HTMLConverterAsync<
       Extract<T, { type: 'block' }> extends SerializedBlockNode<infer B>
         ? SerializedBlockNode<Extract<B, { blockType: K }>>
         : SerializedBlockNode
@@ -80,7 +77,7 @@ export type HTMLConverters<
           : never
         : never,
       string
-    >]?: HTMLConverter<
+    >]?: HTMLConverterAsync<
       Extract<T, { type: 'inlineBlock' }> extends SerializedInlineBlockNode<infer B>
         ? SerializedInlineBlockNode<Extract<B, { blockType: K }>>
         : SerializedInlineBlockNode
@@ -88,13 +85,9 @@ export type HTMLConverters<
   }
 }
 
-export type HTMLConvertersFunction<
+export type HTMLConvertersFunctionAsync<
   T extends { [key: string]: any; type?: string } =
     | DefaultNodeTypes
     | SerializedBlockNode<{ blockName?: null | string }>
     | SerializedInlineBlockNode<{ blockName?: null | string; blockType: string }>,
-> = (args: { defaultConverters: HTMLConverters<DefaultNodeTypes> }) => HTMLConverters<T>
-
-export type SerializedLexicalNodeWithParent = {
-  parent?: SerializedLexicalNode
-} & SerializedLexicalNode
+> = (args: { defaultConverters: HTMLConvertersAsync<DefaultNodeTypes> }) => HTMLConvertersAsync<T>

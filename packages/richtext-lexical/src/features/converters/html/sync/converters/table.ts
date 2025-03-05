@@ -2,18 +2,16 @@ import type {
   SerializedTableCellNode,
   SerializedTableNode,
   SerializedTableRowNode,
-} from '../../../../nodeTypes.js'
+} from '../../../../../nodeTypes.js'
 import type { HTMLConverters } from '../types.js'
 
 export const TableHTMLConverter: HTMLConverters<
   SerializedTableCellNode | SerializedTableNode | SerializedTableRowNode
 > = {
-  table: async ({ node, nodesToHTML, providedStyleTag }) => {
-    const children = (
-      await nodesToHTML({
-        nodes: node.children,
-      })
-    ).join('')
+  table: ({ node, nodesToHTML, providedStyleTag }) => {
+    const children = nodesToHTML({
+      nodes: node.children,
+    }).join('')
 
     return `<div${providedStyleTag} class="lexical-table-container">
         <table class="lexical-table" style="border-collapse: collapse;">
@@ -22,12 +20,10 @@ export const TableHTMLConverter: HTMLConverters<
       </div>`
   },
 
-  tablecell: async ({ node, nodesToHTML, providedCSSString }) => {
-    const children = (
-      await nodesToHTML({
-        nodes: node.children,
-      })
-    ).join('')
+  tablecell: ({ node, nodesToHTML, providedCSSString }) => {
+    const children = nodesToHTML({
+      nodes: node.children,
+    }).join('')
 
     const TagName = node.headerState > 0 ? 'th' : 'td'
     const headerStateClass = `lexical-table-cell-header-${node.headerState}`
@@ -51,12 +47,10 @@ export const TableHTMLConverter: HTMLConverters<
     `
   },
 
-  tablerow: async ({ node, nodesToHTML, providedStyleTag }) => {
-    const children = (
-      await nodesToHTML({
-        nodes: node.children,
-      })
-    ).join('')
+  tablerow: ({ node, nodesToHTML, providedStyleTag }) => {
+    const children = nodesToHTML({
+      nodes: node.children,
+    }).join('')
 
     return `<tr${providedStyleTag} class="lexical-table-row">
         ${children}

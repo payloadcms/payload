@@ -1,13 +1,13 @@
 import type { SerializedEditorState } from 'lexical'
 import type { Field } from 'payload'
 
-import type { HTMLConverters, HTMLConvertersFunction } from '../types.js'
+import type { HTMLConvertersAsync, HTMLConvertersFunctionAsync } from '../types.js'
 
-import { getPayloadPopulateFn } from '../../utilities/payloadPopulateFn.js'
-import { convertLexicalToHTML } from '../index.js'
+import { getPayloadPopulateFn } from '../../../utilities/payloadPopulateFn.js'
+import { convertLexicalToHTMLAsync } from '../index.js'
 
 type Args = {
-  converters?: HTMLConverters | HTMLConvertersFunction
+  converters?: HTMLConvertersAsync | HTMLConvertersFunctionAsync
   /**
    * Whether the lexicalHTML field should be hidden in the admin panel
    *
@@ -72,7 +72,7 @@ export const lexicalHTMLField: (args: Args) => Field = (args) => {
             showHiddenFields: showHiddenFields ?? false,
           })
 
-          return await convertLexicalToHTML({
+          return await convertLexicalToHTMLAsync({
             converters,
             data: lexicalFieldData,
             populate: htmlPopulateFn,
