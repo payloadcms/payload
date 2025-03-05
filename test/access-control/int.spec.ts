@@ -169,7 +169,7 @@ describe('Access Control', () => {
       expect(docOverride.array?.[1].text).toBe(secondArrayText)
     })
 
-    it('should throw validation error when trying to update a field without permission', async () => {
+    it('should use fallback value when trying to update a field without permission', async () => {
       const doc = await payload.create({
         collection: hooksSlug,
         data: {
@@ -177,25 +177,20 @@ describe('Access Control', () => {
         },
       })
 
-      let error
-      try {
-        await payload.update({
-          id: doc.id,
-          collection: hooksSlug,
-          overrideAccess: false,
-          data: {
-            cannotMutateRequired: 'new',
-            canMutate: 'canMutate',
-          },
-        })
-      } catch (e) {
-        error = e
-      }
+      const updatedDoc = await payload.update({
+        id: doc.id,
+        collection: hooksSlug,
+        overrideAccess: false,
+        data: {
+          cannotMutateRequired: 'new',
+          canMutate: 'canMutate',
+        },
+      })
 
-      expect(error).toBeInstanceOf(ValidationError)
+      expect(updatedDoc.cannotMutateRequired).toBe('original')
     })
 
-    it('should use fallback data and NOT throw validation error when required data is missing', async () => {
+    it('should use fallback value when required data is missing', async () => {
       const doc = await payload.create({
         collection: hooksSlug,
         data: {
