@@ -94,7 +94,7 @@
     "http-status": "2.1.0",
     "path-to-regexp": "6.3.0",
     "qs-esm": "7.0.2",
-    "react-diff-viewer-continued": "4.0.4",
+    "react-diff-viewer-continued": "4.0.5",
     "sass": "1.77.4",
     "uuid": "10.0.0"
   },
