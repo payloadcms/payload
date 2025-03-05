@@ -3,7 +3,7 @@ import type { CollectionSlug, ListPreset, SanitizedCollectionPermission } from '
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { transformColumnsToPreferences, transformColumnsToSearchParams } from 'payload/shared'
-import { Fragment, useCallback } from 'react'
+import React, { Fragment, useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 
 import { useConfig } from '../../providers/Config/index.js'
@@ -33,7 +33,7 @@ export const useListPresets = ({
   DeletePresetModal: React.ReactNode
   EditPresetDrawer: React.ReactNode
   hasModifiedPreset: boolean
-  listPresetMenuItems: React.ReactNode
+  listPresetMenuItems: React.ReactNode[]
   openPresetListDrawer: () => void
   PresetListDrawer: React.ReactNode
   resetPreset: () => Promise<void>
@@ -182,6 +182,79 @@ export const useListPresets = ({
     setColumnsModified,
   ])
 
+  const listPresetMenuItems = useMemo(() => {
+    const items: React.ReactNode[] = []
+
+    if (activePreset && hasModified) {
+      items.push(
+        <PopupList.Button
+          onClick={() => {
+            // TODO: reset query and columns
+            setQueryModified(false)
+            setColumnsModified(false)
+          }}
+        >
+          {t('general:reset')}
+        </PopupList.Button>,
+      )
+
+      if (listPresetPermissions.update) {
+        items.push(
+          <PopupList.Button
+            onClick={async () => {
+              await saveCurrentChanges()
+            }}
+          >
+            {activePreset.isShared ? t('general:updateForEveryone') : t('general:save')}
+          </PopupList.Button>,
+        )
+      }
+    }
+
+    items.push(
+      <PopupList.Button
+        onClick={() => {
+          openCreateNewDrawer()
+        }}
+      >
+        {t('general:createNewLabel', {
+          label: t('general:preset'),
+        })}
+      </PopupList.Button>,
+    )
+
+    if (activePreset && listPresetPermissions.delete) {
+      items.push(
+        <Fragment>
+          <PopupList.Button onClick={() => openModal(confirmDeletePresetModalSlug)}>
+            {t('general:delete')}
+          </PopupList.Button>
+          <PopupList.Button
+            onClick={() => {
+              openDocumentDrawer()
+            }}
+          >
+            {t('general:edit')}
+          </PopupList.Button>
+        </Fragment>,
+      )
+    }
+
+    return items
+  }, [
+    activePreset,
+    hasModified,
+    listPresetPermissions?.delete,
+    listPresetPermissions?.update,
+    openCreateNewDrawer,
+    openDocumentDrawer,
+    openModal,
+    saveCurrentChanges,
+    setColumnsModified,
+    setQueryModified,
+    t,
+  ])
+
   return {
     CreateNewPresetDrawer: (
       <CreateNewPresetDrawer
@@ -232,55 +305,7 @@ export const useListPresets = ({
       />
     ),
     hasModifiedPreset: hasModified,
-    listPresetMenuItems: (
-      <Fragment key="preset-menu-items">
-        {activePreset && hasModified ? (
-          <Fragment>
-            <PopupList.Button
-              onClick={() => {
-                // TODO: reset query and columns
-                setQueryModified(false)
-                setColumnsModified(false)
-              }}
-            >
-              {t('general:reset')}
-            </PopupList.Button>
-            {listPresetPermissions.update ? (
-              <PopupList.Button
-                onClick={async () => {
-                  await saveCurrentChanges()
-                }}
-              >
-                {activePreset.isShared ? t('general:updateForEveryone') : t('general:save')}
-              </PopupList.Button>
-            ) : null}
-          </Fragment>
-        ) : null}
-        <PopupList.Button
-          onClick={() => {
-            openCreateNewDrawer()
-          }}
-        >
-          {t('general:createNewLabel', {
-            label: t('general:preset'),
-          })}
-        </PopupList.Button>
-        {activePreset && listPresetPermissions.delete ? (
-          <Fragment>
-            <PopupList.Button onClick={() => openModal(confirmDeletePresetModalSlug)}>
-              {t('general:delete')}
-            </PopupList.Button>
-            <PopupList.Button
-              onClick={() => {
-                openDocumentDrawer()
-              }}
-            >
-              {t('general:edit')}
-            </PopupList.Button>
-          </Fragment>
-        ) : null}
-      </Fragment>
-    ),
+    listPresetMenuItems,
     openPresetListDrawer: openListDrawer,
     PresetListDrawer: (
       <ListDrawer

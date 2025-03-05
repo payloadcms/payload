@@ -135,10 +135,14 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     }
   }, [t, listSearchableFields, i18n, searchLabel])
 
-  const listMenuItems = listMenuItemsFromProps || []
+  let listMenuItems: React.ReactNode[] = listMenuItemsFromProps || []
 
   if (collectionConfig?.enableListPresets && !disableListPresets) {
-    listMenuItems.push(listPresetMenuItems)
+    if (listMenuItems.length > 0) {
+      listMenuItems.unshift(<hr />)
+    }
+
+    listMenuItems = listPresetMenuItems.concat(listMenuItems)
   }
 
   return (
@@ -214,7 +218,11 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                   size="large"
                   verticalAlign="bottom"
                 >
-                  <PopupList.ButtonGroup>{listMenuItems}</PopupList.ButtonGroup>
+                  <PopupList.ButtonGroup>
+                    {listMenuItems.map((item, i) => (
+                      <Fragment key={`list-menu-item-${i}`}>{item}</Fragment>
+                    ))}
+                  </PopupList.ButtonGroup>
                 </Popup>
               )}
             </div>

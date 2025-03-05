@@ -11,6 +11,15 @@
       gap: base(0.6);
     }
 
+    &__popup {
+      hr {
+        width: 100%;
+        height: 1px;
+        background-color: var(--theme-elevation-150);
+        border: none;
+      }
+    }
+
     .search-filter {
       flex-grow: 1;
 

@@ -70,8 +70,8 @@ export interface Config {
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
-    'payload-list-presets': PayloadListPreset;
     'payload-migrations': PayloadMigration;
+    'payload-list-presets': PayloadListPreset;
   };
   collectionsJoins: {};
   collectionsSelect: {
@@ -79,8 +79,8 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
-    'payload-list-presets': PayloadListPresetsSelect<false> | PayloadListPresetsSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+    'payload-list-presets': PayloadListPresetsSelect<false> | PayloadListPresetsSelect<true>;
   };
   db: {
     defaultIDType: string;
@@ -192,6 +192,17 @@ export interface PayloadPreference {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations".
+ */
+export interface PayloadMigration {
+  id: string;
+  name?: string | null;
+  batch?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-list-presets".
  */
 export interface PayloadListPreset {
@@ -233,17 +244,6 @@ export interface PayloadListPreset {
     | boolean
     | null;
   relatedCollection: 'pages';
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-migrations".
- */
-export interface PayloadMigration {
-  id: string;
-  name?: string | null;
-  batch?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -298,6 +298,16 @@ export interface PayloadPreferencesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_select".
+ */
+export interface PayloadMigrationsSelect<T extends boolean = true> {
+  name?: T;
+  batch?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-list-presets_select".
  */
 export interface PayloadListPresetsSelect<T extends boolean = true> {
@@ -330,16 +340,6 @@ export interface PayloadListPresetsSelect<T extends boolean = true> {
   where?: T;
   columns?: T;
   relatedCollection?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-migrations_select".
- */
-export interface PayloadMigrationsSelect<T extends boolean = true> {
-  name?: T;
-  batch?: T;
   updatedAt?: T;
   createdAt?: T;
 }
