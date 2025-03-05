@@ -17,11 +17,10 @@ export async function getFallbackValue({
   if ('name' in field) {
     if (typeof siblingDoc[field.name] !== 'undefined') {
       fallbackValue = cloneDataFromOriginalDoc(siblingDoc[field.name])
-    }
-    if ('defaultValue' in field && typeof field.defaultValue !== 'undefined') {
+    } else if ('defaultValue' in field && typeof field.defaultValue !== 'undefined') {
       fallbackValue = await getDefaultValue({
         defaultValue: field.defaultValue,
-        locale: req.locale,
+        locale: req.locale || '',
         req,
         user: req.user,
       })
