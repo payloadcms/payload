@@ -273,6 +273,17 @@ export const promise = async <T>({
       }
     }
 
+    // ensure the fallback value is only computed one time
+    // either here or when access control returns false
+    const fallbackResult = {
+      executed: false,
+      value: undefined,
+    }
+    if (typeof siblingData[field.name] === 'undefined') {
+      fallbackResult.value = await getFallbackValue({ field, req, siblingDoc })
+      fallbackResult.executed = true
+    }
+
     // Execute hooks
     if (field.hooks?.beforeValidate) {
       for (const hook of field.hooks.beforeValidate) {
@@ -296,7 +307,7 @@ export const promise = async <T>({
           siblingFields,
           value:
             typeof siblingData[field.name] === 'undefined'
-              ? await getFallbackValue({ field, req, siblingDoc })
+              ? fallbackResult.value
               : siblingData[field.name],
         })
 
@@ -313,7 +324,9 @@ export const promise = async <T>({
         : await field.access[operation]({ id, blockData, data, doc, req, siblingData })
 
       if (!result) {
-        siblingData[field.name] = await getFallbackValue({ field, req, siblingDoc })
+        siblingData[field.name] = !fallbackResult.executed
+          ? await getFallbackValue({ field, req, siblingDoc })
+          : fallbackResult.value
       }
     }
   }
