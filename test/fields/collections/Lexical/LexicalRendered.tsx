@@ -91,10 +91,8 @@ export const LexicalRendered: React.FC = () => {
       const html = await convertLexicalToHTMLAsync({
         converters: htmlConvertersAsync,
         data: unpopulatedData.lexicalWithBlocks as SerializedEditorState,
-        populate: await getRestPopulateFn({
+        populate: getRestPopulateFn({
           apiURL: `${serverURL}${api}`,
-          depth: 0,
-          draft: false,
         }),
       })
 

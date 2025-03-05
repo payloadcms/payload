@@ -175,22 +175,79 @@ If you wish to convert JSON to HTML ad-hoc, use the `convertLexicalToHTML` funct
 'use client'
 
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
-
 import { convertLexicalToHTML } from '@payloadcms/richtext-lexical/html'
+
+import React from 'react'
+
+export const MyComponent = ({ data }: { data: SerializedEditorState }) => {
+  const html = convertLexicalToHTML({ data })
+
+  return <div dangerouslySetInnerHTML={{ __html: html }} />
+}
+```
+
+### Generating HTML in your frontend with dynamic population
+
+The default `convertLexicalToHTML` function does not populate data for nodes like uploads or links - it expects you to pass in the fully populated data. If you want the converter to dynamically populate those nodes as they are encountered, you have to use the async version of the converter, imported from `@payloadcms/richtext-lexical/html-async`, and pass in the `populate` function:
+
+```tsx
+'use client'
+
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+
+import { getRestPopulateFn } from '@payloadcms/richtext-lexical/client'
+import { convertLexicalToHTMLAsync } from '@payloadcms/richtext-lexical/html-async'
 import React, { useEffect, useState } from 'react'
 
 export const MyComponent = ({ data }: { data: SerializedEditorState }) => {
   const [html, setHTML] = useState<null | string>(null)
   useEffect(() => {
-    void convertLexicalToHTML({
-      data,
-    }).then((html) => {
+    async function convert() {
+      const html = await convertLexicalToHTMLAsync({
+        data,
+        populate: getRestPopulateFn({
+          apiURL: `http://localhost:3000/api`,
+        }),
+      })
       setHTML(html)
-    })
+    }
+
+    void convert()
   }, [data])
 
   return html && <div dangerouslySetInnerHTML={{ __html: html }} />
 }
+```
+
+Do note that using the rest populate function will result in each node sending a separate request to the REST API, which may be slow for large documents. On the server, you can use the payload populate function, which will be more efficient:
+
+```tsx
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+
+import { getPayloadPopulateFn } from '@payloadcms/richtext-lexical'
+import { convertLexicalToHTMLAsync } from '@payloadcms/richtext-lexical/html-async'
+import { getPayload } from 'payload'
+import React from 'react'
+
+import config from '../../config.js'
+
+export const MyRSCComponent = async ({ data }: { data: SerializedEditorState }) => {
+  const payload = await getPayload({
+    config,
+  })
+
+  const html = await convertLexicalToHTMLAsync({
+    data,
+    populate: await getPayloadPopulateFn({
+      currentDepth: 0,
+      depth: 1,
+      payload,
+    }),
+  })
+
+  return html && <div dangerouslySetInnerHTML={{ __html: html }} />
+}
+
 ```
 
 ### Converting Lexical Blocks

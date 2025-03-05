@@ -8,11 +8,11 @@ export const getPayloadPopulateFn: (
   args: {
     currentDepth: number
     depth: number
-    draft: boolean
+    draft?: boolean
     locale?: TypedLocale
 
-    overrideAccess: boolean
-    showHiddenFields: boolean
+    overrideAccess?: boolean
+    showHiddenFields?: boolean
   } & (
     | {
         /**
@@ -66,12 +66,12 @@ export const getPayloadPopulateFn: (
       currentDepth,
       data: dataContainer,
       depth,
-      draft,
+      draft: draft ?? false,
       key: 'value',
-      overrideAccess,
+      overrideAccess: overrideAccess ?? true,
       req: reqToUse,
       select,
-      showHiddenFields,
+      showHiddenFields: showHiddenFields ?? false,
     })
 
     return dataContainer.value
