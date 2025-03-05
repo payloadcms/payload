@@ -1378,6 +1378,12 @@ export type Block = {
     }
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>
+    /**
+     * Hides the block name field from the Block's header
+     *
+     * @default false
+     */
+    disableBlockName?: boolean
     group?: Record<string, string> | string
     jsx?: PayloadComponent
   }
@@ -1407,7 +1413,7 @@ export type Block = {
 }
 
 export type ClientBlock = {
-  admin?: Pick<Block['admin'], 'custom' | 'group'>
+  admin?: Pick<Block['admin'], 'custom' | 'disableBlockName' | 'group'>
   fields: ClientField[]
   labels?: LabelsClient
 } & Pick<Block, 'imageAltText' | 'imageURL' | 'jsx' | 'slug'>
