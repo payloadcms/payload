@@ -2,7 +2,6 @@
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type {
   CollectionConfig,
-  CompoundIndex,
   SanitizedCollectionConfig,
   SanitizedJoin,
   SanitizedJoins,

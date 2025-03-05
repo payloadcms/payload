@@ -108,6 +108,8 @@ export const addDefaultsToCollectionConfig = (collection: CollectionConfig): Col
   collection.upload = collection.upload ?? false
   collection.versions = collection.versions ?? false
 
+  collection.indexes = collection.indexes ?? []
+
   return collection
 }
 
