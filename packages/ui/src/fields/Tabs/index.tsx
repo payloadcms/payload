@@ -14,6 +14,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 
 import { useCollapsible } from '../../elements/Collapsible/provider.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { useFormFields } from '../../forms/Form/index.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
@@ -21,8 +22,8 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldDescription } from '../FieldDescription/index.js'
-import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
+import { fieldBaseClass } from '../shared/index.js'
 import { TabsProvider } from './provider.js'
 import { TabComponent } from './Tab/index.js'
 
@@ -60,13 +61,32 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
   const { preferencesKey } = useDocumentInfo()
   const { i18n } = useTranslation()
   const { isWithinCollapsible } = useCollapsible()
-  const [activeTabIndex, setActiveTabIndex] = useState<number>(0)
+
+  const tabInfos = useFormFields(([fields]) => {
+    return tabs.map((tab, index) => {
+      const id = tabHasName(tab) ? tab.name : tab?.id
+
+      return {
+        index,
+        passesCondition: fields?.[id]?.passesCondition ?? true,
+        tab,
+      }
+    })
+  })
+
+  const [activeTabIndex, setActiveTabIndex] = useState<number>(() => {
+    return tabInfos.filter(({ passesCondition }) => passesCondition)?.[0]?.index ?? 0
+  })
+
   const tabsPrefKey = `tabs-${indexPath}`
   const [activeTabPath, setActiveTabPath] = useState<string>(() =>
     generateTabPath({ activeTabConfig: tabs[activeTabIndex], path: parentPath }),
   )
 
   const activePathChildrenPath = tabHasName(tabs[activeTabIndex]) ? activeTabPath : parentPath
+
+  const activeTabInfo = tabInfos[activeTabIndex]
+  const activeTabConfig = activeTabInfo?.tab
 
   const [activeTabSchemaPath, setActiveTabSchemaPath] = useState<string>(() =>
     generateTabPath({ activeTabConfig: tabs[0], path: parentSchemaPath }),
@@ -145,7 +165,14 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
     ],
   )
 
-  const activeTabConfig = tabs[activeTabIndex]
+  useEffect(() => {
+    if (activeTabInfo?.passesCondition === false) {
+      const nextTab = tabInfos.find(({ passesCondition }) => passesCondition)
+      if (nextTab) {
+        void handleTabChange(nextTab.index)
+      }
+    }
+  }, [activeTabInfo, tabInfos, handleTabChange])
 
   const activeTabDescription = activeTabConfig.admin?.description ?? activeTabConfig.description
 
@@ -168,18 +195,18 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
       <TabsProvider>
         <div className={`${baseClass}__tabs-wrap`}>
           <div className={`${baseClass}__tabs`}>
-            {tabs.map((tab, tabIndex) => {
-              return (
+            {tabInfos.map(({ index, passesCondition, tab }) => {
+              return passesCondition ? (
                 <TabComponent
-                  isActive={activeTabIndex === tabIndex}
-                  key={tabIndex}
+                  isActive={activeTabIndex === index}
+                  key={index}
                   parentPath={path}
                   setIsActive={() => {
-                    void handleTabChange(tabIndex)
+                    void handleTabChange(index)
                   }}
                   tab={tab}
                 />
-              )
+              ) : null
             })}
           </div>
         </div>

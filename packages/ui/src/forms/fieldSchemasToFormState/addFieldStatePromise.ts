@@ -750,6 +750,19 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         childPermissions = parentPermissions
       }
 
+      const tabCondition = tab.admin?.condition
+        ? tab.admin.condition(fullData, data, { blockData, user: req.user })
+        : true
+
+      const tabPassesCondition = passesCondition && tabCondition
+      const tabID = isNamedTab ? tab.name : (tab?.id ?? undefined)
+
+      if (tabID) {
+        state[tabID] = {
+          passesCondition: tabPassesCondition,
+        }
+      }
+
       return iterateFields({
         id,
         addErrorPathToParent: addErrorPathToParentArg,
@@ -767,7 +780,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         omitParents,
         operation,
         parentIndexPath: isNamedTab ? '' : tabIndexPath,
-        parentPassesCondition: passesCondition,
+        parentPassesCondition: tabPassesCondition,
         parentPath: isNamedTab ? tabPath : parentPath,
         parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
         permissions: childPermissions,
