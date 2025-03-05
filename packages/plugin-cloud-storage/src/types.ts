@@ -10,6 +10,7 @@ import type {
 
 export interface File {
   buffer: Buffer
+  clientUploadContext?: unknown
   filename: string
   filesize: number
   mimeType: string
@@ -28,6 +29,7 @@ export type ClientUploadsConfig =
   | boolean
 
 export type HandleUpload = (args: {
+  clientUploadContext: unknown
   collection: CollectionConfig
   data: any
   file: File

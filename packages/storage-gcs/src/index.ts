@@ -72,7 +72,7 @@ export const gcsStorage: GcsStoragePlugin =
       clientHandler: '@payloadcms/storage-gcs/client#GcsClientUploadHandler',
       collections: gcsStorageOptions.collections,
       config: incomingConfig,
-      enabled: !isPluginDisabled && Boolean(gcsStorageOptions.enabled),
+      enabled: !isPluginDisabled && Boolean(gcsStorageOptions.clientUploads),
       serverHandler: getGenerateSignedURLHandler({
         access:
           typeof gcsStorageOptions.clientUploads === 'object'
