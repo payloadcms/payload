@@ -9,6 +9,9 @@ export const draftCollectionSlug = 'draft-posts'
 export const draftWithValidateCollectionSlug = 'draft-with-validate-posts'
 export const draftWithMaxCollectionSlug = 'draft-with-max-posts'
 
+export const draftWithModifiedOnlySlug = 'draft-with-modified-only'
+export const draftWithModifiedOnlyDisabledSlug = 'draft-with-modified-only-disabled'
+
 export const postCollectionSlug = 'posts'
 
 export const diffCollectionSlug = 'diff'
