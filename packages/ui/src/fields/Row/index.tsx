@@ -13,7 +13,7 @@ const baseClass = 'row'
 
 const RowFieldComponent: RowFieldClientComponent = (props) => {
   const {
-    field: { admin: { className } = {}, fields },
+    field: { admin: { className, style } = {}, fields },
     forceRender = false,
     indexPath = '',
     parentPath = '',
@@ -24,7 +24,10 @@ const RowFieldComponent: RowFieldClientComponent = (props) => {
 
   return (
     <RowProvider>
-      <div className={[fieldBaseClass, baseClass, className].filter(Boolean).join(' ')}>
+      <div
+        className={[fieldBaseClass, baseClass, className].filter(Boolean).join(' ')}
+        style={style || undefined}
+      >
         <RenderFields
           className={`${baseClass}__fields`}
           fields={fields}
