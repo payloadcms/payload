@@ -2,6 +2,7 @@ import type {
   CollectionConfig,
   DateField,
   Field,
+  FlattenedBlock,
   FlattenedField,
   JoinField,
   RelationshipField,
@@ -277,7 +278,19 @@ const stripFields = ({
               if (field.type === 'array') {
                 fields = field.flattenedFields
               } else {
-                const maybeBlock = field.blocks.find((each) => each.slug === data.blockType)
+                let maybeBlock: FlattenedBlock | undefined = undefined
+
+                if (field.blockReferences) {
+                  const maybeBlockReference = field.blockReferences.find(
+                    (each) => typeof each === 'object' && each.slug === data.blockType,
+                  )
+                  if (maybeBlockReference && typeof maybeBlockReference === 'object') {
+                    maybeBlock = maybeBlockReference
+                  }
+                } else {
+                  maybeBlock = field.blocks.find((each) => each.slug === data.blockType)
+                }
+
                 if (maybeBlock) {
                   fields = maybeBlock.flattenedFields
                 }
@@ -309,7 +322,19 @@ const stripFields = ({
           if (field.type === 'array') {
             fields = field.flattenedFields
           } else {
-            const maybeBlock = field.blocks.find((each) => each.slug === data.blockType)
+            let maybeBlock: FlattenedBlock | undefined = undefined
+
+            if (field.blockReferences) {
+              const maybeBlockReference = field.blockReferences.find(
+                (each) => typeof each === 'object' && each.slug === data.blockType,
+              )
+              if (maybeBlockReference && typeof maybeBlockReference === 'object') {
+                maybeBlock = maybeBlockReference
+              }
+            } else {
+              maybeBlock = field.blocks.find((each) => each.slug === data.blockType)
+            }
+
             if (maybeBlock) {
               fields = maybeBlock.flattenedFields
             }
