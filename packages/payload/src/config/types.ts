@@ -855,9 +855,9 @@ export type Config = {
        * @default true
        */
       autoGenerate?: boolean
-      /** The base directory for component paths starting with /.
-       *
-       * By default, this is process.cwd()
+      /**
+       * The base directory for component paths starting with /.
+       * @default process.cwd()
        **/
       baseDir?: string
       /**
@@ -873,6 +873,11 @@ export type Config = {
           imports: Imports
         }) => void
       >
+      /**
+       * If Payload cannot find the import map file location automatically,
+       * you can manually provide it here.
+       */
+      importMapFile?: string
     }
     livePreview?: {
       collections?: string[]
