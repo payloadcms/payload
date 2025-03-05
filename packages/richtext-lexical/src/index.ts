@@ -870,24 +870,30 @@ export {
   ServerBlockNode,
 } from './features/blocks/server/nodes/BlocksNode.js'
 
-export { LinebreakHTMLConverter } from './features/converters/html/converter/converters/linebreak.js'
-export { ParagraphHTMLConverter } from './features/converters/html/converter/converters/paragraph.js'
+export { getHTMLPopulateFn } from './features/converters/html/field/htmlPopulateFn.js'
 
-export { TabHTMLConverter } from './features/converters/html/converter/converters/tab.js'
+export { lexicalHTMLField } from './features/converters/html/field/index.js'
+export { LinebreakHTMLConverter } from './features/converters/html_deprecated/converter/converters/linebreak.js'
 
-export { TextHTMLConverter } from './features/converters/html/converter/converters/text.js'
-export { defaultHTMLConverters } from './features/converters/html/converter/defaultConverters.js'
+export { ParagraphHTMLConverter } from './features/converters/html_deprecated/converter/converters/paragraph.js'
+
+export { TabHTMLConverter } from './features/converters/html_deprecated/converter/converters/tab.js'
+export { TextHTMLConverter } from './features/converters/html_deprecated/converter/converters/text.js'
+export { defaultHTMLConverters } from './features/converters/html_deprecated/converter/defaultConverters.js'
+
 export {
   convertLexicalNodesToHTML,
   convertLexicalToHTML,
-} from './features/converters/html/converter/index.js'
-
-export type { HTMLConverter } from './features/converters/html/converter/types.js'
-export { consolidateHTMLConverters, lexicalHTML } from './features/converters/html/field/index.js'
+} from './features/converters/html_deprecated/converter/index.js'
+export type { HTMLConverter } from './features/converters/html_deprecated/converter/types.js'
+export {
+  consolidateHTMLConverters,
+  lexicalHTML,
+} from './features/converters/html_deprecated/field/index.js'
 export {
   HTMLConverterFeature,
   type HTMLConverterFeatureProps,
-} from './features/converters/html/index.js'
+} from './features/converters/html_deprecated/index.js'
 export { convertHTMLToLexical } from './features/converters/htmlToLexical/index.js'
 export { TestRecorderFeature } from './features/debug/testRecorder/server/index.js'
 export { TreeViewFeature } from './features/debug/treeView/server/index.js'
@@ -1028,6 +1034,7 @@ export type { LexicalEditorProps, LexicalFieldAdminProps, LexicalRichTextAdapter
 
 export { createServerFeature } from './utilities/createServerFeature.js'
 export { editorConfigFactory } from './utilities/editorConfigFactory.js'
+
 export type { FieldsDrawerProps } from './utilities/fieldsDrawer/Drawer.js'
 export { extractPropsFromJSXPropsString } from './utilities/jsx/extractPropsFromJSXPropsString.js'
 
@@ -1037,4 +1044,5 @@ export {
   objectToFrontmatter,
   propsToJSXString,
 } from './utilities/jsx/jsx.js'
+
 export { upgradeLexicalData } from './utilities/upgradeLexicalData/index.js'
