@@ -7,6 +7,7 @@ import {
   migrateRelationshipsV2_V3,
   migrateVersionsV1_V2,
 } from '@payloadcms/db-mongodb/migration-utils'
+import { randomUUID } from 'crypto'
 import { type Table } from 'drizzle-orm'
 import * as drizzlePg from 'drizzle-orm/pg-core'
 import * as drizzleSqlite from 'drizzle-orm/sqlite-core'
@@ -302,6 +303,68 @@ describe('database', () => {
       keys = Object.keys(foundUser)
       expect(keys).not.toContain('password')
       expect(keys).not.toContain('confirm-password')
+    })
+  })
+
+  describe('Compound Indexes', () => {
+    beforeEach(async () => {
+      await payload.delete({ collection: 'compound-indexes', where: {} })
+    })
+
+    it('top level: should throw a unique error', async () => {
+      await payload.create({
+        collection: 'compound-indexes',
+        data: { three: randomUUID(), one: '1', two: '2' },
+      })
+
+      // does not fail
+      await payload.create({
+        collection: 'compound-indexes',
+        data: { three: randomUUID(), one: '1', two: '3' },
+      })
+      // does not fail
+      await payload.create({
+        collection: 'compound-indexes',
+        data: { three: randomUUID(), one: '-1', two: '2' },
+      })
+
+      // fails
+      await expect(
+        payload.create({
+          collection: 'compound-indexes',
+          data: { three: randomUUID(), one: '1', two: '2' },
+        }),
+      ).rejects.toBeTruthy()
+    })
+
+    it('combine group and top level: should throw a unique error', async () => {
+      await payload.create({
+        collection: 'compound-indexes',
+        data: {
+          one: randomUUID(),
+          three: '3',
+          group: { four: '4' },
+        },
+      })
+
+      // does not fail
+      await payload.create({
+        collection: 'compound-indexes',
+        data: { one: randomUUID(), three: '3', group: { four: '5' } },
+      })
+      // does not fail
+      await payload.create({
+        collection: 'compound-indexes',
+        data: { one: randomUUID(), three: '4', group: { four: '4' } },
+      })
+
+      // fails
+      await expect(
+        payload.create({
+          collection: 'compound-indexes',
+          data: { one: randomUUID(), three: '3', group: { four: '4' } },
+        }),
+      ).rejects.toBeTruthy()
     })
   })
 

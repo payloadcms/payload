@@ -5,6 +5,7 @@ import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable.js'
@@ -80,7 +81,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
         const lockDurationInMilliseconds = lockDuration * 1000
 
         const lockedDocument = await req.payload.find({
-          collection: 'payload-locked-documents',
+          collection: lockedDocumentsCollectionSlug,
           depth: 1,
           limit: 1,
           overrideAccess: false,

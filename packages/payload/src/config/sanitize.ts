@@ -30,12 +30,12 @@ import { getListPresetsConfig, listPresetsCollectionSlug } from '../list-presets
 import {
   getLockedDocumentsCollection,
   lockedDocumentsCollectionSlug,
-} from '../lockedDocuments/config.js'
+} from '../locked-documents/config.js'
 import { getPreferencesCollection, preferencesCollectionSlug } from '../preferences/config.js'
-import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/jobsCollection.js'
+import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/index.js'
 import { flattenBlock } from '../utilities/flattenAllFields.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
-import { defaults } from './defaults.js'
+import { addDefaultsToConfig } from './defaults.js'
 
 const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig> => {
   const sanitizedConfig = { ...configToSanitize }
@@ -104,55 +104,7 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
 }
 
 export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedConfig> => {
-  const configWithDefaults = {
-    ...defaults,
-    ...incomingConfig,
-    admin: {
-      ...defaults.admin,
-      ...incomingConfig?.admin,
-      meta: {
-        ...defaults.admin.meta,
-        ...incomingConfig?.admin?.meta,
-      },
-      routes: {
-        ...defaults.admin.routes,
-        ...incomingConfig?.admin?.routes,
-      },
-    },
-    graphQL: {
-      ...defaults.graphQL,
-      ...incomingConfig?.graphQL,
-    },
-    jobs: {
-      ...defaults.jobs,
-      ...incomingConfig?.jobs,
-      access: {
-        ...defaults.jobs.access,
-        ...incomingConfig?.jobs?.access,
-      },
-      tasks: incomingConfig?.jobs?.tasks || [],
-      workflows: incomingConfig?.jobs?.workflows || [],
-    },
-    routes: {
-      ...defaults.routes,
-      ...incomingConfig?.routes,
-    },
-    typescript: {
-      ...defaults.typescript,
-      ...incomingConfig?.typescript,
-    },
-  }
-
-  if (!configWithDefaults?.serverURL) {
-    configWithDefaults.serverURL = ''
-  }
-
-  if (process.env.NEXT_BASE_PATH) {
-    if (!incomingConfig?.routes?.api) {
-      // check for incomingConfig, as configWithDefaults will always have a default value for routes.api
-      configWithDefaults.routes.api = process.env.NEXT_BASE_PATH + '/api'
-    }
-  }
+  const configWithDefaults = addDefaultsToConfig(incomingConfig)
 
   const config: Partial<SanitizedConfig> = sanitizeAdminConfig(configWithDefaults)
 
@@ -334,53 +286,62 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   ) {
     let defaultJobsCollection = getDefaultJobsCollection(config as unknown as Config)
 
-    if (typeof configWithDefaults.jobs.jobsCollectionOverrides === 'function') {
-      defaultJobsCollection = configWithDefaults.jobs.jobsCollectionOverrides({
+    if (defaultJobsCollection) {
+      if (typeof configWithDefaults.jobs.jobsCollectionOverrides === 'function') {
+        defaultJobsCollection = configWithDefaults.jobs.jobsCollectionOverrides({
+          defaultJobsCollection,
+        })
+      }
+      const sanitizedJobsCollection = await sanitizeCollection(
+        config as unknown as Config,
         defaultJobsCollection,
-      })
+        richTextSanitizationPromises,
+        validRelationships,
+      )
+
+      configWithDefaults.collections.push(sanitizedJobsCollection)
     }
+  }
 
-    const sanitizedJobsCollection = await sanitizeCollection(
-      config as unknown as Config,
-      defaultJobsCollection,
-      richTextSanitizationPromises,
-      validRelationships,
+  const lockedDocumentsCollection = getLockedDocumentsCollection(config as unknown as Config)
+  if (lockedDocumentsCollection) {
+    configWithDefaults.collections.push(
+      await sanitizeCollection(
+        config as unknown as Config,
+        getLockedDocumentsCollection(config as unknown as Config),
+        richTextSanitizationPromises,
+        validRelationships,
+      ),
     )
+  }
 
-    configWithDefaults.collections.push(sanitizedJobsCollection)
+  const preferencesCollection = getPreferencesCollection(config as unknown as Config)
+  if (preferencesCollection) {
+    configWithDefaults.collections.push(
+      await sanitizeCollection(
+        config as unknown as Config,
+        getPreferencesCollection(config as unknown as Config),
+        richTextSanitizationPromises,
+        validRelationships,
+      ),
+    )
+  }
+
+  if (migrationsCollection) {
+    configWithDefaults.collections.push(
+      await sanitizeCollection(
+        config as unknown as Config,
+        migrationsCollection,
+        richTextSanitizationPromises,
+        validRelationships,
+      ),
+    )
   }
 
   configWithDefaults.collections.push(
     await sanitizeCollection(
       config as unknown as Config,
-      getLockedDocumentsCollection(config as unknown as Config),
-      richTextSanitizationPromises,
-      validRelationships,
-    ),
-  )
-
-  configWithDefaults.collections.push(
-    await sanitizeCollection(
-      config as unknown as Config,
-      getPreferencesCollection(config as unknown as Config),
-      richTextSanitizationPromises,
-      validRelationships,
-    ),
-  )
-
-  configWithDefaults.collections.push(
-    await sanitizeCollection(
-      config as unknown as Config,
       getListPresetsConfig(config as unknown as Config),
-      richTextSanitizationPromises,
-      validRelationships,
-    ),
-  )
-
-  configWithDefaults.collections.push(
-    await sanitizeCollection(
-      config as unknown as Config,
-      migrationsCollection,
       richTextSanitizationPromises,
       validRelationships,
     ),
