@@ -1133,10 +1133,11 @@ type RelationshipAdmin = {
     >
   } & Admin['components']
   isSortable?: boolean
+  selectionType?: 'drawer' | 'dropdown'
 } & Admin
 
 type RelationshipAdminClient = AdminClient &
-  Pick<RelationshipAdmin, 'allowCreate' | 'allowEdit' | 'isSortable'>
+  Pick<RelationshipAdmin, 'allowCreate' | 'allowEdit' | 'isSortable' | 'selectionType'>
 
 export type PolymorphicRelationshipField = {
   admin?: {

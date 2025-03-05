@@ -50,6 +50,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
         className,
         description,
         isSortable = true,
+        selectionType = 'dropdown',
         sortOptions,
       } = {},
       hasMany,
@@ -600,8 +601,6 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
   }
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
-
-  const selectionType: 'drawer' | 'dropdown' = 'drawer'
 
   return (
     <div
