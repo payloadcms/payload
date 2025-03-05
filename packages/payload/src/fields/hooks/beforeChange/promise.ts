@@ -13,6 +13,7 @@ import { getLabelFromPath } from '../../../utilities/getLabelFromPath.js'
 import { getTranslatedLabel } from '../../../utilities/getTranslatedLabel.js'
 import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../../config/types.js'
 import { getFieldPathsModified as getFieldPaths } from '../../getFieldPaths.js'
+import { getParentLabels } from '../../utilities/getParentLabels.js'
 import { getExistingRowDoc } from './getExistingRowDoc.js'
 import { traverseFields } from './traverseFields.js'
 
@@ -170,14 +171,14 @@ export const promise = async ({
         req,
         siblingData: deepMergeWithSourceArrays(siblingDoc, siblingData),
       })
-
       if (typeof validationResult === 'string') {
         const label = getTranslatedLabel(field?.label || field?.name, req.i18n)
         const parentPathSegments = parentPath ? parentPath.split('.') : []
+        const parentLabels = getParentLabels(parentPathSegments, collection.fields)
 
         const fieldLabel =
-          Array.isArray(parentPathSegments) && parentPathSegments.length > 0
-            ? getLabelFromPath(parentPathSegments.concat(label))
+          Array.isArray(parentLabels) && parentLabels.length > 0
+            ? getLabelFromPath(parentLabels.concat(label))
             : label
 
         errors.push({
