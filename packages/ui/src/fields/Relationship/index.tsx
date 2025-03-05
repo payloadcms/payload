@@ -128,7 +128,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     ,
     { closeDrawer: closeListDrawer, isDrawerOpen: isListDrawerOpen, openDrawer: openListDrawer },
   ] = useListDrawer({
-    collectionSlugs: Array.isArray(relationTo) ? relationTo : [relationTo],
+    collectionSlugs: hasMultipleRelations ? relationTo : [relationTo],
     filterOptions,
   })
 
@@ -143,7 +143,20 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
 
       if (hasMany) {
         const existingValues = Array.isArray(value) ? value : []
-        setValue([...existingValues, formattedSelection])
+
+        // Filter out the existing value if it already exists. Maybe better to filter our the existing values from the list drawer beforehand?
+        const filteredValues = existingValues.filter((existing) => {
+          if (hasMultipleRelations) {
+            return !(
+              typeof existing === 'object' &&
+              existing.relationTo === collectionSlug &&
+              existing.value === doc.id
+            )
+          }
+          return existing !== doc.id
+        })
+
+        setValue([...filteredValues, formattedSelection])
       } else {
         setValue(formattedSelection)
       }
