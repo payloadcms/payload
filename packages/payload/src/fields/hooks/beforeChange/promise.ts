@@ -86,10 +86,6 @@ export const promise = async ({
     parentSchemaPath,
   })
 
-  const passesCondition = field.admin?.condition
-    ? Boolean(field.admin.condition(data, siblingData, { blockData, user: req.user }))
-    : true
-  let skipValidationFromHere = skipValidation || !passesCondition
   const { localization } = req.payload.config
   const defaultLocale = localization ? localization?.defaultLocale : 'en'
   const operationLocale = req.locale || defaultLocale
@@ -97,6 +93,13 @@ export const promise = async ({
   const pathSegments = path ? path.split('.') : []
   const schemaPathSegments = schemaPath ? schemaPath.split('.') : []
   const indexPathSegments = indexPath ? indexPath.split('-').filter(Boolean)?.map(Number) : []
+
+  const passesCondition = field.admin?.condition
+    ? Boolean(
+        field.admin.condition(data, siblingData, { blockData, path: pathSegments, user: req.user }),
+      )
+    : true
+  let skipValidationFromHere = skipValidation || !passesCondition
 
   if (fieldAffectsData(field)) {
     // skip validation if the field is localized and the incoming data is null

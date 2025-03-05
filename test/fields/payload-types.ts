@@ -1153,6 +1153,24 @@ export interface ConditionalLogic {
         blockType: 'blockWithConditionalField';
       }[]
     | null;
+  arrayOne?:
+    | {
+        title?: string | null;
+        arrayTwo?:
+          | {
+              selectOptions?: ('optionOne' | 'optionTwo') | null;
+              arrayThree?:
+                | {
+                    numberField?: number | null;
+                    id?: string | null;
+                  }[]
+                | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2873,6 +2891,24 @@ export interface ConditionalLogicSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+      };
+  arrayOne?:
+    | T
+    | {
+        title?: T;
+        arrayTwo?:
+          | T
+          | {
+              selectOptions?: T;
+              arrayThree?:
+                | T
+                | {
+                    numberField?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
+        id?: T;
       };
   updatedAt?: T;
   createdAt?: T;
