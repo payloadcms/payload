@@ -14,7 +14,7 @@ export async function getFallbackValue({
   siblingDoc: JsonObject
 }): Promise<JsonValue> {
   let fallbackValue = undefined
-  if ('name' in field) {
+  if ('name' in field && field.name) {
     if (typeof siblingDoc[field.name] !== 'undefined') {
       fallbackValue = cloneDataFromOriginalDoc(siblingDoc[field.name])
     } else if ('defaultValue' in field && typeof field.defaultValue !== 'undefined') {
