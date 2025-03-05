@@ -322,10 +322,14 @@ export const promise = async <T>({
         : await field.access[operation]({ id, blockData, data, doc, req, siblingData })
 
       if (!result) {
-        siblingData[field.name] = !fallbackResult.executed
-          ? await getFallbackValue({ field, req, siblingDoc })
-          : fallbackResult.value
+        delete siblingData[field.name]
       }
+    }
+
+    if (typeof siblingData[field.name] === 'undefined') {
+      siblingData[field.name] = !fallbackResult.executed
+        ? await getFallbackValue({ field, req, siblingDoc })
+        : fallbackResult.value
     }
   }
 
