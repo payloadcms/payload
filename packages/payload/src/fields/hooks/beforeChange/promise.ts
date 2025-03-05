@@ -239,10 +239,13 @@ export const promise = async ({
               doc,
               docWithLocales,
               errors,
-              fieldLabelPath: buildFieldLabel(
-                fieldLabelPath,
-                `${getTranslatedLabel(field?.label || field?.name, req.i18n)} ${rowIndex + 1}`,
-              ),
+              fieldLabelPath:
+                field?.label === false
+                  ? fieldLabelPath
+                  : buildFieldLabel(
+                      fieldLabelPath,
+                      `${getTranslatedLabel(field?.label || field?.name, req.i18n)} ${rowIndex + 1}`,
+                    ),
               fields: field.fields,
               global,
               mergeLocaleActions,
@@ -301,10 +304,13 @@ export const promise = async ({
                 doc,
                 docWithLocales,
                 errors,
-                fieldLabelPath: buildFieldLabel(
-                  fieldLabelPath,
-                  `${getTranslatedLabel(field?.label || field?.name, req.i18n)} ${rowIndex + 1}`,
-                ),
+                fieldLabelPath:
+                  field?.label === false
+                    ? fieldLabelPath
+                    : buildFieldLabel(
+                        fieldLabelPath,
+                        `${getTranslatedLabel(field?.label || field?.name, req.i18n)} ${rowIndex + 1}`,
+                      ),
                 fields: block.fields,
                 global,
                 mergeLocaleActions,
@@ -341,7 +347,7 @@ export const promise = async ({
         docWithLocales,
         errors,
         fieldLabelPath:
-          field.type === 'row'
+          field.type === 'row' || field?.label === false
             ? fieldLabelPath
             : buildFieldLabel(
                 fieldLabelPath,
@@ -387,10 +393,13 @@ export const promise = async ({
         doc,
         docWithLocales,
         errors,
-        fieldLabelPath: buildFieldLabel(
-          fieldLabelPath,
-          getTranslatedLabel(field?.label || field?.name, req.i18n),
-        ),
+        fieldLabelPath:
+          field?.label === false
+            ? fieldLabelPath
+            : buildFieldLabel(
+                fieldLabelPath,
+                getTranslatedLabel(field?.label || field?.name, req.i18n),
+              ),
         fields: field.fields,
         global,
         mergeLocaleActions,
@@ -448,10 +457,13 @@ export const promise = async ({
             docWithLocales,
             errors,
             field,
-            fieldLabelPath: buildFieldLabel(
-              fieldLabelPath,
-              getTranslatedLabel(field?.label || field?.name, req.i18n),
-            ),
+            fieldLabelPath:
+              field?.label === false
+                ? fieldLabelPath
+                : buildFieldLabel(
+                    fieldLabelPath,
+                    getTranslatedLabel(field?.label || field?.name, req.i18n),
+                  ),
             global,
             indexPath: indexPathSegments,
             mergeLocaleActions,
@@ -512,10 +524,13 @@ export const promise = async ({
         doc,
         docWithLocales,
         errors,
-        fieldLabelPath: buildFieldLabel(
-          fieldLabelPath,
-          getTranslatedLabel(field?.label || field?.name, req.i18n),
-        ),
+        fieldLabelPath:
+          field?.label === false
+            ? fieldLabelPath
+            : buildFieldLabel(
+                fieldLabelPath,
+                getTranslatedLabel(field?.label || field?.name, req.i18n),
+              ),
         fields: field.fields,
         global,
         mergeLocaleActions,
@@ -544,10 +559,10 @@ export const promise = async ({
         doc,
         docWithLocales,
         errors,
-        fieldLabelPath: buildFieldLabel(
-          fieldLabelPath,
-          getTranslatedLabel(field?.label || '', req.i18n),
-        ),
+        fieldLabelPath:
+          field?.label === false
+            ? fieldLabelPath
+            : buildFieldLabel(fieldLabelPath, getTranslatedLabel(field?.label || '', req.i18n)),
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
         global,
         mergeLocaleActions,
