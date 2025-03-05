@@ -152,5 +152,10 @@ export const addDefaultsToConfig = (config: Config): Config => {
   }
   config.upload = config.upload ?? {}
 
+  config.auth = {
+    jwtOrder: ['JWT', 'Bearer', 'cookie'],
+    ...(config.auth || {}),
+  }
+
   return config
 }
