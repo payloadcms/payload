@@ -275,6 +275,7 @@ jobs:
           - admin__e2e__general
           - admin__e2e__list-view
           - admin__e2e__document-view
+          - admin-bar
           - admin-root
           - auth
           - auth-basic

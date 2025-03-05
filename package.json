@@ -6,6 +6,7 @@
   "scripts": {
     "bf": "pnpm run build:force",
     "build": "pnpm run build:core",
+    "build:admin-bar": "turbo build --filter \"@payloadcms/admin-bar\"",
     "build:all": "turbo build",
     "build:app": "next build",
     "build:app:analyze": "cross-env ANALYZE=true next build",
