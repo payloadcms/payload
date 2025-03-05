@@ -353,15 +353,15 @@ export const getLexicalFieldsCollection: (args: {
         }),
         required: true,
       },
-      {
-        name: 'rendered',
-        type: 'ui',
-        admin: {
-          components: {
-            Field: './collections/Lexical/LexicalRendered.js#LexicalRendered',
-          },
-        },
-      },
+      //{
+      //  name: 'rendered',
+      //  type: 'ui',
+      //  admin: {
+      //    components: {
+      //      Field: './collections/Lexical/LexicalRendered.js#LexicalRendered',
+      //    },
+      //  },
+      //},
       {
         name: 'lexicalWithBlocks_markdown',
         type: 'textarea',
