@@ -182,6 +182,62 @@ const ConditionalLogic: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'arrayOne',
+      type: 'array',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'arrayTwo',
+          type: 'array',
+          fields: [
+            {
+              name: 'selectOptions',
+              type: 'select',
+              defaultValue: 'optionOne',
+              options: [
+                {
+                  label: 'Option One',
+                  value: 'optionOne',
+                },
+                {
+                  label: 'Option Two',
+                  value: 'optionTwo',
+                },
+              ],
+            },
+            {
+              name: 'arrayThree',
+              type: 'array',
+              fields: [
+                {
+                  name: 'numberField',
+                  type: 'number',
+                  admin: {
+                    condition: (data, siblingData, { user }, path) => {
+                      if (path.length < 5) {
+                        return false
+                      } // Ensure path has enough depth
+
+                      const arrayOneIndex = parseInt(String(path[1]), 10)
+                      const arrayTwoIndex = parseInt(String(path[3]), 10)
+
+                      const arrayOneItem = data.arrayOne?.[arrayOneIndex]
+                      const arrayTwoItem = arrayOneItem?.arrayTwo?.[arrayTwoIndex]
+
+                      return arrayTwoItem?.selectOptions === 'optionTwo'
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
 }
 

@@ -177,4 +177,30 @@ describe('Conditional Logic', () => {
     await fieldToToggle.click()
     await expect(page.locator(fieldWithConditionSelector)).toBeVisible()
   })
+
+  test('should render field based on path argument', async () => {
+    await page.goto(url.create)
+
+    const arrayOneButton = page.locator('#field-arrayOne .array-field__add-row')
+    await arrayOneButton.click()
+
+    const arrayTwoButton = page.locator('#arrayOne-row-0 .array-field__add-row')
+    await arrayTwoButton.click()
+
+    const arrayThreeButton = page.locator('#arrayOne-0-arrayTwo-row-0 .array-field__add-row')
+    await arrayThreeButton.click()
+
+    const numberField = page.locator('#field-arrayOne__0__arrayTwo__0__arrayThree__0__numberField')
+
+    await expect(numberField).toBeHidden()
+
+    const selectField = page.locator('#field-arrayOne__0__arrayTwo__0__selectOptions')
+
+    await selectField.click({ delay: 100 })
+    const options = page.locator('.rs__option')
+
+    await options.locator('text=Option Two').click()
+
+    await expect(numberField).toBeVisible()
+  })
 })
