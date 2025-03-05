@@ -26,9 +26,12 @@ import {
   type GlobalSlug,
   sanitizeFields,
 } from '../index.js'
-import { getLockedDocumentsCollection } from '../lockedDocuments/lockedDocumentsCollection.js'
-import getPreferencesCollection from '../preferences/preferencesCollection.js'
-import { getDefaultJobsCollection } from '../queues/config/jobsCollection.js'
+import {
+  getLockedDocumentsCollection,
+  lockedDocumentsCollectionSlug,
+} from '../locked-documents/config.js'
+import { getPreferencesCollection, preferencesCollectionSlug } from '../preferences/config.js'
+import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/index.js'
 import { flattenBlock } from '../utilities/flattenAllFields.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
 import { addDefaultsToConfig } from './defaults.js'
@@ -179,9 +182,9 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   const validRelationships = [
     ...(config.collections.map((c) => c.slug) ?? []),
-    'payload-jobs',
-    'payload-locked-documents',
-    'payload-preferences',
+    jobsCollectionSlug,
+    lockedDocumentsCollectionSlug,
+    preferencesCollectionSlug,
   ]
 
   /**

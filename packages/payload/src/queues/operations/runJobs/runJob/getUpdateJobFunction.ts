@@ -2,13 +2,15 @@
 import type { PayloadRequest } from '../../../../types/index.js'
 import type { BaseJob } from '../../../config/types/workflowTypes.js'
 
+import { jobsCollectionSlug } from '../../../config/index.js'
+
 export type UpdateJobFunction = (jobData: Partial<BaseJob>) => Promise<BaseJob>
 
 export function getUpdateJobFunction(job: BaseJob, req: PayloadRequest): UpdateJobFunction {
   return async (jobData) => {
     const updatedJob = (await req.payload.update({
       id: job.id,
-      collection: 'payload-jobs',
+      collection: jobsCollectionSlug,
       data: jobData,
       depth: 0,
       disableTransaction: true,
