@@ -218,9 +218,10 @@ const ConditionalLogic: CollectionConfig = {
                   type: 'number',
                   admin: {
                     condition: (data, siblingData, { user }, path) => {
+                      // Ensure path has enough depth
                       if (path.length < 5) {
                         return false
-                      } // Ensure path has enough depth
+                      }
 
                       const arrayOneIndex = parseInt(String(path[1]), 10)
                       const arrayTwoIndex = parseInt(String(path[3]), 10)
