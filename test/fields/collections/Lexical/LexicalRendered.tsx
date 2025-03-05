@@ -1,6 +1,7 @@
 'use client'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
+import { getRestPopulateFn } from '@payloadcms/richtext-lexical/client'
 import {
   convertLexicalToHTML,
   type HTMLConvertersFunction,
@@ -45,7 +46,15 @@ export const LexicalRendered: React.FC = () => {
     },
   })
 
+  const [{ data: unpopulatedData }] = usePayloadAPI(`${serverURL}${api}/${collectionSlug}/${id}`, {
+    initialParams: {
+      depth: 0,
+    },
+  })
+
   const [html, setHTML] = useState<null | string>(null)
+  const [htmlFromUnpopulatedData, setHtmlFromUnpopulatedData] = useState<null | string>(null)
+
   useEffect(() => {
     void convertLexicalToHTML({
       converters: htmlConverters,
@@ -54,6 +63,23 @@ export const LexicalRendered: React.FC = () => {
       setHTML(html)
     })
   }, [data.lexicalWithBlocks])
+
+  useEffect(() => {
+    async function convert() {
+      const html = await convertLexicalToHTML({
+        converters: htmlConverters,
+        data: unpopulatedData.lexicalWithBlocks as SerializedEditorState,
+        populate: await getRestPopulateFn({
+          apiURL: `${serverURL}${api}`,
+          depth: 0,
+          draft: false,
+        }),
+      })
+
+      setHtmlFromUnpopulatedData(html)
+    }
+    void convert()
+  }, [unpopulatedData.lexicalWithBlocks, api, serverURL])
 
   if (!data.lexicalWithBlocks) {
     return null
@@ -65,6 +91,10 @@ export const LexicalRendered: React.FC = () => {
       <RichText converters={jsxConverters} data={data.lexicalWithBlocks as SerializedEditorState} />
       <h1>Rendered HTML:</h1>
       {html && <div dangerouslySetInnerHTML={{ __html: html }} />}
+      <h1>Rendered HTML 2:</h1>
+      {htmlFromUnpopulatedData && (
+        <div dangerouslySetInnerHTML={{ __html: htmlFromUnpopulatedData }} />
+      )}
       <h1>Raw JSON:</h1>
       <pre>{JSON.stringify(data.lexicalWithBlocks, null, 2)}</pre>
     </div>

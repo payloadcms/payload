@@ -1,21 +1,22 @@
-import { createLocalReq, type Payload, type PayloadRequest } from 'payload'
+import { createLocalReq, type Payload, type PayloadRequest, type TypedLocale } from 'payload'
 
-import type { HTMLPopulateFn } from '../types.js'
+import type { HTMLPopulateFn } from '../html/types.js'
 
-import { populate } from '../../../../populateGraphQL/populate.js'
+import { populate } from '../../../populateGraphQL/populate.js'
 
-export const getHTMLPopulateFn: (
+export const getPayloadPopulateFn: (
   args: {
     currentDepth: number
     depth: number
     draft: boolean
-    overrideAccess: boolean
+    locale?: TypedLocale
 
+    overrideAccess: boolean
     showHiddenFields: boolean
   } & (
     | {
         /**
-         * This payload property will only be used if req is undefined.
+         * This payload property will only be used if req is undefined. If localization is enabled, you must pass `req` instead.
          */
         payload: Payload
         /**
@@ -26,7 +27,7 @@ export const getHTMLPopulateFn: (
       }
     | {
         /**
-         * This payload property will only be used if req is undefined.
+         * This payload property will only be used if req is undefined. If localization is enabled, you must pass `req` instead.
          */
         payload?: never
         /**

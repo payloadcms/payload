@@ -868,21 +868,20 @@ export {
   ServerBlockNode,
 } from './features/blocks/server/nodes/BlocksNode.js'
 
-export { getHTMLPopulateFn } from './features/converters/html/field/htmlPopulateFn.js'
-
 export { lexicalHTMLField } from './features/converters/html/field/index.js'
-export { LinebreakHTMLConverter } from './features/converters/html_deprecated/converter/converters/linebreak.js'
 
+export { LinebreakHTMLConverter } from './features/converters/html_deprecated/converter/converters/linebreak.js'
 export { ParagraphHTMLConverter } from './features/converters/html_deprecated/converter/converters/paragraph.js'
 
 export { TabHTMLConverter } from './features/converters/html_deprecated/converter/converters/tab.js'
+
 export { TextHTMLConverter } from './features/converters/html_deprecated/converter/converters/text.js'
 export { defaultHTMLConverters } from './features/converters/html_deprecated/converter/defaultConverters.js'
-
 export {
   convertLexicalNodesToHTML,
   convertLexicalToHTML,
 } from './features/converters/html_deprecated/converter/index.js'
+
 export type { HTMLConverter } from './features/converters/html_deprecated/converter/types.js'
 export {
   consolidateHTMLConverters,
@@ -893,6 +892,8 @@ export {
   type HTMLConverterFeatureProps,
 } from './features/converters/html_deprecated/index.js'
 export { convertHTMLToLexical } from './features/converters/htmlToLexical/index.js'
+export { getPayloadPopulateFn } from './features/converters/utilities/payloadPopulateFn.js'
+export { getRestPopulateFn } from './features/converters/utilities/restPopulateFn.js'
 export { TestRecorderFeature } from './features/debug/testRecorder/server/index.js'
 export { TreeViewFeature } from './features/debug/treeView/server/index.js'
 export { EXPERIMENTAL_TableFeature } from './features/experimental_table/server/index.js'

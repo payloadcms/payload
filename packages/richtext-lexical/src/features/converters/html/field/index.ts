@@ -3,8 +3,8 @@ import type { Field } from 'payload'
 
 import type { HTMLConverters, HTMLConvertersFunction } from '../types.js'
 
+import { getPayloadPopulateFn } from '../../utilities/payloadPopulateFn.js'
 import { convertLexicalToHTML } from '../index.js'
-import { getHTMLPopulateFn } from './htmlPopulateFn.js'
 
 type Args = {
   converters?: HTMLConverters | HTMLConvertersFunction
@@ -63,7 +63,7 @@ export const lexicalHTMLField: (args: Args) => Field = (args) => {
             return ''
           }
 
-          const htmlPopulateFn = await getHTMLPopulateFn({
+          const htmlPopulateFn = await getPayloadPopulateFn({
             currentDepth: currentDepth ?? 0,
             depth: depth ?? req.payload.config.defaultDepth,
             draft: draft ?? false,
