@@ -1,3 +1,4 @@
+import type { DefaultDocumentIDType } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 
 export type PreferenceRequest = {
@@ -36,5 +37,6 @@ export type ColumnPreference = {
 export type ListPreferences = {
   columns?: ColumnPreference[]
   limit?: number
+  preset?: DefaultDocumentIDType
   sort?: string
 }

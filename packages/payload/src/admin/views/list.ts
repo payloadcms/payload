@@ -1,8 +1,10 @@
+import type { SanitizedCollectionPermission } from '../../auth/types.js'
 import type {
   CollectionAdminOptions,
   SanitizedCollectionConfig,
 } from '../../collections/config/types.js'
 import type { ServerProps } from '../../config/types.js'
+import type { ListPreset } from '../../list-presets/types.js'
 import type { ListPreferences } from '../../preferences/types.js'
 import type { ResolvedFilterOptions } from '../../types/index.js'
 import type { Column } from '../elements/Table.js'
@@ -40,12 +42,15 @@ export type ListViewClientProps = {
   columnState: Column[]
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
+  disableListPresets?: boolean
   enableRowSelections?: boolean
   hasCreatePermission: boolean
   /**
    * @deprecated
    */
   listPreferences?: ListPreferences
+  listPreset?: ListPreset
+  listPresetPermissions?: SanitizedCollectionPermission
   newDocumentURL: string
   /**
    * @deprecated

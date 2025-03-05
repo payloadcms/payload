@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-export const pagesSlug = 'pages'
+import { pagesSlug } from '../../slugs.js'
 
 export const PagesCollection: CollectionConfig = {
   slug: pagesSlug,

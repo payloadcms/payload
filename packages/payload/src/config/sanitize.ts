@@ -26,6 +26,7 @@ import {
   type GlobalSlug,
   sanitizeFields,
 } from '../index.js'
+import { getListPresetsConfig, listPresetsCollectionSlug } from '../list-presets/config.js'
 import {
   getLockedDocumentsCollection,
   lockedDocumentsCollectionSlug,
@@ -176,6 +177,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   const richTextSanitizationPromises: Array<(config: SanitizedConfig) => Promise<void>> = []
 
   const schedulePublishCollections: CollectionSlug[] = []
+
   const schedulePublishGlobals: GlobalSlug[] = []
 
   const collectionSlugs = new Set<CollectionSlug>()
@@ -185,6 +187,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     jobsCollectionSlug,
     lockedDocumentsCollectionSlug,
     preferencesCollectionSlug,
+    listPresetsCollectionSlug,
   ]
 
   /**
@@ -192,6 +195,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
    * to be populated with the sanitized blocks
    */
   config.blocks = []
+
   if (incomingConfig.blocks?.length) {
     for (const block of incomingConfig.blocks) {
       const sanitizedBlock = block
@@ -206,6 +210,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       sanitizedBlock.labels = !sanitizedBlock.labels
         ? formatLabels(sanitizedBlock.slug)
         : sanitizedBlock.labels
+
       sanitizedBlock.fields = await sanitizeFields({
         config: config as unknown as Config,
         existingFieldNames: new Set(),
@@ -333,6 +338,15 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     )
   }
 
+  configWithDefaults.collections.push(
+    await sanitizeCollection(
+      config as unknown as Config,
+      getListPresetsConfig(config as unknown as Config),
+      richTextSanitizationPromises,
+      validRelationships,
+    ),
+  )
+
   if (config.serverURL !== '') {
     config.csrf.push(config.serverURL)
   }
@@ -366,9 +380,11 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   }
 
   const promises: Promise<void>[] = []
+
   for (const sanitizeFunction of richTextSanitizationPromises) {
     promises.push(sanitizeFunction(config as SanitizedConfig))
   }
+
   await Promise.all(promises)
 
   return config as SanitizedConfig
