@@ -48,6 +48,7 @@ export const defaults: Partial<CollectionConfig> = {
     me: [],
     refresh: [],
   },
+  indexes: [],
   timestamps: true,
   upload: false,
   versions: false,

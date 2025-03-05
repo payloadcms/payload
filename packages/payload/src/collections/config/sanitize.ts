@@ -2,6 +2,7 @@
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type {
   CollectionConfig,
+  CompoundIndex,
   SanitizedCollectionConfig,
   SanitizedJoin,
   SanitizedJoins,
@@ -26,6 +27,7 @@ import {
   addDefaultsToLoginWithUsernameConfig,
 } from './defaults.js'
 import { sanitizeAuthFields, sanitizeUploadFields } from './reservedFieldNames.js'
+import { sanitizeCompoundIndexes } from './sanitizeCompoundIndexes.js'
 import { validateUseAsTitle } from './useAsTitle.js'
 
 export const sanitizeCollection = async (
@@ -240,6 +242,11 @@ export const sanitizeCollection = async (
   sanitizedConfig.polymorphicJoins = polymorphicJoins
 
   sanitizedConfig.flattenedFields = flattenAllFields({ fields: sanitizedConfig.fields })
+
+  sanitizedConfig.sanitizedIndexes = sanitizeCompoundIndexes({
+    fields: sanitizedConfig.flattenedFields,
+    indexes: sanitizedConfig.indexes,
+  })
 
   return sanitizedConfig
 }
