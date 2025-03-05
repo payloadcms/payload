@@ -868,20 +868,21 @@ export {
   $isServerBlockNode,
   type BlockFields,
   ServerBlockNode,
-} from './features/blocks/server/nodes/BlocksNode.js'
+} from './features/blocks/server/nodes/BlockNode.js'
 
+export type { CreateDOMFunction } from './features/blocks/WrapperBlockNode.js'
 export { LinebreakHTMLConverter } from './features/converters/html/converter/converters/linebreak.js'
-export { ParagraphHTMLConverter } from './features/converters/html/converter/converters/paragraph.js'
 
+export { ParagraphHTMLConverter } from './features/converters/html/converter/converters/paragraph.js'
 export { TabHTMLConverter } from './features/converters/html/converter/converters/tab.js'
 
 export { TextHTMLConverter } from './features/converters/html/converter/converters/text.js'
 export { defaultHTMLConverters } from './features/converters/html/converter/defaultConverters.js'
+
 export {
   convertLexicalNodesToHTML,
   convertLexicalToHTML,
 } from './features/converters/html/converter/index.js'
-
 export type { HTMLConverter } from './features/converters/html/converter/types.js'
 export { consolidateHTMLConverters, lexicalHTML } from './features/converters/html/field/index.js'
 export {

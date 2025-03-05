@@ -3,8 +3,9 @@ import type { Block } from 'payload'
 import { fieldSchemasToFormState } from '@payloadcms/ui/forms/fieldSchemasToFormState'
 
 import type { NodeValidation } from '../../typesServer.js'
-import type { BlockFields, SerializedBlockNode } from './nodes/BlocksNode.js'
-import type { SerializedInlineBlockNode } from './nodes/InlineBlocksNode.js'
+import type { SerializedWrapperBlockNode } from '../WrapperBlockNode.js'
+import type { BlockFields, SerializedBlockNode } from './nodes/BlockNode.js'
+import type { SerializedInlineBlockNode } from './nodes/InlineBlockNode.js'
 
 /**
  * Runs validation for blocks. This function will determine if the rich text field itself is valid. It does not handle
@@ -13,7 +14,7 @@ import type { SerializedInlineBlockNode } from './nodes/InlineBlocksNode.js'
  */
 export const blockValidationHOC = (
   blocks: Block[],
-): NodeValidation<SerializedBlockNode | SerializedInlineBlockNode> => {
+): NodeValidation<SerializedBlockNode | SerializedInlineBlockNode | SerializedWrapperBlockNode> => {
   return async ({ node, validation }) => {
     const blockFieldData = node.fields ?? ({} as BlockFields)
 

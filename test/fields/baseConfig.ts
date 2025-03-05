@@ -24,6 +24,7 @@ import {
   getLexicalFieldsCollection,
   lexicalBlocks,
   lexicalInlineBlocks,
+  lexicalWrapperBlocks,
 } from './collections/Lexical/index.js'
 import { LexicalAccessControl } from './collections/LexicalAccessControl/index.js'
 import { LexicalInBlock } from './collections/LexicalInBlock/index.js'
@@ -57,6 +58,7 @@ export const collectionSlugs: CollectionConfig[] = [
   getLexicalFieldsCollection({
     blocks: lexicalBlocks,
     inlineBlocks: lexicalInlineBlocks,
+    wrapperBlocks: lexicalWrapperBlocks,
   }),
   LexicalMigrateFields,
   LexicalLocalizedFields,
