@@ -64,6 +64,7 @@ export interface Config {
   auth: {
     users: UserAuthOperations;
   };
+  blocks: {};
   collections: {
     uploads: Upload;
     'uploads-two': UploadsTwo;
@@ -81,6 +82,7 @@ export interface Config {
     'group-two-collection-twos': GroupTwoCollectionTwo;
     geo: Geo;
     'disable-duplicate': DisableDuplicate;
+    'disable-copy-to-locale': DisableCopyToLocale;
     'base-list-filters': BaseListFilter;
     with300documents: With300Document;
     'with-list-drawer': WithListDrawer;
@@ -106,6 +108,7 @@ export interface Config {
     'group-two-collection-twos': GroupTwoCollectionTwosSelect<false> | GroupTwoCollectionTwosSelect<true>;
     geo: GeoSelect<false> | GeoSelect<true>;
     'disable-duplicate': DisableDuplicateSelect<false> | DisableDuplicateSelect<true>;
+    'disable-copy-to-locale': DisableCopyToLocaleSelect<false> | DisableCopyToLocaleSelect<true>;
     'base-list-filters': BaseListFiltersSelect<false> | BaseListFiltersSelect<true>;
     with300documents: With300DocumentsSelect<false> | With300DocumentsSelect<true>;
     'with-list-drawer': WithListDrawerSelect<false> | WithListDrawerSelect<true>;
@@ -448,6 +451,16 @@ export interface DisableDuplicate {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "disable-copy-to-locale".
+ */
+export interface DisableCopyToLocale {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "base-list-filters".
  */
 export interface BaseListFilter {
@@ -549,6 +562,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'disable-duplicate';
         value: string | DisableDuplicate;
+      } | null)
+    | ({
+        relationTo: 'disable-copy-to-locale';
+        value: string | DisableCopyToLocale;
       } | null)
     | ({
         relationTo: 'base-list-filters';
@@ -859,6 +876,15 @@ export interface GeoSelect<T extends boolean = true> {
  * via the `definition` "disable-duplicate_select".
  */
 export interface DisableDuplicateSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "disable-copy-to-locale_select".
+ */
+export interface DisableCopyToLocaleSelect<T extends boolean = true> {
   title?: T;
   updatedAt?: T;
   createdAt?: T;

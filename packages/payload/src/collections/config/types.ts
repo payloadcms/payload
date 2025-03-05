@@ -327,6 +327,11 @@ export type CollectionAdminOptions = {
    * Custom description for collection. This will also be used as JSDoc for the generated types
    */
   description?: EntityDescription
+  /**
+   * Disable the Copy To Locale button in the edit document view
+   * @default false
+   */
+  disableCopyToLocale?: boolean
   enableRichTextLink?: boolean
   enableRichTextRelationship?: boolean
   /**

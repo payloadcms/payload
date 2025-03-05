@@ -33,6 +33,7 @@ import {
 } from '../../shared.js'
 import {
   customViews2CollectionSlug,
+  disableCopyToLocale as disableCopyToLocaleSlug,
   disableDuplicateSlug,
   geoCollectionSlug,
   globalSlug,
@@ -71,6 +72,7 @@ describe('General', () => {
   let notInViewUrl: AdminUrlUtil
   let globalURL: AdminUrlUtil
   let customViewsURL: AdminUrlUtil
+  let disableCopyToLocale: AdminUrlUtil
   let disableDuplicateURL: AdminUrlUtil
   let serverURL: string
   let adminRoutes: ReturnType<typeof getRoutes>
@@ -91,6 +93,7 @@ describe('General', () => {
     notInViewUrl = new AdminUrlUtil(serverURL, notInViewCollectionSlug)
     globalURL = new AdminUrlUtil(serverURL, globalSlug)
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
+    disableCopyToLocale = new AdminUrlUtil(serverURL, disableCopyToLocaleSlug)
     disableDuplicateURL = new AdminUrlUtil(serverURL, disableDuplicateSlug)
     uploadsTwo = new AdminUrlUtil(serverURL, uploadTwoCollectionSlug)
 
@@ -514,6 +517,14 @@ describe('General', () => {
       await expect(page.locator('.list-header h1')).toContainText('Not In View Collections')
       await page.goto(notInViewUrl.global('not-in-view-global'))
       await expect(page.locator('.render-title')).toContainText('Not In View Global')
+    })
+
+    test('should hide Copy To Locale button when disableCopyToLocale: true', async () => {
+      await page.goto(disableCopyToLocale.create)
+      await page.locator('#field-title').fill(title)
+      await saveDocAndAssert(page)
+      await page.locator('.doc-controls__popup >> .popup-button').click()
+      await expect(page.locator('#copy-locale-data__button')).toBeHidden()
     })
   })
 
