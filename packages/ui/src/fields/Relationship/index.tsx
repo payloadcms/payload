@@ -122,11 +122,14 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     collectionSlug: currentlyOpenRelationship.collectionSlug,
   })
 
-  const [ListDrawer, , { closeDrawer: closeListDrawer, openDrawer: openListDrawer }] =
-    useListDrawer({
-      collectionSlugs: Array.isArray(relationTo) ? relationTo : [relationTo],
-      filterOptions,
-    })
+  const [
+    ListDrawer,
+    ,
+    { closeDrawer: closeListDrawer, isDrawerOpen: isListDrawerOpen, openDrawer: openListDrawer },
+  ] = useListDrawer({
+    collectionSlugs: Array.isArray(relationTo) ? relationTo : [relationTo],
+    filterOptions,
+  })
 
   const onListSelect = useCallback<NonNullable<ListDrawerProps['onSelect']>>(
     ({ collectionSlug, doc }) => {
@@ -631,7 +634,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
         {!errorLoading && (
           <div className={`${baseClass}__wrap`}>
             <ReactSelect
-              backspaceRemovesValue={!isDrawerOpen}
+              backspaceRemovesValue={!(isDrawerOpen || isListDrawerOpen)}
               components={
                 selectionType === 'drawer'
                   ? {
@@ -645,12 +648,12 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
                     }
               }
               customProps={{
-                disableKeyDown: isDrawerOpen,
-                disableMouseDown: isDrawerOpen,
+                disableKeyDown: isDrawerOpen || isListDrawerOpen,
+                disableMouseDown: isDrawerOpen || isListDrawerOpen,
                 onDocumentDrawerOpen,
                 onSave,
               }}
-              disabled={readOnly || isDrawerOpen}
+              disabled={readOnly || isDrawerOpen || isListDrawerOpen}
               filterOption={enableWordBoundarySearch ? filterOption : undefined}
               getOptionValue={(option) => {
                 if (!option) {
@@ -754,7 +757,11 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       {currentlyOpenRelationship.collectionSlug && currentlyOpenRelationship.hasReadPermission && (
         <DocumentDrawer onDelete={onDelete} onDuplicate={onDuplicate} onSave={onSave} />
       )}
-      <ListDrawer allowCreate={true} enableRowSelections={false} onSelect={onListSelect} />
+      <ListDrawer
+        allowCreate={!readOnly && allowCreate}
+        enableRowSelections={false}
+        onSelect={onListSelect}
+      />
     </div>
   )
 }
