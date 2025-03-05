@@ -282,7 +282,6 @@ export const promise = async <T>({
     if (typeof siblingData[field.name] === 'undefined') {
       fallbackResult.value = await getFallbackValue({ field, req, siblingDoc })
       fallbackResult.executed = true
-      siblingData[field.name] = fallbackResult.value
     }
 
     // Execute hooks
@@ -306,7 +305,10 @@ export const promise = async <T>({
           schemaPath: schemaPathSegments,
           siblingData,
           siblingFields,
-          value: siblingData[field.name],
+          value:
+            typeof siblingData[field.name] === 'undefined'
+              ? fallbackResult.value
+              : siblingData[field.name],
         })
 
         if (hookedValue !== undefined) {
