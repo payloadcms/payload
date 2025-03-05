@@ -135,14 +135,19 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     }
   }, [t, listSearchableFields, i18n, searchLabel])
 
-  let listMenuItems: React.ReactNode[] = listMenuItemsFromProps || []
+  let listMenuItems: React.ReactNode[] = listMenuItemsFromProps
 
-  if (collectionConfig?.enableListPresets && !disableListPresets) {
-    if (listMenuItems.length > 0) {
-      listMenuItems.unshift(<hr />)
-    }
-
-    listMenuItems = listPresetMenuItems.concat(listMenuItems)
+  if (
+    collectionConfig?.enableListPresets &&
+    !disableListPresets &&
+    listPresetMenuItems?.length > 0
+  ) {
+    // Cannot push or unshift into `listMenuItemsFromProps` as it will mutate the original array
+    listMenuItems = [
+      ...listPresetMenuItems,
+      listMenuItemsFromProps?.length > 0 ? <PopupList.Divider key="divider" /> : null,
+      ...(listMenuItemsFromProps || []),
+    ]
   }
 
   return (

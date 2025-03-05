@@ -182,11 +182,12 @@ export const useListPresets = ({
     setColumnsModified,
   ])
 
+  // Memoize so that components aren't re-rendered on query and column changes
   const listPresetMenuItems = useMemo(() => {
-    const items: React.ReactNode[] = []
+    const menuItems: React.ReactNode[] = []
 
     if (activePreset && hasModified) {
-      items.push(
+      menuItems.push(
         <PopupList.Button
           onClick={() => {
             // TODO: reset query and columns
@@ -199,7 +200,7 @@ export const useListPresets = ({
       )
 
       if (listPresetPermissions.update) {
-        items.push(
+        menuItems.push(
           <PopupList.Button
             onClick={async () => {
               await saveCurrentChanges()
@@ -211,7 +212,7 @@ export const useListPresets = ({
       }
     }
 
-    items.push(
+    menuItems.push(
       <PopupList.Button
         onClick={() => {
           openCreateNewDrawer()
@@ -224,7 +225,7 @@ export const useListPresets = ({
     )
 
     if (activePreset && listPresetPermissions.delete) {
-      items.push(
+      menuItems.push(
         <Fragment>
           <PopupList.Button onClick={() => openModal(confirmDeletePresetModalSlug)}>
             {t('general:delete')}
@@ -240,7 +241,7 @@ export const useListPresets = ({
       )
     }
 
-    return items
+    return menuItems
   }, [
     activePreset,
     hasModified,
