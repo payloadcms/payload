@@ -219,20 +219,16 @@ export async function writeImportMap({
     }
     importMapFilePath = config.admin.importMap.importMapFile
   } else {
-    const appLocation = path.resolve(rootDir, `app/(payload)${config.routes.admin}/`, fileName)
-    const srcAppLocation = path.resolve(
-      rootDir,
-      `src/app/(payload)${config.routes.admin}/`,
-      fileName,
-    )
+    const appLocation = path.resolve(rootDir, `app/(payload)${config.routes.admin}/`)
+    const srcAppLocation = path.resolve(rootDir, `src/app/(payload)${config.routes.admin}/`)
 
     if (fs.existsSync(appLocation)) {
-      importMapFilePath = appLocation
+      importMapFilePath = path.resolve(appLocation, fileName)
     } else if (fs.existsSync(srcAppLocation)) {
-      importMapFilePath = srcAppLocation
+      importMapFilePath = path.resolve(srcAppLocation, fileName)
     } else {
       throw new Error(
-        `Could not find Payload import map. Looked in ${appLocation} and ${srcAppLocation}`,
+        `Could not find Payload import map folder. Looked in ${appLocation} and ${srcAppLocation}`,
       )
     }
   }
