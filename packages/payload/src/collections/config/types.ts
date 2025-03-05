@@ -370,6 +370,11 @@ export type CollectionAdminOptions = {
 /** Manage all aspects of a data collection */
 export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   /**
+   * Do not set this property manually. This is set to true during sanitization, to avoid
+   * sanitizing the same collection multiple times.
+   */
+  _sanitized?: boolean
+  /**
    * Access control
    */
   access?: {
@@ -460,6 +465,16 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
     refresh?: RefreshHook[]
   }
   /**
+   * Define compound indexes for this collection.
+   * This can be used to either speed up querying/sorting by 2 or more fields at the same time or
+   * to ensure uniqueness between several fields.
+   * Specify field paths
+   * @example
+   * [{ unique: true, fields: ['title', 'group.name'] }]
+   * @default []
+   */
+  indexes?: CompoundIndex[]
+  /**
    * Label configuration
    */
   labels?: {
@@ -537,7 +552,6 @@ export interface SanitizedCollectionConfig
   auth: Auth
   endpoints: Endpoint[] | false
   fields: Field[]
-
   /**
    * Fields in the database schema structure
    * Rows / collapsible / tabs w/o name `fields` merged to top, UIs are excluded
@@ -553,6 +567,8 @@ export interface SanitizedCollectionConfig
    * List of all polymorphic join fields
    */
   polymorphicJoins: SanitizedJoin[]
+
+  sanitizedIndexes: SanitizedCompoundIndex[]
 
   slug: CollectionSlug
   upload: SanitizedUploadConfig
@@ -596,4 +612,19 @@ export type TypeWithTimestamps = {
   createdAt: string
   id: number | string
   updatedAt: string
+}
+
+export type CompoundIndex = {
+  fields: string[]
+  unique?: boolean
+}
+
+export type SanitizedCompoundIndex = {
+  fields: {
+    field: FlattenedField
+    localizedPath: string
+    path: string
+    pathHasLocalized: boolean
+  }[]
+  unique: boolean
 }

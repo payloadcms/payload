@@ -223,6 +223,19 @@ describe('Uploads', () => {
     await saveDocAndAssert(page)
   })
 
+  test('should properly convert avif image to png', async () => {
+    await page.goto(mediaURL.create)
+
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './test-image-avif.avif'))
+    const filename = page.locator('.file-field__filename')
+    await expect(filename).toHaveValue('test-image-avif.avif')
+
+    await saveDocAndAssert(page)
+
+    const fileMetaSizeType = page.locator('.file-meta__size-type')
+    await expect(fileMetaSizeType).toHaveText(/image\/png/)
+  })
+
   test('should create animated file upload', async () => {
     await page.goto(animatedTypeMediaURL.create)
 

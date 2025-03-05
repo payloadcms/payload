@@ -42,7 +42,7 @@
     "next": "^15.1.0",
     "next-intl": "^3.23.2",
     "payload": "latest",
-    "payload-admin-bar": "^1.0.6",
+    "payload-admin-bar": "^1.0.7",
     "prism-react-renderer": "^2.3.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
