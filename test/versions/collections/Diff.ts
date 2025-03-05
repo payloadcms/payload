@@ -176,6 +176,32 @@ export const Diff: CollectionConfig = {
       relationTo: 'media',
       type: 'upload',
     },
+    {
+      name: 'hidden',
+      type: 'text',
+      hidden: true,
+    },
+    {
+      name: 'adminHidden',
+      type: 'text',
+      admin: {
+        hidden: true,
+      },
+    },
+    {
+      name: 'adminDisabled',
+      type: 'text',
+      admin: {
+        disabled: true,
+      },
+    },
+    {
+      name: 'adminHiddenInVersionView',
+      type: 'text',
+      admin: {
+        hiddenInVersionView: true,
+      },
+    },
   ],
   versions: {
     maxPerDoc: 35,
