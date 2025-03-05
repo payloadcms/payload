@@ -160,9 +160,6 @@ export const createClientConfig = ({
             clientConfig.localization.defaultLocalePublishOption =
               config.localization.defaultLocalePublishOption
           }
-          if (config.localization.disableCopyToLocale) {
-            clientConfig.localization.disableCopyToLocale = config.localization.disableCopyToLocale
-          }
           if (config.localization.fallback) {
             clientConfig.localization.fallback = config.localization.fallback
           }

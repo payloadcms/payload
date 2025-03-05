@@ -137,12 +137,7 @@ export const DocumentControls: React.FC<{
     (collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
     (globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave)
 
-  const disableCopyToLocale = !!(
-    localization &&
-    (localization.disableCopyToLocale === true ||
-      (Array.isArray(localization.disableCopyToLocale) &&
-        localization.disableCopyToLocale.includes(slug)))
-  )
+  const disableCopyToLocale = localization && collectionConfig?.admin?.disableCopyToLocale
 
   return (
     <Gutter className={baseClass}>

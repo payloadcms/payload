@@ -494,14 +494,6 @@ export type BaseLocalizationConfig = {
    * @default 'all'
    */
   defaultLocalePublishOption?: 'active' | 'all'
-  /**
-   * Disable the Copy To Locale button in the collection view.
-   * If set to `true`, the button will be disabled for all collections.
-   * If set to an array of collection slugs, the button will be disabled for those collections.
-   * @example `true` | `["collection1", "collection2"]`
-   * @default false
-   */
-  disableCopyToLocale?: boolean | string[]
   /** Set to `true` to let missing values in localised fields fall back to the values in `defaultLocale`
    *
    * If false, then no requests will fallback unless a fallbackLocale is specified in the request.
