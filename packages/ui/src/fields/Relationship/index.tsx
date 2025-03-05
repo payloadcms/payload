@@ -733,7 +733,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
               showError={showError}
               value={valueToRender ?? null}
             />
-            {!readOnly && allowCreate && (
+            {!readOnly && allowCreate && selectionType === 'dropdown' && (
               <AddNewRelation
                 hasMany={hasMany}
                 path={path}
@@ -754,7 +754,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       {currentlyOpenRelationship.collectionSlug && currentlyOpenRelationship.hasReadPermission && (
         <DocumentDrawer onDelete={onDelete} onDuplicate={onDuplicate} onSave={onSave} />
       )}
-      <ListDrawer allowCreate={false} enableRowSelections={false} onSelect={onListSelect} />
+      <ListDrawer allowCreate={true} enableRowSelections={false} onSelect={onListSelect} />
     </div>
   )
 }
