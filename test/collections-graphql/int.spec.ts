@@ -1012,6 +1012,69 @@ describe('collections-graphql', () => {
         const queriedDoc = res.data.CyclicalRelationships.docs[0]
         expect(queriedDoc.title).toEqual(queriedDoc.relationToSelf.title)
       })
+
+      it('should query relationships with some documents unreadable', async () => {
+        const restricteds = [
+          await payload.create({
+            collection: 'restricted',
+            data: {
+              title: 'Item 1',
+              restrictAccess: true,
+            },
+          }),
+          await payload.create({
+            collection: 'restricted',
+            data: {
+              title: 'Item 2',
+              restrictAccess: false,
+            },
+          }),
+          await payload.create({
+            collection: 'restricted',
+            data: {
+              title: 'Item 3',
+              restrictAccess: true,
+            },
+          }),
+          await payload.create({
+            collection: 'restricted',
+            data: {
+              title: 'Item 4',
+              restrictAccess: false,
+            },
+          }),
+        ]
+
+        await payload.create({
+          collection: 'relationship-to-access-restricted',
+          data: {
+            title: 'Relationship to access restricted',
+            restricted: restricteds.map((doc) => doc.id),
+          },
+        })
+
+        const query = `query {
+          RelationshipToAccessRestricteds {
+            docs {
+              restricted {
+                title
+              }
+            }
+          }
+        }`
+
+        const res = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((res) => res.json())
+
+        expect(res.data.RelationshipToAccessRestricteds.docs[0].restricted).toHaveLength(2)
+        expect(res.data.RelationshipToAccessRestricteds.docs[0].restricted[0].title).toEqual(
+          'Item 2',
+        )
+        expect(res.data.RelationshipToAccessRestricteds.docs[0].restricted[1].title).toEqual(
+          'Item 4',
+        )
+      })
     })
   })
 

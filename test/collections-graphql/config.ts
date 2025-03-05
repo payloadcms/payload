@@ -367,6 +367,44 @@ export default buildConfigWithDefaults({
       },
     },
     {
+      slug: 'restricted',
+      access: {
+        read: () => ({
+          restrictAccess: {
+            equals: false,
+          },
+        }),
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'restrictAccess',
+          type: 'checkbox',
+        },
+      ],
+    },
+    {
+      slug: 'relationship-to-access-restricted',
+      access: {
+        read: () => true,
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+        },
+        {
+          name: 'restricted',
+          type: 'relationship',
+          hasMany: true,
+          relationTo: 'restricted',
+        },
+      ],
+    },
+    {
       slug: 'media',
       access: openAccess,
       fields: [
