@@ -1,6 +1,6 @@
 import type { ServerEditorConfig } from '@payloadcms/richtext-lexical'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
-import type { Block, BlockSlug, CollectionConfig } from 'payload'
+import type { Block, BlockSlug, CollectionConfig, PayloadComponent } from 'payload'
 
 import {
   BlocksFeature,
@@ -237,10 +237,101 @@ export const lexicalInlineBlocks: (Block | BlockSlug)[] = [
   },
 ]
 
+export const lexicalWrapperBlocks: Array<{
+  block: Block | BlockSlug
+  createDOM: PayloadComponent
+}> = [
+  {
+    block: {
+      slug: 'wrapperBlock',
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+    },
+    createDOM: './collections/Lexical/wrapperBlocks/createDOM.js#wrapperBlockCreateDOM',
+  },
+  {
+    block: {
+      slug: 'wrapperBlockCustomLabel',
+      admin: {
+        components: {
+          Label: '/collections/Lexical/wrapperBlocks/LabelComponent.js#NameLabelComponent',
+        },
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+    },
+    createDOM: './collections/Lexical/wrapperBlocks/createDOM.js#wrapperBlockCreateDOM',
+  },
+  {
+    block: {
+      slug: 'wrapperBlockCustomBlock',
+      admin: {
+        components: {
+          Block: '/collections/Lexical/wrapperBlocks/BlockComponent.js#BlockComponent',
+        },
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+    },
+    createDOM: './collections/Lexical/wrapperBlocks/createDOM.js#wrapperBlockCreateDOM',
+  },
+  {
+    block: {
+      slug: 'wrapperBlockCustomBlockAndLabel',
+      admin: {
+        components: {
+          Block: '/collections/Lexical/wrapperBlocks/BlockComponent.js#BlockComponent',
+          Label: '/collections/Lexical/wrapperBlocks/LabelComponent.js#NameLabelComponent',
+        },
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+    },
+    createDOM: './collections/Lexical/wrapperBlocks/createDOM.js#wrapperBlockCreateDOM',
+  },
+  {
+    block: {
+      slug: 'wrapperBlockColor',
+      admin: {
+        components: {
+          Label: '/collections/Lexical/wrapperBlocks/ColorLabelComponent.js#ColorLabelComponent',
+        },
+      },
+      fields: [
+        {
+          name: 'color',
+          type: 'text',
+        },
+      ],
+    },
+    createDOM: './collections/Lexical/wrapperBlocks/createDOM.js#wrapperBlockColorCreateDOM',
+  },
+]
+
 export const getLexicalFieldsCollection: (args: {
   blocks: (Block | BlockSlug)[]
   inlineBlocks: (Block | BlockSlug)[]
-}) => CollectionConfig = ({ blocks, inlineBlocks }) => {
+  wrapperBlocks: Array<{
+    block: Block | BlockSlug
+    createDOM: PayloadComponent
+  }>
+}) => CollectionConfig = ({ blocks, inlineBlocks, wrapperBlocks }) => {
   const editorConfig: ServerEditorConfig = {
     features: [
       ...defaultEditorFeatures,
@@ -281,6 +372,7 @@ export const getLexicalFieldsCollection: (args: {
       BlocksFeature({
         blocks,
         inlineBlocks,
+        wrapperBlocks,
       }),
       EXPERIMENTAL_TableFeature(),
     ],
@@ -367,7 +459,7 @@ export const getLexicalFieldsCollection: (args: {
         type: 'textarea',
         hooks: {
           afterRead: [
-            async ({ data, req, siblingData }) => {
+            async ({ req, siblingData }) => {
               const yourSanitizedEditorConfig = await sanitizeServerEditorConfig(
                 editorConfig,
                 req.payload.config,

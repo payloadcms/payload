@@ -145,4 +145,9 @@ export { useInlineBlockComponentContext } from '../../features/blocks/client/com
 export { BlockCollapsible } from '../../features/blocks/client/component/components/BlockCollapsible.js'
 export { BlockEditButton } from '../../features/blocks/client/component/components/BlockEditButton.js'
 export { BlockRemoveButton } from '../../features/blocks/client/component/components/BlockRemoveButton.js'
+
+export { WrapperBlockEditButton } from '../../features/blocks/client/plugin/wrapperBlocks/components/WrapperBlockEditButton.js'
+export { WrapperBlockRemoveButton } from '../../features/blocks/client/plugin/wrapperBlocks/components/WrapperBlockRemoveButton.js'
+export { WrapperBlockLabel } from '../../features/blocks/client/plugin/wrapperBlocks/components/WrapperBlockLabel.js'
+export { WrapperBlockContainer } from '../../features/blocks/client/plugin/wrapperBlocks/components/WrapperBlockContainer.js'
 export { useBlockComponentContext } from '../../features/blocks/client/component/BlockContent.js'
