@@ -248,9 +248,14 @@ const stripFields = ({
   }
 
   for (const field of fields) {
+    reservedKeys = []
     const fieldData = data[field.name]
     if (!fieldData || typeof fieldData !== 'object') {
       continue
+    }
+
+    if (field.type === 'blocks') {
+      reservedKeys.push('blockType')
     }
 
     if ('flattenedFields' in field || 'blocks' in field) {
@@ -302,12 +307,12 @@ const stripFields = ({
                 continue
               }
 
-              stripFields({ config, data, fields })
+              stripFields({ config, data, fields, reservedKeys })
             }
 
             continue
           } else {
-            stripFields({ config, data: localeData, fields: field.flattenedFields })
+            stripFields({ config, data: localeData, fields: field.flattenedFields, reservedKeys })
           }
         }
         continue
@@ -349,12 +354,12 @@ const stripFields = ({
             continue
           }
 
-          stripFields({ config, data, fields })
+          stripFields({ config, data, fields, reservedKeys })
         }
 
         continue
       } else {
-        stripFields({ config, data: fieldData, fields: field.flattenedFields })
+        stripFields({ config, data: fieldData, fields: field.flattenedFields, reservedKeys })
       }
     }
   }
