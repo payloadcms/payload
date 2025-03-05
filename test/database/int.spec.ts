@@ -1790,4 +1790,49 @@ describe('database', () => {
     expect(query2.totalDocs).toEqual(1)
     expect(query3.totalDocs).toEqual(1)
   })
+
+  it('mongodb additional keys stripping', async () => {
+    // eslint-disable-next-line jest/no-conditional-in-test
+    if (payload.db.name !== 'mognoose') {
+      return
+    }
+
+    const arrItemID = randomUUID()
+    const res = await payload.db.collections[postsSlug]?.collection.insertOne({
+      SECRET_FIELD: 'secret data',
+      arrayWithIDs: [
+        {
+          id: arrItemID,
+          additionalKeyInArray: 'true',
+          text: 'existing key',
+        },
+      ],
+    })
+
+    let payloadRes: any = await payload.findByID({
+      collection: postsSlug,
+      id: res!.insertedId.toHexString(),
+    })
+
+    expect(payloadRes.id).toBe(res!.insertedId.toHexString())
+    expect(payloadRes['SECRET_FIELD']).toBeUndefined()
+    expect(payloadRes.arrayWithIDs).toBeDefined()
+    expect(payloadRes.arrayWithIDs[0].id).toBe(arrItemID)
+    expect(payloadRes.arrayWithIDs[0].text).toBe('existing key')
+    expect(payloadRes.arrayWithIDs[0].additionalKeyInArray).toBeUndefined()
+
+    // But allows when allowAdditionaKeys is true
+    payload.db.allowAdditionalKeys = true
+
+    payloadRes = await payload.findByID({
+      collection: postsSlug,
+      id: res!.insertedId.toHexString(),
+    })
+
+    expect(payloadRes.id).toBe(res!.insertedId.toHexString())
+    expect(payloadRes['SECRET_FIELD']).toBe('secret data')
+    expect(payloadRes.arrayWithIDs[0].additionalKeyInArray).toBe('true')
+
+    payload.db.allowAdditionalKeys = false
+  })
 })

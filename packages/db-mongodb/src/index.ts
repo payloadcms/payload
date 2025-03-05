@@ -63,6 +63,13 @@ import { upsert } from './upsert.js'
 export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
 
 export interface Args {
+  /**
+   * By default, Payload strips all additional keys from MongoDB data that don't exist
+   * in the Payload schema. If you have some data that you want to include to the result
+   * but it doesn't exist in Payload, you can enable this flag
+   * @default false
+   */
+  allowAdditionalKeys?: boolean
   /** Set to false to disable auto-pluralization of collection names, Defaults to true */
   autoPluralization?: boolean
   /**
@@ -89,6 +96,7 @@ export interface Args {
    * Defaults to disabled.
    */
   collation?: Omit<CollationOptions, 'locale'>
+
   collectionsSchemaOptions?: Partial<Record<CollectionSlug, SchemaOptions>>
 
   /** Extra configuration options */
@@ -174,6 +182,7 @@ declare module 'payload' {
 }
 
 export function mongooseAdapter({
+  allowAdditionalKeys = false,
   autoPluralization = true,
   collectionsSchemaOptions = {},
   connectOptions,
@@ -210,6 +219,7 @@ export function mongooseAdapter({
       url,
       versions: {},
       // DatabaseAdapter
+      allowAdditionalKeys,
       beginTransaction: transactionOptions === false ? defaultBeginTransaction() : beginTransaction,
       collectionsSchemaOptions,
       commitTransaction,
