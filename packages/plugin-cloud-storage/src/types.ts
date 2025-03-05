@@ -63,6 +63,7 @@ export type StaticHandler = (
 ) => Promise<Response> | Response
 
 export interface GeneratedAdapter {
+  clientUploads?: ClientUploadsConfig
   /**
    * Additional fields to be injected into the base collection and image sizes
    */
