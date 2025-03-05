@@ -66,6 +66,7 @@ export interface Config {
   };
   collections: {
     uploads: Upload;
+    'uploads-two': UploadsTwo;
     posts: Post;
     users: User;
     'hidden-collection': HiddenCollection;
@@ -90,6 +91,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     uploads: UploadsSelect<false> | UploadsSelect<true>;
+    'uploads-two': UploadsTwoSelect<false> | UploadsTwoSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'hidden-collection': HiddenCollectionSelect<false> | HiddenCollectionSelect<true>;
@@ -191,6 +193,25 @@ export interface Upload {
       filename?: string | null;
     };
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads-two".
+ */
+export interface UploadsTwo {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This is a custom collection description.
@@ -470,6 +491,10 @@ export interface PayloadLockedDocument {
         value: string | Upload;
       } | null)
     | ({
+        relationTo: 'uploads-two';
+        value: string | UploadsTwo;
+      } | null)
+    | ({
         relationTo: 'posts';
         value: string | Post;
       } | null)
@@ -610,6 +635,24 @@ export interface UploadsSelect<T extends boolean = true> {
               filename?: T;
             };
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads-two_select".
+ */
+export interface UploadsTwoSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

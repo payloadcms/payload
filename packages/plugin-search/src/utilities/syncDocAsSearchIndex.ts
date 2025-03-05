@@ -56,7 +56,7 @@ export const syncDocAsSearchIndex = async ({
           `Error gathering default priority for ${searchSlug} documents related to ${collection}`,
         )
       }
-    } else {
+    } else if (priority !== undefined) {
       defaultPriority = priority
     }
   }

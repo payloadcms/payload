@@ -5,21 +5,19 @@ import type { Field } from '../../fields/config/types.js'
 import { runJobsEndpoint } from '../restEndpointRun.js'
 import { getJobTaskStatus } from '../utilities/getJobTaskStatus.js'
 
-export const getDefaultJobsCollection: (config: Config) => CollectionConfig | null = (config) => {
-  if (!Array.isArray(config?.jobs?.workflows)) {
-    return null
-  }
+export const jobsCollectionSlug = 'payload-jobs'
 
+export const getDefaultJobsCollection: (config: Config) => CollectionConfig | null = (config) => {
   const workflowSlugs: Set<string> = new Set()
   const taskSlugs: Set<string> = new Set(['inline'])
 
-  if (config.jobs?.workflows.length) {
+  if (config.jobs?.workflows?.length) {
     config.jobs?.workflows.forEach((workflow) => {
       workflowSlugs.add(workflow.slug)
     })
   }
 
-  if (config.jobs?.tasks.length) {
+  if (config.jobs?.tasks?.length) {
     config.jobs.tasks.forEach((task) => {
       if (workflowSlugs.has(task.slug)) {
         throw new Error(
@@ -95,7 +93,7 @@ export const getDefaultJobsCollection: (config: Config) => CollectionConfig | nu
   }
 
   const jobsCollection: CollectionConfig = {
-    slug: 'payload-jobs',
+    slug: jobsCollectionSlug,
     admin: {
       group: 'System',
       hidden: true,

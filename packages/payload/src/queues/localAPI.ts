@@ -8,6 +8,7 @@ import {
   type TypedJobs,
   type Where,
 } from '../index.js'
+import { jobsCollectionSlug } from './config/index.js'
 import { runJobs } from './operations/runJobs/index.js'
 
 export const getJobsLocalAPI = (payload: Payload) => ({
@@ -72,7 +73,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     }
 
     return (await payload.create({
-      collection: 'payload-jobs',
+      collection: jobsCollectionSlug,
       data,
       req: args.req,
     })) as TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']
@@ -143,7 +144,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     }
 
     await payload.db.updateMany({
-      collection: 'payload-jobs',
+      collection: jobsCollectionSlug,
       data: {
         completedAt: null,
         error: {
@@ -172,7 +173,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
 
     await payload.db.updateOne({
       id: args.id,
-      collection: 'payload-jobs',
+      collection: jobsCollectionSlug,
       data: {
         completedAt: null,
         error: {

@@ -29,7 +29,7 @@ const ConditionalLogic: CollectionConfig = {
       type: 'text',
       admin: {
         components: {
-          Field: '/collections/ConditionalLogic/CustomFieldWithField',
+          Field: '/collections/ConditionalLogic/CustomFieldWithField.js',
         },
         condition: ({ toggleField }) => Boolean(toggleField),
       },
@@ -40,7 +40,7 @@ const ConditionalLogic: CollectionConfig = {
       type: 'text',
       admin: {
         components: {
-          Field: '/collections/ConditionalLogic/CustomFieldWithHOC',
+          Field: '/collections/ConditionalLogic/CustomFieldWithHOC.js',
         },
         condition: ({ toggleField }) => Boolean(toggleField),
       },
@@ -50,7 +50,7 @@ const ConditionalLogic: CollectionConfig = {
       type: 'text',
       admin: {
         components: {
-          Field: '/collections/ConditionalLogic/CustomClientField',
+          Field: '/collections/ConditionalLogic/CustomClientField.js',
         },
         condition: ({ toggleField }) => Boolean(toggleField),
       },
@@ -60,7 +60,7 @@ const ConditionalLogic: CollectionConfig = {
       type: 'text',
       admin: {
         components: {
-          Field: '/collections/ConditionalLogic/CustomServerField',
+          Field: '/collections/ConditionalLogic/CustomServerField.js',
         },
         condition: ({ toggleField }) => Boolean(toggleField),
       },
