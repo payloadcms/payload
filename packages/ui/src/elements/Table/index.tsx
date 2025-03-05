@@ -20,7 +20,7 @@ export type Props = {
 }
 
 export const Table: React.FC<Props> = ({ appearance = 'default', columns, data: initialData }) => {
-  const { data: listQueryData } = useListQuery()
+  const { data: listQueryData, query } = useListQuery()
   // Use the data from ListQueryProvider if available, otherwise use the props
   const serverData = listQueryData?.docs || initialData
 
@@ -46,6 +46,11 @@ export const Table: React.FC<Props> = ({ appearance = 'default', columns, data: 
   }
 
   const handleDragEnd = async ({ moveFromIndex, moveToIndex }) => {
+    if (query.sort !== '_order' && query.sort !== '-_order') {
+      toast.warning('To reorder the rows you must first sort them by the "Order" column')
+      return
+    }
+
     if (moveFromIndex === moveToIndex) {
       return
     }
@@ -74,7 +79,10 @@ export const Table: React.FC<Props> = ({ appearance = 'default', columns, data: 
       const collectionSlug = window.location.pathname.split('/').filter(Boolean)[2]
       const response = await fetch(`/api/${collectionSlug}/reorder`, {
         body: JSON.stringify({
-          betweenIds: [newBeforeRow?.id, newAfterRow?.id],
+          betweenIds:
+            query.sort === '_order'
+              ? [newBeforeRow?.id, newAfterRow?.id]
+              : [newAfterRow?.id, newBeforeRow?.id],
           docIds: [movedId],
         }),
         headers: {
@@ -129,13 +137,16 @@ export const Table: React.FC<Props> = ({ appearance = 'default', columns, data: 
                     {activeColumns.map((col, colIndex) => {
                       const { accessor } = col
 
-                      if (col.accessor === '_order') {
-                        return (
-                          <td className={`cell-${accessor}`} key={colIndex}>
-                            {(listQueryData.page - 1) * listQueryData.limit + rowIndex + 1}
-                          </td>
-                        )
-                      }
+                      // Example of what it would look like to display integers as sort keys.
+                      // Since we can only do this if query.sort is "_order" or "-_order",
+                      // we'd better always display fractional indexes for consistency.
+                      // if (col.accessor === '_order' && ['_order', '-_order'].includes(query.sort)) {
+                      //   return (
+                      //     <td className={`cell-${accessor}`} key={colIndex}>
+                      //       {(listQueryData.page - 1) * listQueryData.limit + rowIndex + 1}
+                      //     </td>
+                      //   )
+                      // }
 
                       // Use the cellMap to find which index in the renderedCells to use
                       const cell = col.renderedCells[cellMap[row.id]]
