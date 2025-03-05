@@ -217,7 +217,7 @@ const ConditionalLogic: CollectionConfig = {
                   name: 'numberField',
                   type: 'number',
                   admin: {
-                    condition: (data, siblingData, { user }, path) => {
+                    condition: (data, siblingData, { path, user }) => {
                       // Ensure path has enough depth
                       if (path.length < 5) {
                         return false
