@@ -48,6 +48,7 @@ export const defaults: Partial<CollectionConfig> = {
     me: [],
     refresh: [],
   },
+  indexes: [],
   timestamps: true,
   upload: false,
   versions: false,
@@ -106,6 +107,8 @@ export const addDefaultsToCollectionConfig = (collection: CollectionConfig): Col
   collection.timestamps = collection.timestamps ?? true
   collection.upload = collection.upload ?? false
   collection.versions = collection.versions ?? false
+
+  collection.indexes = collection.indexes ?? []
 
   return collection
 }

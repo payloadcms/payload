@@ -209,15 +209,28 @@ export async function writeImportMap({
   log?: boolean
   rootDir: string
 }) {
-  let importMapFolderPath = ''
-  if (fs.existsSync(path.resolve(rootDir, `app/(payload)${config.routes.admin}/`))) {
-    importMapFolderPath = path.resolve(rootDir, `app/(payload)${config.routes.admin}/`)
-  } else if (fs.existsSync(path.resolve(rootDir, `src/app/(payload)${config.routes.admin}/`))) {
-    importMapFolderPath = path.resolve(rootDir, `src/app/(payload)${config.routes.admin}/`)
+  let importMapFilePath: string | undefined = undefined
+
+  if (config?.admin?.importMap?.importMapFile?.length) {
+    if (!fs.existsSync(config.admin.importMap.importMapFile)) {
+      throw new Error(
+        `Could not find the import map file at ${config.admin.importMap.importMapFile}`,
+      )
+    }
+    importMapFilePath = config.admin.importMap.importMapFile
   } else {
-    throw new Error(
-      `Could not find the payload admin directory. Looked in ${path.resolve(rootDir, `app/(payload)${config.routes.admin}/`)} and ${path.resolve(rootDir, `src/app/(payload)${config.routes.admin}/`)}`,
-    )
+    const appLocation = path.resolve(rootDir, `app/(payload)${config.routes.admin}/`)
+    const srcAppLocation = path.resolve(rootDir, `src/app/(payload)${config.routes.admin}/`)
+
+    if (fs.existsSync(appLocation)) {
+      importMapFilePath = path.resolve(appLocation, fileName)
+    } else if (fs.existsSync(srcAppLocation)) {
+      importMapFilePath = path.resolve(srcAppLocation, fileName)
+    } else {
+      throw new Error(
+        `Could not find Payload import map folder. Looked in ${appLocation} and ${srcAppLocation}`,
+      )
+    }
   }
 
   const imports: string[] = []
@@ -236,8 +249,6 @@ export const importMap = {
 ${mapKeys.join(',\n')}
 }
 `
-
-  const importMapFilePath = path.resolve(importMapFolderPath, fileName)
 
   if (!force) {
     // Read current import map and check in the IMPORTS if there are any new imports. If not, don't write the file.
