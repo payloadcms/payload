@@ -219,7 +219,7 @@ export const MyComponent = ({ data }: { data: SerializedEditorState }) => {
 }
 ```
 
-Do note that using the rest populate function will result in each node sending a separate request to the REST API, which may be slow for large documents. On the server, you can use the payload populate function, which will be more efficient:
+Do note that using the REST populate function will result in each node sending a separate request to the REST API, which may be slow for a large amount of nodes. On the server, you can use the payload populate function, which will be more efficient:
 
 ```tsx
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
@@ -247,7 +247,6 @@ export const MyRSCComponent = async ({ data }: { data: SerializedEditorState }) 
 
   return html && <div dangerouslySetInnerHTML={{ __html: html }} />
 }
-
 ```
 
 ### Converting Lexical Blocks
@@ -267,7 +266,7 @@ import {
   convertLexicalToHTML,
   type HTMLConvertersFunction,
 } from '@payloadcms/richtext-lexical/html'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 
 type NodeTypes =
   | DefaultNodeTypes
@@ -289,17 +288,12 @@ const htmlConverters: HTMLConvertersFunction<NodeTypes> = ({ defaultConverters }
 })
 
 export const MyComponent = ({ data }: { data: SerializedEditorState }) => {
-  const [html, setHTML] = useState<null | string>(null)
-  useEffect(() => {
-    void convertLexicalToHTML({
-      converters: htmlConverters,
-      data,
-    }).then((html) => {
-      setHTML(html)
-    })
-  }, [data])
+  const html = convertLexicalToHTML({
+    converters: htmlConverters,
+    data,
+  })
 
-  return html && <div dangerouslySetInnerHTML={{ __html: html }} />
+  return <div dangerouslySetInnerHTML={{ __html: html }} />
 }
 ```
 
