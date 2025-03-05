@@ -113,5 +113,7 @@ export const flattenAllFields = ({
     }
   }
 
+  flattenedFieldsCache.set(fields, result)
+
   return result
 }
