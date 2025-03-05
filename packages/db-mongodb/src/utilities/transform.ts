@@ -399,7 +399,7 @@ export const transform = ({
         config,
         data,
         fields: flattenAllFields({ cache: true, fields }),
-        reservedKeys: ['id'],
+        reservedKeys: ['id', 'globalType'],
       })
     }
   }
