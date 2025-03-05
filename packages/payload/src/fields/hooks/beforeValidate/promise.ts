@@ -8,10 +8,9 @@ import type { Block, Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName, valueIsValueWithRelation } from '../../config/types.js'
-import { getDefaultValue } from '../../getDefaultValue.js'
 import { getFieldPathsModified as getFieldPaths } from '../../getFieldPaths.js'
-import { cloneDataFromOriginalDoc } from '../beforeChange/cloneDataFromOriginalDoc.js'
 import { getExistingRowDoc } from '../beforeChange/getExistingRowDoc.js'
+import { getFallbackValue } from './getFallbackValue.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args<T> = {
@@ -274,23 +273,6 @@ export const promise = async <T>({
       }
     }
 
-    if (typeof siblingData[field.name] === 'undefined') {
-      // If no incoming data, but existing document data is found, merge it in
-      if (typeof siblingDoc[field.name] !== 'undefined') {
-        siblingData[field.name] = cloneDataFromOriginalDoc(siblingDoc[field.name])
-
-        // Otherwise compute default value
-      } else if (typeof field.defaultValue !== 'undefined') {
-        siblingData[field.name] = await getDefaultValue({
-          defaultValue: field.defaultValue,
-          locale: req.locale,
-          req,
-          user: req.user,
-          value: siblingData[field.name],
-        })
-      }
-    }
-
     // Execute hooks
     if (field.hooks?.beforeValidate) {
       for (const hook of field.hooks.beforeValidate) {
@@ -312,7 +294,10 @@ export const promise = async <T>({
           schemaPath: schemaPathSegments,
           siblingData,
           siblingFields,
-          value: siblingData[field.name],
+          value:
+            typeof siblingData[field.name] === 'undefined'
+              ? await getFallbackValue({ field, req, siblingDoc })
+              : siblingData[field.name],
         })
 
         if (hookedValue !== undefined) {
@@ -328,7 +313,7 @@ export const promise = async <T>({
         : await field.access[operation]({ id, blockData, data, doc, req, siblingData })
 
       if (!result) {
-        delete siblingData[field.name]
+        siblingData[field.name] = await getFallbackValue({ field, req, siblingDoc })
       }
     }
   }
