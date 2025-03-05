@@ -658,7 +658,9 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
-      upload: true,
+      upload: {
+        displayPreview: false,
+      },
     },
     {
       slug: relationPreviewSlug,

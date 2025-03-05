@@ -14,6 +14,7 @@ const baseClass = 'upload upload--has-one'
 
 type Props = {
   readonly className?: string
+  readonly displayPreview?: boolean
   readonly fileDoc: {
     relationTo: string
     value: JsonObject
@@ -25,7 +26,7 @@ type Props = {
 }
 
 export function UploadComponentHasOne(props: Props) {
-  const { className, fileDoc, onRemove, readonly, reloadDoc, serverURL } = props
+  const { className, displayPreview, fileDoc, onRemove, readonly, reloadDoc, serverURL } = props
   const { relationTo, value } = fileDoc
   const id = String(value?.id)
 
@@ -56,6 +57,7 @@ export function UploadComponentHasOne(props: Props) {
         alt={(value?.alt || value?.filename) as string}
         byteSize={value.filesize as number}
         collectionSlug={relationTo}
+        displayPreview={displayPreview}
         filename={value.filename as string}
         id={id}
         mimeType={value?.mimeType as string}

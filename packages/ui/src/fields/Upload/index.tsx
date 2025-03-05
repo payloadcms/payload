@@ -35,6 +35,8 @@ export function UploadComponent(props: UploadFieldClientProps) {
 
   const { config } = useConfig()
 
+  const displayPreview = field.displayPreview
+
   const memoizedValidate = React.useCallback(
     (value, options) => {
       if (typeof validate === 'function') {
@@ -66,6 +68,7 @@ export function UploadComponent(props: UploadFieldClientProps) {
       className={className}
       Description={Description}
       description={description}
+      displayPreview={displayPreview}
       Error={Error}
       filterOptions={filterOptions}
       hasMany={hasMany}
