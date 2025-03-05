@@ -63,9 +63,9 @@ export function FieldErrorsToast({ errorMessage }) {
     <div>
       {message}
       {Array.isArray(errors) && errors.length > 0 ? (
-        <ul>
+        <ul data-testid="field-errors">
           {errors.map((error, index) => {
-            return <li key={index}>{error.replaceAll(' > ', ' → ')}</li>
+            return <li key={index}>{error}</li>
           })}
         </ul>
       ) : null}
