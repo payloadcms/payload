@@ -24,10 +24,8 @@ export const FileCell: React.FC<FileCellProps> = ({
   field,
   rowData,
 }) => {
-  const previewAllowed =
-    'displayPreview' in field && field.displayPreview
-      ? field.displayPreview
-      : collectionConfig.upload && collectionConfig.upload.displayPreview
+  const fieldPreviewAllowed = 'displayPreview' in field ? field.displayPreview : undefined
+  const previewAllowed = fieldPreviewAllowed ?? collectionConfig.upload?.displayPreview ?? true
 
   if (previewAllowed) {
     return (

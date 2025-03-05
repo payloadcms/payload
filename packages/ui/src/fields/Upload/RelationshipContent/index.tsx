@@ -22,6 +22,7 @@ type Props = {
   readonly byteSize: number
   readonly className?: string
   readonly collectionSlug: string
+  readonly displayPreview?: boolean
   readonly filename: string
   readonly id?: number | string
   readonly mimeType: string
@@ -42,6 +43,7 @@ export function RelationshipContent(props: Props) {
     byteSize,
     className,
     collectionSlug,
+    displayPreview,
     filename,
     mimeType,
     onRemove,
@@ -87,7 +89,7 @@ export function RelationshipContent(props: Props) {
   }
 
   const metaText = withMeta ? generateMetaText(mimeType, byteSize) : ''
-  const previewAllowed = collectionConfig.upload.displayPreview
+  const previewAllowed = displayPreview ?? collectionConfig.upload?.displayPreview ?? true
 
   return (
     <div className={[baseClass, className].filter(Boolean).join(' ')}>

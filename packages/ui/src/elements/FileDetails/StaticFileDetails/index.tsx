@@ -38,7 +38,7 @@ export const StaticFileDetails: React.FC<StaticFileDetailsProps> = (props) => {
 
   const { filename, filesize, height, mimeType, thumbnailURL, url, width } = doc
 
-  const previewAllowed = uploadConfig.displayPreview
+  const previewAllowed = uploadConfig.displayPreview ?? true
 
   return (
     <div className={baseClass}>

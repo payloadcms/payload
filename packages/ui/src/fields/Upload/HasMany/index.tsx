@@ -17,6 +17,7 @@ import './index.scss'
 
 type Props = {
   readonly className?: string
+  readonly displayPreview?: boolean
   readonly fileDocs: {
     relationTo: string
     value: JsonObject
@@ -30,8 +31,17 @@ type Props = {
 }
 
 export function UploadComponentHasMany(props: Props) {
-  const { className, fileDocs, isSortable, onRemove, onReorder, readonly, reloadDoc, serverURL } =
-    props
+  const {
+    className,
+    displayPreview,
+    fileDocs,
+    isSortable,
+    onRemove,
+    onReorder,
+    readonly,
+    reloadDoc,
+    serverURL,
+  } = props
 
   const moveRow = React.useCallback(
     (moveFromIndex: number, moveToIndex: number) => {
@@ -120,6 +130,7 @@ export function UploadComponentHasMany(props: Props) {
                       alt={(value?.alt || value?.filename) as string}
                       byteSize={value.filesize as number}
                       collectionSlug={relationTo}
+                      displayPreview={displayPreview}
                       filename={value.filename as string}
                       id={id}
                       mimeType={value?.mimeType as string}
