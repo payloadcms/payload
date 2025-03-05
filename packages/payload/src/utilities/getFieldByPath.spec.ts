@@ -1,7 +1,7 @@
 import { assert } from 'ts-essentials'
 import { flattenAllFields } from './flattenAllFields'
 import { getFieldByPath } from './getFieldByPath'
-import type { FlattenedArrayField, FlattenedGroupField } from '../fields/config/types'
+import type { FlattenedArrayField, FlattenedGroupField } from '../fields/config/types.js'
 
 const fields = flattenAllFields({
   fields: [
