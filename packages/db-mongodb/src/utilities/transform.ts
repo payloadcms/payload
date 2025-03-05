@@ -287,7 +287,9 @@ const stripFields = ({
                   if (maybeBlockReference && typeof maybeBlockReference === 'object') {
                     maybeBlock = maybeBlockReference
                   }
-                } else {
+                }
+
+                if (!maybeBlock) {
                   maybeBlock = field.blocks.find((each) => each.slug === data.blockType)
                 }
 
@@ -328,10 +330,13 @@ const stripFields = ({
               const maybeBlockReference = field.blockReferences.find(
                 (each) => typeof each === 'object' && each.slug === data.blockType,
               )
+
               if (maybeBlockReference && typeof maybeBlockReference === 'object') {
                 maybeBlock = maybeBlockReference
               }
-            } else {
+            }
+
+            if (!maybeBlock) {
               maybeBlock = field.blocks.find((each) => each.slug === data.blockType)
             }
 
