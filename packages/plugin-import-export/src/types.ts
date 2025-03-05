@@ -16,10 +16,6 @@ export type ImportExportPluginConfig = {
    */
   disableJobsQueue?: boolean
   /**
-   * Globals to include the Import/Export controls in
-   */
-  globals?: string[]
-  /**
    * This function takes the default export collection configured in the plugin and allows you to override it by modifying and returning it
    * @param collection
    * @returns collection
