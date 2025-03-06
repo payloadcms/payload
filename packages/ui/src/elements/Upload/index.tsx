@@ -360,6 +360,14 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                       </Button>
                     </Fragment>
                   )}
+                  {/* TODO: WIP */}
+                  {uploadConfig?.adminFileSelectionControl !== undefined && (
+                    <Fragment>
+                      <div>TODO: remove this message</div>
+                      {uploadConfig.adminFileSelectionControl}
+                    </Fragment>
+                  )}
+                  <span>test</span>
                 </div>
 
                 <p className={`${baseClass}__dragAndDropText`}>
