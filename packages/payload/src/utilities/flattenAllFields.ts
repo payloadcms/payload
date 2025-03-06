@@ -16,7 +16,7 @@ export const flattenBlock = ({ block }: { block: Block }): FlattenedBlock => {
   }
 }
 
-const flattenedFieldsCache = new WeakMap<Field[], FlattenedField[]>()
+const flattenedFieldsCache = new Map<Field[], FlattenedField[]>()
 
 export const flattenAllFields = ({
   cache,
