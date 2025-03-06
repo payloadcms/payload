@@ -17,6 +17,7 @@ import React, {
   useOptimistic,
   useRef,
   useState,
+  useTransition,
 } from 'react'
 import { toast } from 'sonner'
 
@@ -120,45 +121,50 @@ export const Form: React.FC<FormProps> = (props) => {
   const contextRef = useRef({} as FormContextType)
   const abortResetFormRef = useRef<AbortController>(null)
 
-  const [formStateInternal, setFormStateInternal] = useState(initialState)
-  const [formState, setOptimisticFormState] = useOptimistic(formStateInternal)
+  const [formState, setFormState] = useState(initialState)
+  const [isPending, startTransition] = useTransition()
+
+  // Create a ref to store the debounce timeout
+  const debounceRef = useRef<NodeJS.Timeout | null>(null)
 
   const dispatchFields = useCallback(
     (action: FieldAction) => {
+      // Wrap the optimistic update in startTransition
       const reducedFormState = fieldReducer(formState, action)
-      console.log('THIS NEEDS TO HAPPEN IMMEDIATELY', reducedFormState, action)
-      startTransition(() => setOptimisticFormState(reducedFormState))
+      console.log('THIS HAPPENS IMMEDIATELY', reducedFormState, action)
+      setFormState(reducedFormState)
 
-      if (Array.isArray(onChange)) {
-        const doOnChange = async () => {
+      // Start the debounced server update
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current)
+      }
+
+      debounceRef.current = setTimeout(() => {
+        startTransition(async () => {
           let formStateAfterOnChange: FormState = reducedFormState
 
-          for (const onChangeFn of onChange) {
-            console.log('THIS PORTION NEEDS TO BE DEBOUNCED ONLY', reducedFormState)
+          const onChangeFunctions = Array.isArray(onChange) ? onChange : [onChange]
+
+          for (const onChangeFn of onChangeFunctions) {
+            console.log('THIS PORTION IS DEBOUNCED', reducedFormState)
             formStateAfterOnChange = await onChangeFn({
-              formState: deepCopyObjectSimpleWithoutReactComponents(reducedFormState),
+              formState: reducedFormState,
               submitted,
             })
           }
 
-          if (!formStateAfterOnChange) {
-            return
+          if (formStateAfterOnChange) {
+            const { newState } = mergeServerFormState({
+              existingState: reducedFormState,
+              incomingState: formStateAfterOnChange,
+            })
+
+            setFormState(newState)
           }
-
-          const { newState } = mergeServerFormState({
-            existingState: reducedFormState || {},
-            incomingState: formStateAfterOnChange,
-          })
-
-          setFormStateInternal(newState)
-        }
-
-        void doOnChange()
-      } else {
-        setFormStateInternal(reducedFormState)
-      }
+        })
+      }, 300) // Adjust debounce delay as needed
     },
-    [formState, onChange, submitted, setOptimisticFormState],
+    [formState, onChange, submitted],
   )
 
   contextRef.current.fields = formState
