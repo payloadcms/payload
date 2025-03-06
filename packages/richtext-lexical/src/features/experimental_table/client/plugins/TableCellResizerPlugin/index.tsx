@@ -1,7 +1,7 @@
 'use client'
 
 import type { TableCellNode, TableDOMCell, TableMapType } from '@lexical/table'
-import type { LexicalEditor } from 'lexical'
+import type { LexicalEditor, NodeKey } from 'lexical'
 import type { JSX, MouseEventHandler } from 'react'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
@@ -16,7 +16,7 @@ import {
   getTableElement,
   TableNode,
 } from '@lexical/table'
-import { calculateZoomLevel } from '@lexical/utils'
+import { calculateZoomLevel, mergeRegister } from '@lexical/utils'
 import { $getNearestNodeFromDOMNode, isHTMLElement } from 'lexical'
 import * as React from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -40,6 +40,7 @@ function TableCellResizer({ editor }: { editor: LexicalEditor }): JSX.Element {
   const targetRef = useRef<HTMLElement | null>(null)
   const resizerRef = useRef<HTMLDivElement | null>(null)
   const tableRectRef = useRef<ClientRect | null>(null)
+  const [hasTable, setHasTable] = useState(false)
   const editorConfig = useEditorConfigContext()
 
   const mouseStartPosRef = useRef<MousePosition | null>(null)
@@ -62,20 +63,37 @@ function TableCellResizer({ editor }: { editor: LexicalEditor }): JSX.Element {
   }
 
   useEffect(() => {
-    return editor.registerNodeTransform(TableNode, (tableNode) => {
-      if (tableNode.getColWidths()) {
+    const tableKeys = new Set<NodeKey>()
+    return mergeRegister(
+      editor.registerMutationListener(TableNode, (nodeMutations) => {
+        for (const [nodeKey, mutation] of nodeMutations) {
+          if (mutation === 'destroyed') {
+            tableKeys.delete(nodeKey)
+          } else {
+            tableKeys.add(nodeKey)
+          }
+        }
+        setHasTable(tableKeys.size > 0)
+      }),
+      editor.registerNodeTransform(TableNode, (tableNode) => {
+        if (tableNode.getColWidths()) {
+          return tableNode
+        }
+
+        const numColumns = tableNode.getColumnCount()
+        const columnWidth = MIN_COLUMN_WIDTH
+
+        tableNode.setColWidths(Array(numColumns).fill(columnWidth))
         return tableNode
-      }
-
-      const numColumns = tableNode.getColumnCount()
-      const columnWidth = MIN_COLUMN_WIDTH
-
-      tableNode.setColWidths(Array(numColumns).fill(columnWidth))
-      return tableNode
-    })
+      }),
+    )
   }, [editor])
 
   useEffect(() => {
+    if (!hasTable) {
+      return
+    }
+
     const onMouseMove = (event: MouseEvent) => {
       const target = event.target
       if (!isHTMLElement(target)) {
@@ -148,7 +166,7 @@ function TableCellResizer({ editor }: { editor: LexicalEditor }): JSX.Element {
     return () => {
       removeRootListener()
     }
-  }, [activeCell, draggingDirection, editor, resetState])
+  }, [activeCell, draggingDirection, editor, hasTable, resetState])
 
   const isHeightChanging = (direction: MouseDraggingDirection) => {
     if (direction === 'bottom') {
