@@ -29,8 +29,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "list-published": "tsx src/lib/getPackageRegistryVersions.ts",
+    "publish-prerelease": "tsx src/publish-prerelease.ts",
     "release": "tsx src/release.ts",
-    "release:canary": "tsx src/publish-canary.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
