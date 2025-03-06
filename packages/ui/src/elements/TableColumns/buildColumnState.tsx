@@ -3,6 +3,7 @@ import type {
   ClientCollectionConfig,
   ClientComponentProps,
   ClientField,
+  Column,
   DefaultCellComponentProps,
   DefaultServerCellComponentProps,
   Field,
@@ -24,7 +25,6 @@ import {
 import React from 'react'
 
 import type { SortColumnProps } from '../SortColumn/index.js'
-import type { Column } from '../Table/index.js'
 
 import {
   RenderCustomComponent,

@@ -26,6 +26,10 @@ export type FormProps = {
    */
   disableValidationOnSubmit?: boolean
   /**
+   * If you don't want the form to be a <form> element, you can pass a string here to use as the wrapper element.
+   */
+  el?: string
+  /**
    * By default, the form will get the field schema (not data) from the current document. If you pass this in, you can override that behavior.
    * This is very useful for sub-forms, where the form's field schema is not necessarily the field schema of the current document (e.g. for the Blocks
    * feature of the Lexical Rich Text field)
@@ -84,7 +88,7 @@ export type CreateFormData = (
    * @default true
    */
   options?: { mergeOverrideData?: boolean },
-) => FormData
+) => FormData | Promise<FormData>
 export type GetFields = () => FormState
 export type GetField = (path: string) => FormField
 export type GetData = () => Data
@@ -227,6 +231,11 @@ export type Context = {
   getFields: GetFields
   getSiblingData: GetSiblingData
   initializing: boolean
+  /**
+   * Tracks wether the form state passes validation.
+   * For example the state could be submitted but invalid as field errors have been returned.
+   */
+  isValid: boolean
   removeFieldRow: ({ path, rowIndex }: { path: string; rowIndex: number }) => void
   replaceFieldRow: ({
     blockType,
@@ -243,7 +252,13 @@ export type Context = {
   }) => void
   replaceState: (state: FormState) => void
   reset: Reset
+  /**
+   * If the form has started processing in the background (e.g.
+   * if autosave is running), this will be true.
+   */
+  setBackgroundProcessing: SetProcessing
   setDisabled: (disabled: boolean) => void
+  setIsValid: (processing: boolean) => void
   setModified: SetModified
   setProcessing: SetProcessing
   setSubmitted: SetSubmitted

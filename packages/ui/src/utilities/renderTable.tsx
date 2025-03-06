@@ -1,25 +1,25 @@
 import type {
   ClientCollectionConfig,
+  ClientConfig,
+  ClientField,
   CollectionConfig,
   Field,
-  FilterOptionsProps,
   ImportMap,
   ListPreferences,
   PaginatedDocs,
   Payload,
   SanitizedCollectionConfig,
-  Where,
 } from 'payload'
-import type { MarkOptional } from 'ts-essentials'
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
-import { fieldIsHiddenOrDisabled, flattenTopLevelFields } from 'payload/shared'
+import { fieldAffectsData, fieldIsHiddenOrDisabled, flattenTopLevelFields } from 'payload/shared'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import type { Column } from '../exports/client/index.js'
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import { buildColumnState } from '../elements/TableColumns/buildColumnState.js'
+import { buildPolymorphicColumnState } from '../elements/TableColumns/buildPolymorphicColumnState.js'
 import { filterFields } from '../elements/TableColumns/filterFields.js'
 import { getInitialColumns } from '../elements/TableColumns/getInitialColumns.js'
 
@@ -51,53 +51,11 @@ export const renderFilters = (
     new Map() as Map<string, React.ReactNode>,
   )
 
-// export const resolveFilterOptions = async ({
-//   fields,
-//   relationTo,
-//   req,
-//   user,
-// }: { fields: Field[] } & MarkOptional<
-//   FilterOptionsProps,
-//   'blockData' | 'data' | 'id' | 'siblingData'
-// >): Promise<Map<string, Where>> => {
-//   const acc = new Map<string, Where>()
-
-//   for (const field of fields) {
-//     if (fieldIsHiddenOrDisabled(field)) {
-//       continue
-//     }
-
-//     if ('name' in field && 'filterOptions' in field && field.filterOptions) {
-//       let resolvedFilterOption = {} as Where
-
-//       if (typeof field.filterOptions === 'function') {
-//         const result = await field.filterOptions({
-//           id: undefined,
-//           blockData: undefined,
-//           data: {}, // use empty object to prevent breaking queries when accessing properties of data
-//           relationTo,
-//           req,
-//           siblingData: {}, // use empty object to prevent breaking queries when accessing properties of siblingData
-//           user,
-//         })
-
-//         if (result && typeof result === 'object') {
-//           resolvedFilterOption = result
-//         }
-//       } else {
-//         resolvedFilterOption = field.filterOptions
-//       }
-
-//       acc.set(field.name, resolvedFilterOption)
-//     }
-//   }
-
-//   return acc
-// }
-
 export const renderTable = ({
   clientCollectionConfig,
+  clientConfig,
   collectionConfig,
+  collections,
   columnPreferences,
   columns: columnsFromArgs,
   customCellProps,
@@ -109,8 +67,10 @@ export const renderTable = ({
   tableAppearance,
   useAsTitle,
 }: {
-  clientCollectionConfig: ClientCollectionConfig
-  collectionConfig: SanitizedCollectionConfig
+  clientCollectionConfig?: ClientCollectionConfig
+  clientConfig?: ClientConfig
+  collectionConfig?: SanitizedCollectionConfig
+  collections?: string[]
   columnPreferences: ListPreferences['columns']
   columns?: ListPreferences['columns']
   customCellProps?: Record<string, any>
@@ -127,31 +87,72 @@ export const renderTable = ({
   Table: React.ReactNode
 } => {
   // Ensure that columns passed as args comply with the field config, i.e. `hidden`, `disableListColumn`, etc.
-  const columns = columnsFromArgs
-    ? columnsFromArgs?.filter((column) =>
-        flattenTopLevelFields(clientCollectionConfig.fields, true)?.some(
-          (field) => 'name' in field && field.name === column.accessor,
-        ),
-      )
-    : getInitialColumns(
-        filterFields(clientCollectionConfig.fields),
-        useAsTitle,
-        clientCollectionConfig?.admin?.defaultColumns,
-      )
 
-  const columnState = buildColumnState({
-    clientCollectionConfig,
-    collectionConfig,
-    columnPreferences,
-    columns,
-    enableRowSelections,
-    i18n,
-    // sortColumnProps,
-    customCellProps,
-    docs,
-    payload,
-    useAsTitle,
-  })
+  let columnState: Column[]
+
+  if (collections) {
+    const fields: ClientField[] = []
+    for (const collection of collections) {
+      const config = clientConfig.collections.find((each) => each.slug === collection)
+
+      for (const field of filterFields(config.fields)) {
+        if (fieldAffectsData(field)) {
+          if (fields.some((each) => fieldAffectsData(each) && each.name === field.name)) {
+            continue
+          }
+        }
+
+        fields.push(field)
+      }
+    }
+
+    const columns = columnsFromArgs
+      ? columnsFromArgs?.filter((column) =>
+          flattenTopLevelFields(fields, true)?.some(
+            (field) => 'name' in field && field.name === column.accessor,
+          ),
+        )
+      : getInitialColumns(fields, useAsTitle, [])
+
+    columnState = buildPolymorphicColumnState({
+      columnPreferences,
+      columns,
+      enableRowSelections,
+      fields,
+      i18n,
+      // sortColumnProps,
+      customCellProps,
+      docs,
+      payload,
+      useAsTitle,
+    })
+  } else {
+    const columns = columnsFromArgs
+      ? columnsFromArgs?.filter((column) =>
+          flattenTopLevelFields(clientCollectionConfig.fields, true)?.some(
+            (field) => 'name' in field && field.name === column.accessor,
+          ),
+        )
+      : getInitialColumns(
+          filterFields(clientCollectionConfig.fields),
+          useAsTitle,
+          clientCollectionConfig?.admin?.defaultColumns,
+        )
+
+    columnState = buildColumnState({
+      clientCollectionConfig,
+      collectionConfig,
+      columnPreferences,
+      columns,
+      enableRowSelections,
+      i18n,
+      // sortColumnProps,
+      customCellProps,
+      docs,
+      payload,
+      useAsTitle,
+    })
+  }
 
   const columnsToUse = [...columnState]
 
@@ -166,8 +167,15 @@ export const renderTable = ({
         hidden: true,
       },
       Heading: i18n.t('version:type'),
-      renderedCells: docs.map((_, i) => (
-        <Pill key={i}>{getTranslation(clientCollectionConfig.labels.singular, i18n)}</Pill>
+      renderedCells: docs.map((doc, i) => (
+        <Pill key={i}>
+          {getTranslation(
+            collections
+              ? payload.collections[doc.relationTo].config.labels.singular
+              : clientCollectionConfig.labels.singular,
+            i18n,
+          )}
+        </Pill>
       )),
     } as Column)
   }
@@ -189,6 +197,7 @@ export const renderTable = ({
 
   return {
     columnState,
-    Table: <Table appearance={tableAppearance} columns={columnsToUse} data={docs} />,
+    // key is required since Next.js 15.2.0 to prevent React key error
+    Table: <Table appearance={tableAppearance} columns={columnsToUse} data={docs} key="table" />,
   }
 }

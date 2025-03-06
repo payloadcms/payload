@@ -1,5 +1,6 @@
 import type {
   Adapter,
+  ClientUploadsConfig,
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
   GeneratedAdapter,
@@ -8,7 +9,9 @@ import type { Config, Plugin, UploadCollectionSlug } from 'payload'
 
 import * as AWS from '@aws-sdk/client-s3'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
+import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
 
+import { getGenerateSignedURLHandler } from './generateSignedURL.js'
 import { getGenerateURL } from './generateURL.js'
 import { getHandleDelete } from './handleDelete.js'
 import { getHandleUpload } from './handleUpload.js'
@@ -29,9 +32,14 @@ export type S3StorageOptions = {
   bucket: string
 
   /**
+   * Do uploads directly on the client to bypass limits on Vercel. You must allow CORS PUT method for the bucket to your website.
+   */
+  clientUploads?: ClientUploadsConfig
+  /**
    * Collection options to apply the S3 adapter to.
    */
   collections: Partial<Record<UploadCollectionSlug, Omit<CollectionOptions, 'adapter'> | true>>
+
   /**
    * AWS S3 client configuration. Highly dependent on your AWS setup.
    *
@@ -59,11 +67,41 @@ type S3StoragePlugin = (storageS3Args: S3StorageOptions) => Plugin
 export const s3Storage: S3StoragePlugin =
   (s3StorageOptions: S3StorageOptions) =>
   (incomingConfig: Config): Config => {
-    if (s3StorageOptions.enabled === false) {
+    let storageClient: AWS.S3 | null = null
+
+    const getStorageClient: () => AWS.S3 = () => {
+      if (storageClient) {
+        return storageClient
+      }
+      storageClient = new AWS.S3(s3StorageOptions.config ?? {})
+      return storageClient
+    }
+
+    const isPluginDisabled = s3StorageOptions.enabled === false
+
+    initClientUploads({
+      clientHandler: '@payloadcms/storage-s3/client#S3ClientUploadHandler',
+      collections: s3StorageOptions.collections,
+      config: incomingConfig,
+      enabled: !isPluginDisabled && Boolean(s3StorageOptions.clientUploads),
+      serverHandler: getGenerateSignedURLHandler({
+        access:
+          typeof s3StorageOptions.clientUploads === 'object'
+            ? s3StorageOptions.clientUploads.access
+            : undefined,
+        acl: s3StorageOptions.acl,
+        bucket: s3StorageOptions.bucket,
+        collections: s3StorageOptions.collections,
+        getStorageClient,
+      }),
+      serverHandlerPath: '/storage-s3-generate-signed-url',
+    })
+
+    if (isPluginDisabled) {
       return incomingConfig
     }
 
-    const adapter = s3StorageInternal(s3StorageOptions)
+    const adapter = s3StorageInternal(getStorageClient, s3StorageOptions)
 
     // Add adapter to each collection option object
     const collectionsWithAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
@@ -102,19 +140,14 @@ export const s3Storage: S3StoragePlugin =
     })(config)
   }
 
-function s3StorageInternal({ acl, bucket, config = {} }: S3StorageOptions): Adapter {
+function s3StorageInternal(
+  getStorageClient: () => AWS.S3,
+  { acl, bucket, clientUploads, config = {} }: S3StorageOptions,
+): Adapter {
   return ({ collection, prefix }): GeneratedAdapter => {
-    let storageClient: AWS.S3 | null = null
-    const getStorageClient: () => AWS.S3 = () => {
-      if (storageClient) {
-        return storageClient
-      }
-      storageClient = new AWS.S3(config)
-      return storageClient
-    }
-
     return {
       name: 's3',
+      clientUploads,
       generateURL: getGenerateURL({ bucket, config }),
       handleDelete: getHandleDelete({ bucket, getStorageClient }),
       handleUpload: getHandleUpload({

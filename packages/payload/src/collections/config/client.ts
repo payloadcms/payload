@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { I18nClient } from '@payloadcms/translations'
 
 import type { StaticDescription } from '../../admin/types.js'
@@ -16,7 +17,15 @@ import { createClientFields } from '../../fields/config/client.js'
 
 export type ServerOnlyCollectionProperties = keyof Pick<
   SanitizedCollectionConfig,
-  'access' | 'custom' | 'endpoints' | 'flattenedFields' | 'hooks' | 'joins'
+  | 'access'
+  | 'custom'
+  | 'endpoints'
+  | 'flattenedFields'
+  | 'hooks'
+  | 'indexes'
+  | 'joins'
+  | 'polymorphicJoins'
+  | 'sanitizedIndexes'
 >
 
 export type ServerOnlyCollectionAdminProperties = keyof Pick<
@@ -67,7 +76,10 @@ const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] 
   'endpoints',
   'custom',
   'joins',
+  'polymorphicJoins',
   'flattenedFields',
+  'indexes',
+  'sanitizedIndexes',
   // `upload`
   // `admin`
   // are all handled separately

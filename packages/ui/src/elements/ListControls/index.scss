@@ -19,6 +19,11 @@
       }
     }
 
+    &__custom-control {
+      padding: 0;
+      border-radius: 0;
+    }
+
     &__buttons-wrap {
       display: flex;
       align-items: center;

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { ValidationFieldError } from '../../../errors/index.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
@@ -24,12 +25,22 @@ type Args = {
    */
   docWithLocales: JsonObject
   errors: ValidationFieldError[]
+  /**
+   * Built up labels of parent fields
+   *
+   * @example "Group Field > Tab Field > Text Field"
+   */
+  fieldLabelPath: string
   fields: (Field | TabAsField)[]
   global: null | SanitizedGlobalConfig
   id?: number | string
-  mergeLocaleActions: (() => Promise<void>)[]
+  mergeLocaleActions: (() => Promise<void> | void)[]
   operation: Operation
   parentIndexPath: string
+  /**
+   * @todo make required in v4.0
+   */
+  parentIsLocalized?: boolean
   parentPath: string
   parentSchemaPath: string
   req: PayloadRequest
@@ -62,11 +73,13 @@ export const traverseFields = async ({
   doc,
   docWithLocales,
   errors,
+  fieldLabelPath,
   fields,
   global,
   mergeLocaleActions,
   operation,
   parentIndexPath,
+  parentIsLocalized,
   parentPath,
   parentSchemaPath,
   req,
@@ -90,10 +103,12 @@ export const traverseFields = async ({
         errors,
         field,
         fieldIndex,
+        fieldLabelPath,
         global,
         mergeLocaleActions,
         operation,
         parentIndexPath,
+        parentIsLocalized,
         parentPath,
         parentSchemaPath,
         req,

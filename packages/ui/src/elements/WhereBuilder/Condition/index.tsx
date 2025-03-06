@@ -1,7 +1,7 @@
 'use client'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { AddCondition, ReducedField, UpdateCondition } from '../types.js'
+import type { AddCondition, ReducedField, RemoveCondition, UpdateCondition } from '../types.js'
 
 export type Props = {
   readonly addCondition: AddCondition
@@ -11,7 +11,7 @@ export type Props = {
   readonly operator: Operator
   readonly orIndex: number
   readonly reducedFields: ReducedField[]
-  readonly removeCondition: ({ andIndex, orIndex }: { andIndex: number; orIndex: number }) => void
+  readonly removeCondition: RemoveCondition
   readonly RenderedFilter: React.ReactNode
   readonly updateCondition: UpdateCondition
   readonly value: string
@@ -68,9 +68,9 @@ export const Condition: React.FC<Props> = (props) => {
     valueOptions = reducedField.field.options
   }
 
-  const updateValue = useEffectEvent((debouncedValue) => {
+  const updateValue = useEffectEvent(async (debouncedValue) => {
     if (operator) {
-      updateCondition({
+      await updateCondition({
         andIndex,
         field: reducedField,
         operator,
@@ -81,7 +81,7 @@ export const Condition: React.FC<Props> = (props) => {
   })
 
   useEffect(() => {
-    updateValue(debouncedValue)
+    void updateValue(debouncedValue)
   }, [debouncedValue])
 
   const disabled =
@@ -89,9 +89,9 @@ export const Condition: React.FC<Props> = (props) => {
     reducedField?.field?.admin?.disableListFilter
 
   const handleFieldChange = useCallback(
-    (field: Option<string>) => {
+    async (field: Option<string>) => {
       setInternalValue(undefined)
-      updateCondition({
+      await updateCondition({
         andIndex,
         field: reducedFields.find((option) => option.value === field.value),
         operator,
@@ -103,6 +103,7 @@ export const Condition: React.FC<Props> = (props) => {
   )
 
   const handleOperatorChange = useCallback(
+<<<<<<< HEAD
     (operator: Option<Operator>) => {
       const validOperatorValue = operatorValueTypes[operator.value] || 'any'
       const isValidValue = validOperatorValue === 'any' || typeof value === validOperatorValue
@@ -114,6 +115,10 @@ export const Condition: React.FC<Props> = (props) => {
       }
 
       updateCondition({
+=======
+    async (operator: Option<Operator>) => {
+      await updateCondition({
+>>>>>>> main
         andIndex,
         field: reducedField,
         operator: operator.value,

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { PaginatedDocs } from '../../../database/types.js'
 import type { PayloadRequest, Where } from '../../../types/index.js'
 import type { WorkflowJSON } from '../../config/types/workflowJSONTypes.js'
@@ -11,6 +12,7 @@ import type { RunJobResult } from './runJob/index.js'
 
 import { Forbidden } from '../../../errors/Forbidden.js'
 import isolateObjectProperty from '../../../utilities/isolateObjectProperty.js'
+import { jobsCollectionSlug } from '../../config/index.js'
 import { getUpdateJobFunction } from './runJob/getUpdateJobFunction.js'
 import { importHandlerPath } from './runJob/importHandlerPath.js'
 import { runJob } from './runJob/index.js'
@@ -109,7 +111,7 @@ export const runJobs = async ({
         docs: [
           (await req.payload.update({
             id,
-            collection: 'payload-jobs',
+            collection: jobsCollectionSlug,
             data: {
               processing: true,
               seenByWorker: true,
@@ -121,7 +123,7 @@ export const runJobs = async ({
         ],
       }
     : ((await req.payload.update({
-        collection: 'payload-jobs',
+        collection: jobsCollectionSlug,
         data: {
           processing: true,
           seenByWorker: true,
@@ -252,7 +254,7 @@ export const runJobs = async ({
   if (jobsToDelete && jobsToDelete.length > 0) {
     try {
       await req.payload.delete({
-        collection: 'payload-jobs',
+        collection: jobsCollectionSlug,
         req,
         where: { id: { in: jobsToDelete } },
       })
