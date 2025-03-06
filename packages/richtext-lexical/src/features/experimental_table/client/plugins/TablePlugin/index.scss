@@ -52,6 +52,14 @@
       outline: none;
     }
 
+    /*
+    * A firefox workaround to allow scrolling of overflowing table cell
+    * ref: https://bugzilla.mozilla.org/show_bug.cgi?id=1904159
+    */
+    &__tableCell > * {
+      overflow: inherit;
+    }
+
     &__tableCellResizer {
       position: absolute;
       right: -4px;
