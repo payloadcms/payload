@@ -455,7 +455,7 @@ function setContainerDivAttributes(containerDiv: HTMLElement, className?: string
   if (className != null) {
     containerDiv.className = className
   }
-  containerDiv.setAttribute('aria-label', 'Typeahead menu')
+  containerDiv.setAttribute('aria-label', 'Slash menu')
   containerDiv.setAttribute('role', 'listbox')
   containerDiv.style.display = 'block'
   containerDiv.style.position = 'absolute'
@@ -521,7 +521,7 @@ export function useMenuAnchorRef(
         setContainerDivAttributes(containerDiv, className)
         anchorElem.append(containerDiv)
       }
-      containerDiv.setAttribute('id', 'typeahead-menu')
+      containerDiv.setAttribute('id', 'slash-menu')
       anchorElementRef.current = containerDiv
       rootElement.setAttribute('aria-controls', 'slash-menu')
     }
