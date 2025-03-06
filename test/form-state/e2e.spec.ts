@@ -59,7 +59,8 @@ test.describe('Form State', () => {
       page,
       postsUrl.create,
       async () => {
-        await field.pressSequentially('Some text to type', { delay: 50 }) // Ensure this is faster than the debounce rate
+        // Need to type _faster_ than the debounce rate (250ms)
+        await field.pressSequentially('Some text to type', { delay: 50 })
       },
       {
         allowedNumberOfRequests: 1,
@@ -68,19 +69,30 @@ test.describe('Form State', () => {
   })
 
   test('should queue onChange functions', async () => {
-    // try and write a failing test
-    // Need to type into a _slower_ than the debounce rate
-    // Monitor network requests to see if the request is debounced
-    // Only a subset of requests should be made, depending on the speed of the response vs the speed of the typing
+    await page.goto(postsUrl.create)
+    const field = page.locator('#field-title')
+    await field.fill('Test')
 
     // only throttle test after initial load to avoid timeouts
     const cdpSession = await throttleTest({
       page,
       context,
-      delay: 'Fast 4G',
+      delay: 'Slow 3G',
     })
 
-    // Tests here
+    await trackNetworkRequests(
+      page,
+      postsUrl.create,
+      async () => {
+        await field.fill('')
+        // Need to type into a _slower_ than the debounce rate (250ms), but _faster_ than the network request
+        await field.pressSequentially('Some text to type', { delay: 300 })
+      },
+      {
+        allowedNumberOfRequests: 2,
+        timeout: 10000, // watch network for 10 seconds to allow requests to build up
+      },
+    )
 
     await cdpSession.send('Network.emulateNetworkConditions', {
       offline: false,
