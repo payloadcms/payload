@@ -7,8 +7,17 @@
       margin: 0px 25px 30px 0px;
     }
     &__tableScrollableWrapper > .LexicalEditorTheme__table {
-      /* Remove the table's margin and put it on the wrapper */
-      margin: 0;
+      /* Remove the table's vertical margin and put it on the wrapper */
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+
+    &__tableAlignmentCenter {
+      margin-left: auto;
+      margin-right: auto;
+    }
+    &__tableAlignmentRight {
+      margin-left: auto;
     }
 
     &__tableSelection *::selection {
@@ -23,7 +32,8 @@
       overflow-x: scroll;
       table-layout: fixed;
       width: fit-content;
-      margin: 0 25px 30px 0;
+      margin-top: 25px;
+      margin-bottom: 30px;
 
       ::selection {
         background: rgba(172, 206, 247);

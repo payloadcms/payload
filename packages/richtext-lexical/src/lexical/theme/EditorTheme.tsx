@@ -82,6 +82,10 @@ export const LexicalEditorTheme: EditorThemeClasses = {
   table: 'LexicalEditorTheme__table',
   tableAddColumns: 'LexicalEditorTheme__tableAddColumns',
   tableAddRows: 'LexicalEditorTheme__tableAddRows',
+  tableAlignment: {
+    center: 'LexicalEditorTheme__tableAlignmentCenter',
+    right: 'LexicalEditorTheme__tableAlignmentRight',
+  },
   tableCell: 'LexicalEditorTheme__tableCell',
   tableCellActionButton: 'LexicalEditorTheme__tableCellActionButton',
   tableCellActionButtonContainer: 'LexicalEditorTheme__tableCellActionButtonContainer',
