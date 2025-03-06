@@ -264,12 +264,17 @@ export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
   siblingData: Partial<TSiblingData>,
   {
     blockData,
+    path,
     user,
   }: {
     /**
      * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
      */
     blockData: Partial<TData>
+    /**
+     * The path of the field, e.g. ["group", "myArray", 1, "textField"]. The path is the schemaPath but with indexes and would be used in the context of field data, not field schemas.
+     */
+    path: (number | string)[]
     user: PayloadRequest['user']
   },
 ) => boolean
@@ -1373,6 +1378,12 @@ export type Block = {
     }
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>
+    /**
+     * Hides the block name field from the Block's header
+     *
+     * @default false
+     */
+    disableBlockName?: boolean
     group?: Record<string, string> | string
     jsx?: PayloadComponent
   }
@@ -1388,6 +1399,9 @@ export type Block = {
     singularName?: string
   }
   imageAltText?: string
+  /**
+   * Preferred aspect ratio of the image is 3 : 2
+   */
   imageURL?: string
   /** Customize generated GraphQL and Typescript schema names.
    * The slug is used by default.
@@ -1402,7 +1416,7 @@ export type Block = {
 }
 
 export type ClientBlock = {
-  admin?: Pick<Block['admin'], 'custom' | 'group'>
+  admin?: Pick<Block['admin'], 'custom' | 'disableBlockName' | 'group'>
   fields: ClientField[]
   labels?: LabelsClient
 } & Pick<Block, 'imageAltText' | 'imageURL' | 'jsx' | 'slug'>

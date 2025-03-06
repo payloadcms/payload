@@ -1,6 +1,6 @@
 import type { AdminViewServerProps } from 'payload'
 
-import { formatAdminURL } from '@payloadcms/ui/shared'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import { Logo } from '../../elements/Logo/index.js'

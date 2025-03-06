@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { assertToastErrors } from 'helpers/assertToastErrors.js'
 import { addListFilter } from 'helpers/e2e/addListFilter.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import { openCreateDocDrawer, openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
@@ -288,9 +289,10 @@ describe('Relationship Field', () => {
     await expect(field).toContainText(anotherRelationOneDoc.id)
     await wait(2000) // Need to wait form state to come back before clicking save
     await page.locator('#action-save').click()
-    await expect(page.locator('.payload-toast-container')).toContainText(
-      `is invalid: ${fieldLabel}`,
-    )
+    await assertToastErrors({
+      page,
+      errors: [fieldLabel],
+    })
     filteredField = page.locator(`#field-${fieldName} .react-select`)
     await filteredField.click({ delay: 100 })
     filteredOptions = filteredField.locator('.rs__option')
@@ -303,7 +305,7 @@ describe('Relationship Field', () => {
   describe('filterOptions', () => {
     // TODO: Flaky test. Fix this! (This is an actual issue not just an e2e flake)
     test('should allow dynamic filterOptions', async () => {
-      await runFilterOptionsTest('relationshipFilteredByID', 'Relationship Filtered')
+      await runFilterOptionsTest('relationshipFilteredByID', 'Relationship Filtered By ID')
     })
 
     // TODO: Flaky test. Fix this! (This is an actual issue not just an e2e flake)

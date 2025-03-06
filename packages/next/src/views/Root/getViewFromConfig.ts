@@ -9,7 +9,7 @@ import type {
 } from 'payload'
 import type React from 'react'
 
-import { formatAdminURL } from '@payloadcms/ui/shared'
+import { formatAdminURL } from 'payload/shared'
 
 import type { initPage } from '../../utilities/initPage/index.js'
 

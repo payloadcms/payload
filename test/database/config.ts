@@ -4,10 +4,9 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import type { TextField } from 'payload'
 
-import { v4 as uuid } from 'uuid'
+import { randomUUID } from 'crypto'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
 import { seed } from './seed.js'
 import {
   customIDsSlug,
@@ -501,7 +500,7 @@ export default buildConfigWithDefaults({
             beforeChange: [
               ({ value, operation }) => {
                 if (operation === 'create') {
-                  return uuid()
+                  return randomUUID()
                 }
                 return value
               },
@@ -563,6 +562,43 @@ export default buildConfigWithDefaults({
         },
       ],
       versions: true,
+    },
+    {
+      slug: 'compound-indexes',
+      fields: [
+        {
+          name: 'one',
+          type: 'text',
+        },
+        {
+          name: 'two',
+          type: 'text',
+        },
+        {
+          name: 'three',
+          type: 'text',
+        },
+        {
+          name: 'group',
+          type: 'group',
+          fields: [
+            {
+              name: 'four',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+      indexes: [
+        {
+          fields: ['one', 'two'],
+          unique: true,
+        },
+        {
+          fields: ['three', 'group.four'],
+          unique: true,
+        },
+      ],
     },
   ],
   globals: [

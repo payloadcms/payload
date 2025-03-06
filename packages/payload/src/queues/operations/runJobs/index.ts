@@ -12,6 +12,7 @@ import type { RunJobResult } from './runJob/index.js'
 
 import { Forbidden } from '../../../errors/Forbidden.js'
 import isolateObjectProperty from '../../../utilities/isolateObjectProperty.js'
+import { jobsCollectionSlug } from '../../config/index.js'
 import { updateJob, updateJobs } from '../../utilities/updateJob.js'
 import { getUpdateJobFunction } from './runJob/getUpdateJobFunction.js'
 import { importHandlerPath } from './runJob/importHandlerPath.js'
@@ -266,14 +267,14 @@ export const runJobs = async ({
     try {
       if (req.payload.config.jobs.runHooks) {
         await req.payload.delete({
-          collection: 'payload-jobs',
+          collection: jobsCollectionSlug,
           depth: 0, // can be 0 since we're not returning anything
           disableTransaction: true,
           where: { id: { in: jobsToDelete } },
         })
       } else {
         await req.payload.db.deleteMany({
-          collection: 'payload-jobs',
+          collection: jobsCollectionSlug,
           where: { id: { in: jobsToDelete } },
         })
       }

@@ -1,13 +1,12 @@
 'use client'
-import type { ClientCollectionConfig, DefaultCellComponentProps, UploadFieldClient } from 'payload'
+import type { DefaultCellComponentProps, UploadFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { fieldAffectsData, fieldIsID } from 'payload/shared'
+import { fieldAffectsData, fieldIsID, formatAdminURL } from 'payload/shared'
 import React from 'react' // TODO: abstract this out to support all routers
 
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { formatAdminURL } from '../../../utilities/formatAdminURL.js'
 import { Link } from '../../Link/index.js'
 import { CodeCell } from './fields/Code/index.js'
 import { cellComponents } from './fields/index.js'

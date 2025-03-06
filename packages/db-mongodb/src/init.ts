@@ -3,7 +3,11 @@ import type { Init, SanitizedCollectionConfig } from 'payload'
 
 import mongoose from 'mongoose'
 import paginate from 'mongoose-paginate-v2'
-import { buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
+import {
+  buildVersionCollectionFields,
+  buildVersionCompoundIndexes,
+  buildVersionGlobalFields,
+} from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 import type { CollectionModel, GlobalModel } from './types.js'
@@ -36,6 +40,7 @@ export const init: Init = function init(this: MongooseAdapter) {
           },
           ...schemaOptions,
         },
+        compoundIndexes: buildVersionCompoundIndexes({ indexes: collection.sanitizedIndexes }),
         configFields: versionCollectionFields,
         payload: this.payload,
       })

@@ -8,7 +8,7 @@ import {
   type TypedJobs,
   type Where,
 } from '../index.js'
-import { jobAfterRead } from './config/jobsCollection.js'
+import { jobAfterRead, jobsCollectionSlug } from './config/index.js'
 import { runJobs } from './operations/runJobs/index.js'
 import { updateJob, updateJobs } from './utilities/updateJob.js'
 
@@ -79,7 +79,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
 
     if (payload?.config?.jobs?.depth || payload?.config?.jobs?.runHooks) {
       return (await payload.create({
-        collection: 'payload-jobs',
+        collection: jobsCollectionSlug,
         data,
         depth: payload.config.jobs.depth ?? 0,
         req: args.req,
@@ -88,7 +88,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
       return jobAfterRead({
         config: payload.config,
         doc: await payload.db.create({
-          collection: 'payload-jobs',
+          collection: jobsCollectionSlug,
           data,
           req: args.req,
         }),
