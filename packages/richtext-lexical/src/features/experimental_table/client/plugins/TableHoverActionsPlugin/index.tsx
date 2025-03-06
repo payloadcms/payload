@@ -17,7 +17,7 @@ import {
   TableNode,
 } from '@lexical/table'
 import { $findMatchingParent, mergeRegister } from '@lexical/utils'
-import { $getNearestNodeFromDOMNode } from 'lexical'
+import { $getNearestNodeFromDOMNode, isHTMLElement } from 'lexical'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import * as React from 'react'
 import { createPortal } from 'react-dom'
@@ -256,7 +256,7 @@ function getMouseInfo(
 } {
   const target = event.target
 
-  if (target && target instanceof HTMLElement) {
+  if (isHTMLElement(target)) {
     const tableDOMNode = target.closest<HTMLElement>(
       `td.${editorConfig.theme.tableCell}, th.${editorConfig.theme.tableCell}`,
     )
