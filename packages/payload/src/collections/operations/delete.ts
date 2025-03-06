@@ -25,6 +25,7 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
 import { deleteScheduledPublishJobs } from '../../versions/deleteScheduledPublishJobs.js'
+import { invalidateDocumentInDataloader } from '../dataloader.js'
 import { buildAfterOperation } from './utils.js'
 
 export type Arguments = {
@@ -202,6 +203,8 @@ export const deleteOperation = async <
             },
           },
         })
+
+        invalidateDocumentInDataloader({ id, collectionSlug: collectionConfig.slug, req })
 
         // /////////////////////////////////////
         // afterRead - Fields
