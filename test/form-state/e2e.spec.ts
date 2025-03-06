@@ -1,6 +1,7 @@
 import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { trackNetworkRequests } from 'helpers/e2e/trackNetworkRequests.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -51,10 +52,26 @@ test.describe('Form State', () => {
   })
 
   test('should debounce onChange events', async () => {
+    await page.goto(postsUrl.create)
+    const field = page.locator('#field-title')
+
+    await trackNetworkRequests(
+      page,
+      postsUrl.create,
+      async () => {
+        await field.pressSequentially('Some text to type', { delay: 50 }) // Ensure this is faster than the debounce rate
+      },
+      {
+        allowedNumberOfRequests: 1,
+      },
+    )
+  })
+
+  test('should queue onChange functions', async () => {
     // try and write a failing test
-    // Need to type into a _faster_ than the debounce rate
+    // Need to type into a _slower_ than the debounce rate
     // Monitor network requests to see if the request is debounced
-    // Only a single request should be made
+    // Only a subset of requests should be made, depending on the speed of the response vs the speed of the typing
 
     // only throttle test after initial load to avoid timeouts
     const cdpSession = await throttleTest({
@@ -63,7 +80,7 @@ test.describe('Form State', () => {
       delay: 'Fast 4G',
     })
 
-    // do tests here
+    // Tests here
 
     await cdpSession.send('Network.emulateNetworkConditions', {
       offline: false,
@@ -73,12 +90,5 @@ test.describe('Form State', () => {
     })
 
     await cdpSession.detach()
-  })
-
-  test('should queue onChange functions', async () => {
-    // try and write a failing test
-    // Need to type into a _slower_ than the debounce rate
-    // Monitor network requests to see if the request is debounced
-    // Only a subset of requests should be made, depending on the speed of the response vs the speed of the typing
   })
 })
