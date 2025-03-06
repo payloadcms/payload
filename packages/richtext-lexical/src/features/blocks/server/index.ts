@@ -206,7 +206,7 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
 
       nodes: [
         createNode({
-          traverseNodeData: traverseNodeDataHOC(props.blocks),
+          traverseNodeData: traverseNodeDataHOC(blockConfigs),
           // @ts-expect-error - TODO: fix this
           getSubFields: ({ node }) => {
             if (!node) {
