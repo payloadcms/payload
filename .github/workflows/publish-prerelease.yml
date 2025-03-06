@@ -33,9 +33,9 @@ jobs:
         # Use 'canary' for main branch, 'internal' for others
         run: |
           if [[ ${{ github.ref_name }} == "main" ]]; then
-            echo "::set-output name=release_type::canary"
+            echo "release_type=canary" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=release_type::internal"
+            echo "release_type=internal" >> $GITHUB_OUTPUT
           fi
 
       - name: Release
