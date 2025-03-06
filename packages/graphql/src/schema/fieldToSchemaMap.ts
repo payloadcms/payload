@@ -77,6 +77,8 @@ type SharedArgs = {
   parentName: string
 }
 
+type GenericFieldToSchemaMap = (args: { field: Field } & SharedArgs) => ObjectTypeConfig
+
 type FieldToSchemaMap = {
   array: (args: { field: ArrayField } & SharedArgs) => ObjectTypeConfig
   blocks: (args: { field: BlocksField } & SharedArgs) => ObjectTypeConfig
@@ -248,18 +250,20 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
     field,
     forceNullable,
     graphqlResult,
+    newlyCreatedBlockType,
     objectTypeConfig,
     parentIsLocalized,
     parentName,
   }) =>
     field.fields.reduce((objectTypeConfigWithCollapsibleFields, subField) => {
-      const addSubField = fieldToSchemaMap[subField.type]
+      const addSubField: GenericFieldToSchemaMap = fieldToSchemaMap[subField.type]
       if (addSubField) {
         return addSubField({
           config,
           field: subField,
           forceNullable,
           graphqlResult,
+          newlyCreatedBlockType,
           objectTypeConfig: objectTypeConfigWithCollapsibleFields,
           parentIsLocalized,
           parentName,
@@ -748,11 +752,15 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       },
     },
   }),
-  row: ({ field, objectTypeConfig }) =>
+  row: ({ field, objectTypeConfig, ...rest }) =>
     field.fields.reduce((objectTypeConfigWithRowFields, subField) => {
-      const addSubField = fieldToSchemaMap[subField.type]
+      const addSubField: GenericFieldToSchemaMap = fieldToSchemaMap[subField.type]
       if (addSubField) {
-        return addSubField(objectTypeConfigWithRowFields, subField)
+        return addSubField({
+          field: subField,
+          objectTypeConfig: objectTypeConfigWithRowFields,
+          ...rest,
+        })
       }
       return objectTypeConfigWithRowFields
     }, objectTypeConfig),
@@ -777,6 +785,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
     field,
     forceNullable,
     graphqlResult,
+    newlyCreatedBlockType,
     objectTypeConfig,
     parentIsLocalized,
     parentName,
@@ -823,9 +832,18 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       return {
         ...tabSchema,
         ...tab.fields.reduce((subFieldSchema, subField) => {
-          const addSubField = fieldToSchemaMap[subField.type]
+          const addSubField: GenericFieldToSchemaMap = fieldToSchemaMap[subField.type]
           if (addSubField) {
-            return addSubField(subFieldSchema, subField)
+            return addSubField({
+              config,
+              field: subField,
+              forceNullable,
+              graphqlResult,
+              newlyCreatedBlockType,
+              objectTypeConfig: subFieldSchema,
+              parentIsLocalized,
+              parentName,
+            })
           }
           return subFieldSchema
         }, tabSchema),
