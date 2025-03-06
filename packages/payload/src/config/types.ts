@@ -946,6 +946,16 @@ export type Config = {
     /** The slug of a Collection that you want to be used to log in to the Admin dashboard. */
     user?: string
   }
+  /**
+   * Configure authentication-related Payload-wide settings.
+   */
+  auth?: {
+    /**
+     * Define which JWT identification methods you'd like to support for Payload's local auth strategy, as well as the order that they're retrieved in.
+     * Defaults to ['JWT', 'Bearer', 'cookie]
+     */
+    jwtOrder: ('Bearer' | 'cookie' | 'JWT')[]
+  }
   /** Custom Payload bin scripts can be injected via the config. */
   bin?: BinScriptConfig[]
   blocks?: Block[]

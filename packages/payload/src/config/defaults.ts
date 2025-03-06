@@ -32,6 +32,9 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
     },
     theme: 'all',
   },
+  auth: {
+    jwtOrder: ['JWT', 'Bearer', 'cookie'],
+  },
   bin: [],
   collections: [],
   cookiePrefix: 'payload',
@@ -148,6 +151,11 @@ export const addDefaultsToConfig = (config: Config): Config => {
     ...(config.typescript || {}),
   }
   config.upload = config.upload ?? {}
+
+  config.auth = {
+    jwtOrder: ['JWT', 'Bearer', 'cookie'],
+    ...(config.auth || {}),
+  }
 
   return config
 }

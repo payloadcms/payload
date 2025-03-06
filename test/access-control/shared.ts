@@ -5,6 +5,7 @@ export const slug = 'posts'
 export const unrestrictedSlug = 'unrestricted'
 export const readOnlySlug = 'read-only-collection'
 export const readOnlyGlobalSlug = 'read-only-global'
+export const hooksSlug = 'hooks'
 
 export const userRestrictedCollectionSlug = 'user-restricted-collection'
 export const fullyRestrictedSlug = 'fully-restricted'

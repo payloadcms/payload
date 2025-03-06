@@ -21,6 +21,7 @@ import type {
   SubmitOptions,
 } from './types.js'
 
+import { FieldErrorsToast } from '../../elements/Toasts/fieldErrors.js'
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useQueues } from '../../hooks/useQueues.js'
@@ -394,7 +395,6 @@ export const Form: React.FC<FormProps> = (props) => {
           contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
           if (json.message) {
             errorToast(json.message)
-
             return
           }
 
@@ -434,7 +434,7 @@ export const Form: React.FC<FormProps> = (props) => {
             })
 
             nonFieldErrors.forEach((err) => {
-              errorToast(err.message || t('error:unknown'))
+              errorToast(<FieldErrorsToast errorMessage={err.message || t('error:unknown')} />)
             })
 
             return
