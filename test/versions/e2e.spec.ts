@@ -22,7 +22,7 @@
  *  - specify locales to show
  */
 
-import type { BrowserContext, Page } from '@playwright/test'
+import type { BrowserContext, Dialog, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -51,6 +51,7 @@ import { titleToDelete } from './shared.js'
 import {
   autosaveCollectionSlug,
   autoSaveGlobalSlug,
+  autosaveWithValidateCollectionSlug,
   customIDSlug,
   diffCollectionSlug,
   disablePublishGlobalSlug,
@@ -59,6 +60,7 @@ import {
   draftGlobalSlug,
   draftWithMaxCollectionSlug,
   draftWithMaxGlobalSlug,
+  draftWithValidateCollectionSlug,
   localizedCollectionSlug,
   localizedGlobalSlug,
   postCollectionSlug,
@@ -79,6 +81,8 @@ describe('Versions', () => {
   let url: AdminUrlUtil
   let serverURL: string
   let autosaveURL: AdminUrlUtil
+  let autosaveWithValidateURL: AdminUrlUtil
+  let draftWithValidateURL: AdminUrlUtil
   let disablePublishURL: AdminUrlUtil
   let customIDURL: AdminUrlUtil
   let postURL: AdminUrlUtil
@@ -115,6 +119,7 @@ describe('Versions', () => {
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, draftCollectionSlug)
       autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
+      autosaveWithValidateURL = new AdminUrlUtil(serverURL, autosaveWithValidateCollectionSlug)
       disablePublishURL = new AdminUrlUtil(serverURL, disablePublishSlug)
       customIDURL = new AdminUrlUtil(serverURL, customIDSlug)
       postURL = new AdminUrlUtil(serverURL, postCollectionSlug)
@@ -129,7 +134,7 @@ describe('Versions', () => {
 
       await rowToDelete.locator('.cell-_select input').check()
       await page.locator('.delete-documents__toggle').click()
-      await page.locator('#confirm-delete').click()
+      await page.locator('#delete-draft-posts #confirm-action').click()
 
       await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
         'Deleted 1 Draft Post successfully.',
@@ -147,7 +152,7 @@ describe('Versions', () => {
 
       // Bulk edit the selected rows
       await page.locator('.publish-many__toggle').click()
-      await page.locator('#confirm-publish').click()
+      await page.locator('#publish-draft-posts #confirm-action').click()
 
       // Check that the statuses for each row has been updated to `published`
       await expect(findTableCell(page, '_status', 'Published Title')).toContainText('Published')
@@ -171,7 +176,7 @@ describe('Versions', () => {
       await expect(findTableCell(page, '_status', title)).toContainText('Draft')
       await selectTableRow(page, title)
       await page.locator('.publish-many__toggle').click()
-      await page.locator('#confirm-publish').click()
+      await page.locator('#publish-autosave-posts #confirm-action').click()
       await expect(findTableCell(page, '_status', title)).toContainText('Published')
     })
 
@@ -184,7 +189,7 @@ describe('Versions', () => {
 
       // Bulk edit the selected rows
       await page.locator('.unpublish-many__toggle').click()
-      await page.locator('#confirm-unpublish').click()
+      await page.locator('#unpublish-draft-posts #confirm-action').click()
 
       // Check that the statuses for each row has been updated to `draft`
       await expect(findTableCell(page, '_status', 'Published Title')).toContainText('Draft')
@@ -306,7 +311,6 @@ describe('Versions', () => {
 
     test('should restore version with correct data', async () => {
       await page.goto(url.create)
-      await page.waitForURL(url.create)
       await page.locator('#field-title').fill('v1')
       await page.locator('#field-description').fill('hello')
       await saveDocAndAssert(page)
@@ -317,7 +321,6 @@ describe('Versions', () => {
       const row2 = page.locator('tbody .row-2')
       const versionID = await row2.locator('.cell-id').textContent()
       await page.goto(`${savedDocURL}/versions/${versionID}`)
-      await page.waitForURL(`${savedDocURL}/versions/${versionID}`)
       await expect(page.locator('.render-field-diffs')).toBeVisible()
       await page.locator('.restore-version__button').click()
       await page.locator('button:has-text("Confirm")').click()
@@ -433,9 +436,49 @@ describe('Versions', () => {
       await expect(drawer.locator('.id-label')).toBeVisible()
     })
 
+    test('collection - autosave - should not create duplicates when clicking Create new', async () => {
+      // This test checks that when we click "Create new" in the list view, it only creates 1 extra document and not more
+      const { totalDocs: initialDocsCount } = await payload.find({
+        collection: autosaveCollectionSlug,
+        draft: true,
+      })
+
+      await page.goto(autosaveURL.create)
+      await page.locator('#field-title').fill('autosave title')
+      await waitForAutoSaveToRunAndComplete(page)
+      await expect(page.locator('#field-title')).toHaveValue('autosave title')
+
+      const { totalDocs: updatedDocsCount } = await payload.find({
+        collection: autosaveCollectionSlug,
+        draft: true,
+      })
+
+      await expect(() => {
+        expect(updatedDocsCount).toBe(initialDocsCount + 1)
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT, intervals: [100] })
+
+      await page.goto(autosaveURL.list)
+      const createNewButton = page.locator('.list-header .btn:has-text("Create New")')
+      await createNewButton.click()
+
+      await page.waitForURL(`**/${autosaveCollectionSlug}/**`)
+
+      await page.locator('#field-title').fill('autosave title')
+      await waitForAutoSaveToRunAndComplete(page)
+      await expect(page.locator('#field-title')).toHaveValue('autosave title')
+
+      const { totalDocs: latestDocsCount } = await payload.find({
+        collection: autosaveCollectionSlug,
+        draft: true,
+      })
+
+      await expect(() => {
+        expect(latestDocsCount).toBe(updatedDocsCount + 1)
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT, intervals: [100] })
+    })
+
     test('collection - should update updatedAt', async () => {
       await page.goto(url.create)
-      await page.waitForURL(`**/${url.create}`)
 
       // fill out doc in english
       await page.locator('#field-title').fill('title')
@@ -489,7 +532,6 @@ describe('Versions', () => {
     test('global - should autosave', async () => {
       const url = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
       await page.goto(url.global(autoSaveGlobalSlug))
-      await page.waitForURL(`**/${autoSaveGlobalSlug}`)
       const titleField = page.locator('#field-title')
       await titleField.fill('global title')
       await waitForAutoSaveToRunAndComplete(page)
@@ -531,7 +573,6 @@ describe('Versions', () => {
       const englishTitle = 'english title'
 
       await page.goto(url.create)
-      await page.waitForURL(`**/${url.create}`)
 
       // fill out doc in english
       await page.locator('#field-title').fill(englishTitle)
@@ -560,7 +601,7 @@ describe('Versions', () => {
 
       // revert to last published version
       await page.locator('#action-revert-to-published').click()
-      await saveDocAndAssert(page, '#action-revert-to-published-confirm')
+      await saveDocAndAssert(page, '[id^=confirm-revert-] #confirm-action')
 
       // verify that spanish content is reverted correctly
       await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
@@ -594,7 +635,6 @@ describe('Versions', () => {
 
     test('should save versions with custom IDs', async () => {
       await page.goto(customIDURL.create)
-      await page.waitForURL(`${customIDURL.create}`)
       await page.locator('#field-id').fill('custom')
       await page.locator('#field-title').fill('title')
       await saveDocAndAssert(page)
@@ -738,6 +778,48 @@ describe('Versions', () => {
       expect(versionsTabUpdated).toBeTruthy()
     })
   })
+
+  describe('Scheduled publish', () => {
+    beforeAll(() => {
+      url = new AdminUrlUtil(serverURL, draftCollectionSlug)
+    })
+
+    test('should schedule publish', async () => {
+      await page.goto(url.create)
+      await page.locator('#field-title').fill('scheduled publish')
+      await page.locator('#field-description').fill('scheduled publish description')
+
+      // schedule publish should not be available before document has been saved
+      await page.locator('#action-save-popup').click()
+      await expect(page.locator('#schedule-publish')).toBeHidden()
+
+      // save draft then try to schedule publish
+      await saveDocAndAssert(page)
+      await page.locator('#action-save-popup').click()
+      await page.locator('#schedule-publish').click()
+
+      // drawer should open
+      await expect(page.locator('.schedule-publish__drawer-header')).toBeVisible()
+      // nothing in scheduled
+      await expect(page.locator('.drawer__content')).toContainText('No upcoming events scheduled.')
+
+      // set date and time
+      await page.locator('.date-time-picker input').fill('Feb 21, 2050 12:00 AM')
+      await page.keyboard.press('Enter')
+
+      // save the scheduled publish
+      await page.locator('#scheduled-publish-save').click()
+
+      // delete the scheduled event after it was made
+      await page.locator('.cell-delete').locator('.btn').click()
+
+      // see toast deleted successfully
+      await expect(
+        page.locator('.payload-toast-item:has-text("Deleted successfully.")'),
+      ).toBeVisible()
+    })
+  })
+
   describe('Collections - publish specific locale', () => {
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, localizedCollectionSlug)
@@ -779,7 +861,7 @@ describe('Versions', () => {
       const publishOptions = page.locator('.doc-controls__controls .popup')
       await publishOptions.click()
 
-      const publishSpecificLocale = page.locator('.popup-button-list button').first()
+      const publishSpecificLocale = page.locator('#publish-locale')
       await expect(publishSpecificLocale).toContainText('English')
       await publishSpecificLocale.click()
 
@@ -809,6 +891,232 @@ describe('Versions', () => {
         en: 'english published',
         es: 'spanish published',
       })
+    })
+  })
+
+  describe('Collections with draft validation', () => {
+    beforeAll(() => {
+      autosaveWithValidateURL = new AdminUrlUtil(serverURL, autosaveWithValidateCollectionSlug)
+      draftWithValidateURL = new AdminUrlUtil(serverURL, draftWithValidateCollectionSlug)
+    })
+
+    test('- can save', async () => {
+      await page.goto(draftWithValidateURL.create)
+
+      const titleField = page.locator('#field-title')
+      await titleField.fill('Initial')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      await expect(titleField).toBeEnabled()
+      await titleField.fill('New title')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      await page.reload()
+
+      // Ensure its saved
+      await expect(page.locator('#field-title')).toHaveValue('New title')
+    })
+
+    test('- can safely trigger validation errors and then continue editing', async () => {
+      await page.goto(draftWithValidateURL.create)
+
+      const titleField = page.locator('#field-title')
+      await titleField.fill('Initial')
+      await saveDocAndAssert(page, '#action-save-draft')
+      await page.reload()
+
+      await expect(titleField).toBeEnabled()
+      await titleField.fill('')
+      await saveDocAndAssert(page, '#action-save-draft', 'error')
+
+      await titleField.fill('New title')
+
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      await page.reload()
+
+      // Ensure its saved
+      await expect(page.locator('#field-title')).toHaveValue('New title')
+    })
+
+    test('- shows a prevent leave alert when form is submitted but invalid', async () => {
+      await page.goto(draftWithValidateURL.create)
+
+      // Flag to check against if window alert has been displayed and dismissed since we can only check via events
+      let alertDisplayed = false
+
+      async function dismissAlert(dialog: Dialog) {
+        alertDisplayed = true
+
+        await dialog.dismiss()
+      }
+
+      async function acceptAlert(dialog: Dialog) {
+        await dialog.accept()
+      }
+
+      const titleField = page.locator('#field-title')
+      await titleField.fill('Initial')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      // Remove required data, then let autosave trigger
+      await expect(titleField).toBeEnabled()
+      await titleField.fill('')
+      await saveDocAndAssert(page, '#action-save-draft', 'error')
+
+      // Expect the prevent leave and then dismiss it
+      page.on('dialog', dismissAlert)
+      await expect(async () => {
+        await page.reload({ timeout: 500 }) // custom short timeout since we want this to fail
+      }).not.toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+
+      await expect(() => {
+        expect(alertDisplayed).toEqual(true)
+      }).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+
+      // Remove event listener and reset our flag
+      page.removeListener('dialog', dismissAlert)
+
+      await expect(page.locator('#field-title')).toHaveValue('')
+
+      // Now has updated data
+      await titleField.fill('New title')
+      await saveDocAndAssert(page, '#action-save-draft')
+      await expect(page.locator('#field-title')).toHaveValue('New title')
+
+      await page.reload()
+
+      page.on('dialog', acceptAlert)
+
+      // Ensure data is saved
+      await expect(page.locator('#field-title')).toHaveValue('New title')
+
+      // Fill with invalid data again, then reload and accept the warning, should contain previous data
+      await titleField.fill('')
+
+      await page.reload()
+
+      await expect(titleField).toBeEnabled()
+
+      // Contains previous data
+      await expect(page.locator('#field-title')).toHaveValue('New title')
+
+      // Remove listener
+      page.removeListener('dialog', acceptAlert)
+    })
+
+    test('- with autosave - can save', async () => {
+      await page.goto(autosaveWithValidateURL.create)
+
+      const titleField = page.locator('#field-title')
+      await titleField.fill('Initial')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      await expect(titleField).toBeEnabled()
+      await titleField.fill('New title')
+      await waitForAutoSaveToRunAndComplete(page)
+
+      await page.reload()
+
+      // Ensure its saved
+      await expect(page.locator('#field-title')).toHaveValue('New title')
+    })
+
+    test('- with autosave - can safely trigger validation errors and then continue editing', async () => {
+      // This test has to make sure we don't enter an infinite loop when draft.validate is on and we have autosave enabled
+      await page.goto(autosaveWithValidateURL.create)
+
+      const titleField = page.locator('#field-title')
+      await titleField.fill('Initial')
+      await saveDocAndAssert(page, '#action-save-draft')
+      await page.reload()
+
+      await expect(titleField).toBeEnabled()
+      await titleField.fill('')
+      await waitForAutoSaveToRunAndComplete(page, 'error')
+
+      await titleField.fill('New title')
+
+      await waitForAutoSaveToRunAndComplete(page)
+
+      await page.reload()
+
+      // Ensure its saved
+      await expect(page.locator('#field-title')).toHaveValue('New title')
+    })
+
+    test('- with autosave - shows a prevent leave alert when form is submitted but invalid', async () => {
+      await page.goto(autosaveWithValidateURL.create)
+
+      // Flag to check against if window alert has been displayed and dismissed since we can only check via events
+      let alertDisplayed = false
+
+      async function dismissAlert(dialog: Dialog) {
+        alertDisplayed = true
+
+        await dialog.dismiss()
+      }
+
+      async function acceptAlert(dialog: Dialog) {
+        await dialog.accept()
+      }
+
+      const titleField = page.locator('#field-title')
+      await titleField.fill('Initial')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      // Remove required data, then let autosave trigger
+      await expect(titleField).toBeEnabled()
+      await titleField.fill('')
+      await waitForAutoSaveToRunAndComplete(page, 'error')
+
+      // Expect the prevent leave and then dismiss it
+      page.on('dialog', dismissAlert)
+      await expect(async () => {
+        await page.reload({ timeout: 500 }) // custom short timeout since we want this to fail
+      }).not.toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+
+      await expect(() => {
+        expect(alertDisplayed).toEqual(true)
+      }).toPass({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+
+      // Remove event listener and reset our flag
+      page.removeListener('dialog', dismissAlert)
+
+      await expect(page.locator('#field-title')).toHaveValue('')
+
+      // Now has updated data
+      await titleField.fill('New title')
+      await waitForAutoSaveToRunAndComplete(page)
+      await expect(page.locator('#field-title')).toHaveValue('New title')
+
+      await page.reload()
+
+      page.on('dialog', acceptAlert)
+
+      // Ensure data is saved
+      await expect(page.locator('#field-title')).toHaveValue('New title')
+
+      // Fill with invalid data again, then reload and accept the warning, should contain previous data
+      await titleField.fill('')
+
+      await page.reload()
+
+      await expect(titleField).toBeEnabled()
+
+      // Contains previous data
+      await expect(page.locator('#field-title')).toHaveValue('New title')
+
+      // Remove listener
+      page.removeListener('dialog', acceptAlert)
     })
   })
 
@@ -905,14 +1213,12 @@ describe('Versions', () => {
     async function navigateToVersionDiff() {
       const versionURL = `${serverURL}/admin/collections/${draftCollectionSlug}/${postID}/versions/${versionID}`
       await page.goto(versionURL)
-      await page.waitForURL(versionURL)
       await expect(page.locator('.render-field-diffs').first()).toBeVisible()
     }
 
     async function navigateToVersionFieldsDiff() {
       const versionURL = `${serverURL}/admin/collections/${diffCollectionSlug}/${diffID}/versions/${versionDiffID}`
       await page.goto(versionURL)
-      await page.waitForURL(versionURL)
       await expect(page.locator('.render-field-diffs').first()).toBeVisible()
     }
 

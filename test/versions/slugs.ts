@@ -1,8 +1,12 @@
 export const autosaveCollectionSlug = 'autosave-posts'
 
+export const autosaveWithValidateCollectionSlug = 'autosave-with-validate-posts'
+
 export const customIDSlug = 'custom-ids'
 
 export const draftCollectionSlug = 'draft-posts'
+
+export const draftWithValidateCollectionSlug = 'draft-with-validate-posts'
 export const draftWithMaxCollectionSlug = 'draft-with-max-posts'
 
 export const postCollectionSlug = 'posts'

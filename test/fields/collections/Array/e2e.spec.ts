@@ -71,6 +71,7 @@ describe('Array', () => {
     await page.goto(url.create)
     const field = page.locator('#field-readOnly__0__text')
     await expect(field).toBeDisabled()
+    await expect(page.locator('#field-readOnly .array-field__add-row')).toBeHidden()
   })
 
   test('should have defaultValue', async () => {

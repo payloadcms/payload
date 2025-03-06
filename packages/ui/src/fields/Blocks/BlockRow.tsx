@@ -23,7 +23,7 @@ const baseClass = 'blocks-field'
 type BlocksFieldProps = {
   addRow: (rowIndex: number, blockType: string) => Promise<void> | void
   block: ClientBlock
-  blocks: ClientBlock[]
+  blocks: (ClientBlock | string)[] | ClientBlock[]
   duplicateRow: (rowIndex: number) => void
   errorCount: number
   fields: ClientField[]
@@ -79,6 +79,8 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   const hasSubmitted = useFormSubmitted()
 
   const fieldHasErrors = hasSubmitted && errorCount > 0
+
+  const showBlockName = !block.admin?.disableBlockName
 
   const classNames = [
     `${baseClass}__row`,
@@ -155,7 +157,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
                   >
                     {getTranslation(block.labels.singular, i18n)}
                   </Pill>
-                  <SectionTitle path={`${path}.blockName`} readOnly={readOnly} />
+                  {showBlockName && <SectionTitle path={`${path}.blockName`} readOnly={readOnly} />}
                   {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
                 </Fragment>
               )}

@@ -12,7 +12,7 @@ type BaseArgs = {
    * When true, skips reading the data back from the database and returns the input data
    * @default false
    */
-  ignoreResult?: boolean
+  ignoreResult?: boolean | 'idOnly'
   joinQuery?: JoinQuery
   path?: string
   req?: Partial<PayloadRequest>

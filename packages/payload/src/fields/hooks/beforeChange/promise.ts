@@ -5,16 +5,20 @@ import type { ValidationFieldError } from '../../../errors/index.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
 import type { JsonObject, Operation, PayloadRequest } from '../../../types/index.js'
-import type { Field, TabAsField, Validate } from '../../config/types.js'
+import type { Block, Field, TabAsField, Validate } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
-import { getLabelFromPath } from '../../../utilities/getLabelFromPath.js'
 import { getTranslatedLabel } from '../../../utilities/getTranslatedLabel.js'
-import { fieldAffectsData, tabHasName } from '../../config/types.js'
+import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../../config/types.js'
 import { getFieldPathsModified as getFieldPaths } from '../../getFieldPaths.js'
 import { getExistingRowDoc } from './getExistingRowDoc.js'
 import { traverseFields } from './traverseFields.js'
+
+function buildFieldLabel(parentLabel: string, label: string): string {
+  const capitalizedLabel = label.charAt(0).toUpperCase() + label.slice(1)
+  return parentLabel ? `${parentLabel} > ${capitalizedLabel}` : capitalizedLabel
+}
 
 type Args = {
   /**
@@ -29,11 +33,18 @@ type Args = {
   errors: ValidationFieldError[]
   field: Field | TabAsField
   fieldIndex: number
+  /**
+   * Built up labels of parent fields
+   *
+   * @example "Group Field > Tab Field > Text Field"
+   */
+  fieldLabelPath: string
   global: null | SanitizedGlobalConfig
   id?: number | string
-  mergeLocaleActions: (() => Promise<void>)[]
+  mergeLocaleActions: (() => Promise<void> | void)[]
   operation: Operation
   parentIndexPath: string
+  parentIsLocalized: boolean
   parentPath: string
   parentSchemaPath: string
   req: PayloadRequest
@@ -63,10 +74,12 @@ export const promise = async ({
   errors,
   field,
   fieldIndex,
+  fieldLabelPath,
   global,
   mergeLocaleActions,
   operation,
   parentIndexPath,
+  parentIsLocalized,
   parentPath,
   parentSchemaPath,
   req,
@@ -84,10 +97,6 @@ export const promise = async ({
     parentSchemaPath,
   })
 
-  const passesCondition = field.admin?.condition
-    ? Boolean(field.admin.condition(data, siblingData, { blockData, user: req.user }))
-    : true
-  let skipValidationFromHere = skipValidation || !passesCondition
   const { localization } = req.payload.config
   const defaultLocale = localization ? localization?.defaultLocale : 'en'
   const operationLocale = req.locale || defaultLocale
@@ -96,9 +105,16 @@ export const promise = async ({
   const schemaPathSegments = schemaPath ? schemaPath.split('.') : []
   const indexPathSegments = indexPath ? indexPath.split('-').filter(Boolean)?.map(Number) : []
 
+  const passesCondition = field.admin?.condition
+    ? Boolean(
+        field.admin.condition(data, siblingData, { blockData, path: pathSegments, user: req.user }),
+      )
+    : true
+  let skipValidationFromHere = skipValidation || !passesCondition
+
   if (fieldAffectsData(field)) {
     // skip validation if the field is localized and the incoming data is null
-    if (field.localized && operationLocale !== defaultLocale) {
+    if (fieldShouldBeLocalized({ field, parentIsLocalized }) && operationLocale !== defaultLocale) {
       if (['array', 'blocks'].includes(field.type) && siblingData[field.name] === null) {
         skipValidationFromHere = true
       }
@@ -106,10 +122,8 @@ export const promise = async ({
 
     // Execute hooks
     if (field.hooks?.beforeChange) {
-      await field.hooks.beforeChange.reduce(async (priorHook, currentHook) => {
-        await priorHook
-
-        const hookedValue = await currentHook({
+      for (const hook of field.hooks.beforeChange) {
+        const hookedValue = await hook({
           blockData,
           collection,
           context,
@@ -133,7 +147,7 @@ export const promise = async ({
         if (hookedValue !== undefined) {
           siblingData[field.name] = hookedValue
         }
-      }, Promise.resolve())
+      }
     }
 
     // Validate
@@ -172,13 +186,10 @@ export const promise = async ({
       })
 
       if (typeof validationResult === 'string') {
-        const label = getTranslatedLabel(field?.label || field?.name, req.i18n)
-        const parentPathSegments = parentPath ? parentPath.split('.') : []
-
-        const fieldLabel =
-          Array.isArray(parentPathSegments) && parentPathSegments.length > 0
-            ? getLabelFromPath(parentPathSegments.concat(label))
-            : label
+        const fieldLabel = buildFieldLabel(
+          fieldLabelPath,
+          getTranslatedLabel(field?.label || field?.name, req.i18n),
+        )
 
         errors.push({
           label: fieldLabel,
@@ -189,29 +200,21 @@ export const promise = async ({
     }
 
     // Push merge locale action if applicable
-    if (localization && field.localized) {
-      mergeLocaleActions.push(async () => {
-        const localeData = await localization.localeCodes.reduce(
-          async (localizedValuesPromise: Promise<JsonObject>, locale) => {
-            const localizedValues = await localizedValuesPromise
-            const fieldValue =
-              locale === req.locale
-                ? siblingData[field.name]
-                : siblingDocWithLocales?.[field.name]?.[locale]
+    if (localization && fieldShouldBeLocalized({ field, parentIsLocalized })) {
+      mergeLocaleActions.push(() => {
+        const localeData = {}
 
-            // const result = await localizedValues
-            // update locale value if it's not undefined
-            if (typeof fieldValue !== 'undefined') {
-              return {
-                ...localizedValues,
-                [locale]: fieldValue,
-              }
-            }
+        for (const locale of localization.localeCodes) {
+          const fieldValue =
+            locale === req.locale
+              ? siblingData[field.name]
+              : siblingDocWithLocales?.[field.name]?.[locale]
 
-            return localizedValuesPromise
-          },
-          Promise.resolve({}),
-        )
+          // update locale value if it's not undefined
+          if (typeof fieldValue !== 'undefined') {
+            localeData[locale] = fieldValue
+          }
+        }
 
         // If there are locales with data, set the data
         if (Object.keys(localeData).length > 0) {
@@ -239,11 +242,19 @@ export const promise = async ({
               doc,
               docWithLocales,
               errors,
+              fieldLabelPath:
+                field?.label === false
+                  ? fieldLabelPath
+                  : buildFieldLabel(
+                      fieldLabelPath,
+                      `${getTranslatedLabel(field?.label || field?.name, req.i18n)} ${rowIndex + 1}`,
+                    ),
               fields: field.fields,
               global,
               mergeLocaleActions,
               operation,
               parentIndexPath: '',
+              parentIsLocalized: parentIsLocalized || field.localized,
               parentPath: path + '.' + rowIndex,
               parentSchemaPath: schemaPath,
               req,
@@ -278,7 +289,12 @@ export const promise = async ({
           )
 
           const blockTypeToMatch = (row as JsonObject).blockType || rowSiblingDoc.blockType
-          const block = field.blocks.find((blockType) => blockType.slug === blockTypeToMatch)
+
+          const block: Block | undefined =
+            req.payload.blocks[blockTypeToMatch] ??
+            ((field.blockReferences ?? field.blocks).find(
+              (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
+            ) as Block | undefined)
 
           if (block) {
             promises.push(
@@ -291,11 +307,19 @@ export const promise = async ({
                 doc,
                 docWithLocales,
                 errors,
+                fieldLabelPath:
+                  field?.label === false
+                    ? fieldLabelPath
+                    : buildFieldLabel(
+                        fieldLabelPath,
+                        `${getTranslatedLabel(field?.label || field?.name, req.i18n)} ${rowIndex + 1}`,
+                      ),
                 fields: block.fields,
                 global,
                 mergeLocaleActions,
                 operation,
                 parentIndexPath: '',
+                parentIsLocalized: parentIsLocalized || field.localized,
                 parentPath: path + '.' + rowIndex,
                 parentSchemaPath: schemaPath + '.' + block.slug,
                 req,
@@ -325,11 +349,19 @@ export const promise = async ({
         doc,
         docWithLocales,
         errors,
+        fieldLabelPath:
+          field.type === 'row' || field?.label === false
+            ? fieldLabelPath
+            : buildFieldLabel(
+                fieldLabelPath,
+                getTranslatedLabel(field?.label || field?.type, req.i18n),
+              ),
         fields: field.fields,
         global,
         mergeLocaleActions,
         operation,
         parentIndexPath: indexPath,
+        parentIsLocalized,
         parentPath,
         parentSchemaPath: schemaPath,
         req,
@@ -364,11 +396,19 @@ export const promise = async ({
         doc,
         docWithLocales,
         errors,
+        fieldLabelPath:
+          field?.label === false
+            ? fieldLabelPath
+            : buildFieldLabel(
+                fieldLabelPath,
+                getTranslatedLabel(field?.label || field?.name, req.i18n),
+              ),
         fields: field.fields,
         global,
         mergeLocaleActions,
         operation,
         parentIndexPath: '',
+        parentIsLocalized: parentIsLocalized || field.localized,
         parentPath: path,
         parentSchemaPath: schemaPath,
         req,
@@ -412,21 +452,27 @@ export const promise = async ({
       const editor: RichTextAdapter = field?.editor
 
       if (editor?.hooks?.beforeChange?.length) {
-        await editor.hooks.beforeChange.reduce(async (priorHook, currentHook) => {
-          await priorHook
-
-          const hookedValue = await currentHook({
+        for (const hook of editor.hooks.beforeChange) {
+          const hookedValue = await hook({
             collection,
             context,
             data,
             docWithLocales,
             errors,
             field,
+            fieldLabelPath:
+              field?.label === false
+                ? fieldLabelPath
+                : buildFieldLabel(
+                    fieldLabelPath,
+                    getTranslatedLabel(field?.label || field?.name, req.i18n),
+                  ),
             global,
             indexPath: indexPathSegments,
             mergeLocaleActions,
             operation,
             originalDoc: doc,
+            parentIsLocalized,
             path: pathSegments,
             previousSiblingDoc: siblingDoc,
             previousValue: siblingDoc[field.name],
@@ -441,7 +487,7 @@ export const promise = async ({
           if (hookedValue !== undefined) {
             siblingData[field.name] = hookedValue
           }
-        }, Promise.resolve())
+        }
       }
 
       break
@@ -481,11 +527,19 @@ export const promise = async ({
         doc,
         docWithLocales,
         errors,
+        fieldLabelPath:
+          field?.label === false
+            ? fieldLabelPath
+            : buildFieldLabel(
+                fieldLabelPath,
+                getTranslatedLabel(field?.label || field?.name, req.i18n),
+              ),
         fields: field.fields,
         global,
         mergeLocaleActions,
         operation,
         parentIndexPath: isNamedTab ? '' : indexPath,
+        parentIsLocalized: parentIsLocalized || field.localized,
         parentPath: isNamedTab ? path : parentPath,
         parentSchemaPath: schemaPath,
         req,
@@ -508,11 +562,16 @@ export const promise = async ({
         doc,
         docWithLocales,
         errors,
+        fieldLabelPath:
+          field?.label === false
+            ? fieldLabelPath
+            : buildFieldLabel(fieldLabelPath, getTranslatedLabel(field?.label || '', req.i18n)),
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
         global,
         mergeLocaleActions,
         operation,
         parentIndexPath: indexPath,
+        parentIsLocalized,
         parentPath: path,
         parentSchemaPath: schemaPath,
         req,

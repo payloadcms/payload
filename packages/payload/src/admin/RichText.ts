@@ -92,19 +92,25 @@ export type BeforeChangeRichTextHookArgs<
   duplicate?: boolean
 
   errors?: ValidationFieldError[]
+  /**
+   * Built up field label
+   *
+   * @example "Group Field > Tab Field > Rich Text Field"
+   */
+  fieldLabelPath: string
   /** Only available in `beforeChange` field hooks */
-  mergeLocaleActions?: (() => Promise<void>)[]
+  mergeLocaleActions?: (() => Promise<void> | void)[]
   /** A string relating to which operation the field type is currently executing within. */
   operation?: 'create' | 'delete' | 'read' | 'update'
   /** The sibling data of the document before changes being applied. */
   previousSiblingDoc?: TData
   /** The previous value of the field, before changes */
   previousValue?: TValue
+
   /**
    * The original siblingData with locales (not modified by any hooks).
    */
   siblingDocWithLocales?: JsonObject
-
   skipValidation?: boolean
 }
 
@@ -125,11 +131,11 @@ export type BaseRichTextHookArgs<
   indexPath: number[]
   /** The full original document in `update` operations. In the `afterChange` hook, this is the resulting document of the operation. */
   originalDoc?: TData
+  parentIsLocalized: boolean
   /**
    * The path of the field, e.g. ["group", "myArray", 1, "textField"]. The path is the schemaPath but with indexes and would be used in the context of field data, not field schemas.
    */
   path: (number | string)[]
-
   /** The Express request object. It is mocked for Local API operations. */
   req: PayloadRequest
   /**
@@ -213,6 +219,7 @@ type RichTextAdapterBase<
     findMany: boolean
     flattenLocales: boolean
     overrideAccess?: boolean
+    parentIsLocalized: boolean
     populateArg?: PopulateType
     populationPromises: Promise<void>[]
     req: PayloadRequest

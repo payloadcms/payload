@@ -56,7 +56,7 @@ export const syncDocAsSearchIndex = async ({
           `Error gathering default priority for ${searchSlug} documents related to ${collection}`,
         )
       }
-    } else {
+    } else if (priority !== undefined) {
       defaultPriority = priority
     }
   }
@@ -149,7 +149,9 @@ export const syncDocAsSearchIndex = async ({
             } = await payload.find({
               collection,
               draft: false,
+              limit: 1,
               locale: syncLocale,
+              pagination: false,
               req,
               where: {
                 and: [

@@ -19,6 +19,7 @@ import NestedAfterReadHooks from './collections/NestedAfterReadHooks/index.js'
 import Relations from './collections/Relations/index.js'
 import TransformHooks from './collections/Transform/index.js'
 import Users, { seedHooksUsers } from './collections/Users/index.js'
+import { ValueCollection } from './collections/Value/index.js'
 import { DataHooksGlobal } from './globals/Data/index.js'
 
 export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
@@ -40,6 +41,7 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
     Users,
     DataHooks,
     FieldPaths,
+    ValueCollection,
   ],
   globals: [DataHooksGlobal],
   endpoints: [

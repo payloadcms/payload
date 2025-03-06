@@ -85,7 +85,6 @@ describe('Radio', () => {
     })
 
     await page.goto(url.create)
-    await page.waitForURL(url.create)
 
     await page.locator('#field-text').fill('test')
     await page.locator('#field-uniqueText').fill(uniqueText)

@@ -1,13 +1,7 @@
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
 
-import type {
-  CustomPreviewButton,
-  CustomPublishButton,
-  CustomSaveButton,
-  CustomSaveDraftButton,
-  CustomUpload,
-} from '../../admin/types.js'
+import type { CustomUpload } from '../../admin/types.js'
 import type { Arguments as MeArguments } from '../../auth/operations/me.js'
 import type {
   Arguments as RefreshArguments,
@@ -287,29 +281,30 @@ export type CollectionAdminOptions = {
       /**
        * Replaces the "Preview" button
        */
-      PreviewButton?: CustomPreviewButton
+      PreviewButton?: CustomComponent
       /**
        * Replaces the "Publish" button
        * + drafts must be enabled
        */
-      PublishButton?: CustomPublishButton
+      PublishButton?: CustomComponent
       /**
        * Replaces the "Save" button
        * + drafts must be disabled
        */
-      SaveButton?: CustomSaveButton
+      SaveButton?: CustomComponent
       /**
        * Replaces the "Save Draft" button
        * + drafts must be enabled
        * + autosave must be disabled
        */
-      SaveDraftButton?: CustomSaveDraftButton
+      SaveDraftButton?: CustomComponent
       /**
        * Replaces the "Upload" section
        * + upload must be enabled
        */
       Upload?: CustomUpload
     }
+    listMenuItems?: CustomComponent[]
     views?: {
       /**
        * Set to a React component to replace the entire Edit View, including all nested routes.
@@ -374,6 +369,11 @@ export type CollectionAdminOptions = {
 
 /** Manage all aspects of a data collection */
 export type CollectionConfig<TSlug extends CollectionSlug = any> = {
+  /**
+   * Do not set this property manually. This is set to true during sanitization, to avoid
+   * sanitizing the same collection multiple times.
+   */
+  _sanitized?: boolean
   /**
    * Access control
    */
@@ -465,6 +465,16 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
     refresh?: RefreshHook[]
   }
   /**
+   * Define compound indexes for this collection.
+   * This can be used to either speed up querying/sorting by 2 or more fields at the same time or
+   * to ensure uniqueness between several fields.
+   * Specify field paths
+   * @example
+   * [{ unique: true, fields: ['title', 'group.name'] }]
+   * @default []
+   */
+  indexes?: CompoundIndex[]
+  /**
    * Label configuration
    */
   labels?: {
@@ -522,6 +532,11 @@ export type SanitizedJoin = {
    * The path of the join field in dot notation
    */
   joinPath: string
+  /**
+   * `parentIsLocalized` is true if any parent field of the
+   * field configuration defining the join is localized
+   */
+  parentIsLocalized: boolean
   targetField: RelationshipField | UploadField
 }
 
@@ -537,7 +552,6 @@ export interface SanitizedCollectionConfig
   auth: Auth
   endpoints: Endpoint[] | false
   fields: Field[]
-
   /**
    * Fields in the database schema structure
    * Rows / collapsible / tabs w/o name `fields` merged to top, UIs are excluded
@@ -548,6 +562,14 @@ export interface SanitizedCollectionConfig
    * Object of collections to join 'Join Fields object keyed by collection
    */
   joins: SanitizedJoins
+
+  /**
+   * List of all polymorphic join fields
+   */
+  polymorphicJoins: SanitizedJoin[]
+
+  sanitizedIndexes: SanitizedCompoundIndex[]
+
   slug: CollectionSlug
   upload: SanitizedUploadConfig
   versions: SanitizedCollectionVersions
@@ -590,4 +612,19 @@ export type TypeWithTimestamps = {
   createdAt: string
   id: number | string
   updatedAt: string
+}
+
+export type CompoundIndex = {
+  fields: string[]
+  unique?: boolean
+}
+
+export type SanitizedCompoundIndex = {
+  fields: {
+    field: FlattenedField
+    localizedPath: string
+    path: string
+    pathHasLocalized: boolean
+  }[]
+  unique: boolean
 }

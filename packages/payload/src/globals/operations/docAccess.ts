@@ -27,6 +27,7 @@ export const docAccessOperation = async (args: Arguments): Promise<SanitizedGlob
     const shouldCommit = await initTransaction(req)
     const result = await getEntityPolicies({
       type: 'global',
+      blockPolicies: {},
       entity: globalConfig,
       operations: globalOperations,
       req,
