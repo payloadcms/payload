@@ -307,8 +307,8 @@ const addSortableFeatures = (sanitized: CollectionConfig) => {
   // 3. Add endpoint
   const moveBetweenHandler: PayloadHandler = async (req) => {
     const body = await req.json()
-    const { betweenIds, docIds } = body as {
-      betweenIds: [string | undefined, string | undefined] // tuple [beforeId, afterId]
+    const { betweenKeys, docIds } = body as {
+      betweenKeys: [string | undefined, string | undefined] // tuple [beforeKey, afterKey]
       docIds: string[] // array of docIds to be moved between the two reference points
     }
 
@@ -319,37 +319,36 @@ const addSortableFeatures = (sanitized: CollectionConfig) => {
       })
     }
 
-    if (!Array.isArray(betweenIds) || betweenIds.length !== 2) {
-      return new Response(JSON.stringify({ error: 'betweenIds must be a tuple of two elements' }), {
-        headers: { 'Content-Type': 'application/json' },
-        status: 400,
-      })
+    if (!Array.isArray(betweenKeys) || betweenKeys.length !== 2) {
+      return new Response(
+        JSON.stringify({ error: 'betweenKeys must be a tuple of two elements' }),
+        {
+          headers: { 'Content-Type': 'application/json' },
+          status: 400,
+        },
+      )
     }
 
-    const [beforeId, afterId] = betweenIds
+    const [beforeKey, afterKey] = betweenKeys
 
-    // Fetch the order values of the documents we're inserting between
-    let beforeOrderValue = null
-    let afterOrderValue = null
+    // // TODO: maybe the endpoint can receive directly the order values?
+    // if (beforeKey === 'pending') {
+    //   const beforeDoc = await req.payload.findByID({
+    //     id: beforeId,
+    //     collection: sanitized.slug,
+    //   })
+    //   beforeOrderValue = beforeDoc?.[ORDER_FIELD_NAME] || null
+    // }
 
-    // TODO: maybe the endpoint can receive directly the order values?
-    if (beforeId) {
-      const beforeDoc = await req.payload.findByID({
-        id: beforeId,
-        collection: sanitized.slug,
-      })
-      beforeOrderValue = beforeDoc?.[ORDER_FIELD_NAME] || null
-    }
+    // if (afterId) {
+    //   const afterDoc = await req.payload.findByID({
+    //     id: afterId,
+    //     collection: sanitized.slug,
+    //   })
+    //   afterOrderValue = afterDoc?.[ORDER_FIELD_NAME] || null
+    // }
 
-    if (afterId) {
-      const afterDoc = await req.payload.findByID({
-        id: afterId,
-        collection: sanitized.slug,
-      })
-      afterOrderValue = afterDoc?.[ORDER_FIELD_NAME] || null
-    }
-
-    const orderValues = generateNKeysBetween(beforeOrderValue, afterOrderValue, docIds.length)
+    const orderValues = generateNKeysBetween(beforeKey, afterKey, docIds.length)
 
     // Update each document with its new order value
     const updatePromises = docIds.map((id, index) => {

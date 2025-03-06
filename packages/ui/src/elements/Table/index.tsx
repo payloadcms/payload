@@ -67,12 +67,13 @@ export const Table: React.FC<Props> = ({ appearance = 'default', columns, data: 
     // Optimisitc update of local state to reorder the rows
     setLocalData((currentData) => {
       const newData = [...currentData]
-      // Move the item in the array
+      // Update the rendered cell for the moved row to show "pending"
       newData[moveFromIndex]._order = `pending`
       const orderedRenderedCells = activeColumns.find(
         (col) => col.accessor === '_order',
       )?.renderedCells
       orderedRenderedCells[cellMap[movedId]] = <>pending</>
+      // Move the item in the array
       newData.splice(moveToIndex, 0, newData.splice(moveFromIndex, 1)[0])
       return newData
     })
@@ -82,10 +83,10 @@ export const Table: React.FC<Props> = ({ appearance = 'default', columns, data: 
       const collectionSlug = window.location.pathname.split('/').filter(Boolean)[2]
       const response = await fetch(`/api/${collectionSlug}/reorder`, {
         body: JSON.stringify({
-          betweenIds:
+          betweenKeys:
             query.sort === '_order'
-              ? [newBeforeRow?.id, newAfterRow?.id]
-              : [newAfterRow?.id, newBeforeRow?.id],
+              ? [newBeforeRow?._order, newAfterRow?._order]
+              : [newAfterRow?._order, newBeforeRow?._order],
           docIds: [movedId],
         }),
         headers: {
