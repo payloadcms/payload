@@ -28,10 +28,17 @@ const isNodeReadableStream = (body: unknown): body is Readable => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const streamToBuffer = async (readableStream: any) => {
   const chunks = []
-  for await (const chunk of readableStream) {
-    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk)
+  try {
+    for await (const chunk of readableStream) {
+      chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk)
+    }
+    return Buffer.concat(chunks)
+  } finally {
+    // Ensure the stream is always closed
+    if (typeof readableStream.destroy === 'function') {
+      readableStream.destroy()
+    }
   }
-  return Buffer.concat(chunks)
 }
 
 export const getHandler = ({ bucket, collection, getStorageClient }: Args): StaticHandler => {
