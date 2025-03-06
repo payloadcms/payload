@@ -558,13 +558,5 @@ export function useMenuAnchorRef(
 
   useDynamicPositioning(resolution, anchorElementRef, positionMenu, onVisibilityChange)
 
-  const containerDiv = anchorElementRef.current
-  if (containerDiv != null) {
-    setContainerDivAttributes(containerDiv, className)
-    if (anchorElem != null) {
-      anchorElem.append(containerDiv)
-    }
-  }
-
   return anchorElementRef
 }
