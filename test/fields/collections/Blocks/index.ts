@@ -11,6 +11,7 @@ export const getBlocksField = (prefix?: string): BlocksField => ({
   blocks: [
     {
       slug: prefix ? `${prefix}Content` : 'content',
+      imageURL: '/api/uploads/file/payload480x320.jpg',
       interfaceName: prefix ? `${prefix}ContentBlock` : 'ContentBlock',
       admin: {
         components: {

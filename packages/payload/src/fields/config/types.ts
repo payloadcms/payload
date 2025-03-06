@@ -1399,6 +1399,9 @@ export type Block = {
     singularName?: string
   }
   imageAltText?: string
+  /**
+   * Preferred aspect ratio of the image is 3 : 2
+   */
   imageURL?: string
   /** Customize generated GraphQL and Typescript schema names.
    * The slug is used by default.

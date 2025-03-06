@@ -901,7 +901,7 @@ export interface ContentBlock {
  * via the `definition` "NoBlockname".
  */
 export interface NoBlockname {
-  text: string;
+  text?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'noBlockname';
@@ -967,7 +967,7 @@ export interface LocalizedContentBlock {
  * via the `definition` "localizedNoBlockname".
  */
 export interface LocalizedNoBlockname {
-  text: string;
+  text?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'localizedNoBlockname';
