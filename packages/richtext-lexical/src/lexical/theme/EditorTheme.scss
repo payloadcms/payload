@@ -184,6 +184,27 @@
       border-bottom: 1px dotted;
     }
 
+    // Renders cursor when native browser does not. See https://github.com/facebook/lexical/issues/3417
+    &__blockCursor {
+      display: block;
+      pointer-events: none;
+      position: absolute;
+    }
+    &__blockCursor:after {
+      content: '';
+      display: block;
+      position: absolute;
+      top: -2px;
+      width: 20px;
+      border-top: 1px solid var(--theme-text);
+      animation: CursorBlink 1.1s steps(2, start) infinite;
+    }
+    @keyframes CursorBlink {
+      to {
+        visibility: hidden;
+      }
+    }
+
     &__code {
       /*background-color: rgb(240, 242, 245);*/
       font-family: Menlo, Consolas, Monaco, monospace;
