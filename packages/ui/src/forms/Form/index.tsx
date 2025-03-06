@@ -10,9 +10,17 @@ import {
   reduceFieldsToValues,
   wait,
 } from 'payload/shared'
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import React, {
+  startTransition,
+  useCallback,
+  useEffect,
+  useOptimistic,
+  useRef,
+  useState,
+} from 'react'
 import { toast } from 'sonner'
 
+import type { FieldAction } from './reducer/types.js'
 import type {
   CreateFormData,
   Context as FormContextType,
@@ -21,8 +29,6 @@ import type {
   SubmitOptions,
 } from './types.js'
 
-import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
-import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -48,9 +54,9 @@ import {
   useDocumentForm,
 } from './context.js'
 import { errorMessages } from './errorMessages.js'
-import { fieldReducer } from './fieldReducer.js'
 import { initContextState } from './initContextState.js'
 import { mergeServerFormState } from './mergeServerFormState.js'
+import { fieldReducer } from './reducer/index.js'
 
 const baseClass = 'form'
 
@@ -114,15 +120,48 @@ export const Form: React.FC<FormProps> = (props) => {
   const contextRef = useRef({} as FormContextType)
   const abortResetFormRef = useRef<AbortController>(null)
 
-  const fieldsReducer = useReducer(fieldReducer, {}, () => initialState)
+  const [formStateInternal, setFormStateInternal] = useState(initialState)
+  const [formState, setOptimisticFormState] = useOptimistic(formStateInternal)
 
-  /**
-   * `fields` is the current, up-to-date state/data of all fields in the form. It can be modified by using dispatchFields,
-   * which calls the fieldReducer, which then updates the state.
-   */
-  const [fields, dispatchFields] = fieldsReducer
+  const dispatchFields = useCallback(
+    (action: FieldAction) => {
+      const reducedFormState = fieldReducer(formState, action)
+      console.log('THIS NEEDS TO HAPPEN IMMEDIATELY', reducedFormState, action)
+      startTransition(() => setOptimisticFormState(reducedFormState))
 
-  contextRef.current.fields = fields
+      if (Array.isArray(onChange)) {
+        const doOnChange = async () => {
+          let formStateAfterOnChange: FormState = reducedFormState
+
+          for (const onChangeFn of onChange) {
+            console.log('THIS PORTION NEEDS TO BE DEBOUNCED ONLY', reducedFormState)
+            formStateAfterOnChange = await onChangeFn({
+              formState: deepCopyObjectSimpleWithoutReactComponents(reducedFormState),
+              submitted,
+            })
+          }
+
+          if (!formStateAfterOnChange) {
+            return
+          }
+
+          const { newState } = mergeServerFormState({
+            existingState: reducedFormState || {},
+            incomingState: formStateAfterOnChange,
+          })
+
+          setFormStateInternal(newState)
+        }
+
+        void doOnChange()
+      } else {
+        setFormStateInternal(reducedFormState)
+      }
+    },
+    [formState, onChange, submitted, setOptimisticFormState],
+  )
+
+  contextRef.current.fields = formState
 
   const validateForm = useCallback(async () => {
     const validatedFieldState = {}
@@ -689,24 +728,12 @@ export const Form: React.FC<FormProps> = (props) => {
     }
   }, [submittedFromProps])
 
-  useEffect(() => {
-    if (initialState) {
-      contextRef.current = { ...initContextState } as FormContextType
-      dispatchFields({
-        type: 'REPLACE_STATE',
-        optimize: false,
-        sanitize: true,
-        state: initialState,
-      })
-    }
-  }, [initialState, dispatchFields])
-
   useThrottledEffect(
     () => {
       refreshCookie()
     },
     15000,
-    [fields],
+    [formState],
   )
 
   useEffect(() => {
@@ -715,63 +742,6 @@ export const Form: React.FC<FormProps> = (props) => {
   }, [locale])
 
   const classes = [className, baseClass].filter(Boolean).join(' ')
-
-  const executeOnChange = useEffectEvent(async (submitted: boolean) => {
-    if (Array.isArray(onChange)) {
-      let revalidatedFormState: FormState = contextRef.current.fields
-
-      for (const onChangeFn of onChange) {
-        // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
-        revalidatedFormState = await onChangeFn({
-          formState: deepCopyObjectSimpleWithoutReactComponents(contextRef.current.fields),
-          submitted,
-        })
-      }
-
-      if (!revalidatedFormState) {
-        return
-      }
-
-      const { changed, newState } = mergeServerFormState({
-        existingState: contextRef.current.fields || {},
-        incomingState: revalidatedFormState,
-      })
-
-      if (changed) {
-        dispatchFields({
-          type: 'REPLACE_STATE',
-          optimize: false,
-          state: newState,
-        })
-      }
-    }
-  })
-
-  const prevFields = useRef(contextRef.current.fields)
-  const isFirstRenderRef = useRef(true)
-
-  useDebouncedEffect(
-    () => {
-      if (isFirstRenderRef.current || !dequal(contextRef.current.fields, prevFields.current)) {
-        if (modified) {
-          void executeOnChange(submitted)
-        }
-      }
-
-      isFirstRenderRef.current = false
-      prevFields.current = contextRef.current.fields
-    },
-    /*
-      Make sure we trigger this whenever modified changes (not just when `fields` changes),
-      otherwise we will miss merging server form state for the first form update/onChange.
-
-      Here's why:
-        `fields` updates before `modified`, because setModified is in a setTimeout.
-        So on the first change, modified is false, so we don't trigger the effect even though we should.
-    **/
-    [modified, submitted, contextRef.current.fields],
-    250,
-  )
 
   const DocumentFormContextComponent: React.FC<any> = isDocumentForm
     ? DocumentFormContext.Provider
@@ -798,7 +768,7 @@ export const Form: React.FC<FormProps> = (props) => {
         <FormContext.Provider value={contextRef.current}>
           <FormWatchContext.Provider
             value={{
-              fields,
+              fields: formState,
               ...contextRef.current,
             }}
           >
@@ -807,7 +777,7 @@ export const Form: React.FC<FormProps> = (props) => {
                 <ProcessingContext.Provider value={processing}>
                   <BackgroundProcessingContext.Provider value={backgroundProcessing}>
                     <ModifiedContext.Provider value={modified}>
-                      <FormFieldsContext.Provider value={fieldsReducer}>
+                      <FormFieldsContext.Provider value={[formState, dispatchFields]}>
                         {children}
                       </FormFieldsContext.Provider>
                     </ModifiedContext.Provider>

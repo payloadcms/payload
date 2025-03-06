@@ -10,7 +10,7 @@ import { toast } from 'sonner'
 
 import type { State } from './reducer.js'
 
-import { fieldReducer } from '../../../forms/Form/fieldReducer.js'
+import { fieldReducer } from '../../../forms/Form/reducer/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useLocale } from '../../../providers/Locale/index.js'
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
