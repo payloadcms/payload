@@ -44,6 +44,28 @@
       }
     }
 
+    &__tableFrozenColumn tr > td:first-child {
+      background-color: var(--theme-bg);
+      position: sticky;
+      z-index: 2;
+      left: 0;
+    }
+    &__tableFrozenColumn tr > th:first-child {
+      background-color: var(--theme-elevation-50);
+      position: sticky;
+      z-index: 2;
+      left: 0;
+    }
+    &__tableFrozenColumn tr > :first-child::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      right: 0;
+      height: 100%;
+      border-right: 1px solid var(--theme-elevation-400);
+    }
+
     &__tableRowStriping tr:nth-child(even) {
       background-color: var(--theme-elevation-100);
     }

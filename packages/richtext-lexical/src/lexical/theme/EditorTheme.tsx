@@ -92,6 +92,7 @@ export const LexicalEditorTheme: EditorThemeClasses = {
   tableCellHeader: 'LexicalEditorTheme__tableCellHeader',
   tableCellResizer: 'LexicalEditorTheme__tableCellResizer',
   tableCellSelected: 'LexicalEditorTheme__tableCellSelected',
+  tableFrozenColumn: 'LexicalEditorTheme__tableFrozenColumn',
   tableRowStriping: 'LexicalEditorTheme__tableRowStriping',
   tableScrollableWrapper: 'LexicalEditorTheme__tableScrollableWrapper',
   tableSelected: 'LexicalEditorTheme__tableSelected',

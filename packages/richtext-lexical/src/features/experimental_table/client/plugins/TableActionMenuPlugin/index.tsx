@@ -402,6 +402,19 @@ function TableActionMenu({
     })
   }, [editor, tableCellNode, clearTableSelection, onClose])
 
+  const toggleFirstColumnFreeze = useCallback(() => {
+    editor.update(() => {
+      if (tableCellNode.isAttached()) {
+        const tableNode = $getTableNodeFromLexicalNodeOrThrow(tableCellNode)
+        if (tableNode) {
+          tableNode.setFrozenColumns(tableNode.getFrozenColumns() === 0 ? 1 : 0)
+        }
+      }
+      clearTableSelection()
+      onClose()
+    })
+  }, [editor, tableCellNode, clearTableSelection, onClose])
+
   let mergeCellButton: JSX.Element | null = null
   if (cellMerge) {
     if (canMergeCells) {
@@ -452,6 +465,14 @@ function TableActionMenu({
         type="button"
       >
         <span className="text">Toggle Row Striping</span>
+      </button>
+      <button
+        className="item"
+        data-test-id="table-freeze-first-column"
+        onClick={() => toggleFirstColumnFreeze()}
+        type="button"
+      >
+        <span className="text">Toggle First Column Freeze</span>
       </button>
       <button
         className="item"
