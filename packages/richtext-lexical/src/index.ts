@@ -26,7 +26,7 @@ import { richTextValidateHOC } from './validate/index.js'
 
 let checkedDependencies = false
 
-export const lexicalTargetVersion = '0.21.0'
+export const lexicalTargetVersion = '0.27.1'
 
 export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapterProvider {
   if (
