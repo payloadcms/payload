@@ -109,16 +109,14 @@ function TableHoverActionsContainer({
         right: tableElemRight,
         width: tableElemWidth,
         y: tableElemY,
-      } = tableContainerElement.getBoundingClientRect()
+      } = (tableDOMElement as HTMLTableElement).getBoundingClientRect()
 
-      // Adjust for using the scrollable table container
-      const parentElement = (tableDOMElement as HTMLTableElement).parentElement
       let tableHasScroll = false
       if (
-        parentElement &&
-        parentElement.classList.contains('LexicalEditorTheme__tableScrollableWrapper')
+        tableContainerElement &&
+        tableContainerElement.classList.contains('LexicalEditorTheme__tableScrollableWrapper')
       ) {
-        tableHasScroll = parentElement.scrollWidth > parentElement.clientWidth
+        tableHasScroll = tableContainerElement.scrollWidth > tableContainerElement.clientWidth
       }
 
       const { left: editorElemLeft, y: editorElemY } = anchorElem.getBoundingClientRect()
@@ -129,11 +127,14 @@ function TableHoverActionsContainer({
         setPosition({
           height: BUTTON_WIDTH_PX,
           left:
-            tableHasScroll && parentElement
-              ? parentElement.offsetLeft
+            tableHasScroll && tableContainerElement
+              ? tableContainerElement.offsetLeft
               : tableElemLeft - editorElemLeft,
           top: tableElemBottom - editorElemY + 5,
-          width: tableHasScroll && parentElement ? parentElement.offsetWidth : tableElemWidth,
+          width:
+            tableHasScroll && tableContainerElement
+              ? tableContainerElement.offsetWidth
+              : tableElemWidth,
         })
       } else if (hoveredColumnNode) {
         setShownColumn(true)
