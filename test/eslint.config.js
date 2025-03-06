@@ -65,7 +65,7 @@ export const testEslintConfig = [
       'playwright/expect-expect': [
         'error',
         {
-          assertFunctionNames: ['assertToastErrors', 'saveDocAndAssert'],
+          assertFunctionNames: ['assertToastErrors', 'saveDocAndAssert', 'runFilterOptionsTest'],
         },
       ],
     },
