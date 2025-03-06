@@ -1,8 +1,7 @@
 import type { PayloadRequest, Where } from '../../types/index.js'
 import type { BaseJob } from '../config/types/workflowTypes.js'
 
-import { jobsCollectionSlug } from '../config/index.js'
-import { jobAfterRead } from '../config/jobsCollection.js'
+import { jobAfterRead, jobsCollectionSlug } from '../config/index.js'
 import { sanitizeUpdateData } from './sanitizeUpdateData.js'
 
 type RunJobArgs = {
@@ -31,7 +30,7 @@ export async function updateJob({
   if (depth || req.payload.config.jobs.runHooks) {
     const result = await req.payload.update({
       id,
-      collection: 'payload-jobs',
+      collection: jobsCollectionSlug,
       data,
       depth,
       disableTransaction,
@@ -48,7 +47,7 @@ export async function updateJob({
   if (partial && !req.payload.db.meta?.supportsPartialData) {
     // update updateData
     const currentJob = await req.payload.db.findOne({
-      collection: 'payload-jobs',
+      collection: jobsCollectionSlug,
       req: disableTransaction === true ? undefined : req,
       where: {
         id: {
@@ -67,7 +66,7 @@ export async function updateJob({
 
   const updatedJob = (await req.payload.db.updateOne({
     id,
-    collection: 'payload-jobs',
+    collection: jobsCollectionSlug,
     data: updateData,
     req: disableTransaction === true ? undefined : req,
     returning: true,
