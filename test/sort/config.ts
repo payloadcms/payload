@@ -73,10 +73,10 @@ export async function createData(
 async function seedSortable(payload: Payload) {
   await payload.delete({ collection: 'sortable', where: {} })
   await createData(payload, 'sortable', [
-    { title: 'Sortable 1' },
-    { title: 'Sortable 2' },
-    { title: 'Sortable 3' },
-    { title: 'Sortable 4' },
+    { title: 'A' },
+    { title: 'B' },
+    { title: 'C' },
+    { title: 'D' },
   ])
   return new Response(JSON.stringify({ success: true }), {
     headers: { 'Content-Type': 'application/json' },
