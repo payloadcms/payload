@@ -78,6 +78,7 @@ export const LexicalEditorTheme: EditorThemeClasses = {
   quote: 'LexicalEditorTheme__quote',
   relationship: 'LexicalEditorTheme__relationship',
   rtl: 'LexicalEditorTheme__rtl',
+  tab: 'LexicalEditorTheme__tabNode',
   table: 'LexicalEditorTheme__table',
   tableAddColumns: 'LexicalEditorTheme__tableAddColumns',
   tableAddRows: 'LexicalEditorTheme__tableAddRows',
