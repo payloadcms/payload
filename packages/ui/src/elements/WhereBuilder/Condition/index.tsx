@@ -103,8 +103,7 @@ export const Condition: React.FC<Props> = (props) => {
   )
 
   const handleOperatorChange = useCallback(
-<<<<<<< HEAD
-    (operator: Option<Operator>) => {
+    async (operator: Option<Operator>) => {
       const validOperatorValue = operatorValueTypes[operator.value] || 'any'
       const isValidValue = validOperatorValue === 'any' || typeof value === validOperatorValue
 
@@ -114,11 +113,7 @@ export const Condition: React.FC<Props> = (props) => {
         setInternalValue(undefined)
       }
 
-      updateCondition({
-=======
-    async (operator: Option<Operator>) => {
       await updateCondition({
->>>>>>> main
         andIndex,
         field: reducedField,
         operator: operator.value,
