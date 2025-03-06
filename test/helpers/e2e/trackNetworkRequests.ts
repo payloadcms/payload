@@ -30,7 +30,7 @@ export const trackNetworkRequests = async (
     beforePoll?: () => Promise<any> | void
     interval?: number
     timeout?: number
-  },
+  } = {},
 ): Promise<Array<Request>> => {
   const matchedRequests: Request[] = []
 
