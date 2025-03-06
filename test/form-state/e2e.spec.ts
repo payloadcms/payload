@@ -49,6 +49,8 @@ test.describe('Form State', () => {
     await page.locator('#field-title').fill(title)
     await page.locator('#field-validateUsingEvent').fill('Not allowed')
     await saveDocAndAssert(page, '#action-save', 'error')
+
+    expect(true).toBe(true)
   })
 
   test('should debounce onChange events', async () => {
@@ -66,6 +68,8 @@ test.describe('Form State', () => {
         allowedNumberOfRequests: 1,
       },
     )
+
+    expect(true).toBe(true)
   })
 
   test('should queue onChange functions', async () => {
@@ -102,5 +106,7 @@ test.describe('Form State', () => {
     })
 
     await cdpSession.detach()
+
+    expect(true).toBe(true)
   })
 })
