@@ -307,8 +307,12 @@ const addSortableFeatures = (sanitized: CollectionConfig) => {
   // 3. Add endpoint
   const moveBetweenHandler: PayloadHandler = async (req) => {
     const body = await req.json()
+    type KeyAndID = {
+      id: string
+      key: string
+    }
     const { betweenKeys, docIds } = body as {
-      betweenKeys: [string | undefined, string | undefined] // tuple [beforeKey, afterKey]
+      betweenKeys: [KeyAndID | undefined, KeyAndID | undefined] // tuple [beforeKey, afterKey]
       docIds: string[] // array of docIds to be moved between the two reference points
     }
 
@@ -329,24 +333,24 @@ const addSortableFeatures = (sanitized: CollectionConfig) => {
       )
     }
 
-    const [beforeKey, afterKey] = betweenKeys
-
-    // // TODO: maybe the endpoint can receive directly the order values?
-    // if (beforeKey === 'pending') {
-    //   const beforeDoc = await req.payload.findByID({
-    //     id: beforeId,
-    //     collection: sanitized.slug,
-    //   })
-    //   beforeOrderValue = beforeDoc?.[ORDER_FIELD_NAME] || null
-    // }
-
-    // if (afterId) {
-    //   const afterDoc = await req.payload.findByID({
-    //     id: afterId,
-    //     collection: sanitized.slug,
-    //   })
-    //   afterOrderValue = afterDoc?.[ORDER_FIELD_NAME] || null
-    // }
+    // If key = pending, we need to find its current key.
+    // This can only happen if the user reorders rows quickly and with a slow connection.
+    const [{ id: beforeId }, { id: afterId }] = betweenKeys
+    let [{ key: beforeKey }, { key: afterKey }] = betweenKeys
+    if (beforeKey === 'pending') {
+      const beforeDoc = await req.payload.findByID({
+        id: beforeId,
+        collection: sanitized.slug,
+      })
+      beforeKey = beforeDoc?.[ORDER_FIELD_NAME] || null
+    }
+    if (afterId) {
+      const afterDoc = await req.payload.findByID({
+        id: afterId,
+        collection: sanitized.slug,
+      })
+      afterKey = afterDoc?.[ORDER_FIELD_NAME] || null
+    }
 
     const orderValues = generateNKeysBetween(beforeKey, afterKey, docIds.length)
 

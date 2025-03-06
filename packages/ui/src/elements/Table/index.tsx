@@ -79,14 +79,30 @@ export const Table: React.FC<Props> = ({ appearance = 'default', columns, data: 
     })
 
     try {
+      type KeyAndID = {
+        id: string
+        key: string
+      }
+      const beforeKeyAndID: KeyAndID = newBeforeRow
+        ? {
+            id: newBeforeRow?.id,
+            key: newBeforeRow?._order,
+          }
+        : undefined
+      const afterKeyAndID: KeyAndID = newAfterRow
+        ? {
+            id: newAfterRow?.id,
+            key: newAfterRow?._order,
+          }
+        : undefined
       // Assuming we're in the context of a collection
       const collectionSlug = window.location.pathname.split('/').filter(Boolean)[2]
       const response = await fetch(`/api/${collectionSlug}/reorder`, {
         body: JSON.stringify({
           betweenKeys:
             query.sort === '_order'
-              ? [newBeforeRow?._order, newAfterRow?._order]
-              : [newAfterRow?._order, newBeforeRow?._order],
+              ? [beforeKeyAndID, afterKeyAndID]
+              : [afterKeyAndID, beforeKeyAndID],
           docIds: [movedId],
         }),
         headers: {
