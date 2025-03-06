@@ -269,11 +269,13 @@ function TableActionMenu({
   const insertTableRowAtSelection = useCallback(
     (shouldInsertAfter: boolean) => {
       editor.update(() => {
-        $insertTableRow__EXPERIMENTAL(shouldInsertAfter)
+        for (let i = 0; i < selectionCounts.rows; i++) {
+          $insertTableRow__EXPERIMENTAL(shouldInsertAfter)
+        }
         onClose()
       })
     },
-    [editor, onClose],
+    [editor, onClose, selectionCounts.rows],
   )
 
   const insertTableColumnAtSelection = useCallback(
