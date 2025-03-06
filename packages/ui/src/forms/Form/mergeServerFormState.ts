@@ -31,6 +31,7 @@ export const mergeServerFormState = ({
       'passesCondition',
       'valid',
       'errorMessage',
+      'errorPaths',
       'rows',
       'customComponents',
       'requiresRender',
