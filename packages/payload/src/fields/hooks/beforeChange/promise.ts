@@ -9,12 +9,16 @@ import type { Block, Field, TabAsField, Validate } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
-import { getLabelFromPath } from '../../../utilities/getLabelFromPath.js'
 import { getTranslatedLabel } from '../../../utilities/getTranslatedLabel.js'
 import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../../config/types.js'
 import { getFieldPathsModified as getFieldPaths } from '../../getFieldPaths.js'
 import { getExistingRowDoc } from './getExistingRowDoc.js'
 import { traverseFields } from './traverseFields.js'
+
+function buildFieldLabel(parentLabel: string, label: string): string {
+  const capitalizedLabel = label.charAt(0).toUpperCase() + label.slice(1)
+  return parentLabel ? `${parentLabel} > ${capitalizedLabel}` : capitalizedLabel
+}
 
 type Args = {
   /**
@@ -29,6 +33,12 @@ type Args = {
   errors: ValidationFieldError[]
   field: Field | TabAsField
   fieldIndex: number
+  /**
+   * Built up labels of parent fields
+   *
+   * @example "Group Field > Tab Field > Text Field"
+   */
+  fieldLabelPath: string
   global: null | SanitizedGlobalConfig
   id?: number | string
   mergeLocaleActions: (() => Promise<void> | void)[]
@@ -64,6 +74,7 @@ export const promise = async ({
   errors,
   field,
   fieldIndex,
+  fieldLabelPath,
   global,
   mergeLocaleActions,
   operation,
@@ -86,10 +97,6 @@ export const promise = async ({
     parentSchemaPath,
   })
 
-  const passesCondition = field.admin?.condition
-    ? Boolean(field.admin.condition(data, siblingData, { blockData, user: req.user }))
-    : true
-  let skipValidationFromHere = skipValidation || !passesCondition
   const { localization } = req.payload.config
   const defaultLocale = localization ? localization?.defaultLocale : 'en'
   const operationLocale = req.locale || defaultLocale
@@ -97,6 +104,13 @@ export const promise = async ({
   const pathSegments = path ? path.split('.') : []
   const schemaPathSegments = schemaPath ? schemaPath.split('.') : []
   const indexPathSegments = indexPath ? indexPath.split('-').filter(Boolean)?.map(Number) : []
+
+  const passesCondition = field.admin?.condition
+    ? Boolean(
+        field.admin.condition(data, siblingData, { blockData, path: pathSegments, user: req.user }),
+      )
+    : true
+  let skipValidationFromHere = skipValidation || !passesCondition
 
   if (fieldAffectsData(field)) {
     // skip validation if the field is localized and the incoming data is null
@@ -172,13 +186,10 @@ export const promise = async ({
       })
 
       if (typeof validationResult === 'string') {
-        const label = getTranslatedLabel(field?.label || field?.name, req.i18n)
-        const parentPathSegments = parentPath ? parentPath.split('.') : []
-
-        const fieldLabel =
-          Array.isArray(parentPathSegments) && parentPathSegments.length > 0
-            ? getLabelFromPath(parentPathSegments.concat(label))
-            : label
+        const fieldLabel = buildFieldLabel(
+          fieldLabelPath,
+          getTranslatedLabel(field?.label || field?.name, req.i18n),
+        )
 
         errors.push({
           label: fieldLabel,
@@ -231,6 +242,13 @@ export const promise = async ({
               doc,
               docWithLocales,
               errors,
+              fieldLabelPath:
+                field?.label === false
+                  ? fieldLabelPath
+                  : buildFieldLabel(
+                      fieldLabelPath,
+                      `${getTranslatedLabel(field?.label || field?.name, req.i18n)} ${rowIndex + 1}`,
+                    ),
               fields: field.fields,
               global,
               mergeLocaleActions,
@@ -289,6 +307,13 @@ export const promise = async ({
                 doc,
                 docWithLocales,
                 errors,
+                fieldLabelPath:
+                  field?.label === false
+                    ? fieldLabelPath
+                    : buildFieldLabel(
+                        fieldLabelPath,
+                        `${getTranslatedLabel(field?.label || field?.name, req.i18n)} ${rowIndex + 1}`,
+                      ),
                 fields: block.fields,
                 global,
                 mergeLocaleActions,
@@ -324,6 +349,13 @@ export const promise = async ({
         doc,
         docWithLocales,
         errors,
+        fieldLabelPath:
+          field.type === 'row' || field?.label === false
+            ? fieldLabelPath
+            : buildFieldLabel(
+                fieldLabelPath,
+                getTranslatedLabel(field?.label || field?.type, req.i18n),
+              ),
         fields: field.fields,
         global,
         mergeLocaleActions,
@@ -364,6 +396,13 @@ export const promise = async ({
         doc,
         docWithLocales,
         errors,
+        fieldLabelPath:
+          field?.label === false
+            ? fieldLabelPath
+            : buildFieldLabel(
+                fieldLabelPath,
+                getTranslatedLabel(field?.label || field?.name, req.i18n),
+              ),
         fields: field.fields,
         global,
         mergeLocaleActions,
@@ -421,6 +460,13 @@ export const promise = async ({
             docWithLocales,
             errors,
             field,
+            fieldLabelPath:
+              field?.label === false
+                ? fieldLabelPath
+                : buildFieldLabel(
+                    fieldLabelPath,
+                    getTranslatedLabel(field?.label || field?.name, req.i18n),
+                  ),
             global,
             indexPath: indexPathSegments,
             mergeLocaleActions,
@@ -481,6 +527,13 @@ export const promise = async ({
         doc,
         docWithLocales,
         errors,
+        fieldLabelPath:
+          field?.label === false
+            ? fieldLabelPath
+            : buildFieldLabel(
+                fieldLabelPath,
+                getTranslatedLabel(field?.label || field?.name, req.i18n),
+              ),
         fields: field.fields,
         global,
         mergeLocaleActions,
@@ -509,6 +562,10 @@ export const promise = async ({
         doc,
         docWithLocales,
         errors,
+        fieldLabelPath:
+          field?.label === false
+            ? fieldLabelPath
+            : buildFieldLabel(fieldLabelPath, getTranslatedLabel(field?.label || '', req.i18n)),
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
         global,
         mergeLocaleActions,

@@ -72,7 +72,7 @@ export const gcsStorage: GcsStoragePlugin =
       clientHandler: '@payloadcms/storage-gcs/client#GcsClientUploadHandler',
       collections: gcsStorageOptions.collections,
       config: incomingConfig,
-      enabled: !isPluginDisabled && Boolean(gcsStorageOptions.enabled),
+      enabled: !isPluginDisabled && Boolean(gcsStorageOptions.clientUploads),
       serverHandler: getGenerateSignedURLHandler({
         access:
           typeof gcsStorageOptions.clientUploads === 'object'
@@ -128,11 +128,12 @@ export const gcsStorage: GcsStoragePlugin =
 
 function gcsStorageInternal(
   getStorageClient: () => Storage,
-  { acl, bucket }: GcsStorageOptions,
+  { acl, bucket, clientUploads }: GcsStorageOptions,
 ): Adapter {
   return ({ collection, prefix }): GeneratedAdapter => {
     return {
       name: 'gcs',
+      clientUploads,
       generateURL: getGenerateURL({ bucket, getStorageClient }),
       handleDelete: getHandleDelete({ bucket, getStorageClient }),
       handleUpload: getHandleUpload({

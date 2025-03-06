@@ -699,16 +699,29 @@ export interface ArrayField {
  */
 export interface BlockField {
   id: string;
-  blocks: (ContentBlock | NumberBlock | SubBlocksBlock | TabsBlock)[];
-  duplicate: (ContentBlock | NumberBlock | SubBlocksBlock | TabsBlock)[];
+  blocks: (ContentBlock | NoBlockname | NumberBlock | SubBlocksBlock | TabsBlock)[];
+  duplicate: (ContentBlock | NoBlockname | NumberBlock | SubBlocksBlock | TabsBlock)[];
   collapsedByDefaultBlocks: (
     | LocalizedContentBlock
+    | LocalizedNoBlockname
     | LocalizedNumberBlock
     | LocalizedSubBlocksBlock
     | LocalizedTabsBlock
   )[];
-  disableSort: (LocalizedContentBlock | LocalizedNumberBlock | LocalizedSubBlocksBlock | LocalizedTabsBlock)[];
-  localizedBlocks: (LocalizedContentBlock | LocalizedNumberBlock | LocalizedSubBlocksBlock | LocalizedTabsBlock)[];
+  disableSort: (
+    | LocalizedContentBlock
+    | LocalizedNoBlockname
+    | LocalizedNumberBlock
+    | LocalizedSubBlocksBlock
+    | LocalizedTabsBlock
+  )[];
+  localizedBlocks: (
+    | LocalizedContentBlock
+    | LocalizedNoBlockname
+    | LocalizedNumberBlock
+    | LocalizedSubBlocksBlock
+    | LocalizedTabsBlock
+  )[];
   i18nBlocks?:
     | {
         text?: string | null;
@@ -885,6 +898,16 @@ export interface ContentBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "NoBlockname".
+ */
+export interface NoBlockname {
+  text: string;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'noBlockname';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "NumberBlock".
  */
 export interface NumberBlock {
@@ -938,6 +961,16 @@ export interface LocalizedContentBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'localizedContent';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localizedNoBlockname".
+ */
+export interface LocalizedNoBlockname {
+  text: string;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'localizedNoBlockname';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1151,6 +1184,24 @@ export interface ConditionalLogic {
         id?: string | null;
         blockName?: string | null;
         blockType: 'blockWithConditionalField';
+      }[]
+    | null;
+  arrayOne?:
+    | {
+        title?: string | null;
+        arrayTwo?:
+          | {
+              selectOptions?: ('optionOne' | 'optionTwo') | null;
+              arrayThree?:
+                | {
+                    numberField?: number | null;
+                    id?: string | null;
+                  }[]
+                | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
       }[]
     | null;
   updatedAt: string;
@@ -1783,7 +1834,7 @@ export interface TabsField {
     text: string;
     id?: string | null;
   }[];
-  blocks: (ContentBlock | NumberBlock | SubBlocksBlock | TabsBlock)[];
+  blocks: (ContentBlock | NoBlockname | NumberBlock | SubBlocksBlock | TabsBlock)[];
   group: {
     number: number;
   };
@@ -2443,6 +2494,7 @@ export interface BlockFieldsSelect<T extends boolean = true> {
     | T
     | {
         content?: T | ContentBlockSelect<T>;
+        noBlockname?: T | NoBlocknameSelect<T>;
         number?: T | NumberBlockSelect<T>;
         subBlocks?: T | SubBlocksBlockSelect<T>;
         tabs?: T | TabsBlockSelect<T>;
@@ -2451,6 +2503,7 @@ export interface BlockFieldsSelect<T extends boolean = true> {
     | T
     | {
         content?: T | ContentBlockSelect<T>;
+        noBlockname?: T | NoBlocknameSelect<T>;
         number?: T | NumberBlockSelect<T>;
         subBlocks?: T | SubBlocksBlockSelect<T>;
         tabs?: T | TabsBlockSelect<T>;
@@ -2459,6 +2512,7 @@ export interface BlockFieldsSelect<T extends boolean = true> {
     | T
     | {
         localizedContent?: T | LocalizedContentBlockSelect<T>;
+        localizedNoBlockname?: T | LocalizedNoBlocknameSelect<T>;
         localizedNumber?: T | LocalizedNumberBlockSelect<T>;
         localizedSubBlocks?: T | LocalizedSubBlocksBlockSelect<T>;
         localizedTabs?: T | LocalizedTabsBlockSelect<T>;
@@ -2467,6 +2521,7 @@ export interface BlockFieldsSelect<T extends boolean = true> {
     | T
     | {
         localizedContent?: T | LocalizedContentBlockSelect<T>;
+        localizedNoBlockname?: T | LocalizedNoBlocknameSelect<T>;
         localizedNumber?: T | LocalizedNumberBlockSelect<T>;
         localizedSubBlocks?: T | LocalizedSubBlocksBlockSelect<T>;
         localizedTabs?: T | LocalizedTabsBlockSelect<T>;
@@ -2475,6 +2530,7 @@ export interface BlockFieldsSelect<T extends boolean = true> {
     | T
     | {
         localizedContent?: T | LocalizedContentBlockSelect<T>;
+        localizedNoBlockname?: T | LocalizedNoBlocknameSelect<T>;
         localizedNumber?: T | LocalizedNumberBlockSelect<T>;
         localizedSubBlocks?: T | LocalizedSubBlocksBlockSelect<T>;
         localizedTabs?: T | LocalizedTabsBlockSelect<T>;
@@ -2674,6 +2730,15 @@ export interface ContentBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "NoBlockname_select".
+ */
+export interface NoBlocknameSelect<T extends boolean = true> {
+  text?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "NumberBlock_select".
  */
 export interface NumberBlockSelect<T extends boolean = true> {
@@ -2718,6 +2783,15 @@ export interface TabsBlockSelect<T extends boolean = true> {
 export interface LocalizedContentBlockSelect<T extends boolean = true> {
   text?: T;
   richText?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localizedNoBlockname_select".
+ */
+export interface LocalizedNoBlocknameSelect<T extends boolean = true> {
+  text?: T;
   id?: T;
   blockName?: T;
 }
@@ -2873,6 +2947,24 @@ export interface ConditionalLogicSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+      };
+  arrayOne?:
+    | T
+    | {
+        title?: T;
+        arrayTwo?:
+          | T
+          | {
+              selectOptions?: T;
+              arrayThree?:
+                | T
+                | {
+                    numberField?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
+        id?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -3368,6 +3460,7 @@ export interface TabsFieldsSelect<T extends boolean = true> {
     | T
     | {
         content?: T | ContentBlockSelect<T>;
+        noBlockname?: T | NoBlocknameSelect<T>;
         number?: T | NumberBlockSelect<T>;
         subBlocks?: T | SubBlocksBlockSelect<T>;
         tabs?: T | TabsBlockSelect<T>;

@@ -19,21 +19,21 @@
     "@payloadcms/next": "latest",
     "@payloadcms/payload-cloud": "latest",
     "@payloadcms/richtext-lexical": "latest",
-    "@payloadcms/storage-vercel-blob": "latest",
     "cross-env": "^7.0.3",
     "graphql": "^16.8.1",
-    "next": "15.1.5",
+    "next": "15.2.0",
     "payload": "latest",
     "react": "19.0.0",
-    "react-dom": "19.0.0"
+    "react-dom": "19.0.0",
+    "@payloadcms/storage-vercel-blob": "latest"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
     "@types/node": "^22.5.4",
-    "@types/react": "19.0.7",
-    "@types/react-dom": "19.0.3",
+    "@types/react": "19.0.10",
+    "@types/react-dom": "19.0.4",
     "eslint": "^9.16.0",
-    "eslint-config-next": "15.1.5",
+    "eslint-config-next": "15.2.0",
     "prettier": "^3.4.2",
     "typescript": "5.7.3"
   },

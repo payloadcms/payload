@@ -15,6 +15,7 @@ export const updateMany: UpdateMany = async function updateMany(
   {
     collection: collectionSlug,
     data,
+    limit,
     locale,
     options: optionsArgs = {},
     req,
@@ -37,7 +38,7 @@ export const updateMany: UpdateMany = async function updateMany(
     session: await getSession(this, req),
   }
 
-  const query = await buildQuery({
+  let query = await buildQuery({
     adapter: this,
     collectionSlug,
     fields: collectionConfig.flattenedFields,
@@ -48,6 +49,19 @@ export const updateMany: UpdateMany = async function updateMany(
   transform({ adapter: this, data, fields: collectionConfig.fields, operation: 'write' })
 
   try {
+    if (typeof limit === 'number' && limit > 0) {
+      const documentsToUpdate = await Model.find(
+        query,
+        {},
+        { ...options, limit, projection: { _id: 1 } },
+      )
+      if (documentsToUpdate.length === 0) {
+        return null
+      }
+
+      query = { _id: { $in: documentsToUpdate.map((doc) => doc._id) } }
+    }
+
     await Model.updateMany(query, data, options)
   } catch (error) {
     handleError({ collection: collectionSlug, error, req })
