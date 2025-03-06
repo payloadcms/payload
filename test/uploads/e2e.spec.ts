@@ -440,9 +440,10 @@ describe('Uploads', () => {
 
       // save the document and expect an error
       await page.locator('button#action-save').click()
-      await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
-        'The following field is invalid: Audio',
-      )
+      await assertToastErrors({
+        page,
+        errors: ['Audio'],
+      })
     })
 
     test('should restrict uploads in drawer based on filterOptions', async () => {

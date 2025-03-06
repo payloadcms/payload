@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { assertToastErrors } from 'helpers/assertToastErrors.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -124,9 +125,10 @@ describe('Array', () => {
     await page.locator('#field-arrayWithMinRows >> .array-field__add-row').click()
 
     await page.click('#action-save', { delay: 100 })
-    await expect(page.locator('.payload-toast-container')).toContainText(
-      'The following field is invalid: Array With Min Rows',
-    )
+    await assertToastErrors({
+      page,
+      errors: ['Array With Min Rows'],
+    })
   })
 
   test('should show singular label for array rows', async () => {

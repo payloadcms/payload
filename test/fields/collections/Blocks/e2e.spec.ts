@@ -274,9 +274,10 @@ describe('Block fields', () => {
     await expect(firstRow).toHaveValue('first row')
 
     await page.click('#action-save', { delay: 100 })
-    await expect(page.locator('.payload-toast-container')).toContainText(
-      'The following field is invalid: Blocks With Min Rows',
-    )
+    await assertToastErrors({
+      page,
+      errors: ['Blocks With Min Rows'],
+    })
   })
 
   test('ensure functions passed to blocks field labels property are respected', async () => {
