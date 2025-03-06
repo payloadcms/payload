@@ -25,6 +25,7 @@
     "@aws-sdk/client-s3": "^3.614.0",
     "@date-fns/tz": "1.2.0",
     "@next/env": "15.2.0",
+    "@payloadcms/admin-bar": "workspace:*",
     "@payloadcms/db-mongodb": "workspace:*",
     "@payloadcms/db-postgres": "workspace:*",
     "@payloadcms/db-sqlite": "workspace:*",

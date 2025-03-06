@@ -21,6 +21,7 @@ import type {
   SubmitOptions,
 } from './types.js'
 
+import { FieldErrorsToast } from '../../elements/Toasts/fieldErrors.js'
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
@@ -392,7 +393,6 @@ export const Form: React.FC<FormProps> = (props) => {
           contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
           if (json.message) {
             errorToast(json.message)
-
             return
           }
 
@@ -432,7 +432,7 @@ export const Form: React.FC<FormProps> = (props) => {
             })
 
             nonFieldErrors.forEach((err) => {
-              errorToast(err.message || t('error:unknown'))
+              errorToast(<FieldErrorsToast errorMessage={err.message || t('error:unknown')} />)
             })
 
             return
@@ -507,10 +507,9 @@ export const Form: React.FC<FormProps> = (props) => {
 
       const handler = getUploadHandler({ collectionSlug })
 
-      if (typeof handler === 'function') {
-        let clientUploadContext = null
+      if (file && typeof handler === 'function') {
         let filename = file.name
-        clientUploadContext = await handler({
+        const clientUploadContext = await handler({
           file,
           updateFilename: (value) => {
             filename = value

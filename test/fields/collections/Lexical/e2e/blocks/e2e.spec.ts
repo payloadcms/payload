@@ -570,9 +570,17 @@ describe('lexicalBlocks', () => {
       await topLevelDocTextField.fill('invalid')
 
       await saveDocAndAssert(page, '#action-save', 'error')
-      await expect(page.locator('.payload-toast-container')).toHaveText(
-        'The following fields are invalid: Lexical With Blocks, LexicalWithBlocks > Group > Text Depends On Doc Data',
-      )
+      await expect(
+        page
+          .locator('.payload-toast-container li')
+          .filter({ hasText: 'The following fields are invalid (2):' }),
+      ).toBeVisible()
+      await expect(
+        page.locator('.payload-toast-container [data-testid="field-errors"] li').nth(0),
+      ).toHaveText('Lexical With Blocks')
+      await expect(
+        page.locator('.payload-toast-container [data-testid="field-errors"] li').nth(1),
+      ).toHaveText('Lexical With Blocks → Group → Text Depends On Doc Data')
       await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
 
       await trackNetworkRequests(
@@ -593,9 +601,18 @@ describe('lexicalBlocks', () => {
       await blockGroupTextField.fill('invalid')
 
       await saveDocAndAssert(page, '#action-save', 'error')
-      await expect(page.locator('.payload-toast-container')).toHaveText(
-        'The following fields are invalid: Lexical With Blocks, LexicalWithBlocks > Group > Text Depends On Sibling Data',
-      )
+      await expect(
+        page
+          .locator('.payload-toast-container li')
+          .filter({ hasText: 'The following fields are invalid (2):' }),
+      ).toBeVisible()
+      await expect(
+        page.locator('.payload-toast-container [data-testid="field-errors"] li').nth(0),
+      ).toHaveText('Lexical With Blocks')
+      await expect(
+        page.locator('.payload-toast-container [data-testid="field-errors"] li').nth(1),
+      ).toHaveText('Lexical With Blocks → Group → Text Depends On Sibling Data')
+
       await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
 
       await trackNetworkRequests(
@@ -616,9 +633,17 @@ describe('lexicalBlocks', () => {
       await blockTextField.fill('invalid')
 
       await saveDocAndAssert(page, '#action-save', 'error')
-      await expect(page.locator('.payload-toast-container')).toHaveText(
-        'The following fields are invalid: Lexical With Blocks, LexicalWithBlocks > Group > Text Depends On Block Data',
-      )
+      await expect(
+        page
+          .locator('.payload-toast-container li')
+          .filter({ hasText: 'The following fields are invalid (2):' }),
+      ).toBeVisible()
+      await expect(
+        page.locator('.payload-toast-container [data-testid="field-errors"] li').nth(0),
+      ).toHaveText('Lexical With Blocks')
+      await expect(
+        page.locator('.payload-toast-container [data-testid="field-errors"] li').nth(1),
+      ).toHaveText('Lexical With Blocks → Group → Text Depends On Block Data')
 
       await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
 
