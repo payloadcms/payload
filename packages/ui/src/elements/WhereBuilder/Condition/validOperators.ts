@@ -15,5 +15,6 @@ export const operatorValueTypes: Record<Operator, 'any' | 'boolean' | 'object' |
   near: 'any',
   not_equals: 'any',
   not_in: 'any',
+  not_like: 'string',
   within: 'any',
 }
