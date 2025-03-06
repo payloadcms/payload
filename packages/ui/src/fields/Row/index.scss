@@ -2,6 +2,8 @@
 
 @layer payload-default {
   .field-type.row {
+    margin-bottom: 0;
+
     .row__fields {
       display: flex;
       flex-wrap: wrap;
@@ -14,6 +16,11 @@
         justify-content: flex-start;
       }
 
+      // add margin if the row has children
+      &:has(> *:nth-child(1)) {
+        margin-bottom: var(--base);
+      }
+
       // If there is more than one child, add inline-margins to space them out.
       &:has(> *:nth-child(2)) {
         margin-inline: calc(var(--base) / -4); // add negative margin to counteract the gap.
@@ -22,10 +29,6 @@
           flex: 0 1 calc(var(--field-width) - var(--base) * 0.5);
           margin-inline: calc(var(--base) / 4);
         }
-      }
-
-      &:empty {
-        display: none;
       }
     }
 
