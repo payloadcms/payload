@@ -1,4 +1,4 @@
-name: release-canary
+name: publish-prerelease
 
 on:
   workflow_dispatch:
@@ -11,7 +11,7 @@ env:
 
 jobs:
   release:
-    name: release-canary-${{ github.ref_name }}-${{ github.sha }}
+    name: publish-prerelease-${{ github.ref_name }}-${{ github.sha }}
     permissions:
       id-token: write
     runs-on: ubuntu-24.04
@@ -27,8 +27,19 @@ jobs:
         run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - name: Canary release script
-        run: pnpm release:canary
+
+      - name: Determine release type
+        id: determine_release_type
+        # Use 'canary' for main branch, 'internal' for others
+        run: |
+          if [[ ${{ github.ref_name }} == "main" ]]; then
+            echo "::set-output name=release_type::canary"
+          else
+            echo "::set-output name=release_type::internal"
+          fi
+
+      - name: Release
+        run: pnpm publish-prerelease --tag ${{ steps.determine_release_type.outputs.release_type }}
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
