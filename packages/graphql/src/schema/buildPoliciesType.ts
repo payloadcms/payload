@@ -60,7 +60,7 @@ const buildFields = (label, fieldsToBuild) =>
 
         return {
           ...builtFields,
-          [field.name]: {
+          [formatName(field.name)]: {
             type: new GraphQLObjectType({
               name: `${label}_${fieldName}`,
               fields: objectTypeFields,

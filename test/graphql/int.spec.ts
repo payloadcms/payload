@@ -57,7 +57,7 @@ describe('graphql', () => {
         collection: 'posts',
         id: post.id,
         data: {
-          relatedToSelf: post.id,
+          relationToSelf: post.id,
         },
       })
 
@@ -86,7 +86,7 @@ describe('graphql', () => {
         collection: 'posts',
         data: {
           title: 'example post',
-          hyphenatedName: 'example-hyphenated-name',
+          'hyphenated-name': 'example-hyphenated-name',
         },
       })
 

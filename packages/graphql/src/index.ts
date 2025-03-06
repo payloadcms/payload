@@ -14,24 +14,12 @@ import { buildLocaleInputType } from './schema/buildLocaleInputType.js'
 import { buildPoliciesType } from './schema/buildPoliciesType.js'
 import { initCollections } from './schema/initCollections.js'
 import { initGlobals } from './schema/initGlobals.js'
-import { sanitizeFieldNames } from './utilities/sanitizeFieldNames.js'
 import { wrapCustomFields } from './utilities/wrapCustomResolver.js'
 
 export function configToSchema(config: SanitizedConfig): {
   schema: GraphQL.GraphQLSchema
   validationRules: (args: OperationArgs<any>) => GraphQL.ValidationRule[]
 } {
-  config.collections = (config.collections || []).map((collection) => {
-    collection.fields = sanitizeFieldNames(collection.fields)
-
-    return collection
-  })
-  config.globals = (config.globals || []).map((global) => {
-    global.fields = sanitizeFieldNames(global.fields)
-
-    return global
-  })
-
   const collections = config.collections.reduce((acc, collection) => {
     acc[collection.slug] = {
       config: collection,
