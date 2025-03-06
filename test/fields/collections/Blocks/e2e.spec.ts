@@ -13,6 +13,7 @@ import {
   saveDocAndAssert,
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
+import { assertToastErrors } from '../../../helpers/assertToastErrors.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../helpers/rest.js'
@@ -274,9 +275,10 @@ describe('Block fields', () => {
     await expect(firstRow).toHaveValue('first row')
 
     await page.click('#action-save', { delay: 100 })
-    await expect(page.locator('.payload-toast-container')).toContainText(
-      'The following field is invalid: Blocks With Min Rows',
-    )
+    await assertToastErrors({
+      page,
+      errors: ['Blocks With Min Rows'],
+    })
   })
 
   test('ensure functions passed to blocks field labels property are respected', async () => {
