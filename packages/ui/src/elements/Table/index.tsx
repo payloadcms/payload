@@ -63,16 +63,18 @@ export const Table: React.FC<Props> = ({ appearance = 'default', columns, data: 
 
     // Store the original data for rollback
     const previousData = [...localData]
+    const orderColumn = activeColumns.find((col) => col.accessor === '_order')
+    const originalRenderedCells = orderColumn?.renderedCells ? [...orderColumn.renderedCells] : null
 
     // Optimisitc update of local state to reorder the rows
     setLocalData((currentData) => {
       const newData = [...currentData]
       // Update the rendered cell for the moved row to show "pending"
       newData[moveFromIndex]._order = `pending`
-      const orderedRenderedCells = activeColumns.find(
-        (col) => col.accessor === '_order',
-      )?.renderedCells
-      orderedRenderedCells[cellMap[movedId]] = <>pending</>
+      if (orderColumn?.renderedCells) {
+        orderColumn.renderedCells[cellMap[movedId]] = <>pending</>
+      }
+
       // Move the item in the array
       newData.splice(moveToIndex, 0, newData.splice(moveFromIndex, 1)[0])
       return newData
@@ -83,27 +85,29 @@ export const Table: React.FC<Props> = ({ appearance = 'default', columns, data: 
         id: string
         key: string
       }
-      const beforeKeyAndID: KeyAndID = newBeforeRow
+
+      const target: KeyAndID = newBeforeRow
         ? {
-            id: newBeforeRow?.id,
-            key: newBeforeRow?._order,
+            id: newBeforeRow.id,
+            key: newBeforeRow._order,
           }
-        : undefined
-      const afterKeyAndID: KeyAndID = newAfterRow
-        ? {
-            id: newAfterRow?.id,
-            key: newAfterRow?._order,
+        : {
+            id: newAfterRow.id,
+            key: newAfterRow._order,
           }
-        : undefined
+
+      const newKeyWillBe =
+        (newBeforeRow && query.sort === '_order') || (!newBeforeRow && query.sort === '-_order')
+          ? 'greater'
+          : 'less'
+
       // Assuming we're in the context of a collection
       const collectionSlug = window.location.pathname.split('/').filter(Boolean)[2]
       const response = await fetch(`/api/${collectionSlug}/reorder`, {
         body: JSON.stringify({
-          betweenKeys:
-            query.sort === '_order'
-              ? [beforeKeyAndID, afterKeyAndID]
-              : [afterKeyAndID, beforeKeyAndID],
-          docIds: [movedId],
+          docsToMove: [movedId],
+          newKeyWillBe,
+          target,
         }),
         headers: {
           'Content-Type': 'application/json',
@@ -124,6 +128,14 @@ export const Table: React.FC<Props> = ({ appearance = 'default', columns, data: 
     } catch (_error) {
       // Rollback to previous state if the request fails
       setLocalData(previousData)
+
+      // Also restore the original rendered cells
+      if (orderColumn?.renderedCells && originalRenderedCells) {
+        for (let i = 0; i < originalRenderedCells.length; i++) {
+          orderColumn.renderedCells[i] = originalRenderedCells[i]
+        }
+      }
+
       toast.error('Failed to reorder')
     }
   }
