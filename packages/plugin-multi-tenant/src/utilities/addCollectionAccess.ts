@@ -18,6 +18,7 @@ const collectionAccessKeys: AllAccessKeys<
 > = ['create', 'read', 'update', 'delete', 'readVersions', 'unlock'] as const
 
 type Args<ConfigType> = {
+  adminUsersSlug: string
   collection: CollectionConfig
   fieldName: string
   tenantsArrayFieldName?: string
@@ -32,6 +33,7 @@ type Args<ConfigType> = {
  * - constrains access a users assigned tenants
  */
 export const addCollectionAccess = <ConfigType>({
+  adminUsersSlug,
   collection,
   fieldName,
   tenantsArrayFieldName,
@@ -44,6 +46,7 @@ export const addCollectionAccess = <ConfigType>({
     }
     collection.access[key] = withTenantAccess<ConfigType>({
       accessFunction: collection.access?.[key],
+      adminUsersSlug,
       collection,
       fieldName: key === 'readVersions' ? `version.${fieldName}` : fieldName,
       operation: key,

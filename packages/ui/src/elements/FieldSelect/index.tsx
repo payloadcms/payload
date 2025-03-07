@@ -67,7 +67,7 @@ const reduceFields = ({
     // escape for a variety of reasons, include ui fields as they have `name`.
     if (
       (fieldAffectsData(field) || field.type === 'ui') &&
-      (field.admin.disableBulkEdit ||
+      (field.admin?.disableBulkEdit ||
         field.unique ||
         fieldIsHiddenOrDisabled(field) ||
         ('readOnly' in field && field.readOnly))

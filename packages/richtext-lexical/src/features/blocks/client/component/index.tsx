@@ -541,6 +541,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
             return await onChange({ formState, submit: true })
           },
         ]}
+        el="div"
         fields={clientBlockFields}
         initialState={initialState}
         onChange={[onChange]}

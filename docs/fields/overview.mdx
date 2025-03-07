@@ -502,7 +502,7 @@ export const MyCollectionConfig: CollectionConfig = {
 
 All Description Functions receive the following arguments:
 
-|    Argument          |    Description                                                         |
+|    Argument          |    Description                                                                                         |
 | --- | --- |
 |    **`t`**           |    The `t` function used to internationalize the Admin Panel. [More details](../configuration/i18n)    |
 
@@ -512,11 +512,21 @@ All Description Functions receive the following arguments:
 
 ### Conditional Logic
 
-You can show and hide fields based on what other fields are doing by utilizing conditional logic on a field by field basis. The `condition` property on a field's admin config accepts a function which takes three arguments:
+You can show and hide fields based on what other fields are doing by utilizing conditional logic on a field by field basis. The `condition` property on a field's admin config accepts a function which takes the following arguments:
 
-- `data` - the entire document's data that is currently being edited
-- `siblingData` - only the fields that are direct siblings to the field with the condition
-- `{ user }` - the final argument is an object containing the currently authenticated user
+|    Argument             |    Description                                                                      |
+| --- | --- |
+|    **`data`**           |    The entire document's data that is currently being edited.                       |
+|    **`siblingData`**    |    Only the fields that are direct siblings to the field with the condition.        |
+|    **`ctx`**            |    An object containing additional information about the field’s location and user. |
+
+The `ctx` object:
+
+|    Property           |    Description                                                                                    |
+| --- | --- |
+|    **`blockData`**    |    The nearest parent block's data. If the field is not inside a block, this will be `undefined`. |
+|    **`path`**         |    The full path to the field in the schema, including array indexes. Useful for dynamic lookups. |
+|    **`user`**         |    The currently authenticated user object.                                                       |
 
 The `condition` function should return a boolean that will control if the field should be displayed or not.
 
@@ -535,7 +545,7 @@ The `condition` function should return a boolean that will control if the field 
       type: 'text',
       admin: {
         // highlight-start
-        condition: (data, siblingData, { user }) => {
+        condition: (data, siblingData, { blockData, path, user }) => {
           if (data.enableGreeting) {
             return true
           } else {

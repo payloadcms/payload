@@ -214,6 +214,6 @@ export const renderTable = ({
 
   return {
     columnState,
-    Table: <Table appearance={tableAppearance} columns={columnState} data={docs} />,
+    Table: <Table appearance={tableAppearance} columns={columnState} data={docs} key="table" />,
   }
 }
