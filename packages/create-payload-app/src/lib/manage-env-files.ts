@@ -22,6 +22,8 @@ const updateEnvExampleVariables = (
 
       const [key] = line.split('=')
 
+      if (!key) {return}
+
       if (key === 'DATABASE_URI' || key === 'POSTGRES_URL' || key === 'MONGODB_URI') {
         const dbChoice = databaseType ? dbChoiceRecord[databaseType] : null
         if (dbChoice) {
