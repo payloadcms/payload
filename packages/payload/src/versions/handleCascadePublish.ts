@@ -321,6 +321,7 @@ export const handleCascadePublish = async ({
           _status: 'published',
         },
         depth: 0,
+        draft: true,
         publishSpecificLocale,
         req,
         where: {
