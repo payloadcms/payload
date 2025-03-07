@@ -92,6 +92,9 @@ export const deTranslations: DefaultTranslationsObject = {
     followingFieldsInvalid_one: 'Das folgende Feld ist nicht korrekt:',
     followingFieldsInvalid_other: 'Die folgenden Felder sind nicht korrekt:',
     incorrectCollection: 'Falsche Sammlung',
+    insufficientClipboardPermissions:
+      'Zugriff auf die Zwischenablage verweigert. Bitte überprüfen Sie die Berechtigungen.',
+    invalidClipboardData: 'Ungültige Zwischenablagedaten.',
     invalidFileType: 'Ungültiger Datei-Typ',
     invalidFileTypeValue: 'Ungültiger Datei-Typ: {{value}}',
     invalidRequestArgs: 'Ungültige Argumente in der Anfrage: {{args}}',
@@ -113,6 +116,7 @@ export const deTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Es gab ein Problem während des Hochladens der Datei.',
     tokenInvalidOrExpired: 'Token ist entweder ungültig oder abgelaufen.',
     tokenNotProvided: 'Token nicht bereitgestellt.',
+    unableToCopy: 'Kopieren nicht möglich.',
     unableToDeleteCount: '{{count}} von {{total}} {{label}} konnte nicht gelöscht werden.',
     unableToReindexCollection:
       'Fehler beim Neuindizieren der Sammlung {{collection}}. Vorgang abgebrochen.',
@@ -215,7 +219,9 @@ export const deTranslations: DefaultTranslationsObject = {
       'Dies entfernt bestehende Indizes und indiziert die Dokumente in allen Sammlungen neu.',
     copied: 'Kopiert',
     copy: 'Kopieren',
+    copyField: 'Feld kopieren',
     copying: 'Kopieren',
+    copyRow: 'Zeile kopieren',
     copyWarning:
       'Sie sind dabei, {{to}} mit {{from}} für {{label}} {{title}} zu überschreiben. Sind Sie sicher?',
     create: 'Erstellen',
@@ -298,6 +304,8 @@ export const deTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Überschreiben Sie vorhandene Felddaten',
     pageNotFound: 'Seite nicht gefunden',
     password: 'Passwort',
+    pasteField: 'Feld einfügen',
+    pasteRow: 'Zeile einfügen',
     payloadSettings: 'Payload Einstellungen',
     perPage: 'Pro Seite: {{limit}}',
     previous: 'Vorherige',
