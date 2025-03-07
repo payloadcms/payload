@@ -6,9 +6,12 @@ import { formatDate } from '@payloadcms/ui/shared'
 
 import type { GenerateEditViewMetadata } from '../Document/getMetaBySegment.js'
 
-import { meta } from '../../utilities/meta.js'
+import { generateMetadata } from '../../utilities/generateMetadata.js'
 
-export const generateMetadata: GenerateEditViewMetadata = async ({
+/**
+ * @todo Remove the `MetaConfig` type assertions. They are currently required because of how the `Metadata` type from `next` consumes the `URL` type.
+ */
+export const generateVersionViewMetadata: GenerateEditViewMetadata = async ({
   collectionConfig,
   config,
   globalConfig,
@@ -17,7 +20,7 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
   const { t } = i18n
 
   let metaToUse: MetaConfig = {
-    ...(config.admin.meta || {}),
+    ...((config.admin.meta || {}) as MetaConfig),
   }
 
   const doc: any = {} // TODO: figure this out
@@ -32,11 +35,11 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
     const titleFromData = doc?.[useAsTitle]
 
     metaToUse = {
-      ...(config.admin.meta || {}),
+      ...((config.admin.meta || {}) as MetaConfig),
       description: t('version:viewingVersion', { documentTitle: doc[useAsTitle], entityLabel }),
       title: `${t('version:version')}${formattedCreatedAt ? ` - ${formattedCreatedAt}` : ''}${titleFromData ? ` - ${titleFromData}` : ''} - ${entityLabel}`,
-      ...(collectionConfig?.admin?.meta || {}),
-      ...(collectionConfig?.admin?.components?.views?.edit?.version?.meta || {}),
+      ...((collectionConfig?.admin?.meta || {}) as MetaConfig),
+      ...((collectionConfig?.admin?.components?.views?.edit?.version?.meta || {}) as MetaConfig),
     }
   }
 
@@ -44,15 +47,15 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
     const entityLabel = getTranslation(globalConfig.label, i18n)
 
     metaToUse = {
-      ...(config.admin.meta || {}),
+      ...((config.admin.meta || {}) as MetaConfig),
       description: t('version:viewingVersionGlobal', { entityLabel }),
       title: `${t('version:version')}${formattedCreatedAt ? ` - ${formattedCreatedAt}` : ''}${entityLabel}`,
-      ...(globalConfig?.admin?.meta || {}),
-      ...(globalConfig?.admin?.components?.views?.edit?.version?.meta || {}),
+      ...((globalConfig?.admin?.meta || {}) as MetaConfig),
+      ...((globalConfig?.admin?.components?.views?.edit?.version?.meta || {}) as MetaConfig),
     }
   }
 
-  return meta({
+  return generateMetadata({
     ...metaToUse,
     serverURL: config.serverURL,
   })

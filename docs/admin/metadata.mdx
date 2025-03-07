@@ -6,7 +6,11 @@ desc: Customize the metadata of your pages within the Admin Panel
 keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Every page within the Admin Panel automatically receives dynamic, auto-generated metadata derived from live document data, the user's current locale, and more, without any additional configuration. This includes the page title, description, og:image and everything in between. Metadata is fully configurable at the root level and cascades down to individual collections, documents, and custom views, allowing for the ability to control metadata on any page with high precision.
+Every page within the Admin Panel automatically receives dynamic, auto-generated metadata derived from live document data, the user's current locale, and more, without any additional configuration. This includes the page title, description, og:image and everything in between.
+
+All metadata is injected into Next.js' [`generateMetadata`](https://nextjs.org/docs/app/api-reference/functions/generate-metadata) function, which is used to generate the `<head>` of pages within the Admin Panel. All metadata options that are in Next.js are available in Payload.
+
+Metadata is fully configurable at the root level and cascades down to individual collections, documents, and custom views. This allows for the ability to control metadata on any page with high precision, while also providing sensible defaults.
 
 Within the Admin Panel, metadata can be customized at the following levels:
 

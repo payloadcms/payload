@@ -1,13 +1,16 @@
 import type { Metadata } from 'next'
-import type { SanitizedCollectionConfig } from 'payload'
+import type { MetaConfig, SanitizedCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 
 import type { GenerateViewMetadata } from '../Root/index.js'
 
-import { meta } from '../../utilities/meta.js'
+import { generateMetadata } from '../../utilities/generateMetadata.js'
 
-export const generateListMetadata = async (
+/**
+ * @todo Remove the `MetaConfig` type assertions. They are currently required because of how the `Metadata` type from `next` consumes the `URL` type.
+ */
+export const generateListViewMetadata = async (
   args: {
     collectionConfig: SanitizedCollectionConfig
   } & Parameters<GenerateViewMetadata>[0],
@@ -22,12 +25,12 @@ export const generateListMetadata = async (
     title = getTranslation(collectionConfig.labels.plural, i18n)
   }
 
-  return meta({
-    ...(config.admin.meta || {}),
+  return generateMetadata({
+    ...((config.admin.meta || {}) as MetaConfig),
     description,
     keywords,
     serverURL: config.serverURL,
     title,
-    ...(collectionConfig?.admin?.meta || {}),
+    ...((collectionConfig?.admin?.meta || {}) as MetaConfig),
   })
 }

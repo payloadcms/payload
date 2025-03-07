@@ -11,16 +11,15 @@ const defaultOpenGraph = {
   title: 'Payload App',
 }
 
-export const meta = async (args: { serverURL: string } & MetaConfig): Promise<any> => {
+export const generateMetadata = async (
+  args: { serverURL: string } & MetaConfig,
+): Promise<Metadata> => {
   const {
     defaultOGImageType,
-    description,
     icons: customIcons,
-    keywords,
-    openGraph: openGraphFromProps,
     serverURL,
-    title,
     titleSuffix,
+    ...incomingMetadata
   } = args
 
   const payloadIcons: IconConfig[] = [
@@ -45,9 +44,9 @@ export const meta = async (args: { serverURL: string } & MetaConfig): Promise<an
     icons = customIcons
   }
 
-  const metaTitle = [title, titleSuffix].filter(Boolean).join(' ')
+  const metaTitle = [incomingMetadata.title, titleSuffix].filter(Boolean).join(' ')
 
-  const ogTitle = `${typeof openGraphFromProps?.title === 'string' ? openGraphFromProps.title : title} ${titleSuffix}`
+  const ogTitle = `${typeof incomingMetadata.openGraph?.title === 'string' ? incomingMetadata.openGraph.title : incomingMetadata.title} ${titleSuffix}`
 
   const mergedOpenGraph: Metadata['openGraph'] = {
     ...(defaultOpenGraph || {}),
@@ -59,7 +58,8 @@ export const meta = async (args: { serverURL: string } & MetaConfig): Promise<an
               height: 630,
               url: `/api/og${qs.stringify(
                 {
-                  description: openGraphFromProps?.description || defaultOpenGraph.description,
+                  description:
+                    incomingMetadata.openGraph?.description || defaultOpenGraph.description,
                   title: ogTitle,
                 },
                 {
@@ -84,13 +84,12 @@ export const meta = async (args: { serverURL: string } & MetaConfig): Promise<an
         }
       : {}),
     title: ogTitle,
-    ...(openGraphFromProps || {}),
+    ...(incomingMetadata.openGraph || {}),
   }
 
   return Promise.resolve({
-    description,
+    ...incomingMetadata,
     icons,
-    keywords,
     metadataBase: new URL(
       serverURL ||
         process.env.PAYLOAD_PUBLIC_SERVER_URL ||
