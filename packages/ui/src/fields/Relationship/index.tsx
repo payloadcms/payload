@@ -675,11 +675,11 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
                   ? `${option.relationTo}_${option.value}`
                   : (option.value as string)
               }}
-              isLoading={selectionType === 'drawer' ? false : isLoading}
+              isLoading={selectionType === 'dropdown' && isLoading}
               isMulti={hasMany}
-              isSearchable={selectionType === 'drawer' ? false : undefined}
+              isSearchable={selectionType === 'dropdown' && undefined}
               isSortable={isSortable}
-              menuIsOpen={selectionType === 'drawer' ? false : menuIsOpen}
+              menuIsOpen={selectionType === 'dropdown' && menuIsOpen}
               onChange={
                 !readOnly
                   ? (selected) => {
