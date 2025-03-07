@@ -51,6 +51,7 @@ export const buildVersionColumns = ({
             docID={docID}
             globalSlug={globalConfig?.slug}
             key={i}
+            modifiedOnly={collectionConfig?.versions.showModifiedOnlyByDefault}
             rowData={{
               id: doc.id,
               updatedAt: doc.updatedAt,

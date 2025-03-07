@@ -20,6 +20,7 @@
  *    - text
  *    - richtext
  *  - specify locales to show
+ *  - specify whether or not to show modifiedOnly
  */
 
 import type { BrowserContext, Dialog, Page } from '@playwright/test'
@@ -60,6 +61,8 @@ import {
   draftGlobalSlug,
   draftWithMaxCollectionSlug,
   draftWithMaxGlobalSlug,
+  draftWithModifiedOnlyDisabledSlug,
+  draftWithModifiedOnlySlug,
   draftWithValidateCollectionSlug,
   localizedCollectionSlug,
   localizedGlobalSlug,
@@ -1140,6 +1143,90 @@ describe('Versions', () => {
       const publishSpecificLocale = page.locator('.doc-controls__controls .popup__content')
 
       await expect(publishSpecificLocale).toContainText('English')
+    })
+  })
+
+  describe('Versions list view', () => {
+    let postID: string
+    let versionsURL: string
+
+    async function createAndGoToPostInCollection(collectionSlug: any) {
+      url = new AdminUrlUtil(serverURL, collectionSlug)
+
+      const newPost = await payload.create({
+        collection: collectionSlug,
+        data: {
+          title: 'new post',
+          description: 'new description',
+        },
+      })
+
+      postID = newPost.id
+
+      await payload.update({
+        collection: collectionSlug,
+        id: postID,
+        data: {
+          title: 'draft post',
+          description: 'draft description',
+          blocksField: [
+            {
+              blockName: 'block1',
+              blockType: 'block',
+              text: 'block text',
+            },
+          ],
+        },
+      })
+
+      versionsURL = `${serverURL}/admin/collections/${collectionSlug}/${postID}/versions`
+      await page.goto(versionsURL)
+      await expect(page.locator('[aria-label="Versions"]').first()).toBeVisible()
+    }
+
+    test('attaches ?modifiedOnly=true query param when opening version diff in collection where setting is set to `true`', async () => {
+      await createAndGoToPostInCollection(draftWithModifiedOnlySlug)
+      const locator = page.locator('main td > a')
+      expect(locator.count()).toBe(2)
+      const hrefs = await locator.evaluateAll((elements) =>
+        elements.map((el) => el.getAttribute('href')),
+      )
+      for (const href of hrefs) {
+        if (!href) {
+          continue
+        }
+        expect(Object.fromEntries(new URL(href).searchParams).modifiedOnly).toBe('true')
+      }
+    })
+
+    test('does not attach ?modifiedOnly=true query param when opening version diff in collection where setting is set to `false`', async () => {
+      await createAndGoToPostInCollection(draftWithModifiedOnlyDisabledSlug)
+      const locator = page.locator('main td > a')
+      expect(locator.count()).toBe(2)
+      const hrefs = await locator.evaluateAll((elements) =>
+        elements.map((el) => el.getAttribute('href')),
+      )
+      for (const href of hrefs) {
+        if (!href) {
+          continue
+        }
+        expect(Object.fromEntries(new URL(href).searchParams).modifiedOnly).toBeFalsy()
+      }
+    })
+
+    test('does not attach ?modifiedOnly=true query param when opening version diff in collection where setting is not set', async () => {
+      await createAndGoToPostInCollection(draftCollectionSlug)
+      const locator = page.locator('main td > a')
+      expect(locator.count()).toBe(2)
+      const hrefs = await locator.evaluateAll((elements) =>
+        elements.map((el) => el.getAttribute('href')),
+      )
+      for (const href of hrefs) {
+        if (!href) {
+          continue
+        }
+        expect(Object.fromEntries(new URL(href).searchParams).modifiedOnly).toBeFalsy()
+      }
     })
   })
 
