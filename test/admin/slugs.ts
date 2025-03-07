@@ -11,6 +11,7 @@ export const hiddenCollectionSlug = 'hidden-collection'
 export const notInViewCollectionSlug = 'not-in-view-collection'
 export const noApiViewCollectionSlug = 'collection-no-api-view'
 export const disableDuplicateSlug = 'disable-duplicate'
+export const disableCopyToLocale = 'disable-copy-to-locale'
 export const uploadCollectionSlug = 'uploads'
 
 export const uploadTwoCollectionSlug = 'uploads-two'
