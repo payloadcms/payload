@@ -1830,6 +1830,19 @@ export interface TabsField {
    * This should not collapse despite there being many tabs pushing the main fields open.
    */
   sidebarField?: string | null;
+  /**
+   * When active, the conditional tab should be visible. When inactive, it should be hidden.
+   */
+  conditionalTabVisible?: boolean | null;
+  conditionalTab?: {
+    conditionalTabField?: string | null;
+    /**
+     * When active, the nested conditional tab should be visible. When inactive, it should be hidden.
+     */
+    nestedConditionalTabVisible?: boolean | null;
+    nestedUnconditionalTabInput?: string | null;
+    nestedConditionalTabInput?: string | null;
+  };
   array: {
     text: string;
     id?: string | null;
@@ -3450,6 +3463,15 @@ export interface TabsFields2Select<T extends boolean = true> {
  */
 export interface TabsFieldsSelect<T extends boolean = true> {
   sidebarField?: T;
+  conditionalTabVisible?: T;
+  conditionalTab?:
+    | T
+    | {
+        conditionalTabField?: T;
+        nestedConditionalTabVisible?: T;
+        nestedUnconditionalTabInput?: T;
+        nestedConditionalTabInput?: T;
+      };
   array?:
     | T
     | {

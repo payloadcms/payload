@@ -237,7 +237,7 @@ export function buildObjectType({
         ...objectTypeConfig,
         [field.name]: {
           type: graphqlResult.types.groupTypes[interfaceName],
-          resolve: (parent, args, context: Context) => {
+          resolve: (parent) => {
             return {
               ...parent[field.name],
               _id: parent._id ?? parent.id,
@@ -695,7 +695,7 @@ export function buildObjectType({
             ...tabSchema,
             [tab.name]: {
               type: graphqlResult.types.groupTypes[interfaceName],
-              resolve(parent, args, context: Context) {
+              resolve(parent) {
                 return {
                   ...parent[tab.name],
                   _id: parent._id ?? parent.id,
