@@ -743,7 +743,7 @@ describe('Versions', () => {
         expect(updated1.title).toBe('new-title')
 
         expect(updated2.id).toBe(id)
-        expect(updated2.title).toBe('new-title')
+        expect(updated2.title).toBe('new-title-2')
       })
     })
 
