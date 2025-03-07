@@ -1,7 +1,5 @@
 // @ts-strict-ignore
 
-import { generateKeyBetween, generateNKeysBetween } from 'fractional-indexing'
-
 import type { Config, Endpoint, PayloadHandler, SanitizedConfig } from '../../config/types.js'
 import type { Field } from '../../fields/config/types.js'
 import type {
@@ -30,6 +28,7 @@ import {
   addDefaultsToCollectionConfig,
   addDefaultsToLoginWithUsernameConfig,
 } from './defaults.js'
+import { generateKeyBetween, generateNKeysBetween } from './fractional-indexing.js'
 import { sanitizeAuthFields, sanitizeUploadFields } from './reservedFieldNames.js'
 import { sanitizeCompoundIndexes } from './sanitizeCompoundIndexes.js'
 import { validateUseAsTitle } from './useAsTitle.js'
