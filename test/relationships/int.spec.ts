@@ -1,11 +1,17 @@
-import type { Payload, PayloadRequest } from 'payload'
-
 import { randomBytes, randomUUID } from 'crypto'
 import path from 'path'
+import {
+  commitTransaction,
+  createLocalReq,
+  initTransaction,
+  type Payload,
+  type PayloadRequest,
+} from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type {
+  Chained,
   ChainedRelation,
   CustomIdNumberRelation,
   CustomIdRelation,
@@ -896,6 +902,73 @@ describe('Relationships', () => {
             })
             .then((res) => res.json())
           expect(doc?.chainedRelation).toEqual(chained.id)
+        })
+
+        it('should populate with a right data within the same transaction after update', async () => {
+          const req = await createLocalReq({}, payload)
+          await initTransaction(req)
+
+          const chained = await payload.create({
+            collection: chainedRelSlug,
+            req,
+            data: { name: 'my-name' },
+          })
+          let doc = await payload.create({
+            collection: slug,
+            data: { chainedRelation: chained.id },
+            req,
+          })
+          expect((doc.chainedRelation as Chained).id).toBe(chained.id)
+
+          await payload.update({
+            collection: chainedRelSlug,
+            req,
+            data: { name: 'new-name' },
+            id: chained.id,
+          })
+
+          doc = await payload.findByID({
+            collection: slug,
+            id: doc.id,
+            req,
+          })
+
+          expect((doc.chainedRelation as Chained).name).toBe('new-name')
+
+          await commitTransaction(req)
+        })
+
+        it('should not populate within the same transaction after delete', async () => {
+          const req = await createLocalReq({}, payload)
+          await initTransaction(req)
+
+          const chained = await payload.create({
+            collection: chainedRelSlug,
+            req,
+            data: { name: 'my-name' },
+          })
+          let doc = await payload.create({
+            collection: slug,
+            data: { chainedRelation: chained.id },
+            req,
+          })
+          expect((doc.chainedRelation as Chained).id).toBe(chained.id)
+
+          await payload.delete({
+            collection: chainedRelSlug,
+            req,
+            id: chained.id,
+          })
+
+          doc = await payload.findByID({
+            collection: slug,
+            id: doc.id,
+            req,
+          })
+
+          expect((doc.chainedRelation as Chained)?.name).toBeUndefined()
+
+          await commitTransaction(req)
         })
 
         it('should respect maxDepth at field level', async () => {

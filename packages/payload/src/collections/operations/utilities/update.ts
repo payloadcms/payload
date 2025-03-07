@@ -34,6 +34,7 @@ import { uploadFiles } from '../../../uploads/uploadFiles.js'
 import { checkDocumentLockStatus } from '../../../utilities/checkDocumentLockStatus.js'
 import { getLatestCollectionVersion } from '../../../versions/getLatestCollectionVersion.js'
 import { saveVersion } from '../../../versions/saveVersion.js'
+import { invalidateDocumentInDataloader } from '../../dataloader.js'
 
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   accessResults: AccessResult
@@ -313,6 +314,8 @@ export const updateDocument = async <
       snapshot: versionSnapshotResult,
     })
   }
+
+  invalidateDocumentInDataloader({ id, collectionSlug: collectionConfig.slug, req })
 
   // /////////////////////////////////////
   // afterRead - Fields
