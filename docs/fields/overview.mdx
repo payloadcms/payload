@@ -286,14 +286,15 @@ export const MyField: Field = {
 
 The following additional properties are provided in the `ctx` object:
 
-|    Property         |    Description                                                                                                                              |
+|    Property         |    Description                                                                                                                                                  |
 | --- | --- |
-|    `data`           |    An object containing the full collection or global document currently being edited.                                                      |
-|    `siblingData`    |    An object containing document data that is scoped to only fields within the same parent of this field.                                   |
-|    `operation`      |    Will be `create` or `update` depending on the UI action or API call.                                                                     |
-|    `id`             |    The `id` of the current document being edited. `id` is `undefined` during the `create` operation.                                        |
-|    `req`            |    The current HTTP request object. Contains `payload`, `user`, etc.                                                                        |
-|    `event`          |    Either `onChange` or `submit` depending on the current action. Used as a performance opt-in. [More details](#async-field-validations).    |
+|    `data`           |    An object containing the full collection or global document currently being edited.                                                                          |
+|    `siblingData`    |    An object containing document data that is scoped to only fields within the same parent of this field.                                                       |
+|    `operation`      |    Will be `create` or `update` depending on the UI action or API call.                                                                                         |
+|    `path`           |    The full path to the field in the schema, represented as an array of string segments, including array indexes. I.e `['group', 'myArray', '1', 'textField']`. |
+|    `id`             |    The `id` of the current document being edited. `id` is `undefined` during the `create` operation.                                                            |
+|    `req`            |    The current HTTP request object. Contains `payload`, `user`, etc.                                                                                            |
+|    `event`          |    Either `onChange` or `submit` depending on the current action. Used as a performance opt-in. [More details](#async-field-validations).                       |
 
 #### Reusing Default Field Validations
 
@@ -522,11 +523,11 @@ You can show and hide fields based on what other fields are doing by utilizing c
 
 The `ctx` object:
 
-|    Property           |    Description                                                                                    |
+|    Property           |    Description                                                                                                                                                  |
 | --- | --- |
-|    **`blockData`**    |    The nearest parent block's data. If the field is not inside a block, this will be `undefined`. |
-|    **`path`**         |    The full path to the field in the schema, including array indexes. Useful for dynamic lookups. |
-|    **`user`**         |    The currently authenticated user object.                                                       |
+|    **`blockData`**    |    The nearest parent block's data. If the field is not inside a block, this will be `undefined`.                                                               |
+|    **`path`**         |    The full path to the field in the schema, represented as an array of string segments, including array indexes. I.e `['group', 'myArray', '1', 'textField']`. |
+|    **`user`**         |    The currently authenticated user object.                                                                                                                     |
 
 The `condition` function should return a boolean that will control if the field should be displayed or not.
 

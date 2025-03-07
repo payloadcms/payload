@@ -181,6 +181,7 @@ export const promise = async ({
         // @ts-expect-error
         jsonError,
         operation,
+        path: pathSegments,
         preferences: { fields: {} },
         previousValue: siblingDoc[field.name],
         req,

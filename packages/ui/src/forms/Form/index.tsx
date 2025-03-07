@@ -134,6 +134,7 @@ export const Form: React.FC<FormProps> = (props) => {
     const validationPromises = Object.entries(contextRef.current.fields).map(
       async ([path, field]) => {
         const validatedField = field
+        const pathSegments = path ? path.split('.') : []
 
         if (field.passesCondition !== false) {
           let validationResult: boolean | string = validatedField.valid
@@ -154,6 +155,7 @@ export const Form: React.FC<FormProps> = (props) => {
               data: documentForm?.getData ? documentForm.getData() : data,
               event: 'submit',
               operation,
+              path: pathSegments,
               preferences: {} as any,
               req: {
                 payload: {
