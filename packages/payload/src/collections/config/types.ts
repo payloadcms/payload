@@ -14,6 +14,7 @@ import type {
   AfterErrorResult,
   CustomComponent,
   EditConfig,
+  EditViewConfig,
   Endpoint,
   EntityDescription,
   EntityDescriptionComponent,
@@ -544,11 +545,27 @@ export type SanitizedJoins = {
   [collectionSlug: string]: SanitizedJoin[]
 }
 
+type AdminComponentsObj = NonNullable<Extract<CollectionConfig['admin'], object>['components']>
+
+type ViewsObj = NonNullable<AdminComponentsObj['views']>
+
+type EditViewConfigObj = NonNullable<NonNullable<AdminComponentsObj['views']>['edit']>
+
 export interface SanitizedCollectionConfig
   extends Omit<
     DeepRequired<CollectionConfig>,
-    'auth' | 'endpoints' | 'fields' | 'slug' | 'upload' | 'versions'
+    'admin' | 'auth' | 'endpoints' | 'fields' | 'slug' | 'upload' | 'versions'
   > {
+  admin: {
+    components: {
+      views: {
+        edit: {
+          meta: MetaConfig
+        } & DeepRequired<Omit<EditViewConfigObj, 'meta'>>
+      } & DeepRequired<Omit<ViewsObj, 'edit'>>
+    } & DeepRequired<Omit<AdminComponentsObj, 'views'>>
+    meta: Extract<CollectionConfig['admin'], object>['meta']
+  } & DeepRequired<Omit<CollectionConfig['admin'], 'components' | 'meta'>>
   auth: Auth
   endpoints: Endpoint[] | false
   fields: Field[]
@@ -557,7 +574,6 @@ export interface SanitizedCollectionConfig
    * Rows / collapsible / tabs w/o name `fields` merged to top, UIs are excluded
    */
   flattenedFields: FlattenedField[]
-
   /**
    * Object of collections to join 'Join Fields object keyed by collection
    */
