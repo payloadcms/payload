@@ -24,6 +24,7 @@ import type {
 import { FieldErrorsToast } from '../../elements/Toasts/fieldErrors.js'
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
+import { useQueues } from '../../hooks/useQueues.js'
 import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -91,6 +92,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const { i18n, t } = useTranslation()
   const { refreshCookie, user } = useAuth()
   const operation = useOperation()
+  const queueTask = useQueues()
 
   const { getFormState } = useServerFunctions()
   const { startRouteTransition } = useRouteTransition()
@@ -754,7 +756,9 @@ export const Form: React.FC<FormProps> = (props) => {
     () => {
       if (isFirstRenderRef.current || !dequal(contextRef.current.fields, prevFields.current)) {
         if (modified) {
-          void executeOnChange(submitted)
+          queueTask(async () => {
+            await executeOnChange(submitted)
+          })
         }
       }
 
