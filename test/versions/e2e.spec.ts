@@ -311,7 +311,6 @@ describe('Versions', () => {
 
     test('should restore version with correct data', async () => {
       await page.goto(url.create)
-      await page.waitForURL(url.create)
       await page.locator('#field-title').fill('v1')
       await page.locator('#field-description').fill('hello')
       await saveDocAndAssert(page)
@@ -322,7 +321,6 @@ describe('Versions', () => {
       const row2 = page.locator('tbody .row-2')
       const versionID = await row2.locator('.cell-id').textContent()
       await page.goto(`${savedDocURL}/versions/${versionID}`)
-      await page.waitForURL(`${savedDocURL}/versions/${versionID}`)
       await expect(page.locator('.render-field-diffs')).toBeVisible()
       await page.locator('.restore-version__button').click()
       await page.locator('button:has-text("Confirm")').click()
@@ -438,9 +436,49 @@ describe('Versions', () => {
       await expect(drawer.locator('.id-label')).toBeVisible()
     })
 
+    test('collection - autosave - should not create duplicates when clicking Create new', async () => {
+      // This test checks that when we click "Create new" in the list view, it only creates 1 extra document and not more
+      const { totalDocs: initialDocsCount } = await payload.find({
+        collection: autosaveCollectionSlug,
+        draft: true,
+      })
+
+      await page.goto(autosaveURL.create)
+      await page.locator('#field-title').fill('autosave title')
+      await waitForAutoSaveToRunAndComplete(page)
+      await expect(page.locator('#field-title')).toHaveValue('autosave title')
+
+      const { totalDocs: updatedDocsCount } = await payload.find({
+        collection: autosaveCollectionSlug,
+        draft: true,
+      })
+
+      await expect(() => {
+        expect(updatedDocsCount).toBe(initialDocsCount + 1)
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT, intervals: [100] })
+
+      await page.goto(autosaveURL.list)
+      const createNewButton = page.locator('.list-header .btn:has-text("Create New")')
+      await createNewButton.click()
+
+      await page.waitForURL(`**/${autosaveCollectionSlug}/**`)
+
+      await page.locator('#field-title').fill('autosave title')
+      await waitForAutoSaveToRunAndComplete(page)
+      await expect(page.locator('#field-title')).toHaveValue('autosave title')
+
+      const { totalDocs: latestDocsCount } = await payload.find({
+        collection: autosaveCollectionSlug,
+        draft: true,
+      })
+
+      await expect(() => {
+        expect(latestDocsCount).toBe(updatedDocsCount + 1)
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT, intervals: [100] })
+    })
+
     test('collection - should update updatedAt', async () => {
       await page.goto(url.create)
-      await page.waitForURL(`**/${url.create}`)
 
       // fill out doc in english
       await page.locator('#field-title').fill('title')
@@ -494,7 +532,6 @@ describe('Versions', () => {
     test('global - should autosave', async () => {
       const url = new AdminUrlUtil(serverURL, autoSaveGlobalSlug)
       await page.goto(url.global(autoSaveGlobalSlug))
-      await page.waitForURL(`**/${autoSaveGlobalSlug}`)
       const titleField = page.locator('#field-title')
       await titleField.fill('global title')
       await waitForAutoSaveToRunAndComplete(page)
@@ -536,7 +573,6 @@ describe('Versions', () => {
       const englishTitle = 'english title'
 
       await page.goto(url.create)
-      await page.waitForURL(`**/${url.create}`)
 
       // fill out doc in english
       await page.locator('#field-title').fill(englishTitle)
@@ -599,7 +635,6 @@ describe('Versions', () => {
 
     test('should save versions with custom IDs', async () => {
       await page.goto(customIDURL.create)
-      await page.waitForURL(`${customIDURL.create}`)
       await page.locator('#field-id').fill('custom')
       await page.locator('#field-title').fill('title')
       await saveDocAndAssert(page)
@@ -751,13 +786,12 @@ describe('Versions', () => {
 
     test('should schedule publish', async () => {
       await page.goto(url.create)
-      await page.waitForURL(url.create)
       await page.locator('#field-title').fill('scheduled publish')
       await page.locator('#field-description').fill('scheduled publish description')
 
       // schedule publish should not be available before document has been saved
       await page.locator('#action-save-popup').click()
-      await expect(page.locator('#schedule-publish')).not.toBeVisible()
+      await expect(page.locator('#schedule-publish')).toBeHidden()
 
       // save draft then try to schedule publish
       await saveDocAndAssert(page)
@@ -827,7 +861,7 @@ describe('Versions', () => {
       const publishOptions = page.locator('.doc-controls__controls .popup')
       await publishOptions.click()
 
-      const publishSpecificLocale = page.locator('.popup-button-list button').first()
+      const publishSpecificLocale = page.locator('#publish-locale')
       await expect(publishSpecificLocale).toContainText('English')
       await publishSpecificLocale.click()
 
@@ -1179,14 +1213,12 @@ describe('Versions', () => {
     async function navigateToVersionDiff() {
       const versionURL = `${serverURL}/admin/collections/${draftCollectionSlug}/${postID}/versions/${versionID}`
       await page.goto(versionURL)
-      await page.waitForURL(versionURL)
       await expect(page.locator('.render-field-diffs').first()).toBeVisible()
     }
 
     async function navigateToVersionFieldsDiff() {
       const versionURL = `${serverURL}/admin/collections/${diffCollectionSlug}/${diffID}/versions/${versionDiffID}`
       await page.goto(versionURL)
-      await page.waitForURL(versionURL)
       await expect(page.locator('.render-field-diffs').first()).toBeVisible()
     }
 

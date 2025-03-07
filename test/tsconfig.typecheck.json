@@ -13,6 +13,9 @@
   ],
   "references": [
     {
+      "path": "../packages/admin-bar"
+    },
+    {
       "path": "../packages/create-payload-app"
     },
     {

@@ -1,4 +1,3 @@
-import type { PaginateOptions } from 'mongoose'
 import type { FlattenedField, SanitizedConfig, Sort } from 'payload'
 
 import { getLocalizedSortProperty } from './getLocalizedSortProperty.js'
@@ -6,7 +5,7 @@ import { getLocalizedSortProperty } from './getLocalizedSortProperty.js'
 type Args = {
   config: SanitizedConfig
   fields: FlattenedField[]
-  locale: string
+  locale?: string
   parentIsLocalized?: boolean
   sort: Sort
   timestamps: boolean
@@ -23,10 +22,10 @@ export const buildSortParam = ({
   config,
   fields,
   locale,
-  parentIsLocalized,
+  parentIsLocalized = false,
   sort,
   timestamps,
-}: Args): PaginateOptions['sort'] => {
+}: Args): Record<string, string> => {
   if (!sort) {
     if (timestamps) {
       sort = '-createdAt'
@@ -39,7 +38,7 @@ export const buildSortParam = ({
     sort = [sort]
   }
 
-  const sorting = sort.reduce<PaginateOptions['sort']>((acc, item) => {
+  const sorting = sort.reduce<Record<string, string>>((acc, item) => {
     let sortProperty: string
     let sortDirection: SortDirection
     if (item.indexOf('-') === 0) {

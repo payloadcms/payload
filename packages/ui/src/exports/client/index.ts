@@ -192,6 +192,7 @@ export {
   useAllFormFields,
   useDocumentForm,
   useForm,
+  useFormBackgroundProcessing,
   useFormFields,
   useFormInitializing,
   useFormModified,
@@ -290,6 +291,8 @@ export {
 export { ScrollInfoProvider, useScrollInfo } from '../../providers/ScrollInfo/index.js'
 export { SearchParamsProvider, useSearchParams } from '../../providers/SearchParams/index.js'
 export { SelectionProvider, useSelection } from '../../providers/Selection/index.js'
+export { UploadHandlersProvider, useUploadHandlers } from '../../providers/UploadHandlers/index.js'
+export type { UploadHandlersContext } from '../../providers/UploadHandlers/index.js'
 export { defaultTheme, type Theme, ThemeProvider, useTheme } from '../../providers/Theme/index.js'
 export { TranslationProvider, useTranslation } from '../../providers/Translation/index.js'
 export { useWindowInfo, WindowInfoProvider } from '../../providers/WindowInfo/index.js'

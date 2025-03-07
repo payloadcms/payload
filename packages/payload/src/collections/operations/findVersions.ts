@@ -96,18 +96,19 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
         if (!docRef.version) {
           ;(docRef as any).version = {}
         }
-        await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
-          await priorHook
 
-          docRef.version =
-            (await hook({
-              collection: collectionConfig,
-              context: req.context,
-              doc: docRef.version,
-              query: fullWhere,
-              req,
-            })) || docRef.version
-        }, Promise.resolve())
+        if (collectionConfig.hooks?.beforeRead?.length) {
+          for (const hook of collectionConfig.hooks.beforeRead) {
+            docRef.version =
+              (await hook({
+                collection: collectionConfig,
+                context: req.context,
+                doc: docRef.version,
+                query: fullWhere,
+                req,
+              })) || docRef.version
+          }
+        }
 
         return docRef
       }),
@@ -147,9 +148,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
         result.docs.map(async (doc) => {
           const docRef = doc
 
-          await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-            await priorHook
-
+          for (const hook of collectionConfig.hooks.afterRead) {
             docRef.version =
               (await hook({
                 collection: collectionConfig,
@@ -159,7 +158,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
                 query: fullWhere,
                 req,
               })) || doc.version
-          }, Promise.resolve())
+          }
 
           return docRef
         }),

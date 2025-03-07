@@ -62,6 +62,10 @@ of relationship types in an easy manner.
   The Join field is extremely performant and does not add additional query overhead to your API responses until you add depth of 1 or above. It works in all database adapters. In MongoDB, we use **aggregations** to automatically join in related documents, and in relational databases, we use joins.
 </Banner>
 
+<Banner type="warning">
+  The Join Field is not supported in [DocumentDB](https://aws.amazon.com/documentdb/) and [Azure Cosmos DB](https://azure.microsoft.com/en-us/products/cosmos-db), as we internally use MongoDB aggregations to query data for that field, which are limited there. This can be changed in the future.
+</Banner>
+
 ### Schema advice
 
 When modeling your database, you might come across many places where you'd like to feature bi-directional relationships.
@@ -158,6 +162,7 @@ object with:
 
 - `docs` an array of related documents or only IDs if the depth is reached
 - `hasNextPage` a boolean indicating if there are additional documents
+- `totalDocs` a total number of documents, exists only if `count: true` is passed to the join query
 
 ```json
 {
@@ -171,7 +176,8 @@ object with:
       }
       // { ... }
     ],
-    "hasNextPage": false
+    "hasNextPage": false,
+    "totalDocs": 10, // if count: true is passed
   }
   // other fields...
 }
@@ -184,6 +190,7 @@ object with:
 
 - `docs` an array of `relationTo` - the collection slug of the document and `value` - the document itself or the ID if the depth is reached
 - `hasNextPage` a boolean indicating if there are additional documents
+- `totalDocs` a total number of documents, exists only if `count: true` is passed to the join query
 
 ```json
 {
@@ -200,7 +207,8 @@ object with:
       }
       // { ... }
     ],
-    "hasNextPage": false
+    "hasNextPage": false,
+    "totalDocs": 10, // if count: true is passed
   }
   // other fields...
 }
@@ -215,10 +223,11 @@ returning. This is useful for performance reasons when you don't need the relate
 The following query options are supported:
 
 | Property    | Description                                                                                         |
-|-------------|-----------------------------------------------------------------------------------------------------|
+| ----------- | --------------------------------------------------------------------------------------------------- |
 | **`limit`** | The maximum related documents to be returned, default is 10.                                        |
 | **`where`** | An optional `Where` query to filter joined documents. Will be merged with the field `where` object. |
 | **`sort`**  | A string used to order related results                                                              |
+| **`count`** | Whether include the count of related documents or not. Not included by default                      |
 
 These can be applied to the local API, GraphQL, and REST API.
 

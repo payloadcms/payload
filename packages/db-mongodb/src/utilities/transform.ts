@@ -2,6 +2,8 @@ import type {
   CollectionConfig,
   DateField,
   Field,
+  FlattenedBlock,
+  FlattenedField,
   JoinField,
   RelationshipField,
   SanitizedConfig,
@@ -10,7 +12,7 @@ import type {
 } from 'payload'
 
 import { Types } from 'mongoose'
-import { traverseFields } from 'payload'
+import { flattenAllFields, traverseFields } from 'payload'
 import { fieldAffectsData, fieldShouldBeLocalized } from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
@@ -228,18 +230,153 @@ type Args = {
   validateRelationships?: boolean
 }
 
+const stripFields = ({
+  config,
+  data,
+  fields,
+  reservedKeys = [],
+}: {
+  config: SanitizedConfig
+  data: any
+  fields: FlattenedField[]
+  reservedKeys?: string[]
+}) => {
+  for (const k in data) {
+    if (!fields.some((field) => field.name === k) && !reservedKeys.includes(k)) {
+      delete data[k]
+    }
+  }
+
+  for (const field of fields) {
+    reservedKeys = []
+    const fieldData = data[field.name]
+    if (!fieldData || typeof fieldData !== 'object') {
+      continue
+    }
+
+    if (field.type === 'blocks') {
+      reservedKeys.push('blockType')
+    }
+
+    if ('flattenedFields' in field || 'blocks' in field) {
+      if (field.localized && config.localization) {
+        for (const localeKey in fieldData) {
+          if (!config.localization.localeCodes.some((code) => code === localeKey)) {
+            delete fieldData[localeKey]
+            continue
+          }
+
+          const localeData = fieldData[localeKey]
+
+          if (!localeData || typeof localeData !== 'object') {
+            continue
+          }
+
+          if (field.type === 'array' || field.type === 'blocks') {
+            if (!Array.isArray(localeData)) {
+              continue
+            }
+
+            for (const data of localeData) {
+              let fields: FlattenedField[] | null = null
+
+              if (field.type === 'array') {
+                fields = field.flattenedFields
+              } else {
+                let maybeBlock: FlattenedBlock | undefined = undefined
+
+                if (field.blockReferences) {
+                  const maybeBlockReference = field.blockReferences.find(
+                    (each) => typeof each === 'object' && each.slug === data.blockType,
+                  )
+                  if (maybeBlockReference && typeof maybeBlockReference === 'object') {
+                    maybeBlock = maybeBlockReference
+                  }
+                }
+
+                if (!maybeBlock) {
+                  maybeBlock = field.blocks.find((each) => each.slug === data.blockType)
+                }
+
+                if (maybeBlock) {
+                  fields = maybeBlock.flattenedFields
+                }
+              }
+
+              if (!fields) {
+                continue
+              }
+
+              stripFields({ config, data, fields, reservedKeys })
+            }
+
+            continue
+          } else {
+            stripFields({ config, data: localeData, fields: field.flattenedFields, reservedKeys })
+          }
+        }
+        continue
+      }
+
+      if (field.type === 'array' || field.type === 'blocks') {
+        if (!Array.isArray(fieldData)) {
+          continue
+        }
+
+        for (const data of fieldData) {
+          let fields: FlattenedField[] | null = null
+
+          if (field.type === 'array') {
+            fields = field.flattenedFields
+          } else {
+            let maybeBlock: FlattenedBlock | undefined = undefined
+
+            if (field.blockReferences) {
+              const maybeBlockReference = field.blockReferences.find(
+                (each) => typeof each === 'object' && each.slug === data.blockType,
+              )
+
+              if (maybeBlockReference && typeof maybeBlockReference === 'object') {
+                maybeBlock = maybeBlockReference
+              }
+            }
+
+            if (!maybeBlock) {
+              maybeBlock = field.blocks.find((each) => each.slug === data.blockType)
+            }
+
+            if (maybeBlock) {
+              fields = maybeBlock.flattenedFields
+            }
+          }
+
+          if (!fields) {
+            continue
+          }
+
+          stripFields({ config, data, fields, reservedKeys })
+        }
+
+        continue
+      } else {
+        stripFields({ config, data: fieldData, fields: field.flattenedFields, reservedKeys })
+      }
+    }
+  }
+}
+
 export const transform = ({
   adapter,
   data,
   fields,
   globalSlug,
   operation,
-  parentIsLocalized,
+  parentIsLocalized = false,
   validateRelationships = true,
 }: Args) => {
   if (Array.isArray(data)) {
-    for (let i = 0; i < data.length; i++) {
-      transform({ adapter, data: data[i], fields, globalSlug, operation, validateRelationships })
+    for (const item of data) {
+      transform({ adapter, data: item, fields, globalSlug, operation, validateRelationships })
     }
     return
   }
@@ -256,20 +393,31 @@ export const transform = ({
     if (data.id instanceof Types.ObjectId) {
       data.id = data.id.toHexString()
     }
+
+    if (!adapter.allowAdditionalKeys) {
+      stripFields({
+        config,
+        data,
+        fields: flattenAllFields({ cache: true, fields }),
+        reservedKeys: ['id', 'globalType'],
+      })
+    }
   }
 
   if (operation === 'write' && globalSlug) {
     data.globalType = globalSlug
   }
 
-  const sanitize: TraverseFieldsCallback = ({ field, ref }) => {
-    if (!ref || typeof ref !== 'object') {
+  const sanitize: TraverseFieldsCallback = ({ field, ref: incomingRef }) => {
+    if (!incomingRef || typeof incomingRef !== 'object') {
       return
     }
 
-    if (field.type === 'date' && operation === 'read' && ref[field.name]) {
+    const ref = incomingRef as Record<string, unknown>
+
+    if (field.type === 'date' && operation === 'read' && field.name in ref && ref[field.name]) {
       if (config.localization && fieldShouldBeLocalized({ field, parentIsLocalized })) {
-        const fieldRef = ref[field.name]
+        const fieldRef = ref[field.name] as Record<string, unknown>
         if (!fieldRef || typeof fieldRef !== 'object') {
           return
         }
@@ -284,7 +432,7 @@ export const transform = ({
       } else {
         sanitizeDate({
           field,
-          ref: ref as Record<string, unknown>,
+          ref,
           value: ref[field.name],
         })
       }
@@ -302,13 +450,13 @@ export const transform = ({
       // handle localized relationships
       if (config.localization && fieldShouldBeLocalized({ field, parentIsLocalized })) {
         const locales = config.localization.locales
-        const fieldRef = ref[field.name]
+        const fieldRef = ref[field.name] as Record<string, unknown>
         if (typeof fieldRef !== 'object') {
           return
         }
 
         for (const { code } of locales) {
-          const value = ref[field.name][code]
+          const value = fieldRef[code]
           if (value) {
             sanitizeRelationship({
               config,
@@ -328,7 +476,7 @@ export const transform = ({
           field,
           locale: undefined,
           operation,
-          ref: ref as Record<string, unknown>,
+          ref,
           validateRelationships,
           value: ref[field.name],
         })

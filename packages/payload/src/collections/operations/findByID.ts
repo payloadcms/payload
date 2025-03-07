@@ -20,6 +20,7 @@ import { sanitizeJoinQuery } from '../../database/sanitizeJoinQuery.js'
 import { NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { validateQueryPaths } from '../../index.js'
+import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 import { buildAfterOperation } from './utils.js'
@@ -54,18 +55,18 @@ export const findByIDOperation = async <
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      args =
-        (await hook({
-          args,
-          collection: args.collection.config,
-          context: args.req.context,
-          operation: 'read',
-          req: args.req,
-        })) || args
-    }, Promise.resolve())
+    if (args.collection.config.hooks?.beforeOperation?.length) {
+      for (const hook of args.collection.config.hooks.beforeOperation) {
+        args =
+          (await hook({
+            args,
+            collection: args.collection.config,
+            context: args.req.context,
+            operation: 'read',
+            req: args.req,
+          })) || args
+      }
+    }
 
     const {
       id,
@@ -162,7 +163,7 @@ export const findByIDOperation = async <
         const lockDurationInMilliseconds = lockDuration * 1000
 
         const lockedDocument = await req.payload.find({
-          collection: 'payload-locked-documents',
+          collection: lockedDocumentsCollectionSlug,
           depth: 1,
           limit: 1,
           overrideAccess: false,
@@ -221,18 +222,18 @@ export const findByIDOperation = async <
     // beforeRead - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      result =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          doc: result,
-          query: findOneArgs.where,
-          req,
-        })) || result
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.beforeRead?.length) {
+      for (const hook of collectionConfig.hooks.beforeRead) {
+        result =
+          (await hook({
+            collection: collectionConfig,
+            context: req.context,
+            doc: result,
+            query: findOneArgs.where,
+            req,
+          })) || result
+      }
+    }
 
     // /////////////////////////////////////
     // afterRead - Fields
@@ -259,18 +260,18 @@ export const findByIDOperation = async <
     // afterRead - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      result =
-        (await hook({
-          collection: collectionConfig,
-          context: req.context,
-          doc: result,
-          query: findOneArgs.where,
-          req,
-        })) || result
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.afterRead?.length) {
+      for (const hook of collectionConfig.hooks.afterRead) {
+        result =
+          (await hook({
+            collection: collectionConfig,
+            context: req.context,
+            doc: result,
+            query: findOneArgs.where,
+            req,
+          })) || result
+      }
+    }
 
     // /////////////////////////////////////
     // afterOperation - Collection

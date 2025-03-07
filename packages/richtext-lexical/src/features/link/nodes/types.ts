@@ -21,6 +21,9 @@ export type LinkFields = {
 export type SerializedLinkNode<T extends SerializedLexicalNode = SerializedLexicalNode> = Spread<
   {
     fields: LinkFields
+    /**
+     * @todo make required in 4.0 and type AutoLinkNode differently
+     */
     id?: string // optional if AutoLinkNode
     type: 'link'
   },

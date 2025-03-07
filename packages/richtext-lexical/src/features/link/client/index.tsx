@@ -1,11 +1,12 @@
 'use client'
 
-import type { LexicalNode } from 'lexical'
+import type { Klass, LexicalNode } from 'lexical'
 
 import { $findMatchingParent } from '@lexical/utils'
 import { $getSelection, $isRangeSelection } from 'lexical'
 
 import type { ToolbarGroup } from '../../toolbars/types.js'
+import type { ClientFeature } from '../../typesClient.js'
 import type { LinkFields } from '../nodes/types.js'
 import type { ExclusiveLinkCollectionsProps } from '../server/index.js'
 
@@ -25,6 +26,7 @@ import { LinkPlugin } from './plugins/link/index.js'
 export type ClientProps = {
   defaultLinkType?: string
   defaultLinkURL?: string
+  disableAutoLinks?: 'creationOnly' | true
 } & ExclusiveLinkCollectionsProps
 
 const toolbarGroups: ToolbarGroup[] = [
@@ -80,18 +82,22 @@ const toolbarGroups: ToolbarGroup[] = [
   ]),
 ]
 
-export const LinkFeatureClient = createClientFeature({
+export const LinkFeatureClient = createClientFeature<ClientProps>(({ props }) => ({
   markdownTransformers: [LinkMarkdownTransformer],
-  nodes: [LinkNode, AutoLinkNode],
+  nodes: [LinkNode, props?.disableAutoLinks === true ? null : AutoLinkNode].filter(
+    Boolean,
+  ) as Array<Klass<LexicalNode>>,
   plugins: [
     {
       Component: LinkPlugin,
       position: 'normal',
     },
-    {
-      Component: AutoLinkPlugin,
-      position: 'normal',
-    },
+    props?.disableAutoLinks === true || props?.disableAutoLinks === 'creationOnly'
+      ? null
+      : {
+          Component: AutoLinkPlugin,
+          position: 'normal',
+        },
     {
       Component: ClickableLinkPlugin,
       position: 'normal',
@@ -100,11 +106,12 @@ export const LinkFeatureClient = createClientFeature({
       Component: FloatingLinkEditorPlugin,
       position: 'floatingAnchorElem',
     },
-  ],
+  ].filter(Boolean) as ClientFeature<ClientProps>['plugins'],
+  sanitizedClientFeatureProps: props,
   toolbarFixed: {
     groups: toolbarGroups,
   },
   toolbarInline: {
     groups: toolbarGroups,
   },
-})
+}))

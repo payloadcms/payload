@@ -107,7 +107,12 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
 
   return (
     <Fragment>
-      <WatchChildErrors fields={fields} path={path.split('.')} setErrorCount={setErrorCount} />
+      <WatchChildErrors
+        fields={fields}
+        // removes the 'collapsible' path segment, i.e. `_index-0`
+        path={path.split('.').slice(0, -1)}
+        setErrorCount={setErrorCount}
+      />
       <div
         className={[
           fieldBaseClass,
