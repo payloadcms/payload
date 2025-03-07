@@ -1,5 +1,5 @@
 import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
-import type { Connect, Payload } from 'payload'
+import type { Connect, Migration, Payload } from 'payload'
 
 import { pushDevSchema } from '@payloadcms/drizzle'
 import { drizzle } from 'drizzle-orm/node-postgres'
@@ -75,7 +75,8 @@ export const connect: Connect = async function connect(
         this.payload.logger.info('---- DROPPED TABLES ----')
       }
     }
-  } catch (err) {
+  } catch (error) {
+    const err = error instanceof Error ? error : new Error(String(error))
     if (err.message?.match(/database .* does not exist/i) && !this.disableCreateDatabase) {
       // capitalize first char of the err msg
       this.payload.logger.info(
@@ -83,7 +84,7 @@ export const connect: Connect = async function connect(
       )
       const isCreated = await this.createDatabase()
 
-      if (isCreated) {
+      if (isCreated && this.connect) {
         await this.connect(options)
         return
       }
@@ -116,6 +117,6 @@ export const connect: Connect = async function connect(
   }
 
   if (process.env.NODE_ENV === 'production' && this.prodMigrations) {
-    await this.migrate({ migrations: this.prodMigrations })
+    await this.migrate({ migrations: this.prodMigrations as unknown as Migration[] })
   }
 }
