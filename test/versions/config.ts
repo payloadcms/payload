@@ -5,6 +5,8 @@ const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import AutosavePosts from './collections/Autosave.js'
 import AutosaveWithValidate from './collections/AutosaveWithValidate.js'
+import { CascadePublish } from './collections/CascadePublish.js'
+import { CascadePublishRelations } from './collections/CascadePublishRelations.js'
 import CustomIDs from './collections/CustomIDs.js'
 import { Diff } from './collections/Diff.js'
 import DisablePublish from './collections/DisablePublish.js'
@@ -16,6 +18,7 @@ import { Media } from './collections/Media.js'
 import Posts from './collections/Posts.js'
 import VersionPosts from './collections/Versions.js'
 import AutosaveGlobal from './globals/Autosave.js'
+import { CascadePublishGlobal } from './globals/CascadePublishGlobal.js'
 import DisablePublishGlobal from './globals/DisablePublish.js'
 import DraftGlobal from './globals/Draft.js'
 import DraftWithMaxGlobal from './globals/DraftWithMax.js'
@@ -43,8 +46,17 @@ export default buildConfigWithDefaults({
     CustomIDs,
     Diff,
     Media,
+    CascadePublish,
+    CascadePublishRelations,
   ],
-  globals: [AutosaveGlobal, DraftGlobal, DraftWithMaxGlobal, DisablePublishGlobal, LocalizedGlobal],
+  globals: [
+    AutosaveGlobal,
+    DraftGlobal,
+    DraftWithMaxGlobal,
+    DisablePublishGlobal,
+    LocalizedGlobal,
+    CascadePublishGlobal,
+  ],
   indexSortableFields: true,
   localization: {
     defaultLocale: 'en',

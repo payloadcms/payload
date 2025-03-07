@@ -37,6 +37,7 @@ export const sanitizeServerFeatures = (
       beforeValidate: new Map(),
     },
     nodes: [],
+    traverseNodeData: new Map(),
 
     validations: new Map(),
   }
@@ -88,6 +89,9 @@ export const sanitizeServerFeatures = (
         const nodeType = 'with' in node.node ? node.node.replace.getType() : node.node.getType() // TODO: Idk if this works for node replacements
         if (node?.graphQLPopulationPromises?.length) {
           sanitized.graphQLPopulationPromises.set(nodeType, node.graphQLPopulationPromises)
+        }
+        if (node?.traverseNodeData) {
+          sanitized.traverseNodeData?.set(nodeType, node.traverseNodeData)
         }
         if (node?.validations?.length) {
           sanitized.validations.set(nodeType, node.validations)

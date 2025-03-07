@@ -14,6 +14,7 @@ export type IncomingDrafts = {
    * To enable, set to true or pass an object with options.
    */
   autosave?: Autosave | boolean
+  cascadePublish?: boolean
   /**
    * Allow for editors to schedule publish / unpublish events in the future.
    */
@@ -32,6 +33,7 @@ export type SanitizedDrafts = {
    * To enable, set to true or pass an object with options.
    */
   autosave: Autosave | false
+  cascadePublish: boolean
   /**
    * Allow for editors to schedule publish / unpublish events in the future.
    */
