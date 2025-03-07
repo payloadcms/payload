@@ -291,9 +291,10 @@ The following additional properties are provided in the `ctx` object:
 |    `data`           |    An object containing the full collection or global document currently being edited.                                                      |
 |    `siblingData`    |    An object containing document data that is scoped to only fields within the same parent of this field.                                   |
 |    `operation`      |    Will be `create` or `update` depending on the UI action or API call.                                                                     |
+|    `path`           |    The full path to the field in the schema, including array indexes. Useful for dynamic lookups.                                           |
 |    `id`             |    The `id` of the current document being edited. `id` is `undefined` during the `create` operation.                                        |
 |    `req`            |    The current HTTP request object. Contains `payload`, `user`, etc.                                                                        |
-|    `event`          |    Either `onChange` or `submit` depending on the current action. Used as a performance opt-in. [More details](#async-field-validations).    |
+|    `event`          |    Either `onChange` or `submit` depending on the current action. Used as a performance opt-in. [More details](#async-field-validations).   |
 
 #### Reusing Default Field Validations
 
