@@ -20,6 +20,7 @@ type DateFNSKeys =
   | 'he'
   | 'hr'
   | 'hu'
+  | 'id'
   | 'it'
   | 'ja'
   | 'ko'
