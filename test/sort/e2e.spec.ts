@@ -50,14 +50,33 @@ describe('Sort functionality', () => {
   // eslint-disable-next-line playwright/expect-expect
   test('Sortable collection', async () => {
     await page.goto(url.list)
+    // SORT BY ORDER ASCENDING
     await page.getByLabel('Sort by Order Ascending').click()
     await assertRows(['A', 'a0'], ['B', 'a1'], ['C', 'a2'], ['D', 'a3'])
-    await moveRow(2, 3)
+    await moveRow(2, 3) // move to middle
     await assertRows(['A', 'a0'], ['C', 'a2'], ['B', 'a2V'], ['D', 'a3'])
+    await moveRow(3, 1) // move to top
+    await assertRows(['B', 'Zz'], ['A', 'a0'], ['C', 'a2'], ['D', 'a3'])
+    await moveRow(1, 4) // move to bottom
+    await assertRows(['A', 'a0'], ['C', 'a2'], ['D', 'a3'], ['B', 'a4'])
+
+    // SORT BY ORDER DESCENDING
+    await page.getByLabel('Sort by Order Descending').click()
+    await assertRows(['B', 'a4'], ['D', 'a3'], ['C', 'a2'], ['A', 'a0'])
+    await moveRow(1, 3) // move to middle
+    await assertRows(['D', 'a3'], ['C', 'a2'], ['B', 'a1'], ['A', 'a0'])
+    await moveRow(3, 1) // move to top
+    await assertRows(['B', 'a4'], ['D', 'a3'], ['C', 'a2'], ['A', 'a0'])
+    await moveRow(1, 4) // move to bottom
+    await assertRows(['D', 'a3'], ['C', 'a2'], ['A', 'a0'], ['B', 'Zz'])
+
+    // SORT BY TITLE
+    await page.getByLabel('Sort by Title Ascending').click()
+    await moveRow(1, 3, 'warning') // warning because not sorted by order first
   })
 })
 
-async function moveRow(from: number, to: number) {
+async function moveRow(from: number, to: number, expected: 'success' | 'warning' = 'success') {
   // counting from 1, zero excluded
   const dragHandle = page.locator(`tbody .sort-row`)
   const source = dragHandle.nth(from - 1)
@@ -78,8 +97,15 @@ async function moveRow(from: number, to: number) {
   })
   await page.mouse.up()
 
-  const pendingOrder = page.locator('td.cell-_order').getByText('pending')
-  await expect.poll(() => pendingOrder.count()).toBe(1)
+  if (expected === 'warning') {
+    const toast = page.locator('.payload-toast-item.toast-warning')
+    await expect(toast).toHaveText(
+      'To reorder the rows you must first sort them by the "Order" column',
+    )
+  } else {
+    const pendingOrder = page.locator('td.cell-_order').getByText('pending')
+    await expect.poll(() => pendingOrder.count()).toBe(1)
+  }
 }
 
 async function assertRows(...expectedRows: Array<[string, string]>) {
