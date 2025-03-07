@@ -18,7 +18,7 @@
     }
   ],
   "type": "module",
-  "sideEffects": [
+  "sideEffectsDisabled": [
     "*.scss",
     "*.css"
   ],

@@ -17,7 +17,7 @@
     }
   ],
   "type": "module",
-  "sideEffects": false,
+  "sideEffectsDisabled": false,
   "exports": {
     "./types": {
       "import": "./src/types.ts",

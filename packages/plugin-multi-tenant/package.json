@@ -11,7 +11,7 @@
     "multi-tenant",
     "nextjs"
   ],
-  "sideEffects": [
+  "sideEffectsDisabled": [
     "*.scss",
     "*.css"
   ],
