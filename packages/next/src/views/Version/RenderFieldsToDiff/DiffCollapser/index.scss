@@ -1,0 +1,46 @@
+@layer payload-default {
+  .diff-collapser {
+    &__toggle-button {
+      all: unset;
+      cursor: pointer;
+      // Align the chevron visually with the label text
+      vertical-align: 1px;
+    }
+
+    &__label {
+      // Add space between label, chevron, and change count
+      margin: 0 calc(var(--base) * 0.25);
+    }
+
+    &__field-change-count {
+      // Reset the font weight of the change count to normal
+      font-weight: normal;
+    }
+
+    &__content {
+      [dir='ltr'] & {
+        // Vertical gutter
+        border-left: 3px solid var(--theme-elevation-50);
+        // Center-align the gutter with the chevron
+        margin-left: 3px;
+        // Content indentation
+        padding-left: calc(var(--base) * 0.5);
+      }
+      [dir='rtl'] & {
+        // Vertical gutter
+        border-right: 3px solid var(--theme-elevation-50);
+        // Center-align the gutter with the chevron
+        margin-right: 3px;
+        // Content indentation
+        padding-right: calc(var(--base) * 0.5);
+      }
+    }
+
+    &__content--is-collapsed {
+      // Hide the content when collapsed. We use display: none instead of
+      // conditional rendering to avoid loosing children's collapsed state when
+      // remounting.
+      display: none;
+    }
+  }
+}

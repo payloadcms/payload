@@ -1,9 +1,15 @@
 import type { PayloadHandler } from 'payload'
 
-import { addLocalesToRequestFromData, headersWithCors } from '@payloadcms/next/utilities'
-import { commitTransaction, getAccessResults, initTransaction, killTransaction } from 'payload'
+import {
+  addLocalesToRequestFromData,
+  commitTransaction,
+  getAccessResults,
+  headersWithCors,
+  initTransaction,
+  killTransaction,
+} from 'payload'
 
-import type { SearchPluginConfigWithLocales } from '../types.js'
+import type { SanitizedSearchPluginConfig } from '../types.js'
 
 import { syncDocAsSearchIndex } from './syncDocAsSearchIndex.js'
 
@@ -13,19 +19,29 @@ type ValidationResult = {
 }
 
 export const generateReindexHandler =
-  (pluginConfig: SearchPluginConfigWithLocales): PayloadHandler =>
+  (pluginConfig: SanitizedSearchPluginConfig): PayloadHandler =>
   async (req) => {
     addLocalesToRequestFromData(req)
+    if (!req.json) {
+      return new Response('Req.json is undefined', { status: 400 })
+    }
     const { collections = [] } = (await req.json()) as { collections: string[] }
     const t = req.t
 
     const searchSlug = pluginConfig?.searchOverrides?.slug || 'search'
     const searchCollections = pluginConfig?.collections || []
-    const reindexLocales = pluginConfig?.locales?.length ? pluginConfig.locales : [req.locale]
+    const reindexLocales = pluginConfig?.locales?.length
+      ? pluginConfig.locales
+      : req.locale
+        ? [req.locale]
+        : []
 
     const validatePermissions = async (): Promise<ValidationResult> => {
       const accessResults = await getAccessResults({ req })
-      const searchAccessResults = accessResults.collections[searchSlug]
+      const searchAccessResults = accessResults.collections?.[searchSlug]
+      if (!searchAccessResults) {
+        return { isValid: false, message: t('error:notAllowedToPerformAction') }
+      }
 
       const permissions = [searchAccessResults.delete, searchAccessResults.update]
       // plugin doesn't allow create by default:

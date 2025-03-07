@@ -17,15 +17,17 @@ import { setTimeout } from 'timers/promises'
 import { devUser } from './credentials.js'
 import { POLL_TOPASS_TIMEOUT } from './playwright.config.js'
 
+type AdminRoutes = NonNullable<Config['admin']>['routes']
+
 type FirstRegisterArgs = {
-  customAdminRoutes?: Config['admin']['routes']
+  customAdminRoutes?: AdminRoutes
   customRoutes?: Config['routes']
   page: Page
   serverURL: string
 }
 
 type LoginArgs = {
-  customAdminRoutes?: Config['admin']['routes']
+  customAdminRoutes?: AdminRoutes
   customRoutes?: Config['routes']
   data?: {
     email: string
@@ -78,16 +80,14 @@ export async function ensureCompilationIsDone({
   noAutoLogin,
   readyURL,
 }: {
-  customAdminRoutes?: Config['admin']['routes']
+  customAdminRoutes?: AdminRoutes
   customRoutes?: Config['routes']
   noAutoLogin?: boolean
   page: Page
   readyURL?: string
   serverURL: string
 }): Promise<void> {
-  const {
-    routes: { admin: adminRoute },
-  } = getRoutes({ customAdminRoutes, customRoutes })
+  const { routes: { admin: adminRoute } = {} } = getRoutes({ customAdminRoutes, customRoutes })
 
   const adminURL = `${serverURL}${adminRoute}`
 
@@ -103,6 +103,7 @@ export async function ensureCompilationIsDone({
       )
 
       await page.goto(adminURL)
+
       await page.waitForURL(
         readyURL ??
           (noAutoLogin ? `${adminURL + (adminURL.endsWith('/') ? '' : '/')}login` : adminURL),
@@ -169,9 +170,7 @@ export async function throttleTest({
 export async function firstRegister(args: FirstRegisterArgs): Promise<void> {
   const { customAdminRoutes, customRoutes, page, serverURL } = args
 
-  const {
-    routes: { admin: adminRoute },
-  } = getRoutes({ customAdminRoutes, customRoutes })
+  const { routes: { admin: adminRoute } = {} } = getRoutes({ customAdminRoutes, customRoutes })
 
   await page.goto(`${serverURL}${adminRoute}`)
   await page.fill('#field-email', devUser.email)
@@ -186,10 +185,8 @@ export async function login(args: LoginArgs): Promise<void> {
   const { customAdminRoutes, customRoutes, data = devUser, page, serverURL } = args
 
   const {
-    admin: {
-      routes: { createFirstUser, login: incomingLoginRoute },
-    },
-    routes: { admin: incomingAdminRoute },
+    admin: { routes: { createFirstUser, login: incomingLoginRoute } = {} },
+    routes: { admin: incomingAdminRoute } = {},
   } = getRoutes({ customAdminRoutes, customRoutes })
 
   const adminRoute = formatAdminURL({ serverURL, adminRoute: incomingAdminRoute, path: '' })
@@ -205,7 +202,6 @@ export async function login(args: LoginArgs): Promise<void> {
   })
 
   await page.goto(loginRoute)
-  await page.waitForURL(loginRoute)
   await wait(500)
   await page.fill('#field-email', data.email)
   await page.fill('#field-password', data.password)
@@ -253,18 +249,6 @@ export async function saveDocAndAssert(
   } else {
     await expect(page.locator('.payload-toast-container .toast-error')).toBeVisible()
   }
-}
-
-export async function openNav(page: Page): Promise<void> {
-  // check to see if the nav is already open and if not, open it
-  // use the `--nav-open` modifier class to check if the nav is open
-  // this will prevent clicking nav links that are bleeding off the screen
-  if (await page.locator('.template-default.template-default--nav-open').isVisible()) {
-    return
-  }
-  // playwright: get first element with .nav-toggler which is VISIBLE (not hidden), could be 2 elements with .nav-toggler on mobile and desktop but only one is visible
-  await page.locator('.nav-toggler >> visible=true').click()
-  await expect(page.locator('.template-default.template-default--nav-open')).toBeVisible()
 }
 
 export async function openDocDrawer(page: Page, selector: string): Promise<void> {
@@ -391,8 +375,14 @@ export async function switchTab(page: Page, selector: string) {
  *
  * Useful to prevent the e2e test from passing when, for example, there are react missing key prop errors
  * @param page
+ * @param options
  */
-export function initPageConsoleErrorCatch(page: Page) {
+export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: boolean }) {
+  const { ignoreCORS = false } = options || {} // Default to not ignoring CORS errors
+  const consoleErrors: string[] = []
+
+  let shouldCollectErrors = false
+
   page.on('console', (msg) => {
     if (
       msg.type() === 'error' &&
@@ -407,14 +397,47 @@ export function initPageConsoleErrorCatch(page: Page) {
       !msg.text().includes('Error getting document data') &&
       !msg.text().includes('Failed trying to load default language strings') &&
       !msg.text().includes('TypeError: Failed to fetch') && // This happens when server actions are aborted
-      !msg.text().includes('der-radius: 2px  Server   Error: Error getting do') // This is a weird error that happens in the console
+      !msg.text().includes('der-radius: 2px  Server   Error: Error getting do') && // This is a weird error that happens in the console
+      // Conditionally ignore CORS errors based on the `ignoreCORS` option
+      !(
+        ignoreCORS &&
+        msg.text().includes('Access to fetch at') &&
+        msg.text().includes("No 'Access-Control-Allow-Origin' header is present")
+      ) &&
+      // Conditionally ignore network-related errors
+      !msg.text().includes('Failed to load resource: net::ERR_FAILED')
     ) {
       // "Failed to fetch RSC payload for" happens seemingly randomly. There are lots of issues in the next.js repository for this. Causes e2e tests to fail and flake. Will ignore for now
       // the the server responded with a status of error happens frequently. Will ignore it for now.
       // Most importantly, this should catch react errors.
       throw new Error(`Browser console error: ${msg.text()}`)
     }
+
+    // Log ignored CORS-related errors for visibility
+    if (msg.type() === 'error' && msg.text().includes('Access to fetch at') && ignoreCORS) {
+      console.log(`Ignoring expected CORS-related error: ${msg.text()}`)
+    }
+
+    // Log ignored network-related errors for visibility
+    if (msg.type() === 'error' && msg.text().includes('Failed to load resource: net::ERR_FAILED')) {
+      console.log(`Ignoring expected network error: ${msg.text()}`)
+    }
   })
+
+  // Capture uncaught errors that do not appear in the console
+  page.on('pageerror', (error) => {
+    if (shouldCollectErrors) {
+      consoleErrors.push(`Page error: ${error.message}`)
+    } else {
+      throw new Error(`Page error: ${error.message}`)
+    }
+  })
+
+  return {
+    consoleErrors,
+    collectErrors: () => (shouldCollectErrors = true), // Enable collection of errors for specific tests
+    stopCollectingErrors: () => (shouldCollectErrors = false), // Disable collection of errors after the test
+  }
 }
 
 export function describeIfInCIOrHasLocalstack(): jest.Describe {
@@ -435,8 +458,6 @@ export function describeIfInCIOrHasLocalstack(): jest.Describe {
   return describe
 }
 
-type AdminRoutes = Config['admin']['routes']
-
 export function getRoutes({
   customAdminRoutes,
   customRoutes,
@@ -450,7 +471,7 @@ export function getRoutes({
   routes: Config['routes']
 } {
   let routes = defaults.routes
-  let adminRoutes = defaults.admin.routes
+  let adminRoutes = defaults.admin?.routes
 
   if (customAdminRoutes) {
     adminRoutes = {

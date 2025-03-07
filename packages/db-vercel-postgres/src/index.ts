@@ -33,6 +33,7 @@ import {
   rollbackTransaction,
   updateGlobal,
   updateGlobalVersion,
+  updateMany,
   updateOne,
   updateVersion,
 } from '@payloadcms/drizzle'
@@ -186,6 +187,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       rollbackTransaction,
       updateGlobal,
       updateGlobalVersion,
+      updateMany,
       updateOne,
       updateVersion,
       upsert: updateOne,

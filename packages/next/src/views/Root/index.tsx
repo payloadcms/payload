@@ -1,11 +1,16 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type { ImportMap, SanitizedConfig } from 'payload'
+import type {
+  AdminViewClientProps,
+  AdminViewServerPropsOnly,
+  ImportMap,
+  SanitizedConfig,
+} from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { formatAdminURL } from '@payloadcms/ui/shared'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { notFound, redirect } from 'next/navigation.js'
+import { formatAdminURL } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { DefaultTemplate } from '../../templates/Default/index.js'
@@ -51,7 +56,7 @@ export const RootPage = async ({
 
   const currentRoute = formatAdminURL({
     adminRoute,
-    path: `${Array.isArray(params.segments) ? `/${params.segments.join('/')}` : ''}`,
+    path: Array.isArray(params.segments) ? `/${params.segments.join('/')}` : null,
   })
 
   const segments = Array.isArray(params.segments) ? params.segments : []
@@ -130,7 +135,7 @@ export const RootPage = async ({
   })
 
   const RenderedView = RenderServerComponent({
-    clientProps: { clientConfig, documentSubViewType, viewType },
+    clientProps: { clientConfig, documentSubViewType, viewType } satisfies AdminViewClientProps,
     Component: DefaultView.payloadComponent,
     Fallback: DefaultView.Component,
     importMap,
@@ -144,7 +149,7 @@ export const RootPage = async ({
       params,
       payload: initPageResult?.req.payload,
       searchParams,
-    },
+    } satisfies AdminViewServerPropsOnly,
   })
 
   return (

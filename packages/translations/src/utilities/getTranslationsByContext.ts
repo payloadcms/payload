@@ -2,8 +2,8 @@ import type { Language } from '../types.js'
 
 import { clientTranslationKeys } from '../clientKeys.js'
 
-function filterKeys(obj, parentGroupKey = '', keys) {
-  const result = {}
+function filterKeys(obj: Record<string, unknown>, parentGroupKey = '', keys: string[]) {
+  const result: Record<string, unknown> = {}
 
   for (const [namespaceKey, value] of Object.entries(obj)) {
     // Skip $schema key
@@ -13,7 +13,7 @@ function filterKeys(obj, parentGroupKey = '', keys) {
     }
 
     if (typeof value === 'object') {
-      const filteredObject = filterKeys(value, namespaceKey, keys)
+      const filteredObject = filterKeys(value as Record<string, unknown>, namespaceKey, keys)
       if (Object.keys(filteredObject).length > 0) {
         result[namespaceKey] = filteredObject
       }
@@ -40,13 +40,13 @@ function filterKeys(obj, parentGroupKey = '', keys) {
   return result
 }
 
-function sortObject(obj) {
-  const sortedObject = {}
+function sortObject(obj: Record<string, unknown>) {
+  const sortedObject: Record<string, unknown> = {}
   Object.keys(obj)
     .sort()
     .forEach((key) => {
       if (typeof obj[key] === 'object') {
-        sortedObject[key] = sortObject(obj[key])
+        sortedObject[key] = sortObject(obj[key] as Record<string, unknown>)
       } else {
         sortedObject[key] = obj[key]
       }

@@ -1,6 +1,5 @@
 'use client'
 import type {
-  ClientCollectionConfig,
   DefaultCellComponentProps,
   JoinFieldClient,
   RelationshipFieldClient,
@@ -98,7 +97,7 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
         const document = documents[relationTo][value]
         const relatedCollection = getEntityConfig({
           collectionSlug: relationTo,
-        }) as ClientCollectionConfig
+        })
 
         const label = formatDocTitle({
           collectionConfig: relatedCollection,
@@ -120,6 +119,7 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
               <FileCell
                 cellData={label}
                 collectionConfig={relatedCollection}
+                collectionSlug={relatedCollection.slug}
                 customCellProps={customCellContext}
                 field={field}
                 rowData={document}

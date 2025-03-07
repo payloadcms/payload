@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 
@@ -69,7 +70,7 @@ export const sanitizeLocales = ({
     })
   }
 
-  if (locale === '*') {
+  if (['*', 'all'].includes(locale)) {
     locale = 'all'
   } else if (localization && !localization.localeCodes.includes(locale) && localization.fallback) {
     locale = localization.defaultLocale

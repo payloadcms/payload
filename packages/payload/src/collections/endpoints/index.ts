@@ -1,6 +1,5 @@
 import type { Endpoint } from '../../config/types.js'
 
-import { authCollectionEndpoints } from '../../auth/endpoints/index.js'
 import { wrapInternalEndpoints } from '../../utilities/wrapInternalEndpoints.js'
 import { countHandler } from './count.js'
 import { createHandler } from './create.js'
@@ -12,14 +11,12 @@ import { findHandler } from './find.js'
 import { findByIDHandler } from './findByID.js'
 import { findVersionByIDHandler } from './findVersionByID.js'
 import { findVersionsHandler } from './findVersions.js'
-import { getFileHandler } from './getFile.js'
 import { previewHandler } from './preview.js'
 import { restoreVersionHandler } from './restoreVersion.js'
 import { updateHandler } from './update.js'
 import { updateByIDHandler } from './updateByID.js'
 
 export const defaultCollectionEndpoints: Endpoint[] = [
-  ...authCollectionEndpoints,
   ...wrapInternalEndpoints([
     {
       handler: countHandler,
@@ -70,11 +67,6 @@ export const defaultCollectionEndpoints: Endpoint[] = [
       handler: findVersionByIDHandler,
       method: 'get',
       path: '/versions/:id',
-    },
-    {
-      handler: getFileHandler,
-      method: 'get',
-      path: '/file/:filename',
     },
     {
       handler: previewHandler,

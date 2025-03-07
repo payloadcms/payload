@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-mongodb",
-  "version": "3.17.1",
+  "version": "3.27.0",
   "description": "The officially supported MongoDB database adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -46,9 +46,7 @@
     "prepublishOnly": "pnpm clean && pnpm turbo build"
   },
   "dependencies": {
-    "http-status": "1.6.2",
-    "mongoose": "8.8.3",
-    "mongoose-aggregate-paginate-v2": "1.1.2",
+    "mongoose": "8.9.5",
     "mongoose-paginate-v2": "1.8.5",
     "prompts": "2.4.2",
     "uuid": "10.0.0"
@@ -56,7 +54,9 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@types/mongoose-aggregate-paginate-v2": "1.0.12",
-    "mongodb": "6.10.0",
+    "@types/prompts": "^2.4.5",
+    "@types/uuid": "10.0.0",
+    "mongodb": "6.12.0",
     "mongodb-memory-server": "^10",
     "payload": "workspace:*"
   },

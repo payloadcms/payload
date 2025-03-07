@@ -1,4 +1,5 @@
-import httpStatus from 'http-status'
+// @ts-strict-ignore
+import { status as httpStatus } from 'http-status'
 
 import type { PayloadHandler } from '../../config/types.js'
 
@@ -23,9 +24,8 @@ export const previewHandler: PayloadHandler = async (req) => {
 
   let previewURL: string
 
-  const generatePreviewURL = req.payload.config.collections.find(
-    (config) => config.slug === collection.config.slug,
-  )?.admin?.preview
+  const generatePreviewURL =
+    req.payload?.collections?.[collection.config.slug]?.config?.admin?.preview
 
   const token = extractJWT(req)
 

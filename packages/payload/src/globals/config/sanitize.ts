@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { GlobalConfig, SanitizedGlobalConfig } from './types.js'
 
@@ -19,8 +20,12 @@ export const sanitizeGlobal = async (
    * so that you can sanitize them together, after the config has been sanitized.
    */
   richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>,
+  _validRelationships?: string[],
 ): Promise<SanitizedGlobalConfig> => {
-  const { collections } = config
+  if (global._sanitized) {
+    return global as SanitizedGlobalConfig
+  }
+  global._sanitized = true
 
   global.label = global.label || toWords(global.slug)
 
@@ -63,7 +68,8 @@ export const sanitizeGlobal = async (
   }
 
   // Sanitize fields
-  const validRelationships = collections.map((c) => c.slug) || []
+  const validRelationships = _validRelationships ?? config.collections.map((c) => c.slug) ?? []
+
   global.fields = await sanitizeFields({
     config,
     fields: global.fields,

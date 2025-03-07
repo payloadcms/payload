@@ -1,9 +1,9 @@
+// @ts-strict-ignore
 import type { DeepPartial } from 'ts-essentials'
 
-import httpStatus from 'http-status'
+import { status as httpStatus } from 'http-status'
 
 import type { FindOneArgs } from '../../database/types.js'
-import type { CollectionSlug } from '../../index.js'
 import type {
   PayloadRequest,
   PopulateType,
@@ -20,6 +20,7 @@ import executeAccess from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
+import { type CollectionSlug, deepCopyObjectSimple } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -63,18 +64,18 @@ export const updateByIDOperation = async <
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      args =
-        (await hook({
-          args,
-          collection: args.collection.config,
-          context: args.req.context,
-          operation: 'update',
-          req: args.req,
-        })) || args
-    }, Promise.resolve())
+    if (args.collection.config.hooks?.beforeOperation?.length) {
+      for (const hook of args.collection.config.hooks.beforeOperation) {
+        args =
+          (await hook({
+            args,
+            collection: args.collection.config,
+            context: args.req.context,
+            operation: 'update',
+            req: args.req,
+          })) || args
+      }
+    }
 
     if (args.publishSpecificLocale) {
       args.req.locale = args.publishSpecificLocale
@@ -168,7 +169,7 @@ export const updateByIDOperation = async <
       autosave,
       collectionConfig,
       config,
-      data: newFileData,
+      data: deepCopyObjectSimple(newFileData),
       depth,
       docWithLocales,
       draftArg,

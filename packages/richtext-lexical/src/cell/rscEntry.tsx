@@ -2,14 +2,12 @@ import type { SerializedLexicalNode } from 'lexical'
 import type { Payload } from 'payload'
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
-import { formatAdminURL } from '@payloadcms/ui/shared'
-import LinkImport from 'next/link.js'
+import { Link } from '@payloadcms/ui'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import type { SanitizedServerEditorConfig } from '../lexical/config/types.js'
 import type { LexicalFieldAdminProps, LexicalRichTextCellProps } from '../types.js'
-
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 function recurseEditorState(
   editorState: SerializedLexicalNode[],

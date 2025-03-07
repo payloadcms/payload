@@ -6,7 +6,12 @@ let initedOGEndpoint = false
 
 const handlerBuilder =
   (config: Promise<SanitizedConfig> | SanitizedConfig) =>
-  async (request: Request): Promise<Response> => {
+  async (
+    request: Request,
+    args: {
+      params: Promise<{ slug: string[] }>
+    },
+  ): Promise<Response> => {
     const awaitedConfig = await config
 
     // Add this endpoint only when using Next.js, still can be overriden.
@@ -25,9 +30,13 @@ const handlerBuilder =
 
     initedOGEndpoint = true
 
+    const awaitedParams = await args.params
+
     const response = await handleEndpoints({
-      basePath: process.env.NEXT_BASE_PATH,
       config,
+      path: awaitedParams
+        ? `${awaitedConfig.routes.api}/${awaitedParams.slug.join('/')}`
+        : undefined,
       request,
     })
 

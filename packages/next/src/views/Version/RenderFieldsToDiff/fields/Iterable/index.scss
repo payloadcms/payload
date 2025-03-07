@@ -1,7 +1,5 @@
 @layer payload-default {
   .iterable-diff {
-    margin-bottom: calc(var(--base) * 2);
-
     &__locale-label {
       background: var(--theme-elevation-100);
       padding: calc(var(--base) * 0.25);
@@ -14,16 +12,9 @@
       }
     }
 
-    &__wrap {
-      margin: calc(var(--base) * 0.5);
-      [dir='ltr'] & {
-        padding-left: calc(var(--base) * 0.5);
-        // border-left: $style-stroke-width-s solid var(--theme-elevation-150);
-      }
-      [dir='rtl'] & {
-        padding-right: calc(var(--base) * 0.5);
-        // border-right: $style-stroke-width-s solid var(--theme-elevation-150);
-      }
+    // Space between each row
+    &__row:not(:first-of-type) {
+      margin-top: calc(var(--base) * 0.5);
     }
 
     &__no-rows {

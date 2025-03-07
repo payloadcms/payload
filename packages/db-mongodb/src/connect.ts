@@ -2,6 +2,7 @@ import type { ConnectOptions } from 'mongoose'
 import type { Connect } from 'payload'
 
 import mongoose from 'mongoose'
+import { defaultBeginTransaction } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -46,7 +47,7 @@ export const connect: Connect = async function connect(
 
     if (!client.options.replicaSet) {
       this.transactionOptions = false
-      this.beginTransaction = undefined
+      this.beginTransaction = defaultBeginTransaction()
     }
 
     if (!this.mongoMemoryServer && !hotReload) {
@@ -69,9 +70,15 @@ export const connect: Connect = async function connect(
       await this.migrate({ migrations: this.prodMigrations })
     }
   } catch (err) {
+    let msg = `Error: cannot connect to MongoDB.`
+
+    if (typeof err === 'object' && err && 'message' in err && typeof err.message === 'string') {
+      msg = `${msg} Details: ${err.message}`
+    }
+
     this.payload.logger.error({
       err,
-      msg: `Error: cannot connect to MongoDB. Details: ${err.message}`,
+      msg,
     })
     process.exit(1)
   }

@@ -145,12 +145,11 @@ export const renderDocumentHandler = async (args: {
     disableActions,
     documentSubViewType: 'default',
     drawerSlug,
+    i18n,
     importMap: payload.importMap,
     initialData,
     initPageResult: {
-      collectionConfig: payload.config.collections.find(
-        (collection) => collection.slug === collectionSlug,
-      ),
+      collectionConfig: payload?.collections?.[collectionSlug]?.config,
       cookies,
       docID,
       globalConfig: payload.config.globals.find((global) => global.slug === collectionSlug),
@@ -165,6 +164,7 @@ export const renderDocumentHandler = async (args: {
     params: {
       segments: ['collections', collectionSlug, docID],
     },
+    payload,
     redirectAfterDelete,
     redirectAfterDuplicate,
     searchParams: {},

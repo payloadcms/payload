@@ -12,6 +12,8 @@ export { defaults as collectionDefaults } from '../collections/config/defaults.j
 
 export { serverProps } from '../config/types.js'
 
+export { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones.js'
+
 export {
   fieldAffectsData,
   fieldHasMaxDepth,
@@ -25,6 +27,7 @@ export {
   fieldIsPresentationalOnly,
   fieldIsSidebar,
   fieldIsVirtual,
+  fieldShouldBeLocalized,
   fieldSupportsMany,
   optionIsObject,
   optionIsValue,
@@ -49,6 +52,7 @@ export {
   deepCopyObjectSimple,
   deepCopyObjectSimpleWithoutReactComponents,
 } from '../utilities/deepCopyObject.js'
+
 export {
   deepMerge,
   deepMergeWithCombinedArrays,
@@ -57,8 +61,10 @@ export {
 } from '../utilities/deepMerge.js'
 
 export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON.js'
+
 export { flattenAllFields } from '../utilities/flattenAllFields.js'
 export { default as flattenTopLevelFields } from '../utilities/flattenTopLevelFields.js'
+export { formatAdminURL } from '../utilities/formatAdminURL.js'
 
 export { getDataByPath } from '../utilities/getDataByPath.js'
 export { getSelectMode } from '../utilities/getSelectMode.js'
@@ -83,6 +89,11 @@ export { reduceFieldsToValues } from '../utilities/reduceFieldsToValues.js'
 export { setsAreEqual } from '../utilities/setsAreEqual.js'
 
 export { default as toKebabCase } from '../utilities/toKebabCase.js'
+
+export {
+  transformColumnsToPreferences,
+  transformColumnsToSearchParams,
+} from '../utilities/transformColumnPreferences.js'
 
 export { unflatten } from '../utilities/unflatten.js'
 export { validateMimeType } from '../utilities/validateMimeType.js'

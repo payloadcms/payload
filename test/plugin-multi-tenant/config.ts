@@ -7,46 +7,41 @@ const dirname = path.dirname(filename)
 import type { Config as ConfigType } from './payload-types.js'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { LinksCollection } from './collections/Links.js'
-import { Posts } from './collections/Posts.js'
+import { Menu } from './collections/Menu.js'
+import { MenuItems } from './collections/MenuItems.js'
 import { Tenants } from './collections/Tenants.js'
-import { Users } from './collections/Users.js'
-import { NavigationGlobalCollection } from './globals/Navigation.js'
+import { Users } from './collections/Users/index.js'
 import { seed } from './seed/index.js'
+import { menuItemsSlug, menuSlug } from './shared.js'
 
 export default buildConfigWithDefaults({
-  collections: [Users, Tenants, Posts, LinksCollection, NavigationGlobalCollection],
+  collections: [Tenants, Users, MenuItems, Menu],
   admin: {
+    autoLogin: false,
     importMap: {
       baseDir: path.resolve(dirname),
+    },
+    components: {
+      graphics: {
+        Logo: '/components/Logo/index.js#Logo',
+        Icon: '/components/Icon/index.js#Icon',
+      },
     },
   },
   onInit: seed,
   plugins: [
     multiTenantPlugin<ConfigType>({
       userHasAccessToAllTenants: (user) => Boolean(user.roles?.includes('admin')),
-      tenantsArrayField: {
-        rowFields: [
-          {
-            name: 'roles',
-            type: 'select',
-            options: [
-              { label: 'Admin', value: 'admin' },
-              { label: 'User', value: 'user' },
-            ],
-          },
-        ],
-      },
       tenantField: {
         access: {},
       },
       collections: {
-        posts: {},
-        links: {},
-        'navigation-global': {
+        [menuItemsSlug]: {},
+        [menuSlug]: {
           isGlobal: true,
         },
       },
+      tenantSelectorLabel: 'Sites',
     }),
   ],
   typescript: {

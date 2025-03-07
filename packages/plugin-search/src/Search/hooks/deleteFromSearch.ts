@@ -12,6 +12,8 @@ export const deleteFromSearch: DeleteFromSearch = async ({
     const searchDocQuery = await payload.find({
       collection: searchSlug,
       depth: 0,
+      limit: 1,
+      pagination: false,
       req,
       where: {
         doc: {

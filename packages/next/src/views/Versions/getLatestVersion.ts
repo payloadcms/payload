@@ -1,4 +1,4 @@
-import type { Payload, Where } from 'payload'
+import type { Payload, PayloadRequest, Where } from 'payload'
 
 import { logError } from 'payload'
 
@@ -8,14 +8,17 @@ type ReturnType = {
 } | null
 
 type Args = {
+  locale?: string
+  overrideAccess?: boolean
   parentID?: number | string
   payload: Payload
+  req?: PayloadRequest
   slug: string
   status: 'draft' | 'published'
   type: 'collection' | 'global'
 }
 export async function getLatestVersion(args: Args): Promise<ReturnType> {
-  const { slug, type = 'collection', parentID, payload, status } = args
+  const { slug, type = 'collection', locale, overrideAccess, parentID, payload, req, status } = args
 
   const and: Where[] = [
     {
@@ -37,6 +40,9 @@ export async function getLatestVersion(args: Args): Promise<ReturnType> {
     const sharedOptions = {
       depth: 0,
       limit: 1,
+      locale,
+      overrideAccess,
+      req,
       sort: '-updatedAt',
       where: {
         and,

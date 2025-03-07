@@ -1,13 +1,8 @@
 import type { I18n } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type {
-  AdminViewComponent,
-  ImportMap,
-  PayloadServerReactComponent,
-  SanitizedConfig,
-} from 'payload'
+import type { AdminViewServerProps, ImportMap, SanitizedConfig } from 'payload'
 
-import { formatAdminURL } from '@payloadcms/ui/shared'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import { DefaultTemplate } from '../../templates/Default/index.js'
@@ -63,6 +58,7 @@ export const NotFoundPage = async ({
     redirectUnauthenticatedUser: true,
     route: formatAdminURL({ adminRoute, path: '/not-found' }),
     searchParams,
+    useLayoutReq: true,
   })
 
   const params = await paramsPromise
@@ -87,6 +83,6 @@ export const NotFoundPage = async ({
   )
 }
 
-export const NotFoundView: PayloadServerReactComponent<AdminViewComponent> = () => {
+export function NotFoundView(props: AdminViewServerProps) {
   return <NotFoundClient marginTop="large" />
 }
