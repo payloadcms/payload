@@ -16,7 +16,7 @@ const baseClass = 'table'
 export type Props = {
   readonly appearance?: 'condensed' | 'default'
   readonly columns?: Column[]
-  readonly data: { [key: string]: unknown; id: string }[]
+  readonly data: Record<string, unknown>[]
 }
 
 export const Table: React.FC<Props> = ({ appearance = 'default', columns, data: initialData }) => {
