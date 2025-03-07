@@ -200,6 +200,9 @@ export function mongooseAdapter({
 
     return createDatabaseAdapter<MongooseAdapter>({
       name: 'mongoose',
+      meta: {
+        supportsPartialData: true,
+      },
 
       // Mongoose-specific
       autoPluralization,
