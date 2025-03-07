@@ -13,6 +13,11 @@ export const trackNetworkRequests = async (
     allowedNumberOfRequests?: number
     beforePoll?: () => Promise<any> | void
     interval?: number
+    /**
+     * If set, allows tests to pass if **less** than the allowed number of requests are made,
+     * as long as at least this number of requests are made.
+     */
+    minimumNumberOfRequests?: number
     timeout?: number
   },
 ): Promise<Array<Request>> => {
@@ -46,7 +51,12 @@ export const trackNetworkRequests = async (
     await new Promise((resolve) => setTimeout(resolve, interval))
   }
 
-  expect(matchedRequests.length).toBe(allowedNumberOfRequests)
+  if (!options?.noMinimum) {
+    expect(matchedRequests.length).toBe(allowedNumberOfRequests)
+  } else {
+    expect(matchedRequests.length).toBeLessThanOrEqual(allowedNumberOfRequests)
+    expect(matchedRequests.length).toBeGreaterThanOrEqual(options.minimumNumberOfRequests)
+  }
 
   return matchedRequests
 }

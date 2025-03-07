@@ -11,6 +11,10 @@
     "seo",
     "yoast"
   ],
+  "sideEffectsDisabled": [
+    "*.scss",
+    "*.css"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/payloadcms/payload.git",

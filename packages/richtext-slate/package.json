@@ -18,6 +18,10 @@
     }
   ],
   "type": "module",
+  "sideEffectsDisabled": [
+    "*.scss",
+    "*.css"
+  ],
   "exports": {
     ".": {
       "import": "./src/index.tsx",
