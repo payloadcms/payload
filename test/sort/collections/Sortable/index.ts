@@ -8,7 +8,7 @@ export const SortableCollection: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     components: {
-      beforeList: ['/Seed#Seed'],
+      beforeList: ['/Seed.tsx#Seed'],
     },
   },
   fields: [
