@@ -40,6 +40,7 @@ export const syncDocAsSearchIndex = async ({
       payload,
       req,
       searchDoc: dataToSave,
+      collection,
     })
   }
 
