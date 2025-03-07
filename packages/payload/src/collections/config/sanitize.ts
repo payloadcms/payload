@@ -11,6 +11,7 @@ import type {
 } from './types.js'
 
 import { authCollectionEndpoints } from '../../auth/endpoints/index.js'
+import executeAccess from '../../auth/executeAccess.js'
 import { getBaseAuthFields } from '../../auth/getAuthFields.js'
 import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
@@ -344,6 +345,18 @@ const addSortableFeatures = (sanitized: CollectionConfig) => {
         status: 400,
       })
     }
+
+    // Prevent reordering if user doesn't have editing permissions
+    await executeAccess(
+      {
+        // Currently only one doc can be moved at a time. We should review this if we want to allow
+        // multiple docs to be moved at once in the future.
+        id: docsToMove[0],
+        data: {},
+        req,
+      },
+      sanitized.access.update,
+    )
 
     const targetId = target.id
     let targetKey = target.key

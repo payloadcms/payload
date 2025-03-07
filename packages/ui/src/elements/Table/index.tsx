@@ -115,6 +115,10 @@ export const Table: React.FC<Props> = ({ appearance = 'default', columns, data: 
         method: 'POST',
       })
 
+      if (response.status === 403) {
+        throw new Error('You do not have permission to reorder these rows')
+      }
+
       if (!response.ok) {
         throw new Error(
           'Failed to reorder. This can happen if you reorder several rows too quickly. Please try again.',
@@ -125,7 +129,8 @@ export const Table: React.FC<Props> = ({ appearance = 'default', columns, data: 
       handleSortChange(query.sort as string).catch((error) => {
         throw error
       })
-    } catch (_error) {
+    } catch (err) {
+      const error = err instanceof Error ? err.message : String(err)
       // Rollback to previous state if the request fails
       setLocalData(previousData)
 
@@ -136,7 +141,7 @@ export const Table: React.FC<Props> = ({ appearance = 'default', columns, data: 
         }
       }
 
-      toast.error('Failed to reorder')
+      toast.error(error)
     }
   }
 
