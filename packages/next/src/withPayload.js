@@ -99,6 +99,32 @@ export const withPayload = (nextConfig = {}) => {
       'libsql',
       'pino-pretty',
       'graphql',
+      // Do not bundle server-only packages during dev to improve compile speed
+      ...(process.env.npm_lifecycle_event === 'dev'
+        ? [
+            'payload',
+            '@payloadcms/db-mongodb',
+            '@payloadcms/db-postgres',
+            '@payloadcms/db-sqlite',
+            '@payloadcms/db-vercel-postgres',
+            '@payloadcms/drizzle',
+            '@payloadcms/email-nodemailer',
+            // TODO: Can I add @payloadcms/richtext-lexical without @payloadcms/richtext-lexical/client ?
+            '@payloadcms/email-resend',
+            '@payloadcms/graphql',
+            '@payloadcms/payload-cloud',
+            '@payloadcms/plugin-cloud-storage',
+            '@payloadcms/plugin-redirects',
+            '@payloadcms/plugin-sentry',
+            '@payloadcms/plugin-stripe',
+            '@payloadcms/storage-azure',
+            '@payloadcms/storage-gcs',
+            '@payloadcms/storage-s3',
+            '@payloadcms/storage-uploadthing',
+            '@payloadcms/storage-vercel-blob',
+            '@payloadcms/translations',
+          ]
+        : []),
     ],
     webpack: (webpackConfig, webpackOptions) => {
       const incomingWebpackConfig =
