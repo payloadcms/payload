@@ -9,7 +9,6 @@ import {
   exactText,
   getRoutes,
   initPageConsoleErrorCatch,
-  openNav,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
   // throttleTest,
@@ -34,12 +33,14 @@ import {
 } from '../../shared.js'
 import {
   customViews2CollectionSlug,
+  disableCopyToLocale as disableCopyToLocaleSlug,
   disableDuplicateSlug,
   geoCollectionSlug,
   globalSlug,
   notInViewCollectionSlug,
   postsCollectionSlug,
   settingsGlobalSlug,
+  uploadTwoCollectionSlug,
 } from '../../slugs.js'
 
 const { beforeAll, beforeEach, describe } = test
@@ -51,6 +52,7 @@ let payload: PayloadTestSDK<Config>
 
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
+import { openNav } from 'helpers/e2e/toggleNav.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -70,9 +72,11 @@ describe('General', () => {
   let notInViewUrl: AdminUrlUtil
   let globalURL: AdminUrlUtil
   let customViewsURL: AdminUrlUtil
+  let disableCopyToLocale: AdminUrlUtil
   let disableDuplicateURL: AdminUrlUtil
   let serverURL: string
   let adminRoutes: ReturnType<typeof getRoutes>
+  let uploadsTwo: AdminUrlUtil
 
   beforeAll(async ({ browser }, testInfo) => {
     const prebuild = false // Boolean(process.env.CI)
@@ -89,7 +93,9 @@ describe('General', () => {
     notInViewUrl = new AdminUrlUtil(serverURL, notInViewCollectionSlug)
     globalURL = new AdminUrlUtil(serverURL, globalSlug)
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
+    disableCopyToLocale = new AdminUrlUtil(serverURL, disableCopyToLocaleSlug)
     disableDuplicateURL = new AdminUrlUtil(serverURL, disableDuplicateSlug)
+    uploadsTwo = new AdminUrlUtil(serverURL, uploadTwoCollectionSlug)
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -406,6 +412,45 @@ describe('General', () => {
       await expect(link).toBeHidden()
     })
 
+    test('should disable active nav item', async () => {
+      await page.goto(postsUrl.list)
+      await openNav(page)
+      const activeItem = page.locator('.nav .nav__link:has(.nav__link-indicator)')
+      await expect(activeItem).toBeVisible()
+      const tagName = await activeItem.evaluate((el) => el.tagName.toLowerCase())
+      expect(tagName).toBe('div')
+    })
+
+    test('should keep active nav item enabled in the edit view', async () => {
+      await page.goto(postsUrl.create)
+      await openNav(page)
+      const activeItem = page.locator('.nav .nav__link:has(.nav__link-indicator)')
+      await expect(activeItem).toBeVisible()
+      const tagName = await activeItem.evaluate((el) => el.tagName.toLowerCase())
+      expect(tagName).toBe('a')
+    })
+
+    test('should only have one nav item active at a time', async () => {
+      await page.goto(uploadsTwo.list)
+      await openNav(page)
+
+      // Locate "uploads" and "uploads-two" nav items
+      const uploadsNavItem = page.locator('.nav-group__content #nav-uploads')
+      const uploadsTwoNavItem = page.locator('.nav-group__content #nav-uploads-two')
+
+      // Ensure both exist before continuing
+      await expect(uploadsNavItem).toBeVisible()
+      await expect(uploadsTwoNavItem).toBeVisible()
+
+      // Locate all nav items containing the nav__link-indicator
+      const activeNavItems = page.locator(
+        '.nav-group__content .nav__link:has(.nav__link-indicator), .nav-group__content div.nav__link:has(.nav__link-indicator)',
+      )
+
+      // Expect exactly one nav item to have the indicator
+      await expect(activeNavItems).toHaveCount(1)
+    })
+
     test('breadcrumbs — should navigate from list to dashboard', async () => {
       await page.goto(postsUrl.list)
       await page.locator(`.step-nav a[href="${adminRoutes.routes.admin}"]`).click()
@@ -473,6 +518,14 @@ describe('General', () => {
       await page.goto(notInViewUrl.global('not-in-view-global'))
       await expect(page.locator('.render-title')).toContainText('Not In View Global')
     })
+
+    test('should hide Copy To Locale button when disableCopyToLocale: true', async () => {
+      await page.goto(disableCopyToLocale.create)
+      await page.locator('#field-title').fill(title)
+      await saveDocAndAssert(page)
+      await page.locator('.doc-controls__popup >> .popup-button').click()
+      await expect(page.locator('#copy-locale-data__button')).toBeHidden()
+    })
   })
 
   describe('custom CSS', () => {
@@ -521,6 +574,8 @@ describe('General', () => {
 
     test('should render protected nested custom view', async () => {
       await page.goto(`${serverURL}${adminRoutes.routes.admin}${protectedCustomNestedViewPath}`)
+
+      // wait for redirect to unauthorized page
       await page.waitForURL(`**${adminRoutes.routes.admin}/unauthorized`)
       await expect(page.locator('.unauthorized')).toBeVisible()
 

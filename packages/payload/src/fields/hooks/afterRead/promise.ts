@@ -123,7 +123,7 @@ export const promise = async ({
   }
 
   // Strip unselected fields
-  if (fieldAffectsData(field) && select && selectMode) {
+  if (fieldAffectsData(field) && select && selectMode && path !== 'id') {
     if (selectMode === 'include') {
       if (!select[field.name]) {
         delete siblingDoc[field.name]

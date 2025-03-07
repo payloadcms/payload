@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-multi-tenant",
-  "version": "3.24.0",
+  "version": "3.27.0",
   "description": "Multi Tenant plugin for Payload",
   "keywords": [
     "payload",
@@ -82,6 +82,7 @@
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
+    "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "payload": "workspace:*"
   },

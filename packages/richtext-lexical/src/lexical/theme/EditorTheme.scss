@@ -106,6 +106,47 @@
       text-decoration: underline line-through;
     }
 
+    &__tabNode {
+      position: relative;
+      text-decoration: none;
+    }
+
+    &__tabNode.LexicalEditorTheme__textUnderline::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0.15em;
+      border-bottom: 0.1em solid currentColor;
+    }
+
+    &__tabNode.LexicalEditorTheme__textStrikethrough::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0.69em;
+      border-top: 0.1em solid currentColor;
+    }
+
+    &__tabNode.LexicalEditorTheme__textUnderlineStrikethrough::before,
+    &__tabNode.LexicalEditorTheme__textUnderlineStrikethrough::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+    }
+
+    &__tabNode.LexicalEditorTheme__textUnderlineStrikethrough::before {
+      top: 0.69em;
+      border-top: 0.1em solid currentColor;
+    }
+
+    &__tabNode.LexicalEditorTheme__textUnderlineStrikethrough::after {
+      bottom: 0.05em;
+      border-bottom: 0.1em solid currentColor;
+    }
+
     &__textSubscript {
       font-size: 0.8em;
       vertical-align: sub !important;
@@ -141,6 +182,27 @@
       color: var(--theme-success-750);
       text-decoration: none;
       border-bottom: 1px dotted;
+    }
+
+    // Renders cursor when native browser does not. See https://github.com/facebook/lexical/issues/3417
+    &__blockCursor {
+      display: block;
+      pointer-events: none;
+      position: absolute;
+    }
+    &__blockCursor:after {
+      content: '';
+      display: block;
+      position: absolute;
+      top: -2px;
+      width: 20px;
+      border-top: 1px solid var(--theme-text);
+      animation: CursorBlink 1.1s steps(2, start) infinite;
+    }
+    @keyframes CursorBlink {
+      to {
+        visibility: hidden;
+      }
     }
 
     &__code {

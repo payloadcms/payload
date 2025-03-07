@@ -139,6 +139,10 @@ export const sanitizeJoinField = ({
     throw new InvalidFieldJoin(join.field)
   }
 
+  if (!joinRelationship.index && !joinRelationship.unique) {
+    joinRelationship.index = true
+  }
+
   if (validateOnly) {
     return
   }

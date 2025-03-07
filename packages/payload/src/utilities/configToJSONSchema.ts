@@ -434,14 +434,15 @@ export function fieldsToJSONSchema(
 
             fieldSchema = {
               ...baseFieldSchema,
-              type: withNullableJSONSchemaType('object', false),
+              type: 'object',
               additionalProperties: false,
               properties: {
                 docs: {
-                  type: withNullableJSONSchemaType('array', false),
+                  type: 'array',
                   items,
                 },
-                hasNextPage: { type: withNullableJSONSchemaType('boolean', false) },
+                hasNextPage: { type: 'boolean' },
+                totalDocs: { type: 'number' },
               },
             }
             break

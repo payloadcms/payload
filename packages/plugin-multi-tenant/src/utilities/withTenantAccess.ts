@@ -15,6 +15,7 @@ import { getTenantAccess } from './getTenantAccess.js'
 
 type Args<ConfigType> = {
   accessFunction?: Access
+  adminUsersSlug: string
   collection: CollectionConfig
   fieldName: string
   operation: AllOperations
@@ -27,6 +28,7 @@ type Args<ConfigType> = {
 export const withTenantAccess =
   <ConfigType>({
     accessFunction,
+    adminUsersSlug,
     collection,
     fieldName,
     tenantsArrayFieldName,
@@ -49,6 +51,7 @@ export const withTenantAccess =
 
     if (
       args.req.user &&
+      args.req.user.collection === adminUsersSlug &&
       !userHasAccessToAllTenants(
         args.req.user as ConfigType extends { user: unknown } ? ConfigType['user'] : User,
       )

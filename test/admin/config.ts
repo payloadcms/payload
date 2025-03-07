@@ -7,6 +7,7 @@ import { BaseListFilter } from './collections/BaseListFilter.js'
 import { CustomFields } from './collections/CustomFields/index.js'
 import { CustomViews1 } from './collections/CustomViews1.js'
 import { CustomViews2 } from './collections/CustomViews2.js'
+import { DisableCopyToLocale } from './collections/DisableCopyToLocale.js'
 import { DisableDuplicate } from './collections/DisableDuplicate.js'
 import { Geo } from './collections/Geo.js'
 import { CollectionGroup1A } from './collections/Group1A.js'
@@ -19,6 +20,7 @@ import { CollectionNoApiView } from './collections/NoApiView.js'
 import { CollectionNotInView } from './collections/NotInView.js'
 import { Posts } from './collections/Posts.js'
 import { UploadCollection } from './collections/Upload.js'
+import { UploadTwoCollection } from './collections/UploadTwo.js'
 import { Users } from './collections/Users.js'
 import { with300Documents } from './collections/With300Documents.js'
 import { CustomGlobalViews1 } from './globals/CustomViews1.js'
@@ -40,6 +42,7 @@ import {
   protectedCustomNestedViewPath,
   publicCustomViewPath,
 } from './shared.js'
+
 export default buildConfigWithDefaults({
   admin: {
     importMap: {
@@ -141,6 +144,7 @@ export default buildConfigWithDefaults({
   },
   collections: [
     UploadCollection,
+    UploadTwoCollection,
     Posts,
     Users,
     CollectionHidden,
@@ -155,6 +159,7 @@ export default buildConfigWithDefaults({
     CollectionGroup2B,
     Geo,
     DisableDuplicate,
+    DisableCopyToLocale,
     BaseListFilter,
     with300Documents,
     ListDrawer,

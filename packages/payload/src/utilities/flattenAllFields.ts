@@ -16,7 +16,23 @@ export const flattenBlock = ({ block }: { block: Block }): FlattenedBlock => {
   }
 }
 
-export const flattenAllFields = ({ fields }: { fields: Field[] }): FlattenedField[] => {
+const flattenedFieldsCache = new Map<Field[], FlattenedField[]>()
+
+export const flattenAllFields = ({
+  cache,
+  fields,
+}: {
+  /** Allows you to get FlattenedField[] from Field[] anywhere without performance overhead by caching. */
+  cache?: boolean
+  fields: Field[]
+}): FlattenedField[] => {
+  if (cache) {
+    const maybeFields = flattenedFieldsCache.get(fields)
+    if (maybeFields) {
+      return maybeFields
+    }
+  }
+
   const result: FlattenedField[] = []
 
   for (const field of fields) {
@@ -96,6 +112,8 @@ export const flattenAllFields = ({ fields }: { fields: Field[] }): FlattenedFiel
       }
     }
   }
+
+  flattenedFieldsCache.set(fields, result)
 
   return result
 }

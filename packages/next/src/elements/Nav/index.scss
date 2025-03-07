@@ -93,36 +93,37 @@
       }
     }
 
-    nav {
-      a {
-        position: relative;
-        padding-block: base(0.125);
-        padding-inline-start: 0;
-        padding-inline-end: base(1.5);
-        display: flex;
-        text-decoration: none;
-
-        &:focus:not(:focus-visible) {
-          box-shadow: none;
-          font-weight: 600;
-        }
-
-        &:hover,
-        &:focus-visible {
-          text-decoration: underline;
-        }
-
-        &.active {
-          font-weight: normal;
-          padding-left: 0;
-          font-weight: 600;
-        }
-      }
-    }
-
     &__link {
       display: flex;
       align-items: center;
+      position: relative;
+      padding-block: base(0.125);
+      padding-inline-start: 0;
+      padding-inline-end: base(1.5);
+      text-decoration: none;
+
+      &:focus:not(:focus-visible) {
+        box-shadow: none;
+        font-weight: 600;
+      }
+
+      &.active {
+        font-weight: normal;
+        padding-left: 0;
+        font-weight: 600;
+      }
+    }
+
+    a.nav__link {
+      &:hover,
+      &:focus-visible {
+        text-decoration: underline;
+      }
+    }
+
+    &__link:has(.nav__link-indicator) {
+      font-weight: 600;
+      padding-left: 0;
     }
 
     &__link-indicator {
@@ -148,7 +149,7 @@
         padding: var(--app-header-height) var(--gutter-h) base(2);
       }
 
-      nav a {
+      &__link {
         font-size: base(0.875);
         line-height: base(1.5);
       }
