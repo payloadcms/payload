@@ -117,12 +117,11 @@ export const withPayload = (nextConfig = {}) => {
             '@payloadcms/plugin-redirects',
             '@payloadcms/plugin-sentry',
             '@payloadcms/plugin-stripe',
-            '@payloadcms/storage-azure',
-            '@payloadcms/storage-gcs',
-            '@payloadcms/storage-s3',
-            '@payloadcms/storage-uploadthing',
-            '@payloadcms/storage-vercel-blob',
-            '@payloadcms/translations',
+            //'@payloadcms/storage-azure', //has /client export
+            //'@payloadcms/storage-gcs', //has /client export
+            //'@payloadcms/storage-s3', //has /client export
+            //'@payloadcms/storage-uploadthing', //has /client export
+            //'@payloadcms/storage-vercel-blob', //has /client export
           ]
         : []),
     ],
