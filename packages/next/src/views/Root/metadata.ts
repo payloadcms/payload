@@ -2,27 +2,27 @@ import type { Metadata } from 'next'
 import type { SanitizedConfig } from 'payload'
 
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
-import { generateAccountMetadata } from '../Account/index.js'
-import { generateCreateFirstUserMetadata } from '../CreateFirstUser/index.js'
-import { generateDashboardMetadata } from '../Dashboard/index.js'
-import { generateDocumentMetadata } from '../Document/meta.js'
-import { generateForgotPasswordMetadata } from '../ForgotPassword/index.js'
-import { generateListMetadata } from '../List/index.js'
-import { generateLoginMetadata } from '../Login/index.js'
-import { generateNotFoundMeta } from '../NotFound/meta.js'
-import { generateResetPasswordMetadata } from '../ResetPassword/index.js'
-import { generateUnauthorizedMetadata } from '../Unauthorized/index.js'
-import { generateVerifyMetadata } from '../Verify/index.js'
+import { generateAccountViewMetadata } from '../Account/metadata.js'
+import { generateCreateFirstUserViewMetadata } from '../CreateFirstUser/metadata.js'
+import { generateDashboardViewMetadata } from '../Dashboard/metadata.js'
+import { generateDocumentViewMetadata } from '../Document/metadata.js'
+import { generateForgotPasswordViewMetadata } from '../ForgotPassword/metadata.js'
+import { generateListViewMetadata } from '../List/metadata.js'
+import { generateLoginViewMetadata } from '../Login/metadata.js'
+import { generateNotFoundViewMetadata } from '../NotFound/metadata.js'
+import { generateResetPasswordViewMetadata } from '../ResetPassword/metadata.js'
+import { generateUnauthorizedViewMetadata } from '../Unauthorized/metadata.js'
+import { generateVerifyViewMetadata } from '../Verify/metadata.js'
 import { generateCustomViewMetadata } from './generateCustomViewMetadata.js'
 import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 
 const oneSegmentMeta = {
-  'create-first-user': generateCreateFirstUserMetadata,
-  forgot: generateForgotPasswordMetadata,
-  login: generateLoginMetadata,
-  logout: generateUnauthorizedMetadata,
-  'logout-inactivity': generateUnauthorizedMetadata,
-  unauthorized: generateUnauthorizedMetadata,
+  'create-first-user': generateCreateFirstUserViewMetadata,
+  forgot: generateForgotPasswordViewMetadata,
+  login: generateLoginViewMetadata,
+  logout: generateUnauthorizedViewMetadata,
+  'logout-inactivity': generateUnauthorizedViewMetadata,
+  unauthorized: generateUnauthorizedViewMetadata,
 }
 
 type Args = {
@@ -68,7 +68,7 @@ export const generatePageMetadata = async ({
 
   switch (segments.length) {
     case 0: {
-      meta = await generateDashboardMetadata({ config, i18n })
+      meta = await generateDashboardViewMetadata({ config, i18n })
       break
     }
     case 1: {
@@ -83,7 +83,7 @@ export const generatePageMetadata = async ({
         break
       } else if (segmentOne === 'account') {
         // --> /account
-        meta = await generateAccountMetadata({ config, i18n })
+        meta = await generateAccountViewMetadata({ config, i18n })
         break
       }
       break
@@ -91,14 +91,14 @@ export const generatePageMetadata = async ({
     case 2: {
       if (`/${segmentOne}` === config.admin.routes.reset) {
         // --> /reset/:token
-        meta = await generateResetPasswordMetadata({ config, i18n })
+        meta = await generateResetPasswordViewMetadata({ config, i18n })
       }
       if (isCollection) {
         // --> /collections/:collectionSlug
-        meta = await generateListMetadata({ collectionConfig, config, i18n })
+        meta = await generateListViewMetadata({ collectionConfig, config, i18n })
       } else if (isGlobal) {
         // --> /globals/:globalSlug
-        meta = await generateDocumentMetadata({
+        meta = await generateDocumentViewMetadata({
           config,
           globalConfig,
           i18n,
@@ -110,7 +110,7 @@ export const generatePageMetadata = async ({
     default: {
       if (segmentTwo === 'verify') {
         // --> /:collectionSlug/verify/:token
-        meta = await generateVerifyMetadata({ config, i18n })
+        meta = await generateVerifyViewMetadata({ config, i18n })
       } else if (isCollection) {
         // Custom Views
         // --> /collections/:collectionSlug/:id
@@ -118,14 +118,14 @@ export const generatePageMetadata = async ({
         // --> /collections/:collectionSlug/:id/versions
         // --> /collections/:collectionSlug/:id/versions/:version
         // --> /collections/:collectionSlug/:id/api
-        meta = await generateDocumentMetadata({ collectionConfig, config, i18n, params })
+        meta = await generateDocumentViewMetadata({ collectionConfig, config, i18n, params })
       } else if (isGlobal) {
         // Custom Views
         // --> /globals/:globalSlug/versions
         // --> /globals/:globalSlug/versions/:version
         // --> /globals/:globalSlug/preview
         // --> /globals/:globalSlug/api
-        meta = await generateDocumentMetadata({
+        meta = await generateDocumentViewMetadata({
           config,
           globalConfig,
           i18n,
@@ -151,7 +151,7 @@ export const generatePageMetadata = async ({
         viewConfig,
       })
     } else {
-      meta = await generateNotFoundMeta({ config, i18n })
+      meta = await generateNotFoundViewMetadata({ config, i18n })
     }
   }
 

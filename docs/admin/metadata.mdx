@@ -6,7 +6,11 @@ desc: Customize the metadata of your pages within the Admin Panel
 keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Every page within the Admin Panel automatically receives dynamic, auto-generated metadata derived from live document data, the user's current locale, and more, without any additional configuration. This includes the page title, description, og:image and everything in between. Metadata is fully configurable at the root level and cascades down to individual collections, documents, and custom views, allowing for the ability to control metadata on any page with high precision.
+Every page within the Admin Panel automatically receives dynamic, auto-generated metadata derived from live document data, the user's current locale, and more. This includes the page title, description, og:image, etc. and requires no additional configuration.
+
+Metadata is fully configurable at the root level and cascades down to individual collections, documents, and custom views. This allows for the ability to control metadata on any page with high precision, while also providing sensible defaults.
+
+All metadata is injected into Next.js' [`generateMetadata`](https://nextjs.org/docs/app/api-reference/functions/generate-metadata) function. This used to generate the `<head>` of pages within the Admin Panel. All metadata options that are available in Next.js are exposed by Payload.
 
 Within the Admin Panel, metadata can be customized at the following levels:
 
@@ -48,13 +52,10 @@ The following options are available for Root Metadata:
 
 | Key | Type | Description |
 | --- | --- | --- |
-| **`title`** | `string` | The title of the Admin Panel. |
-| **`description`** | `string` | The description of the Admin Panel. |
-| **`defaultOGImageType`** | `dynamic` (default), `static`, or `off` | The type of default OG image to use. If set to `dynamic`, Payload will use Next.js image generation to create an image with the title of the page. If set to `static`, Payload will use the `defaultOGImage` URL. If set to `off`, Payload will not generate an OG image. |
-| **`icons`** | `IconConfig[]` | An array of icon objects. [More details](#icons) |
-| **`keywords`** | `string` | A comma-separated list of keywords to include in the metadata of the Admin Panel. |
-| **`openGraph`** | `OpenGraphConfig` | An object containing Open Graph metadata. [More details](#open-graph) |
-| **`titleSuffix`** | `string` | A suffix to append to the end of the title of every page. Defaults to "- Payload". |
+| `defaultOGImageType` | `dynamic` (default), `static`, or `off` | The type of default OG image to use. If set to `dynamic`, Payload will use Next.js image generation to create an image with the title of the page. If set to `static`, Payload will use the `defaultOGImage` URL. If set to `off`, Payload will not generate an OG image. |
+| `icons` | `IconConfig[]` | An array of icon objects. [More details](#icons). |
+| `titleSuffix` | `string` | A suffix to append to the end of the title of every page. Defaults to "- Payload". |
+| `[keyof Metadata]` | `unknown` | Any other properties that Next.js supports within the `generateMetadata` function. [More details](https://nextjs.org/docs/app/api-reference/functions/generate-metadata). |
 
 <Banner type="success">
   **Reminder:**
@@ -93,17 +94,7 @@ To customize icons, use the `icons` key within the `admin.meta` object in your P
 }
 ```
 
-The following options are available for Icons:
-
-| Key | Type | Description |
-| --- | --- | --- |
-| **`rel`** | `string` | The HTML `rel` attribute of the icon. |
-| **`type`** | `string` | The MIME type of the icon. |
-| **`color`** | `string` | The color of the icon. |
-| **`fetchPriority`** | `string` | The [fetch priority](https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/fetchPriority) of the icon. |
-| **`media`** | `string` | The [media query](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_media_queries/Using_media_queries) of the icon. |
-| **`sizes`** | `string` | The [sizes](https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/sizes) of the icon. |
-| **`url`** | `string` | The URL pointing the resource of the icon. |
+For a full list of all available Icon options, see the [Next.js documentation](https://nextjs.org/docs/app/api-reference/functions/generate-metadata#icons).
 
 ### Open Graph
 
@@ -135,14 +126,7 @@ To customize Open Graph metadata, use the `openGraph` key within the `admin.meta
 }
 ```
 
-The following options are available for Open Graph Metadata:
-
-| Key | Type | Description |
-| --- | --- | --- |
-| **`description`** | `string` | The description of the Admin Panel. |
-| **`images`** | `OGImageConfig` or `OGImageConfig[]` | An array of image objects. |
-| **`siteName`** | `string` | The name of the site. |
-| **`title`** | `string` | The title of the Admin Panel. |
+For a full list of all available Open Graph options, see the [Next.js documentation](https://nextjs.org/docs/app/api-reference/functions/generate-metadata#opengraph).
 
 ## Collection Metadata
 

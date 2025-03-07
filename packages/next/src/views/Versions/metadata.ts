@@ -5,9 +5,12 @@ import { getTranslation } from '@payloadcms/translations'
 
 import type { GenerateEditViewMetadata } from '../Document/getMetaBySegment.js'
 
-import { meta } from '../../utilities/meta.js'
+import { generateMetadata } from '../../utilities/generateMetadata.js'
 
-export const generateMetadata: GenerateEditViewMetadata = async ({
+/**
+ * @todo Remove the `MetaConfig` type assertions. They are currently required because of how the `Metadata` type from `next` consumes the `URL` type.
+ */
+export const generateVersionsViewMetadata: GenerateEditViewMetadata = async ({
   collectionConfig,
   config,
   globalConfig,
@@ -22,7 +25,7 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
       : ''
 
   let metaToUse: MetaConfig = {
-    ...(config.admin.meta || {}),
+    ...((config.admin.meta || {}) as MetaConfig),
   }
 
   const data: any = {} // TODO: figure this out
@@ -32,28 +35,28 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
     const titleFromData = data?.[useAsTitle]
 
     metaToUse = {
-      ...(config.admin.meta || {}),
+      ...((config.admin.meta || {}) as MetaConfig),
       description: t('version:viewingVersions', {
         documentTitle: data?.[useAsTitle],
         entitySlug: collectionConfig.slug,
       }),
       title: `${t('version:versions')}${titleFromData ? ` - ${titleFromData}` : ''} - ${entityLabel}`,
-      ...(collectionConfig?.admin.meta || {}),
-      ...(collectionConfig?.admin?.components?.views?.edit?.versions?.meta || {}),
+      ...((collectionConfig?.admin.meta || {}) as MetaConfig),
+      ...((collectionConfig?.admin?.components?.views?.edit?.versions?.meta || {}) as MetaConfig),
     }
   }
 
   if (globalConfig) {
     metaToUse = {
-      ...(config.admin.meta || {}),
+      ...((config.admin.meta || {}) as MetaConfig),
       description: t('version:viewingVersionsGlobal', { entitySlug: globalConfig.slug }),
       title: `${t('version:versions')} - ${entityLabel}`,
-      ...(globalConfig?.admin.meta || {}),
-      ...(globalConfig?.admin?.components?.views?.edit?.versions?.meta || {}),
+      ...((globalConfig?.admin.meta || {}) as MetaConfig),
+      ...((globalConfig?.admin?.components?.views?.edit?.versions?.meta || {}) as MetaConfig),
     }
   }
 
-  return meta({
+  return generateMetadata({
     ...metaToUse,
     serverURL: config.serverURL,
   })

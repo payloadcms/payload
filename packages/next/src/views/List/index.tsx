@@ -18,8 +18,6 @@ import React, { Fragment } from 'react'
 import { renderListViewSlots } from './renderListViewSlots.js'
 import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
 
-export { generateListMetadata } from './meta.js'
-
 type RenderListViewArgs = {
   customCellProps?: Record<string, any>
   disableBulkDelete?: boolean

@@ -7,8 +7,6 @@ import React from 'react'
 import { FormHeader } from '../../elements/FormHeader/index.js'
 import './index.scss'
 
-export { generateUnauthorizedMetadata } from './meta.js'
-
 const baseClass = 'unauthorized'
 
 export function UnauthorizedView({ initPageResult }: AdminViewServerProps) {
