@@ -123,7 +123,7 @@ export const promise = async ({
     }
 
     // Execute hooks
-    if (field.hooks?.beforeChange) {
+    if ('hooks' in field && field.hooks?.beforeChange) {
       for (const hook of field.hooks.beforeChange) {
         const hookedValue = await hook({
           blockData,
