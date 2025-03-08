@@ -18,13 +18,15 @@ import { fieldAffectsData, fieldIsHiddenOrDisabled, flattenTopLevelFields } from
 import type { Column } from '../exports/client/index.js'
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
+import { SortRow } from '../elements/SortRow/index.js'
 import { buildColumnState } from '../elements/TableColumns/buildColumnState.js'
 import { buildPolymorphicColumnState } from '../elements/TableColumns/buildPolymorphicColumnState.js'
 import { filterFields } from '../elements/TableColumns/filterFields.js'
 import { getInitialColumns } from '../elements/TableColumns/getInitialColumns.js'
-
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import { Pill, SelectAll, SelectRow, Table } from '../exports/client/index.js'
+
+const ORDER_FIELD_NAME = '_order'
 
 export const renderFilters = (
   fields: Field[],
@@ -192,6 +194,23 @@ export const renderTable = ({
       },
       Heading: <SelectAll />,
       renderedCells: docs.map((_, i) => <SelectRow key={i} rowData={docs[i]} />),
+    } as Column)
+  }
+
+  // Add drag handle if data is sortable
+  const isSortable = docs.length > 0 && ORDER_FIELD_NAME in docs[0]
+  if (isSortable && !columnsToUse.find((col) => col.accessor === '_dragHandle')) {
+    columnsToUse.unshift({
+      accessor: '_dragHandle',
+      active: true,
+      field: {
+        admin: {
+          disabled: true,
+        },
+        hidden: true,
+      },
+      Heading: '',
+      renderedCells: docs.map((_, i) => <SortRow key={i} />),
     } as Column)
   }
 

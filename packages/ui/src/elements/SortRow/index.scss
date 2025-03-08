@@ -1,0 +1,12 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .sort-row {
+    cursor: grab;
+
+    &__icon {
+      display: block;
+      width: min-content;
+    }
+  }
+}
