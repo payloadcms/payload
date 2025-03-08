@@ -1,14 +1,8 @@
-import type {
-  ClientField,
-  Data,
-  FormField,
-  FormState,
-  Row,
-  User,
-  ValidationFieldError,
-} from 'payload'
+import type { ClientField, Data, FormField, FormState } from 'payload'
 import type React from 'react'
 import type { Dispatch } from 'react'
+
+import type { FieldAction } from './reducer/types.js'
 
 export type Preferences = {
   [key: string]: unknown
@@ -76,11 +70,14 @@ export type SubmitOptions = {
 }
 
 export type DispatchFields = React.Dispatch<any>
+
 export type Submit = (
   options?: SubmitOptions,
   e?: React.FormEvent<HTMLFormElement>,
 ) => Promise<void>
+
 export type ValidateForm = () => Promise<boolean>
+
 export type CreateFormData = (
   overrides?: Record<string, unknown>,
   /**
@@ -89,6 +86,7 @@ export type CreateFormData = (
    */
   options?: { mergeOverrideData?: boolean },
 ) => FormData | Promise<FormData>
+
 export type GetFields = () => FormState
 export type GetField = (path: string) => FormField
 export type GetData = () => Data
@@ -99,106 +97,6 @@ export type SetSubmitted = (submitted: boolean) => void
 export type SetProcessing = (processing: boolean) => void
 
 export type Reset = (data: unknown) => Promise<void>
-
-export type REPLACE_STATE = {
-  optimize?: boolean
-  /**
-   * If `sanitize` is true, default values will be set for form field properties that are not present in the incoming state.
-   * For example, `valid` will be set to true if it is not present in the incoming state.
-   */
-  sanitize?: boolean
-  state: FormState
-  type: 'REPLACE_STATE'
-}
-
-export type REMOVE = {
-  path: string
-  type: 'REMOVE'
-}
-
-export type MODIFY_CONDITION = {
-  path: string
-  result: boolean
-  type: 'MODIFY_CONDITION'
-  user: User
-}
-
-export type UPDATE = {
-  path: string
-  type: 'UPDATE'
-} & Partial<FormField>
-
-export type UPDATE_MANY = {
-  formState: FormState
-  type: 'UPDATE_MANY'
-}
-
-export type REMOVE_ROW = {
-  path: string
-  rowIndex: number
-  type: 'REMOVE_ROW'
-}
-
-export type ADD_ROW = {
-  blockType?: string
-  path: string
-  rowIndex?: number
-  subFieldState?: FormState
-  type: 'ADD_ROW'
-}
-
-export type REPLACE_ROW = {
-  blockType?: string
-  path: string
-  rowIndex: number
-  subFieldState?: FormState
-  type: 'REPLACE_ROW'
-}
-
-export type DUPLICATE_ROW = {
-  path: string
-  rowIndex: number
-  type: 'DUPLICATE_ROW'
-}
-
-export type MOVE_ROW = {
-  moveFromIndex: number
-  moveToIndex: number
-  path: string
-  type: 'MOVE_ROW'
-}
-
-export type ADD_SERVER_ERRORS = {
-  errors: ValidationFieldError[]
-  type: 'ADD_SERVER_ERRORS'
-}
-
-export type SET_ROW_COLLAPSED = {
-  path: string
-  type: 'SET_ROW_COLLAPSED'
-  updatedRows: Row[]
-}
-
-export type SET_ALL_ROWS_COLLAPSED = {
-  path: string
-  type: 'SET_ALL_ROWS_COLLAPSED'
-  updatedRows: Row[]
-}
-
-export type FieldAction =
-  | ADD_ROW
-  | ADD_SERVER_ERRORS
-  | DUPLICATE_ROW
-  | MODIFY_CONDITION
-  | MOVE_ROW
-  | REMOVE
-  | REMOVE_ROW
-  | REPLACE_ROW
-  | REPLACE_STATE
-  | SET_ALL_ROWS_COLLAPSED
-  | SET_ROW_COLLAPSED
-  | UPDATE
-  | UPDATE_MANY
 
 export type FormFieldsContext = [FormState, Dispatch<FieldAction>]
 
