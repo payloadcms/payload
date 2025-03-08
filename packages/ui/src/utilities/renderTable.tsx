@@ -156,8 +156,10 @@ export const renderTable = ({
     })
   }
 
+  const columnsToUse = [...columnState]
+
   if (renderRowTypes) {
-    columnState.unshift({
+    columnsToUse.unshift({
       accessor: 'collection',
       active: true,
       field: {
@@ -181,7 +183,7 @@ export const renderTable = ({
   }
 
   if (enableRowSelections) {
-    columnState.unshift({
+    columnsToUse.unshift({
       accessor: '_select',
       active: true,
       field: {
@@ -197,8 +199,8 @@ export const renderTable = ({
 
   // Add drag handle if data is sortable
   const isSortable = docs.length > 0 && ORDER_FIELD_NAME in docs[0]
-  if (isSortable && !columnState.find((col) => col.accessor === '_dragHandle')) {
-    columnState.unshift({
+  if (isSortable && !columnsToUse.find((col) => col.accessor === '_dragHandle')) {
+    columnsToUse.unshift({
       accessor: '_dragHandle',
       active: true,
       field: {
@@ -214,6 +216,7 @@ export const renderTable = ({
 
   return {
     columnState,
-    Table: <Table appearance={tableAppearance} columns={columnState} data={docs} key="table" />,
+    // key is required since Next.js 15.2.0 to prevent React key error
+    Table: <Table appearance={tableAppearance} columns={columnsToUse} data={docs} key="table" />,
   }
 }
