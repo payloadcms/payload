@@ -145,7 +145,7 @@ export const Table: React.FC<Props> = ({ appearance = 'default', columns, data: 
     }
   }
 
-  const rowIds = localData.map((row) => row.id)
+  const rowIds = localData.map((row) => row.id ?? row._id)
 
   return (
     <div
@@ -178,17 +178,6 @@ export const Table: React.FC<Props> = ({ appearance = 'default', columns, data: 
                   >
                     {activeColumns.map((col, colIndex) => {
                       const { accessor } = col
-
-                      // Example of what it would look like to display integers as sort keys.
-                      // Since we can only do this if query.sort is "_order" or "-_order",
-                      // we'd better always display fractional indexes for consistency.
-                      // if (col.accessor === '_order' && ['_order', '-_order'].includes(query.sort)) {
-                      //   return (
-                      //     <td className={`cell-${accessor}`} key={colIndex}>
-                      //       {(listQueryData.page - 1) * listQueryData.limit + rowIndex + 1}
-                      //     </td>
-                      //   )
-                      // }
 
                       // Use the cellMap to find which index in the renderedCells to use
                       const cell = col.renderedCells[cellMap[row.id]]
