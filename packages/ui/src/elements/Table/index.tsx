@@ -33,7 +33,9 @@ export const Table: React.FC<Props> = ({ appearance = 'default', columns, data: 
   // Update local data when server data changes
   useEffect(() => {
     setLocalData(serverData)
-    setCellMap(Object.fromEntries(serverData.map((item, index) => [String(item.id), index])))
+    setCellMap(
+      Object.fromEntries(serverData.map((item, index) => [String(item.id ?? item._id), index])),
+    )
   }, [serverData])
 
   const activeColumns = columns?.filter((col) => col?.active)
@@ -55,7 +57,7 @@ export const Table: React.FC<Props> = ({ appearance = 'default', columns, data: 
       return
     }
 
-    const movedId = localData[moveFromIndex].id
+    const movedId = localData[moveFromIndex].id ?? localData[moveFromIndex]._id
     const newBeforeRow =
       moveToIndex > moveFromIndex ? localData[moveToIndex] : localData[moveToIndex - 1]
     const newAfterRow =
@@ -88,11 +90,11 @@ export const Table: React.FC<Props> = ({ appearance = 'default', columns, data: 
 
       const target: KeyAndID = newBeforeRow
         ? {
-            id: newBeforeRow.id,
+            id: newBeforeRow.id ?? newBeforeRow._id,
             key: newBeforeRow._order,
           }
         : {
-            id: newAfterRow.id,
+            id: newAfterRow.id ?? newAfterRow._id,
             key: newAfterRow._order,
           }
 
@@ -180,7 +182,7 @@ export const Table: React.FC<Props> = ({ appearance = 'default', columns, data: 
                       const { accessor } = col
 
                       // Use the cellMap to find which index in the renderedCells to use
-                      const cell = col.renderedCells[cellMap[row.id]]
+                      const cell = col.renderedCells[cellMap[row.id ?? row._id]]
 
                       // For drag handles, wrap in div with drag attributes
                       if (accessor === '_dragHandle') {
