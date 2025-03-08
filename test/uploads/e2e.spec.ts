@@ -16,6 +16,7 @@ import {
   saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { assertToastErrors } from '../helpers/assertToastErrors.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { RESTClient } from '../helpers/rest.js'
@@ -440,9 +441,10 @@ describe('Uploads', () => {
 
       // save the document and expect an error
       await page.locator('button#action-save').click()
-      await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
-        'The following field is invalid: Audio',
-      )
+      await assertToastErrors({
+        page,
+        errors: ['Audio'],
+      })
     })
 
     test('should restrict uploads in drawer based on filterOptions', async () => {

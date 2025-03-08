@@ -10,15 +10,7 @@ import {
   reduceFieldsToValues,
   wait,
 } from 'payload/shared'
-import React, {
-  startTransition,
-  useCallback,
-  useEffect,
-  useOptimistic,
-  useRef,
-  useState,
-  useTransition,
-} from 'react'
+import React, { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 
 import type { FieldAction } from './reducer/types.js'
@@ -30,6 +22,7 @@ import type {
   SubmitOptions,
 } from './types.js'
 
+import { FieldErrorsToast } from '../../elements/Toasts/fieldErrors.js'
 import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -437,7 +430,6 @@ export const Form: React.FC<FormProps> = (props) => {
           contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
           if (json.message) {
             errorToast(json.message)
-
             return
           }
 
@@ -477,7 +469,7 @@ export const Form: React.FC<FormProps> = (props) => {
             })
 
             nonFieldErrors.forEach((err) => {
-              errorToast(err.message || t('error:unknown'))
+              errorToast(<FieldErrorsToast errorMessage={err.message || t('error:unknown')} />)
             })
 
             return

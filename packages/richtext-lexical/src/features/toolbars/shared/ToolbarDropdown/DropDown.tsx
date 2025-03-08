@@ -1,6 +1,6 @@
 'use client'
 import { Button } from '@payloadcms/ui'
-import { $addUpdateTag, type LexicalEditor } from 'lexical'
+import { $addUpdateTag, isDOMNode, type LexicalEditor } from 'lexical'
 import React, { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
@@ -229,13 +229,16 @@ export function DropDown({
 
     if (button !== null && showDropDown) {
       const handle = (event: MouseEvent): void => {
-        const { target } = event
-        if (stopCloseOnClickSelf != null) {
-          if (dropDownRef.current != null && dropDownRef.current.contains(target as Node)) {
+        const target = event.target
+        if (!isDOMNode(target)) {
+          return
+        }
+        if (stopCloseOnClickSelf) {
+          if (dropDownRef.current && dropDownRef.current.contains(target)) {
             return
           }
         }
-        if (!button.contains(target as Node)) {
+        if (!button.contains(target)) {
           setShowDropDown(false)
         }
       }

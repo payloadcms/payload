@@ -20,6 +20,7 @@ import {
   saveDocHotkeyAndAssert,
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
+import { assertToastErrors } from '../../../helpers/assertToastErrors.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../helpers/rest.js'
@@ -448,8 +449,6 @@ describe('relationship', () => {
         }),
       ).toBeVisible()
     })
-
-    test.skip('has many', async () => {})
   })
 
   describe('should duplicate document within document drawer', () => {
@@ -509,8 +508,6 @@ describe('relationship', () => {
         }),
       ).toBeVisible()
     })
-
-    test.skip('has many', async () => {})
   })
 
   describe('should delete document within document drawer', () => {
@@ -569,8 +566,6 @@ describe('relationship', () => {
         }),
       ).toBeHidden()
     })
-
-    test.skip('has many', async () => {})
   })
 
   // TODO: Fix this. This test flakes due to react select
@@ -603,9 +598,10 @@ describe('relationship', () => {
       .click()
 
     await page.click('#action-save', { delay: 100 })
-    await expect(page.locator('.payload-toast-container')).toContainText(
-      'The following field is invalid: Relationship With Min Rows',
-    )
+    await assertToastErrors({
+      page,
+      errors: ['Relationship With Min Rows'],
+    })
   })
 
   test('should sort relationship options by sortOptions property (ID in ascending order)', async () => {
