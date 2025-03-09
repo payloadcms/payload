@@ -20,6 +20,10 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
         {
+          name: 'hyphenated-name',
+          type: 'text',
+        },
+        {
           type: 'relationship',
           relationTo: 'posts',
           name: 'relationToSelf',
