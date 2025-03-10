@@ -1,6 +1,7 @@
 import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { addBlock } from 'helpers/e2e/addBlock.js'
 import { trackNetworkRequests } from 'helpers/e2e/trackNetworkRequests.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
@@ -49,6 +50,27 @@ test.describe('Form State', () => {
     await page.locator('#field-title').fill(title)
     await page.locator('#field-validateUsingEvent').fill('Not allowed')
     await saveDocAndAssert(page, '#action-save', 'error')
+
+    expect(true).toBe(true)
+  })
+
+  test('should fire a single network request for onChange events when manipulating blocks', async () => {
+    await page.goto(postsUrl.create)
+
+    await trackNetworkRequests(
+      page,
+      postsUrl.create,
+      async () => {
+        await addBlock({
+          page,
+          blockLabel: 'Text',
+          fieldName: 'blocks',
+        })
+      },
+      {
+        allowedNumberOfRequests: 1,
+      },
+    )
 
     expect(true).toBe(true)
   })

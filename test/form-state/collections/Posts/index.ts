@@ -31,5 +31,29 @@ export const PostsCollection: CollectionConfig = {
         return true
       },
     },
+    {
+      name: 'blocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'text',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          slug: 'number',
+          fields: [
+            {
+              name: 'number',
+              type: 'number',
+            },
+          ],
+        },
+      ],
+    },
   ],
 }

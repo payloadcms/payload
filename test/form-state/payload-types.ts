@@ -123,6 +123,22 @@ export interface Post {
    * This field should only validate on submit. Try typing "Not allowed" and submitting the form.
    */
   validateUsingEvent?: string | null;
+  blocks?:
+    | (
+        | {
+            text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'text';
+          }
+        | {
+            number?: number | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'number';
+          }
+      )[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -207,6 +223,24 @@ export interface PayloadMigration {
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
   validateUsingEvent?: T;
+  blocks?:
+    | T
+    | {
+        text?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        number?:
+          | T
+          | {
+              number?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
