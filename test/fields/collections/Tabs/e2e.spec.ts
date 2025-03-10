@@ -73,7 +73,6 @@ describe('Tabs', () => {
     const jsonValue = '{ "foo": "bar"}'
 
     await page.goto(url.create)
-    await page.waitForURL(url.create)
 
     await switchTab(page, '.tabs-field__tab-button:has-text("Tab with Row")')
     await page.locator('#field-textInRow').fill(textInRowValue)

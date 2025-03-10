@@ -90,6 +90,10 @@ type PayloadRequestData = {
   data?: JsonObject
   /** The file on the request, same rules apply as the `data` property */
   file?: {
+    /**
+     * Context of the file when it was uploaded via client side.
+     */
+    clientUploadContext?: unknown
     data: Buffer
     mimetype: string
     name: string
@@ -145,6 +149,7 @@ export type JoinQuery<TSlug extends CollectionSlug = string> =
         | Partial<{
             [K in keyof TypedCollectionJoins[TSlug]]:
               | {
+                  count?: boolean
                   limit?: number
                   page?: number
                   sort?: string

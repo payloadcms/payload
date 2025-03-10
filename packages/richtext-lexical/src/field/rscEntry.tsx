@@ -39,7 +39,7 @@ export const RscEntryLexicalField: React.FC<
     throw new Error('Initialized lexical RSC field without a field name')
   }
 
-  const { clientFeatures, featureClientSchemaMap } = initLexicalFeatures({
+  const { clientFeatures, featureClientImportMap, featureClientSchemaMap } = initLexicalFeatures({
     clientFieldSchemaMap: args.clientFieldSchemaMap,
     fieldSchemaMap: args.fieldSchemaMap,
     i18n: args.i18n,
@@ -88,6 +88,7 @@ export const RscEntryLexicalField: React.FC<
 
   const props: LexicalRichTextFieldProps = {
     clientFeatures,
+    featureClientImportMap,
     featureClientSchemaMap, // TODO: Does client need this? Why cant this just live in the server
     field: args.clientField as RichTextFieldClient,
     forceRender: args.forceRender,

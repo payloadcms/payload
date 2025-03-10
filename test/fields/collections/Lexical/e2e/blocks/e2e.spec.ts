@@ -24,6 +24,7 @@ import {
   saveDocAndAssert,
 } from '../../../../../helpers.js'
 import { AdminUrlUtil } from '../../../../../helpers/adminUrlUtil.js'
+import { assertToastErrors } from '../../../../../helpers/assertToastErrors.js'
 import { trackNetworkRequests } from '../../../../../helpers/e2e/trackNetworkRequests.js'
 import { initPayloadE2ENoConfig } from '../../../../../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../../../helpers/reInitializeDB.js'
@@ -570,9 +571,10 @@ describe('lexicalBlocks', () => {
       await topLevelDocTextField.fill('invalid')
 
       await saveDocAndAssert(page, '#action-save', 'error')
-      await expect(page.locator('.payload-toast-container')).toHaveText(
-        'The following fields are invalid: Lexical With Blocks, LexicalWithBlocks > Group > Text Depends On Doc Data',
-      )
+      await assertToastErrors({
+        page,
+        errors: ['Lexical With Blocks', 'Lexical With Blocks → Group → Text Depends On Doc Data'],
+      })
       await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
 
       await trackNetworkRequests(
@@ -593,9 +595,13 @@ describe('lexicalBlocks', () => {
       await blockGroupTextField.fill('invalid')
 
       await saveDocAndAssert(page, '#action-save', 'error')
-      await expect(page.locator('.payload-toast-container')).toHaveText(
-        'The following fields are invalid: Lexical With Blocks, LexicalWithBlocks > Group > Text Depends On Sibling Data',
-      )
+      await assertToastErrors({
+        page,
+        errors: [
+          'Lexical With Blocks',
+          'Lexical With Blocks → Group → Text Depends On Sibling Data',
+        ],
+      })
       await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
 
       await trackNetworkRequests(
@@ -616,10 +622,10 @@ describe('lexicalBlocks', () => {
       await blockTextField.fill('invalid')
 
       await saveDocAndAssert(page, '#action-save', 'error')
-      await expect(page.locator('.payload-toast-container')).toHaveText(
-        'The following fields are invalid: Lexical With Blocks, LexicalWithBlocks > Group > Text Depends On Block Data',
-      )
-
+      await assertToastErrors({
+        page,
+        errors: ['Lexical With Blocks', 'Lexical With Blocks → Group → Text Depends On Block Data'],
+      })
       await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
 
       await trackNetworkRequests(
@@ -1190,7 +1196,7 @@ describe('lexicalBlocks', () => {
       // Ensure radio button option1 of radioButtonBlock2 (the default option) is still selected
       await expect(
         radioButtonBlock2.locator('.radio-input:has-text("Option 1")').first(),
-      ).toBeChecked()
+      ).toHaveClass(/radio-input--is-selected/)
 
       // Click radio button option3 of radioButtonBlock2
       await radioButtonBlock2
@@ -1201,7 +1207,7 @@ describe('lexicalBlocks', () => {
       // Ensure previously clicked option2 of radioButtonBlock1 is still selected
       await expect(
         radioButtonBlock1.locator('.radio-input:has-text("Option 2")').first(),
-      ).toBeChecked()
+      ).toHaveClass(/radio-input--is-selected/)
 
       /**
        * Now save and check the actual data. radio button block 1 should have option2 selected and radio button block 2 should have option3 selected

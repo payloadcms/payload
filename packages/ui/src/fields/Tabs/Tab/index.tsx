@@ -25,15 +25,16 @@ export const TabComponent: React.FC<TabProps> = ({ isActive, parentPath, setIsAc
   const [errorCount, setErrorCount] = useState(undefined)
 
   const path = [
-    ...(parentPath ? parentPath.split('.') : []),
+    // removes parent 'tabs' path segment, i.e. `_index-0`
+    ...(parentPath ? parentPath.split('.').slice(0, -1) : []),
     ...(tabHasName(tab) ? [tab.name] : []),
-  ].join('.')
+  ]
 
   const fieldHasErrors = errorCount > 0
 
   return (
     <React.Fragment>
-      <WatchChildErrors fields={tab.fields} path={path.split('.')} setErrorCount={setErrorCount} />
+      <WatchChildErrors fields={tab.fields} path={path} setErrorCount={setErrorCount} />
       <button
         className={[
           baseClass,

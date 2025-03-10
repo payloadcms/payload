@@ -222,7 +222,7 @@ export function PublishButton({ label: labelProp }: PublishButtonClientProps) {
                     )}
                     {localization && canPublish && (
                       <PopupList.ButtonGroup>
-                        <PopupList.Button onClick={secondaryPublish}>
+                        <PopupList.Button id="publish-locale" onClick={secondaryPublish}>
                           {secondaryLabel}
                         </PopupList.Button>
                       </PopupList.ButtonGroup>

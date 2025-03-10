@@ -110,9 +110,9 @@ export const RelationshipCell: React.FC<RelationshipCellProps> = ({
         let fileField = null
 
         if (field.type === 'upload') {
-          const relatedCollectionPreview = !!relatedCollection.upload.displayPreview
+          const fieldPreviewAllowed = 'displayPreview' in field ? field.displayPreview : undefined
           const previewAllowed =
-            field.displayPreview || (relatedCollectionPreview && field.displayPreview !== false)
+            fieldPreviewAllowed ?? relatedCollection.upload?.displayPreview ?? true
 
           if (previewAllowed && document) {
             fileField = (

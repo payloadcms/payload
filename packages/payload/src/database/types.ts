@@ -145,6 +145,8 @@ export interface BaseDatabaseAdapter {
 
   updateGlobalVersion: UpdateGlobalVersion
 
+  updateMany: UpdateMany
+
   updateOne: UpdateOne
 
   updateVersion: UpdateVersion
@@ -292,6 +294,12 @@ export type UpdateGlobalVersionArgs<T = TypeWithID> = {
    */
   options?: Record<string, unknown>
   req?: Partial<PayloadRequest>
+  /**
+   * If true, returns the updated documents
+   *
+   * @default true
+   */
+  returning?: boolean
   select?: SelectType
   versionData: T
 } & (
@@ -319,6 +327,12 @@ export type FindGlobal = <T extends Record<string, unknown> = any>(
 export type CreateGlobalArgs<T extends Record<string, unknown> = any> = {
   data: T
   req?: Partial<PayloadRequest>
+  /**
+   * If true, returns the updated documents
+   *
+   * @default true
+   */
+  returning?: boolean
   slug: string
 }
 export type CreateGlobal = <T extends Record<string, unknown> = any>(
@@ -332,6 +346,12 @@ export type UpdateGlobalArgs<T extends Record<string, unknown> = any> = {
    */
   options?: Record<string, unknown>
   req?: Partial<PayloadRequest>
+  /**
+   * If true, returns the updated documents
+   *
+   * @default true
+   */
+  returning?: boolean
   select?: SelectType
   slug: string
 }
@@ -365,6 +385,12 @@ export type CreateVersionArgs<T = TypeWithID> = {
   parent: number | string
   publishedLocale?: string
   req?: Partial<PayloadRequest>
+  /**
+   * If true, returns the updated documents
+   *
+   * @default true
+   */
+  returning?: boolean
   select?: SelectType
   snapshot?: true
   updatedAt: string
@@ -383,6 +409,12 @@ export type CreateGlobalVersionArgs<T = TypeWithID> = {
   parent: number | string
   publishedLocale?: string
   req?: Partial<PayloadRequest>
+  /**
+   * If true, returns the updated documents
+   *
+   * @default true
+   */
+  returning?: boolean
   select?: SelectType
   snapshot?: true
   updatedAt: string
@@ -403,6 +435,12 @@ export type UpdateVersionArgs<T = TypeWithID> = {
    */
   options?: Record<string, unknown>
   req?: Partial<PayloadRequest>
+  /**
+   * If true, returns the updated documents
+   *
+   * @default true
+   */
+  returning?: boolean
   select?: SelectType
   versionData: T
 } & (
@@ -429,6 +467,12 @@ export type CreateArgs = {
   draft?: boolean
   locale?: string
   req?: Partial<PayloadRequest>
+  /**
+   * If true, returns the updated documents
+   *
+   * @default true
+   */
+  returning?: boolean
   select?: SelectType
 }
 
@@ -445,6 +489,12 @@ export type UpdateOneArgs = {
    */
   options?: Record<string, unknown>
   req?: Partial<PayloadRequest>
+  /**
+   * If true, returns the updated documents
+   *
+   * @default true
+   */
+  returning?: boolean
   select?: SelectType
 } & (
   | {
@@ -462,12 +512,42 @@ export type UpdateOneArgs = {
  */
 export type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
 
+export type UpdateManyArgs = {
+  collection: CollectionSlug
+  data: Record<string, unknown>
+  draft?: boolean
+  joins?: JoinQuery
+  limit?: number
+  locale?: string
+  /**
+   * Additional database adapter specific options to pass to the query
+   */
+  options?: Record<string, unknown>
+  req?: Partial<PayloadRequest>
+  /**
+   * If true, returns the updated documents
+   *
+   * @default true
+   */
+  returning?: boolean
+  select?: SelectType
+  where: Where
+}
+
+export type UpdateMany = (args: UpdateManyArgs) => Promise<Document[] | null>
+
 export type UpsertArgs = {
   collection: CollectionSlug
   data: Record<string, unknown>
   joins?: JoinQuery
   locale?: string
   req?: Partial<PayloadRequest>
+  /**
+   * If true, returns the updated documents
+   *
+   * @default true
+   */
+  returning?: boolean
   select?: SelectType
   where: Where
 }
@@ -478,6 +558,12 @@ export type DeleteOneArgs = {
   collection: CollectionSlug
   joins?: JoinQuery
   req?: Partial<PayloadRequest>
+  /**
+   * If true, returns the updated documents
+   *
+   * @default true
+   */
+  returning?: boolean
   select?: SelectType
   where: Where
 }

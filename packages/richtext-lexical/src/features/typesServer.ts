@@ -27,7 +27,7 @@ import type {
 import type { ServerEditorConfig } from '../lexical/config/types.js'
 import type { Transformer } from '../packages/@lexical/markdown/index.js'
 import type { AdapterProps } from '../types.js'
-import type { HTMLConverter } from './converters/html/converter/types.js'
+import type { HTMLConverter } from './converters/html_deprecated/converter/types.js'
 import type { BaseClientFeatureProps } from './typesClient.js'
 
 export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexicalNode> = (args: {
@@ -221,8 +221,13 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
   /**
    * Allows you to define how a node can be serialized into different formats. Currently, only supports html.
    * Markdown converters are defined in `markdownTransformers` and not here.
+   *
+   * @deprecated - will be removed in 4.0
    */
   converters?: {
+    /**
+     * @deprecated - will be removed in 4.0
+     */
     html?: HTMLConverter<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>
   }
   /**
@@ -280,8 +285,18 @@ export type ServerFeature<ServerProps, ClientFeatureProps> = {
    * This determines what props will be available on the Client.
    */
   clientFeatureProps?: ClientFeatureProps
-  // @ts-expect-error - TODO: fix this
-  componentImports?: Config['admin']['importMap']['generators'][0] | PayloadComponent[]
+  /**
+   * Adds payload components to the importMap.
+   *
+   * If an object is provided, the imported components will automatically be made available to the client feature, keyed by the object's keys.
+   */
+  componentImports?:
+    | {
+        [key: string]: PayloadComponent
+      }
+    // @ts-expect-error - TODO: fix this
+    | Config['admin']['importMap']['generators'][0]
+    | PayloadComponent[]
   generatedTypes?: {
     modifyOutputSchema: (args: {
       collectionIDFieldTypes: { [key: string]: 'number' | 'string' }

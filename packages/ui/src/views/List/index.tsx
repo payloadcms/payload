@@ -24,7 +24,6 @@ import { TableColumnsProvider } from '../../elements/TableColumns/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { SelectionProvider } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -49,9 +48,7 @@ export function DefaultListView(props: ListViewClientProps) {
     enableRowSelections,
     hasCreatePermission: hasCreatePermissionFromProps,
     listMenuItems,
-    listPreferences,
     newDocumentURL,
-    preferenceKey,
     renderedFilters,
     resolvedFilterOptions,
     Table: InitialTable,
@@ -106,8 +103,6 @@ export function DefaultListView(props: ListViewClientProps) {
 
   const { i18n, t } = useTranslation()
 
-  const drawerDepth = useEditDepth()
-
   const { setStepNav } = useStepNav()
 
   const {
@@ -143,25 +138,18 @@ export function DefaultListView(props: ListViewClientProps) {
   ])
 
   useEffect(() => {
-    if (!drawerDepth) {
+    if (!isInDrawer) {
       setStepNav([
         {
           label: labels?.plural,
         },
       ])
     }
-  }, [setStepNav, labels, drawerDepth])
+  }, [setStepNav, labels, isInDrawer])
+
   return (
     <Fragment>
-      <TableColumnsProvider
-        collectionSlug={collectionSlug}
-        columnState={columnState}
-        docs={docs}
-        enableRowSelections={enableRowSelections}
-        listPreferences={listPreferences}
-        preferenceKey={preferenceKey}
-        setTable={setTable}
-      >
+      <TableColumnsProvider collectionSlug={collectionSlug} columnState={columnState}>
         <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
           <SelectionProvider docs={docs} totalDocs={data.totalDocs} user={user}>
             {BeforeList}
