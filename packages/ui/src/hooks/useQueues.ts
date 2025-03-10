@@ -1,16 +1,22 @@
 import { useRef } from 'react'
 
-export function useQueues() {
+export function useQueues(): {
+  queueTask: (fn: (signal: AbortSignal) => Promise<void>) => void
+} {
   const runningTaskRef = useRef<null | Promise<void>>(null)
-  const queuedTask = useRef<(() => Promise<void>) | null>(null)
+  const queuedTask = useRef<((signal: AbortSignal) => Promise<void>) | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
 
-  const queueTask = (fn: () => Promise<void>) => {
-    // Overwrite the latest task
+  const queueTask = (fn: (signal: AbortSignal) => Promise<void>) => {
+    // Overwrite the queued task every time a new one arrives
     queuedTask.current = fn
 
-    // If there's a running task, don't stack more tasks; just update `queuedTask`
+    // If a task is already running, abort it and return
     if (runningTaskRef.current !== null) {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+
       return
     }
 
@@ -23,7 +29,7 @@ export function useQueues() {
         abortControllerRef.current = controller
 
         try {
-          runningTaskRef.current = taskToRun()
+          runningTaskRef.current = taskToRun(controller.signal)
           await runningTaskRef.current // Wait for the task to complete
         } catch (err) {
           if (err.name !== 'AbortError') {
@@ -38,5 +44,5 @@ export function useQueues() {
     void executeTask()
   }
 
-  return queueTask
+  return { queueTask }
 }
