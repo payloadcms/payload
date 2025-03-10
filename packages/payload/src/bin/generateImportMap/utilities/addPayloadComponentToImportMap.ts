@@ -59,7 +59,7 @@ export function addPayloadComponentToImportMap({
       specifier: exportName,
     }
   } else {
-    // Absolute path or package import, e.g. '@payloadcms/ui' or '/users/username/project/test/fields/components/Field.tsx'
+    // Tsconfig alias or package import, e.g. '@payloadcms/ui' or '@/components/MyComponent'
     imports[importIdentifier] = {
       path: componentPath,
       specifier: exportName,
