@@ -12,7 +12,7 @@ import type { JSX } from 'react'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { TablePlugin as LexicalReactTablePlugin } from '@lexical/react/LexicalTablePlugin'
-import { INSERT_TABLE_COMMAND, TableNode } from '@lexical/table'
+import { INSERT_TABLE_COMMAND, TableCellNode, TableNode, TableRowNode } from '@lexical/table'
 import { mergeRegister } from '@lexical/utils'
 import { formatDrawerSlug, useEditDepth } from '@payloadcms/ui'
 import { $getSelection, $isRangeSelection, COMMAND_PRIORITY_EDITOR, createCommand } from 'lexical'
@@ -97,8 +97,10 @@ export const TablePlugin: PluginComponent = () => {
   const { toggleDrawer } = useLexicalDrawer(drawerSlug, true)
 
   useEffect(() => {
-    if (!editor.hasNodes([TableNode])) {
-      throw new Error('TablePlugin: TableNode is not registered on editor')
+    if (!editor.hasNodes([TableNode, TableRowNode, TableCellNode])) {
+      throw new Error(
+        'TablePlugin: TableNode, TableRowNode, or TableCellNode is not registered on editor',
+      )
     }
 
     return mergeRegister(

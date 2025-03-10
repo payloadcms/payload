@@ -12,6 +12,7 @@ import {
 } from 'lexical'
 
 import type { ToolbarGroup } from '../../toolbars/types.js'
+import type { PluginComponent } from '../../typesClient.js'
 
 import { IndentDecreaseIcon } from '../../../lexical/ui/icons/IndentDecrease/index.js'
 import { IndentIncreaseIcon } from '../../../lexical/ui/icons/IndentIncrease/index.js'
@@ -83,7 +84,7 @@ const toolbarGroups: ToolbarGroup[] = [
 export const IndentFeatureClient = createClientFeature({
   plugins: [
     {
-      Component: TabIndentationPlugin,
+      Component: TabIndentationPlugin as PluginComponent,
       position: 'normal',
     },
   ],

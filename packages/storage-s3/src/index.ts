@@ -142,11 +142,12 @@ export const s3Storage: S3StoragePlugin =
 
 function s3StorageInternal(
   getStorageClient: () => AWS.S3,
-  { acl, bucket, config = {} }: S3StorageOptions,
+  { acl, bucket, clientUploads, config = {} }: S3StorageOptions,
 ): Adapter {
   return ({ collection, prefix }): GeneratedAdapter => {
     return {
       name: 's3',
+      clientUploads,
       generateURL: getGenerateURL({ bucket, config }),
       handleDelete: getHandleDelete({ bucket, getStorageClient }),
       handleUpload: getHandleUpload({
