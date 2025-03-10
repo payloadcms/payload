@@ -1,8 +1,5 @@
 // As this is the demo folder, we import Payload SCSS functions relatively.
-@import '../../styles.scss';
+@use '../../styles.scss';
 
 
 
-div {
-    color: $color-red
-}
