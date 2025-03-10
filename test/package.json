@@ -87,6 +87,7 @@
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "server-only": "^0.0.1",
+    "sass": "1.77.4",
     "slate": "0.91.4",
     "tempy": "^1.0.1",
     "ts-essentials": "10.0.3",

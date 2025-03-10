@@ -1858,6 +1858,9 @@ importers:
       react-dom:
         specifier: 19.0.0
         version: 19.0.0(react@19.0.0)
+      sass:
+        specifier: 1.77.4
+        version: 1.77.4
       server-only:
         specifier: ^0.0.1
         version: 0.0.1
