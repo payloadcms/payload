@@ -228,36 +228,35 @@ export interface Product {
   gallery: (string | Media)[];
   layout?: (CallToActionBlock | ContentBlock | MediaBlock)[] | null;
   enableVariants?: boolean | null;
-  variants?: {
-    options: {
-      label: string;
-      slug: string;
-      values?:
-        | {
-            label: string;
-            slug: string;
-            id?: string | null;
-          }[]
-        | null;
-      id?: string | null;
-    }[];
-    variants?:
+  variantOptions: {
+    label: string;
+    slug: string;
+    options?:
       | {
-          options: {
-            label: string;
-            slug: string;
-            id?: string | null;
-          }[];
-          price: number;
-          /**
-           * Define stock for this variant. A stock of 0 disables checkout for this variant.
-           */
-          stock: number;
-          images?: (string | Media)[] | null;
+          label: string;
+          slug: string;
+          group?: string | null;
           id?: string | null;
         }[]
       | null;
-  };
+    id?: string | null;
+  }[];
+  variants?:
+    | {
+        active?: boolean | null;
+        options: {
+          value: string;
+          slug: string;
+          id?: string | null;
+        }[];
+        price: number;
+        /**
+         * Define stock for this variant. A stock of 0 disables checkout for this variant.
+         */
+        stock: number;
+        id?: string | null;
+      }[]
+    | null;
   /**
    * Define stock for this product. A stock of 0 disables checkout for this product.
    */
@@ -1017,38 +1016,35 @@ export interface ProductsSelect<T extends boolean = true> {
         mediaBlock?: T | MediaBlockSelect<T>;
       };
   enableVariants?: T;
-  variants?:
+  variantOptions?:
     | T
     | {
+        label?: T;
+        slug?: T;
         options?:
           | T
           | {
               label?: T;
               slug?: T;
-              values?:
-                | T
-                | {
-                    label?: T;
-                    slug?: T;
-                    id?: T;
-                  };
+              group?: T;
               id?: T;
             };
-        variants?:
+        id?: T;
+      };
+  variants?:
+    | T
+    | {
+        active?: T;
+        options?:
           | T
           | {
-              options?:
-                | T
-                | {
-                    label?: T;
-                    slug?: T;
-                    id?: T;
-                  };
-              price?: T;
-              stock?: T;
-              images?: T;
+              value?: T;
+              slug?: T;
               id?: T;
             };
+        price?: T;
+        stock?: T;
+        id?: T;
       };
   stock?: T;
   price?: T;

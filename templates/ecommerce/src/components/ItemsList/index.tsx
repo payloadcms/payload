@@ -1,4 +1,3 @@
-import type { InfoType } from '@/collections/Products/ui/types'
 import type { CartItems } from '@/payload-types'
 
 import { Price } from '@/components/Price'
@@ -23,11 +22,13 @@ export const ItemsList: React.FC<Props> = ({ items }) => {
             : undefined
 
         const isVariant = Boolean(item.variant)
+        // todo: fix
         const variant = item.product?.variants?.variants?.length
           ? item.product.variants.variants.find((v) => v.id === item.variant)
           : undefined
 
-        const info = isVariant ? (variant?.info as InfoType) : (product?.info as InfoType)
+        // todo: fix
+        const info = null
 
         if (isVariant) {
           if (variant?.images?.[0]?.image && typeof variant?.images?.[0]?.image !== 'string') {

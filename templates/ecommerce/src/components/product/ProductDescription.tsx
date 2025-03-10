@@ -1,5 +1,4 @@
 import type { Product } from '@/payload-types'
-import type { InfoType } from '@/collections/Products/ui/types'
 
 import RichText from '@/components/RichText'
 import { AddToCart } from '@/components/Cart/AddToCart'

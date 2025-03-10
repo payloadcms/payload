@@ -13,7 +13,6 @@ import { VariantOptions as VariantOptions_a0e2456fee3ce2ca80137b4fecc61f43 } fro
 import { KeyLabel as KeyLabel_5cfa349e0a6907ae2ad53190ba896137 } from '@/collections/Products/ui/RowLabels/KeyLabel'
 import { VariantSelect as VariantSelect_1a0e4d1b7199c27e35f9ba7c7b6c50ab } from '@/collections/Products/ui/Variants/VariantSelect'
 import { VariantLabel as VariantLabel_4328c5fb4d789fba8b97b71b57a7d333 } from '@/collections/Products/ui/RowLabels/VariantLabel'
-import { ProductVariants as ProductVariants_8ea9726ca3ee966cff4c93fdacbdfdd0 } from '@/collections/Products/ui/Variants/ProductVariants'
 import { OverviewComponent as OverviewComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { MetaTitleComponent as MetaTitleComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { MetaImageComponent as MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
@@ -55,8 +54,6 @@ export const importMap = {
     VariantSelect_1a0e4d1b7199c27e35f9ba7c7b6c50ab,
   '@/collections/Products/ui/RowLabels/VariantLabel#VariantLabel':
     VariantLabel_4328c5fb4d789fba8b97b71b57a7d333,
-  '@/collections/Products/ui/Variants/ProductVariants#ProductVariants':
-    ProductVariants_8ea9726ca3ee966cff4c93fdacbdfdd0,
   '@payloadcms/plugin-seo/client#OverviewComponent':
     OverviewComponent_a8a977ebc872c5d5ea7ee689724c0860,
   '@payloadcms/plugin-seo/client#MetaTitleComponent':

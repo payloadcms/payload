@@ -1,10 +1,10 @@
 'use client'
-import { ProductVariant } from '@/collections/Products/ui/types'
+
 import { RowLabelProps, useRowLabel } from '@payloadcms/ui'
 import React, { useEffect, useState } from 'react'
 
 export const VariantLabel: React.FC<RowLabelProps> = () => {
-  const { data, rowNumber } = useRowLabel<ProductVariant>()
+  const { data, rowNumber } = useRowLabel<any>()
   const [label, setLabel] = useState(`Variant ${rowNumber}`)
 
   useEffect(() => {

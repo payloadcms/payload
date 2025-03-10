@@ -1,7 +1,5 @@
 'use client'
 
-import type { InfoType } from '@/collections/Products/ui/types'
-
 import { Price } from '@/components/Price'
 import {
   Sheet,

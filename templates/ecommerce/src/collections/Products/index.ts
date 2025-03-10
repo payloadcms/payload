@@ -9,8 +9,6 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 
-import type { ProductVariant } from './ui/types'
-
 import { admins } from '@/access/admins'
 import { CallToAction } from '@/blocks/CallToAction/config'
 import { Content } from '@/blocks/Content/config'
@@ -121,22 +119,32 @@ export const Products: CollectionConfig = {
               type: 'checkbox',
             },
             {
-              name: 'variants',
-              type: 'group',
+              name: 'variantOptions',
+              type: 'array',
               admin: {
-                condition: (data, siblingData) => Boolean(siblingData.enableVariants),
-                // components: {
-                //   Field: '@/collections/Products/ui/Variants/ProductVariants#ProductVariants',
-                // },
+                components: {
+                  RowLabel: '@/collections/Products/ui/RowLabels/KeyLabel#KeyLabel',
+                  Field: '@/collections/Products/ui/Variants/VariantOptions#VariantOptions',
+                },
+                initCollapsed: true,
               },
               fields: [
+                {
+                  name: 'label',
+                  type: 'text',
+                  required: true,
+                },
+                {
+                  name: 'slug',
+                  type: 'text',
+                  required: true,
+                },
                 {
                   name: 'options',
                   type: 'array',
                   admin: {
                     components: {
-                      RowLabel: '@/collections/Products/ui/RowLabels/KeyLabel#KeyLabel',
-                      Field: '@/collections/Products/ui/Variants/VariantOptions#VariantOptions',
+                      RowLabel: '@/collections/Products/ui/RowLabels/OptionLabel#OptionLabel',
                     },
                     initCollapsed: true,
                   },
@@ -152,144 +160,104 @@ export const Products: CollectionConfig = {
                       required: true,
                     },
                     {
-                      name: 'values',
-                      type: 'array',
-                      admin: {
-                        components: {
-                          RowLabel: '@/collections/Products/ui/RowLabels/OptionLabel#OptionLabel',
-                        },
-                        initCollapsed: true,
-                      },
-                      fields: [
-                        {
-                          name: 'label',
-                          type: 'text',
-                          required: true,
-                        },
-                        {
-                          name: 'slug',
-                          type: 'text',
-                          required: true,
-                        },
-                      ],
+                      name: 'group',
+                      type: 'text',
                     },
                   ],
-                  label: 'Variant options',
-                  required: true,
-                  minRows: 1,
+                },
+              ],
+              label: 'Variant options',
+              required: true,
+              minRows: 1,
+            },
+            {
+              name: 'variants',
+              type: 'array',
+              admin: {
+                components: {
+                  RowLabel: '@/collections/Products/ui/RowLabels/VariantLabel#VariantLabel',
+                  Field: '@/collections/Products/ui/Variants/VariantSelect#VariantSelect',
+                },
+                condition: (data, siblingData) => {
+                  return Boolean(siblingData?.variantOptions?.length)
+                },
+                initCollapsed: true,
+              },
+              fields: [
+                {
+                  type: 'checkbox',
+                  name: 'active',
+                  defaultValue: true,
                 },
                 {
-                  name: 'variants',
+                  name: 'options',
                   type: 'array',
-                  admin: {
-                    components: {
-                      RowLabel: '@/collections/Products/ui/RowLabels/VariantLabel#VariantLabel',
-                    },
-                    condition: (data, siblingData) => {
-                      return Boolean(siblingData?.options?.length)
-                    },
-                    initCollapsed: true,
-                  },
                   fields: [
                     {
-                      name: 'options',
-                      type: 'array',
-                      admin: {
-                        components: {
-                          Field: '@/collections/Products/ui/Variants/VariantSelect#VariantSelect',
-                        },
-                      },
-                      fields: [
-                        {
-                          type: 'row',
-                          fields: [
-                            {
-                              name: 'label',
-                              type: 'text',
-                              required: true,
-                            },
-                            {
-                              name: 'slug',
-                              type: 'text',
-                              required: true,
-                            },
-                          ],
-                        },
-                      ],
+                      name: 'value',
+                      type: 'text',
                       required: true,
                     },
                     {
-                      type: 'row',
-                      fields: [
-                        {
-                          name: 'price',
-                          type: 'number',
-                          required: true,
-                        },
-                        {
-                          name: 'stock',
-                          type: 'number',
-                          admin: {
-                            description:
-                              'Define stock for this variant. A stock of 0 disables checkout for this variant.',
-                            width: '50%',
-                          },
-                          defaultValue: 0,
-                          required: true,
-                        },
-                      ],
-                    },
-                    {
-                      name: 'images',
-                      type: 'upload',
-                      relationTo: 'media',
-                      hasMany: true,
+                      name: 'slug',
+                      type: 'text',
+                      required: true,
                     },
                   ],
-                  labels: {
-                    plural: 'Variants',
-                    singular: 'Variant',
-                  },
                   required: true,
-                  minRows: 1,
-                  validate: (value, { siblingData }) => {
-                    // @ts-expect-error
-                    if (siblingData.variants.length) {
-                      // @ts-expect-error
-                      const hasDuplicate = siblingData.variants.some(
-                        (variant: ProductVariant, index) => {
-                          // Check this against other variants
-                          // @ts-expect-error
-                          const dedupedArray = [...siblingData.variants].filter(
-                            (_, i) => i !== index,
-                          )
-
-                          // Join the arrays then compare the strings, note that we sort the array before it's saved in the custom component
-                          const test = dedupedArray.find((otherOption: ProductVariant) => {
-                            const firstOption = otherOption?.options
-                              ?.map((option) => option.slug)
-                              .join('')
-                            const secondOption = variant?.options
-                              ?.map((option) => option.slug)
-                              .join('')
-
-                            return firstOption === secondOption
-                          })
-
-                          return Boolean(test)
-                        },
-                      )
-
-                      if (hasDuplicate) {
-                        return 'There is a duplicate variant'
-                      }
-                    }
-
-                    return true
+                },
+                {
+                  name: 'price',
+                  type: 'number',
+                  required: true,
+                },
+                {
+                  name: 'stock',
+                  type: 'number',
+                  admin: {
+                    description:
+                      'Define stock for this variant. A stock of 0 disables checkout for this variant.',
+                    width: '50%',
                   },
+                  defaultValue: 0,
+                  required: true,
                 },
               ],
-              label: false,
+              labels: {
+                plural: 'Variants',
+                singular: 'Variant',
+              },
+              required: true,
+              minRows: 1,
+              validate: (value, { siblingData }) => {
+                // @ts-expect-error
+                if (siblingData.variants.length) {
+                  // @ts-expect-error
+                  const hasDuplicate = siblingData.variants.some((variant, index) => {
+                    // Check this against other variants
+                    // @ts-expect-error
+                    const dedupedArray = [...siblingData.variants].filter((_, i) => i !== index)
+
+                    // Join the arrays then compare the strings, note that we sort the array before it's saved in the custom component
+                    const test = dedupedArray.find((otherOption) => {
+                      const firstOption = otherOption?.options
+                        ?.map((option) => option.slug)
+                        .join('')
+                      const secondOption = variant?.options?.map((option) => option.slug).join('')
+
+                      return firstOption === secondOption
+                    })
+
+                    return Boolean(test)
+                  })
+
+                  if (hasDuplicate) {
+                    return 'There is a duplicate variant'
+                  }
+                }
+
+                return true
+              },
             },
             {
               name: 'stock',
@@ -385,6 +353,6 @@ export const Products: CollectionConfig = {
     drafts: {
       autosave: false,
     },
-    maxPerDoc: 50,
+    maxPerDoc: 1,
   },
 }

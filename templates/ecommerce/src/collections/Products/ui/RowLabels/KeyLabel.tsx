@@ -2,10 +2,8 @@
 import { RowLabelProps, useRowLabel } from '@payloadcms/ui'
 import React, { useEffect, useState } from 'react'
 
-import type { OptionKey } from '../types'
-
 export const KeyLabel: React.FC<RowLabelProps> = () => {
-  const { data, rowNumber } = useRowLabel<OptionKey>()
+  const { data, rowNumber } = useRowLabel<any>()
   const [label, setLabel] = useState(`Key ${rowNumber}`)
 
   useEffect(() => {
