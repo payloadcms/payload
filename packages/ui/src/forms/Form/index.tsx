@@ -10,7 +10,7 @@ import {
   reduceFieldsToValues,
   wait,
 } from 'payload/shared'
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import type {
@@ -103,6 +103,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const [disabled, setDisabled] = useState(disabledFromProps || false)
   const [isMounted, setIsMounted] = useState(false)
   const [modified, setModified] = useState(false)
+
   /**
    * Tracks wether the form state passes validation.
    * For example the state could be submitted but invalid as field errors have been returned.
@@ -116,16 +117,15 @@ export const Form: React.FC<FormProps> = (props) => {
   const formRef = useRef<HTMLFormElement>(null)
   const contextRef = useRef({} as FormContextType)
   const abortResetFormRef = useRef<AbortController>(null)
+  const isFirstRenderRef = useRef(true)
 
   const fieldsReducer = useReducer(fieldReducer, {}, () => initialState)
 
-  /**
-   * `fields` is the current, up-to-date state/data of all fields in the form. It can be modified by using dispatchFields,
-   * which calls the fieldReducer, which then updates the state.
-   */
   const [fields, dispatchFields] = fieldsReducer
 
   contextRef.current.fields = fields
+
+  const prevFields = useRef(fields)
 
   const validateForm = useCallback(async () => {
     const validatedFieldState = {}
@@ -740,6 +740,8 @@ export const Form: React.FC<FormProps> = (props) => {
       })
 
       if (changed) {
+        prevFields.current = newState
+
         dispatchFields({
           type: 'REPLACE_STATE',
           optimize: false,
@@ -749,31 +751,16 @@ export const Form: React.FC<FormProps> = (props) => {
     }
   })
 
-  const prevFields = useRef(contextRef.current.fields)
-  const isFirstRenderRef = useRef(true)
-
   useDebouncedEffect(
     () => {
-      if (isFirstRenderRef.current || !dequal(contextRef.current.fields, prevFields.current)) {
-        if (modified) {
-          queueTask(async () => {
-            await executeOnChange(submitted)
-          })
-        }
+      if ((isFirstRenderRef.current || !dequal(fields, prevFields.current)) && modified) {
+        queueTask(async () => executeOnChange(submitted))
       }
 
+      prevFields.current = fields
       isFirstRenderRef.current = false
-      prevFields.current = contextRef.current.fields
     },
-    /*
-      Make sure we trigger this whenever modified changes (not just when `fields` changes),
-      otherwise we will miss merging server form state for the first form update/onChange.
-
-      Here's why:
-        `fields` updates before `modified`, because setModified is in a setTimeout.
-        So on the first change, modified is false, so we don't trigger the effect even though we should.
-    **/
-    [modified, submitted, contextRef.current.fields],
+    [modified, submitted, fields, queueTask],
     250,
   )
 
