@@ -201,7 +201,7 @@ export {
   useWatchForm,
 } from '../../forms/Form/context.js'
 export { Form, type FormProps } from '../../forms/Form/index.js'
-export { fieldReducer } from '../../forms/Form/fieldReducer.js'
+export { fieldReducer } from '../../forms/Form/reducer/index.js'
 export { NullifyLocaleField } from '../../forms/NullifyField/index.js'
 export { RenderFields } from '../../forms/RenderFields/index.js'
 export { RowLabel, type RowLabelProps } from '../../forms/RowLabel/index.js'

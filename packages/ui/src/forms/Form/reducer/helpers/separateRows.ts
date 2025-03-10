@@ -1,4 +1,3 @@
-'use client'
 import type { FormState } from 'payload'
 
 type Result = {
@@ -29,19 +28,4 @@ export const separateRows = (path: string, fields: FormState): Result => {
     remainingFields,
     rows,
   }
-}
-
-export const flattenRows = (path: string, rows: FormState[]): FormState => {
-  return rows.reduce(
-    (fields, row, i) => ({
-      ...fields,
-      ...Object.entries(row).reduce((subFields, [subPath, subField]) => {
-        return {
-          ...subFields,
-          [`${path}.${i}.${subPath}`]: { ...subField },
-        }
-      }, {}),
-    }),
-    {},
-  )
 }

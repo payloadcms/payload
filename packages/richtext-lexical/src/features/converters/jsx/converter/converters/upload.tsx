@@ -12,7 +12,7 @@ export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
       return null
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+     
     const uploadDoc = uploadNode.value as FileData & TypeWithID
 
     const url = uploadDoc.url
