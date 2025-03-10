@@ -41,14 +41,14 @@ jobs:
         with:
           filters: |
             needs_build:
-              - '.github/workflows/**'
+              - '.github/workflows/main.yml'
               - 'packages/**'
               - 'test/**'
               - 'pnpm-lock.yaml'
               - 'package.json'
               - 'templates/**'
             needs_tests:
-              - '.github/workflows/**'
+              - '.github/workflows/main.yml'
               - 'packages/**'
               - 'test/**'
               - 'pnpm-lock.yaml'

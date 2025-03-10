@@ -10,6 +10,7 @@ import type { ReloadDoc } from '../types.js'
 import { Button } from '../../../elements/Button/index.js'
 import { useDocumentDrawer } from '../../../elements/DocumentDrawer/index.js'
 import { ThumbnailComponent } from '../../../elements/Thumbnail/index.js'
+import { useConfig } from '../../../providers/Config/index.js'
 import './index.scss'
 
 const baseClass = 'upload-relationship-details'
@@ -21,6 +22,7 @@ type Props = {
   readonly byteSize: number
   readonly className?: string
   readonly collectionSlug: string
+  readonly displayPreview?: boolean
   readonly filename: string
   readonly id?: number | string
   readonly mimeType: string
@@ -41,6 +43,7 @@ export function RelationshipContent(props: Props) {
     byteSize,
     className,
     collectionSlug,
+    displayPreview,
     filename,
     mimeType,
     onRemove,
@@ -51,6 +54,12 @@ export function RelationshipContent(props: Props) {
     x,
     y,
   } = props
+
+  const { config } = useConfig()
+  const collectionConfig =
+    'collections' in config
+      ? config.collections.find((collection) => collection.slug === collectionSlug)
+      : undefined
 
   const [DocumentDrawer, _, { openDrawer }] = useDocumentDrawer({
     id: src ? id : undefined,
@@ -80,17 +89,20 @@ export function RelationshipContent(props: Props) {
   }
 
   const metaText = withMeta ? generateMetaText(mimeType, byteSize) : ''
+  const previewAllowed = displayPreview ?? collectionConfig.upload?.displayPreview ?? true
 
   return (
     <div className={[baseClass, className].filter(Boolean).join(' ')}>
       <div className={`${baseClass}__imageAndDetails`}>
-        <ThumbnailComponent
-          alt={alt}
-          className={`${baseClass}__thumbnail`}
-          filename={filename}
-          fileSrc={thumbnailSrc}
-          size="small"
-        />
+        {previewAllowed && (
+          <ThumbnailComponent
+            alt={alt}
+            className={`${baseClass}__thumbnail`}
+            filename={filename}
+            fileSrc={thumbnailSrc}
+            size="small"
+          />
+        )}
         <div className={`${baseClass}__details`}>
           <p className={`${baseClass}__filename`}>
             {src ? (

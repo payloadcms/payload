@@ -1,10 +1,10 @@
 {
   "name": "@tools/releaser",
   "version": "0.0.1",
-  "description": "",
+  "description": "Release scripts for Payload",
   "keywords": [],
-  "license": "ISC",
-  "author": "",
+  "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "type": "module",
   "exports": {
     ".": {

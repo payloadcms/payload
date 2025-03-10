@@ -67,7 +67,7 @@ export const updateVersion: UpdateVersion = async function updateVersion(
     return null
   }
 
-  transform({ adapter: this, data: doc, fields, operation: 'write' })
+  transform({ adapter: this, data: doc, fields, operation: 'read' })
 
   return doc
 }

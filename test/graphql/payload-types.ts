@@ -64,7 +64,6 @@ export interface Config {
   auth: {
     users: UserAuthOperations;
   };
-  blocks: {};
   collections: {
     posts: Post;
     users: User;
@@ -119,6 +118,7 @@ export interface UserAuthOperations {
 export interface Post {
   id: string;
   title?: string | null;
+  'hyphenated-name'?: string | null;
   relationToSelf?: (string | null) | Post;
   updatedAt: string;
   createdAt: string;
@@ -203,6 +203,7 @@ export interface PayloadMigration {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
+  'hyphenated-name'?: T;
   relationToSelf?: T;
   updatedAt?: T;
   createdAt?: T;
