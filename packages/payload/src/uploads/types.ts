@@ -1,6 +1,7 @@
 import type { ResizeOptions, Sharp } from 'sharp'
 
 import type { TypeWithID } from '../collections/config/types.js'
+import type { PayloadComponent } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { WithMetadata } from './optionallyAppendMetadata.js'
 
@@ -101,12 +102,25 @@ export type AllowList = Array<{
   search?: string
 }>
 
+type Admin = {
+  components?: {
+    /**
+     * The Controls component to extend the upload controls in the admin panel.
+     */
+    controls?: PayloadComponent[]
+  }
+}
+
 export type UploadConfig = {
   /**
    * The adapter name to use for uploads. Used for storage adapter telemetry.
    * @default undefined
    */
   adapter?: string
+  /**
+   * The admin configuration for the upload field.
+   */
+  admin?: Admin
   /**
    * Represents an admin thumbnail, which can be either a React component or a string.
    * - If a string, it should be one of the image size names.
@@ -201,6 +215,7 @@ export type UploadConfig = {
    * @default undefined
    */
   modifyResponseHeaders?: ({ headers }: { headers: Headers }) => Headers
+
   /**
    * Controls the behavior of pasting/uploading files from URLs.
    * If set to `false`, fetching from remote URLs is disabled.
