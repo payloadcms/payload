@@ -10256,13 +10256,6 @@ pure-rand@^6.0.0:
   resolved "https://registry.yarnpkg.com/pure-rand/-/pure-rand-6.0.4.tgz#50b737f6a925468679bff00ad20eade53f37d5c7"
   integrity sha512-LA0Y9kxMYv47GIPJy6MI84fqTd2HmYZI83W/kM/SkKfDlajnZYfmXFTxkbY+xSBPkLJxltMa9hIkmdc29eguMA==
 
-qs-middleware@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/qs-middleware/-/qs-middleware-1.0.3.tgz#84f3535275ba20fd00c2122efacce6ab01092c19"
-  integrity sha512-ymlixxD/0Bj3BMY9x1z8ENdQdhkmsIbDNyVvfM8soHn5p/CRFlLPrmtxmE5aG//q1PzHHSGuLi+6QlHezivseg==
-  dependencies:
-    qs "~6.4.0"
-
 qs@6.11.0:
   version "6.11.0"
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.11.0.tgz#fd0d963446f7a65e1367e01abd85429453f0c37a"
@@ -10276,11 +10269,6 @@ qs@^6.11.0, qs@^6.9.1:
   integrity sha512-tDNIz22aBzCDxLtVH++VnTfzxlfeK5CbqohpSqpJgj1Wg/cQbStNAz3NuqCs5vV+pjBsK4x4pN9HlVh7rcYRiA==
   dependencies:
     side-channel "^1.0.4"
-
-qs@~6.4.0:
-  version "6.4.1"
-  resolved "https://registry.yarnpkg.com/qs/-/qs-6.4.1.tgz#2bad97710a5b661c366b378b1e3a44a592ff45e6"
-  integrity sha512-LQy1Q1fcva/UsnP/6Iaa4lVeM49WiOitu2T4hZCyA/elLKu37L99qcBJk4VCCk+rdLvnMzfKyiN3SZTqdAZGSQ==
 
 querystringify@^2.1.1:
   version "2.2.0"

@@ -3,7 +3,6 @@ import passport from 'passport';
 import compression from 'compression';
 import bodyParser from 'body-parser';
 import methodOverride from 'method-override';
-import qsMiddleware from 'qs-middleware';
 import fileUpload from 'express-fileupload';
 import rateLimit from 'express-rate-limit';
 import localizationMiddleware from '../../localization/middleware';
@@ -15,6 +14,7 @@ import corsHeaders from './corsHeaders';
 import convertPayload from './convertPayload';
 import { i18nMiddleware } from './i18n';
 import defaultPayload from './defaultPayload';
+import { addParsedQuery } from './addParsedQuery';
 
 const middleware = (payload: Payload): any => {
   const rateLimitOptions: {
@@ -40,7 +40,7 @@ const middleware = (payload: Payload): any => {
     i18nMiddleware(payload.config.i18n),
     identifyAPI('REST'),
     methodOverride('X-HTTP-Method-Override'),
-    qsMiddleware({ depth: 10, arrayLimit: 1000 }),
+    addParsedQuery({ depth: 10, arrayLimit: 1000 }),
     bodyParser.urlencoded({ extended: true }),
     compression(payload.config.express.compression),
     localizationMiddleware(payload.config.localization),
