@@ -3,11 +3,10 @@
   "version": "3.24.0",
   "private": true,
   "type": "module",
-  "scripts": {
-  },
+  "scripts": {},
   "devDependencies": {
-    "@types/react": "19.0.1",
     "@types/node": "22.13.5",
+    "@types/react": "19.0.1",
     "@types/react-dom": "19.0.1",
     "next": "15.2.0-canary.74",
     "react": "19.0.0",
@@ -15,7 +14,7 @@
     "tsx": "4.19.2",
     "typescript": "5.7.3"
   },
-  "workspaces:": [
-    "packages/*"
-  ]
+  "dependencies": {
+    "sass": "1.70.0"
+  }
 }
