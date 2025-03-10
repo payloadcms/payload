@@ -1,9 +1,11 @@
 /**
  * @param {import('next').NextConfig} nextConfig
+ * @param {Object} [options] - Optional configuration options
+ * @param {boolean} [options.devBundleServerPackages] - Whether to bundle server packages in development mode. @default true
  *
  * @returns {import('next').NextConfig}
  * */
-export const withPayload = (nextConfig = {}) => {
+export const withPayload = (nextConfig = {}, options = {}) => {
   const env = nextConfig?.env || {}
 
   if (nextConfig.experimental?.staleTimes?.dynamic) {
@@ -100,7 +102,7 @@ export const withPayload = (nextConfig = {}) => {
       'pino-pretty',
       'graphql',
       // Do not bundle server-only packages during dev to improve compile speed
-      ...(process.env.npm_lifecycle_event === 'dev'
+      ...(process.env.npm_lifecycle_event === 'dev' && options.devBundleServerPackages === false
         ? [
             'payload',
             '@payloadcms/db-mongodb',
@@ -109,7 +111,6 @@ export const withPayload = (nextConfig = {}) => {
             '@payloadcms/db-vercel-postgres',
             '@payloadcms/drizzle',
             '@payloadcms/email-nodemailer',
-            // TODO: Can I add @payloadcms/richtext-lexical without @payloadcms/richtext-lexical/client ?
             '@payloadcms/email-resend',
             '@payloadcms/graphql',
             '@payloadcms/payload-cloud',
@@ -117,11 +118,13 @@ export const withPayload = (nextConfig = {}) => {
             '@payloadcms/plugin-redirects',
             '@payloadcms/plugin-sentry',
             '@payloadcms/plugin-stripe',
-            //'@payloadcms/storage-azure', //has /client export
-            //'@payloadcms/storage-gcs', //has /client export
-            //'@payloadcms/storage-s3', //has /client export
-            //'@payloadcms/storage-uploadthing', //has /client export
-            //'@payloadcms/storage-vercel-blob', //has /client export
+            // TODO: Add the following packages, excluding their /client subpath exports, once Next.js supports it
+            // @payloadcms/richtext-lexical
+            //'@payloadcms/storage-azure',
+            //'@payloadcms/storage-gcs',
+            //'@payloadcms/storage-s3',
+            //'@payloadcms/storage-uploadthing',
+            //'@payloadcms/storage-vercel-blob',
           ]
         : []),
     ],
