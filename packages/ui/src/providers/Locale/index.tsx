@@ -63,7 +63,8 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
     return (
       findLocaleFromCode(localization, localeFromParams) ||
       findLocaleFromCode(localization, initialLocaleFromPrefs) ||
-      findLocaleFromCode(localization, defaultLocale)
+      findLocaleFromCode(localization, defaultLocale) ||
+      findLocaleFromCode(localization, localization.locales[0].code)
     )
   })
 
@@ -102,7 +103,8 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
 
         const newLocale =
           findLocaleFromCode(localization, localeToUse) ||
-          findLocaleFromCode(localization, defaultLocale)
+          findLocaleFromCode(localization, defaultLocale) ||
+          findLocaleFromCode(localization, localization.locales[0].code)
 
         setLocale(newLocale)
       }
