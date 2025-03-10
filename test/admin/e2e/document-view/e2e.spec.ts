@@ -180,7 +180,6 @@ describe('Document View', () => {
       await checkPageTitle(page, '[Untitled]')
       await checkBreadcrumb(page, 'Create New')
       await saveDocAndAssert(page)
-      expect(true).toBe(true)
     })
 
     test('collection — should render `useAsTitle` field', async () => {
@@ -190,7 +189,6 @@ describe('Document View', () => {
       await wait(500)
       await checkPageTitle(page, title)
       await checkBreadcrumb(page, title)
-      expect(true).toBe(true)
     })
 
     test('collection — should render `id` as `useAsTitle` fallback', async () => {

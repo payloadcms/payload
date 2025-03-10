@@ -16,7 +16,7 @@ import { expect } from '@playwright/test'
  * @param options.timeout The timeout in milliseconds to poll the network requests, defaults to 5000
  * @returns The matched network requests
  */
-export const trackNetworkRequests = async (
+export const assertNetworkRequests = async (
   page: Page,
   url: string,
   action: () => Promise<any>,

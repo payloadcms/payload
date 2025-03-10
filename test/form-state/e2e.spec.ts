@@ -2,7 +2,7 @@ import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { addBlock } from 'helpers/e2e/addBlock.js'
-import { trackNetworkRequests } from 'helpers/e2e/trackNetworkRequests.js'
+import { assertNetworkRequests } from 'helpers/e2e/assertNetworkRequests.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -50,14 +50,12 @@ test.describe('Form State', () => {
     await page.locator('#field-title').fill(title)
     await page.locator('#field-validateUsingEvent').fill('Not allowed')
     await saveDocAndAssert(page, '#action-save', 'error')
-
-    expect(true).toBe(true)
   })
 
   test('should fire a single network request for onChange events when manipulating blocks', async () => {
     await page.goto(postsUrl.create)
 
-    await trackNetworkRequests(
+    await assertNetworkRequests(
       page,
       postsUrl.create,
       async () => {
@@ -71,15 +69,13 @@ test.describe('Form State', () => {
         allowedNumberOfRequests: 1,
       },
     )
-
-    expect(true).toBe(true)
   })
 
   test('should debounce onChange events', async () => {
     await page.goto(postsUrl.create)
     const field = page.locator('#field-title')
 
-    await trackNetworkRequests(
+    await assertNetworkRequests(
       page,
       postsUrl.create,
       async () => {
@@ -90,8 +86,6 @@ test.describe('Form State', () => {
         allowedNumberOfRequests: 1,
       },
     )
-
-    expect(true).toBe(true)
   })
 
   test('should queue onChange functions', async () => {
@@ -106,7 +100,7 @@ test.describe('Form State', () => {
       delay: 'Slow 3G',
     })
 
-    await trackNetworkRequests(
+    await assertNetworkRequests(
       page,
       postsUrl.create,
       async () => {
@@ -128,7 +122,5 @@ test.describe('Form State', () => {
     })
 
     await cdpSession.detach()
-
-    expect(true).toBe(true)
   })
 })

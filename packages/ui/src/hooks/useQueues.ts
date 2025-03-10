@@ -2,22 +2,22 @@ import { useRef } from 'react'
 
 export function useQueues() {
   const runningTaskRef = useRef<null | Promise<void>>(null)
-  const latestTaskRef = useRef<(() => Promise<void>) | null>(null)
+  const queuedTask = useRef<(() => Promise<void>) | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
 
   const queueTask = (fn: () => Promise<void>) => {
     // Overwrite the latest task
-    latestTaskRef.current = fn
+    queuedTask.current = fn
 
-    // If there's a running task, don't stack more tasks; just update `latestTaskRef`
+    // If there's a running task, don't stack more tasks; just update `queuedTask`
     if (runningTaskRef.current !== null) {
       return
     }
 
     const executeTask = async () => {
-      while (latestTaskRef.current) {
-        const taskToRun = latestTaskRef.current
-        latestTaskRef.current = null // Reset latest task before running
+      while (queuedTask.current) {
+        const taskToRun = queuedTask.current
+        queuedTask.current = null // Reset latest task before running
 
         const controller = new AbortController()
         abortControllerRef.current = controller
