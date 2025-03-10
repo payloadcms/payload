@@ -178,7 +178,7 @@ export type OGImageConfig = {
 }
 
 /**
- * @todo find a way to remove the type assertion here.
+ * @todo find a way to remove the deep clone here.
  * It can probably be removed after the `DeepRequired` from `Config` to `SanitizedConfig` is removed.
  * Same with `CollectionConfig` to `SanitizedCollectionConfig`.
  */
@@ -1235,7 +1235,7 @@ export type EditConfigWithRoot = {
    * Replace or modify _all_ nested document views and routes, including the document header, controls, and tabs. This cannot be used in conjunction with other nested views.
    * + `root` - `/admin/collections/:collection/:id/**\/*`
    */
-  root: EditViewConfig
+  root: Partial<EditViewConfig>
   version?: never
   versions?: never
 }
@@ -1255,12 +1255,12 @@ export type EditConfigWithoutRoot = {
    *
    * To override the entire Edit View including all nested views, use the `root` key.
    */
-  api?: EditViewConfig
-  default?: EditViewConfig
-  livePreview?: EditViewConfig
+  api?: Partial<EditViewConfig>
+  default?: Partial<EditViewConfig>
+  livePreview?: Partial<EditViewConfig>
   root?: never
-  version?: EditViewConfig
-  versions?: EditViewConfig
+  version?: Partial<EditViewConfig>
+  versions?: Partial<EditViewConfig>
 }
 
 export type EntityDescriptionComponent = CustomComponent
