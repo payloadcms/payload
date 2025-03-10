@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 import type { GenerateViewMetadata } from '../Root/index.js'
 
-import { generateMetadata } from '../../utilities/generateMetadata.js'
+import { generateMetadata } from '../../utilities/meta.js'
 
 export const generateResetPasswordViewMetadata: GenerateViewMetadata = async ({
   config,

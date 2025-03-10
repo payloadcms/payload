@@ -5,7 +5,7 @@ import { getTranslation } from '@payloadcms/translations'
 
 import type { GenerateViewMetadata } from '../Root/index.js'
 
-import { generateMetadata } from '../../utilities/generateMetadata.js'
+import { generateMetadata } from '../../utilities/meta.js'
 
 export const generateListViewMetadata = async (
   args: {

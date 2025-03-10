@@ -12,8 +12,6 @@ import type GraphQL from 'graphql'
 import type { GraphQLFormattedError } from 'graphql'
 import type { JSONSchema4 } from 'json-schema'
 import type { Metadata } from 'next'
-import type { IconDescriptor } from 'next/dist/lib/metadata/types/metadata-types.js'
-import type { OpenGraph } from 'next/dist/lib/metadata/types/opengraph-types.js'
 import type { DestinationStream, Level, pino } from 'pino'
 import type React from 'react'
 import type { default as sharp } from 'sharp'
@@ -178,8 +176,6 @@ export type OGImageConfig = {
   url: string
   width?: number | string
 }
-
-export type OpenGraphConfig = OpenGraph
 
 /**
  * @todo find a way to remove the type assertion here.

@@ -1,6 +1,6 @@
 import type { GenerateViewMetadata } from '../Root/index.js'
 
-import { generateMetadata } from '../../utilities/generateMetadata.js'
+import { generateMetadata } from '../../utilities/meta.js'
 
 export const generateForgotPasswordViewMetadata: GenerateViewMetadata = async ({
   config,

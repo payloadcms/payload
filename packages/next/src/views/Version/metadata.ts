@@ -6,7 +6,7 @@ import { formatDate } from '@payloadcms/ui/shared'
 
 import type { GenerateEditViewMetadata } from '../Document/getMetaBySegment.js'
 
-import { generateMetadata } from '../../utilities/generateMetadata.js'
+import { generateMetadata } from '../../utilities/meta.js'
 
 /**
  * @todo Remove the `MetaConfig` type assertions. They are currently required because of how the `Metadata` type from `next` consumes the `URL` type.
