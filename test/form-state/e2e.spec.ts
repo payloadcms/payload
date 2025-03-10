@@ -109,7 +109,7 @@ test.describe('Form State', () => {
         await field.pressSequentially('Some text to type', { delay: 300 })
       },
       {
-        allowedNumberOfRequests: 2,
+        allowedNumberOfRequests: 1,
         timeout: 10000, // watch network for 10 seconds to allow requests to build up
       },
     )
