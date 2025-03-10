@@ -15,6 +15,9 @@ const baseClass = 'code-editor'
 const CodeEditor: React.FC<Props> = (props) => {
   const { className, maxHeight, minHeight, options, readOnly, ...rest } = props
   const MIN_HEIGHT = minHeight ?? 56 // equivalent to 3 lines
+  const paddingFromProps = options?.padding
+    ? (options.padding.top || 0) + (options.padding?.bottom || 0)
+    : 0
 
   const [dynamicHeight, setDynamicHeight] = useState(MIN_HEIGHT)
   const { theme } = useTheme()
@@ -57,11 +60,13 @@ const CodeEditor: React.FC<Props> = (props) => {
       height={maxHeight ? Math.min(dynamicHeight, maxHeight) : dynamicHeight}
       onChange={(value, ev) => {
         rest.onChange?.(value, ev)
-        setDynamicHeight(Math.max(MIN_HEIGHT, value.split('\n').length * 18 + 2))
+        setDynamicHeight(Math.max(MIN_HEIGHT, value.split('\n').length * 18 + 2 + paddingFromProps))
       }}
       onMount={(editor, monaco) => {
         rest.onMount?.(editor, monaco)
-        setDynamicHeight(Math.max(MIN_HEIGHT, editor.getValue().split('\n').length * 18 + 2))
+        setDynamicHeight(
+          Math.max(MIN_HEIGHT, editor.getValue().split('\n').length * 18 + 2 + paddingFromProps),
+        )
       }}
     />
   )
