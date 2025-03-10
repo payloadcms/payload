@@ -571,10 +571,12 @@ describe('lexicalBlocks', () => {
       await topLevelDocTextField.fill('invalid')
 
       await saveDocAndAssert(page, '#action-save', 'error')
+
       await assertToastErrors({
         page,
         errors: ['Lexical With Blocks', 'Lexical With Blocks → Group → Text Depends On Doc Data'],
       })
+
       await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
 
       await trackNetworkRequests(
@@ -583,7 +585,7 @@ describe('lexicalBlocks', () => {
         async () => {
           await topLevelDocTextField.fill('Rich Text') // Default value
         },
-        { allowedNumberOfRequests: 2 },
+        { allowedNumberOfRequests: 1 },
       )
 
       await saveDocAndAssert(page)
@@ -610,7 +612,7 @@ describe('lexicalBlocks', () => {
         async () => {
           await blockGroupTextField.fill('')
         },
-        { allowedNumberOfRequests: 3 },
+        { allowedNumberOfRequests: 2 },
       )
 
       await saveDocAndAssert(page)
@@ -634,7 +636,7 @@ describe('lexicalBlocks', () => {
         async () => {
           await blockTextField.fill('')
         },
-        { allowedNumberOfRequests: 3 },
+        { allowedNumberOfRequests: 2 },
       )
 
       await saveDocAndAssert(page)
