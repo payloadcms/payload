@@ -11,7 +11,7 @@
   },
   "npm": {
     "skipChecks": true,
-    "tag": "canary"
+    "tag": "payload-1"
   },
   "hooks": {
     "before:init": ["yarn", "yarn clean", "yarn test"]

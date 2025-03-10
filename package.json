@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "1.15.8",
+  "version": "1.15.12",
   "description": "Node, React and MongoDB Headless CMS and Application Framework",
   "license": "MIT",
   "engines": {
@@ -40,6 +40,8 @@
     "dev:generate-types": "ts-node -T ./test/generateTypes.ts",
     "dev:generate-graphql-schema": "ts-node -T ./test/generateGraphQLSchema.ts",
     "pretest": "yarn build",
+    "prepack": "yarn clean && yarn build",
+    "prepublishOnly": "yarn clean && yarn build",
     "test": "yarn test:int && yarn test:components && yarn test:e2e",
     "test:int": "cross-env DISABLE_LOGGING=true jest --forceExit --detectOpenHandles",
     "test:e2e": "ts-node -T ./test/runE2E.ts",
@@ -49,7 +51,7 @@
     "translateNewKeys": "ts-node -T ./scripts/translateNewKeys.ts",
     "clean:cache": "rimraf node_modules/.cache",
     "clean": "rimraf dist",
-    "release:patch": "release-it patch",
+    "release:patch": "release-it patch --npm.tag=payload-1",
     "release:minor": "release-it minor",
     "release:major": "release-it major",
     "release:beta": "release-it pre --preReleaseId=beta --npm.tag=beta --config .release-it.pre.json",

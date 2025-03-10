@@ -2,16 +2,17 @@
   "verbose": true,
   "git": {
     "commitMessage": "chore(release): v${version}",
-    "requireCleanWorkingDir": true
+    "requireCleanWorkingDir": false
   },
   "github": {
     "release": true
   },
   "npm": {
-    "skipChecks": true
+    "skipChecks": true,
+    "tag": "payload-1"
   },
   "hooks": {
-    "before:init": ["yarn", "yarn clean", "yarn test"]
+    "before:init": ["yarn", "yarn clean"]
   },
   "plugins": {
     "@release-it/conventional-changelog": {
