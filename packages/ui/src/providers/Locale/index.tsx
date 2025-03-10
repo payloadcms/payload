@@ -48,14 +48,13 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
 
   const { user } = useAuth()
 
-  const defaultLocale =
-    localization && localization.defaultLocale ? localization.defaultLocale : 'en'
+  const defaultLocale = localization ? localization.defaultLocale : 'en'
 
   const { getPreference, setPreference } = usePreferences()
   const localeFromParams = useSearchParams().get('locale')
 
   const [locale, setLocale] = React.useState<Locale>(() => {
-    if (!localization) {
+    if (!localization || (localization && !localization.locales.length)) {
       // TODO: return null V4
       return {} as Locale
     }
@@ -98,15 +97,16 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
       if (localization && user?.id) {
         const localeToUse =
           localeFromParams ||
-          (await fetchPreferences<Locale['code']>('locale', fetchURL)?.then((res) => res.value)) ||
-          defaultLocale
+          (await fetchPreferences<Locale['code']>('locale', fetchURL)?.then((res) => res.value))
 
         const newLocale =
           findLocaleFromCode(localization, localeToUse) ||
           findLocaleFromCode(localization, defaultLocale) ||
-          findLocaleFromCode(localization, localization.locales[0].code)
+          findLocaleFromCode(localization, localization?.locales?.[0]?.code)
 
-        setLocale(newLocale)
+        if (newLocale) {
+          setLocale(newLocale)
+        }
       }
     }
 
