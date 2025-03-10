@@ -19,7 +19,7 @@ export function getImportMapToBaseDirPath({
 }): string {
   const importMapDir = path.dirname(importMapPath)
 
-  // 1. Direct relative path from `importMapDir` → `baseDir`
+  // 1. Direct relative path from `importMapDir` -> `baseDir`
   let relativePath = path.relative(importMapDir, baseDir).replace(/\\/g, '/')
 
   // 2. If they're the same directory, path.relative will be "", so use "./"
