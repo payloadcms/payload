@@ -547,41 +547,15 @@ export type SanitizedJoins = {
   [collectionSlug: string]: SanitizedJoin[]
 }
 
-type NonNullableAdminConfig = NonNullable<CollectionConfig['admin']>
-
-type NonNullableAdminComponents = NonNullable<NonNullableAdminConfig['components']>
-
-type NonNullableAdminViews = NonNullable<NonNullableAdminComponents['views']>
-
 /**
- * @todo remove the `DeepRequired` type in v4, and all related admin overrides
+ * @todo remove the `DeepRequired` in v4.
+ * We don't actually guarantee that all properties are set when sanitizing configs.
  */
 export interface SanitizedCollectionConfig
   extends Omit<
     DeepRequired<CollectionConfig>,
-    'admin' | 'auth' | 'endpoints' | 'fields' | 'slug' | 'upload' | 'versions'
+    'auth' | 'endpoints' | 'fields' | 'slug' | 'upload' | 'versions'
   > {
-  /**
-   * @todo remove all these overrides in v4, see note above
-   */
-  admin: {
-    components: {
-      views: {
-        edit:
-          | ({
-              [key: string]: {
-                meta: MetaConfig
-              } & DeepRequired<Omit<EditViewConfig, 'meta'>>
-            } & DeepRequired<Omit<EditConfigWithoutRoot, string>>)
-          | ({
-              root: {
-                meta: MetaConfig
-              } & DeepRequired<Omit<EditViewConfig, 'meta'>>
-            } & Omit<EditConfigWithRoot, 'root'>)
-      } & DeepRequired<Omit<NonNullableAdminViews, 'edit'>>
-    } & DeepRequired<Omit<NonNullableAdminComponents, 'views'>>
-    meta: NonNullableAdminConfig['meta']
-  } & DeepRequired<Omit<NonNullableAdminConfig, 'components' | 'meta'>>
   auth: Auth
   endpoints: Endpoint[] | false
   fields: Field[]

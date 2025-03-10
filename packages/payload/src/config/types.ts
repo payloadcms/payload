@@ -181,6 +181,13 @@ export type OGImageConfig = {
 
 export type OpenGraphConfig = OpenGraph
 
+/**
+ * @todo find a way to remove the type assertion here.
+ * It can probably be removed after the `DeepRequired` from `Config` to `SanitizedConfig` is removed.
+ * Same with `CollectionConfig` to `SanitizedCollectionConfig`.
+ */
+type DeepClone<T> = T extends object ? { [K in keyof T]: DeepClone<T[K]> } : T
+
 export type MetaConfig = {
   /**
    * When `static`, a pre-made image will be used for all pages.
@@ -194,7 +201,7 @@ export type MetaConfig = {
    * @example `" - Custom CMS"`
    */
   titleSuffix?: string
-} & Metadata
+} & DeepClone<Metadata>
 
 export type ServerOnlyLivePreviewProperties = keyof Pick<LivePreviewConfig, 'url'>
 
@@ -1178,11 +1185,14 @@ export type Config = {
   upload?: FetchAPIFileUploadOptions
 }
 
+/**
+ * @todo remove the `DeepRequired` in v4.
+ * We don't actually guarantee that all properties are set when sanitizing configs.
+ */
 export type SanitizedConfig = {
   admin: {
-    meta?: MetaConfig
     timezones: SanitizedTimezoneConfig
-  } & DeepRequired<Omit<NonNullable<Config['admin']>, 'meta'>>
+  } & DeepRequired<Config['admin']>
   blocks?: FlattenedBlock[]
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */
@@ -1229,7 +1239,7 @@ export type EditConfigWithRoot = {
    * Replace or modify _all_ nested document views and routes, including the document header, controls, and tabs. This cannot be used in conjunction with other nested views.
    * + `root` - `/admin/collections/:collection/:id/**\/*`
    */
-  root: Partial<EditViewConfig>
+  root: EditViewConfig
   version?: never
   versions?: never
 }
@@ -1249,12 +1259,12 @@ export type EditConfigWithoutRoot = {
    *
    * To override the entire Edit View including all nested views, use the `root` key.
    */
-  api?: Partial<EditViewConfig>
-  default?: Partial<EditViewConfig>
-  livePreview?: Partial<EditViewConfig>
+  api?: EditViewConfig
+  default?: EditViewConfig
+  livePreview?: EditViewConfig
   root?: never
-  version?: Partial<EditViewConfig>
-  versions?: Partial<EditViewConfig>
+  version?: EditViewConfig
+  versions?: EditViewConfig
 }
 
 export type EntityDescriptionComponent = CustomComponent
