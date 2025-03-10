@@ -750,12 +750,14 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         childPermissions = parentPermissions
       }
 
-      const tabCondition = tab.admin?.condition
-        ? tab.admin.condition(fullData, data, { blockData, user: req.user })
-        : true
+      const pathSegments = path ? path.split('.') : []
 
-      const tabPassesCondition = passesCondition && tabCondition
-      const tabID = isNamedTab ? tab.name : (tab?.id ?? undefined)
+      const tabPassesCondition =
+        passesCondition && tab.admin?.condition
+          ? tab.admin.condition(fullData, data, { blockData, path: pathSegments, user: req.user })
+          : true
+
+      const tabID = tab?.id
 
       if (tabID) {
         state[tabID] = {
