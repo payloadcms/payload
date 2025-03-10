@@ -22,20 +22,20 @@ describe('addPayloadComponentToImportMap', () => {
     importMapFilePath,
     payloadComponent,
     expectedPath,
-    expectedImportMaptToBaseDirPath,
+    expectedImportMapToBaseDirPath,
   }: {
     baseDir: string
     importMapFilePath: string
     payloadComponent: string
     expectedPath: string
-    expectedImportMaptToBaseDirPath: string
+    expectedImportMapToBaseDirPath: string
   }) {
     const importMapToBaseDirPath = getImportMapToBaseDirPath({
       baseDir,
       importMapPath: importMapFilePath,
     })
 
-    expect(importMapToBaseDirPath).toBe(expectedImportMaptToBaseDirPath)
+    expect(importMapToBaseDirPath).toBe(expectedImportMapToBaseDirPath)
 
     const { path } =
       addPayloadComponentToImportMap({
@@ -53,7 +53,7 @@ describe('addPayloadComponentToImportMap', () => {
       baseDir: '/myPackage/test/myTest',
       importMapFilePath: '/myPackage/app/(payload)/importMap.js',
       payloadComponent: './MyComponent.js#MyExport',
-      expectedImportMaptToBaseDirPath: '../../test/myTest/',
+      expectedImportMapToBaseDirPath: '../../test/myTest/',
       expectedPath: '../../test/myTest/MyComponent.js',
     })
   })
@@ -63,7 +63,7 @@ describe('addPayloadComponentToImportMap', () => {
       baseDir: '/myPackage/test/myTest',
       importMapFilePath: '/myPackage/test/prod/app/(payload)/importMap.js',
       payloadComponent: './MyComponent.js#MyExport',
-      expectedImportMaptToBaseDirPath: '../../../myTest/',
+      expectedImportMapToBaseDirPath: '../../../myTest/',
       expectedPath: '../../../myTest/MyComponent.js',
     })
   })
@@ -73,7 +73,7 @@ describe('addPayloadComponentToImportMap', () => {
       baseDir: '/myPackage/test/myTest',
       importMapFilePath: '/myPackage/test/prod/app/(payload)/importMap.js',
       payloadComponent: '../otherTest/MyComponent.js#MyExport',
-      expectedImportMaptToBaseDirPath: '../../../myTest/',
+      expectedImportMapToBaseDirPath: '../../../myTest/',
       expectedPath: '../../../otherTest/MyComponent.js',
     })
   })
@@ -83,7 +83,7 @@ describe('addPayloadComponentToImportMap', () => {
       baseDir: '/myPackage/test/myTest',
       importMapFilePath: '/myPackage/test/myTest/prod/app/(payload)/importMap.js',
       payloadComponent: './MyComponent.js#MyExport',
-      expectedImportMaptToBaseDirPath: '../../../',
+      expectedImportMapToBaseDirPath: '../../../',
       expectedPath: '../../../MyComponent.js',
     })
   })
@@ -93,7 +93,7 @@ describe('addPayloadComponentToImportMap', () => {
       baseDir: '/test/myTest',
       importMapFilePath: '/app/(payload)/importMap.js',
       payloadComponent: './MyComponent.js#MyExport',
-      expectedImportMaptToBaseDirPath: '../../test/myTest/',
+      expectedImportMapToBaseDirPath: '../../test/myTest/',
       expectedPath: '../../test/myTest/MyComponent.js',
     })
   })
@@ -103,7 +103,7 @@ describe('addPayloadComponentToImportMap', () => {
       baseDir: '/test/myTest',
       importMapFilePath: '/app/(payload)/importMap.js',
       payloadComponent: '../myOtherTest/MyComponent.js#MyExport',
-      expectedImportMaptToBaseDirPath: '../../test/myTest/',
+      expectedImportMapToBaseDirPath: '../../test/myTest/',
       expectedPath: '../../test/myOtherTest/MyComponent.js',
     })
   })
@@ -113,7 +113,17 @@ describe('addPayloadComponentToImportMap', () => {
       baseDir: '/test/myTest/',
       importMapFilePath: '/app/(payload)/importMap.js',
       payloadComponent: './MyComponent.js#MyExport',
-      expectedImportMaptToBaseDirPath: '../../test/myTest/',
+      expectedImportMapToBaseDirPath: '../../test/myTest/',
+      expectedPath: '../../test/myTest/MyComponent.js',
+    })
+  })
+
+  it('relative path with import map not in base dir, component starting with slash', () => {
+    componentPathTest({
+      baseDir: '/test/myTest',
+      importMapFilePath: '/app/(payload)/importMap.js',
+      payloadComponent: '/MyComponent.js#MyExport',
+      expectedImportMapToBaseDirPath: '../../test/myTest/',
       expectedPath: '../../test/myTest/MyComponent.js',
     })
   })
