@@ -10,6 +10,7 @@ import { toast } from 'sonner'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { DraggableSortableItem } from '../DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
+import { ShimmerEffect } from '../ShimmerEffect/index.js'
 
 const baseClass = 'table'
 
@@ -74,7 +75,7 @@ export const Table: React.FC<Props> = ({ appearance = 'default', columns, data: 
       // Update the rendered cell for the moved row to show "pending"
       newData[moveFromIndex]._order = `pending`
       if (orderColumn?.renderedCells) {
-        orderColumn.renderedCells[cellMap[movedId]] = <>pending</>
+        orderColumn.renderedCells[cellMap[movedId]] = <ShimmerEffect height={'20px'} />
       }
 
       // Move the item in the array
