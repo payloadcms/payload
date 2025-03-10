@@ -25,7 +25,7 @@ export const generateVersionsViewMetadata: GenerateEditViewMetadata = async ({
       : ''
 
   let metaToUse: MetaConfig = {
-    ...((config.admin.meta || {}) as MetaConfig),
+    ...(config.admin.meta || {}),
   }
 
   const data: any = {} // TODO: figure this out
@@ -35,20 +35,20 @@ export const generateVersionsViewMetadata: GenerateEditViewMetadata = async ({
     const titleFromData = data?.[useAsTitle]
 
     metaToUse = {
-      ...((config.admin.meta || {}) as MetaConfig),
+      ...(config.admin.meta || {}),
       description: t('version:viewingVersions', {
         documentTitle: data?.[useAsTitle],
         entitySlug: collectionConfig.slug,
       }),
       title: `${t('version:versions')}${titleFromData ? ` - ${titleFromData}` : ''} - ${entityLabel}`,
-      ...((collectionConfig?.admin.meta || {}) as MetaConfig),
-      ...((collectionConfig?.admin?.components?.views?.edit?.versions?.meta || {}) as MetaConfig),
+      ...(collectionConfig?.admin.meta || {}),
+      ...(collectionConfig?.admin?.components?.views?.edit?.versions?.meta || {}),
     }
   }
 
   if (globalConfig) {
     metaToUse = {
-      ...((config.admin.meta || {}) as MetaConfig),
+      ...(config.admin.meta || {}),
       description: t('version:viewingVersionsGlobal', { entitySlug: globalConfig.slug }),
       title: `${t('version:versions')} - ${entityLabel}`,
       ...((globalConfig?.admin.meta || {}) as MetaConfig),

@@ -181,8 +181,6 @@ export type OGImageConfig = {
 
 export type OpenGraphConfig = OpenGraph
 
-export type IconConfig = IconDescriptor
-
 export type MetaConfig = {
   /**
    * When `static`, a pre-made image will be used for all pages.
@@ -192,17 +190,11 @@ export type MetaConfig = {
    */
   defaultOGImageType?: 'dynamic' | 'off' | 'static'
   /**
-   * Icons to be rendered by devices and browsers.
-   *
-   * For example browser tabs, phone home screens, and search engine results.
-   */
-  icons?: IconConfig[]
-  /**
    * String to append to the auto-generated <title> of admin pages
    * @example `" - Custom CMS"`
    */
   titleSuffix?: string
-} & Omit<Metadata, 'icons'>
+} & Metadata
 
 export type ServerOnlyLivePreviewProperties = keyof Pick<LivePreviewConfig, 'url'>
 
@@ -1188,8 +1180,9 @@ export type Config = {
 
 export type SanitizedConfig = {
   admin: {
+    meta?: MetaConfig
     timezones: SanitizedTimezoneConfig
-  } & DeepRequired<Config['admin']>
+  } & DeepRequired<Omit<NonNullable<Config['admin']>, 'meta'>>
   blocks?: FlattenedBlock[]
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */

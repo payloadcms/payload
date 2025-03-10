@@ -2,7 +2,6 @@ import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
 import type {
   AdminViewConfig,
-  MetaConfig,
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
@@ -10,9 +9,6 @@ import type {
 
 import { generateMetadata } from '../../utilities/generateMetadata.js'
 
-/**
- * @todo Remove the `MetaConfig` type assertions. They are currently required because of how the `Metadata` type from `next` consumes the `URL` type.
- */
 export const generateCustomViewMetadata = async (args: {
   collectionConfig?: SanitizedCollectionConfig
   config: SanitizedConfig
@@ -35,11 +31,11 @@ export const generateCustomViewMetadata = async (args: {
     keywords: `Payload`,
     serverURL: config.serverURL,
     title: 'Payload',
-    ...((config.admin.meta || {}) as MetaConfig),
+    ...(config.admin.meta || {}),
     ...(viewConfig.meta || {}),
     openGraph: {
       title: 'Payload',
-      ...((config.admin.meta?.openGraph || {}) as MetaConfig['openGraph']),
+      ...(config.admin.meta?.openGraph || {}),
       ...(viewConfig.meta?.openGraph || {}),
     },
   })

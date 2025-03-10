@@ -23,7 +23,7 @@ export const generateAPIViewMetadata: GenerateEditViewMetadata = async ({
 
   return Promise.resolve(
     generateMetadata({
-      ...((config.admin.meta || {}) as MetaConfig),
+      ...(config.admin.meta || {}),
       description: `API - ${entityLabel}`,
       keywords: 'API',
       serverURL: config.serverURL,

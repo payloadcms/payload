@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import type { IconConfig, MetaConfig } from 'payload'
+import type { MetaConfig } from 'payload'
 
 import { payloadFaviconDark, payloadFaviconLight, staticOGImage } from '@payloadcms/ui/assets'
 import * as qs from 'qs-esm'
@@ -22,7 +22,7 @@ export const generateMetadata = async (
     ...incomingMetadata
   } = args
 
-  const payloadIcons: IconConfig[] = [
+  const payloadIcons: Metadata['icons'] = [
     {
       type: 'image/png',
       rel: 'icon',
@@ -44,7 +44,9 @@ export const generateMetadata = async (
     icons = customIcons
   }
 
-  const metaTitle = [incomingMetadata.title, titleSuffix].filter(Boolean).join(' ')
+  const metaTitle: Metadata['title'] = [incomingMetadata.title, titleSuffix]
+    .filter(Boolean)
+    .join(' ')
 
   const ogTitle = `${typeof incomingMetadata.openGraph?.title === 'string' ? incomingMetadata.openGraph.title : incomingMetadata.title} ${titleSuffix}`
 

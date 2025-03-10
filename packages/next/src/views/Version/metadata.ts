@@ -20,7 +20,7 @@ export const generateVersionViewMetadata: GenerateEditViewMetadata = async ({
   const { t } = i18n
 
   let metaToUse: MetaConfig = {
-    ...((config.admin.meta || {}) as MetaConfig),
+    ...(config.admin.meta || {}),
   }
 
   const doc: any = {} // TODO: figure this out
@@ -35,11 +35,11 @@ export const generateVersionViewMetadata: GenerateEditViewMetadata = async ({
     const titleFromData = doc?.[useAsTitle]
 
     metaToUse = {
-      ...((config.admin.meta || {}) as MetaConfig),
+      ...(config.admin.meta || {}),
       description: t('version:viewingVersion', { documentTitle: doc[useAsTitle], entityLabel }),
       title: `${t('version:version')}${formattedCreatedAt ? ` - ${formattedCreatedAt}` : ''}${titleFromData ? ` - ${titleFromData}` : ''} - ${entityLabel}`,
-      ...((collectionConfig?.admin?.meta || {}) as MetaConfig),
-      ...((collectionConfig?.admin?.components?.views?.edit?.version?.meta || {}) as MetaConfig),
+      ...(collectionConfig?.admin?.meta || {}),
+      ...(collectionConfig?.admin?.components?.views?.edit?.version?.meta || {}),
     }
   }
 
@@ -47,7 +47,7 @@ export const generateVersionViewMetadata: GenerateEditViewMetadata = async ({
     const entityLabel = getTranslation(globalConfig.label, i18n)
 
     metaToUse = {
-      ...((config.admin.meta || {}) as MetaConfig),
+      ...(config.admin.meta || {}),
       description: t('version:viewingVersionGlobal', { entityLabel }),
       title: `${t('version:version')}${formattedCreatedAt ? ` - ${formattedCreatedAt}` : ''}${entityLabel}`,
       ...((globalConfig?.admin?.meta || {}) as MetaConfig),

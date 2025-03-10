@@ -27,7 +27,7 @@ export const generateEditViewMetadata: GenerateEditViewMetadata = async ({
       : ''
 
   const metaToUse: MetaConfig = {
-    ...((config.admin.meta || {}) as MetaConfig),
+    ...(config.admin.meta || {}),
     description: `${isEditing ? t('general:editing') : t('general:creating')} - ${entityLabel}`,
     keywords: `${entityLabel}, Payload, CMS`,
     title: `${isEditing ? t('general:editing') : t('general:creating')} - ${entityLabel}`,
@@ -35,7 +35,7 @@ export const generateEditViewMetadata: GenerateEditViewMetadata = async ({
 
   const ogToUse: MetaConfig['openGraph'] = {
     title: `${isEditing ? t('general:edit') : t('general:edit')} - ${entityLabel}`,
-    ...((config.admin.meta.openGraph || {}) as MetaConfig['openGraph']),
+    ...(config.admin.meta.openGraph || {}),
     ...((collectionConfig
       ? {
           ...(collectionConfig?.admin.meta?.openGraph || {}),
