@@ -31,6 +31,7 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
       setFileExists(false)
       return
     }
+    setFileExists(undefined)
 
     const img = new Image()
     img.src = fileSrc
@@ -54,7 +55,7 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
   }
 
   return (
-    <div className={classNames} key={src}>
+    <div className={classNames}>
       {fileExists === undefined && <ShimmerEffect height="100%" />}
       {fileExists && <img alt={filename as string} src={src} />}
       {fileExists === false && <File />}
@@ -81,6 +82,7 @@ export function ThumbnailComponent(props: ThumbnailComponentProps) {
       setFileExists(false)
       return
     }
+    setFileExists(undefined)
 
     const img = new Image()
     img.src = fileSrc
@@ -104,7 +106,7 @@ export function ThumbnailComponent(props: ThumbnailComponentProps) {
   }
 
   return (
-    <div className={classNames} key={src}>
+    <div className={classNames}>
       {fileExists === undefined && <ShimmerEffect height="100%" />}
       {fileExists && <img alt={alt || filename} src={src} />}
       {fileExists === false && <File />}
