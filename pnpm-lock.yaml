@@ -813,9 +813,6 @@ importers:
       qs:
         specifier: 6.11.2
         version: 6.11.2
-      qs-middleware:
-        specifier: 1.0.3
-        version: 1.0.3
       react:
         specifier: ^18.0.0
         version: 18.2.0
@@ -8813,10 +8810,6 @@ packages:
   pure-rand@6.1.0:
     resolution: {integrity: sha512-bVWawvoZoBYpp6yIoQtQXHZjmz35RSVHnUOTefl8Vcjr8snTPY1wnpSPMWekcFwbxI6gtmT7rSYPFvz71ldiOA==}
 
-  qs-middleware@1.0.3:
-    resolution: {integrity: sha512-ymlixxD/0Bj3BMY9x1z8ENdQdhkmsIbDNyVvfM8soHn5p/CRFlLPrmtxmE5aG//q1PzHHSGuLi+6QlHezivseg==}
-    engines: {node: '>=0.10'}
-
   qs@6.11.0:
     resolution: {integrity: sha512-MvjoMCJwEarSbUYk5O+nmoSzSutSsTwF85zcHPQ9OrlFoZOYIjaqBAJIqIXjptyD5vThxGq52Xu/MaJzRkIk4Q==}
     engines: {node: '>=0.6'}
@@ -8827,10 +8820,6 @@ packages:
 
   qs@6.13.0:
     resolution: {integrity: sha512-+38qI9SOr8tfZ4QmJNplMUxqjbe7LKvvZgWdExBOmd+egZTtjLB67Gu0HRX3u/XOq7UU2Nx6nsjvS16Z9uwfpg==}
-    engines: {node: '>=0.6'}
-
-  qs@6.4.1:
-    resolution: {integrity: sha512-LQy1Q1fcva/UsnP/6Iaa4lVeM49WiOitu2T4hZCyA/elLKu37L99qcBJk4VCCk+rdLvnMzfKyiN3SZTqdAZGSQ==}
     engines: {node: '>=0.6'}
 
   querystringify@2.2.0:
@@ -19972,10 +19961,6 @@ snapshots:
 
   pure-rand@6.1.0: {}
 
-  qs-middleware@1.0.3:
-    dependencies:
-      qs: 6.4.1
-
   qs@6.11.0:
     dependencies:
       side-channel: 1.0.6
@@ -19987,8 +19972,6 @@ snapshots:
   qs@6.13.0:
     dependencies:
       side-channel: 1.0.6
-
-  qs@6.4.1: {}
 
   querystringify@2.2.0: {}
 

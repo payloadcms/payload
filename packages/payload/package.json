@@ -117,7 +117,6 @@
     "probe-image-size": "6.0.0",
     "process": "0.11.10",
     "qs": "6.11.2",
-    "qs-middleware": "1.0.3",
     "react": "^18.0.0",
     "react-animate-height": "2.1.2",
     "react-datepicker": "4.16.0",
