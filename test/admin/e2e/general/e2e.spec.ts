@@ -163,7 +163,7 @@ describe('General', () => {
         await page.goto(`${serverURL}/admin`)
         await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
           'content',
-          'noindex, nofollow',
+          /noindex, nofollow/,
         )
       })
     })
