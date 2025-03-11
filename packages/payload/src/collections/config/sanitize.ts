@@ -269,7 +269,11 @@ const addSortableFeatures = (sanitized: CollectionConfig) => {
     type: 'text',
     admin: {
       disableBulkEdit: true,
+      disabled: true,
+      disableListColumn: true,
+      disableListFilter: true,
       hidden: true,
+      readOnly: true,
     },
     index: true,
     label: ({ t }) => t('general:order'),

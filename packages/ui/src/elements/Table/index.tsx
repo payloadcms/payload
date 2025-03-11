@@ -66,18 +66,12 @@ export const Table: React.FC<Props> = ({ appearance = 'default', columns, data: 
 
     // Store the original data for rollback
     const previousData = [...localData]
-    const orderColumn = activeColumns.find((col) => col.accessor === '_order')
-    const originalRenderedCells = orderColumn?.renderedCells ? [...orderColumn.renderedCells] : null
 
     // Optimisitc update of local state to reorder the rows
     setLocalData((currentData) => {
       const newData = [...currentData]
       // Update the rendered cell for the moved row to show "pending"
       newData[moveFromIndex]._order = `pending`
-      if (orderColumn?.renderedCells) {
-        orderColumn.renderedCells[cellMap[movedId]] = <ShimmerEffect height={'20px'} />
-      }
-
       // Move the item in the array
       newData.splice(moveToIndex, 0, newData.splice(moveFromIndex, 1)[0])
       return newData
@@ -136,14 +130,6 @@ export const Table: React.FC<Props> = ({ appearance = 'default', columns, data: 
       const error = err instanceof Error ? err.message : String(err)
       // Rollback to previous state if the request fails
       setLocalData(previousData)
-
-      // Also restore the original rendered cells
-      if (orderColumn?.renderedCells && originalRenderedCells) {
-        for (let i = 0; i < originalRenderedCells.length; i++) {
-          orderColumn.renderedCells[i] = originalRenderedCells[i]
-        }
-      }
-
       toast.error(error)
     }
   }
