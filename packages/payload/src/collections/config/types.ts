@@ -424,6 +424,9 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    */
   endpoints?: false | Omit<Endpoint, 'root'>[]
   fields: Field[]
+  forceSelect?: IsAny<SelectFromCollectionSlug<TSlug>> extends true
+    ? SelectType
+    : SelectFromCollectionSlug<TSlug>
   /**
    * GraphQL configuration
    */

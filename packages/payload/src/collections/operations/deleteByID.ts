@@ -19,6 +19,7 @@ import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
 import { deleteScheduledPublishJobs } from '../../versions/deleteScheduledPublishJobs.js'
 import { buildAfterOperation } from './utils.js'
@@ -75,7 +76,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
         payload,
       },
       req,
-      select,
+      select: incomingSelect,
       showHiddenFields,
     } = args
 
@@ -165,6 +166,11 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
         req,
       })
     }
+
+    const select = sanitizeSelect({
+      forceSelect: collectionConfig.forceSelect,
+      select: incomingSelect,
+    })
 
     // /////////////////////////////////////
     // Delete document
