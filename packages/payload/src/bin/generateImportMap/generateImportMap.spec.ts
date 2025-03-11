@@ -1,3 +1,4 @@
+import type { PayloadComponent } from '../../index.js'
 import { addPayloadComponentToImportMap } from './utilities/addPayloadComponentToImportMap.js'
 import { getImportMapToBaseDirPath } from './utilities/getImportMapToBaseDirPath.js'
 
@@ -22,13 +23,15 @@ describe('addPayloadComponentToImportMap', () => {
     importMapFilePath,
     payloadComponent,
     expectedPath,
+    expectedSpecifier,
     expectedImportMapToBaseDirPath,
   }: {
     baseDir: string
     importMapFilePath: string
-    payloadComponent: string
+    payloadComponent: PayloadComponent
     expectedPath: string
     expectedImportMapToBaseDirPath: string
+    expectedSpecifier: string
   }) {
     const importMapToBaseDirPath = getImportMapToBaseDirPath({
       baseDir,
@@ -37,7 +40,7 @@ describe('addPayloadComponentToImportMap', () => {
 
     expect(importMapToBaseDirPath).toBe(expectedImportMapToBaseDirPath)
 
-    const { path } =
+    const { path, specifier } =
       addPayloadComponentToImportMap({
         importMapToBaseDirPath,
         importMap,
@@ -46,6 +49,7 @@ describe('addPayloadComponentToImportMap', () => {
       }) ?? {}
 
     expect(path).toBe(expectedPath)
+    expect(specifier).toBe(expectedSpecifier)
   }
 
   it('relative path with import map partially in base dir', () => {
@@ -55,6 +59,7 @@ describe('addPayloadComponentToImportMap', () => {
       payloadComponent: './MyComponent.js#MyExport',
       expectedImportMapToBaseDirPath: '../../test/myTest/',
       expectedPath: '../../test/myTest/MyComponent.js',
+      expectedSpecifier: 'MyExport',
     })
   })
 
@@ -62,9 +67,12 @@ describe('addPayloadComponentToImportMap', () => {
     componentPathTest({
       baseDir: '/myPackage/test/myTest',
       importMapFilePath: '/myPackage/test/prod/app/(payload)/importMap.js',
-      payloadComponent: './MyComponent.js#MyExport',
+      payloadComponent: {
+        path: './MyComponent.js#MyExport',
+      },
       expectedImportMapToBaseDirPath: '../../../myTest/',
       expectedPath: '../../../myTest/MyComponent.js',
+      expectedSpecifier: 'MyExport',
     })
   })
 
@@ -72,9 +80,13 @@ describe('addPayloadComponentToImportMap', () => {
     componentPathTest({
       baseDir: '/myPackage/test/myTest',
       importMapFilePath: '/myPackage/test/prod/app/(payload)/importMap.js',
-      payloadComponent: '../otherTest/MyComponent.js#MyExport',
+      payloadComponent: {
+        path: '../otherTest/MyComponent.js',
+        exportName: 'MyExport',
+      },
       expectedImportMapToBaseDirPath: '../../../myTest/',
       expectedPath: '../../../otherTest/MyComponent.js',
+      expectedSpecifier: 'MyExport',
     })
   })
 
@@ -85,6 +97,7 @@ describe('addPayloadComponentToImportMap', () => {
       payloadComponent: './MyComponent.js#MyExport',
       expectedImportMapToBaseDirPath: '../../../',
       expectedPath: '../../../MyComponent.js',
+      expectedSpecifier: 'MyExport',
     })
   })
 
@@ -95,6 +108,7 @@ describe('addPayloadComponentToImportMap', () => {
       payloadComponent: './MyComponent.js#MyExport',
       expectedImportMapToBaseDirPath: '../../test/myTest/',
       expectedPath: '../../test/myTest/MyComponent.js',
+      expectedSpecifier: 'MyExport',
     })
   })
 
@@ -105,6 +119,7 @@ describe('addPayloadComponentToImportMap', () => {
       payloadComponent: '../myOtherTest/MyComponent.js#MyExport',
       expectedImportMapToBaseDirPath: '../../test/myTest/',
       expectedPath: '../../test/myOtherTest/MyComponent.js',
+      expectedSpecifier: 'MyExport',
     })
   })
 
@@ -115,6 +130,7 @@ describe('addPayloadComponentToImportMap', () => {
       payloadComponent: './MyComponent.js#MyExport',
       expectedImportMapToBaseDirPath: '../../test/myTest/',
       expectedPath: '../../test/myTest/MyComponent.js',
+      expectedSpecifier: 'MyExport',
     })
   })
 
@@ -125,6 +141,7 @@ describe('addPayloadComponentToImportMap', () => {
       payloadComponent: '/MyComponent.js#MyExport',
       expectedImportMapToBaseDirPath: '../../test/myTest/',
       expectedPath: '../../test/myTest/MyComponent.js',
+      expectedSpecifier: 'MyExport',
     })
   })
 })
