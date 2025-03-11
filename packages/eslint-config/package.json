@@ -28,7 +28,6 @@
     "@eslint/js": "9.22.0",
     "@payloadcms/eslint-plugin": "workspace:*",
     "@types/eslint": "9.6.1",
-    "@types/eslint__js": "9.14.0",
     "@typescript-eslint/parser": "8.26.1",
     "eslint": "9.22.0",
     "eslint-config-prettier": "10.1.1",

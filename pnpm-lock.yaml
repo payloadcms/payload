@@ -513,9 +513,6 @@ importers:
       '@types/eslint':
         specifier: 9.6.1
         version: 9.6.1
-      '@types/eslint__js':
-        specifier: 9.14.0
-        version: 9.14.0
       '@typescript-eslint/parser':
         specifier: 8.26.1
         version: 8.26.1(eslint@9.22.0(jiti@1.21.6))(typescript@5.7.3)
@@ -567,9 +564,6 @@ importers:
       '@types/eslint':
         specifier: 9.6.1
         version: 9.6.1
-      '@types/eslint__js':
-        specifier: 9.14.0
-        version: 9.14.0
       '@typescript-eslint/parser':
         specifier: 8.26.1
         version: 8.26.1(eslint@9.22.0(jiti@1.21.6))(typescript@5.7.3)
@@ -5243,10 +5237,6 @@ packages:
 
   '@types/eslint@9.6.1':
     resolution: {integrity: sha512-FXx2pKgId/WyYo2jXw63kk7/+TY7u7AziEJxJAnSFzHlqTAS3Ync6SvgYAN/k4/PQpnnVuzoMuVnByKK2qp0ag==}
-
-  '@types/eslint__js@9.14.0':
-    resolution: {integrity: sha512-s0jepCjOJWB/GKcuba4jISaVpBudw3ClXJ3fUK4tugChUMQsp6kSwuA8Dcx6wFd/JsJqcY8n4rEpa5RTHs5ypA==}
-    deprecated: This is a stub types definition. @eslint/js provides its own type definitions, so you do not need this installed.
 
   '@types/esprima@4.0.6':
     resolution: {integrity: sha512-lIk+kSt9lGv5hxK6aZNjiUEGZqKmOTpmg0tKiJQI+Ow98fLillxsiZNik5+RcP7mXL929KiTH/D9jGtpDlMbVw==}
@@ -14508,10 +14498,6 @@ snapshots:
     dependencies:
       '@types/estree': 1.0.6
       '@types/json-schema': 7.0.15
-
-  '@types/eslint__js@9.14.0':
-    dependencies:
-      '@eslint/js': 9.22.0
 
   '@types/esprima@4.0.6':
     dependencies:
