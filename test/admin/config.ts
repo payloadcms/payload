@@ -129,7 +129,6 @@ export default buildConfigWithDefaults({
         description: 'This is a custom OG description',
         title: 'This is a custom OG title',
       },
-      robots: 'nofollow noindex',
       titleSuffix: '- Custom Title Suffix',
     },
     routes: customAdminRoutes,
