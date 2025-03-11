@@ -189,4 +189,26 @@ describe('addPayloadComponentToImportMap', () => {
       expectedSpecifier: 'MyExport',
     })
   })
+
+  it('importMap and baseDir in same directory', () => {
+    componentPathTest({
+      baseDir: '/test/myTest',
+      importMapFilePath: '/test/myTest/importMap.js',
+      payloadComponent: './MyComponent.js#MyExport',
+      expectedImportMapToBaseDirPath: './',
+      expectedPath: './MyComponent.js',
+      expectedSpecifier: 'MyExport',
+    })
+  })
+
+  it('baseDir within importMap dir', () => {
+    componentPathTest({
+      baseDir: '/test/myTest/components',
+      importMapFilePath: '/test/myTest/importMap.js',
+      payloadComponent: './MyComponent.js#MyExport',
+      expectedImportMapToBaseDirPath: './components/',
+      expectedPath: './components/MyComponent.js',
+      expectedSpecifier: 'MyExport',
+    })
+  })
 })

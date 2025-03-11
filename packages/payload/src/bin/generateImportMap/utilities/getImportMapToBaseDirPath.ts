@@ -25,6 +25,9 @@ export function getImportMapToBaseDirPath({
   // 2. If they're the same directory, path.relative will be "", so use "./"
   if (!relativePath) {
     relativePath = './'
+  } // Add ./ prefix for subdirectories of the current directory
+  else if (!relativePath.startsWith('.') && !relativePath.startsWith('/')) {
+    relativePath = `./${relativePath}`
   }
 
   // 3. For consistency ensure a trailing slash
