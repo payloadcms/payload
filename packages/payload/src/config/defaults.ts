@@ -92,6 +92,7 @@ export const addDefaultsToConfig = (config: Config): Config => {
     },
     meta: {
       defaultOGImageType: 'dynamic',
+      robots: 'noindex, nofollow',
       titleSuffix: '- Payload',
       ...(config?.admin?.meta || {}),
     },
