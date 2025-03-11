@@ -32,7 +32,7 @@ export function getIncomingFiles({
               buffer: req.payloadUploadSizes[key],
               filename: `${resizedFileData.filename}`,
               filesize: req.payloadUploadSizes[key].length,
-              mimeType: data.mimeType,
+              mimeType: resizedFileData.mimeType ?? data.mimeType,
             },
           ])
         }
