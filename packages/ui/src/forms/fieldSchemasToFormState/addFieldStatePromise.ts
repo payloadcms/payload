@@ -757,10 +757,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           ? tab.admin.condition(fullData, data, { blockData, path: pathSegments, user: req.user })
           : true
 
-      const tabID = tab?.id
-
-      if (tabID) {
-        state[tabID] = {
+      if (tab?.id) {
+        state[tab.id] = {
           passesCondition: tabPassesCondition,
         }
       }

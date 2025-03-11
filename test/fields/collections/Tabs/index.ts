@@ -57,6 +57,26 @@ const TabsFields: CollectionConfig = {
               },
             },
             {
+              type: 'group',
+              name: 'conditionalTabGroup',
+              fields: [
+                {
+                  type: 'tabs',
+                  tabs: [
+                    {
+                      // duplicate name as above, should not conflict with tab IDs in form-state, if it does then tests will fail
+                      name: 'conditionalTab',
+                      fields: [],
+                      admin: {
+                        condition: ({ conditionalTab }) =>
+                          !!conditionalTab?.nestedConditionalTabVisible,
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+            {
               type: 'tabs',
 
               tabs: [

@@ -295,7 +295,8 @@ export const sanitizeFields = async ({
           typeof tab.admin.condition === 'function' &&
           !tab.id
         ) {
-          tab.id = tabHasName(tab) ? tab.name : uuid()
+          // Always attach a UUID to tabs with a condition so there's no conflicts even if there are duplicate nested names
+          tab.id = tabHasName(tab) ? `${tab.name}_${uuid()}` : uuid()
         }
 
         tab.fields = await sanitizeFields({
