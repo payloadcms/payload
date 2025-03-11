@@ -1,12 +1,8 @@
-import type { ClientField, FormState } from 'payload'
+import type { ClientField, FieldWithPathClient, FormState } from 'payload'
 
-import {
-  fieldAffectsData,
-  fieldIsHiddenOrDisabled,
-  getFieldPaths,
-  tabHasName,
-} from 'payload/shared'
+import { fieldAffectsData, fieldHasSubFields, fieldIsHiddenOrDisabled } from 'payload/shared'
 
+import { createNestedClientFieldPath } from '../../forms/Form/createNestedClientFieldPath.js'
 import { combineFieldLabel } from '../../utilities/combineFieldLabel.js'
 
 export type SelectedField = {
@@ -31,104 +27,69 @@ export const reduceFieldOptions = ({
   fields,
   formState,
   labelPrefix = null,
-  parentIndexPath,
-  parentPath,
-  parentSchemaPath,
+  path = '',
 }: {
   fields: ClientField[]
   formState?: FormState
   labelPrefix?: React.ReactNode
-  parentIndexPath: string
-  parentPath: string
-  parentSchemaPath: string
-}): FieldOption[] => {
+  path?: string
+}): { Label: React.ReactNode; value: FieldWithPathClient }[] => {
   if (!fields) {
     return []
   }
 
-  return fields?.reduce(
-    (acc, field, fieldIndex) => {
-      if (ignoreFromBulkEdit(field)) {
-        return acc
-      }
+  const CustomLabel = formState?.[path]?.customComponents?.Label
 
-      const { indexPath, path, schemaPath } = getFieldPaths({
-        field,
-        index: fieldIndex,
-        parentIndexPath: 'name' in field ? '' : parentIndexPath,
-        parentPath,
-        parentSchemaPath,
-      })
+  return fields?.reduce((fieldsToUse, field) => {
+    // escape for a variety of reasons, include ui fields as they have `name`.
+    if (
+      (fieldAffectsData(field) || field.type === 'ui') &&
+      (field.admin?.disableBulkEdit ||
+        field.unique ||
+        fieldIsHiddenOrDisabled(field) ||
+        ('readOnly' in field && field.readOnly))
+    ) {
+      return fieldsToUse
+    }
 
-      const CustomLabel = formState?.[path]?.customComponents?.Label
+    if (!(field.type === 'array' || field.type === 'blocks') && fieldHasSubFields(field)) {
+      return [
+        ...fieldsToUse,
+        ...reduceFieldOptions({
+          fields: field.fields,
+          labelPrefix: combineFieldLabel({ CustomLabel, field, prefix: labelPrefix }),
+          path: createNestedClientFieldPath(path, field),
+        }),
+      ]
+    }
 
-      switch (field.type) {
-        case 'group':
-        case 'row': {
-          acc.push(
-            ...reduceFieldOptions({
-              fields: field.fields,
-              labelPrefix: combineFieldLabel({ CustomLabel, field, prefix: labelPrefix }),
-              parentIndexPath: indexPath,
-              parentPath: path,
-              parentSchemaPath: schemaPath,
-            }),
-          )
+    if (field.type === 'tabs' && 'tabs' in field) {
+      return [
+        ...fieldsToUse,
+        ...field.tabs.reduce((tabFields, tab) => {
+          if ('fields' in tab) {
+            const isNamedTab = 'name' in tab && tab.name
+            return [
+              ...tabFields,
+              ...reduceFieldOptions({
+                fields: tab.fields,
+                labelPrefix,
+                path: isNamedTab ? createNestedClientFieldPath(path, field) : path,
+              }),
+            ]
+          }
+        }, []),
+      ]
+    }
 
-          return acc
-        }
+    const formattedField = {
+      label: combineFieldLabel({ CustomLabel, field, prefix: labelPrefix }),
+      value: {
+        ...field,
+        path: createNestedClientFieldPath(path, field),
+      },
+    }
 
-        case 'tabs': {
-          acc.push(
-            ...field.tabs.reduce((tabFields, tab, tabIndex) => {
-              const isNamedTab = tabHasName(tab)
-
-              const {
-                indexPath: tabIndexPath,
-                path: tabPath,
-                schemaPath: tabSchemaPath,
-              } = getFieldPaths({
-                field: {
-                  ...tab,
-                  type: 'tab',
-                },
-                index: tabIndex,
-                parentIndexPath: indexPath,
-                parentPath,
-                parentSchemaPath,
-              })
-
-              return [
-                ...tabFields,
-                ...reduceFieldOptions({
-                  fields: tab.fields,
-                  labelPrefix,
-                  parentIndexPath: isNamedTab ? '' : tabIndexPath,
-                  parentPath: isNamedTab ? tabPath : parentPath,
-                  parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
-                }),
-              ]
-            }, []),
-          )
-
-          return acc
-        }
-
-        default: {
-          acc.push({
-            label: combineFieldLabel({ CustomLabel, field, prefix: labelPrefix }),
-            value: {
-              path,
-            },
-          })
-
-          return acc
-        }
-      }
-    },
-    [] as {
-      label: React.ReactNode
-      value: SelectedField
-    }[],
-  )
+    return [...fieldsToUse, formattedField]
+  }, [])
 }

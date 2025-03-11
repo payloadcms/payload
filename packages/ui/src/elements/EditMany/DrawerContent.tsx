@@ -12,7 +12,7 @@ import type { FormProps } from '../../forms/Form/index.js'
 
 import { useForm } from '../../forms/Form/context.js'
 import { Form } from '../../forms/Form/index.js'
-import { RenderFields } from '../../forms/RenderFields/index.js'
+import { RenderField } from '../../forms/RenderFields/RenderField.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
 import { XIcon } from '../../icons/X/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
@@ -28,8 +28,8 @@ import { filterOutUploadFields } from '../../utilities/filterOutUploadFields.js'
 import { mergeListSearchAndWhere } from '../../utilities/mergeListSearchAndWhere.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { FieldSelect } from '../FieldSelect/index.js'
-import { baseClass, type EditManyProps } from './index.js'
 import './index.scss'
+import { baseClass, type EditManyProps } from './index.js'
 
 const sanitizeUnselectedFields = (formState: FormState, selected: FieldWithPathClient[]) => {
   const filteredData = selected.reduce((acc, field) => {
@@ -292,16 +292,23 @@ export const EditManyDrawerContent: React.FC<
             onSuccess={onSuccess}
           >
             <FieldSelect fields={filteredFields} setSelected={setSelected} />
-            {selected.length === 0 ? null : (
-              <RenderFields
-                fields={selected}
-                parentIndexPath=""
-                parentPath=""
-                parentSchemaPath={slug}
-                permissions={collectionPermissions?.fields}
-                readOnly={false}
-              />
-            )}
+            {selected.length === 0
+              ? null
+              : selected.map((field, i) => {
+                  const { path } = field
+
+                  return (
+                    <RenderField
+                      clientFieldConfig={field}
+                      indexPath=""
+                      key={`${path}-${i}`}
+                      parentPath=""
+                      parentSchemaPath=""
+                      path={path}
+                      permissions={{}}
+                    />
+                  )
+                })}
             <div className={`${baseClass}__sidebar-wrap`}>
               <div className={`${baseClass}__sidebar`}>
                 <div className={`${baseClass}__sidebar-sticky-wrap`}>
