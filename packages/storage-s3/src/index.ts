@@ -64,11 +64,11 @@ export type S3StorageOptions = {
 
 type S3StoragePlugin = (storageS3Args: S3StorageOptions) => Plugin
 
+let storageClient: AWS.S3 | null = null
+
 export const s3Storage: S3StoragePlugin =
   (s3StorageOptions: S3StorageOptions) =>
   (incomingConfig: Config): Config => {
-    let storageClient: AWS.S3 | null = null
-
     const getStorageClient: () => AWS.S3 = () => {
       if (storageClient) {
         return storageClient
