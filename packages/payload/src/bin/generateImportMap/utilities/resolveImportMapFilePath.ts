@@ -1,4 +1,3 @@
-import type { SanitizedConfig } from '../../../config/types.js'
 import fs from 'fs'
 import path from 'path'
 
@@ -6,13 +5,13 @@ import path from 'path'
  * Returns the path to the import map file. If the import map file is not found, it throws an error.
  */
 export function resolveImportMapFilePath({
+  adminRoute = '/admin',
   importMapFile,
   rootDir,
-  adminRoute = '/admin',
 }: {
+  adminRoute?: string
   importMapFile?: string
   rootDir: string
-  adminRoute?: string
 }) {
   let importMapFilePath: string | undefined = undefined
 
