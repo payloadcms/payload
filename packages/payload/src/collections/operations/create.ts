@@ -62,9 +62,10 @@ export const createOperation = async <
   incomingArgs: Arguments<TSlug>,
 ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
+  let shouldCommit = false
 
   try {
-    const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
+    shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
 
     ensureUsernameOrEmail<TSlug>({
       authOptions: args.collection.config.auth,
@@ -394,7 +395,9 @@ export const createOperation = async <
 
     return result
   } catch (error: unknown) {
-    await killTransaction(args.req)
+    if (shouldCommit) {
+      await killTransaction(args.req)
+    }
     throw error
   }
 }
