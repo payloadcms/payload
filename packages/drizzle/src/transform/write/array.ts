@@ -1,5 +1,7 @@
 import type { FlattenedArrayField } from 'payload'
 
+import { fieldShouldBeLocalized } from 'payload/shared'
+
 import type { DrizzleAdapter } from '../../types.js'
 import type { ArrayRowToInsert, BlockRowToInsert, RelationshipToDelete } from './types.js'
 
@@ -18,6 +20,7 @@ type Args = {
   field: FlattenedArrayField
   locale?: string
   numbers: Record<string, unknown>[]
+  parentIsLocalized: boolean
   path: string
   relationships: Record<string, unknown>[]
   relationshipsToDelete: RelationshipToDelete[]
@@ -42,6 +45,7 @@ export const transformArray = ({
   field,
   locale,
   numbers,
+  parentIsLocalized,
   path,
   relationships,
   relationshipsToDelete,
@@ -79,7 +83,7 @@ export const transformArray = ({
         }
       }
 
-      if (field.localized) {
+      if (fieldShouldBeLocalized({ field, parentIsLocalized }) && locale) {
         newRow.row._locale = locale
       }
 
@@ -97,8 +101,10 @@ export const transformArray = ({
         data: arrayRow,
         fieldPrefix: '',
         fields: field.flattenedFields,
+        insideArrayOrBlock: true,
         locales: newRow.locales,
         numbers,
+        parentIsLocalized: parentIsLocalized || field.localized,
         parentTableName: arrayTableName,
         path: `${path || ''}${field.name}.${i}.`,
         relationships,

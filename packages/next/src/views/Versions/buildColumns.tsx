@@ -1,5 +1,6 @@
 import type { I18n } from '@payloadcms/translations'
 import type {
+  Column,
   PaginatedDocs,
   SanitizedCollectionConfig,
   SanitizedConfig,
@@ -7,7 +8,7 @@ import type {
   TypeWithVersion,
 } from 'payload'
 
-import { type Column, SortColumn } from '@payloadcms/ui'
+import { SortColumn } from '@payloadcms/ui'
 import React from 'react'
 
 import { AutosaveCell } from './cells/AutosaveCell/index.js'

@@ -33,6 +33,26 @@ export const Posts: CollectionConfig = {
           },
         },
       ],
+      listMenuItems: [
+        {
+          path: '/components/Banner/index.js#Banner',
+          clientProps: {
+            message: 'listMenuItems',
+          },
+        },
+        {
+          path: '/components/Banner/index.js#Banner',
+          clientProps: {
+            message: 'Many of them',
+          },
+        },
+        {
+          path: '/components/Banner/index.js#Banner',
+          clientProps: {
+            message: 'Ok last one',
+          },
+        },
+      ],
       afterList: [
         {
           path: '/components/Banner/index.js#Banner',
@@ -194,6 +214,14 @@ export const Posts: CollectionConfig = {
       relationTo: 'posts',
     },
     {
+      name: 'users',
+      type: 'relationship',
+      admin: {
+        position: 'sidebar',
+      },
+      relationTo: 'users',
+    },
+    {
       name: 'customCell',
       type: 'text',
       admin: {
@@ -243,25 +271,6 @@ export const Posts: CollectionConfig = {
         description:
           'This is a very long description that takes many characters to complete and hopefully will wrap instead of push the sidebar open, lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, voluptatum voluptates. Quisquam, voluptatum voluptates.',
         position: 'sidebar',
-      },
-    },
-    {
-      name: 'validateUsingEvent',
-      type: 'text',
-      admin: {
-        description:
-          'This field should only validate on submit. Try typing "Not allowed" and submitting the form.',
-      },
-      validate: (value, { event }) => {
-        if (event === 'onChange') {
-          return true
-        }
-
-        if (value === 'Not allowed') {
-          return 'This field has been validated only on submit'
-        }
-
-        return true
       },
     },
   ],

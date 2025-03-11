@@ -82,18 +82,18 @@ function getFullMatchOffset(documentText: string, entryText: string, offset: num
  * Split Lexical TextNode and return a new TextNode only containing matched text.
  * Common use cases include: removing the node, replacing with a new node.
  */
-function $splitNodeContainingQuery(match: MenuTextMatch): null | TextNode {
+function $splitNodeContainingQuery(match: MenuTextMatch): TextNode | undefined {
   const selection = $getSelection()
   if (!$isRangeSelection(selection) || !selection.isCollapsed()) {
-    return null
+    return
   }
   const anchor = selection.anchor
   if (anchor.type !== 'text') {
-    return null
+    return
   }
   const anchorNode = anchor.getNode()
   if (!anchorNode.isSimpleText()) {
-    return null
+    return
   }
   const selectionOffset = anchor.offset
   const textContent = anchorNode.getTextContent().slice(0, selectionOffset)
@@ -101,7 +101,7 @@ function $splitNodeContainingQuery(match: MenuTextMatch): null | TextNode {
   const queryOffset = getFullMatchOffset(textContent, match.matchingString, characterOffset)
   const startOffset = selectionOffset - queryOffset
   if (startOffset < 0) {
-    return null
+    return
   }
   let newNode
   if (startOffset === 0) {
@@ -241,7 +241,7 @@ export function LexicalMenu({
       const allItems = groups.flatMap((group) => group.items)
 
       if (allItems.length) {
-        const firstMatchingItem = allItems[0]
+        const firstMatchingItem = allItems[0]!
         updateSelectedItem(firstMatchingItem)
       }
     }
@@ -334,6 +334,9 @@ export function LexicalMenu({
             const newSelectedIndex = selectedIndex !== allItems.length - 1 ? selectedIndex + 1 : 0
 
             const newSelectedItem = allItems[newSelectedIndex]
+            if (!newSelectedItem) {
+              return false
+            }
 
             updateSelectedItem(newSelectedItem)
             if (newSelectedItem.ref != null && newSelectedItem.ref.current) {
@@ -360,6 +363,9 @@ export function LexicalMenu({
             const newSelectedIndex = selectedIndex !== 0 ? selectedIndex - 1 : allItems.length - 1
 
             const newSelectedItem = allItems[newSelectedIndex]
+            if (!newSelectedItem) {
+              return false
+            }
 
             updateSelectedItem(newSelectedItem)
             if (newSelectedItem.ref != null && newSelectedItem.ref.current) {
@@ -445,6 +451,16 @@ export function LexicalMenu({
   )
 }
 
+function setContainerDivAttributes(containerDiv: HTMLElement, className?: string) {
+  if (className != null) {
+    containerDiv.className = className
+  }
+  containerDiv.setAttribute('aria-label', 'Slash menu')
+  containerDiv.setAttribute('role', 'listbox')
+  containerDiv.style.display = 'block'
+  containerDiv.style.position = 'absolute'
+}
+
 export function useMenuAnchorRef(
   anchorElem: HTMLElement,
   resolution: MenuResolution | null,
@@ -502,16 +518,10 @@ export function useMenuAnchorRef(
       }
 
       if (!containerDiv.isConnected) {
-        if (className != null) {
-          containerDiv.className = className
-        }
-        containerDiv.setAttribute('aria-label', 'Slash menu')
-        containerDiv.setAttribute('id', 'slash-menu')
-        containerDiv.setAttribute('role', 'listbox')
-        containerDiv.style.display = 'block'
-        containerDiv.style.position = 'absolute'
+        setContainerDivAttributes(containerDiv, className)
         anchorElem.append(containerDiv)
       }
+      containerDiv.setAttribute('id', 'slash-menu')
       anchorElementRef.current = containerDiv
       rootElement.setAttribute('aria-controls', 'slash-menu')
     }
@@ -529,6 +539,7 @@ export function useMenuAnchorRef(
         const containerDiv = anchorElementRef.current
         if (containerDiv !== null && containerDiv.isConnected) {
           containerDiv.remove()
+          containerDiv.removeAttribute('id')
         }
       }
     }

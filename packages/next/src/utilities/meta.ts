@@ -1,53 +1,53 @@
 import type { Metadata } from 'next'
-import type { IconConfig, MetaConfig } from 'payload'
+import type { Icon } from 'next/dist/lib/metadata/types/metadata-types.js'
+import type { MetaConfig } from 'payload'
 
 import { payloadFaviconDark, payloadFaviconLight, staticOGImage } from '@payloadcms/ui/assets'
 import * as qs from 'qs-esm'
 
-const defaultOpenGraph = {
+const defaultOpenGraph: Metadata['openGraph'] = {
   description:
     'Payload is a headless CMS and application framework built with TypeScript, Node.js, and React.',
   siteName: 'Payload App',
   title: 'Payload App',
 }
 
-export const meta = async (args: { serverURL: string } & MetaConfig): Promise<any> => {
-  const {
-    defaultOGImageType,
-    description,
-    icons: customIcons,
-    keywords,
-    openGraph: openGraphFromProps,
-    serverURL,
-    title,
-    titleSuffix,
-  } = args
+export const generateMetadata = async (
+  args: { serverURL: string } & MetaConfig,
+): Promise<Metadata> => {
+  const { defaultOGImageType, serverURL, titleSuffix, ...rest } = args
 
-  const payloadIcons: IconConfig[] = [
-    {
-      type: 'image/png',
-      rel: 'icon',
-      sizes: '32x32',
-      url: typeof payloadFaviconDark === 'object' ? payloadFaviconDark?.src : payloadFaviconDark,
-    },
-    {
-      type: 'image/png',
-      media: '(prefers-color-scheme: dark)',
-      rel: 'icon',
-      sizes: '32x32',
-      url: typeof payloadFaviconLight === 'object' ? payloadFaviconLight?.src : payloadFaviconLight,
-    },
-  ]
+  /**
+   * @todo find a way to remove the type assertion here.
+   * It is a result of needing to `DeepCopy` the `MetaConfig` type from Payload.
+   * This is required for the `DeepRequired` from `Config` to `SanitizedConfig`.
+   */
+  const incomingMetadata = rest as Metadata
 
-  let icons = payloadIcons
+  const icons: Metadata['icons'] =
+    incomingMetadata.icons ||
+    ([
+      {
+        type: 'image/png',
+        rel: 'icon',
+        sizes: '32x32',
+        url: typeof payloadFaviconDark === 'object' ? payloadFaviconDark?.src : payloadFaviconDark,
+      },
+      {
+        type: 'image/png',
+        media: '(prefers-color-scheme: dark)',
+        rel: 'icon',
+        sizes: '32x32',
+        url:
+          typeof payloadFaviconLight === 'object' ? payloadFaviconLight?.src : payloadFaviconLight,
+      },
+    ] satisfies Array<Icon>)
 
-  if (customIcons && typeof customIcons === 'object' && Array.isArray(customIcons)) {
-    icons = customIcons
-  }
+  const metaTitle: Metadata['title'] = [incomingMetadata.title, titleSuffix]
+    .filter(Boolean)
+    .join(' ')
 
-  const metaTitle = [title, titleSuffix].filter(Boolean).join(' ')
-
-  const ogTitle = `${typeof openGraphFromProps?.title === 'string' ? openGraphFromProps.title : title} ${titleSuffix}`
+  const ogTitle = `${typeof incomingMetadata.openGraph?.title === 'string' ? incomingMetadata.openGraph.title : incomingMetadata.title} ${titleSuffix}`
 
   const mergedOpenGraph: Metadata['openGraph'] = {
     ...(defaultOpenGraph || {}),
@@ -59,7 +59,8 @@ export const meta = async (args: { serverURL: string } & MetaConfig): Promise<an
               height: 630,
               url: `/api/og${qs.stringify(
                 {
-                  description: openGraphFromProps?.description || defaultOpenGraph.description,
+                  description:
+                    incomingMetadata.openGraph?.description || defaultOpenGraph.description,
                   title: ogTitle,
                 },
                 {
@@ -84,13 +85,12 @@ export const meta = async (args: { serverURL: string } & MetaConfig): Promise<an
         }
       : {}),
     title: ogTitle,
-    ...(openGraphFromProps || {}),
+    ...(incomingMetadata.openGraph || {}),
   }
 
   return Promise.resolve({
-    description,
+    ...incomingMetadata,
     icons,
-    keywords,
     metadataBase: new URL(
       serverURL ||
         process.env.PAYLOAD_PUBLIC_SERVER_URL ||

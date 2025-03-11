@@ -20,6 +20,7 @@ type Args = {
   fields: FlattenedField[]
   joins: BuildQueryJoinAliases
   locale: string
+  parentIsLocalized: boolean
   selectFields: Record<string, GenericColumn>
   selectLocale?: boolean
   tableName: string
@@ -32,6 +33,7 @@ export function parseParams({
   fields,
   joins,
   locale,
+  parentIsLocalized,
   selectFields,
   selectLocale,
   tableName,
@@ -58,6 +60,7 @@ export function parseParams({
             fields,
             joins,
             locale,
+            parentIsLocalized,
             selectFields,
             selectLocale,
             tableName,
@@ -92,6 +95,7 @@ export function parseParams({
                   fields,
                   joins,
                   locale,
+                  parentIsLocalized,
                   pathSegments: relationOrPath.replace(/__/g, '.').split('.'),
                   selectFields,
                   selectLocale,
@@ -157,6 +161,7 @@ export function parseParams({
                     like: { operator: 'like', wildcard: '%' },
                     not_equals: { operator: '<>', wildcard: '' },
                     not_in: { operator: 'not in', wildcard: '' },
+                    not_like: { operator: 'not like', wildcard: '%' },
                   }
 
                   let formattedValue = val
@@ -171,11 +176,15 @@ export function parseParams({
                     formattedValue = ''
                   }
 
-                  constraints.push(
-                    sql.raw(
-                      `${table[columnName].name}${jsonQuery} ${operatorKeys[operator].operator} ${formattedValue}`,
-                    ),
-                  )
+                  let jsonQuerySelector = `${table[columnName].name}${jsonQuery}`
+
+                  if (adapter.name === 'sqlite' && operator === 'not_like') {
+                    jsonQuerySelector = `COALESCE(${table[columnName].name}${jsonQuery}, '')`
+                  }
+
+                  const rawSQLQuery = `${jsonQuerySelector} ${operatorKeys[operator].operator} ${formattedValue}`
+
+                  constraints.push(sql.raw(rawSQLQuery))
 
                   break
                 }

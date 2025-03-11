@@ -31,6 +31,7 @@ export const mergeServerFormState = ({
       'passesCondition',
       'valid',
       'errorMessage',
+      'errorPaths',
       'rows',
       'customComponents',
       'requiresRender',
@@ -38,6 +39,7 @@ export const mergeServerFormState = ({
 
     if (acceptValues) {
       serverPropsToAccept.push('value')
+      serverPropsToAccept.push('initialValue')
     }
 
     for (const [path, newFieldState] of Object.entries(existingState)) {

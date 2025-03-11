@@ -1,18 +1,16 @@
-import type { AdminViewProps } from 'payload'
+import type { AdminViewServerProps } from 'payload'
 
 import React from 'react'
 
-import './index.scss'
 import { LogoutClient } from './LogoutClient.js'
+import './index.scss'
 
 const baseClass = 'logout'
-
-export { generateLogoutMetadata } from './meta.js'
 
 export const LogoutView: React.FC<
   {
     inactivity?: boolean
-  } & AdminViewProps
+  } & AdminViewServerProps
 > = ({ inactivity, initPageResult, searchParams }) => {
   const {
     req: {
@@ -35,6 +33,6 @@ export const LogoutView: React.FC<
   )
 }
 
-export const LogoutInactivity: React.FC<AdminViewProps> = (props) => {
+export function LogoutInactivity(props: AdminViewServerProps) {
   return <LogoutView inactivity {...props} />
 }

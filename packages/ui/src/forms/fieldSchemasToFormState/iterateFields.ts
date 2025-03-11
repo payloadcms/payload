@@ -23,6 +23,10 @@ type Args = {
    * if any parents is localized, then the field is localized. @default false
    */
   anyParentLocalized?: boolean
+  /**
+   * Data of the nearest parent block, or undefined
+   */
+  blockData: Data | undefined
   clientFieldSchemaMap?: ClientFieldSchemaMap
   collectionSlug?: string
   data: Data
@@ -75,6 +79,7 @@ export const iterateFields = async ({
   id,
   addErrorPathToParent: addErrorPathToParentArg,
   anyParentLocalized = false,
+  blockData,
   clientFieldSchemaMap,
   collectionSlug,
   data,
@@ -113,11 +118,19 @@ export const iterateFields = async ({
       parentSchemaPath,
     })
 
+    const pathSegments = path ? path.split('.') : []
+
     if (!skipConditionChecks) {
       try {
         passesCondition = Boolean(
           (field?.admin?.condition
-            ? Boolean(field.admin.condition(fullData || {}, data || {}, { user: req.user }))
+            ? Boolean(
+                field.admin.condition(fullData || {}, data || {}, {
+                  blockData,
+                  path: pathSegments,
+                  user: req.user,
+                }),
+              )
             : true) && parentPassesCondition,
         )
       } catch (err) {
@@ -135,6 +148,7 @@ export const iterateFields = async ({
         id,
         addErrorPathToParent: addErrorPathToParentArg,
         anyParentLocalized,
+        blockData,
         clientFieldSchemaMap,
         collectionSlug,
         data,

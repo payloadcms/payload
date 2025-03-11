@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { SanitizedConfig } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 

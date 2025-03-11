@@ -143,6 +143,11 @@ export type GlobalAdminOptions = {
 }
 
 export type GlobalConfig = {
+  /**
+   * Do not set this property manually. This is set to true during sanitization, to avoid
+   * sanitizing the same global multiple times.
+   */
+  _sanitized?: boolean
   access?: {
     read?: Access
     readDrafts?: Access

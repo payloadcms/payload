@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import {
@@ -32,7 +33,6 @@ import {
   ssrAutosavePagesSlug,
   ssrPagesSlug,
 } from './shared.js'
-import { wait } from 'payload/shared'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -210,7 +210,6 @@ describe('Live Preview', () => {
   test('global — has tab', async () => {
     const global = new AdminUrlUtil(serverURL, 'header')
     await page.goto(global.global('header'))
-    await page.waitForURL(global.global('header'))
 
     const docURL = page.url()
     const pathname = new URL(docURL).pathname
@@ -248,7 +247,6 @@ describe('Live Preview', () => {
 
   test('device — properly measures size', async () => {
     await page.goto(pagesURLUtil.create)
-    await page.waitForURL(pagesURLUtil.create)
     await page.locator('#field-title').fill('Title 3')
     await page.locator('#field-slug').fill('slug-3')
 
@@ -297,7 +295,6 @@ describe('Live Preview', () => {
 
   test('device — resizes to specified breakpoint', async () => {
     await page.goto(pagesURLUtil.create)
-    await page.waitForURL(pagesURLUtil.create)
     await page.locator('#field-title').fill('Title 4')
     await page.locator('#field-slug').fill('slug-4')
 

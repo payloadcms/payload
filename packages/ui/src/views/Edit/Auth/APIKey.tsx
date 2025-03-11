@@ -38,10 +38,12 @@ export const APIKey: React.FC<{ readonly enabled: boolean; readonly readOnly?: b
     text(val, {
       name: 'apiKey',
       type: 'text',
+      blockData: {},
       data: {},
       event: 'onChange',
       maxLength: 48,
       minLength: 24,
+      path: ['apiKey'],
       preferences: { fields: {} },
       req: {
         payload: {

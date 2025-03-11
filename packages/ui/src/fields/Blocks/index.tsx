@@ -1,5 +1,5 @@
 'use client'
-import type { BlocksFieldClientComponent } from 'payload'
+import type { BlocksFieldClientComponent, ClientBlock } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback } from 'react'
@@ -39,6 +39,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     field: {
       name,
       admin: { className, description, isSortable = true } = {},
+      blockReferences,
       blocks,
       label,
       labels: labelsFromProps,
@@ -63,6 +64,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   const { code: locale } = useLocale()
   const {
     config: { localization },
+    config,
   } = useConfig()
   const drawerSlug = useDrawerSlug('blocks-drawer')
   const submitted = useFormSubmitted()
@@ -75,7 +77,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
 
   const editingDefaultLocale = (() => {
     if (localization && localization.fallback) {
-      const defaultLocale = localization.defaultLocale || 'en'
+      const defaultLocale = localization.defaultLocale
       return locale === defaultLocale
     }
 
@@ -261,7 +263,11 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         >
           {rows.map((row, i) => {
             const { blockType, isLoading } = row
-            const blockConfig = blocks.find((block) => block.slug === blockType)
+            const blockConfig: ClientBlock =
+              config.blocksMap[blockType] ??
+              ((blockReferences ?? blocks).find(
+                (block) => typeof block !== 'string' && block.slug === blockType,
+              ) as ClientBlock)
 
             if (blockConfig) {
               const rowPath = `${path}.${i}`
@@ -277,7 +283,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                       {...draggableSortableItemProps}
                       addRow={addRow}
                       block={blockConfig}
-                      blocks={blocks}
+                      blocks={blockReferences ?? blocks}
                       duplicateRow={duplicateRow}
                       errorCount={rowErrorCount}
                       fields={blockConfig.fields}
@@ -347,7 +353,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
           <BlocksDrawer
             addRow={addRow}
             addRowIndex={rows?.length || 0}
-            blocks={blocks}
+            blocks={blockReferences ?? blocks}
             drawerSlug={drawerSlug}
             labels={labels}
           />

@@ -25,7 +25,4 @@ export const PostsCollection: CollectionConfig = {
       }),
     },
   ],
-  versions: {
-    drafts: true,
-  },
 }

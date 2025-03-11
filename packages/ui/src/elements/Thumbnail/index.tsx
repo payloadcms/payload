@@ -31,6 +31,7 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
       setFileExists(false)
       return
     }
+    setFileExists(undefined)
 
     const img = new Image()
     img.src = fileSrc
@@ -50,7 +51,7 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
    */
   if (fileSrc) {
     const queryChar = fileSrc?.includes('?') ? '&' : '?'
-    src = imageCacheTag ? `${fileSrc}${queryChar}${imageCacheTag}` : fileSrc
+    src = imageCacheTag ? `${fileSrc}${queryChar}${encodeURIComponent(imageCacheTag)}` : fileSrc
   }
 
   return (
@@ -81,6 +82,7 @@ export function ThumbnailComponent(props: ThumbnailComponentProps) {
       setFileExists(false)
       return
     }
+    setFileExists(undefined)
 
     const img = new Image()
     img.src = fileSrc
@@ -100,7 +102,7 @@ export function ThumbnailComponent(props: ThumbnailComponentProps) {
    */
   if (fileSrc) {
     const queryChar = fileSrc?.includes('?') ? '&' : '?'
-    src = imageCacheTag ? `${fileSrc}${queryChar}${imageCacheTag}` : fileSrc
+    src = imageCacheTag ? `${fileSrc}${queryChar}${encodeURIComponent(imageCacheTag)}` : fileSrc
   }
 
   return (

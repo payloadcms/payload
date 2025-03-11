@@ -1,15 +1,15 @@
 import type {
-  AdminViewComponent,
-  AdminViewProps,
+  AdminViewServerProps,
   DocumentSubViewTypes,
   ImportMap,
+  PayloadComponent,
   SanitizedConfig,
   ServerPropsFromView,
   ViewTypes,
 } from 'payload'
 import type React from 'react'
 
-import { formatAdminURL } from '@payloadcms/ui/shared'
+import { formatAdminURL } from 'payload/shared'
 
 import type { initPage } from '../../utilities/initPage/index.js'
 
@@ -38,12 +38,12 @@ const baseClasses = {
 }
 
 type OneSegmentViews = {
-  [K in Exclude<keyof SanitizedConfig['admin']['routes'], 'reset'>]: React.FC<AdminViewProps>
+  [K in Exclude<keyof SanitizedConfig['admin']['routes'], 'reset'>]: React.FC<AdminViewServerProps>
 }
 
 export type ViewFromConfig = {
-  Component?: React.FC<AdminViewProps>
-  payloadComponent?: AdminViewComponent
+  Component?: React.FC<AdminViewServerProps>
+  payloadComponent?: PayloadComponent<AdminViewServerProps>
 }
 
 const oneSegmentViews: OneSegmentViews = {

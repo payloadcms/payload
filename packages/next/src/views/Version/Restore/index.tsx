@@ -1,20 +1,20 @@
 'use client'
+
 import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
-  ChevronIcon,
-  Modal,
-  Pill,
-  Popup,
+  ConfirmationModal,
   PopupList,
+  toast,
   useConfig,
   useModal,
+  useRouteTransition,
   useTranslation,
 } from '@payloadcms/ui'
-import { formatAdminURL, requests } from '@payloadcms/ui/shared'
+import { requests } from '@payloadcms/ui/shared'
 import { useRouter } from 'next/navigation.js'
+import { formatAdminURL } from 'payload/shared'
 import React, { Fragment, useCallback, useState } from 'react'
-import { toast } from 'sonner'
 
 import type { Props } from './types.js'
 
@@ -44,10 +44,10 @@ const Restore: React.FC<Props> = ({
   const collectionConfig = getEntityConfig({ collectionSlug })
 
   const { toggleModal } = useModal()
-  const [processing, setProcessing] = useState(false)
   const router = useRouter()
   const { i18n, t } = useTranslation()
   const [draft, setDraft] = useState(false)
+  const { startRouteTransition } = useRouteTransition()
 
   const restoreMessage = t('version:aboutToRestoreGlobal', {
     label: getTranslation(label, i18n),
@@ -76,8 +76,6 @@ const Restore: React.FC<Props> = ({
   }
 
   const handleRestore = useCallback(async () => {
-    setProcessing(true)
-
     const res = await requests.post(fetchURL, {
       headers: {
         'Accept-Language': i18n.language,
@@ -87,11 +85,12 @@ const Restore: React.FC<Props> = ({
     if (res.status === 200) {
       const json = await res.json()
       toast.success(json.message)
-      router.push(redirectURL)
+      return startRouteTransition(() => router.push(redirectURL))
     } else {
       toast.error(t('version:problemRestoringVersion'))
     }
-  }, [fetchURL, redirectURL, t, i18n, router])
+  }, [fetchURL, redirectURL, t, i18n, router, startRouteTransition])
+
   return (
     <Fragment>
       <div className={[baseClass, className].filter(Boolean).join(' ')}>
@@ -115,27 +114,13 @@ const Restore: React.FC<Props> = ({
           {t('version:restoreThisVersion')}
         </Button>
       </div>
-      <Modal className={`${baseClass}__modal`} slug={modalSlug}>
-        <div className={`${baseClass}__wrapper`}>
-          <div className={`${baseClass}__content`}>
-            <h1>{t('version:confirmVersionRestoration')}</h1>
-            <p>{restoreMessage}</p>
-          </div>
-          <div className={`${baseClass}__controls`}>
-            <Button
-              buttonStyle="secondary"
-              onClick={processing ? undefined : () => toggleModal(modalSlug)}
-              size="large"
-              type="button"
-            >
-              {t('general:cancel')}
-            </Button>
-            <Button onClick={processing ? undefined : () => void handleRestore()}>
-              {processing ? t('version:restoring') : t('general:confirm')}
-            </Button>
-          </div>
-        </div>
-      </Modal>
+      <ConfirmationModal
+        body={restoreMessage}
+        confirmingLabel={t('version:restoring')}
+        heading={t('version:confirmVersionRestoration')}
+        modalSlug={modalSlug}
+        onConfirm={handleRestore}
+      />
     </Fragment>
   )
 }

@@ -6,6 +6,7 @@ import type {
   ElementNode as ElementNodeType,
   LexicalCommand,
   LexicalNode,
+  LexicalUpdateJSON,
   NodeKey,
   RangeSelection,
 } from 'lexical'
@@ -40,7 +41,7 @@ export class LinkNode extends ElementNode {
     },
     key,
   }: {
-    fields: LinkFields
+    fields?: LinkFields
     id: string
     key?: NodeKey
   }) {
@@ -71,6 +72,11 @@ export class LinkNode extends ElementNode {
   }
 
   static override importJSON(serializedNode: SerializedLinkNode): LinkNode {
+    const node = $createLinkNode({}).updateFromJSON(serializedNode)
+
+    /**
+     * @todo remove this in 4.0
+     */
     if (
       serializedNode.version === 1 &&
       typeof serializedNode.fields?.doc?.value === 'object' &&
@@ -84,14 +90,6 @@ export class LinkNode extends ElementNode {
       serializedNode.id = new ObjectID.default().toHexString()
       serializedNode.version = 3
     }
-
-    const node = $createLinkNode({
-      id: serializedNode.id,
-      fields: serializedNode.fields,
-    })
-    node.setFormat(serializedNode.format)
-    node.setIndent(serializedNode.indent)
-    node.setDirection(serializedNode.direction)
     return node
   }
 
@@ -203,12 +201,19 @@ export class LinkNode extends ElementNode {
     return url
   }
 
-  setFields(fields: LinkFields): void {
+  setFields(fields: LinkFields): this {
     const writable = this.getWritable()
     writable.__fields = fields
+    return writable
   }
 
-  override updateDOM(prevNode: LinkNode, anchor: HTMLAnchorElement, config: EditorConfig): boolean {
+  setID(id: string): this {
+    const writable = this.getWritable()
+    writable.__id = id
+    return writable
+  }
+
+  override updateDOM(prevNode: this, anchor: HTMLAnchorElement, config: EditorConfig): boolean {
     const url = this.__fields?.url
     const newTab = this.__fields?.newTab
     if (url != null && url !== prevNode.__fields?.url && this.__fields?.linkType === 'custom') {
@@ -238,6 +243,13 @@ export class LinkNode extends ElementNode {
 
     return false
   }
+
+  override updateFromJSON(serializedNode: LexicalUpdateJSON<SerializedLinkNode>): this {
+    return super
+      .updateFromJSON(serializedNode)
+      .setFields(serializedNode.fields)
+      .setID(serializedNode.id as string)
+  }
 }
 
 function $convertAnchorElement(domNode: Node): DOMConversionOutput {
@@ -259,7 +271,7 @@ function $convertAnchorElement(domNode: Node): DOMConversionOutput {
   return { node }
 }
 
-export function $createLinkNode({ id, fields }: { fields: LinkFields; id?: string }): LinkNode {
+export function $createLinkNode({ id, fields }: { fields?: LinkFields; id?: string }): LinkNode {
   return $applyNodeReplacement(
     new LinkNode({
       id: id ?? new ObjectID.default().toHexString(),
@@ -295,9 +307,9 @@ export function $toggleLink(payload: ({ fields: LinkFields } & LinkPayload) | nu
       if ($isLinkNode(parent)) {
         const children = parent.getChildren()
 
-        for (let i = 0; i < children.length; i += 1) {
-          parent.insertBefore(children[i])
-        }
+        children.forEach((child) => {
+          parent.insertBefore(child)
+        })
 
         parent.remove()
       }
@@ -307,7 +319,7 @@ export function $toggleLink(payload: ({ fields: LinkFields } & LinkPayload) | nu
   }
   // Add or merge LinkNodes
   if (nodes?.length === 1) {
-    const firstNode = nodes[0]
+    const firstNode = nodes[0]!
     // if the first node is a LinkNode or if its
     // parent is a LinkNode, we update the URL, target and rel.
     const linkNode: LinkNode | null = $isLinkNode(firstNode)
@@ -375,10 +387,7 @@ export function $toggleLink(payload: ({ fields: LinkFields } & LinkPayload) | nu
       }
       if (linkNode !== null) {
         const children = node.getChildren()
-
-        for (let i = 0; i < children.length; i += 1) {
-          linkNode.append(children[i])
-        }
+        linkNode.append(...children)
       }
 
       node.remove()

@@ -27,9 +27,36 @@ Core features:
 - [Jobs and Scheduled Publishing](#jobs-and-scheduled-publish)
 - [Website](#website)
 
-## Quick Start
+## Quick start
 
-To spin up this example locally, follow these steps:
+Click the 'Deploy' button above to spin up this template directly into Vercel hosting. It will first prompt you save this template into your own Github repo so that you own the code and can make any changes you want to it.
+
+Set up the following services and secrets and then once the app has been built and deployed you will be able to visit your site at the generated URL.
+From this point on you can access your admin panel at `/admin` of your app URL, create an admin user and then click the 'Seed the database' button in the dashboard to add content into your app.
+
+### Services
+
+This project uses the following services integrated into Vercel which you will need to click "Add" and "Connect" for:
+
+Neon Database - Postgres-based cloud database used to host your data
+
+Vercel Blob Storage - object storage used to host your files such as images and videos
+
+The connection variables will automatically be setup for you on Vercel when these services are connected.
+
+#### Secrets
+
+You will be prompted to add the following secret values to your project. These should be long unguessable strong passwords, you can also use a password manager to generate one for these.
+
+CRON_SECRET - used for running cron on Vercel
+
+PAYLOAD_SECRET - used by Payload to sign secrets like JWT tokens
+
+PREVIEW_SECRET - used by Payload for secured live previews of your content
+
+## Quick Start - local setup
+
+To spin up this template locally, follow these steps:
 
 ### Clone
 
@@ -73,7 +100,7 @@ See the [Collections](https://payloadcms.com/docs/configuration/collections) doc
 
 - #### Posts
 
-  Posts are used to generated blog posts, news articles, or any other type of content that is published over time. All posts are layout builder enabled so you can generate unique layouts for each post using layout-building blocks, see [Layout Builder](#layout-builder) for more details. Posts are also draft-enabled so you can preview them before publishing them to your website, see [Draft Preview](#draft-preview) for more details.
+  Posts are used to generate blog posts, news articles, or any other type of content that is published over time. All posts are layout builder enabled so you can generate unique layouts for each post using layout-building blocks, see [Layout Builder](#layout-builder) for more details. Posts are also draft-enabled so you can preview them before publishing them to your website, see [Draft Preview](#draft-preview) for more details.
 
 - #### Pages
 
@@ -170,7 +197,7 @@ Core features:
 - [Next.js App Router](https://nextjs.org)
 - [TypeScript](https://www.typescriptlang.org)
 - [React Hook Form](https://react-hook-form.com)
-- [Payload Admin Bar](https://github.com/payloadcms/payload-admin-bar)
+- [Payload Admin Bar](https://github.com/payloadcms/payload/tree/main/packages/admin-bar)
 - [TailwindCSS styling](https://tailwindcss.com/)
 - [shadcn/ui components](https://ui.shadcn.com/)
 - User Accounts and Authentication

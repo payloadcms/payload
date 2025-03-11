@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { I18n, TFunction } from '@payloadcms/translations'
 import type DataLoader from 'dataloader'
 import type { URL } from 'url'
@@ -89,6 +90,10 @@ type PayloadRequestData = {
   data?: JsonObject
   /** The file on the request, same rules apply as the `data` property */
   file?: {
+    /**
+     * Context of the file when it was uploaded via client side.
+     */
+    clientUploadContext?: unknown
     data: Buffer
     mimetype: string
     name: string
@@ -144,7 +149,9 @@ export type JoinQuery<TSlug extends CollectionSlug = string> =
         | Partial<{
             [K in keyof TypedCollectionJoins[TSlug]]:
               | {
+                  count?: boolean
                   limit?: number
+                  page?: number
                   sort?: string
                   where?: Where
                 }
@@ -239,3 +246,5 @@ export type TransformGlobalWithSelect<
   : DataFromGlobalSlug<TSlug>
 
 export type PopulateType = Partial<TypedCollectionSelect>
+
+export type ResolvedFilterOptions = { [collection: string]: Where }

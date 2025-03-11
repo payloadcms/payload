@@ -12,7 +12,7 @@ import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import {
   apiKeysSlug,
   namedSaveToJWTValue,
-  partialDisableLocaleStrategiesSlug,
+  partialDisableLocalStrategiesSlug,
   publicUsersSlug,
   saveToJWTKey,
   slug,
@@ -720,7 +720,7 @@ describe('Auth', () => {
     it('should allow create of a user with disableLocalStrategy', async () => {
       const email = 'test@example.com'
       const user = await payload.create({
-        collection: partialDisableLocaleStrategiesSlug,
+        collection: partialDisableLocalStrategiesSlug,
         data: {
           email,
           // password is not required
@@ -730,7 +730,7 @@ describe('Auth', () => {
     })
 
     it('should retain fields when auth.disableLocalStrategy.enableFields is true', () => {
-      const authFields = payload.collections[partialDisableLocaleStrategiesSlug].config.fields
+      const authFields = payload.collections[partialDisableLocalStrategiesSlug].config.fields
         // eslint-disable-next-line jest/no-conditional-in-test
         .filter((field) => 'name' in field && field.name)
         .map((field) => (field as FieldAffectingData).name)
@@ -750,7 +750,7 @@ describe('Auth', () => {
 
     it('should prevent login of user with disableLocalStrategy.', async () => {
       await payload.create({
-        collection: partialDisableLocaleStrategiesSlug,
+        collection: partialDisableLocalStrategiesSlug,
         data: {
           email: devUser.email,
           password: devUser.password,
@@ -759,7 +759,7 @@ describe('Auth', () => {
 
       await expect(async () => {
         await payload.login({
-          collection: partialDisableLocaleStrategiesSlug,
+          collection: partialDisableLocalStrategiesSlug,
           data: {
             email: devUser.email,
             password: devUser.password,
@@ -769,7 +769,7 @@ describe('Auth', () => {
     })
 
     it('rest - should prevent login', async () => {
-      const response = await restClient.POST(`/${partialDisableLocaleStrategiesSlug}/login`, {
+      const response = await restClient.POST(`/${partialDisableLocalStrategiesSlug}/login`, {
         body: JSON.stringify({
           email,
           password,

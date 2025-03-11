@@ -412,6 +412,96 @@ describe('Relationships', () => {
           expect(customIdNumberRelation).toMatchObject({ id: generatedCustomIdNumber })
         })
 
+        it('should retrieve totalDocs correctly with hasMany,', async () => {
+          const movie1 = await payload.create({
+            collection: 'movies',
+            data: {},
+          })
+          const movie2 = await payload.create({
+            collection: 'movies',
+            data: {},
+          })
+
+          const movie3 = await payload.create({
+            collection: 'movies',
+            data: { name: 'some-name' },
+          })
+
+          const movie4 = await payload.create({
+            collection: 'movies',
+            data: { name: 'some-name' },
+          })
+
+          await payload.create({
+            collection: 'directors',
+            data: {
+              name: 'Quentin Tarantino',
+              movies: [movie2.id, movie1.id, movie3.id, movie4.id],
+            },
+          })
+
+          const res = await payload.find({
+            collection: 'directors',
+            limit: 10,
+            where: {
+              or: [
+                {
+                  movies: {
+                    equals: movie2.id,
+                  },
+                },
+                {
+                  movies: {
+                    equals: movie1.id,
+                  },
+                },
+                {
+                  movies: {
+                    equals: movie1.id,
+                  },
+                },
+              ],
+            },
+          })
+
+          expect(res.totalDocs).toBe(1)
+
+          const res_2 = await payload.find({
+            collection: 'directors',
+            limit: 10,
+            where: {
+              or: [
+                {
+                  'movies.name': {
+                    equals: 'some-name',
+                  },
+                },
+              ],
+            },
+          })
+
+          expect(res_2.totalDocs).toBe(1)
+
+          const dir_1 = await payload.create({ collection: 'directors', data: { name: 'dir' } })
+          const dir_2 = await payload.create({ collection: 'directors', data: { name: 'dir' } })
+
+          const dir_3 = await payload.create({
+            collection: 'directors',
+            data: { directors: [dir_1.id, dir_2.id] },
+          })
+
+          const result = await payload.find({
+            collection: 'directors',
+            where: {
+              'directors.name': { equals: 'dir' },
+            },
+          })
+
+          expect(result.totalDocs).toBe(1)
+          expect(result.docs).toHaveLength(1)
+          expect(result.docs[0]?.id).toBe(dir_3.id)
+        })
+
         it('should query using "contains" by hasMany relationship field', async () => {
           const movie1 = await payload.create({
             collection: 'movies',
@@ -498,6 +588,7 @@ describe('Relationships', () => {
             },
           })
 
+          // eslint-disable-next-line jest/no-standalone-expect
           expect(query1.totalDocs).toStrictEqual(1)
         })
 
@@ -1039,6 +1130,36 @@ describe('Relationships', () => {
       })
     })
 
+    it('should allow querying within block nesting', async () => {
+      const director = await payload.create({
+        collection: 'directors',
+        data: { name: 'Test Director' },
+      })
+
+      const director_false = await payload.create({
+        collection: 'directors',
+        data: { name: 'False Director' },
+      })
+
+      const doc = await payload.create({
+        collection: 'blocks',
+        data: { blocks: [{ blockType: 'some', director: director.id }] },
+      })
+
+      await payload.create({
+        collection: 'blocks',
+        data: { blocks: [{ blockType: 'some', director: director_false.id }] },
+      })
+
+      const result = await payload.find({
+        collection: 'blocks',
+        where: { 'blocks.director.name': { equals: 'Test Director' } },
+      })
+
+      expect(result.totalDocs).toBe(1)
+      expect(result.docs[0]!.id).toBe(doc.id)
+    })
+
     describe('Nested Querying Separate Collections', () => {
       let director: Director
 
@@ -1424,6 +1545,7 @@ describe('Relationships', () => {
         })
         .then((res) => res.json())
 
+      // eslint-disable-next-line jest/no-standalone-expect
       expect(queryOne.docs).toHaveLength(1)
     })
 
