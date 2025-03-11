@@ -11,6 +11,7 @@ import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
+  throttleTest,
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { assertToastErrors } from '../../../helpers/assertToastErrors.js'
@@ -49,6 +50,11 @@ describe('Block fields', () => {
   })
 
   beforeEach(async () => {
+    await throttleTest({
+      page,
+      context,
+      delay: 'Slow 4G',
+    })
     await reInitializeDB({
       serverURL,
       snapshotKey: 'fieldsTest',
@@ -294,6 +300,8 @@ describe('Block fields', () => {
   describe('row manipulation', () => {
     test('moving rows should immediately move custom row labels', async () => {
       await page.goto(url.create)
+      // Ensure blocks are loaded
+      await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
       // first ensure that the first block has the custom header, and that the second block doesn't
 
@@ -328,11 +336,15 @@ describe('Block fields', () => {
     describe('react hooks', () => {
       test('should add 2 new block rows', async () => {
         await page.goto(url.create)
+        // Ensure blocks are loaded
+        await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
         await page
           .locator('.custom-blocks-field-management')
           .getByRole('button', { name: 'Add Block 1' })
           .click()
+        // Ensure blocks are loaded
+        await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
         const customBlocks = page.locator(
           '#field-customBlocks input[name="customBlocks.0.block1Title"]',
@@ -348,6 +360,8 @@ describe('Block fields', () => {
           .locator('.custom-blocks-field-management')
           .getByRole('button', { name: 'Add Block 2' })
           .click()
+        // Ensure blocks are loaded
+        await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
         await expect(
           page.locator('#field-customBlocks input[name="customBlocks.1.block2Title"]'),
@@ -357,6 +371,8 @@ describe('Block fields', () => {
           .locator('.custom-blocks-field-management')
           .getByRole('button', { name: 'Replace Block 2' })
           .click()
+        // Ensure blocks are loaded
+        await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
         await expect(
           page.locator('#field-customBlocks input[name="customBlocks.1.block1Title"]'),

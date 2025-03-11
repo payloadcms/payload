@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test'
 
+import { expect } from '@playwright/test'
 import { wait } from 'payload/shared'
 
 export const reorderBlocks = async ({
@@ -13,6 +14,9 @@ export const reorderBlocks = async ({
   page: Page
   toBlockIndex: number
 }) => {
+  // Ensure blocks are loaded
+  await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+
   const blocksField = page.locator(`#field-${fieldName}`).first()
 
   const fromField = blocksField.locator(`[id^="${fieldName}-row-${fromBlockIndex}"]`)
@@ -33,4 +37,7 @@ export const reorderBlocks = async ({
   await wait(300)
   await page.mouse.move(toBoundingBox.x - 2, toBoundingBox.y - 2, { steps: 10 })
   await page.mouse.up()
+
+  // Ensure blocks are loaded
+  await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 }
