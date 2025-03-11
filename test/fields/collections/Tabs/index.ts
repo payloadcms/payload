@@ -61,6 +61,10 @@ const TabsFields: CollectionConfig = {
               name: 'conditionalTabGroup',
               fields: [
                 {
+                  type: 'text',
+                  name: 'conditionalTabGroupTitle',
+                },
+                {
                   type: 'tabs',
                   tabs: [
                     {
