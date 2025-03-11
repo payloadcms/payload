@@ -161,7 +161,10 @@ describe('General', () => {
     describe('robots', () => {
       test('should apply default robots meta tag', async () => {
         await page.goto(`${serverURL}/admin`)
-        await expect(page.locator('meta[name="robots"]')).toHaveAttribute('noindex', 'nofollow')
+        await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+          'content',
+          'noindex, nofollow',
+        )
       })
     })
 
