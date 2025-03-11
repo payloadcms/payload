@@ -1,9 +1,9 @@
 import type { GenerateViewMetadata } from '../Root/index.js'
 
-import { meta } from '../../utilities/meta.js'
+import { generateMetadata } from '../../utilities/meta.js'
 
-export const generateAccountMetadata: GenerateViewMetadata = async ({ config, i18n: { t } }) =>
-  meta({
+export const generateAccountViewMetadata: GenerateViewMetadata = async ({ config, i18n: { t } }) =>
+  generateMetadata({
     description: `${t('authentication:accountOfCurrentUser')}`,
     keywords: `${t('authentication:account')}`,
     serverURL: config.serverURL,

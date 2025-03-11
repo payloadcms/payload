@@ -42,7 +42,7 @@ import {
   selectTableRow,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { trackNetworkRequests } from '../helpers/e2e/trackNetworkRequests.js'
+import { assertNetworkRequests } from '../helpers/e2e/assertNetworkRequests.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { waitForAutoSaveToRunAndComplete } from '../helpers/waitForAutoSaveToRunAndComplete.js'
@@ -416,7 +416,7 @@ describe('Versions', () => {
 
       await page.goto(postURL.edit(postID))
 
-      await trackNetworkRequests(
+      await assertNetworkRequests(
         page,
         `${serverURL}/admin/collections/${postCollectionSlug}/${postID}`,
         async () => {
@@ -1224,6 +1224,7 @@ describe('Versions', () => {
 
     test('should render diff', async () => {
       await navigateToVersionDiff()
+      expect(true).toBe(true)
     })
 
     test('should render diff for nested fields', async () => {

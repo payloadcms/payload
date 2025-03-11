@@ -1,12 +1,12 @@
 import type { GenerateViewMetadata } from '../Root/index.js'
 
-import { meta } from '../../utilities/meta.js'
+import { generateMetadata } from '../../utilities/meta.js'
 
-export const generateCreateFirstUserMetadata: GenerateViewMetadata = async ({
+export const generateCreateFirstUserViewMetadata: GenerateViewMetadata = async ({
   config,
   i18n: { t },
 }) =>
-  meta({
+  generateMetadata({
     description: t('authentication:createFirstUser'),
     keywords: t('general:create'),
     serverURL: config.serverURL,

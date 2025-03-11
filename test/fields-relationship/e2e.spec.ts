@@ -23,7 +23,7 @@ import type {
 
 import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { trackNetworkRequests } from '../helpers/e2e/trackNetworkRequests.js'
+import { assertNetworkRequests } from '../helpers/e2e/assertNetworkRequests.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
@@ -176,7 +176,7 @@ describe('Relationship Field', () => {
     await expect(options).toHaveCount(2) // two docs
     await options.nth(0).click()
     await expect(field).toContainText(relationOneDoc.id)
-    await trackNetworkRequests(page, `/api/${relationOneSlug}`, async () => {
+    await assertNetworkRequests(page, `/api/${relationOneSlug}`, async () => {
       await saveDocAndAssert(page)
       await wait(200)
     })
