@@ -66,6 +66,7 @@ const TabsFields: CollectionConfig = {
                     {
                       // duplicate name as above, should not conflict with tab IDs in form-state, if it does then tests will fail
                       name: 'conditionalTab',
+                      label: 'Duplicate conditional tab',
                       fields: [],
                       admin: {
                         condition: ({ conditionalTab }) =>
