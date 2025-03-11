@@ -18,6 +18,7 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
     },
     meta: {
       defaultOGImageType: 'dynamic',
+      robots: 'noindex, nofollow',
       titleSuffix: '- Payload',
     },
     routes: {
