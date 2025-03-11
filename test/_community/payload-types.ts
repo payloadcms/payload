@@ -124,9 +124,6 @@ export interface UserAuthOperations {
  */
 export interface Post {
   id: string;
-  group?: {
-    text?: string | null;
-  };
   content?: {
     root: {
       type: string;
@@ -272,11 +269,6 @@ export interface PayloadMigration {
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
-  group?:
-    | T
-    | {
-        text?: T;
-      };
   content?: T;
   updatedAt?: T;
   createdAt?: T;
