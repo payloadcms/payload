@@ -1,9 +1,9 @@
 import type { GenerateViewMetadata } from '../Root/index.js'
 
-import { meta } from '../../utilities/meta.js'
+import { generateMetadata } from '../../utilities/meta.js'
 
-export const generateVerifyMetadata: GenerateViewMetadata = async ({ config, i18n: { t } }) =>
-  meta({
+export const generateVerifyViewMetadata: GenerateViewMetadata = async ({ config, i18n: { t } }) =>
+  generateMetadata({
     description: t('authentication:verifyUser'),
     keywords: t('authentication:verify'),
     serverURL: config.serverURL,

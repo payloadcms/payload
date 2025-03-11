@@ -5,9 +5,12 @@ import { getTranslation } from '@payloadcms/translations'
 
 import type { GenerateEditViewMetadata } from '../Document/getMetaBySegment.js'
 
-import { meta } from '../../utilities/meta.js'
+import { generateMetadata } from '../../utilities/meta.js'
 
-export const generateMetadata: GenerateEditViewMetadata = async ({
+/**
+ * @todo Remove the type assertion. This is currently required because of how the `Metadata` type from `next` consumes the `URL` type.
+ */
+export const generateEditViewMetadata: GenerateEditViewMetadata = async ({
   collectionConfig,
   config,
   globalConfig,
@@ -33,35 +36,35 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
   const ogToUse: MetaConfig['openGraph'] = {
     title: `${isEditing ? t('general:edit') : t('general:edit')} - ${entityLabel}`,
     ...(config.admin.meta.openGraph || {}),
-    ...(collectionConfig
+    ...((collectionConfig
       ? {
           ...(collectionConfig?.admin.meta?.openGraph || {}),
           ...(collectionConfig?.admin?.components?.views?.edit?.[view]?.meta?.openGraph || {}),
         }
-      : {}),
-    ...(globalConfig
+      : {}) as MetaConfig['openGraph']),
+    ...((globalConfig
       ? {
           ...(globalConfig?.admin.meta?.openGraph || {}),
           ...(globalConfig?.admin?.components?.views?.edit?.[view]?.meta?.openGraph || {}),
         }
-      : {}),
+      : {}) as MetaConfig['openGraph']),
   }
 
-  return meta({
+  return generateMetadata({
     ...metaToUse,
     openGraph: ogToUse,
-    ...(collectionConfig
+    ...((collectionConfig
       ? {
           ...(collectionConfig?.admin.meta || {}),
           ...(collectionConfig?.admin?.components?.views?.edit?.[view]?.meta || {}),
         }
-      : {}),
-    ...(globalConfig
+      : {}) as MetaConfig),
+    ...((globalConfig
       ? {
           ...(globalConfig?.admin.meta || {}),
           ...(globalConfig?.admin?.components?.views?.edit?.[view]?.meta || {}),
         }
-      : {}),
+      : {}) as MetaConfig),
     serverURL: config.serverURL,
   })
 }
