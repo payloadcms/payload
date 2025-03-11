@@ -144,4 +144,27 @@ describe('addPayloadComponentToImportMap', () => {
       expectedSpecifier: 'MyExport',
     })
   })
+
+  it('aliased path', () => {
+    componentPathTest({
+      baseDir: '/test/myTest',
+      importMapFilePath: '/app/(payload)/importMap.js',
+      payloadComponent: '@components/MyComponent.js#MyExport',
+      expectedImportMapToBaseDirPath: '../../test/myTest/',
+      expectedPath: '@components/MyComponent.js',
+      expectedSpecifier: 'MyExport',
+    })
+  })
+  it('aliased path in PayloadComponent object', () => {
+    componentPathTest({
+      baseDir: '/test/',
+      importMapFilePath: '/app/(payload)/importMap.js',
+      payloadComponent: {
+        path: '@components/MyComponent.js',
+      },
+      expectedImportMapToBaseDirPath: '../../test/',
+      expectedPath: '@components/MyComponent.js',
+      expectedSpecifier: 'default',
+    })
+  })
 })
