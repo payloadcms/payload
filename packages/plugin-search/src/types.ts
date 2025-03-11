@@ -19,13 +19,13 @@ export type DocToSync = {
 }
 
 export type BeforeSync = (args: {
+  collectionSlug: string
   originalDoc: {
     [key: string]: any
   }
   payload: Payload
   req: PayloadRequest
   searchDoc: DocToSync
-  collection: string
 }) => DocToSync | Promise<DocToSync>
 
 export type FieldsOverride = (args: { defaultFields: Field[] }) => Field[]

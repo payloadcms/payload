@@ -36,11 +36,11 @@ export const syncDocAsSearchIndex = async ({
       })
     }
     dataToSave = await beforeSync({
+      collectionSlug: collection,
       originalDoc: docToSyncWith,
       payload,
       req,
       searchDoc: dataToSave,
-      collection,
     })
   }
 
