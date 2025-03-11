@@ -2,12 +2,14 @@
 // default beforeDuplicate hook for required and unique fields
 import { type FieldAffectingData, type FieldHook, fieldShouldBeLocalized } from './config/types.js'
 
-const unique: FieldHook = ({ value }) => (typeof value === 'string' ? `${value} - Copy` : undefined)
+const hasValue = (value) => typeof value === 'string' && value.trim() !== ''
+
+const unique: FieldHook = ({ value }) => (hasValue(value) ? `${value} - Copy` : undefined)
 const localizedUnique: FieldHook = ({ req, value }) =>
-  value ? `${value} - ${req?.t('general:copy') ?? 'Copy'}` : undefined
-const uniqueRequired: FieldHook = ({ value }) => `${value} - Copy`
+  hasValue(value) ? `${value} - ${req?.t('general:copy') ?? 'Copy'}` : undefined
+const uniqueRequired: FieldHook = ({ value }) => (hasValue(value) ? `${value} - Copy` : undefined)
 const localizedUniqueRequired: FieldHook = ({ req, value }) =>
-  `${value} - ${req?.t('general:copy') ?? 'Copy'}`
+  hasValue(value) ? `${value} - ${req?.t('general:copy') ?? 'Copy'}` : undefined
 
 export const setDefaultBeforeDuplicate = (
   field: FieldAffectingData,
