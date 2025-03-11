@@ -150,13 +150,13 @@ To customize the Robots Config, use the `admin.meta.robots` property in your Pay
 
 For a full list of all available Robots options, see the [Next.js documentation](https://nextjs.org/docs/app/api-reference/functions/generate-metadata#robots).
 
-##### Prevent Crawling 
+##### Prevent Crawling
 
 While setting meta tags via `admin.meta.robots` can prevent search engines from _indexing_ web pages, it does not prevent them from being _crawled_.
 
 To prevent your pages from being crawled altogether, add a `robots.txt` file to your root directory.
 
-```txt
+```text
 User-agent: *
 Disallow: /admin/
 ```
