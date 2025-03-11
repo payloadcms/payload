@@ -40,15 +40,7 @@ export function addPayloadComponentToImportMap({
   const isRelativePath = componentPath.startsWith('.') || componentPath.startsWith('/')
 
   if (isRelativePath) {
-    // componentPath without the leading dot or slash that is used to indicate a relative path
-    let baseComponentPath = componentPath
-    if (componentPath.startsWith('./')) {
-      baseComponentPath = componentPath.slice(2)
-    } else if (componentPath.startsWith('/')) {
-      baseComponentPath = componentPath.slice(1)
-    }
-
-    const adjustedComponentPath = path.posix.join(importMapToBaseDirPath, baseComponentPath)
+    const adjustedComponentPath = path.posix.join(importMapToBaseDirPath, componentPath)
 
     imports[importIdentifier] = {
       path: adjustedComponentPath,

@@ -167,4 +167,26 @@ describe('addPayloadComponentToImportMap', () => {
       expectedSpecifier: 'default',
     })
   })
+
+  it('relative path import starting with slash, going up', () => {
+    componentPathTest({
+      baseDir: '/test/myTest',
+      importMapFilePath: '/test/myTest/app/importMap.js',
+      payloadComponent: '/../MyComponent.js#MyExport',
+      expectedImportMapToBaseDirPath: '../',
+      expectedPath: '../../MyComponent.js',
+      expectedSpecifier: 'MyExport',
+    })
+  })
+
+  it('relative path import starting with dot-slash, going up', () => {
+    componentPathTest({
+      baseDir: '/test/myTest',
+      importMapFilePath: '/test/myTest/app/importMap.js',
+      payloadComponent: './../MyComponent.js#MyExport',
+      expectedImportMapToBaseDirPath: '../',
+      expectedPath: '../../MyComponent.js',
+      expectedSpecifier: 'MyExport',
+    })
+  })
 })
