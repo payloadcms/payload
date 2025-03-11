@@ -1,24 +1,18 @@
-import type { CountGlobalVersions, SanitizedGlobalConfig } from 'payload'
+import type { CountGlobalVersions } from 'payload'
 
 import { buildVersionGlobalFields } from 'payload'
-import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
 
 import buildQuery from './queries/buildQuery.js'
+import { getGlobal } from './utilities/getEntity.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
 export const countGlobalVersions: CountGlobalVersions = async function countGlobalVersions(
   this: DrizzleAdapter,
-  { global, locale, req, where: whereArg },
+  { global: globalSlug, locale, req, where: whereArg = {} },
 ) {
-  const globalConfig: SanitizedGlobalConfig = this.payload.globals.config.find(
-    ({ slug }) => slug === global,
-  )
-
-  const tableName = this.tableNameMap.get(
-    `_${toSnakeCase(globalConfig.slug)}${this.versionsSuffix}`,
-  )
+  const { globalConfig, tableName } = getGlobal({ adapter: this, globalSlug, versions: true })
 
   const db = await getTransaction(this, req)
 

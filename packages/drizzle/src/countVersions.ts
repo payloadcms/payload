@@ -1,22 +1,22 @@
-import type { CountVersions, SanitizedCollectionConfig } from 'payload'
+import type { CountVersions } from 'payload'
 
 import { buildVersionCollectionFields } from 'payload'
-import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
 
 import buildQuery from './queries/buildQuery.js'
+import { getCollection } from './utilities/getEntity.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
 export const countVersions: CountVersions = async function countVersions(
   this: DrizzleAdapter,
-  { collection, locale, req, where: whereArg },
+  { collection: collectionSlug, locale, req, where: whereArg = {} },
 ) {
-  const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
-
-  const tableName = this.tableNameMap.get(
-    `_${toSnakeCase(collectionConfig.slug)}${this.versionsSuffix}`,
-  )
+  const { collectionConfig, tableName } = getCollection({
+    adapter: this,
+    collectionSlug,
+    versions: true,
+  })
 
   const db = await getTransaction(this, req)
 

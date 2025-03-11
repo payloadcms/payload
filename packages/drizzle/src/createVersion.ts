@@ -2,11 +2,11 @@ import type { CreateVersionArgs, TypeWithID, TypeWithVersion } from 'payload'
 
 import { sql } from 'drizzle-orm'
 import { buildVersionCollectionFields } from 'payload'
-import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
 
 import { upsertRow } from './upsertRow/index.js'
+import { getCollection } from './utilities/getEntity.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
 export async function createVersion<T extends TypeWithID>(
@@ -18,20 +18,21 @@ export async function createVersion<T extends TypeWithID>(
     parent,
     publishedLocale,
     req,
+    returning,
     select,
     snapshot,
     updatedAt,
     versionData,
-    returning,
   }: CreateVersionArgs<T>,
 ) {
   const db = await getTransaction(this, req)
-  const collection = this.payload.collections[collectionSlug].config
-  const defaultTableName = toSnakeCase(collection.slug)
+  const { collectionConfig, tableName } = getCollection({
+    adapter: this,
+    collectionSlug,
+    versions: true,
+  })
 
-  const tableName = this.tableNameMap.get(`_${defaultTableName}${this.versionsSuffix}`)
-
-  const version = { ...versionData }
+  const version: Partial<TypeWithID> = { ...versionData }
   if (version.id) {
     delete version.id
   }
@@ -51,7 +52,7 @@ export async function createVersion<T extends TypeWithID>(
     adapter: this,
     data,
     db,
-    fields: buildVersionCollectionFields(this.payload.config, collection, true),
+    fields: buildVersionCollectionFields(this.payload.config, collectionConfig, true),
     operation: 'create',
     req,
     select,
@@ -60,7 +61,7 @@ export async function createVersion<T extends TypeWithID>(
 
   const table = this.tables[tableName]
 
-  if (collection.versions.drafts) {
+  if (collectionConfig.versions.drafts) {
     await this.execute({
       db,
       sql: sql`

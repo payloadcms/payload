@@ -1,20 +1,17 @@
 import type { CreateGlobalArgs } from 'payload'
 
-import toSnakeCase from 'to-snake-case'
-
 import type { DrizzleAdapter } from './types.js'
 
 import { upsertRow } from './upsertRow/index.js'
+import { getGlobal } from './utilities/getEntity.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
 export async function createGlobal<T extends Record<string, unknown>>(
   this: DrizzleAdapter,
-  { slug, data, req, returning }: CreateGlobalArgs,
+  { slug: globalSlug, data, req, returning }: CreateGlobalArgs,
 ): Promise<T> {
   const db = await getTransaction(this, req)
-  const globalConfig = this.payload.globals.config.find((config) => config.slug === slug)
-
-  const tableName = this.tableNameMap.get(toSnakeCase(globalConfig.slug))
+  const { globalConfig, tableName } = getGlobal({ adapter: this, globalSlug })
 
   data.createdAt = new Date().toISOString()
 
@@ -23,17 +20,17 @@ export async function createGlobal<T extends Record<string, unknown>>(
     data,
     db,
     fields: globalConfig.flattenedFields,
+    ignoreResult: returning === false,
     operation: 'create',
     req,
     tableName,
-    ignoreResult: returning === false,
   })
 
   if (returning === false) {
-    return null
+    return null as unknown as T
   }
 
-  result.globalType = slug
+  result.globalType = globalSlug
 
   return result
 }

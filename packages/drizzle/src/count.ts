@@ -1,19 +1,16 @@
-import type { Count, SanitizedCollectionConfig } from 'payload'
-
-import toSnakeCase from 'to-snake-case'
+import type { Count } from 'payload'
 
 import type { DrizzleAdapter } from './types.js'
 
 import buildQuery from './queries/buildQuery.js'
+import { getCollection } from './utilities/getEntity.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
 export const count: Count = async function count(
   this: DrizzleAdapter,
-  { collection, locale, req, where: whereArg },
+  { collection: collectionSlug, locale, req, where: whereArg = {} },
 ) {
-  const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
-
-  const tableName = this.tableNameMap.get(toSnakeCase(collectionConfig.slug))
+  const { collectionConfig, tableName } = getCollection({ adapter: this, collectionSlug })
 
   const db = await getTransaction(this, req)
 
