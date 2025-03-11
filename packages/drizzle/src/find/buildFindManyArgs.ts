@@ -42,7 +42,7 @@ export const buildFindManyArgs = ({
   select,
   tableName,
   versions,
-}: BuildFindQueryArgs): Record<string, unknown> => {
+}: BuildFindQueryArgs): any => {
   const result: Result = {
     extras: {},
     with: {},

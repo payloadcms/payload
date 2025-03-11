@@ -1,28 +1,26 @@
 import type { DeleteMany } from 'payload'
 
 import { inArray } from 'drizzle-orm'
-import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
 
 import { findMany } from './find/findMany.js'
+import { getCollection } from './utilities/getEntity.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
 export const deleteMany: DeleteMany = async function deleteMany(
   this: DrizzleAdapter,
-  { collection, req, where },
+  { collection: collectionSlug, req, where },
 ) {
   const db = await getTransaction(this, req)
-  const collectionConfig = this.payload.collections[collection].config
-
-  const tableName = this.tableNameMap.get(toSnakeCase(collectionConfig.slug))
+  const { collectionConfig, tableName } = getCollection({ adapter: this, collectionSlug })
 
   const result = await findMany({
     adapter: this,
     fields: collectionConfig.flattenedFields,
     joins: false,
     limit: 0,
-    locale: req?.locale,
+    locale: req?.locale ?? undefined,
     page: 1,
     pagination: false,
     req,
@@ -30,9 +28,9 @@ export const deleteMany: DeleteMany = async function deleteMany(
     where,
   })
 
-  const ids = []
+  const ids: (number | string)[] = []
 
-  result.docs.forEach((data) => {
+  result.docs.forEach((data: any) => {
     ids.push(data.id)
   })
 

@@ -1,3 +1,5 @@
+import type { LibSQLDatabase } from 'drizzle-orm/libsql'
+import type { RelationalQueryBuilder } from 'drizzle-orm/sqlite-core/query-builders/query'
 import type { CollectionSlug, GlobalSlug } from 'payload'
 
 import { APIError } from 'payload'
@@ -67,4 +69,22 @@ export const getGlobal = ({
     globalConfig,
     tableName,
   }
+}
+
+export const getTableQuery = ({
+  adapter,
+  tableName,
+}: {
+  adapter: DrizzleAdapter
+  tableName: string
+}) => {
+  const drizzle = adapter.drizzle
+  // @ts-expect-error we don't have drizzle schema types
+  const table = drizzle.query[tableName] as RelationalQueryBuilder<any, any, any, any> | undefined
+
+  if (!table) {
+    throw new APIError(`Table with the name ${tableName} was not found.`)
+  }
+
+  return table
 }
