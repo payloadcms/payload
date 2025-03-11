@@ -309,6 +309,10 @@ export default buildConfigWithDefaults({
         },
         imageSizes: [
           {
+            name: 'undefinedHeight',
+            width: 300,
+          },
+          {
             name: 'maintainedAspectRatio',
             crop: 'center',
             formatOptions: { format: 'png', options: { quality: 90 } },

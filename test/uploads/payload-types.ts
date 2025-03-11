@@ -64,6 +64,7 @@ export interface Config {
   auth: {
     users: UserAuthOperations;
   };
+  blocks: {};
   collections: {
     relation: Relation;
     audio: Audio;
@@ -207,6 +208,14 @@ export interface Media {
   focalX?: number | null;
   focalY?: number | null;
   sizes?: {
+    undefinedHeight?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
     maintainedAspectRatio?: {
       url?: string | null;
       width?: number | null;
@@ -1868,6 +1877,16 @@ export interface MediaSelect<T extends boolean = true> {
   sizes?:
     | T
     | {
+        undefinedHeight?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
         maintainedAspectRatio?:
           | T
           | {
