@@ -24,6 +24,7 @@ export const assertNetworkRequests = async (
     beforePoll,
     allowedNumberOfRequests = 1,
     timeout = 5000,
+    minimumNumberOfRequests,
     interval = 1000,
   }: {
     allowedNumberOfRequests?: number
@@ -65,11 +66,11 @@ export const assertNetworkRequests = async (
     await new Promise((resolve) => setTimeout(resolve, interval))
   }
 
-  if (!options?.noMinimum) {
+  if (!minimumNumberOfRequests) {
     expect(matchedRequests.length).toBe(allowedNumberOfRequests)
   } else {
     expect(matchedRequests.length).toBeLessThanOrEqual(allowedNumberOfRequests)
-    expect(matchedRequests.length).toBeGreaterThanOrEqual(options.minimumNumberOfRequests)
+    expect(matchedRequests.length).toBeGreaterThanOrEqual(minimumNumberOfRequests)
   }
 
   return matchedRequests
