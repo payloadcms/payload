@@ -13,11 +13,13 @@ import type {
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
 import { fieldAffectsData, fieldIsHiddenOrDisabled, flattenTopLevelFields } from 'payload/shared'
+import React from 'react'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import type { Column } from '../exports/client/index.js'
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
+import { SortHeader } from '../elements/SortHeader/index.js'
 import { SortRow } from '../elements/SortRow/index.js'
 import { buildColumnState } from '../elements/TableColumns/buildColumnState.js'
 import { buildPolymorphicColumnState } from '../elements/TableColumns/buildPolymorphicColumnState.js'
@@ -209,7 +211,11 @@ export const renderTable = ({
         },
         hidden: true,
       },
-      Heading: '',
+      Heading: (
+        <SortHeader
+        // disable={fieldAffectsDataSubFields || fieldIsPresentationalOnly(field) || undefined}
+        />
+      ),
       renderedCells: docs.map((_, i) => <SortRow key={i} />),
     } as Column)
   }
