@@ -7,6 +7,11 @@ const getRemainingColumns = <T extends ClientField[] | Field[]>(
   useAsTitle: string,
 ): ListPreferences['columns'] =>
   fields?.reduce((remaining, field) => {
+    const { admin } = field
+    if (('hidden' in admin && admin.hidden) || ('disabled' in admin && admin.disabled)) {
+      return remaining
+    }
+
     if (fieldAffectsData(field) && field.name === useAsTitle) {
       return remaining
     }
