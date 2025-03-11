@@ -6,9 +6,12 @@ import { formatDate } from '@payloadcms/ui/shared'
 
 import type { GenerateEditViewMetadata } from '../Document/getMetaBySegment.js'
 
-import { meta } from '../../utilities/meta.js'
+import { generateMetadata } from '../../utilities/meta.js'
 
-export const generateMetadata: GenerateEditViewMetadata = async ({
+/**
+ * @todo Remove the `MetaConfig` type assertions. They are currently required because of how the `Metadata` type from `next` consumes the `URL` type.
+ */
+export const generateVersionViewMetadata: GenerateEditViewMetadata = async ({
   collectionConfig,
   config,
   globalConfig,
@@ -47,12 +50,12 @@ export const generateMetadata: GenerateEditViewMetadata = async ({
       ...(config.admin.meta || {}),
       description: t('version:viewingVersionGlobal', { entityLabel }),
       title: `${t('version:version')}${formattedCreatedAt ? ` - ${formattedCreatedAt}` : ''}${entityLabel}`,
-      ...(globalConfig?.admin?.meta || {}),
-      ...(globalConfig?.admin?.components?.views?.edit?.version?.meta || {}),
+      ...((globalConfig?.admin?.meta || {}) as MetaConfig),
+      ...((globalConfig?.admin?.components?.views?.edit?.version?.meta || {}) as MetaConfig),
     }
   }
 
-  return meta({
+  return generateMetadata({
     ...metaToUse,
     serverURL: config.serverURL,
   })

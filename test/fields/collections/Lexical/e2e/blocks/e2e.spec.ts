@@ -25,7 +25,7 @@ import {
 } from '../../../../../helpers.js'
 import { AdminUrlUtil } from '../../../../../helpers/adminUrlUtil.js'
 import { assertToastErrors } from '../../../../../helpers/assertToastErrors.js'
-import { trackNetworkRequests } from '../../../../../helpers/e2e/trackNetworkRequests.js'
+import { assertNetworkRequests } from '../../../../../helpers/e2e/assertNetworkRequests.js'
 import { initPayloadE2ENoConfig } from '../../../../../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../../../helpers/rest.js'
@@ -400,11 +400,12 @@ describe('lexicalBlocks', () => {
       await dependsOnBlockData.locator('.rs__control').click()
 
       // Fill and wait for form state to come back
-      await trackNetworkRequests(page, '/admin/collections/lexical-fields', async () => {
+      await assertNetworkRequests(page, '/admin/collections/lexical-fields', async () => {
         await topLevelDocTextField.fill('invalid')
       })
+
       // Ensure block form state is updated and comes back (=> filter options are updated)
-      await trackNetworkRequests(
+      await assertNetworkRequests(
         page,
         '/admin/collections/lexical-fields',
         async () => {
@@ -442,7 +443,7 @@ describe('lexicalBlocks', () => {
         topLevelDocTextField,
       } = await setupFilterOptionsTests()
 
-      await trackNetworkRequests(
+      await assertNetworkRequests(
         page,
         '/admin/collections/lexical-fields',
         async () => {
@@ -478,7 +479,7 @@ describe('lexicalBlocks', () => {
         topLevelDocTextField,
       } = await setupFilterOptionsTests()
 
-      await trackNetworkRequests(
+      await assertNetworkRequests(
         page,
         '/admin/collections/lexical-fields',
         async () => {
@@ -571,19 +572,21 @@ describe('lexicalBlocks', () => {
       await topLevelDocTextField.fill('invalid')
 
       await saveDocAndAssert(page, '#action-save', 'error')
+
       await assertToastErrors({
         page,
         errors: ['Lexical With Blocks', 'Lexical With Blocks → Group → Text Depends On Doc Data'],
       })
+
       await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
 
-      await trackNetworkRequests(
+      await assertNetworkRequests(
         page,
         '/admin/collections/lexical-fields',
         async () => {
           await topLevelDocTextField.fill('Rich Text') // Default value
         },
-        { allowedNumberOfRequests: 2 },
+        { allowedNumberOfRequests: 1 },
       )
 
       await saveDocAndAssert(page)
@@ -604,13 +607,13 @@ describe('lexicalBlocks', () => {
       })
       await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
 
-      await trackNetworkRequests(
+      await assertNetworkRequests(
         page,
         '/admin/collections/lexical-fields',
         async () => {
           await blockGroupTextField.fill('')
         },
-        { allowedNumberOfRequests: 3 },
+        { allowedNumberOfRequests: 2 },
       )
 
       await saveDocAndAssert(page)
@@ -628,13 +631,13 @@ describe('lexicalBlocks', () => {
       })
       await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
 
-      await trackNetworkRequests(
+      await assertNetworkRequests(
         page,
         '/admin/collections/lexical-fields',
         async () => {
           await blockTextField.fill('')
         },
-        { allowedNumberOfRequests: 3 },
+        { allowedNumberOfRequests: 2 },
       )
 
       await saveDocAndAssert(page)

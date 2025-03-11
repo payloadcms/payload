@@ -1,9 +1,9 @@
 import type { GenerateViewMetadata } from '../Root/index.js'
 
-import { meta } from '../../utilities/meta.js'
+import { generateMetadata } from '../../utilities/meta.js'
 
-export const generateLogoutMetadata: GenerateViewMetadata = async ({ config, i18n: { t } }) =>
-  meta({
+export const generateLogoutViewMetadata: GenerateViewMetadata = async ({ config, i18n: { t } }) =>
+  generateMetadata({
     description: `${t('authentication:logoutUser')}`,
     keywords: `${t('authentication:logout')}`,
     serverURL: config.serverURL,

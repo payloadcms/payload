@@ -10,8 +10,6 @@ import type { DashboardViewClientProps, DashboardViewServerPropsOnly } from './D
 
 import { DefaultDashboard } from './Default/index.js'
 
-export { generateDashboardMetadata } from './meta.js'
-
 export async function Dashboard({ initPageResult, params, searchParams }: AdminViewServerProps) {
   const {
     locale,
