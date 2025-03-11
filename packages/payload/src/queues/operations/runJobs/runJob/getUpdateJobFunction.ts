@@ -10,13 +10,9 @@ export function getUpdateJobFunction(job: BaseJob, req: PayloadRequest): UpdateJ
   return async (jobData) => {
     const updatedJob = await updateJob({
       id: job.id,
-      // We need to run this with partial: true and the partial data. We cannot spread the old job data,
-      // and optimize this by setting partial: false, as in between the state of the old job data, and the time of this update,
-      // the job may have been cancelled. We do not want to override cancel state here
       data: jobData,
       depth: req.payload.config.jobs.depth,
       disableTransaction: true,
-      partial: true,
       req,
     })
 

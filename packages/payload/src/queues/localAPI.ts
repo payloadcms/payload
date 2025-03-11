@@ -173,7 +173,6 @@ export const getJobsLocalAPI = (payload: Payload) => ({
       } & BaseJob,
       depth: 0, // No depth, since we're not returning
       disableTransaction: true,
-      partial: true,
       req: newReq,
       returning: false,
       where: { and },
@@ -203,7 +202,6 @@ export const getJobsLocalAPI = (payload: Payload) => ({
       } & BaseJob,
       depth: 0, // No depth, since we're not returning
       disableTransaction: true,
-      partial: true,
       req: newReq,
       returning: false,
     })

@@ -9,12 +9,6 @@ type RunJobArgs = {
   depth?: number
   disableTransaction?: boolean
   id: number | string
-  /**
-   * If you only pass partial job data, this will need to be true.
-   * Setting it to true will perform an additional fetch before the update, to merge the data,
-   * if mongodb is not used.
-   */
-  partial: boolean
   req: PayloadRequest
   returning?: boolean
 }
@@ -23,7 +17,6 @@ export async function updateJob({
   data,
   depth,
   disableTransaction,
-  partial,
   req,
   returning,
 }: RunJobArgs): Promise<BaseJob | null> {
@@ -44,23 +37,23 @@ export async function updateJob({
 
   let updateData = sanitizeUpdateData({ data })
 
-  if (partial && !req.payload.db.meta?.supportsPartialData) {
-    // update updateData
-    const currentJob = await req.payload.db.findOne({
-      collection: jobsCollectionSlug,
-      req: disableTransaction === true ? undefined : req,
-      where: {
-        id: {
-          equals: id,
-        },
+  // update updateData to support partial updates
+  // TODO: this can be optimized in the future - partial updates are supported in mongodb. In postgres,
+  // we can support this by manually constructing the sql query
+  const currentJob = await req.payload.db.findOne({
+    collection: jobsCollectionSlug,
+    req: disableTransaction === true ? undefined : req,
+    where: {
+      id: {
+        equals: id,
       },
-    })
+    },
+  })
 
-    if (currentJob) {
-      updateData = {
-        ...currentJob,
-        ...updateData,
-      }
+  if (currentJob) {
+    updateData = {
+      ...currentJob,
+      ...updateData,
     }
   }
 
@@ -89,12 +82,6 @@ type RunJobsArgs = {
   depth?: number
   disableTransaction?: boolean
   limit?: number
-  /**
-   * If you only pass partial job data, this will need to be true.
-   * Setting it to true will perform an additional fetch before the update, to merge the data,
-   * if mongodb is not used.
-   */
-  partial: boolean
   req: PayloadRequest
   returning?: boolean
   where: Where
@@ -104,7 +91,6 @@ export async function updateJobs({
   depth,
   disableTransaction,
   limit,
-  partial,
   req,
   returning,
   where,
@@ -127,40 +113,32 @@ export async function updateJobs({
 
   let updatedJobs = []
 
-  if (partial && !req.payload.db.meta?.supportsPartialData) {
-    const jobsToUpdate = await req.payload.db.find({
-      collection: jobsCollectionSlug,
-      limit,
-      req: disableTransaction === true ? undefined : req,
-      where,
-    })
-    if (!jobsToUpdate?.docs) {
-      return null
-    }
+  // TODO: this can be optimized in the future - partial updates are supported in mongodb. In postgres,
+  // we can support this by manually constructing the sql query. We should use req.payload.db.updateMany instead
+  // of req.payload.db.updateOne once this is supported
+  const jobsToUpdate = await req.payload.db.find({
+    collection: jobsCollectionSlug,
+    limit,
+    req: disableTransaction === true ? undefined : req,
+    where,
+  })
+  if (!jobsToUpdate?.docs) {
+    return null
+  }
 
-    for (const job of jobsToUpdate.docs) {
-      const updateData = {
-        ...job,
-        ...data,
-      }
-      const updatedJob = await req.payload.db.updateOne({
-        id: job.id,
-        collection: jobsCollectionSlug,
-        data: sanitizeUpdateData({ data: updateData }),
-        req: disableTransaction === true ? undefined : req,
-        returning,
-      })
-      updatedJobs.push(updatedJob)
+  for (const job of jobsToUpdate.docs) {
+    const updateData = {
+      ...job,
+      ...data,
     }
-  } else {
-    updatedJobs = (await req.payload.db.updateMany({
+    const updatedJob = await req.payload.db.updateOne({
+      id: job.id,
       collection: jobsCollectionSlug,
-      data: sanitizeUpdateData({ data }),
-      limit,
+      data: sanitizeUpdateData({ data: updateData }),
       req: disableTransaction === true ? undefined : req,
       returning,
-      where,
-    })) as BaseJob[]
+    })
+    updatedJobs.push(updatedJob)
   }
 
   if (returning === false || !updatedJobs?.length) {
