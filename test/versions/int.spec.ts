@@ -1,8 +1,8 @@
-import type { Payload } from 'payload';
+import type { Payload } from 'payload'
 
 import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublishHandler'
 import path from 'path'
-import { createLocalReq , ValidationError } from 'payload'
+import { createLocalReq, ValidationError } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
@@ -688,6 +688,62 @@ describe('Versions', () => {
         expect(updateManyResult.errors).toStrictEqual([
           { id: doc.id, message: 'The following field is invalid: Title' },
         ])
+      })
+
+      it('should update with autosave: true', async () => {
+        // Save a draft
+        const { id } = await payload.create({
+          collection: autosaveCollectionSlug,
+          draft: true,
+          data: { title: 'my-title', description: 'some-description', _status: 'draft' },
+        })
+
+        // Autosave the same draft, calls db.updateVersion
+        const updated1 = await payload.update({
+          collection: autosaveCollectionSlug,
+          id,
+          data: {
+            title: 'new-title',
+          },
+          autosave: true,
+          draft: true,
+        })
+
+        const versionsCount = await payload.countVersions({
+          collection: autosaveCollectionSlug,
+          where: {
+            parent: {
+              equals: id,
+            },
+          },
+        })
+
+        // This should not create a new version
+        const updated2 = await payload.update({
+          collection: autosaveCollectionSlug,
+          id,
+          data: {
+            title: 'new-title-2',
+          },
+          autosave: true,
+          draft: true,
+        })
+
+        const versionsCountAfter = await payload.countVersions({
+          collection: autosaveCollectionSlug,
+          where: {
+            parent: {
+              equals: id,
+            },
+          },
+        })
+
+        expect(versionsCount.totalDocs).toBe(versionsCountAfter.totalDocs)
+        expect(updated1.id).toBe(id)
+        expect(updated1.title).toBe('new-title')
+
+        expect(updated2.id).toBe(id)
+        expect(updated2.title).toBe('new-title-2')
       })
     })
 
