@@ -99,9 +99,6 @@ importers:
       drizzle-kit:
         specifier: 0.28.0
         version: 0.28.0
-      escape-html:
-        specifier: ^1.0.3
-        version: 1.0.3
       execa:
         specifier: 5.1.1
         version: 5.1.1
@@ -1819,6 +1816,9 @@ importers:
       drizzle-orm:
         specifier: 0.36.1
         version: 0.36.1(@libsql/client@0.14.0(bufferutil@4.0.8)(utf-8-validate@6.0.5))(@neondatabase/serverless@0.9.5)(@opentelemetry/api@1.9.0)(@types/pg@8.11.6)(@types/react@19.0.10)(@vercel/postgres@0.9.0)(pg@8.11.3)(react@19.0.0)
+      escape-html:
+        specifier: 1.0.3
+        version: 1.0.3
       eslint-plugin-playwright:
         specifier: 2.2.0
         version: 2.2.0(eslint@9.14.0(jiti@1.21.6))
