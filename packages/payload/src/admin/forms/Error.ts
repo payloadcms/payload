@@ -21,7 +21,7 @@ export type FieldErrorServerProps<
   clientField: TFieldClient
   readonly field: TFieldServer
 } & GenericErrorProps &
-  Partial<ServerComponentProps>
+  ServerComponentProps
 
 export type FieldErrorClientComponent<
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,

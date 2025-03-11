@@ -26,7 +26,7 @@ export type FieldLabelServerProps<
   clientField: TFieldClient
   readonly field: TFieldServer
 } & GenericLabelProps &
-  Partial<ServerComponentProps>
+  ServerComponentProps
 
 export type SanitizedLabelProps<TFieldClient extends ClientFieldWithOptionalType> = Omit<
   FieldLabelClientProps<TFieldClient>,
