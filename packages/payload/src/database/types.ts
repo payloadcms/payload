@@ -23,25 +23,26 @@ export interface BaseDatabaseAdapter {
    * Persist the changes made since the start of the transaction.
    */
   commitTransaction: CommitTransaction
+
   /**
    * Open the connection to the database
    */
   connect?: Connect
 
   count: Count
-
   countGlobalVersions: CountGlobalVersions
   countVersions: CountVersions
+
   create: Create
 
   createGlobal: CreateGlobal
 
   createGlobalVersion: CreateGlobalVersion
-
   /**
    * Output a migration file
    */
   createMigration: CreateMigration
+
   createVersion: CreateVersion
 
   /**
@@ -54,11 +55,11 @@ export interface BaseDatabaseAdapter {
   deleteOne: DeleteOne
 
   deleteVersions: DeleteVersions
-
   /**
    * Terminate the connection with the database
    */
   destroy?: Destroy
+
   find: Find
 
   findGlobal: FindGlobal
@@ -75,21 +76,6 @@ export interface BaseDatabaseAdapter {
    * Perform startup tasks required to interact with the database such as building Schema and models
    */
   init?: Init
-
-  /**
-   * @todo make required in 4.0
-   */
-  meta?: {
-    /**
-     * If true, this database adapter supports top-level partial data updates (this excludes deep partial data
-     * like fields within groups).
-     *
-     * If false, passing partial data will delete all other fields not included in the update.
-     *
-     * @todo make required in 4.0
-     */
-    supportsPartialData?: boolean
-  }
 
   /**
    * Run any migration up functions that have not yet been performed and update the status

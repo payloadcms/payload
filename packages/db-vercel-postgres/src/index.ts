@@ -116,9 +116,6 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       initializing,
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
-      meta: {
-        supportsPartialData: false,
-      },
       operators: operatorMap,
       pgSchema: adapterSchema,
       pool: undefined,
