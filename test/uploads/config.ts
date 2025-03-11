@@ -309,10 +309,6 @@ export default buildConfigWithDefaults({
         },
         imageSizes: [
           {
-            name: 'undefinedHeight',
-            width: 300,
-          },
-          {
             name: 'maintainedAspectRatio',
             crop: 'center',
             formatOptions: { format: 'png', options: { quality: 90 } },
@@ -392,6 +388,10 @@ export default buildConfigWithDefaults({
           {
             name: 'focalTest7',
             height: 300,
+            width: 300,
+          },
+          {
+            name: 'undefinedHeight',
             width: 300,
           },
         ],
