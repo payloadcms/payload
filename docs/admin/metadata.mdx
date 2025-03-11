@@ -127,6 +127,45 @@ To customize Open Graph metadata, use the `admin.meta.openGraph` property in you
 
 For a full list of all available Open Graph options, see the [Next.js documentation](https://nextjs.org/docs/app/api-reference/functions/generate-metadata#opengraph).
 
+### Robots
+
+Setting the `robots` property will allow you to control the `robots` meta tag that is rendered within the `<head>` of the Admin Panel. This is used to control how search engines crawl pages and displays them in search results.
+
+By default, the Admin Panel is set to prevent search engines from crawling pages within the Admin Panel.
+
+To customize the Robots Config, use the `admin.meta.robots` property in your Payload Config:
+
+```ts
+{
+  // ...
+  admin: {
+    meta: {
+      // highlight-start
+      robots: 'noindex, nofollow',
+      // highlight-end
+    },
+  },
+}
+```
+
+For a full list of all available Robots options, see the [Next.js documentation](https://nextjs.org/docs/app/api-reference/functions/generate-metadata#robots).
+
+##### Prevent Indexing 
+
+While setting meta tags via `admin.meta.robots` prevents search engines from _crawling_ web pages, it does not prevent them from being _indexed_.
+
+To prevent your pages from being indexed altogether, add a `robots.txt` file to your root directory.
+
+```txt
+User-agent: *
+Disallow: /admin/
+```
+
+<Banner type="info">
+  **Note:**
+  If you've customized the path to your Admin Panel via `config.routes`, be sure to update the `Disallow` directive to match your custom path.
+</Banner>
+
 ## Collection Metadata
 
 Collection Metadata is the metadata that is applied to all pages within any given Collection within the Admin Panel. This metadata is used to customize the title and description of all views within any given Collection, unless overridden by the view itself.
