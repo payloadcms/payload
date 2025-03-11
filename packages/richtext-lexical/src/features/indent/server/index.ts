@@ -9,12 +9,6 @@ export type IndentFeatureProps = {
   disabledNodes?: string[]
 }
 
-/**
- * This feature is used to indent and outdent the text in the editor.
- *
- * @param props - The props for the feature.
- * @param props.disabledNodes - The nodes that should not be indented. "type" property of the nodes you don't want to be indented. These can be: "paragraph", "heading", "listitem", "quote" or other indentable nodes if they exist.
- */
 export const IndentFeature = createServerFeature<
   IndentFeatureProps,
   IndentFeatureProps,

@@ -20,7 +20,7 @@ export const IndentPlugin: PluginComponent<IndentFeatureProps> = (props) => {
   const { disabledNodes } = props.clientProps
 
   useEffect(() => {
-    if (!editor) {
+    if (!editor || !disabledNodes?.length) {
       return
     }
     return mergeRegister(
@@ -28,7 +28,7 @@ export const IndentPlugin: PluginComponent<IndentFeatureProps> = (props) => {
         INDENT_CONTENT_COMMAND,
         () => {
           return $handleIndentAndOutdent((block) => {
-            if (!disabledNodes || !disabledNodes.includes(block.getType())) {
+            if (!disabledNodes.includes(block.getType())) {
               const indent = block.getIndent()
               block.setIndent(indent + 1)
             }
