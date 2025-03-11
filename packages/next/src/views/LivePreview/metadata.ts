@@ -2,16 +2,16 @@ import type { Metadata } from 'next'
 
 import type { GenerateEditViewMetadata } from '../Document/getMetaBySegment.js'
 
-import { generateMetadata as generateDocumentMetadata } from '../Edit/meta.js'
+import { generateEditViewMetadata } from '../Edit/metadata.js'
 
-export const generateMetadata: GenerateEditViewMetadata = async ({
+export const generateLivePreviewViewMetadata: GenerateEditViewMetadata = async ({
   collectionConfig,
   config,
   globalConfig,
   i18n,
   isEditing,
 }): Promise<Metadata> =>
-  generateDocumentMetadata({
+  generateEditViewMetadata({
     collectionConfig,
     config,
     globalConfig,

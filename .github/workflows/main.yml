@@ -308,6 +308,7 @@ jobs:
           - fields__collections__Text
           - fields__collections__UI
           - fields__collections__Upload
+          - form-state
           - live-preview
           - localization
           - locked-documents
