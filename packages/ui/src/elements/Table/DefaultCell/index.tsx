@@ -1,16 +1,38 @@
 'use client'
-import type { DefaultCellComponentProps, UploadFieldClient } from 'payload'
+import type { ClientField, DefaultCellComponentProps, UploadFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { fieldAffectsData, fieldIsID } from 'payload/shared'
-import React, { Fragment } from 'react' // TODO: abstract this out to support all routers
+import React from 'react' // TODO: abstract this out to support all routers
 
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { formatAdminURL } from '../../../utilities/formatAdminURL.js'
+import { isJSXElement } from '../../../utilities/hasOptionLabelJSXElement.js'
 import { Link } from '../../Link/index.js'
 import { CodeCell } from './fields/Code/index.js'
 import { cellComponents } from './fields/index.js'
+
+/**
+ * Determines the displayed value for a select field.
+ */
+const getDisplayedValue = (cellData: any, field: ClientField) => {
+  if (field?.type === 'select' && Array.isArray(field.options)) {
+    const selectedOption = field.options.find((opt) =>
+      typeof opt === 'object' ? opt?.value === cellData : opt === cellData,
+    )
+
+    if (selectedOption) {
+      if (typeof selectedOption === 'object' && 'label' in selectedOption) {
+        return isJSXElement(selectedOption.label)
+          ? selectedOption.label
+          : selectedOption.label || cellData
+      }
+      return selectedOption // Fallback to string value
+    }
+  }
+  return cellData
+}
 
 export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
   const {
@@ -18,6 +40,7 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     className: classNameFromProps,
     collectionSlug,
     field,
+    field: { admin },
     link,
     onClick: onClickFromProps,
     rowData,
@@ -34,12 +57,11 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
 
   const collectionConfig = getEntityConfig({ collectionSlug })
 
-  const classNameFromConfigContext =
-    field && field.admin && 'className' in field.admin ? field.admin.className : undefined
+  const classNameFromConfigContext = admin && 'className' in admin ? admin.className : undefined
 
   const className =
     classNameFromProps ||
-    (field && field.admin && 'className' in field.admin ? field.admin.className : null) ||
+    (field.admin && 'className' in field.admin ? field.admin.className : null) ||
     classNameFromConfigContext
 
   const onClick = onClickFromProps
@@ -97,24 +119,7 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     )
   }
 
-  let displayedValue = cellData
-
-  if (field?.type === 'select' && Array.isArray(field.options)) {
-    const selectedOption = field.options.find((opt) =>
-      typeof opt == 'object' ? opt?.value === cellData : opt === cellData,
-    )
-
-    if (selectedOption) {
-      displayedValue =
-        typeof selectedOption === 'object' &&
-        'label' in selectedOption &&
-        React.isValidElement(selectedOption.label)
-          ? selectedOption.label // Render JSX directly
-          : typeof selectedOption === 'object' && 'label' in selectedOption
-            ? selectedOption.label || cellData // Fallback to string label or raw value
-            : selectedOption // If selectedOption is a string, use it directly
-    }
-  }
+  const displayedValue = getDisplayedValue(cellData, field)
 
   const DefaultCellComponent: React.FC<DefaultCellComponentProps> =
     typeof cellData !== 'undefined' && cellComponents[field.type]
@@ -156,13 +161,9 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
             })}
           {typeof displayedValue === 'string' && displayedValue}
           {typeof displayedValue === 'number' && displayedValue}
-          {typeof displayedValue === 'object' && displayedValue !== null && (
-            <Fragment>
-              {React.isValidElement(displayedValue)
-                ? displayedValue
-                : JSON.stringify(displayedValue)}
-            </Fragment>
-          )}
+          {typeof displayedValue === 'object' &&
+            displayedValue !== null &&
+            JSON.stringify(displayedValue)}
         </WrapElement>
       )
     }

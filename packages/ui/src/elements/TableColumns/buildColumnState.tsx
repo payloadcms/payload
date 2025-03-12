@@ -33,6 +33,7 @@ import {
   SortColumn,
   // eslint-disable-next-line payload/no-imports-from-exports-dir
 } from '../../exports/client/index.js'
+import { hasOptionLabelJSXElement } from '../../utilities/hasOptionLabelJSXElement.js'
 import { RenderServerComponent } from '../RenderServerComponent/index.js'
 import { filterFields } from './filterFields.js'
 
@@ -246,20 +247,6 @@ export const buildColumnState = (args: Args): Column[] => {
               rowData: doc,
             }
 
-            const isSelectOptionLabelReactElement = (cellClientProps) => {
-              const { cellData, field } = cellClientProps
-
-              if (field?.type === 'select' && Array.isArray(field?.options)) {
-                const matchingOption = field.options.find((option) => option.value === cellData)
-
-                if (matchingOption && React.isValidElement(matchingOption.label)) {
-                  return true
-                }
-              }
-
-              return false
-            }
-
             let CustomCell = null
 
             if (_field?.type === 'richText') {
@@ -285,10 +272,7 @@ export const buildColumnState = (args: Args): Column[] => {
                 importMap: payload.importMap,
                 serverProps: cellServerProps,
               })
-            } else if (
-              isSelectOptionLabelReactElement(cellClientProps) &&
-              cellClientProps.cellData
-            ) {
+            } else if (hasOptionLabelJSXElement(cellClientProps) && cellClientProps.cellData) {
               CustomCell = RenderServerComponent({
                 clientProps: cellClientProps,
                 Component: DefaultCell,

@@ -1,6 +1,6 @@
 'use client'
 import type { I18nClient } from '@payloadcms/translations'
-import type { OptionObject, SelectField, SelectFieldDiffClientComponent } from 'payload'
+import type { Option, SelectField, SelectFieldDiffClientComponent } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useTranslation } from '@payloadcms/ui'
@@ -17,7 +17,7 @@ const getOptionsToRender = (
   value: string,
   options: SelectField['options'],
   hasMany: boolean,
-): (OptionObject | string)[] | OptionObject | string => {
+): Option | Option[] => {
   if (hasMany && Array.isArray(value)) {
     return value.map(
       (val) =>
@@ -32,29 +32,21 @@ const getOptionsToRender = (
 }
 
 /**
- * Checks if a given value is a JSX element.
- * JSX elements are objects with a `$$typeof` property representing a React symbol.
- */
-const isJSXElement = (value: any): boolean => {
-  return value && typeof value === 'object' && '$$typeof' in value
-}
-
-/**
  * Translates option labels while ensuring they are strings.
  * If `options.label` is a JSX element, it falls back to `options.value` because `DiffViewer`
  * expects all values to be strings.
  */
-const getTranslatedOptions = (
-  options: (OptionObject | string)[] | OptionObject | string,
-  i18n: I18nClient,
-): string => {
+const getTranslatedOptions = (options: Option | Option[], i18n: I18nClient): string => {
   if (Array.isArray(options)) {
     return options
       .map((option) => {
         if (typeof option === 'string') {
           return option
         }
-        return isJSXElement(option.label) ? option.value : getTranslation(option.label, i18n)
+        const translatedLabel = getTranslation(option.label, i18n)
+
+        // Ensure the result is a string, otherwise use option.value
+        return typeof translatedLabel === 'string' ? translatedLabel : option.value
       })
       .join(', ')
   }
@@ -63,7 +55,9 @@ const getTranslatedOptions = (
     return options
   }
 
-  return isJSXElement(options.label) ? options.value : getTranslation(options.label, i18n)
+  const translatedLabel = getTranslation(options.label, i18n)
+
+  return typeof translatedLabel === 'string' ? translatedLabel : options.value
 }
 
 export const Select: SelectFieldDiffClientComponent = ({
