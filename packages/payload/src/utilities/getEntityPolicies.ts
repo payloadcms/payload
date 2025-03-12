@@ -192,7 +192,12 @@ const executeFieldPolicies = async ({
   const mutablePolicies = policiesObj.fields
 
   // Fields don't have all operations of a collection
-  if (operation === 'delete' || operation === 'readVersions' || operation === 'unlock') {
+  if (
+    operation === 'delete' ||
+    operation === 'readVersions' ||
+    operation === 'unlock' ||
+    operation === 'auth'
+  ) {
     return
   }
 

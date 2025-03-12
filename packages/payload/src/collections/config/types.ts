@@ -384,6 +384,7 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    */
   access?: {
     admin?: ({ req }: { req: PayloadRequest }) => boolean | Promise<boolean>
+    auth?: Access
     create?: Access
     delete?: Access
     read?: Access

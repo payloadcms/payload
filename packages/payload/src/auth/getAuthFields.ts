@@ -1,3 +1,4 @@
+import type { CollectionConfig } from '../collections/config/types.js'
 import type { Field, TextField } from '../fields/config/types.js'
 import type { IncomingAuthType } from './types.js'
 
@@ -8,7 +9,10 @@ import { emailFieldConfig } from './baseFields/email.js'
 import { usernameFieldConfig } from './baseFields/username.js'
 import { verificationFields } from './baseFields/verification.js'
 
-export const getBaseAuthFields = (authConfig: IncomingAuthType): Field[] => {
+export const getBaseAuthFields = (
+  authConfig: IncomingAuthType,
+  collectionConfig: CollectionConfig,
+): Field[] => {
   const authFields: Field[] = []
 
   if (authConfig.useAPIKey) {
@@ -51,6 +55,20 @@ export const getBaseAuthFields = (authConfig: IncomingAuthType): Field[] => {
 
     if (authConfig?.maxLoginAttempts && authConfig.maxLoginAttempts > 0) {
       authFields.push(...accountLockFields)
+    }
+
+    // if collection.access.auth exists, set this as access for all auth fields
+    if (collectionConfig && collectionConfig.access && collectionConfig.access.auth) {
+      authFields.forEach((field) => {
+        if (field.type === 'ui') {
+          return
+        } // skip UI fields
+        field.access = {
+          create: collectionConfig.access.auth,
+          read: collectionConfig.access.auth,
+          update: collectionConfig.access.auth,
+        }
+      })
     }
   }
 

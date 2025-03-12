@@ -569,6 +569,21 @@ export default buildConfigWithDefaults(
       Regression1,
       Regression2,
       Hooks,
+      {
+        slug: 'auth-access',
+        auth: true,
+        access: {
+          auth: ({ req }) => {
+            return req.user && isUser(req.user) && req.user?.roles?.includes('admin') ? true : false
+          },
+        },
+        fields: [
+          {
+            name: 'text',
+            type: 'text',
+          },
+        ],
+      },
     ],
     globals: [
       {

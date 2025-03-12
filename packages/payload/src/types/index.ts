@@ -164,7 +164,7 @@ export type Document = any
 
 export type Operation = 'create' | 'delete' | 'read' | 'update'
 export type VersionOperations = 'readVersions'
-export type AuthOperations = 'unlock'
+export type AuthOperations = 'auth' | 'unlock'
 export type AllOperations = AuthOperations | Operation | VersionOperations
 
 export function docHasTimestamps(doc: any): doc is TypeWithTimestamps {

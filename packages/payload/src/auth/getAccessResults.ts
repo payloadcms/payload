@@ -42,6 +42,10 @@ export async function getAccessResults({
         collectionOperations.push('unlock')
       }
 
+      if (collection.auth) {
+        collectionOperations.push('auth')
+      }
+
       if (collection.versions) {
         collectionOperations.push('readVersions')
       }

@@ -79,6 +79,16 @@ export const Auth: React.FC<Props> = (props) => {
     return false
   }, [permissions, collectionSlug])
 
+  const hasAuthPermission: boolean = useMemo(() => {
+    const collection = permissions?.collections?.[collectionSlug]
+
+    if (collection) {
+      return Boolean('auth' in collection ? collection.auth : undefined)
+    }
+
+    return false
+  }, [permissions, collectionSlug])
+
   const handleChangePassword = useCallback(
     (showPasswordFields: boolean) => {
       if (showPasswordFields) {
@@ -138,99 +148,101 @@ export const Auth: React.FC<Props> = (props) => {
     return null
   }
 
-  return (
-    <div className={[baseClass, className].filter(Boolean).join(' ')}>
-      {enableFields && (
-        <React.Fragment>
-          <EmailAndUsernameFields
-            loginWithUsername={loginWithUsername}
-            operation={operation}
-            permissions={docPermissions?.fields}
-            readOnly={readOnly}
-            t={t}
-          />
-          {(changingPassword || requirePassword) && (!disableLocalStrategy || !enableFields) && (
-            <div className={`${baseClass}__changing-password`}>
-              <PasswordField
-                autoComplete="new-password"
-                field={{
-                  name: 'password',
-                  label: t('authentication:newPassword'),
-                  required: true,
-                }}
-                indexPath=""
-                parentPath=""
-                parentSchemaPath=""
-                path="password"
-                schemaPath="password"
-              />
-              <ConfirmPasswordField disabled={readOnly} />
+  if (hasAuthPermission) {
+    return (
+      <div className={[baseClass, className].filter(Boolean).join(' ')}>
+        {enableFields && (
+          <React.Fragment>
+            <EmailAndUsernameFields
+              loginWithUsername={loginWithUsername}
+              operation={operation}
+              permissions={docPermissions?.fields}
+              readOnly={readOnly}
+              t={t}
+            />
+            {(changingPassword || requirePassword) && (!disableLocalStrategy || !enableFields) && (
+              <div className={`${baseClass}__changing-password`}>
+                <PasswordField
+                  autoComplete="new-password"
+                  field={{
+                    name: 'password',
+                    label: t('authentication:newPassword'),
+                    required: true,
+                  }}
+                  indexPath=""
+                  parentPath=""
+                  parentSchemaPath=""
+                  path="password"
+                  schemaPath="password"
+                />
+                <ConfirmPasswordField disabled={readOnly} />
+              </div>
+            )}
+            <div className={`${baseClass}__controls`}>
+              {changingPassword && !requirePassword && (
+                <Button
+                  buttonStyle="secondary"
+                  disabled={disabled}
+                  onClick={() => handleChangePassword(false)}
+                  size="medium"
+                >
+                  {t('general:cancel')}
+                </Button>
+              )}
+              {!changingPassword && !requirePassword && !disableLocalStrategy && (
+                <Button
+                  buttonStyle="secondary"
+                  disabled={disabled}
+                  id="change-password"
+                  onClick={() => handleChangePassword(true)}
+                  size="medium"
+                >
+                  {t('authentication:changePassword')}
+                </Button>
+              )}
+              {operation === 'update' && hasPermissionToUnlock && (
+                <Button
+                  buttonStyle="secondary"
+                  disabled={disabled}
+                  onClick={() => void unlock()}
+                  size="medium"
+                >
+                  {t('authentication:forceUnlock')}
+                </Button>
+              )}
             </div>
-          )}
-          <div className={`${baseClass}__controls`}>
-            {changingPassword && !requirePassword && (
-              <Button
-                buttonStyle="secondary"
-                disabled={disabled}
-                onClick={() => handleChangePassword(false)}
-                size="medium"
-              >
-                {t('general:cancel')}
-              </Button>
-            )}
-            {!changingPassword && !requirePassword && !disableLocalStrategy && (
-              <Button
-                buttonStyle="secondary"
-                disabled={disabled}
-                id="change-password"
-                onClick={() => handleChangePassword(true)}
-                size="medium"
-              >
-                {t('authentication:changePassword')}
-              </Button>
-            )}
-            {operation === 'update' && hasPermissionToUnlock && (
-              <Button
-                buttonStyle="secondary"
-                disabled={disabled}
-                onClick={() => void unlock()}
-                size="medium"
-              >
-                {t('authentication:forceUnlock')}
-              </Button>
+          </React.Fragment>
+        )}
+        {useAPIKey && (
+          <div className={`${baseClass}__api-key`}>
+            {canReadApiKey && (
+              <Fragment>
+                <CheckboxField
+                  field={{
+                    name: 'enableAPIKey',
+                    admin: { disabled, readOnly: enableAPIKeyReadOnly },
+                    label: t('authentication:enableAPIKey'),
+                  }}
+                  path="enableAPIKey"
+                  schemaPath={`${collectionSlug}.enableAPIKey`}
+                />
+                <APIKey enabled={!!enableAPIKey?.value} readOnly={apiKeyReadOnly} />
+              </Fragment>
             )}
           </div>
-        </React.Fragment>
-      )}
-      {useAPIKey && (
-        <div className={`${baseClass}__api-key`}>
-          {canReadApiKey && (
-            <Fragment>
-              <CheckboxField
-                field={{
-                  name: 'enableAPIKey',
-                  admin: { disabled, readOnly: enableAPIKeyReadOnly },
-                  label: t('authentication:enableAPIKey'),
-                }}
-                path="enableAPIKey"
-                schemaPath={`${collectionSlug}.enableAPIKey`}
-              />
-              <APIKey enabled={!!enableAPIKey?.value} readOnly={apiKeyReadOnly} />
-            </Fragment>
-          )}
-        </div>
-      )}
-      {verify && isEditing && (
-        <CheckboxField
-          field={{
-            name: '_verified',
-            admin: { disabled, readOnly },
-            label: t('authentication:verified'),
-          }}
-          path="_verified"
-          schemaPath={`${collectionSlug}._verified`}
-        />
-      )}
-    </div>
-  )
+        )}
+        {verify && isEditing && (
+          <CheckboxField
+            field={{
+              name: '_verified',
+              admin: { disabled, readOnly },
+              label: t('authentication:verified'),
+            }}
+            path="_verified"
+            schemaPath={`${collectionSlug}._verified`}
+          />
+        )}
+      </div>
+    )
+  }
 }
