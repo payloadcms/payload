@@ -16,6 +16,7 @@
     { "rule": "object-shorthand", "severity": "off", "fixable": true }
   ],
   "typescript.tsdk": "node_modules/typescript/lib",
+  "deno.enable": false,
   // Load .git-blame-ignore-revs file
   "gitlens.advanced.blame.customArguments": ["--ignore-revs-file", ".git-blame-ignore-revs"],
   "jestrunner.jestCommand": "pnpm exec cross-env NODE_OPTIONS=\"--no-deprecation\" node 'node_modules/jest/bin/jest.js'",
@@ -24,5 +25,14 @@
     "runtimeArgs": ["--no-deprecation"]
   },
   // Essentially disables bun test buttons
-  "bun.test.filePattern": "bun.test.ts"
+  "bun.test.filePattern": "bun.test.ts",
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true
+  },
+  "hide-files.files": []
 }
