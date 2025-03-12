@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useCallback, useRef } from 'react'
 
 export function useQueues(): {
   queueTask: (fn: (signal: AbortSignal) => Promise<void>) => void
@@ -7,7 +7,7 @@ export function useQueues(): {
   const queuedTask = useRef<((signal: AbortSignal) => Promise<void>) | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
 
-  const queueTask = (fn: (signal: AbortSignal) => Promise<void>) => {
+  const queueTask = useCallback((fn: (signal: AbortSignal) => Promise<void>) => {
     // Overwrite the queued task every time a new one arrives
     queuedTask.current = fn
 
@@ -42,7 +42,7 @@ export function useQueues(): {
     }
 
     void executeTask()
-  }
+  }, [])
 
   return { queueTask }
 }
