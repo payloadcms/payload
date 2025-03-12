@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test'
 import { addBlock } from 'helpers/e2e/addBlock.js'
 import { openBlocksDrawer } from 'helpers/e2e/openBlocksDrawer.js'
 import { reorderBlocks } from 'helpers/e2e/reorderBlocks.js'
-import { scrollEntirePage, waitForPageStability } from 'helpers/e2e/waitForPageStability.js'
+import { scrollEntirePage } from 'helpers/e2e/scrollEntirePage.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
