@@ -54,10 +54,12 @@ export const getHandler = ({ bucket, collection, getStorageClient }: Args): Stat
       const objectEtag = object.ETag
 
       if (etagFromHeaders && etagFromHeaders === objectEtag) {
+        const bodyBuffer = await streamToBuffer(object.Body)
+
         const response = new Response(null, {
           headers: new Headers({
             'Accept-Ranges': String(object.AcceptRanges),
-            'Content-Length': String(object.ContentLength),
+            'Content-Length': String(object.ContentLength ?? bodyBuffer.length),
             'Content-Type': String(object.ContentType),
             ETag: String(object.ETag),
           }),
@@ -90,7 +92,7 @@ export const getHandler = ({ bucket, collection, getStorageClient }: Args): Stat
       return new Response(bodyBuffer, {
         headers: new Headers({
           'Accept-Ranges': String(object.AcceptRanges),
-          'Content-Length': String(object.ContentLength),
+          'Content-Length': String(object.ContentLength ?? bodyBuffer.length),
           'Content-Type': String(object.ContentType),
           ETag: String(object.ETag),
         }),
