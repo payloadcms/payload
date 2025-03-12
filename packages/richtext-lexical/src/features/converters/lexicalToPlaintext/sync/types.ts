@@ -23,11 +23,13 @@ export type PlaintextConverter<
     }) => string)
   | string
 
+export type DefaultPlaintextNodeTypes =
+  | DefaultNodeTypes
+  | SerializedBlockNode<{ blockName?: null | string; blockType: string }> // need these to ensure types for blocks and inlineBlocks work if no generics are provided
+  | SerializedInlineBlockNode<{ blockName?: null | string; blockType: string }>
+
 export type PlaintextConverters<
-  T extends { [key: string]: any; type?: string } =
-    | DefaultNodeTypes
-    | SerializedBlockNode<{ blockName?: null | string; blockType: string }> // need these to ensure types for blocks and inlineBlocks work if no generics are provided
-    | SerializedInlineBlockNode<{ blockName?: null | string; blockType: string }>, // need these to ensure types for blocks and inlineBlocks work if no generics are provided
+  T extends { [key: string]: any; type?: string } = DefaultPlaintextNodeTypes,
 > = {
   [key: string]:
     | {

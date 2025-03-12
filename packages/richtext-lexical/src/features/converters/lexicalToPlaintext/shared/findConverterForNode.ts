@@ -5,7 +5,7 @@ import type { PlaintextConverter, PlaintextConverters } from '../sync/types.js'
 
 export function findConverterForNode<
   TConverters extends PlaintextConverters,
-  TConverter extends PlaintextConverter,
+  TConverter extends PlaintextConverter<any>,
 >({
   converters,
 
