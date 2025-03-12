@@ -46,11 +46,10 @@ export const AddNewRelation: React.FC<Props> = ({
   const { i18n, t } = useTranslation()
   const [showTooltip, setShowTooltip] = useState(false)
 
-  const [DocumentDrawer, DocumentDrawerToggler, { isDrawerOpen, toggleDrawer }] = useDocumentDrawer(
-    {
+  const [DocumentDrawer, DocumentDrawerToggler, { closeDrawer, isDrawerOpen, toggleDrawer }] =
+    useDocumentDrawer({
       collectionSlug: collectionConfig?.slug,
-    },
-  )
+    })
 
   const onSave: DocumentDrawerContextType['onSave'] = useCallback(
     ({ doc, operation }) => {
@@ -91,10 +90,10 @@ export const AddNewRelation: React.FC<Props> = ({
       }
 
       if (closeOnSave) {
-        toggleDrawer()
+        closeDrawer()
       }
     },
-    [relationTo, collectionConfig, closeOnSave, hasMany, setValue, value, toggleDrawer],
+    [relationTo, collectionConfig, closeOnSave, hasMany, setValue, value, closeDrawer],
   )
 
   const onPopupToggle = useCallback((state) => {
