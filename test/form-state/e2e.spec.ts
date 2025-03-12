@@ -4,6 +4,7 @@ import { expect, test } from '@playwright/test'
 import { addBlock } from 'helpers/e2e/addBlock.js'
 import { assertNetworkRequests } from 'helpers/e2e/assertNetworkRequests.js'
 import * as path from 'path'
+import React from 'react'
 import { fileURLToPath } from 'url'
 
 import {
@@ -69,6 +70,41 @@ test.describe('Form State', () => {
         allowedNumberOfRequests: 1,
       },
     )
+  })
+
+  test('should not throw fields into an infinite rendering loop', async () => {
+    await page.goto(postsUrl.create)
+
+    let renderCount = 0
+
+    page.on('console', (msg) => {
+      if (msg.type() === 'count' && msg.text().includes('Renders')) {
+        renderCount++
+      }
+    })
+
+    const pollInterval = 200
+    const maxTime = 5000
+    const allowedRenders = 25
+
+    let elapsedTime = 0
+
+    const intervalId = setInterval(() => {
+      if (renderCount > allowedRenders) {
+        clearInterval(intervalId)
+        throw new Error(`Render count exceeded the threshold of ${allowedRenders}`)
+      }
+
+      elapsedTime += pollInterval
+
+      if (elapsedTime >= maxTime) {
+        clearInterval(intervalId)
+      }
+    }, pollInterval)
+
+    await page.waitForTimeout(maxTime)
+
+    expect(renderCount).toBeLessThanOrEqual(allowedRenders)
   })
 
   test('should debounce onChange events', async () => {

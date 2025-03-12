@@ -119,6 +119,7 @@ export interface UserAuthOperations {
 export interface Post {
   id: string;
   title?: string | null;
+  renderTracker?: string | null;
   /**
    * This field should only validate on submit. Try typing "Not allowed" and submitting the form.
    */
@@ -222,6 +223,7 @@ export interface PayloadMigration {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
+  renderTracker?: T;
   validateUsingEvent?: T;
   blocks?:
     | T
