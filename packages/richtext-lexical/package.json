@@ -25,25 +25,10 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
-    "./client": {
-      "import": "./src/exports/client/index.ts",
-      "types": "./src/exports/client/index.ts",
-      "default": "./src/exports/client/index.ts"
-    },
-    "./react": {
-      "import": "./src/exports/react/index.ts",
-      "types": "./src/exports/react/index.ts",
-      "default": "./src/exports/react/index.ts"
-    },
-    "./html": {
-      "import": "./src/exports/html/index.ts",
-      "types": "./src/exports/html/index.ts",
-      "default": "./src/exports/html/index.ts"
-    },
-    "./html-async": {
-      "import": "./src/exports/html-async/index.ts",
-      "types": "./src/exports/html-async/index.ts",
-      "default": "./src/exports/html-async/index.ts"
+    "./*": {
+      "import": "./src/exports/*/index.ts",
+      "types": "./src/exports/*/index.ts",
+      "default": "./src/exports/*/index.ts"
     },
     "./rsc": {
       "import": "./src/exports/server/rsc.ts",
@@ -74,11 +59,6 @@
       "import": "./src/exports/server/ast/mdx.ts",
       "types": "./src/exports/server/ast/mdx.ts",
       "default": "./src/exports/server/ast/mdx.ts"
-    },
-    "./shared": {
-      "import": "./src/exports/shared.ts",
-      "types": "./src/exports/shared.ts",
-      "default": "./src/exports/shared.ts"
     }
   },
   "main": "./src/index.ts",
@@ -177,25 +157,10 @@
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
       },
-      "./client": {
-        "import": "./dist/exports/client/index.js",
-        "types": "./dist/exports/client/index.d.ts",
-        "default": "./dist/exports/client/index.js"
-      },
-      "./react": {
-        "import": "./dist/exports/react/index.js",
-        "types": "./dist/exports/react/index.d.ts",
-        "default": "./dist/exports/react/index.js"
-      },
-      "./html": {
-        "import": "./dist/exports/html/index.js",
-        "types": "./dist/exports/html/index.d.ts",
-        "default": "./dist/exports/html/index.js"
-      },
-      "./html-async": {
-        "import": "./dist/exports/html-async/index.js",
-        "types": "./dist/exports/html-async/index.d.ts",
-        "default": "./dist/exports/html-async/index.js"
+      "./*": {
+        "import": "./dist/exports/*/index.js",
+        "types": "./dist/exports/*/index.d.ts",
+        "default": "./dist/exports/*/index.js"
       },
       "./rsc": {
         "import": "./dist/exports/server/rsc.js",
@@ -226,11 +191,6 @@
         "import": "./dist/exports/server/ast/mdx.js",
         "types": "./dist/exports/server/ast/mdx.d.ts",
         "default": "./dist/exports/server/ast/mdx.js"
-      },
-      "./shared": {
-        "import": "./dist/exports/shared.js",
-        "types": "./dist/exports/shared.d.ts",
-        "default": "./dist/exports/shared.js"
       }
     },
     "main": "./dist/index.js",
