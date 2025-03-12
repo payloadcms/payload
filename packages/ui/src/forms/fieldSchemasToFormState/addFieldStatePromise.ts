@@ -752,10 +752,13 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
       const pathSegments = path ? path.split('.') : []
 
+      // If passesCondition is false then this should always result to false
+      // If the tab has no admin.condition provided then fallback to passesCondition and let that decide the result
       const tabPassesCondition =
-        passesCondition && tab.admin?.condition
+        passesCondition &&
+        (typeof tab.admin?.condition === 'function'
           ? tab.admin.condition(fullData, data, { blockData, path: pathSegments, user: req.user })
-          : true
+          : passesCondition)
 
       if (tab?.id) {
         state[tab.id] = {
