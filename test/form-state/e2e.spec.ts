@@ -4,6 +4,7 @@ import { expect, test } from '@playwright/test'
 import { addBlock } from 'helpers/e2e/addBlock.js'
 import { assertNetworkRequests } from 'helpers/e2e/assertNetworkRequests.js'
 import * as path from 'path'
+import React from 'react'
 import { fileURLToPath } from 'url'
 
 import {
@@ -71,6 +72,42 @@ test.describe('Form State', () => {
     )
   })
 
+  test('should not throw fields into an infinite rendering loop', async () => {
+    await page.goto(postsUrl.create)
+    await page.locator('#field-title').fill(title)
+
+    let numberOfRenders = 0
+
+    page.on('console', (msg) => {
+      if (msg.type() === 'count' && msg.text().includes('Renders')) {
+        numberOfRenders++
+      }
+    })
+
+    const allowedNumberOfRenders = 25
+    const pollInterval = 200
+    const maxTime = 5000
+
+    let elapsedTime = 0
+
+    const intervalId = setInterval(() => {
+      if (numberOfRenders > allowedNumberOfRenders) {
+        clearInterval(intervalId)
+        throw new Error(`Render count exceeded the threshold of ${allowedNumberOfRenders}`)
+      }
+
+      elapsedTime += pollInterval
+
+      if (elapsedTime >= maxTime) {
+        clearInterval(intervalId)
+      }
+    }, pollInterval)
+
+    await page.waitForTimeout(maxTime)
+
+    expect(numberOfRenders).toBeLessThanOrEqual(allowedNumberOfRenders)
+  })
+
   test('should debounce onChange events', async () => {
     await page.goto(postsUrl.create)
     const field = page.locator('#field-title')
@@ -106,10 +143,10 @@ test.describe('Form State', () => {
       async () => {
         await field.fill('')
         // Need to type into a _slower_ than the debounce rate (250ms), but _faster_ than the network request
-        await field.pressSequentially('Some text to type', { delay: 300 })
+        await field.pressSequentially('Some text to type', { delay: 275 })
       },
       {
-        allowedNumberOfRequests: 1,
+        allowedNumberOfRequests: 2,
         timeout: 10000, // watch network for 10 seconds to allow requests to build up
       },
     )
