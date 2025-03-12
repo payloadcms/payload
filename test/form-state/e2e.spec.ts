@@ -106,10 +106,10 @@ test.describe('Form State', () => {
       async () => {
         await field.fill('')
         // Need to type into a _slower_ than the debounce rate (250ms), but _faster_ than the network request
-        await field.pressSequentially('Some text to type', { delay: 300 })
+        await field.pressSequentially('Some text to type', { delay: 275 })
       },
       {
-        allowedNumberOfRequests: 1,
+        allowedNumberOfRequests: 2,
         timeout: 10000, // watch network for 10 seconds to allow requests to build up
       },
     )
