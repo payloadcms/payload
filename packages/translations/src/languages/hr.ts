@@ -121,6 +121,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     unknown: 'Došlo je do nepoznate pogreške.',
     unPublishingDocument: 'Došlo je do problema pri poništavanju objave ovog dokumenta.',
     unspecific: 'Došlo je do pogreške.',
+    unverifiedEmail: 'Molimo potvrdite svoju e-mail adresu prije prijave.',
     userEmailAlreadyRegistered: 'Korisnik s navedenom e-mail adresom je već registriran.',
     userLocked: 'Ovaj korisnik je zaključan zbog previše neuspješnih pokušaja prijave.',
     usernameAlreadyRegistered: 'Korisnik s navedenim korisničkim imenom već je registriran.',

@@ -124,6 +124,7 @@ export const frTranslations: DefaultTranslationsObject = {
     unPublishingDocument:
       'Un problème est survenu lors de l’annulation de la publication de ce document.',
     unspecific: 'Une erreur est survenue.',
+    unverifiedEmail: 'Veuillez vérifier votre e-mail avant de vous connecter.',
     userEmailAlreadyRegistered: "Un utilisateur avec l'email donné est déjà enregistré.",
     userLocked:
       'Cet utilisateur est verrouillé en raison d’un trop grand nombre de tentatives de connexion infructueuses.',

@@ -122,6 +122,7 @@ export const deTranslations: DefaultTranslationsObject = {
     unknown: 'Ein unbekannter Fehler ist aufgetreten.',
     unPublishingDocument: 'Es gab ein Problem, dieses Dokument auf Entwurf zu setzen.',
     unspecific: 'Ein Fehler ist aufgetreten.',
+    unverifiedEmail: 'Bitte verifizieren Sie Ihre E-Mail, bevor Sie sich anmelden.',
     userEmailAlreadyRegistered: 'Ein Benutzer mit der angegebenen E-Mail ist bereits registriert.',
     userLocked:
       'Dieser Benutzer ist auf Grund zu vieler unerfolgreicher Anmelde-Versuche gesperrt.',

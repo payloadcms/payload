@@ -120,6 +120,7 @@ export const myTranslations: DefaultTranslationsObject = {
     unknown: 'ဘာမှန်းမသိသော error တက်သွားပါသည်။',
     unPublishingDocument: 'ဖိုင်ကို ပြန်လည့် သိမ်းဆည်းခြင်းမှာ ပြဿနာရှိနေသည်။',
     unspecific: 'Error တက်နေပါသည်။',
+    unverifiedEmail: 'ထည့်သွင်းမည်မဆိုမီ သင့်အီးမေးလ်ကို အတည်ပြုပါ။',
     userEmailAlreadyRegistered: 'ပေးထားသော အီးမေးလ်ဖြင့် အသုံးပြုသူ တစ်ဦး ရှိပြီးဖြစ်သည်။',
     userLocked:
       'အကောင့်ထဲကို ဝင်ရန် အရမ်းအရမ်းကို ကြိုးပမ်းနေသောကြောင့် အကောင့်အား လော့ခ်ချလိုက်ပါသည်။',

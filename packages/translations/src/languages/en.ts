@@ -120,6 +120,7 @@ export const enTranslations = {
     unknown: 'An unknown error has occurred.',
     unPublishingDocument: 'There was a problem while un-publishing this document.',
     unspecific: 'An error has occurred.',
+    unverifiedEmail: 'Please verify your email before logging in.',
     userEmailAlreadyRegistered: 'A user with the given email is already registered.',
     userLocked: 'This user is locked due to having too many failed login attempts.',
     usernameAlreadyRegistered: 'A user with the given username is already registered.',

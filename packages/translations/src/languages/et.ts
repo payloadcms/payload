@@ -119,6 +119,7 @@ export const etTranslations: DefaultTranslationsObject = {
     unknown: 'Tekkis tundmatu viga.',
     unPublishingDocument: 'Selle dokumendi avaldamise tühistamisel tekkis probleem.',
     unspecific: 'Tekkis viga.',
+    unverifiedEmail: 'Palun kinnitage oma e-posti aadress enne sisselogimist.',
     userEmailAlreadyRegistered: 'Selle e-posti aadressiga kasutaja on juba registreeritud.',
     userLocked: 'See kasutaja on lukustatud liiga paljude ebaõnnestunud sisselogimiskatsete tõttu.',
     usernameAlreadyRegistered: 'Selle kasutajanimega kasutaja on juba registreeritud.',

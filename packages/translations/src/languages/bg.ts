@@ -120,6 +120,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     unknown: 'Неизвестна грешка.',
     unPublishingDocument: 'Имаше проблем при скриването на този документ.',
     unspecific: 'Грешка.',
+    unverifiedEmail: 'Моля, потвърдете своя имейл, преди да влезете.',
     userEmailAlreadyRegistered: 'Потребител с дадения имейл вече е регистриран.',
     userLocked: 'Този потребител има прекалено много невалидни опити за влизане и е заключен.',
     usernameAlreadyRegistered: 'Потребител със зададеното потребителско име вече е регистриран.',

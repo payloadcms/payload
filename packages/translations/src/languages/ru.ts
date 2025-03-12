@@ -121,6 +121,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     unknown: 'Произошла неизвестная ошибка.',
     unPublishingDocument: 'При отмене публикации этого документа возникла проблема.',
     unspecific: 'Произошла ошибка.',
+    unverifiedEmail: 'Пожалуйста, подтвердите свою электронную почту перед входом.',
     userEmailAlreadyRegistered: 'Пользователь с указанным email уже зарегистрирован.',
     userLocked:
       'Этот пользователь заблокирован из-за слишком большого количества неудачных попыток входа.',

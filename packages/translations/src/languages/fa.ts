@@ -118,6 +118,7 @@ export const faTranslations: DefaultTranslationsObject = {
     unknown: 'یک خطای ناشناخته رخ داد.',
     unPublishingDocument: 'هنگام لغو انتشار این سند خطایی رخ داد.',
     unspecific: 'خطایی رخ داد.',
+    unverifiedEmail: 'لطفاً قبل از ورود، ایمیل خود را تأیید کنید.',
     userEmailAlreadyRegistered: 'کاربری با ایمیل داده شده قبلاً ثبت نام کرده است.',
     userLocked: 'این کاربر به دلیل تلاش های زیاد برای ورود ناموفق قفل شده است.',
     usernameAlreadyRegistered: 'کاربری با نام کاربری داده شده قبلا ثبت نام کرده است.',
