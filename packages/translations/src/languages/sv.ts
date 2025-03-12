@@ -188,7 +188,7 @@ export const svTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'En annan användare har tagit över redigeringen av detta dokument.',
     applyChanges: 'Verkställ ändringar',
     ascending: 'Stigande',
-    automatic: 'Automatisk',
+    automatic: 'Automatiskt',
     backToDashboard: 'Tillbaka till översikten',
     cancel: 'Avbryt',
     changesNotSaved:
