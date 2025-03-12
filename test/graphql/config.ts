@@ -4,6 +4,7 @@ import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { opsCounterPlugin } from './opsCounter.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -31,6 +32,80 @@ export default buildConfigWithDefaults({
             complexity: 801,
           },
         },
+        {
+          name: 'slug',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'posts-2',
+      fields: [
+        {
+          name: 'title',
+          label: 'Title',
+          type: 'text',
+        },
+        {
+          name: 'slug',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'posts-3',
+      fields: [
+        {
+          name: 'title',
+          label: 'Title',
+          type: 'text',
+        },
+        {
+          name: 'slug',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'posts-4',
+      fields: [
+        {
+          name: 'title',
+          label: 'Title',
+          type: 'text',
+        },
+        {
+          name: 'slug',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'posts-5',
+      fields: [
+        {
+          name: 'title',
+          label: 'Title',
+          type: 'text',
+        },
+        {
+          name: 'slug',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'posts-6',
+      fields: [
+        {
+          name: 'title',
+          label: 'Title',
+          type: 'text',
+        },
+        {
+          name: 'slug',
+          type: 'text',
+        },
       ],
     },
   ],
@@ -53,8 +128,14 @@ export default buildConfigWithDefaults({
   },
   graphQL: {
     maxComplexity: 800,
-    validationRules: () => [NoIntrospection],
+    // validationRules: () => [NoIntrospection],
   },
+  plugins: [
+    opsCounterPlugin({
+      warnAt: 5,
+      max: 20,
+    }),
+  ],
 })
 
 const NoIntrospection: GraphQL.ValidationRule = (context) => ({

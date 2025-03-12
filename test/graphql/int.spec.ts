@@ -104,5 +104,51 @@ describe('graphql', () => {
 
       expect(res.hyphenated_name).toStrictEqual('example-hyphenated-name')
     })
+
+    it('should leverage expected amount of operations per query', async () => {
+      const query = `query pageTypeBySlug($slug: String!, $draft: Boolean = false) {
+    Posts(where: { slug: { equals: $slug } }, draft: $draft) {
+      docs {
+        id
+      }
+    }
+    Posts2s(where: { slug: { equals: $slug } }, draft: $draft) {
+      docs {
+        id
+      }
+    }
+    Posts3s(where: { slug: { equals: $slug } }, draft: $draft) {
+      docs {
+        id
+      }
+    }
+    Posts4s(where: { slug: { equals: $slug } }, draft: $draft) {
+      docs {
+        id
+      }
+    }
+    Posts5s(where: { slug: { equals: $slug } }, draft: $draft) {
+      docs {
+        id
+      }
+    }
+  	Posts6s(where: { slug: { equals: $slug } }, draft: $draft) {
+      docs {
+        id
+      }
+    }
+  }`
+
+      const { data } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query, variables: { slug: 'hello' } }) })
+        .then((res) => res.json())
+
+      expect(data.Posts.docs).toBeDefined()
+      expect(data.Posts2s.docs).toBeDefined()
+      expect(data.Posts3s.docs).toBeDefined()
+      expect(data.Posts4s.docs).toBeDefined()
+      expect(data.Posts5s.docs).toBeDefined()
+      expect(data.Posts6s.docs).toBeDefined()
+    })
   })
 })

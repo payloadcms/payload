@@ -53,6 +53,7 @@ export default withBundleAnalyzer(
 
         return webpackConfig
       },
+      serverExternalPackages: ['graphql'],
     },
     { devBundleServerPackages: false },
   ),
