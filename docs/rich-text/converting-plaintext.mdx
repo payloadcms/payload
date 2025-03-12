@@ -1,0 +1,41 @@
+---
+title: Converting Plaintext
+label: Converting Plaintext
+order: 24
+desc: Converting between lexical richtext and plaintext
+keywords: lexical, richtext, plaintext, text
+---
+
+## Converting Richtext to Plaintext
+
+Export content from the Lexical editor into plain text using the [lexical editor config](/docs/rich-text/converters#getting-the-editor-config) following these steps:
+
+1. Import your current editor state into the headless editor.
+2. Convert and fetch the resulting plain text string.
+
+Here's the code for it:
+
+```ts
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+import { $getRoot } from '@payloadcms/richtext-lexical/lexical'
+
+const yourEditorState: SerializedEditorState // <= your current editor state here
+
+// Import editor state into your headless editor
+try {
+  headlessEditor.update(
+    () => {
+      headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState))
+    },
+    { discrete: true }, // This should commit the editor state immediately
+  )
+} catch (e) {
+  logger.error({ err: e }, 'ERROR parsing editor state')
+}
+
+// Export to plain text
+const plainTextContent =
+  headlessEditor.getEditorState().read(() => {
+    return $getRoot().getTextContent()
+  }) || ''
+```
