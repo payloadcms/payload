@@ -52,6 +52,7 @@
     "@payloadcms/plugin-cloud-storage": "workspace:*"
   },
   "devDependencies": {
+    "@smithy/node-http-handler": "4.0.3",
     "payload": "workspace:*"
   },
   "peerDependencies": {
