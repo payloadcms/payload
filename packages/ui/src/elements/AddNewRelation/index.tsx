@@ -23,6 +23,7 @@ const baseClass = 'relationship-add-new'
 
 export const AddNewRelation: React.FC<Props> = ({
   Button: ButtonFromProps,
+  closeOnSave,
   hasMany,
   path,
   relationTo,
@@ -88,8 +89,12 @@ export const AddNewRelation: React.FC<Props> = ({
 
         setSelectedCollection(undefined)
       }
+
+      if (closeOnSave) {
+        toggleDrawer()
+      }
     },
-    [relationTo, collectionConfig, hasMany, setValue, value],
+    [relationTo, collectionConfig, closeOnSave, hasMany, setValue, value, toggleDrawer],
   )
 
   const onPopupToggle = useCallback((state) => {
