@@ -74,25 +74,26 @@ test.describe('Form State', () => {
 
   test('should not throw fields into an infinite rendering loop', async () => {
     await page.goto(postsUrl.create)
+    await page.locator('#field-title').fill(title)
 
-    let renderCount = 0
+    let numberOfRenders = 0
 
     page.on('console', (msg) => {
       if (msg.type() === 'count' && msg.text().includes('Renders')) {
-        renderCount++
+        numberOfRenders++
       }
     })
 
+    const allowedNumberOfRenders = 25
     const pollInterval = 200
     const maxTime = 5000
-    const allowedRenders = 25
 
     let elapsedTime = 0
 
     const intervalId = setInterval(() => {
-      if (renderCount > allowedRenders) {
+      if (numberOfRenders > allowedNumberOfRenders) {
         clearInterval(intervalId)
-        throw new Error(`Render count exceeded the threshold of ${allowedRenders}`)
+        throw new Error(`Render count exceeded the threshold of ${allowedNumberOfRenders}`)
       }
 
       elapsedTime += pollInterval
@@ -104,7 +105,7 @@ test.describe('Form State', () => {
 
     await page.waitForTimeout(maxTime)
 
-    expect(renderCount).toBeLessThanOrEqual(allowedRenders)
+    expect(numberOfRenders).toBeLessThanOrEqual(allowedNumberOfRenders)
   })
 
   test('should debounce onChange events', async () => {
