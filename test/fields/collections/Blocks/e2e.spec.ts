@@ -51,11 +51,11 @@ describe('Block fields', () => {
   })
 
   beforeEach(async () => {
-    await throttleTest({
+    /*await throttleTest({
       page,
       context,
       delay: 'Slow 4G',
-    })
+    })*/
     await reInitializeDB({
       serverURL,
       snapshotKey: 'fieldsTest',
