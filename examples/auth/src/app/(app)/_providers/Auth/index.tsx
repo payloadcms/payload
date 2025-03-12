@@ -163,7 +163,7 @@ export const AuthProvider: React.FC<{ api?: 'gql' | 'rest'; children: React.Reac
   )
 
   return (
-    <Context.Provider
+    <Context
       value={{
         create,
         forgotPassword,
@@ -177,10 +177,10 @@ export const AuthProvider: React.FC<{ api?: 'gql' | 'rest'; children: React.Reac
       }}
     >
       {children}
-    </Context.Provider>
+    </Context>
   )
 }
 
-type UseAuth<T = User> = () => AuthContext  
+type UseAuth<T = User> = () => AuthContext
 
 export const useAuth: UseAuth = () => useContext(Context)

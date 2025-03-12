@@ -29,11 +29,7 @@ export const UploadEditsProvider = ({ children }) => {
     }))
   }
 
-  return (
-    <Context.Provider value={{ resetUploadEdits, updateUploadEdits, uploadEdits }}>
-      {children}
-    </Context.Provider>
-  )
+  return <Context value={{ resetUploadEdits, updateUploadEdits, uploadEdits }}>{children}</Context>
 }
 
-export const useUploadEdits = (): UploadEditsContext => React.useContext(Context)
+export const useUploadEdits = (): UploadEditsContext => React.use(Context)

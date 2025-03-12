@@ -33,9 +33,9 @@ const MyCustomContext = React.createContext(myCustomValue)
 
 export function MyProvider({ children }: { children: React.ReactNode }) {
   return (
-    <MyCustomContext.Provider value={myCustomValue}>
+    <MyCustomContext value={myCustomValue}>
       {children}
-    </MyCustomContext.Provider>
+    </MyCustomContext>
   )
 }
 

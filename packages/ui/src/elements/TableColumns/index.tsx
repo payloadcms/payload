@@ -90,7 +90,7 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
   }, [defaultColumns, setActiveColumns])
 
   return (
-    <TableColumnContext.Provider
+    <TableColumnContext
       value={{
         columns: columnState,
         LinkedCellOverride,
@@ -101,6 +101,6 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
       }}
     >
       {children}
-    </TableColumnContext.Provider>
+    </TableColumnContext>
   )
 }

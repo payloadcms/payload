@@ -27,11 +27,7 @@ export const HeaderThemeProvider = ({ children }: { children: React.ReactNode })
     setThemeState(themeToSet)
   }, [])
 
-  return (
-    <HeaderThemeContext.Provider value={{ headerTheme, setHeaderTheme }}>
-      {children}
-    </HeaderThemeContext.Provider>
-  )
+  return <HeaderThemeContext value={{ headerTheme, setHeaderTheme }}>{children}</HeaderThemeContext>
 }
 
 export const useHeaderTheme = (): ContextType => useContext(HeaderThemeContext)
