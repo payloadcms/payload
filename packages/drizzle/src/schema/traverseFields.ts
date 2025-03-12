@@ -1,4 +1,4 @@
-import type { FlattenedField } from 'payload'
+import type { CompoundIndex, FlattenedField } from 'payload'
 
 import { InvalidConfiguration } from 'payload'
 import {

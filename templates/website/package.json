@@ -19,6 +19,7 @@
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
   },
   "dependencies": {
+    "@payloadcms/admin-bar": "latest",
     "@payloadcms/db-mongodb": "latest",
     "@payloadcms/live-preview-react": "latest",
     "@payloadcms/next": "latest",
@@ -43,7 +44,6 @@
     "next": "15.2.0",
     "next-sitemap": "^4.2.3",
     "payload": "latest",
-    "payload-admin-bar": "^1.0.7",
     "prism-react-renderer": "^2.3.1",
     "react": "19.0.0",
     "react-dom": "19.0.0",

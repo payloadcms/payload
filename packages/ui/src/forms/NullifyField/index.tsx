@@ -24,12 +24,15 @@ export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({
     config: { localization },
   } = useConfig()
   const [checked, setChecked] = React.useState<boolean>(typeof fieldValue !== 'number')
-  const defaultLocale =
-    localization && localization.defaultLocale ? localization.defaultLocale : 'en'
   const { t } = useTranslation()
 
-  if (!localized || currentLocale === defaultLocale || (localization && !localization.fallback)) {
-    // hide when field is not localized or editing default locale or when fallback is disabled
+  if (!localized || !localization) {
+    // hide when field is not localized or localization is not enabled
+    return null
+  }
+
+  if (localization.defaultLocale === currentLocale || !localization.fallback) {
+    // if editing default locale or when fallback is disabled
     return null
   }
 

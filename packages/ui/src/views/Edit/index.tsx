@@ -491,13 +491,15 @@ export function DefaultEditView({
             />
           )}
           {!isReadOnlyForIncomingUser && preventLeaveWithoutSaving && <LeaveWithoutSaving />}
-          <SetDocumentStepNav
-            collectionSlug={collectionConfig?.slug}
-            globalSlug={globalConfig?.slug}
-            id={id}
-            pluralLabel={collectionConfig?.labels?.plural}
-            useAsTitle={collectionConfig?.admin?.useAsTitle}
-          />
+          {!isInDrawer && (
+            <SetDocumentStepNav
+              collectionSlug={collectionConfig?.slug}
+              globalSlug={globalConfig?.slug}
+              id={id}
+              pluralLabel={collectionConfig?.labels?.plural}
+              useAsTitle={collectionConfig?.admin?.useAsTitle}
+            />
+          )}
           <SetDocumentTitle
             collectionConfig={collectionConfig}
             config={config}

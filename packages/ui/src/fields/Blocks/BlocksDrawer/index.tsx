@@ -123,13 +123,13 @@ export const BlocksDrawer: React.FC<Props> = (props) => {
                             closeModal(drawerSlug)
                           }}
                           thumbnail={
-                            imageURL ? (
-                              <img alt={imageAltText} src={imageURL} />
-                            ) : (
-                              <div className={`${baseClass}__default-image`}>
+                            <div className={`${baseClass}__default-image`}>
+                              {imageURL ? (
+                                <img alt={imageAltText} src={imageURL} />
+                              ) : (
                                 <DefaultBlockImage />
-                              </div>
-                            )
+                              )}
+                            </div>
                           }
                         />
                       </li>

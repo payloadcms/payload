@@ -16,6 +16,7 @@ import {
   saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { assertToastErrors } from '../helpers/assertToastErrors.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { RESTClient } from '../helpers/rest.js'
@@ -399,6 +400,20 @@ describe('Uploads', () => {
     await expect(page.locator('.row-3 .cell-title')).toContainText('draft')
   })
 
+  test('should upload edge case media when an image size contains an undefined height', async () => {
+    await page.goto(mediaURL.create)
+    await page.setInputFiles(
+      'input[type="file"]',
+      path.resolve(dirname, './test-image-1500x735.jpeg'),
+    )
+
+    const filename = page.locator('.file-field__filename')
+
+    await expect(filename).toHaveValue('test-image-1500x735.jpeg')
+
+    await saveDocAndAssert(page)
+  })
+
   describe('filterOptions', () => {
     test('should restrict mimetype based on filterOptions', async () => {
       const audioDoc = (
@@ -440,9 +455,10 @@ describe('Uploads', () => {
 
       // save the document and expect an error
       await page.locator('button#action-save').click()
-      await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
-        'The following field is invalid: Audio',
-      )
+      await assertToastErrors({
+        page,
+        errors: ['Audio'],
+      })
     })
 
     test('should restrict uploads in drawer based on filterOptions', async () => {

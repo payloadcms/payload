@@ -4,6 +4,7 @@
   "private": true,
   "description": "GitHub Action to automatically comment on PRs and Issues when a fix is released.",
   "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "main": "dist/index.js",
   "scripts": {
     "build": "pnpm build:typecheck && pnpm build:ncc",

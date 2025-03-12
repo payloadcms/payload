@@ -22,7 +22,7 @@ import type {
 } from '../../fields/config/types.js'
 import type { Payload } from '../../types/index.js'
 
-import { getFromImportMap } from '../../bin/generateImportMap/getFromImportMap.js'
+import { getFromImportMap } from '../../bin/generateImportMap/utilities/getFromImportMap.js'
 import { MissingEditorProp } from '../../errors/MissingEditorProp.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { flattenTopLevelFields, type ImportMap } from '../../index.js'
@@ -124,6 +124,15 @@ export const createClientBlocks = ({
         schemaPath: '',
       })
       clientBlock.jsx = jsxResolved
+    }
+
+    if (block?.admin?.disableBlockName) {
+      // Check for existing admin object, this way we don't have to spread it in
+      if (clientBlock.admin) {
+        clientBlock.admin.disableBlockName = block.admin.disableBlockName
+      } else {
+        clientBlock.admin = { disableBlockName: block.admin.disableBlockName }
+      }
     }
 
     if (block.labels) {
