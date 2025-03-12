@@ -7,6 +7,13 @@ export type IndentFeatureProps = {
    * These can be: "paragraph", "heading", "listitem", "quote" or other indentable nodes if they exist.
    */
   disabledNodes?: string[]
+  /**
+   * If false, pressing Tab in the middle of a block such as a paragraph or heading will insert a tabNode.
+   * This property does not change the behavior of block-level indents.
+   *
+   * @default false
+   */
+  disableTabNode?: boolean
 }
 
 export const IndentFeature = createServerFeature<
