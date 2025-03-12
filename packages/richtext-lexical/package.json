@@ -60,50 +60,10 @@
       "types": "./src/lexical-proxy/lexical.ts",
       "default": "./src/lexical-proxy/lexical.ts"
     },
-    "./lexical/headless": {
-      "import": "./src/lexical-proxy/@lexical-headless.ts",
-      "types": "./src/lexical-proxy/@lexical-headless.ts",
-      "default": "./src/lexical-proxy/@lexical-headless.ts"
-    },
-    "./lexical/html": {
-      "import": "./src/lexical-proxy/@lexical-html.ts",
-      "types": "./src/lexical-proxy/@lexical-html.ts",
-      "default": "./src/lexical-proxy/@lexical-html.ts"
-    },
-    "./lexical/link": {
-      "import": "./src/lexical-proxy/@lexical-link.ts",
-      "types": "./src/lexical-proxy/@lexical-link.ts",
-      "default": "./src/lexical-proxy/@lexical-link.ts"
-    },
-    "./lexical/list": {
-      "import": "./src/lexical-proxy/@lexical-list.ts",
-      "types": "./src/lexical-proxy/@lexical-list.ts",
-      "default": "./src/lexical-proxy/@lexical-list.ts"
-    },
-    "./lexical/mark": {
-      "import": "./src/lexical-proxy/@lexical-mark.ts",
-      "types": "./src/lexical-proxy/@lexical-mark.ts",
-      "default": "./src/lexical-proxy/@lexical-mark.ts"
-    },
-    "./lexical/markdown": {
-      "import": "./src/lexical-proxy/@lexical-markdown.ts",
-      "types": "./src/lexical-proxy/@lexical-markdown.ts",
-      "default": "./src/lexical-proxy/@lexical-markdown.ts"
-    },
-    "./lexical/rich-text": {
-      "import": "./src/lexical-proxy/@lexical-rich-text.ts",
-      "types": "./src/lexical-proxy/@lexical-rich-text.ts",
-      "default": "./src/lexical-proxy/@lexical-rich-text.ts"
-    },
-    "./lexical/selection": {
-      "import": "./src/lexical-proxy/@lexical-selection.ts",
-      "types": "./src/lexical-proxy/@lexical-selection.ts",
-      "default": "./src/lexical-proxy/@lexical-selection.ts"
-    },
-    "./lexical/utils": {
-      "import": "./src/lexical-proxy/@lexical-utils.ts",
-      "types": "./src/lexical-proxy/@lexical-utils.ts",
-      "default": "./src/lexical-proxy/@lexical-utils.ts"
+    "./lexical/*": {
+      "import": "./src/lexical-proxy/@lexical-*.ts",
+      "types": "./src/lexical-proxy/@lexical-*.ts",
+      "default": "./src/lexical-proxy/@lexical-*.ts"
     },
     "./lexical/react/*": {
       "import": "./src/lexical-proxy/@lexical-react/*.ts",
@@ -252,50 +212,10 @@
         "types": "./dist/lexical-proxy/lexical.d.ts",
         "default": "./dist/lexical-proxy/lexical.js"
       },
-      "./lexical/headless": {
-        "import": "./dist/lexical-proxy/@lexical-headless.js",
-        "types": "./dist/lexical-proxy/@lexical-headless.d.ts",
-        "default": "./dist/lexical-proxy/@lexical-headless.js"
-      },
-      "./lexical/html": {
-        "import": "./dist/lexical-proxy/@lexical-html.js",
-        "types": "./dist/lexical-proxy/@lexical-html.d.ts",
-        "default": "./dist/lexical-proxy/@lexical-html.js"
-      },
-      "./lexical/link": {
-        "import": "./dist/lexical-proxy/@lexical-link.js",
-        "types": "./dist/lexical-proxy/@lexical-link.d.ts",
-        "default": "./dist/lexical-proxy/@lexical-link.js"
-      },
-      "./lexical/list": {
-        "import": "./dist/lexical-proxy/@lexical-list.js",
-        "types": "./dist/lexical-proxy/@lexical-list.d.ts",
-        "default": "./dist/lexical-proxy/@lexical-list.js"
-      },
-      "./lexical/mark": {
-        "import": "./dist/lexical-proxy/@lexical-mark.js",
-        "types": "./dist/lexical-proxy/@lexical-mark.d.ts",
-        "default": "./dist/lexical-proxy/@lexical-mark.js"
-      },
-      "./lexical/markdown": {
-        "import": "./dist/lexical-proxy/@lexical-markdown.js",
-        "types": "./dist/lexical-proxy/@lexical-markdown.d.ts",
-        "default": "./dist/lexical-proxy/@lexical-markdown.js"
-      },
-      "./lexical/rich-text": {
-        "import": "./dist/lexical-proxy/@lexical-rich-text.js",
-        "types": "./dist/lexical-proxy/@lexical-rich-text.d.ts",
-        "default": "./dist/lexical-proxy/@lexical-rich-text.js"
-      },
-      "./lexical/selection": {
-        "import": "./dist/lexical-proxy/@lexical-selection.js",
-        "types": "./dist/lexical-proxy/@lexical-selection.d.ts",
-        "default": "./dist/lexical-proxy/@lexical-selection.js"
-      },
-      "./lexical/utils": {
-        "import": "./dist/lexical-proxy/@lexical-utils.js",
-        "types": "./dist/lexical-proxy/@lexical-utils.d.ts",
-        "default": "./dist/lexical-proxy/@lexical-utils.js"
+      "./lexical/*": {
+        "import": "./dist/lexical-proxy/@lexical-*.js",
+        "types": "./dist/lexical-proxy/@lexical-*.d.ts",
+        "default": "./dist/lexical-proxy/@lexical-*.js"
       },
       "./lexical/react/*": {
         "import": "./dist/lexical-proxy/@lexical-react/*.js",
