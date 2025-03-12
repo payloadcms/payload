@@ -13,54 +13,83 @@ Richtext fields save data in JSON - this is great for storage and flexibility an
 - [Converting Plaintext](/docs/rich-text/converting-plaintext)
 - [Converting Markdown and MDX](/docs/rich-text/converting-markdown)
 
-### Getting the editor config
+## Retrieving the Editor Config
 
-The editor config is required for some converters, as some converters are stored on the lexical nodes directly. The editor config will then decide which nodes & features are enabled, and which converters are used.
+The editor config is required for some converters, as some converters are stored on the lexical nodes directly. The editor config will then determine which nodes & features are enabled and which converters are used.
 
-To get the editor config, import the `editorConfigFactory` factory - this factory provides a variety of ways to get the editor config, depending on your use case.
+Payload provides multiple ways to obtain the editor config through the `editorConfigFactory` from `@payloadcms/richtext-lexical`.
+
+### Importing the Factory
+
+First, import the necessary utilities:
 
 ```ts
 import type { SanitizedConfig } from 'payload'
-
 import {
   editorConfigFactory,
-  FixedToolbarFeature,
-  lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 
-// Your config needs to be available in order to retrieve the default editor config
+// Your Payload Config needs to be available in order to retrieve the default editor config
 const config: SanitizedConfig = {} as SanitizedConfig
+```
 
-// Version 1 - use the default editor config
-const yourEditorConfig = await editorConfigFactory.default({ config })
+### Option 1: Default Editor Config
 
-// Version 2 - if you have access to a lexical fields, you can extract the editor config from it
-const yourEditorConfig2 = editorConfigFactory.fromField({
-  field: collectionConfig.fields[1],
+If you require the default editor config:
+
+```ts
+const defaultEditorConfig = await editorConfigFactory.default({ config })
+```
+
+### Option 2: Extract from a Lexical Field
+
+When a lexical field config is available, you can extract the editor config directly:
+
+```ts
+const fieldEditorConfig = editorConfigFactory.fromField({
+  field: config.collections[0].fields[1],
 })
+```
 
-// Version 3 - create a new editor config - behaves just like instantiating a new `lexicalEditor`
-const yourEditorConfig3 = await editorConfigFactory.fromFeatures({
+### Option 3: Create a Custom Editor Config
+
+You can create a custom editor configuration by specifying additional features:
+
+```ts
+import {
+  FixedToolbarFeature,
+} from '@payloadcms/richtext-lexical'
+
+const customEditorConfig = await editorConfigFactory.fromFeatures({
   config,
-  features: ({ defaultFeatures }) => [...defaultFeatures, FixedToolbarFeature()],
+  features: ({ defaultFeatures }) => [
+    ...defaultFeatures,
+    FixedToolbarFeature(),
+  ],
 })
+```
 
-// Version 4 - if you have instantiated a lexical editor and are accessing it outside a field (=> this is the unsanitized editor),
-// you can extract the editor config from it.
-// This is common if you define the editor in a re-usable module scope variable and pass it to the richText field.
-// This is the least efficient way to get the editor config, and not recommended. It is recommended to extract the `features` arg
-// into a separate variable and use `fromFeatures` instead.
+### Option 4: Extract from an Instantiated Editor
+
+If you have already instantiated a lexical editor (e.g., defined globally or in a reusable module), you can extract the configuration directly from it. However, this method is less efficient and typically not recommended:
+
+```ts
 const editor = lexicalEditor({
-  features: ({ defaultFeatures }) => [...defaultFeatures, FixedToolbarFeature()],
+  features: ({ defaultFeatures }) => [
+    ...defaultFeatures,
+    FixedToolbarFeature(),
+  ],
 })
 
-const yourEditorConfig4 = await editorConfigFactory.fromEditor({
+const instantiatedEditorConfig = await editorConfigFactory.fromEditor({
   config,
   editor,
 })
 ```
 
-### Example - Getting the editor config from an existing field
+For better efficiency, consider extracting the `features` into a separate variable and using `fromFeatures` instead of this method.
+
+### Example - Retrieving the editor config from an existing field
 
 If you have access to the sanitized collection config, you can get access to the lexical sanitized editor config & features, as every lexical richText field returns it. Here is an example how you can get it from another field's afterRead hook:
 
