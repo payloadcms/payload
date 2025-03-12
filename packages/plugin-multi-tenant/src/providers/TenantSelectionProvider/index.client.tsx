@@ -88,7 +88,7 @@ export const TenantSelectionProviderClient = ({
         router.refresh()
       }
     },
-    [setSelectedTenantID, setCookie, router, preventRefreshOnChange, tenantOptions],
+    [deleteCookie, preventRefreshOnChange, router, setCookie, setSelectedTenantID, tenantOptions],
   )
 
   React.useEffect(() => {
@@ -107,11 +107,9 @@ export const TenantSelectionProviderClient = ({
       setSelectedTenantID(initialValue)
       if (initialValue) {
         setCookie(String(initialValue))
+      } else {
+        deleteCookie()
       }
-    }
-
-    if (tenantCookie === undefined) {
-      deleteCookie()
     }
   }, [userID, tenantCookie, initialValue, setCookie, deleteCookie, router])
 
