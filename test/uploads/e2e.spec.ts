@@ -400,6 +400,20 @@ describe('Uploads', () => {
     await expect(page.locator('.row-3 .cell-title')).toContainText('draft')
   })
 
+  test('should upload edge case media when an image size contains an undefined height', async () => {
+    await page.goto(mediaURL.create)
+    await page.setInputFiles(
+      'input[type="file"]',
+      path.resolve(dirname, './test-image-1500x735.jpeg'),
+    )
+
+    const filename = page.locator('.file-field__filename')
+
+    await expect(filename).toHaveValue('test-image-1500x735.jpeg')
+
+    await saveDocAndAssert(page)
+  })
+
   describe('filterOptions', () => {
     test('should restrict mimetype based on filterOptions', async () => {
       const audioDoc = (

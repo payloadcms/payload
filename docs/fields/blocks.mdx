@@ -297,6 +297,22 @@ export const CustomBlocksFieldLabelClient: BlocksFieldLabelClientComponent = ({
 }
 ```
 
+### Row Label
+
+```tsx
+'use client'
+
+import { useRowLabel } from '@payloadcms/ui'
+
+export const BlockRowLabel = () => {
+  const { data, rowNumber } = useRowLabel<{ title?: string }>()
+
+  const customLabel = `${data.type} ${String(rowNumber).padStart(2, '0')} `
+
+  return <div>Custom Label: {customLabel}</div>
+}
+```
+
 ## Block References
 
 If you have multiple blocks used in multiple places, your Payload Config can grow in size, potentially sending more data to the client and requiring more processing on the server. However, you can optimize performance by defining each block **once** in your Payload Config and then referencing its slug wherever it's used instead of passing the entire block config.
