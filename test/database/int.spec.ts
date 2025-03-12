@@ -1793,7 +1793,7 @@ describe('database', () => {
 
   it('mongodb additional keys stripping', async () => {
     // eslint-disable-next-line jest/no-conditional-in-test
-    if (payload.db.name !== 'mognoose') {
+    if (payload.db.name !== 'mongoose') {
       return
     }
 
