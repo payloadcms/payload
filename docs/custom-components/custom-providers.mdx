@@ -27,19 +27,19 @@ Then build your Custom Provider as follows:
 
 ```tsx
 'use client'
-import React, { createContext, useContext } from 'react'
+import React, { createContext, use } from 'react'
 
 const MyCustomContext = React.createContext(myCustomValue)
 
 export function MyProvider({ children }: { children: React.ReactNode }) {
   return (
-    <MyCustomContext.Provider value={myCustomValue}>
+    <MyCustomContext value={myCustomValue}>
       {children}
-    </MyCustomContext.Provider>
+    </MyCustomContext>
   )
 }
 
-export const useMyCustomContext = () => useContext(MyCustomContext)
+export const useMyCustomContext = () => use(MyCustomContext)
 ```
 
 _For details on how to build Custom Components, see [Building Custom Components](./overview#building-custom-components)._

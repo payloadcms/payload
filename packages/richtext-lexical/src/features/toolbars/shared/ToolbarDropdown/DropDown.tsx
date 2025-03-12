@@ -48,7 +48,7 @@ export function DropDownItem({
 
   const ref = useRef<HTMLButtonElement>(null)
 
-  const dropDownContext = React.useContext(DropDownContext)
+  const dropDownContext = React.use(DropDownContext)
 
   if (dropDownContext === null) {
     throw new Error('DropDownItem must be used within a DropDown')
@@ -170,7 +170,7 @@ function DropDownItems({
   }, [items, highlightedItem])
 
   return (
-    <DropDownContext.Provider value={contextValue}>
+    <DropDownContext value={contextValue}>
       <div
         className={(itemsContainerClassNames ?? ['toolbar-popup__dropdown-items']).join(' ')}
         onKeyDown={handleKeyDown}
@@ -178,7 +178,7 @@ function DropDownItems({
       >
         {children}
       </div>
-    </DropDownContext.Provider>
+    </DropDownContext>
   )
 }
 
