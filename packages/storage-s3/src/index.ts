@@ -5,6 +5,7 @@ import type {
   CollectionOptions,
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
+import type { NodeHttpHandlerOptions } from '@smithy/node-http-handler'
 import type { Config, Plugin, UploadCollectionSlug } from 'payload'
 
 import * as AWS from '@aws-sdk/client-s3'
@@ -66,6 +67,17 @@ type S3StoragePlugin = (storageS3Args: S3StorageOptions) => Plugin
 
 let storageClient: AWS.S3 | null = null
 
+const defaultRequestHandlerOpts: NodeHttpHandlerOptions = {
+  httpAgent: {
+    keepAlive: true,
+    maxSockets: 100,
+  },
+  httpsAgent: {
+    keepAlive: true,
+    maxSockets: 100,
+  },
+}
+
 export const s3Storage: S3StoragePlugin =
   (s3StorageOptions: S3StorageOptions) =>
   (incomingConfig: Config): Config => {
@@ -73,7 +85,11 @@ export const s3Storage: S3StoragePlugin =
       if (storageClient) {
         return storageClient
       }
-      storageClient = new AWS.S3(s3StorageOptions.config ?? {})
+
+      storageClient = new AWS.S3({
+        requestHandler: defaultRequestHandlerOpts,
+        ...(s3StorageOptions.config ?? {}),
+      })
       return storageClient
     }
 
