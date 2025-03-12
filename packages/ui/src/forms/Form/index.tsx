@@ -804,7 +804,10 @@ export const Form: React.FC<FormProps> = (props) => {
                 <ProcessingContext value={processing}>
                   <BackgroundProcessingContext value={backgroundProcessing}>
                     <ModifiedContext value={modified}>
-                      <FormFieldsContext value={fieldsReducer}>{children}</FormFieldsContext>
+                      {/* eslint-disable-next-line @eslint-react/no-context-provider */}
+                      <FormFieldsContext.Provider value={fieldsReducer}>
+                        {children}
+                      </FormFieldsContext.Provider>
                     </ModifiedContext>
                   </BackgroundProcessingContext>
                 </ProcessingContext>
