@@ -41,18 +41,8 @@ export const stripeWebhooks = async (args: {
       }
 
       if (event) {
-        handleWebhooks({
-          config,
-          event,
-          payload: req.payload,
-          pluginConfig,
-          req,
-          stripe,
-        })
-
-        // Fire external webhook handlers if they exist
-        if (typeof webhooks === 'function') {
-          webhooks({
+        const fireWebhooks = async () => {
+          await handleWebhooks({
             config,
             event,
             payload: req.payload,
@@ -60,12 +50,10 @@ export const stripeWebhooks = async (args: {
             req,
             stripe,
           })
-        }
 
-        if (typeof webhooks === 'object') {
-          const webhookEventHandler = webhooks[event.type]
-          if (typeof webhookEventHandler === 'function') {
-            webhookEventHandler({
+          // Fire external webhook handlers if they exist
+          if (typeof webhooks === 'function') {
+            await webhooks({
               config,
               event,
               payload: req.payload,
@@ -74,7 +62,46 @@ export const stripeWebhooks = async (args: {
               stripe,
             })
           }
+
+          if (typeof webhooks === 'object') {
+            const webhookEventHandler = webhooks[event.type]
+            if (typeof webhookEventHandler === 'function') {
+              await webhookEventHandler({
+                config,
+                event,
+                payload: req.payload,
+                pluginConfig,
+                req,
+                stripe,
+              })
+            }
+          }
         }
+
+        /**
+         * Run webhook handlers asynchronously. This allows the request to immediately return a 2xx status code to Stripe without waiting for the webhook handlers to complete.
+         * This is because webhooks can be potentially slow if performing database queries or other synchronous API requests.
+         * This is important because Stripe will retry the webhook if it doesn't receive a 2xx status code within the 10-20 second timeout window.
+         * When a webhook fails, Stripe will retry it, causing duplicate events and potential data inconsistencies.
+         *
+         * To do this in Vercel environments, conditionally import the `waitUntil` function from `@vercel/functions`.
+         * If it exists, use it to wrap the `fireWebhooks` function to ensure it completes before the response is sent.
+         * Otherwise, run the `fireWebhooks` function directly and void the promise to prevent the response from waiting.
+         * {@link https://docs.stripe.com/webhooks#acknowledge-events-immediately}
+         */
+        void (async () => {
+          let waitUntil = (promise: Promise<void>) => promise
+
+          try {
+            // @ts-expect-error - Ignore TS error for missing module
+            const { waitUntil: importedWaitUntil } = await import('@vercel/functions')
+            waitUntil = importedWaitUntil
+          } catch (_err) {
+            // silently fail
+          }
+
+          void waitUntil(fireWebhooks())
+        })()
       }
     }
   }
