@@ -102,7 +102,7 @@ export const withPayload = (nextConfig = {}, options = {}) => {
       'pino-pretty',
       'graphql',
       // Do not bundle server-only packages during dev to improve compile speed
-      ...(process.env.npm_lifecycle_event === 'dev' && options.devBundleServerPackages === false
+      ...(process.env.NODE_ENV === 'development' && options.devBundleServerPackages === false
         ? [
             'payload',
             '@payloadcms/db-mongodb',
