@@ -89,8 +89,8 @@ export const CheckoutPage: React.FC = () => {
 
   return (
     <div className="flex flex-col items-stretch justify-stretch md:flex-row gap-6 md:gap-12">
-      <div className="w-full flex-grow flex flex-col gap-8">
-        <div className="prose dark:prose-invert bg-black rounded-sm p-4 flex-grow w-full flex items-center">
+      <div className="w-full grow flex flex-col gap-8">
+        <div className="prose dark:prose-invert bg-black rounded-sm p-4 grow w-full flex items-center">
           <Button asChild className="no-underline text-inherit" variant="outline">
             <Link href="/login">Log in</Link>
           </Button>

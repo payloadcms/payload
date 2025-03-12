@@ -56,7 +56,7 @@ export const LoginForm: React.FC = () => {
         <Input id="password" type="password" {...register('password', { required: true })} />
       </div>
 
-      <div className="text-primary/70 mb-6 prose hover:prose-a:text-primary dark:prose-invert">
+      <div className="text-primary/70 mb-6 prose prose-a:hover:text-primary dark:prose-invert">
         <p>
           Forgot your password?{' '}
           <Link href={`/recover-password${allParams}`}>Click here to reset it</Link>
@@ -65,17 +65,11 @@ export const LoginForm: React.FC = () => {
 
       <div className="flex gap-4 justify-between">
         <Button asChild variant="outline" size="lg">
-          <Link href={`/create-account${allParams}`} className="flex-grow max-w-[50%]">
+          <Link href={`/create-account${allParams}`} className="grow max-w-[50%]">
             Create an account
           </Link>
         </Button>
-        <Button
-          className="flex-grow"
-          disabled={isLoading}
-          size="lg"
-          type="submit"
-          variant="default"
-        >
+        <Button className="grow" disabled={isLoading} size="lg" type="submit" variant="default">
           {isLoading ? 'Processing' : 'Continue'}
         </Button>
       </div>

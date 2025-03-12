@@ -122,6 +122,7 @@ export const Products: CollectionConfig = {
               name: 'variantOptions',
               type: 'array',
               admin: {
+                condition: (data) => Boolean(data.enableVariants),
                 components: {
                   RowLabel: '@/collections/Products/ui/RowLabels/KeyLabel#KeyLabel',
                   Field: '@/collections/Products/ui/Variants/VariantOptions#VariantOptions',
@@ -229,35 +230,6 @@ export const Products: CollectionConfig = {
               },
               required: true,
               minRows: 1,
-              validate: (value, { siblingData }) => {
-                // @ts-expect-error
-                if (siblingData.variants.length) {
-                  // @ts-expect-error
-                  const hasDuplicate = siblingData.variants.some((variant, index) => {
-                    // Check this against other variants
-                    // @ts-expect-error
-                    const dedupedArray = [...siblingData.variants].filter((_, i) => i !== index)
-
-                    // Join the arrays then compare the strings, note that we sort the array before it's saved in the custom component
-                    const test = dedupedArray.find((otherOption) => {
-                      const firstOption = otherOption?.options
-                        ?.map((option) => option.slug)
-                        .join('')
-                      const secondOption = variant?.options?.map((option) => option.slug).join('')
-
-                      return firstOption === secondOption
-                    })
-
-                    return Boolean(test)
-                  })
-
-                  if (hasDuplicate) {
-                    return 'There is a duplicate variant'
-                  }
-                }
-
-                return true
-              },
             },
             {
               name: 'stock',

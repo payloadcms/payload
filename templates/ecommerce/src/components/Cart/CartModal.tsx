@@ -67,9 +67,9 @@ export function CartModal() {
             <p className="mt-6 text-center text-2xl font-bold">Your cart is empty.</p>
           </div>
         ) : (
-          <div className="flex-grow flex">
+          <div className="grow flex">
             <div className="flex flex-col justify-between w-full">
-              <ul className="flex-grow overflow-auto py-4">
+              <ul className="grow overflow-auto py-4">
                 {cart?.items?.map((item, i) => {
                   const product = item.product
 

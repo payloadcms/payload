@@ -57,12 +57,12 @@ export default function AccountDrawer() {
             </ul>
           </div>
         ) : (
-          <div className="flex flex-col flex-grow justify-between gap-2">
+          <div className="flex flex-col grow justify-between gap-2">
             <nav aria-label="My account navigation">
               <Link href="/order-lookup">Order Look-up</Link>
             </nav>
 
-            <div className="flex-grow"></div>
+            <div className="grow"></div>
 
             <div className="flex flex-col gap-2">
               <Button asChild className="w-full" variant="default">

@@ -162,9 +162,10 @@ export interface User {
   name?: string | null;
   roles?: ('admin' | 'customer')[] | null;
   orders?: {
-    docs?: (string | Order)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | Order)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   stripeCustomerID?: string | null;
   cart?: {
     items?: CartItems;
@@ -228,19 +229,21 @@ export interface Product {
   gallery: (string | Media)[];
   layout?: (CallToActionBlock | ContentBlock | MediaBlock)[] | null;
   enableVariants?: boolean | null;
-  variantOptions: {
-    label: string;
-    slug: string;
-    options?:
-      | {
-          label: string;
-          slug: string;
-          group?: string | null;
-          id?: string | null;
-        }[]
-      | null;
-    id?: string | null;
-  }[];
+  variantOptions?:
+    | {
+        label: string;
+        slug: string;
+        options?:
+          | {
+              label: string;
+              slug: string;
+              group?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
   variants?:
     | {
         active?: boolean | null;

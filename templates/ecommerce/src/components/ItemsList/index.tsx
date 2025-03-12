@@ -11,7 +11,7 @@ interface Props {
 
 export const ItemsList: React.FC<Props> = ({ items }) => {
   return (
-    <ul className="flex-grow overflow-auto py-4">
+    <ul className="grow overflow-auto py-4">
       {items?.map((item, i) => {
         if (typeof item.product === 'string' || !item) return <React.Fragment key={item.id} />
 
