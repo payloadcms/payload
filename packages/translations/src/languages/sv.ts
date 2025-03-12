@@ -215,11 +215,11 @@ export const svTranslations: DefaultTranslationsObject = {
     copyWarning:
       'Du håller på att skriva över {{to}} med {{from}} för {{label}} {{title}}. Är du säker?',
     create: 'Skapa',
-    created: 'Skapad',
-    createdAt: 'Skapad',
+    created: 'Skapat',
+    createdAt: 'Skapat',
     createNew: 'Skapa ny',
     createNewLabel: 'Skapa ny {{label}}',
-    creating: 'Skapar',
+    creating: 'Skapar...',
     creatingNewLabel: 'Skapar ny {{label}}',
     currentlyEditing:
       'redigerar för närvarande detta dokument. Om du tar över kommer de att blockeras från att fortsätta redigera och kan också förlora osparade ändringar.',
@@ -339,7 +339,7 @@ export const svTranslations: DefaultTranslationsObject = {
     unsavedChangesDuplicate: 'Du har osparade ändringar. Vill du fortsätta att duplicera?',
     untitled: 'Namnlös',
     upcomingEvents: 'Kommande händelser',
-    updatedAt: 'Uppdaterades',
+    updatedAt: 'Uppdaterat',
     updatedCountSuccessfully: 'Uppdaterade {{count}} {{label}}',
     updatedSuccessfully: 'Uppdaterades',
     updating: 'Uppdaterar...',
