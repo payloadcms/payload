@@ -1,20 +1,31 @@
 import type { Product } from '@/payload-types'
 
-export const productHat: Partial<Product> = {
+export const productHoodie: Partial<Product> = {
+  enableVariants: true,
   variantOptions: [
     {
-      label: 'Color',
-      slug: 'color',
+      label: 'Size',
+      slug: 'size',
       options: [
         {
-          label: 'Black',
-          slug: 'black',
-          group: 'color',
+          label: 'Small',
+          slug: 'small',
+          group: 'size',
         },
         {
-          label: 'White',
-          slug: 'white',
-          group: 'color',
+          label: 'Medium',
+          slug: 'medium',
+          group: 'size',
+        },
+        {
+          label: 'Large',
+          slug: 'large',
+          group: 'size',
+        },
+        {
+          label: 'X Large',
+          slug: 'x-large',
+          group: 'size',
         },
       ],
     },
@@ -24,8 +35,8 @@ export const productHat: Partial<Product> = {
       active: true,
       options: [
         {
-          value: 'black',
-          slug: 'color',
+          value: 'small',
+          slug: 'size',
         },
       ],
       price: 2122,
@@ -35,17 +46,39 @@ export const productHat: Partial<Product> = {
       active: true,
       options: [
         {
-          value: 'white',
-          slug: 'color',
+          value: 'medium',
+          slug: 'size',
         },
       ],
       price: 1299,
       stock: 889,
     },
+    {
+      active: true,
+      options: [
+        {
+          value: 'large',
+          slug: 'size',
+        },
+      ],
+      price: 1999,
+      stock: 13,
+    },
+    {
+      active: true,
+      options: [
+        {
+          value: 'x-large',
+          slug: 'size',
+        },
+      ],
+      price: 0,
+      stock: 23,
+    },
   ],
   stock: 0,
   meta: {
-    title: 'Hat | Payload Ecommerce Template',
+    title: 'Hoodie | Payload Ecommerce Template',
     image: '{{IMAGE_1}}',
     description:
       'Top off your look with our classic hat, crafted for style and comfort. Made with breathable, high-quality materials and an adjustable strap for the perfect fit.',
@@ -85,11 +118,10 @@ export const productHat: Partial<Product> = {
       version: 1,
     },
   },
-  enableVariants: true,
   gallery: ['{{IMAGE_1}}', '{{IMAGE_2}}', '{{IMAGE_3}}'],
   price: 1999,
   publishedOn: '2025-01-21T00:01:06.661Z',
-  title: 'Hat',
-  slug: 'hat',
+  title: 'Hoodie',
+  slug: 'hoodie',
   relatedProducts: ['{{RELATED_PRODUCT_1}}'],
 }

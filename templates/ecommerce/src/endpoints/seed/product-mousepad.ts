@@ -1,10 +1,6 @@
 import type { Product } from '@/payload-types'
 
 export const productMousepad: Partial<Product> = {
-  variants: {
-    options: [],
-    variants: [],
-  },
   stock: 64,
   meta: {
     title: 'Mouse pad | Payload Ecommerce Template',

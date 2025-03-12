@@ -4,6 +4,7 @@ import { contactForm as contactFormData } from './contact-form'
 import { contact as contactPageData } from './contact-page'
 import { productMousepad as productMousepadData } from './product-mousepad'
 import { productHat as productHatData } from './product-hat'
+import { productHoodie as productHoodieData } from './product-hoodie'
 import { home } from './home'
 import { image1 } from './image-1'
 import { image2 } from './image-2'
@@ -245,6 +246,25 @@ export const seed = async ({
         .replace(/"\{\{IMAGE_3\}\}"/g, String(image3ID))
         .replace(/"\{\{CATEGORY_1\}\}"/g, String(hatsID))
         .replace(/"\{\{RELATED_PRODUCT_1\}\}"/g, String(mousePadID)),
+    ),
+  })
+
+  let hatID: number | string = productMousepad.id
+
+  if (payload.db.defaultIDType === 'text') {
+    hatID = `"${hatID}"`
+  }
+
+  const productHoodie = await payload.create({
+    collection: 'products',
+    depth: 0,
+    data: JSON.parse(
+      JSON.stringify(productHoodieData)
+        .replace(/"\{\{IMAGE_1\}\}"/g, String(image1ID))
+        .replace(/"\{\{IMAGE_2\}\}"/g, String(image2ID))
+        .replace(/"\{\{IMAGE_3\}\}"/g, String(image3ID))
+        .replace(/"\{\{CATEGORY_1\}\}"/g, String(hoodiesID))
+        .replace(/"\{\{RELATED_PRODUCT_1\}\}"/g, String(hatID)),
     ),
   })
 
