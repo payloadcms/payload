@@ -2,13 +2,13 @@
 import type { ClientField, FieldWithPathClient, FormState } from 'payload'
 
 import { fieldAffectsData, fieldHasSubFields, fieldIsHiddenOrDisabled } from 'payload/shared'
-import React, { Fragment, useState } from 'react'
+import React, { useState } from 'react'
 
-import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import { createNestedClientFieldPath } from '../../forms/Form/createNestedClientFieldPath.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { combineFieldLabel } from '../../utilities/combineFieldLabel.js'
 import { ReactSelect } from '../ReactSelect/index.js'
 import './index.scss'
 
@@ -17,33 +17,6 @@ const baseClass = 'field-select'
 export type FieldSelectProps = {
   readonly fields: ClientField[]
   readonly setSelected: (fields: FieldWithPathClient[]) => void
-}
-
-export const combineLabel = ({
-  CustomLabel,
-  field,
-  prefix,
-}: {
-  CustomLabel?: React.ReactNode
-  field?: ClientField
-  prefix?: React.ReactNode
-}): React.ReactNode => {
-  return (
-    <Fragment>
-      {prefix ? (
-        <Fragment>
-          <span style={{ display: 'inline-block' }}>{prefix}</span>
-          {' > '}
-        </Fragment>
-      ) : null}
-      <span style={{ display: 'inline-block' }}>
-        <RenderCustomComponent
-          CustomComponent={CustomLabel}
-          Fallback={<FieldLabel label={'label' in field && field.label} />}
-        />
-      </span>
-    </Fragment>
-  )
 }
 
 const reduceFields = ({
@@ -80,7 +53,7 @@ const reduceFields = ({
         ...fieldsToUse,
         ...reduceFields({
           fields: field.fields,
-          labelPrefix: combineLabel({ CustomLabel, field, prefix: labelPrefix }),
+          labelPrefix: combineFieldLabel({ CustomLabel, field, prefix: labelPrefix }),
           path: createNestedClientFieldPath(path, field),
         }),
       ]
@@ -106,7 +79,7 @@ const reduceFields = ({
     }
 
     const formattedField = {
-      label: combineLabel({ CustomLabel, field, prefix: labelPrefix }),
+      label: combineFieldLabel({ CustomLabel, field, prefix: labelPrefix }),
       value: {
         ...field,
         path: createNestedClientFieldPath(path, field),

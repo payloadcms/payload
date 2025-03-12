@@ -173,6 +173,16 @@ export const Posts: CollectionConfig = {
           name: 'title',
           type: 'text',
         },
+        {
+          name: 'groupWithinGroup',
+          type: 'group',
+          fields: [
+            {
+              name: 'titleWithinNestedGroup',
+              type: 'text',
+            },
+          ],
+        },
       ],
     },
     {

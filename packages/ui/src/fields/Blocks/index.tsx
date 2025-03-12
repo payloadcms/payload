@@ -54,6 +54,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     schemaPath: schemaPathFromProps,
     validate,
   } = props
+
   const schemaPath = schemaPathFromProps ?? name
 
   const minRows = (minRowsProp ?? required) ? 1 : 0
