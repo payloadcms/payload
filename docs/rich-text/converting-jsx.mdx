@@ -22,7 +22,7 @@ export const MyComponent = ({ data }: { data: SerializedEditorState }) => {
 }
 ```
 
-The `RichText` component includes built-in serializers for common Lexical nodes but allows customization through the `converters` prop. In our [website template](https://github.com/payloadcms/payload/blob/main/templates/website/src/components/RichText/index.tsx) you have an example of how to use `converters` to render custom blocks, custom nodes and override existing converters.
+The `RichText` component includes built-in converters for common Lexical nodes. You can add or override converters via the `converters` prop for custom blocks, custom nodes, or any modifications you need. See the [website template](https://github.com/payloadcms/payload/blob/main/templates/website/src/components/RichText/index.tsx) for a working example.
 
 <Banner type="default">
   When fetching data, ensure your `depth` setting is high enough to fully populate Lexical nodes such as uploads. The JSX converter requires fully populated data to work correctly.
@@ -68,7 +68,9 @@ export const MyComponent: React.FC<{
 
 ### Converting Lexical Blocks
 
-To convert Lexical Blocks or Inline Blocks to JSX, pass the converter for your block to the `RichText` component. This converter is not included by default, as Payload doesn't know how to render your custom blocks.
+If your rich text includes custom Blocks or Inline Blocks, you must supply custom converters that match each block's slug. This converter is not included by default, as Payload doesn't know how to render your custom blocks.
+
+For example:
 
 ```tsx
 'use client'
