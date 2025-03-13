@@ -79,6 +79,7 @@ The following options are available:
 | `versions`         | Set to true to enable default options, or configure with object properties. [More details](../versions/overview#collection-config).                                                                                  |
 | `defaultPopulate`  | Specify which fields to select when this Collection is populated from another document. [More Details](../queries/select#defaultpopulate-collection-config-property).                                                |
 | `indexes`          | Define compound indexes for this collection. This can be used to either speed up querying/sorting by 2 or more fields at the same time or to ensure uniqueness between several fields.                               |
+| `forceSelect`      | Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks                                                                |
 
 _* An asterisk denotes that a property is required._
 
