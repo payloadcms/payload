@@ -1,6 +1,15 @@
-import type { Data, Field, FlattenedBlock, PayloadRequest, TabAsField, User } from 'payload'
+import type {
+  Data,
+  Field,
+  FlattenedBlock,
+  PayloadRequest,
+  SelectMode,
+  SelectType,
+  TabAsField,
+  User,
+} from 'payload'
 
-import { getDefaultValue } from 'payload'
+import { getDefaultValue, stripUnselectedFields } from 'payload'
 import { fieldAffectsData, tabHasName } from 'payload/shared'
 
 import { iterateFields } from './iterateFields.js'
@@ -11,6 +20,8 @@ type Args<T> = {
   id?: number | string
   locale: string | undefined
   req: PayloadRequest
+  select?: SelectType
+  selectMode?: SelectMode
   siblingData: Data
   user: User
 }
@@ -22,9 +33,22 @@ export const defaultValuePromise = async <T>({
   field,
   locale,
   req,
+  select,
+  selectMode,
   siblingData,
   user,
 }: Args<T>): Promise<void> => {
+  const shouldContinue = stripUnselectedFields({
+    field,
+    select,
+    selectMode,
+    siblingDoc: siblingData,
+  })
+
+  if (!shouldContinue) {
+    return
+  }
+
   if (fieldAffectsData(field)) {
     if (
       typeof siblingData[field.name] === 'undefined' &&
@@ -63,6 +87,8 @@ export const defaultValuePromise = async <T>({
               fields: field.fields,
               locale,
               req,
+              select,
+              selectMode,
               siblingData: row,
               user,
             }),
@@ -97,6 +123,8 @@ export const defaultValuePromise = async <T>({
                 fields: block.fields,
                 locale,
                 req,
+                select,
+                selectMode,
                 siblingData: row,
                 user,
               }),
@@ -117,6 +145,8 @@ export const defaultValuePromise = async <T>({
         fields: field.fields,
         locale,
         req,
+        select,
+        selectMode,
         siblingData,
         user,
       })
@@ -136,6 +166,8 @@ export const defaultValuePromise = async <T>({
         fields: field.fields,
         locale,
         req,
+        select,
+        selectMode,
         siblingData: groupData,
         user,
       })
@@ -161,6 +193,8 @@ export const defaultValuePromise = async <T>({
         fields: field.fields,
         locale,
         req,
+        select,
+        selectMode,
         siblingData: tabSiblingData,
         user,
       })
@@ -175,6 +209,8 @@ export const defaultValuePromise = async <T>({
         fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
         locale,
         req,
+        select,
+        selectMode,
         siblingData,
         user,
       })

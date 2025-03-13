@@ -117,6 +117,8 @@ export const buildFormState = async (
     },
     returnLockStatus,
     schemaPath = collectionSlug || globalSlug,
+    select,
+    selectMode,
     skipValidation,
     updateLastEdited,
   } = args
@@ -210,6 +212,8 @@ export const buildFormState = async (
     renderFieldFn: renderField,
     req,
     schemaPath,
+    select,
+    selectMode,
     skipValidation,
   })
 
