@@ -794,6 +794,7 @@ type TabBase = {
    */
   description?: LabelFunction | StaticDescription
   fields: Field[]
+  id?: string
   interfaceName?: string
   saveToJWT?: boolean | string
 } & Omit<FieldBase, 'required' | 'validate'>
@@ -825,11 +826,11 @@ export type UnnamedTab = {
 } & Omit<TabBase, 'name' | 'virtual'>
 
 export type Tab = NamedTab | UnnamedTab
-
 export type TabsField = {
   admin?: Omit<Admin, 'description'>
-  tabs: Tab[]
   type: 'tabs'
+} & {
+  tabs: Tab[]
 } & Omit<FieldBase, 'admin' | 'localized' | 'name' | 'saveToJWT' | 'virtual'>
 
 export type TabsFieldClient = {
