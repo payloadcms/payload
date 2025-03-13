@@ -1042,16 +1042,14 @@ describe('General', () => {
         .click({ modifiers: [modifier] }),
     ])
 
-    // Wait for navigation to complete in the new tab
-    await newPage.waitForLoadState('load')
+    // Wait for navigation to complete in the new tab and ensure correct URL
+    await expect(newPage.locator('.list-header')).toBeVisible()
+    // using contain here, because after load the lists view will add query params like "?limit=10"
+    expect(newPage.url()).toContain(postsUrl.list)
 
     // Locate the modal container and ensure it is not visible
     const modalContainer = page.locator('.payload__modal-container')
     await expect(modalContainer).toBeHidden()
-
-    // Ensure the new page is the correct URL
-    // using contain here, because after load the lists view will add query params like "?limit=10"
-    expect(newPage.url()).toContain(postsUrl.list)
 
     // Ensure the original page is the correct URL
     expect(page.url()).toBe(postsUrl.create)
