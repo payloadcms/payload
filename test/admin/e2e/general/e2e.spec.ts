@@ -1034,12 +1034,11 @@ describe('General', () => {
     await page.locator('#field-title').fill(newTitle)
 
     // Open link in a new tab by holding down the Meta or Control key
-    const modifier = process.platform === 'win32' ? 'Control' : 'Meta'
     const [newPage] = await Promise.all([
       page.context().waitForEvent('page'),
       page
         .locator(`header.app-header a[href="/admin/collections/posts"]`)
-        .click({ modifiers: [modifier] }),
+        .click({ modifiers: ['ControlOrMeta'] }),
     ])
 
     // Wait for navigation to complete in the new tab and ensure correct URL
