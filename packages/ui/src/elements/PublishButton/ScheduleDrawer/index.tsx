@@ -36,6 +36,7 @@ import { buildUpcomingColumns } from './buildUpcomingColumns.js'
 const baseClass = 'schedule-publish'
 
 type Props = {
+  defaultType?: PublishType
   slug: string
 }
 
@@ -44,7 +45,7 @@ const defaultLocaleOption = {
   value: 'all',
 }
 
-export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
+export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType }) => {
   const { toggleModal } = useModal()
   const {
     config: {
@@ -60,7 +61,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
   const { id, collectionSlug, globalSlug, title } = useDocumentInfo()
   const { i18n, t } = useTranslation()
   const { schedulePublish } = useServerFunctions()
-  const [type, setType] = React.useState<PublishType>('publish')
+  const [type, setType] = React.useState<PublishType>(defaultType || 'publish')
   const [date, setDate] = React.useState<Date>()
   const [timezone, setTimezone] = React.useState<string>(defaultTimezone)
   const [locale, setLocale] = React.useState<{ label: string; value: string }>(defaultLocaleOption)
@@ -313,8 +314,9 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
           </li>
         </ul>
         <br />
-        <FieldLabel label={t('general:time')} required />
+        <FieldLabel label={t('general:time')} path={'time'} required />
         <DatePickerField
+          id="time"
           minDate={new Date()}
           onChange={(e) => onChangeDate(e)}
           pickerAppearance="dayAndTime"
@@ -343,7 +345,13 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
           </React.Fragment>
         )}
         <div className={`${baseClass}__actions`}>
-          <Button buttonStyle="primary" disabled={processing} onClick={handleSave} type="button">
+          <Button
+            buttonStyle="primary"
+            disabled={processing}
+            id="scheduled-publish-save"
+            onClick={handleSave}
+            type="button"
+          >
             {t('general:save')}
           </Button>
           {processing ? <span>{t('general:saving')}</span> : null}

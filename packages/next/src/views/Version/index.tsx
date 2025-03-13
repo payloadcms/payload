@@ -1,6 +1,7 @@
 import type {
   Document,
   DocumentViewServerProps,
+  Locale,
   OptionObject,
   SanitizedCollectionPermission,
   SanitizedGlobalPermission,
@@ -142,26 +143,29 @@ export async function VersionView(props: DocumentViewServerProps) {
     }
   }
 
-  const selectedLocales: OptionObject[] = []
+  let selectedLocales: OptionObject[] = []
   if (localization) {
+    let locales: Locale[] = []
     if (localeCodesFromParams) {
       for (const code of localeCodesFromParams) {
         const locale = localization.locales.find((locale) => locale.code === code)
-        if (locale) {
-          selectedLocales.push({
-            label: locale.label,
-            value: locale.code,
-          })
+        if (!locale) {
+          continue
         }
+        locales.push(locale)
       }
     } else {
-      for (const { code, label } of localization.locales) {
-        selectedLocales.push({
-          label,
-          value: code,
-        })
-      }
+      locales = localization.locales
     }
+
+    if (localization.filterAvailableLocales) {
+      locales = (await localization.filterAvailableLocales({ locales, req })) || []
+    }
+
+    selectedLocales = locales.map((locale) => ({
+      label: locale.label,
+      value: locale.code,
+    }))
   }
 
   const latestVersion =

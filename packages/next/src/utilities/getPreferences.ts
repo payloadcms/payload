@@ -1,40 +1,41 @@
-import type { Payload, User } from 'payload'
+import type { DefaultDocumentIDType, Payload } from 'payload'
 
 import { cache } from 'react'
 
 export const getPreferences = cache(
-  async <T>(key: string, payload: Payload, user: User): Promise<T> => {
-    let result: T = null
-
-    try {
-      result = await payload
-        .find({
-          collection: 'payload-preferences',
-          depth: 0,
-          limit: 1,
-          user,
-          where: {
-            and: [
-              {
-                'user.relationTo': {
-                  equals: payload.config.admin.user,
-                },
+  async <T>(
+    key: string,
+    payload: Payload,
+    userID: DefaultDocumentIDType,
+    userSlug: string,
+  ): Promise<{ id: DefaultDocumentIDType; value: T }> => {
+    const result = (await payload
+      .find({
+        collection: 'payload-preferences',
+        depth: 0,
+        limit: 1,
+        pagination: false,
+        where: {
+          and: [
+            {
+              key: {
+                equals: key,
               },
-              {
-                'user.value': {
-                  equals: user.id,
-                },
+            },
+            {
+              'user.relationTo': {
+                equals: userSlug,
               },
-              {
-                key: {
-                  equals: key,
-                },
+            },
+            {
+              'user.value': {
+                equals: userID,
               },
-            ],
-          },
-        })
-        ?.then((res) => res.docs?.[0]?.value as T)
-    } catch (_err) {} // eslint-disable-line no-empty
+            },
+          ],
+        },
+      })
+      .then((res) => res.docs?.[0])) as { id: DefaultDocumentIDType; value: T }
 
     return result
   },

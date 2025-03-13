@@ -77,6 +77,7 @@ export interface Config {
     'user-restricted-collection': UserRestrictedCollection;
     'create-not-update-collection': CreateNotUpdateCollection;
     'restricted-versions': RestrictedVersion;
+    'restricted-versions-admin-panel': RestrictedVersionsAdminPanel;
     'sibling-data': SiblingDatum;
     'rely-on-request-headers': RelyOnRequestHeader;
     'doc-level-access': DocLevelAccess;
@@ -88,6 +89,7 @@ export interface Config {
     'rich-text': RichText;
     regression1: Regression1;
     regression2: Regression2;
+    hooks: Hook;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -104,6 +106,7 @@ export interface Config {
     'user-restricted-collection': UserRestrictedCollectionSelect<false> | UserRestrictedCollectionSelect<true>;
     'create-not-update-collection': CreateNotUpdateCollectionSelect<false> | CreateNotUpdateCollectionSelect<true>;
     'restricted-versions': RestrictedVersionsSelect<false> | RestrictedVersionsSelect<true>;
+    'restricted-versions-admin-panel': RestrictedVersionsAdminPanelSelect<false> | RestrictedVersionsAdminPanelSelect<true>;
     'sibling-data': SiblingDataSelect<false> | SiblingDataSelect<true>;
     'rely-on-request-headers': RelyOnRequestHeadersSelect<false> | RelyOnRequestHeadersSelect<true>;
     'doc-level-access': DocLevelAccessSelect<false> | DocLevelAccessSelect<true>;
@@ -115,6 +118,7 @@ export interface Config {
     'rich-text': RichTextSelect<false> | RichTextSelect<true>;
     regression1: Regression1Select<false> | Regression1Select<true>;
     regression2: Regression2Select<false> | Regression2Select<true>;
+    hooks: HooksSelect<false> | HooksSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -303,6 +307,17 @@ export interface ReadOnlyCollection {
  * via the `definition` "restricted-versions".
  */
 export interface RestrictedVersion {
+  id: string;
+  name?: string | null;
+  hidden?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-versions-admin-panel".
+ */
+export interface RestrictedVersionsAdminPanel {
   id: string;
   name?: string | null;
   hidden?: boolean | null;
@@ -669,6 +684,18 @@ export interface Regression2 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hooks".
+ */
+export interface Hook {
+  id: string;
+  cannotMutateRequired: string;
+  cannotMutateNotRequired?: string | null;
+  canMutate?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -715,6 +742,10 @@ export interface PayloadLockedDocument {
         value: string | RestrictedVersion;
       } | null)
     | ({
+        relationTo: 'restricted-versions-admin-panel';
+        value: string | RestrictedVersionsAdminPanel;
+      } | null)
+    | ({
         relationTo: 'sibling-data';
         value: string | SiblingDatum;
       } | null)
@@ -757,6 +788,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'regression2';
         value: string | Regression2;
+      } | null)
+    | ({
+        relationTo: 'hooks';
+        value: string | Hook;
       } | null);
   globalSlug?: string | null;
   user:
@@ -919,6 +954,16 @@ export interface CreateNotUpdateCollectionSelect<T extends boolean = true> {
  * via the `definition` "restricted-versions_select".
  */
 export interface RestrictedVersionsSelect<T extends boolean = true> {
+  name?: T;
+  hidden?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-versions-admin-panel_select".
+ */
+export interface RestrictedVersionsAdminPanelSelect<T extends boolean = true> {
   name?: T;
   hidden?: T;
   updatedAt?: T;
@@ -1138,6 +1183,17 @@ export interface Regression2Select<T extends boolean = true> {
         richText2?: T;
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hooks_select".
+ */
+export interface HooksSelect<T extends boolean = true> {
+  cannotMutateRequired?: T;
+  cannotMutateNotRequired?: T;
+  canMutate?: T;
   updatedAt?: T;
   createdAt?: T;
 }

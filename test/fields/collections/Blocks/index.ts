@@ -11,6 +11,7 @@ export const getBlocksField = (prefix?: string): BlocksField => ({
   blocks: [
     {
       slug: prefix ? `${prefix}Content` : 'content',
+      imageURL: '/api/uploads/file/payload480x320.jpg',
       interfaceName: prefix ? `${prefix}ContentBlock` : 'ContentBlock',
       admin: {
         components: {
@@ -27,6 +28,19 @@ export const getBlocksField = (prefix?: string): BlocksField => ({
           name: 'richText',
           type: 'richText',
           editor: slateEditor({}),
+        },
+      ],
+    },
+    {
+      slug: prefix ? `${prefix}NoBlockname` : 'noBlockname',
+      interfaceName: prefix ? `${prefix}NoBlockname` : 'NoBlockname',
+      admin: {
+        disableBlockName: true,
+      },
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
         },
       ],
     },
@@ -423,6 +437,63 @@ const BlockFields: CollectionConfig = {
       // and an issue with all blocks.
       blockReferences: ['localizedTextReference2'],
       blocks: [],
+    },
+    {
+      name: 'groupedBlocks',
+      type: 'blocks',
+      admin: {
+        description: 'The purpose of this field is to test Block groups.',
+      },
+      blocks: [
+        {
+          slug: 'blockWithGroupOne',
+          admin: {
+            group: 'Group',
+          },
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          slug: 'blockWithGroupTwo',
+          admin: {
+            group: 'Group',
+          },
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          slug: 'blockWithLocalizedGroup',
+          admin: {
+            group: {
+              en: 'Group in en',
+              es: 'Group in es',
+            },
+          },
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          slug: 'blockWithoutGroup',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+        },
+      ],
     },
   ],
 }

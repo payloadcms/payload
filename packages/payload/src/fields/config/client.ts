@@ -22,7 +22,7 @@ import type {
 } from '../../fields/config/types.js'
 import type { Payload } from '../../types/index.js'
 
-import { getFromImportMap } from '../../bin/generateImportMap/getFromImportMap.js'
+import { getFromImportMap } from '../../bin/generateImportMap/utilities/getFromImportMap.js'
 import { MissingEditorProp } from '../../errors/MissingEditorProp.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { flattenTopLevelFields, type ImportMap } from '../../index.js'
@@ -107,9 +107,13 @@ export const createClientBlocks = ({
       clientBlock.imageURL = block.imageURL
     }
 
-    if (block.admin?.custom) {
-      clientBlock.admin = {
-        custom: block.admin.custom,
+    if (block.admin?.custom || block.admin?.group) {
+      clientBlock.admin = {}
+      if (block.admin.custom) {
+        clientBlock.admin.custom = block.admin.custom
+      }
+      if (block.admin.group) {
+        clientBlock.admin.group = block.admin.group
       }
     }
 
@@ -120,6 +124,15 @@ export const createClientBlocks = ({
         schemaPath: '',
       })
       clientBlock.jsx = jsxResolved
+    }
+
+    if (block?.admin?.disableBlockName) {
+      // Check for existing admin object, this way we don't have to spread it in
+      if (clientBlock.admin) {
+        clientBlock.admin.disableBlockName = block.admin.disableBlockName
+      } else {
+        clientBlock.admin = { disableBlockName: block.admin.disableBlockName }
+      }
     }
 
     if (block.labels) {
@@ -311,7 +324,7 @@ export const createClientField = ({
       const field = clientField as JoinFieldClient
 
       field.targetField = {
-        relationTo: field.targetField.relationTo,
+        relationTo: field.targetField?.relationTo,
       }
 
       break

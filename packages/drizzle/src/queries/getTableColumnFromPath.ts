@@ -220,6 +220,37 @@ export const getTableColumnFromPath = ({
           let result: TableColumn
           const blockConstraints = []
           const blockSelectFields = {}
+
+          let blockJoin: BuildQueryJoinAliases[0]
+          if (isFieldLocalized && adapter.payload.config.localization) {
+            const conditions = [
+              eq(
+                (aliasTable || adapter.tables[tableName]).id,
+                adapter.tables[newTableName]._parentID,
+              ),
+            ]
+
+            if (locale !== 'all') {
+              conditions.push(eq(adapter.tables[newTableName]._locale, locale))
+            }
+
+            blockJoin = {
+              condition: and(...conditions),
+              table: adapter.tables[newTableName],
+            }
+          } else {
+            blockJoin = {
+              condition: eq(
+                (aliasTable || adapter.tables[tableName]).id,
+                adapter.tables[newTableName]._parentID,
+              ),
+              table: adapter.tables[newTableName],
+            }
+          }
+
+          // Create a new reference for nested joins
+          const newJoins = [...joins]
+
           try {
             result = getTableColumnFromPath({
               adapter,
@@ -227,7 +258,7 @@ export const getTableColumnFromPath = ({
               constraintPath,
               constraints: blockConstraints,
               fields: block.flattenedFields,
-              joins,
+              joins: newJoins,
               locale,
               parentIsLocalized: parentIsLocalized || field.localized,
               pathSegments: pathSegments.slice(1),
@@ -246,30 +277,14 @@ export const getTableColumnFromPath = ({
           blockTableColumn = result
           constraints = constraints.concat(blockConstraints)
           selectFields = { ...selectFields, ...blockSelectFields }
-          if (isFieldLocalized && adapter.payload.config.localization) {
-            const conditions = [
-              eq(
-                (aliasTable || adapter.tables[tableName]).id,
-                adapter.tables[newTableName]._parentID,
-              ),
-            ]
 
-            if (locale !== 'all') {
-              conditions.push(eq(adapter.tables[newTableName]._locale, locale))
+          const previousLength = joins.length
+          joins.push(blockJoin)
+          // Append new joins AFTER the block join to prevent errors with missing FROM clause.
+          if (newJoins.length > previousLength) {
+            for (let i = previousLength; i < newJoins.length; i++) {
+              joins.push(newJoins[i])
             }
-
-            joins.push({
-              condition: and(...conditions),
-              table: adapter.tables[newTableName],
-            })
-          } else {
-            joins.push({
-              condition: eq(
-                (aliasTable || adapter.tables[tableName]).id,
-                adapter.tables[newTableName]._parentID,
-              ),
-              table: adapter.tables[newTableName],
-            })
           }
           return true
         })

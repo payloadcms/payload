@@ -414,6 +414,15 @@ For more details, see the [Documentation](https://payloadcms.com/docs/getting-st
     ```
 1. The `./src/public` directory is now located directly at root level `./public` [see Next.js docs for details](https://nextjs.org/docs/pages/building-your-application/optimizing/static-assets)
 
+1.  Payload now automatically removes `localized: true` property from sub-fields if a parent is localized, as it's redunant and unnecessary. If you have some existing data in this structure and you want to disable that behavior, you need to enable `allowLocalizedWithinLocalized` flag in your payload.config [read more in documentation](https://payloadcms.com/docs/configuration/overview#compatibility-flags), or create a migration script that aligns your data.
+Mongodb example for a link in a page layout.
+
+    ```diff
+    - layout.columns.en.link.en.type.en
+    + layout.columns.en.link.type
+    ```
+
+
 ## Custom Components
 
 1. All Payload React components have been moved from the `payload` package to `@payloadcms/ui`. If you were previously importing components into your app from the `payload` package, for example to create Custom Components, you will need to change your import paths:
@@ -1103,6 +1112,57 @@ plugins: [
 ## `@payloadcms/richtext-lexical`
 
 If you have custom features for `@payloadcms/richtext-lexical` you will need to migrate your code to the new API. Read more about the new API in the [documentation](https://payloadcms.com/docs/rich-text/building-custom-features).
+
+## Reserved Field names
+
+Payload reserves certain field names for internal use. Using any of the following names in your collections or globals will result in those fields being sanitized from the config, which can cause deployment errors. Ensure that any conflicting fields are renamed before migrating.
+
+### General Reserved Names
+
+- `file`
+- `_id` (MongoDB only)
+- `__v` (MongoDB only)
+
+**Important Note**: It is recommended to avoid using field names with an underscore (`_`) prefix unless explicitly required by a plugin. Payload uses this prefix for internal columns, which can lead to conflicts in certain SQL conditions. The following are examples of reserved internal columns (this list is not exhaustive and other internal fields may also apply):
+
+- `_order`
+- `_path`
+- `_uuid`
+- `_parent_id`
+- `_locale`
+
+### Auth-Related Reserved Names
+
+These are restricted if your collection uses `auth: true` and does not have `disableAuthStrategy: true`:
+- `salt`
+- `hash`
+- `apiKey` (when `auth.useAPIKey: true` is enabled)
+- `useAPIKey` (when `auth.useAPIKey: true` is enabled)
+- `resetPasswordToken`
+- `resetPasswordExpiration`
+- `password`
+- `email`
+- `username`
+
+### Upload-Related Reserved Names
+
+These apply if your collection has `upload: true` configured:
+
+- `filename`
+- `mimetype`
+- `filesize`
+- `width`
+- `height`
+- `focalX`
+- `focalY`
+- `url`
+- `thumbnailURL`
+
+If `imageSizes` is configured, the following are also reserved:
+
+- `sizes`
+
+If any of these names are found in your collection / global fields, update them before migrating to avoid unexpected issues.
 
 ## Upgrade from previous beta
 

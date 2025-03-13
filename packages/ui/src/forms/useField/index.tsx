@@ -27,7 +27,7 @@ import {
 /**
  * Get and set the value of a form field.
  *
- * @see https://payloadcms.com/docs/admin/hooks#usefield
+ * @see https://payloadcms.com/docs/admin/react-hooks#usefield
  */
 export const useField = <TValue,>(options: Options): FieldType<TValue> => {
   const { disableFormData = false, hasRows, path, validate } = options
@@ -57,6 +57,8 @@ export const useField = <TValue,>(options: Options): FieldType<TValue> => {
 
   const prevValid = useRef(valid)
   const prevErrorMessage = useRef(field?.errorMessage)
+
+  const pathSegments = path ? path.split('.') : []
 
   // Method to return from `useField`, used to
   // update field values from field component(s)
@@ -154,6 +156,7 @@ export const useField = <TValue,>(options: Options): FieldType<TValue> => {
                 data: documentForm?.getData ? documentForm.getData() : data,
                 event: 'onChange',
                 operation,
+                path: pathSegments,
                 preferences: {} as any,
                 req: {
                   payload: {

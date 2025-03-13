@@ -185,6 +185,7 @@ export const Button: React.FC<Props> = (props) => {
           className={disabled && !enableSubMenu ? `${baseClass}--popup-disabled` : ''}
           disabled={disabled && !enableSubMenu}
           horizontalAlign="right"
+          id={`${id}-popup`}
           noBackground
           render={({ close }) => SubMenuPopupContent({ close: () => close() })}
           size="large"

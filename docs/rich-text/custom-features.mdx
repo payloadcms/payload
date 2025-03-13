@@ -29,9 +29,9 @@ Using the BlocksFeature, you can add both inline blocks (= can be inserted into 
 
 ### Example: Code Field Block with language picker
 
-This example demonstrates how to create a custom code field block with a language picker using the `BlocksFeature`. Make sure to manually install `@payloadcms/ui`first.
+This example demonstrates how to create a custom code field block with a language picker using the `BlocksFeature`. First, make sure to explicitly install `@payloadcms/ui` in your project.
 
-Field config:
+Field Config:
 
 ```ts
 import {
@@ -91,7 +91,6 @@ CodeComponent.tsx:
 
 ```tsx
 'use client'
-
 import type { CodeFieldClient, CodeFieldClientProps } from 'payload'
 
 import { CodeField, useFormFields } from '@payloadcms/ui'
@@ -104,6 +103,8 @@ const languageKeyToMonacoLanguageMap = {
   ts: 'typescript',
   tsx: 'typescript',
 }
+
+type Language = keyof typeof languageKeyToMonacoLanguageMap
 
 export const Code: React.FC<CodeFieldClientProps> = ({
   autoComplete,
@@ -118,10 +119,10 @@ export const Code: React.FC<CodeFieldClientProps> = ({
 }) => {
   const languageField = useFormFields(([fields]) => fields['language'])
 
-  const language: string =
-    (languageField?.value as string) || (languageField.initialValue as string) || 'typescript'
+  const language: Language =
+    (languageField?.value as Language) || (languageField?.initialValue as Language) || 'ts'
 
-  const label = languages[language as keyof typeof languages]
+  const label = languages[language]
 
   const props: CodeFieldClient = useMemo<CodeFieldClient>(
     () => ({
@@ -129,9 +130,10 @@ export const Code: React.FC<CodeFieldClientProps> = ({
       type: 'code',
       admin: {
         ...field.admin,
-        label,
+        editorOptions: undefined,
         language: languageKeyToMonacoLanguageMap[language] || language,
       },
+      label,
     }),
     [field, language, label],
   )

@@ -23,8 +23,14 @@ async function run() {
     const config: SanitizedConfig = await (await import(pathWithConfig)).default
 
     let rootDir = ''
-    if (testConfigDir === 'live-preview' || testConfigDir === 'admin-root') {
+
+    if (
+      testConfigDir === 'live-preview' ||
+      testConfigDir === 'admin-root' ||
+      testConfigDir === 'admin-bar'
+    ) {
       rootDir = testDir
+
       if (process.env.PAYLOAD_TEST_PROD === 'true') {
         // If in prod mode, there may be a testSuite/prod folder. If so, use that as the rootDir
         const prodDir = path.resolve(testDir, 'prod')

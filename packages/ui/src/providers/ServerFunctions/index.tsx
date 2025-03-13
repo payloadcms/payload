@@ -77,7 +77,7 @@ export const ServerFunctionsContext = createContext<ServerFunctionsContextType |
 )
 
 export const useServerFunctions = () => {
-  const context = React.useContext(ServerFunctionsContext)
+  const context = React.use(ServerFunctionsContext)
   if (context === undefined) {
     throw new Error('useServerFunctions must be used within a ServerFunctionsProvider')
   }
@@ -218,7 +218,7 @@ export const ServerFunctionsProvider: React.FC<{
   )
 
   return (
-    <ServerFunctionsContext.Provider
+    <ServerFunctionsContext
       value={{
         copyDataFromLocale,
         getDocumentSlots,
@@ -230,6 +230,6 @@ export const ServerFunctionsProvider: React.FC<{
       }}
     >
       {children}
-    </ServerFunctionsContext.Provider>
+    </ServerFunctionsContext>
   )
 }

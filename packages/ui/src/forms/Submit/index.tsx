@@ -4,7 +4,12 @@ import React from 'react'
 import type { Props } from '../../elements/Button/types.js'
 
 import { Button } from '../../elements/Button/index.js'
-import { useForm, useFormInitializing, useFormProcessing } from '../Form/context.js'
+import {
+  useForm,
+  useFormBackgroundProcessing,
+  useFormInitializing,
+  useFormProcessing,
+} from '../Form/context.js'
 import './index.scss'
 
 const baseClass = 'form-submit'
@@ -21,10 +26,17 @@ export const FormSubmit: React.FC<Props> = (props) => {
   } = props
 
   const processing = useFormProcessing()
+  const backgroundProcessing = useFormBackgroundProcessing()
   const initializing = useFormInitializing()
   const { disabled, submit } = useForm()
 
-  const canSave = !(disabledFromProps || initializing || processing || disabled)
+  const canSave = !(
+    disabledFromProps ||
+    initializing ||
+    processing ||
+    backgroundProcessing ||
+    disabled
+  )
 
   const handleClick =
     onClick ??

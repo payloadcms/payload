@@ -54,6 +54,7 @@ export const beforeChange = async <T extends JsonObject>({
     doc,
     docWithLocales,
     errors,
+    fieldLabelPath: '',
     fields: collection?.fields || global?.fields,
     global,
     mergeLocaleActions,
@@ -81,10 +82,9 @@ export const beforeChange = async <T extends JsonObject>({
     )
   }
 
-  await mergeLocaleActions.reduce(async (priorAction, action) => {
-    await priorAction
+  for (const action of mergeLocaleActions) {
     await action()
-  }, Promise.resolve())
+  }
 
   return data
 }

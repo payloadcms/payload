@@ -4,7 +4,7 @@ import type { ClientBlock, Labels } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
 import { Drawer } from '../../../elements/Drawer/index.js'
 import { ThumbnailCard } from '../../../elements/ThumbnailCard/index.js'
@@ -43,6 +43,27 @@ export const BlocksDrawer: React.FC<Props> = (props) => {
   const { i18n, t } = useTranslation()
   const { config } = useConfig()
 
+  const blockGroups = useMemo(() => {
+    const groups: Record<string, (ClientBlock | string)[]> = {
+      _none: [],
+    }
+    filteredBlocks.forEach((block) => {
+      if (typeof block === 'object' && block.admin?.group) {
+        const group = block.admin.group
+        const label = typeof group === 'string' ? group : getTranslation(group, i18n)
+
+        if (Object.hasOwn(groups, label)) {
+          groups[label].push(block)
+        } else {
+          groups[label] = [block]
+        }
+      } else {
+        groups._none.push(block)
+      }
+    })
+    return groups
+  }, [filteredBlocks, i18n])
+
   useEffect(() => {
     if (!isModalOpen(drawerSlug)) {
       setSearchTerm('')
@@ -71,34 +92,53 @@ export const BlocksDrawer: React.FC<Props> = (props) => {
     >
       <BlockSearch setSearchTerm={setSearchTerm} />
       <div className={`${baseClass}__blocks-wrapper`}>
-        <ul className={`${baseClass}__blocks`}>
-          {filteredBlocks?.map((_block, index) => {
-            const block = typeof _block === 'string' ? config.blocksMap[_block] : _block
+        <ul className={`${baseClass}__block-groups`}>
+          {Object.entries(blockGroups).map(([groupLabel, groupBlocks]) =>
+            !groupBlocks.length ? null : (
+              <li
+                className={[
+                  `${baseClass}__block-group`,
+                  groupLabel === '_none' && `${baseClass}__block-group-none`,
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+                key={groupLabel}
+              >
+                {groupLabel !== '_none' && (
+                  <h3 className={`${baseClass}__block-group-label`}>{groupLabel}</h3>
+                )}
+                <ul className={`${baseClass}__blocks`}>
+                  {groupBlocks.map((_block, index) => {
+                    const block = typeof _block === 'string' ? config.blocksMap[_block] : _block
 
-            const { slug, imageAltText, imageURL, labels: blockLabels } = block
+                    const { slug, imageAltText, imageURL, labels: blockLabels } = block
 
-            return (
-              <li className={`${baseClass}__block`} key={index}>
-                <ThumbnailCard
-                  alignLabel="center"
-                  label={getTranslation(blockLabels?.singular, i18n)}
-                  onClick={() => {
-                    void addRow(addRowIndex, slug)
-                    closeModal(drawerSlug)
-                  }}
-                  thumbnail={
-                    imageURL ? (
-                      <img alt={imageAltText} src={imageURL} />
-                    ) : (
-                      <div className={`${baseClass}__default-image`}>
-                        <DefaultBlockImage />
-                      </div>
+                    return (
+                      <li className={`${baseClass}__block`} key={index}>
+                        <ThumbnailCard
+                          alignLabel="center"
+                          label={getTranslation(blockLabels?.singular, i18n)}
+                          onClick={() => {
+                            void addRow(addRowIndex, slug)
+                            closeModal(drawerSlug)
+                          }}
+                          thumbnail={
+                            <div className={`${baseClass}__default-image`}>
+                              {imageURL ? (
+                                <img alt={imageAltText} src={imageURL} />
+                              ) : (
+                                <DefaultBlockImage />
+                              )}
+                            </div>
+                          }
+                        />
+                      </li>
                     )
-                  }
-                />
+                  })}
+                </ul>
               </li>
-            )
-          })}
+            ),
+          )}
         </ul>
       </div>
     </Drawer>

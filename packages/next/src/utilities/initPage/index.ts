@@ -1,8 +1,7 @@
 import type { InitPageResult, VisibleEntities } from 'payload'
 
-import { headers as getHeaders } from 'next/headers.js'
 import { notFound } from 'next/navigation.js'
-import { getPayload, isEntityHidden, parseCookies } from 'payload'
+import { isEntityHidden } from 'payload'
 import * as qs from 'qs-esm'
 
 import type { Args } from './types.js'
@@ -18,30 +17,37 @@ export const initPage = async ({
   importMap,
   route,
   searchParams,
+  useLayoutReq,
 }: Args): Promise<InitPageResult> => {
-  const headers = await getHeaders()
-  const payload = await getPayload({ config: configPromise, importMap })
   const queryString = `${qs.stringify(searchParams ?? {}, { addQueryPrefix: true })}`
+
+  const {
+    cookies,
+    locale,
+    permissions,
+    req,
+    req: { payload },
+  } = await initReq({
+    configPromise,
+    importMap,
+    key: useLayoutReq ? 'RootLayout' : 'initPage',
+    overrides: {
+      fallbackLocale: false,
+      req: {
+        query: qs.parse(queryString, {
+          depth: 10,
+          ignoreQueryPrefix: true,
+        }),
+      },
+      urlSuffix: `${route}${searchParams ? queryString : ''}`,
+    },
+  })
 
   const {
     collections,
     globals,
     routes: { admin: adminRoute },
   } = payload.config
-
-  const cookies = parseCookies(headers)
-
-  const { locale, permissions, req } = await initReq(payload.config, {
-    fallbackLocale: false,
-    req: {
-      headers,
-      query: qs.parse(queryString, {
-        depth: 10,
-        ignoreQueryPrefix: true,
-      }),
-      url: `${payload.config.serverURL}${route}${searchParams ? queryString : ''}`,
-    },
-  })
 
   const languageOptions = Object.entries(payload.config.i18n.supportedLanguages || {}).reduce(
     (acc, [language, languageConfig]) => {

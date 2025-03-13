@@ -1,24 +1,22 @@
-import type {
-  AdminViewServerProps,
-  ListPreferences,
-  ListQuery,
-  ListViewClientProps,
-  ListViewServerPropsOnly,
-  Where,
-} from 'payload'
-
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
-import { formatAdminURL, mergeListSearchAndWhere } from '@payloadcms/ui/shared'
+import { mergeListSearchAndWhere } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
-import { isNumber } from 'payload/shared'
+import {
+  type AdminViewServerProps,
+  type ColumnPreference,
+  type ListPreferences,
+  type ListQuery,
+  type ListViewClientProps,
+  type ListViewServerPropsOnly,
+  type Where,
+} from 'payload'
+import { formatAdminURL, isNumber, transformColumnsToPreferences } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { renderListViewSlots } from './renderListViewSlots.js'
 import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
-
-export { generateListMetadata } from './meta.js'
 
 type RenderListViewArgs = {
   customCellProps?: Record<string, any>
@@ -72,10 +70,20 @@ export const renderListView = async (
 
   const query = queryFromArgs || queryFromReq
 
+  const columns: ColumnPreference[] = transformColumnsToPreferences(
+    query?.columns as ColumnPreference[] | string,
+  )
+
+  /**
+   * @todo: find a pattern to avoid setting preferences on hard navigation, i.e. direct links, page refresh, etc.
+   * This will ensure that prefs are only updated when explicitly set by the user
+   * This could potentially be done by injecting a `sessionID` into the params and comparing it against a session cookie
+   */
   const listPreferences = await upsertPreferences<ListPreferences>({
     key: `${collectionSlug}-list`,
     req,
     value: {
+      columns,
       limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
       sort: query?.sort as string,
     },
@@ -141,6 +149,7 @@ export const renderListView = async (
       clientCollectionConfig,
       collectionConfig,
       columnPreferences: listPreferences?.columns,
+      columns,
       customCellProps,
       docs: data.docs,
       drawerSlug,
@@ -153,7 +162,7 @@ export const renderListView = async (
     const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
 
     const resolvedFilterOptions = await resolveAllFilterOptions({
-      collectionConfig,
+      fields: collectionConfig.fields,
       req,
     })
 
@@ -203,9 +212,11 @@ export const renderListView = async (
         <Fragment>
           <HydrateAuthProvider permissions={permissions} />
           <ListQueryProvider
+            columns={transformColumnsToPreferences(columnState)}
             data={data}
             defaultLimit={limit}
             defaultSort={sort}
+            listPreferences={listPreferences}
             modifySearchParams={!isInDrawer}
           >
             {RenderServerComponent({

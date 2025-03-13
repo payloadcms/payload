@@ -390,6 +390,10 @@ export default buildConfigWithDefaults({
             height: 300,
             width: 300,
           },
+          {
+            name: 'undefinedHeight',
+            width: 300,
+          },
         ],
         pasteURL: false,
       },
@@ -658,7 +662,9 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
-      upload: true,
+      upload: {
+        displayPreview: false,
+      },
     },
     {
       slug: relationPreviewSlug,

@@ -699,16 +699,29 @@ export interface ArrayField {
  */
 export interface BlockField {
   id: string;
-  blocks: (ContentBlock | NumberBlock | SubBlocksBlock | TabsBlock)[];
-  duplicate: (ContentBlock | NumberBlock | SubBlocksBlock | TabsBlock)[];
+  blocks: (ContentBlock | NoBlockname | NumberBlock | SubBlocksBlock | TabsBlock)[];
+  duplicate: (ContentBlock | NoBlockname | NumberBlock | SubBlocksBlock | TabsBlock)[];
   collapsedByDefaultBlocks: (
     | LocalizedContentBlock
+    | LocalizedNoBlockname
     | LocalizedNumberBlock
     | LocalizedSubBlocksBlock
     | LocalizedTabsBlock
   )[];
-  disableSort: (LocalizedContentBlock | LocalizedNumberBlock | LocalizedSubBlocksBlock | LocalizedTabsBlock)[];
-  localizedBlocks: (LocalizedContentBlock | LocalizedNumberBlock | LocalizedSubBlocksBlock | LocalizedTabsBlock)[];
+  disableSort: (
+    | LocalizedContentBlock
+    | LocalizedNoBlockname
+    | LocalizedNumberBlock
+    | LocalizedSubBlocksBlock
+    | LocalizedTabsBlock
+  )[];
+  localizedBlocks: (
+    | LocalizedContentBlock
+    | LocalizedNoBlockname
+    | LocalizedNumberBlock
+    | LocalizedSubBlocksBlock
+    | LocalizedTabsBlock
+  )[];
   i18nBlocks?:
     | {
         text?: string | null;
@@ -834,6 +847,37 @@ export interface BlockField {
   deduplicatedBlocks2?: ConfigBlockTest[] | null;
   localizedReferencesLocalizedBlock?: LocalizedTextReference[] | null;
   localizedReferences?: LocalizedTextReference2[] | null;
+  /**
+   * The purpose of this field is to test Block groups.
+   */
+  groupedBlocks?:
+    | (
+        | {
+            text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockWithGroupOne';
+          }
+        | {
+            text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockWithGroupTwo';
+          }
+        | {
+            text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockWithLocalizedGroup';
+          }
+        | {
+            text?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'blockWithoutGroup';
+          }
+      )[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -851,6 +895,16 @@ export interface ContentBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'content';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "NoBlockname".
+ */
+export interface NoBlockname {
+  text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'noBlockname';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -907,6 +961,16 @@ export interface LocalizedContentBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'localizedContent';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localizedNoBlockname".
+ */
+export interface LocalizedNoBlockname {
+  text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'localizedNoBlockname';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1022,6 +1086,7 @@ export interface CodeField {
   json?: string | null;
   html?: string | null;
   css?: string | null;
+  codeWithPadding?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1120,6 +1185,24 @@ export interface ConditionalLogic {
         id?: string | null;
         blockName?: string | null;
         blockType: 'blockWithConditionalField';
+      }[]
+    | null;
+  arrayOne?:
+    | {
+        title?: string | null;
+        arrayTwo?:
+          | {
+              selectOptions?: ('optionOne' | 'optionTwo') | null;
+              arrayThree?:
+                | {
+                    numberField?: number | null;
+                    id?: string | null;
+                  }[]
+                | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
       }[]
     | null;
   updatedAt: string;
@@ -1443,6 +1526,15 @@ export interface JsonField {
       | boolean
       | null;
   };
+  customJSON?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1739,11 +1831,24 @@ export interface TabsField {
    * This should not collapse despite there being many tabs pushing the main fields open.
    */
   sidebarField?: string | null;
+  /**
+   * When active, the conditional tab should be visible. When inactive, it should be hidden.
+   */
+  conditionalTabVisible?: boolean | null;
+  conditionalTab?: {
+    conditionalTabField?: string | null;
+    /**
+     * When active, the nested conditional tab should be visible. When inactive, it should be hidden.
+     */
+    nestedConditionalTabVisible?: boolean | null;
+    nestedUnconditionalTabInput?: string | null;
+    nestedConditionalTabInput?: string | null;
+  };
   array: {
     text: string;
     id?: string | null;
   }[];
-  blocks: (ContentBlock | NumberBlock | SubBlocksBlock | TabsBlock)[];
+  blocks: (ContentBlock | NoBlockname | NumberBlock | SubBlocksBlock | TabsBlock)[];
   group: {
     number: number;
   };
@@ -2403,6 +2508,7 @@ export interface BlockFieldsSelect<T extends boolean = true> {
     | T
     | {
         content?: T | ContentBlockSelect<T>;
+        noBlockname?: T | NoBlocknameSelect<T>;
         number?: T | NumberBlockSelect<T>;
         subBlocks?: T | SubBlocksBlockSelect<T>;
         tabs?: T | TabsBlockSelect<T>;
@@ -2411,6 +2517,7 @@ export interface BlockFieldsSelect<T extends boolean = true> {
     | T
     | {
         content?: T | ContentBlockSelect<T>;
+        noBlockname?: T | NoBlocknameSelect<T>;
         number?: T | NumberBlockSelect<T>;
         subBlocks?: T | SubBlocksBlockSelect<T>;
         tabs?: T | TabsBlockSelect<T>;
@@ -2419,6 +2526,7 @@ export interface BlockFieldsSelect<T extends boolean = true> {
     | T
     | {
         localizedContent?: T | LocalizedContentBlockSelect<T>;
+        localizedNoBlockname?: T | LocalizedNoBlocknameSelect<T>;
         localizedNumber?: T | LocalizedNumberBlockSelect<T>;
         localizedSubBlocks?: T | LocalizedSubBlocksBlockSelect<T>;
         localizedTabs?: T | LocalizedTabsBlockSelect<T>;
@@ -2427,6 +2535,7 @@ export interface BlockFieldsSelect<T extends boolean = true> {
     | T
     | {
         localizedContent?: T | LocalizedContentBlockSelect<T>;
+        localizedNoBlockname?: T | LocalizedNoBlocknameSelect<T>;
         localizedNumber?: T | LocalizedNumberBlockSelect<T>;
         localizedSubBlocks?: T | LocalizedSubBlocksBlockSelect<T>;
         localizedTabs?: T | LocalizedTabsBlockSelect<T>;
@@ -2435,6 +2544,7 @@ export interface BlockFieldsSelect<T extends boolean = true> {
     | T
     | {
         localizedContent?: T | LocalizedContentBlockSelect<T>;
+        localizedNoBlockname?: T | LocalizedNoBlocknameSelect<T>;
         localizedNumber?: T | LocalizedNumberBlockSelect<T>;
         localizedSubBlocks?: T | LocalizedSubBlocksBlockSelect<T>;
         localizedTabs?: T | LocalizedTabsBlockSelect<T>;
@@ -2587,6 +2697,38 @@ export interface BlockFieldsSelect<T extends boolean = true> {
   deduplicatedBlocks2?: T | {};
   localizedReferencesLocalizedBlock?: T | {};
   localizedReferences?: T | {};
+  groupedBlocks?:
+    | T
+    | {
+        blockWithGroupOne?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        blockWithGroupTwo?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        blockWithLocalizedGroup?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+        blockWithoutGroup?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2597,6 +2739,15 @@ export interface BlockFieldsSelect<T extends boolean = true> {
 export interface ContentBlockSelect<T extends boolean = true> {
   text?: T;
   richText?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "NoBlockname_select".
+ */
+export interface NoBlocknameSelect<T extends boolean = true> {
+  text?: T;
   id?: T;
   blockName?: T;
 }
@@ -2646,6 +2797,15 @@ export interface TabsBlockSelect<T extends boolean = true> {
 export interface LocalizedContentBlockSelect<T extends boolean = true> {
   text?: T;
   richText?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localizedNoBlockname_select".
+ */
+export interface LocalizedNoBlocknameSelect<T extends boolean = true> {
+  text?: T;
   id?: T;
   blockName?: T;
 }
@@ -2707,6 +2867,7 @@ export interface CodeFieldsSelect<T extends boolean = true> {
   json?: T;
   html?: T;
   css?: T;
+  codeWithPadding?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2801,6 +2962,24 @@ export interface ConditionalLogicSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+      };
+  arrayOne?:
+    | T
+    | {
+        title?: T;
+        arrayTwo?:
+          | T
+          | {
+              selectOptions?: T;
+              arrayThree?:
+                | T
+                | {
+                    numberField?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
+        id?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -3102,6 +3281,7 @@ export interface JsonFieldsSelect<T extends boolean = true> {
     | {
         jsonWithinGroup?: T;
       };
+  customJSON?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3285,6 +3465,15 @@ export interface TabsFields2Select<T extends boolean = true> {
  */
 export interface TabsFieldsSelect<T extends boolean = true> {
   sidebarField?: T;
+  conditionalTabVisible?: T;
+  conditionalTab?:
+    | T
+    | {
+        conditionalTabField?: T;
+        nestedConditionalTabVisible?: T;
+        nestedUnconditionalTabInput?: T;
+        nestedConditionalTabInput?: T;
+      };
   array?:
     | T
     | {
@@ -3295,6 +3484,7 @@ export interface TabsFieldsSelect<T extends boolean = true> {
     | T
     | {
         content?: T | ContentBlockSelect<T>;
+        noBlockname?: T | NoBlocknameSelect<T>;
         number?: T | NumberBlockSelect<T>;
         subBlocks?: T | SubBlocksBlockSelect<T>;
         tabs?: T | TabsBlockSelect<T>;

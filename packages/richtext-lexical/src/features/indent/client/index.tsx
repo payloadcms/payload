@@ -2,7 +2,6 @@
 
 import type { ElementNode, LexicalNode } from 'lexical'
 
-import { TabIndentationPlugin } from '@lexical/react/LexicalTabIndentationPlugin'
 import { $findMatchingParent } from '@lexical/utils'
 import {
   $isElementNode,
@@ -16,6 +15,7 @@ import type { ToolbarGroup } from '../../toolbars/types.js'
 import { IndentDecreaseIcon } from '../../../lexical/ui/icons/IndentDecrease/index.js'
 import { IndentIncreaseIcon } from '../../../lexical/ui/icons/IndentIncrease/index.js'
 import { createClientFeature } from '../../../utilities/createClientFeature.js'
+import { IndentPlugin } from './IndentPlugin.js'
 import { toolbarIndentGroupWithItems } from './toolbarIndentGroup.js'
 
 const toolbarGroups: ToolbarGroup[] = [
@@ -83,7 +83,7 @@ const toolbarGroups: ToolbarGroup[] = [
 export const IndentFeatureClient = createClientFeature({
   plugins: [
     {
-      Component: TabIndentationPlugin,
+      Component: IndentPlugin,
       position: 'normal',
     },
   ],
