@@ -5,7 +5,7 @@ import React from 'react'
 export const hasOptionLabelJSXElement = (cellClientProps: DefaultCellComponentProps) => {
   const { cellData, field } = cellClientProps
 
-  if (field?.type === 'select' && Array.isArray(field?.options)) {
+  if ((field?.type === 'select' || field?.type == 'radio') && Array.isArray(field?.options)) {
     const matchingOption = field.options.find(
       (option) => typeof option === 'object' && option.value === cellData,
     )

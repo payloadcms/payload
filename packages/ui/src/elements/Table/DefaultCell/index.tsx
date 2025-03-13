@@ -17,7 +17,7 @@ import { cellComponents } from './fields/index.js'
  * Determines the displayed value for a select field.
  */
 const getDisplayedValue = (cellData: any, field: ClientField) => {
-  if (field?.type === 'select' && Array.isArray(field.options)) {
+  if ((field?.type === 'select' || field?.type === 'radio') && Array.isArray(field.options)) {
     const selectedOption = field.options.find((opt) =>
       typeof opt === 'object' ? opt?.value === cellData : opt === cellData,
     )
