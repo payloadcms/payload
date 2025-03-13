@@ -3,10 +3,10 @@ import type { StaticLabel } from 'payload'
 
 import React from 'react'
 
-import { ChevronIcon } from '../../icons/Chevron/index.js'
+import { SortDownIcon, SortUpIcon } from '../../icons/Sort/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
-import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
+import { useTranslation } from '../../providers/Translation/index.js'
 
 export type SortHeaderProps = {
   readonly appearance?: 'condensed' | 'default'
@@ -43,7 +43,24 @@ export const SortHeader: React.FC<SortHeaderProps> = (props) => {
     >
       {!disable && (
         <div className={`${baseClass}__buttons`}>
-          <button
+          {sort === asc ? (
+            <button
+              className={[...ascClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
+              onClick={() => void handleSortChange(desc)}
+              type="button"
+            >
+              <SortUpIcon />
+            </button>
+          ) : (
+            <button
+              className={[...descClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
+              onClick={() => void handleSortChange(asc)}
+              type="button"
+            >
+              <SortDownIcon />
+            </button>
+          )}
+          {/* <button
             aria-label={t('general:sortByLabelDirection', {
               direction: t('general:ascending'),
               label: 'custom order',
@@ -52,9 +69,9 @@ export const SortHeader: React.FC<SortHeaderProps> = (props) => {
             onClick={() => void handleSortChange(asc)}
             type="button"
           >
-            <ChevronIcon direction="up" />
-          </button>
-          <button
+            <SortUpIcon />
+          </button> */}
+          {/* <button
             aria-label={t('general:sortByLabelDirection', {
               direction: t('general:descending'),
               label: 'custom order',
@@ -64,7 +81,7 @@ export const SortHeader: React.FC<SortHeaderProps> = (props) => {
             type="button"
           >
             <ChevronIcon />
-          </button>
+          </button> */}
         </div>
       )}
     </div>
