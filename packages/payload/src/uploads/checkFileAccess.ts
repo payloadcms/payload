@@ -4,7 +4,6 @@ import type { PayloadRequest, Where } from '../types/index.js'
 
 import executeAccess from '../auth/executeAccess.js'
 import { Forbidden } from '../errors/Forbidden.js'
-import { getRequestCollectionWithID } from '../utilities/getRequestEntity.js'
 
 export const checkFileAccess = async ({
   collection,
