@@ -272,7 +272,11 @@ export const buildColumnState = (args: Args): Column[] => {
                 importMap: payload.importMap,
                 serverProps: cellServerProps,
               })
-            } else if (hasOptionLabelJSXElement(cellClientProps) && cellClientProps.cellData) {
+            } else if (
+              cellClientProps.cellData &&
+              cellClientProps.field &&
+              hasOptionLabelJSXElement(cellClientProps)
+            ) {
               CustomCell = RenderServerComponent({
                 clientProps: cellClientProps,
                 Component: DefaultCell,

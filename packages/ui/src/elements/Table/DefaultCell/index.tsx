@@ -1,5 +1,5 @@
 'use client'
-import type { ClientField, DefaultCellComponentProps, UploadFieldClient } from 'payload'
+import type { DefaultCellComponentProps, UploadFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { fieldAffectsData, fieldIsID } from 'payload/shared'
@@ -8,31 +8,10 @@ import React from 'react' // TODO: abstract this out to support all routers
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { formatAdminURL } from '../../../utilities/formatAdminURL.js'
-import { isJSXElement } from '../../../utilities/hasOptionLabelJSXElement.js'
+import { getDisplayedFieldValue } from '../../../utilities/getDisplayedFieldValue.js'
 import { Link } from '../../Link/index.js'
 import { CodeCell } from './fields/Code/index.js'
 import { cellComponents } from './fields/index.js'
-
-/**
- * Determines the displayed value for a select field.
- */
-const getDisplayedValue = (cellData: any, field: ClientField) => {
-  if ((field?.type === 'select' || field?.type === 'radio') && Array.isArray(field.options)) {
-    const selectedOption = field.options.find((opt) =>
-      typeof opt === 'object' ? opt?.value === cellData : opt === cellData,
-    )
-
-    if (selectedOption) {
-      if (typeof selectedOption === 'object' && 'label' in selectedOption) {
-        return isJSXElement(selectedOption.label)
-          ? selectedOption.label
-          : selectedOption.label || cellData
-      }
-      return selectedOption // Fallback to string value
-    }
-  }
-  return cellData
-}
 
 export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
   const {
@@ -119,7 +98,7 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     )
   }
 
-  const displayedValue = getDisplayedValue(cellData, field)
+  const displayedValue = getDisplayedFieldValue(cellData, field, i18n)
 
   const DefaultCellComponent: React.FC<DefaultCellComponentProps> =
     typeof cellData !== 'undefined' && cellComponents[field.type]

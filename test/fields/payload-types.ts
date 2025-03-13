@@ -1843,6 +1843,10 @@ export interface TabsField {
      * When active, the nested conditional tab should be visible. When inactive, it should be hidden.
      */
     nestedConditionalTabVisible?: boolean | null;
+    conditionalTabGroup?: {
+      conditionalTabGroupTitle?: string | null;
+      conditionalTab?: {};
+    };
     nestedUnconditionalTabInput?: string | null;
     nestedConditionalTabInput?: string | null;
   };
@@ -3475,6 +3479,12 @@ export interface TabsFieldsSelect<T extends boolean = true> {
     | {
         conditionalTabField?: T;
         nestedConditionalTabVisible?: T;
+        conditionalTabGroup?:
+          | T
+          | {
+              conditionalTabGroupTitle?: T;
+              conditionalTab?: T | {};
+            };
         nestedUnconditionalTabInput?: T;
         nestedConditionalTabInput?: T;
       };
