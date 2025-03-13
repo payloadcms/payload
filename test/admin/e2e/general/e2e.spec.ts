@@ -1043,6 +1043,10 @@ describe('General', () => {
     // Locate the modal container
     const modalContainer = page.locator('.payload__modal-container')
     await expect(modalContainer).toBeHidden()
+
+    // Playwright doesn't open a new tab in headless mode, so we cannot check if the new tab is actually opened
+    // We can only check if the page URL stays the same as expected
+    expect(page.url()).toBe(postsUrl.edit(id))
   })
 
   describe('preferences', () => {
