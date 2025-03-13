@@ -1,5 +1,5 @@
 @layer payload-default {
-  .folder-file-row {
+  .draggable-table-row {
     // vars
     --border-top-left-radius: var(--style-radius-m);
     --border-top-right-radius: var(--style-radius-m);
@@ -39,12 +39,12 @@
       }
     }
 
-    &--selected + .folder-file-row--selected {
+    &--selected + .draggable-table-row--selected {
       --border-top-left-radius: 0;
       --border-top-right-radius: 0;
     }
 
-    &--selected:not(:last-child):has(+ .folder-file-row--selected) {
+    &--selected:not(:last-child):has(+ .draggable-table-row--selected) {
       --border-bottom-left-radius: 0;
       --border-bottom-right-radius: 0;
     }
@@ -91,12 +91,6 @@
       right: 0;
     }
 
-    &__cell {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: calc(var(--base) / 2);
-    }
-
     .simple-table {
       &__hidden-cell {
         position: absolute;
@@ -112,8 +106,8 @@
       position: relative;
     }
 
-    .folder-file-row__row-foreground,
-    .folder-file-row__row-background {
+    .draggable-table-row__row-foreground,
+    .draggable-table-row__row-background {
       position: absolute;
       top: 0;
       left: 0;
@@ -124,11 +118,11 @@
       border-bottom-right-radius: var(--border-bottom-right-radius);
       border-bottom-left-radius: var(--border-bottom-left-radius);
     }
-    .folder-file-row__row-background {
+    .draggable-table-row__row-background {
       z-index: -1;
       background-color: var(--row-bg-color);
     }
-    .folder-file-row__row-foreground {
+    .draggable-table-row__row-foreground {
       opacity: var(--foreground-opacity);
       z-index: 1;
       background-color: var(--theme-bg);

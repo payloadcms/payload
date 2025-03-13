@@ -31,14 +31,13 @@ export type FileCardData = {
 export type FolderContextValue = {
   breadcrumbs?: FolderBreadcrumb[]
   collectionUseAsTitles: Map<string, string>
-  currentFolder?: FolderInterface
+  currentFolder?: FolderInterface | null
   deleteCurrentFolder: () => Promise<Response>
   documents?: GetFolderDataResult['items']
   folderCollectionSlug: string
   folderID?: number | string
   getSelectedItems?: () => PolymorphicRelationshipValue[]
   hasMoreDocuments: boolean
-  isRootFolder?: boolean
   lastSelectedIndex?: number
   moveToFolder: (args: {
     itemsToMove: PolymorphicRelationshipValue[]
@@ -58,14 +57,13 @@ export type FolderContextValue = {
 const Context = React.createContext<FolderContextValue>({
   breadcrumbs: [],
   collectionUseAsTitles: new Map(),
-  currentFolder: undefined,
+  currentFolder: null,
   deleteCurrentFolder: () => Promise.resolve(undefined),
   documents: [],
   folderCollectionSlug: '',
   folderID: undefined,
   getSelectedItems: () => [],
   hasMoreDocuments: true,
-  isRootFolder: undefined,
   lastSelectedIndex: undefined,
   moveToFolder: () => Promise.resolve(undefined),
   populateFolderData: () => Promise.resolve(undefined),
@@ -122,10 +120,6 @@ export function FolderProvider({ children, initialData }: Props) {
   const [hasMoreDocuments, setHasMoreDocuments] = React.useState(() =>
     Boolean(initialData?.hasMoreDocuments),
   )
-
-  const isRootFolder = React.useMemo(() => {
-    return folderBreadcrumbs.length === 1
-  }, [folderBreadcrumbs])
 
   const clearSelections = React.useCallback(() => {
     setSelectedIndexes(new Set())
@@ -184,9 +178,10 @@ export function FolderProvider({ children, initialData }: Props) {
     async ({ folderID: toFolderID }) => {
       clearSelections()
       setActiveFolderID(toFolderID)
+      // not in a drawer (confusing default of 1)
       if (drawerDepth === 1) {
         await refineListData({
-          folder: toFolderID !== folderBreadcrumbs[0].id ? toFolderID : undefined,
+          folder: toFolderID !== folderBreadcrumbs?.[0]?.id ? toFolderID : undefined,
         })
       } else {
         await populateFolderData({ folderID: toFolderID })
@@ -446,14 +441,13 @@ export function FolderProvider({ children, initialData }: Props) {
       value={{
         breadcrumbs: folderBreadcrumbs,
         collectionUseAsTitles,
-        currentFolder: folderBreadcrumbs[folderBreadcrumbs.length - 1],
+        currentFolder: folderBreadcrumbs ? folderBreadcrumbs[folderBreadcrumbs.length - 1] : null,
         deleteCurrentFolder,
         documents,
         folderCollectionSlug,
         folderID: activeFolderID,
         getSelectedItems,
         hasMoreDocuments,
-        isRootFolder,
         lastSelectedIndex,
         moveToFolder,
         populateFolderData,

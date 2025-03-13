@@ -38,6 +38,11 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
   defaultDepth: 2,
   defaultMaxTextLength: 40000,
   endpoints: [],
+  folders: {
+    collections: {},
+    debug: false,
+    enabled: false,
+  },
   globals: [],
   graphQL: {
     disablePlaygroundInProduction: true,

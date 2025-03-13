@@ -332,10 +332,6 @@ export type CollectionAdminOptions = {
    * Custom description for collection. This will also be used as JSDoc for the generated types
    */
   description?: EntityDescription
-  /**
-   * Changes the list view and adds parentFolder field to collection
-   */
-  enableFolders?: boolean | EnableFoldersOptions
   enableRichTextLink?: boolean
   enableRichTextRelationship?: boolean
   /**

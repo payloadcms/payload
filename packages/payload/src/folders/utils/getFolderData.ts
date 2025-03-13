@@ -1,3 +1,4 @@
+import type { User } from '../../index.js'
 import type { Payload } from '../../types/index.js'
 import type { GetFolderDataResult } from '../types.js'
 
@@ -11,6 +12,7 @@ type Args = {
   page?: number
   payload: Payload
   search?: null | string
+  user?: User
 }
 
 export const getFolderData = async ({
@@ -19,6 +21,7 @@ export const getFolderData = async ({
   page,
   payload,
   search,
+  user,
 }: Args): Promise<GetFolderDataResult> => {
   const folderID =
     folderIDArg && payload.db.defaultIDType === 'number' ? parseFloat(folderIDArg) : folderIDArg
@@ -31,18 +34,22 @@ export const getFolderData = async ({
   const subfolders = getFolderSubfolders({
     folderID,
     payload,
+    user,
   })
 
   // [?] @todo
   // should this query fetch using the join on the folderID
   // or should it continue to fetch each collection individually?
-  const documents = getFolderDocuments({
-    folderID,
-    limit: docLimit,
-    page,
-    payload,
-    search,
-  })
+  const documents = folderID
+    ? getFolderDocuments({
+        folderID,
+        limit: docLimit,
+        page,
+        payload,
+        search,
+        user,
+      })
+    : null
 
   const [resolvedBreadcrumbs, resolvedSubfolders, resolvedDocuments] = await Promise.all([
     breadcrumbs,

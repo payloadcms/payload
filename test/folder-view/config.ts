@@ -13,6 +13,14 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
+  folders: {
+    enabled: true,
+    collections: {
+      posts: {},
+      media: {},
+    },
+    debug: true,
+  },
   collections: [Posts, Media],
   globals: [
     {
@@ -20,7 +28,7 @@ export default buildConfigWithDefaults({
       fields: [],
     },
   ],
-  onInit: seed,
+  // onInit: seed,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },

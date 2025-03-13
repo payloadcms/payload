@@ -1,76 +1,56 @@
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Config } from '../config/types.js'
 import type { TextField } from '../fields/config/types.js'
+import type { CollectionSlug } from '../index.js'
 
 import { foldersSlug, parentFolderFieldName } from './constants.js'
 import { createFolderCollection } from './createFolderCollection.js'
-import { createBaseFolderSearchField } from './fields/folderSearch.js'
-import { ensureParentFolder } from './hooks/ensureParentFolder.js'
 
-const isDebugEnabled = (collections: CollectionConfig[]) => {
-  return collections.some((collection) => {
-    if (collection?.admin && 'enableFolders' in collection.admin) {
-      return (
-        typeof collection.admin.enableFolders === 'object' && collection.admin.enableFolders.debug
-      )
-    }
-  })
-}
-
-export function addFolderCollections(config: NonNullable<Config>): void {
-  let debug = null
-  const enabledCollectionSlugs = []
+export async function addFolderCollections(config: NonNullable<Config>): Promise<void> {
   if (!config.collections) {
     return
   }
 
-  for (let i = 0; i < config.collections.length; i++) {
-    const collection = config.collections[i]
-    if (collection.admin?.enableFolders) {
-      enabledCollectionSlugs.push(collection.slug)
-      debug = debug ?? isDebugEnabled(config.collections)
-      collection.admin.enableFolders = {
-        debug,
-      }
+  if (config.folders?.enabled) {
+    const enabledCollectionSlugs: CollectionSlug[] = []
+    const debug = Boolean(config.folders?.debug)
 
-      adjustFolderEnabledCollection({ collection, debug })
+    for (let i = 0; i < config.collections.length; i++) {
+      const collection = config.collections[i]
+      if (config.folders.collections[collection.slug]) {
+        if (collection) {
+          addFieldsToCollection({ collection, debug })
+          enabledCollectionSlugs.push(collection.slug)
+        }
+      }
+    }
+
+    if (enabledCollectionSlugs.length) {
+      let folderCollection = createFolderCollection({
+        collectionSlugs: enabledCollectionSlugs,
+        debug,
+      })
+
+      if (
+        Array.isArray(config.folders.collectionOverrides) &&
+        config.folders.collectionOverrides.length
+      ) {
+        for (const override of config.folders.collectionOverrides) {
+          folderCollection = await override({ collection: folderCollection })
+        }
+      }
+      config.collections.push(folderCollection)
     }
   }
-
-  // add folder collection
-  const folderCollection = createFolderCollection({
-    collectionSlugs: enabledCollectionSlugs,
-    debug: Boolean(debug),
-  })
-
-  if (!config.admin) {
-    config.admin = {}
-  }
-  if (!config.admin?.components) {
-    config.admin.components = {}
-  }
-  if (!config?.admin?.components?.providers) {
-    config.admin.components.providers = []
-  }
-
-  config.collections.push(folderCollection)
 }
 
-function adjustFolderEnabledCollection({
+function addFieldsToCollection({
   collection,
   debug,
 }: {
   collection: CollectionConfig
   debug?: boolean
 }): void {
-  if (!collection.hooks) {
-    collection.hooks = {}
-  }
-  if (!collection.hooks.beforeChange) {
-    collection.hooks.beforeChange = []
-  }
-  collection.hooks.beforeChange.push(ensureParentFolder)
-
   let useAsTitle = collection.admin?.useAsTitle || (collection.upload ? 'filename' : 'id')
   const titleField = collection.fields.find((field): field is TextField => {
     if ('name' in field) {
@@ -87,10 +67,30 @@ function adjustFolderEnabledCollection({
       hidden: !debug,
       index: true,
       relationTo: foldersSlug,
+      required: true,
     },
     {
-      ...createBaseFolderSearchField({ debug, useAsTitle }),
+      name: '_folderSearch',
+      type: 'text',
       access: titleField?.access,
+      admin: {
+        hidden: !debug,
+      },
+      hooks: {
+        beforeChange: [
+          ({ data, operation, originalDoc, value }) => {
+            if (operation === 'create' || operation === 'update') {
+              if (data && useAsTitle in data) {
+                return data[useAsTitle]
+              } else if (originalDoc && useAsTitle in originalDoc) {
+                return originalDoc[useAsTitle]
+              }
+              return value
+            }
+          },
+        ],
+      },
+      index: true,
       localized: titleField?.localized,
     },
   )

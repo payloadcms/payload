@@ -7,10 +7,12 @@ import React from 'react'
 import type { FolderContextValue } from '../../../providers/Folders/index.js'
 import type { PolymorphicRelationshipValue } from '../types.js'
 
+import { DocumentIcon } from '../../../icons/Document/index.js'
+import { FolderIcon } from '../../../icons/Folder/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
+import { DraggableTableRow } from '../DraggableTableRow/index.js'
 import { FolderFileCard } from '../FolderFileCard/index.js'
 import { FolderFileGrid } from '../FolderFileGrid/index.js'
-import { FolderFileRow } from '../FolderFileRow/index.js'
 import { SimpleTable, TableHeader } from '../SimpleTable/index.js'
 import './index.scss'
 
@@ -150,11 +152,12 @@ export function DisplayItems(props: Props) {
       event: React.KeyboardEvent
       item: RowItemEventData
     }): Promise<void> => {
-      const { id, index: itemIndex, relationTo } = item
+      const { index: itemIndex } = item
+
       const isShiftPressed = e.shiftKey
       const isCtrlPressed = e.ctrlKey || e.metaKey
       let newSelectedIndexes: Set<number> = selectedIndexes
-      let shouldNavigateAfterClick: boolean = false
+      const keyCode = e.code
 
       switch (e.code) {
         case 'ArrowDown': {
@@ -201,7 +204,6 @@ export function DisplayItems(props: Props) {
           if (selectedIndexes.size === 1) {
             newSelectedIndexes = new Set([])
             setFocusedRowIndex(undefined)
-            shouldNavigateAfterClick = true
           }
           break
         }
@@ -248,8 +250,8 @@ export function DisplayItems(props: Props) {
 
       setSelectedIndexes(newSelectedIndexes)
 
-      if (shouldNavigateAfterClick) {
-        await navigateAfterClick({ collectionSlug: relationTo, docID: id })
+      if (selectedIndexes.size === 1 && keyCode === 'Enter') {
+        await navigateAfterClick({ collectionSlug: item.relationTo, docID: item.id })
       }
     },
     [
@@ -265,10 +267,11 @@ export function DisplayItems(props: Props) {
 
   const onItemClick = React.useCallback(
     async ({ event, item }: { event: React.MouseEvent; item: RowItemEventData }): Promise<void> => {
-      event.preventDefault()
-      let shouldNavigateAfterClick: boolean = false
+      const { index: itemIndex } = item
 
-      const { id, index: itemIndex, relationTo } = item
+      event.preventDefault()
+
+      let doubleClicked: boolean = false
       const isCtrlPressed = event.ctrlKey || event.metaKey
       const isShiftPressed = event.shiftKey
       let newSelectedIndexes = new Set(selectedIndexes)
@@ -293,10 +296,7 @@ export function DisplayItems(props: Props) {
         // Normal click - select single item
         newSelectedIndexes = new Set([itemIndex])
         const now = Date.now()
-        const doubleClicked = now - lastClickTime.current < 400 && lastSelectedIndex === itemIndex
-        if (doubleClicked) {
-          shouldNavigateAfterClick = true
-        }
+        doubleClicked = now - lastClickTime.current < 400 && lastSelectedIndex === itemIndex
         lastClickTime.current = now
         setLastSelectedIndex(itemIndex)
       }
@@ -308,8 +308,8 @@ export function DisplayItems(props: Props) {
       }
       setSelectedIndexes(newSelectedIndexes)
 
-      if (shouldNavigateAfterClick) {
-        await navigateAfterClick({ collectionSlug: relationTo, docID: id })
+      if (doubleClicked) {
+        await navigateAfterClick({ collectionSlug: item.relationTo, docID: item.id })
       }
     },
     [
@@ -456,13 +456,25 @@ export function DisplayItems(props: Props) {
                   typeof value === 'object' ? value?.[useAsTitle] || subfolderID : subfolderID
                 const itemKey: ItemKey = `${relationTo}-${subfolderID}`
                 return (
-                  <FolderFileRow
-                    // @ts-expect-error
-                    columns={[title, value?.createdAt, value?.updatedAt]}
+                  <DraggableTableRow
+                    columns={[
+                      <span className={`${baseClass}__cell-with-icon`} key={subfolderID}>
+                        <FolderIcon />
+                        {title}
+                      </span>,
+                      // @ts-expect-error
+                      value?.createdAt,
+                      // @ts-expect-error
+                      value?.updatedAt,
+                    ]}
                     disabled={
                       (isMovingItems && selectedItemKeys.has(itemKey)) ||
                       disabledItemKeys?.has(itemKey)
                     }
+                    dragData={{
+                      id: subfolderID,
+                      type: 'folder',
+                    }}
                     id={subfolderID}
                     isDroppable
                     isFocused={focusedRowIndex === subfolderIndex}
@@ -482,7 +494,6 @@ export function DisplayItems(props: Props) {
                         item: { id: subfolderID, index: subfolderIndex, relationTo },
                       })
                     }}
-                    type="folder"
                   />
                 )
               }),
@@ -499,10 +510,23 @@ export function DisplayItems(props: Props) {
                 const adjustedIndex = documentIndex + subfolders.length
                 const itemKey: ItemKey = `${relationTo}-${documentID}`
                 return (
-                  <FolderFileRow
-                    // @ts-expect-error
-                    columns={[title, value.createdAt, value.updatedAt]}
+                  <DraggableTableRow
+                    columns={[
+                      <span className={`${baseClass}__cell-with-icon`} key={documentID}>
+                        <DocumentIcon />
+                        {title}
+                      </span>,
+                      title,
+                      // @ts-expect-error
+                      value.createdAt,
+                      // @ts-expect-error
+                      value.updatedAt,
+                    ]}
                     disabled={isMovingItems || disabledItemKeys?.has(itemKey)}
+                    dragData={{
+                      id: documentID,
+                      type: 'folder',
+                    }}
                     id={documentID}
                     isFocused={focusedRowIndex === adjustedIndex}
                     isSelected={selectedItemKeys.has(itemKey)}
@@ -521,7 +545,6 @@ export function DisplayItems(props: Props) {
                         item: { id: documentID, index: adjustedIndex, relationTo },
                       })
                     }}
-                    type="file"
                   />
                 )
               }),

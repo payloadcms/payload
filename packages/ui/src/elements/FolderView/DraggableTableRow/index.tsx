@@ -2,16 +2,15 @@
 import { useDroppable } from '@dnd-kit/core'
 import React from 'react'
 
-import { DocumentIcon } from '../../../icons/Document/index.js'
-import { FolderIcon } from '../../../icons/Folder/index.js'
 import { DraggableWithClick } from '../DraggableWithClick/index.js'
 import { HiddenCell, TableCell, TableRow } from '../SimpleTable/index.js'
 import './index.scss'
 
-const baseClass = 'folder-file-row'
+const baseClass = 'draggable-table-row'
 type Props = {
   readonly columns: React.ReactNode[]
   readonly disabled?: boolean
+  readonly dragData?: Record<string, unknown>
   readonly id: number | string
   readonly isDroppable?: boolean
   readonly isFocused?: boolean
@@ -20,13 +19,12 @@ type Props = {
   readonly itemKey: string
   readonly onClick?: (e: React.MouseEvent) => void
   readonly onKeyDown?: (e: React.KeyboardEvent) => void
-  readonly type: 'file' | 'folder'
 }
-export function FolderFileRow({
+export function DraggableTableRow({
   id,
-  type,
   columns,
   disabled,
+  dragData,
   isDroppable,
   isFocused,
   isSelected,
@@ -38,10 +36,7 @@ export function FolderFileRow({
   const enableDroppable = isDroppable && !isSelected
   const { isOver, setNodeRef } = useDroppable({
     id,
-    data: {
-      id,
-      type,
-    },
+    data: dragData,
     disabled: !enableDroppable,
   })
   const ref = React.useRef(null)
@@ -64,7 +59,6 @@ export function FolderFileRow({
     <TableRow
       className={[
         baseClass,
-        `${baseClass}--${type}`,
         isSelected && `${baseClass}--selected`,
         isSelecting && `${baseClass}--selecting`,
         disabled && `${baseClass}--disabled`,
@@ -75,11 +69,8 @@ export function FolderFileRow({
         .join(' ')}
     >
       {columns.map((col, i) => (
-        <TableCell key={i}>
-          <span className={`${baseClass}__cell`}>
-            {i === 0 ? type === 'folder' ? <FolderIcon /> : <DocumentIcon /> : null}
-            <span className={`${baseClass}__cell-content`}>{col}</span>
-          </span>
+        <TableCell className={`${baseClass}__cell-content`} key={i}>
+          {col}
         </TableCell>
       ))}
 

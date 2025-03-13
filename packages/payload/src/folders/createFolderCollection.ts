@@ -5,7 +5,6 @@ import { populateFolderDataEndpoint } from './endpoints/populateFolderData.js'
 import { createBaseFolderSearchField } from './fields/folderSearch.js'
 import { deleteSubfoldersAfterDelete } from './hooks/deleteSubfoldersAfterDelete.js'
 import { dissasociateAfterDelete } from './hooks/dissasociateAfterDelete.js'
-import { ensureParentFolder } from './hooks/ensureParentFolder.js'
 
 type CreateFolderCollectionArgs = {
   collectionSlugs: string[]
@@ -38,15 +37,6 @@ export const createFolderCollection = ({
       relationTo: foldersSlug,
     },
     {
-      name: 'isRoot',
-      type: 'checkbox',
-      admin: {
-        hidden: !debug,
-      },
-      defaultValue: false,
-      index: true,
-    },
-    {
       name: 'documentsAndFolders',
       type: 'join',
       admin: {
@@ -66,7 +56,6 @@ export const createFolderCollection = ({
       }),
       deleteSubfoldersAfterDelete({ parentFolderFieldName }),
     ],
-    beforeChange: [ensureParentFolder],
   },
   labels: {
     plural: 'Folders',

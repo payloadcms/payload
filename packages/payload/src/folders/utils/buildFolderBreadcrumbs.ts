@@ -8,83 +8,52 @@ type BuildFolderBreadcrumbsArgs = {
   folderID: null | number | string
   payload: Payload
 }
+/**
+ * Builds breadcrumbs up from child folder
+ * all the way up to root folder
+ */
 export const buildFolderBreadcrumbs = async ({
   breadcrumbs = [],
   folderID,
   payload,
-}: BuildFolderBreadcrumbsArgs): Promise<FolderBreadcrumb[]> => {
-  const folderQuery = (await payload.find({
-    collection: foldersSlug,
-    depth: 0,
-    limit: 2,
-    select: {
-      name: true,
-      isRoot: true,
-      [parentFolderFieldName]: true,
-    },
-    where: {
-      or: [
-        {
-          and: [
-            {
-              id: {
-                equals: folderID,
-              },
-            },
-            {
-              isRoot: {
-                equals: false,
-              },
-            },
-          ],
+}: BuildFolderBreadcrumbsArgs): Promise<FolderBreadcrumb[] | null> => {
+  if (folderID) {
+    const folderQuery = (await payload.find({
+      collection: foldersSlug,
+      depth: 0,
+      limit: 1,
+      select: {
+        name: true,
+        [parentFolderFieldName]: true,
+      },
+      where: {
+        id: {
+          equals: folderID,
         },
-        {
-          isRoot: {
-            equals: true,
-          },
-        },
-      ],
-    },
-  })) as PaginatedDocs<FolderInterface>
+      },
+    })) as PaginatedDocs<FolderInterface>
 
-  const { folder, rootFolder } = folderQuery.docs.reduce<{
-    folder: FolderInterface | null
-    rootFolder: FolderInterface | null
-  }>(
-    (acc, folder) => {
-      if (folder.isRoot) {
-        acc.rootFolder = folder
-      } else {
-        acc.folder = folder
-      }
-      return acc
-    },
-    { folder: null, rootFolder: null },
-  )
+    const folder = folderQuery.docs[0]
 
-  if (folder) {
-    breadcrumbs.push({
-      id: folder.id,
-      name: folder.name,
-    })
-    if (folder[parentFolderFieldName]) {
-      return buildFolderBreadcrumbs({
-        breadcrumbs,
-        folderID:
-          typeof folder[parentFolderFieldName] === 'number' ||
-          typeof folder[parentFolderFieldName] === 'string'
-            ? folder[parentFolderFieldName]
-            : folder[parentFolderFieldName].id,
-        payload,
+    if (folder) {
+      breadcrumbs.push({
+        id: folder.id,
+        name: folder.name,
       })
+      if (folder[parentFolderFieldName]) {
+        return buildFolderBreadcrumbs({
+          breadcrumbs,
+          folderID:
+            typeof folder[parentFolderFieldName] === 'number' ||
+            typeof folder[parentFolderFieldName] === 'string'
+              ? folder[parentFolderFieldName]
+              : folder[parentFolderFieldName].id,
+          payload,
+        })
+      }
     }
   }
 
-  if (rootFolder) {
-    breadcrumbs.push({
-      id: rootFolder.id,
-      name: rootFolder.name,
-    })
-  }
+  breadcrumbs.push({ id: null, name: 'Home', root: true })
   return breadcrumbs.reverse()
 }

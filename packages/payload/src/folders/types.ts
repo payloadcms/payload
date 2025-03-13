@@ -3,13 +3,19 @@ import type { CollectionSlug, SanitizedCollectionConfig } from '../index.js'
 
 export type FolderInterface = {
   _parentFolder?: FolderInterface | (number | string | undefined)
-  isRoot?: boolean
+  documentsAndFolders?: {
+    docs: {
+      relationTo: CollectionSlug
+      value: any
+    }[]
+  }
   name: string
 } & TypeWithID
 
 export type FolderBreadcrumb = {
-  id: number | string
+  id: null | number | string
   name: string
+  root?: boolean
 }
 
 export type Subfolder = {
@@ -30,7 +36,7 @@ export type FolderEnabledColection = {
 } & SanitizedCollectionConfig
 
 export type GetFolderDataResult<DocType = TypeWithID> = {
-  breadcrumbs: FolderBreadcrumb[]
+  breadcrumbs: FolderBreadcrumb[] | null
   hasMoreDocuments: boolean
   items: {
     relationTo: string

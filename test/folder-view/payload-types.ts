@@ -132,7 +132,7 @@ export interface Post {
   id: string;
   title?: string | null;
   heroImage?: (string | null) | Media;
-  _parentFolder?: (string | null) | FolderInterface;
+  _parentFolder: string | FolderInterface;
   _folderSearch?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -143,7 +143,7 @@ export interface Post {
  */
 export interface Media {
   id: string;
-  _parentFolder?: (string | null) | FolderInterface;
+  _parentFolder: string | FolderInterface;
   _folderSearch?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -165,7 +165,6 @@ export interface FolderInterface {
   id: string;
   name: string;
   _parentFolder?: (string | null) | FolderInterface;
-  isRoot?: boolean | null;
   documentsAndFolders?: {
     docs?:
       | (
@@ -324,7 +323,6 @@ export interface UsersSelect<T extends boolean = true> {
 export interface _FoldersSelect<T extends boolean = true> {
   name?: T;
   _parentFolder?: T;
-  isRoot?: T;
   documentsAndFolders?: T;
   _folderSearch?: T;
   updatedAt?: T;

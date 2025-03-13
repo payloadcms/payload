@@ -8,11 +8,25 @@
     &__crumb-item {
       display: flex;
       align-items: center;
-      font-size: var(--base);
+      font-size: calc(var(--base) * 1.25);
       font-weight: bold;
       margin: 0;
       line-height: normal;
       font-family: inherit;
+
+      &:has(.icon--folder) {
+        height: calc(var(--base) * 1.6);
+        .btn__label {
+          display: flex;
+          align-items: center;
+          height: 100%;
+        }
+        .icon--folder {
+          width: calc(var(--base) * 1.25);
+          height: calc(var(--base) * 1.25);
+          color: var(--theme-elevation-300);
+        }
+      }
     }
 
     &__crumb-item--over {
@@ -27,6 +41,15 @@
       .stroke {
         stroke: var(--theme-border-color);
         stroke-width: 2px;
+      }
+    }
+  }
+
+  @include mid-break {
+    .folderBreadcrumbs {
+      &__crumb,
+      &__crumb-item {
+        font-size: var(--base);
       }
     }
   }

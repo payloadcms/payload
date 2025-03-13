@@ -1,4 +1,4 @@
-import type { CollectionSlug, FindArgs, Payload, Where } from '../../index.js'
+import type { CollectionSlug, FindArgs, Payload, User, Where } from '../../index.js'
 
 import { combineWhereConstraints } from '../../utilities/combineWhereConstraints.js'
 import { foldersSlug, parentFolderFieldName } from '../constants.js'
@@ -12,9 +12,10 @@ type GetFolderDocumentsReturnType = {
 }
 type GetFolderDocumentsArgs = {
   depth?: number
-  folderID: null | number | string
+  folderID: number | string
   payload: Payload
   search?: null | string
+  user?: User
 } & Omit<FindArgs, 'collection'>
 export const getFolderDocuments = async (
   args: GetFolderDocumentsArgs,
@@ -29,6 +30,7 @@ async function fetchWithJoin({
   payload,
   search,
   sort,
+  user,
   where,
 }: GetFolderDocumentsArgs): Promise<GetFolderDocumentsReturnType> {
   const constraints: (undefined | Where)[] = [
@@ -38,17 +40,11 @@ async function fetchWithJoin({
         not_equals: foldersSlug,
       },
     },
-    folderID
-      ? {
-          [parentFolderFieldName]: {
-            equals: folderID,
-          },
-        }
-      : {
-          [`${parentFolderFieldName}.isRoot`]: {
-            equals: true,
-          },
-        },
+    {
+      [parentFolderFieldName]: {
+        equals: folderID,
+      },
+    },
   ]
 
   if (search) {
@@ -70,18 +66,14 @@ async function fetchWithJoin({
       },
     },
     limit: 1,
-    where: folderID
-      ? {
-          id: {
-            equals: folderID,
-          },
-        }
-      : {
-          isRoot: {
-            equals: true,
-          },
-        },
+    user,
+    where: {
+      id: {
+        equals: folderID,
+      },
+    },
   })
+
   return currentFolderQuery?.docs[0]?.documentsAndFolders
 }
 
@@ -94,13 +86,7 @@ async function manuallyBuildRelations({
   sort,
   where,
 }: GetFolderDocumentsArgs) {
-  const relationTo = payload.config.collections.reduce((acc, collection) => {
-    if (collection.admin.enableFolders) {
-      acc.push(collection.slug)
-    }
-
-    return acc
-  }, [] as CollectionSlug[])
+  const relationTo = Object.keys(payload.config.folders.collections)
 
   const results: {
     relationTo: CollectionSlug

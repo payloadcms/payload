@@ -109,7 +109,7 @@ export { SaveDraftButton } from '../../elements/SaveDraftButton/index.js'
 // folder elements
 export { FolderBreadcrumbs } from '../../elements/FolderView/Breadcrumbs/index.js'
 export { FolderProvider, useFolder } from '../../providers/Folders/index.js'
-export { FolderAndDocuments } from '../../elements/FolderView/FolderAndDocuments/index.js'
+export { FoldersAndDocuments } from '../../elements/FolderView/FoldersAndDocuments/index.js'
 export { MoveDocToFolder } from '../../elements/FolderView/MoveDocToFolder/index.js'
 
 export { type Option as ReactSelectOption, ReactSelect } from '../../elements/ReactSelect/index.js'

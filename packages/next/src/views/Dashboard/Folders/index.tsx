@@ -6,7 +6,7 @@ import type {
   VisibleEntities,
 } from 'payload'
 
-import { FolderAndDocuments, FolderProvider, ListQueryProvider } from '@payloadcms/ui'
+import { FolderProvider, FoldersAndDocuments, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { type groupNavItems, sanitizeID } from '@payloadcms/ui/shared'
 import { redirect } from 'next/navigation.js'
@@ -64,10 +64,15 @@ export const FolderDashboard: React.FC<FolderDashboardProps> = async (props) => 
     search: typeof searchParams?.search === 'string' ? searchParams.search : undefined,
   })
 
-  const folderID = breadcrumbs[breadcrumbs.length - 1]?.id
+  const folderID = breadcrumbs[breadcrumbs.length - 1]?.root
+    ? undefined
+    : breadcrumbs[breadcrumbs.length - 1]?.id
 
-  if (folderID && searchParamFolderID && searchParamFolderID !== String(folderID)) {
-    return redirect(`${routes.admin}`)
+  if (
+    (folderID && searchParamFolderID && searchParamFolderID !== String(folderID)) ||
+    (searchParamFolderID && !folderID)
+  ) {
+    return redirect(routes.admin)
   }
 
   const displayTypePref = (await payload.find({
@@ -122,7 +127,7 @@ export const FolderDashboard: React.FC<FolderDashboardProps> = async (props) => 
                 },
               })}
 
-            <FolderAndDocuments initialDisplayType={displayTypePref?.docs[0]?.value} />
+            <FoldersAndDocuments initialDisplayType={displayTypePref?.docs[0]?.value} />
             {afterDashboard &&
               RenderServerComponent({
                 Component: afterDashboard,

@@ -45,6 +45,7 @@ export const populateFolderDataEndpoint: Endpoint = {
         typeof req.searchParams.get('search') === 'string'
           ? req.searchParams.get('search')
           : undefined,
+      user: req.user,
     })
 
     return Response.json(data)
