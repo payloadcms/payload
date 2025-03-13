@@ -3,6 +3,7 @@ export const CustomJSXLabel = () => {
     <svg
       className="graphic-icon"
       height="20px"
+      id="payload-logo"
       viewBox="0 0 25 25"
       width="20px"
       xmlns="http://www.w3.org/2000/svg"

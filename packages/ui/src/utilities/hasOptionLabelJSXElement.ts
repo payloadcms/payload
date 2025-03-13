@@ -1,4 +1,4 @@
-import type { DefaultCellComponentProps, OptionLabel } from 'payload'
+import type { DefaultCellComponentProps } from 'payload'
 
 import React from 'react'
 
@@ -20,8 +20,4 @@ export const hasOptionLabelJSXElement = (cellClientProps: DefaultCellComponentPr
   }
 
   return false
-}
-
-export const isJSXElement = (value: OptionLabel): boolean => {
-  return value && typeof value === 'object' && '$$typeof' in value
 }

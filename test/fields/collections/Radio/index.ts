@@ -32,6 +32,7 @@ const RadioFields: CollectionConfig = {
       name: 'radioWithJsxLabelOption',
       label: 'Radio with JSX label option',
       type: 'radio',
+      defaultValue: 'three',
       options: [
         {
           label: 'Value One',
