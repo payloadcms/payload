@@ -4,7 +4,7 @@ export const sortableSlug = 'sortable'
 
 export const SortableCollection: CollectionConfig = {
   slug: sortableSlug,
-  isSortable: true,
+  orderable: true,
   admin: {
     useAsTitle: 'title',
     components: {

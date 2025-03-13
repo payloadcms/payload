@@ -200,8 +200,8 @@ export const renderTable = ({
   }
 
   // Add drag handle if data is sortable
-  const isSortable = docs.length > 0 && ORDER_FIELD_NAME in docs[0]
-  if (isSortable && !columnsToUse.find((col) => col.accessor === '_dragHandle')) {
+  const isOrderable = docs.length > 0 && ORDER_FIELD_NAME in docs[0]
+  if (isOrderable && !columnsToUse.find((col) => col.accessor === '_dragHandle')) {
     columnsToUse.unshift({
       accessor: '_dragHandle',
       active: true,
