@@ -21,13 +21,13 @@ import type { Column } from '../exports/client/index.js'
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import { SortHeader } from '../elements/SortHeader/index.js'
 import { SortRow } from '../elements/SortRow/index.js'
+import { OrderableTable } from '../elements/Table/OrderableTable.js'
 import { buildColumnState } from '../elements/TableColumns/buildColumnState.js'
 import { buildPolymorphicColumnState } from '../elements/TableColumns/buildPolymorphicColumnState.js'
 import { filterFields } from '../elements/TableColumns/filterFields.js'
 import { getInitialColumns } from '../elements/TableColumns/getInitialColumns.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import { Pill, SelectAll, SelectRow, Table } from '../exports/client/index.js'
-
 const ORDER_FIELD_NAME = '_order'
 
 export const renderFilters = (
@@ -201,26 +201,33 @@ export const renderTable = ({
 
   // Add drag handle if data is sortable
   const isOrderable = docs.length > 0 && ORDER_FIELD_NAME in docs[0]
-  if (isOrderable && !columnsToUse.find((col) => col.accessor === '_dragHandle')) {
-    columnsToUse.unshift({
-      accessor: '_dragHandle',
-      active: true,
-      field: {
-        admin: {
-          disabled: true,
-        },
-        hidden: true,
-      },
-      Heading: <SortHeader />,
-      renderedCells: docs.map((_, i) => <SortRow key={i} />),
-    } as Column)
+
+  if (!isOrderable) {
+    return {
+      columnState,
+      // key is required since Next.js 15.2.0 to prevent React key error
+      Table: <Table appearance={tableAppearance} columns={columnsToUse} data={docs} key="table" />,
+    }
   }
+
+  columnsToUse.unshift({
+    accessor: '_dragHandle',
+    active: true,
+    field: {
+      admin: {
+        disabled: true,
+      },
+      hidden: true,
+    },
+    Heading: <SortHeader />,
+    renderedCells: docs.map((_, i) => <SortRow key={i} />),
+  } as Column)
 
   return {
     columnState,
     // key is required since Next.js 15.2.0 to prevent React key error
     Table: (
-      <Table
+      <OrderableTable
         appearance={tableAppearance}
         collection={clientCollectionConfig}
         columns={columnsToUse}
