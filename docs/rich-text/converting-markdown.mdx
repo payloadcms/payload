@@ -6,72 +6,37 @@ desc: Converting between lexical richtext and Markdown / MDX
 keywords: lexical, richtext, markdown, md, mdx
 ---
 
-
-## Converting Markdown to Richtext
-
-Convert markdown content to the Lexical editor format using the [lexical editor config](/docs/rich-text/converters#retrieving-the-editor-config) with the following:
-
-```ts
-import { $convertFromMarkdownString, editorConfigFactory } from '@payloadcms/richtext-lexical'
-
-const yourEditorConfig = await editorConfigFactory.default({ config })
-const markdown = `# Hello World`
-
-headlessEditor.update(
-  () => {
-    $convertFromMarkdownString(markdown, yourEditorConfig.features.markdownTransformers)
-  },
-  { discrete: true },
-)
-
-// Do this if you then want to get the editor JSON
-const editorJSON = headlessEditor.getEditorState().toJSON()
-```
-
-Functions prefixed with a `$` can only be run inside an `editor.update()` or `editorState.read()` callback.
-
-This has been taken from the [lexical serialization & deserialization docs](https://lexical.dev/docs/concepts/serialization#html---lexical).
-
-<Banner type="success">
-  **Note:**
-
-  Using the `discrete: true` flag ensures instant updates to the editor state. If
-  immediate reading of the updated state isn't necessary, you can omit the flag.
-</Banner>
-
 ## Converting Richtext to Markdown
 
-Export content from the Lexical editor into Markdown format using the [lexical editor config](/docs/rich-text/converters#retrieving-the-editor-config) following these steps:
-
-1. Import your current editor state into the headless editor.
-2. Convert and fetch the resulting markdown string.
-
-Here's the code for it:
+If you have access to the Payload Config and the [lexical editor config](/docs/rich-text/converters#retrieving-the-editor-config), you can convert the lexical editor state to Markdown with the following:
 
 ```ts
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
-import { editorConfigFactory } from '@payloadcms/richtext-lexical'
-import { $convertToMarkdownString } from '@payloadcms/richtext-lexical/lexical/markdown'
+import { convertLexicalToMarkdown, editorConfigFactory } from '@payloadcms/richtext-lexical'
 
-const yourEditorConfig = await editorConfigFactory.default({ config })
-const yourEditorState: SerializedEditorState // <= your current editor state here
+// Your richtext data here
+const data: SerializedEditorState = {}
 
-// Import editor state into your headless editor
-try {
-  headlessEditor.update(
-    () => {
-      headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState))
-    },
-    { discrete: true }, // This should commit the editor state immediately
-  )
-} catch (e) {
-  logger.error({ err: e }, 'ERROR parsing editor state')
-}
+const html = convertLexicalToMarkdown({
+  data,
+  editorConfig: await editorConfigFactory.default({
+    config, // <= make sure you have access to your Payload Config
+  }),
+})
+```
 
-// Export to markdown
-let markdown: string
-headlessEditor.getEditorState().read(() => {
-  markdown = $convertToMarkdownString(yourEditorConfig?.features?.markdownTransformers)
+## Converting Markdown to Richtext
+
+If you have access to the Payload Config and the [lexical editor config](/docs/rich-text/converters#retrieving-the-editor-config), you can convert Markdown to the lexical editor state with the following:
+
+```ts
+import { convertMarkdownToLexical, editorConfigFactory } from '@payloadcms/richtext-lexical'
+
+const html = convertMarkdownToLexical({
+  editorConfig: await editorConfigFactory.default({
+    config, // <= make sure you have access to your Payload Config
+  }),
+  markdown: '# Hello world\n\nThis is a **test**.',
 })
 ```
