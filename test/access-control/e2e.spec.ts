@@ -25,6 +25,7 @@ import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
+  authAccess as authAccessSlug,
   createNotUpdateCollectionSlug,
   disabledSlug,
   docLevelAccessSlug,
@@ -68,6 +69,7 @@ describe('Access Control', () => {
   let userRestrictedCollectionURL: AdminUrlUtil
   let userRestrictedGlobalURL: AdminUrlUtil
   let disabledFields: AdminUrlUtil
+  let authAccess: AdminUrlUtil
   let serverURL: string
   let context: BrowserContext
   let logoutURL: string
@@ -87,6 +89,7 @@ describe('Access Control', () => {
     userRestrictedCollectionURL = new AdminUrlUtil(serverURL, userRestrictedCollectionSlug)
     userRestrictedGlobalURL = new AdminUrlUtil(serverURL, userRestrictedGlobalSlug)
     disabledFields = new AdminUrlUtil(serverURL, disabledSlug)
+    authAccess = new AdminUrlUtil(serverURL, authAccessSlug)
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -228,7 +231,7 @@ describe('Access Control', () => {
     /**
      * This reproduces a bug where certain fields were incorrectly marked as read-only
      */
-    // eslint-disable-next-line playwright/expect-expect
+
     test('ensure complex collection config fields show up in correct read-only state', async () => {
       const regression1URL = new AdminUrlUtil(serverURL, 'regression1')
       await page.goto(regression1URL.list)
@@ -272,7 +275,7 @@ describe('Access Control', () => {
     /**
      * This reproduces a bug where certain fields were incorrectly marked as read-only
      */
-    // eslint-disable-next-line playwright/expect-expect
+
     test('ensure complex collection config fields show up in correct read-only state 2', async () => {
       const regression2URL = new AdminUrlUtil(serverURL, 'regression2')
       await page.goto(regression2URL.list)
@@ -731,6 +734,33 @@ describe('Access Control', () => {
       await page.locator('.tabs-field__tab-button').nth(1).click()
       await expect(page.locator('#field-unnamedTab')).toBeDisabled()
       await expect(page.locator('#field-array__0__text')).toBeDisabled()
+    })
+  })
+
+  describe('auth access control', () => {
+    test('should show auth fields when auth access is true', async () => {
+      await page.goto(authAccess.create)
+
+      await expect(page.locator('#field-email')).toBeVisible()
+      await expect(page.locator('#field-password')).toBeVisible()
+    })
+
+    test('should hide auth fields when auth access is false', async () => {
+      await page.goto(url.logout)
+
+      await login({
+        data: {
+          email: nonAdminEmail,
+          password: 'test',
+        },
+        page,
+        serverURL,
+      })
+
+      await page.goto(authAccess.create)
+
+      await expect(page.locator('#field-email')).toBeHidden()
+      await expect(page.locator('#field-password')).toBeHidden()
     })
   })
 })

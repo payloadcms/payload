@@ -21,6 +21,7 @@ export const hiddenFieldsSlug = 'hidden-fields'
 export const hiddenAccessSlug = 'hidden-access'
 export const hiddenAccessCountSlug = 'hidden-access-count'
 export const disabledSlug = 'disabled'
+export const authAccess = 'auth-access'
 
 export const nonAdminEmail = 'no-admin-access@payloadcms.com'
 export const publicUserEmail = 'public-user@payloadcms.com'

@@ -1,5 +1,5 @@
 import type { CollectionConfig } from '../collections/config/types.js'
-import type { Field, TextField } from '../fields/config/types.js'
+import type { Field, FieldAccess, TextField } from '../fields/config/types.js'
 import type { IncomingAuthType } from './types.js'
 
 import { accountLockFields } from './baseFields/accountLock.js'
@@ -64,9 +64,9 @@ export const getBaseAuthFields = (
           return
         } // skip UI fields
         field.access = {
-          create: collectionConfig.access.auth,
-          read: collectionConfig.access.auth,
-          update: collectionConfig.access.auth,
+          create: collectionConfig.access?.auth as FieldAccess,
+          read: collectionConfig.access?.auth as FieldAccess,
+          update: collectionConfig.access?.auth as FieldAccess,
         }
       })
     }

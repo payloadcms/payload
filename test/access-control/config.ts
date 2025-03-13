@@ -659,6 +659,7 @@ export default buildConfigWithDefaults(
         data: {
           email: devUser.email,
           password: devUser.password,
+          roles: ['admin'],
         },
       })
 
