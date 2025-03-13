@@ -560,6 +560,10 @@ export type SanitizedJoins = {
   [collectionSlug: string]: SanitizedJoin[]
 }
 
+/**
+ * @todo remove the `DeepRequired` in v4.
+ * We don't actually guarantee that all properties are set when sanitizing configs.
+ */
 export interface SanitizedCollectionConfig
   extends Omit<
     DeepRequired<CollectionConfig>,
@@ -573,7 +577,6 @@ export interface SanitizedCollectionConfig
    * Rows / collapsible / tabs w/o name `fields` merged to top, UIs are excluded
    */
   flattenedFields: FlattenedField[]
-
   /**
    * Object of collections to join 'Join Fields object keyed by collection
    */

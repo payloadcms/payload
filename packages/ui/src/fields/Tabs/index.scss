@@ -6,6 +6,10 @@
     margin-left: calc(var(--gutter-h) * -1);
     margin-right: calc(var(--gutter-h) * -1);
 
+    &--hidden {
+      display: none;
+    }
+
     &__content-wrap {
       padding-left: var(--gutter-h);
       padding-right: var(--gutter-h);
@@ -48,6 +52,10 @@
         width: var(--gutter-h);
         flex-shrink: 0;
       }
+    }
+
+    &__tab--hidden {
+      display: none;
     }
 
     &__description {

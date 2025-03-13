@@ -1,6 +1,5 @@
 import type { Payload, User, ViewTypes } from 'payload'
 
-import { SELECT_ALL } from '../constants.js'
 import { findTenantOptions } from '../queries/findTenantOptions.js'
 import { getCollectionIDType } from './getCollectionIDType.js'
 import { getTenantFromCookie } from './getTenantFromCookie.js'
@@ -34,7 +33,7 @@ export async function getGlobalViewRedirect({
   let tenant = getTenantFromCookie(headers, idType)
   let redirectRoute
 
-  if (!tenant || tenant === SELECT_ALL) {
+  if (!tenant) {
     const tenantsQuery = await findTenantOptions({
       limit: 1,
       payload,

@@ -18,8 +18,6 @@ import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { initPage } from '../../utilities/initPage/index.js'
 import { getViewFromConfig } from './getViewFromConfig.js'
 
-export { generatePageMetadata } from './meta.js'
-
 export type GenerateViewMetadata = (args: {
   config: SanitizedConfig
   i18n: I18nClient

@@ -750,6 +750,26 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         childPermissions = parentPermissions
       }
 
+      const pathSegments = path ? path.split('.') : []
+
+      // If passesCondition is false then this should always result to false
+      // If the tab has no admin.condition provided then fallback to passesCondition and let that decide the result
+      let tabPassesCondition = passesCondition
+
+      if (passesCondition && typeof tab.admin?.condition === 'function') {
+        tabPassesCondition = tab.admin.condition(fullData, data, {
+          blockData,
+          path: pathSegments,
+          user: req.user,
+        })
+      }
+
+      if (tab?.id) {
+        state[tab.id] = {
+          passesCondition: tabPassesCondition,
+        }
+      }
+
       return iterateFields({
         id,
         addErrorPathToParent: addErrorPathToParentArg,
@@ -767,7 +787,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         omitParents,
         operation,
         parentIndexPath: isNamedTab ? '' : tabIndexPath,
-        parentPassesCondition: passesCondition,
+        parentPassesCondition: tabPassesCondition,
         parentPath: isNamedTab ? tabPath : parentPath,
         parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
         permissions: childPermissions,

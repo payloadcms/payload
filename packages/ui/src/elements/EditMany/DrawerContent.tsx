@@ -266,7 +266,7 @@ export const EditManyDrawerContent: React.FC<
       unpublishedVersionCount={0}
       versionCount={0}
     >
-      <OperationContext.Provider value="update">
+      <OperationContext value="update">
         <div className={`${baseClass}__main`}>
           <div className={`${baseClass}__header`}>
             <h2 className={`${baseClass}__header__title`}>
@@ -332,7 +332,7 @@ export const EditManyDrawerContent: React.FC<
             </div>
           </Form>
         </div>
-      </OperationContext.Provider>
+      </OperationContext>
     </DocumentInfoProvider>
   )
 }
