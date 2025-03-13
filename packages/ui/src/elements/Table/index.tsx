@@ -10,7 +10,6 @@ import { toast } from 'sonner'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { DraggableSortableItem } from '../DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
-import { ShimmerEffect } from '../ShimmerEffect/index.js'
 
 const baseClass = 'table'
 
