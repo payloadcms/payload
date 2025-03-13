@@ -1008,7 +1008,7 @@ describe('General', () => {
       const newTitle = 'new title'
       await page.locator('#field-title').fill(newTitle)
 
-      await page.locator('header.app-header a[href="/admin/collections/posts"]').click()
+      await page.locator(`header.app-header a[href="${postsUrl.list}"]`).click()
 
       // Locate the modal container
       const modalContainer = page.locator('.payload__modal-container')
@@ -1025,11 +1025,9 @@ describe('General', () => {
   })
 
   test('should not open leave-without-saving modal if opening a new tab', async () => {
-    const { id } = await createPost()
-    await page.goto(postsUrl.edit(id))
     const title = 'title'
+    await page.goto(postsUrl.create)
     await page.locator('#field-title').fill(title)
-    await saveDocHotkeyAndAssert(page)
     await expect(page.locator('#field-title')).toHaveValue(title)
 
     const newTitle = 'new title'
@@ -1038,9 +1036,7 @@ describe('General', () => {
     // Open link in a new tab by holding down the Meta key
     const [newPage] = await Promise.all([
       page.context().waitForEvent('page'),
-      page
-        .locator('header.app-header a[href="/admin/collections/posts"]')
-        .click({ modifiers: ['Meta'] }),
+      page.locator(`header.app-header a[href="${postsUrl.list}"]`).click({ modifiers: ['Meta'] }),
     ])
 
     await newPage.waitForLoadState('domcontentloaded')
@@ -1050,10 +1046,10 @@ describe('General', () => {
     await expect(modalContainer).toBeHidden()
 
     // Ensure the new page is the correct URL
-    expect(newPage.url()).toContain('/admin/collections/posts')
+    expect(newPage.url()).toBe(postsUrl.list)
 
     // Ensure the original page is the correct URL
-    expect(page.url()).toBe(postsUrl.edit(id))
+    expect(page.url()).toBe(postsUrl.create)
   })
 
   describe('preferences', () => {
