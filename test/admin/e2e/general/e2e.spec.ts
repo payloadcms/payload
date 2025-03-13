@@ -1008,7 +1008,7 @@ describe('General', () => {
       const newTitle = 'new title'
       await page.locator('#field-title').fill(newTitle)
 
-      await page.locator(`header.app-header a[href="${postsUrl.list}"]`).click()
+      await page.locator(`header.app-header a[href="/admin/collections/posts"]`).click()
 
       // Locate the modal container
       const modalContainer = page.locator('.payload__modal-container')
@@ -1036,17 +1036,21 @@ describe('General', () => {
     // Open link in a new tab by holding down the Meta key
     const [newPage] = await Promise.all([
       page.context().waitForEvent('page'),
-      page.locator(`header.app-header a[href="${postsUrl.list}"]`).click({ modifiers: ['Meta'] }),
+      page
+        .locator(`header.app-header a[href="/admin/collections/posts"]`)
+        .click({ modifiers: ['Meta'] }),
     ])
 
-    await newPage.waitForLoadState('domcontentloaded')
+    // Wait for navigation to complete in the new tab
+    await newPage.waitForLoadState('load')
 
     // Locate the modal container and ensure it is not visible
     const modalContainer = page.locator('.payload__modal-container')
     await expect(modalContainer).toBeHidden()
 
     // Ensure the new page is the correct URL
-    expect(newPage.url()).toBe(postsUrl.list)
+    // using contain here, because after load the lists view will add query params like "?limit=10"
+    expect(newPage.url()).toContain(postsUrl.list)
 
     // Ensure the original page is the correct URL
     expect(page.url()).toBe(postsUrl.create)
