@@ -126,7 +126,7 @@ describe('Tabs', () => {
 
   test('should render array data within named tabs', async () => {
     await navigateToDoc(page, url)
-    await switchTab(page, '.tabs-field__tab-button:nth-child(5)')
+    await switchTab(page, '.tabs-field__tab-button:has-text("Tab with Name")')
     await expect(page.locator('#field-tab__array__0__text')).toHaveValue(
       "Hello, I'm the first row, in a named tab",
     )
@@ -134,16 +134,25 @@ describe('Tabs', () => {
 
   test('should render conditional tab when checkbox is toggled', async () => {
     await navigateToDoc(page, url)
+
     const conditionalTabSelector = '.tabs-field__tab-button:text-is("Conditional Tab")'
-    await expect(page.locator(conditionalTabSelector)).toHaveCount(0)
+    const button = page.locator(conditionalTabSelector)
+    await expect(
+      async () => await expect(page.locator(conditionalTabSelector)).toHaveClass(/--hidden/),
+    ).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
 
     const checkboxSelector = `input#field-conditionalTabVisible`
     await page.locator(checkboxSelector).check()
     await expect(page.locator(checkboxSelector)).toBeChecked()
 
-    await wait(300)
+    await expect(
+      async () => await expect(page.locator(conditionalTabSelector)).not.toHaveClass(/--hidden/),
+    ).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
 
-    await expect(page.locator(conditionalTabSelector)).toHaveCount(1)
     await switchTab(page, conditionalTabSelector)
 
     await expect(
@@ -162,12 +171,22 @@ describe('Tabs', () => {
 
     // Now assert on the nested conditional tab
     const nestedConditionalTabSelector = '.tabs-field__tab-button:text-is("Nested Conditional Tab")'
-    await expect(page.locator(nestedConditionalTabSelector)).toHaveCount(1)
+
+    await expect(
+      async () =>
+        await expect(page.locator(nestedConditionalTabSelector)).not.toHaveClass(/--hidden/),
+    ).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
 
     const nestedCheckboxSelector = `input#field-conditionalTab__nestedConditionalTabVisible`
     await page.locator(nestedCheckboxSelector).uncheck()
 
-    await expect(page.locator(nestedConditionalTabSelector)).toHaveCount(0)
+    await expect(
+      async () => await expect(page.locator(nestedConditionalTabSelector)).toHaveClass(/--hidden/),
+    ).toPass({
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
   })
 
   test('should save preferences for tab order', async () => {
