@@ -166,7 +166,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
   }, [previewWindowType, isPopupOpen, handleWindowChange])
 
   return (
-    <LivePreviewContext.Provider
+    <LivePreviewContext
       value={{
         appIsReady,
         breakpoint,
@@ -198,6 +198,6 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
       <DndContext collisionDetection={customCollisionDetection} onDragEnd={handleDragEnd}>
         {listeningForMessages && children}
       </DndContext>
-    </LivePreviewContext.Provider>
+    </LivePreviewContext>
   )
 }

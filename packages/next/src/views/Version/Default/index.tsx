@@ -182,11 +182,11 @@ export const DefaultVersionView: React.FC<DefaultVersionsViewProps> = ({
             />
           )}
         </div>
-        <SelectedLocalesContext.Provider
+        <SelectedLocalesContext
           value={{ selectedLocales: selectedLocales.map((locale) => locale.value) }}
         >
           {doc?.version && RenderedDiff}
-        </SelectedLocalesContext.Provider>
+        </SelectedLocalesContext>
       </Gutter>
     </main>
   )

@@ -21,7 +21,7 @@ export const NavContext = React.createContext<NavContextType>({
   shouldAnimate: false,
 })
 
-export const useNav = () => React.useContext(NavContext)
+export const useNav = () => React.use(NavContext)
 
 const getNavPreference = async (getPreference): Promise<boolean> => {
   const navPrefs = await getPreference('nav')
@@ -111,8 +111,8 @@ export const NavProvider: React.FC<{
   }, [])
 
   return (
-    <NavContext.Provider value={{ hydrated, navOpen, navRef, setNavOpen, shouldAnimate }}>
+    <NavContext value={{ hydrated, navOpen, navRef, setNavOpen, shouldAnimate }}>
       {children}
-    </NavContext.Provider>
+    </NavContext>
   )
 }
