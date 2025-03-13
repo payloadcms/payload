@@ -4,6 +4,7 @@ import type { PayloadRequest, Where } from '../types/index.js'
 
 import executeAccess from '../auth/executeAccess.js'
 import { Forbidden } from '../errors/Forbidden.js'
+import { getRequestCollectionWithID } from '../utilities/getRequestEntity.js'
 
 export const checkFileAccess = async ({
   collection,
@@ -17,9 +18,22 @@ export const checkFileAccess = async ({
   if (filename.includes('../') || filename.includes('..\\')) {
     throw new Forbidden(req.t)
   }
-
   const { config } = collection
-  const accessResult = await executeAccess({ isReadingStaticFile: true, req }, config.access.read)
+
+  const data = await req.payload.db.findOne({
+    collection: config.slug,
+    req,
+    where: {
+      filename: {
+        equals: filename,
+      },
+    },
+  })
+
+  const accessResult = await executeAccess(
+    { id: data.id, data, isReadingStaticFile: true, req },
+    config.access.read,
+  )
 
   if (typeof accessResult === 'object') {
     const queryToBuild: Where = {
