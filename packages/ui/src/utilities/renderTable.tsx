@@ -219,6 +219,14 @@ export const renderTable = ({
   return {
     columnState,
     // key is required since Next.js 15.2.0 to prevent React key error
-    Table: <Table appearance={tableAppearance} columns={columnsToUse} data={docs} key="table" />,
+    Table: (
+      <Table
+        appearance={tableAppearance}
+        collection={clientCollectionConfig}
+        columns={columnsToUse}
+        data={docs}
+        key="table"
+      />
+    ),
   }
 }

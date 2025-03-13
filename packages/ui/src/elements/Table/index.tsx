@@ -1,6 +1,6 @@
 'use client'
 
-import type { Column } from 'payload'
+import type { ClientCollectionConfig, Column } from 'payload'
 
 import './index.scss'
 
@@ -15,11 +15,17 @@ const baseClass = 'table'
 
 export type Props = {
   readonly appearance?: 'condensed' | 'default'
+  readonly collection: ClientCollectionConfig
   readonly columns?: Column[]
   readonly data: Record<string, unknown>[]
 }
 
-export const Table: React.FC<Props> = ({ appearance = 'default', columns, data: initialData }) => {
+export const Table: React.FC<Props> = ({
+  appearance = 'default',
+  collection,
+  columns,
+  data: initialData,
+}) => {
   const { data: listQueryData, handleSortChange, query } = useListQuery()
   // Use the data from ListQueryProvider if available, otherwise use the props
   const serverData = listQueryData?.docs || initialData
@@ -97,9 +103,7 @@ export const Table: React.FC<Props> = ({ appearance = 'default', columns, data: 
           ? 'greater'
           : 'less'
 
-      // Assuming we're in the context of a collection
-      const collectionSlug = window.location.pathname.split('/').filter(Boolean)[2]
-      const response = await fetch(`/api/${collectionSlug}/reorder`, {
+      const response = await fetch(`/api/${collection.slug}/reorder`, {
         body: JSON.stringify({
           docsToMove: [movedId],
           newKeyWillBe,
