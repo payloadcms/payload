@@ -211,11 +211,7 @@ export const renderTable = ({
         },
         hidden: true,
       },
-      Heading: (
-        <SortHeader
-        // disable={fieldAffectsDataSubFields || fieldIsPresentationalOnly(field) || undefined}
-        />
-      ),
+      Heading: <SortHeader />,
       renderedCells: docs.map((_, i) => <SortRow key={i} />),
     } as Column)
   }
