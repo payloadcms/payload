@@ -43,10 +43,12 @@ const combineLabel = ({
 }
 
 export const reduceFields = ({
+  excludeUnsortable = false,
   fields,
   labelPrefix = null,
   path = '',
 }: {
+  excludeUnsortable?: boolean
   fields: ClientField[]
   labelPrefix?: React.ReactNode
   path?: string
@@ -57,15 +59,18 @@ export const reduceFields = ({
 
   return fields.reduce<{ id: string; label: React.ReactNode; value: string }[]>(
     (fieldsToUse, field) => {
+      const isArrayOrBlocks = field.type === 'array' || field.type === 'blocks'
+
       // escape for a variety of reasons, include ui fields as they have `name`.
-      if (field.type === 'ui') {
+      if (field.type === 'ui' || (excludeUnsortable && isArrayOrBlocks)) {
         return fieldsToUse
       }
 
-      if (!(field.type === 'array' || field.type === 'blocks') && fieldHasSubFields(field)) {
+      if (!isArrayOrBlocks && fieldHasSubFields(field)) {
         return [
           ...fieldsToUse,
           ...reduceFields({
+            excludeUnsortable,
             fields: field.fields,
             labelPrefix: combineLabel({ field, prefix: labelPrefix }),
             path: createNestedClientFieldPath(path, field),
@@ -83,6 +88,7 @@ export const reduceFields = ({
                 return [
                   ...tabFields,
                   ...reduceFields({
+                    excludeUnsortable,
                     fields: tab.fields,
                     labelPrefix,
                     path: isNamedTab ? createNestedClientFieldPath(path, field) : path,
