@@ -1036,16 +1036,23 @@ describe('General', () => {
     await page.locator('#field-title').fill(newTitle)
 
     // Open link in a new tab by holding down the Meta key
-    await page
-      .locator('header.app-header a[href="/admin/collections/posts"]')
-      .click({ modifiers: ['Meta'] })
+    const [newPage] = await Promise.all([
+      page.context().waitForEvent('page'),
+      page
+        .locator('header.app-header a[href="/admin/collections/posts"]')
+        .click({ modifiers: ['Meta'] }),
+    ])
 
-    // Locate the modal container
+    await newPage.waitForLoadState('domcontentloaded')
+
+    // Locate the modal container and ensure it is not visible
     const modalContainer = page.locator('.payload__modal-container')
     await expect(modalContainer).toBeHidden()
 
-    // Playwright doesn't open a new tab in headless mode, so we cannot check if the new tab is actually opened
-    // We can only check if the page URL stays the same as expected
+    // Ensure the new page is the correct URL
+    expect(newPage.url()).toContain('/admin/collections/posts')
+
+    // Ensure the original page is the correct URL
     expect(page.url()).toBe(postsUrl.edit(id))
   })
 
