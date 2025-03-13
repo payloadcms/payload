@@ -1024,6 +1024,27 @@ describe('General', () => {
     })
   })
 
+  test('should not open leave-without-saving modal if opening a new tab', async () => {
+    const { id } = await createPost()
+    await page.goto(postsUrl.edit(id))
+    const title = 'title'
+    await page.locator('#field-title').fill(title)
+    await saveDocHotkeyAndAssert(page)
+    await expect(page.locator('#field-title')).toHaveValue(title)
+
+    const newTitle = 'new title'
+    await page.locator('#field-title').fill(newTitle)
+
+    // Open link in a new tab by holding down the Meta key
+    await page
+      .locator('header.app-header a[href="/admin/collections/posts"]')
+      .click({ modifiers: ['Meta'] })
+
+    // Locate the modal container
+    const modalContainer = page.locator('.payload__modal-container')
+    await expect(modalContainer).toBeHidden()
+  })
+
   describe('preferences', () => {
     test('should successfully reset prefs after clicking reset button', async () => {
       await page.goto(`${serverURL}/admin/account`)
