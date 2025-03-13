@@ -241,7 +241,7 @@ export const sanitizeCollection = async (
   validateUseAsTitle(sanitized)
 
   // Enable custom order
-  if (collection.isSortable) {
+  if (collection.orderable) {
     addSortableFeatures(sanitized)
   }
 
