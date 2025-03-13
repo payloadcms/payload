@@ -870,20 +870,21 @@ export {
   ServerBlockNode,
 } from './features/blocks/server/nodes/BlocksNode.js'
 
-export { lexicalHTMLField } from './features/converters/lexicalToHtml/async/field/index.js'
+export { convertHTMLToLexical } from './features/converters/htmlToLexical/index.js'
 
+export { lexicalHTMLField } from './features/converters/lexicalToHtml/async/field/index.js'
 export { LinebreakHTMLConverter } from './features/converters/lexicalToHtml_deprecated/converter/converters/linebreak.js'
+
 export { ParagraphHTMLConverter } from './features/converters/lexicalToHtml_deprecated/converter/converters/paragraph.js'
 
 export { TabHTMLConverter } from './features/converters/lexicalToHtml_deprecated/converter/converters/tab.js'
-
 export { TextHTMLConverter } from './features/converters/lexicalToHtml_deprecated/converter/converters/text.js'
 export { defaultHTMLConverters } from './features/converters/lexicalToHtml_deprecated/converter/defaultConverters.js'
+
 export {
   convertLexicalNodesToHTML,
   convertLexicalToHTML,
 } from './features/converters/lexicalToHtml_deprecated/converter/index.js'
-
 export type { HTMLConverter } from './features/converters/lexicalToHtml_deprecated/converter/types.js'
 export {
   consolidateHTMLConverters,
@@ -893,7 +894,9 @@ export {
   HTMLConverterFeature,
   type HTMLConverterFeatureProps,
 } from './features/converters/lexicalToHtml_deprecated/index.js'
-export { convertHTMLToLexical } from './features/converters/htmlToLexical/index.js'
+export { convertLexicalToMarkdown } from './features/converters/lexicalToMarkdown/index.js'
+export { convertMarkdownToLexical } from './features/converters/markdownToLexical/index.js'
+
 export { getPayloadPopulateFn } from './features/converters/utilities/payloadPopulateFn.js'
 export { getRestPopulateFn } from './features/converters/utilities/restPopulateFn.js'
 export { TestRecorderFeature } from './features/debug/testRecorder/server/index.js'
