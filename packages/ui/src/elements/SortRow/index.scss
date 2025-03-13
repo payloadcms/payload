@@ -2,7 +2,13 @@
 
 @layer payload-default {
   .sort-row {
-    cursor: grab;
+    opacity: 0.3;
+    cursor: not-allowed;
+
+    &.active {
+      cursor: grab;
+      opacity: 1;
+    }
 
     &__icon {
       display: block;

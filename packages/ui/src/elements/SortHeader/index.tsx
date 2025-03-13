@@ -16,7 +16,7 @@ export type SortHeaderProps = {
 const baseClass = 'sort-header'
 
 export const SortHeader: React.FC<SortHeaderProps> = (props) => {
-  const { appearance, disable = false } = props
+  const { appearance } = props
   const { handleSortChange, query } = useListQuery()
   const { t } = useTranslation()
 
@@ -41,49 +41,25 @@ export const SortHeader: React.FC<SortHeaderProps> = (props) => {
         .filter(Boolean)
         .join(' ')}
     >
-      {!disable && (
-        <div className={`${baseClass}__buttons`}>
-          {sort === asc ? (
-            <button
-              className={[...ascClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
-              onClick={() => void handleSortChange(desc)}
-              type="button"
-            >
-              <SortUpIcon />
-            </button>
-          ) : (
-            <button
-              className={[...descClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
-              onClick={() => void handleSortChange(asc)}
-              type="button"
-            >
-              <SortDownIcon />
-            </button>
-          )}
-          {/* <button
-            aria-label={t('general:sortByLabelDirection', {
-              direction: t('general:ascending'),
-              label: 'custom order',
-            })}
+      <div className={`${baseClass}__buttons`}>
+        {sort === asc ? (
+          <button
             className={[...ascClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
-            onClick={() => void handleSortChange(asc)}
-            type="button"
-          >
-            <SortUpIcon />
-          </button> */}
-          {/* <button
-            aria-label={t('general:sortByLabelDirection', {
-              direction: t('general:descending'),
-              label: 'custom order',
-            })}
-            className={[...descClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
             onClick={() => void handleSortChange(desc)}
             type="button"
           >
-            <ChevronIcon />
-          </button> */}
-        </div>
-      )}
+            <SortUpIcon />
+          </button>
+        ) : (
+          <button
+            className={[...descClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
+            onClick={() => void handleSortChange(asc)}
+            type="button"
+          >
+            <SortDownIcon />
+          </button>
+        )}
+      </div>
     </div>
   )
 }
