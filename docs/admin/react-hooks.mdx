@@ -721,7 +721,7 @@ The `useDocumentInfo` hook provides information about the current document being
 | **`docPermissions`**                | The current document's permissions. Fallback to collection permissions when no id is present.           |
 | **`documentIsLocked`**              | Whether the document is currently locked by another user. More details](./locked-documents).                                               |
 | **`getDocPermissions`**             | Method to retrieve document-level permissions.                                                          |
-| **`getDocPreferences`**             | Method to retrieve document-level user preferences.                                                     |
+| **`getDocPreferences`**             | Method to retrieve document-level user preferences. [More details](./preferences).                                                    |
 | **`globalSlug`**                    | The slug of the global if editing a global document.                                                    |
 | **`hasPublishedDoc`**               | Whether the document has a published version.                                                           |
 | **`hasPublishPermission`**          | Whether the current user has permission to publish the document.                                        |
@@ -734,9 +734,9 @@ The `useDocumentInfo` hook provides information about the current document being
 | **`isLocked`**                      | Whether the document is locked. More details](./locked-documents).                                                                        |
 | **`lastUpdateTime`**                | Timestamp of the last update to the document.                                                           |
 | **`mostRecentVersionIsAutosaved`**  | Whether the most recent version is an autosaved version.                                                |
-| **`preferencesKey`**                | The `preferences` key to use when interacting with document-level user preferences.                     |
+| **`preferencesKey`**                | The `preferences` key to use when interacting with document-level user preferences. [More details](./preferences).                     |
 | **`savedDocumentData`**             | The saved data of the document.                                                                         |
-| **`setDocFieldPreferences`**        | Method to set preferences for a specific field.                                                         |
+| **`setDocFieldPreferences`**        | Method to set preferences for a specific field. [More details](./preferences).                                                         |
 | **`setDocumentTitle`**              | Method to set the document title.                                                                       |
 | **`setHasPublishedDoc`**            | Method to update whether the document has been published.                                               |
 | **`title`**                         | The title of the document.                                                                              |
