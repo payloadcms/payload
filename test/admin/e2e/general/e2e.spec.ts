@@ -1008,7 +1008,7 @@ describe('General', () => {
       const newTitle = 'new title'
       await page.locator('#field-title').fill(newTitle)
 
-      await page.locator('header.app-header a[href="/admin/collections/posts"]').click()
+      await page.locator(`header.app-header a[href="/admin/collections/posts"]`).click()
 
       // Locate the modal container
       const modalContainer = page.locator('.payload__modal-container')
@@ -1022,6 +1022,36 @@ describe('General', () => {
       // Assert that the class on the modal container changes to 'payload__modal-container--exitDone'
       await expect(modalContainer).toHaveClass(/payload__modal-container--exitDone/)
     })
+  })
+
+  test('should not open leave-without-saving modal if opening a new tab', async () => {
+    const title = 'title'
+    await page.goto(postsUrl.create)
+    await page.locator('#field-title').fill(title)
+    await expect(page.locator('#field-title')).toHaveValue(title)
+
+    const newTitle = 'new title'
+    await page.locator('#field-title').fill(newTitle)
+
+    // Open link in a new tab by holding down the Meta or Control key
+    const [newPage] = await Promise.all([
+      page.context().waitForEvent('page'),
+      page
+        .locator(`header.app-header a[href="/admin/collections/posts"]`)
+        .click({ modifiers: ['ControlOrMeta'] }),
+    ])
+
+    // Wait for navigation to complete in the new tab and ensure correct URL
+    await expect(newPage.locator('.list-header')).toBeVisible()
+    // using contain here, because after load the lists view will add query params like "?limit=10"
+    expect(newPage.url()).toContain(postsUrl.list)
+
+    // Locate the modal container and ensure it is not visible
+    const modalContainer = page.locator('.payload__modal-container')
+    await expect(modalContainer).toBeHidden()
+
+    // Ensure the original page is the correct URL
+    expect(page.url()).toBe(postsUrl.create)
   })
 
   describe('preferences', () => {
