@@ -19,6 +19,7 @@ import { i18n } from './i18n.js'
 import { defaultEditorFeatures } from './lexical/config/server/default.js'
 import { populateLexicalPopulationPromises } from './populateGraphQL/populateLexicalPopulationPromises.js'
 import { featuresInputToEditorConfig } from './utilities/editorConfigFactory.js'
+import { recurseNodes } from './utilities/forEachNodeRecursively.js'
 import { getGenerateImportMap } from './utilities/generateImportMap.js'
 import { getGenerateSchemaMap } from './utilities/generateSchemaMap.js'
 import { recurseNodeTree } from './utilities/recurseNodeTree.js'
@@ -852,6 +853,26 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
         }
 
         return outputSchema
+      },
+      traverseData: ({ data, onFields, onRelationship }) => {
+        recurseNodes({
+          callback: (node) => {
+            const traverseNodeData = finalSanitizedEditorConfig.features.traverseNodeData?.get(
+              node.type,
+            )
+
+            if (!traverseNodeData) {
+              return
+            }
+
+            traverseNodeData({
+              node,
+              onFields,
+              onRelationship,
+            })
+          },
+          nodes: data.root.children,
+        })
       },
       validate: richTextValidateHOC({
         editorConfig: finalSanitizedEditorConfig,

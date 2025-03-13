@@ -35,6 +35,7 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import sanitizeInternalFields from '../../utilities/sanitizeInternalFields.js'
+import { handleCascadePublish } from '../../versions/handleCascadePublish.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 import { buildAfterOperation } from './utils.js'
 
@@ -237,6 +238,20 @@ export const createOperation = async <
 
     if (!collectionConfig.upload.disableLocalStorage) {
       await uploadFiles(payload, filesToUpload, req)
+    }
+
+    if (
+      collectionConfig.versions.drafts &&
+      collectionConfig.versions.drafts.cascadePublish &&
+      !draft &&
+      data._status !== 'draft'
+    ) {
+      await handleCascadePublish({
+        collectionSlug: collectionConfig.slug,
+        doc: resultWithLocales,
+        fields: collectionConfig.flattenedFields,
+        req,
+      })
     }
 
     // /////////////////////////////////////

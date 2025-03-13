@@ -22,6 +22,7 @@ import { LinkNode } from '../nodes/LinkNode.js'
 import { linkPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
 import { transformExtraFields } from './transformExtraFields.js'
+import { traverseNodeDataHOC } from './traverseNodeData.js'
 import { linkValidation } from './validate.js'
 
 export type ExclusiveLinkCollectionsProps =
@@ -261,6 +262,7 @@ export const LinkFeature = createServerFeature<
           },
           graphQLPopulationPromises: [linkPopulationPromiseHOC(props)],
           node: LinkNode,
+          traverseNodeData: traverseNodeDataHOC(props),
           validations: [linkValidation(props, sanitizedFieldsWithoutText)],
         }),
       ].filter(Boolean) as Array<NodeWithHooks>,

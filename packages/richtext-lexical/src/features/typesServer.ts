@@ -8,15 +8,19 @@ import type {
   SerializedLexicalNode,
 } from 'lexical'
 import type {
+  CollectionSlug,
   Config,
   Field,
   FieldSchemaMap,
+  FlattenedField,
   JsonObject,
+  Payload,
   PayloadComponent,
   PayloadRequest,
   PopulateType,
   ReplaceAny,
   RequestContext,
+  RichTextAdapter,
   RichTextField,
   RichTextHooks,
   SanitizedConfig,
@@ -53,6 +57,12 @@ export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexica
   req: PayloadRequest
   showHiddenFields: boolean
   siblingDoc: JsonObject
+}) => void
+
+export type TraverseNodeData<T extends SerializedLexicalNode = SerializedLexicalNode> = (args: {
+  node: T
+  onFields?: (args: { data: any; fields: FlattenedField[] }) => void
+  onRelationship?: (args: { collectionSlug: CollectionSlug; id: number | string }) => void
 }) => void
 
 export type NodeValidation<T extends SerializedLexicalNode = SerializedLexicalNode> = ({
@@ -257,6 +267,7 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
   graphQLPopulationPromises?: Array<
     PopulationPromise<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>
   >
+
   /**
    * Just like payload fields, you can provide hooks which are run for this specific node. These are called Node Hooks.
    */
@@ -272,6 +283,7 @@ export type NodeWithHooks<T extends LexicalNode = any> = {
    * The actual lexical node needs to be provided here. This also supports [lexical node replacements](https://lexical.dev/docs/concepts/node-replacement).
    */
   node: Klass<T> | LexicalNodeReplacement
+  traverseNodeData?: TraverseNodeData<ReturnType<ReplaceAny<T, LexicalNode>['exportJSON']>>
   /**
    * This allows you to provide node validations, which are run when your document is being validated, alongside other payload fields.
    * You can use it to throw a validation error for a specific node in case its data is incorrect.
@@ -411,6 +423,7 @@ export type SanitizedServerFeatures = {
     beforeChange?: Map<string, Array<BeforeChangeNodeHook<SerializedLexicalNode>>>
     beforeValidate?: Map<string, Array<BeforeValidateNodeHook<SerializedLexicalNode>>>
   } /**  The node types mapped to their populationPromises */
+  traverseNodeData?: Map<string, TraverseNodeData>
   /**  The node types mapped to their validations */
   validations: Map<string, Array<NodeValidation>>
 } & Required<Pick<ResolvedServerFeature<any, any>, 'i18n' | 'nodes'>>

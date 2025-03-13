@@ -78,6 +78,8 @@ export interface Config {
     'custom-ids': CustomId;
     diff: Diff;
     media: Media;
+    'cascade-publish': CascadePublish;
+    'cascade-publish-relations': CascadePublishRelation;
     users: User;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -98,6 +100,8 @@ export interface Config {
     'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
     diff: DiffSelect<false> | DiffSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'cascade-publish': CascadePublishSelect<false> | CascadePublishSelect<true>;
+    'cascade-publish-relations': CascadePublishRelationsSelect<false> | CascadePublishRelationsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -113,6 +117,7 @@ export interface Config {
     'draft-with-max-global': DraftWithMaxGlobal;
     'disable-publish-global': DisablePublishGlobal;
     'localized-global': LocalizedGlobal;
+    'cascade-publish-global': CascadePublishGlobal;
   };
   globalsSelect: {
     'autosave-global': AutosaveGlobalSelect<false> | AutosaveGlobalSelect<true>;
@@ -120,6 +125,7 @@ export interface Config {
     'draft-with-max-global': DraftWithMaxGlobalSelect<false> | DraftWithMaxGlobalSelect<true>;
     'disable-publish-global': DisablePublishGlobalSelect<false> | DisablePublishGlobalSelect<true>;
     'localized-global': LocalizedGlobalSelect<false> | LocalizedGlobalSelect<true>;
+    'cascade-publish-global': CascadePublishGlobalSelect<false> | CascadePublishGlobalSelect<true>;
   };
   locale: 'en' | 'es' | 'de';
   user: User & {
@@ -397,6 +403,49 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cascade-publish".
+ */
+export interface CascadePublish {
+  id: string;
+  title?: string | null;
+  relation?: (string | null) | CascadePublishRelation;
+  lexical?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  slate?:
+    | {
+        [k: string]: unknown;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cascade-publish-relations".
+ */
+export interface CascadePublishRelation {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -558,6 +607,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'cascade-publish';
+        value: string | CascadePublish;
+      } | null)
+    | ({
+        relationTo: 'cascade-publish-relations';
+        value: string | CascadePublishRelation;
       } | null)
     | ({
         relationTo: 'users';
@@ -822,6 +879,29 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cascade-publish_select".
+ */
+export interface CascadePublishSelect<T extends boolean = true> {
+  title?: T;
+  relation?: T;
+  lexical?: T;
+  slate?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cascade-publish-relations_select".
+ */
+export interface CascadePublishRelationsSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -956,6 +1036,18 @@ export interface LocalizedGlobal {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cascade-publish-global".
+ */
+export interface CascadePublishGlobal {
+  id: string;
+  title?: string | null;
+  relation?: (string | null) | CascadePublishRelation;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "autosave-global_select".
  */
 export interface AutosaveGlobalSelect<T extends boolean = true> {
@@ -1005,6 +1097,18 @@ export interface DisablePublishGlobalSelect<T extends boolean = true> {
 export interface LocalizedGlobalSelect<T extends boolean = true> {
   title?: T;
   content?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cascade-publish-global_select".
+ */
+export interface CascadePublishGlobalSelect<T extends boolean = true> {
+  title?: T;
+  relation?: T;
   _status?: T;
   updatedAt?: T;
   createdAt?: T;

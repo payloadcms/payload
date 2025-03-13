@@ -16,6 +16,7 @@ import AutosaveGlobal from './globals/Autosave.js'
 import {
   autosaveCollectionSlug,
   autoSaveGlobalSlug,
+  cascadePublishRelationsSlug,
   draftCollectionSlug,
   draftGlobalSlug,
   localizedCollectionSlug,
@@ -2821,6 +2822,240 @@ describe('Versions', () => {
         expect(latestVersion.title.es).toBeFalsy()
         expect(latestVersion.title.en).toStrictEqual('New eng')
       })
+    })
+  })
+
+  describe('Cascade publish', () => {
+    it('should cascade publish collection', async () => {
+      const relation = await payload.create({
+        collection: 'cascade-publish-relations',
+        draft: true,
+        data: { title: 'Relation 1' },
+      })
+      expect(relation._status).toBe('draft')
+      const doc = await payload.create({
+        collection: 'cascade-publish',
+        draft: true,
+        data: { relation: relation.id, title: 'Cascade Publish 1' },
+      })
+      expect(doc._status).toBe('draft')
+
+      const publishedDoc = await payload.update({
+        collection: 'cascade-publish',
+        id: doc.id,
+        depth: 0,
+        data: { _status: 'published', title: 'Cascade Publish - published' },
+      })
+
+      expect(publishedDoc._status).toBe('published')
+
+      const publishedRelation = await payload.findByID({
+        collection: 'cascade-publish-relations',
+        id: relation.id,
+      })
+      // And Here it fails..
+      expect(publishedRelation._status).toBe('published')
+    })
+
+    it('should cascade publish collection with relationship data within Lexical', async () => {
+      const relation_1 = await payload.create({
+        collection: 'cascade-publish-relations',
+        draft: true,
+        data: { title: 'Relation 1', _status: 'draft' },
+      })
+      const relation_2 = await payload.create({
+        collection: 'cascade-publish-relations',
+        draft: true,
+        data: { title: 'Relation 2', _status: 'draft' },
+      })
+      const relation_3 = await payload.create({
+        collection: 'cascade-publish-relations',
+        draft: true,
+        data: { title: 'Relation 3', _status: 'draft' },
+      })
+
+      const doc = await payload.create({
+        collection: 'cascade-publish',
+        draft: true,
+        depth: 0,
+        data: {
+          _status: 'draft',
+          title: 'Cascade Publish 1',
+          lexical: {
+            root: {
+              children: [
+                {
+                  format: '',
+                  type: 'relationship',
+                  version: 2,
+                  relationTo: cascadePublishRelationsSlug,
+                  value: relation_1.id,
+                },
+                {
+                  children: [
+                    {
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: 'link to cascade relation',
+                      type: 'text',
+                      version: 1,
+                    },
+                  ],
+                  direction: 'ltr',
+                  format: '',
+                  indent: 0,
+                  id: '665d10938106ab380c7f3730',
+                  type: 'link',
+                  version: 2,
+                  fields: {
+                    url: 'https://',
+                    doc: {
+                      value: relation_2.id,
+                      relationTo: cascadePublishRelationsSlug,
+                    },
+                    newTab: false,
+                    linkType: 'internal',
+                  },
+                },
+                {
+                  format: '',
+                  type: 'block',
+                  version: 2,
+                  fields: {
+                    id: '65298b13db4ef8c744a7faaa',
+                    relation: relation_3.id,
+                    blockName: 'Some Block Node, with Relationship Field',
+                    blockType: 'someBlock',
+                  },
+                },
+              ],
+              direction: 'ltr',
+              format: '',
+              indent: 0,
+              type: 'root',
+              version: 1,
+            },
+          },
+        },
+      })
+
+      const publishedDoc = await payload.update({
+        collection: 'cascade-publish',
+        id: doc.id,
+        depth: 0,
+        draft: false,
+        data: { _status: 'published', title: 'Cascade Publish - published' },
+      })
+      expect(publishedDoc._status).toBe('published')
+
+      const publishedRelation_1 = await payload.findByID({
+        collection: 'cascade-publish-relations',
+        id: relation_1.id,
+      })
+      expect(publishedRelation_1._status).toBe('published')
+
+      const publishedRelation_2 = await payload.findByID({
+        collection: 'cascade-publish-relations',
+        id: relation_2.id,
+      })
+      expect(publishedRelation_2._status).toBe('published')
+
+      const publishedRelation_3 = await payload.findByID({
+        collection: 'cascade-publish-relations',
+        id: relation_3.id,
+      })
+      expect(publishedRelation_3._status).toBe('published')
+    })
+
+    it('should cascade publish collection with relationship data within Slate', async () => {
+      const relation_1 = await payload.create({
+        collection: 'cascade-publish-relations',
+        draft: true,
+        data: { title: 'Relation 1', _status: 'draft' },
+      })
+      const relation_2 = await payload.create({
+        collection: 'cascade-publish-relations',
+        draft: true,
+        data: { title: 'Relation 2', _status: 'draft' },
+      })
+
+      const doc = await payload.create({
+        collection: 'cascade-publish',
+        draft: true,
+        depth: 0,
+        data: {
+          _status: 'draft',
+          title: 'Cascade Publish 1',
+          slate: [
+            {
+              type: 'relationship',
+              relationTo: cascadePublishRelationsSlug,
+              value: { id: relation_1.id },
+            },
+            {
+              type: 'link',
+              linkType: 'internal',
+              doc: {
+                relationTo: cascadePublishRelationsSlug,
+                value: relation_2.id,
+              },
+            },
+          ],
+        },
+      })
+
+      const publishedDoc = await payload.update({
+        collection: 'cascade-publish',
+        id: doc.id,
+        depth: 0,
+        draft: false,
+        data: { _status: 'published', title: 'Cascade Publish - published' },
+      })
+      expect(publishedDoc._status).toBe('published')
+
+      const publishedRelation_1 = await payload.findByID({
+        collection: 'cascade-publish-relations',
+        id: relation_1.id,
+      })
+      expect(publishedRelation_1._status).toBe('published')
+
+      const publishedRelation_2 = await payload.findByID({
+        collection: 'cascade-publish-relations',
+        id: relation_2.id,
+      })
+      expect(publishedRelation_2._status).toBe('published')
+    })
+
+    it('should cascade publish global', async () => {
+      const relation = await payload.create({
+        collection: 'cascade-publish-relations',
+        draft: true,
+        data: { title: 'Relation to global', _status: 'draft' },
+      })
+      expect(relation._status).toBe('draft')
+      const globalDoc = await payload.updateGlobal({
+        slug: 'cascade-publish-global',
+        draft: true,
+        depth: 0,
+        data: { _status: 'draft', title: 'Some title 1', relation: relation.id },
+      })
+      expect(globalDoc._status).toBe('draft')
+
+      const publishedGlobalDoc = await payload.updateGlobal({
+        slug: 'cascade-publish-global',
+        draft: false,
+        depth: 0,
+        data: { _status: 'published' },
+      })
+      expect(publishedGlobalDoc._status).toBe('published')
+
+      const relationDoc = await payload.findByID({
+        collection: 'cascade-publish-relations',
+        id: relation.id,
+      })
+      expect(relationDoc._status).toBe('published')
     })
   })
 })

@@ -5,9 +5,14 @@ import type { JSONSchema4 } from 'json-schema'
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { Config, PayloadComponent, SanitizedConfig } from '../config/types.js'
 import type { ValidationFieldError } from '../errors/ValidationError.js'
-import type { FieldAffectingData, RichTextField, Validate } from '../fields/config/types.js'
+import type {
+  FieldAffectingData,
+  FlattenedField,
+  RichTextField,
+  Validate,
+} from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { RequestContext } from '../index.js'
+import type { CollectionSlug, RequestContext } from '../index.js'
 import type { JsonObject, PayloadRequest, PopulateType } from '../types/index.js'
 import type { RichTextFieldClientProps } from './fields/RichText.js'
 import type { FieldSchemaMap } from './types.js'
@@ -234,6 +239,16 @@ type RichTextAdapterBase<
     interfaceNameDefinitions: Map<string, JSONSchema4>
     isRequired: boolean
   }) => JSONSchema4
+  /**
+   * Executes onRelationship for every relationship field in the richtext data.
+   * Executes onFields for every node that has its fields in the richtext data.
+   */
+  traverseData?: (args: {
+    data: Value
+    field: RichTextField<Value, AdapterProps, ExtraFieldProperties>
+    onFields?: (args: { data: any; fields: FlattenedField[] }) => void
+    onRelationship?: (args: { collectionSlug: CollectionSlug; id: number | string }) => void
+  }) => void
   validate: Validate<
     Value,
     Value,

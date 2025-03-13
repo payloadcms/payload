@@ -6,6 +6,7 @@ import { createNode } from '../../typeUtilities.js'
 import { relationshipPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
 import { RelationshipServerNode } from './nodes/RelationshipNode.js'
+import { traverseNodeData } from './traverseNodeData.js'
 
 export type ExclusiveRelationshipFeatureProps =
   | {
@@ -102,6 +103,7 @@ export const RelationshipFeature = createServerFeature<
             ],
           },
           node: RelationshipServerNode,
+          traverseNodeData,
         }),
       ],
     }
