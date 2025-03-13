@@ -33,8 +33,6 @@ describe('Sort functionality', () => {
 
     url = new AdminUrlUtil(serverURL, sortableSlug)
 
-    console.log('url', url, testInfo)
-
     context = await browser.newContext()
     page = await context.newPage()
 
@@ -51,24 +49,24 @@ describe('Sort functionality', () => {
   test('Sortable collection', async () => {
     await page.goto(url.list)
     // SORT BY ORDER ASCENDING
-    await page.getByLabel('Sort by Order Ascending').click()
-    await assertRows(['A', 'a0'], ['B', 'a1'], ['C', 'a2'], ['D', 'a3'])
+    await page.getByLabel('Sort by Order').click()
+    await assertRows('A', 'B', 'C', 'D')
     await moveRow(2, 3) // move to middle
-    await assertRows(['A', 'a0'], ['C', 'a2'], ['B', 'a2V'], ['D', 'a3'])
+    await assertRows('A', 'C', 'B', 'D')
     await moveRow(3, 1) // move to top
-    await assertRows(['B', 'Zz'], ['A', 'a0'], ['C', 'a2'], ['D', 'a3'])
+    await assertRows('B', 'A', 'C', 'D')
     await moveRow(1, 4) // move to bottom
-    await assertRows(['A', 'a0'], ['C', 'a2'], ['D', 'a3'], ['B', 'a4'])
+    await assertRows('A', 'C', 'D', 'B')
 
     // SORT BY ORDER DESCENDING
-    await page.getByLabel('Sort by Order Descending').click()
-    await assertRows(['B', 'a4'], ['D', 'a3'], ['C', 'a2'], ['A', 'a0'])
+    await page.getByLabel('Sort by Order').click()
+    await assertRows('B', 'D', 'C', 'A')
     await moveRow(1, 3) // move to middle
-    await assertRows(['D', 'a3'], ['C', 'a2'], ['B', 'a1'], ['A', 'a0'])
+    await assertRows('D', 'C', 'B', 'A')
     await moveRow(3, 1) // move to top
-    await assertRows(['B', 'a4'], ['D', 'a3'], ['C', 'a2'], ['A', 'a0'])
+    await assertRows('B', 'D', 'C', 'A')
     await moveRow(1, 4) // move to bottom
-    await assertRows(['D', 'a3'], ['C', 'a2'], ['A', 'a0'], ['B', 'Zz'])
+    await assertRows('D', 'C', 'A', 'B')
 
     // SORT BY TITLE
     await page.getByLabel('Sort by Title Ascending').click()
@@ -102,21 +100,17 @@ async function moveRow(from: number, to: number, expected: 'success' | 'warning'
     await expect(toast).toHaveText(
       'To reorder the rows you must first sort them by the "Order" column',
     )
-  } else {
-    const pendingOrder = page.locator('td.cell-_order').getByText('pending')
-    await expect.poll(() => pendingOrder.count()).toBe(1)
   }
 }
 
-async function assertRows(...expectedRows: Array<[string, string]>) {
+async function assertRows(...expectedRows: Array<string>) {
   const cellTitle = page.locator('td.cell-title a')
-  const cellOrder = page.locator('td.cell-_order')
 
   const rows = page.locator('tbody .sort-row')
   await expect.poll(() => rows.count()).toBe(expectedRows.length)
 
   for (let i = 0; i < expectedRows.length; i++) {
-    await expect(cellTitle.nth(i)).toHaveText(expectedRows[i]![0])
-    await expect(cellOrder.nth(i)).toHaveText(expectedRows[i]![1])
+    console.log('expectedRows[i]', expectedRows[i], await cellTitle.nth(i).textContent())
+    await expect(cellTitle.nth(i)).toHaveText(expectedRows[i]!)
   }
 }

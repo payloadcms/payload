@@ -42,21 +42,29 @@ export const SortHeader: React.FC<SortHeaderProps> = (props) => {
         .join(' ')}
     >
       <div className={`${baseClass}__buttons`}>
-        {sort === asc ? (
+        {sort === desc ? (
           <button
-            className={[...ascClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
-            onClick={() => void handleSortChange(desc)}
-            type="button"
-          >
-            <SortUpIcon />
-          </button>
-        ) : (
-          <button
+            aria-label={t('general:sortByLabelDirection', {
+              direction: t('general:ascending'),
+              label: 'Order',
+            })}
             className={[...descClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
             onClick={() => void handleSortChange(asc)}
             type="button"
           >
             <SortDownIcon />
+          </button>
+        ) : (
+          <button
+            aria-label={t('general:sortByLabelDirection', {
+              direction: t('general:descending'),
+              label: 'Order',
+            })}
+            className={[...ascClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
+            onClick={() => void handleSortChange(desc)}
+            type="button"
+          >
+            <SortUpIcon />
           </button>
         )}
       </div>
