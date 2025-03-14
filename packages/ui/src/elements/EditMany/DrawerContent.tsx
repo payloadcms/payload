@@ -10,6 +10,7 @@ import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo } from 'react'
 
 import type { FormProps } from '../../forms/Form/index.js'
+import type { OnFieldSelect } from '../FieldSelect/index.js'
 
 import { useForm } from '../../forms/Form/context.js'
 import { Form } from '../../forms/Form/index.js'
@@ -27,7 +28,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 import { mergeListSearchAndWhere } from '../../utilities/mergeListSearchAndWhere.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
-import { BulkEditFieldSelect } from './FieldSelect.js'
+import { FieldSelect } from '../FieldSelect/index.js'
 import { baseClass, type EditManyProps } from './index.js'
 import './index.scss'
 
@@ -111,26 +112,26 @@ const SaveDraftButton: React.FC<{
 export const EditManyDrawerContent: React.FC<
   {
     drawerSlug: string
-    selected: FieldWithPathClient[]
-    setSelected: React.Dispatch<React.SetStateAction<FieldWithPathClient[]>>
+    selectedFields: FieldWithPathClient[]
+    setSelectedFields: React.Dispatch<React.SetStateAction<FieldWithPathClient[]>>
   } & EditManyProps
 > = (props) => {
   const {
     collection: { slug, fields, labels: { plural, singular } } = {},
     collection,
     drawerSlug,
-    selected,
-    setSelected,
+    selectedFields,
+    setSelectedFields,
   } = props
 
   const select = useMemo<SelectType>(() => {
     return unflatten(
-      selected.reduce((acc, field) => {
+      selectedFields.reduce((acc, field) => {
         acc[field.path] = true
         return acc
       }, {} as SelectType),
     )
-  }, [selected])
+  }, [selectedFields])
 
   const { permissions, user } = useAuth()
 
@@ -207,6 +208,37 @@ export const EditManyDrawerContent: React.FC<
     closeModal(drawerSlug)
   }
 
+  const onFieldSelect = useCallback<OnFieldSelect>(
+    async ({ dispatchFields, formState, selected }) => {
+      if (selected === null) {
+        setSelectedFields([])
+      } else {
+        setSelectedFields(selected.map(({ value }) => value))
+      }
+
+      const { state } = await getFormState({
+        collectionSlug: collection.slug,
+        docPermissions: collectionPermissions,
+        docPreferences: null,
+        formState,
+        operation: 'update',
+        schemaPath: collection.slug,
+        select: unflatten(
+          selected.reduce((acc, option) => {
+            acc[option.value.path] = true
+            return acc
+          }, {} as SelectType),
+        ),
+      })
+
+      dispatchFields({
+        type: 'UPDATE_MANY',
+        formState: state,
+      })
+    },
+    [getFormState, collection.slug, collectionPermissions, setSelectedFields],
+  )
+
   return (
     <DocumentInfoProvider
       collectionSlug={slug}
@@ -240,15 +272,10 @@ export const EditManyDrawerContent: React.FC<
             </button>
           </div>
           <Form className={`${baseClass}__form`} onChange={[onChange]} onSuccess={onSuccess}>
-            <BulkEditFieldSelect
-              collectionPermissions={collectionPermissions}
-              collectionSlug={slug}
-              fields={fields}
-              onChange={setSelected}
-            />
-            {selected.length === 0 ? null : (
+            <FieldSelect fields={fields} onChange={onFieldSelect} />
+            {selectedFields.length === 0 ? null : (
               <RenderFields
-                fields={selected}
+                fields={selectedFields}
                 parentIndexPath=""
                 parentPath=""
                 parentSchemaPath={slug}
@@ -264,17 +291,17 @@ export const EditManyDrawerContent: React.FC<
                       <React.Fragment>
                         <SaveDraftButton
                           action={`${serverURL}${apiRoute}/${slug}${queryString}&draft=true`}
-                          disabled={selected.length === 0}
+                          disabled={selectedFields.length === 0}
                         />
                         <PublishButton
                           action={`${serverURL}${apiRoute}/${slug}${queryString}&draft=true`}
-                          disabled={selected.length === 0}
+                          disabled={selectedFields.length === 0}
                         />
                       </React.Fragment>
                     ) : (
                       <Submit
                         action={`${serverURL}${apiRoute}/${slug}${queryString}`}
-                        disabled={selected.length === 0}
+                        disabled={selectedFields.length === 0}
                       />
                     )}
                   </div>
