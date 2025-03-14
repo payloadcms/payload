@@ -65,6 +65,9 @@ export const FileCell: React.FC<FileCellProps> = ({
       fileSrc = bestFit.url || fileSrc
     }
 
+    const uploadConfig = collectionConfig?.upload
+    const imageCacheTag = uploadConfig?.cacheTags && rowData?.updatedAt
+
     return (
       <div className={baseClass}>
         <Thumbnail
@@ -75,8 +78,9 @@ export const FileCell: React.FC<FileCellProps> = ({
             filename,
           }}
           fileSrc={fileSrc}
+          imageCacheTag={imageCacheTag}
           size="small"
-          uploadConfig={collectionConfig?.upload}
+          uploadConfig={uploadConfig}
         />
         <span className={`${baseClass}__filename`}>{String(filename)}</span>
       </div>
