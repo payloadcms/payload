@@ -1,6 +1,10 @@
+## [2.32.2](https://github.com/payloadcms/payload/compare/v2.32.1...v2.32.2) (2025-03-14)
+
+Bump critical deps ([#11705](https://github.com/payloadcms/payload/pull/11705))
+
 ## [2.32.1](https://github.com/payloadcms/payload/compare/v2.32.0...v2.32.1) (2025-03-14)
 
-Bumps dependencies ([#11702](https://github.com/payloadcms/payload/pull/11702)) ([#11705](https://github.com/payloadcms/payload/pull/11705))
+Bumps dependencies ([#11702](https://github.com/payloadcms/payload/pull/11702))
 
 ### Bug Fixes
 
