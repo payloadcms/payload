@@ -17,9 +17,22 @@ export const checkFileAccess = async ({
   if (filename.includes('../') || filename.includes('..\\')) {
     throw new Forbidden(req.t)
   }
-
   const { config } = collection
-  const accessResult = await executeAccess({ isReadingStaticFile: true, req }, config.access.read)
+
+  const data = await req.payload.db.findOne({
+    collection: config.slug,
+    req,
+    where: {
+      filename: {
+        equals: filename,
+      },
+    },
+  })
+
+  const accessResult = await executeAccess(
+    { id: data.id, data, isReadingStaticFile: true, req },
+    config.access.read,
+  )
 
   if (typeof accessResult === 'object') {
     const queryToBuild: Where = {
