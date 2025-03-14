@@ -12,7 +12,9 @@ import { Thumbnail } from '../../../../Thumbnail/index.js'
 import './index.scss'
 
 const baseClass = 'file'
-const targetThumbnailSize = 100
+
+const targetThumbnailSizeMin = 40
+const targetThumbnailSizeMax = 180
 
 export interface FileCellProps
   extends DefaultCellComponentProps<TextFieldClient | UploadFieldClient> {
@@ -38,17 +40,29 @@ export const FileCell: React.FC<FileCellProps> = ({
       rowData?.mimeType.startsWith('image') &&
       rowData?.sizes
     ) {
-      fileSrc =
-        Object.values<{ url?: string; width?: number }>(rowData.sizes).reduce(
-          (closest, current) => {
-            const size = current.width
-            if (!size || size < targetThumbnailSize) {
-              return closest
-            }
-            return !closest?.width || size < closest?.width ? current : closest
-          },
-          {},
-        )?.url || fileSrc
+      const sizes = Object.values<{ url?: string; width?: number }>(rowData.sizes)
+
+      const bestFit = sizes.reduce((closest, current) => {
+        if (!current.width) {
+          return closest
+        }
+
+        if (current.width >= targetThumbnailSizeMin && current.width <= targetThumbnailSizeMax) {
+          return !closest.width || current.width < closest.width ? current : closest
+        }
+
+        if (
+          !closest.width ||
+          (closest.width < targetThumbnailSizeMin && current.width > closest.width) ||
+          (closest.width > targetThumbnailSizeMax && current.width < closest.width)
+        ) {
+          return current
+        }
+
+        return closest
+      }, {})
+
+      fileSrc = bestFit.url || fileSrc
     }
 
     return (
