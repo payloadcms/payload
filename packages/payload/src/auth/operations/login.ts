@@ -184,7 +184,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     }
 
     user.collection = collectionConfig.slug
-    user._strategy = args.req.user._strategy
+    user._strategy = 'local-jwt'
 
     if (isLocked(new Date(user.lockUntil).getTime())) {
       throw new LockedAuth(req.t)

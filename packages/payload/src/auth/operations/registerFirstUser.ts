@@ -93,16 +93,14 @@ export const registerFirstUserOperation = async <TSlug extends CollectionSlug>(
     // Log in new user
     // /////////////////////////////////////
 
-    const { exp, token, user } = await payload.login({
+    const { exp, token } = await payload.login({
       ...args,
       collection: slug,
       req,
     })
 
-    if (user) {
-      user.collection = slug
-      user._strategy = req.user ? req.user._strategy : 'local'
-    }
+    result.collection = slug
+    result._strategy = 'local-jwt'
 
     if (shouldCommit) {
       await commitTransaction(req)
@@ -111,7 +109,7 @@ export const registerFirstUserOperation = async <TSlug extends CollectionSlug>(
     return {
       exp,
       token,
-      user,
+      user: result,
     }
   } catch (error: unknown) {
     await killTransaction(req)
