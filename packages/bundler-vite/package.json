@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/bundler-vite",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "The officially supported Vite bundler adapter for Payload",
   "repository": {
     "type": "git",
