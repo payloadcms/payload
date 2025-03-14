@@ -31,7 +31,8 @@ const query: Where = {
 _The exact query syntax will depend on the API you are using, but the concepts are the same across all APIs. [More details](#writing-queries)._
 
 <Banner>
-  **Tip:** You can also use queries within [Access Control](../access-control/overview) functions.
+  **Tip:** You can also use queries within [Access
+  Control](../access-control/overview) functions.
 </Banner>
 
 ## Operators
@@ -57,8 +58,9 @@ The following operators are available for use in queries:
 | `intersects`         | For [Point Fields](../fields/point) to filter documents based on whether points intersect with the given area defined in GeoJSON. [Example](../fields/point#querying-intersects) |
 
 <Banner type="success">
-  **Tip:** If you know your users will be querying on certain fields a lot, add `index: true` to the
-  Field Config. This will speed up searches using that field immensely.
+  **Tip:** If you know your users will be querying on certain fields a
+  lot, add `index: true` to the Field Config. This will speed up
+  searches using that field immensely.
 </Banner>
 
 ### And / Or Logic
@@ -184,7 +186,9 @@ const getPosts = async () => {
     { addQueryPrefix: true },
   )
 
-  const response = await fetch(`http://localhost:3000/api/posts${stringifiedQuery}`)
+  const response = await fetch(
+    `http://localhost:3000/api/posts${stringifiedQuery}`,
+  )
   // Continue to handle the response below...
 }
 ```

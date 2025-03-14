@@ -110,7 +110,12 @@ export const CustomEmailFieldServer: EmailFieldServerComponent = ({
   permissions,
 }) => {
   return (
-    <EmailField field={clientField} path={path} schemaPath={schemaPath} permissions={permissions} />
+    <EmailField
+      field={clientField}
+      path={path}
+      schemaPath={schemaPath}
+      permissions={permissions}
+    />
   )
 }
 ```
@@ -123,7 +128,9 @@ import React from 'react'
 import { EmailField } from '@payloadcms/ui'
 import type { EmailFieldClientComponent } from 'payload'
 
-export const CustomEmailFieldClient: EmailFieldClientComponent = (props) => {
+export const CustomEmailFieldClient: EmailFieldClientComponent = (
+  props,
+) => {
   return <EmailField {...props} />
 }
 ```
@@ -137,18 +144,16 @@ import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
 import type { EmailFieldLabelServerComponent } from 'payload'
 
-export const CustomEmailFieldLabelServer: EmailFieldLabelServerComponent = ({
-  clientField,
-  path,
-}) => {
-  return (
-    <FieldLabel
-      label={clientField?.label || clientField?.name}
-      path={path}
-      required={clientField?.required}
-    />
-  )
-}
+export const CustomEmailFieldLabelServer: EmailFieldLabelServerComponent =
+  ({ clientField, path }) => {
+    return (
+      <FieldLabel
+        label={clientField?.label || clientField?.name}
+        path={path}
+        required={clientField?.required}
+      />
+    )
+  }
 ```
 
 #### Client Component
@@ -159,7 +164,14 @@ import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
 import type { EmailFieldLabelClientComponent } from 'payload'
 
-export const CustomEmailFieldLabelClient: EmailFieldLabelClientComponent = ({ field, path }) => {
-  return <FieldLabel label={field?.label || field?.name} path={path} required={field?.required} />
-}
+export const CustomEmailFieldLabelClient: EmailFieldLabelClientComponent =
+  ({ field, path }) => {
+    return (
+      <FieldLabel
+        label={field?.label || field?.name}
+        path={path}
+        required={field?.required}
+      />
+    )
+  }
 ```

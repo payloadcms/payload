@@ -36,7 +36,9 @@ const Customer: CollectionConfig = {
     beforeChange: [
       async ({ context, data }) => {
         // assign the customerData to context for use later
-        context.customerData = await fetchCustomerData(data.customerID)
+        context.customerData = await fetchCustomerData(
+          data.customerID,
+        )
         return {
           ...data,
           // some data we use here

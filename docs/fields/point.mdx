@@ -26,7 +26,9 @@ export const MyPointField: Field = {
 }
 ```
 
-<Banner type="warning">**Important:** The Point Field currently is not supported in SQLite.</Banner>
+<Banner type="warning">
+  **Important:** The Point Field currently is not supported in SQLite.
+</Banner>
 
 ## Config
 
@@ -146,7 +148,12 @@ export const CustomPointFieldServer: PointFieldServerComponent = ({
   permissions,
 }) => {
   return (
-    <PointField field={clientField} path={path} schemaPath={schemaPath} permissions={permissions} />
+    <PointField
+      field={clientField}
+      path={path}
+      schemaPath={schemaPath}
+      permissions={permissions}
+    />
   )
 }
 ```
@@ -159,7 +166,9 @@ import React from 'react'
 import { PointField } from '@payloadcms/ui'
 import type { PointFieldClientComponent } from 'payload'
 
-export const CustomPointFieldClient: PointFieldClientComponent = (props) => {
+export const CustomPointFieldClient: PointFieldClientComponent = (
+  props,
+) => {
   return <PointField {...props} />
 }
 ```
@@ -173,18 +182,16 @@ import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
 import type { PointFieldLabelServerComponent } from 'payload'
 
-export const CustomPointFieldLabelServer: PointFieldLabelServerComponent = ({
-  clientField,
-  path,
-}) => {
-  return (
-    <FieldLabel
-      label={clientField?.label || clientField?.name}
-      path={path}
-      required={clientField?.required}
-    />
-  )
-}
+export const CustomPointFieldLabelServer: PointFieldLabelServerComponent =
+  ({ clientField, path }) => {
+    return (
+      <FieldLabel
+        label={clientField?.label || clientField?.name}
+        path={path}
+        required={clientField?.required}
+      />
+    )
+  }
 ```
 
 #### Client Component
@@ -195,7 +202,14 @@ import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
 import type { PointFieldLabelClientComponent } from 'payload'
 
-export const CustomPointFieldLabelClient: PointFieldLabelClientComponent = ({ field, path }) => {
-  return <FieldLabel label={field?.label || field?.name} path={path} required={field?.required} />
-}
+export const CustomPointFieldLabelClient: PointFieldLabelClientComponent =
+  ({ field, path }) => {
+    return (
+      <FieldLabel
+        label={field?.label || field?.name}
+        path={path}
+        required={field?.required}
+      />
+    )
+  }
 ```

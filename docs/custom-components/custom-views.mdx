@@ -86,9 +86,11 @@ const config = buildConfig({
 ```
 
 <Banner type="warning">
-  **Note:** Routes are cascading, so unless explicitly given the `exact` property, they will match
-  on URLs that simply _start_ with the route's path. This is helpful when creating catch-all routes
-  in your application. Alternatively, define your nested route _before_ your parent route.
+  **Note:** Routes are cascading, so unless explicitly given the
+  `exact` property, they will match on URLs that simply _start_ with
+  the route's path. This is helpful when creating catch-all routes in
+  your application. Alternatively, define your nested route _before_
+  your parent route.
 </Banner>
 
 ## Building Custom Views
@@ -132,8 +134,9 @@ Your Custom Views will be provided with the following props:
 | `payload`        | The [Payload](../local-api/overview) class.                                                                                        |
 
 <Banner type="warning">
-  **Note:** Some views may receive additional props, such as [Collection Views](#collection-views)
-  and [Global Views](#global-views). See the relevant section for more details.
+  **Note:** Some views may receive additional props, such as
+  [Collection Views](#collection-views) and [Global
+  Views](#global-views). See the relevant section for more details.
 </Banner>
 
 Here is an example of a Custom View component:
@@ -155,8 +158,9 @@ export function MyCustomView(props: AdminViewServerProps) {
 ```
 
 <Banner type="success">
-  **Tip:** For consistent layout and navigation, you may want to wrap your Custom View with one of
-  the built-in [Template](./overview#templates).
+  **Tip:** For consistent layout and navigation, you may want to wrap
+  your Custom View with one of the built-in
+  [Template](./overview#templates).
 </Banner>
 
 ### View Templates
@@ -172,7 +176,11 @@ import { DefaultTemplate } from '@payloadcms/next/templates'
 import { Gutter } from '@payloadcms/ui'
 import React from 'react'
 
-export function MyCustomView({ initPageResult, params, searchParams }: AdminViewServerProps) {
+export function MyCustomView({
+  initPageResult,
+  params,
+  searchParams,
+}: AdminViewServerProps) {
   return (
     <DefaultTemplate
       i18n={initPageResult.req.i18n}
@@ -205,7 +213,9 @@ import type { AdminViewServerProps } from 'payload'
 import { Gutter } from '@payloadcms/ui'
 import React from 'react'
 
-export function MyCustomView({ initPageResult }: AdminViewServerProps) {
+export function MyCustomView({
+  initPageResult,
+}: AdminViewServerProps) {
   const {
     req: { user },
   } = initPageResult
@@ -294,8 +304,9 @@ export const MyCollectionConfig: CollectionConfig = {
 ```
 
 <Banner type="success">
-  **Reminder:** The `edit` key is comprised of various nested views, known as Document Views, that
-  relate to the same Collection Document. [More details](./document-views).
+  **Reminder:** The `edit` key is comprised of various nested views,
+  known as Document Views, that relate to the same Collection
+  Document. [More details](./document-views).
 </Banner>
 
 The following options are available:
@@ -339,8 +350,9 @@ export const MyGlobalConfig: SanitizedGlobalConfig = {
 ```
 
 <Banner type="success">
-  **Reminder:** The `edit` key is comprised of various nested views, known as Document Views, that
-  relate to the same Global Document. [More details](./document-views).
+  **Reminder:** The `edit` key is comprised of various nested views,
+  known as Document Views, that relate to the same Global Document.
+  [More details](./document-views).
 </Banner>
 
 The following options are available:

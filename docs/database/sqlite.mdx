@@ -74,7 +74,12 @@ const posts = await payload.db.drizzle.query.posts.findMany()
 const result = await payload.db.drizzle
   .select()
   .from(posts)
-  .where(and(eq(posts.id, 50), sql`lower(${posts.title}) = 'example post title'`))
+  .where(
+    and(
+      eq(posts.id, 50),
+      sql`lower(${posts.title}) = 'example post title'`,
+    ),
+  )
 ```
 
 ## Tables and relations
@@ -108,7 +113,10 @@ Runs before the schema is built. You can use this hook to extend your database s
 
 ```ts
 import { sqliteAdapter } from '@payloadcms/db-sqlite'
-import { integer, sqliteTable } from '@payloadcms/db-sqlite/drizzle/sqlite-core'
+import {
+  integer,
+  sqliteTable,
+} from '@payloadcms/db-sqlite/drizzle/sqlite-core'
 
 sqliteAdapter({
   beforeSchemaInit: [
@@ -132,7 +140,12 @@ To quickly generate the Drizzle schema from your database you can use [Drizzle I
 You should get the `schema.ts` file which may look like this:
 
 ```ts
-import { sqliteTable, text, uniqueIndex, integer } from 'drizzle-orm/sqlite-core'
+import {
+  sqliteTable,
+  text,
+  uniqueIndex,
+  integer,
+} from 'drizzle-orm/sqlite-core'
 
 export const users = sqliteTable('users', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -186,7 +199,10 @@ The following example adds the `extra_integer_column` column and a composite ind
 
 ```ts
 import { sqliteAdapter } from '@payloadcms/db-sqlite'
-import { index, integer } from '@payloadcms/db-sqlite/drizzle/sqlite-core'
+import {
+  index,
+  integer,
+} from '@payloadcms/db-sqlite/drizzle/sqlite-core'
 import { buildConfig } from 'payload'
 
 export default buildConfig({
@@ -214,10 +230,9 @@ export default buildConfig({
             extraIntegerColumn: integer('extra_integer_column'),
           },
           extraConfig: (table) => ({
-            country_city_composite_index: index('country_city_composite_index').on(
-              table.country,
-              table.city,
-            ),
+            country_city_composite_index: index(
+              'country_city_composite_index',
+            ).on(table.country, table.city),
           }),
         })
 

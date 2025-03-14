@@ -27,8 +27,8 @@ export default buildConfig({
 ```
 
 <Banner type="success">
-  **Tip:** If your Collection is only ever meant to contain a single Document, consider using a
-  [Global](./globals) instead.
+  **Tip:** If your Collection is only ever meant to contain a single
+  Document, consider using a [Global](./globals) instead.
 </Banner>
 
 ## Config Options
@@ -53,9 +53,10 @@ export const Posts: CollectionConfig = {
 
 <Banner type="success">
   **Reminder:** For more complex examples, see the
-  [Templates](https://github.com/payloadcms/payload/tree/main/templates) and
-  [Examples](https://github.com/payloadcms/payload/tree/main/examples) directories in the Payload
-  repository.
+  [Templates](https://github.com/payloadcms/payload/tree/main/templates)
+  and
+  [Examples](https://github.com/payloadcms/payload/tree/main/examples)
+  directories in the Payload repository.
 </Banner>
 
 The following options are available:
@@ -200,7 +201,8 @@ The following options are available:
 | `Upload`          | Replace the default Upload component within the Edit View. [Upload](../upload/overview) must be enabled. [More details](../custom-components/edit-view#upload).                                           |
 
 <Banner type="success">
-  **Note:** For details on how to build Custom Components, see [Building Custom
+  **Note:** For details on how to build Custom Components, see
+  [Building Custom
   Components](../custom-components/overview#building-custom-components).
 </Banner>
 
@@ -253,8 +255,9 @@ export const Posts: CollectionConfig = {
 ```
 
 <Banner type="warning">
-  **Tip:** If you are adding `listSearchableFields`, make sure you index each of these fields so
-  your admin queries can remain performant.
+  **Tip:** If you are adding `listSearchableFields`, make sure you
+  index each of these fields so your admin queries can remain
+  performant.
 </Banner>
 
 ## GraphQL
@@ -277,5 +280,8 @@ You can import types from Payload to help make writing your Collection configs e
 The `CollectionConfig` type represents a raw Collection Config in its full form, where only the bare minimum properties are marked as required. The `SanitizedCollectionConfig` type represents a Collection Config after it has been fully sanitized. Generally, this is only used internally by Payload.
 
 ```ts
-import type { CollectionConfig, SanitizedCollectionConfig } from 'payload'
+import type {
+  CollectionConfig,
+  SanitizedCollectionConfig,
+} from 'payload'
 ```

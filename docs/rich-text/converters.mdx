@@ -17,7 +17,11 @@ import React from 'react'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
-export const MyComponent = ({ data }: { data: SerializedEditorState }) => {
+export const MyComponent = ({
+  data,
+}: {
+  data: SerializedEditorState
+}) => {
   return <RichText data={data} />
 }
 ```
@@ -25,8 +29,9 @@ export const MyComponent = ({ data }: { data: SerializedEditorState }) => {
 The `RichText` component includes built-in serializers for common Lexical nodes but allows customization through the `converters` prop. In our [website template](https://github.com/payloadcms/payload/blob/main/templates/website/src/components/RichText/index.tsx) you have an example of how to use `converters` to render custom blocks, custom nodes and override existing converters.
 
 <Banner type="default">
-  When fetching data, ensure your `depth` setting is high enough to fully populate Lexical nodes
-  such as uploads. The JSX converter requires fully populated data to work correctly.
+  When fetching data, ensure your `depth` setting is high enough to
+  fully populate Lexical nodes such as uploads. The JSX converter
+  requires fully populated data to work correctly.
 </Banner>
 
 ### Converting Internal Links
@@ -36,7 +41,10 @@ By default, Payload doesn't know how to convert **internal** links to JSX, as it
 To fix this, you need to pass the `internalDocToHref` prop to `LinkJSXConverter`. This prop is a function that receives the link node and returns the URL of the document.
 
 ```tsx
-import type { DefaultNodeTypes, SerializedLinkNode } from '@payloadcms/richtext-lexical'
+import type {
+  DefaultNodeTypes,
+  SerializedLinkNode,
+} from '@payloadcms/richtext-lexical'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
 import {
@@ -46,7 +54,11 @@ import {
 } from '@payloadcms/richtext-lexical/react'
 import React from 'react'
 
-const internalDocToHref = ({ linkNode }: { linkNode: SerializedLinkNode }) => {
+const internalDocToHref = ({
+  linkNode,
+}: {
+  linkNode: SerializedLinkNode
+}) => {
   const { relationTo, value } = linkNode.fields.doc!
   if (typeof value !== 'object') {
     throw new Error('Expected value to be an object')
@@ -55,7 +67,9 @@ const internalDocToHref = ({ linkNode }: { linkNode: SerializedLinkNode }) => {
   return relationTo === 'posts' ? `/posts/${slug}` : `/${slug}`
 }
 
-const jsxConverters: JSXConvertersFunction<DefaultNodeTypes> = ({ defaultConverters }) => ({
+const jsxConverters: JSXConvertersFunction<DefaultNodeTypes> = ({
+  defaultConverters,
+}) => ({
   ...defaultConverters,
   ...LinkJSXConverter({ internalDocToHref }),
 })
@@ -73,7 +87,11 @@ To convert Lexical Blocks or Inline Blocks to JSX, pass the converter for your b
 
 ```tsx
 'use client'
-import type { MyInlineBlock, MyNumberBlock, MyTextBlock } from '@/payload-types'
+import type {
+  MyInlineBlock,
+  MyNumberBlock,
+  MyTextBlock,
+} from '@/payload-types'
 import type {
   DefaultNodeTypes,
   SerializedBlockNode,
@@ -81,7 +99,10 @@ import type {
 } from '@payloadcms/richtext-lexical'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
-import { type JSXConvertersFunction, RichText } from '@payloadcms/richtext-lexical/react'
+import {
+  type JSXConvertersFunction,
+  RichText,
+} from '@payloadcms/richtext-lexical/react'
 import React from 'react'
 
 // Extend the default node types with your custom blocks for full type safety
@@ -90,12 +111,16 @@ type NodeTypes =
   | SerializedBlockNode<MyNumberBlock | MyTextBlock>
   | SerializedInlineBlockNode<MyInlineBlock>
 
-const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) => ({
+const jsxConverters: JSXConvertersFunction<NodeTypes> = ({
+  defaultConverters,
+}) => ({
   ...defaultConverters,
   blocks: {
     // Each key should match your block's slug
     myNumberBlock: ({ node }) => <div>{node.fields.number}</div>,
-    myTextBlock: ({ node }) => <div style={{ backgroundColor: 'red' }}>{node.fields.text}</div>,
+    myTextBlock: ({ node }) => (
+      <div style={{ backgroundColor: 'red' }}>{node.fields.text}</div>
+    ),
   },
   inlineBlocks: {
     // Each key should match your inline block's slug
@@ -118,10 +143,16 @@ Example - overriding the upload node converter to use next/image:
 
 ```tsx
 'use client'
-import type { DefaultNodeTypes, SerializedUploadNode } from '@payloadcms/richtext-lexical'
+import type {
+  DefaultNodeTypes,
+  SerializedUploadNode,
+} from '@payloadcms/richtext-lexical'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
-import { type JSXConvertersFunction, RichText } from '@payloadcms/richtext-lexical/react'
+import {
+  type JSXConvertersFunction,
+  RichText,
+} from '@payloadcms/richtext-lexical/react'
 import Image from 'next/image'
 import React from 'react'
 
@@ -143,7 +174,9 @@ const CustomUploadComponent: React.FC<{
   return null
 }
 
-const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) => ({
+const jsxConverters: JSXConvertersFunction<NodeTypes> = ({
+  defaultConverters,
+}) => ({
   ...defaultConverters,
   // Override the default upload converter
   upload: ({ node }) => {
@@ -177,7 +210,11 @@ import { convertLexicalToHTML } from '@payloadcms/richtext-lexical/html'
 
 import React from 'react'
 
-export const MyComponent = ({ data }: { data: SerializedEditorState }) => {
+export const MyComponent = ({
+  data,
+}: {
+  data: SerializedEditorState
+}) => {
   const html = convertLexicalToHTML({ data })
 
   return <div dangerouslySetInnerHTML={{ __html: html }} />
@@ -197,7 +234,11 @@ import { getRestPopulateFn } from '@payloadcms/richtext-lexical/client'
 import { convertLexicalToHTMLAsync } from '@payloadcms/richtext-lexical/html-async'
 import React, { useEffect, useState } from 'react'
 
-export const MyComponent = ({ data }: { data: SerializedEditorState }) => {
+export const MyComponent = ({
+  data,
+}: {
+  data: SerializedEditorState
+}) => {
   const [html, setHTML] = useState<null | string>(null)
   useEffect(() => {
     async function convert() {
@@ -229,7 +270,11 @@ import React from 'react'
 
 import config from '../../config.js'
 
-export const MyRSCComponent = async ({ data }: { data: SerializedEditorState }) => {
+export const MyRSCComponent = async ({
+  data,
+}: {
+  data: SerializedEditorState
+}) => {
   const payload = await getPayload({
     config,
   })
@@ -271,7 +316,9 @@ type NodeTypes =
   | SerializedBlockNode<MyTextBlock>
   | SerializedInlineBlockNode<MyInlineBlock>
 
-const htmlConverters: HTMLConvertersFunction<NodeTypes> = ({ defaultConverters }) => ({
+const htmlConverters: HTMLConvertersFunction<NodeTypes> = ({
+  defaultConverters,
+}) => ({
   ...defaultConverters,
   blocks: {
     // Each key should match your block's slug
@@ -285,7 +332,11 @@ const htmlConverters: HTMLConvertersFunction<NodeTypes> = ({ defaultConverters }
   },
 })
 
-export const MyComponent = ({ data }: { data: SerializedEditorState }) => {
+export const MyComponent = ({
+  data,
+}: {
+  data: SerializedEditorState
+}) => {
   const html = convertLexicalToHTML({
     converters: htmlConverters,
     data,
@@ -357,7 +408,9 @@ const Pages: CollectionConfig = {
           myTextBlock: ({ node, providedCSSString }) =>
             `<div style="background-color: red;${providedCSSString}">${node.fields.text}</div>`,
         },
-      })) as HTMLConvertersFunction<DefaultNodeTypes | SerializedBlockNode<MyTextBlock>>,
+      })) as HTMLConvertersFunction<
+        DefaultNodeTypes | SerializedBlockNode<MyTextBlock>
+      >,
     }),
   ],
 }
@@ -391,13 +444,18 @@ A headless editor can perform such conversions outside of the main editor instan
 
 ```ts
 import { createHeadlessEditor } from '@payloadcms/richtext-lexical/lexical/headless'
-import { getEnabledNodes, editorConfigFactory } from '@payloadcms/richtext-lexical'
+import {
+  getEnabledNodes,
+  editorConfigFactory,
+} from '@payloadcms/richtext-lexical'
 
 const payloadConfig // <= your Payload Config here
 
 const headlessEditor = createHeadlessEditor({
   nodes: getEnabledNodes({
-    editorConfig: await editorConfigFactory.default({ config: payloadConfig }),
+    editorConfig: await editorConfigFactory.default({
+      config: payloadConfig,
+    }),
   }),
 })
 ```
@@ -431,7 +489,10 @@ const yourEditorConfig2 = editorConfigFactory.fromField({
 // Version 3 - create a new editor config - behaves just like instantiating a new `lexicalEditor`
 const yourEditorConfig3 = await editorConfigFactory.fromFeatures({
   config,
-  features: ({ defaultFeatures }) => [...defaultFeatures, FixedToolbarFeature()],
+  features: ({ defaultFeatures }) => [
+    ...defaultFeatures,
+    FixedToolbarFeature(),
+  ],
 })
 
 // Version 4 - if you have instantiated a lexical editor and are accessing it outside a field (=> this is the unsanitized editor),
@@ -440,7 +501,10 @@ const yourEditorConfig3 = await editorConfigFactory.fromFeatures({
 // This is the least efficient way to get the editor config, and not recommended. It is recommended to extract the `features` arg
 // into a separate variable and use `fromFeatures` instead.
 const editor = lexicalEditor({
-  features: ({ defaultFeatures }) => [...defaultFeatures, FixedToolbarFeature()],
+  features: ({ defaultFeatures }) => [
+    ...defaultFeatures,
+    FixedToolbarFeature(),
+  ],
 })
 
 const yourEditorConfig4 = await editorConfigFactory.fromEditor({
@@ -456,7 +520,11 @@ If you have access to the sanitized collection config, you can get access to the
 ```ts
 import type { CollectionConfig, RichTextField } from 'payload'
 
-import { editorConfigFactory, getEnabledNodes, lexicalEditor } from '@payloadcms/richtext-lexical'
+import {
+  editorConfigFactory,
+  getEnabledNodes,
+  lexicalEditor,
+} from '@payloadcms/richtext-lexical'
 import { createHeadlessEditor } from '@payloadcms/richtext-lexical/lexical/headless'
 
 export const MyCollection: CollectionConfig = {
@@ -503,7 +571,10 @@ export const MyCollection: CollectionConfig = {
 If you have access to the Payload Config and the lexical editor config, you can convert HTML to the lexical editor state with the following:
 
 ```ts
-import { convertHTMLToLexical, editorConfigFactory } from '@payloadcms/richtext-lexical'
+import {
+  convertHTMLToLexical,
+  editorConfigFactory,
+} from '@payloadcms/richtext-lexical'
 // Make sure you have jsdom and @types/jsdom installed
 import { JSDOM } from 'jsdom'
 
@@ -521,14 +592,20 @@ const html = convertHTMLToLexical({
 Convert markdown content to the Lexical editor format with the following:
 
 ```ts
-import { $convertFromMarkdownString, editorConfigFactory } from '@payloadcms/richtext-lexical'
+import {
+  $convertFromMarkdownString,
+  editorConfigFactory,
+} from '@payloadcms/richtext-lexical'
 
 const yourEditorConfig = await editorConfigFactory.default({ config })
 const markdown = `# Hello World`
 
 headlessEditor.update(
   () => {
-    $convertFromMarkdownString(markdown, yourEditorConfig.features.markdownTransformers)
+    $convertFromMarkdownString(
+      markdown,
+      yourEditorConfig.features.markdownTransformers,
+    )
   },
   { discrete: true },
 )
@@ -571,7 +648,9 @@ const yourEditorState: SerializedEditorState // <= your current editor state her
 try {
   headlessEditor.update(
     () => {
-      headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState))
+      headlessEditor.setEditorState(
+        headlessEditor.parseEditorState(yourEditorState),
+      )
     },
     { discrete: true }, // This should commit the editor state immediately
   )
@@ -582,7 +661,9 @@ try {
 // Export to markdown
 let markdown: string
 headlessEditor.getEditorState().read(() => {
-  markdown = $convertToMarkdownString(yourEditorConfig?.features?.markdownTransformers)
+  markdown = $convertToMarkdownString(
+    yourEditorConfig?.features?.markdownTransformers,
+  )
 })
 ```
 
@@ -605,7 +686,9 @@ const yourEditorState: SerializedEditorState // <= your current editor state her
 try {
   headlessEditor.update(
     () => {
-      headlessEditor.setEditorState(headlessEditor.parseEditorState(yourEditorState))
+      headlessEditor.setEditorState(
+        headlessEditor.parseEditorState(yourEditorState),
+      )
     },
     { discrete: true }, // This should commit the editor state immediately
   )

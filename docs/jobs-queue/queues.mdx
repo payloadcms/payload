@@ -9,7 +9,8 @@ keywords: jobs queue, application framework, typescript, node, react, nextjs
 Queues are the final aspect of Payload's Jobs Queue and deal with how to _run your jobs_. Up to this point, all we've covered is how to queue up jobs to run, but so far, we aren't actually running any jobs.
 
 <Banner type="default">
-  A **Queue** is a grouping of jobs that should be executed in order of when they were added.
+  A **Queue** is a grouping of jobs that should be executed in order
+  of when they were added.
 </Banner>
 
 When you go to run jobs, Payload will query for any jobs that are added to the queue and then run them. By default, all queued jobs are added to the `default` queue.
@@ -58,8 +59,8 @@ export default buildConfig({
 ```
 
 <Banner type="warning">
-  autoRun is intended for use with a dedicated server that is always running, and should not be used
-  on serverless platforms like Vercel.
+  autoRun is intended for use with a dedicated server that is always
+  running, and should not be used on serverless platforms like Vercel.
 </Banner>
 
 #### Endpoint
@@ -142,7 +143,9 @@ const results = await payload.jobs.run()
 await payload.jobs.run({ queue: 'nightly', limit: 100 })
 
 // You can provide a where clause to filter the jobs that should be run:
-await payload.jobs.run({ where: { 'input.message': { equals: 'secret' } } })
+await payload.jobs.run({
+  where: { 'input.message': { equals: 'secret' } },
+})
 ```
 
 **Run a single job:**

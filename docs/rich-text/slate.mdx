@@ -184,7 +184,9 @@ export const ExampleCollection: CollectionConfig = {
       type: 'richText', // required
       defaultValue: [
         {
-          children: [{ text: 'Here is some default content for this field' }],
+          children: [
+            { text: 'Here is some default content for this field' },
+          ],
         },
       ],
       required: true,
@@ -345,7 +347,9 @@ export default {
       const { shouldBreakOutOnEnter } = editor
 
       editor.shouldBreakOutOnEnter = (element) =>
-        element.type === 'large-body' ? true : shouldBreakOutOnEnter(element)
+        element.type === 'large-body'
+          ? true
+          : shouldBreakOutOnEnter(element)
 
       return editor
     },
@@ -362,5 +366,8 @@ The plugin itself extends Payload's built-in `shouldBreakOutOnEnter` Slate funct
 If you are building your own custom Rich Text elements or leaves, you may benefit from importing the following types:
 
 ```ts
-import type { RichTextCustomElement, RichTextCustomLeaf } from '@payloadcms/richtext-slate'
+import type {
+  RichTextCustomElement,
+  RichTextCustomLeaf,
+} from '@payloadcms/richtext-slate'
 ```

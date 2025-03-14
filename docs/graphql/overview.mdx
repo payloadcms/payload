@@ -142,10 +142,15 @@ export default buildConfig({
   // ...
 })
 
-const NoProductionIntrospection: GraphQL.ValidationRule = (context) => ({
+const NoProductionIntrospection: GraphQL.ValidationRule = (
+  context,
+) => ({
   Field(node) {
     if (process.env.NODE_ENV === 'production') {
-      if (node.name.value === '__schema' || node.name.value === '__type') {
+      if (
+        node.name.value === '__schema' ||
+        node.name.value === '__type'
+      ) {
         context.reportError(
           new GraphQL.GraphQLError(
             'GraphQL introspection is not allowed, but the query contained __schema or __type',

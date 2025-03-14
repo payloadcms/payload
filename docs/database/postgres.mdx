@@ -51,11 +51,13 @@ export default buildConfig({
 ```
 
 <Banner type="info">
-  **Note:** If you're using `vercelPostgresAdapter` your `process.env.POSTGRES_URL` or
-  `pool.connectionString` points to a local database (e.g hostname has `localhost` or `127.0.0.1`)
-  we use the `pg` module for pooling instead of `@vercel/postgres`. This is because
-  `@vercel/postgres` doesn't work with local databases, if you want to disable that behavior, you
-  can pass `forceUseVercelPostgres: true` to the adapter's args and follow [Vercel
+  **Note:** If you're using `vercelPostgresAdapter` your
+  `process.env.POSTGRES_URL` or `pool.connectionString` points to a
+  local database (e.g hostname has `localhost` or `127.0.0.1`) we use
+  the `pg` module for pooling instead of `@vercel/postgres`. This is
+  because `@vercel/postgres` doesn't work with local databases, if you
+  want to disable that behavior, you can pass `forceUseVercelPostgres:
+  true` to the adapter's args and follow [Vercel
   guide](https://vercel.com/docs/storage/vercel-postgres/local-development#option-2:-local-postgres-instance-with-docker)
   for a Docker Neon DB setup.
 </Banner>
@@ -101,7 +103,12 @@ const posts = await payload.db.drizzle.query.posts.findMany()
 const result = await payload.db.drizzle
   .select()
   .from(posts)
-  .where(and(eq(posts.id, 50), sql`lower(${posts.title}) = 'example post title'`))
+  .where(
+    and(
+      eq(posts.id, 50),
+      sql`lower(${posts.title}) = 'example post title'`,
+    ),
+  )
 ```
 
 ## Tables, relations, and enums
@@ -136,7 +143,11 @@ Runs before the schema is built. You can use this hook to extend your database s
 
 ```ts
 import { postgresAdapter } from '@payloadcms/db-postgres'
-import { integer, pgTable, serial } from '@payloadcms/db-postgres/drizzle/pg-core'
+import {
+  integer,
+  pgTable,
+  serial,
+} from '@payloadcms/db-postgres/drizzle/pg-core'
 
 postgresAdapter({
   beforeSchemaInit: [
@@ -160,7 +171,13 @@ To quickly generate the Drizzle schema from your database you can use [Drizzle I
 You should get the `schema.ts` file which may look like this:
 
 ```ts
-import { pgTable, uniqueIndex, serial, varchar, text } from 'drizzle-orm/pg-core'
+import {
+  pgTable,
+  uniqueIndex,
+  serial,
+  varchar,
+  text,
+} from 'drizzle-orm/pg-core'
 
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
@@ -214,7 +231,10 @@ The following example adds the `extra_integer_column` column and a composite ind
 
 ```ts
 import { postgresAdapter } from '@payloadcms/db-postgres'
-import { index, integer } from '@payloadcms/db-postgres/drizzle/pg-core'
+import {
+  index,
+  integer,
+} from '@payloadcms/db-postgres/drizzle/pg-core'
 import { buildConfig } from 'payload'
 
 export default buildConfig({
@@ -242,10 +262,9 @@ export default buildConfig({
             extraIntegerColumn: integer('extra_integer_column'),
           },
           extraConfig: (table) => ({
-            country_city_composite_index: index('country_city_composite_index').on(
-              table.country,
-              table.city,
-            ),
+            country_city_composite_index: index(
+              'country_city_composite_index',
+            ).on(table.country, table.city),
           }),
         })
 

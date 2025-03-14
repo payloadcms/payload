@@ -31,7 +31,8 @@ export default buildConfig({
 ```
 
 <Banner type="success">
-  **Note:** If there is a language that Payload does not yet support, we accept [code
+  **Note:** If there is a language that Payload does not yet support,
+  we accept [code
   contributions](https://github.com/payloadcms/payload/blob/main/CONTRIBUTING.md).
 </Banner>
 
@@ -82,8 +83,8 @@ export default buildConfig({
 ```
 
 <Banner type="warning">
-  **Tip:** It's best to only support the languages that you need so that the bundled JavaScript is
-  kept to a minimum for your project.
+  **Tip:** It's best to only support the languages that you need so
+  that the bundled JavaScript is kept to a minimum for your project.
 </Banner>
 
 ### Custom Translations
@@ -208,8 +209,10 @@ export const customTranslations = {
   },
 }
 
-export type CustomTranslationsObject = typeof customTranslations.en & typeof enTranslations
-export type CustomTranslationsKeys = NestedKeysStripped<CustomTranslationsObject>
+export type CustomTranslationsObject = typeof customTranslations.en &
+  typeof enTranslations
+export type CustomTranslationsKeys =
+  NestedKeysStripped<CustomTranslationsObject>
 ```
 
 Import the shared translations object into our Payload config so they are available for use:
@@ -239,10 +242,16 @@ Import the shared translation types to use in your [Custom Component](../custom-
 import type React from 'react'
 import { useTranslation } from '@payloadcms/ui'
 
-import type { CustomTranslationsObject, CustomTranslationsKeys } from '../custom-translations'
+import type {
+  CustomTranslationsObject,
+  CustomTranslationsKeys,
+} from '../custom-translations'
 
 export const MyComponent: React.FC = () => {
-  const { i18n, t } = useTranslation<CustomTranslationsObject, CustomTranslationsKeys>() // These generics merge your custom translations with the default client translations
+  const { i18n, t } = useTranslation<
+    CustomTranslationsObject,
+    CustomTranslationsKeys
+  >() // These generics merge your custom translations with the default client translations
 
   return t('general:myCustomKey')
 }
@@ -253,7 +262,10 @@ Additionally, Payload exposes the `t` function in various places, for example in
 ```ts
 // <rootDir>/fields/myField.ts
 
-import type { DefaultTranslationKeys, TFunction } from '@payloadcms/translations'
+import type {
+  DefaultTranslationKeys,
+  TFunction,
+} from '@payloadcms/translations'
 import type { Field } from 'payload'
 
 import { CustomTranslationsKeys } from '../custom-translations'

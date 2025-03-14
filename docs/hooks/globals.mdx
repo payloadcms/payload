@@ -23,8 +23,8 @@ export const GlobalWithHooks: GlobalConfig = {
 ```
 
 <Banner type="info">
-  **Tip:** You can also set hooks on the field-level to isolate hook logic to specific fields. [More
-  details](./fields).
+  **Tip:** You can also set hooks on the field-level to isolate hook
+  logic to specific fields. [More details](./fields).
 </Banner>
 
 ## Config Options
@@ -61,7 +61,11 @@ Please do note that this does not run before client-side validation. If you rend
 ```ts
 import type { GlobalBeforeValidateHook } from 'payload'
 
-const beforeValidateHook: GlobalBeforeValidateHook = async ({ data, req, originalDoc }) => {
+const beforeValidateHook: GlobalBeforeValidateHook = async ({
+  data,
+  req,
+  originalDoc,
+}) => {
   return data
 }
 ```
@@ -83,7 +87,11 @@ Immediately following validation, `beforeChange` hooks will run within the `upda
 ```ts
 import type { GlobalBeforeChangeHook } from 'payload'
 
-const beforeChangeHook: GlobalBeforeChangeHook = async ({ data, req, originalDoc }) => {
+const beforeChangeHook: GlobalBeforeChangeHook = async ({
+  data,
+  req,
+  originalDoc,
+}) => {
   return data
 }
 ```
@@ -105,7 +113,11 @@ After a global is updated, the `afterChange` hook runs. Use this hook to purge c
 ```ts
 import type { GlobalAfterChangeHook } from 'payload'
 
-const afterChangeHook: GlobalAfterChangeHook = async ({ doc, previousDoc, req }) => {
+const afterChangeHook: GlobalAfterChangeHook = async ({
+  doc,
+  previousDoc,
+  req,
+}) => {
   return data
 }
 ```

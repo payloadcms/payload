@@ -25,9 +25,11 @@ field instead of the original title. This is especially useful if you happen to 
 but different parents.
 
 <Banner type="info">
-  This plugin is completely open-source and the [source code can be found
-  here](https://github.com/payloadcms/payload/tree/main/packages/plugin-nested-docs). If you need
-  help, check out our [Community Help](https://payloadcms.com/community-help). If you think you've
+  This plugin is completely open-source and the [source code can be
+  found
+  here](https://github.com/payloadcms/payload/tree/main/packages/plugin-nested-docs).
+  If you need help, check out our [Community
+  Help](https://payloadcms.com/community-help). If you think you've
   found a bug, please [open a new
   issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%20nested-docs&template=bug_report.md&title=plugin-nested-docs%3A)
   with as much detail as possible.
@@ -79,7 +81,8 @@ const config = buildConfig({
     nestedDocsPlugin({
       collections: ['pages'],
       generateLabel: (_, doc) => doc.title,
-      generateURL: (docs) => docs.reduce((url, doc) => `${url}/${doc.slug}`, ''),
+      generateURL: (docs) =>
+        docs.reduce((url, doc) => `${url}/${doc.slug}`, ''),
     }),
   ],
 })
@@ -142,7 +145,8 @@ that point, like `/about-us/company/our-team`.
 // payload.config.ts
 nestedDocsPlugin({
   //...
-  generateURL: (docs) => docs.reduce((url, doc) => `${url}/${doc.slug}`, ''), // NOTE: 'slug' is a hypothetical field
+  generateURL: (docs) =>
+    docs.reduce((url, doc) => `${url}/${doc.slug}`, ''), // NOTE: 'slug' is a hypothetical field
 })
 ```
 
@@ -234,7 +238,11 @@ the [Localization](https://payloadcms.com/docs/configuration/localization) docs.
 All types can be directly imported:
 
 ```ts
-import { PluginConfig, GenerateURL, GenerateLabel } from '@payloadcms/plugin-nested-docs/types'
+import {
+  PluginConfig,
+  GenerateURL,
+  GenerateLabel,
+} from '@payloadcms/plugin-nested-docs/types'
 ```
 
 ## Examples

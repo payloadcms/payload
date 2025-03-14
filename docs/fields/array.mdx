@@ -149,7 +149,12 @@ export const CustomArrayFieldServer: ArrayFieldServerComponent = ({
   permissions,
 }) => {
   return (
-    <ArrayField field={clientField} path={path} schemaPath={schemaPath} permissions={permissions} />
+    <ArrayField
+      field={clientField}
+      path={path}
+      schemaPath={schemaPath}
+      permissions={permissions}
+    />
   )
 }
 ```
@@ -162,7 +167,9 @@ import React from 'react'
 import { ArrayField } from '@payloadcms/ui'
 import type { ArrayFieldClientComponent } from 'payload'
 
-export const CustomArrayFieldClient: ArrayFieldClientComponent = (props) => {
+export const CustomArrayFieldClient: ArrayFieldClientComponent = (
+  props,
+) => {
   return <ArrayField {...props} />
 }
 ```
@@ -176,18 +183,16 @@ import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
 import type { ArrayFieldLabelServerComponent } from 'payload'
 
-export const CustomArrayFieldLabelServer: ArrayFieldLabelServerComponent = ({
-  clientField,
-  path,
-}) => {
-  return (
-    <FieldLabel
-      label={clientField?.label || clientField?.name}
-      path={path}
-      required={clientField?.required}
-    />
-  )
-}
+export const CustomArrayFieldLabelServer: ArrayFieldLabelServerComponent =
+  ({ clientField, path }) => {
+    return (
+      <FieldLabel
+        label={clientField?.label || clientField?.name}
+        path={path}
+        required={clientField?.required}
+      />
+    )
+  }
 ```
 
 #### Client Component
@@ -199,9 +204,16 @@ import type { ArrayFieldLabelClientComponent } from 'payload'
 import { FieldLabel } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomArrayFieldLabelClient: ArrayFieldLabelClientComponent = ({ field, path }) => {
-  return <FieldLabel label={field?.label || field?.name} path={path} required={field?.required} />
-}
+export const CustomArrayFieldLabelClient: ArrayFieldLabelClientComponent =
+  ({ field, path }) => {
+    return (
+      <FieldLabel
+        label={field?.label || field?.name}
+        path={path}
+        required={field?.required}
+      />
+    )
+  }
 ```
 
 ### Row Label

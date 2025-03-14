@@ -118,10 +118,14 @@ export const Code: React.FC<CodeFieldClientProps> = ({
   schemaPath,
   validate,
 }) => {
-  const languageField = useFormFields(([fields]) => fields['language'])
+  const languageField = useFormFields(
+    ([fields]) => fields['language'],
+  )
 
   const language: Language =
-    (languageField?.value as Language) || (languageField?.initialValue as Language) || 'ts'
+    (languageField?.value as Language) ||
+    (languageField?.initialValue as Language) ||
+    'ts'
 
   const label = languages[language]
 
@@ -132,7 +136,8 @@ export const Code: React.FC<CodeFieldClientProps> = ({
       admin: {
         ...field.admin,
         editorOptions: undefined,
-        language: languageKeyToMonacoLanguageMap[language] || language,
+        language:
+          languageKeyToMonacoLanguageMap[language] || language,
       },
       label,
     }),
@@ -269,7 +274,10 @@ While nodes added to the server feature do not control how the node is rendered 
 The `createNode` helper function is used to create nodes with proper typing. It is recommended to use this function to create nodes.
 
 ```ts
-import { createServerFeature, createNode } from '@payloadcms/richtext-lexical'
+import {
+  createServerFeature,
+  createNode,
+} from '@payloadcms/richtext-lexical'
 import { MyNode } from './nodes/MyNode'
 
 export const MyFeature = createServerFeature({
@@ -340,7 +348,10 @@ Within lexical, one example where this is done are our list features. Both `Unor
 Here is how we do it:
 
 ```ts
-import { createServerFeature, createNode } from '@payloadcms/richtext-lexical'
+import {
+  createServerFeature,
+  createNode,
+} from '@payloadcms/richtext-lexical'
 
 export const OrderedListFeature = createServerFeature({
   feature: ({ featureProviderMap }) => {
@@ -619,7 +630,8 @@ import type { PluginComponent } from '@payloadcms/richtext-lexical' // type impo
 import { $createMyNode } from '../nodes/MyNode'
 import './index.scss'
 
-export const INSERT_MYNODE_COMMAND: LexicalCommand<void> = createCommand('INSERT_MYNODE_COMMAND')
+export const INSERT_MYNODE_COMMAND: LexicalCommand<void> =
+  createCommand('INSERT_MYNODE_COMMAND')
 
 /**
  * Plugin which registers a lexical command to insert a new MyNode into the editor
@@ -682,9 +694,14 @@ Within dropdown groups, items are positioned vertically when the dropdown is ope
 Example:
 
 ```ts
-import type { ToolbarGroup, ToolbarGroupItem } from '@payloadcms/richtext-lexical'
+import type {
+  ToolbarGroup,
+  ToolbarGroupItem,
+} from '@payloadcms/richtext-lexical'
 
-export const toolbarFormatGroupWithItems = (items: ToolbarGroupItem[]): ToolbarGroup => {
+export const toolbarFormatGroupWithItems = (
+  items: ToolbarGroupItem[],
+): ToolbarGroup => {
   return {
     type: 'buttons',
     items,
@@ -707,11 +724,16 @@ export const toolbarFormatGroupWithItems = (items: ToolbarGroupItem[]): ToolbarG
 Example:
 
 ```ts
-import type { ToolbarGroup, ToolbarGroupItem } from '@payloadcms/richtext-lexical'
+import type {
+  ToolbarGroup,
+  ToolbarGroupItem,
+} from '@payloadcms/richtext-lexical'
 
 import { MyIcon } from './icons/MyIcon'
 
-export const toolbarAddDropdownGroupWithItems = (items: ToolbarGroupItem[]): ToolbarGroup => {
+export const toolbarAddDropdownGroupWithItems = (
+  items: ToolbarGroupItem[],
+): ToolbarGroup => {
   return {
     type: 'dropdown',
     ChildComponent: MyIcon,
@@ -753,7 +775,10 @@ export const MyClientFeature = createClientFeature({
         {
           ChildComponent: IconComponent,
           isActive: ({ selection }) => {
-            if (!$isNodeSelection(selection) || !selection.getNodes().length) {
+            if (
+              !$isNodeSelection(selection) ||
+              !selection.getNodes().length
+            ) {
               return false
             }
 
@@ -796,9 +821,14 @@ The API for adding an item to the floating inline toolbar (`toolbarInline`) is i
 We're exporting `slashMenuBasicGroupWithItems` from `@payloadcms/richtext-lexical/client` which you can use to add items to the slash menu labelled "Basic". If you want to create your own slash menu group, here is an example:
 
 ```ts
-import type { SlashMenuGroup, SlashMenuItem } from '@payloadcms/richtext-lexical'
+import type {
+  SlashMenuGroup,
+  SlashMenuItem,
+} from '@payloadcms/richtext-lexical'
 
-export function mwnSlashMenuGroupWithItems(items: SlashMenuItem[]): SlashMenuGroup {
+export function mwnSlashMenuGroupWithItems(
+  items: SlashMenuItem[],
+): SlashMenuGroup {
   return {
     items,
     key: 'myGroup',
@@ -915,7 +945,11 @@ To accept props in your feature, type them as a generic.
 Server Feature:
 
 ```ts
-createServerFeature<UnSanitizedProps, SanitizedProps, UnSanitizedClientProps>({
+createServerFeature<
+  UnSanitizedProps,
+  SanitizedProps,
+  UnSanitizedClientProps
+>({
   //...
 })
 ```
@@ -932,7 +966,11 @@ The unSanitized props are what the user will pass to the feature when they call 
 To sanitize those in the server feature, you can pass a function to `feature` instead of an object:
 
 ```ts
-createServerFeature<UnSanitizedProps, SanitizedProps, UnSanitizedClientProps>({
+createServerFeature<
+  UnSanitizedProps,
+  SanitizedProps,
+  UnSanitizedClientProps
+>({
   //...
   feature: async ({
     config,
@@ -958,7 +996,13 @@ In the client feature, it works similarly:
 
 ```ts
 createClientFeature<UnSanitizedClientProps, SanitizedClientProps>(
-  ({ clientFunctions, featureProviderMap, props, resolvedFeatures, unSanitizedEditorConfig }) => {
+  ({
+    clientFunctions,
+    featureProviderMap,
+    props,
+    resolvedFeatures,
+    unSanitizedEditorConfig,
+  }) => {
     const sanitizedProps = doSomethingWithProps(props)
     return {
       sanitizedClientFeatureProps: sanitizedProps,
@@ -977,7 +1021,11 @@ type UnSanitizedClientProps = {
   test: string
 }
 
-createServerFeature<UnSanitizedProps, SanitizedProps, UnSanitizedClientProps>({
+createServerFeature<
+  UnSanitizedProps,
+  SanitizedProps,
+  UnSanitizedClientProps
+>({
   //...
   feature: {
     clientFeatureProps: {

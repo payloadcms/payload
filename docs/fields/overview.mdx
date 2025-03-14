@@ -49,8 +49,9 @@ export const Page: CollectionConfig = {
 ```
 
 <Banner type="warning">
-  **Reminder:** Each field is an object with at least the `type` property. This matches the field to
-  its corresponding Field Type. [More details](#field-options).
+  **Reminder:** Each field is an object with at least the `type`
+  property. This matches the field to its corresponding Field Type.
+  [More details](#field-options).
 </Banner>
 
 There are three main categories of fields in Payload:
@@ -106,10 +107,11 @@ Here are the available Virtual Fields:
 - [Join](../fields/join) - achieves two-way data binding between fields
 
 <Banner type="success">
-  **Tip:** Don't see a built-in field type that you need? Build it! Using a combination of [Field
-  Validations](#validation) and [Custom Components](../custom-components/overview), you can override
-  the entirety of how a component functions within the [Admin Panel](../admin/overview) to
-  effectively create your own field type.
+  **Tip:** Don't see a built-in field type that you need? Build it!
+  Using a combination of [Field Validations](#validation) and [Custom
+  Components](../custom-components/overview), you can override the
+  entirety of how a component functions within the [Admin
+  Panel](../admin/overview) to effectively create your own field type.
 </Banner>
 
 ## Field Options
@@ -128,8 +130,8 @@ export const MyField: Field = {
 ```
 
 <Banner type="warning">
-  For a full list of configuration options, see the documentation for each [Field
-  Type](#field-types).
+  For a full list of configuration options, see the documentation for
+  each [Field Type](#field-types).
 </Banner>
 
 ### Field Names
@@ -238,14 +240,15 @@ export const myField: Field = {
   name: 'attribution',
   type: 'text',
   // highlight-start
-  defaultValue: ({ user, locale, req }) => `${translation[locale]} ${user.name}`,
+  defaultValue: ({ user, locale, req }) =>
+    `${translation[locale]} ${user.name}`,
   // highlight-end
 }
 ```
 
 <Banner type="success">
-  **Tip:** You can use async `defaultValue` functions to fill fields with data from API requests or
-  Local API using `req.payload`.
+  **Tip:** You can use async `defaultValue` functions to fill fields
+  with data from API requests or Local API using `req.payload`.
 </Banner>
 
 ### Validation
@@ -284,7 +287,8 @@ export const MyField: Field = {
   type: 'text',
   name: 'myField',
   // highlight-start
-  validate: (val, { user }) => Boolean(user) || 'You must be logged in to save this field',
+  validate: (val, { user }) =>
+    Boolean(user) || 'You must be logged in to save this field',
   // highlight-end
 }
 ```
@@ -369,7 +373,9 @@ export const Orders: CollectionConfig = {
         }
 
         // only perform expensive validation when the form is submitted
-        const response = await fetch(`https://your-api.com/customers/${val}`)
+        const response = await fetch(
+          `https://your-api.com/customers/${val}`,
+        )
 
         if (response.ok) {
           return true
@@ -405,8 +411,9 @@ export const MyCollection: CollectionConfig = {
 ```
 
 <Banner type="warning">
-  **Reminder:** The Custom ID Fields can only be of type [`Number`](./number) or [`Text`](./text).
-  Custom ID fields with type `text` must not contain `/` or `.` characters.
+  **Reminder:** The Custom ID Fields can only be of type
+  [`Number`](./number) or [`Text`](./text). Custom ID fields with type
+  `text` must not contain `/` or `.` characters.
 </Banner>
 
 ## Admin Options
@@ -482,7 +489,8 @@ export const MyCollectionConfig: CollectionConfig = {
 
 <Banner type="warning">
   **Reminder:** To replace the Field Description with a [Custom
-  Component](../custom-components/overview), use the `admin.components.Description` property. [More
+  Component](../custom-components/overview), use the
+  `admin.components.Description` property. [More
   details](#description).
 </Banner>
 
@@ -517,8 +525,8 @@ All Description Functions receive the following arguments:
 | **`t`**  | The `t` function used to internationalize the Admin Panel. [More details](../configuration/i18n) |
 
 <Banner type="info">
-  **Note:** If you need to subscribe to live updates within your form, use a Description Component
-  instead. [More details](#description).
+  **Note:** If you need to subscribe to live updates within your form,
+  use a Description Component instead. [More details](#description).
 </Banner>
 
 ### Conditional Logic
@@ -643,10 +651,11 @@ export const CollectionConfig: CollectionConfig = {
 _For details on how to build Custom Components, see [Building Custom Components](../custom-components/overview#building-custom-components)._
 
 <Banner type="warning">
-  Instead of replacing the entire Field Component, you can alternately replace or slot-in only
-  specific parts by using the [`Label`](#label), [`Error`](#error),
-  [`beforeInput`](#afterinput-and-beforinput), and [`afterInput`](#afterinput-and-beforinput)
-  properties.
+  Instead of replacing the entire Field Component, you can alternately
+  replace or slot-in only specific parts by using the
+  [`Label`](#label), [`Error`](#error),
+  [`beforeInput`](#afterinput-and-beforinput), and
+  [`afterInput`](#afterinput-and-beforinput) properties.
 </Banner>
 
 ##### Default Props
@@ -692,13 +701,16 @@ import { useField } from '@payloadcms/ui'
 export const CustomTextField: React.FC = () => {
   const { value, setValue } = useField() // highlight-line
 
-  return <input onChange={(e) => setValue(e.target.value)} value={value} />
+  return (
+    <input onChange={(e) => setValue(e.target.value)} value={value} />
+  )
 }
 ```
 
 <Banner type="success">
-  For a complete list of all available React hooks, see the [Payload React
-  Hooks](../admin/react-hooks) documentation. For additional help, see [Building Custom
+  For a complete list of all available React hooks, see the [Payload
+  React Hooks](../admin/react-hooks) documentation. For additional
+  help, see [Building Custom
   Components](../custom-components/overview#building-custom-components).
 </Banner>
 

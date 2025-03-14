@@ -28,9 +28,10 @@ const config = buildConfig({
 Writing Plugins is no more complex than writing regular JavaScript. If you know the basic concept of [callback functions](https://developer.mozilla.org/en-US/docs/Glossary/Callback_function) or how [spread syntax](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax) works, and are up to speed with Payload concepts, then writing a plugin will be a breeze.
 
 <Banner type="success">
-  Because we rely on a simple config-based structure, Payload Plugins simply take in an existing
-  config and returns a _modified_ config with new fields, hooks, collections, admin views, or
-  anything else you can think of.
+  Because we rely on a simple config-based structure, Payload Plugins
+  simply take in an existing config and returns a _modified_ config
+  with new fields, hooks, collections, admin views, or anything else
+  you can think of.
 </Banner>
 
 **Example use cases:**
@@ -62,8 +63,8 @@ Plugins are changing every day, so be sure to check back often to see what new p
 
 <Banner type="warning">
   For a complete list of Official Plugins, visit the [Packages
-  Directory](https://github.com/payloadcms/payload/tree/main/packages) of the [Payload
-  Monorepo](https://github.com/payloadcms/payload).
+  Directory](https://github.com/payloadcms/payload/tree/main/packages)
+  of the [Payload Monorepo](https://github.com/payloadcms/payload).
 </Banner>
 
 ## Community Plugins
@@ -73,8 +74,10 @@ Community Plugins are those that are maintained entirely by outside contributors
 Some plugins have become so widely used that they are adopted as an [Official Plugin](#official-plugins), such as the [Lexical Plugin](https://github.com/AlessioGr/payload-plugin-lexical). If you have a plugin that you think should be an Official Plugin, please feel free to start a new [Discussion](https://github.com/payloadcms/payload/discussions).
 
 <Banner type="warning">
-  For maintainers building plugins for others to use, please add the `payload-plugin` topic on
-  [GitHub](https://github.com/topics/payload-plugin) to help others find it.
+  For maintainers building plugins for others to use, please add the
+  `payload-plugin` topic on
+  [GitHub](https://github.com/topics/payload-plugin) to help others
+  find it.
 </Banner>
 
 ## Example
@@ -94,8 +97,9 @@ const config = buildConfig({
 ```
 
 <Banner type="warning">
-  Payload Plugins are executed _after_ the incoming config is validated, but before it is sanitized
-  and has had default options merged in. After all plugins are executed, the full config with all
+  Payload Plugins are executed _after_ the incoming config is
+  validated, but before it is sanitized and has had default options
+  merged in. After all plugins are executed, the full config with all
   plugins will be sanitized.
 </Banner>
 
@@ -104,12 +108,14 @@ Here is an example what the `addLastModified` plugin from above might look like.
 ```ts
 import { Config, Plugin } from 'payload'
 
-export const addLastModified: Plugin = (incomingConfig: Config): Config => {
+export const addLastModified: Plugin = (
+  incomingConfig: Config,
+): Config => {
   // Find all incoming auth-enabled collections
   // so we can create a lastModifiedBy relationship field
   // to all auth collections
-  const authEnabledCollections = incomingConfig.collections.filter((collection) =>
-    Boolean(collection.auth),
+  const authEnabledCollections = incomingConfig.collections.filter(
+    (collection) => Boolean(collection.auth),
   )
 
   // Spread the existing config
@@ -126,7 +132,9 @@ export const addLastModified: Plugin = (incomingConfig: Config): Config => {
           {
             name: 'lastModifiedBy',
             type: 'relationship',
-            relationTo: authEnabledCollections.map(({ slug }) => slug),
+            relationTo: authEnabledCollections.map(
+              ({ slug }) => slug,
+            ),
             hooks: {
               beforeChange: [
                 ({ req }) => ({
@@ -150,6 +158,7 @@ export const addLastModified: Plugin = (incomingConfig: Config): Config => {
 ```
 
 <Banner type="success">
-  **Reminder:** See [how to build your own plugin](./build-your-own) for a more in-depth explication
-  on how create your own Payload Plugin.
+  **Reminder:** See [how to build your own plugin](./build-your-own)
+  for a more in-depth explication on how create your own Payload
+  Plugin.
 </Banner>

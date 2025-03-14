@@ -99,9 +99,9 @@ This is super handy if you'd like to present your editors with a very deliberate
 For example, if you have a `gallery` block, you might want to actually render the gallery of images directly in your Lexical block. With the `admin.components.Block` property, you can do exactly that!
 
 <Banner type="success">
-  **Tip:** If you customize the way your block is rendered in Lexical, you can import utility
-  components to easily edit / remove your block - so that you don't have to build all of this
-  yourself.
+  **Tip:** If you customize the way your block is rendered in Lexical,
+  you can import utility components to easily edit / remove your block
+  - so that you don't have to build all of this yourself.
 </Banner>
 
 To import these utility components for one of your custom blocks, you can import the following:
@@ -137,11 +137,13 @@ import {
 Blocks are defined as separate configs of their own.
 
 <Banner type="success">
-  **Tip:** Best practice is to define each block config in its own file, and then import them into
-  your Blocks field as necessary. This way each block config can be easily shared between fields.
-  For instance, using the "layout builder" example, you might want to feature a few of the same
-  blocks in a Post collection as well as a Page collection. Abstracting into their own files
-  trivializes their reusability.
+  **Tip:** Best practice is to define each block config in its own
+  file, and then import them into your Blocks field as necessary. This
+  way each block config can be easily shared between fields. For
+  instance, using the "layout builder" example, you might want to
+  feature a few of the same blocks in a Post collection as well as a
+  Page collection. Abstracting into their own files trivializes their
+  reusability.
 </Banner>
 
 | Option                     | Description                                                                                                                                                                         |
@@ -178,7 +180,8 @@ import { Block, CollectionConfig } from 'payload'
 const QuoteBlock: Block = {
   slug: 'Quote', // required
   imageURL: 'https://google.com/path/to/image.jpg',
-  imageAltText: 'A nice thumbnail image to show what this block looks like',
+  imageAltText:
+    'A nice thumbnail image to show what this block looks like',
   interfaceName: 'QuoteBlock', // optional
   fields: [
     // required
@@ -247,7 +250,9 @@ import React from 'react'
 import { BlocksField } from '@payloadcms/ui'
 import type { BlocksFieldClientComponent } from 'payload'
 
-export const CustomBlocksFieldClient: BlocksFieldClientComponent = (props) => {
+export const CustomBlocksFieldClient: BlocksFieldClientComponent = (
+  props,
+) => {
   return <BlocksField {...props} />
 }
 ```
@@ -261,18 +266,16 @@ import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
 import type { BlocksFieldLabelServerComponent } from 'payload'
 
-export const CustomBlocksFieldLabelServer: BlocksFieldLabelServerComponent = ({
-  clientField,
-  path,
-}) => {
-  return (
-    <FieldLabel
-      label={clientField?.label || clientField?.name}
-      path={path}
-      required={clientField?.required}
-    />
-  )
-}
+export const CustomBlocksFieldLabelServer: BlocksFieldLabelServerComponent =
+  ({ clientField, path }) => {
+    return (
+      <FieldLabel
+        label={clientField?.label || clientField?.name}
+        path={path}
+        required={clientField?.required}
+      />
+    )
+  }
 ```
 
 #### Client Component
@@ -283,13 +286,16 @@ import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
 import type { BlocksFieldLabelClientComponent } from 'payload'
 
-export const CustomBlocksFieldLabelClient: BlocksFieldLabelClientComponent = ({
-  label,
-  path,
-  required,
-}) => {
-  return <FieldLabel label={field?.label || field?.name} path={path} required={field?.required} />
-}
+export const CustomBlocksFieldLabelClient: BlocksFieldLabelClientComponent =
+  ({ label, path, required }) => {
+    return (
+      <FieldLabel
+        label={field?.label || field?.name}
+        path={path}
+        required={field?.required}
+      />
+    )
+  }
 ```
 
 ### Row Label

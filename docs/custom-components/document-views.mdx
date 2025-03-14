@@ -133,7 +133,9 @@ export const MyCollection: CollectionConfig = {
 }
 ```
 
-<Banner type="warning">**Note:** This applies to _both_ Collections _and_ Globals.</Banner>
+<Banner type="warning">
+  **Note:** This applies to _both_ Collections _and_ Globals.
+</Banner>
 
 The following options are available for tabs:
 
@@ -157,7 +159,11 @@ import type { DocumentTabServerProps } from 'payload'
 import { Link } from '@payloadcms/ui'
 
 export function MyCustomTabComponent(props: DocumentTabServerProps) {
-  return <Link href="/my-custom-tab">This is a custom Document Tab (Server)</Link>
+  return (
+    <Link href="/my-custom-tab">
+      This is a custom Document Tab (Server)
+    </Link>
+  )
 }
 ```
 
@@ -170,6 +176,10 @@ import type { DocumentTabClientProps } from 'payload'
 import { Link } from '@payloadcms/ui'
 
 export function MyCustomTabComponent(props: DocumentTabClientProps) {
-  return <Link href="/my-custom-tab">This is a custom Document Tab (Client)</Link>
+  return (
+    <Link href="/my-custom-tab">
+      This is a custom Document Tab (Client)
+    </Link>
+  )
 }
 ```

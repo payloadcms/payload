@@ -27,10 +27,11 @@ export const FieldWithHooks: Field = {
 All Field Hooks accept an array of synchronous or asynchronous functions. These functions can optionally modify the return value of the field before the operation continues. All Field Hooks are formatted to accept the same arguments, although some arguments may be `undefined` based the specific hook type.
 
 <Banner type="warning">
-  **Important:** Due to GraphQL's typed nature, changing the type of data that you return from a
-  field will produce errors in the [GraphQL API](../graphql/overview). If you need to change the
-  shape or type of data, consider [Collection Hooks](./collections) or [Global Hooks](./globals)
-  instead.
+  **Important:** Due to GraphQL's typed nature, changing the type of
+  data that you return from a field will produce errors in the
+  [GraphQL API](../graphql/overview). If you need to change the shape
+  or type of data, consider [Collection Hooks](./collections) or
+  [Global Hooks](./globals) instead.
 </Banner>
 
 To add hooks to a Field, use the `hooks` property in your [Field Config](../fields/overview):
@@ -78,9 +79,10 @@ The following arguments are provided to all Field Hooks:
 | **`value`**                 | The value of the [Field](../fields/overview).                                                                                                                                                  |
 
 <Banner type="success">
-  **Tip:** It's a good idea to conditionally scope your logic based on which operation is executing.
-  For example, if you are writing a `beforeChange` hook, you may want to perform different logic
-  based on if the current `operation` is `create` or `update`.
+  **Tip:** It's a good idea to conditionally scope your logic based on
+  which operation is executing. For example, if you are writing a
+  `beforeChange` hook, you may want to perform different logic based
+  on if the current `operation` is `create` or `update`.
 </Banner>
 
 ### beforeValidate
@@ -245,7 +247,11 @@ import type { FieldHook } from 'payload'
 // 2: The value type
 // 3: The sibling data type
 
-type ExampleFieldHook = FieldHook<ExampleDocumentType, string, SiblingDataType>
+type ExampleFieldHook = FieldHook<
+  ExampleDocumentType,
+  string,
+  SiblingDataType
+>
 
 const exampleFieldHook: ExampleFieldHook = (args) => {
   const {

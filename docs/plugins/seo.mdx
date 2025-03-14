@@ -15,10 +15,12 @@ As users are editing documents within the Admin Panel, they have the option to "
 To help you visualize what your page might look like in a search engine, a preview is rendered on the page just beneath the meta fields. This preview is updated in real-time as you edit your metadata. There are also visual indicators to help you write effective meta, such as a character counter for the title and description fields. You can even inject your own custom fields into the `meta` field group as your application requires, like `og:title` or `json-ld`. If you've ever used something like Yoast SEO, this plugin might feel very familiar.
 
 <Banner type="info">
-  This plugin is completely open-source and the [source code can be found
-  here](https://github.com/payloadcms/payload/tree/main/packages/plugin-seo). If you need help,
-  check out our [Community Help](https://payloadcms.com/community-help). If you think you've found a
-  bug, please [open a new
+  This plugin is completely open-source and the [source code can be
+  found
+  here](https://github.com/payloadcms/payload/tree/main/packages/plugin-seo).
+  If you need help, check out our [Community
+  Help](https://payloadcms.com/community-help). If you think you've
+  found a bug, please [open a new
   issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%20seo&template=bug_report.md&title=plugin-seo%3A)
   with as much detail as possible.
 </Banner>
@@ -116,9 +118,11 @@ Set the `uploadsCollection` to your application's upload-enabled collection slug
 When the `tabbedUI` property is `true`, it appends an `SEO` tab onto your config using Payload's [Tabs Field](../fields/tabs). If your collection is not already tab-enabled, meaning the first field in your config is not of type `tabs`, then one will be created for you called `Content`. Defaults to `false`.
 
 <Banner type="info">
-  If you wish to continue to use top-level or sidebar fields with `tabbedUI`, you must not let the
-  default `Content` tab get created for you (see the note above). Instead, you must define the first
-  field of your config with type `tabs` and place all other fields adjacent to this one.
+  If you wish to continue to use top-level or sidebar fields with
+  `tabbedUI`, you must not let the default `Content` tab get created
+  for you (see the note above). Instead, you must define the first
+  field of your config with type `tabs` and place all other fields
+  adjacent to this one.
 </Banner>
 
 ##### `generateTitle`
@@ -198,7 +202,8 @@ A function called by the search preview component to display the actual URL of y
 {
   // ...
   seoPlugin({
-    generateURL: ({ doc, collectionSlug }) => `https://yoursite.com/${collectionSlug}/${doc?.slug}`,
+    generateURL: ({ doc, collectionSlug }) =>
+      `https://yoursite.com/${collectionSlug}/${doc?.slug}`,
   })
 }
 ```
@@ -224,9 +229,10 @@ Rename the meta group interface name that is generated for TypeScript and GraphQ
 There is the option to directly import any of the fields from the plugin so that you can include them anywhere as needed.
 
 <Banner type="info">
-  You will still need to configure the plugin in the Payload Config in order to configure the
-  generation functions. Since these fields are imported and used directly, they don't have access to
-  the plugin config so they may need additional arguments to work the same way.
+  You will still need to configure the plugin in the Payload Config in
+  order to configure the generation functions. Since these fields are
+  imported and used directly, they don't have access to the plugin
+  config so they may need additional arguments to work the same way.
 </Banner>
 
 ```ts
@@ -275,9 +281,10 @@ OverviewField({
 ```
 
 <Banner type="info">
-  Tip: You can override the length rules by changing the minLength and maxLength props on the
-  fields. In the case of the OverviewField you can use `titleOverrides` and `descriptionOverrides`
-  to override the length rules.
+  Tip: You can override the length rules by changing the minLength and
+  maxLength props on the fields. In the case of the OverviewField you
+  can use `titleOverrides` and `descriptionOverrides` to override the
+  length rules.
 </Banner>
 
 ## TypeScript
@@ -300,7 +307,10 @@ import type { Page } from './payload-types.ts'
 
 import type { GenerateTitle } from '@payloadcms/plugin-seo/types'
 
-const generateTitle: GenerateTitle<Page> = async ({ doc, locale }) => {
+const generateTitle: GenerateTitle<Page> = async ({
+  doc,
+  locale,
+}) => {
   return `Website.com — ${doc?.title}`
 }
 ```

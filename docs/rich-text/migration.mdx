@@ -46,7 +46,10 @@ const Pages: CollectionConfig = {
       name: 'nameOfYourRichTextField',
       type: 'richText',
       editor: lexicalEditor({
-        features: ({ defaultFeatures }) => [...defaultFeatures, SlateToLexicalFeature({})],
+        features: ({ defaultFeatures }) => [
+          ...defaultFeatures,
+          SlateToLexicalFeature({}),
+        ],
       }),
     },
   ],
@@ -99,7 +102,10 @@ When using the `SlateToLexicalFeature`, you can add your custom converters to th
 import type { CollectionConfig } from 'payload'
 
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
-import { SlateToLexicalFeature, defaultSlateConverters } from '@payloadcms/richtext-lexical'
+import {
+  SlateToLexicalFeature,
+  defaultSlateConverters,
+} from '@payloadcms/richtext-lexical'
 
 import { YourCustomConverter } from '../converters/YourCustomConverter'
 
@@ -113,7 +119,10 @@ const Pages: CollectionConfig = {
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
           SlateToLexicalFeature({
-            converters: [...defaultSlateConverters, YourCustomConverter],
+            converters: [
+              ...defaultSlateConverters,
+              YourCustomConverter,
+            ],
           }),
         ],
       }),

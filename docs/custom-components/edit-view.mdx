@@ -11,9 +11,10 @@ The Edit View is where users interact with individual [Collection](../collection
 The Edit View can be swapped out in its entirety for a Custom View, or it can be injected with a number of Custom Components to add additional functionality or presentational elements without replacing the entire view.
 
 <Banner type="warning">
-  **Note:** The Edit View is one of many [Document Views](./document-views) in the Payload Admin
-  Panel. Each Document View is responsible for a different aspect of the interacting with a single
-  Document.
+  **Note:** The Edit View is one of many [Document
+  Views](./document-views) in the Payload Admin Panel. Each Document
+  View is responsible for a different aspect of the interacting with a
+  single Document.
 </Banner>
 
 ## Custom Edit View
@@ -49,7 +50,9 @@ Here is an example of a custom Edit View:
 import React from 'react'
 import type { DocumentViewServerProps } from 'payload'
 
-export function MyCustomServerEditView(props: DocumentViewServerProps) {
+export function MyCustomServerEditView(
+  props: DocumentViewServerProps,
+) {
   return <div>This is a custom Edit View (Server)</div>
 }
 ```
@@ -61,7 +64,9 @@ export function MyCustomServerEditView(props: DocumentViewServerProps) {
 import React from 'react'
 import type { DocumentViewClientProps } from 'payload'
 
-export function MyCustomClientEditView(props: DocumentViewClientProps) {
+export function MyCustomClientEditView(
+  props: DocumentViewClientProps,
+) {
   return <div>This is a custom Edit View (Client)</div>
 }
 ```
@@ -73,8 +78,9 @@ _For details on how to build Custom Views, including all available props, see [B
 In addition to swapping out the entire Edit View with a [Custom View](./custom-views), you can also override individual components. This allows you to customize specific parts of the Edit View without swapping out the entire view.
 
 <Banner type="warning">
-  **Important:** Collection and Globals are keyed to a different property in the `admin.components`
-  object have slightly different options. Be sure to use the correct key for the entity you are
+  **Important:** Collection and Globals are keyed to a different
+  property in the `admin.components` object have slightly different
+  options. Be sure to use the correct key for the entity you are
   working with.
 </Banner>
 
@@ -363,8 +369,8 @@ export const MyCollection: CollectionConfig = {
 ```
 
 <Banner type="warning">
-  **Note:** The `Description` component is shared between the Edit View and the [List
-  View](./list-view).
+  **Note:** The `Description` component is shared between the Edit
+  View and the [List View](./list-view).
 </Banner>
 
 Here's an example of a custom `Description` component:
@@ -375,7 +381,9 @@ Here's an example of a custom `Description` component:
 import React from 'react'
 import type { ViewDescriptionServerProps } from 'payload'
 
-export function MyDescriptionComponent(props: ViewDescriptionServerProps) {
+export function MyDescriptionComponent(
+  props: ViewDescriptionServerProps,
+) {
   return <div>This is a custom description component (Server)</div>
 }
 ```
@@ -387,7 +395,9 @@ export function MyDescriptionComponent(props: ViewDescriptionServerProps) {
 import React from 'react'
 import type { ViewDescriptionClientProps } from 'payload'
 
-export function MyDescriptionComponent(props: ViewDescriptionClientProps) {
+export function MyDescriptionComponent(
+  props: ViewDescriptionClientProps,
+) {
   return <div>This is a custom description component (Client)</div>
 }
 ```
@@ -415,7 +425,9 @@ export const MyCollection: CollectionConfig = {
 }
 ```
 
-<Banner type="warning">**Note:** The Upload component is only available for Collections.</Banner>
+<Banner type="warning">
+  **Note:** The Upload component is only available for Collections.
+</Banner>
 
 Here's an example of a custom `Upload` component:
 

@@ -60,10 +60,11 @@ export const MySelectField: Field = {
 _\* An asterisk denotes that a property is required._
 
 <Banner type="warning">
-  **Important:** Option values should be strings that do not contain hyphens or special characters
-  due to GraphQL enumeration naming constraints. Underscores are allowed. If you determine you need
-  your option values to be non-strings or contain special characters, they will be formatted
-  accordingly before being used as a GraphQL enum.
+  **Important:** Option values should be strings that do not contain
+  hyphens or special characters due to GraphQL enumeration naming
+  constraints. Underscores are allowed. If you determine you need your
+  option values to be non-strings or contain special characters, they
+  will be formatted accordingly before being used as a GraphQL enum.
 </Banner>
 
 ## Admin Options
@@ -164,7 +165,9 @@ import type { SelectFieldClientComponent } from 'payload'
 import { SelectField } from '@payloadcms/ui'
 import React from 'react'
 
-export const CustomSelectFieldClient: SelectFieldClientComponent = (props) => {
+export const CustomSelectFieldClient: SelectFieldClientComponent = (
+  props,
+) => {
   return <SelectField {...props} />
 }
 ```
@@ -178,18 +181,16 @@ import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
 import type { SelectFieldLabelServerComponent } from 'payload'
 
-export const CustomSelectFieldLabelServer: SelectFieldLabelServerComponent = ({
-  clientField,
-  path,
-}) => {
-  return (
-    <FieldLabel
-      label={clientField?.label || clientField?.name}
-      path={path}
-      required={clientField?.required}
-    />
-  )
-}
+export const CustomSelectFieldLabelServer: SelectFieldLabelServerComponent =
+  ({ clientField, path }) => {
+    return (
+      <FieldLabel
+        label={clientField?.label || clientField?.name}
+        path={path}
+        required={clientField?.required}
+      />
+    )
+  }
 ```
 
 #### Client Component
@@ -200,7 +201,14 @@ import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
 import type { SelectFieldLabelClientComponent } from 'payload'
 
-export const CustomSelectFieldLabelClient: SelectFieldLabelClientComponent = ({ field, path }) => {
-  return <FieldLabel label={field?.label || field?.name} path={path} required={field?.required} />
-}
+export const CustomSelectFieldLabelClient: SelectFieldLabelClientComponent =
+  ({ field, path }) => {
+    return (
+      <FieldLabel
+        label={field?.label || field?.name}
+        path={path}
+        required={field?.required}
+      />
+    )
+  }
 ```

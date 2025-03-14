@@ -115,7 +115,12 @@ export const CustomCodeFieldServer: CodeFieldServerComponent = ({
   permissions,
 }) => {
   return (
-    <CodeField field={clientField} path={path} schemaPath={schemaPath} permissions={permissions} />
+    <CodeField
+      field={clientField}
+      path={path}
+      schemaPath={schemaPath}
+      permissions={permissions}
+    />
   )
 }
 ```
@@ -128,7 +133,9 @@ import React from 'react'
 import { CodeField } from '@payloadcms/ui'
 import type { CodeFieldClientComponent } from 'payload'
 
-export const CustomCodeFieldClient: CodeFieldClientComponent = (props) => {
+export const CustomCodeFieldClient: CodeFieldClientComponent = (
+  props,
+) => {
   return <CodeField {...props} />
 }
 ```
@@ -142,18 +149,16 @@ import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
 import type { CodeFieldLabelServerComponent } from 'payload'
 
-export const CustomCodeFieldLabelServer: CodeFieldLabelServerComponent = ({
-  clientField,
-  path,
-}) => {
-  return (
-    <FieldLabel
-      label={clientField?.label || clientField?.name}
-      path={path}
-      required={clientField?.required}
-    />
-  )
-}
+export const CustomCodeFieldLabelServer: CodeFieldLabelServerComponent =
+  ({ clientField, path }) => {
+    return (
+      <FieldLabel
+        label={clientField?.label || clientField?.name}
+        path={path}
+        required={clientField?.required}
+      />
+    )
+  }
 ```
 
 #### Client Component
@@ -164,7 +169,14 @@ import React from 'react'
 import { FieldLabel } from '@payloadcms/ui'
 import type { CodeFieldLabelClientComponent } from 'payload'
 
-export const CustomCodeFieldLabelClient: CodeFieldLabelClientComponent = ({ field, path }) => {
-  return <FieldLabel label={field?.label || field?.name} path={path} required={field?.required} />
-}
+export const CustomCodeFieldLabelClient: CodeFieldLabelClientComponent =
+  ({ field, path }) => {
+    return (
+      <FieldLabel
+        label={field?.label || field?.name}
+        path={path}
+        required={field?.required}
+      />
+    )
+  }
 ```

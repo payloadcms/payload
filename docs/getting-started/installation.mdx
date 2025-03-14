@@ -15,8 +15,8 @@ Payload requires the following software:
 - Any [compatible database](/docs/database/overview) (MongoDB, Postgres or SQLite)
 
 <Banner type="warning">
-  **Important:** Before proceeding any further, please ensure that you have the above requirements
-  met.
+  **Important:** Before proceeding any further, please ensure that you
+  have the above requirements met.
 </Banner>
 
 ## Quickstart with create-payload-app
@@ -35,7 +35,9 @@ Adding Payload to an existing Next.js app is super straightforward. You can eith
 
 If you don't have a Next.js app already, but you still want to start a project from a blank Next.js app, you can create a new Next.js app using `npx create-next-app` - and then just follow the steps below to install Payload.
 
-<Banner type="info">**Note:** Next.js version 15 or higher is required for Payload.</Banner>
+<Banner type="info">
+  **Note:** Next.js version 15 or higher is required for Payload.
+</Banner>
 
 #### 1. Install the relevant packages
 
@@ -46,8 +48,9 @@ pnpm i payload @payloadcms/next @payloadcms/richtext-lexical sharp graphql
 ```
 
 <Banner type="warning">
-  **Note:** Swap out `pnpm` for your package manager. If you are using npm, you might need to
-  install using legacy peer deps: `npm i --legacy-peer-deps`.
+  **Note:** Swap out `pnpm` for your package manager. If you are using
+  npm, you might need to install using legacy peer deps: `npm i
+  --legacy-peer-deps`.
 </Banner>
 
 Next, install a [Database Adapter](/docs/database/overview). Payload requires a Database Adapter to establish a database connection. Payload works with all types of databases, but the most common are MongoDB and Postgres.
@@ -66,8 +69,9 @@ To install a Database Adapter, you can run **one** of the following commands:
   ```
 
 <Banner type="success">
-  **Note:** New [Database Adapters](/docs/database/overview) are becoming available every day. Check
-  the docs for the most up-to-date list of what's available.
+  **Note:** New [Database Adapters](/docs/database/overview) are
+  becoming available every day. Check the docs for the most up-to-date
+  list of what's available.
 </Banner>
 
 #### 2. Copy Payload files into your Next.js app folder
@@ -85,10 +89,10 @@ app/
 _For an exact reference of the `(payload)` directory, see [Project Structure](../admin/overview#project-structure)._
 
 <Banner type="warning">
-  You may need to copy all of your existing frontend files, including your existing root layout,
-  into its own newly created [Route
-  Group](https://nextjs.org/docs/app/building-your-application/routing/route-groups), i.e.
-  `(my-app)`.
+  You may need to copy all of your existing frontend files, including
+  your existing root layout, into its own newly created [Route
+  Group](https://nextjs.org/docs/app/building-your-application/routing/route-groups),
+  i.e. `(my-app)`.
 </Banner>
 
 The files that Payload needs to have in your `/app` folder do not regenerate, and will never change. Once you slot them in, you never have to revisit them. They are not meant to be edited and simply import Payload dependencies from `@payloadcms/next` for the REST / GraphQL API and Admin Panel.
@@ -118,8 +122,8 @@ export default withPayload(nextConfig) // highlight-line
 ```
 
 <Banner type="warning">
-  **Important:** Payload is a fully ESM project, and that means the `withPayload` function is an
-  ECMAScript module.
+  **Important:** Payload is a fully ESM project, and that means the
+  `withPayload` function is an ECMAScript module.
 </Banner>
 
 To import the Payload Plugin, you need to make sure your `next.config` file is set up to use ESM.

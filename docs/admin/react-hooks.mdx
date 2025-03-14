@@ -10,9 +10,10 @@ Payload provides a variety of powerful [React Hooks](https://react.dev/reference
 
 <Banner type="warning">
   **Reminder:** All Custom Components are [React Server
-  Components](https://react.dev/reference/rsc/server-components) by default. Hooks, on the other
-  hand, are only available in client-side environments. To use hooks, [ensure your component is a
-  client component](../custom-components/overview#client-components).
+  Components](https://react.dev/reference/rsc/server-components) by
+  default. Hooks, on the other hand, are only available in client-side
+  environments. To use hooks, [ensure your component is a client
+  component](../custom-components/overview#client-components).
 </Banner>
 
 ## useField
@@ -26,7 +27,9 @@ To do so, import the `useField` hook as follows:
 import type { TextFieldClientComponent } from 'payload'
 import { useField } from '@payloadcms/ui'
 
-export const CustomTextField: TextFieldClientComponent = ({ path }) => {
+export const CustomTextField: TextFieldClientComponent = ({
+  path,
+}) => {
   const { value, setValue } = useField({ path }) // highlight-line
 
   return (
@@ -80,8 +83,9 @@ type FieldType<T> = {
 There are times when a custom field component needs to have access to data from other fields, and you have a few options to do so. The `useFormFields` hook is a powerful and highly performant way to retrieve a form's field state, as well as to retrieve the `dispatchFields` method, which can be helpful for setting other fields' form states from anywhere within a form.
 
 <Banner type="success">
-  **This hook is great for retrieving only certain fields from form state** because it ensures that
-  it will only cause a rerender when the items that you ask for change.
+  **This hook is great for retrieving only certain fields from form
+  state** because it ensures that it will only cause a rerender when
+  the items that you ask for change.
 </Banner>
 
 Thanks to the awesome package [`use-context-selector`](https://github.com/dai-shi/use-context-selector), you can retrieve a specific field's state easily. This is ideal because you can ensure you have an up-to-date field state, and your component will only re-render when _that field's state_ changes.
@@ -97,10 +101,19 @@ const MyComponent: React.FC = () => {
   const amount = useFormFields(([fields, dispatch]) => fields.amount)
 
   // Do the same thing as above, but to the `feePercentage` field
-  const feePercentage = useFormFields(([fields, dispatch]) => fields.feePercentage)
+  const feePercentage = useFormFields(
+    ([fields, dispatch]) => fields.feePercentage,
+  )
 
-  if (typeof amount?.value !== 'undefined' && typeof feePercentage?.value !== 'undefined') {
-    return <span>The fee is ${(amount.value * feePercentage.value) / 100}</span>
+  if (
+    typeof amount?.value !== 'undefined' &&
+    typeof feePercentage?.value !== 'undefined'
+  ) {
+    return (
+      <span>
+        The fee is ${(amount.value * feePercentage.value) / 100}
+      </span>
+    )
   }
 }
 ```
@@ -658,7 +671,12 @@ import { useDocumentForm } from '@payloadcms/ui'
 const MyComponent: React.FC = () => {
   const { fields: parentDocumentFields } = useDocumentForm()
 
-  return <p>The document's Form has ${Object.keys(parentDocumentFields).length} fields</p>
+  return (
+    <p>
+      The document's Form has $
+      {Object.keys(parentDocumentFields).length} fields
+    </p>
+  )
 }
 ```
 
@@ -686,7 +704,9 @@ const CustomComponent: React.FC = () => {
 
   return (
     <div>
-      <p className="field-type">I am {isCollapsed ? 'closed' : 'open'}</p>
+      <p className="field-type">
+        I am {isCollapsed ? 'closed' : 'open'}
+      </p>
       <button onClick={toggle} type="button">
         Toggle
       </button>
@@ -752,7 +772,9 @@ const LinkFromCategoryToPosts: React.FC = () => {
   }
 
   return (
-    <a href={`/admin/collections/posts?where[or][0][and][0][category][in][0]=[${id}]`}>
+    <a
+      href={`/admin/collections/posts?where[or][0][and][0][category][in][0]=[${id}]`}
+    >
       View posts
     </a>
   )
@@ -907,7 +929,11 @@ const MyComponent: React.FC = () => {
   const mediaConfig = getEntityConfig({ collectionSlug: 'media' })
   // highlight-end
 
-  return <span>The media collection has {mediaConfig.fields.length} fields.</span>
+  return (
+    <span>
+      The media collection has {mediaConfig.fields.length} fields.
+    </span>
+  )
 }
 ```
 
@@ -952,7 +978,9 @@ const MyComponent: React.FC = () => {
       </span>
       <button
         type="button"
-        onClick={() => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))}
+        onClick={() =>
+          setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))
+        }
       >
         Toggle theme
       </button>
@@ -1009,8 +1037,9 @@ const ListenForUpdates: React.FC = () => {
 ```
 
 <Banner type="info">
-  Right now the `useDocumentEvents` hook only tracks recently updated documents, but in the future
-  it will track more document-related events as needed, such as document creation, deletion, etc.
+  Right now the `useDocumentEvents` hook only tracks recently updated
+  documents, but in the future it will track more document-related
+  events as needed, such as document creation, deletion, etc.
 </Banner>
 
 ## useStepNav
@@ -1059,9 +1088,12 @@ import { usePayloadAPI } from '@payloadcms/ui'
 
 const MyComponent: React.FC = () => {
   // Fetch data from a collection item using its ID
-  const [{ data, isError, isLoading }, { setParams }] = usePayloadAPI('/api/posts/123', {
-    initialParams: { depth: 1 },
-  })
+  const [{ data, isError, isLoading }, { setParams }] = usePayloadAPI(
+    '/api/posts/123',
+    {
+      initialParams: { depth: 1 },
+    },
+  )
 
   if (isLoading) return <p>Loading...</p>
   if (isError) return <p>Error occurred while fetching data.</p>
@@ -1069,7 +1101,9 @@ const MyComponent: React.FC = () => {
   return (
     <div>
       <h1>{data?.title}</h1>
-      <button onClick={() => setParams({ cacheBust: Date.now() })}>Refresh Data</button>
+      <button onClick={() => setParams({ cacheBust: Date.now() })}>
+        Refresh Data
+      </button>
     </div>
   )
 }
