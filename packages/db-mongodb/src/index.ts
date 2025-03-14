@@ -184,6 +184,7 @@ declare module 'payload' {
 export function mongooseAdapter({
   allowAdditionalKeys = false,
   autoPluralization = true,
+  collation,
   collectionsSchemaOptions = {},
   connectOptions,
   disableIndexHints = false,
@@ -203,6 +204,7 @@ export function mongooseAdapter({
 
       // Mongoose-specific
       autoPluralization,
+      collation,
       collections: {},
       // @ts-expect-error initialize without a connection
       connection: undefined,
