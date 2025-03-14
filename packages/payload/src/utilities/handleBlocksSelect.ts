@@ -1,10 +1,5 @@
 import type { Block } from '../fields/config/types.js'
-import type {
-  SelectExcludeType,
-  SelectIncludeType,
-  SelectMode,
-  SelectType,
-} from '../types/index.js'
+import type { SelectMode, SelectType } from '../types/index.js'
 
 /**
  * This is used for the Select API to determine the select level of a block.
@@ -27,33 +22,32 @@ export const handleBlocksSelect = ({
       ...select,
     }
 
+    let blockSelect = blocksSelect[block.slug]
+
     // sanitize `{ blocks: { cta: false }}` to `{ blocks: { cta: { id: true, blockType: true }}}`
-    if (selectMode === 'exclude' && blocksSelect[block.slug] === false) {
+    if (selectMode === 'exclude' && blockSelect === false) {
       blockSelectMode = 'include'
 
-      blocksSelect[block.slug] = {
+      blockSelect = {
         id: true,
         blockType: true,
       }
     } else if (selectMode === 'include') {
-      if (!blocksSelect[block.slug]) {
-        blocksSelect[block.slug] = {}
+      if (!blockSelect) {
+        blockSelect = {}
       }
 
-      if (typeof blocksSelect[block.slug] === 'object') {
-        blocksSelect[block.slug] = {
-          ...(blocksSelect[block.slug] as object),
+      if (typeof blockSelect === 'object') {
+        blockSelect = {
+          ...blockSelect,
         }
 
-        /**
-         * @todo this type assertions here should not be required, as we're already typechecking in the if statement
-         */
-        ;(blocksSelect[block.slug] as SelectExcludeType | SelectIncludeType)['id'] = true
-        ;(blocksSelect[block.slug] as SelectExcludeType | SelectIncludeType)['blockType'] = true
+        blockSelect['id'] = true
+        blockSelect['blockType'] = true
       }
     }
 
-    return { blockSelect: blocksSelect?.[block.slug], blockSelectMode }
+    return { blockSelect, blockSelectMode }
   }
 
   return { blockSelect: select, blockSelectMode: selectMode }
