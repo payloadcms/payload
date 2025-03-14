@@ -26,7 +26,7 @@
     "prepublishOnly": "pnpm clean && pnpm build"
   },
   "dependencies": {
-    "@rollup/plugin-image": "^3.0.2",
+    "@rollup/plugin-image": "^3.0.3",
     "@vitejs/plugin-react": "^4.0.4",
     "compression": "1.7.4",
     "connect-history-api-fallback": "1.6.0",
