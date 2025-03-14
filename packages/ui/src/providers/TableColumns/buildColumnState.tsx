@@ -35,7 +35,6 @@ import {
   // eslint-disable-next-line payload/no-imports-from-exports-dir
 } from '../../exports/client/index.js'
 import { hasOptionLabelJSXElement } from '../../utilities/hasOptionLabelJSXElement.js'
-import { RenderServerComponent } from '../RenderServerComponent/index.js'
 import { filterFields } from './filterFields.js'
 
 type Args = {
