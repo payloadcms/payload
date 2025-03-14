@@ -42,14 +42,14 @@ const flattenAllWherePaths = (where: Where, paths: string[]) => {
   }
 }
 
-const buildSQLWhere = (where: Where, alias: string) => {
+const buildSQLWhere = (where: Where, alias: string, adapter: DrizzleAdapter) => {
   for (const k in where) {
     if (['AND', 'OR'].includes(k.toUpperCase())) {
       if (Array.isArray(where[k])) {
         const op = 'AND' === k.toUpperCase() ? and : or
         const accumulated = []
         for (const whereField of where[k]) {
-          accumulated.push(buildSQLWhere(whereField, alias))
+          accumulated.push(buildSQLWhere(whereField, alias, adapter))
         }
         return op(...accumulated)
       }
@@ -57,7 +57,10 @@ const buildSQLWhere = (where: Where, alias: string) => {
       const payloadOperator = Object.keys(where[k])[0]
       const value = where[k][payloadOperator]
 
-      return operatorMap[payloadOperator](sql.raw(`"${alias}"."${k.split('.').join('_')}"`), value)
+      return adapter.operators[payloadOperator](
+        sql.raw(`"${alias}"."${k.split('.').join('_')}"`),
+        value,
+      )
     }
   }
 }
@@ -493,7 +496,7 @@ export const traverseFields = ({
           )
 
           if (where && Object.keys(where).length > 0) {
-            sqlWhere = and(sqlWhere, buildSQLWhere(where, subQueryAlias))
+            sqlWhere = and(sqlWhere, buildSQLWhere(where, subQueryAlias, adapter))
           }
 
           if (shouldCount) {

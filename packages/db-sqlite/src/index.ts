@@ -1,4 +1,3 @@
-import type { Operators } from '@payloadcms/drizzle'
 import type { DatabaseAdapterObj, Payload } from 'payload'
 
 import {
@@ -29,7 +28,6 @@ import {
   migrateRefresh,
   migrateReset,
   migrateStatus,
-  operatorMap,
   queryDrafts,
   rollbackTransaction,
   updateGlobal,
@@ -39,7 +37,6 @@ import {
   updateOne,
   updateVersion,
 } from '@payloadcms/drizzle'
-import { like, notLike } from 'drizzle-orm'
 import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
 import { fileURLToPath } from 'url'
 
@@ -56,6 +53,7 @@ import { dropDatabase } from './dropDatabase.js'
 import { execute } from './execute.js'
 import { init } from './init.js'
 import { insert } from './insert.js'
+import { operatorMap } from './operatorMap.js'
 import { requireDrizzleKit } from './requireDrizzleKit.js'
 
 export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
@@ -78,14 +76,6 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       resolveInitializing = res
       rejectInitializing = rej
     })
-
-    // sqlite's like operator is case-insensitive, so we overwrite the DrizzleAdapter operators to not use ilike
-    const operators = {
-      ...operatorMap,
-      contains: like,
-      like,
-      not_like: notLike,
-    } as unknown as Operators
 
     return createDatabaseAdapter<SQLiteAdapter>({
       name: 'sqlite',
@@ -113,7 +103,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       initializing,
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
-      operators,
+      operators: operatorMap,
       prodMigrations: args.prodMigrations,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       push: args.push,
