@@ -1,3 +1,7 @@
+import path from 'path'
+import { execSync } from 'child_process'
+import { fileURLToPath } from 'url'
+
 /**
  * @param {import('next').NextConfig} nextConfig
  * @param {Object} [options] - Optional configuration options
@@ -13,6 +17,20 @@ export const withPayload = (nextConfig = {}, options = {}) => {
       'Payload detected a non-zero value for the `staleTimes.dynamic` option in your Next.js config. This will slow down page transitions and may cause stale data to load within the Admin panel. To clear this warning, remove the `staleTimes.dynamic` option from your Next.js config or set it to 0. In the future, Next.js may support scoping this option to specific routes.',
     )
     env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH = 'true'
+  }
+
+  if (
+    (process.env.npm_lifecycle_script === 'next build' ||
+      process.env.npm_lifecycle_event === 'build') &&
+    process.env.PAYLOAD_GENERATE_IMPORTMAP_ON_BUILD !== 'false'
+  ) {
+    try {
+      const payloadBin = path.resolve(
+        path.dirname(fileURLToPath(import.meta.resolve('payload'))),
+        '../bin.js',
+      )
+      execSync(`node "${payloadBin}" generate:importmap`, { stdio: 'inherit' })
+    } catch (_) {}
   }
 
   if (process.env.PAYLOAD_PATCH_TURBOPACK_WARNINGS !== 'false') {
