@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-stripe",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "homepage:": "https://payloadcms.com",
   "repository": {
     "type": "git",
