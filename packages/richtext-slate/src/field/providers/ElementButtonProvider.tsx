@@ -25,17 +25,17 @@ export const ElementButtonProvider: React.FC<
   const { children, ...rest } = props
 
   return (
-    <ElementButtonContext.Provider
+    <ElementButtonContext
       value={{
         ...rest,
       }}
     >
       {children}
-    </ElementButtonContext.Provider>
+    </ElementButtonContext>
   )
 }
 
 export const useElementButton = () => {
-  const path = React.useContext(ElementButtonContext)
+  const path = React.use(ElementButtonContext)
   return path
 }

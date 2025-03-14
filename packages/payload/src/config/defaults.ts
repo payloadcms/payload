@@ -18,6 +18,7 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
     },
     meta: {
       defaultOGImageType: 'dynamic',
+      robots: 'noindex, nofollow',
       titleSuffix: '- Payload',
     },
     routes: {
@@ -31,6 +32,9 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
       unauthorized: '/unauthorized',
     },
     theme: 'all',
+  },
+  auth: {
+    jwtOrder: ['JWT', 'Bearer', 'cookie'],
   },
   bin: [],
   collections: [],
@@ -88,6 +92,7 @@ export const addDefaultsToConfig = (config: Config): Config => {
     },
     meta: {
       defaultOGImageType: 'dynamic',
+      robots: 'noindex, nofollow',
       titleSuffix: '- Payload',
       ...(config?.admin?.meta || {}),
     },
@@ -148,6 +153,11 @@ export const addDefaultsToConfig = (config: Config): Config => {
     ...(config.typescript || {}),
   }
   config.upload = config.upload ?? {}
+
+  config.auth = {
+    jwtOrder: ['JWT', 'Bearer', 'cookie'],
+    ...(config.auth || {}),
+  }
 
   return config
 }

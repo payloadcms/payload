@@ -134,7 +134,7 @@ export function BulkUploadProvider({ children }: { readonly children: React.Reac
   }, [])
 
   return (
-    <Context.Provider
+    <Context
       value={{
         collectionSlug: collection,
         currentActivePath,
@@ -164,11 +164,11 @@ export function BulkUploadProvider({ children }: { readonly children: React.Reac
         {children}
         <BulkUploadDrawer />
       </React.Fragment>
-    </Context.Provider>
+    </Context>
   )
 }
 
-export const useBulkUpload = () => React.useContext(Context)
+export const useBulkUpload = () => React.use(Context)
 
 export function useBulkUploadDrawerSlug() {
   const depth = useDrawerDepth()

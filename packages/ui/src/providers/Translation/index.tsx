@@ -14,7 +14,7 @@ import type { LanguageOptions } from 'payload'
 import { importDateFNSLocale, t } from '@payloadcms/translations'
 import { enUS } from 'date-fns/locale/en-US'
 import { useRouter } from 'next/navigation.js'
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, use, useEffect, useState } from 'react'
 
 type ContextType<
   TAdditionalTranslations = {},
@@ -98,7 +98,7 @@ export const TranslationProvider: React.FC<Props> = ({
   }, [dateFNSKey])
 
   return (
-    <Context.Provider
+    <Context
       value={{
         i18n: {
           dateFNS,
@@ -114,11 +114,11 @@ export const TranslationProvider: React.FC<Props> = ({
       }}
     >
       {children}
-    </Context.Provider>
+    </Context>
   )
 }
 
 export const useTranslation = <
   TAdditionalTranslations = {},
   TAdditionalClientTranslationKeys extends string = never,
->() => useContext<ContextType<TAdditionalTranslations, TAdditionalClientTranslationKeys>>(Context)
+>() => use<ContextType<TAdditionalTranslations, TAdditionalClientTranslationKeys>>(Context)

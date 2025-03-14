@@ -6,8 +6,8 @@ export {
   parseCookies,
 } from '../auth/cookies.js'
 export { getLoginOptions } from '../auth/getLoginOptions.js'
-export { getFromImportMap } from '../bin/generateImportMap/getFromImportMap.js'
-export { parsePayloadComponent } from '../bin/generateImportMap/parsePayloadComponent.js'
+export { getFromImportMap } from '../bin/generateImportMap/utilities/getFromImportMap.js'
+export { parsePayloadComponent } from '../bin/generateImportMap/utilities/parsePayloadComponent.js'
 export { defaults as collectionDefaults } from '../collections/config/defaults.js'
 
 export { serverProps } from '../config/types.js'

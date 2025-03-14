@@ -10,7 +10,7 @@ import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
 import { initPage } from '../../utilities/initPage/index.js'
 import { NotFoundClient } from './index.client.js'
 
-export const generatePageMetadata = async ({
+export const generateNotFoundViewMetadata = async ({
   config: configPromise,
 }: {
   config: Promise<SanitizedConfig> | SanitizedConfig

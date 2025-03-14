@@ -7,7 +7,6 @@ import './index.scss'
 import { SelectInput, useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
-import { SELECT_ALL } from '../../constants.js'
 import { useTenantSelection } from '../../providers/TenantSelectionProvider/index.client.js'
 
 export const TenantSelector = ({ label, viewType }: { label: string; viewType?: ViewTypes }) => {
@@ -38,13 +37,7 @@ export const TenantSelector = ({ label, viewType }: { label: string; viewType?: 
         onChange={handleChange}
         options={options}
         path="setTenant"
-        value={
-          selectedTenantID
-            ? selectedTenantID === SELECT_ALL
-              ? undefined
-              : (selectedTenantID as string)
-            : undefined
-        }
+        value={selectedTenantID as string | undefined}
       />
     </div>
   )

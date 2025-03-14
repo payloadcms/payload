@@ -1274,6 +1274,7 @@ export type {
   NumberField,
   NumberFieldClient,
   Option,
+  OptionLabel,
   OptionObject,
   PointField,
   PointFieldClient,

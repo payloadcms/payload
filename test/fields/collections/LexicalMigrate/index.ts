@@ -1,9 +1,8 @@
 import type { CollectionConfig } from 'payload'
 
 import {
-  HTMLConverterFeature,
   lexicalEditor,
-  lexicalHTML,
+  lexicalHTMLField,
   LinkFeature,
   TreeViewFeature,
   UploadFeature,
@@ -39,7 +38,6 @@ export const LexicalMigrateFields: CollectionConfig = {
           ...defaultFeatures,
           LexicalPluginToLexicalFeature({ quiet: true }),
           TreeViewFeature(),
-          HTMLConverterFeature(),
           LinkFeature({
             fields: ({ defaultFields }) => [
               ...defaultFields,
@@ -80,7 +78,6 @@ export const LexicalMigrateFields: CollectionConfig = {
           ...defaultFeatures,
           SlateToLexicalFeature(),
           TreeViewFeature(),
-          HTMLConverterFeature(),
           LinkFeature({
             fields: ({ defaultFields }) => [
               ...defaultFields,
@@ -117,11 +114,11 @@ export const LexicalMigrateFields: CollectionConfig = {
       name: 'lexicalSimple',
       type: 'richText',
       editor: lexicalEditor({
-        features: ({ defaultFeatures }) => [...defaultFeatures, HTMLConverterFeature()],
+        features: ({ defaultFeatures }) => [...defaultFeatures],
       }),
       defaultValue: getSimpleLexicalData('simple'),
     },
-    lexicalHTML('lexicalSimple', { name: 'lexicalSimple_html' }),
+    lexicalHTMLField({ htmlFieldName: 'lexicalSimple_html', lexicalFieldName: 'lexicalSimple' }),
     {
       name: 'groupWithLexicalField',
       type: 'group',
@@ -130,11 +127,14 @@ export const LexicalMigrateFields: CollectionConfig = {
           name: 'lexicalInGroupField',
           type: 'richText',
           editor: lexicalEditor({
-            features: ({ defaultFeatures }) => [...defaultFeatures, HTMLConverterFeature()],
+            features: ({ defaultFeatures }) => [...defaultFeatures],
           }),
           defaultValue: getSimpleLexicalData('group'),
         },
-        lexicalHTML('lexicalInGroupField', { name: 'lexicalInGroupField_html' }),
+        lexicalHTMLField({
+          htmlFieldName: 'lexicalInGroupField_html',
+          lexicalFieldName: 'lexicalInGroupField',
+        }),
       ],
     },
     {
@@ -145,10 +145,13 @@ export const LexicalMigrateFields: CollectionConfig = {
           name: 'lexicalInArrayField',
           type: 'richText',
           editor: lexicalEditor({
-            features: ({ defaultFeatures }) => [...defaultFeatures, HTMLConverterFeature()],
+            features: ({ defaultFeatures }) => [...defaultFeatures],
           }),
         },
-        lexicalHTML('lexicalInArrayField', { name: 'lexicalInArrayField_html' }),
+        lexicalHTMLField({
+          htmlFieldName: 'lexicalInArrayField_html',
+          lexicalFieldName: 'lexicalInArrayField',
+        }),
       ],
     },
   ],

@@ -194,7 +194,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   }, [defaultSort, defaultLimit, modifySearchParams, columns])
 
   return (
-    <ListQueryContext.Provider
+    <ListQueryContext
       value={{
         collectionSlug,
         data,
@@ -209,9 +209,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
         ...contextRef.current,
       }}
     >
-      <ListQueryModifiedContext.Provider value={modified}>
-        {children}
-      </ListQueryModifiedContext.Provider>
-    </ListQueryContext.Provider>
+      <ListQueryModifiedContext value={modified}>{children}</ListQueryModifiedContext>
+    </ListQueryContext>
   )
 }
