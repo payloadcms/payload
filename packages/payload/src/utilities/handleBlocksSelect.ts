@@ -1,28 +1,37 @@
 import type { Block } from '../fields/config/types.js'
-import type { SelectMode, SelectType } from '../types/index.js'
+import type {
+  SelectExcludeType,
+  SelectIncludeType,
+  SelectMode,
+  SelectType,
+} from '../types/index.js'
 
+/**
+ * This is used for the Select API to determine the select level of a block.
+ * It will ensure that `id` and `blockType` are always included in the select object.
+ * @returns { blockSelect: boolean | SelectType, blockSelectMode: SelectMode }
+ */
 export const handleBlocksSelect = ({
   block,
   select,
   selectMode,
 }: {
   block: Block
-  select: boolean | SelectType
+  select: SelectType[string]
   selectMode: SelectMode
-}): { blockSelect: SelectType; blockSelectMode: SelectMode } => {
-  let blocksSelect = select
-  let blockSelectMode = selectMode
-
+}): { blockSelect: boolean | SelectType; blockSelectMode: SelectMode } => {
   if (typeof select === 'object') {
-    blocksSelect = {
+    let blockSelectMode = selectMode
+
+    const blocksSelect = {
       ...select,
     }
 
-    // sanitize blocks: {cta: false} to blocks: {cta: {id: true, blockType: true}}
+    // sanitize `{ blocks: { cta: false }}` to `{ blocks: { cta: { id: true, blockType: true }}}`
     if (selectMode === 'exclude' && blocksSelect[block.slug] === false) {
       blockSelectMode = 'include'
 
-      select[block.slug] = {
+      blocksSelect[block.slug] = {
         id: true,
         blockType: true,
       }
@@ -36,11 +45,16 @@ export const handleBlocksSelect = ({
           ...(blocksSelect[block.slug] as object),
         }
 
-        blocksSelect[block.slug]['id'] = true
-        blocksSelect[block.slug]['blockType'] = true
+        /**
+         * @todo this type assertions here should not be required, as we're already typechecking in the if statement
+         */
+        ;(blocksSelect[block.slug] as SelectExcludeType | SelectIncludeType)['id'] = true
+        ;(blocksSelect[block.slug] as SelectExcludeType | SelectIncludeType)['blockType'] = true
       }
     }
+
+    return { blockSelect: blocksSelect?.[block.slug], blockSelectMode }
   }
 
-  return { blockSelect: blocksSelect?.[block.slug], blockSelectMode }
+  return { blockSelect: select, blockSelectMode: selectMode }
 }
