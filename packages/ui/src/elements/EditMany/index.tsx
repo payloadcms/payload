@@ -58,6 +58,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
             collection={props.collection}
             drawerSlug={drawerSlug}
             selected={selected}
+            setSelected={setSelected}
           />
         </Drawer>
       </EditDepthProvider>

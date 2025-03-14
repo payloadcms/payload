@@ -16,7 +16,7 @@ const baseClass = 'field-select'
 
 export type FieldSelectProps = {
   readonly fields: ClientField[]
-  readonly setSelected: (fields: FieldWithPathClient[]) => void
+  readonly onChange: (fields: FieldWithPathClient[]) => void
 }
 
 export const combineLabel = ({
@@ -117,7 +117,7 @@ const reduceFields = ({
   }, [])
 }
 
-export const FieldSelect: React.FC<FieldSelectProps> = ({ fields, setSelected }) => {
+export const FieldSelect: React.FC<FieldSelectProps> = ({ fields, onChange }) => {
   const { t } = useTranslation()
   const { dispatchFields, getFields } = useForm()
 
@@ -127,9 +127,9 @@ export const FieldSelect: React.FC<FieldSelectProps> = ({ fields, setSelected })
     const activeFields = getFields()
 
     if (selected === null) {
-      setSelected([])
+      onChange([])
     } else {
-      setSelected(selected.map(({ value }) => value))
+      onChange(selected.map(({ value }) => value))
     }
 
     // remove deselected values from form state

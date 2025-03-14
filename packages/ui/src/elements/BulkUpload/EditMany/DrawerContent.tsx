@@ -78,7 +78,7 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
         </button>
       </div>
       <Form className={`${baseClass}__form`} initialState={{}} onSubmit={handleSubmit}>
-        <FieldSelect fields={filteredFields} setSelected={setSelectedFields} />
+        <FieldSelect fields={filteredFields} onChange={setSelectedFields} />
         {selectedFields.length === 0 ? null : (
           <RenderFields
             fields={selectedFields}
