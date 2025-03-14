@@ -13,7 +13,7 @@ import type {
 import type { Block, Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
-import { handleBlocksSelect } from '../../../utilities/handleBlocksSelect.js'
+import { getBlockSelect } from '../../../utilities/getBlockSelect.js'
 import { stripUnselectedFields } from '../../../utilities/stripUnselectedFields.js'
 import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../../config/types.js'
 import { getDefaultValue } from '../../getDefaultValue.js'
@@ -462,7 +462,7 @@ export const promise = async ({
               (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
             ) as Block | undefined)
 
-          const { blockSelect, blockSelectMode } = handleBlocksSelect({
+          const { blockSelect, blockSelectMode } = getBlockSelect({
             block,
             select: select?.[field.name],
             selectMode,

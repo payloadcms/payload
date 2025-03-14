@@ -6,7 +6,7 @@ import type { SelectMode, SelectType } from '../types/index.js'
  * It will ensure that `id` and `blockType` are always included in the select object.
  * @returns { blockSelect: boolean | SelectType, blockSelectMode: SelectMode }
  */
-export const handleBlocksSelect = ({
+export const getBlockSelect = ({
   block,
   select,
   selectMode,

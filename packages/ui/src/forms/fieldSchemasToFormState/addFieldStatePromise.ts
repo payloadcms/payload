@@ -17,7 +17,7 @@ import type {
 } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
-import { handleBlocksSelect } from 'payload'
+import { getBlockSelect } from 'payload'
 import {
   deepCopyObjectSimple,
   fieldAffectsData,
@@ -397,7 +397,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
               )
             }
 
-            const { blockSelect, blockSelectMode } = handleBlocksSelect({
+            const { blockSelect, blockSelectMode } = getBlockSelect({
               block,
               select: select?.[field.name],
               selectMode,

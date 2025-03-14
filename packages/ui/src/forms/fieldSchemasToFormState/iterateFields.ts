@@ -115,17 +115,6 @@ export const iterateFields = async ({
   const promises = []
 
   fields.forEach((field, fieldIndex) => {
-    const shouldContinue = stripUnselectedFields({
-      field,
-      select,
-      selectMode,
-      siblingDoc: data,
-    })
-
-    if (!shouldContinue) {
-      return
-    }
-
     let passesCondition = true
 
     const { indexPath, path, schemaPath } = getFieldPaths({
@@ -135,6 +124,21 @@ export const iterateFields = async ({
       parentPath,
       parentSchemaPath,
     })
+
+    console.log('path', path)
+
+    if (path !== 'id') {
+      const shouldContinue = stripUnselectedFields({
+        field,
+        select,
+        selectMode,
+        siblingDoc: data,
+      })
+
+      if (!shouldContinue) {
+        return
+      }
+    }
 
     const pathSegments = path ? path.split('.') : []
 
