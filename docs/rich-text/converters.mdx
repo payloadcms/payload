@@ -18,16 +18,15 @@ import { RichText } from '@payloadcms/richtext-lexical/react'
 import { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
 export const MyComponent = ({ data }: { data: SerializedEditorState }) => {
-  return (
-    <RichText data={data} />
-  )
+  return <RichText data={data} />
 }
 ```
 
 The `RichText` component includes built-in serializers for common Lexical nodes but allows customization through the `converters` prop. In our [website template](https://github.com/payloadcms/payload/blob/main/templates/website/src/components/RichText/index.tsx) you have an example of how to use `converters` to render custom blocks, custom nodes and override existing converters.
 
 <Banner type="default">
-  When fetching data, ensure your `depth` setting is high enough to fully populate Lexical nodes such as uploads. The JSX converter requires fully populated data to work correctly.
+  When fetching data, ensure your `depth` setting is high enough to fully populate Lexical nodes
+  such as uploads. The JSX converter requires fully populated data to work correctly.
 </Banner>
 
 ### Converting Internal Links
@@ -162,7 +161,6 @@ export const MyComponent: React.FC<{
 ## Lexical => HTML
 
 If you don't have a React-based frontend, or if you need to send the content to a third-party service, you can convert lexical to HTML. There are two ways to do this:
-
 
 1. **Generating HTML in your frontend** Convert JSON to HTML on-demand wherever you need it (Recommended).
 2. **Outputting HTML from the Collection:** Create a new field in your collection to convert saved JSON content to HTML. Payload generates and outputs the HTML for use in your frontend. This is not recommended, as this approach adds additional overhead to the Payload API and may not work with live preview.
@@ -375,7 +373,8 @@ Here is some "base" CSS you can use to ensure that nested lists render correctly
 
 ```css
 /* Base CSS for Lexical HTML */
-.nestedListItem, .list-check {
+.nestedListItem,
+.list-check {
   list-style-type: none;
 }
 ```
@@ -398,7 +397,7 @@ const payloadConfig // <= your Payload Config here
 
 const headlessEditor = createHeadlessEditor({
   nodes: getEnabledNodes({
-    editorConfig: await editorConfigFactory.default({config: payloadConfig})
+    editorConfig: await editorConfigFactory.default({ config: payloadConfig }),
   }),
 })
 ```
@@ -545,8 +544,9 @@ This has been taken from the [lexical serialization & deserialization docs](http
 <Banner type="success">
   **Note:**
 
-  Using the `discrete: true` flag ensures instant updates to the editor state. If
-  immediate reading of the updated state isn't necessary, you can omit the flag.
+Using the `discrete: true` flag ensures instant updates to the editor state. If
+immediate reading of the updated state isn't necessary, you can omit the flag.
+
 </Banner>
 
 ## Lexical => Markdown
