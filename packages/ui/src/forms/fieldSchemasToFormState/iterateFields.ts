@@ -125,8 +125,6 @@ export const iterateFields = async ({
       parentSchemaPath,
     })
 
-    console.log('path', path)
-
     if (path !== 'id') {
       const shouldContinue = stripUnselectedFields({
         field,

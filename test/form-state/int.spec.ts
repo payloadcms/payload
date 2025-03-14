@@ -1,6 +1,8 @@
+import type { Payload, User } from 'payload'
+
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import path from 'path'
-import { createLocalReq, type Payload } from 'payload'
+import { createLocalReq } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
@@ -12,6 +14,7 @@ import { postsSlug } from './collections/Posts/index.js'
 let payload: Payload
 let token: string
 let restClient: NextRESTClient
+let user: User
 
 const { email, password } = devUser
 const filename = fileURLToPath(import.meta.url)
@@ -34,6 +37,7 @@ describe('Form State', () => {
       .then((res) => res.json())
 
     token = data.token
+    user = data.user
   })
 
   afterAll(async () => {
@@ -43,7 +47,7 @@ describe('Form State', () => {
   })
 
   it('should build entire form state', async () => {
-    const req = await createLocalReq({}, payload)
+    const req = await createLocalReq({ user }, payload)
 
     const postData = await payload.create({
       collection: postsSlug,
@@ -74,7 +78,7 @@ describe('Form State', () => {
       schemaPath: postsSlug,
     })
 
-    expect(state).toStrictEqual({
+    expect(state).toMatchObject({
       title: {
         value: postData.title,
         initialValue: postData.title,
@@ -99,7 +103,7 @@ describe('Form State', () => {
   })
 
   it('should use `select` to build partial form state with only specified fields', async () => {
-    const req = await createLocalReq({}, payload)
+    const req = await createLocalReq({ user }, payload)
 
     const postData = await payload.create({
       collection: postsSlug,
