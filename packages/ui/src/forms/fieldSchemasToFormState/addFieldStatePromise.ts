@@ -345,7 +345,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           },
           {
             promises: [],
-            rows: undefined,
+            rows: [],
           },
         )
 
