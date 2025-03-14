@@ -92,7 +92,6 @@ export type BuildFormStateArgs = {
   returnLockStatus?: boolean
   schemaPath: string
   select?: SelectType
-  selectMode?: SelectMode
   skipValidation?: boolean
   updateLastEdited?: boolean
 } & (

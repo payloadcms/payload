@@ -13,10 +13,8 @@ import type {
 import type { Block, Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
-import {
-  handleBlocksSelect,
-  stripUnselectedFields,
-} from '../../../utilities/stripUnselectedFields.js'
+import { handleBlocksSelect } from '../../../utilities/handleBlocksSelect.js'
+import { stripUnselectedFields } from '../../../utilities/stripUnselectedFields.js'
 import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../../config/types.js'
 import { getDefaultValue } from '../../getDefaultValue.js'
 import { getFieldPathsModified as getFieldPaths } from '../../getFieldPaths.js'

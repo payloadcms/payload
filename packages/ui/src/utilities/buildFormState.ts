@@ -1,7 +1,7 @@
 import type { BuildFormStateArgs, ClientConfig, ClientUser, ErrorResult, FormState } from 'payload'
 
 import { formatErrors } from 'payload'
-import { reduceFieldsToValues } from 'payload/shared'
+import { getSelectMode, reduceFieldsToValues } from 'payload/shared'
 
 import { fieldSchemasToFormState } from '../forms/fieldSchemasToFormState/index.js'
 import { renderField } from '../forms/fieldSchemasToFormState/renderField.js'
@@ -118,10 +118,11 @@ export const buildFormState = async (
     returnLockStatus,
     schemaPath = collectionSlug || globalSlug,
     select,
-    selectMode,
     skipValidation,
     updateLastEdited,
   } = args
+
+  const selectMode = select ? getSelectMode(select) : undefined
 
   let data = incomingData
 

@@ -1,22 +1,23 @@
-import ObjectIdImport from 'bson-objectid'
-import {
-  type ClientFieldSchemaMap,
-  type Data,
-  type DocumentPreferences,
-  type Field,
-  type FieldSchemaMap,
-  type FieldState,
-  type FlattenedBlock,
-  type FormState,
-  type FormStateWithoutComponents,
-  handleBlocksSelect,
-  type PayloadRequest,
-  type SanitizedFieldPermissions,
-  type SanitizedFieldsPermissions,
-  type SelectMode,
-  type SelectType,
-  type Validate,
+import type {
+  ClientFieldSchemaMap,
+  Data,
+  DocumentPreferences,
+  Field,
+  FieldSchemaMap,
+  FieldState,
+  FlattenedBlock,
+  FormState,
+  FormStateWithoutComponents,
+  PayloadRequest,
+  SanitizedFieldPermissions,
+  SanitizedFieldsPermissions,
+  SelectMode,
+  SelectType,
+  Validate,
 } from 'payload'
+
+import ObjectIdImport from 'bson-objectid'
+import { handleBlocksSelect } from 'payload'
 import {
   deepCopyObjectSimple,
   fieldAffectsData,
