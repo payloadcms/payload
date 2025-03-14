@@ -112,19 +112,16 @@ Accepts an `email` and `password`. On success, it will return the logged in user
 **Example REST API login**:
 
 ```ts
-const res = await fetch(
-  'http://localhost:3000/api/[collection-slug]/login',
-  {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      email: 'dev@payloadcms.com',
-      password: 'this-is-not-our-password...or-is-it?',
-    }),
+const res = await fetch('http://localhost:3000/api/[collection-slug]/login', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
   },
-)
+  body: JSON.stringify({
+    email: 'dev@payloadcms.com',
+    password: 'this-is-not-our-password...or-is-it?',
+  }),
+})
 
 const json = await res.json()
 
@@ -176,15 +173,12 @@ As Payload sets HTTP-only cookies, logging out cannot be done by just removing a
 **Example REST API logout**:
 
 ```ts
-const res = await fetch(
-  'http://localhost:3000/api/[collection-slug]/logout',
-  {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+const res = await fetch('http://localhost:3000/api/[collection-slug]/logout', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
   },
-)
+})
 ```
 
 **Example GraphQL Mutation**:
@@ -294,15 +288,12 @@ To restrict who is allowed to unlock users, you can utilize the [`unlock`](../ac
 **Example REST API unlock**:
 
 ```ts
-const res = await fetch(
-  `http://localhost:3000/api/[collection-slug]/unlock`,
-  {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+const res = await fetch(`http://localhost:3000/api/[collection-slug]/unlock`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
   },
-)
+})
 ```
 
 **Example GraphQL Mutation**:
@@ -367,14 +358,13 @@ const token = await payload.forgotPassword({
 ```
 
 <Banner type="info">
-  **Note:** if you do not have a `config.serverURL` set, Payload will
-  attempt to create one for you if the `forgot-password` operation was
-  triggered via REST or GraphQL by looking at the incoming `req`. But
-  this is not supported if you are calling `payload.forgotPassword()`
-  via the Local API. If you do not have a `serverURL` set, you may
-  want to override your `auth.forgotPassword.generateEmailHTML`
-  function to provide a full URL to link the user to a proper
-  reset-password page.
+  **Note:** if you do not have a `config.serverURL` set, Payload will attempt to
+  create one for you if the `forgot-password` operation was triggered via REST
+  or GraphQL by looking at the incoming `req`. But this is not supported if you
+  are calling `payload.forgotPassword()` via the Local API. If you do not have a
+  `serverURL` set, you may want to override your
+  `auth.forgotPassword.generateEmailHTML` function to provide a full URL to link
+  the user to a proper reset-password page.
 </Banner>
 
 <Banner type="success">

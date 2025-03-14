@@ -53,12 +53,12 @@ const getPosts = async (payload: Payload) => {
 ```
 
 <Banner type="warning">
-  **Important:** To perform querying with `select` efficiently,
-  Payload implements your `select` query on the database level.
-  Because of that, your `beforeRead` and `afterRead` hooks may not
-  receive the full `doc`. To ensure that some fields are always
-  selected for your hooks / access control, regardless of the `select`
-  query you can use `forceSelect` collection config property.
+  **Important:** To perform querying with `select` efficiently, Payload
+  implements your `select` query on the database level. Because of that, your
+  `beforeRead` and `afterRead` hooks may not receive the full `doc`. To ensure
+  that some fields are always selected for your hooks / access control,
+  regardless of the `select` query you can use `forceSelect` collection config
+  property.
 </Banner>
 
 ## REST API
@@ -106,9 +106,8 @@ const getPosts = async () => {
 ```
 
 <Banner type="info">
-  **Reminder:** This is the same for
-  [Globals](../configuration/globals) using the `/api/globals`
-  endpoint.
+  **Reminder:** This is the same for [Globals](../configuration/globals) using
+  the `/api/globals` endpoint.
 </Banner>
 
 ## defaultPopulate collection config property
@@ -145,10 +144,9 @@ export const Pages: CollectionConfig<'pages'> = {
 
 <Banner type="warning">
   **Important:** When using `defaultPopulate` on a collection with
-  [Uploads](/docs/fields/upload) enabled and you want to select the
-  `url` field, it is important to specify `filename: true` as well,
-  otherwise Payload will not be able to construct the correct file
-  URL, instead returning `url: null`.
+  [Uploads](/docs/fields/upload) enabled and you want to select the `url` field,
+  it is important to specify `filename: true` as well, otherwise Payload will
+  not be able to construct the correct file URL, instead returning `url: null`.
 </Banner>
 
 ## populate

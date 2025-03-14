@@ -52,9 +52,9 @@ _For details on how to build Custom Components, see [Building Custom Components]
 
 <Banner type="success">
   **Note:** You can also use set [Collection
-  Components](../configuration/collections#custom-components) and
-  [Global Components](../configuration/globals#custom-components) in
-  their respective configs.
+  Components](../configuration/collections#custom-components) and [Global
+  Components](../configuration/globals#custom-components) in their respective
+  configs.
 </Banner>
 
 ## Components
@@ -93,9 +93,8 @@ export default function MyCustomAction() {
 ```
 
 <Banner type="success">
-  **Note:** You can also use add Actions to the [Edit
-  View](./edit-view) and [List View](./list-view) in their respective
-  configs.
+  **Note:** You can also use add Actions to the [Edit View](./edit-view) and
+  [List View](./list-view) in their respective configs.
 </Banner>
 
 ### beforeDashboard
@@ -123,11 +122,7 @@ Here is an example of a simple `beforeDashboard` component:
 
 ```tsx
 export default function MyBeforeDashboardComponent() {
-  return (
-    <div>
-      This is a custom component injected before the Dashboard.
-    </div>
-  )
+  return <div>This is a custom component injected before the Dashboard.</div>
 }
 ```
 
@@ -156,11 +151,7 @@ Here is an example of a simple `afterDashboard` component:
 
 ```tsx
 export default function MyAfterDashboardComponent() {
-  return (
-    <div>
-      This is a custom component injected after the Dashboard.
-    </div>
-  )
+  return <div>This is a custom component injected after the Dashboard.</div>
 }
 ```
 
@@ -189,11 +180,7 @@ Here is an example of a simple `beforeLogin` component:
 
 ```tsx
 export default function MyBeforeLoginComponent() {
-  return (
-    <div>
-      This is a custom component injected before the Login form.
-    </div>
-  )
+  return <div>This is a custom component injected before the Login form.</div>
 }
 ```
 
@@ -222,11 +209,7 @@ Here is an example of a simple `afterLogin` component:
 
 ```tsx
 export default function MyAfterLoginComponent() {
-  return (
-    <div>
-      This is a custom component injected after the Login form.
-    </div>
-  )
+  return <div>This is a custom component injected after the Login form.</div>
 }
 ```
 
@@ -255,11 +238,7 @@ Here is an example of a simple `beforeNavLinks` component:
 
 ```tsx
 export default function MyBeforeNavLinksComponent() {
-  return (
-    <div>
-      This is a custom component injected before the Nav links.
-    </div>
-  )
+  return <div>This is a custom component injected before the Nav links.</div>
 }
 ```
 
@@ -288,9 +267,7 @@ Here is an example of a simple `afterNavLinks` component:
 
 ```tsx
 export default function MyAfterNavLinksComponent() {
-  return (
-    <p>This is a custom component injected after the Nav links.</p>
-  )
+  return <p>This is a custom component injected after the Nav links.</p>
 }
 ```
 
@@ -457,8 +434,6 @@ Here is an example of a simple `logout.Button` component:
 
 ```tsx
 export default function MyCustomLogoutButton() {
-  return (
-    <button onClick={() => alert('Logging out!')}>Log Out</button>
-  )
+  return <button onClick={() => alert('Logging out!')}>Log Out</button>
 }
 ```

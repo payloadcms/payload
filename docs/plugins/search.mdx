@@ -17,12 +17,11 @@ To query search results, use all the existing Payload APIs that you are already 
 This plugin is a great way to implement a fast, immersive search experience such as a search bar in a front-end application. Many applications may not need the power and complexity of a third-party service like Algolia or ElasticSearch. This plugin provides a first-party alternative that is easy to set up and runs entirely on your own database.
 
 <Banner type="info">
-  This plugin is completely open-source and the [source code can be
-  found
+  This plugin is completely open-source and the [source code can be found
   here](https://github.com/payloadcms/payload/tree/main/packages/plugin-search).
   If you need help, check out our [Community
-  Help](https://payloadcms.com/community-help). If you think you've
-  found a bug, please [open a new
+  Help](https://payloadcms.com/community-help). If you think you've found a bug,
+  please [open a new
   issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%20search&template=bug_report.md&title=plugin-search%3A)
   with as much detail as possible.
 </Banner>
@@ -175,8 +174,5 @@ Collection reindexing allows you to recreate search documents from your search-e
 All types can be directly imported:
 
 ```ts
-import type {
-  SearchConfig,
-  BeforeSync,
-} from '@payloadcms/plugin-search/types'
+import type { SearchConfig, BeforeSync } from '@payloadcms/plugin-search/types'
 ```

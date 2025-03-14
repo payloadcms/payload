@@ -118,9 +118,7 @@ export const Code: React.FC<CodeFieldClientProps> = ({
   schemaPath,
   validate,
 }) => {
-  const languageField = useFormFields(
-    ([fields]) => fields['language'],
-  )
+  const languageField = useFormFields(([fields]) => fields['language'])
 
   const language: Language =
     (languageField?.value as Language) ||
@@ -136,8 +134,7 @@ export const Code: React.FC<CodeFieldClientProps> = ({
       admin: {
         ...field.admin,
         editorOptions: undefined,
-        language:
-          languageKeyToMonacoLanguageMap[language] || language,
+        language: languageKeyToMonacoLanguageMap[language] || language,
       },
       label,
     }),
@@ -274,10 +271,7 @@ While nodes added to the server feature do not control how the node is rendered 
 The `createNode` helper function is used to create nodes with proper typing. It is recommended to use this function to create nodes.
 
 ```ts
-import {
-  createServerFeature,
-  createNode,
-} from '@payloadcms/richtext-lexical'
+import { createServerFeature, createNode } from '@payloadcms/richtext-lexical'
 import { MyNode } from './nodes/MyNode'
 
 export const MyFeature = createServerFeature({
@@ -348,10 +342,7 @@ Within lexical, one example where this is done are our list features. Both `Unor
 Here is how we do it:
 
 ```ts
-import {
-  createServerFeature,
-  createNode,
-} from '@payloadcms/richtext-lexical'
+import { createServerFeature, createNode } from '@payloadcms/richtext-lexical'
 
 export const OrderedListFeature = createServerFeature({
   feature: ({ featureProviderMap }) => {
@@ -630,8 +621,9 @@ import type { PluginComponent } from '@payloadcms/richtext-lexical' // type impo
 import { $createMyNode } from '../nodes/MyNode'
 import './index.scss'
 
-export const INSERT_MYNODE_COMMAND: LexicalCommand<void> =
-  createCommand('INSERT_MYNODE_COMMAND')
+export const INSERT_MYNODE_COMMAND: LexicalCommand<void> = createCommand(
+  'INSERT_MYNODE_COMMAND',
+)
 
 /**
  * Plugin which registers a lexical command to insert a new MyNode into the editor
@@ -775,10 +767,7 @@ export const MyClientFeature = createClientFeature({
         {
           ChildComponent: IconComponent,
           isActive: ({ selection }) => {
-            if (
-              !$isNodeSelection(selection) ||
-              !selection.getNodes().length
-            ) {
+            if (!$isNodeSelection(selection) || !selection.getNodes().length) {
               return false
             }
 
@@ -945,11 +934,7 @@ To accept props in your feature, type them as a generic.
 Server Feature:
 
 ```ts
-createServerFeature<
-  UnSanitizedProps,
-  SanitizedProps,
-  UnSanitizedClientProps
->({
+createServerFeature<UnSanitizedProps, SanitizedProps, UnSanitizedClientProps>({
   //...
 })
 ```
@@ -966,11 +951,7 @@ The unSanitized props are what the user will pass to the feature when they call 
 To sanitize those in the server feature, you can pass a function to `feature` instead of an object:
 
 ```ts
-createServerFeature<
-  UnSanitizedProps,
-  SanitizedProps,
-  UnSanitizedClientProps
->({
+createServerFeature<UnSanitizedProps, SanitizedProps, UnSanitizedClientProps>({
   //...
   feature: async ({
     config,
@@ -1021,11 +1002,7 @@ type UnSanitizedClientProps = {
   test: string
 }
 
-createServerFeature<
-  UnSanitizedProps,
-  SanitizedProps,
-  UnSanitizedClientProps
->({
+createServerFeature<UnSanitizedProps, SanitizedProps, UnSanitizedClientProps>({
   //...
   feature: {
     clientFeatureProps: {

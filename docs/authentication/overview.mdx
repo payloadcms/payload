@@ -41,8 +41,8 @@ _Admin Panel screenshot depicting an Admins Collection with Auth enabled_
 Any [Collection](../configuration/collections) can opt-in to supporting Authentication. Once enabled, each Document that is created within the Collection can be thought of as a "user". This enables a complete authentication workflow on your Collection, such as logging in and out, resetting their password, and more.
 
 <Banner type="warning">
-  **Note:** By default, Payload provides an auth-enabled `User`
-  Collection which is used to access the Admin Panel. [More
+  **Note:** By default, Payload provides an auth-enabled `User` Collection which
+  is used to access the Admin Panel. [More
   details](../admin/overview#the-admin-user-collection).
 </Banner>
 
@@ -66,13 +66,13 @@ export const Admins: CollectionConfig = {
 ```
 
 <Banner type="info">
-  **Tip:** For default auth behavior, set `auth: true`. This is a good
-  starting point for most applications.
+  **Tip:** For default auth behavior, set `auth: true`. This is a good starting
+  point for most applications.
 </Banner>
 
 <Banner type="warning">
-  **Note:** Auth-enabled Collections with be automatically injected
-  with the `hash`, `salt`, and `email` fields. [More
+  **Note:** Auth-enabled Collections with be automatically injected with the
+  `hash`, `salt`, and `email` fields. [More
   details](../fields/overview#field-names).
 </Banner>
 
@@ -155,9 +155,9 @@ export default buildConfig({
 ```
 
 <Banner type="warning">
-  **Warning:** The recommended way to use this feature is behind an
-  [Environment Variable](../configuration/environment-vars). This will
-  ensure it is _disabled_ in production.
+  **Warning:** The recommended way to use this feature is behind an [Environment
+  Variable](../configuration/environment-vars). This will ensure it is
+  _disabled_ in production.
 </Banner>
 
 The following options are available:

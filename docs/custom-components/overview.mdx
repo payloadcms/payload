@@ -11,9 +11,9 @@ The Payload [Admin Panel](../admin/overview) is designed to be as minimal and st
 All Custom Components in Payload are [React Server Components](https://react.dev/reference/rsc/server-components) by default. This enables the use of the [Local API](../local-api/overview) directly on the front-end. Custom Components are available for nearly every part of the Admin Panel for extreme granularity and control.
 
 <Banner type="success">
-  **Note:** Client Components continue to be fully supported. To use
-  Client Components in your app, simply include the `'use client'`
-  directive. Payload will automatically detect and remove all
+  **Note:** Client Components continue to be fully supported. To use Client
+  Components in your app, simply include the `'use client'` directive. Payload
+  will automatically detect and remove all
   [non-serializable](https://react.dev/reference/rsc/use-client#serializable-types)
   default props before rendering your component. [More
   details](#client-components).
@@ -50,9 +50,9 @@ const config = buildConfig({
 ```
 
 <Banner type="success">
-  **Note:** All Custom Components can be either Server Components or
-  Client Components, depending on the presence of the `'use client'`
-  directive at the top of the file.
+  **Note:** All Custom Components can be either Server Components or Client
+  Components, depending on the presence of the `'use client'` directive at the
+  top of the file.
 </Banner>
 
 ### Component Paths
@@ -218,13 +218,13 @@ Each Custom Component receives the following props by default:
 | `i18n`    | The [i18n](../configuration/i18n) object.   |
 
 <Banner type="warning">
-  **Reminder:** All Custom Components also receive various other props
-  that are specific to the component being rendered. See [Root
+  **Reminder:** All Custom Components also receive various other props that are
+  specific to the component being rendered. See [Root
   Components](#root-components), [Collection
   Components](../configuration/collections#custom-components), [Global
   Components](../configuration/globals#custom-components), or [Field
-  Components](../fields/overview#custom-components) for a complete
-  list of all default props per component.
+  Components](../fields/overview#custom-components) for a complete list of all
+  default props per component.
 </Banner>
 
 ### Custom Props
@@ -258,11 +258,7 @@ Here is how your component might receive this prop:
 import React from 'react'
 import { Link } from '@payloadcms/ui'
 
-export function MyComponent({
-  myCustomProp,
-}: {
-  myCustomProp: string
-}) {
+export function MyComponent({ myCustomProp }: { myCustomProp: string }) {
   return <Link href="/admin/logout">{myCustomProp}</Link>
 }
 ```
@@ -281,18 +277,16 @@ export function MyClientComponent() {
   const [count, setCount] = useState(0)
 
   return (
-    <button onClick={() => setCount(count + 1)}>
-      Clicked {count} times
-    </button>
+    <button onClick={() => setCount(count + 1)}>Clicked {count} times</button>
   )
 }
 ```
 
 <Banner type="warning">
   **Reminder:** Client Components cannot be passed [non-serializable
-  props](https://react.dev/reference/rsc/use-client#serializable-types).
-  If you are rendering your Client Component _from within_ a Server
-  Component, ensure that its props are serializable.
+  props](https://react.dev/reference/rsc/use-client#serializable-types). If you
+  are rendering your Client Component _from within_ a Server Component, ensure
+  that its props are serializable.
 </Banner>
 
 ### Accessing the Payload Config
@@ -404,8 +398,8 @@ export function MyClientComponent() {
 ```
 
 <Banner type="success">
-  See the [Hooks](../admin/react-hooks) documentation for a full list
-  of available hooks.
+  See the [Hooks](../admin/react-hooks) documentation for a full list of
+  available hooks.
 </Banner>
 
 ### Getting the Current Locale
@@ -448,8 +442,8 @@ function Greeting() {
 ```
 
 <Banner type="success">
-  See the [Hooks](../admin/react-hooks) documentation for a full list
-  of available hooks.
+  See the [Hooks](../admin/react-hooks) documentation for a full list of
+  available hooks.
 </Banner>
 
 ### Using Hooks
@@ -469,8 +463,8 @@ export function MyClientComponent() {
 ```
 
 <Banner type="success">
-  See the [Hooks](../admin/react-hooks) documentation for a full list
-  of available hooks.
+  See the [Hooks](../admin/react-hooks) documentation for a full list of
+  available hooks.
 </Banner>
 
 ### Adding Styles
@@ -508,7 +502,6 @@ Payload also exports its [SCSS](https://sass-lang.com) library for reuse which i
 ```
 
 <Banner type="success">
-  **Note:** You can also drill into Payload's own component styles, or
-  easily apply global, app-wide CSS. More on that
-  [here](../admin/customizing-css).
+  **Note:** You can also drill into Payload's own component styles, or easily
+  apply global, app-wide CSS. More on that [here](../admin/customizing-css).
 </Banner>

@@ -23,8 +23,8 @@ export const CollectionWithHooks: CollectionConfig = {
 ```
 
 <Banner type="info">
-  **Tip:** You can also set hooks on the field-level to isolate hook
-  logic to specific fields. [More details](./fields).
+  **Tip:** You can also set hooks on the field-level to isolate hook logic to
+  specific fields. [More details](./fields).
 </Banner>
 
 ## Config Options
@@ -103,9 +103,7 @@ Please do note that this does not run before client-side validation. If you rend
 ```ts
 import type { CollectionBeforeValidateHook } from 'payload'
 
-const beforeValidateHook: CollectionBeforeValidateHook = async ({
-  data,
-}) => {
+const beforeValidateHook: CollectionBeforeValidateHook = async ({ data }) => {
   return data
 }
 ```
@@ -128,9 +126,7 @@ Immediately following validation, `beforeChange` hooks will run within `create` 
 ```ts
 import type { CollectionBeforeChangeHook } from 'payload'
 
-const beforeChangeHook: CollectionBeforeChangeHook = async ({
-  data,
-}) => {
+const beforeChangeHook: CollectionBeforeChangeHook = async ({ data }) => {
   return data
 }
 ```
@@ -153,9 +149,7 @@ After a document is created or updated, the `afterChange` hook runs. This hook i
 ```ts
 import type { CollectionAfterChangeHook } from 'payload'
 
-const afterChangeHook: CollectionAfterChangeHook = async ({
-  doc,
-}) => {
+const afterChangeHook: CollectionAfterChangeHook = async ({ doc }) => {
   return doc
 }
 ```
@@ -270,9 +264,7 @@ Available Collection operations include `create`, `find`, `findByID`, `update`, 
 ```ts
 import type { CollectionAfterOperationHook } from 'payload'
 
-const afterOperationHook: CollectionAfterOperationHook = async ({
-  result,
-}) => {
+const afterOperationHook: CollectionAfterOperationHook = async ({ result }) => {
   return result
 }
 ```
@@ -319,9 +311,7 @@ For [Auth-enabled Collections](../authentication/overview), this hook runs durin
 ```ts
 import type { CollectionBeforeLoginHook } from 'payload'
 
-const beforeLoginHook: CollectionBeforeLoginHook = async ({
-  user,
-}) => {
+const beforeLoginHook: CollectionBeforeLoginHook = async ({ user }) => {
   return user
 }
 ```

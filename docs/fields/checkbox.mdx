@@ -79,17 +79,21 @@ import type React from 'react'
 import { CheckboxField } from '@payloadcms/ui'
 import type { CheckboxFieldServerComponent } from 'payload'
 
-export const CustomCheckboxFieldServer: CheckboxFieldServerComponent =
-  ({ clientField, path, schemaPath, permissions }) => {
-    return (
-      <CheckboxField
-        field={clientField}
-        path={path}
-        schemaPath={schemaPath}
-        permissions={permissions}
-      />
-    )
-  }
+export const CustomCheckboxFieldServer: CheckboxFieldServerComponent = ({
+  clientField,
+  path,
+  schemaPath,
+  permissions,
+}) => {
+  return (
+    <CheckboxField
+      field={clientField}
+      path={path}
+      schemaPath={schemaPath}
+      permissions={permissions}
+    />
+  )
+}
 ```
 
 #### Client Component
@@ -100,10 +104,11 @@ import React from 'react'
 import { CheckboxField } from '@payloadcms/ui'
 import type { CheckboxFieldClientComponent } from 'payload'
 
-export const CustomCheckboxFieldClient: CheckboxFieldClientComponent =
-  (props) => {
-    return <CheckboxField {...props} />
-  }
+export const CustomCheckboxFieldClient: CheckboxFieldClientComponent = (
+  props,
+) => {
+  return <CheckboxField {...props} />
+}
 ```
 
 ### Label

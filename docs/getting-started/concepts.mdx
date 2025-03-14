@@ -53,8 +53,8 @@ Everything Payload does (create, read, update, delete, login, logout, etc.) is e
 - [GraphQL](#graphql-api) - A full GraphQL API with a GraphQL Playground
 
 <Banner type="success">
-  **Note:** All of these APIs share the exact same query language.
-  [More details](../queries/overview).
+  **Note:** All of these APIs share the exact same query language. [More
+  details](../queries/overview).
 </Banner>
 
 ### Local API
@@ -90,8 +90,7 @@ const MyServerComponent: React.FC = () => {
 ```
 
 <Banner type="info">
-  For more information about the Local API, [click
-  here](../local-api/overview).
+  For more information about the Local API, [click here](../local-api/overview).
 </Banner>
 
 ### REST API
@@ -107,8 +106,7 @@ fetch('https://localhost:3000/api/pages') // highlight-line
 ```
 
 <Banner type="info">
-  For more information about the REST API, [click
-  here](../rest-api/overview).
+  For more information about the REST API, [click here](../rest-api/overview).
 </Banner>
 
 ### GraphQL API
@@ -121,8 +119,7 @@ You can use any GraphQL client with Payload's GraphQL endpoint. Here are a few p
 - [`@apollo/client`](https://www.apollographql.com/docs/react/api/core/ApolloClient/) - an industry-standard GraphQL client with lots of nice features
 
 <Banner type="info">
-  For more information about the GraphQL API, [click
-  here](../graphql/overview).
+  For more information about the GraphQL API, [click here](../graphql/overview).
 </Banner>
 
 ## Package Structure
@@ -130,9 +127,9 @@ You can use any GraphQL client with Payload's GraphQL endpoint. Here are a few p
 Payload is abstracted into a set of dedicated packages to keep the core `payload` package as lightweight as possible. This allows you to only install the parts of Payload based on your unique project requirements.
 
 <Banner type="warning">
-  **Important:** Version numbers of all official Payload packages are
-  always published in sync. You should make sure that you always use
-  matching versions for all official Payload packages.
+  **Important:** Version numbers of all official Payload packages are always
+  published in sync. You should make sure that you always use matching versions
+  for all official Payload packages.
 </Banner>
 
 `payload`
@@ -146,12 +143,7 @@ Payload also contains all TypeScript definitions, which can be imported from `pa
 Here's how to import some common Payload types:
 
 ```ts
-import {
-  Config,
-  CollectionConfig,
-  GlobalConfig,
-  Field,
-} from 'payload'
+import { Config, CollectionConfig, GlobalConfig, Field } from 'payload'
 ```
 
 `@payloadcms/next`
@@ -175,6 +167,6 @@ You can choose which Database Adapter you'd like to use for your project, and no
 Payload's Rich Text functionality is abstracted into separate packages and if you want to enable Rich Text in your project, you'll need to install one of these packages. We recommend Lexical for all new projects, and this is where Payload will focus its efforts on from this point, but Slate is still supported if you have already built with it.
 
 <Banner type="info">
-  **Note:** Rich Text is entirely optional and you may not need it for
-  your project.
+  **Note:** Rich Text is entirely optional and you may not need it for your
+  project.
 </Banner>

@@ -66,9 +66,8 @@ export const MyRelationshipField: Field = {
 _\* An asterisk denotes that a property is required._
 
 <Banner type="success">
-  **Tip:** The [Depth](../queries/depth) parameter can be used to
-  automatically populate related documents that are returned by the
-  API.
+  **Tip:** The [Depth](../queries/depth) parameter can be used to automatically
+  populate related documents that are returned by the API.
 </Banner>
 
 ## Admin Options
@@ -408,10 +407,11 @@ import React from 'react'
 import { RelationshipField } from '@payloadcms/ui'
 import type { RelationshipFieldClientComponent } from 'payload'
 
-export const CustomRelationshipFieldClient: RelationshipFieldClientComponent =
-  (props) => {
-    return <RelationshipField {...props} />
-  }
+export const CustomRelationshipFieldClient: RelationshipFieldClientComponent = (
+  props,
+) => {
+  return <RelationshipField {...props} />
+}
 ```
 
 ### Label

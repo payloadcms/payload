@@ -106,17 +106,21 @@ import type React from 'react'
 import { TextareaField } from '@payloadcms/ui'
 import type { TextareaFieldServerComponent } from 'payload'
 
-export const CustomTextareaFieldServer: TextareaFieldServerComponent =
-  ({ clientField, path, schemaPath, permissions }) => {
-    return (
-      <TextareaField
-        field={clientField}
-        path={path}
-        schemaPath={schemaPath}
-        permissions={permissions}
-      />
-    )
-  }
+export const CustomTextareaFieldServer: TextareaFieldServerComponent = ({
+  clientField,
+  path,
+  schemaPath,
+  permissions,
+}) => {
+  return (
+    <TextareaField
+      field={clientField}
+      path={path}
+      schemaPath={schemaPath}
+      permissions={permissions}
+    />
+  )
+}
 ```
 
 #### Client Component
@@ -127,10 +131,11 @@ import React from 'react'
 import { TextareaField } from '@payloadcms/ui'
 import type { TextareaFieldClientComponent } from 'payload'
 
-export const CustomTextareaFieldClient: TextareaFieldClientComponent =
-  (props) => {
-    return <TextareaField {...props} />
-  }
+export const CustomTextareaFieldClient: TextareaFieldClientComponent = (
+  props,
+) => {
+  return <TextareaField {...props} />
+}
 ```
 
 ### Label

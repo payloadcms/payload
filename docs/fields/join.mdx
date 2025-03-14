@@ -59,19 +59,18 @@ are related to the Category are populated for you. This is extremely powerful an
 of relationship types in an easy manner.
 
 <Banner type="success">
-  The Join field is extremely performant and does not add additional
-  query overhead to your API responses until you add depth of 1 or
-  above. It works in all database adapters. In MongoDB, we use
-  **aggregations** to automatically join in related documents, and in
-  relational databases, we use joins.
+  The Join field is extremely performant and does not add additional query
+  overhead to your API responses until you add depth of 1 or above. It works in
+  all database adapters. In MongoDB, we use **aggregations** to automatically
+  join in related documents, and in relational databases, we use joins.
 </Banner>
 
 <Banner type="warning">
   The Join Field is not supported in
   [DocumentDB](https://aws.amazon.com/documentdb/) and [Azure Cosmos
-  DB](https://azure.microsoft.com/en-us/products/cosmos-db), as we
-  internally use MongoDB aggregations to query data for that field,
-  which are limited there. This can be changed in the future.
+  DB](https://azure.microsoft.com/en-us/products/cosmos-db), as we internally
+  use MongoDB aggregations to query data for that field, which are limited
+  there. This can be changed in the future.
 </Banner>
 
 ### Schema advice
@@ -107,8 +106,8 @@ architecture. You might not want to have that `_rels` table, and would prefer to
 table design.
 
 <Banner type="success">
-  With the Join field, you can control your own junction table design,
-  and avoid Payload's automatic _rels table creation.
+  With the Join field, you can control your own junction table design, and avoid
+  Payload's automatic _rels table creation.
 </Banner>
 
 The `join` field can be used in conjunction with _any_ collection - and if you wanted to define your own "junction"
@@ -266,9 +265,9 @@ const result = await payload.find({
 ```
 
 <Banner type="warning">
-  Currently, `Where` query support on joined documents for join fields
-  with an array of `collection` is limited and not supported for
-  fields inside arrays and blocks.
+  Currently, `Where` query support on joined documents for join fields with an
+  array of `collection` is limited and not supported for fields inside arrays
+  and blocks.
 </Banner>
 
 <Banner type="warning">

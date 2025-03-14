@@ -283,9 +283,7 @@ const editorState: DefaultTypedEditorState = {
 Just like `TypedEditorState`, the `DefaultTypedEditorState` also accepts an optional node type union as a generic. Here, this would **add** the specified node types to the default ones. Example:
 
 ```ts
-DefaultTypedEditorState<
-  SerializedBlockNode | YourCustomSerializedNode
->
+DefaultTypedEditorState<SerializedBlockNode | YourCustomSerializedNode>
 ```
 
 This is a type-safe representation of the editor state. If you look at the auto suggestions of a node's `type` property, you will see all the possible node types you can use.

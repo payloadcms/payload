@@ -17,11 +17,7 @@ import React from 'react'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
-export const MyComponent = ({
-  data,
-}: {
-  data: SerializedEditorState
-}) => {
+export const MyComponent = ({ data }: { data: SerializedEditorState }) => {
   return <RichText data={data} />
 }
 ```
@@ -29,9 +25,9 @@ export const MyComponent = ({
 The `RichText` component includes built-in serializers for common Lexical nodes but allows customization through the `converters` prop. In our [website template](https://github.com/payloadcms/payload/blob/main/templates/website/src/components/RichText/index.tsx) you have an example of how to use `converters` to render custom blocks, custom nodes and override existing converters.
 
 <Banner type="default">
-  When fetching data, ensure your `depth` setting is high enough to
-  fully populate Lexical nodes such as uploads. The JSX converter
-  requires fully populated data to work correctly.
+  When fetching data, ensure your `depth` setting is high enough to fully
+  populate Lexical nodes such as uploads. The JSX converter requires fully
+  populated data to work correctly.
 </Banner>
 
 ### Converting Internal Links
@@ -54,11 +50,7 @@ import {
 } from '@payloadcms/richtext-lexical/react'
 import React from 'react'
 
-const internalDocToHref = ({
-  linkNode,
-}: {
-  linkNode: SerializedLinkNode
-}) => {
+const internalDocToHref = ({ linkNode }: { linkNode: SerializedLinkNode }) => {
   const { relationTo, value } = linkNode.fields.doc!
   if (typeof value !== 'object') {
     throw new Error('Expected value to be an object')
@@ -87,11 +79,7 @@ To convert Lexical Blocks or Inline Blocks to JSX, pass the converter for your b
 
 ```tsx
 'use client'
-import type {
-  MyInlineBlock,
-  MyNumberBlock,
-  MyTextBlock,
-} from '@/payload-types'
+import type { MyInlineBlock, MyNumberBlock, MyTextBlock } from '@/payload-types'
 import type {
   DefaultNodeTypes,
   SerializedBlockNode,
@@ -210,11 +198,7 @@ import { convertLexicalToHTML } from '@payloadcms/richtext-lexical/html'
 
 import React from 'react'
 
-export const MyComponent = ({
-  data,
-}: {
-  data: SerializedEditorState
-}) => {
+export const MyComponent = ({ data }: { data: SerializedEditorState }) => {
   const html = convertLexicalToHTML({ data })
 
   return <div dangerouslySetInnerHTML={{ __html: html }} />
@@ -234,11 +218,7 @@ import { getRestPopulateFn } from '@payloadcms/richtext-lexical/client'
 import { convertLexicalToHTMLAsync } from '@payloadcms/richtext-lexical/html-async'
 import React, { useEffect, useState } from 'react'
 
-export const MyComponent = ({
-  data,
-}: {
-  data: SerializedEditorState
-}) => {
+export const MyComponent = ({ data }: { data: SerializedEditorState }) => {
   const [html, setHTML] = useState<null | string>(null)
   useEffect(() => {
     async function convert() {
@@ -332,11 +312,7 @@ const htmlConverters: HTMLConvertersFunction<NodeTypes> = ({
   },
 })
 
-export const MyComponent = ({
-  data,
-}: {
-  data: SerializedEditorState
-}) => {
+export const MyComponent = ({ data }: { data: SerializedEditorState }) => {
   const html = convertLexicalToHTML({
     converters: htmlConverters,
     data,

@@ -11,12 +11,11 @@ keywords: plugins, multi-tenant, multi-tenancy, plugin, payload, cms, seo, index
 This plugin sets up multi-tenancy for your application from within your [Admin Panel](../admin/overview). It does so by adding a `tenant` field to all specified collections. Your front-end application can then query data by tenant. You must add the Tenants collection so you control what fields are available for each tenant.
 
 <Banner type="info">
-  This plugin is completely open-source and the [source code can be
-  found
+  This plugin is completely open-source and the [source code can be found
   here](https://github.com/payloadcms/payload/tree/main/packages/plugin-multi-tenant).
   If you need help, check out our [Community
-  Help](https://payloadcms.com/community-help). If you think you've
-  found a bug, please [open a new
+  Help](https://payloadcms.com/community-help). If you think you've found a bug,
+  please [open a new
   issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%multi-tenant&template=bug_report.md&title=plugin-multi-tenant%3A)
   with as much detail as possible.
 </Banner>
@@ -182,9 +181,7 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    * Useful for super-admin type users
    */
   userHasAccessToAllTenants?: (
-    user: ConfigTypes extends { user: unknown }
-      ? ConfigTypes['user']
-      : User,
+    user: ConfigTypes extends { user: unknown } ? ConfigTypes['user'] : User,
   ) => boolean
   /**
    * Opt out of adding access constraints to the tenants collection
@@ -332,9 +329,7 @@ type ContextType = {
    *
    * If not switching tenants while viewing a "global", set to true
    */
-  setPreventRefreshOnChange: React.Dispatch<
-    React.SetStateAction<boolean>
-  >
+  setPreventRefreshOnChange: React.Dispatch<React.SetStateAction<boolean>>
   /**
    * Sets the selected tenant ID
    *

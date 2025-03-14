@@ -7,8 +7,8 @@ keywords: rest, api, documentation, Content Management System, cms, headless, ja
 ---
 
 <Banner>
-  A fully functional REST API is automatically generated from your
-  Collection and Global configs.
+  A fully functional REST API is automatically generated from your Collection
+  and Global configs.
 </Banner>
 
 The REST API is a fully functional HTTP client that allows you to interact with your Documents in a RESTful manner. It supports all CRUD operations and is equipped with automatic pagination, depth, and sorting.
@@ -569,8 +569,8 @@ In addition to the dynamically generated endpoints above Payload also has REST e
 Additional REST API endpoints can be added to your application by providing an array of `endpoints` in various places within a Payload Config. Custom endpoints are useful for adding additional middleware on existing routes or for building custom functionality into Payload apps and plugins. Endpoints can be added at the top of the Payload Config, `collections`, and `globals` and accessed respective of the api and slugs you have configured.
 
 <Banner type="warning">
-  Custom endpoints are not authenticated by default. You are
-  responsible for securing your own endpoints.
+  Custom endpoints are not authenticated by default. You are responsible for
+  securing your own endpoints.
 </Banner>
 
 Each endpoint object needs to have:
@@ -603,10 +603,7 @@ export const Orders: CollectionConfig = {
         const tracking = await getTrackingInfo(req.routeParams.id)
 
         if (!tracking) {
-          return Response.json(
-            { error: 'not found' },
-            { status: 404 },
-          )
+          return Response.json({ error: 'not found' }, { status: 404 })
         }
 
         return Response.json({
@@ -639,10 +636,7 @@ export const Orders: CollectionConfig = {
       handler: async (req) => {
         // this is an example of an authenticated endpoint
         if (!req.user) {
-          return Response.json(
-            { error: 'forbidden' },
-            { status: 403 },
-          )
+          return Response.json({ error: 'forbidden' }, { status: 403 })
         }
 
         // do something
@@ -658,10 +652,10 @@ export const Orders: CollectionConfig = {
 ```
 
 <Banner>
-  **Note:** **req** will have the **payload** object and can be used
-  inside your endpoint handlers for making calls like
-  req.payload.find() that will make use of [Access
-  Control](../access-control/overview) and [Hooks](../hooks/overview).
+  **Note:** **req** will have the **payload** object and can be used inside your
+  endpoint handlers for making calls like req.payload.find() that will make use
+  of [Access Control](../access-control/overview) and
+  [Hooks](../hooks/overview).
 </Banner>
 
 #### Helpful tips
@@ -771,14 +765,11 @@ const res = await fetch(`${api}/${collectionSlug}`, {
 #### Equivalent Regular GET Request
 
 ```ts
-const res = await fetch(
-  `${api}/${collectionSlug}?depth=1&locale=en`,
-  {
-    method: 'GET',
-    credentials: 'include',
-    headers: {
-      'Accept-Language': i18n.language,
-    },
+const res = await fetch(`${api}/${collectionSlug}?depth=1&locale=en`, {
+  method: 'GET',
+  credentials: 'include',
+  headers: {
+    'Accept-Language': i18n.language,
   },
-)
+})
 ```

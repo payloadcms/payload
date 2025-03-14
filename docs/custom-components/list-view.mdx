@@ -11,9 +11,9 @@ The List View is where users interact with a list of [Collection](../collections
 The List View can be swapped out in its entirety for a Custom View, or it can be injected with a number of Custom Components to add additional functionality or presentational elements without replacing the entire view.
 
 <Banner type="info">
-  **Note:** Only [Collections](../collections/overview) have a List
-  View. [Globals](../globals/overview) do not have a List View as they
-  are single documents.
+  **Note:** Only [Collections](../collections/overview) have a List View.
+  [Globals](../globals/overview) do not have a List View as they are single
+  documents.
 </Banner>
 
 ## Custom List View
@@ -171,12 +171,8 @@ Here's an example of a custom `beforeListTable` component:
 import React from 'react'
 import type { BeforeListTableServerProps } from 'payload'
 
-export function MyBeforeListTableComponent(
-  props: BeforeListTableServerProps,
-) {
-  return (
-    <div>This is a custom beforeListTable component (Server)</div>
-  )
+export function MyBeforeListTableComponent(props: BeforeListTableServerProps) {
+  return <div>This is a custom beforeListTable component (Server)</div>
 }
 ```
 
@@ -187,12 +183,8 @@ export function MyBeforeListTableComponent(
 import React from 'react'
 import type { BeforeListTableClientProps } from 'payload'
 
-export function MyBeforeListTableComponent(
-  props: BeforeListTableClientProps,
-) {
-  return (
-    <div>This is a custom beforeListTable component (Client)</div>
-  )
+export function MyBeforeListTableComponent(props: BeforeListTableClientProps) {
+  return <div>This is a custom beforeListTable component (Client)</div>
 }
 ```
 
@@ -271,9 +263,7 @@ Here's an example of a custom `afterListTable` component:
 import React from 'react'
 import type { AfterListTableServerProps } from 'payload'
 
-export function MyAfterListTableComponent(
-  props: AfterListTableServerProps,
-) {
+export function MyAfterListTableComponent(props: AfterListTableServerProps) {
   return <div>This is a custom afterListTable component (Server)</div>
 }
 ```
@@ -285,9 +275,7 @@ export function MyAfterListTableComponent(
 import React from 'react'
 import type { AfterListTableClientProps } from 'payload'
 
-export function MyAfterListTableComponent(
-  props: AfterListTableClientProps,
-) {
+export function MyAfterListTableComponent(props: AfterListTableClientProps) {
   return <div>This is a custom afterListTable component (Client)</div>
 }
 ```
@@ -314,8 +302,8 @@ export const MyCollection: CollectionConfig = {
 ```
 
 <Banner type="warning">
-  **Note:** The `Description` component is shared between the List
-  View and the [Edit View](./edit-view).
+  **Note:** The `Description` component is shared between the List View and the
+  [Edit View](./edit-view).
 </Banner>
 
 Here's an example of a custom `Description` component:
@@ -326,14 +314,8 @@ Here's an example of a custom `Description` component:
 import React from 'react'
 import type { ViewDescriptionServerProps } from 'payload'
 
-export function MyDescriptionComponent(
-  props: ViewDescriptionServerProps,
-) {
-  return (
-    <div>
-      This is a custom Collection description component (Server)
-    </div>
-  )
+export function MyDescriptionComponent(props: ViewDescriptionServerProps) {
+  return <div>This is a custom Collection description component (Server)</div>
 }
 ```
 
@@ -344,13 +326,7 @@ export function MyDescriptionComponent(
 import React from 'react'
 import type { ViewDescriptionClientProps } from 'payload'
 
-export function MyDescriptionComponent(
-  props: ViewDescriptionClientProps,
-) {
-  return (
-    <div>
-      This is a custom Collection description component (Client)
-    </div>
-  )
+export function MyDescriptionComponent(props: ViewDescriptionClientProps) {
+  return <div>This is a custom Collection description component (Client)</div>
 }
 ```

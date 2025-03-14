@@ -119,10 +119,7 @@ const Pages: CollectionConfig = {
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
           SlateToLexicalFeature({
-            converters: [
-              ...defaultSlateConverters,
-              YourCustomConverter,
-            ],
+            converters: [...defaultSlateConverters, YourCustomConverter],
           }),
         ],
       }),

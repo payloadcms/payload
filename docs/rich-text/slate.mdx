@@ -184,9 +184,7 @@ export const ExampleCollection: CollectionConfig = {
       type: 'richText', // required
       defaultValue: [
         {
-          children: [
-            { text: 'Here is some default content for this field' },
-          ],
+          children: [{ text: 'Here is some default content for this field' }],
         },
       ],
       required: true,
@@ -347,9 +345,7 @@ export default {
       const { shouldBreakOutOnEnter } = editor
 
       editor.shouldBreakOutOnEnter = (element) =>
-        element.type === 'large-body'
-          ? true
-          : shouldBreakOutOnEnter(element)
+        element.type === 'large-body' ? true : shouldBreakOutOnEnter(element)
 
       return editor
     },

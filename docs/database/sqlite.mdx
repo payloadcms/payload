@@ -75,10 +75,7 @@ const result = await payload.db.drizzle
   .select()
   .from(posts)
   .where(
-    and(
-      eq(posts.id, 50),
-      sql`lower(${posts.title}) = 'example post title'`,
-    ),
+    and(eq(posts.id, 50), sql`lower(${posts.title}) = 'example post title'`),
   )
 ```
 
@@ -113,10 +110,7 @@ Runs before the schema is built. You can use this hook to extend your database s
 
 ```ts
 import { sqliteAdapter } from '@payloadcms/db-sqlite'
-import {
-  integer,
-  sqliteTable,
-} from '@payloadcms/db-sqlite/drizzle/sqlite-core'
+import { integer, sqliteTable } from '@payloadcms/db-sqlite/drizzle/sqlite-core'
 
 sqliteAdapter({
   beforeSchemaInit: [
@@ -199,10 +193,7 @@ The following example adds the `extra_integer_column` column and a composite ind
 
 ```ts
 import { sqliteAdapter } from '@payloadcms/db-sqlite'
-import {
-  index,
-  integer,
-} from '@payloadcms/db-sqlite/drizzle/sqlite-core'
+import { index, integer } from '@payloadcms/db-sqlite/drizzle/sqlite-core'
 import { buildConfig } from 'payload'
 
 export default buildConfig({
