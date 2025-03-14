@@ -13,6 +13,7 @@ import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { PgSchema, PgTableFn, PgTransactionConfig } from 'drizzle-orm/pg-core'
 
 export type Args = {
+  acceptIDOnCreate?: boolean
   /**
    * Transform the schema after it's built.
    * You can use it to customize the schema with features that aren't supported by Payload.

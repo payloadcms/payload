@@ -13,6 +13,7 @@ import type { PgSchema, PgTableFn, PgTransactionConfig } from 'drizzle-orm/pg-co
 import type { Pool, PoolConfig } from 'pg'
 
 export type Args = {
+  acceptIDOnCreate?: boolean
   /**
    * Transform the schema after it's built.
    * You can use it to customize the schema with features that aren't supported by Payload.
