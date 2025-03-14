@@ -139,6 +139,11 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
       await commitTransaction(req)
     }
 
+    if (fullUser) {
+      fullUser.collection = collectionConfig.slug
+      fullUser._strategy = req.user._strategy
+    }
+
     const result = {
       token,
       user: fullUser,
