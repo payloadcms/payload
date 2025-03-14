@@ -11,7 +11,7 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
-  // throttleTest,
+  throttleTest,
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
@@ -107,11 +107,11 @@ describe('General', () => {
   })
 
   beforeEach(async () => {
-    // await throttleTest({
-    //   page,
-    //   context,
-    //   delay: 'Fast 4G',
-    // })
+    await throttleTest({
+      page,
+      context,
+      delay: 'Fast 4G',
+    })
 
     await reInitializeDB({
       serverURL,
