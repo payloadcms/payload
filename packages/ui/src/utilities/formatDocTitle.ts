@@ -55,9 +55,12 @@ export const formatDocTitle = ({
     title = getTranslation(globalConfig?.label, i18n) || globalConfig?.slug
   }
 
-  // richtext lexical case:
+  // richtext lexical case. We convert the first child of root to plain text
+  if (isSerializedLexicalEditor(title)) {
+    title = formatRichTextLexical(title.root.children?.[0]?.children || [], '')
+  }
   if (!title && isSerializedLexicalEditor(fallback)) {
-    title = formatRichTextLexical(fallback.root.children, '')
+    title = formatRichTextLexical(fallback.root.children?.[0]?.children || [], '')
   }
 
   if (!title) {

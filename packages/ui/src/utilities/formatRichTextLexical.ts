@@ -1,6 +1,6 @@
 type SerializedLexicalEditor = {
   root: {
-    children: Array<{ type: string }>
+    children: Array<{ children?: Array<{ type: string }>; type: string }>
   }
 }
 
@@ -9,7 +9,7 @@ export function isSerializedLexicalEditor(value: unknown): value is SerializedLe
 }
 
 export function formatRichTextLexical(
-  editorState: Array<{ type: string }>,
+  editorState: Array<{ children?: Array<{ type: string }>; type: string }>,
   textContent: string,
   i: number = 0,
 ): string {
