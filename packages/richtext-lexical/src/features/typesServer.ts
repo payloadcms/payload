@@ -27,7 +27,7 @@ import type {
 import type { ServerEditorConfig } from '../lexical/config/types.js'
 import type { Transformer } from '../packages/@lexical/markdown/index.js'
 import type { AdapterProps } from '../types.js'
-import type { HTMLConverter } from './converters/html_deprecated/converter/types.js'
+import type { HTMLConverter } from './converters/lexicalToHtml_deprecated/converter/types.js'
 import type { BaseClientFeatureProps } from './typesClient.js'
 
 export type PopulationPromise<T extends SerializedLexicalNode = SerializedLexicalNode> = (args: {

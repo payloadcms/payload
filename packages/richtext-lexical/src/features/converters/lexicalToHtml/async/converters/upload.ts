@@ -1,7 +1,7 @@
 import type { FileData, FileSizeImproved, TypeWithID } from 'payload'
 
 import type { SerializedUploadNode } from '../../../../../nodeTypes.js'
-import type { UploadDataImproved } from '../../../../upload/server/nodes/UploadNode.js'
+import type { UploadDataImproved } from '../../../../upload/server/nodes/UploadNode.jsx'
 import type { HTMLConvertersAsync } from '../types.js'
 
 export const UploadHTMLConverterAsync: HTMLConvertersAsync<SerializedUploadNode> = {

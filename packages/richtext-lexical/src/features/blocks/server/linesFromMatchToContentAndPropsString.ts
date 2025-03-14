@@ -155,7 +155,12 @@ export function linesFromStartToContentAndPropsString({
     }
 
     if (lineIndex === linesCopy.length - 1 && !isEndOptional && !isSelfClosing) {
-      throw new Error('End match not found for lines ' + lines.join('\n'))
+      throw new Error(
+        'End match not found for lines ' +
+          lines.join('\n') +
+          '\n\n. Start match: ' +
+          JSON.stringify(startMatch),
+      )
     }
   }
 

@@ -1,6 +1,6 @@
 import { stringify } from 'qs-esm'
 
-import type { HTMLPopulateFn } from '../html/async/types.js'
+import type { HTMLPopulateFn } from '../lexicalToHtml/async/types.js'
 
 export const getRestPopulateFn: (args: {
   /**
