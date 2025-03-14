@@ -1,10 +1,10 @@
 ## [2.32.2](https://github.com/payloadcms/payload/compare/v2.32.1...v2.32.2) (2025-03-14)
 
-Bump critical deps ([#11705](https://github.com/payloadcms/payload/pull/11705))
+- Bumps dependencies ([#11702](https://github.com/payloadcms/payload/pull/11702)) ([#11705](https://github.com/payloadcms/payload/pull/11705))
 
-## [2.32.1](https://github.com/payloadcms/payload/compare/v2.32.0...v2.32.1) (2025-03-14)
+### Bug Fixes
 
-Bumps dependencies ([#11702](https://github.com/payloadcms/payload/pull/11702))
+* remove collapsible label prefix from the FieldSelect dropdown component ([#10760](https://github.com/payloadcms/payload/issues/10760)) ([a5e6ea5](https://github.com/payloadcms/payload/commit/a5e6ea57373591ec90f452ad61b376f72f9ce304)), closes [#10757](https://github.com/payloadcms/payload/issues/10757)
 
 ### Bug Fixes
 
