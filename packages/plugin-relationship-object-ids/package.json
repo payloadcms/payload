@@ -35,6 +35,6 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "payload": "workspace:*",
-    "webpack": "^5.78.0"
+    "webpack": "5.91.0"
   }
 }

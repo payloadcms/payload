@@ -201,7 +201,7 @@
     "terser-webpack-plugin": "^5.3.10",
     "url-loader": "4.1.1",
     "vite": "^4.4.9",
-    "webpack": "^5.78.0"
+    "webpack": "5.91.0"
   },
   "resolutions": {
     "ajv": "8.14.0",

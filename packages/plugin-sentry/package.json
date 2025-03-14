@@ -52,6 +52,6 @@
     "nodemon": "3.0.3",
     "payload": "workspace:*",
     "ts-jest": "^29.1.0",
-    "webpack": "^5.78.0"
+    "webpack": "5.91.0"
   }
 }
