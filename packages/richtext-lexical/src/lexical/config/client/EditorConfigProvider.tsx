@@ -9,6 +9,7 @@ import * as React from 'react'
 import { createContext, use, useMemo, useRef, useState } from 'react'
 
 import type { InlineBlockNode } from '../../../features/blocks/client/nodes/InlineBlocksNode.js'
+import type { BlockNode } from '../../../features/blocks/client/nodes/BlocksNode.js'
 import type { LexicalRichTextFieldProps } from '../../../types.js'
 import type { SanitizedClientEditorConfig } from '../types.js'
 
@@ -22,6 +23,7 @@ export interface EditorConfigContextType {
   blurEditor: (editorContext: EditorConfigContextType) => void
   childrenEditors: React.RefObject<Map<string, EditorConfigContextType>>
   createdInlineBlock?: InlineBlockNode
+  createdBlock?: BlockNode
   editDepth: number
   editor: LexicalEditor
   editorConfig: SanitizedClientEditorConfig
@@ -33,6 +35,7 @@ export interface EditorConfigContextType {
   parentEditor: EditorConfigContextType
   registerChild: (uuid: string, editorContext: EditorConfigContextType) => void
   setCreatedInlineBlock?: React.Dispatch<React.SetStateAction<InlineBlockNode | undefined>>
+  setCreatedBlock?: React.Dispatch<React.SetStateAction<BlockNode | undefined>>
   unregisterChild?: (uuid: string) => void
   uuid: string
 }
@@ -66,6 +69,7 @@ export const EditorConfigProvider = ({
   const [focusedEditor, setFocusedEditor] = useState<EditorConfigContextType | null>(null)
   const focusHistory = useRef<Set<string>>(new Set())
   const [createdInlineBlock, setCreatedInlineBlock] = useState<InlineBlockNode>()
+  const [createdBlock, setCreatedBlock] = useState<BlockNode>()
 
   const editDepth = useEditDepth()
 
@@ -78,6 +82,7 @@ export const EditorConfigProvider = ({
         },
         childrenEditors,
         createdInlineBlock,
+        createdBlock,
         editDepth,
         editor,
         editorConfig,
@@ -115,6 +120,7 @@ export const EditorConfigProvider = ({
           }
         },
         setCreatedInlineBlock,
+        setCreatedBlock,
         unregisterChild: (childUUID) => {
           if (childrenEditors.current.has(childUUID)) {
             const newMap = new Map(childrenEditors.current)
@@ -128,6 +134,8 @@ export const EditorConfigProvider = ({
     [
       createdInlineBlock,
       setCreatedInlineBlock,
+      createdBlock,
+      setCreatedBlock,
       editor,
       childrenEditors,
       editorConfig,
