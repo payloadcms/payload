@@ -9,8 +9,6 @@ import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
 import { CreateFirstUserClient } from './index.client.js'
 import './index.scss'
 
-export { generateCreateFirstUserMetadata } from './meta.js'
-
 export async function CreateFirstUserView({ initPageResult }: AdminViewServerProps) {
   const {
     locale,

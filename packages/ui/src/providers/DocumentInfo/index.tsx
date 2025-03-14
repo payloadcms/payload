@@ -4,8 +4,8 @@ import type { ClientUser, DocumentPreferences, SanitizedDocumentPermissions } fr
 import * as qs from 'qs-esm'
 import React, {
   createContext,
+  use,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -28,7 +28,7 @@ const Context = createContext({} as DocumentInfoContext)
 
 export type * from './types.js'
 
-export const useDocumentInfo = (): DocumentInfoContext => useContext(Context)
+export const useDocumentInfo = (): DocumentInfoContext => use(Context)
 
 const DocumentInfo: React.FC<
   {
@@ -360,7 +360,7 @@ const DocumentInfo: React.FC<
     versionCount,
   }
 
-  return <Context.Provider value={value}>{children}</Context.Provider>
+  return <Context value={value}>{children}</Context>
 }
 
 export const DocumentInfoProvider: React.FC<

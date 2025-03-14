@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@payloadcms/db-mongodb": "latest",
+    "@payloadcms/db-postgres": "^3.25.0",
     "@payloadcms/next": "latest",
     "@payloadcms/plugin-multi-tenant": "latest",
     "@payloadcms/richtext-lexical": "latest",

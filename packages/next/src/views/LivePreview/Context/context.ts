@@ -4,7 +4,7 @@ import type { fieldSchemaToJSON } from 'payload/shared'
 import type { Dispatch } from 'react'
 import type React from 'react'
 
-import { createContext, useContext } from 'react'
+import { createContext, use } from 'react'
 
 import type { usePopupWindow } from '../usePopupWindow.js'
 import type { SizeReducerAction } from './sizeReducer.js'
@@ -83,4 +83,4 @@ export const LivePreviewContext = createContext<LivePreviewContextType>({
   zoom: 1,
 })
 
-export const useLivePreviewContext = () => useContext(LivePreviewContext)
+export const useLivePreviewContext = () => use(LivePreviewContext)

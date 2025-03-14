@@ -1,7 +1,8 @@
 import type { AdminViewServerProps } from 'payload'
 
 import { Button, Link } from '@payloadcms/ui'
-import { formatAdminURL, Translation } from '@payloadcms/ui/shared'
+import { Translation } from '@payloadcms/ui/shared'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import { FormHeader } from '../../elements/FormHeader/index.js'
@@ -9,8 +10,6 @@ import { ResetPasswordForm } from './ResetPasswordForm/index.js'
 import './index.scss'
 
 export const resetPasswordBaseClass = 'reset-password'
-
-export { generateResetPasswordMetadata } from './meta.js'
 
 export function ResetPassword({ initPageResult, params }: AdminViewServerProps) {
   const { req } = initPageResult

@@ -43,6 +43,7 @@ import type {
 } from '../../index.js'
 import type {
   PayloadRequest,
+  SelectIncludeType,
   SelectType,
   Sort,
   TransformCollectionWithSelect,
@@ -327,6 +328,11 @@ export type CollectionAdminOptions = {
    * Custom description for collection. This will also be used as JSDoc for the generated types
    */
   description?: EntityDescription
+  /**
+   * Disable the Copy To Locale button in the edit document view
+   * @default false
+   */
+  disableCopyToLocale?: boolean
   enableRichTextLink?: boolean
   enableRichTextRelationship?: boolean
   /**
@@ -369,6 +375,11 @@ export type CollectionAdminOptions = {
 
 /** Manage all aspects of a data collection */
 export type CollectionConfig<TSlug extends CollectionSlug = any> = {
+  /**
+   * Do not set this property manually. This is set to true during sanitization, to avoid
+   * sanitizing the same collection multiple times.
+   */
+  _sanitized?: boolean
   /**
    * Access control
    */
@@ -415,6 +426,12 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   endpoints?: false | Omit<Endpoint, 'root'>[]
   fields: Field[]
   /**
+   * Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks
+   */
+  forceSelect?: IsAny<SelectFromCollectionSlug<TSlug>> extends true
+    ? SelectIncludeType
+    : SelectFromCollectionSlug<TSlug>
+  /**
    * GraphQL configuration
    */
   graphQL?:
@@ -459,6 +476,16 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
      */
     refresh?: RefreshHook[]
   }
+  /**
+   * Define compound indexes for this collection.
+   * This can be used to either speed up querying/sorting by 2 or more fields at the same time or
+   * to ensure uniqueness between several fields.
+   * Specify field paths
+   * @example
+   * [{ unique: true, fields: ['title', 'group.name'] }]
+   * @default []
+   */
+  indexes?: CompoundIndex[]
   /**
    * Label configuration
    */
@@ -529,6 +556,10 @@ export type SanitizedJoins = {
   [collectionSlug: string]: SanitizedJoin[]
 }
 
+/**
+ * @todo remove the `DeepRequired` in v4.
+ * We don't actually guarantee that all properties are set when sanitizing configs.
+ */
 export interface SanitizedCollectionConfig
   extends Omit<
     DeepRequired<CollectionConfig>,
@@ -537,13 +568,11 @@ export interface SanitizedCollectionConfig
   auth: Auth
   endpoints: Endpoint[] | false
   fields: Field[]
-
   /**
    * Fields in the database schema structure
    * Rows / collapsible / tabs w/o name `fields` merged to top, UIs are excluded
    */
   flattenedFields: FlattenedField[]
-
   /**
    * Object of collections to join 'Join Fields object keyed by collection
    */
@@ -553,6 +582,8 @@ export interface SanitizedCollectionConfig
    * List of all polymorphic join fields
    */
   polymorphicJoins: SanitizedJoin[]
+
+  sanitizedIndexes: SanitizedCompoundIndex[]
 
   slug: CollectionSlug
   upload: SanitizedUploadConfig
@@ -596,4 +627,19 @@ export type TypeWithTimestamps = {
   createdAt: string
   id: number | string
   updatedAt: string
+}
+
+export type CompoundIndex = {
+  fields: string[]
+  unique?: boolean
+}
+
+export type SanitizedCompoundIndex = {
+  fields: {
+    field: FlattenedField
+    localizedPath: string
+    path: string
+    pathHasLocalized: boolean
+  }[]
+  unique: boolean
 }

@@ -21,7 +21,7 @@ export const setCookieBasedOnDomain: CollectionAfterLoginHook = async ({ req, us
       expires: getCookieExpiration({ seconds: 7200 }),
       path: '/',
       returnCookieAsObject: false,
-      value: relatedOrg.docs[0].id,
+      value: String(relatedOrg.docs[0].id),
     })
 
     // Merge existing responseHeaders with the new Set-Cookie header

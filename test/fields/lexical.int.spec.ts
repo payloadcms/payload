@@ -304,8 +304,8 @@ describe('Lexical', () => {
         })
       ).docs[0] as never
 
-      const htmlField: string = lexicalDoc?.lexicalSimple_html
-      expect(htmlField).toStrictEqual('<p>simple</p>')
+      const htmlField = lexicalDoc?.lexicalSimple_html
+      expect(htmlField).toStrictEqual('<div class="payload-richtext"><p>simple</p></div>')
     })
     it('htmlConverter: should output correct HTML for lexical field nested in group', async () => {
       const lexicalDoc: LexicalMigrateField = (
@@ -320,8 +320,8 @@ describe('Lexical', () => {
         })
       ).docs[0] as never
 
-      const htmlField: string = lexicalDoc?.groupWithLexicalField?.lexicalInGroupField_html
-      expect(htmlField).toStrictEqual('<p>group</p>')
+      const htmlField = lexicalDoc?.groupWithLexicalField?.lexicalInGroupField_html
+      expect(htmlField).toStrictEqual('<div class="payload-richtext"><p>group</p></div>')
     })
     it('htmlConverter: should output correct HTML for lexical field nested in array', async () => {
       const lexicalDoc: LexicalMigrateField = (
@@ -336,11 +336,11 @@ describe('Lexical', () => {
         })
       ).docs[0] as never
 
-      const htmlField1: string = lexicalDoc?.arrayWithLexicalField[0].lexicalInArrayField_html
-      const htmlField2: string = lexicalDoc?.arrayWithLexicalField[1].lexicalInArrayField_html
+      const htmlField1 = lexicalDoc?.arrayWithLexicalField?.[0]?.lexicalInArrayField_html
+      const htmlField2 = lexicalDoc?.arrayWithLexicalField?.[1]?.lexicalInArrayField_html
 
-      expect(htmlField1).toStrictEqual('<p>array 1</p>')
-      expect(htmlField2).toStrictEqual('<p>array 2</p>')
+      expect(htmlField1).toStrictEqual('<div class="payload-richtext"><p>array 1</p></div>')
+      expect(htmlField2).toStrictEqual('<div class="payload-richtext"><p>array 2</p></div>')
     })
   })
   describe('advanced - blocks', () => {
@@ -654,7 +654,7 @@ describe('Lexical', () => {
         locale: 'en',
         data: {
           title: 'Localized Lexical hooks',
-          lexicalBlocksLocalized: textToLexicalJSON({ text: 'some text' }) as any,
+          lexicalBlocksLocalized: textToLexicalJSON({ text: 'some text' }),
           lexicalBlocksSubLocalized: generateLexicalLocalizedRichText(
             'Shared text',
             'English text in block',

@@ -1815,7 +1815,7 @@ describe('Fields', () => {
             ],
           },
         }),
-      ).rejects.toThrow('The following field is invalid: Items 1 > SubArray 1 > Second text field')
+      ).rejects.toThrow('The following field is invalid: Items 1 > Sub Array 1 > Second text field')
     })
 
     it('should show proper validation error on text field in row field in nested array', async () => {
@@ -1835,7 +1835,7 @@ describe('Fields', () => {
             ],
           },
         }),
-      ).rejects.toThrow('The following field is invalid: Items 1 > SubArray 1 > Text In Row')
+      ).rejects.toThrow('The following field is invalid: Items 1 > Sub Array 1 > Text In Row')
     })
   })
 
@@ -2363,7 +2363,7 @@ describe('Fields', () => {
             ],
           },
         }),
-      ).rejects.toThrow('The following field is invalid: Array 3 > Text')
+      ).rejects.toThrow('The following field is invalid: Tab with Array > Array 3 > Text')
     })
   })
 
@@ -2667,7 +2667,7 @@ describe('Fields', () => {
           },
         }),
       ).rejects.toThrow(
-        'The following field is invalid: Group > SubGroup > Required Text Within Sub Group',
+        'The following field is invalid: Collapsible Field > Group > Sub Group > Required Text Within Sub Group',
       )
     })
   })
