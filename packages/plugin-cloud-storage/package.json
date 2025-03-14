@@ -63,7 +63,7 @@
     "payload": "workspace:*",
     "rimraf": "^4.1.2",
     "ts-node": "^9.1.1",
-    "webpack": "^5.78.0"
+    "webpack": "5.91.0"
   },
   "dependencies": {
     "find-node-modules": "^2.1.3",

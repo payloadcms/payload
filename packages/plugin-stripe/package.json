@@ -48,7 +48,7 @@
     "@types/react": "18.0.21",
     "payload": "workspace:*",
     "prettier": "^2.7.1",
-    "webpack": "^5.78.0"
+    "webpack": "5.91.0"
   },
   "files": [
     "dist",

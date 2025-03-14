@@ -24,7 +24,7 @@
   "license": "MIT",
   "peerDependencies": {
     "payload": "workspace:*",
-    "mongoose": "6.12.3"
+    "mongoose": "^6.12.3"
   },
   "files": [
     "dist",
@@ -35,6 +35,6 @@
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "payload": "workspace:*",
-    "webpack": "^5.78.0"
+    "webpack": "5.91.0"
   }
 }

@@ -36,7 +36,7 @@
     "@types/nodemailer": "6.4.16",
     "payload": "workspace:*",
     "ts-jest": "^29.1.0",
-    "webpack": "^5.78.0"
+    "webpack": "5.91.0"
   },
   "files": [
     "dist"
