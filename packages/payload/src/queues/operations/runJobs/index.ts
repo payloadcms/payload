@@ -13,6 +13,7 @@ import type { RunJobResult } from './runJob/index.js'
 import { Forbidden } from '../../../errors/Forbidden.js'
 import isolateObjectProperty from '../../../utilities/isolateObjectProperty.js'
 import { jobsCollectionSlug } from '../../config/index.js'
+import { updateJob, updateJobs } from '../../utilities/updateJob.js'
 import { getUpdateJobFunction } from './runJob/getUpdateJobFunction.js'
 import { importHandlerPath } from './runJob/importHandlerPath.js'
 import { runJob } from './runJob/index.js'
@@ -106,40 +107,45 @@ export const runJobs = async ({
   // the same job being picked up by another worker
   const jobsQuery: {
     docs: BaseJob[]
-  } = id
-    ? {
-        docs: [
-          (await req.payload.update({
-            id,
-            collection: jobsCollectionSlug,
-            data: {
-              processing: true,
-              seenByWorker: true,
-            },
-            depth: req.payload.config.jobs.depth,
-            disableTransaction: true,
-            showHiddenFields: true,
-          })) as BaseJob,
-        ],
-      }
-    : ((await req.payload.update({
-        collection: jobsCollectionSlug,
+  } = { docs: [] }
+
+  if (id) {
+    // Only one job to run
+    jobsQuery.docs = [
+      await updateJob({
+        id,
         data: {
           processing: true,
-          seenByWorker: true,
         },
         depth: req.payload.config.jobs.depth,
         disableTransaction: true,
-        limit,
-        showHiddenFields: true,
-        where,
-      })) as unknown as PaginatedDocs<BaseJob>)
+        req,
+        returning: true,
+      }),
+    ]
+  } else {
+    const updatedDocs = await updateJobs({
+      data: {
+        processing: true,
+      },
+      depth: req.payload.config.jobs.depth,
+      disableTransaction: true,
+      limit,
+      req,
+      returning: true,
+      where,
+    })
+
+    if (updatedDocs) {
+      jobsQuery.docs = updatedDocs
+    }
+  }
 
   /**
    * Just for logging purposes, we want to know how many jobs are new and how many are existing (= already been tried).
    * This is only for logs - in the end we still want to run all jobs, regardless of whether they are new or existing.
    */
-  const { newJobs } = jobsQuery.docs.reduce(
+  const { existingJobs, newJobs } = jobsQuery.docs.reduce(
     (acc, job) => {
       if (job.totalTried > 0) {
         acc.existingJobs.push(job)
@@ -159,7 +165,11 @@ export const runJobs = async ({
   }
 
   if (jobsQuery?.docs?.length) {
-    req.payload.logger.info(`Running ${jobsQuery.docs.length} jobs.`)
+    req.payload.logger.info({
+      msg: `Running ${jobsQuery.docs.length} jobs.`,
+      new: newJobs?.length,
+      retrying: existingJobs?.length,
+    })
   }
   const jobsToDelete: (number | string)[] | undefined = req.payload.config.jobs.deleteJobOnComplete
     ? []
@@ -253,11 +263,19 @@ export const runJobs = async ({
 
   if (jobsToDelete && jobsToDelete.length > 0) {
     try {
-      await req.payload.delete({
-        collection: jobsCollectionSlug,
-        req,
-        where: { id: { in: jobsToDelete } },
-      })
+      if (req.payload.config.jobs.runHooks) {
+        await req.payload.delete({
+          collection: jobsCollectionSlug,
+          depth: 0, // can be 0 since we're not returning anything
+          disableTransaction: true,
+          where: { id: { in: jobsToDelete } },
+        })
+      } else {
+        await req.payload.db.deleteMany({
+          collection: jobsCollectionSlug,
+          where: { id: { in: jobsToDelete } },
+        })
+      }
     } catch (err) {
       req.payload.logger.error({
         err,
