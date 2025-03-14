@@ -8,7 +8,9 @@ keywords: version history, drafts, preview, draft, restore, publish, autosave, C
 
 Payload's Draft functionality builds on top of the Versions functionality to allow you to make changes to your collection documents and globals, but publish only when you're ready. This functionality allows you to build powerful Preview environments for your data, where you can make sure your changes look good before publishing documents.
 
-<Banner type="warning">Drafts rely on Versions being enabled in order to function.</Banner>
+<Banner type="warning">
+  Drafts rely on Versions being enabled in order to function.
+</Banner>
 
 By enabling Versions with Drafts, your collections and globals can maintain _newer_, and _unpublished_ versions of your documents. It's perfect for cases where you might want to work on a document, update it and save your progress, but not necessarily make it publicly published right away. Drafts are extremely helpful when building preview implementations.
 
@@ -42,9 +44,9 @@ Within the Admin UI, if drafts are enabled, a document can be shown with one of 
 ## Draft API
 
 <Banner type="success">
-  If drafts are enabled on your collection or global, important and powerful changes are made to
-  your REST, GraphQL, and Local APIs that allow you to specify if you are interacting with drafts or
-  with live documents.
+  If drafts are enabled on your collection or global, important and powerful
+  changes are made to your REST, GraphQL, and Local APIs that allow you to
+  specify if you are interacting with drafts or with live documents.
 </Banner>
 
 #### Updating or creating drafts
@@ -74,15 +76,20 @@ If you simply fetch your created document using a `find` or `findByID` operation
 But, if you specify `draft` as `true`, Payload will automatically replace your published document's content with content coming from the most recently saved `version`. In this case, as we have created _two_ versions in the above scenario, Payload will send back data from the newest (second) draft and your document will appear as the most recently drafted version instead of the published version.
 
 <Banner type="error">
-  **Important:** the `draft` argument on its own will not restrict documents with `_status: 'draft'` from being returned from the API. You need to use Access Control to prevent documents with `_status: 'draft'` from being returned to unauthenticated users. Read below for more information on how this works.
+  **Important:** the `draft` argument on its own will not restrict documents
+  with `_status: 'draft'` from being returned from the API. You need to use
+  Access Control to prevent documents with `_status: 'draft'` from being
+  returned to unauthenticated users. Read below for more information on how this
+  works.
 </Banner>
 
 ## Controlling who can see Collection drafts
 
 <Banner type="warning">
-  If you're using the **drafts** feature, it's important for you to consider who can
-  view your drafts, and who can view only published documents. Luckily, Payload makes this extremely
-  simple and puts the power completely in your hands.
+  If you're using the **drafts** feature, it's important for you to consider who
+  can view your drafts, and who can view only published documents. Luckily,
+  Payload makes this extremely simple and puts the power completely in your
+  hands.
 </Banner>
 
 #### Restricting draft access
@@ -122,13 +129,14 @@ export const Pages: CollectionConfig = {
 <Banner type="warning">
   **Note regarding adding versions to an existing collection**
 
-  If you already have a collection with documents, and you *opt in* to draft functionality
-  after you have already created existing documents, all of your old documents
-  *will not have a `_status` field* until you resave them. For this reason, if you are
-  *adding* versions into an existing collection, you might want to write your Access Control
-  function to allow for users to read both documents where
-  **`_status` is equal to `"published"`** as well as where
-  **`_status` does not exist**.
+If you already have a collection with documents, and you _opt in_ to draft functionality
+after you have already created existing documents, all of your old documents
+_will not have a `_status` field_ until you resave them. For this reason, if you are
+_adding_ versions into an existing collection, you might want to write your Access Control
+function to allow for users to read both documents where
+**`_status` is equal to `"published"`** as well as where
+**`_status` does not exist**.
+
 </Banner>
 
 Here is an example for how to write an [Access Control](../access-control/overview) function that grants access to both documents where `_status` is equal to "published" and where `_status` does not exist:
@@ -178,7 +186,12 @@ Payload provides for an ability to schedule publishing / unpublishing events in 
 You can enable this functionality on both collections and globals via the `versions.drafts.schedulePublish: true` property.
 
 <Banner type="warning">
-  **Important:** if you are going to enable scheduled publish / unpublish, you need to make sure your Payload app is set up to process [Jobs](/docs/jobs-queue/overview). This feature works by creating a Job in the background, which will be picked up after the job becomes available. If you do not have any mechanism in place to run jobs, your scheduled publish / unpublish jobs will never be executed.
+  **Important:** if you are going to enable scheduled publish / unpublish, you
+  need to make sure your Payload app is set up to process
+  [Jobs](/docs/jobs-queue/overview). This feature works by creating a Job in the
+  background, which will be picked up after the job becomes available. If you do
+  not have any mechanism in place to run jobs, your scheduled publish /
+  unpublish jobs will never be executed.
 </Banner>
 
 ## Unpublishing drafts

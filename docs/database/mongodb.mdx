@@ -53,9 +53,10 @@ You can access Mongoose models as follows:
 - Versions model (both collections and globals) - `payload.db.versions[myEntitySlug]`
 
 ## Using other MongoDB implementations
+
 Limitations with [DocumentDB](https://aws.amazon.com/documentdb/) and [Azure Cosmos DB](https://azure.microsoft.com/en-us/products/cosmos-db):
 
-* For Azure Cosmos DB you must pass `transactionOptions: false` to the adapter options. Azure Cosmos DB does not support transactions that update two and more documents in different collections, which is a common case when using Payload (via hooks).
-* For Azure Cosmos DB the root config property `indexSortableFields` must be set to `true`.
-* The [Join Field](../fields/join) is not supported in DocumentDB and Azure Cosmos DB, as we internally use MongoDB aggregations to query data for that field, which are limited there. This can be changed in the future.
-* For DocumentDB pass `disableIndexHints: true` to disable hinting to the DB to use `id` as index which can cause problems with DocumentDB.
+- For Azure Cosmos DB you must pass `transactionOptions: false` to the adapter options. Azure Cosmos DB does not support transactions that update two and more documents in different collections, which is a common case when using Payload (via hooks).
+- For Azure Cosmos DB the root config property `indexSortableFields` must be set to `true`.
+- The [Join Field](../fields/join) is not supported in DocumentDB and Azure Cosmos DB, as we internally use MongoDB aggregations to query data for that field, which are limited there. This can be changed in the future.
+- For DocumentDB pass `disableIndexHints: true` to disable hinting to the DB to use `id` as index which can cause problems with DocumentDB.
