@@ -9,6 +9,7 @@ import type {
 import { getTranslation } from '@payloadcms/translations'
 
 import { formatDate } from '../utilities/formatDate.js'
+import { formatRichTextLexical, isSerializedLexicalEditor } from './formatRichTextLexical.js'
 
 export const formatDocTitle = ({
   collectionConfig,
@@ -21,7 +22,7 @@ export const formatDocTitle = ({
   collectionConfig?: ClientCollectionConfig
   data: TypeWithID
   dateFormat: SanitizedConfig['admin']['dateFormat']
-  fallback?: string
+  fallback?: object | string
   globalConfig?: ClientGlobalConfig
   i18n: I18n<any, any>
 }): string => {
@@ -54,8 +55,13 @@ export const formatDocTitle = ({
     title = getTranslation(globalConfig?.label, i18n) || globalConfig?.slug
   }
 
+  // richtext lexical case:
+  if (!title && isSerializedLexicalEditor(fallback)) {
+    title = formatRichTextLexical(fallback.root.children, '')
+  }
+
   if (!title) {
-    title = fallback || `[${i18n.t('general:untitled')}]`
+    title = typeof fallback === 'string' ? fallback : `[${i18n.t('general:untitled')}]`
   }
 
   return title

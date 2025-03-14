@@ -1,0 +1,30 @@
+type SerializedLexicalEditor = {
+  root: {
+    children: Array<{ type: string }>
+  }
+}
+
+export function isSerializedLexicalEditor(value: unknown): value is SerializedLexicalEditor {
+  return typeof value === 'object' && 'root' in value
+}
+
+export function formatRichTextLexical(
+  editorState: Array<{ type: string }>,
+  textContent: string,
+  i: number = 0,
+): string {
+  for (const node of editorState) {
+    i++
+    if ('text' in node && node.text) {
+      textContent += node.text as string
+    } else {
+      if (!('children' in node)) {
+        textContent += `[${node.type}]`
+      }
+    }
+    if ('children' in node && node.children) {
+      textContent += formatRichTextLexical(node.children as Array<{ type: string }>, textContent, i)
+    }
+  }
+  return textContent
+}
