@@ -115,9 +115,9 @@ import { GraphQL } from '@payloadcms/graphql/types'
 ```
 
 <Banner type="warning">
-  For queries, mutations and handlers make sure you use the `GraphQL` and `payload` instances provided via arguments.
+  For queries, mutations and handlers make sure you use the `GraphQL` and
+  `payload` instances provided via arguments.
 </Banner>
-
 
 **`buildPaginatedListType`**
 
@@ -134,7 +134,10 @@ export const getMyPosts = (GraphQL, payload) => {
     args: {},
     resolve: Resolver,
     // The name of your new type has to be unique
-    type: buildPaginatedListType('AuthorPosts', payload.collections['posts'].graphQL?.type),
+    type: buildPaginatedListType(
+      'AuthorPosts',
+      payload.collections['posts'].graphQL?.type,
+    ),
   }
 }
 ```

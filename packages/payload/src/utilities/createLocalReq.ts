@@ -101,8 +101,9 @@ type CreateLocalReq = (
 export const createLocalReq: CreateLocalReq = async (
   { context, fallbackLocale, locale: localeArg, req = {} as PayloadRequest, urlSuffix, user },
   payload,
-) => {
+): Promise<PayloadRequest> => {
   const localization = payload.config?.localization
+
   if (localization) {
     const locale = localeArg === '*' ? 'all' : localeArg
     const defaultLocale = localization.defaultLocale

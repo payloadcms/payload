@@ -855,6 +855,7 @@ describe('General', () => {
     test('should not override un-edited values in bulk edit if it has a defaultValue', async () => {
       await deleteAllPosts()
       const post1Title = 'Post'
+
       const postData = {
         title: 'Post',
         arrayOfFields: [
@@ -879,6 +880,7 @@ describe('General', () => {
         ],
         defaultValueField: 'not the default value',
       }
+
       const updatedPostTitle = `${post1Title} (Updated)`
       await createPost(postData)
       await page.goto(postsUrl.list)
@@ -890,10 +892,8 @@ describe('General', () => {
         hasText: exactText('Title'),
       })
 
-      await expect(titleOption).toBeVisible()
       await titleOption.click()
       const titleInput = page.locator('#field-title')
-      await expect(titleInput).toBeVisible()
       await titleInput.fill(updatedPostTitle)
       await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
 

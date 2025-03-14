@@ -159,7 +159,7 @@
     "p-limit": "^5.0.0",
     "playwright": "1.50.0",
     "playwright-core": "1.50.0",
-    "prettier": "3.3.3",
+    "prettier": "3.5.3",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "rimraf": "6.0.1",

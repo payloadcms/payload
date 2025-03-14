@@ -63,7 +63,7 @@
     "@types/react": "19.0.10",
     "@types/react-dom": "19.0.4",
     "dotenv": "16.4.7",
-    "prettier": "3.3.3",
+    "prettier": "3.5.3",
     "typescript": "5.7.3"
   },
   "publishConfig": {
