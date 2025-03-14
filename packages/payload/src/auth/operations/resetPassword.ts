@@ -141,7 +141,7 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
 
     if (fullUser) {
       fullUser.collection = collectionConfig.slug
-      fullUser._strategy = req.user._strategy
+      fullUser._strategy = req.user ? req.user._strategy : 'local'
     }
 
     const result = {

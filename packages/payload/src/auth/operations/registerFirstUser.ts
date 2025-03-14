@@ -101,7 +101,7 @@ export const registerFirstUserOperation = async <TSlug extends CollectionSlug>(
 
     if (user) {
       user.collection = slug
-      user._strategy = req.user._strategy
+      user._strategy = req.user ? req.user._strategy : 'local'
     }
 
     if (shouldCommit) {
