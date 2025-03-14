@@ -1,4 +1,4 @@
-@import '../../../../scss/styles';
+@import '~@payloadcms/ui/scss';
 
 @layer payload-default {
   .ContentEditable__root > div:has(.lexical-block) {
