@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/bundler-webpack",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "The officially supported Webpack bundler adapter for Payload",
   "repository": {
     "type": "git",
