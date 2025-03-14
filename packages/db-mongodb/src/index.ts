@@ -63,6 +63,16 @@ import { upsert } from './upsert.js'
 export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
 
 export interface Args {
+  /**
+   * Enable this flag if you want to thread your own ID to create operation data, for example:
+   * ```ts
+   * import { Types } from 'mongoose'
+   *
+   * const id = new Types.ObjectId().toHexString()
+   * const doc = await payload.create({ collection: 'posts', data: {id, title: "my title"}})
+   * assertEq(doc.id, id)
+   * ```
+   */
   acceptIDOnCreate?: boolean
   /**
    * By default, Payload strips all additional keys from MongoDB data that don't exist

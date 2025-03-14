@@ -13,6 +13,13 @@ import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { PgSchema, PgTableFn, PgTransactionConfig } from 'drizzle-orm/pg-core'
 
 export type Args = {
+  /**
+   * Enable this flag if you want to thread your own ID to create operation data, for example:
+   * ```ts
+   * // doc created with id 1
+   * const doc = await payload.create({ collection: 'posts', data: {id: 1, title: "my title"}})
+   * ```
+   */
   acceptIDOnCreate?: boolean
   /**
    * Transform the schema after it's built.
