@@ -1305,6 +1305,7 @@ export interface EmailField {
 export interface RadioField {
   id: string;
   radio?: ('one' | 'two' | 'three') | null;
+  radioWithJsxLabelOption?: ('one' | 'two' | 'three') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1800,6 +1801,7 @@ export interface SelectField {
   settings?: {
     category?: ('a' | 'b')[] | null;
   };
+  selectWithJsxLabelOption?: ('one' | 'two' | 'three') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1841,6 +1843,10 @@ export interface TabsField {
      * When active, the nested conditional tab should be visible. When inactive, it should be hidden.
      */
     nestedConditionalTabVisible?: boolean | null;
+    conditionalTabGroup?: {
+      conditionalTabGroupTitle?: string | null;
+      conditionalTab?: {};
+    };
     nestedUnconditionalTabInput?: string | null;
     nestedConditionalTabInput?: string | null;
   };
@@ -3075,6 +3081,7 @@ export interface EmailFieldsSelect<T extends boolean = true> {
  */
 export interface RadioFieldsSelect<T extends boolean = true> {
   radio?: T;
+  radioWithJsxLabelOption?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3437,6 +3444,7 @@ export interface SelectFieldsSelect<T extends boolean = true> {
     | {
         category?: T;
       };
+  selectWithJsxLabelOption?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3471,6 +3479,12 @@ export interface TabsFieldsSelect<T extends boolean = true> {
     | {
         conditionalTabField?: T;
         nestedConditionalTabVisible?: T;
+        conditionalTabGroup?:
+          | T
+          | {
+              conditionalTabGroupTitle?: T;
+              conditionalTab?: T | {};
+            };
         nestedUnconditionalTabInput?: T;
         nestedConditionalTabInput?: T;
       };
