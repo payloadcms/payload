@@ -7,7 +7,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import { unflatten } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { useCallback, useEffect, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { FormProps } from '../../forms/Form/index.js'
 import type { OnFieldSelect } from '../FieldSelect/index.js'
@@ -149,6 +149,8 @@ export const EditManyDrawerContent: React.FC<
   const { count, getQueryParams, selectAll } = useSelection()
   const { i18n, t } = useTranslation()
 
+  const [isInitializing, setIsInitializing] = useState(false)
+
   const router = useRouter()
   const abortFormStateRef = React.useRef<AbortController>(null)
   const { clearRouteCache } = useRouteCache()
@@ -210,6 +212,8 @@ export const EditManyDrawerContent: React.FC<
 
   const onFieldSelect = useCallback<OnFieldSelect>(
     async ({ dispatchFields, formState, selected }) => {
+      setIsInitializing(true)
+
       if (selected === null) {
         setSelectedFields([])
       } else {
@@ -235,6 +239,8 @@ export const EditManyDrawerContent: React.FC<
         type: 'UPDATE_MANY',
         formState: state,
       })
+
+      setIsInitializing(false)
     },
     [getFormState, collection.slug, collectionPermissions, setSelectedFields],
   )
@@ -271,7 +277,12 @@ export const EditManyDrawerContent: React.FC<
               <XIcon />
             </button>
           </div>
-          <Form className={`${baseClass}__form`} onChange={[onChange]} onSuccess={onSuccess}>
+          <Form
+            className={`${baseClass}__form`}
+            isInitializing={isInitializing}
+            onChange={[onChange]}
+            onSuccess={onSuccess}
+          >
             <FieldSelect fields={fields} onChange={onFieldSelect} />
             {selectedFields.length === 0 ? null : (
               <RenderFields

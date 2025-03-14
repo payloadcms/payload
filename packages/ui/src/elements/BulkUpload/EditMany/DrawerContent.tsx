@@ -37,6 +37,7 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
     forms,
   } = props
 
+  const [isInitializing, setIsInitializing] = useState(false)
   const { permissions } = useAuth()
   const { i18n, t } = useTranslation()
   const { closeModal } = useModal()
@@ -63,6 +64,8 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
 
   const onFieldSelect = useCallback<OnFieldSelect>(
     async ({ dispatchFields, formState, selected }) => {
+      setIsInitializing(true)
+
       if (selected === null) {
         setSelectedFields([])
       } else {
@@ -88,6 +91,8 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
         type: 'UPDATE_MANY',
         formState: state,
       })
+
+      setIsInitializing(false)
     },
     [getFormState, collection, collectionPermissions],
   )
@@ -111,7 +116,11 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
           <XIcon />
         </button>
       </div>
-      <Form className={`${baseClass}__form`} onSubmit={handleSubmit}>
+      <Form
+        className={`${baseClass}__form`}
+        isInitializing={isInitializing}
+        onSubmit={handleSubmit}
+      >
         <FieldSelect fields={fields} onChange={onFieldSelect} />
         {selectedFields.length === 0 ? null : (
           <RenderFields
