@@ -51,6 +51,7 @@ export const defaultTimezones: Timezone[] = [
   { label: '(UTC+08:00) Singapore', value: 'Asia/Singapore' },
   { label: '(UTC+09:00) Tokyo, Osaka, Sapporo', value: 'Asia/Tokyo' },
   { label: '(UTC+09:00) Seoul', value: 'Asia/Seoul' },
+  { label: '(UTC+10:00) Brisbane', value: 'Australia/Brisbane' },
   { label: '(UTC+10:00) Sydney, Melbourne', value: 'Australia/Sydney' },
   { label: '(UTC+10:00) Guam, Port Moresby', value: 'Pacific/Guam' },
   { label: '(UTC+11:00) New Caledonia', value: 'Pacific/Noumea' },
