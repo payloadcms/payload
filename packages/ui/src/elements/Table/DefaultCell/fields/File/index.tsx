@@ -42,25 +42,35 @@ export const FileCell: React.FC<FileCellProps> = ({
     ) {
       const sizes = Object.values<{ url?: string; width?: number }>(rowData.sizes)
 
-      const bestFit = sizes.reduce((closest, current) => {
-        if (!current.width) {
+      const bestFit = sizes.reduce(
+        (closest, current) => {
+          if (!current.width || current.width < targetThumbnailSizeMin) {
+            return closest
+          }
+
+          if (current.width >= targetThumbnailSizeMin && current.width <= targetThumbnailSizeMax) {
+            return !closest.width ||
+              current.width < closest.width ||
+              closest.width < targetThumbnailSizeMin ||
+              closest.width > targetThumbnailSizeMax
+              ? current
+              : closest
+          }
+
+          if (
+            !closest.width ||
+            (!closest.original &&
+              closest.width < targetThumbnailSizeMin &&
+              current.width > closest.width) ||
+            (closest.width > targetThumbnailSizeMax && current.width < closest.width)
+          ) {
+            return current
+          }
+
           return closest
-        }
-
-        if (current.width >= targetThumbnailSizeMin && current.width <= targetThumbnailSizeMax) {
-          return !closest.width || current.width < closest.width ? current : closest
-        }
-
-        if (
-          !closest.width ||
-          (closest.width < targetThumbnailSizeMin && current.width > closest.width) ||
-          (closest.width > targetThumbnailSizeMax && current.width < closest.width)
-        ) {
-          return current
-        }
-
-        return closest
-      }, {})
+        },
+        { original: true, url: rowData?.url, width: rowData?.width },
+      )
 
       fileSrc = bestFit.url || fileSrc
     }
