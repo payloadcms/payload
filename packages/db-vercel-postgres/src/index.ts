@@ -89,6 +89,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
 
     return createDatabaseAdapter<VercelPostgresAdapter>({
       name: 'postgres',
+      acceptIDOnCreate: args.acceptIDOnCreate ?? false,
       afterSchemaInit: args.afterSchemaInit ?? [],
       beforeSchemaInit: args.beforeSchemaInit ?? [],
       createDatabase,

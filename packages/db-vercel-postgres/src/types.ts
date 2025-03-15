@@ -14,6 +14,14 @@ import type { PgSchema, PgTableFn, PgTransactionConfig } from 'drizzle-orm/pg-co
 
 export type Args = {
   /**
+   * Enable this flag if you want to thread your own ID to create operation data, for example:
+   * ```ts
+   * // doc created with id 1
+   * const doc = await payload.create({ collection: 'posts', data: {id: 1, title: "my title"}})
+   * ```
+   */
+  acceptIDOnCreate?: boolean
+  /**
    * Transform the schema after it's built.
    * You can use it to customize the schema with features that aren't supported by Payload.
    * Examples may include: composite indices, generated columns, vectors

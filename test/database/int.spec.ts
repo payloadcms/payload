@@ -12,7 +12,7 @@ import { type Table } from 'drizzle-orm'
 import * as drizzlePg from 'drizzle-orm/pg-core'
 import * as drizzleSqlite from 'drizzle-orm/sqlite-core'
 import fs from 'fs'
-import { Types } from 'mongoose'
+import mongoose, { Types } from 'mongoose'
 import path from 'path'
 import {
   commitTransaction,
@@ -1834,5 +1834,22 @@ describe('database', () => {
     expect(payloadRes.arrayWithIDs[0].additionalKeyInArray).toBe('true')
 
     payload.db.allowAdditionalKeys = false
+  })
+
+  it('accepts ID on create', async () => {
+    payload.db.acceptIDOnCreate = true
+    let id: any = null
+    if (payload.db.name === 'mongoose') {
+      id = new mongoose.Types.ObjectId().toHexString()
+    } else if (payload.db.idType === 'uuid') {
+      id = randomUUID()
+    } else {
+      id = 9999
+    }
+
+    const post = await payload.create({ collection: 'posts', data: { id, title: 'created' } })
+
+    expect(post.id).toBe(id)
+    payload.db.acceptIDOnCreate = false
   })
 })

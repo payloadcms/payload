@@ -64,6 +64,17 @@ export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
 
 export interface Args {
   /**
+   * Enable this flag if you want to thread your own ID to create operation data, for example:
+   * ```ts
+   * import { Types } from 'mongoose'
+   *
+   * const id = new Types.ObjectId().toHexString()
+   * const doc = await payload.create({ collection: 'posts', data: {id, title: "my title"}})
+   * assertEq(doc.id, id)
+   * ```
+   */
+  acceptIDOnCreate?: boolean
+  /**
    * By default, Payload strips all additional keys from MongoDB data that don't exist
    * in the Payload schema. If you have some data that you want to include to the result
    * but it doesn't exist in Payload, you can enable this flag
@@ -72,6 +83,7 @@ export interface Args {
   allowAdditionalKeys?: boolean
   /** Set to false to disable auto-pluralization of collection names, Defaults to true */
   autoPluralization?: boolean
+
   /**
    * If enabled, collation allows for language-specific rules for string comparison.
    * This configuration can include the following options:
@@ -98,7 +110,6 @@ export interface Args {
   collation?: Omit<CollationOptions, 'locale'>
 
   collectionsSchemaOptions?: Partial<Record<CollectionSlug, SchemaOptions>>
-
   /** Extra configuration options */
   connectOptions?: {
     /**
@@ -182,6 +193,7 @@ declare module 'payload' {
 }
 
 export function mongooseAdapter({
+  acceptIDOnCreate = false,
   allowAdditionalKeys = false,
   autoPluralization = true,
   collectionsSchemaOptions = {},
@@ -219,6 +231,7 @@ export function mongooseAdapter({
       url,
       versions: {},
       // DatabaseAdapter
+      acceptIDOnCreate,
       allowAdditionalKeys,
       beginTransaction: transactionOptions === false ? defaultBeginTransaction() : beginTransaction,
       collectionsSchemaOptions,

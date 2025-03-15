@@ -93,6 +93,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
 
     return createDatabaseAdapter<PostgresAdapter>({
       name: 'postgres',
+      acceptIDOnCreate: args.acceptIDOnCreate ?? false,
       afterSchemaInit: args.afterSchemaInit ?? [],
       beforeSchemaInit: args.beforeSchemaInit ?? [],
       createDatabase,
