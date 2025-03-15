@@ -22,6 +22,14 @@ export { useEffectEvent } from '../../hooks/useEffectEvent.js'
 
 export { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 
+// list preset elements
+export { ListPresetsColumnsCell } from '../../elements/ListPresets/cells/ColumnsCell/index.js'
+export { ListPresetsWhereCell } from '../../elements/ListPresets/cells/WhereCell/index.js'
+export { ListPresetsAccessCell } from '../../elements/ListPresets/cells/AccessCell/index.js'
+export { ListPresetsColumnsField } from '../../elements/ListPresets/fields/ColumnsField/index.js'
+export { ListPresetsWhereField } from '../../elements/ListPresets/fields/WhereField/index.js'
+export { ListPresetsAccessLabel } from '../../elements/ListPresets/fields/AccessLabel/index.js'
+
 // elements
 export { ConfirmationModal } from '../../elements/ConfirmationModal/index.js'
 export type { OnCancel } from '../../elements/ConfirmationModal/index.js'
@@ -29,11 +37,11 @@ export { Link } from '../../elements/Link/index.js'
 export { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
 export { DocumentTakeOver } from '../../elements/DocumentTakeOver/index.js'
 export { DocumentLocked } from '../../elements/DocumentLocked/index.js'
-export { TableColumnsProvider, useTableColumns } from '../../elements/TableColumns/index.js'
+export { TableColumnsProvider, useTableColumns } from '../../providers/TableColumns/index.js'
 export {
   RenderDefaultCell,
   useCellProps,
-} from '../../elements/TableColumns/RenderDefaultCell/index.js'
+} from '../../providers/TableColumns/RenderDefaultCell/index.js'
 
 export { Translation } from '../../elements/Translation/index.js'
 export { default as DatePicker } from '../../elements/DatePicker/DatePicker.js'

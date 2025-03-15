@@ -2,15 +2,7 @@
 import type { ClientUser, DocumentPreferences, SanitizedDocumentPermissions } from 'payload'
 
 import * as qs from 'qs-esm'
-import React, {
-  createContext,
-  use,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 

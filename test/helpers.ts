@@ -245,7 +245,7 @@ export async function saveDocAndAssert(
 
   if (expectation === 'success') {
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('create')
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('/create')
   } else {
     await expect(page.locator('.payload-toast-container .toast-error')).toBeVisible()
   }

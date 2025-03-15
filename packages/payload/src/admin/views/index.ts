@@ -45,8 +45,6 @@ export type AdminViewServerPropsOnly = {
   readonly importMap: ImportMap
   readonly initialData?: Data
   readonly initPageResult: InitPageResult
-  readonly redirectAfterDelete?: boolean
-  readonly redirectAfterDuplicate?: boolean
 } & ServerProps
 
 export type AdminViewServerProps = AdminViewClientProps & AdminViewServerPropsOnly

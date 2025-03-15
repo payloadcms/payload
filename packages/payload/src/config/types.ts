@@ -49,6 +49,7 @@ import type {
   RequestContext,
   TypedUser,
 } from '../index.js'
+import type { ListPresetConstraints } from '../list-presets/types.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -945,12 +946,12 @@ export type Config = {
   cookiePrefix?: string
   /** Either a whitelist array of URLS to allow CORS requests from, or a wildcard string ('*') to accept incoming requests from any domain. */
   cors?: '*' | CORSConfig | string[]
-
   /** A whitelist array of URLs to allow Payload cookies to be accepted from as a form of CSRF protection. */
   csrf?: string[]
 
   /** Extension point to add your custom data. Server only. */
   custom?: Record<string, any>
+
   /** Pass in a database adapter for use on this project. */
   db: DatabaseAdapterResult
   /** Enable to expose more detailed error information. */
@@ -1034,6 +1035,20 @@ export type Config = {
    * @experimental There may be frequent breaking changes to this API
    */
   jobs?: JobsConfig
+  listPresets?: {
+    access: {
+      create?: Access
+      delete?: Access
+      read?: Access
+      update?: Access
+    }
+    constraints: {
+      create?: ListPresetConstraints
+      delete?: ListPresetConstraints
+      read?: ListPresetConstraints
+      update?: ListPresetConstraints
+    }
+  }
   /**
    * Translate your content to different languages/locales.
    *

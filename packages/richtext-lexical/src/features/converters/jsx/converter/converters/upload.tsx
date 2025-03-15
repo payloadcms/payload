@@ -12,7 +12,6 @@ export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
       return null
     }
 
-     
     const uploadDoc = uploadNode.value as FileData & TypeWithID
 
     const url = uploadDoc.url
