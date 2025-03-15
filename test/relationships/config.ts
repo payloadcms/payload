@@ -481,6 +481,54 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'relationship-using-list-drawer',
+      fields: [
+        {
+          type: 'relationship',
+          name: 'relationship',
+          admin: { selectionType: 'drawer' },
+          relationTo: ['movies'],
+        },
+        {
+          type: 'relationship',
+          name: 'hasManyRelationship',
+          admin: { selectionType: 'drawer' },
+          hasMany: true,
+          relationTo: ['movies'],
+        },
+        {
+          name: 'polymorphicRelationship',
+          admin: { selectionType: 'drawer' },
+          type: 'relationship',
+          relationTo: ['movies', 'directors'],
+        },
+        {
+          name: 'polymorphicHasManyRelationship',
+          admin: { selectionType: 'drawer' },
+          type: 'relationship',
+          hasMany: true,
+          relationTo: ['movies', 'directors'],
+        },
+        {
+          name: 'polymorphicHasManyFiltered',
+          admin: { selectionType: 'drawer' },
+          type: 'relationship',
+          hasMany: true,
+          relationTo: ['movies', 'directors', 'relation'],
+          filterOptions: ({ relationTo }) => {
+            // returns a Where query dynamically by the type of relationship
+            if (relationTo === 'relation') {
+              return {
+                disableRelation: { not_equals: true },
+              }
+            } else {
+              return true
+            }
+          },
+        },
+      ],
+    },
   ],
   onInit: async (payload) => {
     await payload.create({
