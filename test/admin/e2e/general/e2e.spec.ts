@@ -33,12 +33,14 @@ import {
 } from '../../shared.js'
 import {
   customViews2CollectionSlug,
+  disableCopyToLocale as disableCopyToLocaleSlug,
   disableDuplicateSlug,
   geoCollectionSlug,
   globalSlug,
   notInViewCollectionSlug,
   postsCollectionSlug,
   settingsGlobalSlug,
+  uploadTwoCollectionSlug,
 } from '../../slugs.js'
 
 const { beforeAll, beforeEach, describe } = test
@@ -70,9 +72,11 @@ describe('General', () => {
   let notInViewUrl: AdminUrlUtil
   let globalURL: AdminUrlUtil
   let customViewsURL: AdminUrlUtil
+  let disableCopyToLocale: AdminUrlUtil
   let disableDuplicateURL: AdminUrlUtil
   let serverURL: string
   let adminRoutes: ReturnType<typeof getRoutes>
+  let uploadsTwo: AdminUrlUtil
 
   beforeAll(async ({ browser }, testInfo) => {
     const prebuild = false // Boolean(process.env.CI)
@@ -89,7 +93,9 @@ describe('General', () => {
     notInViewUrl = new AdminUrlUtil(serverURL, notInViewCollectionSlug)
     globalURL = new AdminUrlUtil(serverURL, globalSlug)
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
+    disableCopyToLocale = new AdminUrlUtil(serverURL, disableCopyToLocaleSlug)
     disableDuplicateURL = new AdminUrlUtil(serverURL, disableDuplicateSlug)
+    uploadsTwo = new AdminUrlUtil(serverURL, uploadTwoCollectionSlug)
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -149,6 +155,16 @@ describe('General', () => {
         await page.goto(`${serverURL}/admin/custom-minimal-view`)
         const pattern = new RegExp(`^${customRootViewMetaTitle}`)
         await expect(page.title()).resolves.toMatch(pattern)
+      })
+    })
+
+    describe('robots', () => {
+      test('should apply default robots meta tag', async () => {
+        await page.goto(`${serverURL}/admin`)
+        await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+          'content',
+          /noindex, nofollow/,
+        )
       })
     })
 
@@ -424,6 +440,27 @@ describe('General', () => {
       expect(tagName).toBe('a')
     })
 
+    test('should only have one nav item active at a time', async () => {
+      await page.goto(uploadsTwo.list)
+      await openNav(page)
+
+      // Locate "uploads" and "uploads-two" nav items
+      const uploadsNavItem = page.locator('.nav-group__content #nav-uploads')
+      const uploadsTwoNavItem = page.locator('.nav-group__content #nav-uploads-two')
+
+      // Ensure both exist before continuing
+      await expect(uploadsNavItem).toBeVisible()
+      await expect(uploadsTwoNavItem).toBeVisible()
+
+      // Locate all nav items containing the nav__link-indicator
+      const activeNavItems = page.locator(
+        '.nav-group__content .nav__link:has(.nav__link-indicator), .nav-group__content div.nav__link:has(.nav__link-indicator)',
+      )
+
+      // Expect exactly one nav item to have the indicator
+      await expect(activeNavItems).toHaveCount(1)
+    })
+
     test('breadcrumbs — should navigate from list to dashboard', async () => {
       await page.goto(postsUrl.list)
       await page.locator(`.step-nav a[href="${adminRoutes.routes.admin}"]`).click()
@@ -490,6 +527,14 @@ describe('General', () => {
       await expect(page.locator('.list-header h1')).toContainText('Not In View Collections')
       await page.goto(notInViewUrl.global('not-in-view-global'))
       await expect(page.locator('.render-title')).toContainText('Not In View Global')
+    })
+
+    test('should hide Copy To Locale button when disableCopyToLocale: true', async () => {
+      await page.goto(disableCopyToLocale.create)
+      await page.locator('#field-title').fill(title)
+      await saveDocAndAssert(page)
+      await page.locator('.doc-controls__popup >> .popup-button').click()
+      await expect(page.locator('#copy-locale-data__button')).toBeHidden()
     })
   })
 
@@ -810,6 +855,7 @@ describe('General', () => {
     test('should not override un-edited values in bulk edit if it has a defaultValue', async () => {
       await deleteAllPosts()
       const post1Title = 'Post'
+
       const postData = {
         title: 'Post',
         arrayOfFields: [
@@ -834,6 +880,7 @@ describe('General', () => {
         ],
         defaultValueField: 'not the default value',
       }
+
       const updatedPostTitle = `${post1Title} (Updated)`
       await createPost(postData)
       await page.goto(postsUrl.list)
@@ -845,10 +892,8 @@ describe('General', () => {
         hasText: exactText('Title'),
       })
 
-      await expect(titleOption).toBeVisible()
       await titleOption.click()
       const titleInput = page.locator('#field-title')
-      await expect(titleInput).toBeVisible()
       await titleInput.fill(updatedPostTitle)
       await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
 
@@ -963,7 +1008,7 @@ describe('General', () => {
       const newTitle = 'new title'
       await page.locator('#field-title').fill(newTitle)
 
-      await page.locator('header.app-header a[href="/admin/collections/posts"]').click()
+      await page.locator(`header.app-header a[href="/admin/collections/posts"]`).click()
 
       // Locate the modal container
       const modalContainer = page.locator('.payload__modal-container')
@@ -977,6 +1022,36 @@ describe('General', () => {
       // Assert that the class on the modal container changes to 'payload__modal-container--exitDone'
       await expect(modalContainer).toHaveClass(/payload__modal-container--exitDone/)
     })
+  })
+
+  test('should not open leave-without-saving modal if opening a new tab', async () => {
+    const title = 'title'
+    await page.goto(postsUrl.create)
+    await page.locator('#field-title').fill(title)
+    await expect(page.locator('#field-title')).toHaveValue(title)
+
+    const newTitle = 'new title'
+    await page.locator('#field-title').fill(newTitle)
+
+    // Open link in a new tab by holding down the Meta or Control key
+    const [newPage] = await Promise.all([
+      page.context().waitForEvent('page'),
+      page
+        .locator(`header.app-header a[href="/admin/collections/posts"]`)
+        .click({ modifiers: ['ControlOrMeta'] }),
+    ])
+
+    // Wait for navigation to complete in the new tab and ensure correct URL
+    await expect(newPage.locator('.list-header')).toBeVisible()
+    // using contain here, because after load the lists view will add query params like "?limit=10"
+    expect(newPage.url()).toContain(postsUrl.list)
+
+    // Locate the modal container and ensure it is not visible
+    const modalContainer = page.locator('.payload__modal-container')
+    await expect(modalContainer).toBeHidden()
+
+    // Ensure the original page is the correct URL
+    expect(page.url()).toBe(postsUrl.create)
   })
 
   describe('preferences', () => {

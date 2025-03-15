@@ -4,6 +4,7 @@
 import type { EditorProps } from '@monaco-editor/react'
 import type { JSONSchema4 } from 'json-schema'
 import type { CSSProperties } from 'react'
+import type React from 'react'
 import type { DeepUndefinable, MarkRequired } from 'ts-essentials'
 
 import type {
@@ -264,12 +265,17 @@ export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
   siblingData: Partial<TSiblingData>,
   {
     blockData,
+    path,
     user,
   }: {
     /**
      * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
      */
     blockData: Partial<TData>
+    /**
+     * The path of the field, e.g. ["group", "myArray", 1, "textField"]. The path is the schemaPath but with indexes and would be used in the context of field data, not field schemas.
+     */
+    path: (number | string)[]
     user: PayloadRequest['user']
   },
 ) => boolean
@@ -399,6 +405,10 @@ export type BaseValidateOptions<TData, TSiblingData, TValue> = {
   event?: 'onChange' | 'submit'
   id?: number | string
   operation?: Operation
+  /**
+   * The path of the field, e.g. ["group", "myArray", 1, "textField"]. The path is the schemaPath but with indexes and would be used in the context of field data, not field schemas.
+   */
+  path: (number | string)[]
   preferences: DocumentPreferences
   previousValue?: TValue
   req: PayloadRequest
@@ -423,11 +433,16 @@ export type Validate<
   options: ValidateOptions<TData, TSiblingData, TFieldConfig, TValue>,
 ) => Promise<string | true> | string | true
 
+export type OptionLabel =
+  | (() => React.JSX.Element)
+  | LabelFunction
+  | React.JSX.Element
+  | StaticLabel
+
 export type OptionObject = {
-  label: LabelFunction | StaticLabel
+  label: OptionLabel
   value: string
 }
-
 export type Option = OptionObject | string
 
 export type FieldGraphQLType = {
@@ -779,6 +794,7 @@ type TabBase = {
    */
   description?: LabelFunction | StaticDescription
   fields: Field[]
+  id?: string
   interfaceName?: string
   saveToJWT?: boolean | string
 } & Omit<FieldBase, 'required' | 'validate'>
@@ -810,11 +826,11 @@ export type UnnamedTab = {
 } & Omit<TabBase, 'name' | 'virtual'>
 
 export type Tab = NamedTab | UnnamedTab
-
 export type TabsField = {
   admin?: Omit<Admin, 'description'>
-  tabs: Tab[]
   type: 'tabs'
+} & {
+  tabs: Tab[]
 } & Omit<FieldBase, 'admin' | 'localized' | 'name' | 'saveToJWT' | 'virtual'>
 
 export type TabsFieldClient = {
@@ -1373,6 +1389,12 @@ export type Block = {
     }
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>
+    /**
+     * Hides the block name field from the Block's header
+     *
+     * @default false
+     */
+    disableBlockName?: boolean
     group?: Record<string, string> | string
     jsx?: PayloadComponent
   }
@@ -1388,6 +1410,9 @@ export type Block = {
     singularName?: string
   }
   imageAltText?: string
+  /**
+   * Preferred aspect ratio of the image is 3 : 2
+   */
   imageURL?: string
   /** Customize generated GraphQL and Typescript schema names.
    * The slug is used by default.
@@ -1402,7 +1427,7 @@ export type Block = {
 }
 
 export type ClientBlock = {
-  admin?: Pick<Block['admin'], 'custom' | 'group'>
+  admin?: Pick<Block['admin'], 'custom' | 'disableBlockName' | 'group'>
   fields: ClientField[]
   labels?: LabelsClient
 } & Pick<Block, 'imageAltText' | 'imageURL' | 'jsx' | 'slug'>

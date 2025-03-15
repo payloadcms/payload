@@ -6,8 +6,8 @@ export {
   parseCookies,
 } from '../auth/cookies.js'
 export { getLoginOptions } from '../auth/getLoginOptions.js'
-export { getFromImportMap } from '../bin/generateImportMap/getFromImportMap.js'
-export { parsePayloadComponent } from '../bin/generateImportMap/parsePayloadComponent.js'
+export { getFromImportMap } from '../bin/generateImportMap/utilities/getFromImportMap.js'
+export { parsePayloadComponent } from '../bin/generateImportMap/utilities/parsePayloadComponent.js'
 export { defaults as collectionDefaults } from '../collections/config/defaults.js'
 
 export { serverProps } from '../config/types.js'
@@ -64,10 +64,12 @@ export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON.js'
 
 export { flattenAllFields } from '../utilities/flattenAllFields.js'
 export { default as flattenTopLevelFields } from '../utilities/flattenTopLevelFields.js'
-export { getDataByPath } from '../utilities/getDataByPath.js'
+export { formatAdminURL } from '../utilities/formatAdminURL.js'
 
+export { getDataByPath } from '../utilities/getDataByPath.js'
 export { getSelectMode } from '../utilities/getSelectMode.js'
 export { getSiblingData } from '../utilities/getSiblingData.js'
+
 export { getUniqueListBy } from '../utilities/getUniqueListBy.js'
 
 export { isNextBuild } from '../utilities/isNextBuild.js'

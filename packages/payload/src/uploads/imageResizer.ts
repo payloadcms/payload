@@ -360,6 +360,7 @@ export async function resizeAndTransformImageSizes({
         const prioritizeHeight = resizeAspectRatio < originalAspectRatio
         // Scales the image before extracting from it
         resized = imageToResize.resize({
+          fastShrinkOnLoad: false,
           height: prioritizeHeight ? resizeHeight : undefined,
           width: prioritizeHeight ? undefined : resizeWidth,
         })

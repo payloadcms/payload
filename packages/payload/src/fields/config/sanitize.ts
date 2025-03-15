@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import { deepMergeSimple } from '@payloadcms/translations/utilities'
+import { v4 as uuid } from 'uuid'
 
 import type {
   CollectionConfig,
@@ -78,6 +79,9 @@ export const sanitizeFields = async ({
 
     if ('_sanitized' in field && field._sanitized === true) {
       continue
+    }
+    if ('_sanitized' in field) {
+      field._sanitized = true
     }
 
     if (!field.type) {
@@ -285,6 +289,16 @@ export const sanitizeFields = async ({
           tab.label = toWords(tab.name)
         }
 
+        if (
+          'admin' in tab &&
+          tab.admin?.condition &&
+          typeof tab.admin.condition === 'function' &&
+          !tab.id
+        ) {
+          // Always attach a UUID to tabs with a condition so there's no conflicts even if there are duplicate nested names
+          tab.id = tabHasName(tab) ? `${tab.name}_${uuid()}` : uuid()
+        }
+
         tab.fields = await sanitizeFields({
           config,
           existingFieldNames: tabHasName(tab) ? new Set() : existingFieldNames,
@@ -303,10 +317,6 @@ export const sanitizeFields = async ({
 
     if (field.type === 'ui' && typeof field.admin.disableBulkEdit === 'undefined') {
       field.admin.disableBulkEdit = true
-    }
-
-    if ('_sanitized' in field) {
-      field._sanitized = true
     }
 
     fields[i] = field

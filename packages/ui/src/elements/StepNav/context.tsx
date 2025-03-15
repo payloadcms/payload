@@ -1,9 +1,9 @@
 'use client'
-import React, { createContext, useContext, useState } from 'react'
+import React, { createContext, use, useState } from 'react'
 
 import type { ContextType } from './types.js'
 
-export const useStepNav = (): ContextType => useContext(Context)
+export const useStepNav = (): ContextType => use(Context)
 
 export const Context = createContext({} as ContextType)
 
@@ -11,13 +11,13 @@ export const StepNavProvider: React.FC<{ children?: React.ReactNode }> = ({ chil
   const [stepNav, setStepNav] = useState([])
 
   return (
-    <Context.Provider
+    <Context
       value={{
         setStepNav,
         stepNav,
       }}
     >
       {children}
-    </Context.Provider>
+    </Context>
   )
 }

@@ -117,8 +117,9 @@ export const usePreventLeave = ({
           const newUrl = anchor.href
           const isAnchor = isAnchorOfCurrentUrl(currentUrl, newUrl)
           const isDownloadLink = anchor.download !== ''
+          const isNewTab = anchor.target === '_blank' || event.metaKey || event.ctrlKey
 
-          const isPageLeaving = !(newUrl === currentUrl || isAnchor || isDownloadLink)
+          const isPageLeaving = !(newUrl === currentUrl || isAnchor || isDownloadLink || isNewTab)
 
           if (isPageLeaving && prevent && (!onPrevent ? !window.confirm(message) : true)) {
             // Keep a reference of the href
