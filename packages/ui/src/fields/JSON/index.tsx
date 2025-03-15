@@ -31,6 +31,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
     readOnly,
     validate,
   } = props
+
   const [jsonError, setJsonError] = useState<string>()
   const inputChangeFromRef = React.useRef<'system' | 'user'>('system')
   const [editorKey, setEditorKey] = useState<string>('')
@@ -46,6 +47,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
     initialValue,
     setValue,
     showError,
@@ -90,7 +92,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
 
   const handleChange = useCallback(
     (val) => {
-      if (readOnly) {
+      if (readOnly || disabled) {
         return
       }
       inputChangeFromRef.current = 'user'
@@ -103,7 +105,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
         setJsonError(e)
       }
     },
-    [readOnly, setValue],
+    [readOnly, disabled, setValue],
   )
 
   useEffect(() => {
@@ -128,7 +130,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
         baseClass,
         className,
         showError && 'error',
-        readOnly && 'read-only',
+        (readOnly || disabled) && 'read-only',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -153,7 +155,7 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
           onChange={handleChange}
           onMount={handleMount}
           options={editorOptions}
-          readOnly={readOnly}
+          readOnly={readOnly || disabled}
           value={initialStringValue}
           wrapperProps={{
             id: `field-${path?.replace(/\./g, '__')}`,

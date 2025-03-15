@@ -54,6 +54,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     schemaPath: schemaPathFromProps,
     validate,
   } = props
+
   const schemaPath = schemaPathFromProps ?? name
 
   const minRows = (minRowsProp ?? required) ? 1 : 0
@@ -98,6 +99,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label, RowLabels } = {},
+    disabled,
     errorPaths,
     rows = [],
     showError,
@@ -276,7 +278,11 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
               ).length
 
               return (
-                <DraggableSortableItem disabled={readOnly || !isSortable} id={row.id} key={row.id}>
+                <DraggableSortableItem
+                  disabled={readOnly || disabled || !isSortable}
+                  id={row.id}
+                  key={row.id}
+                >
                   {(draggableSortableItemProps) => (
                     <BlockRow
                       {...draggableSortableItemProps}
@@ -295,7 +301,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                       parentPath={path}
                       path={rowPath}
                       permissions={permissions}
-                      readOnly={readOnly}
+                      readOnly={readOnly || disabled}
                       removeRow={removeRow}
                       row={row}
                       rowCount={rows.length}
@@ -335,12 +341,12 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         <Fragment>
           <DrawerToggler
             className={`${baseClass}__drawer-toggler`}
-            disabled={readOnly}
+            disabled={readOnly || disabled}
             slug={drawerSlug}
           >
             <Button
               buttonStyle="icon-label"
-              disabled={readOnly}
+              disabled={readOnly || disabled}
               el="span"
               icon="plus"
               iconPosition="left"

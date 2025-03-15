@@ -54,6 +54,7 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
     setValue,
     showError,
     value,
@@ -75,7 +76,7 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
 
   const handleHasManyChange = useCallback(
     (selectedOption) => {
-      if (!readOnly) {
+      if (!(readOnly || disabled)) {
         let newValue
         if (!selectedOption) {
           newValue = []
@@ -88,7 +89,7 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
         setValue(newValue)
       }
     },
-    [readOnly, setValue],
+    [readOnly, setValue, disabled],
   )
 
   // useEffect update valueToRender:
@@ -136,7 +137,7 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
       }
       path={path}
       placeholder={placeholder}
-      readOnly={readOnly}
+      readOnly={readOnly || disabled}
       required={required}
       rtl={renderRTL}
       showError={showError}

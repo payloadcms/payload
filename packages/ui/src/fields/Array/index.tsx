@@ -111,6 +111,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label, RowLabels } = {},
+    disabled,
     errorPaths,
     rows: rowsData = [],
     showError,
@@ -197,7 +198,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   const fieldErrorCount = errorPaths.length
   const fieldHasErrors = submitted && errorPaths.length > 0
 
-  const showRequired = readOnly && rowsData.length === 0
+  const showRequired = (readOnly || disabled) && rowsData.length === 0
   const showMinRows = rowsData.length < minRows || (required && rowsData.length === 0)
 
   return (
@@ -285,7 +286,11 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
             ).length
 
             return (
-              <DraggableSortableItem disabled={readOnly || !isSortable} id={rowID} key={rowID}>
+              <DraggableSortableItem
+                disabled={readOnly || disabled || !isSortable}
+                id={rowID}
+                key={rowID}
+              >
                 {(draggableSortableItemProps) => (
                   <ArrayRow
                     {...draggableSortableItemProps}
@@ -303,7 +308,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                     parentPath={path}
                     path={rowPath}
                     permissions={permissions}
-                    readOnly={readOnly}
+                    readOnly={readOnly || disabled}
                     removeRow={removeRow}
                     row={rowData}
                     rowCount={rowsData?.length}

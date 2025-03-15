@@ -68,8 +68,7 @@ const RichTextComponent: React.FC<
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
-    formInitializing,
-    formProcessing,
+    disabled: disabledFromField,
     initialValue,
     setValue,
     showError,
@@ -79,7 +78,7 @@ const RichTextComponent: React.FC<
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || formProcessing || formInitializing
+  const disabled = readOnlyFromProps || disabledFromField
 
   const [isSmallWidthViewport, setIsSmallWidthViewport] = useState<boolean>(false)
   const [rerenderProviderKey, setRerenderProviderKey] = useState<Date>()

@@ -51,6 +51,7 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
     setValue,
     showError,
     value,
@@ -63,7 +64,13 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
 
   return (
     <div
-      className={[fieldBaseClass, 'email', className, showError && 'error', readOnly && 'read-only']
+      className={[
+        fieldBaseClass,
+        'email',
+        className,
+        showError && 'error',
+        (readOnly || disabled) && 'read-only',
+      ]
         .filter(Boolean)
         .join(' ')}
       style={styles}
@@ -84,7 +91,7 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
         {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
         <input
           autoComplete={autoComplete}
-          disabled={readOnly}
+          disabled={readOnly || disabled}
           id={`field-${path.replace(/\./g, '__')}`}
           name={path}
           onChange={setValue}

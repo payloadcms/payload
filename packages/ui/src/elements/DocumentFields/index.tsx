@@ -29,7 +29,7 @@ export const DocumentFields: React.FC<Args> = ({
   docPermissions,
   fields,
   forceSidebarWrap,
-  readOnly: readOnlyProp,
+  readOnly,
   schemaPathSegments,
 }) => {
   const { hasSidebarFields, mainFields, sidebarFields } = useMemo(() => {
@@ -52,11 +52,6 @@ export const DocumentFields: React.FC<Args> = ({
       },
     )
   }, [fields])
-
-  const formInitializing = useFormInitializing()
-  const formProcessing = useFormProcessing()
-
-  const readOnly = readOnlyProp || formInitializing || formProcessing
 
   return (
     <div

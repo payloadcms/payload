@@ -9,6 +9,7 @@ export type Options = {
 
 export type FieldType<T> = {
   customComponents?: FieldState['customComponents']
+  disabled: boolean
   errorMessage?: string
   errorPaths?: string[]
   filterOptions?: FilterOptionsResult

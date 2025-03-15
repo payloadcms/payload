@@ -60,6 +60,7 @@ const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
     setValue,
     showError,
     value,
@@ -86,7 +87,7 @@ const TextareaFieldComponent: TextareaFieldClientComponent = (props) => {
       }}
       path={path}
       placeholder={getTranslation(placeholder, i18n)}
-      readOnly={readOnly}
+      readOnly={readOnly || disabled}
       required={required}
       rows={rows}
       rtl={isRTL}

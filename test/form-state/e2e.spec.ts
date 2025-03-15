@@ -39,7 +39,19 @@ test.describe('Form State', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
-  test('collection — should re-enable fields after save', async () => {
+  test('should disable fields during initialization', async () => {
+    await page.goto(postsUrl.create)
+    await expect(page.locator('#field-title')).toBeDisabled()
+  })
+
+  test('should disable fields while processing', async () => {
+    await page.goto(postsUrl.create)
+    await page.locator('#field-title').fill(title)
+    await page.click('#action-save', { delay: 100 })
+    await expect(page.locator('#field-title')).toBeDisabled()
+  })
+
+  test('should re-enable fields after save', async () => {
     await page.goto(postsUrl.create)
     await page.locator('#field-title').fill(title)
     await saveDocAndAssert(page)
