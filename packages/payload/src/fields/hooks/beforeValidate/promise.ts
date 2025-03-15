@@ -285,7 +285,7 @@ export const promise = async <T>({
     }
 
     // Execute hooks
-    if (field.hooks?.beforeValidate) {
+    if ('hooks' in field && field.hooks?.beforeValidate) {
       for (const hook of field.hooks.beforeValidate) {
         const hookedValue = await hook({
           blockData,

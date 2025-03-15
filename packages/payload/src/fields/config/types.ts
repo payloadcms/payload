@@ -737,7 +737,7 @@ export type RowField = {
   admin?: Omit<Admin, 'description'>
   fields: Field[]
   type: 'row'
-} & Omit<FieldBase, 'admin' | 'label' | 'localized' | 'name' | 'validate' | 'virtual'>
+} & Omit<FieldBase, 'admin' | 'hooks' | 'label' | 'localized' | 'name' | 'validate' | 'virtual'>
 
 export type RowFieldClient = {
   admin?: Omit<AdminClient, 'description'>
@@ -776,7 +776,7 @@ export type CollapsibleField = {
       label: Required<FieldBase['label']>
     }
 ) &
-  Omit<FieldBase, 'label' | 'localized' | 'name' | 'validate' | 'virtual'>
+  Omit<FieldBase, 'hooks' | 'label' | 'localized' | 'name' | 'validate' | 'virtual'>
 
 export type CollapsibleFieldClient = {
   admin?: {
@@ -823,7 +823,7 @@ export type UnnamedTab = {
     | LabelFunction
     | string
   localized?: never
-} & Omit<TabBase, 'name' | 'virtual'>
+} & Omit<TabBase, 'hooks' | 'name' | 'virtual'>
 
 export type Tab = NamedTab | UnnamedTab
 export type TabsField = {
