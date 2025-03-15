@@ -5,9 +5,11 @@ type CorsArgs = {
   headers: Headers
   req: Partial<PayloadRequest>
 }
-export const headersWithCors = ({ headers, req }: CorsArgs): Headers => {
+export const headersWithCors = ({ headers: headersArg, req }: CorsArgs): Headers => {
   const cors = req?.payload.config.cors
   const requestOrigin = req?.headers.get('Origin')
+
+  const headers = new Headers(headersArg)
 
   if (cors) {
     const defaultAllowedHeaders = [
