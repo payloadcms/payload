@@ -76,6 +76,7 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
 
     if (user) {
       user.collection = args.req.user.collection
+      user._strategy = args.req.user._strategy
     }
 
     let result: Result

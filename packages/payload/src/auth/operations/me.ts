@@ -41,6 +41,7 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
 
     if (user) {
       user.collection = collection.config.slug
+      user._strategy = req.user._strategy
     }
 
     if (req.user.collection !== collection.config.slug) {

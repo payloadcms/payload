@@ -169,7 +169,12 @@ export type AuthStrategyFunctionArgs = {
 
 export type AuthStrategyResult = {
   responseHeaders?: Headers
-  user: null | User
+  user:
+    | ({
+        _strategy?: string
+        collection?: string
+      } & User)
+    | null
 }
 
 export type AuthStrategyFunction = (

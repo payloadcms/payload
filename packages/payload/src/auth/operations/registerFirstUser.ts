@@ -99,6 +99,9 @@ export const registerFirstUserOperation = async <TSlug extends CollectionSlug>(
       req,
     })
 
+    result.collection = slug
+    result._strategy = 'local-jwt'
+
     if (shouldCommit) {
       await commitTransaction(req)
     }
