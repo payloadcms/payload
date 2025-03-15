@@ -641,12 +641,16 @@ export type {
 } from './views/index.js'
 
 export type {
+  AfterBulkActionsClientProps,
+  AfterBulkActionsServerPropsOnly,
   AfterListClientProps,
   AfterListServerProps,
   AfterListServerPropsOnly,
   AfterListTableClientProps,
   AfterListTableServerProps,
   AfterListTableServerPropsOnly,
+  BeforeBulkActionsClientProps,
+  BeforeBulkActionsServerPropsOnly,
   BeforeListClientProps,
   BeforeListServerProps,
   BeforeListServerPropsOnly,

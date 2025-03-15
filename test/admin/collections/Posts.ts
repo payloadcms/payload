@@ -69,6 +69,22 @@ export const Posts: CollectionConfig = {
           },
         },
       ],
+      beforeBulkActions: [
+        {
+          path: '/components/Banner/index.js#Banner',
+          clientProps: {
+            message: 'BeforeBulkActions custom component',
+          },
+        },
+      ],
+      afterBulkActions: [
+        {
+          path: '/components/Banner/index.js#Banner',
+          clientProps: {
+            message: 'AfterBulkActions custom component',
+          },
+        },
+      ],
     },
     pagination: {
       defaultLimit: 5,
