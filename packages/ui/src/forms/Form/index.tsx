@@ -10,7 +10,7 @@ import {
   reduceFieldsToValues,
   wait,
 } from 'payload/shared'
-import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import type {
@@ -771,7 +771,7 @@ export const Form: React.FC<FormProps> = (props) => {
   )
 
   const DocumentFormContextComponent: React.FC<any> = isDocumentForm
-    ? DocumentFormContext.Provider
+    ? DocumentFormContext
     : React.Fragment
 
   const documentFormContextProps = isDocumentForm
@@ -792,28 +792,29 @@ export const Form: React.FC<FormProps> = (props) => {
       ref={formRef}
     >
       <DocumentFormContextComponent {...documentFormContextProps}>
-        <FormContext.Provider value={contextRef.current}>
-          <FormWatchContext.Provider
+        <FormContext value={contextRef.current}>
+          <FormWatchContext
             value={{
               fields,
               ...contextRef.current,
             }}
           >
-            <SubmittedContext.Provider value={submitted}>
-              <InitializingContext.Provider value={!isMounted || (isMounted && initializing)}>
-                <ProcessingContext.Provider value={processing}>
-                  <BackgroundProcessingContext.Provider value={backgroundProcessing}>
-                    <ModifiedContext.Provider value={modified}>
+            <SubmittedContext value={submitted}>
+              <InitializingContext value={!isMounted || (isMounted && initializing)}>
+                <ProcessingContext value={processing}>
+                  <BackgroundProcessingContext value={backgroundProcessing}>
+                    <ModifiedContext value={modified}>
+                      {/* eslint-disable-next-line @eslint-react/no-context-provider */}
                       <FormFieldsContext.Provider value={fieldsReducer}>
                         {children}
                       </FormFieldsContext.Provider>
-                    </ModifiedContext.Provider>
-                  </BackgroundProcessingContext.Provider>
-                </ProcessingContext.Provider>
-              </InitializingContext.Provider>
-            </SubmittedContext.Provider>
-          </FormWatchContext.Provider>
-        </FormContext.Provider>
+                    </ModifiedContext>
+                  </BackgroundProcessingContext>
+                </ProcessingContext>
+              </InitializingContext>
+            </SubmittedContext>
+          </FormWatchContext>
+        </FormContext>
       </DocumentFormContextComponent>
     </El>
   )

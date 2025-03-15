@@ -13,7 +13,7 @@ const baseClass = 'default-cell'
 const CellPropsContext = React.createContext<DefaultCellComponentProps | null>(null)
 
 export const useCellProps = (): DefaultCellComponentProps | null =>
-  React.useContext(CellPropsContext)
+  React.use(CellPropsContext)
 
 export const RenderDefaultCell: React.FC<{
   clientProps: DefaultCellComponentProps
@@ -44,8 +44,8 @@ export const RenderDefaultCell: React.FC<{
   }
 
   return (
-    <CellPropsContext.Provider value={propsToPass}>
+    <CellPropsContext value={propsToPass}>
       {isLinkedColumn && LinkedCellOverride ? LinkedCellOverride : <DefaultCell {...propsToPass} />}
-    </CellPropsContext.Provider>
+    </CellPropsContext>
   )
 }

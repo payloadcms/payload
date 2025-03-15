@@ -74,11 +74,9 @@ export const RouteTransitionProvider: React.FC<RouteTransitionProps> = ({ childr
   )
 
   return (
-    <RouteTransitionContext.Provider
-      value={{ isTransitioning, startRouteTransition, transitionProgress }}
-    >
+    <RouteTransitionContext value={{ isTransitioning, startRouteTransition, transitionProgress }}>
       {children}
-    </RouteTransitionContext.Provider>
+    </RouteTransitionContext>
   )
 }
 
@@ -121,4 +119,4 @@ const RouteTransitionContext = React.createContext<RouteTransitionContextValue>(
  *   // ...
  * }
  */
-export const useRouteTransition = () => React.useContext(RouteTransitionContext)
+export const useRouteTransition = () => React.use(RouteTransitionContext)

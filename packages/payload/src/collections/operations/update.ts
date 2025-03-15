@@ -23,6 +23,7 @@ import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { updateDocument } from './utilities/update.js'
@@ -93,7 +94,7 @@ export const updateOperation = async <
         payload,
       },
       req,
-      select,
+      select: incomingSelect,
       showHiddenFields,
       where,
     } = args
@@ -183,6 +184,11 @@ export const updateOperation = async <
       const { id } = docWithLocales
 
       try {
+        const select = sanitizeSelect({
+          forceSelect: collectionConfig.forceSelect,
+          select: incomingSelect,
+        })
+
         // ///////////////////////////////////////////////
         // Update document, runs all document level hooks
         // ///////////////////////////////////////////////
