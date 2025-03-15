@@ -1138,6 +1138,7 @@ type SharedRelationshipPropertiesClient = FieldBaseClient &
 type RelationshipAdmin = {
   allowCreate?: boolean
   allowEdit?: boolean
+  closeOnSave?: boolean
   components?: {
     afterInput?: CustomComponent[]
     beforeInput?: CustomComponent[]
@@ -1152,7 +1153,7 @@ type RelationshipAdmin = {
 } & Admin
 
 type RelationshipAdminClient = AdminClient &
-  Pick<RelationshipAdmin, 'allowCreate' | 'allowEdit' | 'isSortable'>
+  Pick<RelationshipAdmin, 'allowCreate' | 'allowEdit' | 'closeOnSave' | 'isSortable'>
 
 export type PolymorphicRelationshipField = {
   admin?: {
@@ -1505,6 +1506,7 @@ export type JoinField = {
   }
   admin?: {
     allowCreate?: boolean
+    closeOnSave?: boolean
     components?: {
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
@@ -1553,7 +1555,10 @@ export type JoinField = {
 
 export type JoinFieldClient = {
   admin?: AdminClient &
-    Pick<JoinField['admin'], 'allowCreate' | 'defaultColumns' | 'disableBulkEdit' | 'readOnly'>
+    Pick<
+      JoinField['admin'],
+      'allowCreate' | 'closeOnSave' | 'defaultColumns' | 'disableBulkEdit' | 'readOnly'
+    >
 } & { targetField: Pick<RelationshipFieldClient, 'relationTo'> } & FieldBaseClient &
   Pick<
     JoinField,
