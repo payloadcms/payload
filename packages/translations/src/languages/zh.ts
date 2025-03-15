@@ -115,6 +115,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     unknown: '发生了一个未知的错误。',
     unPublishingDocument: '取消发布此文件时出现了问题。',
     unspecific: '发生了一个错误。',
+    unverifiedEmail: '请在登录前验证您的电子邮件。',
     userEmailAlreadyRegistered: '给定电子邮件的用户已经注册。',
     userLocked: '该用户由于有太多次失败的登录尝试而被锁定。',
     usernameAlreadyRegistered: '已有用户使用了该用户名进行注册。',

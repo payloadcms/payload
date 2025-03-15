@@ -120,6 +120,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     unknown: 'En ukjent feil har oppstått.',
     unPublishingDocument: 'Det oppstod et problem under avpublisering av dokumentet.',
     unspecific: 'En feil har oppstått.',
+    unverifiedEmail: 'Vennligst bekreft e-posten din før du logger inn.',
     userEmailAlreadyRegistered: 'En bruker med den oppgitte e-posten er allerede registrert.',
     userLocked: 'Denne brukeren er låst på grunn av for mange mislykkede innloggingsforsøk.',
     usernameAlreadyRegistered: 'En bruker med det gitte brukernavnet er allerede registrert.',

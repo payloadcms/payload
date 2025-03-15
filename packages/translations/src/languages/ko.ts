@@ -120,6 +120,7 @@ export const koTranslations: DefaultTranslationsObject = {
     unknown: '알 수 없는 오류가 발생했습니다.',
     unPublishingDocument: '이 문서의 게시 취소 중에 문제가 발생했습니다.',
     unspecific: '오류가 발생했습니다.',
+    unverifiedEmail: '로그인하기 전에 이메일을 확인하세요.',
     userEmailAlreadyRegistered: '주어진 이메일로 이미 등록된 사용자가 있습니다.',
     userLocked: '이 사용자는 로그인 실패 횟수가 너무 많아 잠겼습니다.',
     usernameAlreadyRegistered: '주어진 사용자 이름을 가진 사용자가 이미 등록되어 있습니다.',

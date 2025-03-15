@@ -121,6 +121,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     unknown: 'Виникла невідома помилка.',
     unPublishingDocument: 'Під час скасування публікації даного документа виникла помилка.',
     unspecific: 'Виникла помилка.',
+    unverifiedEmail: 'Будь ласка, підтвердьте свою електронну пошту перед входом.',
     userEmailAlreadyRegistered: 'Користувач із вказаною електронною поштою вже зареєстрований.',
     userLocked: 'Цей користувач заблокований через велику кількість невдалих спроб входу.',
     usernameAlreadyRegistered: 'Користувач з вказаним іменем користувача вже зареєстрований.',

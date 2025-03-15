@@ -120,6 +120,7 @@ export const plTranslations: DefaultTranslationsObject = {
     unknown: 'Wystąpił nieznany błąd.',
     unPublishingDocument: 'Wystąpił problem podczas cofania publikacji tego dokumentu.',
     unspecific: 'Wystąpił błąd',
+    unverifiedEmail: 'Proszę zweryfikować swój e-mail przed zalogowaniem się.',
     userEmailAlreadyRegistered: 'Użytkownik o podanym adresie e-mail jest już zarejestrowany.',
     userLocked: 'Ten użytkownik został zablokowany z powodu zbyt wielu nieudanych prób logowania.',
     usernameAlreadyRegistered: 'Użytkownik o podanej nazwie użytkownika jest już zarejestrowany.',

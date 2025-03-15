@@ -117,6 +117,7 @@ export const heTranslations: DefaultTranslationsObject = {
     unknown: 'אירעה שגיאה לא ידועה.',
     unPublishingDocument: 'אירעה בעיה בביטול הפרסום של מסמך זה.',
     unspecific: 'אירעה שגיאה.',
+    unverifiedEmail: 'אנא אמת את כתובת האימייל שלך לפני ההתחברות.',
     userEmailAlreadyRegistered: 'משתמש עם האימייל הנתון כבר רשום.',
     userLocked: 'המשתמש נעול עקב מספר נסיונות התחברות כושלים.',
     usernameAlreadyRegistered: 'משתמש עם שם המשתמש שניתן כבר רשום.',

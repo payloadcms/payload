@@ -120,6 +120,7 @@ export const svTranslations: DefaultTranslationsObject = {
     unknown: 'Ett okänt fel har uppstått.',
     unPublishingDocument: 'Det uppstod ett problem när det här dokumentet skulle avpubliceras.',
     unspecific: 'Ett fel har uppstått.',
+    unverifiedEmail: 'Vänligen verifiera din e-post innan du loggar in.',
     userEmailAlreadyRegistered: 'En användare med den angivna e-postadressen är redan registrerad.',
     userLocked: 'Den här användaren är låst på grund av för många misslyckade inloggningsförsök.',
     usernameAlreadyRegistered: 'En användare med det angivna användarnamnet är redan registrerad.',

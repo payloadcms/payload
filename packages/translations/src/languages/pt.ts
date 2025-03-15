@@ -120,6 +120,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     unknown: 'Ocorreu um erro desconhecido.',
     unPublishingDocument: 'Ocorreu um problema ao despublicar esse documento',
     unspecific: 'Ocorreu um erro.',
+    unverifiedEmail: 'Por favor, verifique seu e-mail antes de fazer login.',
     userEmailAlreadyRegistered: 'Um usuário com o email fornecido já está registrado.',
     userLocked: 'Esse usuário está bloqueado devido a muitas tentativas de login malsucedidas.',
     usernameAlreadyRegistered: 'Um usuário com o nome de usuário fornecido já está registrado.',

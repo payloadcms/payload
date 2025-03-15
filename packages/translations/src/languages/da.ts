@@ -119,6 +119,7 @@ export const daTranslations: DefaultTranslationsObject = {
     unknown: 'En ukendt fejl er opstået.',
     unPublishingDocument: 'Der opstod et problem med at ophæve udgivelsen af dette dokument.',
     unspecific: 'En fejl er opstået.',
+    unverifiedEmail: 'Bekræft venligst din e-mail, før du logger ind.',
     userEmailAlreadyRegistered: 'Email allerede registreret.',
     userLocked: 'Denne bruger er låst på grund af for mange fejlede loginforsøg',
     usernameAlreadyRegistered: 'Brugernavn allerede registeret.',

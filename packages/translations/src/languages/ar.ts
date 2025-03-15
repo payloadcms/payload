@@ -119,6 +119,7 @@ export const arTranslations: DefaultTranslationsObject = {
     unknown: 'حدث خطأ غير معروف.',
     unPublishingDocument: 'حدث خطأ أثناء إلغاء نشر هذا المستند.',
     unspecific: 'حدث خطأ.',
+    unverifiedEmail: 'يرجى التحقق من بريدك الإلكتروني قبل تسجيل الدخول.',
     userEmailAlreadyRegistered: 'يوجد مستخدم مسجل بالفعل بهذا البريد الإلكتروني.',
     userLocked: 'تمّ قفل هذا المستخدم نظرًا لوجود عدد كبير من محاولات تسجيل الدّخول الغير ناجحة.',
     usernameAlreadyRegistered: 'المستخدم بالاسم المعطى مسجل بالفعل.',

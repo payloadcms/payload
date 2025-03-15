@@ -121,6 +121,7 @@ export const caTranslations: DefaultTranslationsObject = {
     unknown: "S'ha produït un error desconegut.",
     unPublishingDocument: 'Hi ha hagut un problema mentre es despublicava aquest document.',
     unspecific: "S'ha produït un error.",
+    unverifiedEmail: 'Si us plau, verifica el teu correu electrònic abans d’iniciar sessió.',
     userEmailAlreadyRegistered: 'Ja hi ha un usuari registrat amb aquest correu electrònic.',
     userLocked: "Aquest usuari està bloquejat per massa intents fallits d'inici de sessió.",
     usernameAlreadyRegistered: "Ja hi ha un usuari registrat amb aquest nom d'usuari.",

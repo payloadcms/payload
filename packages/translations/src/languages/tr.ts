@@ -121,6 +121,7 @@ export const trTranslations: DefaultTranslationsObject = {
     unknown: 'Bilinmeyen bir hata oluştu.',
     unPublishingDocument: 'Geçerli döküman yayından kaldırılırken bir sorun oluştu.',
     unspecific: 'Bir hata oluştu.',
+    unverifiedEmail: 'Giriş yapmadan önce e-posta adresinizi doğrulayın.',
     userEmailAlreadyRegistered: 'Verilen e-posta ile zaten kayıtlı bir kullanıcı var.',
     userLocked:
       'Hesabınız hatalı giriş denemeleri yüzünden geçici olarak kilitlendi. Lütfen daha sonra tekrar deneyin.',

@@ -81,6 +81,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'error:unauthorizedAdmin',
   'error:unknown',
   'error:unspecific',
+  'error:unverifiedEmail',
   'error:userEmailAlreadyRegistered',
   'error:usernameAlreadyRegistered',
   'error:tokenNotProvided',

@@ -122,6 +122,7 @@ export const huTranslations: DefaultTranslationsObject = {
     unknown: 'Ismeretlen hiba történt.',
     unPublishingDocument: 'Hiba történt a dokumentum közzétételének visszavonása közben.',
     unspecific: 'Hiba történt.',
+    unverifiedEmail: 'Kérjük, erősítse meg e-mail címét, mielőtt bejelentkezik.',
     userEmailAlreadyRegistered: 'A megadott email címmel már regisztráltak egy felhasználót.',
     userLocked: 'Ez a felhasználó túl sok sikertelen bejelentkezési kísérlet miatt zárolva van.',
     usernameAlreadyRegistered: 'Egy felhasználó a megadott felhasználónévvel már regisztrált.',
