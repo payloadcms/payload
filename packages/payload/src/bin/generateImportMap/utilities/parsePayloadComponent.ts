@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import type { PayloadComponent } from '../../../config/types.js'
 
-import { extractPathAndExportName } from '../../utilities/extractPathAndExportName.js'
+import { extractPathAndExportName } from '../../../utilities/extractPathAndExportName.js'
 
 export function parsePayloadComponent(PayloadComponent: PayloadComponent): {
   exportName: string
