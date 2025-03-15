@@ -19,6 +19,8 @@ const baseClass = 'list-header'
 const drawerBaseClass = 'list-drawer'
 
 export type ListHeaderProps = {
+  AfterBulkActions?: React.ReactNode
+  BeforeBulkActions?: React.ReactNode
   className?: string
   collectionConfig: ClientCollectionConfig
   Description?: React.ReactNode
@@ -34,6 +36,8 @@ export type ListHeaderProps = {
 }
 
 const DefaultListHeader: React.FC<ListHeaderProps> = ({
+  AfterBulkActions,
+  BeforeBulkActions,
   className,
   collectionConfig,
   Description,
@@ -77,6 +81,8 @@ const DefaultListHeader: React.FC<ListHeaderProps> = ({
       )}
       {!smallBreak && (
         <ListSelection
+          AfterBulkActions={AfterBulkActions}
+          BeforeBulkActions={BeforeBulkActions}
           collectionConfig={collectionConfig}
           disableBulkDelete={disableBulkDelete}
           disableBulkEdit={disableBulkEdit}

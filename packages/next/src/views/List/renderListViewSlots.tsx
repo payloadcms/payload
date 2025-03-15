@@ -1,7 +1,11 @@
 import type {
+  AfterBulkActionsClientProps,
+  AfterBulkActionsServerPropsOnly,
   AfterListClientProps,
   AfterListTableClientProps,
   AfterListTableServerPropsOnly,
+  BeforeBulkActionsClientProps,
+  BeforeBulkActionsServerPropsOnly,
   BeforeListClientProps,
   BeforeListServerPropsOnly,
   BeforeListTableClientProps,
@@ -80,6 +84,24 @@ export const renderListViewSlots = ({
       Component: collectionConfig.admin.components.beforeListTable,
       importMap: payload.importMap,
       serverProps: serverProps satisfies BeforeListTableServerPropsOnly,
+    })
+  }
+
+  if (collectionConfig.admin.components?.beforeBulkActions) {
+    result.BeforeBulkActions = RenderServerComponent({
+      clientProps: clientProps satisfies BeforeBulkActionsClientProps,
+      Component: collectionConfig.admin.components.beforeBulkActions,
+      importMap: payload.importMap,
+      serverProps: serverProps satisfies BeforeBulkActionsServerPropsOnly,
+    })
+  }
+
+  if (collectionConfig.admin.components?.afterBulkActions) {
+    result.AfterBulkActions = RenderServerComponent({
+      clientProps: clientProps satisfies AfterBulkActionsClientProps,
+      Component: collectionConfig.admin.components.afterBulkActions,
+      importMap: payload.importMap,
+      serverProps: serverProps satisfies AfterBulkActionsServerPropsOnly,
     })
   }
 
