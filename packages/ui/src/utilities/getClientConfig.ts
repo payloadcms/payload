@@ -4,28 +4,29 @@ import type { ClientConfig, ImportMap, SanitizedConfig } from 'payload'
 import { createClientConfig } from 'payload'
 import { cache } from 'react'
 
-let cachedClientConfig: ClientConfig | null = global._payload_clientConfig
+let cachedClientConfigs: Record<string, ClientConfig> = global._payload_localizedClientConfigs
 
-if (!cachedClientConfig) {
-  cachedClientConfig = global._payload_clientConfig = null
+if (!cachedClientConfigs) {
+  cachedClientConfigs = global._payload_localizedClientConfigs = {}
 }
 
 export const getClientConfig = cache(
   (args: { config: SanitizedConfig; i18n: I18nClient; importMap: ImportMap }): ClientConfig => {
-    if (cachedClientConfig && !global._payload_doNotCacheClientConfig) {
-      return cachedClientConfig
+    const { config, i18n, importMap } = args
+    const currentLocale = i18n.language
+
+    if (cachedClientConfigs[currentLocale] && !global._payload_doNotCacheClientConfig) {
+      return cachedClientConfigs[currentLocale]
     }
 
-    const { config, i18n, importMap } = args
-
-    cachedClientConfig = createClientConfig({
+    const cachedClientConfig = createClientConfig({
       config,
       i18n,
       importMap,
     })
 
-    global._payload_clientConfig = cachedClientConfig
-
+    cachedClientConfigs[currentLocale] = cachedClientConfig
+    global._payload_localizedClientConfigs = cachedClientConfigs
     global._payload_doNotCacheClientConfig = false
 
     return cachedClientConfig
