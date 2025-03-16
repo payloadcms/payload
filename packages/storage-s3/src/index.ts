@@ -111,7 +111,7 @@ export const s3Storage: S3StoragePlugin =
         getStorageClient,
       }),
       // Prevent colliding of multiple s3Storage plugin instances with client uploads enabled.
-      serverHandlerPath: `/storage-s3-generate-signed-url/${Math.random().toString(36).substring(2, 15)}`
+      serverHandlerPath: `/storage-s3-generate-signed-url-${Math.random().toString(36).substring(2, 15)}`
     })
 
     if (isPluginDisabled) {
