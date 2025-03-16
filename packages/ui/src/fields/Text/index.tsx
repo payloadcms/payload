@@ -1,6 +1,7 @@
 'use client'
 import type { TextFieldClientComponent } from 'payload'
 
+import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { Option } from '../../elements/ReactSelect/types.js'
@@ -10,6 +11,7 @@ import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { isFieldRTL } from '../shared/index.js'
 import { TextInput } from './Input.js'
@@ -36,6 +38,8 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
     readOnly,
     validate,
   } = props
+
+  const { i18n } = useTranslation()
 
   const locale = useLocale()
 
@@ -135,7 +139,7 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
             }
       }
       path={path}
-      placeholder={placeholder}
+      placeholder={getTranslation(placeholder, i18n)}
       readOnly={readOnly}
       required={required}
       rtl={renderRTL}

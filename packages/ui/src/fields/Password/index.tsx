@@ -1,6 +1,7 @@
 'use client'
 import type { PasswordFieldValidation, PayloadRequest } from 'payload'
 
+import { getTranslation } from '@payloadcms/translations'
 import { password } from 'payload/shared'
 import React, { useCallback, useMemo } from 'react'
 
@@ -36,7 +37,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
     validate,
   } = props
 
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
   const locale = useLocale()
   const { config } = useConfig()
 
@@ -108,7 +109,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
         setValue(e.target.value)
       }}
       path={path}
-      placeholder={placeholder}
+      placeholder={getTranslation(placeholder, i18n)}
       readOnly={disabled}
       required={required}
       rtl={renderRTL}

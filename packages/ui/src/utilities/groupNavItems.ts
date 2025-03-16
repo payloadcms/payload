@@ -37,66 +37,65 @@ export function groupNavItems(
   permissions: SanitizedPermissions,
   i18n: I18nClient,
 ): NavGroupType[] {
-  const result = entities.reduce(
-    (groups, entityToGroup) => {
-      // Skip entities where admin.group is explicitly false
-      if (entityToGroup.entity?.admin?.group === false) {
-        return groups
-      }
-
-      if (permissions?.[entityToGroup.type.toLowerCase()]?.[entityToGroup.entity.slug]?.read) {
-        const translatedGroup = getTranslation(entityToGroup.entity.admin.group, i18n)
-
-        const labelOrFunction =
-          'labels' in entityToGroup.entity
-            ? entityToGroup.entity.labels.plural
-            : entityToGroup.entity.label
-
-        const label =
-          typeof labelOrFunction === 'function' ? labelOrFunction({ t: i18n.t }) : labelOrFunction
-
-        if (entityToGroup.entity.admin.group) {
-          const existingGroup = groups.find(
-            (group) => getTranslation(group.label, i18n) === translatedGroup,
-          ) as NavGroupType
-
-          let matchedGroup: NavGroupType = existingGroup
-
-          if (!existingGroup) {
-            matchedGroup = { entities: [], label: translatedGroup }
-            groups.push(matchedGroup)
-          }
-
-          matchedGroup.entities.push({
-            slug: entityToGroup.entity.slug,
-            type: entityToGroup.type,
-            label,
-          })
-        } else {
-          const defaultGroup = groups.find((group) => {
-            return getTranslation(group.label, i18n) === i18n.t(`general:${entityToGroup.type}`)
-          }) as NavGroupType
-          defaultGroup.entities.push({
-            slug: entityToGroup.entity.slug,
-            type: entityToGroup.type,
-            label,
-          })
-        }
-      }
-
-      return groups
+  const defaultGroups: NavGroupType[] = [
+    {
+      entities: [],
+      label: i18n.t('general:collections'),
     },
-    [
-      {
-        entities: [],
-        label: i18n.t('general:collections'),
-      },
-      {
-        entities: [],
-        label: i18n.t('general:globals'),
-      },
-    ],
-  )
+    {
+      entities: [],
+      label: i18n.t('general:globals'),
+    },
+  ]
+
+  const result = entities.reduce((groups, entityToGroup) => {
+    // Skip entities where admin.group is explicitly false
+    if (entityToGroup.entity?.admin?.group === false) {
+      return groups
+    }
+
+    if (permissions?.[entityToGroup.type.toLowerCase()]?.[entityToGroup.entity.slug]?.read) {
+      const entityLabel =
+        'labels' in entityToGroup.entity
+          ? entityToGroup.entity.labels.plural
+          : entityToGroup.entity.label
+
+      const label = getTranslation(entityLabel, i18n)
+
+      const groupEntity: NavGroupType['entities'][number] = {
+        slug: entityToGroup.entity.slug,
+        type: entityToGroup.type,
+        label,
+      }
+
+      let matchedGroup: NavGroupType
+
+      if (entityToGroup.entity.admin.group) {
+        const translatedGroup = getTranslation(entityToGroup.entity.admin.group, i18n)
+        const existingGroup = groups.find(
+          (group) => getTranslation(group.label, i18n) === translatedGroup,
+        )
+
+        matchedGroup = existingGroup
+
+        if (!existingGroup) {
+          matchedGroup = { entities: [], label: translatedGroup }
+          groups.push(matchedGroup)
+        }
+      } else {
+        const translatedGroup = i18n.t(`general:${entityToGroup.type}`)
+        const defaultGroup = groups.find(
+          (group) => getTranslation(group.label, i18n) === translatedGroup,
+        )
+
+        matchedGroup = defaultGroup
+      }
+
+      matchedGroup.entities.push(groupEntity)
+    }
+
+    return groups
+  }, defaultGroups)
 
   return result.filter((group) => group.entities.length > 0)
 }

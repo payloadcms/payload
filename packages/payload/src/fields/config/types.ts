@@ -543,7 +543,7 @@ export type NumberField = {
       Label?: CustomComponent<NumberFieldLabelClientComponent | NumberFieldLabelServerComponent>
     } & Admin['components']
     /** Set this property to define a placeholder string for the field. */
-    placeholder?: Record<string, string> | string
+    placeholder?: LabelFunction | StaticLabel
     /** Set a value for the number field to increment / decrement using browser controls. */
     step?: number
   } & Admin
@@ -588,7 +588,7 @@ export type TextField = {
       Error?: CustomComponent<TextFieldErrorClientComponent | TextFieldErrorServerComponent>
       Label?: CustomComponent<TextFieldLabelClientComponent | TextFieldLabelServerComponent>
     } & Admin['components']
-    placeholder?: Record<string, string> | string
+    placeholder?: LabelFunction | StaticLabel
     rtl?: boolean
   } & Admin
   maxLength?: number
@@ -630,7 +630,7 @@ export type EmailField = {
       Error?: CustomComponent<EmailFieldErrorClientComponent | EmailFieldErrorServerComponent>
       Label?: CustomComponent<EmailFieldLabelClientComponent | EmailFieldLabelServerComponent>
     } & Admin['components']
-    placeholder?: Record<string, string> | string
+    placeholder?: LabelFunction | StaticLabel
   } & Admin
   type: 'email'
   validate?: EmailFieldValidation
@@ -649,7 +649,7 @@ export type TextareaField = {
       Error?: CustomComponent<TextareaFieldErrorClientComponent | TextareaFieldErrorServerComponent>
       Label?: CustomComponent<TextareaFieldLabelClientComponent | TextareaFieldLabelServerComponent>
     } & Admin['components']
-    placeholder?: Record<string, string> | string
+    placeholder?: LabelFunction | StaticLabel
     rows?: number
     rtl?: boolean
   } & Admin
@@ -691,7 +691,7 @@ export type DateField = {
       Label?: CustomComponent<DateFieldLabelClientComponent | DateFieldLabelServerComponent>
     } & Admin['components']
     date?: ConditionalDateProps
-    placeholder?: Record<string, string> | string
+    placeholder?: LabelFunction | StaticLabel
   } & Admin
   /**
    * Enable timezone selection in the admin interface.
@@ -1482,7 +1482,7 @@ export type PointField = {
       Error?: CustomComponent<PointFieldErrorClientComponent | PointFieldErrorServerComponent>
       Label?: CustomComponent<PointFieldLabelClientComponent | PointFieldLabelServerComponent>
     } & Admin['components']
-    placeholder?: Record<string, string> | string
+    placeholder?: LabelFunction | StaticLabel
     step?: number
   } & Admin
   type: 'point'
