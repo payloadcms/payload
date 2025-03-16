@@ -341,7 +341,7 @@ export type CollectionAdminOptions = {
    * - Provide a record to define localized group names.
    * - Set to `false` to exclude the entity from the sidebar / dashboard without disabling its routes.
    */
-  group?: false | Record<string, string> | string
+  group?: false | LabelFunction | StaticLabel
   /**
    * Exclude the collection from the admin nav and routes
    */
