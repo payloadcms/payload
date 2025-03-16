@@ -1,8 +1,8 @@
-import type * as AWS from '@aws-sdk/client-s3'
 import type { StaticHandler } from '@payloadcms/plugin-cloud-storage/types'
 import type { CollectionConfig } from 'payload'
 import type { Readable } from 'stream'
 
+import * as AWS from '@aws-sdk/client-s3'
 import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
 import path from 'path'
 
@@ -53,10 +53,6 @@ export const getHandler = ({ bucket, collection, getStorageClient }: Args): Stat
         Key: key,
       })
 
-      if (!object.Body) {
-        return new Response(null, { status: 404, statusText: 'Not Found' })
-      }
-
       const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
       const objectEtag = object.ETag
 
@@ -97,6 +93,9 @@ export const getHandler = ({ bucket, collection, getStorageClient }: Args): Stat
         status: 200,
       })
     } catch (err) {
+      if (err instanceof AWS.NoSuchKey) {
+        return new Response(null, { status: 404, statusText: 'Not Found' })
+      }
       req.payload.logger.error(err)
       return new Response('Internal Server Error', { status: 500 })
     } finally {
