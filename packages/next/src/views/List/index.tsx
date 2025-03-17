@@ -6,7 +6,7 @@ import type {
   ListQuery,
   ListViewClientProps,
   ListViewServerPropsOnly,
-  QueryPreset,
+  queryPreset,
   SanitizedCollectionPermission,
   Where,
 } from 'payload'
@@ -141,24 +141,24 @@ export const renderListView = async (
       }
     }
 
-    let querypreset: QueryPreset | undefined
-    let querypresetPermissions: SanitizedCollectionPermission | undefined
+    let queryPreset: queryPreset | undefined
+    let queryPresetPermissions: SanitizedCollectionPermission | undefined
 
     if (listPreferences?.preset) {
       try {
-        querypreset = (await payload.findByID({
+        queryPreset = (await payload.findByID({
           id: listPreferences?.preset,
           collection: 'payload-query-presets',
           depth: 0,
           overrideAccess: false,
           user,
-        })) as QueryPreset
+        })) as queryPreset
 
-        if (querypreset) {
-          querypresetPermissions = await getDocumentPermissions({
-            id: querypreset.id,
+        if (queryPreset) {
+          queryPresetPermissions = await getDocumentPermissions({
+            id: queryPreset.id,
             collectionConfig: config.collections.find((c) => c.slug === 'payload-query-presets'),
-            data: querypreset,
+            data: queryPreset,
             req,
           })?.then(({ docPermissions }) => docPermissions)
         }
@@ -272,8 +272,8 @@ export const renderListView = async (
                 hasCreatePermission,
                 listPreferences,
                 newDocumentURL,
-                querypreset,
-                querypresetPermissions,
+                queryPreset,
+                queryPresetPermissions,
                 renderedFilters,
                 resolvedFilterOptions,
                 Table,

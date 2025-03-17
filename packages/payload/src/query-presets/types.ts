@@ -8,7 +8,7 @@ export const operations = ['delete', 'read', 'update'] as const
 type Operation = (typeof operations)[number]
 
 // TODO: this should just exist in `GeneratedTypes` instead
-export type QueryPreset = {
+export type queryPreset = {
   access: Access
   columns: ListPreferences['columns']
   id: number | string
@@ -26,10 +26,10 @@ export type Access = {
   }
 }
 
-export type QueryPresetConstraint = {
+export type queryPresetConstraint = {
   fields: Field[]
   label: string
   value: string
 }
 
-export type QueryPresetConstraints = QueryPresetConstraint[]
+export type queryPresetConstraints = queryPresetConstraint[]

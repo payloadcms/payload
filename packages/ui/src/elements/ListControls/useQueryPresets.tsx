@@ -1,4 +1,4 @@
-import type { CollectionSlug, QueryPreset, SanitizedCollectionPermission } from 'payload'
+import type { CollectionSlug, queryPreset, SanitizedCollectionPermission } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
@@ -22,11 +22,11 @@ const queryPresetsSlug = 'payload-query-presets'
 export const useQueryPresets = ({
   activePreset,
   collectionSlug,
-  querypresetPermissions,
+  queryPresetPermissions,
 }: {
-  activePreset: QueryPreset
+  activePreset: queryPreset
   collectionSlug: CollectionSlug
-  querypresetPermissions: SanitizedCollectionPermission
+  queryPresetPermissions: SanitizedCollectionPermission
 }): {
   CreateNewPresetDrawer: React.ReactNode
   DeletePresetModal: React.ReactNode
@@ -34,7 +34,7 @@ export const useQueryPresets = ({
   hasModifiedPreset: boolean
   openPresetListDrawer: () => void
   PresetListDrawer: React.ReactNode
-  querypresetMenuItems: React.ReactNode[]
+  queryPresetMenuItems: React.ReactNode[]
   resetPreset: () => Promise<void>
 } => {
   const { modified, query, refineListData, setModified: setQueryModified } = useListQuery()
@@ -70,7 +70,7 @@ export const useQueryPresets = ({
     })
 
   const handlePresetChange = useCallback(
-    async (preset: QueryPreset) => {
+    async (preset: queryPreset) => {
       await refineListData(
         {
           columns: preset.columns ? transformColumnsToSearchParams(preset.columns) : undefined,
@@ -83,7 +83,7 @@ export const useQueryPresets = ({
     [refineListData],
   )
 
-  const resetQueryPreset = useCallback(async () => {
+  const resetqueryPreset = useCallback(async () => {
     await refineListData(
       {
         columns: undefined,
@@ -110,7 +110,7 @@ export const useQueryPresets = ({
               }),
             )
 
-            await resetQueryPreset()
+            await resetqueryPreset()
           } else {
             if (json.errors) {
               json.errors.forEach((error) => toast.error(error.message))
@@ -125,7 +125,7 @@ export const useQueryPresets = ({
     } catch (_err) {
       toast.error(t('error:deletingTitle', { title: activePreset.title }))
     }
-  }, [apiRoute, activePreset?.id, activePreset?.title, t, presetConfig, i18n, resetQueryPreset])
+  }, [apiRoute, activePreset?.id, activePreset?.title, t, presetConfig, i18n, resetqueryPreset])
 
   const saveCurrentChanges = useCallback(async () => {
     try {
@@ -177,7 +177,7 @@ export const useQueryPresets = ({
   ])
 
   // Memoize so that components aren't re-rendered on query and column changes
-  const querypresetMenuItems = useMemo(() => {
+  const queryPresetMenuItems = useMemo(() => {
     const menuItems: React.ReactNode[] = []
 
     if (activePreset && modified) {
@@ -197,7 +197,7 @@ export const useQueryPresets = ({
         </PopupList.Button>,
       )
 
-      if (querypresetPermissions.update) {
+      if (queryPresetPermissions.update) {
         menuItems.push(
           <PopupList.Button
             onClick={async () => {
@@ -222,7 +222,7 @@ export const useQueryPresets = ({
       </PopupList.Button>,
     )
 
-    if (activePreset && querypresetPermissions.delete) {
+    if (activePreset && queryPresetPermissions.delete) {
       menuItems.push(
         <Fragment>
           <PopupList.Button onClick={() => openModal(confirmDeletePresetModalSlug)}>
@@ -242,8 +242,8 @@ export const useQueryPresets = ({
     return menuItems
   }, [
     activePreset,
-    querypresetPermissions?.delete,
-    querypresetPermissions?.update,
+    queryPresetPermissions?.delete,
+    queryPresetPermissions?.update,
     openCreateNewDrawer,
     openDocumentDrawer,
     openModal,
@@ -263,7 +263,7 @@ export const useQueryPresets = ({
         }}
         onSave={async ({ doc }) => {
           closeCreateNewDrawer()
-          await handlePresetChange(doc as QueryPreset)
+          await handlePresetChange(doc as queryPreset)
         }}
         redirectAfterCreate={false}
       />
@@ -295,10 +295,10 @@ export const useQueryPresets = ({
           // setSelectedPreset(undefined)
         }}
         onDuplicate={async ({ doc }) => {
-          await handlePresetChange(doc as QueryPreset)
+          await handlePresetChange(doc as queryPreset)
         }}
         onSave={async ({ doc }) => {
-          await handlePresetChange(doc as QueryPreset)
+          await handlePresetChange(doc as queryPreset)
         }}
       />
     ),
@@ -310,11 +310,11 @@ export const useQueryPresets = ({
         disableQueryPresets
         onSelect={async ({ doc }) => {
           closeListDrawer()
-          await handlePresetChange(doc as QueryPreset)
+          await handlePresetChange(doc as queryPreset)
         }}
       />
     ),
-    querypresetMenuItems,
-    resetPreset: resetQueryPreset,
+    queryPresetMenuItems,
+    resetPreset: resetqueryPreset,
   }
 }

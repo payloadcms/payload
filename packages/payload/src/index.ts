@@ -1390,7 +1390,7 @@ export type {
   PreferenceUpdateRequest,
   TabsPreferences,
 } from './preferences/types.js'
-export type { QueryPreset } from './query-presets/types.js'
+export type { queryPreset } from './query-presets/types.js'
 export type { JobsConfig, RunJobAccess, RunJobAccessArgs } from './queues/config/types/index.js'
 export type {
   RunInlineTaskFunction,

@@ -66,7 +66,6 @@ describe('Query Presets', () => {
   test('should select preset and apply filters', async () => {
     await page.goto(pagesUrl.list)
     await clearSelectedPreset({ page })
-    console.log(seedData.everyone.title)
     await selectPreset({ page, presetTitle: seedData.everyone.title })
 
     await expectURLParams({

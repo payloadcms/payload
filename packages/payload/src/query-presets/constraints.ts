@@ -3,7 +3,7 @@ import type { Field } from '../fields/config/types.js'
 
 import { fieldAffectsData } from '../fields/config/types.js'
 import { toWords } from '../utilities/formatLabels.js'
-import { operations, type QueryPresetConstraint } from './types.js'
+import { operations, type queryPresetConstraint } from './types.js'
 
 export const getConstraints = (config: Config): Field => ({
   name: 'access',
@@ -43,7 +43,7 @@ export const getConstraints = (config: Config): Field => ({
                 value: 'specificUsers',
               },
               ...(config?.queryPresets?.constraints?.[operation]?.map(
-                (option: QueryPresetConstraint) => ({
+                (option: queryPresetConstraint) => ({
                   label: option.label,
                   value: option.value,
                 }),
@@ -74,7 +74,7 @@ export const getConstraints = (config: Config): Field => ({
             relationTo: 'users',
           },
           ...(config?.queryPresets?.constraints?.[operation]?.reduce(
-            (acc: Field[], option: QueryPresetConstraint) => {
+            (acc: Field[], option: queryPresetConstraint) => {
               option.fields.forEach((field, index) => {
                 acc.push({ ...field })
 

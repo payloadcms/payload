@@ -40,8 +40,8 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     enableColumns = true,
     enableSort = false,
     listMenuItems: listMenuItemsFromProps,
-    querypreset: activePreset,
-    querypresetPermissions,
+    queryPreset: activePreset,
+    queryPresetPermissions,
     renderedFilters,
     resolvedFilterOptions,
   } = props
@@ -55,12 +55,12 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     hasModifiedPreset,
     openPresetListDrawer,
     PresetListDrawer,
-    querypresetMenuItems,
+    queryPresetMenuItems,
     resetPreset,
   } = useQueryPresets({
     activePreset,
     collectionSlug,
-    querypresetPermissions,
+    queryPresetPermissions,
   })
 
   const titleField = useUseTitleField(collectionConfig)
@@ -140,11 +140,11 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
   if (
     collectionConfig?.enableQueryPresets &&
     !disableQueryPresets &&
-    querypresetMenuItems?.length > 0
+    queryPresetMenuItems?.length > 0
   ) {
     // Cannot push or unshift into `listMenuItemsFromProps` as it will mutate the original array
     listMenuItems = [
-      ...querypresetMenuItems,
+      ...queryPresetMenuItems,
       listMenuItemsFromProps?.length > 0 ? <PopupList.Divider key="divider" /> : null,
       ...(listMenuItemsFromProps || []),
     ]

@@ -50,8 +50,8 @@ export function DefaultListView(props: ListViewClientProps) {
     hasCreatePermission: hasCreatePermissionFromProps,
     listMenuItems,
     newDocumentURL,
-    querypreset,
-    querypresetPermissions,
+    queryPreset,
+    queryPresetPermissions,
     renderedFilters,
     resolvedFilterOptions,
     Table: InitialTable,
@@ -196,8 +196,8 @@ export function DefaultListView(props: ListViewClientProps) {
                   collectionConfig?.enableQueryPresets !== true || disableQueryPresets
                 }
                 listMenuItems={listMenuItems}
-                querypreset={querypreset}
-                querypresetPermissions={querypresetPermissions}
+                queryPreset={queryPreset}
+                queryPresetPermissions={queryPresetPermissions}
                 renderedFilters={renderedFilters}
                 resolvedFilterOptions={resolvedFilterOptions}
               />

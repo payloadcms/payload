@@ -49,7 +49,7 @@ import type {
   RequestContext,
   TypedUser,
 } from '../index.js'
-import type { QueryPresetConstraints } from '../query-presets/types.js'
+import type { queryPresetConstraints } from '../query-presets/types.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -1114,12 +1114,12 @@ export type Config = {
       update?: Access
     }
     constraints: {
-      create?: QueryPresetConstraints
-      delete?: QueryPresetConstraints
-      read?: QueryPresetConstraints
-      update?: QueryPresetConstraints
+      create?: queryPresetConstraints
+      delete?: queryPresetConstraints
+      read?: queryPresetConstraints
+      update?: queryPresetConstraints
     }
-    labels: CollectionConfig['labels']
+    labels?: CollectionConfig['labels']
   }
   /** Control the routing structure that Payload binds itself to. */
   routes?: {

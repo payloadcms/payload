@@ -9,7 +9,7 @@ import { useField } from '../../../../forms/useField/index.js'
 import { Pill } from '../../../Pill/index.js'
 import './index.scss'
 
-export const QueryPresetsColumnsField: JSONFieldClientComponent = ({
+export const QueryPresetsColumnField: JSONFieldClientComponent = ({
   field: { label, required },
   path,
 }) => {

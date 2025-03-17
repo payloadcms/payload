@@ -26,7 +26,7 @@ export { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 export { QueryPresetsColumnsCell } from '../../elements/QueryPresets/cells/ColumnsCell/index.js'
 export { QueryPresetsWhereCell } from '../../elements/QueryPresets/cells/WhereCell/index.js'
 export { QueryPresetsAccessCell } from '../../elements/QueryPresets/cells/AccessCell/index.js'
-export { QueryPresetsColumnsField } from '../../elements/QueryPresets/fields/ColumnsField/index.js'
+export { QueryPresetsColumnField } from '../../elements/QueryPresets/fields/ColumnsField/index.js'
 export { QueryPresetsWhereField } from '../../elements/QueryPresets/fields/WhereField/index.js'
 
 // elements

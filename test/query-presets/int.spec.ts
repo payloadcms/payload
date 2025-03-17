@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url'
 import { devUser, regularUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 
-const querypresetsCollectionSlug = 'payload-query-presets'
+const queryPresetsCollectionSlug = 'payload-query-presets'
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -52,7 +52,7 @@ describe('Shared Filters', () => {
   describe('default access control', () => {
     it('should respect access when set to "specificUsers"', async () => {
       const presetForSpecificUsers = await payload.create({
-        collection: querypresetsCollectionSlug,
+        collection: queryPresetsCollectionSlug,
         user,
         data: {
           title: 'Specific Users',
@@ -76,7 +76,7 @@ describe('Shared Filters', () => {
       })
 
       const foundPresetWithUser1 = await payload.findByID({
-        collection: querypresetsCollectionSlug,
+        collection: queryPresetsCollectionSlug,
         depth: 0,
         user,
         overrideAccess: false,
@@ -87,7 +87,7 @@ describe('Shared Filters', () => {
 
       try {
         const foundPresetWithUser2 = await payload.findByID({
-          collection: querypresetsCollectionSlug,
+          collection: queryPresetsCollectionSlug,
           depth: 0,
           user: user2,
           overrideAccess: false,
@@ -100,7 +100,7 @@ describe('Shared Filters', () => {
       }
 
       const presetUpdatedByUser1 = await payload.update({
-        collection: querypresetsCollectionSlug,
+        collection: queryPresetsCollectionSlug,
         id: presetForSpecificUsers.id,
         user,
         overrideAccess: false,
@@ -113,7 +113,7 @@ describe('Shared Filters', () => {
 
       try {
         const presetUpdatedByUser2 = await payload.update({
-          collection: querypresetsCollectionSlug,
+          collection: queryPresetsCollectionSlug,
           id: presetForSpecificUsers.id,
           user: user2,
           overrideAccess: false,
@@ -132,7 +132,7 @@ describe('Shared Filters', () => {
     it('should respect access when set to "onlyMe"', async () => {
       // create a new doc so that the creating user is the owner
       const presetForOnlyMe = await payload.create({
-        collection: querypresetsCollectionSlug,
+        collection: queryPresetsCollectionSlug,
         user,
         data: {
           title: 'Only Me',
@@ -154,7 +154,7 @@ describe('Shared Filters', () => {
       })
 
       const foundPresetWithUser1 = await payload.findByID({
-        collection: querypresetsCollectionSlug,
+        collection: queryPresetsCollectionSlug,
         depth: 0,
         user,
         overrideAccess: false,
@@ -165,7 +165,7 @@ describe('Shared Filters', () => {
 
       try {
         const foundPresetWithUser2 = await payload.findByID({
-          collection: querypresetsCollectionSlug,
+          collection: queryPresetsCollectionSlug,
           depth: 0,
           user: user2,
           overrideAccess: false,
@@ -179,7 +179,7 @@ describe('Shared Filters', () => {
       }
 
       const presetUpdatedByUser1 = await payload.update({
-        collection: querypresetsCollectionSlug,
+        collection: queryPresetsCollectionSlug,
         id: presetForOnlyMe.id,
         user,
         overrideAccess: false,
@@ -192,7 +192,7 @@ describe('Shared Filters', () => {
 
       try {
         const presetUpdatedByUser2 = await payload.update({
-          collection: querypresetsCollectionSlug,
+          collection: queryPresetsCollectionSlug,
           id: presetForOnlyMe.id,
           user: user2,
           overrideAccess: false,
@@ -210,7 +210,7 @@ describe('Shared Filters', () => {
 
     it('should respect access when set to "everyone"', async () => {
       const presetForEveryone = await payload.create({
-        collection: querypresetsCollectionSlug,
+        collection: queryPresetsCollectionSlug,
         user,
         data: {
           title: 'Everyone',
@@ -235,7 +235,7 @@ describe('Shared Filters', () => {
       })
 
       const foundPresetWithUser1 = await payload.findByID({
-        collection: querypresetsCollectionSlug,
+        collection: queryPresetsCollectionSlug,
         depth: 0,
         user,
         overrideAccess: false,
@@ -245,7 +245,7 @@ describe('Shared Filters', () => {
       expect(foundPresetWithUser1.id).toBe(presetForEveryone.id)
 
       const foundPresetWithUser2 = await payload.findByID({
-        collection: querypresetsCollectionSlug,
+        collection: queryPresetsCollectionSlug,
         depth: 0,
         user: user2,
         overrideAccess: false,
@@ -255,7 +255,7 @@ describe('Shared Filters', () => {
       expect(foundPresetWithUser2.id).toBe(presetForEveryone.id)
 
       const presetUpdatedByUser1 = await payload.update({
-        collection: querypresetsCollectionSlug,
+        collection: queryPresetsCollectionSlug,
         id: presetForEveryone.id,
         user,
         overrideAccess: false,
@@ -267,7 +267,7 @@ describe('Shared Filters', () => {
       expect(presetUpdatedByUser1.title).toBe('Everyone (Update 1)')
 
       const presetUpdatedByUser2 = await payload.update({
-        collection: querypresetsCollectionSlug,
+        collection: queryPresetsCollectionSlug,
         id: presetForEveryone.id,
         user: user2,
         overrideAccess: false,
@@ -283,7 +283,7 @@ describe('Shared Filters', () => {
   describe('user-defined access control', () => {
     it('should respect access when set to "specificRoles"', async () => {
       const presetForSpecificRoles = await payload.create({
-        collection: querypresetsCollectionSlug,
+        collection: queryPresetsCollectionSlug,
         user,
         data: {
           title: 'Specific Roles',
@@ -307,7 +307,7 @@ describe('Shared Filters', () => {
       })
 
       const foundPresetWithUser1 = await payload.findByID({
-        collection: querypresetsCollectionSlug,
+        collection: queryPresetsCollectionSlug,
         depth: 0,
         user,
         overrideAccess: false,
@@ -318,7 +318,7 @@ describe('Shared Filters', () => {
 
       try {
         const foundPresetWithUser2 = await payload.findByID({
-          collection: querypresetsCollectionSlug,
+          collection: queryPresetsCollectionSlug,
           depth: 0,
           user: user2,
           overrideAccess: false,
@@ -332,7 +332,7 @@ describe('Shared Filters', () => {
       }
 
       const presetUpdatedByUser1 = await payload.update({
-        collection: querypresetsCollectionSlug,
+        collection: queryPresetsCollectionSlug,
         id: presetForSpecificRoles.id,
         user,
         overrideAccess: false,
@@ -345,7 +345,7 @@ describe('Shared Filters', () => {
 
       try {
         const presetUpdatedByUser2 = await payload.update({
-          collection: querypresetsCollectionSlug,
+          collection: queryPresetsCollectionSlug,
           id: presetForSpecificRoles.id,
           user: user2,
           overrideAccess: false,
@@ -362,7 +362,7 @@ describe('Shared Filters', () => {
     })
   })
 
-  it.skip('should disable query presets when "enabledQueryPresets" is not true on the collection', async () => {
+  it.skip('should disable query presets when "enabledqueryPresets" is not true on the collection', async () => {
     try {
       const result = await payload.create({
         collection: 'payload-query-presets',
@@ -383,7 +383,7 @@ describe('Shared Filters', () => {
   describe('Where object formatting', () => {
     it('transforms "where" query objects into the "and" / "or" format', async () => {
       const result = await payload.create({
-        collection: querypresetsCollectionSlug,
+        collection: queryPresetsCollectionSlug,
         user,
         data: {
           title: 'Where Object Formatting',

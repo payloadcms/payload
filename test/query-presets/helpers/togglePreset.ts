@@ -24,8 +24,8 @@ export async function selectPreset({ page, presetTitle }: { page: Page; presetTi
 }
 
 export async function clearSelectedPreset({ page }: { page: Page }) {
-  const querypresetsControl = page.locator('button#select-preset')
-  const clearButton = querypresetsControl.locator('#clear-preset')
+  const queryPresetsControl = page.locator('button#select-preset')
+  const clearButton = queryPresetsControl.locator('#clear-preset')
 
   if (await clearButton.isVisible()) {
     await clearButton.click()
@@ -33,7 +33,7 @@ export async function clearSelectedPreset({ page }: { page: Page }) {
 
   const regex = /columns=/
   await page.waitForURL((url) => !regex.test(url.search))
-  await expect(querypresetsControl.locator('#clear-preset')).toBeHidden()
+  await expect(queryPresetsControl.locator('#clear-preset')).toBeHidden()
 
   await expect(
     page.locator('button#select-preset', {

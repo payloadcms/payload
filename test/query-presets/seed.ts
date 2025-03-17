@@ -1,17 +1,17 @@
-import type { Payload, QueryPreset } from 'payload'
+import type { Payload, queryPreset } from 'payload'
 
 import { devUser as devCredentials, regularUser as regularCredentials } from '../credentials.js'
 import { executePromises } from '../helpers/executePromises.js'
 import { seedDB } from '../helpers/seed.js'
 import { collectionSlugs, pagesSlug, usersSlug } from './slugs.js'
 
-type SeededQueryPreset = {
+type SeededqueryPreset = {
   relatedCollection: 'pages'
-} & Omit<QueryPreset, 'id' | 'relatedCollection'>
+} & Omit<queryPreset, 'id' | 'relatedCollection'>
 
 export const seedData: {
-  everyone: SeededQueryPreset
-  onlyMe: SeededQueryPreset
+  everyone: SeededqueryPreset
+  onlyMe: SeededqueryPreset
 } = {
   onlyMe: {
     relatedCollection: 'pages',

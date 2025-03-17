@@ -1,5 +1,5 @@
 'use client'
-import type { QueryPreset } from 'payload'
+import type { queryPreset } from 'payload'
 
 import { PeopleIcon } from '../../../icons/People/index.js'
 import { XIcon } from '../../../icons/X/index.js'
@@ -14,7 +14,7 @@ export function ActiveQueryPreset({
   openPresetListDrawer,
   resetPreset,
 }: {
-  activePreset: QueryPreset
+  activePreset: queryPreset
   openPresetListDrawer: () => void
   resetPreset: () => Promise<void>
 }) {
