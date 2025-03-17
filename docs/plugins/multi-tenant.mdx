@@ -10,12 +10,12 @@ keywords: plugins, multi-tenant, multi-tenancy, plugin, payload, cms, seo, index
 
 This plugin sets up multi-tenancy for your application from within your [Admin Panel](../admin/overview). It does so by adding a `tenant` field to all specified collections. Your front-end application can then query data by tenant. You must add the Tenants collection so you control what fields are available for each tenant.
 
-
 <Banner type="info">
   This plugin is completely open-source and the [source code can be found
-  here](https://github.com/payloadcms/payload/tree/main/packages/plugin-multi-tenant). If you need
-  help, check out our [Community Help](https://payloadcms.com/community-help). If you think you've
-  found a bug, please [open a new
+  here](https://github.com/payloadcms/payload/tree/main/packages/plugin-multi-tenant).
+  If you need help, check out our [Community
+  Help](https://payloadcms.com/community-help). If you think you've found a bug,
+  please [open a new
   issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%multi-tenant&template=bug_report.md&title=plugin-multi-tenant%3A)
   with as much detail as possible.
 </Banner>
@@ -32,10 +32,11 @@ This plugin sets up multi-tenancy for your application from within your [Admin P
 <Banner type="error">
   **Warning**
 
-  By default this plugin cleans up documents when a tenant is deleted. You should ensure you have
-  strong access control on your tenants collection to prevent deletions by unauthorized users.
+By default this plugin cleans up documents when a tenant is deleted. You should ensure you have
+strong access control on your tenants collection to prevent deletions by unauthorized users.
 
-  You can disabled this behavior by setting `cleanupAfterTenantDelete` to `false` in the plugin options.
+You can disabled this behavior by setting `cleanupAfterTenantDelete` to `false` in the plugin options.
+
 </Banner>
 
 ## Installation
@@ -161,7 +162,7 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
   /**
    * Customize tenant selector label
    *
-   * Either a string or an object where the keys are locales and the values are the string labels
+   * Either a string or an object where the keys are i18n codes and the values are the string labels
    */
   tenantSelectorLabel?:
     | Partial<{
@@ -253,7 +254,6 @@ export default config
 
 The plugin scaffolds out everything you will need to separate data by tenant. You can use the `tenant` field to filter data from enabled collections in your front-end application.
 
-
 In your frontend you can query and constrain data by tenant with the following:
 
 ```tsx
@@ -332,14 +332,16 @@ type ContextType = {
   setPreventRefreshOnChange: React.Dispatch<React.SetStateAction<boolean>>
   /**
    * Sets the selected tenant ID
-   * 
+   *
    * @param args.id - The ID of the tenant to select
    * @param args.refresh - Whether to refresh the page after changing the tenant
    */
-  setTenant: (args: { id: number | string | undefined; refresh?: boolean }) => void
+  setTenant: (args: {
+    id: number | string | undefined
+    refresh?: boolean
+  }) => void
 }
 ```
-
 
 ## Examples
 
