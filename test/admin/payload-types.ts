@@ -269,10 +269,6 @@ export interface Post {
    * This is a very long description that takes many characters to complete and hopefully will wrap instead of push the sidebar open, lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, voluptatum voluptates. Quisquam, voluptatum voluptates.
    */
   sidebarField?: string | null;
-  /**
-   * This field should only validate on submit. Try typing "Not allowed" and submitting the form.
-   */
-  validateUsingEvent?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -719,7 +715,6 @@ export interface PostsSelect<T extends boolean = true> {
   disableListColumnText?: T;
   disableListFilterText?: T;
   sidebarField?: T;
-  validateUsingEvent?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

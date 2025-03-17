@@ -43,6 +43,7 @@ import type {
 } from '../../index.js'
 import type {
   PayloadRequest,
+  SelectIncludeType,
   SelectType,
   Sort,
   TransformCollectionWithSelect,
@@ -424,6 +425,12 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    */
   endpoints?: false | Omit<Endpoint, 'root'>[]
   fields: Field[]
+  /**
+   * Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks
+   */
+  forceSelect?: IsAny<SelectFromCollectionSlug<TSlug>> extends true
+    ? SelectIncludeType
+    : SelectFromCollectionSlug<TSlug>
   /**
    * GraphQL configuration
    */
