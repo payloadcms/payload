@@ -8,8 +8,8 @@ import type {
 
 import { getTranslation } from '@payloadcms/translations'
 
-import { formatDate } from '../utilities/formatDate.js'
-import { formatRichTextLexical, isSerializedLexicalEditor } from './formatRichTextLexical.js'
+import { formatDate } from './formatDateTitle.js'
+import { formatLexicalDocTitle, isSerializedLexicalEditor } from './formatLexicalDocTitle.js'
 
 export const formatDocTitle = ({
   collectionConfig,
@@ -57,10 +57,10 @@ export const formatDocTitle = ({
 
   // richtext lexical case. We convert the first child of root to plain text
   if (isSerializedLexicalEditor(title)) {
-    title = formatRichTextLexical(title.root.children?.[0]?.children || [], '')
+    title = formatLexicalDocTitle(title.root.children?.[0]?.children || [], '')
   }
   if (!title && isSerializedLexicalEditor(fallback)) {
-    title = formatRichTextLexical(fallback.root.children?.[0]?.children || [], '')
+    title = formatLexicalDocTitle(fallback.root.children?.[0]?.children || [], '')
   }
 
   if (!title) {

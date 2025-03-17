@@ -8,13 +8,11 @@ export function isSerializedLexicalEditor(value: unknown): value is SerializedLe
   return typeof value === 'object' && 'root' in value
 }
 
-export function formatRichTextLexical(
+export function formatLexicalDocTitle(
   editorState: Array<{ children?: Array<{ type: string }>; type: string }>,
   textContent: string,
-  i: number = 0,
 ): string {
   for (const node of editorState) {
-    i++
     if ('text' in node && node.text) {
       textContent += node.text as string
     } else {
@@ -23,7 +21,7 @@ export function formatRichTextLexical(
       }
     }
     if ('children' in node && node.children) {
-      textContent += formatRichTextLexical(node.children as Array<{ type: string }>, textContent, i)
+      textContent += formatLexicalDocTitle(node.children as Array<{ type: string }>, textContent)
     }
   }
   return textContent
