@@ -1349,7 +1349,7 @@ export type BlockJSX = {
    */
   export: (props: {
     fields: BlockFields
-    lexicalToMarkdown?: (props: { editorState: Record<string, any> }) => string
+    lexicalToMarkdown: (props: { editorState: Record<string, any> }) => string
   }) =>
     | {
         children?: string
@@ -1367,7 +1367,7 @@ export type BlockJSX = {
     children: string
     closeMatch: null | RegExpMatchArray // Only available when customEndRegex is set
     htmlToLexical?: ((props: { html: string }) => any) | null
-    markdownToLexical?: (props: { markdown: string }) => Record<string, any>
+    markdownToLexical: (props: { markdown: string }) => Record<string, any>
     openMatch?: RegExpMatchArray
     props: Record<string, any>
   }) => BlockFields | false

@@ -12,11 +12,9 @@ export const LinkHTMLConverter: (args: {
     const rel: string | undefined = node.fields.newTab ? 'noopener noreferrer' : undefined
     const target: string | undefined = node.fields.newTab ? '_blank' : undefined
 
-    return `(
-      <a${providedStyleTag} href="${node.fields.url}" rel=${rel} target=${target}>
+    return `<a${providedStyleTag} href="${node.fields.url}" rel=${rel} target=${target}>
         ${children}
-      </a>
-    )`
+      </a>`
   },
   link: ({ node, nodesToHTML, providedStyleTag }) => {
     const children = nodesToHTML({
@@ -38,10 +36,8 @@ export const LinkHTMLConverter: (args: {
       }
     }
 
-    return `(
-      <a${providedStyleTag} href="${href}" rel=${rel} target=${target}>
+    return `<a${providedStyleTag} href="${href}" rel=${rel} target=${target}>
         ${children}
-      </a>
-    )`
+      </a>`
   },
 })

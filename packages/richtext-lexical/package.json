@@ -45,6 +45,11 @@
       "types": "./src/exports/html-async/index.ts",
       "default": "./src/exports/html-async/index.ts"
     },
+    "./plaintext": {
+      "import": "./src/exports/plaintext/index.ts",
+      "types": "./src/exports/plaintext/index.ts",
+      "default": "./src/exports/plaintext/index.ts"
+    },
     "./rsc": {
       "import": "./src/exports/server/rsc.ts",
       "types": "./src/exports/server/rsc.ts",
@@ -436,6 +441,11 @@
         "import": "./dist/exports/html-async/index.js",
         "types": "./dist/exports/html-async/index.d.ts",
         "default": "./dist/exports/html-async/index.js"
+      },
+      "./plaintext": {
+        "import": "./dist/exports/plaintext/index.js",
+        "types": "./dist/exports/plaintext/index.d.ts",
+        "default": "./dist/exports/plaintext/index.js"
       },
       "./rsc": {
         "import": "./dist/exports/server/rsc.js",
