@@ -272,6 +272,7 @@ export function mongooseAdapter({
   }
 
   return {
+    allowIDOnCreate,
     defaultIDType: 'text',
     init: adapter,
   }

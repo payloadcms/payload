@@ -608,6 +608,7 @@ export type PaginatedDocs<T = any> = {
 }
 
 export type DatabaseAdapterResult<T = BaseDatabaseAdapter> = {
+  allowIDOnCreate?: boolean
   defaultIDType: 'number' | 'text'
   init: (args: { payload: Payload }) => T
 }
