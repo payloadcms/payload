@@ -91,8 +91,10 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
       if (typeof existingCondition === 'object' && field.value) {
         const value = valueArg ?? existingCondition?.[operator]
 
-        const valueChanged = value !== existingCondition?.[field.value][operator]
-        const operatorChanged = operator !== Object.keys(existingCondition?.[field.value] || {})[0]
+        const valueChanged = value !== existingCondition?.[field.value]?.[operator]
+
+        const operatorChanged =
+          operator !== Object.keys(existingCondition?.[field.value] || {})?.[0]
 
         if (valueChanged || operatorChanged) {
           const newRowCondition = {
