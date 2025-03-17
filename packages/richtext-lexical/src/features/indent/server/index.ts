@@ -8,8 +8,8 @@ export type IndentFeatureProps = {
    */
   disabledNodes?: string[]
   /**
-   * If false, pressing Tab in the middle of a block such as a paragraph or heading will insert a tabNode.
-   * This property does not change the behavior of block-level indents.
+   * If true, pressing Tab in the middle of a block such as a paragraph or heading will not insert a tabNode.
+   * Instead, Tab will only be used for block-level indentation.
    *
    * @default false
    */
