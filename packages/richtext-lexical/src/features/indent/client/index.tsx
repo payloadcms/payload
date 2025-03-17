@@ -92,10 +92,11 @@ export const IndentFeatureClient = createClientFeature<IndentFeatureProps>(({ pr
   return {
     plugins: [
       {
-        Component: () => IndentPlugin({ clientProps: props }),
+        Component: IndentPlugin,
         position: 'normal',
       },
     ],
+    sanitizedClientFeatureProps: props,
     toolbarFixed: {
       groups: toolbarGroups({ disabledNodes }),
     },
