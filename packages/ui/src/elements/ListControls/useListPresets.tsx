@@ -8,7 +8,6 @@ import { toast } from 'sonner'
 
 import { useConfig } from '../../providers/Config/index.js'
 import { useListQuery } from '../../providers/ListQuery/context.js'
-import { useTableColumns } from '../../providers/TableColumns/context.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
@@ -38,19 +37,10 @@ export const useListPresets = ({
   PresetListDrawer: React.ReactNode
   resetPreset: () => Promise<void>
 } => {
-  const {
-    modified: listQueryModified,
-    query,
-    refineListData,
-    setModified: setQueryModified,
-  } = useListQuery()
+  const { modified, query, refineListData, setModified: setQueryModified } = useListQuery()
 
   const { i18n, t } = useTranslation()
   const { openModal } = useModal()
-
-  const { modified: columnsModified, setModified: setColumnsModified } = useTableColumns()
-
-  const hasModified = listQueryModified || columnsModified
 
   const {
     config: {
@@ -161,7 +151,6 @@ export const useListPresets = ({
             )
 
             setQueryModified(false)
-            setColumnsModified(false)
           } else {
             if (json.errors) {
               json.errors.forEach((error) => toast.error(error.message))
@@ -185,20 +174,23 @@ export const useListPresets = ({
     presetConfig?.labels?.singular,
     i18n,
     setQueryModified,
-    setColumnsModified,
   ])
 
   // Memoize so that components aren't re-rendered on query and column changes
   const listPresetMenuItems = useMemo(() => {
     const menuItems: React.ReactNode[] = []
 
-    if (activePreset && hasModified) {
+    if (activePreset && modified) {
       menuItems.push(
         <PopupList.Button
-          onClick={() => {
-            // TODO: reset query and columns
-            setQueryModified(false)
-            setColumnsModified(false)
+          onClick={async () => {
+            await refineListData(
+              {
+                columns: transformColumnsToSearchParams(activePreset.columns),
+                where: activePreset.where,
+              },
+              false,
+            )
           }}
         >
           {t('general:reset')}
@@ -250,16 +242,15 @@ export const useListPresets = ({
     return menuItems
   }, [
     activePreset,
-    hasModified,
     listPresetPermissions?.delete,
     listPresetPermissions?.update,
     openCreateNewDrawer,
     openDocumentDrawer,
     openModal,
     saveCurrentChanges,
-    setColumnsModified,
-    setQueryModified,
     t,
+    refineListData,
+    modified,
   ])
 
   return {
@@ -311,7 +302,7 @@ export const useListPresets = ({
         }}
       />
     ),
-    hasModifiedPreset: hasModified,
+    hasModifiedPreset: modified,
     listPresetMenuItems,
     openPresetListDrawer: openListDrawer,
     PresetListDrawer: (
