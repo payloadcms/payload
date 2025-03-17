@@ -83,7 +83,7 @@ export interface Config {
     'payload-list-presets': PayloadListPresetsSelect<false> | PayloadListPresetsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   globals: {};
   globalsSelect: {};
@@ -119,7 +119,7 @@ export interface UserAuthOperations {
  * via the `definition` "pages".
  */
 export interface Page {
-  id: string;
+  id: number;
   text?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -130,7 +130,7 @@ export interface Page {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   name?: string | null;
   roles?: ('admin' | 'user')[] | null;
   updatedAt: string;
@@ -149,20 +149,20 @@ export interface User {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'pages';
-        value: string | Page;
+        value: number | Page;
       } | null)
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -172,10 +172,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -195,7 +195,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -206,22 +206,22 @@ export interface PayloadMigration {
  * via the `definition` "payload-list-presets".
  */
 export interface PayloadListPreset {
-  id: string;
+  id: number;
   title: string;
   isShared?: boolean | null;
   access?: {
     delete?: {
       constraint?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
-      users?: (string | User)[] | null;
+      users?: (number | User)[] | null;
     };
     read?: {
       constraint?: ('everyone' | 'onlyMe' | 'specificUsers' | 'specificRoles') | null;
-      users?: (string | User)[] | null;
+      users?: (number | User)[] | null;
       roles?: ('admin' | 'user')[] | null;
     };
     update?: {
       constraint?: ('everyone' | 'onlyMe' | 'specificUsers' | 'specificRoles') | null;
-      users?: (string | User)[] | null;
+      users?: (number | User)[] | null;
       roles?: ('admin' | 'user')[] | null;
     };
   };

@@ -71,7 +71,6 @@ export interface Config {
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
-    'payload-list-presets': PayloadListPreset;
     'payload-migrations': PayloadMigration;
   };
   collectionsJoins: {};
@@ -81,11 +80,10 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
-    'payload-list-presets': PayloadListPresetsSelect<false> | PayloadListPresetsSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   globals: {
     menu: Menu;
@@ -125,7 +123,7 @@ export interface UserAuthOperations {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: number;
+  id: string;
   title?: string | null;
   content?: {
     root: {
@@ -150,7 +148,7 @@ export interface Post {
  * via the `definition` "media".
  */
 export interface Media {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -194,7 +192,7 @@ export interface Media {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -211,24 +209,24 @@ export interface User {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'posts';
-        value: number | Post;
+        value: string | Post;
       } | null)
     | ({
         relationTo: 'media';
-        value: number | Media;
+        value: string | Media;
       } | null)
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -238,10 +236,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -258,53 +256,10 @@ export interface PayloadPreference {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-list-presets".
- */
-export interface PayloadListPreset {
-  id: string;
-  title: string;
-  access?: {
-    delete?: {
-      constraint?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
-      users?: (string | User)[] | null;
-    };
-    read?: {
-      constraint?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
-      users?: (string | User)[] | null;
-    };
-    update?: {
-      constraint?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
-      users?: (string | User)[] | null;
-    };
-  };
-  where:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  columns?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  relatedCollection: 'posts' | 'media' | 'users' | 'payload-locked-documents' | 'payload-preferences';
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -410,40 +365,6 @@ export interface PayloadPreferencesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-list-presets_select".
- */
-export interface PayloadListPresetsSelect<T extends boolean = true> {
-  title?: T;
-  access?:
-    | T
-    | {
-        delete?:
-          | T
-          | {
-              constraint?: T;
-              users?: T;
-            };
-        read?:
-          | T
-          | {
-              constraint?: T;
-              users?: T;
-            };
-        update?:
-          | T
-          | {
-              constraint?: T;
-              users?: T;
-            };
-      };
-  where?: T;
-  columns?: T;
-  relatedCollection?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-migrations_select".
  */
 export interface PayloadMigrationsSelect<T extends boolean = true> {
@@ -457,7 +378,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "menu".
  */
 export interface Menu {
-  id: number;
+  id: string;
   globalText?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;

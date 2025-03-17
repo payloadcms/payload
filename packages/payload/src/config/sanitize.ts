@@ -178,6 +178,8 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   const schedulePublishCollections: CollectionSlug[] = []
 
+  const listPresetsCollections: CollectionSlug[] = []
+
   const schedulePublishGlobals: GlobalSlug[] = []
 
   const collectionSlugs = new Set<CollectionSlug>()
@@ -187,7 +189,6 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     jobsCollectionSlug,
     lockedDocumentsCollectionSlug,
     preferencesCollectionSlug,
-    listPresetsCollectionSlug,
   ]
 
   /**
@@ -237,6 +238,14 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
     if (typeof draftsConfig === 'object' && draftsConfig.schedulePublish) {
       schedulePublishCollections.push(config.collections[i].slug)
+    }
+
+    if (config.collections[i].enableListPresets) {
+      listPresetsCollections.push(config.collections[i].slug)
+
+      if (!validRelationships.includes(listPresetsCollectionSlug)) {
+        validRelationships.push(listPresetsCollectionSlug)
+      }
     }
 
     config.collections[i] = await sanitizeCollection(
@@ -330,14 +339,16 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     ),
   )
 
-  configWithDefaults.collections.push(
-    await sanitizeCollection(
-      config as unknown as Config,
-      getListPresetsConfig(config as unknown as Config),
-      richTextSanitizationPromises,
-      validRelationships,
-    ),
-  )
+  if (listPresetsCollections.length > 0) {
+    configWithDefaults.collections.push(
+      await sanitizeCollection(
+        config as unknown as Config,
+        getListPresetsConfig(config as unknown as Config),
+        richTextSanitizationPromises,
+        validRelationships,
+      ),
+    )
+  }
 
   if (config.serverURL !== '') {
     config.csrf.push(config.serverURL)
