@@ -398,6 +398,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     height: 'Altura',
     lessInfo: 'Ver menos',
     moreInfo: 'Ver mais',
+    noFile: 'Sem arquivo',
     pasteURL: 'Colar URL',
     previewSizes: 'Tamanhos de Pré-visualização',
     selectCollectionToBrowse: 'Selecione uma Coleção para Navegar',

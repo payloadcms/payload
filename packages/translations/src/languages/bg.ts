@@ -397,6 +397,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     height: 'Височина',
     lessInfo: 'По-малко информация',
     moreInfo: 'Повече информация',
+    noFile: 'Няма файл',
     pasteURL: 'Поставяне на URL',
     previewSizes: 'Преглед на размери',
     selectCollectionToBrowse: 'Избери колекция, която да разгледаш',

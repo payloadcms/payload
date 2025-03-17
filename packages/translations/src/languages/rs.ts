@@ -397,6 +397,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     height: 'Висина',
     lessInfo: 'Мање информација',
     moreInfo: 'Више информација',
+    noFile: 'Nema fajla',
     pasteURL: 'Налепи URL',
     previewSizes: 'Величине прегледа',
     selectCollectionToBrowse: 'Одаберите колекцију за преглед',

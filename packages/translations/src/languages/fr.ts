@@ -407,6 +407,7 @@ export const frTranslations: DefaultTranslationsObject = {
     height: 'Hauteur',
     lessInfo: 'Moins d’infos',
     moreInfo: 'Plus d’infos',
+    noFile: 'Aucun fichier',
     pasteURL: "Coller l'URL",
     previewSizes: 'Tailles d’aperçu',
     selectCollectionToBrowse: 'Sélectionnez une collection à parcourir',

@@ -396,6 +396,7 @@ export const daTranslations: DefaultTranslationsObject = {
     height: 'Højde',
     lessInfo: 'Mindre info',
     moreInfo: 'Mere info',
+    noFile: 'Ingen fil',
     pasteURL: 'Indsæt URL',
     previewSizes: 'Forhåndsvisningsstørrelser',
     selectCollectionToBrowse: 'Vælg en samling for at browse',

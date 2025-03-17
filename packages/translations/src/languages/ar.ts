@@ -392,6 +392,7 @@ export const arTranslations: DefaultTranslationsObject = {
     height: 'الطّول',
     lessInfo: 'معلومات أقلّ',
     moreInfo: 'معلومات أكثر',
+    noFile: 'لا يوجد ملف',
     pasteURL: 'لصق الرابط',
     previewSizes: 'أحجام المعاينة',
     selectCollectionToBrowse: 'حدّد مجموعة لاستعراضها',

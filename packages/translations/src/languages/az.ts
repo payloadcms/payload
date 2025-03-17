@@ -399,6 +399,7 @@ export const azTranslations: DefaultTranslationsObject = {
     height: 'Hündürlük',
     lessInfo: 'Daha az məlumat',
     moreInfo: 'Daha çox məlumat',
+    noFile: 'Heç bir fayl',
     pasteURL: 'URL yapışdır',
     previewSizes: 'Öncədən baxış ölçüləri',
     selectCollectionToBrowse: 'Gözdən keçirmək üçün bir Kolleksiya seçin',

@@ -401,6 +401,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     height: 'Hoogte',
     lessInfo: 'Minder info',
     moreInfo: 'Meer info',
+    noFile: 'Geen bestand',
     pasteURL: 'URL plakken',
     previewSizes: 'Voorbeeldgroottes',
     selectCollectionToBrowse: 'Selecteer een collectie om door te bladeren',

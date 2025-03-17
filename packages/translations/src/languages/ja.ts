@@ -396,6 +396,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     height: '高さ',
     lessInfo: '詳細を隠す',
     moreInfo: '詳細を表示',
+    noFile: 'ファイルなし',
     pasteURL: 'URLを貼り付け',
     previewSizes: 'プレビューサイズ',
     selectCollectionToBrowse: '閲覧するコレクションを選択',

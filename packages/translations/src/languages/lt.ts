@@ -399,6 +399,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     height: 'Aukštis',
     lessInfo: 'Mažiau informacijos',
     moreInfo: 'Daugiau informacijos',
+    noFile: 'Nėra failo',
     pasteURL: 'Įklijuokite URL',
     previewSizes: 'Peržiūros dydžiai',
     selectCollectionToBrowse: 'Pasirinkite kolekciją, kurią norėtumėte naršyti',

@@ -397,6 +397,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     height: 'Visina',
     lessInfo: 'Manje informacija',
     moreInfo: 'Više informacija',
+    noFile: 'Nema datoteke',
     pasteURL: 'Zalijepi URL',
     previewSizes: 'Veličine pregleda',
     selectCollectionToBrowse: 'Odaberite kolekciju za pregled',
