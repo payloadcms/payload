@@ -259,6 +259,7 @@ type ActiveTabProps = {
   readonly permissions: SanitizedFieldPermissions
   readonly readOnly: boolean
 }
+
 function TabContent({
   description,
   fields,
@@ -273,6 +274,7 @@ function TabContent({
   readOnly,
 }: ActiveTabProps) {
   const { i18n } = useTranslation()
+
   const { customComponents: { AfterInput, BeforeInput, Description, Field } = {} } = useField({
     path,
   })
