@@ -32,10 +32,10 @@ export type ServerOnlyRootProperties = keyof Pick<
   | 'hooks'
   | 'i18n'
   | 'jobs'
-  | 'listPresets'
   | 'logger'
   | 'onInit'
   | 'plugins'
+  | 'queryPresets'
   | 'secret'
   | 'sharp'
   | 'typescript'
@@ -85,7 +85,7 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   'graphQL',
   'jobs',
   'logger',
-  'listPresets',
+  'queryPresets',
   // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
 ]
 

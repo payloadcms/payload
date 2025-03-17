@@ -2,9 +2,9 @@ import type {
   ClientCollectionConfig,
   ColumnPreference,
   ListPreferences,
-  ListPreset,
   ListQuery,
   PaginatedDocs,
+  QueryPreset,
   Sort,
   Where,
 } from 'payload'

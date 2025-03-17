@@ -4,8 +4,8 @@ import type {
   SanitizedCollectionConfig,
 } from '../../collections/config/types.js'
 import type { ServerProps } from '../../config/types.js'
-import type { ListPreset } from '../../list-presets/types.js'
 import type { ListPreferences } from '../../preferences/types.js'
+import type { QueryPreset } from '../../query-presets/types.js'
 import type { ResolvedFilterOptions } from '../../types/index.js'
 import type { Column } from '../elements/Table.js'
 import type { Data } from '../types.js'
@@ -42,20 +42,20 @@ export type ListViewClientProps = {
   columnState: Column[]
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
-  disableListPresets?: boolean
+  disableQueryPresets?: boolean
   enableRowSelections?: boolean
   hasCreatePermission: boolean
   /**
    * @deprecated
    */
   listPreferences?: ListPreferences
-  listPreset?: ListPreset
-  listPresetPermissions?: SanitizedCollectionPermission
   newDocumentURL: string
   /**
    * @deprecated
    */
   preferenceKey?: string
+  querypreset?: QueryPreset
+  querypresetPermissions?: SanitizedCollectionPermission
   renderedFilters?: Map<string, React.ReactNode>
   resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
 } & ListViewSlots

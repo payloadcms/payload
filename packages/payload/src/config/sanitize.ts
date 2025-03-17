@@ -26,12 +26,12 @@ import {
   type GlobalSlug,
   sanitizeFields,
 } from '../index.js'
-import { getListPresetsConfig, listPresetsCollectionSlug } from '../list-presets/config.js'
 import {
   getLockedDocumentsCollection,
   lockedDocumentsCollectionSlug,
 } from '../locked-documents/config.js'
 import { getPreferencesCollection, preferencesCollectionSlug } from '../preferences/config.js'
+import { getQueryPresetsConfig, queryPresetsCollectionSlug } from '../query-presets/config.js'
 import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/index.js'
 import { flattenBlock } from '../utilities/flattenAllFields.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
@@ -178,7 +178,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   const schedulePublishCollections: CollectionSlug[] = []
 
-  const listPresetsCollections: CollectionSlug[] = []
+  const queryPresetsCollections: CollectionSlug[] = []
 
   const schedulePublishGlobals: GlobalSlug[] = []
 
@@ -240,11 +240,11 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       schedulePublishCollections.push(config.collections[i].slug)
     }
 
-    if (config.collections[i].enableListPresets) {
-      listPresetsCollections.push(config.collections[i].slug)
+    if (config.collections[i].enableQueryPresets) {
+      queryPresetsCollections.push(config.collections[i].slug)
 
-      if (!validRelationships.includes(listPresetsCollectionSlug)) {
-        validRelationships.push(listPresetsCollectionSlug)
+      if (!validRelationships.includes(queryPresetsCollectionSlug)) {
+        validRelationships.push(queryPresetsCollectionSlug)
       }
     }
 
@@ -339,11 +339,11 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     ),
   )
 
-  if (listPresetsCollections.length > 0) {
+  if (queryPresetsCollections.length > 0) {
     configWithDefaults.collections.push(
       await sanitizeCollection(
         config as unknown as Config,
-        getListPresetsConfig(config as unknown as Config),
+        getQueryPresetsConfig(config as unknown as Config),
         richTextSanitizationPromises,
         validRelationships,
       ),

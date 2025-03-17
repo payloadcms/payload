@@ -3,10 +3,10 @@ import type {
   ColumnPreference,
   DefaultDocumentIDType,
   ListPreferences,
-  ListPreset,
   ListQuery,
   ListViewClientProps,
   ListViewServerPropsOnly,
+  QueryPreset,
   SanitizedCollectionPermission,
   Where,
 } from 'payload'
@@ -31,7 +31,7 @@ type RenderListViewArgs = {
   customCellProps?: Record<string, any>
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
-  disableListPresets?: boolean
+  disableQueryPresets?: boolean
   drawerSlug?: string
   enableRowSelections: boolean
   overrideEntityVisibility?: boolean
@@ -50,7 +50,7 @@ export const renderListView = async (
     customCellProps,
     disableBulkDelete,
     disableBulkEdit,
-    disableListPresets,
+    disableQueryPresets,
     drawerSlug,
     enableRowSelections,
     initPageResult,
@@ -141,29 +141,29 @@ export const renderListView = async (
       }
     }
 
-    let listPreset: ListPreset | undefined
-    let listPresetPermissions: SanitizedCollectionPermission | undefined
+    let querypreset: QueryPreset | undefined
+    let querypresetPermissions: SanitizedCollectionPermission | undefined
 
     if (listPreferences?.preset) {
       try {
-        listPreset = (await payload.findByID({
+        querypreset = (await payload.findByID({
           id: listPreferences?.preset,
-          collection: 'payload-list-presets',
+          collection: 'payload-query-presets',
           depth: 0,
           overrideAccess: false,
           user,
-        })) as ListPreset
+        })) as QueryPreset
 
-        if (listPreset) {
-          listPresetPermissions = await getDocumentPermissions({
-            id: listPreset.id,
-            collectionConfig: config.collections.find((c) => c.slug === 'payload-list-presets'),
-            data: listPreset,
+        if (querypreset) {
+          querypresetPermissions = await getDocumentPermissions({
+            id: querypreset.id,
+            collectionConfig: config.collections.find((c) => c.slug === 'payload-query-presets'),
+            data: querypreset,
             req,
           })?.then(({ docPermissions }) => docPermissions)
         }
       } catch (err) {
-        req.payload.logger.error(`Error fetching list preset or preset permissions: ${err}`)
+        req.payload.logger.error(`Error fetching query preset or preset permissions: ${err}`)
       }
     }
 
@@ -267,13 +267,13 @@ export const renderListView = async (
                 columnState,
                 disableBulkDelete,
                 disableBulkEdit,
-                disableListPresets,
+                disableQueryPresets,
                 enableRowSelections,
                 hasCreatePermission,
                 listPreferences,
-                listPreset,
-                listPresetPermissions,
                 newDocumentURL,
+                querypreset,
+                querypresetPermissions,
                 renderedFilters,
                 resolvedFilterOptions,
                 Table,

@@ -45,13 +45,13 @@ export function DefaultListView(props: ListViewClientProps) {
     Description,
     disableBulkDelete,
     disableBulkEdit,
-    disableListPresets,
+    disableQueryPresets,
     enableRowSelections,
     hasCreatePermission: hasCreatePermissionFromProps,
     listMenuItems,
-    listPreset,
-    listPresetPermissions,
     newDocumentURL,
+    querypreset,
+    querypresetPermissions,
     renderedFilters,
     resolvedFilterOptions,
     Table: InitialTable,
@@ -192,12 +192,12 @@ export function DefaultListView(props: ListViewClientProps) {
                 }
                 collectionConfig={collectionConfig}
                 collectionSlug={collectionSlug}
-                disableListPresets={
-                  collectionConfig?.enableListPresets !== true || disableListPresets
+                disableQueryPresets={
+                  collectionConfig?.enableQueryPresets !== true || disableQueryPresets
                 }
                 listMenuItems={listMenuItems}
-                listPreset={listPreset}
-                listPresetPermissions={listPresetPermissions}
+                querypreset={querypreset}
+                querypresetPermissions={querypresetPermissions}
                 renderedFilters={renderedFilters}
                 resolvedFilterOptions={resolvedFilterOptions}
               />

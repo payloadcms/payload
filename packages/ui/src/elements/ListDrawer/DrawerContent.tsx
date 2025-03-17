@@ -18,7 +18,7 @@ import { type Option } from '../ReactSelect/index.js'
 export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   allowCreate = true,
   collectionSlugs,
-  disableListPresets,
+  disableQueryPresets,
   drawerSlug,
   enableRowSelections,
   filterOptions,
@@ -92,7 +92,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
             collectionSlug: slug,
             disableBulkDelete: true,
             disableBulkEdit: true,
-            disableListPresets,
+            disableQueryPresets,
             drawerSlug,
             enableRowSelections,
             overrideEntityVisibility,
@@ -119,7 +119,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       enableRowSelections,
       filterOptions,
       overrideEntityVisibility,
-      disableListPresets,
+      disableQueryPresets,
     ],
   )
 

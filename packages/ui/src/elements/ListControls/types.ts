@@ -1,6 +1,6 @@
 import type {
   ClientCollectionConfig,
-  ListPreset,
+  QueryPreset,
   ResolvedFilterOptions,
   SanitizedCollectionPermission,
   Where,
@@ -20,15 +20,15 @@ export type ListControlsProps = {
    * These are now handled by the `ListSelection` component
    */
   readonly disableBulkEdit?: boolean
-  readonly disableListPresets?: boolean
+  readonly disableQueryPresets?: boolean
   readonly enableColumns?: boolean
   readonly enableSort?: boolean
   readonly handleSearchChange?: (search: string) => void
   readonly handleSortChange?: (sort: string) => void
   readonly handleWhereChange?: (where: Where) => void
   readonly listMenuItems?: React.ReactNode[]
-  readonly listPreset?: ListPreset
-  readonly listPresetPermissions?: SanitizedCollectionPermission
+  readonly querypreset?: QueryPreset
+  readonly querypresetPermissions?: SanitizedCollectionPermission
   readonly renderedFilters?: Map<string, React.ReactNode>
   readonly resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
 }

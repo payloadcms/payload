@@ -421,9 +421,9 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    */
   disableDuplicate?: boolean
   /**
-   * Opt-in to enable list presets for this collection
+   * Opt-in to enable query presets for this collection
    */
-  enableListPresets?: boolean
+  enableQueryPresets?: boolean
   /**
    * Custom rest api endpoints, set false to disable all rest endpoints for this collection.
    */

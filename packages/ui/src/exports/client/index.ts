@@ -22,13 +22,13 @@ export { useEffectEvent } from '../../hooks/useEffectEvent.js'
 
 export { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 
-// list preset elements
-export { ListPresetsColumnsCell } from '../../elements/ListPresets/cells/ColumnsCell/index.js'
-export { ListPresetsWhereCell } from '../../elements/ListPresets/cells/WhereCell/index.js'
-export { ListPresetsAccessCell } from '../../elements/ListPresets/cells/AccessCell/index.js'
-export { ListPresetsColumnsField } from '../../elements/ListPresets/fields/ColumnsField/index.js'
-export { ListPresetsWhereField } from '../../elements/ListPresets/fields/WhereField/index.js'
-export { ListPresetsAccessLabel } from '../../elements/ListPresets/fields/AccessLabel/index.js'
+// query preset elements
+export { QueryPresetsColumnsCell } from '../../elements/QueryPresets/cells/ColumnsCell/index.js'
+export { QueryPresetsWhereCell } from '../../elements/QueryPresets/cells/WhereCell/index.js'
+export { QueryPresetsAccessCell } from '../../elements/QueryPresets/cells/AccessCell/index.js'
+export { QueryPresetsColumnsField } from '../../elements/QueryPresets/fields/ColumnsField/index.js'
+export { QueryPresetsWhereField } from '../../elements/QueryPresets/fields/WhereField/index.js'
+export { QueryPresetsAccessLabel } from '../../elements/QueryPresets/fields/AccessLabel/index.js'
 
 // elements
 export { ConfirmationModal } from '../../elements/ConfirmationModal/index.js'

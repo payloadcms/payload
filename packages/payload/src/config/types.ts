@@ -49,7 +49,7 @@ import type {
   RequestContext,
   TypedUser,
 } from '../index.js'
-import type { ListPresetConstraints } from '../list-presets/types.js'
+import type { QueryPresetConstraints } from '../query-presets/types.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
 
@@ -1035,27 +1035,12 @@ export type Config = {
    * @experimental There may be frequent breaking changes to this API
    */
   jobs?: JobsConfig
-  listPresets?: {
-    access: {
-      create?: Access
-      delete?: Access
-      read?: Access
-      update?: Access
-    }
-    constraints: {
-      create?: ListPresetConstraints
-      delete?: ListPresetConstraints
-      read?: ListPresetConstraints
-      update?: ListPresetConstraints
-    }
-  }
   /**
    * Translate your content to different languages/locales.
    *
    * @default false // disable localization
    */
   localization?: false | LocalizationConfig
-
   /**
    * Logger options, logger options with a destination stream, or an instantiated logger instance.
    *
@@ -1112,6 +1097,7 @@ export type Config = {
    * @default 10
    */
   maxDepth?: number
+
   /** A function that is called immediately following startup that receives the Payload instance as its only argument. */
   onInit?: (payload: Payload) => Promise<void> | void
   /**
@@ -1120,6 +1106,20 @@ export type Config = {
    * @see https://payloadcms.com/docs/plugins/overview
    */
   plugins?: Plugin[]
+  queryPresets?: {
+    access: {
+      create?: Access
+      delete?: Access
+      read?: Access
+      update?: Access
+    }
+    constraints: {
+      create?: QueryPresetConstraints
+      delete?: QueryPresetConstraints
+      read?: QueryPresetConstraints
+      update?: QueryPresetConstraints
+    }
+  }
   /** Control the routing structure that Payload binds itself to. */
   routes?: {
     /** The route for the admin panel.

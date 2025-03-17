@@ -1378,7 +1378,6 @@ export { findVersionByIDOperation as findVersionByIDOperationGlobal } from './gl
 export { findVersionsOperation as findVersionsOperationGlobal } from './globals/operations/findVersions.js'
 export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
-export type { ListPreset } from './list-presets/types.js'
 export type {
   CollapsedPreferences,
   ColumnPreference,
@@ -1390,6 +1389,7 @@ export type {
   PreferenceUpdateRequest,
   TabsPreferences,
 } from './preferences/types.js'
+export type { QueryPreset } from './query-presets/types.js'
 export type { JobsConfig, RunJobAccess, RunJobAccessArgs } from './queues/config/types/index.js'
 export type {
   RunInlineTaskFunction,

@@ -19,9 +19,9 @@ import { ColumnSelector } from '../ColumnSelector/index.js'
 import { Pill } from '../Pill/index.js'
 import { SearchFilter } from '../SearchFilter/index.js'
 import { WhereBuilder } from '../WhereBuilder/index.js'
-import { ActiveListPreset } from './ActiveListPreset/index.js'
+import { ActiveQueryPreset } from './ActiveQueryPreset/index.js'
 import { getTextFieldsToBeSearched } from './getTextFieldsToBeSearched.js'
-import { useListPresets } from './useListPresets.js'
+import { useQueryPresets } from './useQueryPresets.js'
 import './index.scss'
 
 const baseClass = 'list-controls'
@@ -36,12 +36,12 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     beforeActions,
     collectionConfig,
     collectionSlug,
-    disableListPresets,
+    disableQueryPresets,
     enableColumns = true,
     enableSort = false,
     listMenuItems: listMenuItemsFromProps,
-    listPreset: activePreset,
-    listPresetPermissions,
+    querypreset: activePreset,
+    querypresetPermissions,
     renderedFilters,
     resolvedFilterOptions,
   } = props
@@ -53,14 +53,14 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     DeletePresetModal,
     EditPresetDrawer,
     hasModifiedPreset,
-    listPresetMenuItems,
     openPresetListDrawer,
     PresetListDrawer,
+    querypresetMenuItems,
     resetPreset,
-  } = useListPresets({
+  } = useQueryPresets({
     activePreset,
     collectionSlug,
-    listPresetPermissions,
+    querypresetPermissions,
   })
 
   const titleField = useUseTitleField(collectionConfig)
@@ -138,13 +138,13 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
   let listMenuItems: React.ReactNode[] = listMenuItemsFromProps
 
   if (
-    collectionConfig?.enableListPresets &&
-    !disableListPresets &&
-    listPresetMenuItems?.length > 0
+    collectionConfig?.enableQueryPresets &&
+    !disableQueryPresets &&
+    querypresetMenuItems?.length > 0
   ) {
     // Cannot push or unshift into `listMenuItemsFromProps` as it will mutate the original array
     listMenuItems = [
-      ...listPresetMenuItems,
+      ...querypresetMenuItems,
       listMenuItemsFromProps?.length > 0 ? <PopupList.Divider key="divider" /> : null,
       ...(listMenuItemsFromProps || []),
     ]
@@ -207,8 +207,8 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                   {t('general:sort')}
                 </Pill>
               )}
-              {!disableListPresets && (
-                <ActiveListPreset
+              {!disableQueryPresets && (
+                <ActiveQueryPreset
                   activePreset={activePreset}
                   openPresetListDrawer={openPresetListDrawer}
                   resetPreset={resetPreset}

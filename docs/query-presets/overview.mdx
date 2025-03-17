@@ -1,0 +1,126 @@
+---
+title: Query Presets
+label: Overview
+order: 10
+desc: Query Presets allow you to save and share filters, columns, and sort orders for your collections.
+keywords:
+---
+
+Query Presets allow you to save and share filters, columns, and sort orders for your [Collections](../configuration/collections). This is useful for reusing common or complex filtering patterns and column configurations across your team.
+
+Each Query preset is saved as a new record in the database under the `payload-query-presets` collection. This allows for an endless number of preset configurations, where the users of your app define the presets that are most useful to them, rather than being hard coded into the Payload Config.
+
+Within the [Admin Panel](../admin/overview), Query Presets are applied to the List View. When enabled, new controls are displayed for you can manage presets. Once saved, these presets are available for future use by you and your team.
+
+To enable Query Presets on a Collection, use the `enableQueryPresets` property in your [Collection Config](../configuration/collections).
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const MyCollection: CollectionConfig = {
+  // ...
+  // highlight-start
+  enableQueryPresets: true,
+  // highlight-end
+}
+```
+
+## Access Control
+
+Query Presets are subject to the same [Access Control](../access-control/overview) as the rest of Payload. This means you can use the same function patterns you are already familiar with to control who can read, update, and delete each individual Query preset.
+
+### Default Access Control
+
+By default, Payload provides a set of sensible defaults for all Query Presets, but you can customize these rules to suit your needs. Those defaults are as follows:
+
+- Only Me: Only the user who created the preset can read, update, and delete it.
+- Everyone: All users can read, update, and delete the preset.
+- Specific Users: Only select users can read, update, and delete the preset.
+
+When a user manages a Query preset, these options will be available to them in the Admin Panel.
+
+### Custom Access Control
+
+You can also add custom access control rules to Query Presets. For example, you could create a rule that only allows users with a specific role to read, update, or delete a preset.
+
+#### Adding a new option
+
+To add a custom access control rule, you'll first need to append a new option for users to select when managing a Query preset. Options are per operation, so you can have completely different rules for reading, updating, and deleting.
+
+Each options requires a label, a value, and a list of fields that will be used to determine access. The fields are conditionally rendered only when that particular option is selected.
+
+To do this, use the `queryPresets.constraints` property in your [Payload Config](../configuration/payload-config).
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  // highlight-start
+  queryPresets: {
+    // ...
+    constraints: {
+      read: {
+        label: 'Specific Roles',
+        value: 'specificRoles,
+        fields: [
+          {
+            name: 'roles',
+            type: 'select',
+            hasMany: true,
+            options: [
+              { label: 'Admin', value: 'admin' },
+              { label: 'User', value: 'user' },
+            ],
+          },
+        ],
+      },
+      update: {
+        // ...
+      },
+      delete: {
+        // ...
+      },
+    }
+  },
+  // highlight-end
+})
+```
+
+#### Applying the new option
+
+Once you've added the new option, you'll need to write specific access control rules for each operation using the fields that you've provided. Payload will automatically merge these rules with the default rules.
+
+To do this, use the `queryPresets.access` property in your [Collection Config](../configuration/collections):
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  // highlight-start
+  queryPresets: {
+    // ...
+    access: {
+      read: ({ req: { user } }) => ({
+        'access.read.roles': {
+          // Your fields are automatically injected into the access[operation] group
+          in: user?.roles,
+        },
+      }),
+      update: () => {
+        // ...
+      },
+      delete: () => {
+        // ...
+      },
+    },
+  },
+  // highlight-end
+})
+```
+
+<Banner type="warning">
+  **Note:** Payload injects your custom fields into the `access[operation]`
+  group, so your rules need to reflect this.
+</Banner>
