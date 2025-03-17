@@ -307,6 +307,7 @@ export const useListPresets = ({
     openPresetListDrawer: openListDrawer,
     PresetListDrawer: (
       <ListDrawer
+        allowCreate={false}
         disableListPresets
         onSelect={async ({ doc }) => {
           closeListDrawer()
