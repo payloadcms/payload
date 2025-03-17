@@ -7,7 +7,7 @@ import type { ITableColumns, TableColumnsProviderProps } from './types.js'
 
 import { useConfig } from '../../providers/Config/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
-import { TableColumnContext, TableColumnsModifiedContext } from './context.js'
+import { TableColumnContext } from './context.js'
 
 export { useTableColumns } from './context.js'
 
@@ -29,16 +29,10 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
     (state, action: Column[]) => action,
   )
 
-  const [modified, setModified] = React.useState(false)
-
   const contextRef = useRef({} as ITableColumns)
-
-  contextRef.current.modified = modified
 
   const toggleColumn = useCallback(
     async (column: string) => {
-      setModified(true)
-
       const newColumnState = (columnState || []).map((col) => {
         if (col.accessor === column) {
           return { ...col, active: !col.active }
@@ -59,8 +53,6 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
 
   const moveColumn = useCallback(
     async (args: { fromIndex: number; toIndex: number }) => {
-      setModified(true)
-
       const { fromIndex, toIndex } = args
       const newColumnState = [...(columnState || [])]
       const [columnToMove] = newColumnState.splice(fromIndex, 1)
@@ -78,11 +70,7 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
   )
 
   const setActiveColumns = useCallback(
-    async (columns: string[], shouldSetModified = true) => {
-      if (shouldSetModified) {
-        setModified(true)
-      }
-
+    async (columns: string[]) => {
       const newColumnState = currentQuery.columns
 
       columns.forEach((colName) => {
@@ -100,7 +88,7 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
   )
 
   const resetColumnsState = React.useCallback(async () => {
-    await setActiveColumns(defaultColumns, false)
+    await setActiveColumns(defaultColumns)
   }, [defaultColumns, setActiveColumns])
 
   return (
@@ -108,16 +96,14 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
       value={{
         columns: columnState,
         LinkedCellOverride,
-        modified,
         moveColumn,
         resetColumnsState,
         setActiveColumns,
-        setModified,
         toggleColumn,
         ...contextRef.current,
       }}
     >
-      <TableColumnsModifiedContext value={modified}>{children}</TableColumnsModifiedContext>
+      {children}
     </TableColumnContext>
   )
 }
