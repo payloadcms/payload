@@ -1106,6 +1106,10 @@ export type Config = {
    * @see https://payloadcms.com/docs/plugins/overview
    */
   plugins?: Plugin[]
+  /**
+   * Allow you to save and share filters, columns, and sort orders for your collections.
+   * @see https://payloadcms.com/docs/query-presets/overview
+   */
   queryPresets?: {
     access: {
       create?: Access

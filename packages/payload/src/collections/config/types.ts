@@ -421,7 +421,8 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    */
   disableDuplicate?: boolean
   /**
-   * Opt-in to enable query presets for this collection
+   * Opt-in to enable query presets for this collection.
+   * @see https://payloadcms.com/docs/query-presets/overview
    */
   enableQueryPresets?: boolean
   /**
