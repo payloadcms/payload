@@ -2,8 +2,8 @@
 
 import React from 'react'
 
+import { DragHandleIcon } from '../../icons/DragHandle/index.js'
 import './index.scss'
-import { DragHandleVerticalIcon } from '../../icons/DragHandleVertical/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 
 const baseClass = 'sort-row'
@@ -14,7 +14,7 @@ export const SortRow = () => {
 
   return (
     <div className={`${baseClass} ${isActive ? 'active' : ''}`} role="button" tabIndex={0}>
-      <DragHandleVerticalIcon className={`${baseClass}__icon`} />
+      <DragHandleIcon className={`${baseClass}__icon`} />
     </div>
   )
 }
