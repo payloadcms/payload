@@ -24,10 +24,7 @@ export const Users: CollectionConfig = {
       saveToJWT: true,
       type: 'select',
       name: 'role',
-      options: [
-        'super-admin',
-        'user',
-      ]
+      options: ['super-admin', 'user'],
     },
     {
       // the entire object will be stored in the JWT
@@ -46,7 +43,7 @@ export const Users: CollectionConfig = {
           type: 'text',
           name: 'omitField',
         },
-      ]
+      ],
     },
     {
       type: 'group',
@@ -63,18 +60,18 @@ export const Users: CollectionConfig = {
           type: 'text',
           name: 'omitField',
         },
-      ]
+      ],
     },
-  ]
+  ],
 }
 ```
 
 <Banner type="success">
   **Tip:**
 
-  If you wish to use a different key other than the field `name`, you can define `saveToJWT` as a string.
-</Banner>
+If you wish to use a different key other than the field `name`, you can define `saveToJWT` as a string.
 
+</Banner>
 
 ### Using Token Data
 

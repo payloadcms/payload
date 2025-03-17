@@ -14,13 +14,20 @@ import './index.scss'
 const baseClass = 'tabs-field__tab-button'
 
 type TabProps = {
+  readonly hidden?: boolean
   readonly isActive?: boolean
   readonly parentPath: string
   readonly setIsActive: () => void
   readonly tab: ClientTab
 }
 
-export const TabComponent: React.FC<TabProps> = ({ isActive, parentPath, setIsActive, tab }) => {
+export const TabComponent: React.FC<TabProps> = ({
+  hidden,
+  isActive,
+  parentPath,
+  setIsActive,
+  tab,
+}) => {
   const { i18n } = useTranslation()
   const [errorCount, setErrorCount] = useState(undefined)
 
@@ -40,6 +47,7 @@ export const TabComponent: React.FC<TabProps> = ({ isActive, parentPath, setIsAc
           baseClass,
           fieldHasErrors && `${baseClass}--has-error`,
           isActive && `${baseClass}--active`,
+          hidden && `${baseClass}--hidden`,
         ]
           .filter(Boolean)
           .join(' ')}

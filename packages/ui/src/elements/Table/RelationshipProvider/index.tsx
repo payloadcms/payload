@@ -1,7 +1,7 @@
 'use client'
 import type { TypeWithID } from 'payload'
 
-import React, { createContext, useCallback, useContext, useEffect, useReducer, useRef } from 'react'
+import React, { createContext, use, useCallback, useEffect, useReducer, useRef } from 'react'
 
 import { useDebounce } from '../../../hooks/useDebounce.js'
 import { useConfig } from '../../../providers/Config/index.js'
@@ -115,7 +115,7 @@ export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNod
     [],
   )
 
-  return <Context.Provider value={{ documents, getRelationships }}>{children}</Context.Provider>
+  return <Context value={{ documents, getRelationships }}>{children}</Context>
 }
 
-export const useListRelationships = (): ListRelationshipContext => useContext(Context)
+export const useListRelationships = (): ListRelationshipContext => use(Context)

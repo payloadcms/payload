@@ -3,7 +3,7 @@
 import type { Locale } from 'payload'
 
 import { useSearchParams } from 'next/navigation.js'
-import React, { createContext, useContext, useEffect, useRef, useState } from 'react'
+import React, { createContext, use, useEffect, useRef, useState } from 'react'
 
 import { findLocaleFromCode } from '../../utilities/findLocaleFromCode.js'
 import { useAuth } from '../Auth/index.js'
@@ -114,18 +114,18 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
   }, [defaultLocale, getPreference, localization, fetchURL, localeFromParams, user?.id])
 
   return (
-    <LocaleContext.Provider value={locale}>
-      <LocaleLoadingContext.Provider value={{ localeIsLoading: isLoading, setLocaleIsLoading }}>
+    <LocaleContext value={locale}>
+      <LocaleLoadingContext value={{ localeIsLoading: isLoading, setLocaleIsLoading }}>
         {children}
-      </LocaleLoadingContext.Provider>
-    </LocaleContext.Provider>
+      </LocaleLoadingContext>
+    </LocaleContext>
   )
 }
 
-export const useLocaleLoading = () => useContext(LocaleLoadingContext)
+export const useLocaleLoading = () => use(LocaleLoadingContext)
 
 /**
  * TODO: V4
  * The return type of the `useLocale` hook will change in v4. It will return `null | Locale` instead of `false | {} | Locale`.
  */
-export const useLocale = (): Locale => useContext(LocaleContext)
+export const useLocale = (): Locale => use(LocaleContext)
