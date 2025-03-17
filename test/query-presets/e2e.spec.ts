@@ -33,7 +33,7 @@ let payload: PayloadTestSDK<Config>
 let serverURL: string
 let everyoneID: string | undefined
 
-describe('Query presets', () => {
+describe('Query Presets', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))

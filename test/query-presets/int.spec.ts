@@ -368,7 +368,7 @@ describe('Shared Filters', () => {
         collection: 'payload-query-presets',
         user,
         data: {
-          title: 'Disabled Query presets',
+          title: 'Disabled Query Presets',
           relatedCollection: 'users',
         },
       })

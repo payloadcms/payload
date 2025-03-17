@@ -8,7 +8,7 @@ keywords:
 
 Query Presets allow you to save and share filters, columns, and sort orders for your [Collections](../configuration/collections). This is useful for reusing common or complex filtering patterns and column configurations across your team.
 
-Each Query preset is saved as a new record in the database under the `payload-query-presets` collection. This allows for an endless number of preset configurations, where the users of your app define the presets that are most useful to them, rather than being hard coded into the Payload Config.
+Each Query Preset is saved as a new record in the database under the `payload-query-presets` collection. This allows for an endless number of preset configurations, where the users of your app define the presets that are most useful to them, rather than being hard coded into the Payload Config.
 
 Within the [Admin Panel](../admin/overview), Query Presets are applied to the List View. When enabled, new controls are displayed for you can manage presets. Once saved, these presets are available for future use by you and your team.
 
@@ -27,7 +27,7 @@ export const MyCollection: CollectionConfig = {
 
 ## Access Control
 
-Query Presets are subject to the same [Access Control](../access-control/overview) as the rest of Payload. This means you can use the same function patterns you are already familiar with to control who can read, update, and delete each individual Query preset.
+Query Presets are subject to the same [Access Control](../access-control/overview) as the rest of Payload. This means you can use the same function patterns you are already familiar with to control who can read, update, and delete each individual Query Preset.
 
 ### Default Access Control
 
@@ -37,7 +37,7 @@ By default, Payload provides a set of sensible defaults for all Query Presets, b
 - Everyone: All users can read, update, and delete the preset.
 - Specific Users: Only select users can read, update, and delete the preset.
 
-When a user manages a Query preset, these options will be available to them in the Admin Panel.
+When a user manages a Query Preset, these options will be available to them in the Admin Panel.
 
 ### Custom Access Control
 
@@ -45,7 +45,7 @@ You can also add custom access control rules to Query Presets. For example, you 
 
 #### Adding a new option
 
-To add a custom access control rule, you'll first need to append a new option for users to select when managing a Query preset. Options are per operation, so you can have completely different rules for reading, updating, and deleting.
+To add a custom access control rule, you'll first need to append a new option for users to select when managing a Query Preset. Options are per operation, so you can have completely different rules for reading, updating, and deleting.
 
 Each options requires a label, a value, and a list of fields that will be used to determine access. The fields are conditionally rendered only when that particular option is selected.
 

@@ -156,8 +156,9 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
     ],
   },
   labels: {
-    plural: 'Query presets',
-    singular: 'Query preset',
+    plural: 'Query Presets',
+    singular: 'Query Preset',
+    ...(config.queryPresets?.labels || {}),
   },
   lockDocuments: false,
 })
