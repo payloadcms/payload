@@ -53,8 +53,12 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
 
   const refineListData = useCallback(
     // eslint-disable-next-line @typescript-eslint/require-await
-    async (incomingQuery: ListQuery) => {
-      setModified(true)
+    async (incomingQuery: ListQuery, modified?: boolean) => {
+      if (modified !== undefined) {
+        setModified(modified)
+      } else {
+        setModified(true)
+      }
 
       let page = 'page' in incomingQuery ? incomingQuery.page : currentQuery?.page
 

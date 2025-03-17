@@ -81,21 +81,27 @@ export const useListPresets = ({
 
   const handlePresetChange = useCallback(
     async (preset: ListPreset) => {
-      await refineListData({
-        columns: preset.columns ? transformColumnsToSearchParams(preset.columns) : undefined,
-        preset: preset.id,
-        where: preset.where,
-      })
+      await refineListData(
+        {
+          columns: preset.columns ? transformColumnsToSearchParams(preset.columns) : undefined,
+          preset: preset.id,
+          where: preset.where,
+        },
+        false,
+      )
     },
     [refineListData],
   )
 
   const resetListPreset = useCallback(async () => {
-    await refineListData({
-      columns: undefined,
-      preset: undefined,
-      where: undefined,
-    })
+    await refineListData(
+      {
+        columns: undefined,
+        preset: undefined,
+        where: undefined,
+      },
+      false,
+    )
   }, [refineListData])
 
   const handleDeletePreset = useCallback(async () => {

@@ -2,6 +2,7 @@ import type {
   ClientCollectionConfig,
   ColumnPreference,
   ListPreferences,
+  ListPreset,
   ListQuery,
   PaginatedDocs,
   Sort,
@@ -41,6 +42,6 @@ export type IListQueryContext = {
   defaultSort?: Sort
   modified: boolean
   query: ListQuery
-  refineListData: (args: ListQuery) => Promise<void>
+  refineListData: (args: ListQuery, setModified?: boolean) => Promise<void>
   setModified: (modified: boolean) => void
 } & ContextHandlers
