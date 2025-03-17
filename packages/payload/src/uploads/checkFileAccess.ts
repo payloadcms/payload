@@ -30,7 +30,7 @@ export const checkFileAccess = async ({
   })
 
   const accessResult = await executeAccess(
-    { id: data.id, data, isReadingStaticFile: true, req },
+    { id: data?.id, data, isReadingStaticFile: true, req },
     config.access.read,
   )
 
