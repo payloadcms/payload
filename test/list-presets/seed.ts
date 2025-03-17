@@ -1,12 +1,21 @@
-import type { Payload } from 'payload'
+import type { ListPreset, Payload } from 'payload'
 
 import { devUser as devCredentials, regularUser as regularCredentials } from '../credentials.js'
 import { executePromises } from '../helpers/executePromises.js'
 import { seedDB } from '../helpers/seed.js'
 import { collectionSlugs, pagesSlug, usersSlug } from './slugs.js'
 
-export const seedData = {
+type SeededListPreset = {
+  relatedCollection: 'pages'
+} & Omit<ListPreset, 'id' | 'relatedCollection'>
+
+export const seedData: {
+  everyone: SeededListPreset
+  onlyMe: SeededListPreset
+} = {
   onlyMe: {
+    relatedCollection: 'pages',
+    isShared: false,
     title: 'Only Me',
     columns: [
       {
@@ -32,6 +41,8 @@ export const seedData = {
     },
   },
   everyone: {
+    relatedCollection: 'pages',
+    isShared: true,
     title: 'Everyone',
     access: {
       delete: {
@@ -131,28 +142,14 @@ export const seed = async (_payload: Payload) => {
           collection: 'payload-list-presets',
           user: devUser,
           overrideAccess: false,
-          data: {
-            isShared: true,
-            title: seedData.everyone.title,
-            where: seedData.everyone.where,
-            access: seedData.everyone.access as any,
-            columns: seedData.everyone.columns,
-            relatedCollection: pagesSlug,
-          },
+          data: seedData.everyone,
         }),
       () =>
         _payload.create({
           collection: 'payload-list-presets',
           user: devUser,
           overrideAccess: false,
-          data: {
-            title: seedData.onlyMe.title,
-            isShared: false,
-            where: seedData.onlyMe.where,
-            access: seedData.onlyMe.access as any,
-            columns: seedData.onlyMe.columns,
-            relatedCollection: pagesSlug,
-          },
+          data: seedData.onlyMe,
         }),
     ],
     false,

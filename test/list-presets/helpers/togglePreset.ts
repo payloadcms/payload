@@ -37,7 +37,7 @@ export async function clearSelectedPreset({ page }: { page: Page }) {
 
   await expect(
     page.locator('button#select-preset', {
-      hasText: exactText('Select preset'),
+      hasText: exactText('Select Preset'),
     }),
   ).toBeVisible()
 }

@@ -12,7 +12,7 @@ export async function expectURLParams({
   where,
   presetID,
 }: {
-  columns: ColumnPreference[]
+  columns?: ColumnPreference[]
   page: Page
   presetID?: string | undefined
   where: Where

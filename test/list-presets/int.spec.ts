@@ -226,6 +226,9 @@ describe('Shared Filters', () => {
             update: {
               constraint: 'everyone',
             },
+            delete: {
+              constraint: 'everyone',
+            },
           },
           relatedCollection: 'pages',
         },
@@ -394,6 +397,9 @@ describe('Shared Filters', () => {
               constraint: 'everyone',
             },
             update: {
+              constraint: 'everyone',
+            },
+            delete: {
               constraint: 'everyone',
             },
           },

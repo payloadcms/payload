@@ -116,7 +116,7 @@ export const getListPresetsConfig = (config: Config): CollectionConfig => ({
   ],
   hooks: {
     beforeValidate: [
-      ({ data, operation }) => {
+      ({ data, operation, req }) => {
         // TODO: type this
         const typedData = data as any
 
@@ -131,8 +131,8 @@ export const getListPresetsConfig = (config: Config): CollectionConfig => ({
               typedData[operation] = {}
             }
 
-            // If there is no default constraint for this operation, or if the list preset is not shared, set the constraint to 'onlyMe'
-            if (!typedData.access[operation]?.constraint || !data?.isShared) {
+            // Ensure all operations have a constraint
+            if (!typedData.access[operation]?.constraint) {
               typedData.access[operation] = {
                 ...typedData.access[operation],
                 constraint: 'onlyMe',

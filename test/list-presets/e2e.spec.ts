@@ -55,7 +55,6 @@ describe('List Presets', () => {
         },
       })
       .then((res) => {
-        console.log(res.docs?.[0])
         return res.docs?.[0]?.id
       })
 
@@ -67,6 +66,7 @@ describe('List Presets', () => {
   test('should select preset and apply filters', async () => {
     await page.goto(pagesUrl.list)
     await clearSelectedPreset({ page })
+    console.log(seedData.everyone.title)
     await selectPreset({ page, presetTitle: seedData.everyone.title })
 
     await expectURLParams({
@@ -102,7 +102,7 @@ describe('List Presets', () => {
 
     await expect(
       page.locator('button#select-preset', {
-        hasText: exactText('Select preset'),
+        hasText: exactText('Select Preset'),
       }),
     ).toBeVisible()
 
@@ -119,13 +119,7 @@ describe('List Presets', () => {
     // recreate preset for the next tests
     await payload.create({
       collection: 'payload-list-presets',
-      data: {
-        title: seedData.everyone.title,
-        where: seedData.onlyMe.where,
-        access: seedData.onlyMe.access as any,
-        columns: seedData.onlyMe.columns,
-        relatedCollection: 'pages',
-      },
+      data: seedData.everyone,
     })
   })
 
@@ -191,7 +185,8 @@ describe('List Presets', () => {
     ).toBeHidden()
   })
 
-  test('should reset active changes', () => {
+  // eslint-disable-next-line playwright/no-skipped-test, playwright/expect-expect
+  test.skip('should reset active changes', () => {
     // select a preset, make a change to the presets, click "reset", and ensure the changes are reverted
   })
 
@@ -206,6 +201,8 @@ describe('List Presets', () => {
     await drawer.locator('input[name="title"]').fill('New Title')
 
     await saveDocAndAssert(page)
+
+    await drawer.locator('button.doc-drawer__header-close').click()
     await expect(drawer).toBeHidden()
 
     await expect(
@@ -222,10 +219,12 @@ describe('List Presets', () => {
     await expect(page.locator('#select-preset')).toBeHidden()
   })
 
+  // eslint-disable-next-line playwright/no-skipped-test, playwright/expect-expect
   test.skip('only show save for everyone when a preset has active changes', () => {
     // select a preset, make a change to the presets, and ensure the "save for everyone" button is visible
   })
 
+  // eslint-disable-next-line playwright/no-skipped-test, playwright/expect-expect
   test.skip('can save for everyone', () => {
     // select a preset, make a change to the presets, click "save for everyone", and ensure the changes are saved
   })
@@ -233,7 +232,7 @@ describe('List Presets', () => {
   test('can create new preset', async () => {
     await page.goto(pagesUrl.list)
 
-    await clickListMenuItem({ page, menuItemLabel: 'Create new preset' })
+    await clickListMenuItem({ page, menuItemLabel: 'Create new Preset' })
     const modal = page.locator('[id^=doc-drawer_payload-list-presets_0_]')
     await expect(modal).toBeVisible()
     await modal.locator('input[name="title"]').fill('New Preset')
