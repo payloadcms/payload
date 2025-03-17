@@ -993,6 +993,7 @@ export { JWTAuthentication } from './auth/strategies/jwt.js'
 export type {
   AuthStrategyFunction,
   AuthStrategyFunctionArgs,
+  AuthStrategyResult,
   CollectionPermission,
   DocumentPermissions,
   FieldPermissions,

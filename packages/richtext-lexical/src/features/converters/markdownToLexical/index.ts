@@ -1,24 +1,21 @@
+import type { SerializedLexicalNode } from 'lexical'
+
 import { createHeadlessEditor } from '@lexical/headless'
-import { $getRoot, $getSelection, type SerializedLexicalNode } from 'lexical'
 
 import type { SanitizedServerEditorConfig } from '../../../lexical/config/types.js'
 import type { DefaultNodeTypes, TypedEditorState } from '../../../nodeTypes.js'
 
 import { getEnabledNodes } from '../../../lexical/nodes/index.js'
-import { $generateNodesFromDOM } from '../../../lexical-proxy/@lexical-html.js'
+import { $convertFromMarkdownString } from '../../../packages/@lexical/markdown/index.js'
 
-export const convertHTMLToLexical = <TNodeTypes extends SerializedLexicalNode = DefaultNodeTypes>({
+export const convertMarkdownToLexical = <
+  TNodeTypes extends SerializedLexicalNode = DefaultNodeTypes,
+>({
   editorConfig,
-  html,
-  JSDOM,
+  markdown,
 }: {
   editorConfig: SanitizedServerEditorConfig
-  html: string
-  JSDOM: new (html: string) => {
-    window: {
-      document: Document
-    }
-  }
+  markdown: string
 }): TypedEditorState<TNodeTypes> => {
   const headlessEditor = createHeadlessEditor({
     nodes: getEnabledNodes({
@@ -28,17 +25,7 @@ export const convertHTMLToLexical = <TNodeTypes extends SerializedLexicalNode = 
 
   headlessEditor.update(
     () => {
-      const dom = new JSDOM(html)
-
-      const nodes = $generateNodesFromDOM(headlessEditor, dom.window.document)
-
-      $getRoot().select()
-
-      const selection = $getSelection()
-      if (selection === null) {
-        throw new Error('Selection is null')
-      }
-      selection.insertNodes(nodes)
+      $convertFromMarkdownString(markdown, editorConfig.features.markdownTransformers)
     },
     { discrete: true },
   )
