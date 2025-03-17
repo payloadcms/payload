@@ -1,3 +1,4 @@
+export { FieldDiffLabel } from '../../elements/FieldDiffLabel/index.js'
 // IMPORTANT: the shared.ts file CANNOT contain any Server Components _that import client components_.
 export { filterFields } from '../../elements/TableColumns/filterFields.js'
 export { getInitialColumns } from '../../elements/TableColumns/getInitialColumns.js'

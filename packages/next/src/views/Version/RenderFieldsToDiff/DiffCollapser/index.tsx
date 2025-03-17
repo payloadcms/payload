@@ -2,10 +2,10 @@
 import type { ClientField } from 'payload'
 
 import { ChevronIcon, Pill, useConfig, useTranslation } from '@payloadcms/ui'
+import { FieldDiffLabel } from '@payloadcms/ui/shared'
 import { fieldIsArrayType, fieldIsBlockType } from 'payload/shared'
 import React, { useState } from 'react'
 
-import Label from '../Label/index.js'
 import './index.scss'
 import { countChangedFields, countChangedFieldsInRows } from '../utilities/countChangedFields.js'
 
@@ -100,7 +100,7 @@ export const DiffCollapser: React.FC<Props> = ({
 
   return (
     <div className={baseClass}>
-      <Label>
+      <FieldDiffLabel>
         <button
           aria-label={isCollapsed ? 'Expand' : 'Collapse'}
           className={`${baseClass}__toggle-button`}
@@ -115,7 +115,7 @@ export const DiffCollapser: React.FC<Props> = ({
             {t('version:changedFieldsCount', { count: changeCount })}
           </Pill>
         )}
-      </Label>
+      </FieldDiffLabel>
       <div className={contentClassNames}>{children}</div>
     </div>
   )
