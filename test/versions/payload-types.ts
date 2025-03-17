@@ -77,6 +77,7 @@ export interface Config {
     'version-posts': VersionPost;
     'custom-ids': CustomId;
     diff: Diff;
+    text: Text;
     media: Media;
     users: User;
     'payload-jobs': PayloadJob;
@@ -97,6 +98,7 @@ export interface Config {
     'version-posts': VersionPostsSelect<false> | VersionPostsSelect<true>;
     'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
     diff: DiffSelect<false> | DiffSelect<true>;
+    text: TextSelect<false> | TextSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
@@ -397,6 +399,16 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "text".
+ */
+export interface Text {
+  id: string;
+  text: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -554,6 +566,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'diff';
         value: string | Diff;
+      } | null)
+    | ({
+        relationTo: 'text';
+        value: string | Text;
       } | null)
     | ({
         relationTo: 'media';
@@ -800,6 +816,15 @@ export interface DiffSelect<T extends boolean = true> {
   text?: T;
   textArea?: T;
   upload?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "text_select".
+ */
+export interface TextSelect<T extends boolean = true> {
+  text?: T;
   updatedAt?: T;
   createdAt?: T;
 }
