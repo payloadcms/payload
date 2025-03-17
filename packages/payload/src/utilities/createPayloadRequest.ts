@@ -11,7 +11,6 @@ import { getPayload } from '../index.js'
 import { sanitizeLocales } from './addLocalesToRequest.js'
 import { getRequestLanguage } from './getRequestLanguage.js'
 import { parseCookies } from './parseCookies.js'
-import { sanitizeFallbackLocale } from './sanitizeFallbackLocale.js'
 
 type Args = {
   config: Promise<SanitizedConfig> | SanitizedConfig
