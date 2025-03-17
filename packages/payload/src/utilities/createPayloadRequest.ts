@@ -66,18 +66,13 @@ export const createPayloadRequest = async ({
     : {}
 
   if (localization) {
-    fallbackLocale = sanitizeFallbackLocale({
-      fallbackLocale,
-      locale,
-      localization,
-    })
-
     const locales = sanitizeLocales({
       fallbackLocale,
       locale,
       localization,
     })
 
+    fallbackLocale = locales.fallbackLocale
     locale = locales.locale
   }
 
