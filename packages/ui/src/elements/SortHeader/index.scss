@@ -6,22 +6,6 @@
     gap: calc(var(--base) / 2);
     align-items: center;
 
-    &__label {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    &__label,
-    .btn {
-      vertical-align: middle;
-      display: inline-block;
-    }
-
-    &__label {
-      cursor: default;
-    }
-
     &__buttons {
       display: flex;
       align-items: center;
@@ -30,6 +14,7 @@
 
     &__button {
       margin: 0;
+      padding: 0 !important;
       opacity: 0.3;
       padding: calc(var(--base) / 4);
       display: inline-flex;
