@@ -58,7 +58,9 @@ type NodeTypes =
   | SerializedBlockNode<MyTextBlock>
   | SerializedInlineBlockNode<MyInlineBlock>
 
-const htmlConverters: HTMLConvertersFunction<NodeTypes> = ({ defaultConverters }) => ({
+const htmlConverters: HTMLConvertersFunction<NodeTypes> = ({
+  defaultConverters,
+}) => ({
   ...defaultConverters,
   blocks: {
     // Each key should match your block's slug
@@ -144,7 +146,9 @@ const Pages: CollectionConfig = {
           myTextBlock: ({ node, providedCSSString }) =>
             `<div style="background-color: red;${providedCSSString}">${node.fields.text}</div>`,
         },
-      })) as HTMLConvertersFunction<DefaultNodeTypes | SerializedBlockNode<MyTextBlock>>,
+      })) as HTMLConvertersFunction<
+        DefaultNodeTypes | SerializedBlockNode<MyTextBlock>
+      >,
     }),
   ],
 }
@@ -195,7 +199,11 @@ import React from 'react'
 
 import config from '../../config.js'
 
-export const MyRSCComponent = async ({ data }: { data: SerializedEditorState }) => {
+export const MyRSCComponent = async ({
+  data,
+}: {
+  data: SerializedEditorState
+}) => {
   const payload = await getPayload({
     config,
   })
@@ -218,7 +226,10 @@ export const MyRSCComponent = async ({ data }: { data: SerializedEditorState }) 
 If you need to convert raw HTML into a Lexical editor state, use `convertHTMLToLexical` from `@payloadcms/richtext-lexical`, along with the [editorConfigFactory to retrieve the editor config](/docs/rich-text/converters#retrieving-the-editor-config):
 
 ```ts
-import { convertHTMLToLexical, editorConfigFactory } from '@payloadcms/richtext-lexical'
+import {
+  convertHTMLToLexical,
+  editorConfigFactory,
+} from '@payloadcms/richtext-lexical'
 // Make sure you have jsdom and @types/jsdom installed
 import { JSDOM } from 'jsdom'
 

@@ -26,7 +26,10 @@ const plaintext = convertLexicalToPlaintext({ data })
 The `convertLexicalToPlaintext` functions accepts a `converters` object that allows you to customize how specific nodes are converted to plaintext.
 
 ```ts
-import type { DefaultNodeTypes, SerializedBlockNode } from '@payloadcms/richtext-lexical'
+import type {
+  DefaultNodeTypes,
+  SerializedBlockNode,
+} from '@payloadcms/richtext-lexical'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import type { MyTextBlock } from '@/payload-types'
 
@@ -38,7 +41,9 @@ import {
 // Your richtext data here
 const data: SerializedEditorState = {}
 
-const converters: PlaintextConverters<DefaultNodeTypes | SerializedBlockNode<MyTextBlock>> = {
+const converters: PlaintextConverters<
+  DefaultNodeTypes | SerializedBlockNode<MyTextBlock>
+> = {
   blocks: {
     textBlock: ({ node }) => {
       return node.fields.text ?? ''
@@ -58,6 +63,7 @@ const plaintext = convertLexicalToPlaintext({
 Unlike other converters, there are no default converters for plaintext.
 
 If a node does not have a converter defined, the following heuristics are used to convert it to plaintext:
+
 - If the node has a `text` field, it will be used as the plaintext.
 - If the node has a `children` field, the children will be recursively converted to plaintext.
 - If the node has neither, it will be ignored.

@@ -13,7 +13,10 @@ If you have access to the Payload Config and the [lexical editor config](/docs/r
 ```ts
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
-import { convertLexicalToMarkdown, editorConfigFactory } from '@payloadcms/richtext-lexical'
+import {
+  convertLexicalToMarkdown,
+  editorConfigFactory,
+} from '@payloadcms/richtext-lexical'
 
 // Your richtext data here
 const data: SerializedEditorState = {}
@@ -55,7 +58,8 @@ const Pages: CollectionConfig = {
       hooks: {
         afterRead: [
           ({ siblingData, siblingFields }) => {
-            const data: SerializedEditorState = siblingData['nameOfYourRichTextField']
+            const data: SerializedEditorState =
+              siblingData['nameOfYourRichTextField']
 
             if (!data) {
               return ''
@@ -65,7 +69,8 @@ const Pages: CollectionConfig = {
               data,
               editorConfig: editorConfigFactory.fromField({
                 field: siblingFields.find(
-                  (field) => 'name' in field && field.name === 'nameOfYourRichTextField',
+                  (field) =>
+                    'name' in field && field.name === 'nameOfYourRichTextField',
                 ) as RichTextField,
               }),
             })
@@ -91,7 +96,10 @@ const Pages: CollectionConfig = {
 If you have access to the Payload Config and the [lexical editor config](/docs/rich-text/converters#retrieving-the-editor-config), you can convert Markdown to the lexical editor state with the following:
 
 ```ts
-import { convertMarkdownToLexical, editorConfigFactory } from '@payloadcms/richtext-lexical'
+import {
+  convertMarkdownToLexical,
+  editorConfigFactory,
+} from '@payloadcms/richtext-lexical'
 
 const html = convertMarkdownToLexical({
   editorConfig: await editorConfigFactory.default({
@@ -110,6 +118,7 @@ Payload supports serializing and deserializing MDX content. While Markdown conve
 Here is an example of a `Banner` block.
 
 This block:
+
 - Renders in the admin UI as a normal Lexical block with specific fields (e.g. type, content).
 - Converts to an MDX `Banner` component.
 - Can parse that MDX `Banner` back into a Lexical state.
@@ -200,7 +209,8 @@ const Pages: CollectionConfig = {
       hooks: {
         afterRead: [
           ({ siblingData, siblingFields }) => {
-            const data: SerializedEditorState = siblingData['nameOfYourRichTextField']
+            const data: SerializedEditorState =
+              siblingData['nameOfYourRichTextField']
 
             if (!data) {
               return ''
@@ -210,7 +220,8 @@ const Pages: CollectionConfig = {
               data,
               editorConfig: editorConfigFactory.fromField({
                 field: siblingFields.find(
-                  (field) => 'name' in field && field.name === 'nameOfYourRichTextField',
+                  (field) =>
+                    'name' in field && field.name === 'nameOfYourRichTextField',
                 ) as RichTextField,
               }),
             })
@@ -237,18 +248,18 @@ The conversion is done using the `jsx` property of the block. The `export` funct
 
 The `export` function takes the block field data and the `lexicalToMarkdown` function as arguments. It returns the following object:
 
-| Property | Type   | Description                                                                 |
-| -------- | ------ | --------------------------------------------------------------------------- |
+| Property   | Type   | Description                                                        |
+| ---------- | ------ | ------------------------------------------------------------------ |
 | `children` | string | This will be in between the opening and closing tags of the block. |
-| `props`    | object | This will be in the opening tag of the block. |
+| `props`    | object | This will be in the opening tag of the block.                      |
 
 ### Import
 
 The `import` function provides data extracted from the MDX. It takes the following arguments:
 
-| Argument | Type   | Description                                                                 |
-| -------- | ------ | --------------------------------------------------------------------------- |
-| `children` | string | This will be the text between the opening and closing tags of the block. |
+| Argument   | Type   | Description                                                                          |
+| ---------- | ------ | ------------------------------------------------------------------------------------ |
+| `children` | string | This will be the text between the opening and closing tags of the block.             |
 | `props`    | object | These are the props passed to the block, parsed from the opening tag into an object. |
 
 The returning object is equal to the block field data.
