@@ -1,0 +1,11 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .lexical-diff {
+    &__diff-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+  }
+}

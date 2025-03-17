@@ -1,48 +1,64 @@
-.html-diff-create-text-wrapper {
-  background: #d4eee9;
-}
+@import '../../../scss/styles.scss';
 
-.html-diff-delete-text-wrapper {
-  color: #8e3ee2;
-  text-decoration-color: #7024c0;
-  text-decoration-line: line-through;
-}
+@layer payload-default {
+  .lexical-diff__diff-container {
+    p:has(.html-diff-create-text-wrapper) {
+      background: var(--theme-success-100);
+    }
 
-.html-diff-create-inline-wrapper,
-.html-diff-delete-inline-wrapper {
-  display: inline-flex;
-}
+    p:has(.html-diff-delete-text-wrapper) {
+      background: var(--theme-error-100);
+    }
 
-.html-diff-create-block-wrapper,
-.html-diff-delete-block-wrapper {
-  display: flex;
-}
+    .html-diff {
+      &-create-text-wrapper {
+        background: var(--theme-success-200);
+      }
 
-.html-diff-create-inline-wrapper,
-.html-diff-delete-inline-wrapper,
-.html-diff-create-block-wrapper,
-.html-diff-delete-block-wrapper {
-  position: relative;
-  align-items: center;
-  flex-direction: row;
+      &-delete-text-wrapper {
+        color: var(--theme-error-500);
+        text-decoration-color: var(--theme-error-500);
+        text-decoration-line: line-through;
+      }
 
-  &::after {
-    position: absolute;
-    top: 0;
-    left: 0;
-    display: block;
-    width: 100%;
-    height: 100%;
-    content: '';
+      &-create-inline-wrapper,
+      &-delete-inline-wrapper {
+        display: inline-flex;
+      }
+
+      &-create-block-wrapper,
+      &-delete-block-wrapper {
+        display: flex;
+      }
+
+      &-create-inline-wrapper,
+      &-delete-inline-wrapper,
+      &-create-block-wrapper,
+      &-delete-block-wrapper {
+        position: relative;
+        align-items: center;
+        flex-direction: row;
+
+        &::after {
+          position: absolute;
+          top: 0;
+          left: 0;
+          display: block;
+          width: 100%;
+          height: 100%;
+          content: '';
+        }
+      }
+
+      &-create-inline-wrapper::after,
+      &-create-block-wrapper::after {
+        background: var(--theme-success-200);
+      }
+
+      &-delete-inline-wrapper::after,
+      &-delete-block-wrapper::after {
+        background: var(--theme-success-200);
+      }
+    }
   }
-}
-
-.html-diff-create-inline-wrapper::after,
-.html-diff-create-block-wrapper::after {
-  background: rgba(212, 238, 233, 0.7);
-}
-
-.html-diff-delete-inline-wrapper::after,
-.html-diff-delete-block-wrapper::after {
-  background: rgba(222, 207, 227, 0.7);
 }
