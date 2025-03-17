@@ -23,9 +23,7 @@ First, import the necessary utilities:
 
 ```ts
 import type { SanitizedConfig } from 'payload'
-import {
-  editorConfigFactory,
-} from '@payloadcms/richtext-lexical'
+import { editorConfigFactory } from '@payloadcms/richtext-lexical'
 
 // Your Payload Config needs to be available in order to retrieve the default editor config
 const config: SanitizedConfig = {} as SanitizedConfig
@@ -54,9 +52,7 @@ const fieldEditorConfig = editorConfigFactory.fromField({
 You can create a custom editor configuration by specifying additional features:
 
 ```ts
-import {
-  FixedToolbarFeature,
-} from '@payloadcms/richtext-lexical'
+import { FixedToolbarFeature } from '@payloadcms/richtext-lexical'
 
 const customEditorConfig = await editorConfigFactory.fromFeatures({
   config,
@@ -94,7 +90,11 @@ If you have access to the sanitized collection config, you can access the lexica
 ```ts
 import type { CollectionConfig, RichTextField } from 'payload'
 
-import { editorConfigFactory, getEnabledNodes, lexicalEditor } from '@payloadcms/richtext-lexical'
+import {
+  editorConfigFactory,
+  getEnabledNodes,
+  lexicalEditor,
+} from '@payloadcms/richtext-lexical'
 
 export const MyCollection: CollectionConfig = {
   slug: 'slug',
@@ -128,5 +128,3 @@ export const MyCollection: CollectionConfig = {
   ],
 }
 ```
-
-

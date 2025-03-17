@@ -8,6 +8,8 @@ import type {
   FormStateWithoutComponents,
   PayloadRequest,
   SanitizedFieldsPermissions,
+  SelectMode,
+  SelectType,
 } from 'payload'
 
 import type { RenderFieldMethod } from './types.js'
@@ -70,6 +72,8 @@ type Args = {
   renderFieldFn?: RenderFieldMethod
   req: PayloadRequest
   schemaPath: string
+  select?: SelectType
+  selectMode?: SelectMode
   skipValidation?: boolean
 }
 
@@ -90,6 +94,8 @@ export const fieldSchemasToFormState = async ({
   renderFieldFn,
   req,
   schemaPath,
+  select,
+  selectMode,
   skipValidation,
 }: Args): Promise<FormState> => {
   if (!clientFieldSchemaMap && renderFieldFn) {
@@ -109,6 +115,8 @@ export const fieldSchemasToFormState = async ({
       fields,
       locale: req.locale,
       req,
+      select,
+      selectMode,
       siblingData: dataWithDefaultValues,
       user: req.user,
     })
@@ -142,6 +150,8 @@ export const fieldSchemasToFormState = async ({
       renderAllFields,
       renderFieldFn,
       req,
+      select,
+      selectMode,
       skipValidation,
       state,
     })
