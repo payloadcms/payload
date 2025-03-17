@@ -137,7 +137,7 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
       }
       path={path}
       placeholder={placeholder}
-      readOnly={disabled || readOnly}
+      readOnly={readOnly || disabled}
       required={required}
       rtl={renderRTL}
       showError={showError}
