@@ -30,7 +30,7 @@ export const create: Create = async function create(
 
   if (customIDType) {
     data._id = data.id
-  } else if (this.acceptIDOnCreate && data.id) {
+  } else if (this.allowIDOnCreate && data.id) {
     try {
       data._id = new Types.ObjectId(data.id as string)
     } catch (error) {

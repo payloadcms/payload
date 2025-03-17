@@ -49,7 +49,7 @@ export default buildConfig({
 | `afterSchemaInit`          | Drizzle schema hook. Runs after the schema is built. [More Details](#afterschemainit)                                                                                            |
 | `generateSchemaOutputFile` | Override generated schema from `payload generate:db-schema` file path. Defaults to `{CWD}/src/payload-generated.schema.ts`                                                       |
 | `autoIncrement`            | Pass `true` to enable SQLite [AUTOINCREMENT](https://www.sqlite.org/autoinc.html) for primary keys to ensure the same ID cannot be reused from deleted rows                      |
-| `acceptIDOnCreate`         | Enable this flag if you want to thread your own ID to create operation data without using a custom ID field.                                                                     |
+| `allowIDOnCreate`          | Enable this flag if you want to thread your own ID to create operation data without using a custom ID field.                                                                     |
 
 ## Access to Drizzle
 

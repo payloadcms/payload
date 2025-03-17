@@ -1837,7 +1837,7 @@ describe('database', () => {
   })
 
   it('accepts ID on create', async () => {
-    payload.db.acceptIDOnCreate = true
+    payload.db.allowIDOnCreate = true
     let id: any = null
     if (payload.db.name === 'mongoose') {
       id = new mongoose.Types.ObjectId().toHexString()
@@ -1850,6 +1850,6 @@ describe('database', () => {
     const post = await payload.create({ collection: 'posts', data: { id, title: 'created' } })
 
     expect(post.id).toBe(id)
-    payload.db.acceptIDOnCreate = false
+    payload.db.allowIDOnCreate = false
   })
 })

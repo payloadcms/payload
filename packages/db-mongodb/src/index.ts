@@ -64,6 +64,13 @@ export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
 
 export interface Args {
   /**
+   * By default, Payload strips all additional keys from MongoDB data that don't exist
+   * in the Payload schema. If you have some data that you want to include to the result
+   * but it doesn't exist in Payload, you can enable this flag
+   * @default false
+   */
+  allowAdditionalKeys?: boolean
+  /**
    * Enable this flag if you want to thread your own ID to create operation data, for example:
    * ```ts
    * import { Types } from 'mongoose'
@@ -73,14 +80,7 @@ export interface Args {
    * assertEq(doc.id, id)
    * ```
    */
-  acceptIDOnCreate?: boolean
-  /**
-   * By default, Payload strips all additional keys from MongoDB data that don't exist
-   * in the Payload schema. If you have some data that you want to include to the result
-   * but it doesn't exist in Payload, you can enable this flag
-   * @default false
-   */
-  allowAdditionalKeys?: boolean
+  allowIDOnCreate?: boolean
   /** Set to false to disable auto-pluralization of collection names, Defaults to true */
   autoPluralization?: boolean
 
@@ -193,8 +193,8 @@ declare module 'payload' {
 }
 
 export function mongooseAdapter({
-  acceptIDOnCreate = false,
   allowAdditionalKeys = false,
+  allowIDOnCreate = false,
   autoPluralization = true,
   collectionsSchemaOptions = {},
   connectOptions,
@@ -231,8 +231,8 @@ export function mongooseAdapter({
       url,
       versions: {},
       // DatabaseAdapter
-      acceptIDOnCreate,
       allowAdditionalKeys,
+      allowIDOnCreate,
       beginTransaction: transactionOptions === false ? defaultBeginTransaction() : beginTransaction,
       collectionsSchemaOptions,
       commitTransaction,

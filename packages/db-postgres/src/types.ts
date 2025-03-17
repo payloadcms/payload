@@ -14,19 +14,19 @@ import type { Pool, PoolConfig } from 'pg'
 
 export type Args = {
   /**
+   * Transform the schema after it's built.
+   * You can use it to customize the schema with features that aren't supported by Payload.
+   * Examples may include: composite indices, generated columns, vectors
+   */
+  afterSchemaInit?: PostgresSchemaHook[]
+  /**
    * Enable this flag if you want to thread your own ID to create operation data, for example:
    * ```ts
    * // doc created with id 1
    * const doc = await payload.create({ collection: 'posts', data: {id: 1, title: "my title"}})
    * ```
    */
-  acceptIDOnCreate?: boolean
-  /**
-   * Transform the schema after it's built.
-   * You can use it to customize the schema with features that aren't supported by Payload.
-   * Examples may include: composite indices, generated columns, vectors
-   */
-  afterSchemaInit?: PostgresSchemaHook[]
+  allowIDOnCreate?: boolean
   /**
    * Transform the schema before it's built.
    * You can use it to preserve an existing database schema and if there are any collissions Payload will override them.

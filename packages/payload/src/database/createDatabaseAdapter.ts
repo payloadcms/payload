@@ -22,7 +22,7 @@ const commitTransaction: CommitTransaction = () => Promise.resolve(null)
 export function createDatabaseAdapter<T extends BaseDatabaseAdapter>(
   args: MarkOptional<
     T,
-    | 'acceptIDOnCreate'
+    | 'allowIDOnCreate'
     | 'createMigration'
     | 'migrate'
     | 'migrateDown'

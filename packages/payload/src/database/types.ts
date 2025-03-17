@@ -14,7 +14,7 @@ import type { TypeWithVersion } from '../versions/types.js'
 export type { TypeWithVersion }
 
 export interface BaseDatabaseAdapter {
-  acceptIDOnCreate?: boolean
+  allowIDOnCreate?: boolean
   /**
    * Start a transaction, requiring commitTransaction() to be called for any changes to be made.
    * @returns an identifier for the transaction or null if one cannot be established
