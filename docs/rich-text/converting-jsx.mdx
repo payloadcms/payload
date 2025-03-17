@@ -16,16 +16,16 @@ import { RichText } from '@payloadcms/richtext-lexical/react'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
 export const MyComponent = ({ data }: { data: SerializedEditorState }) => {
-  return (
-    <RichText data={data} />
-  )
+  return <RichText data={data} />
 }
 ```
 
 The `RichText` component includes built-in converters for common Lexical nodes. You can add or override converters via the `converters` prop for custom blocks, custom nodes, or any modifications you need. See the [website template](https://github.com/payloadcms/payload/blob/main/templates/website/src/components/RichText/index.tsx) for a working example.
 
 <Banner type="default">
-  When fetching data, ensure your `depth` setting is high enough to fully populate Lexical nodes such as uploads. The JSX converter requires fully populated data to work correctly.
+  When fetching data, ensure your `depth` setting is high enough to fully
+  populate Lexical nodes such as uploads. The JSX converter requires fully
+  populated data to work correctly.
 </Banner>
 
 ### Converting Internal Links
@@ -35,7 +35,10 @@ By default, Payload doesn't know how to convert **internal** links to JSX, as it
 To fix this, you need to pass the `internalDocToHref` prop to `LinkJSXConverter`. This prop is a function that receives the link node and returns the URL of the document.
 
 ```tsx
-import type { DefaultNodeTypes, SerializedLinkNode } from '@payloadcms/richtext-lexical'
+import type {
+  DefaultNodeTypes,
+  SerializedLinkNode,
+} from '@payloadcms/richtext-lexical'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
 import {
@@ -51,10 +54,22 @@ const internalDocToHref = ({ linkNode }: { linkNode: SerializedLinkNode }) => {
     throw new Error('Expected value to be an object')
   }
   const slug = value.slug
-  return relationTo === 'posts' ? `/posts/${slug}` : `/${slug}`
+
+  switch (relationTo) {
+    case 'posts':
+      return `/posts/${slug}`
+    case 'categories':
+      return `/category/${slug}`
+    case 'pages':
+      return `/${slug}`
+    default:
+      return `/${relationTo}/${slug}`
+  }
 }
 
-const jsxConverters: JSXConvertersFunction<DefaultNodeTypes> = ({ defaultConverters }) => ({
+const jsxConverters: JSXConvertersFunction<DefaultNodeTypes> = ({
+  defaultConverters,
+}) => ({
   ...defaultConverters,
   ...LinkJSXConverter({ internalDocToHref }),
 })
@@ -82,7 +97,10 @@ import type {
 } from '@payloadcms/richtext-lexical'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
-import { type JSXConvertersFunction, RichText } from '@payloadcms/richtext-lexical/react'
+import {
+  type JSXConvertersFunction,
+  RichText,
+} from '@payloadcms/richtext-lexical/react'
 import React from 'react'
 
 // Extend the default node types with your custom blocks for full type safety
@@ -91,12 +109,16 @@ type NodeTypes =
   | SerializedBlockNode<MyNumberBlock | MyTextBlock>
   | SerializedInlineBlockNode<MyInlineBlock>
 
-const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) => ({
+const jsxConverters: JSXConvertersFunction<NodeTypes> = ({
+  defaultConverters,
+}) => ({
   ...defaultConverters,
   blocks: {
     // Each key should match your block's slug
     myNumberBlock: ({ node }) => <div>{node.fields.number}</div>,
-    myTextBlock: ({ node }) => <div style={{ backgroundColor: 'red' }}>{node.fields.text}</div>,
+    myTextBlock: ({ node }) => (
+      <div style={{ backgroundColor: 'red' }}>{node.fields.text}</div>
+    ),
   },
   inlineBlocks: {
     // Each key should match your inline block's slug
@@ -119,10 +141,16 @@ Example - overriding the upload node converter to use next/image:
 
 ```tsx
 'use client'
-import type { DefaultNodeTypes, SerializedUploadNode } from '@payloadcms/richtext-lexical'
+import type {
+  DefaultNodeTypes,
+  SerializedUploadNode,
+} from '@payloadcms/richtext-lexical'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
-import { type JSXConvertersFunction, RichText } from '@payloadcms/richtext-lexical/react'
+import {
+  type JSXConvertersFunction,
+  RichText,
+} from '@payloadcms/richtext-lexical/react'
 import Image from 'next/image'
 import React from 'react'
 
@@ -144,7 +172,9 @@ const CustomUploadComponent: React.FC<{
   return null
 }
 
-const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) => ({
+const jsxConverters: JSXConvertersFunction<NodeTypes> = ({
+  defaultConverters,
+}) => ({
   ...defaultConverters,
   // Override the default upload converter
   upload: ({ node }) => {
