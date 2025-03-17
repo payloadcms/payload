@@ -19,9 +19,9 @@ export const updateOne: UpdateOne = async function updateOne(
     joins: joinQuery,
     locale,
     req,
-    returning,
     select,
     where: whereArg,
+    returning,
   },
 ) {
   const db = await getTransaction(this, req)
@@ -71,12 +71,12 @@ export const updateOne: UpdateOne = async function updateOne(
     data,
     db,
     fields: collection.flattenedFields,
-    ignoreResult: returning === false,
     joinQuery,
     operation: 'update',
     req,
     select,
     tableName,
+    ignoreResult: returning === false,
   })
 
   if (returning === false) {
