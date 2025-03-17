@@ -28,7 +28,6 @@ export { QueryPresetsWhereCell } from '../../elements/QueryPresets/cells/WhereCe
 export { QueryPresetsAccessCell } from '../../elements/QueryPresets/cells/AccessCell/index.js'
 export { QueryPresetsColumnsField } from '../../elements/QueryPresets/fields/ColumnsField/index.js'
 export { QueryPresetsWhereField } from '../../elements/QueryPresets/fields/WhereField/index.js'
-export { QueryPresetsAccessLabel } from '../../elements/QueryPresets/fields/AccessLabel/index.js'
 
 // elements
 export { ConfirmationModal } from '../../elements/ConfirmationModal/index.js'
