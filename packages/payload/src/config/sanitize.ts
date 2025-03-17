@@ -31,7 +31,7 @@ import {
   lockedDocumentsCollectionSlug,
 } from '../locked-documents/config.js'
 import { getPreferencesCollection, preferencesCollectionSlug } from '../preferences/config.js'
-import { getqueryPresetsConfig, queryPresetsCollectionSlug } from '../query-presets/config.js'
+import { getQueryPresetsConfig, queryPresetsCollectionSlug } from '../query-presets/config.js'
 import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/index.js'
 import { flattenBlock } from '../utilities/flattenAllFields.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
@@ -343,7 +343,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     configWithDefaults.collections.push(
       await sanitizeCollection(
         config as unknown as Config,
-        getqueryPresetsConfig(config as unknown as Config),
+        getQueryPresetsConfig(config as unknown as Config),
         richTextSanitizationPromises,
         validRelationships,
       ),
