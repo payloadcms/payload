@@ -117,21 +117,12 @@ export const EditManyDrawerContent: React.FC<
   } & EditManyProps
 > = (props) => {
   const {
-    collection: { slug, fields, labels: { plural, singular } } = {},
+    collection: { fields, labels: { plural, singular } } = {},
     collection,
     drawerSlug,
     selectedFields,
     setSelectedFields,
   } = props
-
-  const select = useMemo<SelectType>(() => {
-    return unflatten(
-      selectedFields.reduce((acc, field) => {
-        acc[field.path] = true
-        return acc
-      }, {} as SelectType),
-    )
-  }, [selectedFields])
 
   const { permissions, user } = useAuth()
 
@@ -154,20 +145,29 @@ export const EditManyDrawerContent: React.FC<
   const router = useRouter()
   const abortFormStateRef = React.useRef<AbortController>(null)
   const { clearRouteCache } = useRouteCache()
-  const collectionPermissions = permissions?.collections?.[slug]
+  const collectionPermissions = permissions?.collections?.[collection.slug]
   const searchParams = useSearchParams()
+
+  const select = useMemo<SelectType>(() => {
+    return unflatten(
+      selectedFields.reduce((acc, field) => {
+        acc[field.path] = true
+        return acc
+      }, {} as SelectType),
+    )
+  }, [selectedFields])
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState }) => {
       const controller = handleAbortRef(abortFormStateRef)
 
       const { state } = await getFormState({
-        collectionSlug: slug,
+        collectionSlug: collection.slug,
         docPermissions: collectionPermissions,
         docPreferences: null,
         formState: prevFormState,
         operation: 'update',
-        schemaPath: slug,
+        schemaPath: collection.slug,
         select,
         signal: controller.signal,
       })
@@ -176,7 +176,7 @@ export const EditManyDrawerContent: React.FC<
 
       return state
     },
-    [getFormState, slug, collectionPermissions, select],
+    [getFormState, collection, collectionPermissions, select],
   )
 
   useEffect(() => {
@@ -247,7 +247,7 @@ export const EditManyDrawerContent: React.FC<
 
   return (
     <DocumentInfoProvider
-      collectionSlug={slug}
+      collectionSlug={collection.slug}
       currentEditor={user}
       hasPublishedDoc={false}
       id={null}
@@ -289,7 +289,7 @@ export const EditManyDrawerContent: React.FC<
                 fields={selectedFields}
                 parentIndexPath=""
                 parentPath=""
-                parentSchemaPath={slug}
+                parentSchemaPath={collection.slug}
                 permissions={collectionPermissions?.fields}
                 readOnly={false}
               />
@@ -301,17 +301,17 @@ export const EditManyDrawerContent: React.FC<
                     {collection?.versions?.drafts ? (
                       <React.Fragment>
                         <SaveDraftButton
-                          action={`${serverURL}${apiRoute}/${slug}${queryString}&draft=true`}
+                          action={`${serverURL}${apiRoute}/${collection.slug}${queryString}&draft=true`}
                           disabled={selectedFields.length === 0}
                         />
                         <PublishButton
-                          action={`${serverURL}${apiRoute}/${slug}${queryString}&draft=true`}
+                          action={`${serverURL}${apiRoute}/${collection.slug}${queryString}&draft=true`}
                           disabled={selectedFields.length === 0}
                         />
                       </React.Fragment>
                     ) : (
                       <Submit
-                        action={`${serverURL}${apiRoute}/${slug}${queryString}`}
+                        action={`${serverURL}${apiRoute}/${collection.slug}${queryString}`}
                         disabled={selectedFields.length === 0}
                       />
                     )}

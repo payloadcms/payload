@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { assertNetworkRequests } from 'helpers/e2e/assertNetworkRequests.js'
 import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import path from 'path'
 import { wait } from 'payload/shared'
@@ -892,7 +893,6 @@ describe('Uploads', () => {
     })
 
     test('should apply field value to all bulk upload files after edit many', async () => {
-      // Navigate to the upload creation page
       await page.goto(uploadsOne.create)
 
       // Upload single file
@@ -900,12 +900,14 @@ describe('Uploads', () => {
         '.file-field input[type="file"]',
         path.resolve(dirname, './image.png'),
       )
+
       const filename = page.locator('.file-field__filename')
       await expect(filename).toHaveValue('image.png')
 
       const bulkUploadButton = page.locator('#field-hasManyUpload button', {
         hasText: exactText('Create New'),
       })
+
       await bulkUploadButton.click()
 
       const bulkUploadModal = page.locator('#bulk-upload-drawer-slug-1')
@@ -921,20 +923,27 @@ describe('Uploads', () => {
       const editManyBulkUploadModal = page.locator('#edit-uploads-2-bulk-uploads')
       await expect(editManyBulkUploadModal).toBeVisible()
 
-      const fieldSelector = page.locator('.edit-many-bulk-uploads__form .react-select')
-      await fieldSelector.click({ delay: 100 })
+      await page.locator('.edit-many-bulk-uploads__form .react-select').click({ delay: 100 })
       const options = page.locator('.rs__option')
-      // Select an option
+
       await options.locator('text=Prefix').click()
 
-      await page.locator('#edit-uploads-2-bulk-uploads #field-prefix').fill('some prefix')
+      // wait for form state to return and remove the error state from the required field
+      await assertNetworkRequests(
+        page,
+        uploadsOne.create,
+        async () => {
+          await page.locator('#edit-uploads-2-bulk-uploads #field-prefix').fill('some prefix')
+        },
+        {
+          allowedNumberOfRequests: 1,
+        },
+      )
 
       await page.locator('.edit-many-bulk-uploads__sidebar-wrap button').click()
-
-      const saveButton = page.locator('.bulk-upload--actions-bar__saveButtons button')
-      await saveButton.click()
-
+      await page.locator('.bulk-upload--actions-bar__saveButtons button').click()
       await page.waitForSelector('#field-hasManyUpload .upload--has-many__dragItem')
+
       const itemCount = await page
         .locator('#field-hasManyUpload .upload--has-many__dragItem')
         .count()
