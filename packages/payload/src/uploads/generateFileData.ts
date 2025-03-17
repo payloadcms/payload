@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { OutputInfo, Sharp, SharpOptions } from 'sharp'
 
 import { fileTypeFromBuffer } from 'file-type'
@@ -140,7 +141,7 @@ export const generateFileData = async <T>({
     let mime: string
     const fileHasAdjustments =
       fileSupportsResize &&
-      Boolean(resizeOptions || formatOptions || imageSizes || trimOptions || file.tempFilePath)
+      Boolean(resizeOptions || formatOptions || trimOptions || file.tempFilePath)
 
     const sharpOptions: SharpOptions = {}
 

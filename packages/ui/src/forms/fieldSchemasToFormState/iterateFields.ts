@@ -8,8 +8,11 @@ import type {
   FormStateWithoutComponents,
   PayloadRequest,
   SanitizedFieldsPermissions,
+  SelectMode,
+  SelectType,
 } from 'payload'
 
+import { stripUnselectedFields } from 'payload'
 import { getFieldPaths } from 'payload/shared'
 
 import type { AddFieldStatePromiseArgs } from './addFieldStatePromise.js'
@@ -23,6 +26,10 @@ type Args = {
    * if any parents is localized, then the field is localized. @default false
    */
   anyParentLocalized?: boolean
+  /**
+   * Data of the nearest parent block, or undefined
+   */
+  blockData: Data | undefined
   clientFieldSchemaMap?: ClientFieldSchemaMap
   collectionSlug?: string
   data: Data
@@ -57,6 +64,8 @@ type Args = {
   renderAllFields: boolean
   renderFieldFn: RenderFieldMethod
   req: PayloadRequest
+  select?: SelectType
+  selectMode?: SelectMode
   /**
    * Whether to skip checking the field's condition. @default false
    */
@@ -75,6 +84,7 @@ export const iterateFields = async ({
   id,
   addErrorPathToParent: addErrorPathToParentArg,
   anyParentLocalized = false,
+  blockData,
   clientFieldSchemaMap,
   collectionSlug,
   data,
@@ -96,6 +106,8 @@ export const iterateFields = async ({
   renderAllFields,
   renderFieldFn: renderFieldFn,
   req,
+  select,
+  selectMode,
   skipConditionChecks = false,
   skipValidation = false,
   state = {},
@@ -113,11 +125,32 @@ export const iterateFields = async ({
       parentSchemaPath,
     })
 
+    if (path !== 'id') {
+      const shouldContinue = stripUnselectedFields({
+        field,
+        select,
+        selectMode,
+        siblingDoc: data,
+      })
+
+      if (!shouldContinue) {
+        return
+      }
+    }
+
+    const pathSegments = path ? path.split('.') : []
+
     if (!skipConditionChecks) {
       try {
         passesCondition = Boolean(
           (field?.admin?.condition
-            ? Boolean(field.admin.condition(fullData || {}, data || {}, { user: req.user }))
+            ? Boolean(
+                field.admin.condition(fullData || {}, data || {}, {
+                  blockData,
+                  path: pathSegments,
+                  user: req.user,
+                }),
+              )
             : true) && parentPassesCondition,
         )
       } catch (err) {
@@ -135,6 +168,7 @@ export const iterateFields = async ({
         id,
         addErrorPathToParent: addErrorPathToParentArg,
         anyParentLocalized,
+        blockData,
         clientFieldSchemaMap,
         collectionSlug,
         data,
@@ -160,6 +194,8 @@ export const iterateFields = async ({
         renderFieldFn,
         req,
         schemaPath,
+        select,
+        selectMode,
         skipConditionChecks,
         skipValidation,
         state,

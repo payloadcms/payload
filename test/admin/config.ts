@@ -7,6 +7,7 @@ import { BaseListFilter } from './collections/BaseListFilter.js'
 import { CustomFields } from './collections/CustomFields/index.js'
 import { CustomViews1 } from './collections/CustomViews1.js'
 import { CustomViews2 } from './collections/CustomViews2.js'
+import { DisableCopyToLocale } from './collections/DisableCopyToLocale.js'
 import { DisableDuplicate } from './collections/DisableDuplicate.js'
 import { Geo } from './collections/Geo.js'
 import { CollectionGroup1A } from './collections/Group1A.js'
@@ -14,11 +15,14 @@ import { CollectionGroup1B } from './collections/Group1B.js'
 import { CollectionGroup2A } from './collections/Group2A.js'
 import { CollectionGroup2B } from './collections/Group2B.js'
 import { CollectionHidden } from './collections/Hidden.js'
+import { ListDrawer } from './collections/ListDrawer.js'
 import { CollectionNoApiView } from './collections/NoApiView.js'
 import { CollectionNotInView } from './collections/NotInView.js'
 import { Posts } from './collections/Posts.js'
 import { UploadCollection } from './collections/Upload.js'
+import { UploadTwoCollection } from './collections/UploadTwo.js'
 import { Users } from './collections/Users.js'
+import { with300Documents } from './collections/With300Documents.js'
 import { CustomGlobalViews1 } from './globals/CustomViews1.js'
 import { CustomGlobalViews2 } from './globals/CustomViews2.js'
 import { Global } from './globals/Global.js'
@@ -45,7 +49,7 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
     components: {
-      actions: ['/components/AdminButton/index.js#AdminButton'],
+      actions: ['/components/actions/AdminButton/index.js#AdminButton'],
       afterDashboard: [
         '/components/AfterDashboard/index.js#AfterDashboard',
         '/components/AfterDashboardClient/index.js#AfterDashboardClient',
@@ -140,6 +144,7 @@ export default buildConfigWithDefaults({
   },
   collections: [
     UploadCollection,
+    UploadTwoCollection,
     Posts,
     Users,
     CollectionHidden,
@@ -154,7 +159,10 @@ export default buildConfigWithDefaults({
     CollectionGroup2B,
     Geo,
     DisableDuplicate,
+    DisableCopyToLocale,
     BaseListFilter,
+    with300Documents,
+    ListDrawer,
   ],
   globals: [
     GlobalHidden,
@@ -177,6 +185,7 @@ export default buildConfigWithDefaults({
     },
   },
   localization: {
+    defaultLocalePublishOption: 'active',
     defaultLocale: 'en',
     locales: [
       {

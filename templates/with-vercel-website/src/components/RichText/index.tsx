@@ -3,12 +3,12 @@ import {
   DefaultNodeTypes,
   SerializedBlockNode,
   SerializedLinkNode,
+  type DefaultTypedEditorState,
 } from '@payloadcms/richtext-lexical'
-import { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import {
   JSXConvertersFunction,
   LinkJSXConverter,
-  RichText as RichTextWithoutBlocks,
+  RichText as ConvertRichText,
 } from '@payloadcms/richtext-lexical/react'
 
 import { CodeBlock, CodeBlockProps } from '@/blocks/Code/Component'
@@ -20,7 +20,7 @@ import type {
 } from '@/payload-types'
 import { BannerBlock } from '@/blocks/Banner/Component'
 import { CallToActionBlock } from '@/blocks/CallToAction/Component'
-import { cn } from '@/utilities/cn'
+import { cn } from '@/utilities/ui'
 
 type NodeTypes =
   | DefaultNodeTypes
@@ -56,7 +56,7 @@ const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) 
 })
 
 type Props = {
-  data: SerializedEditorState
+  data: DefaultTypedEditorState
   enableGutter?: boolean
   enableProse?: boolean
 } & React.HTMLAttributes<HTMLDivElement>
@@ -64,13 +64,14 @@ type Props = {
 export default function RichText(props: Props) {
   const { className, enableProse = true, enableGutter = true, ...rest } = props
   return (
-    <RichTextWithoutBlocks
+    <ConvertRichText
       converters={jsxConverters}
       className={cn(
+        'payload-richtext',
         {
-          'container ': enableGutter,
+          container: enableGutter,
           'max-w-none': !enableGutter,
-          'mx-auto prose md:prose-md dark:prose-invert ': enableProse,
+          'mx-auto prose md:prose-md dark:prose-invert': enableProse,
         },
         className,
       )}

@@ -1,14 +1,16 @@
 /* eslint-disable no-console */
 'use client'
 
-import type { Where } from 'payload'
+import type { Column, Where } from 'payload'
 
+import { TZDateMini as TZDate } from '@date-fns/tz/date/mini'
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import React from 'react'
+import { transpose } from 'date-fns/transpose'
+import * as qs from 'qs-esm'
+import React, { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 
-import type { Column } from '../../Table/index.js'
 import type { PublishType, UpcomingEvent } from './types.js'
 
 import { FieldLabel } from '../../../fields/FieldLabel/index.js'
@@ -27,12 +29,14 @@ import { Gutter } from '../../Gutter/index.js'
 import { ReactSelect } from '../../ReactSelect/index.js'
 import { ShimmerEffect } from '../../ShimmerEffect/index.js'
 import { Table } from '../../Table/index.js'
-import { buildUpcomingColumns } from './buildUpcomingColumns.js'
 import './index.scss'
+import { TimezonePicker } from '../../TimezonePicker/index.js'
+import { buildUpcomingColumns } from './buildUpcomingColumns.js'
 
 const baseClass = 'schedule-publish'
 
 type Props = {
+  defaultType?: PublishType
   slug: string
 }
 
@@ -41,11 +45,14 @@ const defaultLocaleOption = {
   value: 'all',
 }
 
-export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
+export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType }) => {
   const { toggleModal } = useModal()
   const {
     config: {
-      admin: { dateFormat },
+      admin: {
+        dateFormat,
+        timezones: { defaultTimezone, supportedTimezones },
+      },
       localization,
       routes: { api },
       serverURL,
@@ -54,13 +61,18 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
   const { id, collectionSlug, globalSlug, title } = useDocumentInfo()
   const { i18n, t } = useTranslation()
   const { schedulePublish } = useServerFunctions()
-  const [type, setType] = React.useState<PublishType>('publish')
+  const [type, setType] = React.useState<PublishType>(defaultType || 'publish')
   const [date, setDate] = React.useState<Date>()
+  const [timezone, setTimezone] = React.useState<string>(defaultTimezone)
   const [locale, setLocale] = React.useState<{ label: string; value: string }>(defaultLocaleOption)
   const [processing, setProcessing] = React.useState(false)
   const modalTitle = t('general:schedulePublishFor', { title })
   const [upcoming, setUpcoming] = React.useState<UpcomingEvent[]>()
   const [upcomingColumns, setUpcomingColumns] = React.useState<Column[]>()
+  const deleteHandlerRef = React.useRef<((id: number | string) => Promise<void>) | null>(() => null)
+
+  // Get the user timezone so we can adjust the displayed value against it
+  const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
   const localeOptions = React.useMemo(() => {
     if (localization) {
@@ -78,7 +90,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
   }, [localization, i18n])
 
   const fetchUpcoming = React.useCallback(async () => {
-    const params: { sort: string; where: Where } = {
+    const query: { sort: string; where: Where } = {
       sort: 'waitUntil',
       where: {
         and: [
@@ -97,13 +109,12 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
     }
 
     if (collectionSlug) {
-      params.where.and.push({
+      query.where.and.push({
         'input.doc.value': {
-          equals: id,
+          equals: String(id),
         },
       })
-
-      params.where.and.push({
+      query.where.and.push({
         'input.doc.relationTo': {
           equals: collectionSlug,
         },
@@ -111,7 +122,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
     }
 
     if (globalSlug) {
-      params.where.and.push({
+      query.where.and.push({
         'input.global': {
           equals: globalSlug,
         },
@@ -119,12 +130,61 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
     }
 
     const { docs } = await requests
-      .get(`${serverURL}${api}/payload-jobs`, { params })
+      .post(`${serverURL}${api}/payload-jobs`, {
+        body: qs.stringify(query),
+        headers: {
+          'Accept-Language': i18n.language,
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-HTTP-Method-Override': 'GET',
+        },
+      })
       .then((res) => res.json())
 
-    setUpcomingColumns(buildUpcomingColumns({ dateFormat, docs, i18n, localization, t }))
+    setUpcomingColumns(
+      buildUpcomingColumns({
+        dateFormat,
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        deleteHandler: deleteHandlerRef.current,
+        docs,
+        i18n,
+        localization,
+        supportedTimezones,
+        t,
+      }),
+    )
     setUpcoming(docs)
-  }, [api, collectionSlug, dateFormat, globalSlug, i18n, id, serverURL, t, localization])
+  }, [
+    collectionSlug,
+    globalSlug,
+    serverURL,
+    api,
+    i18n,
+    dateFormat,
+    localization,
+    supportedTimezones,
+    t,
+    id,
+  ])
+
+  const deleteHandler = React.useCallback(
+    async (id: number | string) => {
+      try {
+        await schedulePublish({
+          deleteID: id,
+        })
+        await fetchUpcoming()
+        toast.success(t('general:deletedSuccessfully'))
+      } catch (err) {
+        console.error(err)
+        toast.error(err.message)
+      }
+    },
+    [fetchUpcoming, schedulePublish, t],
+  )
+
+  React.useEffect(() => {
+    deleteHandlerRef.current = deleteHandler
+  }, [deleteHandler])
 
   const handleSave = React.useCallback(async () => {
     if (!date) {
@@ -146,11 +206,12 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
         doc: collectionSlug
           ? {
               relationTo: collectionSlug,
-              value: id,
+              value: String(id),
             }
           : undefined,
         global: globalSlug || undefined,
         locale: publishSpecificLocale,
+        timezone,
       })
 
       setDate(undefined)
@@ -162,7 +223,59 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
     }
 
     setProcessing(false)
-  }, [date, t, schedulePublish, type, locale, collectionSlug, id, globalSlug, fetchUpcoming])
+  }, [
+    date,
+    locale,
+    type,
+    t,
+    schedulePublish,
+    collectionSlug,
+    id,
+    globalSlug,
+    timezone,
+    fetchUpcoming,
+  ])
+
+  const displayedValue = useMemo(() => {
+    if (timezone && userTimezone && date) {
+      // Create TZDate instances for the selected timezone and the user's timezone
+      // These instances allow us to transpose the date between timezones while keeping the same time value
+      const DateWithOriginalTz = TZDate.tz(timezone)
+      const DateWithUserTz = TZDate.tz(userTimezone)
+
+      const modifiedDate = new TZDate(date).withTimeZone(timezone)
+
+      // Transpose the date to the selected timezone
+      const dateWithTimezone = transpose(modifiedDate, DateWithOriginalTz)
+
+      // Transpose the date to the user's timezone - this is necessary because the react-datepicker component insists on displaying the date in the user's timezone
+      const dateWithUserTimezone = transpose(dateWithTimezone, DateWithUserTz)
+
+      return dateWithUserTimezone.toISOString()
+    }
+
+    return date
+  }, [timezone, date, userTimezone])
+
+  const onChangeDate = useCallback(
+    (incomingDate: Date) => {
+      if (timezone && incomingDate) {
+        // Create TZDate instances for the selected timezone
+        const tzDateWithUTC = TZDate.tz(timezone)
+
+        // Creates a TZDate instance for the user's timezone  — this is default behaviour of TZDate as it wraps the Date constructor
+        const dateToUserTz = new TZDate(incomingDate)
+
+        // Transpose the date to the selected timezone
+        const dateWithTimezone = transpose(dateToUserTz, tzDateWithUTC)
+
+        setDate(dateWithTimezone || null)
+      } else {
+        setDate(incomingDate || null)
+      }
+    },
+    [setDate, timezone],
+  )
 
   React.useEffect(() => {
     if (!upcoming) {
@@ -211,15 +324,24 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
           </li>
         </ul>
         <br />
-        <FieldLabel label={t('general:time')} required />
+        <FieldLabel label={t('general:time')} path={'time'} required />
         <DatePickerField
+          id="time"
           minDate={new Date()}
-          onChange={(e) => setDate(e)}
+          onChange={(e) => onChangeDate(e)}
           pickerAppearance="dayAndTime"
           readOnly={processing}
           timeIntervals={5}
-          value={date}
+          value={displayedValue}
         />
+        {supportedTimezones.length > 0 && (
+          <TimezonePicker
+            id={`timezone-picker`}
+            onChange={setTimezone}
+            options={supportedTimezones}
+            selectedTimezone={timezone}
+          />
+        )}
         <br />
         {localeOptions.length > 0 && type === 'publish' && (
           <React.Fragment>
@@ -233,7 +355,13 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug }) => {
           </React.Fragment>
         )}
         <div className={`${baseClass}__actions`}>
-          <Button buttonStyle="primary" disabled={processing} onClick={handleSave} type="button">
+          <Button
+            buttonStyle="primary"
+            disabled={processing}
+            id="scheduled-publish-save"
+            onClick={handleSave}
+            type="button"
+          >
             {t('general:save')}
           </Button>
           {processing ? <span>{t('general:saving')}</span> : null}

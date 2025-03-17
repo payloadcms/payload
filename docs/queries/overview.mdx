@@ -31,35 +31,36 @@ const query: Where = {
 _The exact query syntax will depend on the API you are using, but the concepts are the same across all APIs. [More details](#writing-queries)._
 
 <Banner>
-  **Tip:**
-  You can also use queries within [Access Control](../access-control/overview) functions.
+  **Tip:** You can also use queries within [Access
+  Control](../access-control/overview) functions.
 </Banner>
 
 ## Operators
 
 The following operators are available for use in queries:
 
-| Operator             | Description                                                                                                                                                                         |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `equals`             | The value must be exactly equal.                                                                                                                                                    |
-| `not_equals`         | The query will return all documents where the value is not equal.                                                                                                                   |
-| `greater_than`       | For numeric or date-based fields.                                                                                                                                                   |
-| `greater_than_equal` | For numeric or date-based fields.                                                                                                                                                   |
-| `less_than`          | For numeric or date-based fields.                                                                                                                                                   |
-| `less_than_equal`    | For numeric or date-based fields.                                                                                                                                                   |
-| `like`               | Case-insensitive string must be present. If string of words, all words must be present, in any order.                                                                               |
-| `contains`           | Must contain the value entered, case-insensitive.                                                                                                                                   |
-| `in`                 | The value must be found within the provided comma-delimited list of values.                                                                                                         |
-| `not_in`             | The value must NOT be within the provided comma-delimited list of values.                                                                                                           |
-| `all`                | The value must contain all values provided in the comma-delimited list.                                                                                                             |
-| `exists`             | Only return documents where the value either exists (`true`) or does not exist (`false`).                                                                                           |
-| `near`               | For distance related to a [Point Field](../fields/point) comma separated as `<longitude>, <latitude>, <maxDistance in meters (nullable)>, <minDistance in meters (nullable)>`.      |
-| `within`             | For [Point Fields](../fields/point) to filter documents based on whether points are inside of the given area defined in GeoJSON. [Example](../fields/point#querying-within)         |
-| `intersects`         | For [Point Fields](../fields/point) to filter documents based on whether points intersect with the given area  defined in GeoJSON. [Example](../fields/point#querying-intersects)   |
+| Operator             | Description                                                                                                                                                                      |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `equals`             | The value must be exactly equal.                                                                                                                                                 |
+| `not_equals`         | The query will return all documents where the value is not equal.                                                                                                                |
+| `greater_than`       | For numeric or date-based fields.                                                                                                                                                |
+| `greater_than_equal` | For numeric or date-based fields.                                                                                                                                                |
+| `less_than`          | For numeric or date-based fields.                                                                                                                                                |
+| `less_than_equal`    | For numeric or date-based fields.                                                                                                                                                |
+| `like`               | Case-insensitive string must be present. If string of words, all words must be present, in any order.                                                                            |
+| `contains`           | Must contain the value entered, case-insensitive.                                                                                                                                |
+| `in`                 | The value must be found within the provided comma-delimited list of values.                                                                                                      |
+| `not_in`             | The value must NOT be within the provided comma-delimited list of values.                                                                                                        |
+| `all`                | The value must contain all values provided in the comma-delimited list. Note: currently this operator is supported only with the MongoDB adapter.                                |
+| `exists`             | Only return documents where the value either exists (`true`) or does not exist (`false`).                                                                                        |
+| `near`               | For distance related to a [Point Field](../fields/point) comma separated as `<longitude>, <latitude>, <maxDistance in meters (nullable)>, <minDistance in meters (nullable)>`.   |
+| `within`             | For [Point Fields](../fields/point) to filter documents based on whether points are inside of the given area defined in GeoJSON. [Example](../fields/point#querying-within)      |
+| `intersects`         | For [Point Fields](../fields/point) to filter documents based on whether points intersect with the given area defined in GeoJSON. [Example](../fields/point#querying-intersects) |
 
 <Banner type="success">
-  **Tip:**
-  If you know your users will be querying on certain fields a lot, add `index: true` to the Field Config. This will speed up searches using that field immensely.
+  **Tip:** If you know your users will be querying on certain fields a lot, add
+  `index: true` to the Field Config. This will speed up searches using that
+  field immensely.
 </Banner>
 
 ### And / Or Logic
@@ -72,14 +73,16 @@ To join queries, use the `and` or `or` keys in your query object:
 import type { Where } from 'payload'
 
 const query: Where = {
-  or: [ // highlight-line
+  or: [
+    // highlight-line
     {
       color: {
         equals: 'mint',
       },
     },
     {
-      and: [ // highlight-line
+      and: [
+        // highlight-line
         {
           color: {
             equals: 'white',
@@ -183,7 +186,9 @@ const getPosts = async () => {
     { addQueryPrefix: true },
   )
 
-  const response = await fetch(`http://localhost:3000/api/posts${stringifiedQuery}`)
+  const response = await fetch(
+    `http://localhost:3000/api/posts${stringifiedQuery}`,
+  )
   // Continue to handle the response below...
 }
 ```

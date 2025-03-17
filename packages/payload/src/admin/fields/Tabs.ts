@@ -18,13 +18,18 @@ import type {
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
+  FieldDiffClientComponent,
+  FieldDiffServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
 } from '../types.js'
 
 export type ClientTab =
-  | ({ fields: ClientField[]; readonly path?: string } & Omit<NamedTab, 'fields'>)
-  | ({ fields: ClientField[] } & Omit<UnnamedTab, 'fields'>)
+  | ({ fields: ClientField[]; passesCondition?: boolean; readonly path?: string } & Omit<
+      NamedTab,
+      'fields'
+    >)
+  | ({ fields: ClientField[]; passesCondition?: boolean } & Omit<UnnamedTab, 'fields'>)
 
 type TabsFieldBaseClientProps = FieldPaths
 
@@ -63,3 +68,7 @@ export type TabsFieldErrorServerComponent = FieldErrorServerComponent<
 >
 
 export type TabsFieldErrorClientComponent = FieldErrorClientComponent<TabsFieldClientWithoutType>
+
+export type TabsFieldDiffServerComponent = FieldDiffServerComponent<TabsField, TabsFieldClient>
+
+export type TabsFieldDiffClientComponent = FieldDiffClientComponent<TabsFieldClient>

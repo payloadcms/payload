@@ -23,6 +23,7 @@ type DateFNSKeys =
   | 'it'
   | 'ja'
   | 'ko'
+  | 'lt'
   | 'nb'
   | 'nl'
   | 'pl'

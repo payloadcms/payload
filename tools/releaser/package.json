@@ -1,0 +1,54 @@
+{
+  "name": "@tools/releaser",
+  "version": "0.0.1",
+  "description": "Release scripts for Payload",
+  "keywords": [],
+  "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./lib": {
+      "import": "./src/lib/*.ts",
+      "types": "./src/lib/*.ts",
+      "default": "./src/lib/*.ts"
+    },
+    "./utils": {
+      "import": "./src/utils/*.ts",
+      "types": "./src/utils/*.ts",
+      "default": "./src/utils/*.ts"
+    }
+  },
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "list-published": "tsx src/lib/getPackageRegistryVersions.ts",
+    "publish-prerelease": "tsx src/publish-prerelease.ts",
+    "release": "tsx src/release.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@swc-node/register": "1.10.9",
+    "@tools/constants": "workspace:*",
+    "chalk": "^4.1.2",
+    "changelogen": "^0.5.5",
+    "execa": "5.1.1",
+    "minimist": "1.2.8",
+    "open": "^10.1.0",
+    "p-limit": "^5.0.0",
+    "prompts": "2.4.2",
+    "semver": "^7.5.4",
+    "tsx": "^4.19.2"
+  },
+  "devDependencies": {
+    "@types/minimist": "1.2.5",
+    "@types/prompts": "^2.4.5",
+    "@types/semver": "^7.5.3"
+  }
+}

@@ -19,10 +19,22 @@ export type InsideFieldsPreferences = {
   collapsed: CollapsedPreferences
   tabIndex: number
 }
+
 export type FieldsPreferences = {
   [key: string]: InsideFieldsPreferences
 }
 
 export type DocumentPreferences = {
   fields: FieldsPreferences
+}
+
+export type ColumnPreference = {
+  accessor: string
+  active: boolean
+}
+
+export type ListPreferences = {
+  columns?: ColumnPreference[]
+  limit?: number
+  sort?: string
 }

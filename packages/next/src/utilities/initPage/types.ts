@@ -20,4 +20,15 @@ export type Args = {
    * The search parameters of the current route provided to all pages in Next.js.
    */
   searchParams: { [key: string]: string | string[] | undefined }
+  /**
+   * If `useLayoutReq` is `true`, this page will use the cached `req` created by the root layout
+   * instead of creating a new one.
+   *
+   * This improves performance for pages that are able to share the same `req` as the root layout,
+   * as permissions do not need to be re-calculated.
+   *
+   * If the page has unique query and url params that need to be part of the `req` object, or if you
+   * need permissions calculation to respect those you should not use this property.
+   */
+  useLayoutReq?: boolean
 }

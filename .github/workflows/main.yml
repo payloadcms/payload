@@ -41,14 +41,14 @@ jobs:
         with:
           filters: |
             needs_build:
-              - '.github/workflows/**'
+              - '.github/workflows/main.yml'
               - 'packages/**'
               - 'test/**'
               - 'pnpm-lock.yaml'
               - 'package.json'
               - 'templates/**'
             needs_tests:
-              - '.github/workflows/**'
+              - '.github/workflows/main.yml'
               - 'packages/**'
               - 'test/**'
               - 'pnpm-lock.yaml'
@@ -254,17 +254,11 @@ jobs:
         if: matrix.database == 'supabase'
 
       - name: Integration Tests
-        uses: nick-fields/retry@v3
+        run: pnpm test:int
         env:
           NODE_OPTIONS: --max-old-space-size=8096
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ env.POSTGRES_URL }}
-        with:
-          retry_on: any
-          max_attempts: 5
-          timeout_minutes: 15
-          command: pnpm test:int
-          on_retry_command: pnpm clean:build && pnpm install --no-frozen-lockfile
 
   tests-e2e:
     runs-on: ubuntu-24.04
@@ -281,6 +275,7 @@ jobs:
           - admin__e2e__general
           - admin__e2e__list-view
           - admin__e2e__document-view
+          - admin-bar
           - admin-root
           - auth
           - auth-basic
@@ -289,6 +284,7 @@ jobs:
           - fields-relationship
           - fields__collections__Array
           - fields__collections__Blocks
+          - fields__collections__Blocks#config.blockreferences.ts
           - fields__collections__Checkbox
           - fields__collections__Collapsible
           - fields__collections__ConditionalLogic
@@ -299,6 +295,7 @@ jobs:
           - fields__collections__JSON
           - fields__collections__Lexical__e2e__main
           - fields__collections__Lexical__e2e__blocks
+          - fields__collections__Lexical__e2e__blocks#config.blockreferences.ts
           - fields__collections__Number
           - fields__collections__Point
           - fields__collections__Radio
@@ -311,12 +308,14 @@ jobs:
           - fields__collections__Text
           - fields__collections__UI
           - fields__collections__Upload
+          - form-state
           - live-preview
           - localization
           - locked-documents
           - i18n
           - plugin-cloud-storage
           - plugin-form-builder
+          - plugin-import-export
           - plugin-nested-docs
           - plugin-seo
           - versions
@@ -368,13 +367,7 @@ jobs:
         run: pnpm exec playwright install-deps chromium
 
       - name: E2E Tests
-        uses: nick-fields/retry@v3
-        with:
-          retry_on: any
-          max_attempts: 5
-          timeout_minutes: 20
-          command: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e:prod:ci ${{ matrix.suite }}
-          on_retry_command: pnpm clean:build && pnpm install --no-frozen-lockfile && pnpm build:all
+        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e:prod:ci ${{ matrix.suite }}
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}.json
           NEXT_TELEMETRY_DISABLED: 1
@@ -427,6 +420,7 @@ jobs:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: payloadtests
+      MONGODB_VERSION: 6.0
 
     steps:
       - uses: actions/checkout@v4
@@ -466,8 +460,14 @@ jobs:
           echo "POSTGRES_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
         if: matrix.database == 'postgres'
 
+      # Avoid dockerhub rate-limiting
+      - name: Cache Docker images
+        uses: ScribeMD/docker-cache@0.5.0
+        with:
+          key: docker-${{ runner.os }}-mongo-${{ env.MONGODB_VERSION }}
+
       - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.11.0
+        uses: supercharge/mongodb-github-action@1.12.0
         with:
           mongodb-version: 6.0
         if: matrix.database == 'mongodb'
@@ -475,7 +475,9 @@ jobs:
       - name: Build Template
         run: |
           pnpm run script:pack --dest templates/${{ matrix.template }}
-          pnpm runts scripts/build-template-with-local-pkgs.ts ${{ matrix.template }} $POSTGRES_URL
+          pnpm run script:build-template-with-local-pkgs ${{ matrix.template }} $POSTGRES_URL
+        env:
+          NODE_OPTIONS: --max-old-space-size=8096
 
   tests-type-generation:
     runs-on: ubuntu-24.04

@@ -25,7 +25,7 @@ const getPosts = async (payload: Payload) => {
       text: true,
       // select a specific field from group
       group: {
-        number: true
+        number: true,
       },
       // select all fields from array
       array: true,
@@ -43,8 +43,8 @@ const getPosts = async (payload: Payload) => {
     select: {
       array: false,
       group: {
-        number: false
-      }
+        number: false,
+      },
     }, // highlight-line
   })
 
@@ -52,19 +52,23 @@ const getPosts = async (payload: Payload) => {
 }
 ```
 
-
 <Banner type="warning">
-  **Important:**
-  To perform querying with `select` efficiently, Payload implements your `select` query on the database level. Because of that, your `beforeRead` and `afterRead` hooks may not receive the full `doc`.
+  **Important:** To perform querying with `select` efficiently, Payload
+  implements your `select` query on the database level. Because of that, your
+  `beforeRead` and `afterRead` hooks may not receive the full `doc`. To ensure
+  that some fields are always selected for your hooks / access control,
+  regardless of the `select` query you can use `forceSelect` collection config
+  property.
 </Banner>
-
 
 ## REST API
 
 To specify select in the [REST API](../rest-api/overview), you can use the `select` parameter in your query:
 
 ```ts
-fetch('https://localhost:3000/api/posts?select[color]=true&select[group][number]=true') // highlight-line
+fetch(
+  'https://localhost:3000/api/posts?select[color]=true&select[group][number]=true',
+) // highlight-line
   .then((res) => res.json())
   .then((data) => console.log(data))
 ```
@@ -80,8 +84,8 @@ import type { Where } from 'payload'
 const select: Where = {
   text: true,
   group: {
-    number: true
-  }
+    number: true,
+  },
   // This query could be much more complex
   // and QS would handle it beautifully
 }
@@ -94,16 +98,17 @@ const getPosts = async () => {
     { addQueryPrefix: true },
   )
 
-  const response = await fetch(`http://localhost:3000/api/posts${stringifiedQuery}`)
+  const response = await fetch(
+    `http://localhost:3000/api/posts${stringifiedQuery}`,
+  )
   // Continue to handle the response below...
 }
 ```
 
 <Banner type="info">
-  **Reminder:**
-  This is the same for [Globals](../configuration/globals) using the `/api/globals` endpoint.
+  **Reminder:** This is the same for [Globals](../configuration/globals) using
+  the `/api/globals` endpoint.
 </Banner>
-
 
 ## defaultPopulate collection config property
 
@@ -138,8 +143,10 @@ export const Pages: CollectionConfig<'pages'> = {
 ```
 
 <Banner type="warning">
-  <strong>Important:</strong>
-  When using `defaultPopulate` on a collection with [Uploads](/docs/fields/upload) enabled and you want to select the `url` field, it is important to specify `filename: true` as well, otherwise Payload will not be able to construct the correct file URL, instead returning `url: null`.
+  **Important:** When using `defaultPopulate` on a collection with
+  [Uploads](/docs/fields/upload) enabled and you want to select the `url` field,
+  it is important to specify `filename: true` as well, otherwise Payload will
+  not be able to construct the correct file URL, instead returning `url: null`.
 </Banner>
 
 ## populate

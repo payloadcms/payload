@@ -35,8 +35,8 @@ export const MyGroupField: Field = {
 
 | Option                 | Description                                                                                                                                                                                                                                                                        |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`name`** *          | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                                                                                                             |
-| **`fields`** *        | Array of field types to nest within this Group.                                                                                                                                                                                                                                    |
+| **`name`** \*          | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                                                                                                                             |
+| **`fields`** \*        | Array of field types to nest within this Group.                                                                                                                                                                                                                                    |
 | **`label`**            | Used as a heading in the Admin Panel and to name the generated GraphQL type.                                                                                                                                                                                                       |
 | **`validate`**         | Provide a custom validation function that will be executed on both the Admin Panel and the backend. [More](/docs/fields/overview#validation)                                                                                                                                       |
 | **`saveToJWT`**        | If this field is top-level and nested in a config supporting [Authentication](/docs/authentication/overview), include its data in the user JWT.                                                                                                                                    |
@@ -51,28 +51,29 @@ export const MyGroupField: Field = {
 | **`typescriptSchema`** | Override field type generation with providing a JSON schema                                                                                                                                                                                                                        |
 | **`virtual`**          | Provide `true` to disable field in the database. See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges)                                                                                                                   |
 
-_* An asterisk denotes that a property is required._
+_\* An asterisk denotes that a property is required._
 
 ## Admin Options
 
-The customize the appearance and behavior of the Group Field in the [Admin Panel](../admin/overview), you can use the `admin` option:
+To customize the appearance and behavior of the Group Field in the [Admin Panel](../admin/overview), you can use the `admin` option:
 
 ```ts
 import type { Field } from 'payload'
 
 export const MyGroupField: Field = {
   // ...
-  admin: { // highlight-line
+  admin: {
+    // highlight-line
     // ...
   },
 }
 ```
 
-The Group Field inherits all of the default options from the base [Field Admin Config](../admin/fields#admin-options), plus the following additional options:
+The Group Field inherits all of the default options from the base [Field Admin Config](./overview#admin-options), plus the following additional options:
 
-| Option              | Description                                                                                                                                                                                                                   |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`hideGutter`**    | Set this property to `true` to hide this field's gutter within the Admin Panel. The field gutter is rendered as a vertical line and padding, but often if this field is nested within a Group, Block, or Array, you may want to hide the gutter. |
+| Option           | Description                                                                                                                                                                                                                                      |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`hideGutter`** | Set this property to `true` to hide this field's gutter within the Admin Panel. The field gutter is rendered as a vertical line and padding, but often if this field is nested within a Group, Block, or Array, you may want to hide the gutter. |
 
 ## Example
 

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { ExecutionResult, GraphQLSchema, ValidationRule } from 'graphql'
 import type { Request as graphQLRequest, OperationArgs } from 'graphql-http'
 import type { Logger } from 'pino'
@@ -63,6 +64,8 @@ import type {
 } from './types/index.js'
 import type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 export type { FieldState } from './admin/forms/Form.js'
+import { Cron } from 'croner'
+
 import type { TypeWithVersion } from './versions/types.js'
 
 import { decrypt, encrypt } from './auth/crypto.js'
@@ -72,9 +75,10 @@ import { generateImportMap, type ImportMap } from './bin/generateImportMap/index
 import { checkPayloadDependencies } from './checkPayloadDependencies.js'
 import localOperations from './collections/operations/local/index.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
-import { fieldAffectsData } from './fields/config/types.js'
+import { fieldAffectsData, type FlattenedBlock } from './fields/config/types.js'
 import localGlobalOperations from './globals/operations/local/index.js'
 import { getJobsLocalAPI } from './queues/localAPI.js'
+import { isNextBuild } from './utilities/isNextBuild.js'
 import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 import { traverseFields } from './utilities/traverseFields.js'
@@ -102,6 +106,9 @@ export interface GeneratedTypes {
     }
   }
 
+  blocksUntyped: {
+    [slug: string]: JsonObject
+  }
   collectionsJoinsUntyped: {
     [slug: string]: {
       [schemaPath: string]: CollectionSlug
@@ -147,6 +154,11 @@ type ResolveCollectionType<T> = 'collections' extends keyof T
   : // @ts-expect-error
     T['collectionsUntyped']
 
+type ResolveBlockType<T> = 'blocks' extends keyof T
+  ? T['blocks']
+  : // @ts-expect-error
+    T['blocksUntyped']
+
 type ResolveCollectionSelectType<T> = 'collectionsSelect' extends keyof T
   ? T['collectionsSelect']
   : // @ts-expect-error
@@ -169,6 +181,8 @@ type ResolveGlobalSelectType<T> = 'globalsSelect' extends keyof T
 
 // Applying helper types to GeneratedTypes
 export type TypedCollection = ResolveCollectionType<GeneratedTypes>
+
+export type TypedBlock = ResolveBlockType<GeneratedTypes>
 
 export type TypedUploadCollection = NonNever<{
   [K in keyof TypedCollection]:
@@ -193,6 +207,8 @@ export type StringKeyOf<T> = Extract<keyof T, string>
 
 // Define the types for slugs using the appropriate collections and globals
 export type CollectionSlug = StringKeyOf<TypedCollection>
+
+export type BlockSlug = StringKeyOf<TypedBlock>
 
 export type UploadCollectionSlug = StringKeyOf<TypedUploadCollection>
 
@@ -242,6 +258,8 @@ export class BasePayload {
   }
 
   authStrategies: AuthStrategy[]
+
+  blocks: Record<BlockSlug, FlattenedBlock> = {}
 
   collections: Record<CollectionSlug, Collection> = {}
 
@@ -578,9 +596,9 @@ export class BasePayload {
       config: this.config.globals,
     }
 
-    this.config.collections.forEach((collection) => {
+    for (const collection of this.config.collections) {
       let customIDType = undefined
-      const findCustomID: TraverseFieldsCallback = ({ field, next }) => {
+      const findCustomID: TraverseFieldsCallback = ({ field }) => {
         if (
           ['array', 'blocks', 'group'].includes(field.type) ||
           (field.type === 'tab' && 'name' in field)
@@ -598,13 +616,23 @@ export class BasePayload {
         }
       }
 
-      traverseFields({ callback: findCustomID, fields: collection.fields })
+      traverseFields({
+        callback: findCustomID,
+        config: this.config,
+        fields: collection.fields,
+        parentIsLocalized: false,
+      })
 
       this.collections[collection.slug] = {
         config: collection,
         customIDType,
       }
-    })
+    }
+
+    this.blocks = this.config.blocks.reduce((blocks, block) => {
+      blocks[block.slug] = block
+      return blocks
+    }, {})
 
     // Generate types on startup
     if (process.env.NODE_ENV !== 'production' && this.config.typescript.autoGenerate !== false) {
@@ -659,10 +687,10 @@ export class BasePayload {
         (c) => c.upload && c.upload.adapter === undefined, // Uploads enabled, but no storage adapter provided
       )
 
-      if (uploadCollWithoutAdapter) {
+      if (uploadCollWithoutAdapter.length) {
         const slugs = uploadCollWithoutAdapter.map((c) => c.slug).join(', ')
         this.logger.warn(
-          `Collections with uploads enabled require a storage adapter when deploying to Vercel. Collections without storage adapters: ${slugs}. See https://payloadcms.com/docs/upload/storage-adapters for more info.`,
+          `Collections with uploads enabled require a storage adapter when deploying to Vercel. Collection(s) without storage adapters: ${slugs}. See https://payloadcms.com/docs/upload/storage-adapters for more info.`,
         )
       }
     }
@@ -704,13 +732,49 @@ export class BasePayload {
       })
     }
 
-    if (!options.disableOnInit) {
-      if (typeof options.onInit === 'function') {
-        await options.onInit(this)
+    try {
+      if (!options.disableOnInit) {
+        if (typeof options.onInit === 'function') {
+          await options.onInit(this)
+        }
+        if (typeof this.config.onInit === 'function') {
+          await this.config.onInit(this)
+        }
       }
-      if (typeof this.config.onInit === 'function') {
-        await this.config.onInit(this)
-      }
+    } catch (error) {
+      this.logger.error({ err: error }, 'Error running onInit function')
+      throw error
+    }
+
+    if (this.config.jobs.autoRun && !isNextBuild()) {
+      const DEFAULT_CRON = '* * * * *'
+      const DEFAULT_LIMIT = 10
+
+      const cronJobs =
+        typeof this.config.jobs.autoRun === 'function'
+          ? await this.config.jobs.autoRun(this)
+          : this.config.jobs.autoRun
+
+      await Promise.all(
+        cronJobs.map((cronConfig) => {
+          const job = new Cron(cronConfig.cron ?? DEFAULT_CRON, async () => {
+            if (typeof this.config.jobs.shouldAutoRun === 'function') {
+              const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
+
+              if (!shouldAutoRun) {
+                job.stop()
+
+                return false
+              }
+            }
+
+            await this.jobs.run({
+              limit: cronConfig.limit ?? DEFAULT_LIMIT,
+              queue: cronConfig.queue,
+            })
+          })
+        }),
+      )
     }
 
     return this
@@ -769,6 +833,11 @@ export const reload = async (
       customIDType: payload.collections[collection.slug]?.customIDType,
     }
     return collections
+  }, {})
+
+  payload.blocks = config.blocks.reduce((blocks, block) => {
+    blocks[block.slug] = block
+    return blocks
   }, {})
 
   payload.globals = {
@@ -854,8 +923,12 @@ export const getPayload = async (
       try {
         const port = process.env.PORT || '3000'
 
+        const path = '/_next/webpack-hmr'
+        // The __NEXT_ASSET_PREFIX env variable is set for both assetPrefix and basePath (tested in Next.js 15.1.6)
+        const prefix = process.env.__NEXT_ASSET_PREFIX ?? ''
+
         cached.ws = new WebSocket(
-          `ws://localhost:${port}${process.env.NEXT_BASE_PATH ?? ''}/_next/webpack-hmr`,
+          process.env.PAYLOAD_HMR_URL_OVERRIDE ?? `ws://localhost:${port}${prefix}${path}`,
         )
 
         cached.ws.onmessage = (event) => {
@@ -877,6 +950,8 @@ export const getPayload = async (
     }
   } catch (e) {
     cached.promise = null
+    // add identifier to error object, so that our error logger in routeError.ts does not attempt to re-initialize getPayload
+    e.payloadInitError = true
     throw e
   }
 
@@ -897,6 +972,7 @@ interface RequestContext {
 export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 export type { Payload, RequestContext }
 export { executeAuthStrategies } from './auth/executeAuthStrategies.js'
+export { extractAccessFromPermission } from './auth/extractAccessFromPermission.js'
 export { getAccessResults } from './auth/getAccessResults.js'
 export { getFieldsToSign } from './auth/getFieldsToSign.js'
 export * from './auth/index.js'
@@ -912,6 +988,8 @@ export { registerFirstUserOperation } from './auth/operations/registerFirstUser.
 export { resetPasswordOperation } from './auth/operations/resetPassword.js'
 export { unlockOperation } from './auth/operations/unlock.js'
 export { verifyEmailOperation } from './auth/operations/verifyEmail.js'
+export { JWTAuthentication } from './auth/strategies/jwt.js'
+
 export type {
   AuthStrategyFunction,
   AuthStrategyFunctionArgs,
@@ -932,8 +1010,8 @@ export type {
 } from './auth/types.js'
 
 export { generateImportMap } from './bin/generateImportMap/index.js'
-
 export type { ImportMap } from './bin/generateImportMap/index.js'
+
 export { genImportMapIterateFields } from './bin/generateImportMap/iterateFields.js'
 
 export {
@@ -980,7 +1058,8 @@ export type {
   TypeWithID,
   TypeWithTimestamps,
 } from './collections/config/types.js'
-
+export type { CompoundIndex } from './collections/config/types.js'
+export type { SanitizedCompoundIndex } from './collections/config/types.js'
 export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
 export { countOperation } from './collections/operations/count.js'
 export { createOperation } from './collections/operations/create.js'
@@ -995,21 +1074,22 @@ export { findVersionsOperation } from './collections/operations/findVersions.js'
 export { restoreVersionOperation } from './collections/operations/restoreVersion.js'
 export { updateOperation } from './collections/operations/update.js'
 export { updateByIDOperation } from './collections/operations/updateByID.js'
+
 export { buildConfig } from './config/build.js'
 export {
   type ClientConfig,
   createClientConfig,
   serverOnlyAdminConfigProperties,
   serverOnlyConfigProperties,
+  type UnsanitizedClientConfig,
 } from './config/client.js'
 export { defaults } from './config/defaults.js'
-
 export { sanitizeConfig } from './config/sanitize.js'
 export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
 export { createDatabaseAdapter } from './database/createDatabaseAdapter.js'
 export { defaultBeginTransaction } from './database/defaultBeginTransaction.js'
-export { default as flattenWhereToOperators } from './database/flattenWhereToOperators.js'
+export { flattenWhereToOperators } from './database/flattenWhereToOperators.js'
 export { getLocalizedPaths } from './database/getLocalizedPaths.js'
 export { createMigration } from './database/migrations/createMigration.js'
 export { getMigrations } from './database/migrations/getMigrations.js'
@@ -1034,6 +1114,7 @@ export type {
   Connect,
   Count,
   CountArgs,
+  CountGlobalVersionArgs,
   CountGlobalVersions,
   CountVersions,
   Create,
@@ -1078,11 +1159,14 @@ export type {
   UpdateGlobalArgs,
   UpdateGlobalVersion,
   UpdateGlobalVersionArgs,
+  UpdateMany,
+  UpdateManyArgs,
   UpdateOne,
   UpdateOneArgs,
   UpdateVersion,
   UpdateVersionArgs,
   Upsert,
+  UpsertArgs,
 } from './database/types.js'
 export type { EmailAdapter as PayloadEmailAdapter, SendEmailOptions } from './email/types.js'
 export {
@@ -1111,10 +1195,11 @@ export {
   ValidationError,
   ValidationErrorName,
 } from './errors/index.js'
+
 export type { ValidationFieldError } from './errors/index.js'
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
-
 export { baseIDField } from './fields/baseFields/baseIDField.js'
+
 export {
   createClientField,
   createClientFields,
@@ -1122,6 +1207,7 @@ export {
   type ServerOnlyFieldProperties,
 } from './fields/config/client.js'
 export { sanitizeFields } from './fields/config/sanitize.js'
+
 export type {
   AdminClient,
   ArrayField,
@@ -1171,6 +1257,7 @@ export type {
   FlattenedBlocksField,
   FlattenedField,
   FlattenedGroupField,
+  FlattenedJoinField,
   FlattenedTabAsField,
   GroupField,
   GroupFieldClient,
@@ -1187,6 +1274,7 @@ export type {
   NumberField,
   NumberFieldClient,
   Option,
+  OptionLabel,
   OptionObject,
   PointField,
   PointFieldClient,
@@ -1224,12 +1312,12 @@ export type {
   ValueWithRelation,
 } from './fields/config/types.js'
 export { getDefaultValue } from './fields/getDefaultValue.js'
-
 export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
 export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
 export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
 export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
+
 export { default as sortableFieldTypes } from './fields/sortableFieldTypes.js'
 export { validations } from './fields/validations.js'
 
@@ -1264,6 +1352,7 @@ export type {
   UploadFieldValidation,
   UsernameFieldValidation,
 } from './fields/validations.js'
+
 export {
   type ClientGlobalConfig,
   createClientGlobalConfig,
@@ -1283,9 +1372,7 @@ export type {
   GlobalConfig,
   SanitizedGlobalConfig,
 } from './globals/config/types.js'
-
 export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
-
 export { findOneOperation } from './globals/operations/findOne.js'
 export { findVersionByIDOperation as findVersionByIDOperationGlobal } from './globals/operations/findVersionByID.js'
 export { findVersionsOperation as findVersionsOperationGlobal } from './globals/operations/findVersions.js'
@@ -1293,9 +1380,11 @@ export { restoreVersionOperation as restoreVersionOperationGlobal } from './glob
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
 export type {
   CollapsedPreferences,
+  ColumnPreference,
   DocumentPreferences,
   FieldsPreferences,
   InsideFieldsPreferences,
+  ListPreferences,
   PreferenceRequest,
   PreferenceUpdateRequest,
   TabsPreferences,
@@ -1304,6 +1393,7 @@ export type { JobsConfig, RunJobAccess, RunJobAccessArgs } from './queues/config
 export type {
   RunInlineTaskFunction,
   RunTaskFunction,
+  RunTaskFunctions,
   TaskConfig,
   TaskHandler,
   TaskHandlerArgs,
@@ -1327,7 +1417,10 @@ export { importHandlerPath } from './queues/operations/runJobs/runJob/importHand
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
+
 export type * from './uploads/types.js'
+export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
+export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
 export { commitTransaction } from './utilities/commitTransaction.js'
 export {
   configToJSONSchema,
@@ -1337,6 +1430,7 @@ export {
 } from './utilities/configToJSONSchema.js'
 export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'
 export { createLocalReq } from './utilities/createLocalReq.js'
+export { createPayloadRequest } from './utilities/createPayloadRequest.js'
 export {
   deepCopyObject,
   deepCopyObjectComplex,
@@ -1364,8 +1458,12 @@ export { flattenAllFields } from './utilities/flattenAllFields.js'
 export { default as flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
 export { formatErrors } from './utilities/formatErrors.js'
 export { formatLabels, formatNames, toWords } from './utilities/formatLabels.js'
+export { getBlockSelect } from './utilities/getBlockSelect.js'
 export { getCollectionIDFieldTypes } from './utilities/getCollectionIDFieldTypes.js'
 export { getObjectDotNotation } from './utilities/getObjectDotNotation.js'
+export { getRequestLanguage } from './utilities/getRequestLanguage.js'
+export { handleEndpoints } from './utilities/handleEndpoints.js'
+export { headersWithCors } from './utilities/headersWithCors.js'
 export { initTransaction } from './utilities/initTransaction.js'
 export { isEntityHidden } from './utilities/isEntityHidden.js'
 export { default as isolateObjectProperty } from './utilities/isolateObjectProperty.js'
@@ -1375,20 +1473,22 @@ export { killTransaction } from './utilities/killTransaction.js'
 export { logError } from './utilities/logError.js'
 export { defaultLoggerOptions } from './utilities/logger.js'
 export { mapAsync } from './utilities/mapAsync.js'
+export { mergeHeaders } from './utilities/mergeHeaders.js'
 export { sanitizeFallbackLocale } from './utilities/sanitizeFallbackLocale.js'
 export { sanitizeJoinParams } from './utilities/sanitizeJoinParams.js'
 export { sanitizePopulateParam } from './utilities/sanitizePopulateParam.js'
 export { sanitizeSelectParam } from './utilities/sanitizeSelectParam.js'
+export { stripUnselectedFields } from './utilities/stripUnselectedFields.js'
 export { traverseFields } from './utilities/traverseFields.js'
 export type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'
 export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
+export { buildVersionCompoundIndexes } from './versions/buildVersionCompoundIndexes.js'
 export { versionDefaults } from './versions/defaults.js'
 export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js'
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
 export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
-
 export { saveVersion } from './versions/saveVersion.js'
 export type { SchedulePublishTaskInput } from './versions/schedule/types.js'
 export type { TypeWithVersion } from './versions/types.js'

@@ -1,19 +1,22 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type {
   ClientCollectionConfig,
+  ClientComponentProps,
   ClientField,
+  Column,
   DefaultCellComponentProps,
   DefaultServerCellComponentProps,
   Field,
+  ListPreferences,
   PaginatedDocs,
   Payload,
   SanitizedCollectionConfig,
+  ServerComponentProps,
   StaticLabel,
 } from 'payload'
 
 import { MissingEditorProp } from 'payload'
 import {
-  deepCopyObjectSimple,
   fieldIsHiddenOrDisabled,
   fieldIsID,
   fieldIsPresentationalOnly,
@@ -21,16 +24,16 @@ import {
 } from 'payload/shared'
 import React from 'react'
 
-import type { ColumnPreferences } from '../../providers/ListQuery/index.js'
 import type { SortColumnProps } from '../SortColumn/index.js'
-import type { Column } from '../Table/index.js'
 
 import {
+  DefaultCell,
   RenderCustomComponent,
   RenderDefaultCell,
   SortColumn,
   // eslint-disable-next-line payload/no-imports-from-exports-dir
 } from '../../exports/client/index.js'
+import { hasOptionLabelJSXElement } from '../../utilities/hasOptionLabelJSXElement.js'
 import { RenderServerComponent } from '../RenderServerComponent/index.js'
 import { filterFields } from './filterFields.js'
 
@@ -38,8 +41,8 @@ type Args = {
   beforeRows?: Column[]
   clientCollectionConfig: ClientCollectionConfig
   collectionConfig: SanitizedCollectionConfig
-  columnPreferences: ColumnPreferences
-  columns?: ColumnPreferences
+  columnPreferences: ListPreferences['columns']
+  columns?: ListPreferences['columns']
   customCellProps: DefaultCellComponentProps['customCellProps']
   docs: PaginatedDocs['docs']
   enableRowSelections: boolean
@@ -164,8 +167,29 @@ export const buildColumnState = (args: Args): Column[] => {
         ? _field.admin.components.Label
         : undefined
 
+    // TODO: customComponent will be optional in v4
+    const clientProps: Omit<ClientComponentProps, 'customComponents'> = {
+      field,
+    }
+
+    const customLabelServerProps: Pick<
+      ServerComponentProps,
+      'clientField' | 'collectionSlug' | 'field' | 'i18n' | 'payload'
+    > = {
+      clientField: field,
+      collectionSlug: collectionConfig.slug,
+      field: _field,
+      i18n,
+      payload,
+    }
+
     const CustomLabel = CustomLabelToRender
-      ? RenderServerComponent({ Component: CustomLabelToRender, importMap: payload.importMap })
+      ? RenderServerComponent({
+          clientProps,
+          Component: CustomLabelToRender,
+          importMap: payload.importMap,
+          serverProps: customLabelServerProps,
+        })
       : undefined
 
     const fieldAffectsDataSubFields =
@@ -185,16 +209,10 @@ export const buildColumnState = (args: Args): Column[] => {
 
     const baseCellClientProps: DefaultCellComponentProps = {
       cellData: undefined,
-      collectionConfig: deepCopyObjectSimple(clientCollectionConfig),
+      collectionSlug: clientCollectionConfig.slug,
       customCellProps,
       field,
       rowData: undefined,
-    }
-
-    const serverProps: Pick<DefaultServerCellComponentProps, 'field' | 'i18n' | 'payload'> = {
-      field: _field,
-      i18n,
-      payload,
     }
 
     const column: Column = {
@@ -211,6 +229,21 @@ export const buildColumnState = (args: Args): Column[] => {
               ...baseCellClientProps,
               cellData: 'name' in field ? doc[field.name] : undefined,
               link: isLinkedColumn,
+              rowData: doc,
+            }
+
+            const cellServerProps: DefaultServerCellComponentProps = {
+              cellData: cellClientProps.cellData,
+              className: baseCellClientProps.className,
+              collectionConfig,
+              collectionSlug: collectionConfig.slug,
+              columnIndex: baseCellClientProps.columnIndex,
+              customCellProps: baseCellClientProps.customCellProps,
+              field: _field,
+              i18n,
+              link: cellClientProps.link,
+              onClick: baseCellClientProps.onClick,
+              payload,
               rowData: doc,
             }
 
@@ -237,21 +270,31 @@ export const buildColumnState = (args: Args): Column[] => {
                 clientProps: cellClientProps,
                 Component: _field.editor.CellComponent,
                 importMap: payload.importMap,
-                serverProps,
+                serverProps: cellServerProps,
+              })
+            } else if (
+              cellClientProps.cellData &&
+              cellClientProps.field &&
+              hasOptionLabelJSXElement(cellClientProps)
+            ) {
+              CustomCell = RenderServerComponent({
+                clientProps: cellClientProps,
+                Component: DefaultCell,
+                importMap: payload.importMap,
               })
             } else {
-              CustomCell =
-                _field?.admin && 'components' in _field.admin && _field.admin.components?.Cell
-                  ? RenderServerComponent({
-                      clientProps: cellClientProps,
-                      Component:
-                        _field?.admin &&
-                        'components' in _field.admin &&
-                        _field.admin.components?.Cell,
-                      importMap: payload.importMap,
-                      serverProps,
-                    })
-                  : undefined
+              const CustomCellComponent = _field?.admin?.components?.Cell
+
+              if (CustomCellComponent) {
+                CustomCell = RenderServerComponent({
+                  clientProps: cellClientProps,
+                  Component: CustomCellComponent,
+                  importMap: payload.importMap,
+                  serverProps: cellServerProps,
+                })
+              } else {
+                CustomCell = undefined
+              }
             }
 
             return (

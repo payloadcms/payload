@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import fs from 'fs'
 import { Readable } from 'stream'
 

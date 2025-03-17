@@ -2,7 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { slateEditor } from '@payloadcms/richtext-slate'
 
-import { slugPluralLabel, slugSingularLabel } from '../shared.js'
+import { customTabAdminDescription, slugPluralLabel, slugSingularLabel } from '../shared.js'
 import { postsCollectionSlug, uploadCollectionSlug } from '../slugs.js'
 
 export const Posts: CollectionConfig = {
@@ -30,6 +30,26 @@ export const Posts: CollectionConfig = {
           path: '/components/Banner/index.js#Banner',
           clientProps: {
             message: 'AfterListTable custom component',
+          },
+        },
+      ],
+      listMenuItems: [
+        {
+          path: '/components/Banner/index.js#Banner',
+          clientProps: {
+            message: 'listMenuItems',
+          },
+        },
+        {
+          path: '/components/Banner/index.js#Banner',
+          clientProps: {
+            message: 'Many of them',
+          },
+        },
+        {
+          path: '/components/Banner/index.js#Banner',
+          clientProps: {
+            message: 'Ok last one',
           },
         },
       ],
@@ -104,6 +124,16 @@ export const Posts: CollectionConfig = {
             },
           ],
           label: 'Tab 1',
+          admin: {
+            description: customTabAdminDescription,
+          },
+        },
+        {
+          label: 'Tab 2',
+          fields: [],
+          admin: {
+            description: () => `t:${customTabAdminDescription}`,
+          },
         },
       ],
     },
@@ -172,6 +202,14 @@ export const Posts: CollectionConfig = {
         position: 'sidebar',
       },
       relationTo: 'posts',
+    },
+    {
+      name: 'users',
+      type: 'relationship',
+      admin: {
+        position: 'sidebar',
+      },
+      relationTo: 'users',
     },
     {
       name: 'customCell',

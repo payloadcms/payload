@@ -13,6 +13,7 @@ import { Pill } from '../../elements/Pill/index.js'
 import { ShimmerEffect } from '../../elements/ShimmerEffect/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
+import { RowLabel } from '../../forms/RowLabel/index.js'
 import { useThrottledValue } from '../../hooks/useThrottledValue.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { RowActions } from './RowActions.js'
@@ -23,7 +24,7 @@ const baseClass = 'blocks-field'
 type BlocksFieldProps = {
   addRow: (rowIndex: number, blockType: string) => Promise<void> | void
   block: ClientBlock
-  blocks: ClientBlock[]
+  blocks: (ClientBlock | string)[] | ClientBlock[]
   duplicateRow: (rowIndex: number) => void
   errorCount: number
   fields: ClientField[]
@@ -79,6 +80,8 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   const hasSubmitted = useFormSubmitted()
 
   const fieldHasErrors = hasSubmitted && errorCount > 0
+
+  const showBlockName = !block.admin?.disableBlockName
 
   const classNames = [
     `${baseClass}__row`,
@@ -143,21 +146,30 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
           isLoading ? (
             <ShimmerEffect height="1rem" width="8rem" />
           ) : (
-            Label || (
-              <div className={`${baseClass}__block-header`}>
-                <span className={`${baseClass}__block-number`}>
-                  {String(rowIndex + 1).padStart(2, '0')}
-                </span>
-                <Pill
-                  className={`${baseClass}__block-pill ${baseClass}__block-pill-${row.blockType}`}
-                  pillStyle="white"
-                >
-                  {getTranslation(block.labels.singular, i18n)}
-                </Pill>
-                <SectionTitle path={`${path}.blockName`} readOnly={readOnly} />
-                {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
-              </div>
-            )
+            <div className={`${baseClass}__block-header`}>
+              <RowLabel
+                CustomComponent={Label}
+                label={
+                  <>
+                    <span className={`${baseClass}__block-number`}>
+                      {String(rowIndex + 1).padStart(2, '0')}
+                    </span>
+                    <Pill
+                      className={`${baseClass}__block-pill ${baseClass}__block-pill-${row.blockType}`}
+                      pillStyle="white"
+                    >
+                      {getTranslation(block.labels.singular, i18n)}
+                    </Pill>
+                    {showBlockName && (
+                      <SectionTitle path={`${path}.blockName`} readOnly={readOnly} />
+                    )}
+                  </>
+                }
+                path={path}
+                rowNumber={rowIndex}
+              />
+              {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
+            </div>
           )
         }
         isCollapsed={row.collapsed}

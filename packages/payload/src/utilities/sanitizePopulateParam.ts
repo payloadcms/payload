@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { PopulateType } from '../types/index.js'
 
 import { sanitizeSelectParam } from './sanitizeSelectParam.js'

@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import pluralize from 'pluralize'
 const { isPlural, singular } = pluralize
 

@@ -4,10 +4,24 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import type { TextField } from 'payload'
 
-import { v4 as uuid } from 'uuid'
+import { randomUUID } from 'crypto'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
+import { seed } from './seed.js'
+import {
+  customIDsSlug,
+  customSchemaSlug,
+  defaultValuesSlug,
+  errorOnUnnamedFieldsSlug,
+  fakeCustomIDsSlug,
+  fieldsPersistanceSlug,
+  pgMigrationSlug,
+  placesSlug,
+  postsSlug,
+  relationASlug,
+  relationBSlug,
+  relationshipsMigrationSlug,
+} from './shared.js'
 
 const defaultValueField: TextField = {
   name: 'defaultValue',
@@ -23,12 +37,71 @@ export default buildConfigWithDefaults({
   },
   collections: [
     {
-      slug: 'posts',
+      slug: postsSlug,
       fields: [
         {
           name: 'title',
           type: 'text',
           required: true,
+        },
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              name: 'D1',
+              fields: [
+                {
+                  name: 'D2',
+                  type: 'group',
+                  fields: [
+                    {
+                      type: 'row',
+                      fields: [
+                        {
+                          type: 'collapsible',
+                          fields: [
+                            {
+                              type: 'tabs',
+                              tabs: [
+                                {
+                                  fields: [
+                                    {
+                                      name: 'D3',
+                                      type: 'group',
+                                      fields: [
+                                        {
+                                          type: 'row',
+                                          fields: [
+                                            {
+                                              type: 'collapsible',
+                                              fields: [
+                                                {
+                                                  name: 'D4',
+                                                  type: 'text',
+                                                },
+                                              ],
+                                              label: 'Collapsible2',
+                                            },
+                                          ],
+                                        },
+                                      ],
+                                    },
+                                  ],
+                                  label: 'Tab1',
+                                },
+                              ],
+                            },
+                          ],
+                          label: 'Collapsible2',
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+              label: 'Tab1',
+            },
+          ],
         },
         {
           name: 'hasTransaction',
@@ -97,7 +170,33 @@ export default buildConfigWithDefaults({
       },
     },
     {
-      slug: 'default-values',
+      slug: errorOnUnnamedFieldsSlug,
+      fields: [
+        {
+          type: 'tabs',
+          tabs: [
+            {
+              label: 'UnnamedTab',
+              fields: [
+                {
+                  name: 'groupWithinUnnamedTab',
+                  type: 'group',
+                  fields: [
+                    {
+                      name: 'text',
+                      type: 'text',
+                      required: true,
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      slug: defaultValuesSlug,
       fields: [
         {
           name: 'title',
@@ -136,7 +235,7 @@ export default buildConfigWithDefaults({
       ],
     },
     {
-      slug: 'relation-a',
+      slug: relationASlug,
       fields: [
         {
           name: 'title',
@@ -153,7 +252,7 @@ export default buildConfigWithDefaults({
       },
     },
     {
-      slug: 'relation-b',
+      slug: relationBSlug,
       fields: [
         {
           name: 'title',
@@ -175,7 +274,7 @@ export default buildConfigWithDefaults({
       },
     },
     {
-      slug: 'pg-migrations',
+      slug: pgMigrationSlug,
       fields: [
         {
           name: 'relation1',
@@ -243,7 +342,7 @@ export default buildConfigWithDefaults({
       versions: true,
     },
     {
-      slug: 'custom-schema',
+      slug: customSchemaSlug,
       dbName: 'customs',
       fields: [
         {
@@ -318,7 +417,7 @@ export default buildConfigWithDefaults({
       },
     },
     {
-      slug: 'places',
+      slug: placesSlug,
       fields: [
         {
           name: 'country',
@@ -331,7 +430,7 @@ export default buildConfigWithDefaults({
       ],
     },
     {
-      slug: 'fields-persistance',
+      slug: fieldsPersistanceSlug,
       fields: [
         {
           name: 'text',
@@ -389,7 +488,7 @@ export default buildConfigWithDefaults({
       ],
     },
     {
-      slug: 'custom-ids',
+      slug: customIDsSlug,
       fields: [
         {
           name: 'id',
@@ -401,7 +500,7 @@ export default buildConfigWithDefaults({
             beforeChange: [
               ({ value, operation }) => {
                 if (operation === 'create') {
-                  return uuid()
+                  return randomUUID()
                 }
                 return value
               },
@@ -416,7 +515,7 @@ export default buildConfigWithDefaults({
       versions: { drafts: true },
     },
     {
-      slug: 'fake-custom-ids',
+      slug: fakeCustomIDsSlug,
       fields: [
         {
           name: 'title',
@@ -449,7 +548,7 @@ export default buildConfigWithDefaults({
       ],
     },
     {
-      slug: 'relationships-migration',
+      slug: relationshipsMigrationSlug,
       fields: [
         {
           type: 'relationship',
@@ -464,6 +563,43 @@ export default buildConfigWithDefaults({
       ],
       versions: true,
     },
+    {
+      slug: 'compound-indexes',
+      fields: [
+        {
+          name: 'one',
+          type: 'text',
+        },
+        {
+          name: 'two',
+          type: 'text',
+        },
+        {
+          name: 'three',
+          type: 'text',
+        },
+        {
+          name: 'group',
+          type: 'group',
+          fields: [
+            {
+              name: 'four',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+      indexes: [
+        {
+          fields: ['one', 'two'],
+          unique: true,
+        },
+        {
+          fields: ['three', 'group.four'],
+          unique: true,
+        },
+      ],
+    },
   ],
   globals: [
     {
@@ -477,19 +613,33 @@ export default buildConfigWithDefaults({
       ],
       versions: true,
     },
+    {
+      slug: 'global-2',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      slug: 'global-3',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
   ],
   localization: {
     defaultLocale: 'en',
     locales: ['en', 'es'],
   },
   onInit: async (payload) => {
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: devUser.email,
-        password: devUser.password,
-      },
-    })
+    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
+      await seed(payload)
+    }
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

@@ -1,13 +1,7 @@
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
 
-import type {
-  CustomPreviewButton,
-  CustomPublishButton,
-  CustomSaveButton,
-  CustomSaveDraftButton,
-  CustomUpload,
-} from '../../admin/types.js'
+import type { CustomUpload } from '../../admin/types.js'
 import type { Arguments as MeArguments } from '../../auth/operations/me.js'
 import type {
   Arguments as RefreshArguments,
@@ -49,6 +43,7 @@ import type {
 } from '../../index.js'
 import type {
   PayloadRequest,
+  SelectIncludeType,
   SelectType,
   Sort,
   TransformCollectionWithSelect,
@@ -287,29 +282,30 @@ export type CollectionAdminOptions = {
       /**
        * Replaces the "Preview" button
        */
-      PreviewButton?: CustomPreviewButton
+      PreviewButton?: CustomComponent
       /**
        * Replaces the "Publish" button
        * + drafts must be enabled
        */
-      PublishButton?: CustomPublishButton
+      PublishButton?: CustomComponent
       /**
        * Replaces the "Save" button
        * + drafts must be disabled
        */
-      SaveButton?: CustomSaveButton
+      SaveButton?: CustomComponent
       /**
        * Replaces the "Save Draft" button
        * + drafts must be enabled
        * + autosave must be disabled
        */
-      SaveDraftButton?: CustomSaveDraftButton
+      SaveDraftButton?: CustomComponent
       /**
        * Replaces the "Upload" section
        * + upload must be enabled
        */
       Upload?: CustomUpload
     }
+    listMenuItems?: CustomComponent[]
     views?: {
       /**
        * Set to a React component to replace the entire Edit View, including all nested routes.
@@ -332,6 +328,11 @@ export type CollectionAdminOptions = {
    * Custom description for collection. This will also be used as JSDoc for the generated types
    */
   description?: EntityDescription
+  /**
+   * Disable the Copy To Locale button in the edit document view
+   * @default false
+   */
+  disableCopyToLocale?: boolean
   enableRichTextLink?: boolean
   enableRichTextRelationship?: boolean
   /**
@@ -374,6 +375,11 @@ export type CollectionAdminOptions = {
 
 /** Manage all aspects of a data collection */
 export type CollectionConfig<TSlug extends CollectionSlug = any> = {
+  /**
+   * Do not set this property manually. This is set to true during sanitization, to avoid
+   * sanitizing the same collection multiple times.
+   */
+  _sanitized?: boolean
   /**
    * Access control
    */
@@ -420,6 +426,12 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   endpoints?: false | Omit<Endpoint, 'root'>[]
   fields: Field[]
   /**
+   * Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks
+   */
+  forceSelect?: IsAny<SelectFromCollectionSlug<TSlug>> extends true
+    ? SelectIncludeType
+    : SelectFromCollectionSlug<TSlug>
+  /**
    * GraphQL configuration
    */
   graphQL?:
@@ -464,6 +476,16 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
      */
     refresh?: RefreshHook[]
   }
+  /**
+   * Define compound indexes for this collection.
+   * This can be used to either speed up querying/sorting by 2 or more fields at the same time or
+   * to ensure uniqueness between several fields.
+   * Specify field paths
+   * @example
+   * [{ unique: true, fields: ['title', 'group.name'] }]
+   * @default []
+   */
+  indexes?: CompoundIndex[]
   /**
    * Label configuration
    */
@@ -517,10 +539,16 @@ export type SanitizedJoin = {
    * The field configuration defining the join
    */
   field: JoinField
+  getForeignPath?(args: { locale?: TypedLocale }): string
   /**
    * The path of the join field in dot notation
    */
   joinPath: string
+  /**
+   * `parentIsLocalized` is true if any parent field of the
+   * field configuration defining the join is localized
+   */
+  parentIsLocalized: boolean
   targetField: RelationshipField | UploadField
 }
 
@@ -528,6 +556,10 @@ export type SanitizedJoins = {
   [collectionSlug: string]: SanitizedJoin[]
 }
 
+/**
+ * @todo remove the `DeepRequired` in v4.
+ * We don't actually guarantee that all properties are set when sanitizing configs.
+ */
 export interface SanitizedCollectionConfig
   extends Omit<
     DeepRequired<CollectionConfig>,
@@ -536,17 +568,23 @@ export interface SanitizedCollectionConfig
   auth: Auth
   endpoints: Endpoint[] | false
   fields: Field[]
-
   /**
    * Fields in the database schema structure
    * Rows / collapsible / tabs w/o name `fields` merged to top, UIs are excluded
    */
   flattenedFields: FlattenedField[]
-
   /**
    * Object of collections to join 'Join Fields object keyed by collection
    */
   joins: SanitizedJoins
+
+  /**
+   * List of all polymorphic join fields
+   */
+  polymorphicJoins: SanitizedJoin[]
+
+  sanitizedIndexes: SanitizedCompoundIndex[]
+
   slug: CollectionSlug
   upload: SanitizedUploadConfig
   versions: SanitizedCollectionVersions
@@ -589,4 +627,19 @@ export type TypeWithTimestamps = {
   createdAt: string
   id: number | string
   updatedAt: string
+}
+
+export type CompoundIndex = {
+  fields: string[]
+  unique?: boolean
+}
+
+export type SanitizedCompoundIndex = {
+  fields: {
+    field: FlattenedField
+    localizedPath: string
+    path: string
+    pathHasLocalized: boolean
+  }[]
+  unique: boolean
 }

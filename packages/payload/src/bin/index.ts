@@ -1,3 +1,5 @@
+// @ts-strict-ignore
+/* eslint-disable no-console */
 import { Cron } from 'croner'
 import minimist from 'minimist'
 import { pathToFileURL } from 'node:url'
@@ -11,7 +13,18 @@ import { generateImportMap } from './generateImportMap/index.js'
 import { generateTypes } from './generateTypes.js'
 import { info } from './info.js'
 import { loadEnv } from './loadEnv.js'
-import { migrate } from './migrate.js'
+import { migrate, availableCommands as migrateCommands } from './migrate.js'
+
+// Note: this does not account for any user bin scripts
+const availableScripts = [
+  'generate:db-schema',
+  'generate:importmap',
+  'generate:types',
+  'info',
+  'jobs:run',
+  'run',
+  ...migrateCommands,
+] as const
 
 export const bin = async () => {
   loadEnv()
@@ -63,8 +76,18 @@ export const bin = async () => {
 
   if (userBinScript) {
     try {
-      const script: BinScript = await import(pathToFileURL(userBinScript.scriptPath).toString())
-      await script(config)
+      const module = await import(pathToFileURL(userBinScript.scriptPath).toString())
+
+      if (!module.script || typeof module.script !== 'function') {
+        console.error(
+          `Could not find "script" function export for script ${userBinScript.key} in ${userBinScript.scriptPath}`,
+        )
+      } else {
+        await module.script(config).catch((err: unknown) => {
+          console.log(`Script ${userBinScript.key} failed, details:`)
+          console.error(err)
+        })
+      }
     } catch (err) {
       console.log(`Could not find associated bin script for the ${userBinScript.key} command`)
       console.error(err)
@@ -137,6 +160,8 @@ export const bin = async () => {
     process.exit(0)
   }
 
-  console.error(`Unknown script: "${script}".`)
+  console.error(script ? `Unknown command: "${script}"` : 'Please provide a command to run')
+  console.log(`\nAvailable commands:\n${availableScripts.map((c) => `  - ${c}`).join('\n')}`)
+
   process.exit(1)
 }

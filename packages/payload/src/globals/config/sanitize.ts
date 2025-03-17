@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { GlobalConfig, SanitizedGlobalConfig } from './types.js'
 
@@ -9,6 +10,7 @@ import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { toWords } from '../../utilities/formatLabels.js'
 import baseVersionFields from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
+import { defaultGlobalEndpoints } from '../endpoints/index.js'
 
 export const sanitizeGlobal = async (
   config: Config,
@@ -18,8 +20,12 @@ export const sanitizeGlobal = async (
    * so that you can sanitize them together, after the config has been sanitized.
    */
   richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>,
+  _validRelationships?: string[],
 ): Promise<SanitizedGlobalConfig> => {
-  const { collections } = config
+  if (global._sanitized) {
+    return global as SanitizedGlobalConfig
+  }
+  global._sanitized = true
 
   global.label = global.label || toWords(global.slug)
 
@@ -62,7 +68,8 @@ export const sanitizeGlobal = async (
   }
 
   // Sanitize fields
-  const validRelationships = collections.map((c) => c.slug) || []
+  const validRelationships = _validRelationships ?? config.collections.map((c) => c.slug) ?? []
+
   global.fields = await sanitizeFields({
     config,
     fields: global.fields,
@@ -70,6 +77,16 @@ export const sanitizeGlobal = async (
     richTextSanitizationPromises,
     validRelationships,
   })
+
+  if (global.endpoints !== false) {
+    if (!global.endpoints) {
+      global.endpoints = []
+    }
+
+    for (const endpoint of defaultGlobalEndpoints) {
+      global.endpoints.push(endpoint)
+    }
+  }
 
   if (global.versions) {
     if (global.versions === true) {

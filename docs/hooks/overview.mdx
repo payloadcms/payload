@@ -26,8 +26,10 @@ There are four main types of Hooks in Payload:
 - [Field Hooks](/docs/hooks/fields)
 
 <Banner type="warning">
-  **Reminder:**
-  Payload also ships a set of _React_ hooks that you can use in your frontend application. Although they share a common name, these are very different things and should not be confused. [More details](../admin/hooks).
+  **Reminder:** Payload also ships a set of _React_ hooks that you can use in
+  your frontend application. Although they share a common name, these are very
+  different things and should not be confused. [More
+  details](../admin/react-hooks).
 </Banner>
 
 ## Root Hooks
@@ -51,9 +53,9 @@ export default buildConfig({
 
 The following options are available:
 
-| Option       | Description                                                                                   |
-|--------------|-----------------------------------------------------------------------------------------------|
-| **`afterError`** | Runs after an error occurs in the Payload application.                                         |
+| Option           | Description                                            |
+| ---------------- | ------------------------------------------------------ |
+| **`afterError`** | Runs after an error occurs in the Payload application. |
 
 ### afterError
 
@@ -65,9 +67,11 @@ import { buildConfig } from 'payload'
 export default buildConfig({
   // ...
   hooks: {
-    afterError: [async ({ error }) => {
-      // Do something
-    }]
+    afterError: [
+      async ({ error }) => {
+        // Do something
+      },
+    ],
   },
 })
 ```
@@ -82,6 +86,7 @@ The following arguments are provided to the `afterError` Hook:
 | **`req`**           | The `PayloadRequest` object that extends [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request). Contains currently authenticated `user` and the Local API instance `payload`. |
 | **`collection`**    | The [Collection](../configuration/collections) in which this Hook is running against. This will be `undefined` if the hook is executed from a non-collection endpoint or GraphQL.               |
 | **`result`**        | The formatted error result object, available if the hook is executed from a REST context.                                                                                                       |
+
 ## Async vs. Synchronous
 
 All Hooks can be written as either synchronous or asynchronous functions. Choosing the right type depends on your use case, but switching between the two is as simple as adding or removing the `async` keyword.

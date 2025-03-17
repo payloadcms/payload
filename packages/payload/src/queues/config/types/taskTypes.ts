@@ -7,19 +7,28 @@ export type TaskInputOutput = {
 }
 export type TaskHandlerResult<
   TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput,
-> = {
-  output: TTaskSlugOrInputOutput extends keyof TypedJobs['tasks']
-    ? TypedJobs['tasks'][TTaskSlugOrInputOutput]['output']
-    : TTaskSlugOrInputOutput extends TaskInputOutput // Check if it's actually TaskInputOutput type
-      ? TTaskSlugOrInputOutput['output']
-      : never
-  state?: 'failed' | 'succeeded'
-}
+> =
+  | {
+      errorMessage?: string
+      state: 'failed'
+    }
+  | {
+      output: TTaskSlugOrInputOutput extends keyof TypedJobs['tasks']
+        ? TypedJobs['tasks'][TTaskSlugOrInputOutput]['output']
+        : TTaskSlugOrInputOutput extends TaskInputOutput // Check if it's actually TaskInputOutput type
+          ? TTaskSlugOrInputOutput['output']
+          : never
+      state?: 'succeeded'
+    }
 
 export type TaskHandlerArgs<
   TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput,
   TWorkflowSlug extends keyof TypedJobs['workflows'] = string,
 > = {
+  /**
+   * Use this function to run a sub-task from within another task.
+   */
+  inlineTask: RunInlineTaskFunction
   input: TTaskSlugOrInputOutput extends keyof TypedJobs['tasks']
     ? TypedJobs['tasks'][TTaskSlugOrInputOutput]['input']
     : TTaskSlugOrInputOutput extends TaskInputOutput // Check if it's actually TaskInputOutput type
@@ -27,6 +36,7 @@ export type TaskHandlerArgs<
       : never
   job: RunningJob<TWorkflowSlug>
   req: PayloadRequest
+  tasks: RunTaskFunctions
 }
 
 /**
@@ -79,6 +89,8 @@ export type RunTaskFunctions = {
   [TTaskSlug in keyof TypedJobs['tasks']]: RunTaskFunction<TTaskSlug>
 }
 
+type MaybePromise<T> = Promise<T> | T
+
 export type RunInlineTaskFunction = <TTaskInput extends object, TTaskOutput extends object>(
   taskID: string,
   taskArgs: {
@@ -92,12 +104,22 @@ export type RunInlineTaskFunction = <TTaskInput extends object, TTaskOutput exte
      */
     retries?: number | RetryConfig | undefined
     // This is the same as TaskHandler, but typed out explicitly in order to improve type inference
-    task: (args: { input: TTaskInput; job: RunningJob<any>; req: PayloadRequest }) =>
+    task: (args: {
+      inlineTask: RunInlineTaskFunction
+      input: TTaskInput
+      job: RunningJob<any>
+      req: PayloadRequest
+      tasks: RunTaskFunctions
+    }) => MaybePromise<
+      | {
+          errorMessage?: string
+          state: 'failed'
+        }
       | {
           output: TTaskOutput
-          state?: 'failed' | 'succeeded'
+          state?: 'succeeded'
         }
-      | Promise<{ output: TTaskOutput; state?: 'failed' | 'succeeded' }>
+    >
   },
 ) => Promise<TTaskOutput>
 
