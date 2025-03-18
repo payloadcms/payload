@@ -391,6 +391,7 @@ export const thTranslations: DefaultTranslationsObject = {
     height: 'ความสูง',
     lessInfo: 'ซ่อนข้อมูล',
     moreInfo: 'แสดงข้อมูล',
+    noFile: 'ไม่มีไฟล์',
     pasteURL: 'วาง URL',
     previewSizes: 'ขนาดตัวอย่าง',
     selectCollectionToBrowse: 'เลือก Collection ที่ต้องการค้นหา',

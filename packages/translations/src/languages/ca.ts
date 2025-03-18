@@ -398,6 +398,7 @@ export const caTranslations: DefaultTranslationsObject = {
     height: 'Alçada',
     lessInfo: 'Menys informació',
     moreInfo: 'Més informació',
+    noFile: 'No hi ha cap fitxer',
     pasteURL: "Enganxa l'URL",
     previewSizes: 'Mides de la vista prèvia',
     selectCollectionToBrowse: 'Selecciona una col·lecció per explorar',

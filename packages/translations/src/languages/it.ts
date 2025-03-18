@@ -401,6 +401,7 @@ export const itTranslations: DefaultTranslationsObject = {
     height: 'Altezza',
     lessInfo: 'Meno info',
     moreInfo: 'Più info',
+    noFile: 'Nessun file',
     pasteURL: 'Incolla URL',
     previewSizes: 'Anteprime Dimensioni',
     selectCollectionToBrowse: 'Seleziona una Collezione da Sfogliare',

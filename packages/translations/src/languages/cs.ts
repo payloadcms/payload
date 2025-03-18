@@ -395,6 +395,7 @@ export const csTranslations: DefaultTranslationsObject = {
     height: 'Výška',
     lessInfo: 'Méně informací',
     moreInfo: 'Více informací',
+    noFile: 'Žádný soubor',
     pasteURL: 'Vložit URL',
     previewSizes: 'Náhled velikostí',
     selectCollectionToBrowse: 'Vyberte kolekci pro procházení',

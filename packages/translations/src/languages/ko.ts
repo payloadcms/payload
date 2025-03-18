@@ -394,6 +394,7 @@ export const koTranslations: DefaultTranslationsObject = {
     height: '높이',
     lessInfo: '정보 숨기기',
     moreInfo: '정보 더보기',
+    noFile: '파일 없음',
     pasteURL: 'URL 붙여넣기',
     previewSizes: '미리보기 크기',
     selectCollectionToBrowse: '찾을 컬렉션 선택',

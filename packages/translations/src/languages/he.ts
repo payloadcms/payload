@@ -388,6 +388,7 @@ export const heTranslations: DefaultTranslationsObject = {
     height: 'גובה',
     lessInfo: 'פחות מידע',
     moreInfo: 'מידע נוסף',
+    noFile: 'אין קובץ',
     pasteURL: 'הדבק כתובת אתר',
     previewSizes: 'גדלי תצוגה מקדימה',
     selectCollectionToBrowse: 'בחר אוסף לצפייה',

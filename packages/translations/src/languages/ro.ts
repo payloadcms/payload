@@ -401,6 +401,7 @@ export const roTranslations: DefaultTranslationsObject = {
     height: 'Înălțime',
     lessInfo: 'Mai puține informații',
     moreInfo: 'Mai multe informații',
+    noFile: 'Niciun fișier',
     pasteURL: 'Lipește URL',
     previewSizes: 'Dimensiuni Previzualizare',
     selectCollectionToBrowse: 'Selectați o colecție pentru navigare',

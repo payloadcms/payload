@@ -398,6 +398,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     height: 'Høyde',
     lessInfo: 'Mindre info',
     moreInfo: 'Mer info',
+    noFile: 'Ingen fil',
     pasteURL: 'Lim inn URL',
     previewSizes: 'Forhåndsvisningsstørrelser',
     selectCollectionToBrowse: 'Velg en samling å bla i',
