@@ -1,11 +1,10 @@
 'use client'
-import type { ClientField, FieldWithPathClient } from 'payload'
+import type { ClientField, FieldWithPathClient, FormState } from 'payload'
 
 import React, { useState } from 'react'
 
 import type { FieldAction } from '../../forms/Form/types.js'
 
-import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -29,33 +28,6 @@ export type OnFieldSelect = ({
 export type FieldSelectProps = {
   readonly fields: ClientField[]
   readonly onChange: OnFieldSelect
-}
-
-export const combineLabel = ({
-  CustomLabel,
-  field,
-  prefix,
-}: {
-  CustomLabel?: React.ReactNode
-  field?: ClientField
-  prefix?: React.ReactNode
-}): React.ReactNode => {
-  return (
-    <Fragment>
-      {prefix ? (
-        <Fragment>
-          <span style={{ display: 'inline-block' }}>{prefix}</span>
-          {' > '}
-        </Fragment>
-      ) : null}
-      <span style={{ display: 'inline-block' }}>
-        <RenderCustomComponent
-          CustomComponent={CustomLabel}
-          Fallback={<FieldLabel label={'label' in field && field.label} />}
-        />
-      </span>
-    </Fragment>
-  )
 }
 
 export type FieldOption = { Label: React.ReactNode; value: FieldWithPathClient }

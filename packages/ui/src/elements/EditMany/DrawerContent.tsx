@@ -286,9 +286,9 @@ export const EditManyDrawerContent: React.FC<
             onSuccess={onSuccess}
           >
             <FieldSelect fields={fields} onChange={onFieldSelect} />
-            {selected.length === 0
+            {selectedFields.length === 0
               ? null
-              : selected.map((field, i) => {
+              : selectedFields.map((field, i) => {
                   const { path } = field
 
                   return (
@@ -299,7 +299,7 @@ export const EditManyDrawerContent: React.FC<
                       parentPath=""
                       parentSchemaPath=""
                       path={path}
-                      permissions={{}}
+                      permissions={'name' in field && collectionPermissions.fields?.[field.name]}
                     />
                   )
                 })}
