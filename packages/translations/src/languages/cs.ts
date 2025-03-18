@@ -120,6 +120,7 @@ export const csTranslations: DefaultTranslationsObject = {
     unknown: 'Došlo k neznámé chybě.',
     unPublishingDocument: 'Při zrušení publikování tohoto dokumentu došlo k chybě.',
     unspecific: 'Došlo k chybě.',
+    unverifiedEmail: 'Před přihlášením ověřte svůj e-mail.',
     userEmailAlreadyRegistered: 'Uživatel s daným e-mailem je již zaregistrován.',
     userLocked: 'Tento uživatel je uzamčen kvůli příliš mnoha neúspěšným pokusům o přihlášení.',
     usernameAlreadyRegistered: 'Uživatel se zadaným uživatelským jménem je již zaregistrován.',
