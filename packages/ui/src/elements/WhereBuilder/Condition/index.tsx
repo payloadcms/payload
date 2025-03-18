@@ -27,7 +27,7 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { ReactSelect } from '../../ReactSelect/index.js'
 import { DefaultFilter } from './DefaultFilter/index.js'
-import { operatorValueTypes } from './validOperators.js'
+import { getOperatorValueTypes } from './validOperators.js'
 import './index.scss'
 
 const baseClass = 'condition'
@@ -104,8 +104,12 @@ export const Condition: React.FC<Props> = (props) => {
 
   const handleOperatorChange = useCallback(
     async (operator: Option<Operator>) => {
+      const operatorValueTypes = getOperatorValueTypes(reducedField.field.type)
       const validOperatorValue = operatorValueTypes[operator.value] || 'any'
-      const isValidValue = validOperatorValue === 'any' || typeof value === validOperatorValue
+      const isValidValue =
+        validOperatorValue === 'any' ||
+        typeof value === validOperatorValue ||
+        (validOperatorValue === 'boolean' && (value === 'true' || value === 'false'))
 
       if (!isValidValue) {
         // if the current value is not valid for the new operator
