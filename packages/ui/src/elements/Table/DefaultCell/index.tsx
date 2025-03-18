@@ -148,5 +148,17 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     }
   }
 
+  if (field.type === 'select' && field.options.length && typeof cellData === 'string') {
+    const className = [wrapElementProps.className, `selected--${cellData}`]
+      .filter(Boolean)
+      .join(' ')
+
+    return (
+      <WrapElement {...wrapElementProps} className={className}>
+        {CellComponent}
+      </WrapElement>
+    )
+  }
+
   return <WrapElement {...wrapElementProps}>{CellComponent}</WrapElement>
 }

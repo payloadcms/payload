@@ -413,6 +413,7 @@ describe('List View', () => {
       await expect(whereBuilder.locator('.condition__value input')).toHaveValue('')
     })
 
+    // eslint-disable-next-line playwright/expect-expect
     test('should remove condition from URL when value is cleared', async () => {
       await page.goto(postsUrl.list)
 
@@ -433,6 +434,7 @@ describe('List View', () => {
       await page.waitForURL(new RegExp(encodedQueryString))
     })
 
+    // eslint-disable-next-line playwright/expect-expect, playwright/no-skipped-test
     test.skip('should remove condition from URL when a different field is selected', async () => {
       // TODO: fix this bug and write this test
     })
@@ -1287,6 +1289,9 @@ describe('List View', () => {
       await expect(columnAfterSort).toHaveClass(/column-selector__column--active/)
       await expect(page.locator('#heading-_status')).toBeVisible()
       await expect(page.locator('.cell-_status').first()).toBeVisible()
+      await expect(
+        page.locator('.cell-_status').first().locator("[class*='selected--']"),
+      ).toBeVisible()
 
       // sort by title again in descending order
       await page.locator('#heading-title button.sort-column__desc').click()
