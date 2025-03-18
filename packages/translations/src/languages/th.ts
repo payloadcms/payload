@@ -118,6 +118,7 @@ export const thTranslations: DefaultTranslationsObject = {
     unknown: 'เกิดปัญหาบางอย่างที่ไม่ทราบสาเหตุ',
     unPublishingDocument: 'เกิดปัญหาระหว่างการยกเลิกการเผยแพร่เอกสารนี้',
     unspecific: 'เกิดปัญหาบางอย่าง',
+    unverifiedEmail: 'กรุณายืนยันอีเมลของคุณก่อนเข้าสู่ระบบ',
     userEmailAlreadyRegistered: 'ผู้ใช้ที่มีอีเมลดังกล่าวได้ลงทะเบียนแล้ว',
     userLocked: 'บัญชีนี้ถูกล็อกเนื่องจากมีการพยายามเข้าสู่ระบบมากเกินไป',
     usernameAlreadyRegistered: 'ผู้ใช้ที่มีชื่อผู้ใช้ที่ระบุไว้แล้วถูกลงทะเบียนเอาไว้แล้ว',

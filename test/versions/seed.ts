@@ -7,7 +7,6 @@ import type { DraftPost } from './payload-types.js'
 import { devUser } from '../credentials.js'
 import { executePromises } from '../helpers/executePromises.js'
 import { generateLexicalData } from './collections/Diff/generateLexicalData.js'
-import { titleToDelete } from './shared.js'
 import {
   autosaveWithValidateCollectionSlug,
   diffCollectionSlug,
@@ -112,18 +111,6 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     depth: 0,
     overrideAccess: true,
     draft: false,
-  })
-
-  await _payload.create({
-    collection: draftCollectionSlug,
-    data: {
-      blocksField,
-      description: 'Description',
-      title: titleToDelete,
-    },
-    depth: 0,
-    overrideAccess: true,
-    draft: true,
   })
 
   await _payload.create({
