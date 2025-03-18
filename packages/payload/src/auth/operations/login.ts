@@ -189,7 +189,7 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
     }
 
     if (args.collection.config.auth.verify && user._verified === false) {
-      throw new UnverifiedEmail(req.t)
+      throw new UnverifiedEmail({ t: req.t })
     }
 
     user.collection = collectionConfig.slug

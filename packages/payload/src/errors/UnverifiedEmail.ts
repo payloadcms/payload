@@ -6,7 +6,7 @@ import { status as httpStatus } from 'http-status'
 import { APIError } from './APIError.js'
 
 export class UnverifiedEmail extends APIError {
-  constructor(t?: TFunction) {
+  constructor({ t }: { t?: TFunction }) {
     super(
       t ? t('error:unverifiedEmail') : en.translations.error.unverifiedEmail,
       httpStatus.FORBIDDEN,
