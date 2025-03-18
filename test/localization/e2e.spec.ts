@@ -556,6 +556,30 @@ describe('Localization', () => {
 
       await cdpSession.detach()
     })
+
+    test('should not show fallback data after saving data', async () => {
+      await page.goto(url.create)
+      await changeLocale(page, defaultLocale)
+      await page.locator('#field-title').fill(title)
+
+      await saveDocAndAssert(page)
+      await changeLocale(page, spanishLocale)
+
+      // POST data
+      await page.locator('#field-description').fill('non-localized description')
+      await saveDocAndAssert(page)
+
+      // POST updated data
+      await page.locator('#field-description').fill('non-localized description 2')
+      await saveDocAndAssert(page)
+
+      // The title should not have posted with a value
+      await expect
+        .poll(() => page.locator('#field-title').inputValue(), {
+          timeout: POLL_TOPASS_TIMEOUT,
+        })
+        .not.toBe(title)
+    })
   })
 
   test('should use label in search filter when string or object', async () => {

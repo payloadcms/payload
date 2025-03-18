@@ -19,11 +19,9 @@ export const LinkHTMLConverterAsync: (args: {
     const rel: string | undefined = node.fields.newTab ? 'noopener noreferrer' : undefined
     const target: string | undefined = node.fields.newTab ? '_blank' : undefined
 
-    return `(
-      <a${providedStyleTag} href="${node.fields.url}" rel=${rel} target=${target}>
+    return `<a${providedStyleTag} href="${node.fields.url}" rel=${rel} target=${target}>
         ${children}
-      </a>
-    )`
+      </a>`
   },
   link: async ({ node, nodesToHTML, populate, providedStyleTag }) => {
     const children = (
@@ -47,10 +45,8 @@ export const LinkHTMLConverterAsync: (args: {
       }
     }
 
-    return `(
-      <a${providedStyleTag} href="${href}" rel=${rel} target=${target}>
+    return `<a${providedStyleTag} href="${href}" rel=${rel} target=${target}>
         ${children}
-      </a>
-    )`
+      </a>`
   },
 })

@@ -11,8 +11,9 @@ The Edit View is where users interact with individual [Collection](../collection
 The Edit View can be swapped out in its entirety for a Custom View, or it can be injected with a number of Custom Components to add additional functionality or presentational elements without replacing the entire view.
 
 <Banner type="warning">
-  **Note:**
-  The Edit View is one of many [Document Views](./document-views) in the Payload Admin Panel. Each Document View is responsible for a different aspect of the interacting with a single Document.
+  **Note:** The Edit View is one of many [Document Views](./document-views) in
+  the Payload Admin Panel. Each Document View is responsible for a different
+  aspect of the interacting with a single Document.
 </Banner>
 
 ## Custom Edit View
@@ -33,7 +34,7 @@ const config = buildConfig({
             Component: '/path/to/MyCustomEditViewComponent',
           },
           // highlight-end
-        }
+        },
       },
     },
   },
@@ -49,11 +50,7 @@ import React from 'react'
 import type { DocumentViewServerProps } from 'payload'
 
 export function MyCustomServerEditView(props: DocumentViewServerProps) {
-  return (
-    <div>
-      This is a custom Edit View (Server)
-    </div>
-  )
+  return <div>This is a custom Edit View (Server)</div>
 }
 ```
 
@@ -65,11 +62,7 @@ import React from 'react'
 import type { DocumentViewClientProps } from 'payload'
 
 export function MyCustomClientEditView(props: DocumentViewClientProps) {
-  return (
-    <div>
-      This is a custom Edit View (Client)
-    </div>
-  )
+  return <div>This is a custom Edit View (Client)</div>
 }
 ```
 
@@ -80,8 +73,9 @@ _For details on how to build Custom Views, including all available props, see [B
 In addition to swapping out the entire Edit View with a [Custom View](./custom-views), you can also override individual components. This allows you to customize specific parts of the Edit View without swapping out the entire view.
 
 <Banner type="warning">
-  **Important:**
-  Collection and Globals are keyed to a different property in the `admin.components` object have slightly different options. Be sure to use the correct key for the entity you are working with.
+  **Important:** Collection and Globals are keyed to a different property in the
+  `admin.components` object have slightly different options. Be sure to use the
+  correct key for the entity you are working with.
 </Banner>
 
 #### Collections
@@ -107,14 +101,14 @@ export const MyCollection: CollectionConfig = {
 
 The following options are available:
 
-| Path                  | Description                                                                                                                                                                                                         |
-|-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `SaveButton`         | A button that saves the current document. [More details](#SaveButton).                                                                                                                                  |
-| `SaveDraftButton`    | A button that saves the current document as a draft. [More details](#SaveDraftButton).                                                                                                                                  |
-| `PublishButton`      | A button that publishes the current document. [More details](#PublishButton).                                                                                                                                  |
-| `PreviewButton`      | A button that previews the current document. [More details](#PreviewButton).                                                                                                                                  |
-| `Description`        | A description of the Collection. [More details](#Description).                                                                                                                                  |
-| `Upload`             | A file upload component. [More details](#Upload).                                                                                                                                  |
+| Path              | Description                                                                            |
+| ----------------- | -------------------------------------------------------------------------------------- |
+| `SaveButton`      | A button that saves the current document. [More details](#SaveButton).                 |
+| `SaveDraftButton` | A button that saves the current document as a draft. [More details](#SaveDraftButton). |
+| `PublishButton`   | A button that publishes the current document. [More details](#PublishButton).          |
+| `PreviewButton`   | A button that previews the current document. [More details](#PreviewButton).           |
+| `Description`     | A description of the Collection. [More details](#Description).                         |
+| `Upload`          | A file upload component. [More details](#Upload).                                      |
 
 #### Globals
 
@@ -139,13 +133,13 @@ export const MyGlobal: GlobalConfig = {
 
 The following options are available:
 
-| Path                  | Description                                                                                                                                                                                                         |
-|-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `SaveButton`         | A button that saves the current document. [More details](#SaveButton).                                                                                                                                  |
-| `SaveDraftButton`    | A button that saves the current document as a draft. [More details](#SaveDraftButton).                                                                                                                                  |
-| `PublishButton`      | A button that publishes the current document. [More details](#PublishButton).                                                                                                                                  |
-| `PreviewButton`      | A button that previews the current document. [More details](#PreviewButton).                                                                                                                                  |
-| `Description`        | A description of the Global. [More details](#Description).                                                                                                                                  |
+| Path              | Description                                                                            |
+| ----------------- | -------------------------------------------------------------------------------------- |
+| `SaveButton`      | A button that saves the current document. [More details](#SaveButton).                 |
+| `SaveDraftButton` | A button that saves the current document as a draft. [More details](#SaveDraftButton). |
+| `PublishButton`   | A button that publishes the current document. [More details](#PublishButton).          |
+| `PreviewButton`   | A button that previews the current document. [More details](#PreviewButton).           |
+| `Description`     | A description of the Global. [More details](#Description).                             |
 
 ### SaveButton
 
@@ -164,7 +158,7 @@ export const MyCollection: CollectionConfig = {
         // highlight-start
         SaveButton: '/path/to/MySaveButton',
         // highlight-end
-      }
+      },
     },
   },
 }
@@ -180,9 +174,7 @@ import { SaveButton } from '@payloadcms/ui'
 import type { SaveButtonServerProps } from 'payload'
 
 export function MySaveButton(props: SaveButtonServerProps) {
-  return (
-    <SaveButton label="Save" />
-  )
+  return <SaveButton label="Save" />
 }
 ```
 
@@ -195,9 +187,7 @@ import { SaveButton } from '@payloadcms/ui'
 import type { SaveButtonClientProps } from 'payload'
 
 export function MySaveButton(props: SaveButtonClientProps) {
-  return (
-    <SaveButton label="Save" />
-  )
+  return <SaveButton label="Save" />
 }
 ```
 
@@ -218,7 +208,7 @@ export const MyCollection: CollectionConfig = {
         // highlight-start
         SaveDraftButton: '/path/to/MySaveDraftButton',
         // highlight-end
-      }
+      },
     },
   },
 }
@@ -234,9 +224,7 @@ import { SaveDraftButton } from '@payloadcms/ui'
 import type { SaveDraftButtonServerProps } from 'payload'
 
 export function MySaveDraftButton(props: SaveDraftButtonServerProps) {
-  return (
-    <SaveDraftButton />
-  )
+  return <SaveDraftButton />
 }
 ```
 
@@ -249,9 +237,7 @@ import { SaveDraftButton } from '@payloadcms/ui'
 import type { SaveDraftButtonClientProps } from 'payload'
 
 export function MySaveDraftButton(props: SaveDraftButtonClientProps) {
-  return (
-    <SaveDraftButton />
-  )
+  return <SaveDraftButton />
 }
 ```
 
@@ -272,7 +258,7 @@ export const MyCollection: CollectionConfig = {
         // highlight-start
         PublishButton: '/path/to/MyPublishButton',
         // highlight-end
-      }
+      },
     },
   },
 }
@@ -288,9 +274,7 @@ import { PublishButton } from '@payloadcms/ui'
 import type { PublishButtonClientProps } from 'payload'
 
 export function MyPublishButton(props: PublishButtonServerProps) {
-  return (
-    <PublishButton label="Publish" />
-  )
+  return <PublishButton label="Publish" />
 }
 ```
 
@@ -303,9 +287,7 @@ import { PublishButton } from '@payloadcms/ui'
 import type { PublishButtonClientProps } from 'payload'
 
 export function MyPublishButton(props: PublishButtonClientProps) {
-  return (
-    <PublishButton label="Publish" />
-  )
+  return <PublishButton label="Publish" />
 }
 ```
 
@@ -326,7 +308,7 @@ export const MyCollection: CollectionConfig = {
         // highlight-start
         PreviewButton: '/path/to/MyPreviewButton',
         // highlight-end
-      }
+      },
     },
   },
 }
@@ -342,9 +324,7 @@ import { PreviewButton } from '@payloadcms/ui'
 import type { PreviewButtonServerProps } from 'payload'
 
 export function MyPreviewButton(props: PreviewButtonServerProps) {
-  return (
-    <PreviewButton />
-  )
+  return <PreviewButton />
 }
 ```
 
@@ -357,9 +337,7 @@ import { PreviewButton } from '@payloadcms/ui'
 import type { PreviewButtonClientProps } from 'payload'
 
 export function MyPreviewButton(props: PreviewButtonClientProps) {
-  return (
-    <PreviewButton />
-  )
+  return <PreviewButton />
 }
 ```
 
@@ -385,8 +363,8 @@ export const MyCollection: CollectionConfig = {
 ```
 
 <Banner type="warning">
-  **Note:**
-  The `Description` component is shared between the Edit View and the [List View](./list-view).
+  **Note:** The `Description` component is shared between the Edit View and the
+  [List View](./list-view).
 </Banner>
 
 Here's an example of a custom `Description` component:
@@ -398,11 +376,7 @@ import React from 'react'
 import type { ViewDescriptionServerProps } from 'payload'
 
 export function MyDescriptionComponent(props: ViewDescriptionServerProps) {
-  return (
-    <div>
-      This is a custom description component (Server)
-    </div>
-  )
+  return <div>This is a custom description component (Server)</div>
 }
 ```
 
@@ -414,11 +388,7 @@ import React from 'react'
 import type { ViewDescriptionClientProps } from 'payload'
 
 export function MyDescriptionComponent(props: ViewDescriptionClientProps) {
-  return (
-    <div>
-      This is a custom description component (Client)
-    </div>
-  )
+  return <div>This is a custom description component (Client)</div>
 }
 ```
 
@@ -439,15 +409,14 @@ export const MyCollection: CollectionConfig = {
         // highlight-start
         Upload: '/path/to/MyUploadComponent',
         // highlight-end
-      }
+      },
     },
   },
 }
 ```
 
 <Banner type="warning">
-  **Note:**
-  The Upload component is only available for Collections.
+  **Note:** The Upload component is only available for Collections.
 </Banner>
 
 Here's an example of a custom `Upload` component:
@@ -456,8 +425,6 @@ Here's an example of a custom `Upload` component:
 import React from 'react'
 
 export function MyUploadComponent() {
-  return (
-    <input type="file" />
-  )
+  return <input type="file" />
 }
 ```
