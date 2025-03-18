@@ -3,6 +3,7 @@ import type { PipelineStage } from 'mongoose'
 import {
   APIError,
   appendVersionToQueryKey,
+  buildVersionCollectionFields,
   type CollectionSlug,
   combineQueries,
   type FlattenedField,
@@ -299,9 +300,13 @@ export const buildJoinAggregation = async ({
         throw new Error('Unreachable')
       }
 
+      const fields = useDrafts
+        ? buildVersionCollectionFields(adapter.payload.config, collectionConfig, true)
+        : collectionConfig.flattenedFields
+
       const sort = buildSortParam({
         config: adapter.payload.config,
-        fields: collectionConfig.flattenedFields,
+        fields,
         locale,
         sort: useDrafts ? getQueryDraftsSort({ collectionConfig, sort: sortJoin }) : sortJoin,
         timestamps: true,
@@ -483,10 +488,6 @@ export const buildJoinAggregation = async ({
             },
           })
         }
-      }
-
-      if (useDrafts) {
-        debugger
       }
     }
   }
