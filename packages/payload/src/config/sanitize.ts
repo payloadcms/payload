@@ -35,6 +35,7 @@ import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/i
 import { flattenBlock } from '../utilities/flattenAllFields.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
 import { addDefaultsToConfig } from './defaults.js'
+import { setupOrderable } from './orderable/index.js'
 
 const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig> => {
   const sanitizedConfig = { ...configToSanitize }
@@ -106,6 +107,9 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   const configWithDefaults = addDefaultsToConfig(incomingConfig)
 
   const config: Partial<SanitizedConfig> = sanitizeAdminConfig(configWithDefaults)
+
+  // Add orderable fields
+  setupOrderable(config as SanitizedConfig)
 
   if (!config.endpoints) {
     config.endpoints = []
