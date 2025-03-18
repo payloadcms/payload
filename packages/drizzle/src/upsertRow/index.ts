@@ -66,6 +66,9 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         })
       }
     } else {
+      if (adapter.allowIDOnCreate && data.id) {
+        rowToInsert.row.id = data.id
+      }
       ;[insertedRow] = await adapter.insert({
         db,
         tableName,

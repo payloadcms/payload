@@ -12,7 +12,7 @@ import { type Table } from 'drizzle-orm'
 import * as drizzlePg from 'drizzle-orm/pg-core'
 import * as drizzleSqlite from 'drizzle-orm/sqlite-core'
 import fs from 'fs'
-import { Types } from 'mongoose'
+import mongoose, { Types } from 'mongoose'
 import path from 'path'
 import {
   commitTransaction,
@@ -303,6 +303,81 @@ describe('database', () => {
       keys = Object.keys(foundUser)
       expect(keys).not.toContain('password')
       expect(keys).not.toContain('confirm-password')
+    })
+  })
+
+  describe('allow ID on create', () => {
+    beforeAll(() => {
+      payload.db.allowIDOnCreate = true
+      payload.config.db.allowIDOnCreate = true
+    })
+
+    afterAll(() => {
+      payload.db.allowIDOnCreate = false
+      payload.config.db.allowIDOnCreate = false
+    })
+
+    it('Local API - accepts ID on create', async () => {
+      let id: any = null
+      if (payload.db.name === 'mongoose') {
+        id = new mongoose.Types.ObjectId().toHexString()
+      } else if (payload.db.idType === 'uuid') {
+        id = randomUUID()
+      } else {
+        id = 9999
+      }
+
+      const post = await payload.create({ collection: 'posts', data: { id, title: 'created' } })
+
+      expect(post.id).toBe(id)
+    })
+
+    it('REST API - accepts ID on create', async () => {
+      let id: any = null
+      if (payload.db.name === 'mongoose') {
+        id = new mongoose.Types.ObjectId().toHexString()
+      } else if (payload.db.idType === 'uuid') {
+        id = randomUUID()
+      } else {
+        id = 99999
+      }
+
+      const response = await restClient.POST(`/posts`, {
+        body: JSON.stringify({
+          id,
+          title: 'created',
+        }),
+      })
+
+      const post = await response.json()
+
+      expect(post.doc.id).toBe(id)
+    })
+
+    it('GraphQL - accepts ID on create', async () => {
+      let id: any = null
+      if (payload.db.name === 'mongoose') {
+        id = new mongoose.Types.ObjectId().toHexString()
+      } else if (payload.db.idType === 'uuid') {
+        id = randomUUID()
+      } else {
+        id = 999999
+      }
+
+      const query = `mutation {
+                createPost(data: {title: "created", id: ${typeof id === 'string' ? `"${id}"` : id}}) {
+                id
+                title
+              }
+            }`
+      const res = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+
+      const doc = res.data.createPost
+
+      expect(doc).toMatchObject({ title: 'created', id })
+      expect(doc.id).toBe(id)
     })
   })
 
