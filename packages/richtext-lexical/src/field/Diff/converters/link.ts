@@ -1,3 +1,5 @@
+import { createHash } from 'crypto'
+
 import type {
   HTMLConvertersAsync,
   HTMLPopulateFn,
@@ -19,7 +21,10 @@ export const LinkDiffHTMLConverterAsync: (args: {
       })
     ).join('')
 
-    return `<a${providedStyleTag} data-enable-match="true" href="${node.fields.url}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>
+    // hash fields to ensure they are diffed if they change
+    const nodeFieldsHash = createHash('sha256').update(JSON.stringify(node.fields)).digest('hex')
+
+    return `<a${providedStyleTag} data-fields-hash="${nodeFieldsHash}" data-enable-match="true" href="${node.fields.url}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>
         ${children}
       </a>`
   },
@@ -42,7 +47,12 @@ export const LinkDiffHTMLConverterAsync: (args: {
       }
     }
 
-    return `<a${providedStyleTag} data-enable-match="true" href="${href}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>
+    // hash fields to ensure they are diffed if they change
+    const nodeFieldsHash = createHash('sha256')
+      .update(JSON.stringify(node.fields ?? {}))
+      .digest('hex')
+
+    return `<a${providedStyleTag} data-fields-hash="${nodeFieldsHash}" data-enable-match="true" href="${href}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>
         ${children}
       </a>`
   },

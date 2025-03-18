@@ -2,11 +2,11 @@ import type { FileData, PayloadRequest, TypeWithID } from 'payload'
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
 import { File } from '@payloadcms/ui/shared'
-
-import type { HTMLConvertersAsync } from '../../../../features/converters/lexicalToHtml/async/types.js'
+import { createHash } from 'crypto'
 
 import './index.scss'
 
+import type { HTMLConvertersAsync } from '../../../../features/converters/lexicalToHtml/async/types.js'
 import type { UploadDataImproved } from '../../../../features/upload/server/nodes/UploadNode.js'
 import type { SerializedUploadNode } from '../../../../nodeTypes.js'
 
@@ -46,6 +46,11 @@ export const UploadDiffHTMLConverterAsync: (args: {
 
       const ReactDOMServer = (await import('react-dom/server')).default
 
+      // hash fields to ensure they are diffed if they change
+      const nodeFieldsHash = createHash('sha256')
+        .update(JSON.stringify(node.fields ?? {}))
+        .digest('hex')
+
       const JSX = (
         <div className={`${baseClass}${providedCSSString}`}>
           <div className={`${baseClass}__card`}>
@@ -55,12 +60,20 @@ export const UploadDiffHTMLConverterAsync: (args: {
                   <img
                     alt={uploadDoc?.filename}
                     data-enable-match="true"
+                    data-fields-hash={`${nodeFieldsHash}`}
                     data-lexical-upload-id={uploadNode.value}
                     data-lexical-upload-relation-to={uploadNode.relationTo}
                     src={thumbnailSRC}
                   />
                 ) : (
-                  <File />
+                  <div
+                    data-enable-match="true"
+                    data-fields-hash={`${nodeFieldsHash}`}
+                    data-lexical-upload-id={uploadNode.value}
+                    data-lexical-upload-relation-to={uploadNode.relationTo}
+                  >
+                    <File />
+                  </div>
                 )}
               </div>
               <div className={`${baseClass}__info`}>
