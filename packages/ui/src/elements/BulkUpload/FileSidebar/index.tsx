@@ -166,7 +166,7 @@ export function FileSidebar() {
                         {currentFile.name || t('upload:noFile')}
                       </p>
                     </div>
-                    {currentFile?.size ? (
+                    {currentFile instanceof File ? (
                       <p className={`${baseClass}__fileSize`}>{getFileSize(currentFile)}</p>
                     ) : null}
                     <div className={`${baseClass}__remove ${baseClass}__remove--underlay`}>
