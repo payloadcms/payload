@@ -7,8 +7,9 @@ keywords: uploads, images, media, overview, documentation, Content Management Sy
 ---
 
 <Banner>
-  Payload provides everything you need to enable file upload, storage, and management directly
-  on your server—including extremely powerful file [access control](#access-control).
+  Payload provides everything you need to enable file upload, storage, and
+  management directly on your server—including extremely powerful file [access
+  control](#access-control).
 </Banner>
 
 <LightDarkImage
@@ -38,7 +39,8 @@ Every Payload Collection can opt-in to supporting Uploads by specifying the `upl
 <Banner type="success">
   **Tip:**
 
-  A common pattern is to create a **"media"** collection and enable **upload** on that collection.
+A common pattern is to create a **"media"** collection and enable **upload** on that collection.
+
 </Banner>
 
 ```ts
@@ -88,30 +90,29 @@ export const Media: CollectionConfig = {
 
 _An asterisk denotes that an option is required._
 
-| Option                         | Description                                                                                                                                                                                                                                   |
-|--------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **`adminThumbnail`**           | Set the way that the [Admin Panel](../admin/overview) will display thumbnails for this Collection. [More](#admin-thumbnails)                                                                                                                  |
-| **`bulkUpload`**               | Allow users to upload in bulk from the list view, default is true                                                                                                                                                                             |
-| **`cacheTags`**                | Set to `false` to disable the cache tag set in the UI for the admin thumbnail component. Useful for when CDNs don't allow certain cache queries.                                                                                              |
-| **`crop`**                     | Set to `false` to disable the cropping tool in the [Admin Panel](../admin/overview). Crop is enabled by default. [More](#crop-and-focal-point-selector)                                                                                       |
-| **`disableLocalStorage`**      | Completely disable uploading files to disk locally. [More](#disabling-local-upload-storage)                                                                                                                                                   |
-| **`displayPreview`**           | Enable displaying preview of the uploaded file in Upload fields related to this Collection. Can be locally overridden by `displayPreview` option in Upload field. [More](/docs/fields/upload#config-options).                                 |
-| **`externalFileHeaderFilter`** | Accepts existing headers and returns the headers after filtering or modifying.                                                                                                                                                                |
-| **`filesRequiredOnCreate`**    | Mandate file data on creation, default is true.                                                                                                                                                                                               |
-| **`filenameCompoundIndex`**    | Field slugs to use for a compound index instead of the default filename index.                                                                                                                                                                |
-| **`focalPoint`**               | Set to `false` to disable the focal point selection tool in the [Admin Panel](../admin/overview). The focal point selector is only available when `imageSizes` or `resizeOptions` are defined. [More](#crop-and-focal-point-selector)         |
-| **`formatOptions`**            | An object with `format` and `options` that are used with the Sharp image library to format the upload file. [More](https://sharp.pixelplumbing.com/api-output#toformat)                                                                       |
-| **`handlers`**                 | Array of Request handlers to execute when fetching a file, if a handler returns a Response it will be sent to the client. Otherwise Payload will retrieve and send back the file.                                                             |
-| **`imageSizes`**               | If specified, image uploads will be automatically resized in accordance to these image sizes. [More](#image-sizes)                                                                                                                            |
-| **`mimeTypes`**                | Restrict mimeTypes in the file picker. Array of valid mimetypes or mimetype wildcards [More](#mimetypes)                                                                                                                                      |
+| Option                         | Description                                                                                                                                                                                                                                        |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`adminThumbnail`**           | Set the way that the [Admin Panel](../admin/overview) will display thumbnails for this Collection. [More](#admin-thumbnails)                                                                                                                       |
+| **`bulkUpload`**               | Allow users to upload in bulk from the list view, default is true                                                                                                                                                                                  |
+| **`cacheTags`**                | Set to `false` to disable the cache tag set in the UI for the admin thumbnail component. Useful for when CDNs don't allow certain cache queries.                                                                                                   |
+| **`crop`**                     | Set to `false` to disable the cropping tool in the [Admin Panel](../admin/overview). Crop is enabled by default. [More](#crop-and-focal-point-selector)                                                                                            |
+| **`disableLocalStorage`**      | Completely disable uploading files to disk locally. [More](#disabling-local-upload-storage)                                                                                                                                                        |
+| **`displayPreview`**           | Enable displaying preview of the uploaded file in Upload fields related to this Collection. Can be locally overridden by `displayPreview` option in Upload field. [More](/docs/fields/upload#config-options).                                      |
+| **`externalFileHeaderFilter`** | Accepts existing headers and returns the headers after filtering or modifying.                                                                                                                                                                     |
+| **`filesRequiredOnCreate`**    | Mandate file data on creation, default is true.                                                                                                                                                                                                    |
+| **`filenameCompoundIndex`**    | Field slugs to use for a compound index instead of the default filename index.                                                                                                                                                                     |
+| **`focalPoint`**               | Set to `false` to disable the focal point selection tool in the [Admin Panel](../admin/overview). The focal point selector is only available when `imageSizes` or `resizeOptions` are defined. [More](#crop-and-focal-point-selector)              |
+| **`formatOptions`**            | An object with `format` and `options` that are used with the Sharp image library to format the upload file. [More](https://sharp.pixelplumbing.com/api-output#toformat)                                                                            |
+| **`handlers`**                 | Array of Request handlers to execute when fetching a file, if a handler returns a Response it will be sent to the client. Otherwise Payload will retrieve and send back the file.                                                                  |
+| **`imageSizes`**               | If specified, image uploads will be automatically resized in accordance to these image sizes. [More](#image-sizes)                                                                                                                                 |
+| **`mimeTypes`**                | Restrict mimeTypes in the file picker. Array of valid mimetypes or mimetype wildcards [More](#mimetypes)                                                                                                                                           |
 | **`pasteURL`**                 | Controls whether files can be uploaded from remote URLs by pasting them into the Upload field. **Enabled by default.** Accepts `false` to disable or an object with an `allowList` of valid remote URLs. [More](#uploading-files-from-remote-urls) |
-| **`resizeOptions`**            | An object passed to the the Sharp image library to resize the uploaded file. [More](https://sharp.pixelplumbing.com/api-resize)                                                                                                               |
-| **`staticDir`**                | The folder directory to use to store media in. Can be either an absolute path or relative to the directory that contains your config. Defaults to your collection slug                                                                        |
-| **`trimOptions`**              | An object passed to the the Sharp image library to trim the uploaded file. [More](https://sharp.pixelplumbing.com/api-resize#trim)                                                                                                            |
-| **`withMetadata`**             | If specified, appends metadata to the output image file.  Accepts a boolean or a function that receives `metadata` and `req`, returning a boolean.                                                                                            |
-| **`hideFileInputOnCreate`**    | Set to `true` to prevent the admin UI from showing file inputs during document creation, useful for programmatic file generation.                                                                               |
-| **`hideRemoveFile`**           | Set to `true` to prevent the admin UI having a way to remove an existing file while editing.                                                                                                                                                  |
-
+| **`resizeOptions`**            | An object passed to the the Sharp image library to resize the uploaded file. [More](https://sharp.pixelplumbing.com/api-resize)                                                                                                                    |
+| **`staticDir`**                | The folder directory to use to store media in. Can be either an absolute path or relative to the directory that contains your config. Defaults to your collection slug                                                                             |
+| **`trimOptions`**              | An object passed to the the Sharp image library to trim the uploaded file. [More](https://sharp.pixelplumbing.com/api-resize#trim)                                                                                                                 |
+| **`withMetadata`**             | If specified, appends metadata to the output image file. Accepts a boolean or a function that receives `metadata` and `req`, returning a boolean.                                                                                                  |
+| **`hideFileInputOnCreate`**    | Set to `true` to prevent the admin UI from showing file inputs during document creation, useful for programmatic file generation.                                                                                                                  |
+| **`hideRemoveFile`**           | Set to `true` to prevent the admin UI having a way to remove an existing file while editing.                                                                                                                                                       |
 
 ### Payload-wide Upload Options
 
@@ -206,8 +207,9 @@ When an uploaded image is smaller than the defined image size, we have 3 options
 <Banner type="error">
   **Note:**
 
-  By default, the image size will return NULL when the uploaded image is smaller than the defined
-  image size. Use the `withoutEnlargement` prop to change this.
+By default, the image size will return NULL when the uploaded image is smaller than the defined
+image size. Use the `withoutEnlargement` prop to change this.
+
 </Banner>
 
 #### Custom file name per size
@@ -243,10 +245,11 @@ If you are using a plugin to send your files off to a third-party file storage h
 <Banner type="warning">
   **Note:**
 
-  This is a fairly advanced feature. If you do disable local file storage, by default, your admin
-  panel's thumbnails will be broken as you will not have stored a file. It will be totally up to you
-  to use either a plugin or your own hooks to store your files in a permanent manner, as well as
-  provide your own admin thumbnail using **upload.adminThumbnail**.
+This is a fairly advanced feature. If you do disable local file storage, by default, your admin
+panel's thumbnails will be broken as you will not have stored a file. It will be totally up to you
+to use either a plugin or your own hooks to store your files in a permanent manner, as well as
+provide your own admin thumbnail using **upload.adminThumbnail**.
+
 </Banner>
 
 ## Admin Thumbnails
@@ -276,9 +279,9 @@ export const Media: CollectionConfig = {
         fit: 'cover',
         height: 600,
         width: 1800,
-      }
-    ]
-  }
+      },
+    ],
+  },
 }
 ```
 
@@ -291,9 +294,10 @@ export const Media: CollectionConfig = {
   slug: 'media',
   upload: {
     // highlight-start
-    adminThumbnail: ({ doc }) => `https://google.com/custom-path-to-file/${doc.filename}`,
+    adminThumbnail: ({ doc }) =>
+      `https://google.com/custom-path-to-file/${doc.filename}`,
     // highlight-end
-  }
+  },
 }
 ```
 
@@ -321,8 +325,9 @@ export const Media: CollectionConfig = {
 <Banner type="warning">
   **Important:**
 
-  Uploading files is currently only possible through the REST and Local APIs due to how GraphQL
-  works. It's difficult and fairly nonsensical to support uploading files through GraphQL.
+Uploading files is currently only possible through the REST and Local APIs due to how GraphQL
+works. It's difficult and fairly nonsensical to support uploading files through GraphQL.
+
 </Banner>
 
 To upload a file, use your collection's [`create`](/docs/rest-api/overview#collections) endpoint. Send it all the data that your Collection requires, as well as a `file` key containing the file that you'd like to upload.
@@ -330,10 +335,10 @@ To upload a file, use your collection's [`create`](/docs/rest-api/overview#colle
 Send your request as a `multipart/form-data` request, using [`FormData`](https://developer.mozilla.org/en-US/docs/Web/API/FormData) if possible.
 
 ```ts
-const fileInput = document.querySelector('#your-file-input') ;
-const formData = new FormData();
+const fileInput = document.querySelector('#your-file-input')
+const formData = new FormData()
 
-formData.append('file', fileInput.files[0]);
+formData.append('file', fileInput.files[0])
 
 fetch('api/:upload-slug', {
   method: 'POST',
@@ -371,8 +376,9 @@ The `data` property should still include all the required fields of your `media`
 <Banner type="warning">
   **Important:**
 
-  Remember that all custom hooks attached to the `media` collection will still trigger.
-  Ensure that files match the specified mimeTypes or sizes defined in the collection's `formatOptions` or custom `hooks`.
+Remember that all custom hooks attached to the `media` collection will still trigger.
+Ensure that files match the specified mimeTypes or sizes defined in the collection's `formatOptions` or custom `hooks`.
+
 </Banner>
 
 ## Uploading Files from Remote URLs
@@ -424,14 +430,13 @@ export const Media: CollectionConfig = {
 
 _An asterisk denotes that an option is required._
 
-| Option           | Description                                                                                          | Example       |
-| ---------------- | ---------------------------------------------------------------------------------------------------- | ------------- |
-| **`hostname`** * | The hostname of the allowed URL. This is required to ensure the URL is coming from a trusted source. | `example.com` |
-| **`pathname`**   | The path portion of the URL. Supports wildcards to match multiple paths.                             | `/images/*`   |
-| **`port`**       | The port number of the URL. If not specified, the default port for the protocol will be used.        | `3000`        |
-| **`protocol`**   | The protocol to match. Must be either `http` or `https`. Defaults to `https`.                        | `https`       |
-| **`search`**     | The query string of the URL. If specified, the URL must match this exact query string.               | `?version=1`  |
-
+| Option            | Description                                                                                          | Example       |
+| ----------------- | ---------------------------------------------------------------------------------------------------- | ------------- |
+| **`hostname`** \* | The hostname of the allowed URL. This is required to ensure the URL is coming from a trusted source. | `example.com` |
+| **`pathname`**    | The path portion of the URL. Supports wildcards to match multiple paths.                             | `/images/*`   |
+| **`port`**        | The port number of the URL. If not specified, the default port for the protocol will be used.        | `3000`        |
+| **`protocol`**    | The protocol to match. Must be either `http` or `https`. Defaults to `https`.                        | `https`       |
+| **`search`**      | The query string of the URL. If specified, the URL must match this exact query string.               | `?version=1`  |
 
 ## Access Control
 

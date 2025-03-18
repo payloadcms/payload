@@ -148,11 +148,23 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType }) => {
         docs,
         i18n,
         localization,
+        supportedTimezones,
         t,
       }),
     )
     setUpcoming(docs)
-  }, [collectionSlug, globalSlug, serverURL, api, dateFormat, id, t, i18n, localization])
+  }, [
+    collectionSlug,
+    globalSlug,
+    serverURL,
+    api,
+    i18n,
+    dateFormat,
+    localization,
+    supportedTimezones,
+    t,
+    id,
+  ])
 
   const deleteHandler = React.useCallback(
     async (id: number | string) => {
@@ -202,7 +214,6 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType }) => {
         timezone,
       })
 
-      setTimezone(defaultTimezone)
       setDate(undefined)
       toast.success(t('version:scheduledSuccessfully'))
       void fetchUpcoming()
@@ -222,7 +233,6 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType }) => {
     id,
     globalSlug,
     timezone,
-    defaultTimezone,
     fetchUpcoming,
   ])
 

@@ -111,7 +111,7 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
   /**
    * Customize tenant selector label
    *
-   * Either a string or an object where the keys are locales and the values are the string labels
+   * Either a string or an object where the keys are i18n codes and the values are the string labels
    */
   tenantSelectorLabel?:
     | Partial<{

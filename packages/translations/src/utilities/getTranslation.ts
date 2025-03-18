@@ -3,6 +3,7 @@ import type { JSX } from 'react'
 import type { I18n, TFunction } from '../types.js'
 
 type LabelType =
+  | (() => JSX.Element)
   | (({ t }: { t: TFunction }) => string)
   | JSX.Element
   | Record<string, string>

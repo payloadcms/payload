@@ -31,7 +31,7 @@ export const MyJSONField: Field = {
 
 | Option                 | Description                                                                                                                                                                 |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`name`** *          | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                      |
+| **`name`** \*          | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                      |
 | **`label`**            | Text used as a field label in the Admin Panel or an object with keys for each language.                                                                                     |
 | **`unique`**           | Enforce that each entry in the Collection has a unique value for this field.                                                                                                |
 | **`index`**            | Build an [index](/docs/database/overview) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
@@ -49,7 +49,7 @@ export const MyJSONField: Field = {
 | **`typescriptSchema`** | Override field type generation with providing a JSON schema                                                                                                                 |
 | **`virtual`**          | Provide `true` to disable field in the database. See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges)            |
 
-_* An asterisk denotes that a property is required._
+_\* An asterisk denotes that a property is required._
 
 ## Admin Options
 
@@ -60,7 +60,8 @@ import type { Field } from 'payload'
 
 export const MyJSONField: Field = {
   // ...
-  admin: { // highlight-line
+  admin: {
+    // highlight-line
     // ...
   },
 }
@@ -90,12 +91,12 @@ export const ExampleCollection: CollectionConfig = {
   ],
 }
 ```
+
 ## JSON Schema Validation
 
 Payload JSON fields fully support the [JSON schema](https://json-schema.org/) standard. By providing a schema in your field config, the editor will be guided in the admin UI, getting typeahead for properties and their formats automatically. When the document is saved, the default validation will prevent saving any invalid data in the field according to the schema in your config.
 
 If you only provide a URL to a schema, Payload will fetch the desired schema if it is publicly available. If not, it is recommended to add the schema directly to your config or import it from another file so that it can be implemented consistently in your project.
-
 
 ### Local JSON Schema
 
@@ -118,11 +119,10 @@ export const ExampleCollection: CollectionConfig = {
           properties: {
             foo: {
               enum: ['bar', 'foobar'],
-            }
+            },
           },
         },
       },
-
     },
   ],
 }

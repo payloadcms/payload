@@ -27,11 +27,13 @@ import React from 'react'
 import type { SortColumnProps } from '../SortColumn/index.js'
 
 import {
+  DefaultCell,
   RenderCustomComponent,
   RenderDefaultCell,
   SortColumn,
   // eslint-disable-next-line payload/no-imports-from-exports-dir
 } from '../../exports/client/index.js'
+import { hasOptionLabelJSXElement } from '../../utilities/hasOptionLabelJSXElement.js'
 import { RenderServerComponent } from '../RenderServerComponent/index.js'
 import { filterFields } from './filterFields.js'
 
@@ -269,6 +271,16 @@ export const buildColumnState = (args: Args): Column[] => {
                 Component: _field.editor.CellComponent,
                 importMap: payload.importMap,
                 serverProps: cellServerProps,
+              })
+            } else if (
+              cellClientProps.cellData &&
+              cellClientProps.field &&
+              hasOptionLabelJSXElement(cellClientProps)
+            ) {
+              CustomCell = RenderServerComponent({
+                clientProps: cellClientProps,
+                Component: DefaultCell,
+                importMap: payload.importMap,
               })
             } else {
               const CustomCellComponent = _field?.admin?.components?.Cell

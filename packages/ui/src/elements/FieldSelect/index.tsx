@@ -3,54 +3,70 @@ import type { ClientField, FieldWithPathClient } from 'payload'
 
 import React, { useState } from 'react'
 
+import type { FieldAction } from '../../forms/Form/types.js'
+
+import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { filterOutUploadFields } from '../../utilities/filterOutUploadFields.js'
 import { ReactSelect } from '../ReactSelect/index.js'
 import { reduceFieldOptions } from './reduceFieldOptions.js'
 import './index.scss'
 
 const baseClass = 'field-select'
 
+export type OnFieldSelect = ({
+  dispatchFields,
+  formState,
+  selected,
+}: {
+  dispatchFields: React.Dispatch<FieldAction>
+  formState: FormState
+  selected: FieldOption[]
+}) => void
+
 export type FieldSelectProps = {
   readonly fields: ClientField[]
-  readonly setSelected: (fields: FieldWithPathClient[]) => void
+  readonly onChange: OnFieldSelect
 }
 
-export const FieldSelect: React.FC<FieldSelectProps> = ({ fields, setSelected }) => {
+export const combineLabel = ({
+  CustomLabel,
+  field,
+  prefix,
+}: {
+  CustomLabel?: React.ReactNode
+  field?: ClientField
+  prefix?: React.ReactNode
+}): React.ReactNode => {
+  return (
+    <Fragment>
+      {prefix ? (
+        <Fragment>
+          <span style={{ display: 'inline-block' }}>{prefix}</span>
+          {' > '}
+        </Fragment>
+      ) : null}
+      <span style={{ display: 'inline-block' }}>
+        <RenderCustomComponent
+          CustomComponent={CustomLabel}
+          Fallback={<FieldLabel label={'label' in field && field.label} />}
+        />
+      </span>
+    </Fragment>
+  )
+}
+
+export type FieldOption = { Label: React.ReactNode; value: FieldWithPathClient }
+
+export const FieldSelect: React.FC<FieldSelectProps> = ({ fields, onChange }) => {
   const { t } = useTranslation()
   const { dispatchFields, getFields } = useForm()
 
-  const [options] = useState(() => reduceFieldOptions({ fields, formState: getFields() }))
-
-  console.log(options)
-
-  const handleChange = (selected) => {
-    const activeFields = getFields()
-
-    if (selected === null) {
-      setSelected([])
-    } else {
-      setSelected(selected.map(({ value }) => value))
-    }
-
-    // remove deselected values from form state
-    if (selected === null || Object.keys(activeFields || []).length > selected.length) {
-      Object.keys(activeFields).forEach((path) => {
-        if (
-          selected === null ||
-          !selected.find((field) => {
-            return field.value.path === path
-          })
-        ) {
-          dispatchFields({
-            type: 'REMOVE',
-            path,
-          })
-        }
-      })
-    }
-  }
+  const [options] = useState<FieldOption[]>(() =>
+    reduceFieldOptions({ fields: filterOutUploadFields(fields), formState: getFields() }),
+  )
 
   return (
     <div className={baseClass}>
@@ -63,7 +79,9 @@ export const FieldSelect: React.FC<FieldSelectProps> = ({ fields, setSelected })
           return String(option.value)
         }}
         isMulti
-        onChange={handleChange}
+        onChange={(selected: FieldOption[]) =>
+          onChange({ dispatchFields, formState: getFields(), selected })
+        }
         options={options}
       />
     </div>

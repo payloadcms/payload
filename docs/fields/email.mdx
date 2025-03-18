@@ -30,7 +30,7 @@ export const MyEmailField: Field = {
 
 | Option                 | Description                                                                                                                                                                 |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`name`** *          | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                      |
+| **`name`** \*          | To be used as the property name when stored and retrieved from the database. [More](/docs/fields/overview#field-names)                                                      |
 | **`label`**            | Text used as a field label in the Admin Panel or an object with keys for each language.                                                                                     |
 | **`unique`**           | Enforce that each entry in the Collection has a unique value for this field.                                                                                                |
 | **`index`**            | Build an [index](/docs/database/overview) for this field to produce faster queries. Set this field to `true` if your users will perform queries on this field's data often. |
@@ -47,7 +47,7 @@ export const MyEmailField: Field = {
 | **`typescriptSchema`** | Override field type generation with providing a JSON schema                                                                                                                 |
 | **`virtual`**          | Provide `true` to disable field in the database. See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges)            |
 
-_* An asterisk denotes that a property is required._
+_\* An asterisk denotes that a property is required._
 
 ## Admin Options
 
@@ -58,7 +58,8 @@ import type { Field } from 'payload'
 
 export const MyEmailField: Field = {
   // ...
-  admin: { // highlight-line
+  admin: {
+    // highlight-line
     // ...
   },
 }
@@ -66,10 +67,10 @@ export const MyEmailField: Field = {
 
 The Email Field inherits all of the default options from the base [Field Admin Config](./overview#admin-options), plus the following additional options:
 
-| Property                       | Description                                                                                                                            |
-| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-| **`placeholder`**              | Set this property to define a placeholder string for the field.                                                                         |
-| **`autoComplete`**             | Set this property to a string that will be used for browser autocomplete.                                                               |
+| Property           | Description                                                               |
+| ------------------ | ------------------------------------------------------------------------- |
+| **`placeholder`**  | Set this property to define a placeholder string for the field.           |
+| **`autoComplete`** | Set this property to a string that will be used for browser autocomplete. |
 
 ## Example
 
@@ -109,7 +110,12 @@ export const CustomEmailFieldServer: EmailFieldServerComponent = ({
   permissions,
 }) => {
   return (
-    <EmailField field={clientField} path={path} schemaPath={schemaPath} permissions={permissions} />
+    <EmailField
+      field={clientField}
+      path={path}
+      schemaPath={schemaPath}
+      permissions={permissions}
+    />
   )
 }
 ```
@@ -168,5 +174,6 @@ export const CustomEmailFieldLabelClient: EmailFieldLabelClientComponent = ({
       path={path}
       required={field?.required}
     />
-  )}
+  )
+}
 ```
