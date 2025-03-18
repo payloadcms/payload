@@ -66,7 +66,9 @@ export interface HtmlDiffOptions {
   minMatchedSize?: number
 }
 
+// eslint-disable-next-line regexp/no-super-linear-backtracking, regexp/optimal-quantifier-concatenation
 const htmlStartTagReg = /^<(?<name>[^\s/>]+)[^>]*>$/
+// eslint-disable-next-line regexp/no-super-linear-backtracking, regexp/optimal-quantifier-concatenation
 const htmlTagWithNameReg = /^<(?<isEnd>\/)?(?<name>[^\s>]+)[^>]*>$/
 
 const htmlTagReg = /^<[^>]+>/
@@ -123,6 +125,7 @@ export class HtmlDiff {
     if (oldHtml === newHtml) {
       this.unifiedContent = oldHtml
       let equalSequence = 0
+      // eslint-disable-next-line regexp/no-super-linear-backtracking, regexp/optimal-quantifier-concatenation
       const content = oldHtml.replace(/<([^\s/>]+)[^>]*>/g, (match: string, name: string) => {
         const tagNameLength = name.length + 1
         return `${match.slice(0, tagNameLength)} data-seq="${++equalSequence}"${match.slice(tagNameLength)}`
@@ -522,8 +525,7 @@ export class HtmlDiff {
         }
 
         default: {
-          const exhaustiveCheck: never = operation.type
-          console.error('Error operation type: ' + exhaustiveCheck)
+          console.error('Richtext diff error - invalid operation: ' + String(operation.type))
         }
       }
     })
@@ -650,8 +652,7 @@ export class HtmlDiff {
         }
 
         default: {
-          const exhaustiveCheck: never = operation.type
-          console.error('Error operation type: ' + exhaustiveCheck)
+          console.error('Richtext diff error - invalid operation: ' + String(operation.type))
         }
       }
     })
