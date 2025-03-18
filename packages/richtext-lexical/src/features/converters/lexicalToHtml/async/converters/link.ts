@@ -16,14 +16,9 @@ export const LinkHTMLConverterAsync: (args: {
       })
     ).join('')
 
-    const rel: string | undefined = node.fields.newTab ? 'noopener noreferrer' : undefined
-    const target: string | undefined = node.fields.newTab ? '_blank' : undefined
-
-    return `(
-      <a${providedStyleTag} href="${node.fields.url}" rel=${rel} target=${target}>
+    return `<a${providedStyleTag} href="${node.fields.url}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>
         ${children}
-      </a>
-    )`
+      </a>`
   },
   link: async ({ node, nodesToHTML, populate, providedStyleTag }) => {
     const children = (
@@ -31,9 +26,6 @@ export const LinkHTMLConverterAsync: (args: {
         nodes: node.children,
       })
     ).join('')
-
-    const rel: string | undefined = node.fields.newTab ? 'noopener noreferrer' : undefined
-    const target: string | undefined = node.fields.newTab ? '_blank' : undefined
 
     let href: string = node.fields.url ?? ''
     if (node.fields.linkType === 'internal') {
@@ -47,10 +39,8 @@ export const LinkHTMLConverterAsync: (args: {
       }
     }
 
-    return `(
-      <a${providedStyleTag} href="${href}" rel=${rel} target=${target}>
+    return `<a${providedStyleTag} href="${href}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>
         ${children}
-      </a>
-    )`
+      </a>`
   },
 })

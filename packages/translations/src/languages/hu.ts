@@ -401,6 +401,7 @@ export const huTranslations: DefaultTranslationsObject = {
     height: 'Magasság',
     lessInfo: 'Kevesebb információ',
     moreInfo: 'További információ',
+    noFile: 'Nincs fájl',
     pasteURL: 'URL beillesztése',
     previewSizes: 'Előnézeti méretek',
     selectCollectionToBrowse: 'Válassza ki a böngészni kívánt gyűjteményt',

@@ -394,6 +394,7 @@ export const etTranslations: DefaultTranslationsObject = {
     height: 'Kõrgus',
     lessInfo: 'Vähem infot',
     moreInfo: 'Rohkem infot',
+    noFile: 'Pole faili',
     pasteURL: 'Kleebi URL',
     previewSizes: 'Eelvaate suurused',
     selectCollectionToBrowse: 'Vali kollektsioon sirvimiseks',

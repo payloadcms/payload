@@ -397,6 +397,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     height: 'Висота',
     lessInfo: 'Менше інформації',
     moreInfo: 'Більше інформації',
+    noFile: 'Немає файлу',
     pasteURL: 'Вставити URL',
     previewSizes: 'Попередній перегляд розмірів',
     selectCollectionToBrowse: 'Оберіть колекцію для перегляду',

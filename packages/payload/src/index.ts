@@ -993,6 +993,7 @@ export { JWTAuthentication } from './auth/strategies/jwt.js'
 export type {
   AuthStrategyFunction,
   AuthStrategyFunctionArgs,
+  AuthStrategyResult,
   CollectionPermission,
   DocumentPermissions,
   FieldPermissions,
@@ -1274,6 +1275,7 @@ export type {
   NumberField,
   NumberFieldClient,
   Option,
+  OptionLabel,
   OptionObject,
   PointField,
   PointFieldClient,
@@ -1457,6 +1459,7 @@ export { flattenAllFields } from './utilities/flattenAllFields.js'
 export { default as flattenTopLevelFields } from './utilities/flattenTopLevelFields.js'
 export { formatErrors } from './utilities/formatErrors.js'
 export { formatLabels, formatNames, toWords } from './utilities/formatLabels.js'
+export { getBlockSelect } from './utilities/getBlockSelect.js'
 export { getCollectionIDFieldTypes } from './utilities/getCollectionIDFieldTypes.js'
 export { getObjectDotNotation } from './utilities/getObjectDotNotation.js'
 export { getRequestLanguage } from './utilities/getRequestLanguage.js'
@@ -1476,6 +1479,7 @@ export { sanitizeFallbackLocale } from './utilities/sanitizeFallbackLocale.js'
 export { sanitizeJoinParams } from './utilities/sanitizeJoinParams.js'
 export { sanitizePopulateParam } from './utilities/sanitizePopulateParam.js'
 export { sanitizeSelectParam } from './utilities/sanitizeSelectParam.js'
+export { stripUnselectedFields } from './utilities/stripUnselectedFields.js'
 export { traverseFields } from './utilities/traverseFields.js'
 export type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'

@@ -37,7 +37,7 @@ type Args = {
  */
 export const lexicalHTMLField: (args: Args) => Field = (args) => {
   const { converters, hidden = true, htmlFieldName, lexicalFieldName, storeInDB = false } = args
-  return {
+  const field: Field = {
     name: htmlFieldName,
     type: 'code',
     admin: {
@@ -79,15 +79,18 @@ export const lexicalHTMLField: (args: Args) => Field = (args) => {
           })
         },
       ],
-      beforeChange: [
-        ({ siblingData, value }) => {
-          if (storeInDB) {
-            return value
-          }
-          delete siblingData[htmlFieldName]
-          return null
-        },
-      ],
     },
   }
+
+  if (!storeInDB) {
+    field.hooks = field.hooks ?? {}
+    field.hooks.beforeChange = [
+      ({ siblingData }) => {
+        delete siblingData[htmlFieldName]
+        return null
+      },
+    ]
+  }
+
+  return field
 }

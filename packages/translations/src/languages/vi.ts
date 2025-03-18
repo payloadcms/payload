@@ -397,6 +397,7 @@ export const viTranslations: DefaultTranslationsObject = {
     height: 'Chiều cao',
     lessInfo: 'Hiển thị ít hơn',
     moreInfo: 'Thêm',
+    noFile: 'Không có tệp',
     pasteURL: 'Dán URL',
     previewSizes: 'Kích cỡ xem trước',
     selectCollectionToBrowse: 'Chọn một Collection để tìm',

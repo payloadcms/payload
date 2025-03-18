@@ -13,6 +13,15 @@ export const PostsCollection: CollectionConfig = {
       type: 'text',
     },
     {
+      name: 'renderTracker',
+      type: 'text',
+      admin: {
+        components: {
+          Field: './collections/Posts/RenderTracker.js#RenderTracker',
+        },
+      },
+    },
+    {
       name: 'validateUsingEvent',
       type: 'text',
       admin: {
