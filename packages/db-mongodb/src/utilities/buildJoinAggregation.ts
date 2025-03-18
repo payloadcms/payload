@@ -2,14 +2,18 @@ import type { PipelineStage } from 'mongoose'
 
 import {
   APIError,
+  appendVersionToQueryKey,
   type CollectionSlug,
+  combineQueries,
   type FlattenedField,
+  getQueryDraftsSort,
   type JoinQuery,
   type SanitizedCollectionConfig,
 } from 'payload'
 import { fieldShouldBeLocalized } from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
+import type { CollectionModel } from '../types.js'
 
 import { buildQuery } from '../queries/buildQuery.js'
 import { buildSortParam } from '../queries/buildSortParam.js'
@@ -261,10 +265,27 @@ export const buildJoinAggregation = async ({
         continue
       }
 
-      const { collectionConfig, Model: JoinModel } = getCollection({
-        adapter,
-        collectionSlug: join.field.collection as string,
-      })
+      const collectionConfig = adapter.payload.collections[join.field.collection as string]?.config
+
+      if (!collectionConfig) {
+        throw new APIError(
+          `Collection config for ${join.field.collection.toString()} was not found`,
+        )
+      }
+
+      let JoinModel: CollectionModel | undefined
+
+      const useDrafts = versions && collectionConfig.versions.drafts
+
+      if (useDrafts) {
+        JoinModel = adapter.versions[collectionConfig.slug]
+      } else {
+        JoinModel = adapter.collections[collectionConfig.slug]
+      }
+
+      if (!JoinModel) {
+        throw new APIError(`Join Model was not found for ${collectionConfig.slug}`)
+      }
 
       const {
         count,
@@ -282,7 +303,7 @@ export const buildJoinAggregation = async ({
         config: adapter.payload.config,
         fields: collectionConfig.flattenedFields,
         locale,
-        sort: sortJoin,
+        sort: useDrafts ? getQueryDraftsSort({ collectionConfig, sort: sortJoin }) : sortJoin,
         timestamps: true,
       })
       const sortProperty = Object.keys(sort)[0]!
@@ -291,7 +312,13 @@ export const buildJoinAggregation = async ({
       const $match = await JoinModel.buildQuery({
         locale,
         payload: adapter.payload,
-        where: whereJoin,
+        where: useDrafts
+          ? combineQueries(appendVersionToQueryKey(whereJoin), {
+              latest: {
+                equals: true,
+              },
+            })
+          : whereJoin,
       })
 
       const pipeline: Exclude<PipelineStage, PipelineStage.Merge | PipelineStage.Out>[] = [
@@ -343,6 +370,12 @@ export const buildJoinAggregation = async ({
           },
         )
 
+      let foreignFieldPrefix = ''
+
+      if (useDrafts) {
+        foreignFieldPrefix = 'version.'
+      }
+
       if (adapter.payload.config.localization && locale === 'all') {
         adapter.payload.config.localization.localeCodes.forEach((code) => {
           const as = `${versions ? `version.${join.joinPath}` : join.joinPath}${code}`
@@ -351,7 +384,7 @@ export const buildJoinAggregation = async ({
             {
               $lookup: {
                 as: `${as}.docs`,
-                foreignField: `${join.field.on}${code}${polymorphicSuffix}`,
+                foreignField: `${foreignFieldPrefix}${join.field.on}${code}${polymorphicSuffix}`,
                 from: JoinModel.collection.name,
                 localField: versions ? 'parent' : '_id',
                 pipeline,
@@ -362,7 +395,7 @@ export const buildJoinAggregation = async ({
                 [`${as}.docs`]: {
                   $map: {
                     as: 'doc',
-                    in: '$$doc._id',
+                    in: useDrafts ? `$$doc.parent` : '$$doc._id',
                     input: `$${as}.docs`,
                   },
                 }, // Slicing the docs to match the limit
@@ -385,7 +418,10 @@ export const buildJoinAggregation = async ({
           }
 
           if (count) {
-            addTotalDocsAggregation(as, `${join.field.on}${code}${polymorphicSuffix}`)
+            addTotalDocsAggregation(
+              as,
+              `${foreignFieldPrefix}${join.field.on}${code}${polymorphicSuffix}`,
+            )
           }
         })
       } else {
@@ -412,7 +448,7 @@ export const buildJoinAggregation = async ({
           {
             $lookup: {
               as: `${as}.docs`,
-              foreignField,
+              foreignField: `${foreignFieldPrefix}${foreignField}`,
               from: JoinModel.collection.name,
               localField: versions ? 'parent' : '_id',
               pipeline,
@@ -423,7 +459,7 @@ export const buildJoinAggregation = async ({
               [`${as}.docs`]: {
                 $map: {
                   as: 'doc',
-                  in: '$$doc._id',
+                  in: useDrafts ? `$$doc.parent` : '$$doc._id',
                   input: `$${as}.docs`,
                 },
               }, // Slicing the docs to match the limit
@@ -435,7 +471,7 @@ export const buildJoinAggregation = async ({
         )
 
         if (count) {
-          addTotalDocsAggregation(as, foreignField)
+          addTotalDocsAggregation(as, `${foreignFieldPrefix}${foreignField}`)
         }
 
         if (limitJoin > 0) {
@@ -447,6 +483,10 @@ export const buildJoinAggregation = async ({
             },
           })
         }
+      }
+
+      if (useDrafts) {
+        debugger
       }
     }
   }
