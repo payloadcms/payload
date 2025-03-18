@@ -7,6 +7,9 @@ interface MatchedBlock {
 }
 
 interface Operation {
+  /**
+   * Index of entry in tokenized token list
+   */
   newEnd: number
   newStart: number
   oldEnd: number
@@ -131,6 +134,7 @@ export class HtmlDiff {
     this.newTokens = this.tokenize(newHtml)
     // step2: find matched blocks
     this.matchedBlockList = this.getMatchedBlockList()
+
     // step3: generate operation list
     this.operationList = this.getOperationList()
   }
@@ -174,6 +178,7 @@ export class HtmlDiff {
     matchedBlockList: MatchedBlock[] = [],
   ): MatchedBlock[] {
     const matchBlock = this.computeBestMatchedBlock(oldStart, oldEnd, newStart, newEnd)
+
     if (!matchBlock) {
       return []
     }
@@ -221,8 +226,13 @@ export class HtmlDiff {
     let i = -1
     for (const token of tokens) {
       i++
+
+      // If this is true, this HTML should be diffed as well - not just its children
+      const isMatchElement = token.includes('data-enable-match="true"')
+      const isHtmlTag = !!token.match(htmlTagReg)?.length
+
       // this token is html tag
-      if (token.match(htmlTagReg)) {
+      if (!isMatchElement && isHtmlTag) {
         // handle text tokens before
         if (i > textStartIndex) {
           result += this.dressUpText(type, tokens.slice(textStartIndex, i))
@@ -236,6 +246,18 @@ export class HtmlDiff {
         } else {
           result += token
         }
+      } else if (isMatchElement && isHtmlTag) {
+        // handle text tokens before
+        if (i > textStartIndex) {
+          result += this.dressUpText(type, tokens.slice(textStartIndex, i))
+        }
+
+        // handle this tag
+        textStartIndex = i + 1
+        // Add data-match-type to the tag that can be styled
+        const newToken = this.dressupMatchEnabledHtmlTag(type, token)
+
+        result += newToken
       }
     }
     if (textStartIndex < tokensLength) {
@@ -254,6 +276,21 @@ export class HtmlDiff {
     return ''
   }
 
+  private dressupMatchEnabledHtmlTag(type: BaseOpType, token: string): string {
+    // token is a single html tag, e.g. <a data-enable-match="true" href="https://2" rel=undefined target=undefined>
+    // add data-match-type to the tag
+    const tagName = token.match(htmlStartTagReg)?.groups?.name
+    if (!tagName) {
+      return token
+    }
+    const tagNameLength = tagName.length + 1
+    const matchType = type === 'create' ? 'create' : 'delete'
+    return `${token.slice(0, tagNameLength)} data-match-type="${matchType}"${token.slice(
+      tagNameLength,
+      token.length,
+    )}`
+  }
+
   private dressUpText(type: BaseOpType, tokens: string[]): string {
     const text = tokens.join('')
     if (!text.trim()) {
@@ -268,6 +305,10 @@ export class HtmlDiff {
     return ''
   }
 
+  /**
+   * Generates a list of token entries that are matched between the old and new HTML. This list will not
+   * include token ranges that differ.
+   */
   private getMatchedBlockList(): MatchedBlock[] {
     const n1 = this.oldTokens.length
     const n2 = this.newTokens.length

@@ -17,7 +17,7 @@ export function generateLexicalData(args: {
               format: 0,
               mode: 'normal',
               style: '',
-              text: `Fugiat esse${args.updated ? ' new ' : ''}in dolor aleiqua cillum proident ad cillum excepteur mollit reprehenderit mollit commodo. Pariatur incididunt non exercitation est mollit nisi labore${args.updated ? ' ' : 'delete'}officia cupidatat amet commodo commodo proident occaecat.`,
+              text: `Fugiat esse${args.updated ? ' new ' : ''}in dolor aleiqua ${args.updated ? 'gillum' : 'cillum'} proident ad cillum excepteur mollit reprehenderit mollit commodo. Pariatur incididunt non exercitation est mollit nisi labore${args.updated ? ' ' : 'delete'}officia cupidatat amet commodo commodo proident occaecat.`,
               type: 'text',
               version: 1,
             },

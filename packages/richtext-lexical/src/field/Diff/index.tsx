@@ -7,18 +7,47 @@ import React from 'react'
 
 import './htmlDiff/index.scss'
 import './index.scss'
+
+import type { HTMLConvertersFunction } from '../../features/converters/lexicalToHtml/sync/types.js'
+
 import { convertLexicalToHTML } from '../../features/converters/lexicalToHtml/sync/index.js'
 import { HtmlDiff } from './htmlDiff/index.js'
 const baseClass = 'lexical-diff'
+
+const converters: HTMLConvertersFunction = ({ defaultConverters }) => ({
+  ...defaultConverters,
+  link: ({ node, nodesToHTML, providedStyleTag }) => {
+    const children = nodesToHTML({
+      nodes: node.children,
+    }).join('')
+
+    const rel: string | undefined = node.fields.newTab ? 'noopener noreferrer' : undefined
+    const target: string | undefined = node.fields.newTab ? '_blank' : undefined
+
+    let href: string = node.fields.url ?? ''
+    if (node.fields.linkType === 'internal') {
+      console.error(
+        'Lexical => HTML converter: Link converter: found internal link, but internalDocToHref is not provided',
+      )
+      href = '#' // fallback
+    }
+
+    return `<a${providedStyleTag} data-enable-match="true" href="${href}" rel=${rel} target=${target}>
+        ${children}
+      </a>`
+  },
+})
 
 export const LexicalDiffComponent: RichTextFieldDiffServerComponent = (args) => {
   const { comparisonValue, field, i18n, locale, versionValue } = args
 
   const comparisonHTML = convertLexicalToHTML({
+    converters,
     data: comparisonValue as SerializedEditorState,
   })
 
   const versionHTML = convertLexicalToHTML({
+    converters,
     data: versionValue as SerializedEditorState,
   })
 

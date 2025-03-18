@@ -2,25 +2,29 @@
 
 @layer payload-default {
   .lexical-diff__diff-container {
-    p:has(.html-diff-create-text-wrapper) {
+    p:has(.html-diff-create-text-wrapper),
+    p:has([data-match-type='create']) {
       background: var(--theme-success-100);
     }
 
-    p:has(.html-diff-delete-text-wrapper) {
+    p:has(.html-diff-delete-text-wrapper),
+    p:has([data-match-type='delete']) {
       background: var(--theme-error-100);
     }
 
+    .html-diff-delete-text-wrapper,
+    [data-match-type='delete'] {
+      color: var(--theme-error-500);
+      text-decoration-color: var(--theme-error-500);
+      text-decoration-line: line-through;
+    }
+
+    .html-diff-create-text-wrapper,
+    [data-match-type='create'] {
+      background: var(--theme-success-200);
+    }
+
     .html-diff {
-      &-create-text-wrapper {
-        background: var(--theme-success-200);
-      }
-
-      &-delete-text-wrapper {
-        color: var(--theme-error-500);
-        text-decoration-color: var(--theme-error-500);
-        text-decoration-line: line-through;
-      }
-
       &-create-inline-wrapper,
       &-delete-inline-wrapper {
         display: inline-flex;
