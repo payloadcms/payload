@@ -21,9 +21,6 @@ const converters: HTMLConvertersFunction = ({ defaultConverters }) => ({
       nodes: node.children,
     }).join('')
 
-    const rel: string | undefined = node.fields.newTab ? 'noopener noreferrer' : undefined
-    const target: string | undefined = node.fields.newTab ? '_blank' : undefined
-
     let href: string = node.fields.url ?? ''
     if (node.fields.linkType === 'internal') {
       console.error(
@@ -32,7 +29,7 @@ const converters: HTMLConvertersFunction = ({ defaultConverters }) => ({
       href = '#' // fallback
     }
 
-    return `<a${providedStyleTag} data-enable-match="true" href="${href}" rel=${rel} target=${target}>
+    return `<a${providedStyleTag} data-enable-match="true" href="${href}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>
         ${children}
       </a>`
   },
