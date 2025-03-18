@@ -13,9 +13,9 @@ import { ShimmerEffect } from '../../elements/ShimmerEffect/index.js'
 import { useFormSubmitted } from '../../forms/Form/context.js'
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { RowLabel } from '../../forms/RowLabel/index.js'
-import './index.scss'
 import { useThrottledValue } from '../../hooks/useThrottledValue.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import './index.scss'
 
 const baseClass = 'array-field'
 
