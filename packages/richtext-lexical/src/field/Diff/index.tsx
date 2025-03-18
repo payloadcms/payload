@@ -4,6 +4,7 @@ import type { RichTextFieldDiffServerComponent } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import { FieldDiffLabel } from '@payloadcms/ui/shared'
 import React from 'react'
+import { v4 as uuidv4 } from 'uuid'
 
 import './htmlDiff/index.scss'
 import './index.scss'
@@ -32,6 +33,44 @@ const converters: HTMLConvertersFunction = ({ defaultConverters }) => ({
     return `<a${providedStyleTag} data-enable-match="true" href="${href}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>
         ${children}
       </a>`
+  },
+  listitem: ({ node, nodesToHTML, parent, providedCSSString }) => {
+    const hasSubLists = node.children.some((child) => child.type === 'list')
+
+    const children = nodesToHTML({
+      nodes: node.children,
+    }).join('')
+
+    if ('listType' in parent && parent?.listType === 'check') {
+      const uuid = uuidv4()
+      return `<li
+            aria-checked="${node.checked ? 'true' : 'false'}"
+            class="list-item-checkbox${node.checked ? ' list-item-checkbox-checked' : ' list-item-checkbox-unchecked'}${hasSubLists ? ' nestedListItem' : ''}"
+            role="checkbox"
+            style="list-style-type: none;${providedCSSString}"
+            tabIndex="-1"
+            value="${node.value}"
+            data-enable-match="true"
+          >
+            ${
+              hasSubLists
+                ? children
+                : `<input${node.checked ? ' checked' : ''} id="${uuid}" readOnly="true" type="checkbox" />
+              <label htmlFor="${uuid}">${children}</label>
+              <br />`
+            }
+          </li>`
+    } else {
+      return `<li
+            class="${hasSubLists ? 'nestedListItem' : ''}"
+            style="${hasSubLists ? `list-style-type: none;${providedCSSString}` : providedCSSString}"
+            value="${node.value}"
+            data-enable-match="true"
+          >${children}</li>`
+    }
+  },
+  upload: ({ node, providedStyleTag }) => {
+    return 'image here'
   },
 })
 
