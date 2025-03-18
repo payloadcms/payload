@@ -19,18 +19,8 @@ export const checkFileAccess = async ({
   }
   const { config } = collection
 
-  const data = await req.payload.db.findOne({
-    collection: config.slug,
-    req,
-    where: {
-      filename: {
-        equals: filename,
-      },
-    },
-  })
-
   const accessResult = await executeAccess(
-    { id: data?.id, data, isReadingStaticFile: true, req },
+    { data: { filename }, isReadingStaticFile: true, req },
     config.access.read,
   )
 
