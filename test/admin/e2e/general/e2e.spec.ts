@@ -867,9 +867,10 @@ describe('General', () => {
       })
 
       await titleOption.click()
-      const titleInput = bulkEditModal.locator('#field-title')
+      const titleInput = bulkEditModal.locator('#field-group__title')
       await titleInput.fill('New Group Title')
       await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
+
       await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
         'Updated 1 Post successfully.',
       )
