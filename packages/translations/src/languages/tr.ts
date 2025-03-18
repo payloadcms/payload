@@ -402,6 +402,7 @@ export const trTranslations: DefaultTranslationsObject = {
     height: 'Yükseklik',
     lessInfo: 'Daha az bilgi',
     moreInfo: 'Daha fazla bilgi',
+    noFile: 'Dosya yok',
     pasteURL: 'URL yapıştır',
     previewSizes: 'Önizleme Boyutları',
     selectCollectionToBrowse: 'Görüntülenecek bir koleksiyon seçin',

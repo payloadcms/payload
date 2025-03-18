@@ -395,6 +395,7 @@ export const faTranslations: DefaultTranslationsObject = {
     height: 'ارتفاع',
     lessInfo: 'اطلاعات کمتر',
     moreInfo: 'اطلاعات بیشتر',
+    noFile: 'هیچ فایلی',
     pasteURL: 'چسباندن آدرس اینترنتی',
     previewSizes: 'اندازه های پیش نمایش',
     selectCollectionToBrowse: 'یک مجموعه را برای مرور انتخاب کنید',

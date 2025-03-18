@@ -384,6 +384,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     height: '高度',
     lessInfo: '更少資訊',
     moreInfo: '更多資訊',
+    noFile: '沒有檔案',
     pasteURL: '貼上網址',
     previewSizes: '預覽尺寸',
     selectCollectionToBrowse: '選擇一個要瀏覽的集合',
