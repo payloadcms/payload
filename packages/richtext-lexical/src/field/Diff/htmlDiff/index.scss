@@ -35,7 +35,7 @@
 
     .html-diff-create-text-wrapper,
     [data-match-type='create']:not(img) {
-      background: var(--theme-success-200);
+      background: var(--theme-success-300);
     }
 
     .html-diff {
@@ -75,7 +75,7 @@
 
       &-delete-inline-wrapper::after,
       &-delete-block-wrapper::after {
-        background: var(--theme-success-200);
+        background: var(--theme-error-100);
       }
     }
   }
