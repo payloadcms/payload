@@ -12,7 +12,7 @@ import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.j
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { sortableSlug } from './collections/Sortable/index.js'
+import { orderableSlug } from './collections/Orderable/index.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -31,7 +31,7 @@ describe('Sort functionality', () => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
-    url = new AdminUrlUtil(serverURL, sortableSlug)
+    url = new AdminUrlUtil(serverURL, orderableSlug)
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -44,12 +44,14 @@ describe('Sort functionality', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
+  // NOTES: It works for me in headed browser but not in headless, I don't know why.
+  //  If you are debugging this test, remember to press the seed button before each attempt.
   // assertRows contains expect
   // eslint-disable-next-line playwright/expect-expect
-  test('Sortable collection', async () => {
-    await page.goto(url.list)
+  test('Orderable collection', async () => {
+    await page.goto(`${url.list}?sort=-_order`)
     // SORT BY ORDER ASCENDING
-    await page.getByLabel('Sort by Order').click()
+    await page.getByLabel('Sort by Order').nth(0).click()
     await assertRows('A', 'B', 'C', 'D')
     await moveRow(2, 3) // move to middle
     await assertRows('A', 'C', 'B', 'D')
@@ -59,7 +61,8 @@ describe('Sort functionality', () => {
     await assertRows('A', 'C', 'D', 'B')
 
     // SORT BY ORDER DESCENDING
-    await page.getByLabel('Sort by Order').click()
+    await page.getByLabel('Sort by Order').nth(0).click()
+    await page.waitForURL(/sort=-_order/, { timeout: 2000 })
     await assertRows('B', 'D', 'C', 'A')
     await moveRow(1, 3) // move to middle
     await assertRows('D', 'C', 'B', 'A')
@@ -70,6 +73,7 @@ describe('Sort functionality', () => {
 
     // SORT BY TITLE
     await page.getByLabel('Sort by Title Ascending').click()
+    await page.waitForURL(/sort=title/, { timeout: 2000 })
     await moveRow(1, 3, 'warning') // warning because not sorted by order first
   })
 })
@@ -83,7 +87,9 @@ async function moveRow(from: number, to: number, expected: 'success' | 'warning'
   const sourceBox = await source.boundingBox()
   const targetBox = await target.boundingBox()
   if (!sourceBox || !targetBox) {
-    throw new Error('Could not find elements to drag and drop')
+    throw new Error(
+      `Could not find elements to DnD. Probably the dndkit animation is not finished. Try increasing the timeout`,
+    )
   }
   // steps is important: move slightly to trigger the drag sensor of DnD-kit
   await page.mouse.move(sourceBox.x + sourceBox.width / 2, sourceBox.y + sourceBox.height / 2, {
@@ -94,6 +100,8 @@ async function moveRow(from: number, to: number, expected: 'success' | 'warning'
     steps: 10,
   })
   await page.mouse.up()
+  // eslint-disable-next-line playwright/no-wait-for-timeout
+  await page.waitForTimeout(400) // dndkit animation
 
   if (expected === 'warning') {
     const toast = page.locator('.payload-toast-item.toast-warning')
@@ -110,7 +118,6 @@ async function assertRows(...expectedRows: Array<string>) {
   await expect.poll(() => rows.count()).toBe(expectedRows.length)
 
   for (let i = 0; i < expectedRows.length; i++) {
-    console.log('expectedRows[i]', expectedRows[i], await cellTitle.nth(i).textContent())
     await expect(cellTitle.nth(i)).toHaveText(expectedRows[i]!)
   }
 }
