@@ -10,7 +10,7 @@ import './index.scss'
 import type { UploadDataImproved } from '../../../../features/upload/server/nodes/UploadNode.js'
 import type { SerializedUploadNode } from '../../../../nodeTypes.js'
 
-const baseClass = 'lexical-upload'
+const baseClass = 'lexical-upload-diff'
 
 export const UploadDiffHTMLConverterAsync: (args: {
   i18n: I18nClient

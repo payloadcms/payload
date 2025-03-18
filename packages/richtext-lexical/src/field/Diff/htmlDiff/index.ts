@@ -1,3 +1,5 @@
+// Taken and modified from https://github.com/Arman19941113/html-diff/blob/master/packages/html-diff/src/index.ts
+
 interface MatchedBlock {
   newEnd: number
   newStart: number
