@@ -228,7 +228,7 @@ export type FieldHook<TData extends TypeWithID = any, TValue = any, TSiblingData
   args: FieldHookArgs<TData, TValue, TSiblingData>,
 ) => Promise<TValue> | TValue
 
-export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (args: {
+export type FieldAccessArgs<TData extends TypeWithID = any, TSiblingData = any> = {
   /**
    * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
    */
@@ -251,7 +251,11 @@ export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (a
    * Immediately adjacent data to this field. For example, if this is a `group` field, then `siblingData` will be the other fields within the group.
    */
   siblingData?: Partial<TSiblingData>
-}) => boolean | Promise<boolean>
+}
+
+export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (
+  args: FieldAccessArgs<TData, TSiblingData>,
+) => boolean | Promise<boolean>
 
 //TODO: In 4.0, we should replace the three parameters of the condition function with a single, named parameter object
 export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
