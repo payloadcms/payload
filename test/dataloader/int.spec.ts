@@ -199,6 +199,7 @@ describe('dataloader', () => {
       const findArgs = {
         collection: 'items' as CollectionSlug,
         req,
+        depth: 0,
         where: {
           name: { exists: true },
         },
@@ -208,8 +209,7 @@ describe('dataloader', () => {
       void req.payloadDataLoader.find(findArgs)
       await req.payloadDataLoader.find(findArgs)
 
-      // once is for authentication
-      expect(spy).toHaveBeenCalledTimes(2)
+      expect(spy).toHaveBeenCalledTimes(1)
     })
   })
 })
