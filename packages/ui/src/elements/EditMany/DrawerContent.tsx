@@ -158,7 +158,7 @@ export const EditManyDrawerContent: React.FC<
   }, [selectedFields])
 
   const onChange: FormProps['onChange'][0] = useCallback(
-    async ({ formState: prevFormState }) => {
+    async ({ formState: prevFormState, submitted }) => {
       const controller = handleAbortRef(abortFormStateRef)
 
       const { state } = await getFormState({
@@ -170,6 +170,7 @@ export const EditManyDrawerContent: React.FC<
         schemaPath: collection.slug,
         select,
         signal: controller.signal,
+        skipValidation: !submitted,
       })
 
       abortFormStateRef.current = null
@@ -233,6 +234,7 @@ export const EditManyDrawerContent: React.FC<
             return acc
           }, {} as SelectType),
         ),
+        skipValidation: true,
       })
 
       dispatchFields({

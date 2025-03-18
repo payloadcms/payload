@@ -1,7 +1,6 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { assertNetworkRequests } from 'helpers/e2e/assertNetworkRequests.js'
 import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import path from 'path'
 import { wait } from 'payload/shared'
@@ -928,17 +927,7 @@ describe('Uploads', () => {
 
       await options.locator('text=Prefix').click()
 
-      // wait for form state to return and remove the error state from the required field
-      await assertNetworkRequests(
-        page,
-        uploadsOne.create,
-        async () => {
-          await page.locator('#edit-uploads-2-bulk-uploads #field-prefix').fill('some prefix')
-        },
-        {
-          allowedNumberOfRequests: 1,
-        },
-      )
+      await page.locator('#edit-uploads-2-bulk-uploads #field-prefix').fill('some prefix')
 
       await page.locator('.edit-many-bulk-uploads__sidebar-wrap button').click()
       await page.locator('.bulk-upload--actions-bar__saveButtons button').click()
