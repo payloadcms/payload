@@ -16,6 +16,7 @@ export async function selectPreset({ page, presetTitle }: { page: Page; presetTi
     .locator('tbody tr td button', {
       hasText: exactText(presetTitle),
     })
+    .first()
     .click()
 
   await page.waitForURL(() => page.url() !== currentURL)

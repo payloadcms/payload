@@ -7,8 +7,18 @@ import React from 'react'
 const transformWhereToNaturalLanguage = (where: Where): string => {
   if (where.or && where.or.length > 0 && where.or[0].and && where.or[0].and.length > 0) {
     const orQuery = where.or[0]
-    const andQuery = orQuery.and[0]
+    const andQuery = orQuery?.and?.[0]
+
+    if (!andQuery) {
+      return 'No where query'
+    }
+
     const key = Object.keys(andQuery)[0]
+
+    if (!andQuery[key]) {
+      return 'No where query'
+    }
+
     const operator = Object.keys(andQuery[key])[0]
     const value = andQuery[key][operator]
 
