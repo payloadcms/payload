@@ -1,14 +1,11 @@
 // @ts-strict-ignore
 // default beforeDuplicate hook for required and unique fields
 import { type FieldAffectingData, type FieldHook, fieldShouldBeLocalized } from './config/types.js'
-import { handleUniqueFields } from './utilities/handleUniqueFields.ts.js'
 
-const hasValue = (value) => typeof value === 'string' && value.trim() !== ''
-const unique: FieldHook = ({ value }) => (hasValue(value) ? `${value} - Copy` : undefined)
+const isStringValue = (value) => typeof value === 'string' && value.trim() !== ''
+const unique: FieldHook = ({ value }) => (isStringValue(value) ? `${value} - Copy` : undefined)
 const localizedUnique: FieldHook = ({ req, value }) =>
-  hasValue(value) ? `${value} - ${req?.t('general:copy') ?? 'Copy'}` : undefined
-const numberUnique: FieldHook = ({ value }) => (value ? `${value + 1}` : undefined)
-const resetUnique: FieldHook = () => undefined
+  isStringValue(value) ? `${value} - ${req?.t('general:copy') ?? 'Copy'}` : undefined
 
 export const setDefaultBeforeDuplicate = (
   field: FieldAffectingData,
@@ -20,16 +17,12 @@ export const setDefaultBeforeDuplicate = (
       (Array.isArray(field.hooks.beforeDuplicate) && field.hooks.beforeDuplicate.length === 0))
   ) {
     if (field.unique) {
-      const updateStrategy = handleUniqueFields(field.type)
-
-      const strategyHooks = {
-        append: [fieldShouldBeLocalized({ field, parentIsLocalized }) ? localizedUnique : unique],
-        numericallyAppend: [numberUnique],
-        undefined: [resetUnique],
-      }
-
-      if (strategyHooks[updateStrategy]) {
-        field.hooks.beforeDuplicate = strategyHooks[updateStrategy]
+      if (['email', 'number', 'point', 'relationship', 'select', 'upload'].includes(field.type)) {
+        field.hooks.beforeDuplicate = [() => undefined]
+      } else if (['code', 'json', 'text', 'textarea'].includes(field.type)) {
+        field.hooks.beforeDuplicate = fieldShouldBeLocalized({ field, parentIsLocalized })
+          ? [localizedUnique]
+          : [unique]
       }
     }
   }
