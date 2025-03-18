@@ -121,6 +121,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     unknown: 'Дошло је до непознате грешке.',
     unPublishingDocument: 'Постоји проблем при поништавању објаве овог документа.',
     unspecific: 'Дошло је до грешке.',
+    unverifiedEmail: 'Молимо вас да верификујете своју е-пошту пре пријаве.',
     userEmailAlreadyRegistered: 'Корисник са датом имејл адресом је већ регистрован.',
     userLocked: 'Овај корисник је закључан због превеликог броја неуспешних покушаја пријаве.',
     usernameAlreadyRegistered: 'Korisnik sa datim korisničkim imenom je već registrovan.',

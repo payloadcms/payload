@@ -122,6 +122,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     unknown: 'Er is een onbekende fout opgetreden.',
     unPublishingDocument: 'Er was een probleem met het depubliceren van dit document.',
     unspecific: 'Er is een fout opgetreden.',
+    unverifiedEmail: 'Verifieer uw e-mail voordat u inlogt.',
     userEmailAlreadyRegistered: 'Een gebruiker met het opgegeven e-mailadres is al geregistreerd.',
     userLocked: 'Deze gebruiker is vergrendeld wegens te veel mislukte inlogpogingen.',
     usernameAlreadyRegistered: 'Een gebruiker met de opgegeven gebruikersnaam is al geregistreerd.',

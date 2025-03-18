@@ -120,6 +120,7 @@ export const azTranslations: DefaultTranslationsObject = {
     unknown: 'Naməlum bir xəta baş verdi.',
     unPublishingDocument: 'Bu sənədin nəşrini ləğv etmək zamanı problem baş verdi.',
     unspecific: 'Xəta baş verdi.',
+    unverifiedEmail: 'Zəhmət olmasa, daxil olmadan əvvəl e-poçtunuzu təsdiqləyin.',
     userEmailAlreadyRegistered: 'Verilən e-poçt ünvanı ilə artıq istifadəçi qeydiyyatdan keçib.',
     userLocked: 'Bu istifadəçi çoxsaylı uğursuz giriş cəhdləri səbəbindən kilidlənib.',
     usernameAlreadyRegistered: 'Verilən istifadəçi adı ilə artıq qeydiyyatdan keçmişdir.',

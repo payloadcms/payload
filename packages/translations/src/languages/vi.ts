@@ -120,6 +120,7 @@ export const viTranslations: DefaultTranslationsObject = {
     unknown: 'Lỗi - Không xác định (unknown error).',
     unPublishingDocument: 'Lỗi - Đã xảy ra vấn để khi ẩn bản tài liệu.',
     unspecific: 'Lỗi - Đã xảy ra (unspecific error).',
+    unverifiedEmail: 'Vui lòng xác minh email trước khi đăng nhập.',
     userEmailAlreadyRegistered: 'Người dùng với email đã cho đã được đăng ký.',
     userLocked: 'Lỗi- Tài khoản đã bị khóa do đăng nhập thất bại nhiều lần.',
     usernameAlreadyRegistered: 'Một người dùng với tên đăng nhập đã cho đã được đăng ký.',

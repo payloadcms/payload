@@ -120,6 +120,7 @@ export const slTranslations: DefaultTranslationsObject = {
     unknown: 'Prišlo je do neznane napake.',
     unPublishingDocument: 'Pri umiku objave tega dokumenta je prišlo do težave.',
     unspecific: 'Prišlo je do napake.',
+    unverifiedEmail: 'Pred prijavo preverite svoj e-poštni naslov.',
     userEmailAlreadyRegistered: 'Uporabnik s tem e-poštnim naslovom je že registriran.',
     userLocked: 'Ta uporabnik je zaklenjen zaradi prevelikega števila neuspešnih poskusov prijave.',
     usernameAlreadyRegistered: 'Uporabnik s tem uporabniškim imenom je že registriran.',

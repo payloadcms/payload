@@ -190,7 +190,16 @@ export const email: EmailFieldValidation = (
     }
   }
 
-  if ((value && !/\S[^\s@]*@\S+\.\S+/.test(value)) || (!value && required)) {
+  /**
+   * Disallows emails with double quotes (e.g., "user"@example.com, user@"example.com", "user@example.com")
+   * Rejects spaces anywhere in the email (e.g., user @example.com)
+   * Prevents consecutive dots (e.g., user..name@example.com)
+   * Ensures a valid domain (e.g., rejects user@example, user@example..com)
+   * Allows standard formats like user@example.com, user.name+alias@example.co.uk
+   */
+  const emailRegex = /^(?!.*\.\.)[\w.%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i
+
+  if ((value && !emailRegex.test(value)) || (!value && required)) {
     return t('validation:emailAddress')
   }
 

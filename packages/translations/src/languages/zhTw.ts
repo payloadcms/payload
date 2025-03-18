@@ -115,6 +115,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     unknown: '發生了一個未知的錯誤。',
     unPublishingDocument: '取消發布此文件時出現了問題。',
     unspecific: '發生了一個錯誤。',
+    unverifiedEmail: '請在登入前驗證您的電子郵件。',
     userEmailAlreadyRegistered: '給定電子郵件的用戶已經註冊。',
     userLocked: '該使用者由於有太多次失敗的登錄嘗試而被鎖定。',
     usernameAlreadyRegistered: '已有使用者使用所提供的用戶名註冊。',

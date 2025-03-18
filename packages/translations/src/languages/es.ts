@@ -120,6 +120,7 @@ export const esTranslations: DefaultTranslationsObject = {
     unknown: 'Ocurrió un error desconocido.',
     unPublishingDocument: 'Ocurrió un error al despublicar este documento.',
     unspecific: 'Ocurrió un error.',
+    unverifiedEmail: 'Por favor, verifica tu correo electrónico antes de iniciar sesión.',
     userEmailAlreadyRegistered:
       'Ya hay un usuario registrado con el correo electrónico proporcionado.',
     userLocked:
