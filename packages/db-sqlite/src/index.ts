@@ -66,6 +66,7 @@ const filename = fileURLToPath(import.meta.url)
 export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
   const sqliteIDType = args.idType || 'number'
   const payloadIDType = sqliteIDType === 'uuid' ? 'text' : 'number'
+  const allowIDOnCreate = args.allowIDOnCreate ?? false
 
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = findMigrationDir(args.migrationDir)
@@ -88,6 +89,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
     return createDatabaseAdapter<SQLiteAdapter>({
       name: 'sqlite',
       afterSchemaInit: args.afterSchemaInit ?? [],
+      allowIDOnCreate,
       autoIncrement: args.autoIncrement ?? false,
       beforeSchemaInit: args.beforeSchemaInit ?? [],
       client: undefined,
@@ -186,6 +188,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
   }
 
   return {
+    allowIDOnCreate,
     defaultIDType: payloadIDType,
     init: adapter,
   }

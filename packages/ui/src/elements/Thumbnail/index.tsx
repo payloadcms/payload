@@ -28,7 +28,7 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
 
   const src = React.useMemo(() => {
     if (!fileSrc) {
-      return ''
+      return null
     }
 
     /**
@@ -81,7 +81,7 @@ export function ThumbnailComponent(props: ThumbnailComponentProps) {
 
   const src = React.useMemo(() => {
     if (!fileSrc) {
-      return ''
+      return null
     }
 
     /**

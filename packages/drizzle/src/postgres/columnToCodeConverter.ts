@@ -35,6 +35,12 @@ export const columnToCodeConverter: ColumnToCodeConverter = ({
     }
   }
 
+  if (column.type === 'vector') {
+    if (column.dimensions) {
+      columnBuilderArgsArray.push(`dimensions: ${column.dimensions}`)
+    }
+  }
+
   let columnBuilderArgs = ''
 
   if (columnBuilderArgsArray.length) {

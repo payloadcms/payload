@@ -24,7 +24,7 @@
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.614.0",
     "@date-fns/tz": "1.2.0",
-    "@next/env": "15.2.2",
+    "@next/env": "15.2.3",
     "@payloadcms/admin-bar": "workspace:*",
     "@payloadcms/db-mongodb": "workspace:*",
     "@payloadcms/db-postgres": "workspace:*",
@@ -78,7 +78,7 @@
     "jest": "29.7.0",
     "jwt-decode": "4.0.0",
     "mongoose": "8.9.5",
-    "next": "15.2.2",
+    "next": "15.2.3",
     "nodemailer": "6.9.16",
     "payload": "workspace:*",
     "qs-esm": "7.0.2",

@@ -32,7 +32,8 @@ export const initClientUploads = <ExtraProps extends Record<string, unknown>, T>
     let handlerCount = 0
 
     for (const endpoint of config.endpoints) {
-      if (endpoint.path === serverHandlerPath) {
+      // We want to match on 'path', 'path-1', 'path-2', etc.
+      if (endpoint.path?.startsWith(serverHandlerPath)) {
         handlerCount++
       }
     }
