@@ -24,6 +24,7 @@ type BuildJoinAggregationArgs = {
   adapter: MongooseAdapter
   collection: CollectionSlug
   collectionConfig: SanitizedCollectionConfig
+  draftsEnabled?: boolean
   joins?: JoinQuery
   locale?: string
   projection?: Record<string, true>
@@ -37,6 +38,7 @@ export const buildJoinAggregation = async ({
   adapter,
   collection,
   collectionConfig,
+  draftsEnabled,
   joins,
   locale,
   projection,
@@ -276,7 +278,7 @@ export const buildJoinAggregation = async ({
 
       let JoinModel: CollectionModel | undefined
 
-      const useDrafts = versions && collectionConfig.versions.drafts
+      const useDrafts = (draftsEnabled || versions) && Boolean(collectionConfig.versions.drafts)
 
       if (useDrafts) {
         JoinModel = adapter.versions[collectionConfig.slug]

@@ -71,6 +71,7 @@ type TraverseFieldArgs = {
   currentArgs: Result
   currentTableName: string
   depth?: number
+  draftsEnabled?: boolean
   fields: FlattenedField[]
   joinQuery: JoinQuery
   joins?: BuildQueryJoinAliases
@@ -98,6 +99,7 @@ export const traverseFields = ({
   currentArgs,
   currentTableName,
   depth,
+  draftsEnabled,
   fields,
   joinQuery = {},
   joins,
@@ -203,6 +205,7 @@ export const traverseFields = ({
           currentArgs: withArray,
           currentTableName: arrayTableName,
           depth,
+          draftsEnabled,
           fields: field.flattenedFields,
           joinQuery,
           locale,
@@ -314,6 +317,7 @@ export const traverseFields = ({
               currentArgs: withBlock,
               currentTableName: tableName,
               depth,
+              draftsEnabled,
               fields: block.flattenedFields,
               joinQuery,
               locale,
@@ -355,6 +359,7 @@ export const traverseFields = ({
           currentArgs,
           currentTableName,
           depth,
+          draftsEnabled,
           fields: field.flattenedFields,
           joinQuery,
           joins,
@@ -522,7 +527,8 @@ export const traverseFields = ({
             .where(sqlWhere)}`.as(columnName)
         } else {
           const useDrafts =
-            versions && adapter.payload.collections[field.collection].config.versions.drafts
+            (versions || draftsEnabled) &&
+            Boolean(adapter.payload.collections[field.collection].config.versions.drafts)
 
           const fields = useDrafts
             ? buildVersionCollectionFields(
