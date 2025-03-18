@@ -10,11 +10,15 @@ export async function selectPreset({ page, presetTitle }: { page: Page; presetTi
   const modal = page.locator('[id^=list-drawer_0_]')
   await expect(modal).toBeVisible()
 
+  const currentURL = page.url()
+
   await modal
     .locator('tbody tr td button', {
       hasText: exactText(presetTitle),
     })
     .click()
+
+  await page.waitForURL(() => page.url() !== currentURL)
 
   await expect(
     page.locator('button#select-preset', {

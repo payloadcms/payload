@@ -6,7 +6,7 @@ import type { ColumnPreference, Where } from 'payload'
 
 import { transformColumnsToSearchParams } from 'payload/shared'
 
-export async function expectURLParams({
+export async function assertURLParams({
   page,
   columns,
   where,

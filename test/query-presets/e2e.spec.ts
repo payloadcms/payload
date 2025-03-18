@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import * as path from 'path'
@@ -12,12 +12,13 @@ import {
   exactText,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
+  // throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { clickListMenuItem, openListMenu } from '../helpers/e2e/toggleListMenu.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { expectURLParams } from './helpers/expectURLParams.js'
+import { assertURLParams } from './helpers/assertURLParams.js'
 import { openQueryPresetDrawer } from './helpers/openQueryPresetDrawer.js'
 import { clearSelectedPreset, selectPreset } from './helpers/togglePreset.js'
 import { seedData } from './seed.js'
@@ -25,13 +26,14 @@ import { seedData } from './seed.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const { beforeAll, describe } = test
+const { beforeAll, describe, beforeEach } = test
 
 let page: Page
 let pagesUrl: AdminUrlUtil
 let payload: PayloadTestSDK<Config>
 let serverURL: string
 let everyoneID: string | undefined
+let context: BrowserContext
 
 describe('Query Presets', () => {
   beforeAll(async ({ browser }, testInfo) => {
@@ -40,7 +42,7 @@ describe('Query Presets', () => {
 
     pagesUrl = new AdminUrlUtil(serverURL, 'pages')
 
-    const context = await browser.newContext()
+    context = await browser.newContext()
     page = await context.newPage()
 
     everyoneID = await payload
@@ -63,12 +65,20 @@ describe('Query Presets', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
+  beforeEach(async () => {
+    // await throttleTest({
+    //   page,
+    //   context,
+    //   delay: 'Fast 4G',
+    // })
+  })
+
   test('should select preset and apply filters', async () => {
     await page.goto(pagesUrl.list)
     await clearSelectedPreset({ page })
     await selectPreset({ page, presetTitle: seedData.everyone.title })
 
-    await expectURLParams({
+    await assertURLParams({
       page,
       columns: seedData.everyone.columns,
       where: seedData.everyone.where,
@@ -129,7 +139,7 @@ describe('Query Presets', () => {
 
     await page.reload()
 
-    await expectURLParams({
+    await assertURLParams({
       page,
       columns: seedData.everyone.columns,
       where: seedData.everyone.where,
@@ -184,6 +194,38 @@ describe('Query Presets', () => {
     ).toBeHidden()
   })
 
+  test('only show save for everyone when a preset is shared and has active changes', async () => {
+    await page.goto(pagesUrl.list)
+    await clearSelectedPreset({ page })
+
+    await openListMenu({ page })
+    await expect(
+      page.locator('#list-menu .popup__content .popup-button-list__button', {
+        hasText: exactText('Save for Everyone'),
+      }),
+    ).toBeHidden()
+
+    await selectPreset({ page, presetTitle: seedData.onlyMe.title })
+
+    await openListMenu({ page })
+
+    await expect(
+      page.locator('#list-menu .popup__content .popup-button-list__button', {
+        hasText: exactText('Save for Everyone'),
+      }),
+    ).toBeHidden()
+
+    await selectPreset({ page, presetTitle: seedData.everyone.title })
+
+    await openListMenu({ page })
+
+    await expect(
+      page.locator('#list-menu .popup__content .popup-button-list__button', {
+        hasText: exactText('Save for Everyone'),
+      }),
+    ).toBeVisible()
+  })
+
   // eslint-disable-next-line playwright/no-skipped-test, playwright/expect-expect
   test.skip('should reset active changes', () => {
     // select a preset, make a change to the presets, click "reset", and ensure the changes are reverted
@@ -199,10 +241,14 @@ describe('Query Presets', () => {
     await expect(titleValue).toHaveValue(seedData.everyone.title)
     await drawer.locator('input[name="title"]').fill('New Title')
 
+    const currentURL = page.url()
+
     await saveDocAndAssert(page)
 
     await drawer.locator('button.doc-drawer__header-close').click()
     await expect(drawer).toBeHidden()
+
+    await page.waitForURL(() => page.url() !== currentURL)
 
     await expect(
       page.locator('button#select-preset', {
@@ -219,11 +265,6 @@ describe('Query Presets', () => {
   })
 
   // eslint-disable-next-line playwright/no-skipped-test, playwright/expect-expect
-  test.skip('only show save for everyone when a preset has active changes', () => {
-    // select a preset, make a change to the presets, and ensure the "save for everyone" button is visible
-  })
-
-  // eslint-disable-next-line playwright/no-skipped-test, playwright/expect-expect
   test.skip('can save for everyone', () => {
     // select a preset, make a change to the presets, click "save for everyone", and ensure the changes are saved
   })
@@ -235,8 +276,12 @@ describe('Query Presets', () => {
     const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(modal).toBeVisible()
     await modal.locator('input[name="title"]').fill('New Preset')
+
+    const currentURL = page.url()
     await saveDocAndAssert(page)
     await expect(modal).toBeHidden()
+
+    await page.waitForURL(() => page.url() !== currentURL)
 
     await expect(
       page.locator('button#select-preset', {
