@@ -7,7 +7,7 @@ import React from 'react'
 
 import './htmlDiff/index.scss'
 import './index.scss'
-import { convertLexicalToHTML } from '../../features/converters/html/sync/index.js'
+import { convertLexicalToHTML } from '../../features/converters/lexicalToHtml/sync/index.js'
 import { HtmlDiff } from './htmlDiff/index.js'
 const baseClass = 'lexical-diff'
 

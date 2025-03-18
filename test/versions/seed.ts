@@ -158,7 +158,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       ],
       arrayLocalized: [
         {
-          textInArrayLocalized: 'textInArrayLocalized',
+          textInArrayLocalized: 'textInArray original',
         },
       ],
       blocks: [
@@ -210,7 +210,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
       ],
       arrayLocalized: [
         {
-          textInArrayLocalized: 'textInArrayLocalized2',
+          textInArrayLocalized: 'textInArray',
         },
       ],
       blocks: [
