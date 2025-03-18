@@ -218,8 +218,9 @@ export class HtmlDiff {
 
     let result = ''
     let textStartIndex = 0
-    for (let i = 0; i < tokensLength; i++) {
-      const token = tokens[i]
+    let i = -1
+    for (const token of tokens) {
+      i++
       // this token is html tag
       if (token.match(htmlTagReg)) {
         // handle text tokens before
@@ -454,7 +455,7 @@ export class HtmlDiff {
             const startTagMatch = token.match(htmlStartTagReg)
             if (startTagMatch) {
               equalSequence += 1
-              const tagNameLength = startTagMatch.groups.name.length + 1
+              const tagNameLength = (startTagMatch?.groups?.name?.length ?? 0) + 1
               equalString += `${token.slice(0, tagNameLength)} data-seq="${equalSequence}"${token.slice(tagNameLength)}`
             } else {
               equalString += token
@@ -527,15 +528,15 @@ export class HtmlDiff {
           if (
             olds.length === 1 &&
             news.length === 1 &&
-            olds[0].match(htmlTagReg) &&
-            news[0].match(htmlTagReg)
+            olds[0]?.match(htmlTagReg) &&
+            news[0]?.match(htmlTagReg)
           ) {
             result += news[0]
             break
           }
 
-          const deletedTokens = []
-          const createdTokens = []
+          const deletedTokens: string[] = []
+          const createdTokens: string[] = []
           let createIndex = operation.newStart
           for (
             let deleteIndex = operation.oldStart;
@@ -543,12 +544,17 @@ export class HtmlDiff {
             deleteIndex++
           ) {
             const deletedToken = this.oldTokens[deleteIndex]
-            const matchTagResultD = deletedToken.match(htmlTagWithNameReg)
+
+            if (!deletedToken) {
+              continue
+            }
+
+            const matchTagResultD = deletedToken?.match(htmlTagWithNameReg)
             if (matchTagResultD) {
               // handle replaced tag token
 
               // skip special tag
-              if ([htmlImgTagReg, htmlVideoTagReg].some((item) => deletedToken.match(item))) {
+              if ([htmlImgTagReg, htmlVideoTagReg].some((item) => deletedToken?.match(item))) {
                 deletedTokens.push(deletedToken)
                 continue
               }
@@ -563,11 +569,14 @@ export class HtmlDiff {
                 tempCreateIndex++
               ) {
                 const createdToken = this.newTokens[tempCreateIndex]
-                const matchTagResultC = createdToken.match(htmlTagWithNameReg)
+                if (!createdToken) {
+                  continue
+                }
+                const matchTagResultC = createdToken?.match(htmlTagWithNameReg)
                 if (
                   matchTagResultC &&
-                  matchTagResultC.groups.name === matchTagResultD.groups.name &&
-                  matchTagResultC.groups.isEnd === matchTagResultD.groups.isEnd
+                  matchTagResultC.groups?.name === matchTagResultD.groups?.name &&
+                  matchTagResultC.groups?.isEnd === matchTagResultD.groups?.isEnd
                 ) {
                   // find first matched tag, but not maybe the expected tag(to optimize)
                   isTagInNewFind = true
