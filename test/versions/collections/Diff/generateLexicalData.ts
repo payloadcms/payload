@@ -34,7 +34,7 @@ export function generateLexicalData(args: {
           children: [
             {
               detail: 0,
-              format: 1,
+              format: args.updated ? 1 : 0,
               mode: 'normal',
               style: '',
               text: 'Some ',
@@ -43,7 +43,7 @@ export function generateLexicalData(args: {
             },
             {
               detail: 0,
-              format: 0,
+              format: args.updated ? 0 : 1,
               mode: 'normal',
               style: '',
               text: 'Bold',
