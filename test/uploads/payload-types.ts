@@ -54,6 +54,7 @@ export type SupportedTimezones =
   | 'Asia/Singapore'
   | 'Asia/Tokyo'
   | 'Asia/Seoul'
+  | 'Australia/Brisbane'
   | 'Australia/Sydney'
   | 'Pacific/Guam'
   | 'Pacific/Noumea'
@@ -64,6 +65,7 @@ export interface Config {
   auth: {
     users: UserAuthOperations;
   };
+  blocks: {};
   collections: {
     relation: Relation;
     audio: Audio;
@@ -320,6 +322,14 @@ export interface Media {
       filename?: string | null;
     };
     focalTest7?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    undefinedHeight?: {
       url?: string | null;
       width?: number | null;
       height?: number | null;
@@ -2009,6 +2019,16 @@ export interface MediaSelect<T extends boolean = true> {
               filename?: T;
             };
         focalTest7?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        undefinedHeight?:
           | T
           | {
               url?: T;

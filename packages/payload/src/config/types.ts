@@ -11,6 +11,7 @@ import type { BusboyConfig } from 'busboy'
 import type GraphQL from 'graphql'
 import type { GraphQLFormattedError } from 'graphql'
 import type { JSONSchema4 } from 'json-schema'
+import type { Metadata } from 'next'
 import type { DestinationStream, Level, pino } from 'pino'
 import type React from 'react'
 import type { default as sharp } from 'sharp'
@@ -176,29 +177,12 @@ export type OGImageConfig = {
   width?: number | string
 }
 
-export type OpenGraphConfig = {
-  description?: string
-  images?: OGImageConfig | OGImageConfig[]
-  siteName?: string
-  title?: string
-}
-
-export type IconConfig = {
-  color?: string
-  /**
-   * @see https://developer.mozilla.org/docs/Web/API/HTMLImageElement/fetchPriority
-   */
-  fetchPriority?: 'auto' | 'high' | 'low'
-  media?: string
-  /** defaults to rel="icon" */
-  rel?: string
-  sizes?: string
-  type?: string
-  /**
-   * URL of the icon to use. You can use a relative path from the public folder (see https://nextjs.org/docs/app/building-your-application/optimizing/static-assets) or an absolute URL.
-   */
-  url: string
-}
+/**
+ * @todo find a way to remove the deep clone here.
+ * It can probably be removed after the `DeepRequired` from `Config` to `SanitizedConfig` is removed.
+ * Same with `CollectionConfig` to `SanitizedCollectionConfig`.
+ */
+type DeepClone<T> = T extends object ? { [K in keyof T]: DeepClone<T[K]> } : T
 
 export type MetaConfig = {
   /**
@@ -209,38 +193,11 @@ export type MetaConfig = {
    */
   defaultOGImageType?: 'dynamic' | 'off' | 'static'
   /**
-   * Overrides the auto-generated <meta name="description"> of admin pages
-   * @example `"This is my custom CMS built with Payload."`
-   */
-  description?: string
-  /**
-   * Icons to be rendered by devices and browsers.
-   *
-   * For example browser tabs, phone home screens, and search engine results.
-   */
-  icons?: IconConfig[]
-  /**
-   * Overrides the auto-generated <meta name="keywords"> of admin pages
-   * @example `"CMS, Payload, Custom"`
-   */
-  keywords?: string
-  /**
-   * Metadata to be rendered as `og` meta tags in the head of the Admin Panel.
-   *
-   * For example when sharing the Admin Panel on social media or through messaging services.
-   */
-  openGraph?: OpenGraphConfig
-  /**
-   * Overrides the auto-generated <title> of admin pages
-   * @example `"My Admin Panel"`
-   */
-  title?: string
-  /**
    * String to append to the auto-generated <title> of admin pages
    * @example `" - Custom CMS"`
    */
   titleSuffix?: string
-}
+} & DeepClone<Metadata>
 
 export type ServerOnlyLivePreviewProperties = keyof Pick<LivePreviewConfig, 'url'>
 
@@ -1224,6 +1181,10 @@ export type Config = {
   upload?: FetchAPIFileUploadOptions
 }
 
+/**
+ * @todo remove the `DeepRequired` in v4.
+ * We don't actually guarantee that all properties are set when sanitizing configs.
+ */
 export type SanitizedConfig = {
   admin: {
     timezones: SanitizedTimezoneConfig

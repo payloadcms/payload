@@ -23,6 +23,7 @@ import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
 import { deleteScheduledPublishJobs } from '../../versions/deleteScheduledPublishJobs.js'
 import { buildAfterOperation } from './utils.js'
@@ -80,7 +81,7 @@ export const deleteOperation = async <
         payload,
       },
       req,
-      select,
+      select: incomingSelect,
       showHiddenFields,
       where,
     } = args
@@ -107,6 +108,11 @@ export const deleteOperation = async <
     })
 
     const fullWhere = combineQueries(where, accessResult)
+
+    const select = sanitizeSelect({
+      forceSelect: collectionConfig.forceSelect,
+      select: incomingSelect,
+    })
 
     // /////////////////////////////////////
     // Retrieve documents

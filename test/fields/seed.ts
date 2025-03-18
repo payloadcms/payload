@@ -69,10 +69,15 @@ const dirname = path.dirname(filename)
 
 export const seed = async (_payload: Payload) => {
   const jpgPath = path.resolve(dirname, './collections/Upload/payload.jpg')
+  const jpg480x320Path = path.resolve(dirname, './collections/Upload/payload480x320.jpg')
   const pngPath = path.resolve(dirname, './uploads/payload.png')
 
   // Get both files in parallel
-  const [jpgFile, pngFile] = await Promise.all([getFileByPath(jpgPath), getFileByPath(pngPath)])
+  const [jpgFile, jpg480x320File, pngFile] = await Promise.all([
+    getFileByPath(jpgPath),
+    getFileByPath(jpg480x320Path),
+    getFileByPath(pngPath),
+  ])
 
   const createdArrayDoc = await _payload.create({
     collection: arrayFieldsSlug,
@@ -117,6 +122,14 @@ export const seed = async (_payload: Payload) => {
       media: createdPNGDoc.id,
     },
     file: jpgFile,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  await _payload.create({
+    collection: uploadsSlug,
+    data: {},
+    file: jpg480x320File,
     depth: 0,
     overrideAccess: true,
   })

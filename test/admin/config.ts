@@ -7,6 +7,7 @@ import { BaseListFilter } from './collections/BaseListFilter.js'
 import { CustomFields } from './collections/CustomFields/index.js'
 import { CustomViews1 } from './collections/CustomViews1.js'
 import { CustomViews2 } from './collections/CustomViews2.js'
+import { DisableCopyToLocale } from './collections/DisableCopyToLocale.js'
 import { DisableDuplicate } from './collections/DisableDuplicate.js'
 import { Geo } from './collections/Geo.js'
 import { CollectionGroup1A } from './collections/Group1A.js'
@@ -158,6 +159,7 @@ export default buildConfigWithDefaults({
     CollectionGroup2B,
     Geo,
     DisableDuplicate,
+    DisableCopyToLocale,
     BaseListFilter,
     with300Documents,
     ListDrawer,

@@ -10,6 +10,8 @@ import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
 
 export type Arguments = {
   currentDepth?: number
@@ -37,7 +39,7 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     populate,
     req: { fallbackLocale, locale, payload },
     req,
-    select,
+    select: incomingSelect,
     showHiddenFields,
   } = args
 
@@ -56,6 +58,11 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
     }
 
     const hasWhereAccess = typeof accessResults === 'object'
+
+    const select = sanitizeSelect({
+      forceSelect: getQueryDraftsSelect({ select: globalConfig.forceSelect }),
+      select: incomingSelect,
+    })
 
     const findGlobalVersionsArgs: FindGlobalVersionsArgs = {
       global: globalConfig.slug,

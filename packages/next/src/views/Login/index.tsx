@@ -8,8 +8,6 @@ import { Logo } from '../../elements/Logo/index.js'
 import { LoginForm } from './LoginForm/index.js'
 import './index.scss'
 
-export { generateLoginMetadata } from './meta.js'
-
 export const loginBaseClass = 'login'
 
 export function LoginView({ initPageResult, params, searchParams }: AdminViewServerProps) {

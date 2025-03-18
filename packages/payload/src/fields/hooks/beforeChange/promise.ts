@@ -17,7 +17,9 @@ import { traverseFields } from './traverseFields.js'
 
 function buildFieldLabel(parentLabel: string, label: string): string {
   const capitalizedLabel = label.charAt(0).toUpperCase() + label.slice(1)
-  return parentLabel ? `${parentLabel} > ${capitalizedLabel}` : capitalizedLabel
+  return parentLabel && capitalizedLabel
+    ? `${parentLabel} > ${capitalizedLabel}`
+    : capitalizedLabel || parentLabel
 }
 
 type Args = {
@@ -179,6 +181,7 @@ export const promise = async ({
         // @ts-expect-error
         jsonError,
         operation,
+        path: pathSegments,
         preferences: { fields: {} },
         previousValue: siblingDoc[field.name],
         req,

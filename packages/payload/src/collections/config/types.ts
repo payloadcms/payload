@@ -43,6 +43,7 @@ import type {
 } from '../../index.js'
 import type {
   PayloadRequest,
+  SelectIncludeType,
   SelectType,
   Sort,
   TransformCollectionWithSelect,
@@ -327,6 +328,11 @@ export type CollectionAdminOptions = {
    * Custom description for collection. This will also be used as JSDoc for the generated types
    */
   description?: EntityDescription
+  /**
+   * Disable the Copy To Locale button in the edit document view
+   * @default false
+   */
+  disableCopyToLocale?: boolean
   enableRichTextLink?: boolean
   enableRichTextRelationship?: boolean
   /**
@@ -419,6 +425,12 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    */
   endpoints?: false | Omit<Endpoint, 'root'>[]
   fields: Field[]
+  /**
+   * Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks
+   */
+  forceSelect?: IsAny<SelectFromCollectionSlug<TSlug>> extends true
+    ? SelectIncludeType
+    : SelectFromCollectionSlug<TSlug>
   /**
    * GraphQL configuration
    */
@@ -544,6 +556,10 @@ export type SanitizedJoins = {
   [collectionSlug: string]: SanitizedJoin[]
 }
 
+/**
+ * @todo remove the `DeepRequired` in v4.
+ * We don't actually guarantee that all properties are set when sanitizing configs.
+ */
 export interface SanitizedCollectionConfig
   extends Omit<
     DeepRequired<CollectionConfig>,
@@ -557,7 +573,6 @@ export interface SanitizedCollectionConfig
    * Rows / collapsible / tabs w/o name `fields` merged to top, UIs are excluded
    */
   flattenedFields: FlattenedField[]
-
   /**
    * Object of collections to join 'Join Fields object keyed by collection
    */

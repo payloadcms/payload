@@ -401,6 +401,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     height: 'Высота',
     lessInfo: 'Меньше информации',
     moreInfo: 'Больше информации',
+    noFile: 'Нет файла',
     pasteURL: 'Вставить URL',
     previewSizes: 'Предварительный просмотр размеров',
     selectCollectionToBrowse: 'Выберите Коллекцию для просмотра',

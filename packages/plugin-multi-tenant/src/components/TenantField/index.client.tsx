@@ -5,7 +5,6 @@ import type { RelationshipFieldClientProps } from 'payload'
 import { RelationshipField, useField } from '@payloadcms/ui'
 import React from 'react'
 
-import { SELECT_ALL } from '../../constants.js'
 import { useTenantSelection } from '../../providers/TenantSelectionProvider/index.client.js'
 import './index.scss'
 
@@ -30,14 +29,11 @@ export const TenantField = (args: Props) => {
         setTenant({ id: value, refresh: unique })
       } else {
         // in the document view, the tenant field should always have a value
-        const defaultValue =
-          !selectedTenantID || selectedTenantID === SELECT_ALL
-            ? options[0]?.value
-            : selectedTenantID
+        const defaultValue = selectedTenantID || options[0]?.value
         setTenant({ id: defaultValue, refresh: unique })
       }
       hasSetValueRef.current = true
-    } else if ((!value || value !== selectedTenantID) && selectedTenantID !== SELECT_ALL) {
+    } else if (!value || value !== selectedTenantID) {
       // Update the field on the document value when the tenant is changed
       setValue(selectedTenantID)
     }

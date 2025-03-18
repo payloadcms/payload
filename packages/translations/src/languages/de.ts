@@ -403,6 +403,7 @@ export const deTranslations: DefaultTranslationsObject = {
     height: 'Höhe',
     lessInfo: 'Weniger Info',
     moreInfo: 'Mehr Info',
+    noFile: 'Keine Datei',
     pasteURL: 'URL einfügen',
     previewSizes: 'Vorschaugrößen',
     selectCollectionToBrowse: 'Wähle eine Sammlung zum Durchsuchen aus',

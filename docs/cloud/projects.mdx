@@ -9,10 +9,11 @@ keywords: cloud, payload cloud, projects, project, overview, database, file stor
 ## Overview
 
 <Banner>
-  The overview tab shows your most recent deployment, along with build and deployment logs. From
-  here, you can see your live URL, deployment details like timestamps and commit hash, as well as
-  the status of your deployment. You can also trigger a redeployment manually, which will rebuild
-  your project using the current configuration.
+  The overview tab shows your most recent deployment, along with build and
+  deployment logs. From here, you can see your live URL, deployment details like
+  timestamps and commit hash, as well as the status of your deployment. You can
+  also trigger a redeployment manually, which will rebuild your project using
+  the current configuration.
 </Banner>
 
 ![Payload Cloud Overview Page](https://payloadcms.com/images/docs/cloud/overview-page.jpg)
@@ -59,7 +60,9 @@ You can update settings from your Project’s Settings tab. Changes to your buil
 From the Environment Variables page of the Settings tab, you can add, update and delete variables for use in your project. Like build settings, these changes will trigger a redeployment of your project.
 
 <Banner>
-  Note: For security reasons, any variables you wish to provide to the [Admin Panel](../admin/overview) must be prefixed with `NEXT_PUBLIC_`. [More details](../configuration/environment-vars).
+  Note: For security reasons, any variables you wish to provide to the [Admin
+  Panel](../admin/overview) must be prefixed with `NEXT_PUBLIC_`. [More
+  details](../configuration/environment-vars).
 </Banner>
 
 ## Custom Domains
@@ -67,8 +70,9 @@ From the Environment Variables page of the Settings tab, you can add, update and
 With Payload Cloud, you can add custom domain names to your project. To do so, first go to the Domains page of the Settings tab of your project. Here you can see your default domain. To add a new domain, type in the domain name you wish to use.
 
 <Banner>
-  Note: do not include the protocol (http:// or https://) or any paths (/page). Only include the
-  domain name and extension, and optionally a subdomain. - your-domain.com - backend.your-domain.com
+  Note: do not include the protocol (http:// or https://) or any paths (/page).
+  Only include the domain name and extension, and optionally a subdomain. -
+  your-domain.com - backend.your-domain.com
 </Banner>
 
 Once you click save, a DNS record will be generated for your domain name to point to your live project. Add this record into your DNS provider’s records, and once the records are resolving properly (this can take 1hr to 48hrs in some cases), your domain will now to point to your live project.
@@ -111,13 +115,14 @@ export default buildConfig({
 ```
 
 <Banner type="warning">
-  **Note:** If your Payload Config already has an email with transport, this will take precedence
-  over Payload Cloud's email service.
+  **Note:** If your Payload Config already has an email with transport, this
+  will take precedence over Payload Cloud's email service.
 </Banner>
 
 <Banner type="info">
-  Good to know: the Payload Cloud Plugin was previously named `@payloadcms/plugin-cloud`. If you are
-  using this plugin, you should update to the new package name.
+  Good to know: the Payload Cloud Plugin was previously named
+  `@payloadcms/plugin-cloud`. If you are using this plugin, you should update to
+  the new package name.
 </Banner>
 
 #### **Optional configuration**
