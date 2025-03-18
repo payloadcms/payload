@@ -17,7 +17,7 @@ export const Pages: CollectionConfig = {
   fields: [
     {
       name: 'title',
-      label: 'Title',
+      label: { en: 'Title', es: 'Título', de: 'Titel' },
       type: 'text',
       required: true,
     },
