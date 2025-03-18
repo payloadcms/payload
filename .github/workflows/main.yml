@@ -279,6 +279,7 @@ jobs:
           - admin-root
           - auth
           - auth-basic
+          - bulk-edit
           - joins
           - field-error-states
           - fields-relationship

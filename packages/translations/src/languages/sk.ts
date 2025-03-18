@@ -402,6 +402,7 @@ export const skTranslations: DefaultTranslationsObject = {
     height: 'Výška',
     lessInfo: 'Menej informácií',
     moreInfo: 'Viac informácií',
+    noFile: 'Žiadny súbor',
     pasteURL: 'Vložiť URL',
     previewSizes: 'Náhľady veľkostí',
     selectCollectionToBrowse: 'Vyberte kolekciu na prezeranie',

@@ -402,6 +402,7 @@ export const enTranslations = {
     height: 'Height',
     lessInfo: 'Less info',
     moreInfo: 'More info',
+    noFile: 'No file',
     pasteURL: 'Paste URL',
     previewSizes: 'Preview Sizes',
     selectCollectionToBrowse: 'Select a Collection to Browse',

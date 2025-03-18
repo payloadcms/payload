@@ -402,6 +402,7 @@ export const svTranslations: DefaultTranslationsObject = {
     height: 'Höjd',
     lessInfo: 'Mindre info',
     moreInfo: 'Mer info',
+    noFile: 'Ingen fil',
     pasteURL: 'Klistra in URL',
     previewSizes: 'Förhandsgranska storlekar',
     selectCollectionToBrowse: 'Välj en samling att bläddra i',
