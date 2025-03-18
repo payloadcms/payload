@@ -7,6 +7,7 @@ import { getCollectionIDType } from './getCollectionIDType.js'
 import { getTenantFromCookie } from './getTenantFromCookie.js'
 
 type Args = {
+  basePath?: string
   docID?: number | string
   headers: Headers
   payload: Payload
@@ -19,6 +20,7 @@ type Args = {
 }
 export async function getGlobalViewRedirect({
   slug,
+  basePath,
   docID,
   headers,
   payload,
@@ -91,6 +93,7 @@ export async function getGlobalViewRedirect({
   if (redirectRoute) {
     return formatAdminURL({
       adminRoute: payload.config.routes.admin,
+      basePath,
       path: redirectRoute,
       serverURL: payload.config.serverURL,
     })
