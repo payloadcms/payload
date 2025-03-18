@@ -3,10 +3,17 @@ import type { BatchLoadFn } from 'dataloader'
 
 import DataLoader from 'dataloader'
 
+import type { CollectionSlug } from '../index.js'
 import type { PayloadRequest, PopulateType, SelectType } from '../types/index.js'
 import type { TypeWithID } from './config/types.js'
 
 import { isValidID } from '../utilities/isValidID.js'
+
+const InternalIDSlugCacheKeyMap = Symbol('InternalIDSlugCacheKeyMap')
+
+const getInternalIDSlugCacheKeyMap = (req: PayloadRequest): Map<string, string[]> => {
+  return req.payloadDataLoader[InternalIDSlugCacheKeyMap]
+}
 
 // Payload uses `dataloader` to solve the classic GraphQL N+1 problem.
 
@@ -145,6 +152,14 @@ const batchAndLoadDocs =
         })
         const docsIndex = keys.findIndex((key) => key === docKey)
 
+        const map = getInternalIDSlugCacheKeyMap(req)
+        let items = map.get(`${doc.id}-${collection}`)
+        if (!items) {
+          items = []
+          map.set(`${doc.id}-${collection}`, items)
+        }
+        items.push(docKey)
+
         if (docsIndex > -1) {
           docs[docsIndex] = doc
         }
@@ -157,7 +172,12 @@ const batchAndLoadDocs =
     return docs
   }
 
-export const getDataLoader = (req: PayloadRequest) => new DataLoader(batchAndLoadDocs(req))
+export const getDataLoader = (req: PayloadRequest): DataLoader<string, TypeWithID> => {
+  const dataLoader = new DataLoader(batchAndLoadDocs(req))
+  dataLoader[InternalIDSlugCacheKeyMap] = new Map()
+
+  return dataLoader
+}
 
 type CreateCacheKeyArgs = {
   collectionSlug: string
@@ -201,3 +221,30 @@ export const createDataloaderCacheKey = ({
     select,
     populate,
   ])
+
+export const invalidateDocumentInDataloader = ({
+  id,
+  collectionSlug,
+  req,
+}: {
+  collectionSlug: CollectionSlug
+  id: number | string
+  req: PayloadRequest
+}) => {
+  if (!req.payloadDataLoader) {
+    return
+  }
+
+  const cacheKeyMap = getInternalIDSlugCacheKeyMap(req)
+  const keys = cacheKeyMap.get(`${id}-${collectionSlug}`)
+
+  if (!keys) {
+    return
+  }
+
+  for (const key of keys) {
+    req.payloadDataLoader.clear(key)
+  }
+
+  cacheKeyMap.delete(`${id}-${collectionSlug}`)
+}

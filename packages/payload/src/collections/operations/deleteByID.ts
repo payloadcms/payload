@@ -6,7 +6,7 @@ import type {
   SelectType,
   TransformCollectionWithSelect,
 } from '../../types/index.js'
-import type { BeforeOperationHook, Collection, DataFromCollectionSlug } from '../config/types.js'
+import type { Collection, DataFromCollectionSlug } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
@@ -22,6 +22,7 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
 import { deleteScheduledPublishJobs } from '../../versions/deleteScheduledPublishJobs.js'
+import { invalidateDocumentInDataloader } from '../dataloader.js'
 import { buildAfterOperation } from './utils.js'
 
 export type Arguments = {
@@ -182,6 +183,8 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       select,
       where: { id: { equals: id } },
     })
+
+    invalidateDocumentInDataloader({ id, collectionSlug: collectionConfig.slug, req })
 
     // /////////////////////////////////////
     // Delete Preferences
