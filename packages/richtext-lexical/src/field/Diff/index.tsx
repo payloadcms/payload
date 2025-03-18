@@ -14,6 +14,7 @@ import { convertLexicalToHTMLAsync } from '../../features/converters/lexicalToHt
 import { getPayloadPopulateFn } from '../../features/converters/utilities/payloadPopulateFn.js'
 import { LinkDiffHTMLConverterAsync } from './converters/link.js'
 import { ListItemDiffHTMLConverterAsync } from './converters/list.js'
+import { RelationshipDiffHTMLConverterAsync } from './converters/relationship/index.js'
 import { UploadDiffHTMLConverterAsync } from './converters/upload/index.js'
 import { HtmlDiff } from './htmlDiff/index.js'
 const baseClass = 'lexical-diff'
@@ -26,6 +27,7 @@ export const LexicalDiffComponent: RichTextFieldDiffServerComponent = async (arg
     ...LinkDiffHTMLConverterAsync({}),
     ...ListItemDiffHTMLConverterAsync,
     ...UploadDiffHTMLConverterAsync({ i18n: args.i18n, req: args.req }),
+    ...RelationshipDiffHTMLConverterAsync({ i18n: args.i18n, req: args.req }),
   })
 
   const payloadPopulateFn = await getPayloadPopulateFn({

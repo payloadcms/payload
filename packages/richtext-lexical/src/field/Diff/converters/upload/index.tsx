@@ -63,7 +63,7 @@ export const UploadDiffHTMLConverterAsync: (args: {
                   <File />
                 )}
               </div>
-              <div className={`${baseClass}__topRowRightPanel`}>
+              <div className={`${baseClass}__info`}>
                 <div className={`${baseClass}__collectionLabel`}>
                   {relatedCollection?.labels?.singular
                     ? getTranslation(relatedCollection.labels.singular, i18n)

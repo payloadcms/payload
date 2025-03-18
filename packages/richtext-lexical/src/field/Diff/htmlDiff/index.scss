@@ -11,7 +11,8 @@
     h4,
     h5,
     blockquote,
-    .lexical-upload,
+    .lexical-upload-diff,
+    .lexical-relationship-diff,
     h6 {
       &:has(.html-diff-create-text-wrapper),
       &:has([data-match-type='create']) {
