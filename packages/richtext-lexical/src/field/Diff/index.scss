@@ -7,5 +7,16 @@
       grid-template-columns: 1fr 1fr;
       gap: 20px;
     }
+
+    blockquote {
+      font-size: base(0.8);
+      margin-block: base(0.8);
+      margin-inline: base(0.2);
+      border-inline-start-color: var(--theme-elevation-150);
+      border-inline-start-width: base(0.2);
+      border-inline-start-style: solid;
+      padding-inline-start: base(0.6);
+      padding-block: base(0.2);
+    }
   }
 }
