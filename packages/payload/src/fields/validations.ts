@@ -595,7 +595,7 @@ const validateFilterOptions: Validate<
             falseCollections.push(collection)
           }
 
-          const result = await payload.find({
+          const result = await req.payloadDataLoader.find({
             collection,
             depth: 0,
             limit: 0,
