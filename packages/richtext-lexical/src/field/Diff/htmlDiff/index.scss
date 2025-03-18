@@ -11,7 +11,7 @@
     h4,
     h5,
     blockquote,
-    img,
+    .lexical-upload,
     h6 {
       &:has(.html-diff-create-text-wrapper),
       &:has([data-match-type='create']) {
@@ -32,7 +32,7 @@
     }
 
     .html-diff-create-text-wrapper,
-    [data-match-type='create'] {
+    [data-match-type='create']:not(img) {
       background: var(--theme-success-200);
     }
 

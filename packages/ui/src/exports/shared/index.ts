@@ -7,6 +7,7 @@ export { withMergedProps } from '../../elements/withMergedProps/index.js' // can
 export { WithServerSideProps } from '../../elements/WithServerSideProps/index.js'
 export { mergeFieldStyles } from '../../fields/mergeFieldStyles.js'
 export { reduceToSerializableFields } from '../../forms/Form/reduceToSerializableFields.js'
+export { File } from '../../graphics/File/index.js'
 export { PayloadIcon } from '../../graphics/Icon/index.js'
 export { PayloadLogo } from '../../graphics/Logo/index.js'
 export { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
