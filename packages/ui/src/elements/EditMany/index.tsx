@@ -31,11 +31,10 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
   const [selectedFields, setSelectedFields] = useState<FieldWithPathClient[]>([])
 
   const collectionPermissions = permissions?.collections?.[slug]
-  const hasUpdatePermission = collectionPermissions?.update
 
   const drawerSlug = `edit-${slug}`
 
-  if (selectAll === SelectAllStatus.None || !hasUpdatePermission) {
+  if (selectAll === SelectAllStatus.None || !collectionPermissions?.update) {
     return null
   }
 

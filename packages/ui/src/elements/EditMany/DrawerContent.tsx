@@ -300,7 +300,15 @@ export const EditManyDrawerContent: React.FC<
                       parentPath=""
                       parentSchemaPath=""
                       path={path}
-                      permissions={'name' in field && collectionPermissions.fields?.[field.name]}
+                      permissions={
+                        collectionPermissions.fields === undefined ||
+                        collectionPermissions.fields === null ||
+                        collectionPermissions.fields === true
+                          ? true
+                          : 'name' in field
+                            ? collectionPermissions.fields?.[field.name]
+                            : undefined
+                      }
                     />
                   )
                 })}
