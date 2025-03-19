@@ -9,7 +9,7 @@ import { generateKeyBetween, generateNKeysBetween } from './fractional-indexing.
  * This function creates:
  * - N fields per collection, named `_order` or `_<collection>_<joinField>_order`
  * - 1 hook per collection
- * - 1 endpoint per collection
+ * - 1 endpoint per app
  */
 export const setupOrderable = (config: SanitizedConfig) => {
   let atLeastOneOrderableField = false
@@ -54,12 +54,12 @@ export const setupOrderable = (config: SanitizedConfig) => {
 
 export const addOrderableFieldsAndHook = (
   collection: CollectionConfig,
-  orderFieldNames: string[],
+  orderableFieldNames: string[],
 ) => {
   // 1. Add field
-  orderFieldNames.forEach((orderFieldName) => {
+  orderableFieldNames.forEach((orderableFieldName) => {
     const orderField: Field = {
-      name: orderFieldName,
+      name: orderableFieldName,
       type: 'text',
       admin: {
         disableBulkEdit: true,
@@ -89,16 +89,16 @@ export const addOrderableFieldsAndHook = (
     // Only set _order on create, not on update (unless explicitly provided)
     if (operation === 'create') {
       await Promise.all(
-        orderFieldNames.map(async (orderFieldName) => {
+        orderableFieldNames.map(async (orderableFieldName) => {
           const lastDoc = await req.payload.find({
             collection: collection.slug,
             depth: 0,
             limit: 1,
-            sort: `-${orderFieldName}`,
+            sort: `-${orderableFieldName}`,
           })
 
-          const lastOrderValue = lastDoc.docs[0]?.[orderFieldName] || null
-          data[orderFieldName] = generateKeyBetween(lastOrderValue, null)
+          const lastOrderValue = lastDoc.docs[0]?.[orderableFieldName] || null
+          data[orderableFieldName] = generateKeyBetween(lastOrderValue, null)
         }),
       )
     }
@@ -109,24 +109,27 @@ export const addOrderableFieldsAndHook = (
   collection.hooks.beforeChange.push(orderBeforeChangeHook)
 }
 
+/**
+ * The body of the reorder endpoint.
+ * @internal
+ */
+export type OrderableEndpointBody = {
+  collectionSlug: string
+  docsToMove: string[]
+  newKeyWillBe: 'greater' | 'less'
+  orderableFieldName: string
+  target: {
+    id: string
+    key: string
+  }
+}
+
 export const addOrderableEndpoint = (config: SanitizedConfig) => {
   // 3. Add endpoint
   const reorderHandler: PayloadHandler = async (req) => {
-    const body = (await req.json?.()) as {
-      collectionSlug: string
-      // array of docs IDs to be moved before or after the target
-      docsToMove: string[]
-      // new key relative to the target. We don't use "after" or "before" as
-      // it can be misleading if the table is sorted in descending order.
-      newKeyWillBe: 'greater' | 'less'
-      orderFieldName: string
-      target: KeyAndID
-    }
-    type KeyAndID = {
-      id: string
-      key: string
-    }
-    const { collectionSlug, docsToMove, newKeyWillBe, orderFieldName, target } = body
+    const body = (await req.json?.()) as OrderableEndpointBody
+
+    const { collectionSlug, docsToMove, newKeyWillBe, orderableFieldName, target } = body
 
     if (!Array.isArray(docsToMove) || docsToMove.length === 0) {
       return new Response(JSON.stringify({ error: 'docsToMove must be a non-empty array' }), {
@@ -182,7 +185,7 @@ export const addOrderableEndpoint = (config: SanitizedConfig) => {
         id: targetId,
         collection: collection.slug,
       })
-      targetKey = beforeDoc?.[orderFieldName] || null
+      targetKey = beforeDoc?.[orderableFieldName] || null
     }
 
     // The reason the endpoint does not receive this docId as an argument is that there
@@ -192,14 +195,14 @@ export const addOrderableEndpoint = (config: SanitizedConfig) => {
       collection: collection.slug,
       depth: 0,
       limit: 1,
-      sort: newKeyWillBe === 'greater' ? orderFieldName : `-${orderFieldName}`,
+      sort: newKeyWillBe === 'greater' ? orderableFieldName : `-${orderableFieldName}`,
       where: {
-        [orderFieldName]: {
+        [orderableFieldName]: {
           [newKeyWillBe === 'greater' ? 'greater_than' : 'less_than']: targetKey,
         },
       },
     })
-    const adjacentDocKey = adjacentDoc.docs?.[0]?.[orderFieldName] || null
+    const adjacentDocKey = adjacentDoc.docs?.[0]?.[orderableFieldName] || null
 
     // Currently N (= docsToMove.length) is always 1. Maybe in the future we will
     // allow dragging and reordering multiple documents at once via the UI.
@@ -214,7 +217,7 @@ export const addOrderableEndpoint = (config: SanitizedConfig) => {
         id,
         collection: collection.slug,
         data: {
-          [orderFieldName]: orderValues[index],
+          [orderableFieldName]: orderValues[index],
         },
       })
     })

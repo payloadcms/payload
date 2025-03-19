@@ -155,6 +155,7 @@ export const renderListView = async (
       drawerSlug,
       enableRowSelections,
       i18n: req.i18n,
+      orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
       payload,
       useAsTitle: collectionConfig.admin.useAsTitle,
     })

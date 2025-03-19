@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientCollectionConfig, Column } from 'payload'
+import type { ClientCollectionConfig, Column, OrderableEndpointBody } from 'payload'
 
 import './index.scss'
 
@@ -26,7 +26,7 @@ export const OrderableTable: React.FC<Props> = ({
   columns,
   data: initialData,
 }) => {
-  const { data: listQueryData, handleSortChange, query } = useListQuery()
+  const { data: listQueryData, handleSortChange, orderableFieldName, query } = useListQuery()
   // Use the data from ListQueryProvider if available, otherwise use the props
   const serverData = listQueryData?.docs || initialData
 
@@ -54,7 +54,7 @@ export const OrderableTable: React.FC<Props> = ({
   }
 
   const handleDragEnd = async ({ moveFromIndex, moveToIndex }) => {
-    if (query.sort !== '_order' && query.sort !== '-_order') {
+    if (query.sort !== orderableFieldName && query.sort !== `-${orderableFieldName}`) {
       toast.warning('To reorder the rows you must first sort them by the "Order" column')
       return
     }
@@ -76,39 +76,39 @@ export const OrderableTable: React.FC<Props> = ({
     setLocalData((currentData) => {
       const newData = [...currentData]
       // Update the rendered cell for the moved row to show "pending"
-      newData[moveFromIndex]._order = `pending`
+      newData[moveFromIndex][orderableFieldName] = `pending`
       // Move the item in the array
       newData.splice(moveToIndex, 0, newData.splice(moveFromIndex, 1)[0])
       return newData
     })
 
     try {
-      type KeyAndID = {
-        id: string
-        key: string
-      }
-
-      const target: KeyAndID = newBeforeRow
+      const target: OrderableEndpointBody['target'] = newBeforeRow
         ? {
             id: newBeforeRow.id ?? newBeforeRow._id,
-            key: newBeforeRow._order,
+            key: newBeforeRow[orderableFieldName],
           }
         : {
             id: newAfterRow.id ?? newAfterRow._id,
-            key: newAfterRow._order,
+            key: newAfterRow[orderableFieldName],
           }
 
       const newKeyWillBe =
-        (newBeforeRow && query.sort === '_order') || (!newBeforeRow && query.sort === '-_order')
+        (newBeforeRow && query.sort === orderableFieldName) ||
+        (!newBeforeRow && query.sort === `-${orderableFieldName}`)
           ? 'greater'
           : 'less'
 
-      const response = await fetch(`/api/${collection.slug}/reorder`, {
-        body: JSON.stringify({
-          docsToMove: [movedId],
-          newKeyWillBe,
-          target,
-        }),
+      const jsonBody: OrderableEndpointBody = {
+        collectionSlug: collection.slug,
+        docsToMove: [movedId],
+        newKeyWillBe,
+        orderableFieldName,
+        target,
+      }
+
+      const response = await fetch(`/api/reorder`, {
+        body: JSON.stringify(jsonBody),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -126,7 +126,7 @@ export const OrderableTable: React.FC<Props> = ({
       }
 
       // This will trigger an update of the data from the server
-      handleSortChange(query.sort as string).catch((error) => {
+      handleSortChange(query.sort).catch((error) => {
         throw error
       })
     } catch (err) {

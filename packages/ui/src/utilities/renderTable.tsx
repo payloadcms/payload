@@ -66,6 +66,7 @@ export const renderTable = ({
   docs,
   enableRowSelections,
   i18n,
+  orderableFieldName,
   payload,
   renderRowTypes,
   tableAppearance,
@@ -82,6 +83,7 @@ export const renderTable = ({
   drawerSlug?: string
   enableRowSelections: boolean
   i18n: I18nClient
+  orderableFieldName: string
   payload: Payload
   renderRowTypes?: boolean
   tableAppearance?: 'condensed' | 'default'
@@ -199,10 +201,7 @@ export const renderTable = ({
     } as Column)
   }
 
-  // Add drag handle if data is sortable
-  const isOrderable = docs.length > 0 && ORDER_FIELD_NAME in docs[0]
-
-  if (!isOrderable) {
+  if (!orderableFieldName) {
     return {
       columnState,
       // key is required since Next.js 15.2.0 to prevent React key error

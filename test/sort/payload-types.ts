@@ -190,7 +190,9 @@ export interface Localized {
  */
 export interface Orderable {
   id: string;
-  _order?: string | null;
+  _orderable_orderableJoinField_order: string;
+  _orderable_orderableJoinField1_order: string;
+  _order: string;
   title?: string | null;
   orderableField?: (string | null) | OrderableJoin;
   updatedAt: string;
@@ -202,7 +204,7 @@ export interface Orderable {
  */
 export interface OrderableJoin {
   id: string;
-  _order?: string | null;
+  _order: string;
   title?: string | null;
   orderableJoinField1?: {
     docs?: (string | Orderable)[];
@@ -377,6 +379,8 @@ export interface LocalizedSelect<T extends boolean = true> {
  * via the `definition` "orderable_select".
  */
 export interface OrderableSelect<T extends boolean = true> {
+  _orderable_orderableJoinField_order?: T;
+  _orderable_orderableJoinField1_order?: T;
   _order?: T;
   title?: T;
   orderableField?: T;
