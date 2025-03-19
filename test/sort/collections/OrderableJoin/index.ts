@@ -24,7 +24,7 @@ export const OrderableJoinCollection: CollectionConfig = {
       collection: 'orderable',
     },
     {
-      name: 'orderableJoinField',
+      name: 'orderableJoinField2',
       type: 'join',
       on: 'orderableField',
       orderable: true,

@@ -219,6 +219,7 @@ export const renderListView = async (
             defaultSort={sort}
             listPreferences={listPreferences}
             modifySearchParams={!isInDrawer}
+            orderableFieldName={collectionConfig.orderable === true ? '_order' : undefined}
           >
             {RenderServerComponent({
               clientProps: {

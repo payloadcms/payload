@@ -156,7 +156,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       setIsLoadingTable(false)
     },
     [
-      field?.defaultLimit,
+      field.defaultLimit,
       field.defaultSort,
       field.admin.defaultColumns,
       field.collection,

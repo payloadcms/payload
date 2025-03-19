@@ -80,7 +80,7 @@ export interface Config {
   collectionsJoins: {
     'orderable-join': {
       orderableJoinField1: 'orderable';
-      orderableJoinField: 'orderable';
+      orderableJoinField2: 'orderable';
       nonOrderableJoinField: 'orderable';
     };
   };
@@ -190,7 +190,7 @@ export interface Localized {
  */
 export interface Orderable {
   id: string;
-  _orderable_orderableJoinField_order: string;
+  _orderable_orderableJoinField2_order: string;
   _orderable_orderableJoinField1_order: string;
   _order: string;
   title?: string | null;
@@ -211,7 +211,7 @@ export interface OrderableJoin {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
-  orderableJoinField?: {
+  orderableJoinField2?: {
     docs?: (string | Orderable)[];
     hasNextPage?: boolean;
     totalDocs?: number;
@@ -379,7 +379,7 @@ export interface LocalizedSelect<T extends boolean = true> {
  * via the `definition` "orderable_select".
  */
 export interface OrderableSelect<T extends boolean = true> {
-  _orderable_orderableJoinField_order?: T;
+  _orderable_orderableJoinField2_order?: T;
   _orderable_orderableJoinField1_order?: T;
   _order?: T;
   title?: T;
@@ -395,7 +395,7 @@ export interface OrderableJoinSelect<T extends boolean = true> {
   _order?: T;
   title?: T;
   orderableJoinField1?: T;
-  orderableJoinField?: T;
+  orderableJoinField2?: T;
   nonOrderableJoinField?: T;
   updatedAt?: T;
   createdAt?: T;

@@ -16,7 +16,6 @@ export const setupOrderable = (config: SanitizedConfig) => {
   const fieldsToAdd = new Map<CollectionConfig, string[]>()
 
   config.collections.forEach((collection) => {
-    // const orderableFields = collection.orderable ? ['_order'] : []
     if (collection.orderable) {
       const currentFields = fieldsToAdd.get(collection) || []
       fieldsToAdd.set(collection, [...currentFields, '_order'])
@@ -156,6 +155,12 @@ export const addOrderableEndpoint = (config: SanitizedConfig) => {
     const collection = config.collections.find((c) => c.slug === collectionSlug)
     if (!collection) {
       return new Response(JSON.stringify({ error: `Collection ${collectionSlug} not found` }), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 400,
+      })
+    }
+    if (typeof orderableFieldName !== 'string') {
+      return new Response(JSON.stringify({ error: 'orderableFieldName must be a string' }), {
         headers: { 'Content-Type': 'application/json' },
         status: 400,
       })
