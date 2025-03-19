@@ -14,5 +14,14 @@ export const SelfJoins: CollectionConfig = {
       on: 'rel',
       collection: 'self-joins',
     },
+    {
+      name: 'hideIfEmpty',
+      type: 'join',
+      on: 'rel',
+      collection: 'self-joins',
+      admin: {
+        condition: ({ hideIfEmpty }) => hideIfEmpty?.docs?.length > 0,
+      },
+    },
   ],
 }

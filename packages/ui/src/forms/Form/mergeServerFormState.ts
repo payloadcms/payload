@@ -77,7 +77,7 @@ export const mergeServerFormState = ({
        * Handle adding all the remaining props that should be updated in the local form state from the server form state
        */
       serverPropsToAccept.forEach((prop) => {
-        if (!dequal(incomingState[path]?.[prop], newFieldState[prop])) {
+        if (prop in incomingState && !dequal(incomingState[path]?.[prop], newFieldState[prop])) {
           changed = true
           fieldChanged = true
           if (!(prop in incomingState[path])) {
