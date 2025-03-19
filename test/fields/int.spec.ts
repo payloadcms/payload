@@ -643,6 +643,34 @@ describe('Fields', () => {
 
       expect(result.totalDocs).toBe(0)
     })
+
+    it.only('should query createdAt (in with results)', async () => {
+      const result = await payload.find({
+        collection: 'date-fields',
+        depth: 0,
+        where: {
+          createdAt: {
+            in: [new Date(doc.createdAt)],
+          },
+        },
+      })
+
+      expect(result.docs[0].id).toBe(doc.id)
+    })
+
+    it.only('should query createdAt (in without results)', async () => {
+      const result = await payload.find({
+        collection: 'date-fields',
+        depth: 0,
+        where: {
+          createdAt: {
+            in: [tenMinutesAgo],
+          },
+        },
+      })
+
+      expect(result.totalDocs).toBe(0)
+    })
   })
 
   describe('select', () => {
