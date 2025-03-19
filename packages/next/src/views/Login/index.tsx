@@ -26,7 +26,7 @@ export function LoginView({ initPageResult, params, searchParams }: AdminViewSer
   } = config
 
   if (user) {
-    redirect((searchParams.redirect as string) || admin)
+    redirect(encodeURIComponent((searchParams.redirect as string) || admin))
   }
 
   const collectionConfig = payload?.collections?.[userSlug]?.config
