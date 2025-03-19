@@ -36,7 +36,7 @@ export const updateMany: UpdateMany = async function updateMany(
 
   const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
 
-  let sort
+  let sort: Record<string, unknown> | undefined
   if (!hasNearConstraint) {
     sort = buildSortParam({
       config: this.payload.config,
