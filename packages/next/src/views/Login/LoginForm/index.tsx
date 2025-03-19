@@ -91,9 +91,13 @@ export const LoginForm: React.FC<{
       initialState={initialState}
       method="POST"
       onSuccess={handleLogin}
-      redirect={encodeURIComponent(
-        typeof searchParams?.redirect === 'string' ? searchParams.redirect : adminRoute,
-      )}
+      redirect={
+        typeof searchParams?.redirect === 'string'
+          ? searchParams.redirect.startsWith('/')
+            ? searchParams.redirect
+            : encodeURIComponent(searchParams.redirect)
+          : adminRoute
+      }
       waitForAutocomplete
     >
       <div className={`${baseClass}__inputWrap`}>
