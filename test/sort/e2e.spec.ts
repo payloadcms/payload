@@ -13,12 +13,11 @@ import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { orderableSlug } from './collections/Orderable/index.js'
+import { orderableJoinSlug } from './collections/OrderableJoin/index.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 const { beforeAll, describe } = test
-let url: AdminUrlUtil
-
 let page: Page
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 let payload: PayloadTestSDK<Config>
@@ -30,8 +29,6 @@ describe('Sort functionality', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
-
-    url = new AdminUrlUtil(serverURL, orderableSlug)
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -49,38 +46,69 @@ describe('Sort functionality', () => {
   // assertRows contains expect
   // eslint-disable-next-line playwright/expect-expect
   test('Orderable collection', async () => {
+    const url = new AdminUrlUtil(serverURL, orderableSlug)
     await page.goto(`${url.list}?sort=-_order`)
     // SORT BY ORDER ASCENDING
-    await page.getByLabel('Sort by Order').nth(0).click()
-    await assertRows('A', 'B', 'C', 'D')
+    await page.locator('.sort-header button').nth(0).click()
+    await assertRows(0, 'A', 'B', 'C', 'D')
     await moveRow(2, 3) // move to middle
-    await assertRows('A', 'C', 'B', 'D')
+    await assertRows(0, 'A', 'C', 'B', 'D')
     await moveRow(3, 1) // move to top
-    await assertRows('B', 'A', 'C', 'D')
+    await assertRows(0, 'B', 'A', 'C', 'D')
     await moveRow(1, 4) // move to bottom
-    await assertRows('A', 'C', 'D', 'B')
+    await assertRows(0, 'A', 'C', 'D', 'B')
 
     // SORT BY ORDER DESCENDING
-    await page.getByLabel('Sort by Order').nth(0).click()
+    await page.locator('.sort-header button').nth(0).click()
     await page.waitForURL(/sort=-_order/, { timeout: 2000 })
-    await assertRows('B', 'D', 'C', 'A')
+    await assertRows(0, 'B', 'D', 'C', 'A')
     await moveRow(1, 3) // move to middle
-    await assertRows('D', 'C', 'B', 'A')
+    await assertRows(0, 'D', 'C', 'B', 'A')
     await moveRow(3, 1) // move to top
-    await assertRows('B', 'D', 'C', 'A')
+    await assertRows(0, 'B', 'D', 'C', 'A')
     await moveRow(1, 4) // move to bottom
-    await assertRows('D', 'C', 'A', 'B')
+    await assertRows(0, 'D', 'C', 'A', 'B')
 
     // SORT BY TITLE
     await page.getByLabel('Sort by Title Ascending').click()
     await page.waitForURL(/sort=title/, { timeout: 2000 })
     await moveRow(1, 3, 'warning') // warning because not sorted by order first
   })
+
+  test('Orderable join fields', async () => {
+    const url = new AdminUrlUtil(serverURL, orderableJoinSlug)
+    await page.goto(url.list)
+
+    await page.getByText('Join A').click()
+    await expect(page.locator('.sort-header button')).toHaveCount(2)
+
+    await page.locator('.sort-header button').nth(0).click()
+    await assertRows(0, 'A', 'B', 'C', 'D')
+    await moveRow(2, 3, 'success', 0) // move to middle
+    await assertRows(0, 'A', 'C', 'B', 'D')
+
+    await page.locator('.sort-header button').nth(1).click()
+    await assertRows(1, 'A', 'B', 'C', 'D')
+    await moveRow(1, 4, 'success', 1) // move to end
+    await assertRows(1, 'B', 'C', 'D', 'A')
+
+    await page.reload()
+    await page.locator('.sort-header button').nth(0).click()
+    await page.locator('.sort-header button').nth(1).click()
+    await assertRows(0, 'A', 'C', 'B', 'D')
+    await assertRows(1, 'B', 'C', 'D', 'A')
+  })
 })
 
-async function moveRow(from: number, to: number, expected: 'success' | 'warning' = 'success') {
+async function moveRow(
+  from: number,
+  to: number,
+  expected: 'success' | 'warning' = 'success',
+  nthTable = 0,
+) {
   // counting from 1, zero excluded
-  const dragHandle = page.locator(`tbody .sort-row`)
+  const table = page.locator(`tbody`).nth(nthTable)
+  const dragHandle = table.locator(`.sort-row`)
   const source = dragHandle.nth(from - 1)
   const target = dragHandle.nth(to - 1)
 
@@ -111,10 +139,11 @@ async function moveRow(from: number, to: number, expected: 'success' | 'warning'
   }
 }
 
-async function assertRows(...expectedRows: Array<string>) {
-  const cellTitle = page.locator('td.cell-title a')
+async function assertRows(nthTable: number, ...expectedRows: Array<string>) {
+  const table = page.locator('tbody').nth(nthTable)
+  const cellTitle = table.locator('.cell-title > :first-child')
 
-  const rows = page.locator('tbody .sort-row')
+  const rows = table.locator('.sort-row')
   await expect.poll(() => rows.count()).toBe(expectedRows.length)
 
   for (let i = 0; i < expectedRows.length; i++) {
