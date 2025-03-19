@@ -19,6 +19,7 @@ import {
   $getRoot,
   $getSelection,
   $isParagraphNode,
+  $isTextNode,
 } from 'lexical'
 
 import type {
@@ -29,7 +30,6 @@ import type {
   Transformer,
 } from './MarkdownTransformers.js'
 
-import { IS_APPLE_WEBKIT, IS_IOS, IS_SAFARI } from '../../../lexical/utils/environment.js'
 import { importTextTransformers } from './importTextTransformers.js'
 import { isEmptyParagraph, transformersByType } from './utils.js'
 
@@ -213,6 +213,15 @@ function $importBlocks(
 
   importTextTransformers(textNode, textFormatTransformersIndex, textMatchTransformers)
 
+  // Go through every text node in the element node and handle escape characters
+  for (const child of elementNode.getChildren()) {
+    if ($isTextNode(child)) {
+      const textContent = child.getTextContent()
+      const escapedText = textContent.replace(/\\([*_`~])/g, '$1')
+      child.setTextContent(escapedText)
+    }
+  }
+
   // If no transformer found and we left with original paragraph node
   // can check if its content can be appended to the previous node
   // if it's a paragraph, quote or list
@@ -255,13 +264,15 @@ function createTextFormatTransformersIndex(
     const tagRegExp = tag.replace(/([*^+])/g, '\\$1')
     openTagsRegExp.push(tagRegExp)
 
-    if (IS_SAFARI || IS_IOS || IS_APPLE_WEBKIT) {
-      fullMatchRegExpByTag[tag] = new RegExp(
-        `(${tagRegExp})(?![${tagRegExp}\\s])(.*?[^${tagRegExp}\\s])${tagRegExp}(?!${tagRegExp})`,
-      )
-    } else {
+    // Single-char tag (e.g. "*"),
+    if (tag.length === 1) {
       fullMatchRegExpByTag[tag] = new RegExp(
         `(?<![\\\\${tagRegExp}])(${tagRegExp})((\\\\${tagRegExp})?.*?[^${tagRegExp}\\s](\\\\${tagRegExp})?)((?<!\\\\)|(?<=\\\\\\\\))(${tagRegExp})(?![\\\\${tagRegExp}])`,
+      )
+    } else {
+      // Multi‐char tags (e.g. "**")
+      fullMatchRegExpByTag[tag] = new RegExp(
+        `(?<!\\\\)(${tagRegExp})((\\\\${tagRegExp})?.*?[^\\s](\\\\${tagRegExp})?)((?<!\\\\)|(?<=\\\\\\\\))(${tagRegExp})(?!\\\\)`,
       )
     }
   }
@@ -269,14 +280,9 @@ function createTextFormatTransformersIndex(
   return {
     // Reg exp to find open tag + content + close tag
     fullMatchRegExpByTag,
-    // Reg exp to find opening tags
-    openTagsRegExp: new RegExp(
-      (IS_SAFARI || IS_IOS || IS_APPLE_WEBKIT ? '' : `${escapeRegExp}`) +
-        '(' +
-        openTagsRegExp.join('|') +
-        ')',
-      'g',
-    ),
+
+    // Regexp to locate *any* potential opening tag (longest first).
+    openTagsRegExp: new RegExp(`${escapeRegExp}(${openTagsRegExp.join('|')})`, 'g'),
     transformersByTag,
   }
 }

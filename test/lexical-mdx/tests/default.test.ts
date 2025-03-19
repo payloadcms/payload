@@ -376,13 +376,13 @@ there4
     input: `
 | Option            | Default route           | Description                                     |
 | ----------------- | ----------------------- | ----------------------------------------------- |
-| \`account\`         |                         | The user's account page.                        |
+| \`account\` \\*         |                         | The user's account page.                        |
 | \`createFirstUser\` | \`/create-first-user\`    | The page to create the first user.              |
 `,
     inputAfterConvertFromEditorJSON: `
 | Option            | Default route           | Description                                     |
 |---|---|---|
-| \`account\`         |                         | The user's account page.                        |
+| \`account\`  \\*         |                         | The user's account page.                        |
 | \`createFirstUser\` | \`/create-first-user\`    | The page to create the first user.              |
 `,
     rootChildren: [tableJson],
@@ -397,6 +397,19 @@ there4
       fields: {
         blockType: 'Banner',
         content: textToRichText('children text'),
+      },
+    },
+  },
+  {
+    input: `
+<Banner>
+  Escaped \\*
+</Banner>
+`,
+    blockNode: {
+      fields: {
+        blockType: 'Banner',
+        content: textToRichText('Escaped *'),
       },
     },
   },
