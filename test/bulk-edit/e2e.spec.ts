@@ -489,6 +489,7 @@ test.describe('Bulk Edit', () => {
     await modal.locator('.field-select .rs__option', { hasText: exactText('Array') }).click()
     await modal.locator('#field-array > button.array-field__add-row').click()
 
+    await expect(page.locator('#field-array__0__optional')).toBeVisible()
     await expect(page.locator('#field-array__0__noRead')).toBeHidden()
     await expect(page.locator('#field-array__0__noUpdate')).toBeDisabled()
   })
