@@ -317,7 +317,7 @@ describe('database', () => {
       payload.config.db.allowIDOnCreate = false
     })
 
-    it('Local API - accepts ID on create', async () => {
+    it('local API - accepts ID on create', async () => {
       let id: any = null
       if (payload.db.name === 'mongoose') {
         id = new mongoose.Types.ObjectId().toHexString()
@@ -332,7 +332,7 @@ describe('database', () => {
       expect(post.id).toBe(id)
     })
 
-    it('REST API - accepts ID on create', async () => {
+    it('rEST API - accepts ID on create', async () => {
       let id: any = null
       if (payload.db.name === 'mongoose') {
         id = new mongoose.Types.ObjectId().toHexString()
@@ -354,7 +354,7 @@ describe('database', () => {
       expect(post.doc.id).toBe(id)
     })
 
-    it('GraphQL - accepts ID on create', async () => {
+    it('graphQL - accepts ID on create', async () => {
       let id: any = null
       if (payload.db.name === 'mongoose') {
         id = new mongoose.Types.ObjectId().toHexString()
@@ -1166,6 +1166,140 @@ describe('database', () => {
       expect(notUpdatedDocs).toHaveLength(6)
       expect(notUpdatedDocs?.[0]?.title).toBe('not updated')
       expect(notUpdatedDocs?.[5]?.title).toBe('not updated')
+    })
+
+    it('ensure updateMany respects limit and sort', async () => {
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      const numbers = Array.from({ length: 11 }, (_, i) => i)
+
+      // shuffle the numbers
+      numbers.sort(() => Math.random() - 0.5)
+
+      // create 11 documents numbered 0-10, but in random order
+      for (const i of numbers) {
+        await payload.create({
+          collection: postsSlug,
+          data: {
+            title: 'not updated',
+            number: i,
+          },
+        })
+      }
+
+      const result = await payload.db.updateMany({
+        collection: postsSlug,
+        data: {
+          title: 'updated',
+        },
+        limit: 5,
+        sort: 'number',
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      expect(result?.length).toBe(5)
+
+      for (let i = 0; i < 5; i++) {
+        expect(result?.[i]?.number).toBe(i)
+        expect(result?.[i]?.title).toBe('updated')
+      }
+
+      // Ensure all posts minus the one we don't want updated are updated
+      const { docs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        sort: 'number',
+        where: {
+          title: {
+            equals: 'updated',
+          },
+        },
+      })
+
+      expect(docs).toHaveLength(5)
+      for (let i = 0; i < 5; i++) {
+        expect(docs?.[i]?.number).toBe(i)
+        expect(docs?.[i]?.title).toBe('updated')
+      }
+    })
+
+    it('ensure updateMany respects limit and negative sort', async () => {
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      const numbers = Array.from({ length: 11 }, (_, i) => i)
+
+      // shuffle the numbers
+      numbers.sort(() => Math.random() - 0.5)
+
+      // create 11 documents numbered 0-10, but in random order
+      for (const i of numbers) {
+        await payload.create({
+          collection: postsSlug,
+          data: {
+            title: 'not updated',
+            number: i,
+          },
+        })
+      }
+
+      const result = await payload.db.updateMany({
+        collection: postsSlug,
+        data: {
+          title: 'updated',
+        },
+        limit: 5,
+        sort: '-number',
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      expect(result?.length).toBe(5)
+
+      for (let i = 10; i > 5; i--) {
+        expect(result?.[-i + 10]?.number).toBe(i)
+        expect(result?.[-i + 10]?.title).toBe('updated')
+      }
+
+      // Ensure all posts minus the one we don't want updated are updated
+      const { docs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        sort: '-number',
+        where: {
+          title: {
+            equals: 'updated',
+          },
+        },
+      })
+
+      expect(docs).toHaveLength(5)
+      for (let i = 10; i > 5; i--) {
+        expect(docs?.[-i + 10]?.number).toBe(i)
+        expect(docs?.[-i + 10]?.title).toBe('updated')
+      }
     })
 
     it('ensure updateMany correctly handles 0 limit', async () => {
