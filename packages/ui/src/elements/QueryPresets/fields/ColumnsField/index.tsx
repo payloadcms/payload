@@ -20,11 +20,15 @@ export const QueryPresetsColumnField: JSONFieldClientComponent = ({
       <FieldLabel as="h3" label={label} path={path} required={required} />
       <div className="value-wrapper">
         {value
-          ? transformColumnsToSearchParams(value as ColumnPreference[]).map((column, i) => (
-              <Pill key={i} pillStyle="always-white">
-                {toWords(column)}
-              </Pill>
-            ))
+          ? transformColumnsToSearchParams(value as ColumnPreference[]).map((column, i) => {
+              const isColumnActive = !column.startsWith('-')
+
+              return (
+                <Pill key={i} pillStyle={isColumnActive ? 'always-white' : 'light-gray'}>
+                  {toWords(column)}
+                </Pill>
+              )
+            })
           : 'No columns selected'}
       </div>
     </div>

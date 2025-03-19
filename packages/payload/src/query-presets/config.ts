@@ -14,6 +14,7 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
   slug: queryPresetsCollectionSlug,
   access: getAccess(config),
   admin: {
+    defaultColumns: ['title', 'isShared', 'access', 'where', 'columns'],
     hidden: true,
     useAsTitle: 'title',
   },
