@@ -15,12 +15,16 @@ export const operatorMap: Operators = {
   less_than: withISODateConversion(defaultOperators.less_than),
   less_than_equal: withISODateConversion(defaultOperators.less_than_equal),
   not_equals: withISODateConversion(defaultOperators.not_equals),
+  in: withISODateConversion(defaultOperators.in),
+  not_in: withISODateConversion(defaultOperators.not_in),
 }
 
 function withISODateConversion(op: Operators[keyof Operators]): Operators[keyof Operators] {
   return (left, right) => {
     if (right instanceof Date) {
       right = right.toISOString()
+    } else if (Array.isArray(right)) {
+      right = right.map((item) => item instanceof Date ? item.toISOString() : item)
     }
     return op(left, right)
   }
