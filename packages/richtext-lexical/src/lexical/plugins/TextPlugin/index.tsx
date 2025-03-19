@@ -11,7 +11,7 @@ export function TextPlugin({ features }: { features: SanitizedClientFeatures }) 
   const [editor] = useLexicalComposerContext()
 
   useEffect(() => {
-    const disabledFormats = getDisabledFormats(features.enabledFormats)
+    const disabledFormats = getDisabledFormats(features.enabledFormats as TextFormatType[])
     if (disabledFormats.length === 0) {
       return
     }

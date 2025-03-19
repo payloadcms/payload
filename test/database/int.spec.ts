@@ -317,7 +317,7 @@ describe('database', () => {
       payload.config.db.allowIDOnCreate = false
     })
 
-    it('local API - accepts ID on create', async () => {
+    it('Local API - accepts ID on create', async () => {
       let id: any = null
       if (payload.db.name === 'mongoose') {
         id = new mongoose.Types.ObjectId().toHexString()
@@ -332,7 +332,7 @@ describe('database', () => {
       expect(post.id).toBe(id)
     })
 
-    it('rEST API - accepts ID on create', async () => {
+    it('REST API - accepts ID on create', async () => {
       let id: any = null
       if (payload.db.name === 'mongoose') {
         id = new mongoose.Types.ObjectId().toHexString()
@@ -354,7 +354,7 @@ describe('database', () => {
       expect(post.doc.id).toBe(id)
     })
 
-    it('graphQL - accepts ID on create', async () => {
+    it('GraphQL - accepts ID on create', async () => {
       let id: any = null
       if (payload.db.name === 'mongoose') {
         id = new mongoose.Types.ObjectId().toHexString()
