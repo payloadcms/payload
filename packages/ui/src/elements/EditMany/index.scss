@@ -126,12 +126,11 @@
 
     &__document-actions {
       display: flex;
-      flex-wrap: wrap;
       padding: base(1);
       gap: base(0.5);
 
       .form-submit {
-        width: calc(50% - #{base(1)});
+        width: 100%;
 
         @include mid-break {
           width: auto;
