@@ -1,4 +1,4 @@
-import type { BrowserContext, Page } from '@playwright/test'
+import type { BrowserContext, Locator, Page } from '@playwright/test'
 import type { PayloadTestSDK } from 'helpers/sdk/index.js'
 
 import { expect, test } from '@playwright/test'
@@ -390,18 +390,17 @@ test.describe('Bulk Edit', () => {
 
     const { id: postID } = await createPost(postData)
     await page.goto(postsUrl.list)
-    await page.locator('input#select-all').check()
-    await page.locator('.edit-many__toggle').click()
-    await page.locator('.field-select .rs__control').click()
 
-    const titleOption = page.locator('.field-select .rs__option', {
+    const { modal } = await selectAllAndEditMany(page)
+
+    const titleOption = modal.locator('.field-select .rs__option', {
       hasText: exactText('Title'),
     })
 
     await titleOption.click()
-    const titleInput = page.locator('#field-title')
+    const titleInput = modal.locator('#field-title')
     await titleInput.fill(updatedPostTitle)
-    await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
+    await modal.locator('.form-submit button[type="submit"].edit-many__publish').click()
 
     await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
       'Updated 1 Post successfully.',
@@ -423,7 +422,50 @@ test.describe('Bulk Edit', () => {
       title: updatedPostTitle,
     })
   })
+
+  test('should not display fields options lacking read and update permissions', async () => {
+    await deleteAllPosts()
+
+    await createPost()
+
+    await page.goto(postsUrl.list)
+
+    const { modal } = await selectAllAndEditMany(page)
+
+    await expect(
+      modal.locator('.field-select .rs__option', { hasText: exactText('No Read') }),
+    ).toBeHidden()
+
+    await expect(
+      modal.locator('.field-select .rs__option', { hasText: exactText('No Update') }),
+    ).toBeHidden()
+  })
+
+  test('should thread field permissions through subfields', async () => {
+    await deleteAllPosts()
+
+    await createPost()
+
+    await page.goto(postsUrl.list)
+
+    const { modal } = await selectAllAndEditMany(page)
+
+    await modal.locator('.field-select .rs__control').click()
+    await modal.locator('.field-select .rs__option', { hasText: exactText('Array') }).click()
+    await modal.locator('#field-array > button.array-field__add-row').click()
+
+    await expect(page.locator('#field-array__0__noRead')).toBeHidden()
+    await expect(page.locator('#field-array__0__noUpdate')).toBeDisabled()
+  })
 })
+
+async function selectAllAndEditMany(page: Page): Promise<{ modal: Locator }> {
+  await page.locator('input#select-all').check()
+  await page.locator('.edit-many__toggle').click()
+  const modal = page.locator('#edit-posts')
+  await expect(modal).toBeVisible()
+  return { modal }
+}
 
 async function deleteAllPosts() {
   await payload.delete({ collection: postsSlug, where: { id: { exists: true } } })

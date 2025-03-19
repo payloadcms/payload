@@ -1,7 +1,17 @@
 'use client'
-import type { ClientField, FieldWithPathClient, FormState } from 'payload'
+import type {
+  ClientField,
+  FieldWithPathClient,
+  FormState,
+  SanitizedFieldPermissions,
+} from 'payload'
 
-import { fieldAffectsData, fieldHasSubFields, fieldIsHiddenOrDisabled } from 'payload/shared'
+import {
+  fieldAffectsData,
+  fieldHasSubFields,
+  fieldIsHiddenOrDisabled,
+  getFieldPermissions,
+} from 'payload/shared'
 import React, { Fragment, useState } from 'react'
 
 import type { FieldAction } from '../../forms/Form/types.js'
@@ -30,6 +40,11 @@ export type OnFieldSelect = ({
 export type FieldSelectProps = {
   readonly fields: ClientField[]
   readonly onChange: OnFieldSelect
+  readonly permissions:
+    | {
+        [fieldName: string]: SanitizedFieldPermissions
+      }
+    | SanitizedFieldPermissions
 }
 
 export const combineLabel = ({
@@ -65,12 +80,20 @@ const reduceFields = ({
   fields,
   formState,
   labelPrefix = null,
+  parentPath = '',
   path = '',
+  permissions,
 }: {
-  fields: ClientField[]
-  formState?: FormState
-  labelPrefix?: React.ReactNode
-  path?: string
+  readonly fields: ClientField[]
+  readonly formState?: FormState
+  readonly labelPrefix?: React.ReactNode
+  readonly parentPath?: string
+  readonly path?: string
+  readonly permissions:
+    | {
+        [fieldName: string]: SanitizedFieldPermissions
+      }
+    | SanitizedFieldPermissions
 }): FieldOption[] => {
   if (!fields) {
     return []
@@ -79,13 +102,28 @@ const reduceFields = ({
   const CustomLabel = formState?.[path]?.customComponents?.Label
 
   return fields?.reduce((fieldsToUse, field) => {
+    const {
+      operation: hasOperationPermission,
+      permissions: fieldPermissions,
+      read: hasReadPermission,
+    } = getFieldPermissions({
+      field,
+      operation: 'update',
+      parentName: parentPath?.includes('.')
+        ? parentPath.split('.')[parentPath.split('.').length - 1]
+        : parentPath,
+      permissions,
+    })
+
     // escape for a variety of reasons, include ui fields as they have `name`.
     if (
       (fieldAffectsData(field) || field.type === 'ui') &&
       (field.admin?.disableBulkEdit ||
         field.unique ||
         fieldIsHiddenOrDisabled(field) ||
-        ('readOnly' in field && field.readOnly))
+        ('readOnly' in field && field.readOnly) ||
+        !hasOperationPermission ||
+        !hasReadPermission)
     ) {
       return fieldsToUse
     }
@@ -96,7 +134,9 @@ const reduceFields = ({
         ...reduceFields({
           fields: field.fields,
           labelPrefix: combineLabel({ CustomLabel, field, prefix: labelPrefix }),
+          parentPath: path,
           path: createNestedClientFieldPath(path, field),
+          permissions: fieldPermissions,
         }),
       ]
     }
@@ -107,12 +147,15 @@ const reduceFields = ({
         ...field.tabs.reduce((tabFields, tab) => {
           if ('fields' in tab) {
             const isNamedTab = 'name' in tab && tab.name
+
             return [
               ...tabFields,
               ...reduceFields({
                 fields: tab.fields,
                 labelPrefix,
+                parentPath: path,
                 path: isNamedTab ? createNestedClientFieldPath(path, field) : path,
+                permissions: isNamedTab ? fieldPermissions[tab.name] : fieldPermissions,
               }),
             ]
           }
@@ -132,12 +175,12 @@ const reduceFields = ({
   }, [])
 }
 
-export const FieldSelect: React.FC<FieldSelectProps> = ({ fields, onChange }) => {
+export const FieldSelect: React.FC<FieldSelectProps> = ({ fields, onChange, permissions }) => {
   const { t } = useTranslation()
   const { dispatchFields, getFields } = useForm()
 
   const [options] = useState<FieldOption[]>(() =>
-    reduceFields({ fields: filterOutUploadFields(fields), formState: getFields() }),
+    reduceFields({ fields: filterOutUploadFields(fields), formState: getFields(), permissions }),
   )
 
   return (

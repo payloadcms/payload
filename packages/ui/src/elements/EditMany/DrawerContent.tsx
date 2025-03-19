@@ -285,7 +285,11 @@ export const EditManyDrawerContent: React.FC<
             onChange={[onChange]}
             onSuccess={onSuccess}
           >
-            <FieldSelect fields={fields} onChange={onFieldSelect} />
+            <FieldSelect
+              fields={fields}
+              onChange={onFieldSelect}
+              permissions={collectionPermissions.fields}
+            />
             {selectedFields.length === 0 ? null : (
               <RenderFields
                 fields={selectedFields}
