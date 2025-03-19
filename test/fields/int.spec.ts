@@ -565,6 +565,7 @@ describe('Fields', () => {
 
   describe('timestamps', () => {
     const tenMinutesAgo = new Date(Date.now() - 1000 * 60 * 10)
+    const tenMinutesLater = new Date(Date.now() + 1000 * 60 * 10)
     let doc
     beforeEach(async () => {
       doc = await payload.create({
@@ -587,7 +588,7 @@ describe('Fields', () => {
       expect(docs.map(({ id }) => id)).toContain(doc.id)
     })
 
-    it('should query createdAt', async () => {
+    it('should query createdAt (greater_than_equal with results)', async () => {
       const result = await payload.find({
         collection: 'date-fields',
         depth: 0,
@@ -599,6 +600,48 @@ describe('Fields', () => {
       })
 
       expect(result.docs[0].id).toEqual(doc.id)
+    })
+
+    it('should query createdAt (greater_than_equal with no results)', async () => {
+      let result = await payload.find({
+        collection: 'date-fields',
+        depth: 0,
+        where: {
+          createdAt: {
+            greater_than_equal: tenMinutesLater,
+          },
+        },
+      })
+
+      expect(result.totalDocs).toBe(0)
+    })
+
+    it('should query createdAt (less_than with results)', async () => {
+      const result = await payload.find({
+        collection: 'date-fields',
+        depth: 0,
+        where: {
+          createdAt: {
+            less_than: tenMinutesLater,
+          },
+        },
+      })
+
+      expect(result.docs[0].id).toEqual(doc.id)
+    })
+
+    it('should query createdAt (less_than with no results)', async () => {
+      const result = await payload.find({
+        collection: 'date-fields',
+        depth: 0,
+        where: {
+          createdAt: {
+            less_than: tenMinutesAgo,
+          },
+        },
+      })
+
+      expect(result.totalDocs).toBe(0)
     })
   })
 
