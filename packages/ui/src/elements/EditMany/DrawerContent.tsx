@@ -152,8 +152,8 @@ export const EditManyDrawerContent: React.FC<
 
   const select = useMemo<SelectType>(() => {
     return unflatten(
-      selectedFields.reduce((acc, field) => {
-        acc[field.value.path] = true
+      selectedFields.reduce((acc, option) => {
+        acc[option.value.path] = true
         return acc
       }, {} as SelectType),
     )
