@@ -6,11 +6,11 @@ desc: Query Presets allow you to save and share filters, columns, and sort order
 keywords:
 ---
 
-Query Presets allow you to save and share filters, columns, and sort orders for your [Collections](../configuration/collections). This is useful for reusing common or complex filtering patterns and column configurations across your team.
+Query Presets allow you to save and share filters, columns, and sort orders for your [Collections](../configuration/collections). This is useful for reusing common or complex filtering patterns and column configurations or sharing across your team.
 
 Each Query Preset is saved as a new record in the database under the `payload-query-presets` collection. This allows for an endless number of preset configurations, where the users of your app define the presets that are most useful to them, rather than being hard coded into the Payload Config.
 
-Within the [Admin Panel](../admin/overview), Query Presets are applied to the List View. When enabled, new controls are displayed for you can manage presets. Once saved, these presets are available for future use by you and your team.
+Within the [Admin Panel](../admin/overview), Query Presets are applied to the List View. When enabled, new controls are displayed for users to manage presets. Once saved, these presets can be loaded up at any time and optionally shared with others.
 
 To enable Query Presets on a Collection, use the `enableQueryPresets` property in your [Collection Config](../configuration/collections).
 
@@ -25,29 +25,56 @@ export const MyCollection: CollectionConfig = {
 }
 ```
 
+## Config Options
+
+Query Preset settings are managed on the `queryPresets` property in your [Collection Config](../configuration/collections).
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  // highlight-start
+  queryPresets: {
+    // ...
+  },
+  // highlight-end
+})
+```
+
+The following options are available for Query Presets:
+
+| Option        | Description                                                                                                            |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `access`      | Custom access control rules for reading, updating, and deleting Query Presets. [More details](#custom-access-control). |
+| `constraints` | Used to define options and fields for custom access control rules. [More details](#custom-access-control).             |
+| `labels`      | Custom labels to use for the Query Presets Collection.                                                                 |
+
 ## Access Control
 
-Query Presets are subject to the same [Access Control](../access-control/overview) as the rest of Payload. This means you can use the same function patterns you are already familiar with to control who can read, update, and delete each individual Query Preset.
+Query Presets are subject to the same [Access Control](../access-control/overview) as the rest of Payload. This means you can use the same function patterns you are already familiar with to control who can read, update, and delete each individual preset.
 
 ### Default Access Control
 
-By default, Payload provides a set of sensible defaults for all Query Presets, but you can customize these rules to suit your needs. Those defaults are as follows:
+By default, Payload provides a set of sensible defaults for all Query Presets, but you can customize these rules to suit your needs.
 
-- Only Me: Only the user who created the preset can read, update, and delete it.
-- Everyone: All users can read, update, and delete the preset.
-- Specific Users: Only select users can read, update, and delete the preset.
+These defaults are as follows:
 
-When a user manages a Query Preset, these options will be available to them in the Admin Panel.
+- **Only Me**: Only the user who created the preset can read, update, and delete it.
+- **Everyone**: All users can read, update, and delete the preset.
+- **Specific Users**: Only select users can read, update, and delete the preset.
+
+When a user manages a preset, these options will be available to them in the Admin Panel for each operation.
 
 ### Custom Access Control
 
-You can also add custom access control rules to Query Presets. For example, you could create a rule that only allows users with a specific role to read, update, or delete a preset.
+In addition to the defaults, you can also inject custom access control rules into Query Presets. For example, you could create a rule that only allows users with a specific role to read, update, or delete a preset.
 
 #### Adding a new option
 
-To add a custom access control rule, you'll first need to append a new option for users to select when managing a Query Preset. Options are per operation, so you can have completely different rules for reading, updating, and deleting.
+To add a custom access control rule, you'll first need to append a new option for users to select when managing the preset. Options are per operation, so you can have completely different rules for reading, updating, and deleting.
 
-Each options requires a label, a value, and a list of fields that will be used to determine access. The fields are conditionally rendered only when that particular option is selected.
+Each option requires a label, a value, and a list of fields that will be used to determine access. The fields are conditionally rendered when that particular option is selected.
 
 To do this, use the `queryPresets.constraints` property in your [Payload Config](../configuration/payload-config).
 
@@ -62,7 +89,7 @@ const config = buildConfig({
     constraints: {
       read: {
         label: 'Specific Roles',
-        value: 'specificRoles,
+        value: 'specificRoles',
         fields: [
           {
             name: 'roles',
@@ -81,7 +108,7 @@ const config = buildConfig({
       delete: {
         // ...
       },
-    }
+    },
   },
   // highlight-end
 })
@@ -89,7 +116,7 @@ const config = buildConfig({
 
 #### Applying the new option
 
-Once you've added the new option, you'll need to write specific access control rules for each operation using the fields that you've provided. Payload will automatically merge these rules with the default rules.
+Once you've added the new option, you'll need to write specific access control rules for each operation using the fields that you've provided. Payload will automatically merge these rules with its defaults.
 
 To do this, use the `queryPresets.access` property in your [Collection Config](../configuration/collections):
 
@@ -121,6 +148,6 @@ const config = buildConfig({
 ```
 
 <Banner type="warning">
-  **Note:** Payload injects your custom fields into the `access[operation]`
-  group, so your rules need to reflect this.
+  **Note:** Payload places your custom fields into the `access[operation]` field
+  group, so your rules will need to reflect this.
 </Banner>
