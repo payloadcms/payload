@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { SanitizedFieldPermissions } from '../auth/types.js'
 import type { ClientField, Field } from '../fields/config/types.js'
 import type { Operation } from '../types/index.js'
