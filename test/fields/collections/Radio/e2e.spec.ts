@@ -75,4 +75,16 @@ describe('Radio', () => {
       'Value One',
     )
   })
+
+  test('should show custom JSX label in list', async () => {
+    await page.goto(url.list)
+    await expect(page.locator('.cell-radioWithJsxLabelOption svg#payload-logo')).toBeVisible()
+  })
+
+  test('should show custom JSX label while editing', async () => {
+    await page.goto(url.create)
+    await expect(
+      page.locator('label[for="field-radioWithJsxLabelOption-three"] svg#payload-logo'),
+    ).toBeVisible()
+  })
 })

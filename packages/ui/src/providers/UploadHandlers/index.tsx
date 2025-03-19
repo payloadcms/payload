@@ -38,13 +38,11 @@ export const UploadHandlersProvider = ({ children }) => {
     })
   }
 
-  return (
-    <Context.Provider value={{ getUploadHandler, setUploadHandler }}>{children}</Context.Provider>
-  )
+  return <Context value={{ getUploadHandler, setUploadHandler }}>{children}</Context>
 }
 
 export const useUploadHandlers = (): UploadHandlersContext => {
-  const context = React.useContext(Context)
+  const context = React.use(Context)
 
   if (context === null) {
     throw new Error('useUploadHandlers must be used within UploadHandlersProvider')

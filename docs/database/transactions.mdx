@@ -13,13 +13,15 @@ By default, Payload will use transactions for all data changing operations, as l
 <Banner type="info">
   **Note:**
 
-  MongoDB requires a connection to a replicaset in order to make use of transactions.
+MongoDB requires a connection to a replicaset in order to make use of transactions.
+
 </Banner>
 
 <Banner type="info">
   **Note:**
 
-  Transactions in SQLite are disabled by default. You need to pass `transactionOptions: {}` to enable them.
+Transactions in SQLite are disabled by default. You need to pass `transactionOptions: {}` to enable them.
+
 </Banner>
 
 The initial request made to Payload will begin a new transaction and attach it to the `req.transactionID`. If you have a `hook` that interacts with the database, you can opt in to using the same transaction by passing the `req` in the arguments. For example:
@@ -96,7 +98,7 @@ const standalonePayloadScript = async () => {
         some: 'data',
       },
       where: {
-        slug: { equals: 'my-slug' }
+        slug: { equals: 'my-slug' },
       },
       req: { transactionID },
     })
@@ -130,7 +132,7 @@ await payload.update({
     some: 'data',
   },
   where: {
-    slug: { equals: 'my-slug' }
+    slug: { equals: 'my-slug' },
   },
   disableTransaction: true,
 })

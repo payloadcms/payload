@@ -10,6 +10,7 @@ import { getSelect } from './getSelect.js'
 
 type Export = {
   collectionSlug: string
+  drafts?: 'no' | 'yes'
   exportsCollection: string
   fields?: string[]
   format: 'csv' | 'json'
@@ -41,6 +42,7 @@ export const createExport = async (args: CreateExportArgs) => {
       id,
       name: nameArg,
       collectionSlug,
+      drafts,
       exportsCollection,
       fields,
       format,
@@ -64,11 +66,12 @@ export const createExport = async (args: CreateExportArgs) => {
   const findArgs = {
     collection: collectionSlug,
     depth: 0,
+    draft: drafts === 'yes',
     limit: 100,
     locale,
     overrideAccess: false,
     page: 0,
-    select: fields ? getSelect(fields) : undefined,
+    select: Array.isArray(fields) && fields.length > 0 ? getSelect(fields) : undefined,
     sort,
     user,
     where,

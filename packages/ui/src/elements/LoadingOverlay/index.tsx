@@ -54,7 +54,7 @@ export const LoadingOverlayProvider: React.FC<{ children?: React.ReactNode }> = 
   )
 
   return (
-    <Context.Provider
+    <Context
       value={{
         isOnScreen: isMounted,
         toggleLoadingOverlay,
@@ -69,12 +69,12 @@ export const LoadingOverlayProvider: React.FC<{ children?: React.ReactNode }> = 
         />
       )}
       {children}
-    </Context.Provider>
+    </Context>
   )
 }
 
 export const useLoadingOverlay = (): LoadingOverlayContext => {
-  const contextHook = React.useContext(Context)
+  const contextHook = React.use(Context)
   if (contextHook === undefined) {
     throw new Error('useLoadingOverlay must be used within a LoadingOverlayProvider')
   }

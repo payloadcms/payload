@@ -3,6 +3,14 @@ import type { ArrayField, CollectionSlug, Field, RelationshipField, User } from 
 
 export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
   /**
+   * Base path for your application
+   *
+   * https://nextjs.org/docs/app/api-reference/config/next-config-js/basePath
+   *
+   * @default undefined
+   */
+  basePath?: string
+  /**
    * After a tenant is deleted, the plugin will attempt to clean up related documents
    * - removing documents with the tenant ID
    * - removing the tenant from users
@@ -111,7 +119,7 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
   /**
    * Customize tenant selector label
    *
-   * Either a string or an object where the keys are locales and the values are the string labels
+   * Either a string or an object where the keys are i18n codes and the values are the string labels
    */
   tenantSelectorLabel?:
     | Partial<{

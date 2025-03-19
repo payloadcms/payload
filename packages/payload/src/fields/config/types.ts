@@ -4,6 +4,7 @@
 import type { EditorProps } from '@monaco-editor/react'
 import type { JSONSchema4 } from 'json-schema'
 import type { CSSProperties } from 'react'
+import type React from 'react'
 import type { DeepUndefinable, MarkRequired } from 'ts-essentials'
 
 import type {
@@ -227,7 +228,7 @@ export type FieldHook<TData extends TypeWithID = any, TValue = any, TSiblingData
   args: FieldHookArgs<TData, TValue, TSiblingData>,
 ) => Promise<TValue> | TValue
 
-export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (args: {
+export type FieldAccessArgs<TData extends TypeWithID = any, TSiblingData = any> = {
   /**
    * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
    */
@@ -250,7 +251,11 @@ export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (a
    * Immediately adjacent data to this field. For example, if this is a `group` field, then `siblingData` will be the other fields within the group.
    */
   siblingData?: Partial<TSiblingData>
-}) => boolean | Promise<boolean>
+}
+
+export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (
+  args: FieldAccessArgs<TData, TSiblingData>,
+) => boolean | Promise<boolean>
 
 //TODO: In 4.0, we should replace the three parameters of the condition function with a single, named parameter object
 export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
@@ -432,11 +437,16 @@ export type Validate<
   options: ValidateOptions<TData, TSiblingData, TFieldConfig, TValue>,
 ) => Promise<string | true> | string | true
 
+export type OptionLabel =
+  | (() => React.JSX.Element)
+  | LabelFunction
+  | React.JSX.Element
+  | StaticLabel
+
 export type OptionObject = {
-  label: LabelFunction | StaticLabel
+  label: OptionLabel
   value: string
 }
-
 export type Option = OptionObject | string
 
 export type FieldGraphQLType = {
@@ -788,6 +798,7 @@ type TabBase = {
    */
   description?: LabelFunction | StaticDescription
   fields: Field[]
+  id?: string
   interfaceName?: string
   saveToJWT?: boolean | string
 } & Omit<FieldBase, 'required' | 'validate'>
@@ -819,11 +830,11 @@ export type UnnamedTab = {
 } & Omit<TabBase, 'name' | 'virtual'>
 
 export type Tab = NamedTab | UnnamedTab
-
 export type TabsField = {
   admin?: Omit<Admin, 'description'>
-  tabs: Tab[]
   type: 'tabs'
+} & {
+  tabs: Tab[]
 } & Omit<FieldBase, 'admin' | 'localized' | 'name' | 'saveToJWT' | 'virtual'>
 
 export type TabsFieldClient = {
@@ -1342,7 +1353,7 @@ export type BlockJSX = {
    */
   export: (props: {
     fields: BlockFields
-    lexicalToMarkdown?: (props: { editorState: Record<string, any> }) => string
+    lexicalToMarkdown: (props: { editorState: Record<string, any> }) => string
   }) =>
     | {
         children?: string
@@ -1360,7 +1371,7 @@ export type BlockJSX = {
     children: string
     closeMatch: null | RegExpMatchArray // Only available when customEndRegex is set
     htmlToLexical?: ((props: { html: string }) => any) | null
-    markdownToLexical?: (props: { markdown: string }) => Record<string, any>
+    markdownToLexical: (props: { markdown: string }) => Record<string, any>
     openMatch?: RegExpMatchArray
     props: Record<string, any>
   }) => BlockFields | false

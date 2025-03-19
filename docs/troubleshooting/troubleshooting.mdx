@@ -12,7 +12,7 @@ keywords: admin, components, custom, customize, documentation, Content Managemen
 
 This means that your auth cookie is not being set or accepted correctly upon logging in. To resolve check the following settings in your Payload Config:
 
-- CORS - If you are using the '*', try to explicitly only allow certain domains instead including the one you have specified.
+- CORS - If you are using the '\*', try to explicitly only allow certain domains instead including the one you have specified.
 - CSRF - Do you have this set? if so, make sure your domain is whitelisted within the csrf domains. If not, probably not the issue, but probably can't hurt to whitelist it anyway.
 - Cookie settings. If these are completely undefined, then that's fine. but if you have cookie domain set, or anything similar, make sure you don't have the domain misconfigured
 

@@ -81,10 +81,12 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'error:unauthorizedAdmin',
   'error:unknown',
   'error:unspecific',
+  'error:unverifiedEmail',
   'error:userEmailAlreadyRegistered',
   'error:usernameAlreadyRegistered',
   'error:tokenNotProvided',
   'error:unPublishingDocument',
+  'error:problemUploadingFile',
 
   'fields:addLabel',
   'fields:addLink',
@@ -334,6 +336,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'upload:width',
   'upload:fileName',
   'upload:fileSize',
+  'upload:noFile',
 
   'validation:emailAddress',
   'validation:enterNumber',

@@ -178,7 +178,7 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
   }, [defaultSort, defaultLimit, modifySearchParams, columns])
 
   return (
-    <ListQueryContext.Provider
+    <ListQueryContext
       value={{
         data,
         handlePageChange,
@@ -191,6 +191,6 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
       }}
     >
       {children}
-    </ListQueryContext.Provider>
+    </ListQueryContext>
   )
 }

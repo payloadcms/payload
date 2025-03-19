@@ -41,8 +41,9 @@ _Admin Panel screenshot depicting an Admins Collection with Auth enabled_
 Any [Collection](../configuration/collections) can opt-in to supporting Authentication. Once enabled, each Document that is created within the Collection can be thought of as a "user". This enables a complete authentication workflow on your Collection, such as logging in and out, resetting their password, and more.
 
 <Banner type="warning">
-  **Note:**
-  By default, Payload provides an auth-enabled `User` Collection which is used to access the Admin Panel. [More details](../admin/overview#the-admin-user-collection).
+  **Note:** By default, Payload provides an auth-enabled `User` Collection which
+  is used to access the Admin Panel. [More
+  details](../admin/overview#the-admin-user-collection).
 </Banner>
 
 To enable Authentication on a Collection, use the `auth` property in the [Collection Config](../configuration/collections):
@@ -65,31 +66,32 @@ export const Admins: CollectionConfig = {
 ```
 
 <Banner type="info">
-  **Tip:**
-  For default auth behavior, set `auth: true`. This is a good starting point for most applications.
+  **Tip:** For default auth behavior, set `auth: true`. This is a good starting
+  point for most applications.
 </Banner>
 
 <Banner type="warning">
-  **Note:**
-  Auth-enabled Collections with be automatically injected with the `hash`, `salt`, and `email` fields. [More details](../fields/overview#field-names).
+  **Note:** Auth-enabled Collections with be automatically injected with the
+  `hash`, `salt`, and `email` fields. [More
+  details](../fields/overview#field-names).
 </Banner>
 
 The following options are available:
 
-| Option                     | Description                                                                                                                                                                                                                         |
-|----------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **`cookies`**              | Set cookie options, including `secure`, `sameSite`, and `domain`. For advanced users.                                                                                                                                               |
-| **`depth`**                | How many levels deep a `user` document should be populated when creating the JWT and binding the `user` to the `req`. Defaults to `0` and should only be modified if absolutely necessary, as this will affect performance. |
-| **`disableLocalStrategy`** | Advanced - disable Payload's built-in local auth strategy. Only use this property if you have replaced Payload's auth mechanisms with your own.                                                                                     |
-| **`forgotPassword`**       | Customize the way that the `forgotPassword` operation functions. [More details](./email#forgot-password).                                                                                                             |
-| **`lockTime`**             | Set the time (in milliseconds) that a user should be locked out if they fail authentication more times than `maxLoginAttempts` allows for.                                                                                          |
-| **`loginWithUsername`**    | Ability to allow users to login with username/password. [More](/docs/authentication/overview#login-with-username)                                                                                                                     |
-| **`maxLoginAttempts`**     | Only allow a user to attempt logging in X amount of times. Automatically locks out a user from authenticating if this limit is passed. Set to `0` to disable.                                                                       |
-| **`removeTokenFromResponses`** | Set to true if you want to remove the token from the returned authentication API responses such as login or refresh.                                                                                                                                                            |
-| **`strategies`**           | Advanced - an array of custom authentication strategies to extend this collection's authentication with. [More details](./custom-strategies).                                                                         |
-| **`tokenExpiration`**      | How long (in seconds) to keep the user logged in. JWTs and HTTP-only cookies will both expire at the same time.                                                                                                                     |
-| **`useAPIKey`**            | Payload Authentication provides for API keys to be set on each user within an Authentication-enabled Collection. [More details](./api-keys).                                                                       |
-| **`verify`**               | Set to `true` or pass an object with verification options to require users to verify by email before they are allowed to log into your app. [More details](./email#email-verification).                                  |
+| Option                         | Description                                                                                                                                                                                                                 |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`cookies`**                  | Set cookie options, including `secure`, `sameSite`, and `domain`. For advanced users.                                                                                                                                       |
+| **`depth`**                    | How many levels deep a `user` document should be populated when creating the JWT and binding the `user` to the `req`. Defaults to `0` and should only be modified if absolutely necessary, as this will affect performance. |
+| **`disableLocalStrategy`**     | Advanced - disable Payload's built-in local auth strategy. Only use this property if you have replaced Payload's auth mechanisms with your own.                                                                             |
+| **`forgotPassword`**           | Customize the way that the `forgotPassword` operation functions. [More details](./email#forgot-password).                                                                                                                   |
+| **`lockTime`**                 | Set the time (in milliseconds) that a user should be locked out if they fail authentication more times than `maxLoginAttempts` allows for.                                                                                  |
+| **`loginWithUsername`**        | Ability to allow users to login with username/password. [More](/docs/authentication/overview#login-with-username)                                                                                                           |
+| **`maxLoginAttempts`**         | Only allow a user to attempt logging in X amount of times. Automatically locks out a user from authenticating if this limit is passed. Set to `0` to disable.                                                               |
+| **`removeTokenFromResponses`** | Set to true if you want to remove the token from the returned authentication API responses such as login or refresh.                                                                                                        |
+| **`strategies`**               | Advanced - an array of custom authentication strategies to extend this collection's authentication with. [More details](./custom-strategies).                                                                               |
+| **`tokenExpiration`**          | How long (in seconds) to keep the user logged in. JWTs and HTTP-only cookies will both expire at the same time.                                                                                                             |
+| **`useAPIKey`**                | Payload Authentication provides for API keys to be set on each user within an Authentication-enabled Collection. [More details](./api-keys).                                                                                |
+| **`verify`**                   | Set to `true` or pass an object with verification options to require users to verify by email before they are allowed to log into your app. [More details](./email#email-verification).                                     |
 
 ### Login With Username
 
@@ -153,14 +155,15 @@ export default buildConfig({
 ```
 
 <Banner type="warning">
-  **Warning:**
-  The recommended way to use this feature is behind an [Environment Variable](../configuration/environment-vars). This will ensure it is _disabled_ in production.
+  **Warning:** The recommended way to use this feature is behind an [Environment
+  Variable](../configuration/environment-vars). This will ensure it is
+  _disabled_ in production.
 </Banner>
 
 The following options are available:
 
 | Option            | Description                                                                                                     |
-|-------------------|-----------------------------------------------------------------------------------------------------------------|
+| ----------------- | --------------------------------------------------------------------------------------------------------------- |
 | **`username`**    | The username of the user to login as                                                                            |
 | **`email`**       | The email address of the user to login as                                                                       |
 | **`password`**    | The password of the user to login as. This is only needed if `prefillOnly` is set to true                       |

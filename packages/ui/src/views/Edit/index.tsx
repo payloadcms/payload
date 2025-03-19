@@ -323,6 +323,7 @@ export function DefaultEditView({
       schemaPathSegments,
       isLockingEnabled,
       setDocumentIsLocked,
+      startRouteTransition,
     ],
   )
 

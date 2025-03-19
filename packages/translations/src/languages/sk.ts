@@ -122,6 +122,7 @@ export const skTranslations: DefaultTranslationsObject = {
     unknown: 'Došlo k neznámej chybe.',
     unPublishingDocument: 'Pri zrušení publikovania tohto dokumentu došlo k chybe.',
     unspecific: 'Došlo k chybe.',
+    unverifiedEmail: 'Pred prihlásením si overte svoj e-mail.',
     userEmailAlreadyRegistered: 'Používateľ s daným e-mailom je už zaregistrovaný.',
     userLocked:
       'Tento používateľ je uzamknutý kvôli príliš mnohým neúspešným pokusom o prihlásenie.',
@@ -398,6 +399,7 @@ export const skTranslations: DefaultTranslationsObject = {
     height: 'Výška',
     lessInfo: 'Menej informácií',
     moreInfo: 'Viac informácií',
+    noFile: 'Žiadny súbor',
     pasteURL: 'Vložiť URL',
     previewSizes: 'Náhľady veľkostí',
     selectCollectionToBrowse: 'Vyberte kolekciu na prezeranie',

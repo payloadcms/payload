@@ -12,8 +12,8 @@ export { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.j
 export { requests } from '../../utilities/api.js'
 export { findLocaleFromCode } from '../../utilities/findLocaleFromCode.js'
 export { formatAdminURL } from '../../utilities/formatAdminURL.js'
-export { formatDate } from '../../utilities/formatDate.js'
-export { formatDocTitle } from '../../utilities/formatDocTitle.js'
+export { formatDate } from '../../utilities/formatDocTitle/formatDateTitle.js'
+export { formatDocTitle } from '../../utilities/formatDocTitle/index.js'
 export {
   type EntityToGroup,
   EntityType,
