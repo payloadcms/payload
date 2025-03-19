@@ -282,6 +282,7 @@ function createTextFormatTransformersIndex(
     fullMatchRegExpByTag,
 
     // Regexp to locate *any* potential opening tag (longest first).
+    // eslint-disable-next-line regexp/no-useless-character-class, regexp/no-empty-capturing-group, regexp/no-empty-group
     openTagsRegExp: new RegExp(`${escapeRegExp}(${openTagsRegExp.join('|')})`, 'g'),
     transformersByTag,
   }
