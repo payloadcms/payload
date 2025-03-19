@@ -42,7 +42,6 @@ export const setupOrderable = (config: SanitizedConfig) => {
   })
   Array.from(fieldsToAdd.entries()).forEach(([collection, orderableFields]) => {
     if (orderableFields.length > 0) {
-      // console.log('orderableFields', orderableFields)
       addOrderableFieldsAndHook(collection, orderableFields)
       atLeastOneOrderableField = true
     }
@@ -71,8 +70,7 @@ export const addOrderableFieldsAndHook = (
         readOnly: true,
       },
       index: true,
-      label: ({ t }) => t('general:order'),
-      // required: true,
+      required: true,
       unique: true,
     }
 
