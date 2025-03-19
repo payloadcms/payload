@@ -69,6 +69,24 @@ export const Posts: CollectionConfig = {
           },
         },
       ],
+      edit: {
+        beforeDocumentMenuItems: [
+          {
+            path: '/components/Banner/index.js#Banner',
+            clientProps: {
+              message: 'BeforeDocumentMenuItems custom component',
+            },
+          },
+        ],
+        afterDocumentMenuItems: [
+          {
+            path: '/components/Banner/index.js#Banner',
+            clientProps: {
+              message: 'AfterDocumentMenuItems custom component',
+            },
+          },
+        ],
+      },
     },
     pagination: {
       defaultLimit: 5,

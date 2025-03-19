@@ -1,4 +1,6 @@
 import type {
+  AfterDocumentMenuItemsServerPropsOnly,
+  BeforeDocumentMenuItemsServerPropsOnly,
   DefaultServerFunctionArgs,
   DocumentSlots,
   PayloadRequest,
@@ -78,6 +80,30 @@ export const renderDocumentSlots: (args: {
       Fallback: ViewDescription,
       importMap: req.payload.importMap,
       serverProps: serverProps satisfies ViewDescriptionServerPropsOnly,
+    })
+  }
+
+  const customBeforeDocumentMenuItems =
+    collectionConfig?.admin?.components?.edit?.beforeDocumentMenuItems ||
+    globalConfig?.admin?.components?.elements?.beforeDocumentMenuItems
+
+  if (customBeforeDocumentMenuItems) {
+    components.BeforeDocumentMenuItems = RenderServerComponent({
+      Component: customBeforeDocumentMenuItems,
+      importMap: req.payload.importMap,
+      serverProps: serverProps satisfies BeforeDocumentMenuItemsServerPropsOnly,
+    })
+  }
+
+  const customAfterDocumentMenuItems =
+    collectionConfig?.admin?.components?.edit?.afterDocumentMenuItems ||
+    globalConfig?.admin?.components?.elements?.afterDocumentMenuItems
+
+  if (customAfterDocumentMenuItems) {
+    components.AfterDocumentMenuItems = RenderServerComponent({
+      Component: customAfterDocumentMenuItems,
+      importMap: req.payload.importMap,
+      serverProps: serverProps satisfies AfterDocumentMenuItemsServerPropsOnly,
     })
   }
 

@@ -101,14 +101,16 @@ export const MyCollection: CollectionConfig = {
 
 The following options are available:
 
-| Path              | Description                                                                            |
-| ----------------- | -------------------------------------------------------------------------------------- |
-| `SaveButton`      | A button that saves the current document. [More details](#SaveButton).                 |
-| `SaveDraftButton` | A button that saves the current document as a draft. [More details](#SaveDraftButton). |
-| `PublishButton`   | A button that publishes the current document. [More details](#PublishButton).          |
-| `PreviewButton`   | A button that previews the current document. [More details](#PreviewButton).           |
-| `Description`     | A description of the Collection. [More details](#Description).                         |
-| `Upload`          | A file upload component. [More details](#Upload).                                      |
+| Path                      | Description                                                                                                  |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `SaveButton`              | A button that saves the current document. [More details](#SaveButton).                                       |
+| `SaveDraftButton`         | A button that saves the current document as a draft. [More details](#SaveDraftButton).                       |
+| `PublishButton`           | A button that publishes the current document. [More details](#PublishButton).                                |
+| `PreviewButton`           | A button that previews the current document. [More details](#PreviewButton).                                 |
+| `Description`             | A description of the Collection. [More details](#Description).                                               |
+| `Upload`                  | A file upload component. [More details](#Upload).                                                            |
+| `beforeDocumentMenuItems` | An array of components to inject _before_ the built-in menu items. [More details](#BeforeDocumentMenuItems). |
+| `afterDocumentMenuItems`  | An array of components to inject _after_ the built-in menu items. [More details](#AfterDocumentMenuItems).   |
 
 #### Globals
 
@@ -133,13 +135,15 @@ export const MyGlobal: GlobalConfig = {
 
 The following options are available:
 
-| Path              | Description                                                                            |
-| ----------------- | -------------------------------------------------------------------------------------- |
-| `SaveButton`      | A button that saves the current document. [More details](#SaveButton).                 |
-| `SaveDraftButton` | A button that saves the current document as a draft. [More details](#SaveDraftButton). |
-| `PublishButton`   | A button that publishes the current document. [More details](#PublishButton).          |
-| `PreviewButton`   | A button that previews the current document. [More details](#PreviewButton).           |
-| `Description`     | A description of the Global. [More details](#Description).                             |
+| Path                      | Description                                                                                                  |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `SaveButton`              | A button that saves the current document. [More details](#SaveButton).                                       |
+| `SaveDraftButton`         | A button that saves the current document as a draft. [More details](#SaveDraftButton).                       |
+| `PublishButton`           | A button that publishes the current document. [More details](#PublishButton).                                |
+| `PreviewButton`           | A button that previews the current document. [More details](#PreviewButton).                                 |
+| `Description`             | A description of the Global. [More details](#Description).                                                   |
+| `beforeDocumentMenuItems` | An array of components to inject _before_ the built-in menu items. [More details](#BeforeDocumentMenuItems). |
+| `afterDocumentMenuItems`  | An array of components to inject _after_ the built-in menu items. [More details](#AfterDocumentMenuItems).   |
 
 ### SaveButton
 
@@ -426,5 +430,111 @@ import React from 'react'
 
 export function MyUploadComponent() {
   return <input type="file" />
+}
+```
+
+### BeforeDocumentMenuItems
+
+The `beforeDocumentMenuItems` property allows you to render an array of custom components before the built-in menu items.
+
+To add `beforeDocumentMenuItems` components, use the `components.edit.beforeDocumentMenuItems` property in your [Collection Config](../configuration/collections) or `components.elements.beforeDocumentMenuItems` in your [Global Config](../configuration/globals):
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const MyCollection: CollectionConfig = {
+  // ...
+  admin: {
+    components: {
+      edit: {
+        // highlight-start
+        beforeDocumentMenuItems: [
+          '/path/to/MyBeforeDocumentMenuItemsComponent',
+        ],
+        // highlight-end
+      },
+    },
+  },
+}
+```
+
+Here's an example of a custom `beforeDocumentMenuItems` component:
+
+#### Server Component
+
+```tsx
+import React from 'react'
+import type { BeforeDocumentMenuItemsServerProps } from 'payload'
+
+export function MyBeforeDocumentMenuItemsComponent(
+  props: BeforeDocumentMenuItemsServerProps,
+) {
+  return <div>This is a custom beforeDocumentMenuItems component (Server)</div>
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import type { BeforeDocumentMenuItemsClientProps } from 'payload'
+
+export function MyBeforeDocumentMenuItemsComponent(
+  props: BeforeDocumentMenuItemsClientProps,
+) {
+  return <div>This is a custom beforeDocumentMenuItems component (Client)</div>
+}
+```
+
+### AfterDocumentMenuItems
+
+The `afterDocumentMenuItems` property allows you to render an array of custom components before the built-in menu items.
+
+To add `afterDocumentMenuItems` components, use the `components.edit.afterDocumentMenuItems` property in your [Collection Config](../configuration/collections) or `components.elements.afterDocumentMenuItems` in your [Global Config](../configuration/globals):
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const MyCollection: CollectionConfig = {
+  // ...
+  admin: {
+    components: {
+      edit: {
+        // highlight-start
+        afterDocumentMenuItems: ['/path/to/MyAfterDocumentMenuItemsComponent'],
+        // highlight-end
+      },
+    },
+  },
+}
+```
+
+Here's an example of a custom `afterDocumentMenuItems` component:
+
+#### Server Component
+
+```tsx
+import React from 'react'
+import type { AfterDocumentMenuItemsServerProps } from 'payload'
+
+export function MyAfterDocumentMenuItemsComponent(
+  props: AfterDocumentMenuItemsServerProps,
+) {
+  return <div>This is a custom afterDocumentMenuItems component (Server)</div>
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import type { BeforeDocumentMenuItemsClientProps } from 'payload'
+
+export function MyAfterDocumentMenuItemsComponent(
+  props: AfterDocumentMenuItemsClientProps,
+) {
+  return <div>This is a custom afterDocumentMenuItems component (Client)</div>
 }
 ```

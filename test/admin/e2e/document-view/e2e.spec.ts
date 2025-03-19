@@ -326,6 +326,56 @@ describe('Document View', () => {
       await expect(docTab).toContainText('Custom Tab Component')
       await expect(title).toContainText('Custom View With Tab Component')
     })
+
+    test('collection - should render custom beforeDocumentMenuItems component', async () => {
+      const { id } = await createPost()
+      await page.goto(postsUrl.edit(id))
+
+      await page.locator('.doc-controls__popup .popup-button').click()
+
+      await expect(
+        page.locator('.doc-controls__popup .popup__content').locator('div', {
+          hasText: exactText('BeforeDocumentMenuItems custom component'),
+        }),
+      ).toBeVisible()
+    })
+
+    test('collection - should render custom afterDocumentMenuItems component', async () => {
+      const { id } = await createPost()
+      await page.goto(postsUrl.edit(id))
+
+      await page.locator('.doc-controls__popup .popup-button').click()
+
+      await expect(
+        page.locator('.doc-controls__popup .popup__content').locator('div', {
+          hasText: exactText('AfterDocumentMenuItems custom component'),
+        }),
+      ).toBeVisible()
+    })
+
+    test('global - should render custom beforeDocumentMenuItems component', async () => {
+      await page.goto(globalURL.global(globalSlug))
+
+      await page.locator('.doc-controls__popup .popup-button').click()
+
+      await expect(
+        page.locator('.doc-controls__popup .popup__content').locator('div', {
+          hasText: exactText('BeforeDocumentMenuItems custom component'),
+        }),
+      ).toBeVisible()
+    })
+
+    test('global - should render custom afterDocumentMenuItems component', async () => {
+      await page.goto(globalURL.global(globalSlug))
+
+      await page.locator('.doc-controls__popup .popup-button').click()
+
+      await expect(
+        page.locator('.doc-controls__popup .popup__content').locator('div', {
+          hasText: exactText('AfterDocumentMenuItems custom component'),
+        }),
+      ).toBeVisible()
+    })
   })
 
   describe('drawers', () => {

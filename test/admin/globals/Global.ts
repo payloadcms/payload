@@ -16,6 +16,24 @@ export const Global: GlobalConfig = {
           },
         },
       },
+      elements: {
+        beforeDocumentMenuItems: [
+          {
+            path: '/components/Banner/index.js#Banner',
+            clientProps: {
+              message: 'BeforeDocumentMenuItems custom component',
+            },
+          },
+        ],
+        afterDocumentMenuItems: [
+          {
+            path: '/components/Banner/index.js#Banner',
+            clientProps: {
+              message: 'AfterDocumentMenuItems custom component',
+            },
+          },
+        ],
+      },
     },
     group: 'Group',
     preview: () => 'https://payloadcms.com',

@@ -42,6 +42,8 @@ const baseClass = 'collection-edit'
 // When rendered within a drawer, props are empty
 // This is solely to support custom edit views which get server-rendered
 export function DefaultEditView({
+  AfterDocumentMenuItems,
+  BeforeDocumentMenuItems,
   Description,
   PreviewButton,
   PublishButton,
@@ -509,6 +511,8 @@ export function DefaultEditView({
           <DocumentControls
             apiURL={apiURL}
             customComponents={{
+              AfterDocumentMenuItems,
+              BeforeDocumentMenuItems,
               PreviewButton,
               PublishButton,
               SaveButton,

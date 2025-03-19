@@ -279,6 +279,8 @@ export type CollectionAdminOptions = {
      * Components within the edit view
      */
     edit?: {
+      afterDocumentMenuItems?: CustomComponent[]
+      beforeDocumentMenuItems?: CustomComponent[]
       /**
        * Replaces the "Preview" button
        */

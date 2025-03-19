@@ -38,6 +38,8 @@ const baseClass = 'doc-controls'
 export const DocumentControls: React.FC<{
   readonly apiURL: string
   readonly customComponents?: {
+    readonly AfterDocumentMenuItems?: React.ReactNode
+    readonly BeforeDocumentMenuItems?: React.ReactNode
     readonly PreviewButton?: React.ReactNode
     readonly PublishButton?: React.ReactNode
     readonly SaveButton?: React.ReactNode
@@ -68,6 +70,8 @@ export const DocumentControls: React.FC<{
     id,
     slug,
     customComponents: {
+      AfterDocumentMenuItems,
+      BeforeDocumentMenuItems,
       PreviewButton: CustomPreviewButton,
       PublishButton: CustomPublishButton,
       SaveButton: CustomSaveButton,
@@ -123,12 +127,13 @@ export const DocumentControls: React.FC<{
   }, [data, i18n, dateFormat])
 
   const hasCreatePermission = permissions && 'create' in permissions && permissions.create
-
   const hasDeletePermission = permissions && 'delete' in permissions && permissions.delete
+  const hasCollectionConfig = !!collectionConfig && !!id
+  const hasCustomComponents = !!BeforeDocumentMenuItems || !!AfterDocumentMenuItems
 
-  const showDotMenu = Boolean(
-    collectionConfig && id && !disableActions && (hasCreatePermission || hasDeletePermission),
-  )
+  const showDotMenu =
+    !disableActions &&
+    ((hasCollectionConfig && (hasCreatePermission || hasDeletePermission)) || hasCustomComponents)
 
   const unsavedDraftWithValidations =
     !id && collectionConfig?.versions?.drafts && collectionConfig.versions?.drafts.validate
@@ -265,50 +270,56 @@ export const DocumentControls: React.FC<{
               verticalAlign="bottom"
             >
               <PopupList.ButtonGroup>
-                {showCopyToLocale && <CopyLocaleData />}
-                {hasCreatePermission && (
-                  <React.Fragment>
-                    {!disableCreate && (
-                      <Fragment>
-                        {editDepth > 1 ? (
-                          <PopupList.Button id="action-create" onClick={onDrawerCreateNew}>
-                            {i18n.t('general:createNew')}
-                          </PopupList.Button>
-                        ) : (
-                          <PopupList.Button
-                            href={formatAdminURL({
-                              adminRoute,
-                              path: `/collections/${collectionConfig?.slug}/create`,
-                            })}
-                            id="action-create"
-                          >
-                            {i18n.t('general:createNew')}
-                          </PopupList.Button>
+                {BeforeDocumentMenuItems}
+                {hasCollectionConfig && (
+                  <Fragment>
+                    {showCopyToLocale && <CopyLocaleData />}
+                    {hasCreatePermission && (
+                      <React.Fragment>
+                        {!disableCreate && (
+                          <Fragment>
+                            {editDepth > 1 ? (
+                              <PopupList.Button id="action-create" onClick={onDrawerCreateNew}>
+                                {i18n.t('general:createNew')}
+                              </PopupList.Button>
+                            ) : (
+                              <PopupList.Button
+                                href={formatAdminURL({
+                                  adminRoute,
+                                  path: `/collections/${collectionConfig?.slug}/create`,
+                                })}
+                                id="action-create"
+                              >
+                                {i18n.t('general:createNew')}
+                              </PopupList.Button>
+                            )}
+                          </Fragment>
                         )}
-                      </Fragment>
+                        {collectionConfig.disableDuplicate !== true && isEditing && (
+                          <DuplicateDocument
+                            id={id.toString()}
+                            onDuplicate={onDuplicate}
+                            redirectAfterDuplicate={redirectAfterDuplicate}
+                            singularLabel={collectionConfig?.labels?.singular}
+                            slug={collectionConfig?.slug}
+                          />
+                        )}
+                      </React.Fragment>
                     )}
-                    {collectionConfig.disableDuplicate !== true && isEditing && (
-                      <DuplicateDocument
+                    {hasDeletePermission && (
+                      <DeleteDocument
+                        buttonId="action-delete"
+                        collectionSlug={collectionConfig?.slug}
                         id={id.toString()}
-                        onDuplicate={onDuplicate}
-                        redirectAfterDuplicate={redirectAfterDuplicate}
+                        onDelete={onDelete}
+                        redirectAfterDelete={redirectAfterDelete}
                         singularLabel={collectionConfig?.labels?.singular}
-                        slug={collectionConfig?.slug}
+                        useAsTitle={collectionConfig?.admin?.useAsTitle}
                       />
                     )}
-                  </React.Fragment>
+                  </Fragment>
                 )}
-                {hasDeletePermission && (
-                  <DeleteDocument
-                    buttonId="action-delete"
-                    collectionSlug={collectionConfig?.slug}
-                    id={id.toString()}
-                    onDelete={onDelete}
-                    redirectAfterDelete={redirectAfterDelete}
-                    singularLabel={collectionConfig?.labels?.singular}
-                    useAsTitle={collectionConfig?.admin?.useAsTitle}
-                  />
-                )}
+                {AfterDocumentMenuItems}
               </PopupList.ButtonGroup>
             </Popup>
           )}

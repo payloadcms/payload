@@ -71,6 +71,8 @@ const getAbsoluteUrl = (url) => {
 }
 
 const PreviewView: React.FC<Props> = ({
+  AfterDocumentMenuItems,
+  BeforeDocumentMenuItems,
   collectionConfig,
   config,
   Description,
@@ -495,6 +497,8 @@ const PreviewView: React.FC<Props> = ({
         <DocumentControls
           apiURL={apiURL}
           customComponents={{
+            AfterDocumentMenuItems,
+            BeforeDocumentMenuItems,
             PreviewButton,
             PublishButton,
             SaveButton,
@@ -603,7 +607,9 @@ export const LivePreviewClient: React.FC<
         url={url}
       >
         <PreviewView
+          AfterDocumentMenuItems={props.AfterDocumentMenuItems}
           apiRoute={apiRoute}
+          BeforeDocumentMenuItems={props.BeforeDocumentMenuItems}
           collectionConfig={collectionConfig}
           config={config}
           Description={props.Description}

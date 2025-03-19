@@ -50,6 +50,16 @@ export type {
    */
   CustomComponent as CustomSaveDraftButton,
 } from '../config/types.js'
+export type {
+  AfterDocumentMenuItemsClientProps,
+  AfterDocumentMenuItemsServerProps,
+  AfterDocumentMenuItemsServerPropsOnly,
+} from './elements/AfterDocumentMenuItems.js'
+export type {
+  BeforeDocumentMenuItemsClientProps,
+  BeforeDocumentMenuItemsServerProps,
+  BeforeDocumentMenuItemsServerPropsOnly,
+} from './elements/BeforeDocumentMenuItems.js'
 export type { DefaultCellComponentProps, DefaultServerCellComponentProps } from './elements/Cell.js'
 export type { ConditionalDateProps } from './elements/DatePicker.js'
 export type { DayPickerProps, SharedProps, TimePickerProps } from './elements/DatePicker.js'
@@ -553,6 +563,8 @@ export type FieldRow = {
 }
 
 export type DocumentSlots = {
+  AfterDocumentMenuItems?: React.ReactNode
+  BeforeDocumentMenuItems?: React.ReactNode
   Description?: React.ReactNode
   PreviewButton?: React.ReactNode
   PublishButton?: React.ReactNode

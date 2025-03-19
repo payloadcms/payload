@@ -9,6 +9,7 @@ import type {
 } from '../../admin/types.js'
 import type {
   Access,
+  CustomComponent,
   EditConfig,
   Endpoint,
   EntityDescription,
@@ -80,6 +81,8 @@ export type GlobalAdminOptions = {
    */
   components?: {
     elements?: {
+      afterDocumentMenuItems?: CustomComponent[]
+      beforeDocumentMenuItems?: CustomComponent[]
       Description?: EntityDescriptionComponent
       /**
        * Replaces the "Preview" button
