@@ -165,7 +165,11 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
         onChange={[onChange]}
         onSubmit={handleSubmit}
       >
-        <FieldSelect fields={fields} onChange={onFieldSelect} />
+        <FieldSelect
+          fields={fields}
+          onChange={onFieldSelect}
+          permissions={collectionPermissions.fields}
+        />
         {selectedFields.length === 0 ? null : (
           <RenderFields
             fields={selectedFields}
