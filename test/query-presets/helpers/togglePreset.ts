@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 import { exactText } from 'helpers.js'
+import { TEST_TIMEOUT_LONG } from 'playwright.config.js'
 
 import { openQueryPresetDrawer } from './openQueryPresetDrawer.js'
 
@@ -37,7 +38,11 @@ export async function clearSelectedPreset({ page }: { page: Page }) {
   }
 
   const regex = /columns=/
-  await page.waitForURL((url) => !regex.test(url.search))
+
+  await page.waitForURL((url) => !regex.test(url.search), {
+    timeout: TEST_TIMEOUT_LONG,
+  })
+
   await expect(queryPresetsControl.locator('#clear-preset')).toBeHidden()
 
   await expect(

@@ -13,7 +13,7 @@ import {
   exactText,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-  // throttleTest,
+  throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { clickListMenuItem, openListMenu } from '../helpers/e2e/toggleListMenu.js'
@@ -68,11 +68,11 @@ describe('Query Presets', () => {
   })
 
   beforeEach(async () => {
-    // await throttleTest({
-    //   page,
-    //   context,
-    //   delay: 'Fast 4G',
-    // })
+    await throttleTest({
+      page,
+      context,
+      delay: 'Fast 4G',
+    })
   })
 
   test('should select preset and apply filters', async () => {
@@ -109,7 +109,10 @@ describe('Query Presets', () => {
     await page.locator('#confirm-delete-preset #confirm-action').click()
 
     const regex = /columns=/
-    await page.waitForURL((url) => !regex.test(url.search))
+
+    await page.waitForURL((url) => !regex.test(url.search), {
+      timeout: TEST_TIMEOUT_LONG,
+    })
 
     await expect(
       page.locator('button#select-preset', {
