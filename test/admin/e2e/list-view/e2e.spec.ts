@@ -437,6 +437,7 @@ describe('List View', () => {
       await expect(valueField).toHaveValue('')
     })
 
+    // eslint-disable-next-line playwright/expect-expect
     test('should remove condition from URL when value is cleared', async () => {
       await page.goto(postsUrl.list)
 
@@ -457,6 +458,7 @@ describe('List View', () => {
       await page.waitForURL(new RegExp(encodedQueryString))
     })
 
+    // eslint-disable-next-line playwright/expect-expect, playwright/no-skipped-test
     test.skip('should remove condition from URL when a different field is selected', async () => {
       // TODO: fix this bug and write this test
     })
