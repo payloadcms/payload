@@ -82,6 +82,23 @@ export const Orders: CollectionConfig = {
         },
       ],
     },
+    {
+      type: 'select',
+      name: 'status',
+      defaultValue: 'processing',
+      required: true,
+      options: [
+        {
+          label: 'Processing',
+          value: 'processing',
+        },
+        {
+          label: 'Completed',
+          value: 'completed',
+        },
+      ],
+      interfaceName: 'OrderStatus',
+    },
   ],
   hooks: {
     afterChange: [clearUserCart],

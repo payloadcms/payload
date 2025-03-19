@@ -18,7 +18,7 @@ import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import React, { Suspense, useEffect, useState } from 'react'
 
-import { Search, SearchSkeleton } from './search'
+import { Search, SearchSkeleton } from './Search'
 
 interface Props {
   menu: Header['navItems']

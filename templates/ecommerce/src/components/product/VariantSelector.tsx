@@ -1,18 +1,20 @@
 'use client'
 
+import { generateCombinations } from '@/collections/Products/ui/Variants/VariantSelect/buildCombinations'
+import { Button } from '@/components/ui/button'
 import type { Product } from '@/payload-types'
 
 import { createUrl } from '@/utilities/createUrl'
 import clsx from 'clsx'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import React from 'react'
+import React, { useMemo } from 'react'
 
 export function VariantSelector({ product }: { product: Product }) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const variants = product.variants?.variants
-  const variantOptions = product.variants?.options
+  const variants = product.variants
+  const variantOptions = product.variantOptions
   const hasVariants = Boolean(product.enableVariants && variants?.length && variantOptions?.length)
 
   if (!hasVariants) {
@@ -22,16 +24,18 @@ export function VariantSelector({ product }: { product: Product }) {
   /**
    * Flattened array of all possible variant combinations.
    */
-  const combinations = variants!.map((variant) => {
-    return variant.options
-  })
+  const combinations = useMemo(() => {
+    if (!variantOptions) return []
+
+    return generateCombinations(variantOptions)
+  }, [variants])
 
   return variantOptions?.map((key) => {
-    const options = key.values
+    const options = key.options
 
     return (
-      <dl className="mb-8" key={key.slug}>
-        <dt className="mb-4 text-sm uppercase tracking-wide">{key.label}</dt>
+      <dl className="" key={key.slug}>
+        <dt className="mb-4 text-sm">{key.label}</dt>
         <dd className="flex flex-wrap gap-3">
           <React.Fragment>
             {options?.map((option) => {
@@ -60,29 +64,25 @@ export function VariantSelector({ product }: { product: Product }) {
               // This is the "magic" that will cross check possible variant combinations and preemptively
               // disable combinations that are not available. For example, if the color gray is only available in size medium,
               // then all other sizes should be disabled.
-              const filtered = Array.from(optionSearchParams.entries()).filter(([key, value]) => {
-                return combinations?.find((combination) => {
-                  const option = variants?.find((option) => {
-                    return option.options.find((option) => {
-                      return option.slug === key && option.label === value
-                    })
-                  })
+              // const filtered = Array.from(optionSearchParams.entries()).filter(([key, value]) => {
+              //   return combinations?.find((combination) => {
+              //     const option = variants?.find((option) => {
+              //       return option.options.find((option) => {
+              //         return option.slug === key && option.value === value
+              //       })
+              //     })
 
-                  return option?.slug === value
-                })
-              })
-
-              console.log({ filtered })
+              //     return option?.slug === value
+              //   })
+              // })
 
               const existingVariant = variants?.find((variant) => {
-                const hasOption = variant.options.find((variantOption) => {
-                  return variantOption.slug === optionSlug
+                const hasOption = variant.options.every((variantOption) => {
+                  return variantOption.value === optionSlug
                 })
 
                 return hasOption
               })
-
-              console.log({ existingVariant })
 
               const isAvailableForSale = Boolean(existingVariant?.id && existingVariant?.stock > 0)
 
@@ -91,18 +91,12 @@ export function VariantSelector({ product }: { product: Product }) {
                 Boolean(isAvailableForSale) && searchParams.get(optionKeyLowerCase) === option.slug
 
               return (
-                <button
+                <Button
+                  variant={'ghost'}
                   aria-disabled={!isAvailableForSale}
-                  className={clsx(
-                    'flex min-w-[48px] items-center justify-center rounded-full border bg-neutral-100 px-2 py-1 text-sm dark:border-neutral-800 dark:bg-neutral-900',
-                    {
-                      'cursor-default ring-2 ring-blue-600': isActive,
-                      'relative z-10 cursor-not-allowed overflow-hidden bg-neutral-100 text-neutral-500 ring-1 ring-neutral-300 before:absolute before:inset-x-0 before:-z-10 before:h-px before:-rotate-45 before:bg-neutral-300 before:transition-transform dark:bg-neutral-900 dark:text-neutral-400 dark:ring-neutral-700 dark:before:bg-neutral-700':
-                        !isAvailableForSale,
-                      'ring-1 ring-transparent transition duration-300 ease-in-out hover:scale-110 hover:ring-blue-600 ':
-                        !isActive && isAvailableForSale,
-                    },
-                  )}
+                  className={clsx('px-2', {
+                    'bg-primary/5 text-primary': isActive,
+                  })}
                   disabled={!isAvailableForSale}
                   key={option.slug}
                   onClick={() => {
@@ -111,10 +105,9 @@ export function VariantSelector({ product }: { product: Product }) {
                     })
                   }}
                   title={`${option.label} ${!isAvailableForSale ? ' (Out of Stock)' : ''}`}
-                  type="button"
                 >
                   {option.label}
-                </button>
+                </Button>
               )
             })}
           </React.Fragment>

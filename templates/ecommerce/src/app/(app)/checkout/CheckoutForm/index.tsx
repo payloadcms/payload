@@ -67,7 +67,7 @@ export const CheckoutForm: React.FC = () => {
 
               query.append('limit', '1')
               query.append('depth', '0')
-              query.append('where', `[stripePaymentIntentID][equals]=${paymentIntent.id}`)
+              query.append('where[stripePaymentIntentID][equals]', `${paymentIntent.id}`)
 
               const url = `${process.env.NEXT_PUBLIC_SERVER_URL}/api/orders?${query.toString()}`
 
@@ -78,8 +78,6 @@ export const CheckoutForm: React.FC = () => {
                 })
                   .then((res) => res.json())
                   .then((data) => {
-                    console.log('received', data, 'for payment', paymentIntent)
-
                     const redirect = `/orders/${data.docs?.[0]?.id}?paymentId=${paymentIntent.id}`
                     clearCart()
                     router.push(redirect)
@@ -110,9 +108,6 @@ export const CheckoutForm: React.FC = () => {
       {error && <Message error={error} />}
       <PaymentElement />
       <div className="mt-8 flex gap-4">
-        <Button asChild variant="outline">
-          <Link href="/cart">Back to cart</Link>
-        </Button>
         <Button disabled={!stripe || isLoading} type="submit" variant="default">
           {isLoading ? 'Loading...' : 'Pay now'}
         </Button>

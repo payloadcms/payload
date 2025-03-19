@@ -98,7 +98,7 @@ export const AccountForm: React.FC = () => {
             <p className="">
               {'Change your account details below, or '}
               <Button
-                className="px-0 text-inherit underline"
+                className="px-0 text-inherit underline hover:cursor-pointer"
                 onClick={() => setChangePassword(!changePassword)}
                 type="button"
                 variant="link"
@@ -109,11 +109,15 @@ export const AccountForm: React.FC = () => {
             </p>
           </div>
           <div className="mb-4">
-            <Label htmlFor="email">Email Address</Label>
+            <Label htmlFor="email" className="mb-2">
+              Email Address
+            </Label>
             <Input id="email" {...register('email', { required: true })} required type="email" />
           </div>
           <div className="mb-8">
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name" className="mb-2">
+              Name
+            </Label>
             <Input id="name" {...register('name', { required: true })} required type="text" />
           </div>
         </Fragment>
@@ -123,7 +127,7 @@ export const AccountForm: React.FC = () => {
             <p>
               {'Change your password below, or '}
               <Button
-                className="px-0 text-inherit underline"
+                className="px-0 text-inherit underline hover:cursor-pointer"
                 onClick={() => setChangePassword(!changePassword)}
                 type="button"
                 variant="link"
@@ -134,7 +138,9 @@ export const AccountForm: React.FC = () => {
             </p>
           </div>
           <div className="mb-4">
-            <Label htmlFor="password">New password</Label>
+            <Label htmlFor="password" className="mb-2">
+              New password
+            </Label>
             <Input
               id="password"
               {...register('password', { required: true })}
@@ -144,7 +150,9 @@ export const AccountForm: React.FC = () => {
           </div>
 
           <div className="mb-8">
-            <Label htmlFor="passwordConfirm">Confirm password</Label>
+            <Label htmlFor="passwordConfirm" className="mb-2">
+              Confirm password
+            </Label>
             <Input
               id="passwordConfirm"
               {...register('passwordConfirm', {

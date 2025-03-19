@@ -1,3 +1,4 @@
+import { formatNumberToCurrency } from '@/utilities/formatNumberToCurrency'
 import React from 'react'
 
 type BaseProps = {
@@ -23,18 +24,14 @@ type Props = BaseProps & (PriceFixed | PriceRange)
 export const Price = ({
   amount,
   className,
-  currencyCode = 'USD',
+  currencyCode = 'usd',
   highestAmount,
   lowestAmount,
 }: Props & React.ComponentProps<'p'>) => {
   if (amount) {
     return (
       <p className={className} suppressHydrationWarning>
-        {`${new Intl.NumberFormat(undefined, {
-          currency: currencyCode,
-          currencyDisplay: 'narrowSymbol',
-          style: 'currency',
-        }).format(amount / 100)}`}
+        {formatNumberToCurrency(amount)}
       </p>
     )
   }
@@ -42,15 +39,7 @@ export const Price = ({
   if (highestAmount && highestAmount !== lowestAmount) {
     return (
       <p className={className} suppressHydrationWarning>
-        {`${new Intl.NumberFormat(undefined, {
-          currency: currencyCode,
-          currencyDisplay: 'narrowSymbol',
-          style: 'currency',
-        }).format(lowestAmount / 100)} - ${new Intl.NumberFormat(undefined, {
-          currency: currencyCode,
-          currencyDisplay: 'narrowSymbol',
-          style: 'currency',
-        }).format(highestAmount / 100)}`}
+        {`${formatNumberToCurrency(lowestAmount)} - ${formatNumberToCurrency(highestAmount)}`}
       </p>
     )
   }
@@ -58,11 +47,7 @@ export const Price = ({
   if (lowestAmount) {
     return (
       <p className={className} suppressHydrationWarning>
-        {`${new Intl.NumberFormat(undefined, {
-          currency: currencyCode,
-          currencyDisplay: 'narrowSymbol',
-          style: 'currency',
-        }).format(lowestAmount / 100)}`}
+        {`${formatNumberToCurrency(lowestAmount)}`}
       </p>
     )
   }

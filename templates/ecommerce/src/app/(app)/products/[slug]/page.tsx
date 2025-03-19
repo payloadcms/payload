@@ -1,7 +1,7 @@
 import type { Media, Product } from '@/payload-types'
 
 import { RenderBlocks } from '@/blocks/RenderBlocks'
-import { GridTileImage } from '@/components/grid/tile'
+import { GridTileImage } from '@/components/Grid/tile'
 import { Gallery } from '@/components/product/Gallery'
 import { ProductDescription } from '@/components/product/ProductDescription'
 import configPromise from '@payload-config'
@@ -10,6 +10,8 @@ import { draftMode } from 'next/headers'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import React, { Suspense } from 'react'
+import { Button } from '@/components/ui/button'
+import { ChevronLeftIcon } from 'lucide-react'
 
 /* export async function generateMetadata({
   params,
@@ -61,7 +63,7 @@ export default async function ProductPage({ params }: Args) {
 
   if (!product) return notFound()
 
-  const variants = product.enableVariants ? product.variants?.variants : []
+  const variants = product.enableVariants ? product?.variants : []
 
   const metaImage = typeof product.meta?.image !== 'string' ? product.meta?.image : undefined
   const hasStock = product.enableVariants
@@ -70,8 +72,8 @@ export default async function ProductPage({ params }: Args) {
 
   let price = product.price
 
-  if (product.enableVariants && product.variants?.variants?.length) {
-    price = product.variants?.variants?.reduce((acc, variant) => {
+  if (product.enableVariants && product?.variants?.length) {
+    price = product.variants?.reduce((acc, variant) => {
       if (variant?.price > acc) {
         return variant.price
       }
@@ -98,18 +100,6 @@ export default async function ProductPage({ params }: Args) {
 
   const gallery = product.gallery?.filter((image) => typeof image !== 'string')
 
-  if (variants?.length) {
-    variants.forEach((variant) => {
-      if (variant?.images?.length) {
-        variant.images.forEach((image) => {
-          if (typeof image !== 'string') {
-            gallery?.push(image)
-          }
-        })
-      }
-    })
-  }
-
   return (
     <React.Fragment>
       <script
@@ -118,9 +108,15 @@ export default async function ProductPage({ params }: Args) {
         }}
         type="application/ld+json"
       />
-      <div className="container">
-        <div className="flex flex-col rounded-lg border border-neutral-200 bg-white p-8 md:py-12 lg:flex-row lg:gap-8 dark:border-neutral-800 dark:bg-black">
-          <div className="h-full w-full basis-full lg:basis-4/6">
+      <div className="container pt-8">
+        <Button asChild variant="ghost" className="mb-4">
+          <Link href="/shop">
+            <ChevronLeftIcon />
+            All products
+          </Link>
+        </Button>
+        <div className="flex flex-col rounded-lg border p-8 md:py-12 lg:flex-row lg:gap-8 bg-primary-foreground">
+          <div className="h-full w-full basis-full lg:basis-1/2">
             <Suspense
               fallback={
                 <div className="relative aspect-square h-full max-h-[550px] w-full overflow-hidden" />
@@ -130,7 +126,7 @@ export default async function ProductPage({ params }: Args) {
             </Suspense>
           </div>
 
-          <div className="basis-full lg:basis-2/6">
+          <div className="basis-full lg:basis-1/2">
             <ProductDescription product={product} />
           </div>
         </div>

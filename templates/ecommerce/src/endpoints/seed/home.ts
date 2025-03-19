@@ -4,7 +4,7 @@ export const home: RequiredDataFromCollectionSlug<'pages'> = {
   slug: 'home',
   _status: 'published',
   hero: {
-    type: 'highImpact',
+    type: 'lowImpact',
     links: [
       {
         link: {
@@ -23,8 +23,6 @@ export const home: RequiredDataFromCollectionSlug<'pages'> = {
         },
       },
     ],
-    // @ts-ignore
-    media: '{{IMAGE_1}}',
     richText: {
       root: {
         type: 'root',

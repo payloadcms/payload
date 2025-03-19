@@ -49,6 +49,17 @@ export const Products: CollectionConfig = {
       generatePreviewPath({ path: `/product/${typeof doc?.slug === 'string' ? doc.slug : ''}` }),
     useAsTitle: 'title',
   },
+  defaultPopulate: {
+    title: true,
+    slug: true,
+    variantOptions: true,
+    variants: true,
+    enableVariants: true,
+    gallery: true,
+    price: true,
+    stock: true,
+    meta: true,
+  },
   fields: [
     {
       name: 'title',

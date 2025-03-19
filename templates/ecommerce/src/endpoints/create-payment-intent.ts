@@ -19,7 +19,9 @@ export const createPaymentIntent: PayloadHandler = async (req) => {
 
   await addDataAndFileToRequest(req)
 
-  const cartFromRequest = req.data?.cart
+  console.log({ data: req.data })
+
+  const amountFromRequest = req.data?.amount
   const emailFromRequest = req.data?.email
 
   if (!user && !emailFromRequest) {
@@ -35,13 +37,8 @@ export const createPaymentIntent: PayloadHandler = async (req) => {
     })
   }
 
-  const cart = fullUser?.cart?.items || (cartFromRequest as { items: CartItems }).items
-
-  if (!cart || cart.length === 0) {
-    return Response.json(
-      { error: 'Please provide a cart either directly or from the user.' },
-      { status: 401 },
-    )
+  if (!amountFromRequest) {
+    return Response.json({ error: 'Please provide an amount.' }, { status: 401 })
   }
 
   try {
@@ -104,68 +101,16 @@ export const createPaymentIntent: PayloadHandler = async (req) => {
       }
     }
 
-    let total = 0
-
-    const metadata: any[] = []
-
-    // for each item in cart, lookup the product in Stripe and add its price to the total
-    await Promise.all(
-      cart?.map(async (item) => {
-        const { product, quantity, variant: variantFromItem } = item
-
-        const isVariant = Boolean(variantFromItem)
-
-        if (!quantity) {
-          return null
-        }
-
-        if (!product || typeof product === 'string') {
-          return null
-        }
-
-        let price = 0
-        let variant: NonNullable<NonNullable<Product['variants']>['variants']>[number] | null = null
-
-        if (isVariant) {
-          const matchingVariant = product?.variants?.variants?.find(
-            (item) => item.id === variantFromItem,
-          )
-
-          if (matchingVariant) {
-            variant = matchingVariant
-            price = matchingVariant.price || 0
-          }
-        } else {
-          price = product.price || 0
-        }
-
-        metadata.push({
-          product: product.title,
-          productId: product?.id,
-          quantity: quantity,
-          variantId: variant?.id,
-          variant: variant?.options.map((option) => option).join(', '),
-        })
-
-        total += price * quantity
-
-        return null
-      }),
-    )
+    const total = amountFromRequest
 
     if (total === 0) {
       throw new Error('There is nothing to pay for, add some items to your cart and try again.')
     }
 
-    console.log({ metadata })
-
     const paymentIntent = await stripe.paymentIntents.create({
       amount: total,
       currency: 'usd',
       customer: stripeCustomerID,
-      metadata: {
-        cart: JSON.stringify(metadata),
-      },
       payment_method_types: ['card'],
     })
 

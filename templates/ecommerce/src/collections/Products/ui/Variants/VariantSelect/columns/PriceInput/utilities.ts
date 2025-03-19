@@ -18,22 +18,6 @@
  */
 export const currency = { code: 'USD', symbol: '$', name: 'US Dollar', decimalPlaces: 2 }
 
-export const formatNumberToCurrency = (value: number): string => {
-  if (!currency) {
-    return value.toString()
-  }
-
-  // Convert from base value (e.g., cents) to decimal value (e.g., dollars)
-  const decimalValue = value / Math.pow(10, currency.decimalPlaces)
-
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: currency.code,
-    minimumFractionDigits: currency.decimalPlaces,
-    maximumFractionDigits: currency.decimalPlaces,
-  }).format(decimalValue)
-}
-
 // Convert display value with decimal point to base value (e.g., $25.00 to 2500)
 export const convertToBaseValue = (displayValue: string): number => {
   if (!currency) {

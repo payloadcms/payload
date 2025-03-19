@@ -27,7 +27,7 @@ export const CheckoutPage: React.FC = () => {
   const router = useRouter()
   const [error, setError] = useState<null | string>(null)
   const [clientSecret, setClientSecret] = useState()
-  const hasMadePaymentIntent = useRef(false)
+  const hasRequestedPaymentIntent = useRef(false)
   const { theme } = useTheme()
   const [email, setEmail] = useState('')
   const [emailEditable, setEmailEditable] = useState(true)
@@ -36,20 +36,23 @@ export const CheckoutPage: React.FC = () => {
 
   useEffect(() => {
     if (
-      cart &&
+      cartTotal.amount &&
+      cartTotal.amount > 0 &&
       (user || (Boolean(email) && !emailEditable)) &&
-      hasMadePaymentIntent.current === false
+      hasRequestedPaymentIntent.current === false
     ) {
-      hasMadePaymentIntent.current = true
+      hasRequestedPaymentIntent.current = true
 
       const makeIntent = async () => {
         try {
           const body = !user
             ? {
-                cart,
+                amount: cartTotal.amount,
                 email,
               }
-            : undefined
+            : {
+                amount: cartTotal.amount,
+              }
 
           const paymentReq = await fetch(
             `${process.env.NEXT_PUBLIC_SERVER_URL}/api/create-payment-intent`,
@@ -83,22 +86,25 @@ export const CheckoutPage: React.FC = () => {
 
       void makeIntent()
     }
-  }, [cart, user, emailEditable, email])
+  }, [cartTotal, user, emailEditable, email])
 
   if (!stripe) return null
 
   return (
-    <div className="flex flex-col items-stretch justify-stretch md:flex-row gap-6 md:gap-12">
-      <div className="w-full grow flex flex-col gap-8">
-        <div className="prose dark:prose-invert bg-black rounded-sm p-4 grow w-full flex items-center">
-          <Button asChild className="no-underline text-inherit" variant="outline">
-            <Link href="/login">Log in</Link>
-          </Button>
-          <p className="mt-0">
-            <span className="mx-2">or</span>
-            <Link href="/create-account">create an account</Link>
-          </p>
-        </div>
+    <div className="flex flex-col items-stretch justify-stretch md:flex-row grow">
+      <div className="basis-full lg:basis-1/2 flex flex-col gap-8 lg:pr-8 pt-8">
+        <h2 className="font-medium text-3xl">Contact</h2>
+        {!user && (
+          <div className="prose dark:prose-invert bg-black rounded-sm p-4 grow w-full flex items-center">
+            <Button asChild className="no-underline text-inherit" variant="outline">
+              <Link href="/login">Log in</Link>
+            </Button>
+            <p className="mt-0">
+              <span className="mx-2">or</span>
+              <Link href="/create-account">create an account</Link>
+            </p>
+          </div>
+        )}
         {user ? (
           <div className="bg-black rounded-sm p-4 w-full">
             <div>
@@ -136,6 +142,8 @@ export const CheckoutPage: React.FC = () => {
           </div>
         )}
 
+        <h2 className="font-medium text-3xl">Payment</h2>
+
         {cartIsEmpty && (
           <div className="prose dark:prose-invert">
             <p>
@@ -167,20 +175,22 @@ export const CheckoutPage: React.FC = () => {
                   appearance: {
                     theme: 'stripe',
                     variables: {
-                      borderRadius: '0px',
-                      colorBackground:
-                        theme === 'dark' ? cssVariables.colors.base850 : cssVariables.colors.base0,
+                      borderRadius: '6px',
+                      colorPrimary: '#858585',
+                      gridColumnSpacing: '20px',
+                      gridRowSpacing: '20px',
+                      colorBackground: theme === 'dark' ? '#0a0a0a' : cssVariables.colors.base0,
                       colorDanger: cssVariables.colors.error500,
                       colorDangerText: cssVariables.colors.error500,
                       colorIcon:
                         theme === 'dark' ? cssVariables.colors.base0 : cssVariables.colors.base1000,
-                      colorText:
-                        theme === 'dark' ? cssVariables.colors.base0 : cssVariables.colors.base1000,
-                      colorTextPlaceholder: cssVariables.colors.base500,
-                      fontFamily: 'Inter, sans-serif',
+                      colorText: theme === 'dark' ? '#858585' : cssVariables.colors.base1000,
+                      colorTextPlaceholder: '#858585',
+                      fontFamily: 'Geist, sans-serif',
                       fontSizeBase: '16px',
                       fontWeightBold: '600',
                       fontWeightNormal: '500',
+                      spacingUnit: '4px',
                     },
                   },
                   clientSecret,
@@ -193,66 +203,60 @@ export const CheckoutPage: React.FC = () => {
           )}
         </Suspense>
       </div>
+
       {!cartIsEmpty && (
-        <div className="max-w-md w-full">
+        <div className="basis-full lg:basis-1/2 lg:pl-8 p-8 border-l bg-primary/5 flex flex-col gap-8">
+          <h2 className="text-3xl font-medium">Your cart</h2>
           {cart?.items?.map((item, index) => {
             if (typeof item.product === 'object' && item.product) {
               const {
                 product,
-                product: { id, meta, title },
+                product: { id, meta, title, gallery },
                 quantity,
                 variant: variantId,
               } = item
 
-              let stripeProductID
-
-              if (variantId) {
-                const variant = product.variants?.variants?.find((v) => v.id === variantId)
-                stripeProductID = variant?.stripeProductID
-              } else {
-                stripeProductID = product.stripeProductID
-              }
-
               if (!quantity) return null
 
-              const isLast = index === (cart?.items?.length || 0) - 1
-
-              const metaImage = meta?.image
+              const image = gallery?.[0] || meta?.image
 
               return (
-                <Fragment key={index}>
-                  <div className="">
-                    <div className="relative">
-                      {!metaImage && <span className="classes.placeholder">No image</span>}
-                      {metaImage && typeof metaImage !== 'string' && (
-                        <Media className="" fill imgClassName="" resource={metaImage} />
+                <div className="flex items-start gap-4" key={index}>
+                  <div className="flex items-stretch justify-stretch h-20 w-20 p-2 rounded-lg border">
+                    <div className="relative w-full h-full">
+                      {image && typeof image !== 'string' && (
+                        <Media className="" fill imgClassName="rounded-lg" resource={image} />
                       )}
-                    </div>
-                    <div className="">
-                      {!stripeProductID && (
-                        <p className="classes.warning">
-                          {'This product is not yet connected to Stripe. To link this product, '}
-                          <Link
-                            href={`${process.env.NEXT_PUBLIC_SERVER_URL}/admin/collections/products/${id}`}
-                          >
-                            edit this product in the admin panel
-                          </Link>
-                          .
-                        </p>
-                      )}
-                      <h6 className="">{title}</h6>
-
-                      {product.price && <Price amount={product.price} currencyCode="usd" />}
                     </div>
                   </div>
-                  {!isLast && <hr />}
-                </Fragment>
+                  <div className="flex grow justify-between items-center">
+                    <div className="flex flex-col gap-1">
+                      <p className="font-medium text-lg">{title}</p>
+                      {variantId && (
+                        <p className="text-sm font-mono text-primary/50 tracking-[0.1em]">
+                          {product.variants
+                            ?.find((v) => v.id === variantId)
+                            ?.options.map((option) => option.value)
+                            .join(', ')}
+                        </p>
+                      )}
+                      <div>
+                        {'x'}
+                        {quantity}
+                      </div>
+                    </div>
+
+                    {product.price && <Price amount={product.price} currencyCode="usd" />}
+                  </div>
+                </div>
               )
             }
             return null
           })}
-          <div className="flex gap-2">
-            <span>Order total:</span> <Price amount={cartTotal.amount} currencyCode="usd" />
+          <hr />
+          <div className="flex justify-between items-center gap-2">
+            <span className="uppercase">Total</span>{' '}
+            <Price className="text-3xl font-medium" amount={cartTotal.amount} currencyCode="usd" />
           </div>
         </div>
       )}

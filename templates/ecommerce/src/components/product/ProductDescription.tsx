@@ -13,10 +13,10 @@ export function ProductDescription({ product }: { product: Product }) {
     highestAmount = 0,
     currency = 'usd'
 
-  const hasVariants = product.enableVariants && product.variants?.variants?.length
+  const hasVariants = product.enableVariants && product.variants?.length
 
   if (hasVariants) {
-    const variantsOrderedByPrice = product.variants?.variants?.sort((a, b) => {
+    const variantsOrderedByPrice = product.variants?.sort((a, b) => {
       return a.price - b.price
     })
 
@@ -29,10 +29,10 @@ export function ProductDescription({ product }: { product: Product }) {
   }
 
   return (
-    <React.Fragment>
-      <div className="mb-6 flex flex-col border-b pb-6 dark:border-neutral-700">
-        <h1 className="mb-2 text-5xl font-medium">{product.title}</h1>
-        <div className="mr-auto w-auto rounded-full bg-blue-600 p-2 text-sm text-white">
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+        <h1 className="text-2xl font-medium">{product.title}</h1>
+        <div className="uppercase font-mono">
           {hasVariants ? (
             <Price
               currencyCode={currency}
@@ -44,17 +44,28 @@ export function ProductDescription({ product }: { product: Product }) {
           )}
         </div>
       </div>
-      <Suspense fallback={null}>
-        <VariantSelector product={product} />
-      </Suspense>
 
       {product.description ? (
-        <RichText className="mb-6" data={product.description} enableGutter={false} />
+        <RichText className="" data={product.description} enableGutter={false} />
       ) : null}
 
-      <Suspense fallback={null}>
-        <AddToCart product={product} variants={product.variants?.variants || []} />
-      </Suspense>
-    </React.Fragment>
+      <hr />
+
+      {hasVariants && (
+        <>
+          <Suspense fallback={null}>
+            <VariantSelector product={product} />
+          </Suspense>
+
+          <hr />
+        </>
+      )}
+
+      <div className="flex items-center justify-between">
+        <Suspense fallback={null}>
+          <AddToCart product={product} variants={product?.variants || []} />
+        </Suspense>
+      </div>
+    </div>
   )
 }

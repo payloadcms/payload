@@ -18,7 +18,8 @@ import React, { useEffect, useRef, useState } from 'react'
 
 import { DeleteItemButton } from './DeleteItemButton'
 import { EditItemQuantityButton } from './EditItemQuantityButton'
-import { OpenCart } from './OpenCart'
+import { OpenCartButton } from './OpenCart'
+import { Button } from '@/components/ui/button'
 
 export function CartModal() {
   const { cart, cartQuantity, cartTotal } = useCart()
@@ -30,18 +31,18 @@ export function CartModal() {
   )
   const pathname = usePathname()
 
-  useEffect(() => {
-    // Open cart modal when quantity changes.
-    if (cartQuantity !== quantityRef.current) {
-      // But only if it's not already open (quantity also changes when editing items in cart).
-      if (!isOpen && pathname !== '/checkout') {
-        setIsOpen(true)
-      }
+  // useEffect(() => {
+  //   // Open cart modal when quantity changes.
+  //   if (cartQuantity !== quantityRef.current) {
+  //     // But only if it's not already open (quantity also changes when editing items in cart).
+  //     if (!isOpen && pathname !== '/checkout') {
+  //       setIsOpen(true)
+  //     }
 
-      // Always update the quantity reference
-      quantityRef.current = cartQuantity
-    }
-  }, [isOpen, cartQuantity, pathname])
+  //     // Always update the quantity reference
+  //     quantityRef.current = cartQuantity
+  //   }
+  // }, [isOpen, cartQuantity, pathname])
 
   useEffect(() => {
     // Close the cart modal when the pathname changes.
@@ -50,8 +51,8 @@ export function CartModal() {
 
   return (
     <Sheet onOpenChange={setIsOpen} open={isOpen}>
-      <SheetTrigger className="relative flex h-11 w-11 items-center justify-center rounded-md border border-neutral-200 text-black transition-colors dark:border-neutral-700 dark:bg-black dark:text-white">
-        <OpenCart quantity={cartQuantity} />
+      <SheetTrigger asChild>
+        <OpenCartButton quantity={cartQuantity} />
       </SheetTrigger>
 
       <SheetContent className="flex flex-col">
@@ -67,7 +68,7 @@ export function CartModal() {
             <p className="mt-6 text-center text-2xl font-bold">Your cart is empty.</p>
           </div>
         ) : (
-          <div className="grow flex">
+          <div className="grow flex px-4">
             <div className="flex flex-col justify-between w-full">
               <ul className="grow overflow-auto py-4">
                 {cart?.items?.map((item, i) => {
@@ -88,23 +89,16 @@ export function CartModal() {
                   let price = product.price
 
                   const isVariant = Boolean(item.variant)
-                  const variant = product?.variants?.variants?.length
-                    ? product.variants.variants.find((v) => v.id === item.variant)
+                  const variant = product?.variants?.length
+                    ? product.variants.find((v) => v.id === item.variant)
                     : undefined
 
                   if (isVariant) {
                     price = variant?.price
-
-                    if (variant?.images?.[0] && typeof variant.images?.[0] !== 'string') {
-                      image = variant.images[0]
-                    }
                   }
 
                   return (
-                    <li
-                      className="flex w-full flex-col border-b border-neutral-300 dark:border-neutral-700"
-                      key={i}
-                    >
+                    <li className="flex w-full flex-col" key={i}>
                       <div className="relative flex w-full flex-row justify-between px-1 py-4">
                         <div className="absolute z-40 -mt-2 ml-[55px]">
                           <DeleteItemButton item={item} />
@@ -128,7 +122,7 @@ export function CartModal() {
                               <p className="text-sm text-neutral-500 dark:text-neutral-400 capitalize">
                                 {variant.options
                                   ?.map((option) => {
-                                    return option.label
+                                    return option.slug
                                   })
                                   .join(', ')}
                               </p>
@@ -143,7 +137,7 @@ export function CartModal() {
                               currencyCode={'usd'}
                             />
                           )}
-                          <div className="ml-auto flex h-9 flex-row items-center rounded-full border border-neutral-200 dark:border-neutral-700">
+                          <div className="ml-auto flex h-9 flex-row items-center rounded-lg border">
                             <EditItemQuantityButton item={item} type="minus" />
                             <p className="w-6 text-center">
                               <span className="w-full text-sm">{item.quantity}</span>
@@ -156,7 +150,7 @@ export function CartModal() {
                   )
                 })}
               </ul>
-              <div>
+              <div className="px-4">
                 <div className="py-4 text-sm text-neutral-500 dark:text-neutral-400">
                   <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 pt-1 dark:border-neutral-700">
                     <p>Total</p>
@@ -166,12 +160,12 @@ export function CartModal() {
                       currencyCode={cartTotal.currency}
                     />
                   </div>
-                  <Link
-                    className="block w-full rounded-full bg-blue-600 p-3 text-center text-sm font-medium text-white opacity-90 hover:opacity-100"
-                    href="/checkout"
-                  >
-                    Proceed to Checkout
-                  </Link>
+
+                  <Button asChild>
+                    <Link className="w-full" href="/checkout">
+                      Proceed to Checkout
+                    </Link>
+                  </Button>
                 </div>
               </div>
             </div>

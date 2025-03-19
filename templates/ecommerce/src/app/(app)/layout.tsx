@@ -8,6 +8,7 @@ import { ensureStartsWith } from '@/utilities/ensureStartsWith'
 import { Providers } from '@/providers'
 import { InitTheme } from '@/providers/Theme/InitTheme'
 import { GeistSans } from 'geist/font/sans'
+import { GeistMono } from 'geist/font/mono'
 import React from 'react'
 
 import './globals.css'
@@ -41,13 +42,17 @@ const twitterSite = TWITTER_SITE ? ensureStartsWith(TWITTER_SITE, 'https://') : 
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html className={GeistSans.variable} lang="en" suppressHydrationWarning>
+    <html
+      className={[GeistSans.variable, GeistMono.variable].filter(Boolean).join(' ')}
+      lang="en"
+      suppressHydrationWarning
+    >
       <head>
         <InitTheme />
         <link href="/favicon.ico" rel="icon" sizes="32x32" />
         <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
       </head>
-      <body className="bg-neutral-50 text-black selection:bg-teal-300 dark:bg-neutral-900 dark:text-white dark:selection:bg-pink-500 dark:selection:text-white">
+      <body>
         <Providers>
           <AdminBar />
           <LivePreviewListener />

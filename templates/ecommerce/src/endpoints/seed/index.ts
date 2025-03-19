@@ -316,18 +316,22 @@ export const seed = async ({
           {
             link: {
               type: 'custom',
-              label: 'Products',
-              url: '/search',
+              label: 'Home',
+              url: '/',
             },
           },
           {
             link: {
-              type: 'reference',
-              label: 'Contact',
-              reference: {
-                relationTo: 'pages',
-                value: contactPage.id,
-              },
+              type: 'custom',
+              label: 'Shop',
+              url: '/shop',
+            },
+          },
+          {
+            link: {
+              type: 'custom',
+              label: 'Account',
+              url: '/account',
             },
           },
         ],

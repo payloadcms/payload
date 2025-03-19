@@ -3,7 +3,7 @@
 import type { Media as MediaType } from '@/payload-types'
 
 import { Media } from '@/components/Media'
-import { GridTileImage } from '@/components/grid/tile'
+import { GridTileImage } from '@/components/Grid/tile'
 import { createUrl } from '@/utilities/createUrl'
 import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react'
 import Link from 'next/link'

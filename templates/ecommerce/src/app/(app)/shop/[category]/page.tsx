@@ -1,5 +1,5 @@
-import { Grid } from '@/components/grid'
-import { ProductGridItems } from '@/components/layout/ProductGridItems'
+import { Grid } from '@/components/Grid'
+import { ProductGridItem } from '@/components/ProductGridItem'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import React from 'react'
@@ -10,14 +10,18 @@ export const metadata = {
 }
 
 export default async function SearchCategoryPage({
-  params,
-  searchParams,
+  params: paramsPromise,
+  searchParams: searchParamsPromise,
 }: {
-  params: { category: string }
-  searchParams?: { [key: string]: string | string[] | undefined }
+  params: Promise<{ category: string }>
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
-  const { q: searchValue, sort } = searchParams as { [key: string]: string }
-  const { category } = params
+  const searchParams = await searchParamsPromise
+  const searchValue = searchParams?.q
+  const sort = searchParams?.sort
+
+  const { category } = await paramsPromise
+
   const payload = await getPayload({ config: configPromise })
 
   // Get the category id so we can search for products that belong to this category
@@ -66,8 +70,10 @@ export default async function SearchCategoryPage({
         </p>
       ) : null}
       {products?.docs.length > 0 ? (
-        <Grid className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          <ProductGridItems products={products.docs} />
+        <Grid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          {products.docs.map((product) => {
+            return <ProductGridItem key={product.slug} product={product} />
+          })}
         </Grid>
       ) : null}
     </React.Fragment>

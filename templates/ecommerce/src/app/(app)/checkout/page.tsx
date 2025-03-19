@@ -7,7 +7,7 @@ import { CheckoutPage } from './CheckoutPage'
 
 export default function Checkout() {
   return (
-    <div className="container min-h-[60vh] my-16">
+    <div className="container min-h-[90vh] flex">
       {!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY && (
         <div>
           <Fragment>
@@ -31,6 +31,8 @@ export default function Checkout() {
           </Fragment>
         </div>
       )}
+
+      <h1 className="sr-only">Checkout</h1>
 
       <CheckoutPage />
     </div>

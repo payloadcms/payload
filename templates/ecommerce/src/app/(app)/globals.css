@@ -1,6 +1,9 @@
 @import 'tailwindcss';
 
-/* @config '../../../tailwind.config.mjs'; */
+@plugin "@tailwindcss/typography";
+@plugin "tailwindcss-animate";
+
+@custom-variant dark (&:is([data-theme='dark'] *));
 
 /*
   The default border color has changed to `currentColor` in Tailwind CSS v4,
@@ -18,6 +21,17 @@
   ::file-selector-button {
     border-color: var(--color-gray-200, currentColor);
   }
+}
+
+@theme {
+  --font-sans: var(--font-geist-sans), sans-serif;
+  --font-mono: var(--font-geist-mono), sans-serif;
+}
+
+@utility container {
+  margin-inline: auto;
+  padding-inline: 2rem;
+  max-width: 76.125rem;
 }
 
 :root {
@@ -57,17 +71,17 @@
 }
 
 [data-theme='dark'] {
-  --background: hsl(0 0% 0%);
+  --background: hsla(0, 0%, 4%);
   --foreground: hsl(210 40% 98%);
 
-  --card: hsl(240 6% 10%);
+  --card: hsl(0, 0%, 8%);
   --card-foreground: hsl(210 40% 98%);
 
   --popover: hsl(222.2 84% 4.9%);
   --popover-foreground: hsl(210 40% 98%);
 
   --primary: hsl(210 40% 98%);
-  --primary-foreground: hsl(222.2 47.4% 11.2%);
+  --primary-foreground: hsl(0, 0%, 6%);
 
   --secondary: hsl(217.2 32.6% 17.5%);
   --secondary-foreground: hsl(210 40% 98%);
@@ -75,14 +89,14 @@
   --muted: hsl(217.2 32.6% 17.5%);
   --muted-foreground: hsl(215 20.2% 65.1%);
 
-  --accent: hsl(217.2 32.6% 17.5%);
+  --accent: hsla(197, 100%, 58%);
   --accent-foreground: hsl(210 40% 98%);
 
   --destructive: hsl(0 62.8% 30.6%);
   --destructive-foreground: hsl(210 40% 98%);
 
-  --border: hsl(240 4% 16%);
-  --input: hsl(217.2 32.6% 17.5%);
+  --border: hsla(0, 0%, 100%, 0.1);
+  --input: hsla(0, 0%, 100%, 0.1);
   --ring: hsl(212.7 26.8% 83.9%);
 
   --success: hsl(196 100% 14%);
@@ -139,6 +153,7 @@
 
 html {
   opacity: 0;
+  @apply font-sans;
 }
 
 html[data-theme='dark'],

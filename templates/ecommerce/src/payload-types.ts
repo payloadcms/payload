@@ -8,6 +8,11 @@
 
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "OrderStatus".
+ */
+export type OrderStatus = 'processing' | 'completed';
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "CartItems".
  */
 export type CartItems =
@@ -200,6 +205,7 @@ export interface Order {
         id?: string | null;
       }[]
     | null;
+  status: OrderStatus;
   updatedAt: string;
   createdAt: string;
 }
@@ -1292,6 +1298,7 @@ export interface OrdersSelect<T extends boolean = true> {
         quantity?: T;
         id?: T;
       };
+  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }
