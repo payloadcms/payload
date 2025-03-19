@@ -43,18 +43,16 @@ export const updateMany: UpdateMany = async function updateMany(
 
   let idsToUpdate: (number | string)[] = []
 
-  const selectDistinctMethods: ChainedMethods = []
-
-  if (orderBy) {
-    selectDistinctMethods.push({
-      args: [() => orderBy.map(({ column, order }) => order(column))],
-      method: 'orderBy',
-    })
-  }
-
   const selectDistinctResult = await selectDistinct({
     adapter: this,
-    chainedMethods: selectDistinctMethods,
+    chainedMethods: orderBy
+      ? [
+          {
+            args: [() => orderBy.map(({ column, order }) => order(column))],
+            method: 'orderBy',
+          },
+        ]
+      : [],
     db,
     joins,
     selectFields,
@@ -64,19 +62,16 @@ export const updateMany: UpdateMany = async function updateMany(
 
   if (selectDistinctResult?.[0]?.id) {
     idsToUpdate = selectDistinctResult?.map((doc) => doc.id)
-
-    // If id wasn't passed but `where` without any joins, retrieve it with findFirst
   } else if (whereToUse && !joins.length) {
+    // If id wasn't passed but `where` without any joins, retrieve it with findFirst
+
     const _db = db as LibSQLDatabase
 
     const table = this.tables[tableName]
 
-    const chainedMethods: ChainedMethods = [
-      {
-        args: [where],
-        method: 'where',
-      },
-    ]
+    const query = _db.select({ id: table.id }).from(table).where(where)
+
+    const chainedMethods: ChainedMethods = []
 
     if (typeof limit === 'number' && limit > 0) {
       chainedMethods.push({
@@ -91,8 +86,6 @@ export const updateMany: UpdateMany = async function updateMany(
         method: 'orderBy',
       })
     }
-
-    const query = _db.select({ id: table.id }).from(table)
 
     const docsToUpdate = await chainMethods({
       methods: chainedMethods,
