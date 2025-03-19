@@ -124,6 +124,19 @@
       }
     }
 
+    &__save {
+      width: calc(50% - #{base(1)});
+
+      @include mid-break {
+        width: 100%;
+      }
+    }
+
+    &__publish,
+    &__draft {
+      width: 100%;
+    }
+
     &__document-actions {
       display: flex;
       padding: base(1);
@@ -138,7 +151,6 @@
         }
 
         .btn {
-          width: 100%;
           padding-left: base(0.5);
           padding-right: base(0.5);
           margin-bottom: 0;
