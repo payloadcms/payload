@@ -45,6 +45,10 @@ export default buildConfigWithDefaults({
           required: true,
         },
         {
+          name: 'number',
+          type: 'number',
+        },
+        {
           type: 'tabs',
           tabs: [
             {
