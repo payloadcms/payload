@@ -29,8 +29,9 @@ import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.j
 import { mergeListSearchAndWhere } from '../../utilities/mergeListSearchAndWhere.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { FieldSelect } from '../FieldSelect/index.js'
-import './index.scss'
 import { baseClass, type EditManyProps } from './index.js'
+import './index.scss'
+import '../../forms/RenderFields/index.scss'
 
 const Submit: React.FC<{
   readonly action: string
@@ -286,9 +287,9 @@ export const EditManyDrawerContent: React.FC<
             onSuccess={onSuccess}
           >
             <FieldSelect fields={fields} onChange={onFieldSelect} />
-            {selectedFields.length === 0
-              ? null
-              : selectedFields.map((field, i) => {
+            {selectedFields.length === 0 ? null : (
+              <div className="render-fields">
+                {selectedFields.map((field, i) => {
                   const { path } = field
 
                   return (
@@ -303,6 +304,8 @@ export const EditManyDrawerContent: React.FC<
                     />
                   )
                 })}
+              </div>
+            )}
             <div className={`${baseClass}__sidebar-wrap`}>
               <div className={`${baseClass}__sidebar`}>
                 <div className={`${baseClass}__sidebar-sticky-wrap`}>
