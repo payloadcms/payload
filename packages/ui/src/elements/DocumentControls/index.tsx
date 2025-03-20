@@ -16,7 +16,7 @@ import { useFormInitializing, useFormProcessing } from '../../forms/Form/context
 import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { formatDate } from '../../utilities/formatDate.js'
+import { formatDate } from '../../utilities/formatDocTitle/formatDateTitle.js'
 import { Autosave } from '../Autosave/index.js'
 import { Button } from '../Button/index.js'
 import { CopyLocaleData } from '../CopyLocaleData/index.js'

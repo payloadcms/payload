@@ -1391,7 +1391,9 @@ export type {
   TabsPreferences,
 } from './preferences/types.js'
 export type { QueryPreset } from './query-presets/types.js'
+export { jobAfterRead } from './queues/config/index.js'
 export type { JobsConfig, RunJobAccess, RunJobAccessArgs } from './queues/config/types/index.js'
+
 export type {
   RunInlineTaskFunction,
   RunTaskFunction,

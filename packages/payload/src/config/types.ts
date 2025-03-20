@@ -509,9 +509,7 @@ export type LocalizationConfig = Prettify<
   LocalizationConfigWithLabels | LocalizationConfigWithNoLabels
 >
 
-export type LabelFunction<TTranslationKeys = DefaultTranslationKeys> = ({
-  t,
-}: {
+export type LabelFunction<TTranslationKeys = DefaultTranslationKeys> = (args: {
   i18n: I18nClient
   t: TFunction<TTranslationKeys>
 }) => string

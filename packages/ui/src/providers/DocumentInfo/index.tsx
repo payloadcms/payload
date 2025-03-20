@@ -8,7 +8,7 @@ import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 
 import { useAuth } from '../../providers/Auth/index.js'
 import { requests } from '../../utilities/api.js'
-import { formatDocTitle } from '../../utilities/formatDocTitle.js'
+import { formatDocTitle } from '../../utilities/formatDocTitle/index.js'
 import { useConfig } from '../Config/index.js'
 import { useLocale, useLocaleLoading } from '../Locale/index.js'
 import { usePreferences } from '../Preferences/index.js'
