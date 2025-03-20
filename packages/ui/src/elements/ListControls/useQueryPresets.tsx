@@ -13,6 +13,7 @@ import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { useListDrawer } from '../ListDrawer/index.js'
 import { PopupList } from '../Popup/index.js'
+import { PopupListGroupLabel } from '../Popup/PopupGroupLabel/index.js'
 import { Translation } from '../Translation/index.js'
 
 const confirmDeletePresetModalSlug = 'confirm-delete-preset'
@@ -178,7 +179,12 @@ export const useQueryPresets = ({
 
   // Memoize so that components aren't re-rendered on query and column changes
   const queryPresetMenuItems = useMemo(() => {
-    const menuItems: React.ReactNode[] = []
+    const menuItems: React.ReactNode[] = [
+      <PopupListGroupLabel
+        key="preset-group-label"
+        label={getTranslation(presetConfig.labels.plural, i18n)}
+      />,
+    ]
 
     if (activePreset && modified) {
       menuItems.push(
@@ -216,9 +222,7 @@ export const useQueryPresets = ({
           openCreateNewDrawer()
         }}
       >
-        {t('general:createNewLabel', {
-          label: presetConfig.labels.singular,
-        })}
+        {t('general:createNew')}
       </PopupList.Button>,
     )
 
@@ -251,7 +255,8 @@ export const useQueryPresets = ({
     t,
     refineListData,
     modified,
-    presetConfig.labels.singular,
+    presetConfig.labels.plural,
+    i18n,
   ])
 
   return {

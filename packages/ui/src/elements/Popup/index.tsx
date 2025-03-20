@@ -60,6 +60,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     verticalAlign: verticalAlignFromProps = 'top',
   } = props
   const { height: windowHeight, width: windowWidth } = useWindowInfo()
+
   const [intersectionRef, intersectionEntry] = useIntersect({
     root: boundingRef?.current || null,
     rootMargin: '-100px 0px 0px 0px',
@@ -212,7 +213,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
           <div className={`${baseClass}__scroll-container`}>
             <div className={`${baseClass}__scroll-content`}>
               {render && render({ close: () => setActive(false) })}
-              {children && children}
+              {children}
             </div>
           </div>
         </div>

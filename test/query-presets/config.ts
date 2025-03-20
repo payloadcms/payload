@@ -17,6 +17,10 @@ export default buildConfigWithDefaults({
     },
   },
   queryPresets: {
+    // labels: {
+    //   singular: 'Report',
+    //   plural: 'Reports',
+    // },
     access: {
       read: ({ req: { user } }) => ({
         'access.read.roles': {

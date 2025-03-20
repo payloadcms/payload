@@ -4,6 +4,6 @@ import './index.scss'
 
 const baseClass = 'popup-divider'
 
-export const Divider: React.FC = () => {
+export const PopupListDivider: React.FC = () => {
   return <hr className={baseClass} />
 }
