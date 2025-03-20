@@ -286,6 +286,20 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
         defaultJobsCollection = configWithDefaults.jobs.jobsCollectionOverrides({
           defaultJobsCollection,
         })
+
+        const hooks = defaultJobsCollection?.hooks
+        // @todo - delete this check in 4.0
+        if (hooks && config?.jobs?.runHooks !== true) {
+          for (const hook of Object.keys(hooks)) {
+            const defaultAmount = hook === 'afterRead' || hook === 'beforeChange' ? 1 : 0
+            if (hooks[hook]?.length > defaultAmount) {
+              console.warn(
+                `The jobsCollectionOverrides function is returning a collection with an additional ${hook} hook defined. These hooks will not run unless the jobs.runHooks option is set to true. Setting this option to true will negatively impact performance.`,
+              )
+              break
+            }
+          }
+        }
       }
       const sanitizedJobsCollection = await sanitizeCollection(
         config as unknown as Config,

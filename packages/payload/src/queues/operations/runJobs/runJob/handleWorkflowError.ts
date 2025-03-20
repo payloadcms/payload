@@ -26,7 +26,7 @@ export function handleWorkflowError({
 } {
   const jobLabel = job.workflowSlug || `Task: ${job.taskSlug}`
 
-  let hasFinalError = state.reachedMaxRetries // If any TASK reached max retries, the job has an error
+  let hasFinalError = state.reachedMaxRetries || !!('cancelled' in error && error.cancelled) // If any TASK reached max retries, the job has an error
   const maxWorkflowRetries: number =
     (typeof workflowConfig.retries === 'object'
       ? workflowConfig.retries.attempts
