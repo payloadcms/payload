@@ -22,6 +22,7 @@ type Args = {
   sort: Sort
   sortAggregation?: PipelineStage[]
   timestamps: boolean
+  versions?: boolean
 }
 
 export type SortArgs = {
@@ -35,12 +36,16 @@ const relationshipSort = ({
   adapter,
   fields,
   path,
+  sort,
   sortAggregation,
+  sortDirection,
 }: {
   adapter: MongooseAdapter
   fields: FlattenedField[]
   path: string
+  sort: Record<string, string>
   sortAggregation: PipelineStage[]
+  sortDirection: SortDirection
 }) => {
   let currentFields = fields
   const segments = path.split('.')
@@ -58,8 +63,8 @@ const relationshipSort = ({
     if ('fields' in field) {
       currentFields = field.flattenedFields
     } else if (field.type === 'relationship' && i !== segments.length - 1) {
-      const relationshipPath = segments.splice(0, i).join('.')
-      const sortFieldPath = segments.splice(i + 1, segments.length).join('.')
+      const relationshipPath = segments.slice(0, i + 1).join('.')
+      const sortFieldPath = segments.slice(i + 1, segments.length).join('.')
       if (Array.isArray(field.relationTo)) {
         throw new APIError('Not supported')
       }
@@ -67,11 +72,8 @@ const relationshipSort = ({
       const foreignCollection = getCollection({ adapter, collectionSlug: field.relationTo })
 
       if (
-        sortAggregation.some((each) => {
-          if ('$lookup' in each && each.$lookup.as === `__${path}`) {
-            return false
-          }
-          return true
+        !sortAggregation.some((each) => {
+          return '$lookup' in each && each.$lookup.as === `__${path}`
         })
       ) {
         sortAggregation.push({
@@ -89,6 +91,9 @@ const relationshipSort = ({
             ],
           },
         })
+
+        sort[`__${path}.${sortFieldPath}`] = sortDirection
+
         return true
       }
     }
@@ -136,20 +141,27 @@ export const buildSortParam = ({
 
     if (
       sortAggregation &&
-      relationshipSort({ adapter, fields, path: sortProperty, sortAggregation })
-    ) {
-      sortProperty = `__${sortProperty}`
-      acc[sortProperty] = sortDirection
-    } else {
-      const localizedProperty = getLocalizedSortProperty({
-        config,
+      relationshipSort({
+        adapter,
         fields,
-        locale,
-        parentIsLocalized,
-        segments: sortProperty.split('.'),
+        path: sortProperty,
+        sort: acc,
+        sortAggregation,
+        sortDirection,
       })
-      acc[localizedProperty] = sortDirection
+    ) {
+      return acc
     }
+
+    const localizedProperty = getLocalizedSortProperty({
+      config,
+      fields,
+      locale,
+      parentIsLocalized,
+      segments: sortProperty.split('.'),
+    })
+    acc[localizedProperty] = sortDirection
+
     return acc
   }, {})
 
