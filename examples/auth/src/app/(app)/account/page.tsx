@@ -37,7 +37,7 @@ export default async function Account() {
           .
         </p>
         <AccountForm />
-        <Button appearance="secondary" href="/logout" label="Log out" />
+        <Button className="destructive" appearance="secondary" href="/logout" label="Log out" />
       </Gutter>
     </Fragment>
   )
