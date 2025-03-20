@@ -1300,6 +1300,89 @@ Some line [Start of link
     },
   },
   {
+    input: `
+<Banner>
+  Some line [Text **bold** \\*normal\\*](/some/link)
+</Banner>
+`,
+    blockNode: {
+      fields: {
+        blockType: 'Banner',
+        content: {
+          root: {
+            children: [
+              {
+                children: [
+                  {
+                    detail: 0,
+                    format: 0,
+                    mode: 'normal',
+                    style: '',
+                    text: 'Some line ',
+                    type: 'text',
+                    version: 1,
+                  },
+                  {
+                    children: [
+                      {
+                        detail: 0,
+                        format: 0,
+                        mode: 'normal',
+                        style: '',
+                        text: 'Text ',
+                        type: 'text',
+                        version: 1,
+                      },
+                      {
+                        detail: 0,
+                        format: 1,
+                        mode: 'normal',
+                        style: '',
+                        text: 'bold',
+                        type: 'text',
+                        version: 1,
+                      },
+                      {
+                        detail: 0,
+                        format: 0,
+                        mode: 'normal',
+                        style: '',
+                        text: ' *normal*',
+                        type: 'text',
+                        version: 1,
+                      },
+                    ],
+                    fields: {
+                      linkType: 'custom',
+                      newTab: false,
+                      url: '/some/link',
+                    },
+                    format: '',
+                    indent: 0,
+                    type: 'link',
+                    version: 3,
+                  },
+                ],
+                direction: null,
+                format: '',
+                indent: 0,
+                textFormat: 0,
+                textStyle: '',
+                type: 'paragraph',
+                version: 1,
+              },
+            ],
+            direction: null,
+            format: '',
+            indent: 0,
+            type: 'root',
+            version: 1,
+          },
+        },
+      },
+    },
+  },
+  {
     inputAfterConvertFromEditorJSON: `
 <Banner>
   Text text [ Link ](/some/link) .
