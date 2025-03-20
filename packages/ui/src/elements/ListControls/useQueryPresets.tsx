@@ -106,7 +106,7 @@ export const useQueryPresets = ({
           if (res.status < 400) {
             toast.success(
               t('general:titleDeleted', {
-                label: getTranslation(presetConfig.labels.singular, i18n),
+                label: getTranslation(presetConfig?.labels?.singular, i18n),
                 title: activePreset.title,
               }),
             )
@@ -182,7 +182,7 @@ export const useQueryPresets = ({
     const menuItems: React.ReactNode[] = [
       <PopupListGroupLabel
         key="preset-group-label"
-        label={getTranslation(presetConfig.labels.plural, i18n)}
+        label={getTranslation(presetConfig?.labels?.plural, i18n)}
       />,
     ]
 
@@ -255,7 +255,7 @@ export const useQueryPresets = ({
     t,
     refineListData,
     modified,
-    presetConfig.labels.plural,
+    presetConfig?.labels?.plural,
     i18n,
   ])
 
@@ -284,7 +284,7 @@ export const useQueryPresets = ({
             i18nKey="general:aboutToDelete"
             t={t}
             variables={{
-              label: presetConfig.labels.singular,
+              label: presetConfig?.labels?.singular,
               title: activePreset?.title,
             }}
           />
