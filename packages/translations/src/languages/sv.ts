@@ -297,7 +297,6 @@ export const svTranslations: DefaultTranslationsObject = {
     password: 'Lösenord',
     payloadSettings: 'Programinställningar',
     perPage: 'Per Sida: {{limit}}',
-    preset: 'Förinställd',
     previous: 'Föregående',
     reindex: 'Omindexera',
     reindexingAll: 'Omindexerar alla {{collections}}...',

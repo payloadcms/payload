@@ -297,7 +297,6 @@ export const azTranslations: DefaultTranslationsObject = {
     password: 'Şifrə',
     payloadSettings: 'Payload Parametrləri',
     perPage: 'Hər səhifədə: {{limit}}',
-    preset: 'Öncədən təyin edilmiş',
     previous: 'Əvvəlki',
     reindex: 'Yenidən indekslə',
     reindexingAll: 'Bütün {{collections}} yenidən indekslənir.',

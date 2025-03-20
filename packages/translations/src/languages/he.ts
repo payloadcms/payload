@@ -290,7 +290,6 @@ export const heTranslations: DefaultTranslationsObject = {
     password: 'סיסמה',
     payloadSettings: 'הגדרות מערכת Payload',
     perPage: '{{limit}} בכל עמוד',
-    preset: 'מוגדר מראש',
     previous: 'קודם',
     reindex: 'החזרת אינדקס',
     reindexingAll: 'החזרת אינדקס לכל {{collections}}.',

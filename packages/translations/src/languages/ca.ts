@@ -297,7 +297,6 @@ export const caTranslations: DefaultTranslationsObject = {
     password: 'Contrasenya',
     payloadSettings: 'configuracio Payload',
     perPage: 'Per pagian: {{limit}}',
-    preset: 'Preset',
     previous: 'Previ',
     reindex: 'Reindexa',
     reindexingAll: 'Reindexa tots el {{collections}}.',

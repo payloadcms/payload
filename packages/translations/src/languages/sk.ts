@@ -298,7 +298,6 @@ export const skTranslations: DefaultTranslationsObject = {
     password: 'Heslo',
     payloadSettings: 'Nastavenia dátového záznamu',
     perPage: 'Na stránku: {{limit}}',
-    preset: 'Prednastavené',
     previous: 'Predchádzajúci',
     reindex: 'Reindexovať',
     reindexingAll: 'Znova sa indexujú všetky {{collections}}.',

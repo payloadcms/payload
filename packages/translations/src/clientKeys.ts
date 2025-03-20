@@ -235,7 +235,6 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:password',
   'general:payloadSettings',
   'general:perPage',
-  'general:preset',
   'general:previous',
   'general:reindex',
   'general:reindexingAll',

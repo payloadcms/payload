@@ -297,7 +297,6 @@ export const nbTranslations: DefaultTranslationsObject = {
     password: 'Passord',
     payloadSettings: 'Payload-innstillinger',
     perPage: 'Per side: {{limit}}',
-    preset: 'Forhåndsinnstilling',
     previous: 'Forrige',
     reindex: 'Reindekser',
     reindexingAll: 'Reindekserer alle {{collections}}.',

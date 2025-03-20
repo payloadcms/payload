@@ -297,7 +297,6 @@ export const rsTranslations: DefaultTranslationsObject = {
     password: 'Лозинка',
     payloadSettings: 'Payload поставке',
     perPage: 'По страници: {{limit}}',
-    preset: 'Unapred postavljeno',
     previous: 'Prethodni',
     reindex: 'Реиндексирај',
     reindexingAll: 'Ponovno indeksiranje svih {{collections}}.',

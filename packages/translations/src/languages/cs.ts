@@ -295,7 +295,6 @@ export const csTranslations: DefaultTranslationsObject = {
     password: 'Heslo',
     payloadSettings: 'Payload nastavení',
     perPage: 'Na stránku: {{limit}}',
-    preset: 'Přednastavení',
     previous: 'Předchozí',
     reindex: 'Přeindexovat',
     reindexingAll: 'Přeindexování všech {{collections}}.',

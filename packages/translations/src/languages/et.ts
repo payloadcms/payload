@@ -294,7 +294,6 @@ export const etTranslations: DefaultTranslationsObject = {
     password: 'Parool',
     payloadSettings: 'Payload seaded',
     perPage: 'Lehel: {{limit}}',
-    preset: 'Eelseadistus',
     previous: 'Eelmine',
     reindex: 'Indekseeri uuesti',
     reindexingAll: 'Indekseerin uuesti kõik {{collections}}.',

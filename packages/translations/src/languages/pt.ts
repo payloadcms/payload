@@ -297,7 +297,6 @@ export const ptTranslations: DefaultTranslationsObject = {
     password: 'Senha',
     payloadSettings: 'Configurações do Payload',
     perPage: 'Itens por Página: {{limit}}',
-    preset: 'Predefinido',
     previous: 'Anterior',
     reindex: 'Reindexar',
     reindexingAll: 'Reindexando todas as {{collections}}.',

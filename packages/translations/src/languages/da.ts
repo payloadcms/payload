@@ -295,7 +295,6 @@ export const daTranslations: DefaultTranslationsObject = {
     password: 'Adgangskode',
     payloadSettings: 'Payload-indstillinger',
     perPage: 'Per side: {{limit}}',
-    preset: 'Forudindstillet',
     previous: 'Tidligere',
     reindex: 'Genindekser',
     reindexingAll: 'Genindekserer alle {{collections}}.',

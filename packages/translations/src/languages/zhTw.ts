@@ -286,7 +286,6 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     password: '密碼',
     payloadSettings: 'Payload設定',
     perPage: '每一頁： {{limit}} 個',
-    preset: '預設',
     previous: '先前的',
     reindex: '重新索引',
     reindexingAll: '正在重新索引所有{{collections}}。',

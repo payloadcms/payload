@@ -299,7 +299,6 @@ export const huTranslations: DefaultTranslationsObject = {
     password: 'Jelszó',
     payloadSettings: 'Payload beállítások',
     perPage: 'Oldalanként: {{limit}}',
-    preset: 'Előbeállítás',
     previous: 'Előző',
     reindex: 'Újraindexelés',
     reindexingAll: 'Az összes {{collections}} újraindexálása folyamatban.',

@@ -300,7 +300,6 @@ export const itTranslations: DefaultTranslationsObject = {
     password: 'Password',
     payloadSettings: 'Impostazioni di Payload',
     perPage: 'Per Pagina: {{limit}}',
-    preset: 'Preimpostato',
     previous: 'Precedente',
     reindex: 'Reindicizza',
     reindexingAll: "Rifacendo l'indice di tutte le {{collections}}.",

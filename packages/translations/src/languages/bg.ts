@@ -296,7 +296,6 @@ export const bgTranslations: DefaultTranslationsObject = {
     password: 'Парола',
     payloadSettings: 'Настройки на Payload',
     perPage: 'На страница: {{limit}}',
-    preset: 'Предварително зададен',
     previous: 'Предишен',
     reindex: 'Преиндексиране',
     reindexingAll: 'Преиндексиране на всички {{collections}}.',

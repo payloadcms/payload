@@ -297,7 +297,6 @@ export const hrTranslations: DefaultTranslationsObject = {
     password: 'Lozinka',
     payloadSettings: 'Payload postavke',
     perPage: 'Po stranici: {{limit}}',
-    preset: 'Predložak',
     previous: 'Prethodni',
     reindex: 'Ponovno indeksiraj',
     reindexingAll: 'Ponovno indeksiranje svih {{collections}}.',

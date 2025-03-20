@@ -293,7 +293,6 @@ export const arTranslations: DefaultTranslationsObject = {
     password: 'كلمة المرور',
     payloadSettings: 'الإعدادات',
     perPage: 'لكلّ صفحة: {{limit}}',
-    preset: 'مُعد مُسبقًا',
     previous: 'سابق',
     reindex: 'إعادة الفهرسة',
     reindexingAll: 'جاري إعادة فهرسة جميع {{collections}}.',

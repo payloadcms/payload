@@ -299,7 +299,6 @@ export const ruTranslations: DefaultTranslationsObject = {
     password: 'Пароль',
     payloadSettings: 'Настройки Payload',
     perPage: 'На странице: {{limit}}',
-    preset: 'Предустановка',
     previous: 'Предыдущий',
     reindex: 'Переиндексировать',
     reindexingAll: 'Переиндексирование всех {{collections}}.',

@@ -301,7 +301,6 @@ export const roTranslations: DefaultTranslationsObject = {
     password: 'Parola',
     payloadSettings: 'Setări de Payload',
     perPage: 'Pe pagină: {{limit}}',
-    preset: 'Presetare',
     previous: 'Anterior',
     reindex: 'Reindexare',
     reindexingAll: 'Reindexarea tuturor {{collections}}.',

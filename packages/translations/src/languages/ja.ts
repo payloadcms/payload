@@ -297,7 +297,6 @@ export const jaTranslations: DefaultTranslationsObject = {
     password: 'パスワード',
     payloadSettings: 'Payload 設定',
     perPage: '表示件数: {{limit}}',
-    preset: 'プリセット',
     previous: '前の',
     reindex: '再インデックス',
     reindexingAll: 'すべての{{collections}}を再インデックスしています。',

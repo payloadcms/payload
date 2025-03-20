@@ -296,7 +296,6 @@ export const viTranslations: DefaultTranslationsObject = {
     password: 'Mật khẩu',
     payloadSettings: 'Cài đặt',
     perPage: 'Hiển thị mỗi trang: {{limit}}',
-    preset: 'Cài đặt trước',
     previous: 'Trước đó',
     reindex: 'Tái lập chỉ mục',
     reindexingAll: 'Đang tái lập chỉ mục tất cả {{collections}}.',

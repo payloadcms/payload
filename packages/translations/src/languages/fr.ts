@@ -304,7 +304,6 @@ export const frTranslations: DefaultTranslationsObject = {
     password: 'Mot de passe',
     payloadSettings: 'Paramètres de Payload',
     perPage: 'Par Page: {{limit}}',
-    preset: 'Préréglage',
     previous: 'Précédent',
     reindex: 'Réindexer',
     reindexingAll: 'Réindexation de toutes les {{collections}}.',

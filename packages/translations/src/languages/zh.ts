@@ -286,7 +286,6 @@ export const zhTranslations: DefaultTranslationsObject = {
     password: '密码',
     payloadSettings: 'Payload设置',
     perPage: '每一页: {{limit}}',
-    preset: '预设',
     previous: '前一个',
     reindex: '重新索引',
     reindexingAll: '正在重新索引所有{{collections}}。',

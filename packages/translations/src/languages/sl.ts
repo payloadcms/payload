@@ -296,7 +296,6 @@ export const slTranslations: DefaultTranslationsObject = {
     password: 'Geslo',
     payloadSettings: 'Nastavitve Payloada',
     perPage: 'Na stran: {{limit}}',
-    preset: 'Prednastavitev',
     previous: 'Prejšnji',
     reindex: 'Reindeksiraj',
     reindexingAll: 'Ponovno indeksiranje vseh {{collections}}.',

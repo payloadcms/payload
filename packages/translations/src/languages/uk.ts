@@ -296,7 +296,6 @@ export const ukTranslations: DefaultTranslationsObject = {
     password: 'Пароль',
     payloadSettings: 'Налаштування Payload',
     perPage: 'На сторінці: {{limit}}',
-    preset: 'Попередньо встановлені параметри',
     previous: 'Попередній',
     reindex: 'Повторне індексування',
     reindexingAll: 'Перебудова індексів для всіх {{collections}}.',

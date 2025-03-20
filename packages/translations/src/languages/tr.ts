@@ -300,7 +300,6 @@ export const trTranslations: DefaultTranslationsObject = {
     password: 'Parola',
     payloadSettings: 'Ayarlar',
     perPage: 'Sayfa başına: {{limit}}',
-    preset: 'Ön Ayar',
     previous: 'Önceki',
     reindex: 'Yeniden İndeksle',
     reindexingAll: 'Tüm {{collections}} yeniden dizine alınıyor.',

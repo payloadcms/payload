@@ -293,7 +293,6 @@ export const thTranslations: DefaultTranslationsObject = {
     password: 'รหัสผ่าน',
     payloadSettings: 'การตั้งค่า Payload',
     perPage: 'จำนวนต่อหน้า: {{limit}}',
-    preset: 'พรีเซ็ต',
     previous: 'ก่อนหน้านี้',
     reindex: 'จัดทำดัชนีใหม่',
     reindexingAll: 'กำลังทำการจัดทำดัชนีใหม่ทั้งหมดใน {{collections}}.',

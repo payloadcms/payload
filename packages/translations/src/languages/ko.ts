@@ -295,7 +295,6 @@ export const koTranslations: DefaultTranslationsObject = {
     password: '비밀번호',
     payloadSettings: 'Payload 설정',
     perPage: '페이지당 개수: {{limit}}',
-    preset: '사전 설정',
     previous: '이전',
     reindex: '재인덱싱',
     reindexingAll: '모든 {{collections}}를 다시 인덱싱하는 중입니다.',

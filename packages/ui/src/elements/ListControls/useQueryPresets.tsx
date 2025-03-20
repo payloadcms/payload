@@ -217,7 +217,7 @@ export const useQueryPresets = ({
         }}
       >
         {t('general:createNewLabel', {
-          label: t('general:preset'),
+          label: presetConfig.labels.singular,
         })}
       </PopupList.Button>,
     )
@@ -251,6 +251,7 @@ export const useQueryPresets = ({
     t,
     refineListData,
     modified,
+    presetConfig.labels.singular,
   ])
 
   return {
@@ -278,7 +279,7 @@ export const useQueryPresets = ({
             i18nKey="general:aboutToDelete"
             t={t}
             variables={{
-              label: getTranslation(t('general:preset'), i18n),
+              label: presetConfig.labels.singular,
               title: activePreset?.title,
             }}
           />

@@ -295,7 +295,6 @@ export const faTranslations: DefaultTranslationsObject = {
     password: 'گذرواژه',
     payloadSettings: 'تنظیمات پی‌لود',
     perPage: 'هر برگه: {{limit}}',
-    preset: 'پیش فرض',
     previous: 'قبلی',
     reindex: 'بازنمایه‌سازی',
     reindexingAll: 'در حال بازایندکس همه {{collections}}.',

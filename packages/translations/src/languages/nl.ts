@@ -300,7 +300,6 @@ export const nlTranslations: DefaultTranslationsObject = {
     password: 'Wachtwoord',
     payloadSettings: 'Payload Instellingen',
     perPage: 'Per pagina: {{limit}}',
-    preset: 'Voorinstelling',
     previous: 'Vorige',
     reindex: 'Herindexeren',
     reindexingAll: 'Bezig met het opnieuw indexeren van alle {{collections}}.',

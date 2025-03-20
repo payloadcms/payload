@@ -301,7 +301,6 @@ export const esTranslations: DefaultTranslationsObject = {
     password: 'Contraseña',
     payloadSettings: 'Configuración de la carga',
     perPage: 'Por página: {{limit}}',
-    preset: 'Preestablecido',
     previous: 'Anterior',
     reindex: 'Reindexar',
     reindexingAll: 'Reindexando todas las {{collections}}.',

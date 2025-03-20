@@ -299,7 +299,6 @@ export const myTranslations: DefaultTranslationsObject = {
     password: 'စကားဝှက်',
     payloadSettings: 'ရွေးချယ်စရာများ',
     perPage: 'စာမျက်နှာ အလိုက်: {{limit}}',
-    preset: 'အသင်းများ',
     previous: 'ယခင်',
     reindex: 'ပြန်လည်အညွှန်းပြုလုပ်ပါ',
     reindexingAll: 'အပေါ် {{collections}} အားလုံးကို ထပ်လိပ်နေပါသည်။',

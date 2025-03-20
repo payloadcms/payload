@@ -297,7 +297,6 @@ export const enTranslations = {
     password: 'Password',
     payloadSettings: 'Payload Settings',
     perPage: 'Per Page: {{limit}}',
-    preset: 'Preset',
     previous: 'Previous',
     reindex: 'Reindex',
     reindexingAll: 'Reindexing all {{collections}}.',

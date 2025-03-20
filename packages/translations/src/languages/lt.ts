@@ -299,7 +299,6 @@ export const ltTranslations: DefaultTranslationsObject = {
     password: 'Slaptažodis',
     payloadSettings: 'Payload nustatymai',
     perPage: 'Puslapyje: {{limit}}',
-    preset: 'Nustatytas',
     previous: 'Ankstesnis',
     reindex: 'Perindeksuoti',
     reindexingAll: 'Perindeksuojamos visos {{collections}}.',

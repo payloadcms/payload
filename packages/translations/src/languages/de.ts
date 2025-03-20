@@ -301,7 +301,6 @@ export const deTranslations: DefaultTranslationsObject = {
     password: 'Passwort',
     payloadSettings: 'Payload Einstellungen',
     perPage: 'Pro Seite: {{limit}}',
-    preset: 'Voreinstellung',
     previous: 'Vorherige',
     reindex: 'Neuindizieren',
     reindexingAll: 'Alle {{collections}} werden neu indiziert.',

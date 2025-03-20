@@ -3,6 +3,7 @@ import type { QueryPreset } from 'payload'
 
 import { PeopleIcon } from '../../../icons/People/index.js'
 import { XIcon } from '../../../icons/X/index.js'
+import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Pill } from '../../Pill/index.js'
 import './index.scss'
@@ -19,6 +20,11 @@ export function ActiveQueryPreset({
   resetPreset: () => Promise<void>
 }) {
   const { t } = useTranslation()
+  const { getEntityConfig } = useConfig()
+
+  const presetsConfig = getEntityConfig({
+    collectionSlug: 'payload-query-presets',
+  })
 
   return (
     <Pill
@@ -31,7 +37,7 @@ export function ActiveQueryPreset({
     >
       {activePreset?.isShared && <PeopleIcon className={`${baseClass}__shared`} />}
       <div className={`${baseClass}__label-text`}>
-        {activePreset?.title || t('general:selectLabel', { label: t('general:preset') })}
+        {activePreset?.title || t('general:selectLabel', { label: presetsConfig.labels.singular })}
       </div>
       {activePreset ? (
         <div
