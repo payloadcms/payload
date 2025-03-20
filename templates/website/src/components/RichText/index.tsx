@@ -21,6 +21,7 @@ import type {
 import { BannerBlock } from '@/blocks/Banner/Component'
 import { CallToActionBlock } from '@/blocks/CallToAction/Component'
 import { cn } from '@/utilities/ui'
+import { ParagraphJSXConverter } from './converters/paragraph'
 
 type NodeTypes =
   | DefaultNodeTypes
@@ -38,6 +39,10 @@ const internalDocToHref = ({ linkNode }: { linkNode: SerializedLinkNode }) => {
 const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) => ({
   ...defaultConverters,
   ...LinkJSXConverter({ internalDocToHref }),
+  // ParagraphJSXConverter is an example custom converter
+  // If you don't plan to edit it, it can be removed as it is included in the default converters
+  ...ParagraphJSXConverter,
+  // End of example
   blocks: {
     banner: ({ node }) => <BannerBlock className="col-start-2 mb-4" {...node.fields} />,
     mediaBlock: ({ node }) => (
