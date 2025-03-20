@@ -31,7 +31,7 @@ export const getConstraints = (config: Config): Field => ({
             type: 'select',
             defaultValue: 'onlyMe',
             label: ({ i18n }) =>
-              `Specify who can ${operation} this ${getTranslation(config.queryPresets.labels?.singular || 'Preset', i18n)}`,
+              `Specify who can ${operation} this ${getTranslation(config.queryPresets?.labels?.singular || 'Preset', i18n)}`,
             options: [
               {
                 label: 'Everyone',
