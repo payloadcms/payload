@@ -344,7 +344,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Artimieji renginiai',
     updatedAt: 'Atnaujinta',
     updatedCountSuccessfully: '{{count}} {{label}} sėkmingai atnaujinta.',
-    updatedLabelSuccessfully: 'Sėkmingai atnaujinta {{žymė}}.',
+    updatedLabelSuccessfully: 'Sėkmingai atnaujinta {{label}}.',
     updatedSuccessfully: 'Sėkmingai atnaujinta.',
     updateForEveryone: 'Atnaujinimas visiems',
     updating: 'Atnaujinimas',

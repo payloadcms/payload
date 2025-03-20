@@ -318,7 +318,7 @@ export const trTranslations: DefaultTranslationsObject = {
     selectAll: "Tüm {{count}} {{label}}'ı seçin",
     selectAllRows: 'Tüm satırları seçin',
     selectedCount: '{{count}} {{label}} seçildi',
-    selectLabel: '{{etiket}} seçin',
+    selectLabel: '{{label}} seçin',
     selectValue: 'Bir değer seçin',
     showAllLabel: 'Tüm {{label}} göster',
     sorryNotFound: 'Üzgünüz, isteğinizle eşleşen bir sonuç bulunamadı.',

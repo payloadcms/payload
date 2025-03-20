@@ -307,7 +307,7 @@ export const heTranslations: DefaultTranslationsObject = {
     selectAll: 'בחר את כל {{count}} ה{{label}}',
     selectAllRows: 'בחר את כל השורות',
     selectedCount: '{{count}} {{label}} נבחרו',
-    selectLabel: 'בחר {{תווית}}',
+    selectLabel: '{{label}} בחר',
     selectValue: 'בחר ערך',
     showAllLabel: 'הצג את כל ה{{label}}',
     sorryNotFound: 'מצטערים - אין תוצאות התואמות את הבקשה.',

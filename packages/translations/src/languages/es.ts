@@ -319,7 +319,7 @@ export const esTranslations: DefaultTranslationsObject = {
     selectAll: 'Seleccionar todo {{count}} {{label}}',
     selectAllRows: 'Selecciona todas las filas',
     selectedCount: '{{count}} {{label}} seleccionado',
-    selectLabel: 'Seleccione {{etiqueta}}',
+    selectLabel: 'Seleccione {{label}}',
     selectValue: 'Selecciona un valor',
     showAllLabel: 'Muestra todas {{label}}',
     sorryNotFound: 'Lo sentimos. No hay nada que corresponda con tu solicitud.',

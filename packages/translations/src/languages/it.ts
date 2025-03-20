@@ -346,7 +346,7 @@ export const itTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Eventi Imminenti',
     updatedAt: 'Aggiornato il',
     updatedCountSuccessfully: '{{count}} {{label}} aggiornato con successo.',
-    updatedLabelSuccessfully: '{{Etichetta}} aggiornata con successo.',
+    updatedLabelSuccessfully: '{{label}} aggiornata con successo.',
     updatedSuccessfully: 'Aggiornato con successo.',
     updateForEveryone: 'Aggiornamento per tutti',
     updating: 'Aggiornamento',

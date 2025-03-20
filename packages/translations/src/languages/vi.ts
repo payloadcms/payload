@@ -341,7 +341,7 @@ export const viTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Sự kiện sắp tới',
     updatedAt: 'Ngày cập nhật',
     updatedCountSuccessfully: 'Đã cập nhật thành công {{count}} {{label}}.',
-    updatedLabelSuccessfully: 'Đã cập nhật {{nhãn}} thành công.',
+    updatedLabelSuccessfully: 'Đã cập nhật {{label}} thành công.',
     updatedSuccessfully: 'Cập nhật thành công.',
     updateForEveryone: 'Cập nhật cho mọi người',
     updating: 'Đang cập nhật',

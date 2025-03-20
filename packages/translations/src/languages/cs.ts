@@ -340,7 +340,7 @@ export const csTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Nadcházející události',
     updatedAt: 'Aktualizováno v',
     updatedCountSuccessfully: 'Úspěšně aktualizováno {{count}} {{label}}.',
-    updatedLabelSuccessfully: 'Úspěšně aktualizovaný {{štítek}}.',
+    updatedLabelSuccessfully: 'Úspěšně aktualizovaný {{label}}.',
     updatedSuccessfully: 'Úspěšně aktualizováno.',
     updateForEveryone: 'Aktualizace pro všechny',
     updating: 'Aktualizace',

@@ -342,7 +342,7 @@ export const plTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Nadchodzące Wydarzenia',
     updatedAt: 'Data edycji',
     updatedCountSuccessfully: 'Pomyślnie zaktualizowano {{count}} {{label}}.',
-    updatedLabelSuccessfully: 'Pomyślnie zaktualizowano {{etykieta}}.',
+    updatedLabelSuccessfully: 'Pomyślnie zaktualizowano {{label}}.',
     updatedSuccessfully: 'Aktualizacja zakończona sukcesem.',
     updateForEveryone: 'Aktualizacja dla wszystkich',
     updating: 'Aktualizacja',
