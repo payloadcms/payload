@@ -1964,6 +1964,22 @@ describe('database', () => {
       })
       expect(doc.postTitle).toBe('my-title')
     })
+
+    it('should allow to query by a virtual field with reference', async () => {
+      const post = await payload.create({ collection: 'posts', data: { title: 'my-title' } })
+      await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post.id },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'virtual-relations',
+        where: { postTitle: { equals: 'my-title' } },
+      })
+      expect(docs).toHaveLength(1)
+      expect(docs[0]?.postTitle).toBe('my-title')
+    })
   })
 
   it('should not allow to query by a field with `virtual: true`', async () => {

@@ -2,17 +2,19 @@
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { FlattenedField } from '../../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
-import type { PayloadRequest } from '../../types/index.js'
+import type { PayloadRequest, WhereField } from '../../types/index.js'
 import type { EntityPolicies, PathToQuery } from './types.js'
 
 import { fieldAffectsData, fieldIsVirtual } from '../../fields/config/types.js'
 import { getEntityPolicies } from '../../utilities/getEntityPolicies.js'
+import { getFieldByPath } from '../../utilities/getFieldByPath.js'
 import isolateObjectProperty from '../../utilities/isolateObjectProperty.js'
 import { getLocalizedPaths } from '../getLocalizedPaths.js'
 import { validateQueryPaths } from './validateQueryPaths.js'
 
 type Args = {
   collectionConfig?: SanitizedCollectionConfig
+  constraint: WhereField
   errors: { path: string }[]
   fields: FlattenedField[]
   globalConfig?: SanitizedGlobalConfig
@@ -31,6 +33,7 @@ type Args = {
  */
 export async function validateSearchParam({
   collectionConfig,
+  constraint,
   errors,
   fields,
   globalConfig,
@@ -98,8 +101,34 @@ export async function validateSearchParam({
         return
       }
 
-      if (fieldIsVirtual(field)) {
-        errors.push({ path })
+      if ('virtual' in field && field.virtual) {
+        if (field.virtual === true) {
+          errors.push({ path })
+        } else {
+          const relationshipField = getFieldByPath({
+            fields: req.payload.collections[collectionSlug].config.flattenedFields,
+            path: field.virtual.relationship,
+          })
+
+          if (
+            relationshipField &&
+            relationshipField.field.type === 'relationship' &&
+            !relationshipField.field.hasMany &&
+            typeof relationshipField.field.relationTo === 'string'
+          ) {
+            constraint[`${field.virtual.relationship}.${field.virtual.path}`] = constraint[path]
+            delete constraint[path]
+
+            field = getFieldByPath({
+              fields:
+                req.payload.collections[relationshipField.field.relationTo].config.flattenedFields,
+              path: field.virtual.path,
+            }).field
+            collectionSlug = relationshipField.field.relationTo
+          } else {
+            errors.push({ path })
+          }
+        }
       }
 
       if (!overrideAccess && fieldAffectsData(field)) {
