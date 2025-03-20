@@ -363,7 +363,7 @@ export const deTranslations: DefaultTranslationsObject = {
     copyFrom: 'Kopieren von',
     copyFromTo: 'Kopieren von {{from}} zu {{to}}',
     copyTo: 'Kopieren nach',
-    copyToLocale: 'Für eine andere Sprache kopieren',
+    copyToLocale: 'Erstelle Kopie für Sprach-Variante',
     localeToPublish: 'Zu veröffentlichende Sprache',
     selectLocaleToCopy: 'Wähle den Ort zum Kopieren aus',
   },
