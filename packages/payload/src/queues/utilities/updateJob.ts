@@ -1,102 +1,62 @@
+import type { ManyOptions } from '../../collections/operations/local/update.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 import type { BaseJob } from '../config/types/workflowTypes.js'
 
 import { jobAfterRead, jobsCollectionSlug } from '../config/index.js'
 import { sanitizeUpdateData } from './sanitizeUpdateData.js'
 
-type RunJobArgs = {
-  data: Partial<BaseJob>
-  depth?: number
-  disableTransaction?: boolean
-  id: number | string
-  req: PayloadRequest
-  returning?: boolean
-}
-export async function updateJob({
-  id,
-  data,
-  depth,
-  disableTransaction,
-  req,
-  returning,
-}: RunJobArgs): Promise<BaseJob | null> {
-  if (depth || req.payload.config.jobs.runHooks) {
-    const result = await req.payload.update({
-      id,
-      collection: jobsCollectionSlug,
-      data,
-      depth,
-      disableTransaction,
-      req,
-    })
-    if (returning === false) {
-      return null
-    }
-    return result as BaseJob
-  }
-
-  let updateData = sanitizeUpdateData({ data })
-
-  // update updateData to support partial updates
-  // TODO: this can be optimized in the future - partial updates are supported in mongodb. In postgres,
-  // we can support this by manually constructing the sql query
-  const currentJob = await req.payload.db.findOne({
-    collection: jobsCollectionSlug,
-    req: disableTransaction === true ? undefined : req,
-    where: {
-      id: {
-        equals: id,
-      },
-    },
-  })
-
-  if (currentJob) {
-    updateData = {
-      ...currentJob,
-      ...updateData,
-    }
-  }
-
-  const updatedJob = (await req.payload.db.updateOne({
-    id,
-    collection: jobsCollectionSlug,
-    data: updateData,
-    req: disableTransaction === true ? undefined : req,
-    returning: true,
-  })) as BaseJob
-
-  if (returning === false) {
-    return null
-  }
-
-  const res = jobAfterRead({
-    config: req.payload.config,
-    doc: updatedJob,
-  })
-
-  return res
-}
-
-type RunJobsArgs = {
+type BaseArgs = {
   data: Partial<BaseJob>
   depth?: number
   disableTransaction?: boolean
   limit?: number
   req: PayloadRequest
   returning?: boolean
+}
+
+type ArgsByID = {
+  id: number | string
+  limit?: never
+  where?: never
+}
+
+/**
+ * Convenience method for updateJobs by id
+ */
+export async function updateJob(args: ArgsByID & BaseArgs) {
+  const result = await updateJobs({
+    ...args,
+    id: undefined,
+    limit: 1,
+    where: { id: { equals: args.id } },
+  })
+  if (result) {
+    return result[0]
+  }
+}
+
+type ArgsWhere = {
+  id?: never | undefined
+  limit?: number
   where: Where
 }
+
+type RunJobsArgs = (ArgsByID | ArgsWhere) & BaseArgs
+
 export async function updateJobs({
+  id,
   data,
   depth,
   disableTransaction,
-  limit,
+  limit: limitArg,
   req,
   returning,
   where,
 }: RunJobsArgs): Promise<BaseJob[] | null> {
+  const limit = id ? 1 : limitArg
   if (depth || req.payload.config?.jobs?.runHooks) {
     const result = await req.payload.update({
+      id,
       collection: jobsCollectionSlug,
       data,
       depth,
@@ -104,14 +64,14 @@ export async function updateJobs({
       limit,
       req,
       where,
-    })
+    } as ManyOptions<any, any>)
     if (returning === false || !result) {
       return null
     }
     return result.docs as BaseJob[]
   }
 
-  let updatedJobs = []
+  const updatedJobs = []
 
   // TODO: this can be optimized in the future - partial updates are supported in mongodb. In postgres,
   // we can support this by manually constructing the sql query. We should use req.payload.db.updateMany instead
@@ -119,6 +79,7 @@ export async function updateJobs({
   const jobsToUpdate = await req.payload.db.find({
     collection: jobsCollectionSlug,
     limit,
+    pagination: false,
     req: disableTransaction === true ? undefined : req,
     where,
   })
@@ -145,12 +106,10 @@ export async function updateJobs({
     return null
   }
 
-  const res = updatedJobs.map((updatedJob) => {
+  return updatedJobs.map((updatedJob) => {
     return jobAfterRead({
       config: req.payload.config,
       doc: updatedJob,
     })
   })
-
-  return res
 }
