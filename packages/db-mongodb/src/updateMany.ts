@@ -1,9 +1,11 @@
 import type { MongooseUpdateQueryOptions } from 'mongoose'
-import type { UpdateMany } from 'payload'
+
+import { flattenWhereToOperators, type UpdateMany } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
 import { buildQuery } from './queries/buildQuery.js'
+import { buildSortParam } from './queries/buildSortParam.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
 import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
@@ -21,10 +23,30 @@ export const updateMany: UpdateMany = async function updateMany(
     req,
     returning,
     select,
+    sort: sortArg,
     where,
   },
 ) {
+  let hasNearConstraint = false
+
+  if (where) {
+    const constraints = flattenWhereToOperators(where)
+    hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'))
+  }
+
   const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
+
+  let sort: Record<string, unknown> | undefined
+  if (!hasNearConstraint) {
+    sort = buildSortParam({
+      adapter: this,
+      config: this.payload.config,
+      fields: collectionConfig.flattenedFields,
+      locale,
+      sort: sortArg || collectionConfig.defaultSort,
+      timestamps: true,
+    })
+  }
 
   const options: MongooseUpdateQueryOptions = {
     ...optionsArgs,
@@ -53,7 +75,7 @@ export const updateMany: UpdateMany = async function updateMany(
       const documentsToUpdate = await Model.find(
         query,
         {},
-        { ...options, limit, projection: { _id: 1 } },
+        { ...options, limit, projection: { _id: 1 }, sort },
       )
       if (documentsToUpdate.length === 0) {
         return null
@@ -71,7 +93,14 @@ export const updateMany: UpdateMany = async function updateMany(
     return null
   }
 
-  const result = await Model.find(query, {}, options)
+  const result = await Model.find(
+    query,
+    {},
+    {
+      ...options,
+      sort,
+    },
+  )
 
   transform({
     adapter: this,

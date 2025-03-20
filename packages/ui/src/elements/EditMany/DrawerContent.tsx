@@ -14,7 +14,7 @@ import type { OnFieldSelect } from '../FieldSelect/index.js'
 
 import { useForm } from '../../forms/Form/context.js'
 import { Form } from '../../forms/Form/index.js'
-import { RenderFields } from '../../forms/RenderFields/index.js'
+import { RenderField } from '../../forms/RenderFields/RenderField.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
 import { XIcon } from '../../icons/X/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
@@ -31,6 +31,7 @@ import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { FieldSelect } from '../FieldSelect/index.js'
 import { baseClass, type EditManyProps } from './index.js'
 import './index.scss'
+import '../../forms/RenderFields/index.scss'
 
 const Submit: React.FC<{
   readonly action: string
@@ -287,14 +288,31 @@ export const EditManyDrawerContent: React.FC<
           >
             <FieldSelect fields={fields} onChange={onFieldSelect} />
             {selectedFields.length === 0 ? null : (
-              <RenderFields
-                fields={selectedFields}
-                parentIndexPath=""
-                parentPath=""
-                parentSchemaPath={collection.slug}
-                permissions={collectionPermissions?.fields}
-                readOnly={false}
-              />
+              <div className="render-fields">
+                {selectedFields.map((field, i) => {
+                  const { path } = field
+
+                  return (
+                    <RenderField
+                      clientFieldConfig={field}
+                      indexPath=""
+                      key={`${path}-${i}`}
+                      parentPath=""
+                      parentSchemaPath=""
+                      path={path}
+                      permissions={
+                        collectionPermissions.fields === undefined ||
+                        collectionPermissions.fields === null ||
+                        collectionPermissions.fields === true
+                          ? true
+                          : 'name' in field
+                            ? collectionPermissions.fields?.[field.name]
+                            : undefined
+                      }
+                    />
+                  )
+                })}
+              </div>
             )}
             <div className={`${baseClass}__sidebar-wrap`}>
               <div className={`${baseClass}__sidebar`}>

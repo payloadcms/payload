@@ -534,6 +534,7 @@ export type UpdateManyArgs = {
    */
   returning?: boolean
   select?: SelectType
+  sort?: Sort
   where: Where
 }
 
