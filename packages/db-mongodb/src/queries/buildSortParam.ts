@@ -40,6 +40,7 @@ const relationshipSort = ({
   sort,
   sortAggregation,
   sortDirection,
+  versions,
 }: {
   adapter: MongooseAdapter
   fields: FlattenedField[]
@@ -48,6 +49,7 @@ const relationshipSort = ({
   sort: Record<string, string>
   sortAggregation: PipelineStage[]
   sortDirection: SortDirection
+  versions?: boolean
 }) => {
   let currentFields = fields
   const segments = path.split('.')
@@ -56,6 +58,11 @@ const relationshipSort = ({
   }
 
   for (const [i, segment] of segments.entries()) {
+    if (versions && i === 0 && segment === 'version') {
+      segments.shift()
+      continue
+    }
+
     const field = currentFields.find((each) => each.name === segment)
 
     if (!field) {
@@ -129,6 +136,7 @@ export const buildSortParam = ({
   sort,
   sortAggregation,
   timestamps,
+  versions,
 }: Args): Record<string, string> => {
   if (!sort) {
     if (timestamps) {
@@ -167,6 +175,7 @@ export const buildSortParam = ({
         sort: acc,
         sortAggregation,
         sortDirection,
+        versions,
       })
     ) {
       return acc

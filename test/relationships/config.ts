@@ -223,6 +223,7 @@ export default buildConfigWithDefaults({
     },
     {
       slug: 'movies',
+      versions: { drafts: true },
       fields: [
         {
           name: 'name',

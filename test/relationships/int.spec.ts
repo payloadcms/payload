@@ -686,6 +686,22 @@ describe('Relationships', () => {
 
           expect(res_1.docs).toStrictEqual([movie_2, movie_1])
           expect(res_2.docs).toStrictEqual([movie_1, movie_2])
+          global.d = true
+          const draft_res_1 = await payload.find({
+            collection: 'movies',
+            sort: '-director.name',
+            depth: 0,
+            draft: true,
+          })
+          const draft_res_2 = await payload.find({
+            collection: 'movies',
+            sort: 'director.name',
+            depth: 0,
+            draft: true,
+          })
+
+          expect(draft_res_1.docs).toStrictEqual([movie_2, movie_1])
+          expect(draft_res_2.docs).toStrictEqual([movie_1, movie_2])
 
           const localized_res_1 = await payload.find({
             collection: 'movies',
