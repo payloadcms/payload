@@ -22,8 +22,12 @@ type Handler = (
 }
 
 export const tempFileHandler: Handler = (options, fieldname, filename) => {
-  const dir = path.normalize(options.tempFileDir)
-  const tempFilePath = path.join(process.cwd(), dir, getTempFilename())
+  const tempFilePath = path.join(
+    process.cwd(),
+    // Remove drive letter prefix on Windows
+    path.normalize(options.tempFileDir).replace(/^[A-Z]:\\/i, ''),
+    getTempFilename(),
+  )
   checkAndMakeDir({ createParentPath: true }, tempFilePath)
 
   debugLog(options, `Temporary file path is ${tempFilePath}`)
