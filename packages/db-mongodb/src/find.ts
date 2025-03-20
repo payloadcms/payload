@@ -44,6 +44,7 @@ export const find: Find = async function find(
   let sort
   if (!hasNearConstraint) {
     sort = buildSortParam({
+      adapter: this,
       config: this.payload.config,
       fields: collectionConfig.flattenedFields,
       locale,

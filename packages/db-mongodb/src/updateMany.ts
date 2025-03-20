@@ -39,6 +39,7 @@ export const updateMany: UpdateMany = async function updateMany(
   let sort: Record<string, unknown> | undefined
   if (!hasNearConstraint) {
     sort = buildSortParam({
+      adapter: this,
       config: this.payload.config,
       fields: collectionConfig.flattenedFields,
       locale,
