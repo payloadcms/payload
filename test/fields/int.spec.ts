@@ -1011,7 +1011,7 @@ describe('Fields', () => {
         id: createdDocId,
       })
 
-      expect(resultingDoc.hasMany).toHaveLength(0)
+      expect(resultingDoc.localizedHasMany).toHaveLength(0)
     })
   })
 
