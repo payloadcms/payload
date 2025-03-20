@@ -4,7 +4,7 @@ import type {
   ListPreferences,
   ListQuery,
   PaginatedDocs,
-  queryPreset,
+  QueryPreset,
   Sort,
   Where,
 } from 'payload'

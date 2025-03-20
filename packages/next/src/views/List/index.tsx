@@ -6,7 +6,7 @@ import type {
   ListQuery,
   ListViewClientProps,
   ListViewServerPropsOnly,
-  queryPreset,
+  QueryPreset,
   SanitizedCollectionPermission,
   Where,
 } from 'payload'
@@ -141,7 +141,7 @@ export const renderListView = async (
       }
     }
 
-    let queryPreset: queryPreset | undefined
+    let queryPreset: QueryPreset | undefined
     let queryPresetPermissions: SanitizedCollectionPermission | undefined
 
     if (listPreferences?.preset) {
@@ -152,7 +152,7 @@ export const renderListView = async (
           depth: 0,
           overrideAccess: false,
           user,
-        })) as queryPreset
+        })) as QueryPreset
 
         if (queryPreset) {
           queryPresetPermissions = await getDocumentPermissions({

@@ -6,7 +6,7 @@ import { transformWhereQuery } from '../utilities/transformWhereQuery.js'
 import { validateWhereQuery } from '../utilities/validateWhereQuery.js'
 import { getAccess } from './access.js'
 import { getConstraints } from './constraints.js'
-import { operations, type queryPreset } from './types.js'
+import { operations, type QueryPreset } from './types.js'
 
 export const queryPresetsCollectionSlug = 'payload-query-presets'
 
@@ -29,7 +29,7 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
       type: 'checkbox',
       defaultValue: false,
       validate: (isShared, { data }) => {
-        const typedData = data as queryPreset
+        const typedData = data as QueryPreset
 
         // ensure the `isShared` is only true if all constraints are 'onlyMe'
         if (typedData?.access) {

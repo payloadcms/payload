@@ -1,6 +1,6 @@
 import type {
   ClientCollectionConfig,
-  queryPreset,
+  QueryPreset,
   ResolvedFilterOptions,
   SanitizedCollectionPermission,
   Where,
@@ -27,7 +27,7 @@ export type ListControlsProps = {
   readonly handleSortChange?: (sort: string) => void
   readonly handleWhereChange?: (where: Where) => void
   readonly listMenuItems?: React.ReactNode[]
-  readonly queryPreset?: queryPreset
+  readonly queryPreset?: QueryPreset
   readonly queryPresetPermissions?: SanitizedCollectionPermission
   readonly renderedFilters?: Map<string, React.ReactNode>
   readonly resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
