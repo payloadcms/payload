@@ -593,11 +593,6 @@ describe('Relationships', () => {
         })
 
         it('should sort by a property of a hasMany relationship', async () => {
-          // no support for sort by relation in mongodb
-          if (isMongoose(payload)) {
-            return
-          }
-
           const movie1 = await payload.create({
             collection: 'movies',
             data: {
@@ -636,6 +631,92 @@ describe('Relationships', () => {
           })
 
           expect(result.docs[0].id).toStrictEqual(director1.id)
+        })
+
+        it('should sort by a property of a relationship', async () => {
+          await payload.delete({ collection: 'directors', where: {} })
+          await payload.delete({ collection: 'movies', where: {} })
+
+          const director_1 = await payload.create({
+            collection: 'directors',
+            data: { name: 'Dan', localized: 'Dan' },
+          })
+
+          await payload.update({
+            collection: 'directors',
+            id: director_1.id,
+            locale: 'de',
+            data: { localized: 'Mr. Dan' },
+          })
+
+          const director_2 = await payload.create({
+            collection: 'directors',
+            data: { name: 'Mr. Dan', localized: 'Mr. Dan' },
+          })
+
+          await payload.update({
+            collection: 'directors',
+            id: director_2.id,
+            locale: 'de',
+            data: { localized: 'Dan' },
+          })
+
+          const movie_1 = await payload.create({
+            collection: 'movies',
+            depth: 0,
+            data: { director: director_1.id, name: 'Some Movie 1' },
+          })
+
+          const movie_2 = await payload.create({
+            collection: 'movies',
+            depth: 0,
+            data: { director: director_2.id, name: 'Some Movie 2' },
+          })
+
+          const res_1 = await payload.find({
+            collection: 'movies',
+            sort: '-director.name',
+            depth: 0,
+          })
+          const res_2 = await payload.find({
+            collection: 'movies',
+            sort: 'director.name',
+            depth: 0,
+          })
+
+          expect(res_1.docs).toStrictEqual([movie_2, movie_1])
+          expect(res_2.docs).toStrictEqual([movie_1, movie_2])
+
+          const draft_res_1 = await payload.find({
+            collection: 'movies',
+            sort: '-director.name',
+            depth: 0,
+            draft: true,
+          })
+          const draft_res_2 = await payload.find({
+            collection: 'movies',
+            sort: 'director.name',
+            depth: 0,
+            draft: true,
+          })
+
+          expect(draft_res_1.docs).toStrictEqual([movie_2, movie_1])
+          expect(draft_res_2.docs).toStrictEqual([movie_1, movie_2])
+
+          const localized_res_1 = await payload.find({
+            collection: 'movies',
+            sort: 'director.localized',
+            depth: 0,
+            locale: 'de',
+          })
+          const localized_res_2 = await payload.find({
+            collection: 'movies',
+            sort: 'director.localized',
+            depth: 0,
+          })
+
+          expect(localized_res_1.docs).toStrictEqual([movie_2, movie_1])
+          expect(localized_res_2.docs).toStrictEqual([movie_1, movie_2])
         })
 
         it('should query using "in" by hasMany relationship field', async () => {
