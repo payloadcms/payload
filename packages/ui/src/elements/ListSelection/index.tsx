@@ -14,6 +14,8 @@ import './index.scss'
 const baseClass = 'list-selection'
 
 export type ListSelectionProps = {
+  AfterBulkActions?: React.ReactNode
+  BeforeBulkActions?: React.ReactNode
   collectionConfig?: ClientCollectionConfig
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
@@ -21,6 +23,8 @@ export type ListSelectionProps = {
 }
 
 export const ListSelection: React.FC<ListSelectionProps> = ({
+  AfterBulkActions,
+  BeforeBulkActions,
   collectionConfig,
   disableBulkDelete,
   disableBulkEdit,
@@ -47,7 +51,8 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
           {t('general:selectAll', { count: totalDocs, label: '' })}
         </button>
       )}
-      {!disableBulkEdit && !disableBulkDelete && <span>&mdash;</span>}
+      {!!BeforeBulkActions || !!AfterBulkActions || (!disableBulkEdit && !disableBulkDelete) && <span>&mdash;</span>}
+      {BeforeBulkActions}
       {!disableBulkEdit && (
         <Fragment>
           <EditMany collection={collectionConfig} />
@@ -56,6 +61,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
         </Fragment>
       )}
       {!disableBulkDelete && <DeleteMany collection={collectionConfig} />}
+      {AfterBulkActions}
     </div>
   )
 }

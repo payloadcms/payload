@@ -88,13 +88,15 @@ export const MyCollection: CollectionConfig = {
 
 The following options are available:
 
-| Path              | Description                                                                                                               |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `beforeList`      | An array of custom components to inject before the list of documents in the List View. [More details](#beforeList).       |
-| `beforeListTable` | An array of custom components to inject before the table of documents in the List View. [More details](#beforeListTable). |
-| `afterList`       | An array of custom components to inject after the list of documents in the List View. [More details](#afterList).         |
-| `afterListTable`  | An array of custom components to inject after the table of documents in the List View. [More details](#afterListTable).   |
-| `Description`     | A component to render a description of the Collection. [More details](#Description).                                      |
+| Path                | Description                                                                                                               |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `beforeList`        | An array of custom components to inject before the list of documents in the List View. [More details](#beforeList).       |
+| `beforeListTable`   | An array of custom components to inject before the table of documents in the List View. [More details](#beforeListTable). |
+| `beforeBulkActions` | An array of custom components to inject before the list of bulk actions in the List View. [More details](#beforeActions). |
+| `afterList`         | An array of custom components to inject after the list of documents in the List View. [More details](#afterList).         |
+| `afterListTable`    | An array of custom components to inject after the table of documents in the List View. [More details](#afterListTable).   |
+| `afterBulkActions`  | An array of custom components to inject after the list of bulk actions in the List View. [More details](#afterActions).   |
+| `Description`       | A component to render a description of the Collection. [More details](#Description).                                      |
 
 ### beforeList
 
@@ -188,6 +190,52 @@ export function MyBeforeListTableComponent(props: BeforeListTableClientProps) {
 }
 ```
 
+### beforeBulkActions
+
+The `beforeBulkActions` property allows you to inject custom components before the list of bulk actions in the List View.
+
+To add `beforeBulkActions` components, use the `components.beforeBulkActions` property in your [Collection Config](../configuration/collections):
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const MyCollection: CollectionConfig = {
+  // ...
+  admin: {
+    components: {
+      // highlight-start
+      beforeBulkActions: ['/path/to/MyBeforeBulkActionsComponent'],
+      // highlight-end
+    },
+  },
+}
+```
+
+Here's an example of a custom `beforeBulkActions` component:
+
+#### Server Component
+
+```tsx
+import React from 'react'
+import type { BeforeBulkActionsServerProps } from 'payload'
+
+export function MyBeforeBulkActionsComponent(props: BeforeBulkActionsServerProps) {
+  return <div>This is a custom beforeBulkActions component (Server)</div>
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import type { BeforeBulkActionsClientProps } from 'payload'
+
+export function MyBeforeBulkActionsComponent(props: BeforeBulkActionsClientProps) {
+  return <div>This is a custom beforeBulkActions component (Client)</div>
+}
+```
+
 ### afterList
 
 The `afterList` property allows you to inject custom components after the list of documents in the List View.
@@ -277,6 +325,52 @@ import type { AfterListTableClientProps } from 'payload'
 
 export function MyAfterListTableComponent(props: AfterListTableClientProps) {
   return <div>This is a custom afterListTable component (Client)</div>
+}
+```
+
+### afterBulkActions
+
+The `afterBulkActions` property allows you to inject custom components after the list of bulk actions in the List View.
+
+To add `afterBulkActions` components, use the `components.afterBulkActions` property in your [Collection Config](../configuration/collections):
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const MyCollection: CollectionConfig = {
+  // ...
+  admin: {
+    components: {
+      // highlight-start
+      afterBulkActions: ['/path/to/MyAfterBulkActionsComponent'],
+      // highlight-end
+    },
+  },
+}
+```
+
+Here's an example of a custom `afterBulkActions` component:
+
+#### Server Component
+
+```tsx
+import React from 'react'
+import type { AfterBulkActionsServerProps } from 'payload'
+
+export function MyAfterBulkActionsComponent(props: AfterBulkActionsServerProps) {
+  return <div>This is a custom afterBulkActions component (Server)</div>
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import type { AfterBulkActionsClientProps } from 'payload'
+
+export function MyAfterBulkActionsComponent(props: AfterBulkActionsClientProps) {
+  return <div>This is a custom afterBulkActions component (Client)</div>
 }
 ```
 
