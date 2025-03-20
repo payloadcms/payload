@@ -443,6 +443,7 @@ export type OptionObject = {
   label: OptionLabel
   value: string
 }
+
 export type Option = OptionObject | string
 
 export type FieldGraphQLType = {
