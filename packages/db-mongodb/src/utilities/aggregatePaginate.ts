@@ -18,6 +18,7 @@ export const aggregatePaginate = async ({
   sort,
   sortAggregation,
   useEstimatedCount,
+  virtualFieldsAggregation,
 }: {
   adapter: MongooseAdapter
   collation?: CollationOptions
@@ -32,6 +33,7 @@ export const aggregatePaginate = async ({
   sort?: object
   sortAggregation?: PipelineStage[]
   useEstimatedCount?: boolean
+  virtualFieldsAggregation?: PipelineStage[]
 }): Promise<PaginatedDocs<any>> => {
   const aggregation: PipelineStage[] = [{ $match: query }]
 
@@ -61,6 +63,12 @@ export const aggregatePaginate = async ({
 
   if (joinAggregation) {
     for (const stage of joinAggregation) {
+      aggregation.push(stage)
+    }
+  }
+
+  if (virtualFieldsAggregation) {
+    for (const stage of virtualFieldsAggregation) {
       aggregation.push(stage)
     }
   }

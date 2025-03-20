@@ -1957,11 +1957,13 @@ describe('database', () => {
 
     it('should allow virtual field with reference', async () => {
       const post = await payload.create({ collection: 'posts', data: { title: 'my-title' } })
-      const doc = await payload.create({
+      const { id } = await payload.create({
         collection: 'virtual-relations',
         depth: 0,
         data: { post: post.id },
       })
+
+      const doc = await payload.findByID({ collection: 'virtual-relations', depth: 0, id })
       expect(doc.postTitle).toBe('my-title')
     })
 
