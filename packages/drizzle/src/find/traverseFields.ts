@@ -1,9 +1,17 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { SQLiteSelectBase } from 'drizzle-orm/sqlite-core'
-import type { FlattenedField, JoinQuery, SelectMode, SelectType, Where } from 'payload'
 
 import { and, asc, count, desc, eq, or, sql } from 'drizzle-orm'
-import { fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
+import {
+  APIError,
+  type FlattenedField,
+  getFieldByPath,
+  type JoinQuery,
+  type SelectMode,
+  type SelectType,
+  type Where,
+} from 'payload'
+import { fieldShouldBeLocalized } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { BuildQueryJoinAliases, ChainedMethods, DrizzleAdapter } from '../types.js'
@@ -72,6 +80,7 @@ type TraverseFieldArgs = {
   selectMode?: SelectMode
   tablePath: string
   topLevelArgs: Record<string, unknown>
+  topLevelFields?: FlattenedField[]
   topLevelTableName: string
   versions?: boolean
   withTabledFields: {
@@ -99,12 +108,65 @@ export const traverseFields = ({
   selectMode,
   tablePath,
   topLevelArgs,
+  topLevelFields = fields,
   topLevelTableName,
   versions,
   withTabledFields,
 }: TraverseFieldArgs) => {
   fields.forEach((field) => {
-    if (fieldIsVirtual(field)) {
+    if ('virtual' in field && field.virtual) {
+      if (field.virtual === true) {
+        return
+      }
+
+      let relationshipPath = field.virtual.relationship.replaceAll('.', '_')
+      if (versions) {
+        relationshipPath = `version_${relationshipPath}`
+      }
+
+      const relationshipColumn = adapter.tables[currentTableName][relationshipPath]
+
+      if (!relationshipColumn) {
+        throw new APIError('not found')
+      }
+      const relationshipField = getFieldByPath({
+        fields: topLevelFields,
+        path: field.virtual.relationship,
+      })
+
+      if (!relationshipField) {
+        throw new APIError('not found')
+      }
+
+      if (
+        relationshipField.field.type === 'relationship' &&
+        !relationshipField.field.hasMany &&
+        typeof relationshipField.field.relationTo === 'string'
+      ) {
+        const collection = adapter.payload.collections[relationshipField.field.relationTo].config
+        const columnName = `${path.replaceAll('.', '_')}${field.name}`
+
+        const db = adapter.drizzle as LibSQLDatabase
+
+        const foreignTable = adapter.tables[adapter.tableNameMap.get(toSnakeCase(collection.slug))]
+
+        const foreignValue = foreignTable[field.virtual.path.replace('.', '_')]
+
+        if (!foreignValue) {
+          throw new APIError('fuckl')
+        }
+
+        currentArgs.extras[columnName] = sql`${db
+          .select({
+            value: foreignValue,
+          })
+          .from(foreignTable)
+          .where(eq(foreignTable.id, relationshipColumn))
+          .limit(1)}`.as(columnName)
+      } else {
+        throw new APIError('Invalid relationship')
+      }
+
       return
     }
 
@@ -202,6 +264,7 @@ export const traverseFields = ({
           selectMode,
           tablePath: '',
           topLevelArgs,
+          topLevelFields,
           topLevelTableName,
           withTabledFields,
         })
@@ -313,6 +376,7 @@ export const traverseFields = ({
               selectMode: blockSelectMode,
               tablePath: '',
               topLevelArgs,
+              topLevelFields,
               topLevelTableName,
               withTabledFields,
             })
@@ -359,6 +423,7 @@ export const traverseFields = ({
           selectMode,
           tablePath: `${tablePath}${toSnakeCase(field.name)}_`,
           topLevelArgs,
+          topLevelFields,
           topLevelTableName,
           versions,
           withTabledFields,

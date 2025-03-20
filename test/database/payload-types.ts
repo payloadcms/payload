@@ -75,6 +75,7 @@ export interface Config {
     'pg-migrations': PgMigration;
     'custom-schema': CustomSchema;
     places: Place;
+    'virtual-relations': VirtualRelation;
     'fields-persistance': FieldsPersistance;
     'custom-ids': CustomId;
     'fake-custom-ids': FakeCustomId;
@@ -95,6 +96,7 @@ export interface Config {
     'pg-migrations': PgMigrationsSelect<false> | PgMigrationsSelect<true>;
     'custom-schema': CustomSchemaSelect<false> | CustomSchemaSelect<true>;
     places: PlacesSelect<false> | PlacesSelect<true>;
+    'virtual-relations': VirtualRelationsSelect<false> | VirtualRelationsSelect<true>;
     'fields-persistance': FieldsPersistanceSelect<false> | FieldsPersistanceSelect<true>;
     'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
     'fake-custom-ids': FakeCustomIdsSelect<false> | FakeCustomIdsSelect<true>;
@@ -346,6 +348,17 @@ export interface Place {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "virtual-relations".
+ */
+export interface VirtualRelation {
+  id: string;
+  postTitle?: string | null;
+  post?: (string | null) | Post;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "fields-persistance".
  */
 export interface FieldsPersistance {
@@ -474,6 +487,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'places';
         value: string | Place;
+      } | null)
+    | ({
+        relationTo: 'virtual-relations';
+        value: string | VirtualRelation;
       } | null)
     | ({
         relationTo: 'fields-persistance';
@@ -718,6 +735,16 @@ export interface CustomSchemaSelect<T extends boolean = true> {
 export interface PlacesSelect<T extends boolean = true> {
   country?: T;
   city?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "virtual-relations_select".
+ */
+export interface VirtualRelationsSelect<T extends boolean = true> {
+  postTitle?: T;
+  post?: T;
   updatedAt?: T;
   createdAt?: T;
 }

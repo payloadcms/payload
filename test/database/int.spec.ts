@@ -1954,6 +1954,16 @@ describe('database', () => {
       expect(res.textWithinRow).toBeUndefined()
       expect(res.textWithinTabs).toBeUndefined()
     })
+
+    it('should allow virtual field with reference', async () => {
+      const post = await payload.create({ collection: 'posts', data: { title: 'my-title' } })
+      const doc = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post.id },
+      })
+      expect(doc.postTitle).toBe('my-title')
+    })
   })
 
   it('should not allow to query by a field with `virtual: true`', async () => {

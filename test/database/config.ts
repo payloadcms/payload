@@ -434,6 +434,24 @@ export default buildConfigWithDefaults({
       ],
     },
     {
+      slug: 'virtual-relations',
+      fields: [
+        {
+          name: 'postTitle',
+          type: 'text',
+          virtual: {
+            path: 'title',
+            relationship: 'post',
+          },
+        },
+        {
+          name: 'post',
+          type: 'relationship',
+          relationTo: 'posts',
+        },
+      ],
+    },
+    {
       slug: fieldsPersistanceSlug,
       fields: [
         {
