@@ -62,7 +62,10 @@ const relationshipSort = ({
 
     if ('fields' in field) {
       currentFields = field.flattenedFields
-    } else if (field.type === 'relationship' && i !== segments.length - 1) {
+    } else if (
+      (field.type === 'relationship' || field.type === 'upload') &&
+      i !== segments.length - 1
+    ) {
       const relationshipPath = segments.slice(0, i + 1).join('.')
       const sortFieldPath = segments.slice(i + 1, segments.length).join('.')
       if (Array.isArray(field.relationTo)) {
