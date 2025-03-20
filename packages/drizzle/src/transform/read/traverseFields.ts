@@ -92,8 +92,8 @@ export const traverseFields = <T extends Record<string, unknown>>({
   const sanitizedPath = path ? `${path}.` : path
 
   const formatted = fields.reduce((result, field) => {
-    if ('virtual' in field && field.virtual && field.virtual === true) {
-      return
+    if ('virtual' in field && field.virtual === true) {
+      return result
     }
 
     const fieldName = `${fieldPrefix || ''}${field.name}`
