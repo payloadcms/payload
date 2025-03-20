@@ -14,8 +14,8 @@ type AllAccessKeys<T extends readonly string[]> = T[number] extends keyof Omit<
   : never
 
 const collectionAccessKeys: AllAccessKeys<
-  ['create', 'read', 'update', 'delete', 'readVersions', 'unlock']
-> = ['create', 'read', 'update', 'delete', 'readVersions', 'unlock'] as const
+  ['create', 'read', 'update', 'delete', 'readVersions', 'unlock', 'auth']
+> = ['create', 'read', 'update', 'delete', 'readVersions', 'unlock', 'auth'] as const
 
 type Args<ConfigType> = {
   adminUsersSlug: string

@@ -64,6 +64,7 @@ export interface Config {
   auth: {
     users: UserAuthOperations;
     'public-users': PublicUserAuthOperations;
+    'auth-access': AuthAccessAuthOperations;
   };
   blocks: {};
   collections: {
@@ -90,6 +91,7 @@ export interface Config {
     regression1: Regression1;
     regression2: Regression2;
     hooks: Hook;
+    'auth-access': AuthAccess;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -119,6 +121,7 @@ export interface Config {
     regression1: Regression1Select<false> | Regression1Select<true>;
     regression2: Regression2Select<false> | Regression2Select<true>;
     hooks: HooksSelect<false> | HooksSelect<true>;
+    'auth-access': AuthAccessSelect<false> | AuthAccessSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -147,6 +150,9 @@ export interface Config {
       })
     | (PublicUser & {
         collection: 'public-users';
+      })
+    | (AuthAccess & {
+        collection: 'auth-access';
       });
   jobs: {
     tasks: unknown;
@@ -172,6 +178,24 @@ export interface UserAuthOperations {
   };
 }
 export interface PublicUserAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface AuthAccessAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -696,6 +720,24 @@ export interface Hook {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "auth-access".
+ */
+export interface AuthAccess {
+  id: string;
+  text?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -792,6 +834,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'hooks';
         value: string | Hook;
+      } | null)
+    | ({
+        relationTo: 'auth-access';
+        value: string | AuthAccess;
       } | null);
   globalSlug?: string | null;
   user:
@@ -802,6 +848,10 @@ export interface PayloadLockedDocument {
     | {
         relationTo: 'public-users';
         value: string | PublicUser;
+      }
+    | {
+        relationTo: 'auth-access';
+        value: string | AuthAccess;
       };
   updatedAt: string;
   createdAt: string;
@@ -820,6 +870,10 @@ export interface PayloadPreference {
     | {
         relationTo: 'public-users';
         value: string | PublicUser;
+      }
+    | {
+        relationTo: 'auth-access';
+        value: string | AuthAccess;
       };
   key?: string | null;
   value?:
@@ -1196,6 +1250,22 @@ export interface HooksSelect<T extends boolean = true> {
   canMutate?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "auth-access_select".
+ */
+export interface AuthAccessSelect<T extends boolean = true> {
+  text?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
