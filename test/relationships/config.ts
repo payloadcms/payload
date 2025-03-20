@@ -243,6 +243,11 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
         {
+          name: 'localized',
+          type: 'text',
+          localized: true,
+        },
+        {
           name: 'movies',
           type: 'relationship',
           relationTo: 'movies',

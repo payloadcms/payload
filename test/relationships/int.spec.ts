@@ -639,12 +639,26 @@ describe('Relationships', () => {
 
           const director_1 = await payload.create({
             collection: 'directors',
-            data: { name: 'Dan' },
+            data: { name: 'Dan', localized: 'Dan' },
+          })
+
+          await payload.update({
+            collection: 'directors',
+            id: director_1.id,
+            locale: 'de',
+            data: { localized: 'Mr. Dan' },
           })
 
           const director_2 = await payload.create({
             collection: 'directors',
-            data: { name: 'Mr. Dan' },
+            data: { name: 'Mr. Dan', localized: 'Mr. Dan' },
+          })
+
+          await payload.update({
+            collection: 'directors',
+            id: director_2.id,
+            locale: 'de',
+            data: { localized: 'Dan' },
           })
 
           const movie_1 = await payload.create({
@@ -672,6 +686,21 @@ describe('Relationships', () => {
 
           expect(res_1.docs).toStrictEqual([movie_2, movie_1])
           expect(res_2.docs).toStrictEqual([movie_1, movie_2])
+
+          const localized_res_1 = await payload.find({
+            collection: 'movies',
+            sort: 'director.localized',
+            depth: 0,
+            locale: 'de',
+          })
+          const localized_res_2 = await payload.find({
+            collection: 'movies',
+            sort: 'director.localized',
+            depth: 0,
+          })
+
+          expect(localized_res_1.docs).toStrictEqual([movie_2, movie_1])
+          expect(localized_res_2.docs).toStrictEqual([movie_1, movie_2])
         })
 
         it('should query using "in" by hasMany relationship field', async () => {

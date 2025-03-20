@@ -3,7 +3,7 @@ import type { PipelineStage } from 'mongoose'
 import {
   APIError,
   type FlattenedField,
-  getLocalizedPaths,
+  getFieldByPath,
   type SanitizedConfig,
   type Sort,
 } from 'payload'
@@ -35,6 +35,7 @@ export type SortDirection = 'asc' | 'desc'
 const relationshipSort = ({
   adapter,
   fields,
+  locale,
   path,
   sort,
   sortAggregation,
@@ -42,6 +43,7 @@ const relationshipSort = ({
 }: {
   adapter: MongooseAdapter
   fields: FlattenedField[]
+  locale?: string
   path: string
   sort: Record<string, string>
   sortAggregation: PipelineStage[]
@@ -67,12 +69,25 @@ const relationshipSort = ({
       i !== segments.length - 1
     ) {
       const relationshipPath = segments.slice(0, i + 1).join('.')
-      const sortFieldPath = segments.slice(i + 1, segments.length).join('.')
+      let sortFieldPath = segments.slice(i + 1, segments.length).join('.')
       if (Array.isArray(field.relationTo)) {
         throw new APIError('Not supported')
       }
 
       const foreignCollection = getCollection({ adapter, collectionSlug: field.relationTo })
+
+      const foreignFieldPath = getFieldByPath({
+        fields: foreignCollection.collectionConfig.flattenedFields,
+        path: sortFieldPath,
+      })
+
+      if (!foreignFieldPath) {
+        return false
+      }
+
+      if (foreignFieldPath.pathHasLocalized && locale) {
+        sortFieldPath = foreignFieldPath.localizedPath.replace('<locale>', locale)
+      }
 
       if (
         !sortAggregation.some((each) => {
@@ -147,6 +162,7 @@ export const buildSortParam = ({
       relationshipSort({
         adapter,
         fields,
+        locale,
         path: sortProperty,
         sort: acc,
         sortAggregation,
