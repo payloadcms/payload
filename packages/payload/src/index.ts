@@ -20,7 +20,6 @@ import type { Options as VerifyEmailOptions } from './auth/operations/local/veri
 import type { Result as LoginResult } from './auth/operations/login.js'
 import type { Result as ResetPasswordResult } from './auth/operations/resetPassword.js'
 import type { AuthStrategy, User } from './auth/types.js'
-export type { FieldState } from './admin/forms/Form.js'
 import type {
   BulkOperationResult,
   Collection,
