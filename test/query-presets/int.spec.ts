@@ -50,6 +50,97 @@ describe('Shared Filters', () => {
   })
 
   describe('default access control', () => {
+    it('should only allow logged in users to perform actions', async () => {
+      // create
+      try {
+        const result = await payload.create({
+          collection: queryPresetsCollectionSlug,
+          user: undefined,
+          overrideAccess: false,
+          data: {
+            title: 'Only Logged In Users',
+            relatedCollection: 'pages',
+          },
+        })
+
+        expect(result).toBeFalsy()
+      } catch (error: unknown) {
+        expect((error as Error).message).toBe('You are not allowed to perform this action.')
+      }
+
+      const { id } = await payload.create({
+        collection: queryPresetsCollectionSlug,
+        data: {
+          title: 'Only Logged In Users',
+          relatedCollection: 'pages',
+        },
+      })
+
+      // read
+      try {
+        const result = await payload.findByID({
+          collection: queryPresetsCollectionSlug,
+          depth: 0,
+          user: undefined,
+          overrideAccess: false,
+          id,
+        })
+
+        expect(result).toBeFalsy()
+      } catch (error: unknown) {
+        expect((error as Error).message).toBe('You are not allowed to perform this action.')
+      }
+
+      // update
+      try {
+        const result = await payload.update({
+          collection: queryPresetsCollectionSlug,
+          id,
+          user: undefined,
+          overrideAccess: false,
+          data: {
+            title: 'Only Logged In Users (Updated)',
+          },
+        })
+
+        expect(result).toBeFalsy()
+      } catch (error: unknown) {
+        expect((error as Error).message).toBe('You are not allowed to perform this action.')
+
+        // make sure the update didn't go through
+        const preset = await payload.findByID({
+          collection: queryPresetsCollectionSlug,
+          depth: 0,
+          id,
+        })
+
+        expect(preset.title).toBe('Only Logged In Users')
+      }
+
+      // delete
+      try {
+        const result = await payload.delete({
+          collection: queryPresetsCollectionSlug,
+          id: 'some-id',
+          user: undefined,
+          overrideAccess: false,
+        })
+
+        expect(result).toBeFalsy()
+      } catch (error: unknown) {
+        expect((error as Error).message).toBe('You are not allowed to perform this action.')
+
+        // make sure the delete didn't go through
+        const preset = await payload.findByID({
+          collection: queryPresetsCollectionSlug,
+          depth: 0,
+          id,
+        })
+
+        expect(preset.title).toBe('Only Logged In Users')
+      }
+    })
+
     it('should respect access when set to "specificUsers"', async () => {
       const presetForSpecificUsers = await payload.create({
         collection: queryPresetsCollectionSlug,
@@ -95,8 +186,8 @@ describe('Shared Filters', () => {
         })
 
         expect(foundPresetWithUser2).toBeFalsy()
-      } catch (error) {
-        expect(error).toBeDefined()
+      } catch (error: unknown) {
+        expect((error as Error).message).toBe('Not Found')
       }
 
       const presetUpdatedByUser1 = await payload.update({
@@ -123,9 +214,8 @@ describe('Shared Filters', () => {
         })
 
         expect(presetUpdatedByUser2).toBeFalsy()
-      } catch (error) {
-        expect(error).toBeDefined()
-        // swallow error
+      } catch (error: unknown) {
+        expect((error as Error).message).toBe('You are not allowed to perform this action.')
       }
     })
 
@@ -173,9 +263,8 @@ describe('Shared Filters', () => {
         })
 
         expect(foundPresetWithUser2).toBeFalsy()
-      } catch (error) {
-        expect(error).toBeDefined()
-        // swallow error
+      } catch (error: unknown) {
+        expect((error as Error).message).toBe('Not Found')
       }
 
       const presetUpdatedByUser1 = await payload.update({
@@ -202,9 +291,8 @@ describe('Shared Filters', () => {
         })
 
         expect(presetUpdatedByUser2).toBeFalsy()
-      } catch (error) {
-        expect(error).toBeDefined()
-        // swallow error
+      } catch (error: unknown) {
+        expect((error as Error).message).toBe('You are not allowed to perform this action.')
       }
     })
 
@@ -326,9 +414,8 @@ describe('Shared Filters', () => {
         })
 
         expect(foundPresetWithUser2).toBeFalsy()
-      } catch (error) {
-        expect(error).toBeDefined()
-        // swallow error
+      } catch (error: unknown) {
+        expect((error as Error).message).toBe('Not Found')
       }
 
       const presetUpdatedByUser1 = await payload.update({
@@ -355,21 +442,20 @@ describe('Shared Filters', () => {
         })
 
         expect(presetUpdatedByUser2).toBeFalsy()
-      } catch (error) {
-        expect(error).toBeDefined()
-        // swallow error
+      } catch (error: unknown) {
+        expect((error as Error).message).toBe('You are not allowed to perform this action.')
       }
     })
   })
 
-  it.skip('should disable query presets when "enabledqueryPresets" is not true on the collection', async () => {
+  it.skip('should disable query presets when "enabledQueryPresets" is not true on the collection', async () => {
     try {
       const result = await payload.create({
         collection: 'payload-query-presets',
         user,
         data: {
           title: 'Disabled Query Presets',
-          relatedCollection: 'users',
+          relatedCollection: 'pages',
         },
       })
 
