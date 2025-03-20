@@ -468,6 +468,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
     if (field.type === 'text' && field?.hasMany) {
       const textPathMatch = texts[`${sanitizedPath}${field.name}`]
       if (!textPathMatch) {
+        result[field.name] = []
         return result
       }
 
@@ -507,6 +508,7 @@ export const traverseFields = <T extends Record<string, unknown>>({
     if (field.type === 'number' && field.hasMany) {
       const numberPathMatch = numbers[`${sanitizedPath}${field.name}`]
       if (!numberPathMatch) {
+        result[field.name] = []
         return result
       }
 
@@ -686,8 +688,6 @@ export const traverseFields = <T extends Record<string, unknown>>({
     if (Object.keys(localizedFieldData).length > 0) {
       result[field.name] = localizedFieldData
     }
-
-    return result
 
     return result
   }, dataRef)

@@ -424,8 +424,7 @@ describe('Fields', () => {
         id: createdDocId,
       })
 
-      // In db-postgres expect undefined, in db-mongodb we get []
-      expect([undefined, []]).toContainEqual(resultingDoc.hasMany)
+      expect(resultingDoc.hasMany).toHaveLength(0)
     })
   })
 
@@ -1012,8 +1011,7 @@ describe('Fields', () => {
         id: createdDocId,
       })
 
-      // In db-postgres expect undefined, in db-mongodb we get []
-      expect([undefined, []]).toContainEqual(resultingDoc.hasMany)
+      expect(resultingDoc.hasMany).toHaveLength(0)
     })
   })
 
