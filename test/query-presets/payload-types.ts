@@ -133,7 +133,7 @@ export interface Page {
 export interface User {
   id: string;
   name?: string | null;
-  roles?: ('admin' | 'user')[] | null;
+  roles?: ('admin' | 'user' | 'anonymous')[] | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -214,12 +214,12 @@ export interface PayloadQueryPreset {
     read?: {
       constraint?: ('everyone' | 'onlyMe' | 'specificUsers' | 'specificRoles') | null;
       users?: (string | User)[] | null;
-      roles?: ('admin' | 'user')[] | null;
+      roles?: ('admin' | 'user' | 'anonymous')[] | null;
     };
     update?: {
       constraint?: ('everyone' | 'onlyMe' | 'specificUsers' | 'specificRoles') | null;
       users?: (string | User)[] | null;
-      roles?: ('admin' | 'user')[] | null;
+      roles?: ('admin' | 'user' | 'anonymous')[] | null;
     };
     delete?: {
       constraint?: ('everyone' | 'onlyMe' | 'specificUsers') | null;

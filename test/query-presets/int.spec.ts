@@ -13,6 +13,7 @@ let payload: Payload
 let restClient: NextRESTClient
 let user: User
 let user2: User
+let anonymousUser: User
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -37,6 +38,16 @@ describe('Shared Filters', () => {
         collection: 'users',
         data: {
           email: regularUser.email,
+          password: regularUser.password,
+        },
+      })
+      ?.then((result) => result.user)
+
+    anonymousUser = await payload
+      .login({
+        collection: 'users',
+        data: {
+          email: 'anonymous@email.com',
           password: regularUser.password,
         },
       })
@@ -369,6 +380,52 @@ describe('Shared Filters', () => {
   })
 
   describe('user-defined access control', () => {
+    it('should respect top-level access control overrides', async () => {
+      const preset = await payload.create({
+        collection: queryPresetsCollectionSlug,
+        user,
+        data: {
+          title: 'Top-Level Access Control Override',
+          relatedCollection: 'pages',
+          access: {
+            read: {
+              constraint: 'everyone',
+            },
+            update: {
+              constraint: 'everyone',
+            },
+            delete: {
+              constraint: 'everyone',
+            },
+          },
+        },
+      })
+
+      const foundPresetWithUser1 = await payload.findByID({
+        collection: queryPresetsCollectionSlug,
+        depth: 0,
+        user,
+        overrideAccess: false,
+        id: preset.id,
+      })
+
+      expect(foundPresetWithUser1.id).toBe(preset.id)
+
+      try {
+        const foundPresetWithAnonymousUser = await payload.findByID({
+          collection: queryPresetsCollectionSlug,
+          depth: 0,
+          user: anonymousUser,
+          overrideAccess: false,
+          id: preset.id,
+        })
+
+        expect(foundPresetWithAnonymousUser).toBeFalsy()
+      } catch (error: unknown) {
+        expect((error as Error).message).toBe('You are not allowed to perform this action.')
+      }
+    })
+
     it('should respect access when set to "specificRoles"', async () => {
       const presetForSpecificRoles = await payload.create({
         collection: queryPresetsCollectionSlug,

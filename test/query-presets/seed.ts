@@ -1,17 +1,17 @@
-import type { Payload, queryPreset } from 'payload'
+import type { Payload, QueryPreset } from 'payload'
 
 import { devUser as devCredentials, regularUser as regularCredentials } from '../credentials.js'
 import { executePromises } from '../helpers/executePromises.js'
 import { seedDB } from '../helpers/seed.js'
 import { collectionSlugs, pagesSlug, usersSlug } from './slugs.js'
 
-type SeededqueryPreset = {
+type SeededQueryPreset = {
   relatedCollection: 'pages'
-} & Omit<queryPreset, 'id' | 'relatedCollection'>
+} & Omit<QueryPreset, 'id' | 'relatedCollection'>
 
 export const seedData: {
-  everyone: SeededqueryPreset
-  onlyMe: SeededqueryPreset
+  everyone: SeededQueryPreset
+  onlyMe: SeededQueryPreset
 } = {
   onlyMe: {
     relatedCollection: 'pages',
@@ -90,6 +90,16 @@ export const seed = async (_payload: Payload) => {
             password: regularCredentials.password,
             name: 'User',
             roles: ['user'],
+          },
+        }),
+      () =>
+        _payload.create({
+          collection: usersSlug,
+          data: {
+            email: 'anonymous@email.com',
+            password: regularCredentials.password,
+            name: 'User',
+            roles: ['anonymous'],
           },
         }),
     ],

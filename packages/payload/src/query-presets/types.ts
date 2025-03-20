@@ -1,5 +1,5 @@
 import type { Field } from '../fields/config/types.js'
-import type { CollectionSlug } from '../index.js'
+import type { Access, CollectionSlug } from '../index.js'
 import type { ListPreferences } from '../preferences/types.js'
 import type { Where } from '../types/index.js'
 
@@ -8,9 +8,13 @@ export const operations = ['read', 'update', 'delete'] as const
 
 type Operation = (typeof operations)[number]
 
-// TODO: this should just exist in `GeneratedTypes` instead
 export type QueryPreset = {
-  access: Access
+  access: {
+    [operation in Operation]: {
+      constraint: 'everyone' | 'onlyMe' | 'specificUsers'
+      users?: string[]
+    }
+  }
   columns: ListPreferences['columns']
   id: number | string
   isShared: boolean
@@ -19,15 +23,8 @@ export type QueryPreset = {
   where: Where
 }
 
-// TODO: this should just exist in `GeneratedTypes` instead
-export type Access = {
-  [operation in Operation]: {
-    constraint: 'everyone' | 'onlyMe' | 'specificUsers'
-    users?: string[]
-  }
-}
-
 export type QueryPresetConstraint = {
+  access: Access<QueryPreset>
   fields: Field[]
   label: string
   value: string

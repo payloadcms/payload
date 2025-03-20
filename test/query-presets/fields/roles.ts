@@ -13,5 +13,9 @@ export const roles: Field = {
       label: 'User',
       value: 'user',
     },
+    {
+      label: 'Anonymous',
+      value: 'anonymous',
+    },
   ],
 }
