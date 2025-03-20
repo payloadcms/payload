@@ -1,3 +1,5 @@
+import { getTranslation } from '@payloadcms/translations'
+
 import type { Config } from '../config/types.js'
 import type { Field } from '../fields/config/types.js'
 
@@ -28,7 +30,8 @@ export const getConstraints = (config: Config): Field => ({
             name: 'constraint',
             type: 'select',
             defaultValue: 'onlyMe',
-            label: false,
+            label: ({ i18n }) =>
+              `Specify who can ${operation} this ${getTranslation(config.queryPresets.labels?.singular || 'Preset', i18n)}`,
             options: [
               {
                 label: 'Everyone',
@@ -97,4 +100,5 @@ export const getConstraints = (config: Config): Field => ({
     ],
     label: () => toWords(operation),
   })),
+  label: 'Sharing settings',
 })

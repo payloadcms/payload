@@ -211,10 +211,6 @@ export interface PayloadQueryPreset {
   title: string;
   isShared?: boolean | null;
   access?: {
-    delete?: {
-      constraint?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
-      users?: (string | User)[] | null;
-    };
     read?: {
       constraint?: ('everyone' | 'onlyMe' | 'specificUsers' | 'specificRoles') | null;
       users?: (string | User)[] | null;
@@ -224,6 +220,10 @@ export interface PayloadQueryPreset {
       constraint?: ('everyone' | 'onlyMe' | 'specificUsers' | 'specificRoles') | null;
       users?: (string | User)[] | null;
       roles?: ('admin' | 'user')[] | null;
+    };
+    delete?: {
+      constraint?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
+      users?: (string | User)[] | null;
     };
   };
   where?:
@@ -317,12 +317,6 @@ export interface PayloadQueryPresetsSelect<T extends boolean = true> {
   access?:
     | T
     | {
-        delete?:
-          | T
-          | {
-              constraint?: T;
-              users?: T;
-            };
         read?:
           | T
           | {
@@ -336,6 +330,12 @@ export interface PayloadQueryPresetsSelect<T extends boolean = true> {
               constraint?: T;
               users?: T;
               roles?: T;
+            };
+        delete?:
+          | T
+          | {
+              constraint?: T;
+              users?: T;
             };
       };
   where?: T;

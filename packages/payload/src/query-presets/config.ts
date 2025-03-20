@@ -49,7 +49,6 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
     {
       name: 'where',
       type: 'json',
-      // hidden: true, // uncomment this when ready
       admin: {
         components: {
           Cell: '@payloadcms/ui#QueryPresetsWhereCell',
@@ -72,11 +71,11 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
           },
         ],
       },
+      label: 'Filters',
     },
     {
       name: 'columns',
       type: 'json',
-      // hidden: true, // uncomment this when ready
       admin: {
         components: {
           Cell: '@payloadcms/ui#QueryPresetsColumnsCell',

@@ -3,7 +3,8 @@ import type { CollectionSlug } from '../index.js'
 import type { ListPreferences } from '../preferences/types.js'
 import type { Where } from '../types/index.js'
 
-export const operations = ['delete', 'read', 'update'] as const
+// Note: order matters here as it will change the rendered order in the UI
+export const operations = ['read', 'update', 'delete'] as const
 
 type Operation = (typeof operations)[number]
 

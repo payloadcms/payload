@@ -1,6 +1,8 @@
 'use client'
 import type { QueryPreset } from 'payload'
 
+import { getTranslation } from '@payloadcms/translations'
+
 import { PeopleIcon } from '../../../icons/People/index.js'
 import { XIcon } from '../../../icons/X/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
@@ -19,7 +21,7 @@ export function ActiveQueryPreset({
   openPresetListDrawer: () => void
   resetPreset: () => Promise<void>
 }) {
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
   const { getEntityConfig } = useConfig()
 
   const presetsConfig = getEntityConfig({
@@ -37,7 +39,8 @@ export function ActiveQueryPreset({
     >
       {activePreset?.isShared && <PeopleIcon className={`${baseClass}__shared`} />}
       <div className={`${baseClass}__label-text`}>
-        {activePreset?.title || t('general:selectLabel', { label: presetsConfig.labels.singular })}
+        {activePreset?.title ||
+          t('general:selectLabel', { label: getTranslation(presetsConfig.labels.singular, i18n) })}
       </div>
       {activePreset ? (
         <div

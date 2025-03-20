@@ -23,11 +23,11 @@ export { useEffectEvent } from '../../hooks/useEffectEvent.js'
 export { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 
 // query preset elements
-export { QueryPresetsColumnsCell } from '../../elements/QueryPresets/cells/ColumnsCell/index.js'
-export { QueryPresetsWhereCell } from '../../elements/QueryPresets/cells/WhereCell/index.js'
-export { QueryPresetsAccessCell } from '../../elements/QueryPresets/cells/AccessCell/index.js'
-export { QueryPresetsColumnField } from '../../elements/QueryPresets/fields/ColumnsField/index.js'
-export { QueryPresetsWhereField } from '../../elements/QueryPresets/fields/WhereField/index.js'
+export { QueryPresetsColumnsCell } from '../../elements/queryPresets/cells/ColumnsCell/index.js'
+export { QueryPresetsWhereCell } from '../../elements/queryPresets/cells/WhereCell/index.js'
+export { QueryPresetsAccessCell } from '../../elements/queryPresets/cells/AccessCell/index.js'
+export { QueryPresetsColumnField } from '../../elements/queryPresets/fields/ColumnsField/index.js'
+export { QueryPresetsWhereField } from '../../elements/queryPresets/fields/WhereField/index.js'
 
 // elements
 export { ConfirmationModal } from '../../elements/ConfirmationModal/index.js'

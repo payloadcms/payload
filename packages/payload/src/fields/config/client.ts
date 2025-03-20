@@ -224,7 +224,7 @@ export const createClientField = ({
         //@ts-expect-error - would need to type narrow
         if (typeof incomingField.label === 'function') {
           //@ts-expect-error - would need to type narrow
-          clientField.label = incomingField.label({ t: i18n.t })
+          clientField.label = incomingField.label({ i18n, t: i18n.t })
         } else {
           //@ts-expect-error - would need to type narrow
           clientField.label = incomingField.label
@@ -345,7 +345,7 @@ export const createClientField = ({
             }
 
             field.options[i] = {
-              label: option.label({ t: i18n.t }),
+              label: option.label({ i18n, t: i18n.t }),
               value: option.value,
             }
           }
@@ -409,7 +409,7 @@ export const createClientField = ({
                   case 'description':
                     if ('description' in tab.admin) {
                       if (typeof tab.admin?.description === 'function') {
-                        clientTab.admin.description = tab.admin.description({ t: i18n.t })
+                        clientTab.admin.description = tab.admin.description({ i18n, t: i18n.t })
                       } else {
                         clientTab.admin.description = tab.admin.description
                       }
