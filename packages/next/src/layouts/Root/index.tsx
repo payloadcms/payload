@@ -31,7 +31,7 @@ export const RootLayout = async ({
   readonly config: Promise<SanitizedConfig>
   readonly importMap: ImportMap
   readonly serverFunction: ServerFunctionClient
-  readonly htmlProps?: Omit<React.DetailedHTMLProps<React.HtmlHTMLAttributes<HTMLHtmlElement>, HTMLHtmlElement>, 'suppressHydrationWarning' | 'lang' | 'dir'>
+  readonly htmlProps?: React.HtmlHTMLAttributes<HTMLHtmlElement>
 }) => {
   checkDependencies()
 
