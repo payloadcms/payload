@@ -44,11 +44,11 @@ const config = buildConfig({
 
 The following options are available for Query Presets:
 
-| Option        | Description                                                                                                            |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `access`      | Custom access control rules for reading, updating, and deleting Query Presets. [More details](#custom-access-control). |
-| `constraints` | Used to define options and fields for custom access control rules. [More details](#custom-access-control).             |
-| `labels`      | Custom labels to use for the Query Presets Collection.                                                                 |
+| Option        | Description                                                                                                |
+| ------------- | ---------------------------------------------------------------------------------------------------------- |
+| `access`      | Custom access control rules for Query Presets collection. [More details](#custom-access-control).          |
+| `constraints` | Used to define options and fields for custom access control rules. [More details](#custom-access-control). |
+| `labels`      | Custom labels to use for the Query Presets Collection.                                                     |
 
 ## Access Control
 
@@ -68,13 +68,45 @@ When a user manages a preset, these options will be available to them in the Adm
 
 ### Custom Access Control
 
-In addition to the defaults, you can also inject custom access control rules into Query Presets. For example, you could create a rule that only allows users with a specific role to read, update, or delete a preset.
+In addition to the defaults, you can also inject custom access control rules into Query Presets. For example, you could disallow all users of a particular role from operating on any preset. Or you could create a rule that only allows users with a specific role to read, update, or delete one particular preset.
 
-#### Adding a new option
+There are two ways to customize access control for Query Presets:
 
-To add a custom access control rule, you'll first need to append a new option for users to select when managing the preset. Options are per operation, so you can have completely different rules for reading, updating, and deleting.
+1. [Collection Access Control](#static-access-control): Define a set of rules that apply to all Query Presets. These rules are _not_ controllable by the user.
+2. [Document Access Control](#dynamic-access-control): Define a set of rules that apply to a specific Query Preset. These rules _are_ controllable by the user.
 
-Each option requires a label, a value, and a list of fields that will be used to determine access. The fields are conditionally rendered when that particular option is selected.
+#### Collection Access Control
+
+You can define static access control rules that apply to all Query Presets. These rules are not controllable by the user and are applied to all presets. They are written statically in your Collection Config.
+
+To add Collection Access Control, use the `queryPresets.access` property in your [Collection Config](../configuration/collections):
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  queryPresets: {
+    // ...
+    // highlight-start
+    access: {
+      read: ({ req: { user } }) =>
+        user?.roles?.some((role) => role === 'admin'),
+      update: ({ req: { user } }) =>
+        user?.roles?.some((role) => role === 'admin'),
+    },
+    // highlight-end
+  },
+})
+```
+
+This example restricts all Query Presets to users with the role of `admin`.
+
+#### Document Access Control
+
+You can also define dynamic access control rules that apply to each specific Query Preset. These rules are controllable by the user and written to the database when the preset is saved.
+
+Each rule will receive its own label to render in the dropdown, a set of fields to conditionally render when the rule is selected, and an access control function that determines how these fields affect access.
 
 To do this, use the `queryPresets.constraints` property in your [Payload Config](../configuration/payload-config).
 
@@ -83,9 +115,9 @@ import { buildConfig } from 'payload'
 
 const config = buildConfig({
   // ...
-  // highlight-start
   queryPresets: {
     // ...
+    // highlight-start
     constraints: {
       read: {
         label: 'Specific Roles',
@@ -101,53 +133,30 @@ const config = buildConfig({
             ],
           },
         ],
+        access: ({ req: { user } }) => ({
+          'access.update.roles': {
+            in: [user?.roles],
+          },
+        }),
       },
-      update: {
-        // ...
-      },
-      delete: {
-        // ...
-      },
+      // highlight-end
     },
   },
-  // highlight-end
 })
 ```
 
-#### Applying the new option
-
-Once you've added the new option, you'll need to write specific access control rules for each operation using the fields that you've provided. Payload will automatically merge these rules with its defaults.
-
-To do this, use the `queryPresets.access` property in your [Collection Config](../configuration/collections):
-
-```ts
-import { buildConfig } from 'payload'
-
-const config = buildConfig({
-  // ...
-  // highlight-start
-  queryPresets: {
-    // ...
-    access: {
-      read: ({ req: { user } }) => ({
-        'access.read.roles': {
-          // Your fields are automatically injected into the access[operation] group
-          in: user?.roles,
-        },
-      }),
-      update: () => {
-        // ...
-      },
-      delete: () => {
-        // ...
-      },
-    },
-  },
-  // highlight-end
-})
-```
+In this example, we've added a new option called `Specific Roles` that allows users to select from a list of roles. When this option is selected, the user will be prompted to select one or more roles from a list of options. The access control rule for this option is that the user operating on the preset must have one of the selected roles.
 
 <Banner type="warning">
   **Note:** Payload places your custom fields into the `access[operation]` field
   group, so your rules will need to reflect this.
 </Banner>
+
+The following options are available for each constraint:
+
+| Option   | Description                                                              |
+| -------- | ------------------------------------------------------------------------ |
+| `label`  | The label to display in the dropdown for this constraint.                |
+| `value`  | The value to store in the database when this constraint is selected.     |
+| `fields` | An array of fields to render when this constraint is selected.           |
+| `access` | A function that determines the access control rules for this constraint. |
