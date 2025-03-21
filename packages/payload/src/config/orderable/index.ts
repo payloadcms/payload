@@ -3,6 +3,7 @@ import type { Field, JoinField } from '../../fields/config/types.js'
 import type { Endpoint, PayloadHandler, SanitizedConfig } from '../types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
+import { flattenAllFields2 } from '../../utilities/flattenAllFields.js'
 import { generateKeyBetween, generateNKeysBetween } from './fractional-indexing.js'
 
 /**
@@ -23,7 +24,8 @@ export const setupOrderable = (config: SanitizedConfig) => {
       fieldsToAdd.set(collection, [...currentFields, '_order'])
       collection.defaultSort = collection.defaultSort ?? '_order'
     }
-    collection.fields
+    const flattenedFields = flattenAllFields2(collection.fields)
+    flattenedFields
       .filter((field): field is JoinField => field.type === 'join' && field.orderable === true)
       .forEach((field) => {
         if (Array.isArray(field.collection)) {
