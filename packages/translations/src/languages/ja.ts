@@ -121,6 +121,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     unknown: '不明なエラーが発生しました。',
     unPublishingDocument: 'このデータを非公開する際に問題が発生しました。',
     unspecific: 'エラーが発生しました。',
+    unverifiedEmail: 'ログインする前にメールを確認してください。',
     userEmailAlreadyRegistered: '指定されたメールのユーザーはすでに登録されています。',
     userLocked: 'このユーザーは、ログイン試行回数が多すぎるため、ロックされています。',
     usernameAlreadyRegistered: '指定されたユーザーネームのユーザーはすでに登録されています。',

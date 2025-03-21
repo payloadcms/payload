@@ -122,6 +122,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     unknown: 'Įvyko nežinoma klaida.',
     unPublishingDocument: 'Šio dokumento nepublikuojant kildavo problema.',
     unspecific: 'Įvyko klaida.',
+    unverifiedEmail: 'Prieš prisijungdami patvirtinkite savo el. paštą.',
     userEmailAlreadyRegistered: 'Vartotojas su nurodytu el. paštu jau yra užregistruotas.',
     userLocked: 'Šis vartotojas užrakintas dėl per daug nepavykusių prisijungimo bandymų.',
     usernameAlreadyRegistered: 'Vartotojas su nurodytu vartotojo vardu jau užregistruotas.',

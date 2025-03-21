@@ -97,16 +97,16 @@ export const getFields = (config: Config): Field[] => {
                 },
                 width: '33%',
               },
-              defaultValue: 'true',
+              defaultValue: 'yes',
               label: 'Drafts',
               options: [
                 {
-                  label: 'True',
-                  value: 'true',
+                  label: 'Yes',
+                  value: 'yes',
                 },
                 {
-                  label: 'False',
-                  value: 'false',
+                  label: 'No',
+                  value: 'no',
                 },
               ],
             },

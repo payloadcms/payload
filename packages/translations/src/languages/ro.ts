@@ -122,6 +122,7 @@ export const roTranslations: DefaultTranslationsObject = {
     unknown: 'S-a produs o eroare necunoscută.',
     unPublishingDocument: 'A existat o problemă în timpul nepublicării acestui document.',
     unspecific: 'S-a produs o eroare.',
+    unverifiedEmail: 'Vă rugăm să vă verificați e-mailul înainte de a vă autentifica.',
     userEmailAlreadyRegistered: 'Un utilizator cu emailul dat este deja înregistrat.',
     userLocked:
       'Acest utilizator este blocat din cauza unui număr prea mare de încercări de autentificare eșuate.',

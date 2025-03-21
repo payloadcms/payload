@@ -25,11 +25,13 @@ export const RootLayout = async ({
   config: configPromise,
   importMap,
   serverFunction,
+  htmlProps = {},
 }: {
   readonly children: React.ReactNode
   readonly config: Promise<SanitizedConfig>
   readonly importMap: ImportMap
   readonly serverFunction: ServerFunctionClient
+  readonly htmlProps?: React.HtmlHTMLAttributes<HTMLHtmlElement>
 }) => {
   checkDependencies()
 
@@ -105,6 +107,7 @@ export const RootLayout = async ({
       dir={dir}
       lang={languageCode}
       suppressHydrationWarning={config?.admin?.suppressHydrationWarning ?? false}
+      {...htmlProps}
     >
       <head>
         <style>{`@layer payload-default, payload;`}</style>

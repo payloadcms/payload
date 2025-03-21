@@ -8,7 +8,8 @@ import type {
 
 import { getTranslation } from '@payloadcms/translations'
 
-import { formatDate } from '../utilities/formatDate.js'
+import { formatDate } from './formatDateTitle.js'
+import { formatLexicalDocTitle, isSerializedLexicalEditor } from './formatLexicalDocTitle.js'
 
 export const formatDocTitle = ({
   collectionConfig,
@@ -21,7 +22,7 @@ export const formatDocTitle = ({
   collectionConfig?: ClientCollectionConfig
   data: TypeWithID
   dateFormat: SanitizedConfig['admin']['dateFormat']
-  fallback?: string
+  fallback?: object | string
   globalConfig?: ClientGlobalConfig
   i18n: I18n<any, any>
 }): string => {
@@ -54,8 +55,16 @@ export const formatDocTitle = ({
     title = getTranslation(globalConfig?.label, i18n) || globalConfig?.slug
   }
 
+  // richtext lexical case. We convert the first child of root to plain text
+  if (isSerializedLexicalEditor(title)) {
+    title = formatLexicalDocTitle(title.root.children?.[0]?.children || [], '')
+  }
+  if (!title && isSerializedLexicalEditor(fallback)) {
+    title = formatLexicalDocTitle(fallback.root.children?.[0]?.children || [], '')
+  }
+
   if (!title) {
-    title = fallback || `[${i18n.t('general:untitled')}]`
+    title = typeof fallback === 'string' ? fallback : `[${i18n.t('general:untitled')}]`
   }
 
   return title

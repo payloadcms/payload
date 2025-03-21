@@ -87,6 +87,7 @@ export const buildJoinAggregation = async ({
     }
 
     const sort = buildSortParam({
+      adapter,
       config: adapter.payload.config,
       fields: aggregatedFields,
       locale,
@@ -279,6 +280,7 @@ export const buildJoinAggregation = async ({
       }
 
       const sort = buildSortParam({
+        adapter,
         config: adapter.payload.config,
         fields: collectionConfig.flattenedFields,
         locale,

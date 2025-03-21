@@ -25,8 +25,15 @@ export function LoginView({ initPageResult, params, searchParams }: AdminViewSer
     routes: { admin },
   } = config
 
+  const redirectUrl =
+    typeof searchParams.redirect === 'string'
+      ? searchParams.redirect.startsWith('/') // If it's a relative path, keep it
+        ? searchParams.redirect
+        : encodeURIComponent(searchParams.redirect) // Otherwise, encode it
+      : admin
+
   if (user) {
-    redirect((searchParams.redirect as string) || admin)
+    redirect(redirectUrl)
   }
 
   const collectionConfig = payload?.collections?.[userSlug]?.config
