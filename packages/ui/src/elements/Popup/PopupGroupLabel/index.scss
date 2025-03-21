@@ -1,0 +1,8 @@
+@import '../../../scss/styles.scss';
+
+@layer payload-default {
+  .popup-list-group-label {
+    color: var(--theme-elevation-500);
+    padding: 0 var(--list-button-padding);
+  }
+}

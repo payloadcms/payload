@@ -5,9 +5,9 @@ import React, { useCallback } from 'react'
 import type { DocumentDrawerProps } from '../../../DocumentDrawer/types.js'
 
 import { EditIcon } from '../../../../icons/Edit/index.js'
+import { useCellProps } from '../../../../providers/TableColumns/RenderDefaultCell/index.js'
 import { useDocumentDrawer } from '../../../DocumentDrawer/index.js'
 import { DefaultCell } from '../../../Table/DefaultCell/index.js'
-import { useCellProps } from '../../../TableColumns/RenderDefaultCell/index.js'
 import './index.scss'
 
 export const DrawerLink: React.FC<{

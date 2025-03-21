@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-export const postsSlug = 'posts'
+import { postsSlug } from '../../slugs.js'
 
 export const PostsCollection: CollectionConfig = {
   slug: postsSlug,

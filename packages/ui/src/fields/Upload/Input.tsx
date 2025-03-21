@@ -190,7 +190,7 @@ export function UploadInput(props: UploadInputProps) {
   const populateDocs = React.useCallback<PopulateDocs>(
     async (ids, relatedCollectionSlug) => {
       if (!ids.length) {
-        return;
+        return
       }
 
       const query: {

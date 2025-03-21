@@ -26,8 +26,8 @@ import { useEffectEvent } from '../../../hooks/useEffectEvent.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { ReactSelect } from '../../ReactSelect/index.js'
-import { DefaultFilter } from './DefaultFilter/index.js'
 import './index.scss'
+import { DefaultFilter } from './DefaultFilter/index.js'
 
 const baseClass = 'condition'
 

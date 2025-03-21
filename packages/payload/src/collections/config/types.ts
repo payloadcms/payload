@@ -421,6 +421,11 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    */
   disableDuplicate?: boolean
   /**
+   * Opt-in to enable query presets for this collection.
+   * @see https://payloadcms.com/docs/query-presets/overview
+   */
+  enableQueryPresets?: boolean
+  /**
    * Custom rest api endpoints, set false to disable all rest endpoints for this collection.
    */
   endpoints?: false | Omit<Endpoint, 'root'>[]

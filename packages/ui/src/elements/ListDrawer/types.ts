@@ -7,6 +7,7 @@ import type { ListDrawerContextProps } from './Provider.js'
 export type ListDrawerProps = {
   readonly allowCreate?: boolean
   readonly collectionSlugs: SanitizedCollectionConfig['slug'][]
+  readonly disableQueryPresets?: boolean
   readonly drawerSlug?: string
   readonly enableRowSelections?: boolean
   readonly filterOptions?: FilterOptionsResult
@@ -28,10 +29,8 @@ export type UseListDrawer = (args: {
   selectedCollection?: SanitizedCollectionConfig['slug']
   uploads?: boolean // finds all collections with upload: true
 }) => [
-  React.FC<
-    Pick<ListDrawerProps, 'allowCreate' | 'enableRowSelections' | 'onBulkSelect' | 'onSelect'>
-  >, // drawer
-  React.FC<Pick<ListTogglerProps, 'children' | 'className' | 'disabled' | 'onClick'>>, // toggler
+  React.FC<Omit<ListDrawerProps, 'collectionSlugs'>>,
+  React.FC<Omit<ListTogglerProps, 'drawerSlug'>>,
   {
     closeDrawer: () => void
     collectionSlugs: SanitizedCollectionConfig['slug'][]

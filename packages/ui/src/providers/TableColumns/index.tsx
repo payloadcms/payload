@@ -1,9 +1,9 @@
 'use client'
 import { type Column } from 'payload'
 import { transformColumnsToSearchParams } from 'payload/shared'
-import React, { startTransition, useCallback } from 'react'
+import React, { startTransition, useCallback, useRef } from 'react'
 
-import type { TableColumnsProviderProps } from './types.js'
+import type { ITableColumns, TableColumnsProviderProps } from './types.js'
 
 import { useConfig } from '../../providers/Config/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
@@ -28,6 +28,8 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
     columnStateFromProps,
     (state, action: Column[]) => action,
   )
+
+  const contextRef = useRef({} as ITableColumns)
 
   const toggleColumn = useCallback(
     async (column: string) => {
@@ -98,6 +100,7 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
         resetColumnsState,
         setActiveColumns,
         toggleColumn,
+        ...contextRef.current,
       }}
     >
       {children}
