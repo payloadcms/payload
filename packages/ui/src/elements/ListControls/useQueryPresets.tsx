@@ -226,7 +226,7 @@ export const useQueryPresets = ({
       </PopupList.Button>,
     )
 
-    if (activePreset && queryPresetPermissions.delete) {
+    if (activePreset && queryPresetPermissions?.delete) {
       menuItems.push(
         <Fragment>
           <PopupList.Button onClick={() => openModal(confirmDeletePresetModalSlug)}>

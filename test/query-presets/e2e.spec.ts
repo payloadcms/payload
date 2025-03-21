@@ -323,7 +323,7 @@ describe('Query Presets', () => {
 
     const presetTitle = 'New Preset'
 
-    await clickListMenuItem({ page, menuItemLabel: 'Create new Preset' })
+    await clickListMenuItem({ page, menuItemLabel: 'Create New' })
     const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(modal).toBeVisible()
     await modal.locator('input[name="title"]').fill(presetTitle)
