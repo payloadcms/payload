@@ -18,7 +18,7 @@ let anonymousUser: User
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-describe('Shared Filters', () => {
+describe('Query Presets', () => {
   beforeAll(async () => {
     // @ts-expect-error: initPayloadInt does not have a proper type definition
     ;({ payload, restClient } = await initPayloadInt(dirname))

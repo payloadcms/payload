@@ -1,6 +1,7 @@
 import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { openListColumns } from 'helpers/e2e/openListColumns.js'
 import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
@@ -13,7 +14,7 @@ import {
   exactText,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-  throttleTest,
+  // throttleTest,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { clickListMenuItem, openListMenu } from '../helpers/e2e/toggleListMenu.js'
@@ -68,10 +69,14 @@ describe('Query Presets', () => {
   })
 
   beforeEach(async () => {
-    await throttleTest({
-      page,
-      context,
-      delay: 'Fast 4G',
+    // await throttleTest({
+    //   page,
+    //   context,
+    //   delay: 'Fast 4G',
+    // })
+
+    await payload.delete({
+      collection: 'payload-preferences',
     })
   })
 
@@ -262,9 +267,40 @@ describe('Query Presets', () => {
     ).toBeVisible()
   })
 
-  // eslint-disable-next-line playwright/no-skipped-test, playwright/expect-expect
-  test.skip('should reset active changes', () => {
-    // select a preset, make a change to the presets, click "reset", and ensure the changes are reverted
+  test('should reset active changes', async () => {
+    await page.goto(pagesUrl.list)
+    await clearSelectedPreset({ page })
+    await selectPreset({ page, presetTitle: seedData.everyone.title })
+
+    const { columnContainer } = await toggleColumn(page, { columnLabel: 'ID' })
+
+    const column = columnContainer.locator(`.column-selector .column-selector__column`, {
+      hasText: exactText('ID'),
+    })
+
+    await openListMenu({ page })
+    await clickListMenuItem({ page, menuItemLabel: 'Reset' })
+
+    await openListColumns(page, {})
+    await expect(column).toHaveClass(/column-selector__column--active/)
+  })
+
+  test('should only enter modified state when changes are made to an active preset', async () => {
+    await page.goto(pagesUrl.list)
+    await clearSelectedPreset({ page })
+    await expect(page.locator('.list-controls__modified')).toBeHidden()
+    await selectPreset({ page, presetTitle: seedData.everyone.title })
+    await expect(page.locator('.list-controls__modified')).toBeHidden()
+    await toggleColumn(page, { columnLabel: 'ID' })
+    await expect(page.locator('.list-controls__modified')).toBeVisible()
+    await openListMenu({ page })
+    await clickListMenuItem({ page, menuItemLabel: 'Update for everyone' })
+    await expect(page.locator('.list-controls__modified')).toBeHidden()
+    await toggleColumn(page, { columnLabel: 'ID' })
+    await expect(page.locator('.list-controls__modified')).toBeVisible()
+    await openListMenu({ page })
+    await clickListMenuItem({ page, menuItemLabel: 'Reset' })
+    await expect(page.locator('.list-controls__modified')).toBeHidden()
   })
 
   test('can edit a preset through the document drawer', async () => {
@@ -314,8 +350,8 @@ describe('Query Presets', () => {
   })
 
   // eslint-disable-next-line playwright/no-skipped-test, playwright/expect-expect
-  test.skip('can save for everyone', () => {
-    // select a preset, make a change to the presets, click "save for everyone", and ensure the changes are saved
+  test.skip('can save a preset', () => {
+    // select a preset, make a change to the presets, click "save for everyone" or "save", and ensure the changes persist
   })
 
   test('can create new preset', async () => {

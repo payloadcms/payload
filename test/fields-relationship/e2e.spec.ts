@@ -332,7 +332,7 @@ describe('Relationship Field', () => {
       // now ensure that the same filter options are applied in the list view
       await page.goto(url.list)
 
-      const whereBuilder = await addListFilter({
+      const { whereBuilder } = await addListFilter({
         page,
         fieldLabel: 'Relationship Filtered By Field',
         operatorLabel: 'equals',
@@ -367,7 +367,7 @@ describe('Relationship Field', () => {
       // now ensure that the same filter options are applied in the list view
       await page.goto(url.list)
 
-      const whereBuilder = await addListFilter({
+      const { whereBuilder } = await addListFilter({
         page,
         fieldLabel: 'Collapsible > Nested Relationship Filtered By Field',
         operatorLabel: 'equals',

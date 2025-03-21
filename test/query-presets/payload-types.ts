@@ -225,10 +225,6 @@ export interface PayloadQueryPreset {
       constraint?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
       users?: (string | User)[] | null;
     };
-    create?: {
-      constraint?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
-      users?: (string | User)[] | null;
-    };
   };
   where?:
     | {
@@ -336,12 +332,6 @@ export interface PayloadQueryPresetsSelect<T extends boolean = true> {
               roles?: T;
             };
         delete?:
-          | T
-          | {
-              constraint?: T;
-              users?: T;
-            };
-        create?:
           | T
           | {
               constraint?: T;

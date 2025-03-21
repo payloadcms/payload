@@ -1,7 +1,17 @@
 import type { Access, Config } from '../config/types.js'
 import type { Operation } from '../types/index.js'
 
+import defaultAccess from '../auth/defaultAccess.js'
+
 const operations: Operation[] = ['delete', 'read', 'update', 'create'] as const
+
+const defaultCollectionAccess = {
+  create: defaultAccess,
+  delete: defaultAccess,
+  read: defaultAccess,
+  unlock: defaultAccess,
+  update: defaultAccess,
+}
 
 export const getAccess = (config: Config): Record<Operation, Access> =>
   operations.reduce(
@@ -13,13 +23,20 @@ export const getAccess = (config: Config): Record<Operation, Access> =>
           return false
         }
 
-        const customRootAccess = config?.queryPresets?.access?.[operation]
+        const collectionAccess = config?.queryPresets?.access?.[operation]
           ? await config.queryPresets.access[operation](args)
-          : undefined
+          : defaultCollectionAccess?.[operation]
+            ? defaultCollectionAccess[operation](args)
+            : true
 
-        // If root access control is false, no need to continue to constraint-level access
-        if (customRootAccess === false) {
+        // If collection-level access control is `false`, no need to continue to document-level access
+        if (collectionAccess === false) {
           return false
+        }
+
+        // The `create` operation does not affect the document-level access control
+        if (operation === 'create') {
+          return collectionAccess
         }
 
         return {
@@ -47,15 +64,13 @@ export const getAccess = (config: Config): Record<Operation, Access> =>
                 },
                 ...(await Promise.all(
                   (config?.queryPresets?.constraints?.[operation] || []).map(async (constraint) => {
-                    const customConstraintAccess = constraint.access
+                    const constraintAccess = constraint.access
                       ? await constraint.access(args)
                       : undefined
 
                     return {
                       and: [
-                        ...(typeof customConstraintAccess === 'object'
-                          ? [customConstraintAccess]
-                          : []),
+                        ...(typeof constraintAccess === 'object' ? [constraintAccess] : []),
                         {
                           [`access.${operation}.constraint`]: {
                             equals: constraint.value,
@@ -67,7 +82,7 @@ export const getAccess = (config: Config): Record<Operation, Access> =>
                 )),
               ],
             },
-            ...(typeof customRootAccess === 'object' ? [customRootAccess] : []),
+            ...(typeof collectionAccess === 'object' ? [collectionAccess] : []),
           ],
         }
       }

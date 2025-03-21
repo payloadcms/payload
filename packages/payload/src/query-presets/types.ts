@@ -4,7 +4,7 @@ import type { ListPreferences } from '../preferences/types.js'
 import type { Where } from '../types/index.js'
 
 // Note: order matters here as it will change the rendered order in the UI
-export const operations = ['read', 'update', 'delete', 'create'] as const
+export const operations = ['read', 'update', 'delete'] as const
 
 type Operation = (typeof operations)[number]
 
