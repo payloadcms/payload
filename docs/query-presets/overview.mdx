@@ -6,13 +6,13 @@ desc: Query Presets allow you to save and share filters, columns, and sort order
 keywords:
 ---
 
-Query Presets allow you to save and share filters, columns, and sort orders for your [Collections](../configuration/collections). This is useful for reusing common or complex filtering patterns and column configurations or sharing across your team.
+Query Presets allow you to save and share filters, columns, and sort orders for your [Collections](../configuration/collections). This is useful for reusing common or complex filtering patterns and/or sharing them across your team.
 
 Each Query Preset is saved as a new record in the database under the `payload-query-presets` collection. This allows for an endless number of preset configurations, where the users of your app define the presets that are most useful to them, rather than being hard coded into the Payload Config.
 
 Within the [Admin Panel](../admin/overview), Query Presets are applied to the List View. When enabled, new controls are displayed for users to manage presets. Once saved, these presets can be loaded up at any time and optionally shared with others.
 
-To enable Query Presets on a Collection, use the `enableQueryPresets` property in your [Collection Config](../configuration/collections).
+To enable Query Presets on a Collection, use the `enableQueryPresets` property in your [Collection Config](../configuration/collections):
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -27,7 +27,9 @@ export const MyCollection: CollectionConfig = {
 
 ## Config Options
 
-Query Preset settings are managed on the `queryPresets` property in your [Collection Config](../configuration/collections).
+While not required, you may want to customize the behavior of Query Presets to suit your needs, such as add custom labels or access control rules.
+
+Settings for Query Presets are managed on the `queryPresets` property at the root of your [Payload Config](../configuration/overview):
 
 ```ts
 import { buildConfig } from 'payload'
@@ -44,42 +46,26 @@ const config = buildConfig({
 
 The following options are available for Query Presets:
 
-| Option        | Description                                                                                                |
-| ------------- | ---------------------------------------------------------------------------------------------------------- |
-| `access`      | Custom access control rules for Query Presets collection. [More details](#custom-access-control).          |
-| `constraints` | Used to define options and fields for custom access control rules. [More details](#custom-access-control). |
-| `labels`      | Custom labels to use for the Query Presets Collection.                                                     |
+| Option        | Description                                                                                                                     |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `access`      | Used to define custom collection-level access control that applies to all presets. [More details](#access-control).             |
+| `constraints` | Used to define custom document-level access control that apply to individual presets. [More details](#document-access-control). |
+| `labels`      | Custom labels to use for the Query Presets collection.                                                                          |
 
 ## Access Control
 
-Query Presets are subject to the same [Access Control](../access-control/overview) as the rest of Payload. This means you can use the same function patterns you are already familiar with to control who can read, update, and delete each individual preset.
+Query Presets are subject to the same [Access Control](../access-control/overview) as the rest of Payload. This means you can use the same patterns you are already familiar with to control who can read, update, and delete presets.
 
-### Default Access Control
+Access Control for Query Presets can be customized in two ways:
 
-By default, Payload provides a set of sensible defaults for all Query Presets, but you can customize these rules to suit your needs.
+1. [Collection Access Control](#static-access-control): Applies to all presets. These rules are not controllable by the user and are statically defined in the config.
+2. [Document Access Control](#dynamic-access-control): Applies to each individual preset. These rules are controllable by the user and are saved to the document.
 
-These defaults are as follows:
+### Collection Access Control
 
-- **Only Me**: Only the user who created the preset can read, update, and delete it.
-- **Everyone**: All users can read, update, and delete the preset.
-- **Specific Users**: Only select users can read, update, and delete the preset.
+Collection-level access control applies to _all_ presets within the Query Presets collection. Users cannot control these rules, they are written statically in your config.
 
-When a user manages a preset, these options will be available to them in the Admin Panel for each operation.
-
-### Custom Access Control
-
-In addition to the defaults, you can also inject custom access control rules into Query Presets. For example, you could disallow all users of a particular role from operating on any preset. Or you could create a rule that only allows users with a specific role to read, update, or delete one particular preset.
-
-There are two ways to customize access control for Query Presets:
-
-1. [Collection Access Control](#static-access-control): Define a set of rules that apply to all Query Presets. These rules are _not_ controllable by the user.
-2. [Document Access Control](#dynamic-access-control): Define a set of rules that apply to a specific Query Preset. These rules _are_ controllable by the user.
-
-#### Collection Access Control
-
-You can define static access control rules that apply to all Query Presets. These rules are not controllable by the user and are applied to all presets. They are written statically in your Collection Config.
-
-To add Collection Access Control, use the `queryPresets.access` property in your [Collection Config](../configuration/collections):
+To add Collection Access Control, use the `queryPresets.access` property in your [Payload Config](../configuration/overview):
 
 ```ts
 import { buildConfig } from 'payload'
@@ -102,11 +88,27 @@ const config = buildConfig({
 
 This example restricts all Query Presets to users with the role of `admin`.
 
-#### Document Access Control
+### Document Access Control
 
-You can also define dynamic access control rules that apply to each specific Query Preset. These rules are controllable by the user and written to the database when the preset is saved.
+You can also define access control rules that apply to each specific preset. Users have the ability to define and modify these rules on the fly as they manage presets. These are saved dynamically in the database on each document.
 
-Each rule will receive its own label to render in the dropdown, a set of fields to conditionally render when the rule is selected, and an access control function that determines how these fields affect access.
+When a user manages a preset, document-level access control options will be available to them in the Admin Panel for each operation.
+
+By default, Payload provides a set of sensible defaults for all Query Presets, but you can customize these rules to suit your needs:
+
+- **Only Me**: Only the user who created the preset can read, update, and delete it.
+- **Everyone**: All users can read, update, and delete the preset.
+- **Specific Users**: Only select users can read, update, and delete the preset.
+
+#### Custom Access Control
+
+You can augment the default access control rules with your own custom rules. This can be useful for creating more complex access control patterns that the defaults don't provide, such as for RBAC.
+
+Adding custom access control rules requires:
+
+1. A label to display in the dropdown
+2. A set of fields to conditionally render when that option is selected
+3. A function that returns the access control rules for that option
 
 To do this, use the `queryPresets.constraints` property in your [Payload Config](../configuration/payload-config).
 
