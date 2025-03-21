@@ -28,7 +28,6 @@ import { filterFields } from '../elements/TableColumns/filterFields.js'
 import { getInitialColumns } from '../elements/TableColumns/getInitialColumns.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import { Pill, SelectAll, SelectRow, Table } from '../exports/client/index.js'
-const ORDER_FIELD_NAME = '_order'
 
 export const renderFilters = (
   fields: Field[],

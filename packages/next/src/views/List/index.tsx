@@ -104,11 +104,7 @@ export const renderListView = async (
 
     const sort =
       listPreferences?.sort ||
-      (typeof collectionConfig.defaultSort === 'string'
-        ? collectionConfig.defaultSort
-        : collectionConfig.orderable
-          ? '_order'
-          : undefined)
+      (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : undefined)
 
     let where = mergeListSearchAndWhere({
       collectionConfig,

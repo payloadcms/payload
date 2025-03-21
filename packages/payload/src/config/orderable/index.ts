@@ -10,6 +10,8 @@ import { generateKeyBetween, generateNKeysBetween } from './fractional-indexing.
  * - N fields per collection, named `_order` or `_<collection>_<joinField>_order`
  * - 1 hook per collection
  * - 1 endpoint per app
+ *
+ * Also, if collection.defaultSort or joinField.defaultSort is not set, it will be set to the orderable field.
  */
 export const setupOrderable = (config: SanitizedConfig) => {
   let atLeastOneOrderableField = false
@@ -19,6 +21,7 @@ export const setupOrderable = (config: SanitizedConfig) => {
     if (collection.orderable) {
       const currentFields = fieldsToAdd.get(collection) || []
       fieldsToAdd.set(collection, [...currentFields, '_order'])
+      collection.defaultSort = collection.defaultSort ?? '_order'
     }
     collection.fields
       .filter((field): field is JoinField => field.type === 'join' && field.orderable === true)
@@ -32,6 +35,7 @@ export const setupOrderable = (config: SanitizedConfig) => {
             `Join field ${field.name} targets non-existent collection ${field.collection}`,
           )
         }
+        field.defaultSort = field.defaultSort ?? `_${field.collection}_${field.name}_order`
         const currentFields = fieldsToAdd.get(relationshipCollection) || []
         fieldsToAdd.set(relationshipCollection, [
           ...currentFields,
