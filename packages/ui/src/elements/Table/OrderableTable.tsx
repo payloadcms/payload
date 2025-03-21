@@ -124,11 +124,6 @@ export const OrderableTable: React.FC<Props> = ({
           'Failed to reorder. This can happen if you reorder several rows too quickly. Please try again.',
         )
       }
-
-      // This will trigger an update of the data from the server
-      handleSortChange(query.sort).catch((error) => {
-        throw error
-      })
     } catch (err) {
       const error = err instanceof Error ? err.message : String(err)
       // Rollback to previous state if the request fails
