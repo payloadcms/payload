@@ -96,7 +96,7 @@ export const deTranslations: DefaultTranslationsObject = {
     invalidFileTypeValue: 'Ungültiger Datei-Typ: {{value}}',
     invalidRequestArgs: 'Ungültige Argumente in der Anfrage: {{args}}',
     loadingDocument: 'Es gab ein Problem, das Dokument mit der ID {{id}} zu laden.',
-    localesNotSaved_one: 'Das folgende Sprache konnte nicht gespeichert werden:',
+    localesNotSaved_one: 'Die folgende Sprache konnte nicht gespeichert werden:',
     localesNotSaved_other: 'Die folgenden Sprachen konnten nicht gespeichert werden:',
     logoutFailed: 'Abmeldung fehlgeschlagen.',
     missingEmail: 'E-Mail-Adresse fehlt.',
@@ -359,7 +359,7 @@ export const deTranslations: DefaultTranslationsObject = {
     welcome: 'Willkommen',
   },
   localization: {
-    cannotCopySameLocale: 'Kann nicht in dieselbe Sprache kopieren werden',
+    cannotCopySameLocale: 'Kann nicht in dieselbe Sprache kopiert werden',
     copyFrom: 'Kopieren von',
     copyFromTo: 'Kopieren von {{from}} zu {{to}}',
     copyTo: 'Kopieren nach',
