@@ -1,9 +1,7 @@
 // @ts-strict-ignore
 
-import type { Config, Endpoint, PayloadHandler, SanitizedConfig } from '../../config/types.js'
-import type { Field } from '../../fields/config/types.js'
+import type { Config, SanitizedConfig } from '../../config/types.js'
 import type {
-  BeforeChangeHook,
   CollectionConfig,
   SanitizedCollectionConfig,
   SanitizedJoin,
@@ -11,7 +9,6 @@ import type {
 } from './types.js'
 
 import { authCollectionEndpoints } from '../../auth/endpoints/index.js'
-import executeAccess from '../../auth/executeAccess.js'
 import { getBaseAuthFields } from '../../auth/getAuthFields.js'
 import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
@@ -29,7 +26,6 @@ import {
   addDefaultsToCollectionConfig,
   addDefaultsToLoginWithUsernameConfig,
 } from './defaults.js'
-import { generateKeyBetween, generateNKeysBetween } from './fractional-indexing.js'
 import { sanitizeAuthFields, sanitizeUploadFields } from './reservedFieldNames.js'
 import { sanitizeCompoundIndexes } from './sanitizeCompoundIndexes.js'
 import { validateUseAsTitle } from './useAsTitle.js'
@@ -240,11 +236,6 @@ export const sanitizeCollection = async (
 
   validateUseAsTitle(sanitized)
 
-  // Enable custom order
-  if (collection.orderable) {
-    addSortableFeatures(sanitized)
-  }
-
   const sanitizedConfig = sanitized as SanitizedCollectionConfig
 
   sanitizedConfig.joins = joins
@@ -258,173 +249,4 @@ export const sanitizeCollection = async (
   })
 
   return sanitizedConfig
-}
-
-const addSortableFeatures = (sanitized: CollectionConfig) => {
-  const ORDER_FIELD_NAME = '_order'
-
-  // 1. Add field
-  const orderField: Field = {
-    name: ORDER_FIELD_NAME,
-    type: 'text',
-    admin: {
-      disableBulkEdit: true,
-      disabled: true,
-      disableListColumn: true,
-      disableListFilter: true,
-      hidden: true,
-      readOnly: true,
-    },
-    index: true,
-    label: ({ t }) => t('general:order'),
-    required: true,
-    unique: true,
-  }
-
-  sanitized.fields.unshift(orderField)
-
-  // 2. Add hook
-  if (!sanitized.hooks) {
-    sanitized.hooks = {}
-  }
-  if (!sanitized.hooks.beforeChange) {
-    sanitized.hooks.beforeChange = []
-  }
-
-  const orderBeforeChangeHook: BeforeChangeHook = async ({ data, operation, req }) => {
-    // Only set _order on create, not on update (unless explicitly provided)
-    if (operation === 'create') {
-      // Find the last document to place this one after
-      const lastDoc = await req.payload.find({
-        collection: sanitized.slug,
-        depth: 0,
-        limit: 1,
-        sort: `-${ORDER_FIELD_NAME}`,
-      })
-
-      const lastOrderValue = lastDoc.docs[0]?.[ORDER_FIELD_NAME] || null
-      data[ORDER_FIELD_NAME] = generateKeyBetween(lastOrderValue, null)
-    }
-
-    return data
-  }
-
-  sanitized.hooks.beforeChange.push(orderBeforeChangeHook)
-
-  // 3. Add endpoint
-  const reorderHandler: PayloadHandler = async (req) => {
-    const body = await req.json()
-    type KeyAndID = {
-      id: string
-      key: string
-    }
-    const { docsToMove, newKeyWillBe, target } = body as {
-      // array of docs IDs to be moved before or after the target
-      docsToMove: string[]
-      // new key relative to the target. We don't use "after" or "before" as
-      // it can be misleading if the table is sorted in descending order.
-      newKeyWillBe: 'greater' | 'less'
-      target: KeyAndID
-    }
-
-    if (!Array.isArray(docsToMove) || docsToMove.length === 0) {
-      return new Response(JSON.stringify({ error: 'docsToMove must be a non-empty array' }), {
-        headers: { 'Content-Type': 'application/json' },
-        status: 400,
-      })
-    }
-    if (
-      typeof target !== 'object' ||
-      typeof target.id !== 'string' ||
-      typeof target.key !== 'string'
-    ) {
-      return new Response(JSON.stringify({ error: 'target must be an object with id and key' }), {
-        headers: { 'Content-Type': 'application/json' },
-        status: 400,
-      })
-    }
-    if (newKeyWillBe !== 'greater' && newKeyWillBe !== 'less') {
-      return new Response(JSON.stringify({ error: 'newKeyWillBe must be "greater" or "less"' }), {
-        headers: { 'Content-Type': 'application/json' },
-        status: 400,
-      })
-    }
-
-    // Prevent reordering if user doesn't have editing permissions
-    await executeAccess(
-      {
-        // Currently only one doc can be moved at a time. We should review this if we want to allow
-        // multiple docs to be moved at once in the future.
-        id: docsToMove[0],
-        data: {},
-        req,
-      },
-      sanitized.access.update,
-    )
-
-    const targetId = target.id
-    let targetKey = target.key
-
-    // If targetKey = pending, we need to find its current key.
-    // This can only happen if the user reorders rows quickly with a slow connection.
-    if (targetKey === 'pending') {
-      const beforeDoc = await req.payload.findByID({
-        id: targetId,
-        collection: sanitized.slug,
-      })
-      targetKey = beforeDoc?.[ORDER_FIELD_NAME] || null
-    }
-
-    // The reason the endpoint does not receive this docId as an argument is that there
-    // are situations where the user may not see or know what the next or previous one is. For
-    // example, access control restrictions, if docBefore is the last one on the page, etc.
-    const adjacentDoc = await req.payload.find({
-      collection: sanitized.slug,
-      depth: 0,
-      limit: 1,
-      sort: newKeyWillBe === 'greater' ? ORDER_FIELD_NAME : `-${ORDER_FIELD_NAME}`,
-      where: {
-        [ORDER_FIELD_NAME]: {
-          [newKeyWillBe === 'greater' ? 'greater_than' : 'less_than']: targetKey,
-        },
-      },
-    })
-    const adjacentDocKey = adjacentDoc.docs?.[0]?.[ORDER_FIELD_NAME] || null
-
-    // Currently N (= docsToMove.length) is always 1. Maybe in the future we will
-    // allow dragging and reordering multiple documents at once via the UI.
-    const orderValues =
-      newKeyWillBe === 'greater'
-        ? generateNKeysBetween(targetKey, adjacentDocKey, docsToMove.length)
-        : generateNKeysBetween(adjacentDocKey, targetKey, docsToMove.length)
-
-    // Update each document with its new order value
-    const updatePromises = docsToMove.map((id, index) => {
-      return req.payload.update({
-        id,
-        collection: sanitized.slug,
-        data: {
-          [ORDER_FIELD_NAME]: orderValues[index],
-        },
-      })
-    })
-
-    await Promise.all(updatePromises)
-
-    return new Response(JSON.stringify({ orderValues, success: true }), {
-      headers: { 'Content-Type': 'application/json' },
-      status: 200,
-    })
-  }
-
-  const reorderEndpoint: Endpoint = {
-    handler: reorderHandler,
-    method: 'post',
-    path: '/reorder',
-  }
-
-  if (!sanitized.endpoints) {
-    sanitized.endpoints = []
-  }
-  sanitized.endpoints.push(reorderEndpoint)
 }

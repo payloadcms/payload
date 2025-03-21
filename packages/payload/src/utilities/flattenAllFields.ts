@@ -16,6 +16,46 @@ export const flattenBlock = ({ block }: { block: Block }): FlattenedBlock => {
   }
 }
 
+/**
+ * Like flattenAllFields, but instead of creating a `flattenedFields` key, it puts all the fields in the top-level array.
+ */
+export const flattenAllFields2 = (fields: Field[]): Field[] => {
+  const result: Field[] = []
+
+  for (const field of fields) {
+    // Add the current field if it's not a structural field
+    if (field.type !== 'row' && field.type !== 'collapsible') {
+      result.push(field)
+    }
+
+    // Process subfields for various container types
+    if (
+      field.type === 'group' ||
+      field.type === 'array' ||
+      field.type === 'collapsible' ||
+      field.type === 'row'
+    ) {
+      if ('fields' in field && Array.isArray(field.fields)) {
+        result.push(...flattenAllFields2(field.fields))
+      }
+    } else if (field.type === 'tabs' && 'tabs' in field) {
+      field.tabs.forEach((tab) => {
+        if ('fields' in tab && Array.isArray(tab.fields)) {
+          result.push(...flattenAllFields2(tab.fields))
+        }
+      })
+    } else if (field.type === 'blocks' && 'blocks' in field) {
+      field.blocks.forEach((block) => {
+        if (typeof block !== 'string' && 'fields' in block && Array.isArray(block.fields)) {
+          result.push(...flattenAllFields2(block.fields))
+        }
+      })
+    }
+  }
+
+  return result
+}
+
 const flattenedFieldsCache = new Map<Field[], FlattenedField[]>()
 
 export const flattenAllFields = ({

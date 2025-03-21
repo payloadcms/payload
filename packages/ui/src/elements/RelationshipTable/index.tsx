@@ -140,6 +140,10 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         columns: transformColumnsToPreferences(query?.columns) || defaultColumns,
         docs,
         enableRowSelections: false,
+        orderableFieldName:
+          !field.orderable || Array.isArray(field.collection)
+            ? undefined
+            : `_${field.collection}_${field.name}_order`,
         parent,
         query: newQuery,
         renderRowTypes: true,
@@ -154,6 +158,10 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     [
       field.defaultLimit,
       field.defaultSort,
+      field.admin.defaultColumns,
+      field.collection,
+      field.name,
+      field.orderable,
       collectionConfig?.admin?.pagination?.defaultLimit,
       collectionConfig?.defaultSort,
       query,
@@ -330,6 +338,11 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                 }
                 modifySearchParams={false}
                 onQueryChange={setQuery}
+                orderableFieldName={
+                  !field.orderable || Array.isArray(field.collection)
+                    ? undefined
+                    : `_${field.collection}_${field.name}_order`
+                }
               >
                 <TableColumnsProvider
                   collectionSlug={Array.isArray(relationTo) ? relationTo[0] : relationTo}

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 
 import { SortDownIcon, SortUpIcon } from '../../icons/Sort/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
@@ -15,19 +15,30 @@ export type SortHeaderProps = {
 const baseClass = 'sort-header'
 
 function useSort() {
-  const { handleSortChange, query } = useListQuery()
-  const sort = useRef<'asc' | 'desc'>(query.sort === '-_order' ? 'desc' : 'asc')
-  const isActive = query.sort === '-_order' || query.sort === '_order'
+  const { handleSortChange, orderableFieldName, query } = useListQuery()
+  const querySort = Array.isArray(query.sort) ? query.sort[0] : query.sort
+  const sort = useRef<'asc' | 'desc'>(querySort === `-${orderableFieldName}` ? 'desc' : 'asc')
+  const isActive = querySort === `-${orderableFieldName}` || querySort === orderableFieldName
+
+  // This is necessary if you initialize the page without sort url param
+  // but your preferences are to sort by -_order.
+  // Since sort isn't updated, the arrow would incorrectly point upward.
+  useEffect(() => {
+    if (!isActive) {
+      return
+    }
+    sort.current = querySort === `-${orderableFieldName}` ? 'desc' : 'asc'
+  }, [orderableFieldName, querySort, isActive])
 
   const handleSortPress = () => {
     // If it's already sorted by the "_order" field, toggle between "asc" and "desc"
     if (isActive) {
-      void handleSortChange(sort.current === 'asc' ? '-_order' : '_order')
+      void handleSortChange(sort.current === 'asc' ? `-${orderableFieldName}` : orderableFieldName)
       sort.current = sort.current === 'asc' ? 'desc' : 'asc'
       return
     }
     // If NOT sorted by the "_order" field, sort by that field but do not toggle the current value of "asc" or "desc".
-    void handleSortChange(sort.current === 'asc' ? '_order' : '-_order')
+    void handleSortChange(sort.current === 'asc' ? orderableFieldName : `-${orderableFieldName}`)
   }
 
   return { handleSortPress, isActive, sort }

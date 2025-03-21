@@ -27,6 +27,7 @@ export type ListQueryProps = {
   readonly listPreferences?: ListPreferences
   readonly modifySearchParams?: boolean
   readonly onQueryChange?: OnListQueryChange
+  readonly orderableFieldName?: string
   /**
    * @deprecated
    */
@@ -37,6 +38,7 @@ export type IListQueryContext = {
   data: PaginatedDocs
   defaultLimit?: number
   defaultSort?: Sort
+  orderableFieldName?: string
   query: ListQuery
   refineListData: (args: ListQuery) => Promise<void>
 } & ContextHandlers
