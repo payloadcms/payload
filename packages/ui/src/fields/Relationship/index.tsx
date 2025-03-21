@@ -7,11 +7,13 @@ import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../../elements/DocumentDrawer/types.js'
+import type { ListDrawerProps } from '../../elements/ListDrawer/types.js'
 import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
 import type { GetResults, Option, Value } from './types.js'
 
 import { AddNewRelation } from '../../elements/AddNewRelation/index.js'
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
+import { useListDrawer } from '../../elements/ListDrawer/index.js'
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
@@ -48,6 +50,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
         className,
         description,
         isSortable = true,
+        selectionType = 'dropdown',
         sortOptions,
       } = {},
       hasMany,
@@ -120,6 +123,49 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
     id: currentlyOpenRelationship.id,
     collectionSlug: currentlyOpenRelationship.collectionSlug,
   })
+
+  const [
+    ListDrawer,
+    ,
+    { closeDrawer: closeListDrawer, isDrawerOpen: isListDrawerOpen, openDrawer: openListDrawer },
+  ] = useListDrawer({
+    collectionSlugs: hasMultipleRelations ? relationTo : [relationTo],
+    filterOptions,
+  })
+
+  const onListSelect = useCallback<NonNullable<ListDrawerProps['onSelect']>>(
+    ({ collectionSlug, doc }) => {
+      const formattedSelection = hasMultipleRelations
+        ? {
+            relationTo: collectionSlug,
+            value: doc.id,
+          }
+        : doc.id
+
+      if (hasMany) {
+        const existingValues = Array.isArray(value) ? value : []
+
+        // Filter out the existing value if it already exists. Maybe better to filter our the existing values from the list drawer beforehand?
+        const filteredValues = existingValues.filter((existing) => {
+          if (hasMultipleRelations) {
+            return !(
+              typeof existing === 'object' &&
+              existing.relationTo === collectionSlug &&
+              existing.value === doc.id
+            )
+          }
+          return existing !== doc.id
+        })
+
+        setValue([...filteredValues, formattedSelection])
+      } else {
+        setValue(formattedSelection)
+      }
+
+      closeListDrawer()
+    },
+    [hasMany, hasMultipleRelations, setValue, closeListDrawer, value],
+  )
 
   const openDrawerWhenRelationChanges = useRef(false)
 
@@ -601,18 +647,26 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
         {!errorLoading && (
           <div className={`${baseClass}__wrap`}>
             <ReactSelect
-              backspaceRemovesValue={!isDrawerOpen}
-              components={{
-                MultiValueLabel,
-                SingleValue,
-              }}
+              backspaceRemovesValue={!(isDrawerOpen || isListDrawerOpen)}
+              components={
+                selectionType === 'drawer'
+                  ? {
+                      DropdownIndicator: null,
+                      MultiValueLabel,
+                      SingleValue,
+                    }
+                  : {
+                      MultiValueLabel,
+                      SingleValue,
+                    }
+              }
               customProps={{
-                disableKeyDown: isDrawerOpen,
-                disableMouseDown: isDrawerOpen,
+                disableKeyDown: isDrawerOpen || isListDrawerOpen,
+                disableMouseDown: isDrawerOpen || isListDrawerOpen,
                 onDocumentDrawerOpen,
                 onSave,
               }}
-              disabled={readOnly || disabled || isDrawerOpen}
+              disabled={readOnly || disabled || isDrawerOpen || isListDrawerOpen}
               filterOption={enableWordBoundarySearch ? filterOption : undefined}
               getOptionValue={(option) => {
                 if (!option) {
@@ -622,9 +676,11 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
                   ? `${option.relationTo}_${option.value}`
                   : (option.value as string)
               }}
-              isLoading={isLoading}
+              isLoading={selectionType === 'dropdown' && isLoading}
               isMulti={hasMany}
+              isSearchable={selectionType === 'dropdown' && undefined}
               isSortable={isSortable}
+              menuIsOpen={selectionType === 'dropdown' && menuIsOpen}
               onChange={
                 !(readOnly || disabled)
                   ? (selected) => {
@@ -661,19 +717,22 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
                 setMenuIsOpen(false)
               }}
               onMenuOpen={() => {
-                setMenuIsOpen(true)
-
-                if (!hasLoadedFirstPageRef.current) {
-                  setIsLoading(true)
-                  void getResults({
-                    filterOptions,
-                    lastLoadedPage: {},
-                    onSuccess: () => {
-                      hasLoadedFirstPageRef.current = true
-                      setIsLoading(false)
-                    },
-                    value: initialValue,
-                  })
+                if (selectionType === 'drawer') {
+                  openListDrawer()
+                } else {
+                  setMenuIsOpen(true)
+                  if (!hasLoadedFirstPageRef.current) {
+                    setIsLoading(true)
+                    void getResults({
+                      filterOptions,
+                      lastLoadedPage: {},
+                      onSuccess: () => {
+                        hasLoadedFirstPageRef.current = true
+                        setIsLoading(false)
+                      },
+                      value: initialValue,
+                    })
+                  }
                 }
               }}
               onMenuScrollToBottom={() => {
@@ -690,7 +749,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
               showError={showError}
               value={valueToRender ?? null}
             />
-            {!(readOnly || disabled) && allowCreate && (
+            {!(readOnly || disabled) && allowCreate && selectionType === 'dropdown' && (
               <AddNewRelation
                 hasMany={hasMany}
                 path={path}
@@ -711,6 +770,11 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       {currentlyOpenRelationship.collectionSlug && currentlyOpenRelationship.hasReadPermission && (
         <DocumentDrawer onDelete={onDelete} onDuplicate={onDuplicate} onSave={onSave} />
       )}
+      <ListDrawer
+        allowCreate={!readOnly && allowCreate}
+        enableRowSelections={false}
+        onSelect={onListSelect}
+      />
     </div>
   )
 }
