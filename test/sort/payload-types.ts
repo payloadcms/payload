@@ -204,7 +204,6 @@ export interface Orderable {
  */
 export interface OrderableJoin {
   id: string;
-  _order: string;
   title?: string | null;
   orderableJoinField1?: {
     docs?: (string | Orderable)[];
@@ -392,7 +391,6 @@ export interface OrderableSelect<T extends boolean = true> {
  * via the `definition` "orderable-join_select".
  */
 export interface OrderableJoinSelect<T extends boolean = true> {
-  _order?: T;
   title?: T;
   orderableJoinField1?: T;
   orderableJoinField2?: T;
