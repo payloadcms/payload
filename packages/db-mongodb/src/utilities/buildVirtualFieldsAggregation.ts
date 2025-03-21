@@ -9,12 +9,14 @@ import { getCollection } from './getEntity.js'
 export const buildVirtualFieldsAggregation = ({
   adapter,
   fields,
+  locale,
   prefix = '',
   result = [],
   rootFields = fields,
 }: {
   adapter: MongooseAdapter
   fields: FlattenedField[]
+  locale?: string
   prefix?: string
   result?: PipelineStage[]
   rootFields?: FlattenedField[]
@@ -48,10 +50,28 @@ export const buildVirtualFieldsAggregation = ({
         !relationshipField.field.hasMany &&
         typeof relationshipField.field.relationTo === 'string'
       ) {
-        const { Model: RelationshipModel } = getCollection({
+        const { collectionConfig, Model: RelationshipModel } = getCollection({
           adapter,
           collectionSlug: relationshipField.field.relationTo,
         })
+
+        const foreignField = getFieldByPath({
+          fields: collectionConfig.flattenedFields,
+          path: field.virtual.path,
+        })
+
+        if (!foreignField) {
+          throw new APIError('Foreign field was not found')
+        }
+
+        let foreignPath = field.virtual.path
+
+        if (foreignField.pathHasLocalized && adapter.payload.config.localization) {
+          foreignPath = foreignField.localizedPath.replace(
+            '<locale>',
+            locale || adapter.payload.config.localization.defaultLocale,
+          )
+        }
 
         result.push({
           $lookup: {
@@ -63,7 +83,7 @@ export const buildVirtualFieldsAggregation = ({
               {
                 $project: {
                   _id: 0,
-                  [field.virtual.path]: 1,
+                  [foreignPath]: 1,
                 },
               },
             ],
@@ -73,7 +93,7 @@ export const buildVirtualFieldsAggregation = ({
         result.push({
           $addFields: {
             [currentPath]: {
-              $first: `$${currentPath}.${field.virtual.path}`,
+              $first: `$${currentPath}.${foreignPath}`,
             },
           },
         })

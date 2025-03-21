@@ -52,6 +52,7 @@ export const findOne: FindOne = async function findOne(
   const virtualFieldsAggregation = buildVirtualFieldsAggregation({
     adapter: this,
     fields: collectionConfig.flattenedFields,
+    locale,
   })
 
   let doc

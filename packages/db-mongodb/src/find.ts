@@ -137,6 +137,7 @@ export const find: Find = async function find(
   const virtualFieldsAggregation = buildVirtualFieldsAggregation({
     adapter: this,
     fields: collectionConfig.flattenedFields,
+    locale,
   })
 
   if (aggregate || sortAggregation.length > 0 || virtualFieldsAggregation.length > 0) {
