@@ -1,8 +1,4 @@
-// As this is the demo folder, we import Payload SCSS functions relatively.
-@import '../../../../../packages/ui/src/scss/styles.scss';
-
-// In your own projects, you'd import as follows:
-// @import '~payload/scss';
+@import '~@payloadcms/ui/scss';
 
 .custom-default-view {
   &__login-btn {
@@ -13,6 +9,7 @@
     display: flex;
     flex-direction: column;
     gap: base(1);
+    color: var(--color-success-350);
 
     & > * {
       margin: 0;
