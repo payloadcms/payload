@@ -1968,20 +1968,44 @@ describe('database', () => {
     })
 
     it('should allow to query by a virtual field with reference', async () => {
-      const post = await payload.create({ collection: 'posts', data: { title: 'my-title-2' } })
-      await payload.create({
+      await payload.delete({ collection: 'posts', where: {} })
+      await payload.delete({ collection: 'virtual-relations', where: {} })
+      const post_1 = await payload.create({ collection: 'posts', data: { title: 'Dan' } })
+      const post_2 = await payload.create({ collection: 'posts', data: { title: 'Mr.Dan' } })
+
+      const doc_1 = await payload.create({
         collection: 'virtual-relations',
         depth: 0,
-        data: { post: post.id },
+        data: { post: post_1.id },
+      })
+      const doc_2 = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post_2.id },
       })
 
-      const { docs } = await payload.find({
+      const { docs: ascDocs } = await payload.find({
         collection: 'virtual-relations',
-        where: { postTitle: { equals: 'my-title-2' } },
+        sort: 'postTitle',
+        depth: 0,
       })
-      expect(docs).toHaveLength(1)
-      expect(docs[0]?.postTitle).toBe('my-title-2')
+
+      expect(ascDocs[0]?.id).toBe(doc_1.id)
+
+      expect(ascDocs[1]?.id).toBe(doc_2.id)
+
+      const { docs: descDocs } = await payload.find({
+        collection: 'virtual-relations',
+        sort: '-postTitle',
+        depth: 0,
+      })
+
+      expect(descDocs[1]?.id).toBe(doc_1.id)
+
+      expect(descDocs[0]?.id).toBe(doc_2.id)
     })
+
+    it.todo('should allow to sort by a virtual field with reference')
   })
 
   it('should not allow to query by a field with `virtual: true`', async () => {
