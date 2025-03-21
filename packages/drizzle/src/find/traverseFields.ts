@@ -150,19 +150,51 @@ export const traverseFields = ({
 
         const foreignTable = adapter.tables[adapter.tableNameMap.get(toSnakeCase(collection.slug))]
 
-        const foreignValue = foreignTable[field.virtual.path.replace('.', '_')]
+        const foreignField = getFieldByPath({
+          fields:
+            adapter.payload.collections[relationshipField.field.relationTo].config.flattenedFields,
+          path: field.virtual.path,
+        })
 
-        if (!foreignValue) {
-          throw new APIError('fuckl')
+        if (!foreignField) {
+          throw new APIError('Invalid foreign field')
         }
 
-        currentArgs.extras[columnName] = sql`${db
-          .select({
-            value: foreignValue,
-          })
-          .from(foreignTable)
-          .where(eq(foreignTable.id, relationshipColumn))
-          .limit(1)}`.as(columnName)
+        if (foreignField.pathHasLocalized && adapter.payload.config.localization) {
+          const tableName = adapter.tableNameMap.get(toSnakeCase(collection.slug))
+          const foreignLocaleTable = adapter.tables[`${tableName}${adapter.localesSuffix}`]
+          const foreignValue = foreignLocaleTable[field.virtual.path.replaceAll('.', '_')]
+
+          currentArgs.extras[columnName] = sql`${db
+            .select({
+              value: foreignValue,
+            })
+            .from(foreignLocaleTable)
+            .where(
+              and(
+                eq(foreignLocaleTable._parentID, relationshipColumn),
+                eq(
+                  foreignLocaleTable._locale,
+                  locale || adapter.payload.config.localization.defaultLocale,
+                ),
+              ),
+            )
+            .limit(1)}`.as(columnName)
+        } else {
+          const foreignValue = foreignTable[field.virtual.path.replaceAll('.', '_')]
+
+          if (!foreignValue) {
+            throw new APIError('fuckl')
+          }
+
+          currentArgs.extras[columnName] = sql`${db
+            .select({
+              value: foreignValue,
+            })
+            .from(foreignTable)
+            .where(eq(foreignTable.id, relationshipColumn))
+            .limit(1)}`.as(columnName)
+        }
       } else {
         throw new APIError('Invalid relationship')
       }

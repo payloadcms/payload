@@ -154,6 +154,7 @@ export interface UserAuthOperations {
 export interface Post {
   id: string;
   title: string;
+  localized?: string | null;
   number?: number | null;
   D1?: {
     D2?: {
@@ -353,6 +354,7 @@ export interface Place {
 export interface VirtualRelation {
   id: string;
   postTitle?: string | null;
+  postLocalized?: string | null;
   post?: (string | null) | Post;
   updatedAt: string;
   createdAt: string;
@@ -564,6 +566,7 @@ export interface PayloadMigration {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
+  localized?: T;
   number?: T;
   D1?:
     | T
@@ -744,6 +747,7 @@ export interface PlacesSelect<T extends boolean = true> {
  */
 export interface VirtualRelationsSelect<T extends boolean = true> {
   postTitle?: T;
+  postLocalized?: T;
   post?: T;
   updatedAt?: T;
   createdAt?: T;

@@ -1967,6 +1967,32 @@ describe('database', () => {
       expect(doc.postTitle).toBe('my-title')
     })
 
+    it('should allow virtual field with reference localized', async () => {
+      const post = await payload.create({
+        collection: 'posts',
+        data: { title: 'my-title', localized: 'localized en' },
+      })
+
+      await payload.update({
+        collection: 'posts',
+        id: post.id,
+        locale: 'es',
+        data: { localized: 'localized es' },
+      })
+
+      const { id } = await payload.create({
+        collection: 'virtual-relations',
+        depth: 0,
+        data: { post: post.id },
+      })
+
+      let doc = await payload.findByID({ collection: 'virtual-relations', depth: 0, id })
+      expect(doc.postLocalized).toBe('localized en')
+
+      doc = await payload.findByID({ collection: 'virtual-relations', depth: 0, id, locale: 'es' })
+      expect(doc.postLocalized).toBe('localized es')
+    })
+
     it('should allow to query by a virtual field with reference', async () => {
       await payload.delete({ collection: 'posts', where: {} })
       await payload.delete({ collection: 'virtual-relations', where: {} })

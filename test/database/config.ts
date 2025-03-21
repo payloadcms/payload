@@ -45,6 +45,11 @@ export default buildConfigWithDefaults({
           required: true,
         },
         {
+          name: 'localized',
+          type: 'text',
+          localized: true,
+        },
+        {
           name: 'number',
           type: 'number',
         },
@@ -441,6 +446,14 @@ export default buildConfigWithDefaults({
           type: 'text',
           virtual: {
             path: 'title',
+            relationship: 'post',
+          },
+        },
+        {
+          name: 'postLocalized',
+          type: 'text',
+          virtual: {
+            path: 'localized',
             relationship: 'post',
           },
         },
