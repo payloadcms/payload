@@ -4,7 +4,6 @@ export const orderableJoinSlug = 'orderable-join'
 
 export const OrderableJoinCollection: CollectionConfig = {
   slug: orderableJoinSlug,
-  orderable: true,
   admin: {
     useAsTitle: 'title',
     components: {
