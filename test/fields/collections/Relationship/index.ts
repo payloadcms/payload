@@ -60,6 +60,14 @@ const RelationshipFields: CollectionConfig = {
       type: 'relationship',
     },
     {
+      name: 'relationWithCloseOnSaveToTrue',
+      admin: {
+        closeOnSave: true,
+      },
+      relationTo: 'text-fields',
+      type: 'relationship',
+    },
+    {
       name: 'relationWithDynamicDefault',
       defaultValue: ({ user }) => user?.id,
       relationTo: 'users',
