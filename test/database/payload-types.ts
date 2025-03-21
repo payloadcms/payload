@@ -358,6 +358,7 @@ export interface VirtualRelation {
   post?: (string | null) | Post;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -751,6 +752,7 @@ export interface VirtualRelationsSelect<T extends boolean = true> {
   post?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

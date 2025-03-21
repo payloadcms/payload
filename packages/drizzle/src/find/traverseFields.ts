@@ -120,6 +120,7 @@ export const traverseFields = ({
       }
 
       let relationshipPath = field.virtual.relationship.replaceAll('.', '_')
+
       if (versions) {
         relationshipPath = `version_${relationshipPath}`
       }
@@ -127,15 +128,16 @@ export const traverseFields = ({
       const relationshipColumn = adapter.tables[currentTableName][relationshipPath]
 
       if (!relationshipColumn) {
-        throw new APIError('not found')
+        return
       }
+
       const relationshipField = getFieldByPath({
         fields: topLevelFields,
-        path: field.virtual.relationship,
+        path: versions ? `version.${field.virtual.relationship}` : field.virtual.relationship,
       })
 
       if (!relationshipField) {
-        throw new APIError('not found')
+        return
       }
 
       if (
@@ -157,7 +159,7 @@ export const traverseFields = ({
         })
 
         if (!foreignField) {
-          throw new APIError('Invalid foreign field')
+          return
         }
 
         if (foreignField.pathHasLocalized && adapter.payload.config.localization) {
@@ -195,8 +197,6 @@ export const traverseFields = ({
             .where(eq(foreignTable.id, relationshipColumn))
             .limit(1)}`.as(columnName)
         }
-      } else {
-        throw new APIError('Invalid relationship')
       }
 
       return
@@ -298,6 +298,7 @@ export const traverseFields = ({
           topLevelArgs,
           topLevelFields,
           topLevelTableName,
+          versions,
           withTabledFields,
         })
 
@@ -410,6 +411,7 @@ export const traverseFields = ({
               topLevelArgs,
               topLevelFields,
               topLevelTableName,
+              versions,
               withTabledFields,
             })
 

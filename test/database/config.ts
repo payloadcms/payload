@@ -440,6 +440,7 @@ export default buildConfigWithDefaults({
     },
     {
       slug: 'virtual-relations',
+      admin: { useAsTitle: 'postTitle' },
       fields: [
         {
           name: 'postTitle',
@@ -463,6 +464,7 @@ export default buildConfigWithDefaults({
           relationTo: 'posts',
         },
       ],
+      versions: { drafts: true },
     },
     {
       slug: fieldsPersistanceSlug,

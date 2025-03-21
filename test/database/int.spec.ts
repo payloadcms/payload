@@ -1965,6 +1965,13 @@ describe('database', () => {
 
       const doc = await payload.findByID({ collection: 'virtual-relations', depth: 0, id })
       expect(doc.postTitle).toBe('my-title')
+      const draft = await payload.find({
+        collection: 'virtual-relations',
+        depth: 0,
+        where: { id: { equals: id } },
+        draft: true,
+      })
+      expect(draft.docs[0]?.postTitle).toBe('my-title')
     })
 
     it('should allow virtual field with reference localized', async () => {
