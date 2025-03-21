@@ -1,5 +1,5 @@
 'use client'
-import type { FormState, SanitizedCollectionConfig, UploadEdits } from 'payload'
+import type { DocumentSlots, FormState, SanitizedCollectionConfig, UploadEdits } from 'payload'
 
 import { isImage } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
@@ -12,14 +12,15 @@ import { useField } from '../../forms/useField/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
+import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { Button } from '../Button/index.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { Dropzone } from '../Dropzone/index.js'
 import { EditUpload } from '../EditUpload/index.js'
-import { FileDetails } from '../FileDetails/index.js'
 import './index.scss'
+import { FileDetails } from '../FileDetails/index.js'
 import { PreviewSizes } from '../PreviewSizes/index.js'
 import { Thumbnail } from '../Thumbnail/index.js'
 
@@ -92,6 +93,8 @@ export type UploadProps = {
 
 export const Upload: React.FC<UploadProps> = (props) => {
   const { collectionSlug, customActions, initialState, onChange, uploadConfig } = props
+  const { getDocumentSlots } = useServerFunctions()
+  const [documentSlots, setDocumentSlots] = React.useState<DocumentSlots>({})
 
   const {
     config: {
@@ -270,9 +273,12 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
   const imageCacheTag = uploadConfig?.cacheTags && savedDocumentData?.updatedAt
 
-  if (uploadConfig.hideFileInputOnCreate && !savedDocumentData?.filename) {
-    return null
-  }
+  useEffect(() => {
+    void (async () => {
+      const slots = await getDocumentSlots({ collectionSlug })
+      setDocumentSlots(slots)
+    })()
+  }, [getDocumentSlots, collectionSlug])
 
   return (
     <div className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}>
@@ -334,8 +340,12 @@ export const Upload: React.FC<UploadProps> = (props) => {
                       </Button>
                     </Fragment>
                   )}
-                </div>
 
+                  {uploadConfig?.admin?.components?.controls &&
+                    documentSlots?.UploadControls !== undefined && (
+                      <Fragment>{documentSlots.UploadControls}</Fragment>
+                    )}
+                </div>
                 <p className={`${baseClass}__dragAndDropText`}>
                   {t('general:or')} {t('upload:dragAndDrop')}
                 </p>
