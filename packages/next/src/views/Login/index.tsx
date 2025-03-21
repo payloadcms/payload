@@ -5,9 +5,9 @@ import { redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
 import { Logo } from '../../elements/Logo/index.js'
+import { getSafeRedirect } from '../../utilities/getSafeRedirect.js'
 import { LoginForm } from './LoginForm/index.js'
 import './index.scss'
-
 export const loginBaseClass = 'login'
 
 export function LoginView({ initPageResult, params, searchParams }: AdminViewServerProps) {
@@ -25,12 +25,7 @@ export function LoginView({ initPageResult, params, searchParams }: AdminViewSer
     routes: { admin },
   } = config
 
-  const redirectUrl =
-    typeof searchParams.redirect === 'string'
-      ? searchParams.redirect.startsWith('/') // If it's a relative path, keep it
-        ? searchParams.redirect
-        : encodeURIComponent(searchParams.redirect) // Otherwise, encode it
-      : admin
+  const redirectUrl = getSafeRedirect(searchParams.redirect, admin)
 
   if (user) {
     redirect(redirectUrl)
