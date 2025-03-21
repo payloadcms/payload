@@ -12,9 +12,10 @@ type SeededQueryPreset = {
 export const seedData: {
   everyone: SeededQueryPreset
   onlyMe: SeededQueryPreset
+  specificUsers: (args: { userID: string }) => SeededQueryPreset
 } = {
   onlyMe: {
-    relatedCollection: 'pages',
+    relatedCollection: pagesSlug,
     isShared: false,
     title: 'Only Me',
     columns: [
@@ -41,7 +42,7 @@ export const seedData: {
     },
   },
   everyone: {
-    relatedCollection: 'pages',
+    relatedCollection: pagesSlug,
     isShared: true,
     title: 'Everyone',
     access: {
@@ -67,6 +68,36 @@ export const seedData: {
       },
     },
   },
+  specificUsers: ({ userID }: { userID: string }) => ({
+    title: 'Specific Users',
+    isShared: true,
+    where: {
+      text: {
+        equals: 'example page',
+      },
+    },
+    access: {
+      read: {
+        constraint: 'specificUsers',
+        users: [userID],
+      },
+      update: {
+        constraint: 'specificUsers',
+        users: [userID],
+      },
+      delete: {
+        constraint: 'specificUsers',
+        users: [userID],
+      },
+    },
+    columns: [
+      {
+        accessor: 'text',
+        active: true,
+      },
+    ],
+    relatedCollection: pagesSlug,
+  }),
 }
 
 export const seed = async (_payload: Payload) => {
@@ -120,32 +151,7 @@ export const seed = async (_payload: Payload) => {
           collection: 'payload-query-presets',
           user: devUser,
           overrideAccess: false,
-          data: {
-            title: 'Specific Users',
-            isShared: true,
-            where: {
-              text: {
-                equals: 'example page',
-              },
-            },
-            access: {
-              read: {
-                constraint: 'specificUsers',
-                users: [devUser?.id || ''],
-              },
-              update: {
-                constraint: 'specificUsers',
-                users: [devUser?.id || ''],
-              },
-            },
-            columns: [
-              {
-                accessor: 'text',
-                active: true,
-              },
-            ],
-            relatedCollection: pagesSlug,
-          },
+          data: seedData.specificUsers({ userID: devUser?.id || '' }),
         }),
       () =>
         _payload.create({

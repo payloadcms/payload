@@ -27,6 +27,7 @@ export async function assertURLParams({
     const escapedColumns = encodeURIComponent(
       JSON.stringify(transformColumnsToSearchParams(columns)),
     )
+
     const columnsRegex = new RegExp(`columns=${escapedColumns}`)
     await page.waitForURL(columnsRegex)
   }
