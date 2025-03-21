@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 
 import { SortDownIcon, SortUpIcon } from '../../icons/Sort/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
@@ -16,8 +16,19 @@ const baseClass = 'sort-header'
 
 function useSort() {
   const { handleSortChange, orderableFieldName, query } = useListQuery()
-  const sort = useRef<'asc' | 'desc'>(query.sort === `-${orderableFieldName}` ? 'desc' : 'asc')
-  const isActive = query.sort === `-${orderableFieldName}` || query.sort === orderableFieldName
+  const querySort = Array.isArray(query.sort) ? query.sort[0] : query.sort
+  const sort = useRef<'asc' | 'desc'>(querySort === `-${orderableFieldName}` ? 'desc' : 'asc')
+  const isActive = querySort === `-${orderableFieldName}` || querySort === orderableFieldName
+
+  // This is necessary if you initialize the page without sort url param
+  // but your preferences are to sort by -_order.
+  // Since sort isn't updated, the arrow would incorrectly point upward.
+  useEffect(() => {
+    if (!isActive) {
+      return
+    }
+    sort.current = querySort === `-${orderableFieldName}` ? 'desc' : 'asc'
+  }, [orderableFieldName, querySort, isActive])
 
   const handleSortPress = () => {
     // If it's already sorted by the "_order" field, toggle between "asc" and "desc"
