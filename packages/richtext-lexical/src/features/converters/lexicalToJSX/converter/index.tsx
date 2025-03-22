@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import type { SerializedEditorState, SerializedLexicalNode } from 'lexical'
 
 import React from 'react'
@@ -51,7 +52,7 @@ export function convertLexicalNodesToJSX({
     let converterForNode: JSXConverter<any> | undefined
     if (node.type === 'block') {
       converterForNode = converters?.blocks?.[(node as SerializedBlockNode)?.fields?.blockType]
-      if (!converterForNode) {
+      if (!converterForNode && !unknownConverter) {
         console.error(
           `Lexical => JSX converter: Blocks converter: found ${(node as SerializedBlockNode)?.fields?.blockType} block, but no converter is provided`,
         )
@@ -59,7 +60,7 @@ export function convertLexicalNodesToJSX({
     } else if (node.type === 'inlineBlock') {
       converterForNode =
         converters?.inlineBlocks?.[(node as SerializedInlineBlockNode)?.fields?.blockType]
-      if (!converterForNode) {
+      if (!converterForNode && !unknownConverter) {
         console.error(
           `Lexical => JSX converter: Inline Blocks converter: found ${(node as SerializedInlineBlockNode)?.fields?.blockType} inline block, but no converter is provided`,
         )

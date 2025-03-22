@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import type { SerializedLexicalNode } from 'lexical'
 
 import type { SerializedBlockNode, SerializedInlineBlockNode } from '../../../../nodeTypes.js'
@@ -30,7 +31,7 @@ export function findConverterForNode<
     converterForNode = converters?.blocks?.[
       (node as SerializedBlockNode)?.fields?.blockType
     ] as TConverter
-    if (!converterForNode) {
+    if (!converterForNode && !unknownConverter) {
       console.error(
         `Lexical => HTML converter: Blocks converter: found ${(node as SerializedBlockNode)?.fields?.blockType} block, but no converter is provided`,
       )
@@ -39,7 +40,7 @@ export function findConverterForNode<
     converterForNode = converters?.inlineBlocks?.[
       (node as SerializedInlineBlockNode)?.fields?.blockType
     ] as TConverter
-    if (!converterForNode) {
+    if (!converterForNode && !unknownConverter) {
       console.error(
         `Lexical => HTML converter: Inline Blocks converter: found ${(node as SerializedInlineBlockNode)?.fields?.blockType} inline block, but no converter is provided`,
       )

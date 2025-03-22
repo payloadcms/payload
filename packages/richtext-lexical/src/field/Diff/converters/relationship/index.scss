@@ -1,0 +1,48 @@
+@import '../../../../scss/styles.scss';
+
+@layer payload-default {
+  .lexical-relationship-diff {
+    @extend %body;
+    @include shadow-sm;
+    max-width: calc(var(--base) * 15);
+    width: calc(var(--base) * 10);
+
+    display: flex;
+    align-items: center;
+    background: var(--theme-input-bg);
+    border-radius: $style-radius-m;
+    border: 1px solid var(--theme-elevation-100);
+    position: relative;
+    font-family: var(--font-body);
+    margin-block: base(0.5);
+    max-height: calc(var(--base) * 4);
+
+    &:hover {
+      border: 1px solid var(--theme-elevation-150);
+    }
+
+    &__card {
+      @include soft-shadow-bottom;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      flex-grow: 1;
+      display: flex;
+      align-items: flex-start;
+      flex-direction: column;
+      padding: calc(var(--base) * 0.25) calc(var(--base) * 0.75);
+      justify-content: space-between;
+    }
+
+    &__title {
+      display: flex;
+      flex-direction: row;
+    }
+
+    &__collectionLabel {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+}

@@ -101,6 +101,13 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
           sanitizedEditorConfig: finalSanitizedEditorConfig,
         },
       },
+      DiffComponent: {
+        path: '@payloadcms/richtext-lexical/rsc#LexicalDiffComponent',
+        serverProps: {
+          admin: args?.admin,
+          sanitizedEditorConfig: finalSanitizedEditorConfig,
+        },
+      },
       editorConfig: finalSanitizedEditorConfig,
       features,
       FieldComponent: {

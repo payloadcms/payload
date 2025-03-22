@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { diffCollectionSlug, draftCollectionSlug } from '../slugs.js'
+import { diffCollectionSlug, draftCollectionSlug } from '../../slugs.js'
 
 export const Diff: CollectionConfig = {
   slug: diffCollectionSlug,
