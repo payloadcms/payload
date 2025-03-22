@@ -1,9 +1,17 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { SQLiteSelectBase } from 'drizzle-orm/sqlite-core'
-import type { FlattenedField, JoinQuery, SelectMode, SelectType, Where } from 'payload'
 
 import { and, asc, count, desc, eq, or, sql } from 'drizzle-orm'
-import { fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
+import {
+  APIError,
+  type FlattenedField,
+  getFieldByPath,
+  type JoinQuery,
+  type SelectMode,
+  type SelectType,
+  type Where,
+} from 'payload'
+import { fieldShouldBeLocalized } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { BuildQueryJoinAliases, ChainedMethods, DrizzleAdapter } from '../types.js'
@@ -72,6 +80,7 @@ type TraverseFieldArgs = {
   selectMode?: SelectMode
   tablePath: string
   topLevelArgs: Record<string, unknown>
+  topLevelFields?: FlattenedField[]
   topLevelTableName: string
   versions?: boolean
   withTabledFields: {
@@ -99,12 +108,97 @@ export const traverseFields = ({
   selectMode,
   tablePath,
   topLevelArgs,
+  topLevelFields = fields,
   topLevelTableName,
   versions,
   withTabledFields,
 }: TraverseFieldArgs) => {
   fields.forEach((field) => {
-    if (fieldIsVirtual(field)) {
+    if ('virtual' in field && field.virtual) {
+      if (field.virtual === true) {
+        return
+      }
+
+      let relationshipPath = field.virtual.relationship.replaceAll('.', '_')
+
+      if (versions) {
+        relationshipPath = `version_${relationshipPath}`
+      }
+
+      const relationshipColumn = adapter.tables[currentTableName][relationshipPath]
+
+      if (!relationshipColumn) {
+        return
+      }
+
+      const relationshipField = getFieldByPath({
+        fields: topLevelFields,
+        path: versions ? `version.${field.virtual.relationship}` : field.virtual.relationship,
+      })
+
+      if (!relationshipField) {
+        return
+      }
+
+      if (
+        relationshipField.field.type === 'relationship' &&
+        !relationshipField.field.hasMany &&
+        typeof relationshipField.field.relationTo === 'string'
+      ) {
+        const collection = adapter.payload.collections[relationshipField.field.relationTo].config
+        const columnName = `${path.replaceAll('.', '_')}${field.name}`
+
+        const db = adapter.drizzle as LibSQLDatabase
+
+        const foreignTable = adapter.tables[adapter.tableNameMap.get(toSnakeCase(collection.slug))]
+
+        const foreignField = getFieldByPath({
+          fields:
+            adapter.payload.collections[relationshipField.field.relationTo].config.flattenedFields,
+          path: field.virtual.path,
+        })
+
+        if (!foreignField) {
+          return
+        }
+
+        if (foreignField.pathHasLocalized && adapter.payload.config.localization) {
+          const tableName = adapter.tableNameMap.get(toSnakeCase(collection.slug))
+          const foreignLocaleTable = adapter.tables[`${tableName}${adapter.localesSuffix}`]
+          const foreignValue = foreignLocaleTable[field.virtual.path.replaceAll('.', '_')]
+
+          currentArgs.extras[columnName] = sql`${db
+            .select({
+              value: foreignValue,
+            })
+            .from(foreignLocaleTable)
+            .where(
+              and(
+                eq(foreignLocaleTable._parentID, relationshipColumn),
+                eq(
+                  foreignLocaleTable._locale,
+                  locale || adapter.payload.config.localization.defaultLocale,
+                ),
+              ),
+            )
+            .limit(1)}`.as(columnName)
+        } else {
+          const foreignValue = foreignTable[field.virtual.path.replaceAll('.', '_')]
+
+          if (!foreignValue) {
+            throw new APIError('fuckl')
+          }
+
+          currentArgs.extras[columnName] = sql`${db
+            .select({
+              value: foreignValue,
+            })
+            .from(foreignTable)
+            .where(eq(foreignTable.id, relationshipColumn))
+            .limit(1)}`.as(columnName)
+        }
+      }
+
       return
     }
 
@@ -202,7 +296,9 @@ export const traverseFields = ({
           selectMode,
           tablePath: '',
           topLevelArgs,
+          topLevelFields,
           topLevelTableName,
+          versions,
           withTabledFields,
         })
 
@@ -313,7 +409,9 @@ export const traverseFields = ({
               selectMode: blockSelectMode,
               tablePath: '',
               topLevelArgs,
+              topLevelFields,
               topLevelTableName,
+              versions,
               withTabledFields,
             })
 
@@ -359,6 +457,7 @@ export const traverseFields = ({
           selectMode,
           tablePath: `${tablePath}${toSnakeCase(field.name)}_`,
           topLevelArgs,
+          topLevelFields,
           topLevelTableName,
           versions,
           withTabledFields,
