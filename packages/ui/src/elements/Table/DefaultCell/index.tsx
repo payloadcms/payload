@@ -148,5 +148,19 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     }
   }
 
+  if ((field.type === 'select' || field.type === 'radio') && field.options.length && cellData) {
+    const classes = Array.isArray(cellData)
+      ? cellData.map((value) => `selected--${value}`).join(' ')
+      : `selected--${cellData}`
+
+    const className = [wrapElementProps.className, classes].filter(Boolean).join(' ')
+
+    return (
+      <WrapElement {...wrapElementProps} className={className}>
+        {CellComponent}
+      </WrapElement>
+    )
+  }
+
   return <WrapElement {...wrapElementProps}>{CellComponent}</WrapElement>
 }
