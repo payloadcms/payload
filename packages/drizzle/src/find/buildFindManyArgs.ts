@@ -11,6 +11,7 @@ type BuildFindQueryArgs = {
   adapter: DrizzleAdapter
   collectionSlug?: string
   depth: number
+  draftsEnabled?: boolean
   fields: FlattenedField[]
   joinQuery?: JoinQuery
   /**
@@ -35,6 +36,7 @@ export const buildFindManyArgs = ({
   adapter,
   collectionSlug,
   depth,
+  draftsEnabled,
   fields,
   joinQuery,
   joins = [],
@@ -80,6 +82,7 @@ export const buildFindManyArgs = ({
     currentArgs: result,
     currentTableName: tableName,
     depth,
+    draftsEnabled,
     fields,
     joinQuery,
     joins,

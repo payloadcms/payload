@@ -206,6 +206,7 @@ export type QueryDrafts = <T = TypeWithID>(args: QueryDraftsArgs) => Promise<Pag
 
 export type FindOneArgs = {
   collection: CollectionSlug
+  draftsEnabled?: boolean
   joins?: JoinQuery
   locale?: string
   req?: Partial<PayloadRequest>
@@ -217,6 +218,7 @@ export type FindOne = <T extends TypeWithID>(args: FindOneArgs) => Promise<null 
 
 export type FindArgs = {
   collection: CollectionSlug
+  draftsEnabled?: boolean
   joins?: JoinQuery
   /** Setting limit to 1 is equal to the previous Model.findOne(). Setting limit to 0 disables the limit */
   limit?: number

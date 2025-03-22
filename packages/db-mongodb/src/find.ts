@@ -18,6 +18,7 @@ export const find: Find = async function find(
   this: MongooseAdapter,
   {
     collection: collectionSlug,
+    draftsEnabled,
     joins = {},
     limit = 0,
     locale,
@@ -128,6 +129,7 @@ export const find: Find = async function find(
     adapter: this,
     collection: collectionSlug,
     collectionConfig,
+    draftsEnabled,
     joins,
     locale,
     query,

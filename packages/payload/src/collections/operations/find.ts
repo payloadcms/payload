@@ -183,6 +183,7 @@ export const findOperation = async <
 
       result = await payload.db.find<DataFromCollectionSlug<TSlug>>({
         collection: collectionConfig.slug,
+        draftsEnabled,
         joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
         limit: sanitizedLimit,
         locale,
