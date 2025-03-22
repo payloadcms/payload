@@ -413,6 +413,31 @@ describe('List View', () => {
       await expect(whereBuilder.locator('.condition__value input')).toHaveValue('')
     })
 
+    test('should reset filter value when incompatible operator is selected', async () => {
+      await page.goto(postsUrl.list)
+
+      const whereBuilder = await addListFilter({
+        page,
+        fieldLabel: 'Created At',
+        operatorLabel: 'exists',
+        value: 'true',
+      })
+
+      const operatorField = whereBuilder.locator('.condition__operator')
+      await operatorField.click()
+
+      // select new operator with different value type
+      const dropdownFieldOption = operatorField.locator('.rs__option', {
+        hasText: exactText('is greater than'),
+      })
+
+      await dropdownFieldOption.click()
+      const valueField = whereBuilder.locator('.condition__value input')
+
+      await expect(valueField).toHaveValue('')
+    })
+
+    // eslint-disable-next-line playwright/expect-expect
     test('should remove condition from URL when value is cleared', async () => {
       await page.goto(postsUrl.list)
 
@@ -433,6 +458,7 @@ describe('List View', () => {
       await page.waitForURL(new RegExp(encodedQueryString))
     })
 
+    // eslint-disable-next-line playwright/expect-expect, playwright/no-skipped-test
     test.skip('should remove condition from URL when a different field is selected', async () => {
       // TODO: fix this bug and write this test
     })
