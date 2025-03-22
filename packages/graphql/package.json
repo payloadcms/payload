@@ -17,6 +17,7 @@
     }
   ],
   "type": "module",
+  "sideEffectsDisabled": false,
   "exports": {
     ".": {
       "import": "./src/index.ts",

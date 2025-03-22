@@ -16,7 +16,10 @@
       "url": "https://payloadcms.com"
     }
   ],
-  "sideEffects": false,
+  "sideEffectsDisabled": [
+    "*.scss",
+    "*.css"
+  ],
   "type": "module",
   "exports": {
     ".": {

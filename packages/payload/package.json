@@ -37,7 +37,7 @@
       "url": "https://payloadcms.com"
     }
   ],
-  "sideEffects": false,
+  "sideEffectsDisabled": false,
   "type": "module",
   "exports": {
     ".": {
