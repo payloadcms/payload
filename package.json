@@ -133,7 +133,7 @@
     "@types/jest": "29.5.12",
     "@types/minimist": "1.2.5",
     "@types/node": "22.5.4",
-    "@types/react": "19.0.10",
+    "@types/react": "19.0.12",
     "@types/react-dom": "19.0.4",
     "@types/shelljs": "0.8.15",
     "chalk": "^4.1.2",
