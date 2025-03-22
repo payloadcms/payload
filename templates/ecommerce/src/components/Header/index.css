@@ -1,0 +1,29 @@
+.navLink {
+  overflow: hidden;
+  border-radius: unset;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: var(--primary);
+    transition: transform 0.3s;
+  }
+
+  &:not(.active) {
+    &:hover {
+      &::after {
+        transform: translateY(-2px);
+      }
+    }
+  }
+
+  &.active {
+    &::after {
+      transform: translateY(-2px);
+    }
+  }
+}
