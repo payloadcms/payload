@@ -138,6 +138,18 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
           blockType: 'TextBlock',
           textInBlock: 'textInBlock',
         },
+        {
+          blockType: 'CollapsibleBlock',
+          textInCollapsibleInCollapsibleBlock: 'textInCollapsibleInCollapsibleBlock',
+          textInRowInCollapsibleBlock: 'textInRowInCollapsibleBlock',
+        },
+        {
+          blockType: 'TabsBlock',
+          namedTab1InBlock: {
+            textInNamedTab1InBlock: 'textInNamedTab1InBlock',
+          },
+          textInUnnamedTab2InBlock: 'textInUnnamedTab2InBlock',
+        },
       ],
       checkbox: true,
       code: 'code',
@@ -185,6 +197,18 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
         {
           blockType: 'TextBlock',
           textInBlock: 'textInBlock2',
+        },
+        {
+          blockType: 'CollapsibleBlock',
+          textInCollapsibleInCollapsibleBlock: 'textInCollapsibleInCollapsibleBlock2',
+          textInRowInCollapsibleBlock: 'textInRowInCollapsibleBlock2',
+        },
+        {
+          blockType: 'TabsBlock',
+          namedTab1InBlock: {
+            textInNamedTab1InBlock: 'textInNamedTab1InBlock2',
+          },
+          textInUnnamedTab2InBlock: 'textInUnnamedTab2InBlock2',
         },
       ],
       checkbox: false,

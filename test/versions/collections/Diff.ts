@@ -39,6 +39,64 @@ export const Diff: CollectionConfig = {
             },
           ],
         },
+        {
+          slug: 'CollapsibleBlock',
+          fields: [
+            {
+              type: 'collapsible',
+              label: 'Collapsible',
+              fields: [
+                {
+                  type: 'collapsible',
+                  label: 'Nested Collapsible',
+                  fields: [
+                    {
+                      name: 'textInCollapsibleInCollapsibleBlock',
+                      type: 'text',
+                    },
+                  ],
+                },
+                {
+                  type: 'row',
+                  fields: [
+                    {
+                      name: 'textInRowInCollapsibleBlock',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          slug: 'TabsBlock',
+          fields: [
+            {
+              type: 'tabs',
+              tabs: [
+                {
+                  name: 'namedTab1InBlock',
+                  fields: [
+                    {
+                      name: 'textInNamedTab1InBlock',
+                      type: 'text',
+                    },
+                  ],
+                },
+                {
+                  label: 'Unnamed Tab 2 In Block',
+                  fields: [
+                    {
+                      name: 'textInUnnamedTab2InBlock',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
       ],
     },
     {
