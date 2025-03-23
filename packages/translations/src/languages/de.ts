@@ -13,7 +13,7 @@ export const deTranslations: DefaultTranslationsObject = {
     beginCreateFirstUser: 'Erstelle deinen ersten Benutzer, um zu beginnen',
     changePassword: 'Passwort ändern',
     checkYourEmailForPasswordReset:
-      'Wenn die E-Mail-Adresse mit einem Benutzerkonto verknüpft ist, erhältst du in Kürze Anweisungen zur Zurücksetzung Ihres Passworts. Bitte überprüfen deinen Spam-Ordner, wenn du die E-Mail nicht in deinem Posteingang siehst.',
+      'Wenn die E-Mail-Adresse mit einem Benutzerkonto verknüpft ist, erhältst du in Kürze Anweisungen zur Zurücksetzung deines Passworts. Bitte überprüfe deinen Spam-Ordner, wenn du die E-Mail nicht in deinem Posteingang siehst.',
     confirmGeneration: 'Generierung bestätigen',
     confirmPassword: 'Passwort bestätigen',
     createFirstUser: 'Ersten Benutzer erstellen',
@@ -29,7 +29,7 @@ export const deTranslations: DefaultTranslationsObject = {
       'Bitte gib deine E-Mail-Adresse an. Du wirst eine E-Mail mit Instruktionen zum Zurücksetzen deines Passworts erhalten.',
     forgotPasswordQuestion: 'Passwort vergessen?',
     forgotPasswordUsernameInstructions:
-      'Bitte gebe deinen Benutzernamen ein. Anweisungen zum Zurücksetzen deines Passworts werden an die mit deinem Benutzernamen verknüpfte E-Mail-Adresse gesendet.',
+      'Bitte gib deinen Benutzernamen ein. Anweisungen zum Zurücksetzen deines Passworts werden an die mit deinem Benutzernamen verknüpfte E-Mail-Adresse gesendet.',
     generate: 'Generieren',
     generateNewAPIKey: 'Neuen API-Key generieren',
     generatingNewAPIKeyWillInvalidate:
@@ -77,7 +77,7 @@ export const deTranslations: DefaultTranslationsObject = {
     youAreInactive:
       'Du warst einige Zeit inaktiv und wirst in Kürze zu deiner eigenen Sicherheit abgemeldet. Möchtest du angemeldet bleiben?',
     youAreReceivingResetPassword:
-      'Du erhältst diese Nachricht, weil du (oder jemand anderes) das Zurücksetzen deines Passworts für dein Benutzerkonto angefordert hat. Bitte klicke auf den folgenden Link, oder kopiere die URL in deinen Browser den Prozess abzuschließen:',
+      'Du erhältst diese Nachricht, weil du (oder jemand anderes) das Zurücksetzen deines Passworts für dein Benutzerkonto angefordert hat. Bitte klicke auf den folgenden Link, oder kopiere die URL in deinen Browser, um den Prozess abzuschließen:',
     youDidNotRequestPassword:
       'Solltest du dies nicht angefordert haben, ignoriere diese E-Mail und dein Passwort bleibt unverändert.',
   },
@@ -324,7 +324,7 @@ export const deTranslations: DefaultTranslationsObject = {
     sort: 'Sortieren',
     sortByLabelDirection: 'Sortieren nach {{label}} {{direction}}',
     stayOnThisPage: 'Auf dieser Seite bleiben',
-    submissionSuccessful: 'Einrichung erfolgreich.',
+    submissionSuccessful: 'Einrichtung erfolgreich.',
     submit: 'Senden',
     submitting: 'Wird aktualisiert...',
     success: 'Erfolg',
@@ -417,7 +417,7 @@ export const deTranslations: DefaultTranslationsObject = {
   },
   validation: {
     emailAddress: 'Bitte gib eine korrekte E-Mail-Adresse an.',
-    enterNumber: 'Bitte gib eine gültige Nummer an,',
+    enterNumber: 'Bitte gib eine gültige Nummer an.',
     fieldHasNo: 'Dieses Feld hat kein {{label}}',
     greaterThanMax: '{{value}} ist größer als der maximal erlaubte {{label}} von {{max}}.',
     invalidInput: 'Dieses Feld hat einen inkorrekten Wert.',
@@ -435,7 +435,7 @@ export const deTranslations: DefaultTranslationsObject = {
     timezoneRequired: 'Eine Zeitzone ist erforderlich.',
     trueOrFalse: 'Dieses Feld kann nur wahr oder falsch sein.',
     username:
-      'Bitte gebe einen gültigen Benutzernamen ein. Dieser kann Buchstaben, Zahlen, Bindestriche, Punkte und Unterstriche enthalten.',
+      'Bitte gib einen gültigen Benutzernamen ein. Dieser kann Buchstaben, Zahlen, Bindestriche, Punkte und Unterstriche enthalten.',
     validUploadID: "'Dieses Feld enthält keine valide Upload-ID.'",
   },
   version: {
@@ -505,9 +505,9 @@ export const deTranslations: DefaultTranslationsObject = {
     versionID: 'Version-ID',
     versions: 'Versionen',
     viewingVersion: 'Betrachte Version für {{entityLabel}} {{documentTitle}}',
-    viewingVersionGlobal: '`Betrachte Version für das Globale Dokument {{entityLabel}}',
+    viewingVersionGlobal: 'Betrachte Version für das Globale Dokument {{entityLabel}}',
     viewingVersions: 'Betrachte Versionen für {{entityLabel}} {{documentTitle}}',
-    viewingVersionsGlobal: '`Betrachte Versionen für das Globale Dokument {{entityLabel}}',
+    viewingVersionsGlobal: 'Betrachte Versionen für das Globale Dokument {{entityLabel}}',
   },
 }
 
