@@ -504,10 +504,10 @@ export const deTranslations: DefaultTranslationsObject = {
     versionCreatedOn: '{{version}} erstellt am:',
     versionID: 'Version-ID',
     versions: 'Versionen',
-    viewingVersion: 'Betrachte Version für {{entityLabel}} {{documentTitle}}',
-    viewingVersionGlobal: 'Betrachte Version für das Globale Dokument {{entityLabel}}',
-    viewingVersions: 'Betrachte Versionen für {{entityLabel}} {{documentTitle}}',
-    viewingVersionsGlobal: 'Betrachte Versionen für das Globale Dokument {{entityLabel}}',
+    viewingVersion: 'Version für {{entityLabel}} {{documentTitle}} ansehen',
+    viewingVersionGlobal: 'Version für das Globale Dokument {{entityLabel}} ansehen',
+    viewingVersions: 'Versionen für {{entityLabel}} {{documentTitle}} ansehen',
+    viewingVersionsGlobal: 'Versionen für das Globale Dokument {{entityLabel}} ansehen',
   },
 }
 
