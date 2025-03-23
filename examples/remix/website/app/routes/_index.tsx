@@ -65,7 +65,7 @@ export default function Index() {
                   <input type="hidden" name="postId" value={post.id} />
                   <button
                     type="submit"
-                    className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-700 text-sm"
+                    className="px-2 py-1 bg-red-500 text-white rounded-sm hover:bg-red-700 text-sm"
                   >
                     X
                   </button>
@@ -78,14 +78,14 @@ export default function Index() {
           <h2> Create new post</h2>
           <Form method="post" className="flex gap-4 flex-col">
             <input
-              className="px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-2 border border-gray-300 rounded-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500"
               placeholder="Title"
               type="text"
               name="title"
             />
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+              className="px-4 py-2 bg-blue-500 text-white rounded-sm hover:bg-blue-700"
             >
               Submit
             </button>
