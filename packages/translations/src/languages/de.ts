@@ -33,7 +33,7 @@ export const deTranslations: DefaultTranslationsObject = {
     generate: 'Generieren',
     generateNewAPIKey: 'Neuen API-Key generieren',
     generatingNewAPIKeyWillInvalidate:
-      'Die Generierung eines neuen API-Keys wird der vorherigen Key <1>ungültig</1>. Bist du sicher, dass du fortfahren möchtest?',
+      'Wenn du einen neuen Key generierst, wird der vorherige <1>ungültig</1>. Bist du sicher, dass du fortfahren möchtest?',
     lockUntil: 'Sperren bis',
     logBackIn: 'Wieder anmelden',
     loggedIn:
@@ -137,7 +137,7 @@ export const deTranslations: DefaultTranslationsObject = {
     addLink: 'Link hinzufügen',
     addNew: 'Neuen Eintrag hinzufügen',
     addNewLabel: '{{label}} erstellen',
-    addRelationship: 'Verknüpfung hinzufügen',
+    addRelationship: 'Beziehung hinzufügen',
     addUpload: 'Neue Datei hochladen',
     block: 'Block',
     blocks: 'Blöcke',
@@ -155,7 +155,7 @@ export const deTranslations: DefaultTranslationsObject = {
     enterURL: 'URL eingeben',
     internalLink: 'Interne Verlinkung',
     itemsAndMore: '{{items}} und {{count}} mehr',
-    labelRelationship: '{{label}} Verknüpfung',
+    labelRelationship: '{{label}}-Beziehung',
     latitude: 'Breitengrad',
     linkedTo: 'Verweist auf <0>{{label}}</0>',
     linkType: 'Linktyp',
