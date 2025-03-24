@@ -60,10 +60,8 @@ export const connect: Connect = async function connect(
         this.payload.logger.info('---- DROPPED TABLES ----')
       }
     }
-  } catch (err) {
-    if (!(err instanceof Error)) {
-      throw new Error('Unknown error')
-    }
+  } catch (error) {
+    const err = error instanceof Error ? error : new Error(String(error))
     if (err.message?.match(/database .* does not exist/i) && !this.disableCreateDatabase) {
       // capitalize first char of the err msg
       this.payload.logger.info(
