@@ -75,6 +75,7 @@ export interface Config {
     'pg-migrations': PgMigration;
     'custom-schema': CustomSchema;
     places: Place;
+    'virtual-relations': VirtualRelation;
     'fields-persistance': FieldsPersistance;
     'custom-ids': CustomId;
     'fake-custom-ids': FakeCustomId;
@@ -95,6 +96,7 @@ export interface Config {
     'pg-migrations': PgMigrationsSelect<false> | PgMigrationsSelect<true>;
     'custom-schema': CustomSchemaSelect<false> | CustomSchemaSelect<true>;
     places: PlacesSelect<false> | PlacesSelect<true>;
+    'virtual-relations': VirtualRelationsSelect<false> | VirtualRelationsSelect<true>;
     'fields-persistance': FieldsPersistanceSelect<false> | FieldsPersistanceSelect<true>;
     'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
     'fake-custom-ids': FakeCustomIdsSelect<false> | FakeCustomIdsSelect<true>;
@@ -152,6 +154,7 @@ export interface UserAuthOperations {
 export interface Post {
   id: string;
   title: string;
+  localized?: string | null;
   number?: number | null;
   D1?: {
     D2?: {
@@ -346,6 +349,19 @@ export interface Place {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "virtual-relations".
+ */
+export interface VirtualRelation {
+  id: string;
+  postTitle?: string | null;
+  postLocalized?: string | null;
+  post?: (string | null) | Post;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "fields-persistance".
  */
 export interface FieldsPersistance {
@@ -476,6 +492,10 @@ export interface PayloadLockedDocument {
         value: string | Place;
       } | null)
     | ({
+        relationTo: 'virtual-relations';
+        value: string | VirtualRelation;
+      } | null)
+    | ({
         relationTo: 'fields-persistance';
         value: string | FieldsPersistance;
       } | null)
@@ -547,6 +567,7 @@ export interface PayloadMigration {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
+  localized?: T;
   number?: T;
   D1?:
     | T
@@ -720,6 +741,18 @@ export interface PlacesSelect<T extends boolean = true> {
   city?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "virtual-relations_select".
+ */
+export interface VirtualRelationsSelect<T extends boolean = true> {
+  postTitle?: T;
+  postLocalized?: T;
+  post?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

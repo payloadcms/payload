@@ -8,6 +8,7 @@ import { buildQuery } from './queries/buildQuery.js'
 import { aggregatePaginate } from './utilities/aggregatePaginate.js'
 import { buildJoinAggregation } from './utilities/buildJoinAggregation.js'
 import { buildProjectionFromSelect } from './utilities/buildProjectionFromSelect.js'
+import { buildVirtualFieldsAggregation } from './utilities/buildVirtualFieldsAggregation.js'
 import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 import { transform } from './utilities/transform.js'
@@ -49,8 +50,14 @@ export const findOne: FindOne = async function findOne(
     query,
   })
 
+  const virtualFieldsAggregation = buildVirtualFieldsAggregation({
+    adapter: this,
+    fields: collectionConfig.flattenedFields,
+    locale,
+  })
+
   let doc
-  if (aggregate) {
+  if (aggregate || virtualFieldsAggregation.length > 0) {
     const { docs } = await aggregatePaginate({
       adapter: this,
       joinAggregation: aggregate,
@@ -60,6 +67,7 @@ export const findOne: FindOne = async function findOne(
       projection,
       query,
       session,
+      virtualFieldsAggregation,
     })
     doc = docs[0]
   } else {
