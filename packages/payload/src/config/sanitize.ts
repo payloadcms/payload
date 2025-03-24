@@ -18,6 +18,7 @@ import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
 import { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones.js'
+import { addFolderCollections } from '../folders/addFolderCollections.js'
 import { sanitizeGlobal } from '../globals/config/sanitize.js'
 import {
   baseBlockFields,
@@ -179,6 +180,8 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   const schedulePublishGlobals: GlobalSlug[] = []
 
   const collectionSlugs = new Set<CollectionSlug>()
+
+  await addFolderCollections(config as unknown as Config)
 
   const validRelationships = [
     ...(config.collections.map((c) => c.slug) ?? []),
@@ -351,7 +354,15 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     config.csrf.push(config.serverURL)
   }
 
-  // Get deduped list of upload adapters
+  const uploadAdapters = new Set<string>()
+  // interact with all collections
+  for (const collection of config.collections) {
+    // deduped upload adapters
+    if (collection.upload?.adapter) {
+      uploadAdapters.add(collection.upload.adapter)
+    }
+  }
+
   if (!config.upload) {
     config.upload = { adapters: [] }
   }

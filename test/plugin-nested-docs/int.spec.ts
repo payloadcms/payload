@@ -3,8 +3,9 @@ import type { ArrayField, Payload, RelationshipField } from 'payload'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import type { Page } from './payload-types.js'
+
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import { Page } from './payload-types.js'
 
 let payload: Payload
 
@@ -98,8 +99,8 @@ describe('@payloadcms/plugin-nested-docs', () => {
         },
       })
 
-      const firstUpdatedChildBreadcrumbs = docs[0]?.breadcrumbs as Page['breadcrumbs']
-      const lastUpdatedChildBreadcrumbs = docs[10]?.breadcrumbs as Page['breadcrumbs']
+      const firstUpdatedChildBreadcrumbs = docs[0]?.breadcrumbs
+      const lastUpdatedChildBreadcrumbs = docs[10]?.breadcrumbs
 
       expect(firstUpdatedChildBreadcrumbs).toHaveLength(2)
       // @ts-ignore

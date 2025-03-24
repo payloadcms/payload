@@ -256,6 +256,11 @@ export type AfterForgotPasswordHook = (args: {
   context: RequestContext
 }) => any
 
+export type EnableFoldersOptions = {
+  // Displays the folder collection and parentFolder field in the document view
+  debug?: boolean
+}
+
 export type BaseListFilter = (args: {
   limit: number
   locale?: TypedLocale
@@ -563,8 +568,9 @@ export type SanitizedJoins = {
 export interface SanitizedCollectionConfig
   extends Omit<
     DeepRequired<CollectionConfig>,
-    'auth' | 'endpoints' | 'fields' | 'slug' | 'upload' | 'versions'
+    'admin' | 'auth' | 'endpoints' | 'fields' | 'slug' | 'upload' | 'versions'
   > {
+  admin: CollectionAdminOptions
   auth: Auth
   endpoints: Endpoint[] | false
   fields: Field[]

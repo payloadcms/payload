@@ -45,6 +45,8 @@ export type AdminViewServerPropsOnly = {
   readonly importMap: ImportMap
   readonly initialData?: Data
   readonly initPageResult: InitPageResult
+  readonly params?: { [key: string]: string | string[] | undefined }
+  readonly redirectAfterCreate?: boolean
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
 } & ServerProps
