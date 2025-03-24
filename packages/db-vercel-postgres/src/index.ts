@@ -1,3 +1,4 @@
+import type { PgTableFn } from 'drizzle-orm/pg-core'
 import type { DatabaseAdapterObj, Payload } from 'payload'
 
 import {
@@ -80,10 +81,10 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
     if (args.schemaName) {
       adapterSchema = pgSchema(args.schemaName)
     } else {
-      adapterSchema = { enum: pgEnum, table: pgTable }
+      adapterSchema = { enum: pgEnum, table: pgTable as unknown as PgTableFn<string> }
     }
 
-    const extensions = (args.extensions ?? []).reduce((acc, name) => {
+    const extensions = (args.extensions ?? []).reduce<Record<string, boolean>>((acc, name) => {
       acc[name] = true
       return acc
     }, {})
@@ -97,6 +98,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       createExtensions,
       defaultDrizzleSnapshot,
       disableCreateDatabase: args.disableCreateDatabase ?? false,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       drizzle: undefined,
       enums: {},
       extensions,
@@ -123,6 +125,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       pool: undefined,
       poolOptions: args.pool,
       prodMigrations: args.prodMigrations,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       push: args.push,
       rawRelations: {},
       rawTables: {},
@@ -169,6 +172,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       find,
       findGlobal,
       findGlobalVersions,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       findOne,
       findVersions,
       init,
@@ -183,8 +187,10 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       packageName: '@payloadcms/db-vercel-postgres',
       payload,
       queryDrafts,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       rejectInitializing,
       requireDrizzleKit,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       resolveInitializing,
       rollbackTransaction,
       updateGlobal,

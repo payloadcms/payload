@@ -1,5 +1,5 @@
 import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
-import type { Connect } from 'payload'
+import type { Connect, Migration } from 'payload'
 
 import { pushDevSchema } from '@payloadcms/drizzle'
 import { sql, VercelPool } from '@vercel/postgres'
@@ -61,6 +61,9 @@ export const connect: Connect = async function connect(
       }
     }
   } catch (err) {
+    if (!(err instanceof Error)) {
+      throw new Error('Unknown error')
+    }
     if (err.message?.match(/database .* does not exist/i) && !this.disableCreateDatabase) {
       // capitalize first char of the err msg
       this.payload.logger.info(
@@ -69,7 +72,7 @@ export const connect: Connect = async function connect(
       const isCreated = await this.createDatabase()
 
       if (isCreated) {
-        await this.connect(options)
+        await this.connect?.(options)
         return
       }
     } else {
@@ -101,6 +104,6 @@ export const connect: Connect = async function connect(
   }
 
   if (process.env.NODE_ENV === 'production' && this.prodMigrations) {
-    await this.migrate({ migrations: this.prodMigrations })
+    await this.migrate({ migrations: this.prodMigrations as Migration[] })
   }
 }
