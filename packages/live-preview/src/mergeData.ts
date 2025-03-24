@@ -4,7 +4,15 @@ import type { PopulationsByCollection } from './types.js'
 
 import { traverseFields } from './traverseFields.js'
 
-const defaultRequestHandler = ({ apiPath, endpoint, serverURL }) => {
+const defaultRequestHandler = ({
+  apiPath,
+  endpoint,
+  serverURL,
+}: {
+  apiPath: string
+  endpoint: string
+  serverURL: string
+}) => {
   const url = `${serverURL}${apiPath}/${endpoint}`
   return fetch(url, {
     credentials: 'include',
