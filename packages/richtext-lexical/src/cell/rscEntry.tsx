@@ -1,5 +1,5 @@
 import type { SerializedLexicalNode } from 'lexical'
-import type { Payload } from 'payload'
+import type { Payload, RowData, SanitizedCollectionConfig } from 'payload'
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
 import { Link } from '@payloadcms/ui'
@@ -34,6 +34,11 @@ export const RscEntryLexicalCell: React.FC<
   {
     admin: LexicalFieldAdminProps
     i18n: I18nClient
+    onClick?: (args: {
+      cellData: unknown
+      collectionSlug: SanitizedCollectionConfig['slug']
+      rowData: RowData
+    }) => void
     payload: Payload
     sanitizedEditorConfig: SanitizedServerEditorConfig
   } & LexicalRichTextCellProps
@@ -46,6 +51,7 @@ export const RscEntryLexicalCell: React.FC<
     field,
     i18n,
     link,
+    onClick: onClickFromProps,
     payload,
     rowData,
   } = props
@@ -57,6 +63,8 @@ export const RscEntryLexicalCell: React.FC<
     (field.admin && 'className' in field.admin ? field.admin.className : null) ||
     classNameFromConfigContext
   const adminRoute = payload.config.routes.admin
+
+  const onClick = onClickFromProps
 
   let WrapElement: React.ComponentType<any> | string = 'span'
 
@@ -79,6 +87,18 @@ export const RscEntryLexicalCell: React.FC<
           path: `/collections/${collectionConfig?.slug}/${rowData.id}`,
         })
       : ''
+  }
+
+  if (typeof onClick === 'function') {
+    WrapElement = 'button'
+    wrapElementProps.type = 'button'
+    wrapElementProps.onClick = () => {
+      onClick({
+        cellData,
+        collectionSlug: collectionConfig?.slug,
+        rowData,
+      })
+    }
   }
 
   let textContent: React.ReactNode[] = []

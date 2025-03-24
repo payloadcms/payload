@@ -1,5 +1,10 @@
 'use client'
-import type { DefaultCellComponentProps, UploadFieldClient } from 'payload'
+import type {
+  DefaultCellComponentProps,
+  RowData,
+  SanitizedCollectionConfig,
+  UploadFieldClient,
+} from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { fieldAffectsData, fieldIsID } from 'payload/shared'
@@ -13,7 +18,15 @@ import { Link } from '../../Link/index.js'
 import { CodeCell } from './fields/Code/index.js'
 import { cellComponents } from './fields/index.js'
 
-export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
+export type DefaultCellProps = {
+  onClick?: (args: {
+    cellData: unknown
+    collectionSlug: SanitizedCollectionConfig['slug']
+    rowData: RowData
+  }) => void
+} & DefaultCellComponentProps
+
+export const DefaultCell: React.FC<DefaultCellProps> = (props) => {
   const {
     cellData,
     className: classNameFromProps,
@@ -21,6 +34,7 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     field,
     field: { admin },
     link,
+    onClick: onClickFromProps,
     rowData,
   } = props
 
@@ -41,6 +55,8 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     classNameFromProps ||
     (field.admin && 'className' in field.admin ? field.admin.className : null) ||
     classNameFromConfigContext
+
+  const onClick = onClickFromProps
 
   let WrapElement: React.ComponentType<any> | string = 'span'
 
@@ -63,6 +79,18 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
           path: `/collections/${collectionConfig?.slug}/${encodeURIComponent(rowData.id)}`,
         })
       : ''
+  }
+
+  if (typeof onClick === 'function') {
+    WrapElement = 'button'
+    wrapElementProps.type = 'button'
+    wrapElementProps.onClick = () => {
+      onClick({
+        cellData,
+        collectionSlug: collectionConfig?.slug,
+        rowData,
+      })
+    }
   }
 
   if (fieldIsID(field)) {

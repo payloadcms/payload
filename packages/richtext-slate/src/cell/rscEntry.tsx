@@ -1,4 +1,9 @@
-import type { DefaultServerCellComponentProps, Payload } from 'payload'
+import type {
+  DefaultServerCellComponentProps,
+  Payload,
+  RowData,
+  SanitizedCollectionConfig,
+} from 'payload'
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
 import { Link } from '@payloadcms/ui'
@@ -8,6 +13,11 @@ import React from 'react'
 export const RscEntrySlateCell: React.FC<
   {
     i18n: I18nClient
+    onClick?: (args: {
+      cellData: unknown
+      collectionSlug: SanitizedCollectionConfig['slug']
+      rowData: RowData
+    }) => void
     payload: Payload
   } & DefaultServerCellComponentProps
 > = (props) => {
@@ -19,6 +29,7 @@ export const RscEntrySlateCell: React.FC<
     field,
     i18n,
     link,
+    onClick: onClickFromProps,
     payload,
     rowData,
   } = props
@@ -30,6 +41,8 @@ export const RscEntrySlateCell: React.FC<
     (field.admin && 'className' in field.admin ? field.admin.className : null) ||
     classNameFromConfigContext
   const adminRoute = payload.config.routes.admin
+
+  const onClick = onClickFromProps
 
   let WrapElement: React.ComponentType<any> | string = 'span'
 
@@ -52,6 +65,18 @@ export const RscEntrySlateCell: React.FC<
           path: `/collections/${collectionConfig?.slug}/${rowData.id}`,
         })
       : ''
+  }
+
+  if (typeof onClick === 'function') {
+    WrapElement = 'button'
+    wrapElementProps.type = 'button'
+    wrapElementProps.onClick = () => {
+      onClick({
+        cellData,
+        collectionSlug: collectionConfig?.slug,
+        rowData,
+      })
+    }
   }
 
   let textContent = ''
