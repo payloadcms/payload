@@ -104,10 +104,10 @@
     "@babel/preset-env": "7.26.7",
     "@babel/preset-react": "7.26.3",
     "@babel/preset-typescript": "7.26.0",
-    "@next/eslint-plugin-next": "15.1.5",
+    "@next/eslint-plugin-next": "15.2.3",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/busboy": "1.5.4",
-    "@types/react": "19.0.10",
+    "@types/react": "19.0.12",
     "@types/react-dom": "19.0.4",
     "@types/uuid": "10.0.0",
     "babel-plugin-react-compiler": "19.0.0-beta-714736e-20250131",
@@ -119,7 +119,7 @@
   },
   "peerDependencies": {
     "graphql": "^16.8.1",
-    "next": "^15.0.0",
+    "next": "^15.2.3",
     "payload": "workspace:*"
   },
   "engines": {

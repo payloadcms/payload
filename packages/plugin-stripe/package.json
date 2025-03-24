@@ -71,7 +71,7 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/next": "workspace:*",
     "@types/lodash.get": "^4.4.7",
-    "@types/react": "19.0.10",
+    "@types/react": "19.0.12",
     "@types/react-dom": "19.0.4",
     "@types/uuid": "10.0.0",
     "payload": "workspace:*"

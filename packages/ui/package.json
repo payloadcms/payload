@@ -147,7 +147,7 @@
     "@babel/preset-typescript": "7.26.0",
     "@hyrious/esbuild-plugin-commonjs": "^0.2.4",
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/react": "19.0.10",
+    "@types/react": "19.0.12",
     "@types/react-dom": "19.0.4",
     "@types/uuid": "10.0.0",
     "babel-plugin-react-compiler": "19.0.0-beta-714736e-20250131",
@@ -157,7 +157,7 @@
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "next": "^15.0.0",
+    "next": "^15.2.3",
     "payload": "workspace:*",
     "react": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020",
     "react-dom": "^19.0.0 || ^19.0.0-rc-65a56d0e-20241020"
