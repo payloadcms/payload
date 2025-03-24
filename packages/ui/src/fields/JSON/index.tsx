@@ -81,8 +81,8 @@ const JSONFieldComponent: JSONFieldClientComponent = (props) => {
 
       const uri = jsonSchema.uri
       const newUri = uri.includes('?')
-        ? `${uri}&${typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : uuidv4()}`
-        : `${uri}?${typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : uuidv4()}`
+        ? `${uri}&${(crypto.randomUUID || uuidv4)()}`
+        : `${uri}?${(crypto.randomUUID || uuidv4)()}`
 
       editor.setModel(
         monaco.editor.createModel(JSON.stringify(value, null, 2), 'json', monaco.Uri.parse(newUri)),
