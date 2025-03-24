@@ -65,6 +65,20 @@ export const PostsCollection: CollectionConfig = {
             },
           ],
         },
+        {
+          name: 'noRead',
+          type: 'text',
+          access: {
+            read: () => false,
+          },
+        },
+        {
+          name: 'noUpdate',
+          type: 'text',
+          access: {
+            update: () => false,
+          },
+        },
       ],
     },
     {
@@ -81,6 +95,20 @@ export const PostsCollection: CollectionConfig = {
           ],
         },
       ],
+    },
+    {
+      name: 'noRead',
+      type: 'text',
+      access: {
+        read: () => false,
+      },
+    },
+    {
+      name: 'noUpdate',
+      type: 'text',
+      access: {
+        update: () => false,
+      },
     },
   ],
 }

@@ -67,7 +67,10 @@ export { formatAdminURL } from '../utilities/formatAdminURL.js'
 export { formatLabels, toWords } from '../utilities/formatLabels.js'
 export { getDataByPath } from '../utilities/getDataByPath.js'
 
+export { getFieldPermissions } from '../utilities/getFieldPermissions.js'
+
 export { getSelectMode } from '../utilities/getSelectMode.js'
+
 export { getSiblingData } from '../utilities/getSiblingData.js'
 
 export { getUniqueListBy } from '../utilities/getUniqueListBy.js'

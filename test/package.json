@@ -62,7 +62,7 @@
     "@sentry/nextjs": "^8.33.1",
     "@sentry/react": "^7.77.0",
     "@types/jest": "29.5.12",
-    "@types/react": "19.0.10",
+    "@types/react": "19.0.12",
     "@types/react-dom": "19.0.4",
     "babel-plugin-react-compiler": "19.0.0-beta-714736e-20250131",
     "comment-json": "^4.2.3",
