@@ -511,6 +511,16 @@ export const seed = async (_payload: Payload) => {
     depth: 0,
   })
 
+  const getInlineBlock = () => ({
+    type: 'inlineBlock',
+    fields: {
+      id: Math.random().toString(36).substring(2, 15),
+      text: 'text',
+      blockType: 'inlineBlockInLexical',
+    },
+    version: 1,
+  })
+
   await _payload.create({
     collection: 'LexicalInBlock',
     depth: 0,
@@ -547,6 +557,32 @@ export const seed = async (_payload: Payload) => {
           blockType: 'lexicalInBlock2',
           blockName: '2',
           lexical: textToLexicalJSON({ text: '2' }),
+        },
+        {
+          blockType: 'lexicalInBlock2',
+          lexical: {
+            root: {
+              children: [
+                {
+                  children: [...Array.from({ length: 20 }, () => getInlineBlock())],
+                  direction: null,
+                  format: '',
+                  indent: 0,
+                  type: 'paragraph',
+                  version: 1,
+                  textFormat: 0,
+                  textStyle: '',
+                },
+              ],
+              direction: null,
+              format: '',
+              indent: 0,
+              type: 'root',
+              version: 1,
+            },
+          },
+          id: '67e1af0b78de3228e23ef1d5',
+          blockName: '1',
         },
       ],
     },
