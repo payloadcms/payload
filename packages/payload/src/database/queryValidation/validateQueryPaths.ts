@@ -50,17 +50,31 @@ export async function validateQueryPaths({
 
       if ((path === 'and' || path === 'or') && Array.isArray(constraint)) {
         for (const item of constraint) {
-          promises.push(
-            validateQueryPaths({
-              collectionConfig,
-              errors,
-              overrideAccess,
-              policies,
-              req,
-              versionFields,
-              where: item,
-            }),
-          )
+          if (collectionConfig) {
+            promises.push(
+              validateQueryPaths({
+                errors,
+                globalConfig,
+                overrideAccess,
+                policies,
+                req,
+                versionFields,
+                where: item,
+              }),
+            )
+          } else {
+            promises.push(
+              validateQueryPaths({
+                errors,
+                globalConfig,
+                overrideAccess,
+                policies,
+                req,
+                versionFields,
+                where: item,
+              }),
+            )
+          }
         }
       } else if (!Array.isArray(constraint)) {
         for (const operator in constraint) {
