@@ -12,7 +12,6 @@ export const insert: Insert = async function (
     ? await db.insert(table).values(values).onConflictDoUpdate(onConflictDoUpdate).returning()
     : await db.insert(table).values(values).returning()
 
-  // TODO: this is possibly a bug. Result is of type 'any[] | ResultSet', but ResultSet
-  // is not an array!
+  // See https://github.com/payloadcms/payload/pull/11831#discussion_r2010431908
   return result as Record<string, unknown>[]
 }
