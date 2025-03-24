@@ -27,7 +27,7 @@ const defaultRequestHandler = ({
 // Instead, we keep track of the old locale ourselves and trigger a re-population when it changes
 let prevLocale: string | undefined
 
-export const mergeData = async <T>(args: {
+export const mergeData = async <T extends Record<string, any>>(args: {
   apiRoute?: string
   collectionPopulationRequestHandler?: ({
     apiPath,
@@ -94,7 +94,7 @@ export const mergeData = async <T>(args: {
 
         if (res?.docs?.length > 0) {
           res.docs.forEach((doc) => {
-            populationsByCollection[collection].forEach((population) => {
+            populationsByCollection[collection]?.forEach((population) => {
               if (population.id === doc.id) {
                 population.ref[population.accessor] = doc
               }

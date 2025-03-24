@@ -47,7 +47,7 @@ export const traverseFields = <T extends Record<string, any>>(args: {
 
               traverseFields({
                 externallyUpdatedRelationship,
-                fieldSchema: fieldSchema.fields,
+                fieldSchema: fieldSchema.fields!,
                 incomingData: incomingRow,
                 localeChanged,
                 populationsByCollection,
@@ -63,7 +63,7 @@ export const traverseFields = <T extends Record<string, any>>(args: {
         case 'blocks':
           if (Array.isArray(incomingData[fieldName])) {
             result[fieldName] = incomingData[fieldName].map((incomingBlock, i) => {
-              const incomingBlockJSON = fieldSchema.blocks[incomingBlock.blockType]
+              const incomingBlockJSON = fieldSchema.blocks?.[incomingBlock.blockType]
 
               if (!result[fieldName]) {
                 result[fieldName] = []
@@ -81,7 +81,7 @@ export const traverseFields = <T extends Record<string, any>>(args: {
 
               traverseFields({
                 externallyUpdatedRelationship,
-                fieldSchema: incomingBlockJSON!.fields,
+                fieldSchema: incomingBlockJSON!.fields!,
                 incomingData: incomingBlock,
                 localeChanged,
                 populationsByCollection,
@@ -105,7 +105,7 @@ export const traverseFields = <T extends Record<string, any>>(args: {
 
           traverseFields({
             externallyUpdatedRelationship,
-            fieldSchema: fieldSchema.fields,
+            fieldSchema: fieldSchema.fields!,
             incomingData: incomingData[fieldName] || {},
             localeChanged,
             populationsByCollection,
@@ -165,11 +165,11 @@ export const traverseFields = <T extends Record<string, any>>(args: {
                   incomingRelation === externallyUpdatedRelationship?.id
 
                 if (hasChanged || hasUpdated || localeChanged) {
-                  if (!populationsByCollection[fieldSchema.relationTo]) {
-                    populationsByCollection[fieldSchema.relationTo] = []
+                  if (!populationsByCollection[fieldSchema.relationTo!]) {
+                    populationsByCollection[fieldSchema.relationTo!] = []
                   }
 
-                  populationsByCollection[fieldSchema.relationTo]?.push({
+                  populationsByCollection[fieldSchema.relationTo!]?.push({
                     id: incomingRelation,
                     accessor: i,
                     ref: result[fieldName],
@@ -264,11 +264,11 @@ export const traverseFields = <T extends Record<string, any>>(args: {
                 // if the new value is not empty, populate it
                 // otherwise set the value to null
                 if (newID) {
-                  if (!populationsByCollection[fieldSchema.relationTo]) {
-                    populationsByCollection[fieldSchema.relationTo] = []
+                  if (!populationsByCollection[fieldSchema.relationTo!]) {
+                    populationsByCollection[fieldSchema.relationTo!] = []
                   }
 
-                  populationsByCollection[fieldSchema.relationTo]?.push({
+                  populationsByCollection[fieldSchema.relationTo!]?.push({
                     id: newID,
                     accessor: fieldName,
                     ref: result as Record<string, unknown>,
