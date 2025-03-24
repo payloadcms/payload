@@ -39,20 +39,25 @@ export const getAccess = (config: Config): Record<Operation, Access> =>
           and: [
             {
               or: [
-                {
-                  and: [
-                    {
-                      [`access.${operation}.users`]: {
-                        in: [req.user.id],
+                // Default access control ensures a user exists, but custom access control may not
+                ...(req?.user
+                  ? [
+                      {
+                        and: [
+                          {
+                            [`access.${operation}.users`]: {
+                              in: [req.user.id],
+                            },
+                          },
+                          {
+                            [`access.${operation}.constraint`]: {
+                              in: ['onlyMe', 'specificUsers'],
+                            },
+                          },
+                        ],
                       },
-                    },
-                    {
-                      [`access.${operation}.constraint`]: {
-                        in: ['onlyMe', 'specificUsers'],
-                      },
-                    },
-                  ],
-                },
+                    ]
+                  : []),
                 {
                   [`access.${operation}.constraint`]: {
                     equals: 'everyone',

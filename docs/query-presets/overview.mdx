@@ -77,9 +77,9 @@ const config = buildConfig({
     // highlight-start
     access: {
       read: ({ req: { user } }) =>
-        user?.roles?.some((role) => role === 'admin'),
+        user ? user?.roles?.some((role) => role === 'admin') : false,
       update: ({ req: { user } }) =>
-        user?.roles?.some((role) => role === 'admin'),
+        user ? user?.roles?.some((role) => role === 'admin') : false,
     },
     // highlight-end
   },
@@ -87,6 +87,13 @@ const config = buildConfig({
 ```
 
 This example restricts all Query Presets to users with the role of `admin`.
+
+<Banner type="warning">
+  **Note:** Custom access control will override the defaults on this collection,
+  including the requirement for a user to be authenticated. Be sure to include
+  any necessary checks in your custom rules unless you intend on making these
+  publicly accessible.
+</Banner>
 
 ### Document Access Control
 
@@ -136,7 +143,7 @@ const config = buildConfig({
           },
         ],
         access: ({ req: { user } }) => ({
-          'access.update.roles': {
+          'access.read.roles': {
             in: [user?.roles],
           },
         }),
