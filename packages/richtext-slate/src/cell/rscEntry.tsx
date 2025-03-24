@@ -19,7 +19,6 @@ export const RscEntrySlateCell: React.FC<
     field,
     i18n,
     link,
-    onClick: onClickFromProps,
     payload,
     rowData,
   } = props
@@ -31,8 +30,6 @@ export const RscEntrySlateCell: React.FC<
     (field.admin && 'className' in field.admin ? field.admin.className : null) ||
     classNameFromConfigContext
   const adminRoute = payload.config.routes.admin
-
-  const onClick = onClickFromProps
 
   let WrapElement: React.ComponentType<any> | string = 'span'
 
@@ -55,18 +52,6 @@ export const RscEntrySlateCell: React.FC<
           path: `/collections/${collectionConfig?.slug}/${rowData.id}`,
         })
       : ''
-  }
-
-  if (typeof onClick === 'function') {
-    WrapElement = 'button'
-    wrapElementProps.type = 'button'
-    wrapElementProps.onClick = () => {
-      onClick({
-        cellData,
-        collectionSlug: collectionConfig?.slug,
-        rowData,
-      })
-    }
   }
 
   let textContent = ''

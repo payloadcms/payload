@@ -21,7 +21,6 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     field,
     field: { admin },
     link,
-    onClick: onClickFromProps,
     rowData,
   } = props
 
@@ -42,8 +41,6 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     classNameFromProps ||
     (field.admin && 'className' in field.admin ? field.admin.className : null) ||
     classNameFromConfigContext
-
-  const onClick = onClickFromProps
 
   let WrapElement: React.ComponentType<any> | string = 'span'
 
@@ -66,18 +63,6 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
           path: `/collections/${collectionConfig?.slug}/${encodeURIComponent(rowData.id)}`,
         })
       : ''
-  }
-
-  if (typeof onClick === 'function') {
-    WrapElement = 'button'
-    wrapElementProps.type = 'button'
-    wrapElementProps.onClick = () => {
-      onClick({
-        cellData,
-        collectionSlug: collectionConfig?.slug,
-        rowData,
-      })
-    }
   }
 
   if (fieldIsID(field)) {
