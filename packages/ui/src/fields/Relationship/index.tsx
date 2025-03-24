@@ -47,10 +47,10 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       admin: {
         allowCreate = true,
         allowEdit = true,
+        appearance = 'select',
         className,
         description,
         isSortable = true,
-        selectionType = 'dropdown',
         sortOptions,
       } = {},
       hasMany,
@@ -648,18 +648,11 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
           <div className={`${baseClass}__wrap`}>
             <ReactSelect
               backspaceRemovesValue={!(isDrawerOpen || isListDrawerOpen)}
-              components={
-                selectionType === 'drawer'
-                  ? {
-                      DropdownIndicator: null,
-                      MultiValueLabel,
-                      SingleValue,
-                    }
-                  : {
-                      MultiValueLabel,
-                      SingleValue,
-                    }
-              }
+              components={{
+                MultiValueLabel,
+                SingleValue,
+                ...(appearance !== 'select' && { DropdownIndicator: null }),
+              }}
               customProps={{
                 disableKeyDown: isDrawerOpen || isListDrawerOpen,
                 disableMouseDown: isDrawerOpen || isListDrawerOpen,
@@ -676,11 +669,11 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
                   ? `${option.relationTo}_${option.value}`
                   : (option.value as string)
               }}
-              isLoading={selectionType === 'dropdown' && isLoading}
+              isLoading={appearance === 'select' && isLoading}
               isMulti={hasMany}
-              isSearchable={selectionType === 'dropdown' && undefined}
+              isSearchable={appearance === 'select'}
               isSortable={isSortable}
-              menuIsOpen={selectionType === 'dropdown' && menuIsOpen}
+              menuIsOpen={appearance === 'select' ? menuIsOpen : false}
               onChange={
                 !(readOnly || disabled)
                   ? (selected) => {
@@ -717,9 +710,9 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
                 setMenuIsOpen(false)
               }}
               onMenuOpen={() => {
-                if (selectionType === 'drawer') {
+                if (appearance === 'drawer') {
                   openListDrawer()
-                } else {
+                } else if (appearance === 'select') {
                   setMenuIsOpen(true)
                   if (!hasLoadedFirstPageRef.current) {
                     setIsLoading(true)
@@ -749,7 +742,7 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
               showError={showError}
               value={valueToRender ?? null}
             />
-            {!(readOnly || disabled) && allowCreate && selectionType === 'dropdown' && (
+            {!(readOnly || disabled) && allowCreate && appearance === 'select' && (
               <AddNewRelation
                 hasMany={hasMany}
                 path={path}
