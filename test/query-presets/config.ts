@@ -22,8 +22,10 @@ export default buildConfigWithDefaults({
     //   plural: 'Reports',
     // },
     access: {
-      read: ({ req: { user } }) => !user?.roles?.some((role) => role === 'anonymous'),
-      update: ({ req: { user } }) => !user?.roles?.some((role) => role === 'anonymous'),
+      read: ({ req: { user } }) =>
+        user ? !user?.roles?.some((role) => role === 'anonymous') : false,
+      update: ({ req: { user } }) =>
+        user ? !user?.roles?.some((role) => role === 'anonymous') : false,
     },
     constraints: {
       read: [
