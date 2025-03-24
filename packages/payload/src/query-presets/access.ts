@@ -19,10 +19,6 @@ export const getAccess = (config: Config): Record<Operation, Access> =>
       acc[operation] = async (args) => {
         const { req } = args
 
-        if (!req.user) {
-          return false
-        }
-
         const collectionAccess = config?.queryPresets?.access?.[operation]
           ? await config.queryPresets.access[operation](args)
           : defaultCollectionAccess?.[operation]

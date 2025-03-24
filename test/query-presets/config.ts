@@ -32,8 +32,8 @@ export default buildConfigWithDefaults({
           value: 'specificRoles',
           fields: [roles],
           access: ({ req: { user } }) => ({
-            'access.update.roles': {
-              in: [user?.roles],
+            'access.read.roles': {
+              in: user?.roles || [],
             },
           }),
         },
@@ -45,7 +45,7 @@ export default buildConfigWithDefaults({
           fields: [roles],
           access: ({ req: { user } }) => ({
             'access.update.roles': {
-              in: [user?.roles],
+              in: user?.roles || [],
             },
           }),
         },
