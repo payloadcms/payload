@@ -12,6 +12,7 @@ import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 
 export type Arguments = {
@@ -40,7 +41,7 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
     populate,
     req,
     req: { fallbackLocale, locale, payload },
-    select,
+    select: incomingSelect,
     showHiddenFields,
   } = args
 
@@ -114,6 +115,11 @@ export const restoreVersionOperation = async <TData extends TypeWithID = any>(
     // /////////////////////////////////////
     // Update
     // /////////////////////////////////////
+
+    const select = sanitizeSelect({
+      forceSelect: collectionConfig.forceSelect,
+      select: incomingSelect,
+    })
 
     let result = await req.payload.db.updateOne({
       id: parentDocID,

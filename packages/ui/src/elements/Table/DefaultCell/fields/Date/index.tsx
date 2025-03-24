@@ -5,7 +5,7 @@ import React from 'react'
 
 import { useConfig } from '../../../../../providers/Config/index.js'
 import { useTranslation } from '../../../../../providers/Translation/index.js'
-import { formatDate } from '../../../../../utilities/formatDate.js'
+import { formatDate } from '../../../../../utilities/formatDocTitle/formatDateTitle.js'
 
 export const DateCell: React.FC<DefaultCellComponentProps<DateFieldClient>> = ({
   cellData,

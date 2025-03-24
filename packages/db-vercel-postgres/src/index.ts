@@ -33,6 +33,7 @@ import {
   rollbackTransaction,
   updateGlobal,
   updateGlobalVersion,
+  updateMany,
   updateOne,
   updateVersion,
 } from '@payloadcms/drizzle'
@@ -63,6 +64,7 @@ const filename = fileURLToPath(import.meta.url)
 export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<VercelPostgresAdapter> {
   const postgresIDType = args.idType || 'serial'
   const payloadIDType = postgresIDType === 'serial' ? 'number' : 'text'
+  const allowIDOnCreate = args.allowIDOnCreate ?? false
 
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = findMigrationDir(args.migrationDir)
@@ -89,6 +91,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
     return createDatabaseAdapter<VercelPostgresAdapter>({
       name: 'postgres',
       afterSchemaInit: args.afterSchemaInit ?? [],
+      allowIDOnCreate,
       beforeSchemaInit: args.beforeSchemaInit ?? [],
       createDatabase,
       createExtensions,
@@ -186,6 +189,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       rollbackTransaction,
       updateGlobal,
       updateGlobalVersion,
+      updateMany,
       updateOne,
       updateVersion,
       upsert: updateOne,
@@ -193,6 +197,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
   }
 
   return {
+    allowIDOnCreate,
     defaultIDType: payloadIDType,
     init: adapter,
   }

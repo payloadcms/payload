@@ -34,11 +34,13 @@ export default buildConfig({
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `autoPluralization`        | Tell Mongoose to auto-pluralize any collection names if it encounters any singular words used as collection `slug`s.                                                                                                                                                                                         |
 | `connectOptions`           | Customize MongoDB connection options. Payload will connect to your MongoDB database using default options which you can override and extend to include all the [options](https://mongoosejs.com/docs/connections.html#options) available to mongoose.                                                        |
-| `collectionsSchemaOptions` | Customize Mongoose schema options for collections.                                                                                                                                                                                                                                                                                                             |
+| `collectionsSchemaOptions` | Customize Mongoose schema options for collections.                                                                                                                                                                                                                                                           |
 | `disableIndexHints`        | Set to true to disable hinting to MongoDB to use 'id' as index. This is currently done when counting documents for pagination, as it increases the speed of the count function used in that query. Disabling this optimization might fix some problems with AWS DocumentDB. Defaults to false                |
 | `migrationDir`             | Customize the directory that migrations are stored.                                                                                                                                                                                                                                                          |
 | `transactionOptions`       | An object with configuration properties used in [transactions](https://www.mongodb.com/docs/manual/core/transactions/) or `false` which will disable the use of transactions.                                                                                                                                |
 | `collation`                | Enable language-specific string comparison with customizable options. Available on MongoDB 3.4+. Defaults locale to "en". Example: `{ strength: 3 }`. For a full list of collation options and their definitions, see the [MongoDB documentation](https://www.mongodb.com/docs/manual/reference/collation/). |
+| `allowAdditionalKeys`      | By default, Payload strips all additional keys from MongoDB data that don't exist in the Payload schema. If you have some data that you want to include to the result but it doesn't exist in Payload, you can set this to `true`. Be careful as Payload access control _won't_ work for this data.          |
+| `allowIDOnCreate`          | Set to `true` to use the `id` passed in data on the create API operations without using a custom ID field.                                                                                                                                                                                                   |
 
 ## Access to Mongoose models
 
@@ -50,3 +52,12 @@ You can access Mongoose models as follows:
 - Collection models - `payload.db.collections[myCollectionSlug]`
 - Globals model - `payload.db.globals`
 - Versions model (both collections and globals) - `payload.db.versions[myEntitySlug]`
+
+## Using other MongoDB implementations
+
+Limitations with [DocumentDB](https://aws.amazon.com/documentdb/) and [Azure Cosmos DB](https://azure.microsoft.com/en-us/products/cosmos-db):
+
+- For Azure Cosmos DB you must pass `transactionOptions: false` to the adapter options. Azure Cosmos DB does not support transactions that update two and more documents in different collections, which is a common case when using Payload (via hooks).
+- For Azure Cosmos DB the root config property `indexSortableFields` must be set to `true`.
+- The [Join Field](../fields/join) is not supported in DocumentDB and Azure Cosmos DB, as we internally use MongoDB aggregations to query data for that field, which are limited there. This can be changed in the future.
+- For DocumentDB pass `disableIndexHints: true` to disable hinting to the DB to use `id` as index which can cause problems with DocumentDB.

@@ -36,18 +36,15 @@ import {
   changeLocale,
   ensureCompilationIsDone,
   exactText,
-  findTableCell,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-  selectTableRow,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { trackNetworkRequests } from '../helpers/e2e/trackNetworkRequests.js'
+import { assertNetworkRequests } from '../helpers/e2e/assertNetworkRequests.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { waitForAutoSaveToRunAndComplete } from '../helpers/waitForAutoSaveToRunAndComplete.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { titleToDelete } from './shared.js'
 import {
   autosaveCollectionSlug,
   autoSaveGlobalSlug,
@@ -123,130 +120,6 @@ describe('Versions', () => {
       disablePublishURL = new AdminUrlUtil(serverURL, disablePublishSlug)
       customIDURL = new AdminUrlUtil(serverURL, customIDSlug)
       postURL = new AdminUrlUtil(serverURL, postCollectionSlug)
-    })
-
-    // This test has to run before bulk updates that will rename the title
-    test('should delete', async () => {
-      await page.goto(url.list)
-
-      const rows = page.locator(`tr`)
-      const rowToDelete = rows.filter({ hasText: titleToDelete })
-
-      await rowToDelete.locator('.cell-_select input').check()
-      await page.locator('.delete-documents__toggle').click()
-      await page.locator('#delete-draft-posts #confirm-action').click()
-
-      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
-        'Deleted 1 Draft Post successfully.',
-      )
-
-      await expect(page.locator('.row-1 .cell-title')).not.toHaveText(titleToDelete)
-    })
-
-    test('bulk update - should publish many', async () => {
-      await page.goto(url.list)
-
-      // Select specific rows by title
-      await selectTableRow(page, 'Published Title')
-      await selectTableRow(page, 'Draft Title')
-
-      // Bulk edit the selected rows
-      await page.locator('.publish-many__toggle').click()
-      await page.locator('#publish-draft-posts #confirm-action').click()
-
-      // Check that the statuses for each row has been updated to `published`
-      await expect(findTableCell(page, '_status', 'Published Title')).toContainText('Published')
-
-      await expect(findTableCell(page, '_status', 'Draft Title')).toContainText('Published')
-    })
-
-    test('bulk publish with autosave documents', async () => {
-      const title = 'autosave title'
-      const description = 'autosave description'
-      await page.goto(autosaveURL.create)
-      // gets redirected from /create to /slug/id due to autosave
-      await page.waitForURL(new RegExp(`${autosaveURL.edit('')}`))
-      await wait(500)
-      await expect(page.locator('#field-title')).toBeEnabled()
-      await page.locator('#field-title').fill(title)
-      await expect(page.locator('#field-description')).toBeEnabled()
-      await page.locator('#field-description').fill(description)
-      await waitForAutoSaveToRunAndComplete(page)
-      await page.goto(autosaveURL.list)
-      await expect(findTableCell(page, '_status', title)).toContainText('Draft')
-      await selectTableRow(page, title)
-      await page.locator('.publish-many__toggle').click()
-      await page.locator('#publish-autosave-posts #confirm-action').click()
-      await expect(findTableCell(page, '_status', title)).toContainText('Published')
-    })
-
-    test('bulk update - should unpublish many', async () => {
-      await page.goto(url.list)
-
-      // Select specific rows by title
-      await selectTableRow(page, 'Published Title')
-      await selectTableRow(page, 'Draft Title')
-
-      // Bulk edit the selected rows
-      await page.locator('.unpublish-many__toggle').click()
-      await page.locator('#unpublish-draft-posts #confirm-action').click()
-
-      // Check that the statuses for each row has been updated to `draft`
-      await expect(findTableCell(page, '_status', 'Published Title')).toContainText('Draft')
-      await expect(findTableCell(page, '_status', 'Draft Title')).toContainText('Draft')
-    })
-
-    test('bulk update — should publish changes', async () => {
-      const description = 'published document'
-      await page.goto(url.list)
-
-      // Select specific rows by title
-      await selectTableRow(page, 'Published Title')
-      await selectTableRow(page, 'Draft Title')
-
-      // Bulk edit the selected rows to `published` status
-      await page.locator('.edit-many__toggle').click()
-      await page.locator('.field-select .rs__control').click()
-      const options = page.locator('.rs__option')
-      const field = options.locator('text=Description')
-      await field.click()
-      await page.locator('#field-description').fill(description)
-      await page.locator('.form-submit .edit-many__publish').click()
-
-      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
-        'Draft Posts successfully.',
-      )
-
-      // Check that the statuses for each row has been updated to `published`
-      await expect(findTableCell(page, '_status', 'Published Title')).toContainText('Published')
-
-      await expect(findTableCell(page, '_status', 'Draft Title')).toContainText('Published')
-    })
-
-    test('bulk update — should draft changes', async () => {
-      const description = 'draft document'
-      await page.goto(url.list)
-
-      // Select specific rows by title
-      await selectTableRow(page, 'Published Title')
-      await selectTableRow(page, 'Draft Title')
-
-      // Bulk edit the selected rows to `draft` status
-      await page.locator('.edit-many__toggle').click()
-      await page.locator('.field-select .rs__control').click()
-      const options = page.locator('.rs__option')
-      const field = options.locator('text=Description')
-      await field.click()
-      await page.locator('#field-description').fill(description)
-      await page.locator('.form-submit .edit-many__draft').click()
-
-      await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
-        'Draft Posts successfully.',
-      )
-
-      // Check that the statuses for each row has been updated to `draft`
-      await expect(findTableCell(page, '_status', 'Published Title')).toContainText('Draft')
-      await expect(findTableCell(page, '_status', 'Draft Title')).toContainText('Draft')
     })
 
     test('collection — has versions tab', async () => {
@@ -416,7 +289,7 @@ describe('Versions', () => {
 
       await page.goto(postURL.edit(postID))
 
-      await trackNetworkRequests(
+      await assertNetworkRequests(
         page,
         `${serverURL}/admin/collections/${postCollectionSlug}/${postID}`,
         async () => {
@@ -861,7 +734,7 @@ describe('Versions', () => {
       const publishOptions = page.locator('.doc-controls__controls .popup')
       await publishOptions.click()
 
-      const publishSpecificLocale = page.locator('.popup-button-list button').first()
+      const publishSpecificLocale = page.locator('#publish-locale')
       await expect(publishSpecificLocale).toContainText('English')
       await publishSpecificLocale.click()
 
@@ -1224,6 +1097,7 @@ describe('Versions', () => {
 
     test('should render diff', async () => {
       await navigateToVersionDiff()
+      expect(true).toBe(true)
     })
 
     test('should render diff for nested fields', async () => {

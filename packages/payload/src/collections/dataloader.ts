@@ -3,8 +3,10 @@ import type { BatchLoadFn } from 'dataloader'
 
 import DataLoader from 'dataloader'
 
+import type { FindArgs } from '../database/types.js'
 import type { PayloadRequest, PopulateType, SelectType } from '../types/index.js'
 import type { TypeWithID } from './config/types.js'
+import type { Options } from './operations/local/find.js'
 
 import { isValidID } from '../utilities/isValidID.js'
 
@@ -157,7 +159,65 @@ const batchAndLoadDocs =
     return docs
   }
 
-export const getDataLoader = (req: PayloadRequest) => new DataLoader(batchAndLoadDocs(req))
+export const getDataLoader = (req: PayloadRequest) => {
+  const findQueries = new Map()
+  const dataLoader = new DataLoader(batchAndLoadDocs(req)) as PayloadRequest['payloadDataLoader']
+
+  dataLoader.find = (args: FindArgs) => {
+    const key = createFindDataloaderCacheKey(args)
+    const cached = findQueries.get(key)
+    if (cached) {
+      return cached
+    }
+    const request = req.payload.find(args)
+    findQueries.set(key, request)
+    return request
+  }
+
+  return dataLoader
+}
+
+const createFindDataloaderCacheKey = ({
+  collection,
+  currentDepth,
+  depth,
+  disableErrors,
+  draft,
+  includeLockStatus,
+  joins,
+  limit,
+  overrideAccess,
+  page,
+  pagination,
+  populate,
+  req,
+  select,
+  showHiddenFields,
+  sort,
+  where,
+}: Options<string, SelectType>): string =>
+  JSON.stringify([
+    collection,
+    currentDepth,
+    depth,
+    disableErrors,
+    draft,
+    includeLockStatus,
+    joins,
+    limit,
+    overrideAccess,
+    page,
+    pagination,
+    populate,
+    req?.locale,
+    req?.fallbackLocale,
+    req?.user?.id,
+    req?.transactionID,
+    select,
+    showHiddenFields,
+    sort,
+    where,
+  ])
 
 type CreateCacheKeyArgs = {
   collectionSlug: string

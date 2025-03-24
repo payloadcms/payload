@@ -1,30 +1,29 @@
 import type { PipelineStage } from 'mongoose'
-import type {
-  CollectionSlug,
-  FlattenedField,
-  JoinQuery,
-  SanitizedCollectionConfig,
-  Where,
-} from 'payload'
 
+import {
+  APIError,
+  type CollectionSlug,
+  type FlattenedField,
+  type JoinQuery,
+  type SanitizedCollectionConfig,
+} from 'payload'
 import { fieldShouldBeLocalized } from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
 
 import { buildQuery } from '../queries/buildQuery.js'
 import { buildSortParam } from '../queries/buildSortParam.js'
+import { getCollection } from './getEntity.js'
 
 type BuildJoinAggregationArgs = {
   adapter: MongooseAdapter
   collection: CollectionSlug
   collectionConfig: SanitizedCollectionConfig
-  joins: JoinQuery
-  // the number of docs to get at the top collection level
-  limit?: number
-  locale: string
+  joins?: JoinQuery
+  locale?: string
   projection?: Record<string, true>
   // the where clause for the top collection
-  query?: Where
+  query?: Record<string, unknown>
   /** whether the query is from drafts */
   versions?: boolean
 }
@@ -34,10 +33,8 @@ export const buildJoinAggregation = async ({
   collection,
   collectionConfig,
   joins,
-  limit,
   locale,
   projection,
-  query,
   versions,
 }: BuildJoinAggregationArgs): Promise<PipelineStage[] | undefined> => {
   if (
@@ -48,24 +45,17 @@ export const buildJoinAggregation = async ({
     return
   }
 
-  const joinConfig = adapter.payload.collections[collection].config.joins
-  const polymorphicJoinsConfig = adapter.payload.collections[collection].config.polymorphicJoins
-  const aggregate: PipelineStage[] = [
-    {
-      $sort: { createdAt: -1 },
-    },
-  ]
+  const joinConfig = adapter.payload.collections[collection]?.config?.joins
 
-  if (query) {
-    aggregate.push({
-      $match: query,
-    })
+  if (!joinConfig) {
+    throw new APIError(`Could not retrieve sanitized join config for ${collection}.`)
   }
 
-  if (limit) {
-    aggregate.push({
-      $limit: limit,
-    })
+  const aggregate: PipelineStage[] = []
+  const polymorphicJoinsConfig = adapter.payload.collections[collection]?.config?.polymorphicJoins
+
+  if (!polymorphicJoinsConfig) {
+    throw new APIError(`Could not retrieve sanitized polymorphic joins config for ${collection}.`)
   }
 
   for (const join of polymorphicJoinsConfig) {
@@ -82,12 +72,14 @@ export const buildJoinAggregation = async ({
       limit: limitJoin = join.field.defaultLimit ?? 10,
       page,
       sort: sortJoin = join.field.defaultSort || collectionConfig.defaultSort,
-      where: whereJoin,
+      where: whereJoin = {},
     } = joins?.[join.joinPath] || {}
 
     const aggregatedFields: FlattenedField[] = []
     for (const collectionSlug of join.field.collection) {
-      for (const field of adapter.payload.collections[collectionSlug].config.flattenedFields) {
+      const { collectionConfig } = getCollection({ adapter, collectionSlug })
+
+      for (const field of collectionConfig.flattenedFields) {
         if (!aggregatedFields.some((eachField) => eachField.name === field.name)) {
           aggregatedFields.push(field)
         }
@@ -95,6 +87,7 @@ export const buildJoinAggregation = async ({
     }
 
     const sort = buildSortParam({
+      adapter,
       config: adapter.payload.config,
       fields: aggregatedFields,
       locale,
@@ -109,7 +102,7 @@ export const buildJoinAggregation = async ({
       where: whereJoin,
     })
 
-    const sortProperty = Object.keys(sort)[0]
+    const sortProperty = Object.keys(sort)[0]! // assert because buildSortParam always returns at least 1 key.
     const sortDirection = sort[sortProperty] === 'asc' ? 1 : -1
 
     const projectSort = sortProperty !== '_id' && sortProperty !== 'relationTo'
@@ -144,10 +137,12 @@ export const buildJoinAggregation = async ({
         },
       ]
 
+      const { Model: JoinModel } = getCollection({ adapter, collectionSlug })
+
       aggregate.push({
         $lookup: {
           as: alias,
-          from: adapter.collections[collectionSlug].collection.name,
+          from: JoinModel.collection.name,
           let: {
             root_id_: '$_id',
           },
@@ -179,7 +174,7 @@ export const buildJoinAggregation = async ({
         aggregate.push({
           $lookup: {
             as: `${as}.totalDocs.${alias}`,
-            from: adapter.collections[collectionSlug].collection.name,
+            from: JoinModel.collection.name,
             let: {
               root_id_: '$_id',
             },
@@ -252,7 +247,13 @@ export const buildJoinAggregation = async ({
   }
 
   for (const slug of Object.keys(joinConfig)) {
-    for (const join of joinConfig[slug]) {
+    const joinsList = joinConfig[slug]
+
+    if (!joinsList) {
+      throw new APIError(`Failed to retrieve array of joins for ${slug} in collectio ${collection}`)
+    }
+
+    for (const join of joinsList) {
       if (projection && !projection[join.joinPath]) {
         continue
       }
@@ -261,31 +262,35 @@ export const buildJoinAggregation = async ({
         continue
       }
 
+      const { collectionConfig, Model: JoinModel } = getCollection({
+        adapter,
+        collectionSlug: join.field.collection as string,
+      })
+
       const {
         count,
         limit: limitJoin = join.field.defaultLimit ?? 10,
         page,
         sort: sortJoin = join.field.defaultSort || collectionConfig.defaultSort,
-        where: whereJoin,
+        where: whereJoin = {},
       } = joins?.[join.joinPath] || {}
 
       if (Array.isArray(join.field.collection)) {
         throw new Error('Unreachable')
       }
 
-      const joinModel = adapter.collections[join.field.collection]
-
       const sort = buildSortParam({
+        adapter,
         config: adapter.payload.config,
-        fields: adapter.payload.collections[slug].config.flattenedFields,
+        fields: collectionConfig.flattenedFields,
         locale,
         sort: sortJoin,
         timestamps: true,
       })
-      const sortProperty = Object.keys(sort)[0]
+      const sortProperty = Object.keys(sort)[0]!
       const sortDirection = sort[sortProperty] === 'asc' ? 1 : -1
 
-      const $match = await joinModel.buildQuery({
+      const $match = await JoinModel.buildQuery({
         locale,
         payload: adapter.payload,
         where: whereJoin,
@@ -321,7 +326,7 @@ export const buildJoinAggregation = async ({
             $lookup: {
               as: `${as}.totalDocs`,
               foreignField,
-              from: adapter.collections[slug].collection.name,
+              from: JoinModel.collection.name,
               localField: versions ? 'parent' : '_id',
               pipeline: [
                 {
@@ -349,7 +354,7 @@ export const buildJoinAggregation = async ({
               $lookup: {
                 as: `${as}.docs`,
                 foreignField: `${join.field.on}${code}${polymorphicSuffix}`,
-                from: adapter.collections[slug].collection.name,
+                from: JoinModel.collection.name,
                 localField: versions ? 'parent' : '_id',
                 pipeline,
               },
@@ -410,7 +415,7 @@ export const buildJoinAggregation = async ({
             $lookup: {
               as: `${as}.docs`,
               foreignField,
-              from: adapter.collections[slug].collection.name,
+              from: JoinModel.collection.name,
               localField: versions ? 'parent' : '_id',
               pipeline,
             },
@@ -446,10 +451,6 @@ export const buildJoinAggregation = async ({
         }
       }
     }
-  }
-
-  if (projection) {
-    aggregate.push({ $project: projection })
   }
 
   return aggregate

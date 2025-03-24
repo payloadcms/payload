@@ -37,6 +37,7 @@ export const generatePasswordSaltHash = async ({
     blockData: {},
     data: {},
     event: 'submit',
+    path: ['password'],
     preferences: { fields: {} },
     req,
     required: true,

@@ -138,64 +138,6 @@ export const Posts: CollectionConfig = {
       ],
     },
     {
-      name: 'arrayOfFields',
-      type: 'array',
-      admin: {
-        initCollapsed: true,
-      },
-      fields: [
-        {
-          name: 'optional',
-          type: 'text',
-        },
-        {
-          name: 'innerArrayOfFields',
-          type: 'array',
-          fields: [
-            {
-              name: 'innerOptional',
-              type: 'text',
-            },
-          ],
-        },
-      ],
-    },
-    {
-      name: 'group',
-      type: 'group',
-      fields: [
-        {
-          name: 'defaultValueField',
-          type: 'text',
-          defaultValue: 'testing',
-        },
-        {
-          name: 'title',
-          type: 'text',
-        },
-      ],
-    },
-    {
-      name: 'someBlock',
-      type: 'blocks',
-      blocks: [
-        {
-          slug: 'textBlock',
-          fields: [
-            {
-              name: 'textFieldForBlock',
-              type: 'text',
-            },
-          ],
-        },
-      ],
-    },
-    {
-      name: 'defaultValueField',
-      type: 'text',
-      defaultValue: 'testing',
-    },
-    {
       name: 'relationship',
       type: 'relationship',
       admin: {
@@ -261,25 +203,6 @@ export const Posts: CollectionConfig = {
         description:
           'This is a very long description that takes many characters to complete and hopefully will wrap instead of push the sidebar open, lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, voluptatum voluptates. Quisquam, voluptatum voluptates.',
         position: 'sidebar',
-      },
-    },
-    {
-      name: 'validateUsingEvent',
-      type: 'text',
-      admin: {
-        description:
-          'This field should only validate on submit. Try typing "Not allowed" and submitting the form.',
-      },
-      validate: (value, { event }) => {
-        if (event === 'onChange') {
-          return true
-        }
-
-        if (value === 'Not allowed') {
-          return 'This field has been validated only on submit'
-        }
-
-        return true
       },
     },
   ],

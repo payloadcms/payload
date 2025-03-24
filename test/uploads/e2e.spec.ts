@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -12,10 +13,10 @@ import {
   ensureCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
-  openDocDrawer,
   saveDocAndAssert,
 } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+import { assertToastErrors } from '../helpers/assertToastErrors.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../helpers/reInitializeDB.js'
 import { RESTClient } from '../helpers/rest.js'
@@ -223,6 +224,19 @@ describe('Uploads', () => {
     await saveDocAndAssert(page)
   })
 
+  test('should properly convert avif image to png', async () => {
+    await page.goto(mediaURL.create)
+
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './test-image-avif.avif'))
+    const filename = page.locator('.file-field__filename')
+    await expect(filename).toHaveValue('test-image-avif.avif')
+
+    await saveDocAndAssert(page)
+
+    const fileMetaSizeType = page.locator('.file-meta__size-type')
+    await expect(fileMetaSizeType).toHaveText(/image\/png/)
+  })
+
   test('should create animated file upload', async () => {
     await page.goto(animatedTypeMediaURL.create)
 
@@ -381,9 +395,23 @@ describe('Uploads', () => {
     await page.locator('#field-versionedImage .icon--x').click()
 
     // choose from existing
-    await openDocDrawer(page, '#field-versionedImage .upload__listToggler')
+    await openDocDrawer({ page, selector: '#field-versionedImage .upload__listToggler' })
 
     await expect(page.locator('.row-3 .cell-title')).toContainText('draft')
+  })
+
+  test('should upload edge case media when an image size contains an undefined height', async () => {
+    await page.goto(mediaURL.create)
+    await page.setInputFiles(
+      'input[type="file"]',
+      path.resolve(dirname, './test-image-1500x735.jpeg'),
+    )
+
+    const filename = page.locator('.file-field__filename')
+
+    await expect(filename).toHaveValue('test-image-1500x735.jpeg')
+
+    await saveDocAndAssert(page)
   })
 
   describe('filterOptions', () => {
@@ -402,12 +430,15 @@ describe('Uploads', () => {
       await wait(500) // flake workaround
       await page.locator('#field-audio .upload-relationship-details__remove').click()
 
-      await openDocDrawer(page, '#field-audio .upload__listToggler')
+      await openDocDrawer({ page, selector: '#field-audio .upload__listToggler' })
 
       const listDrawer = page.locator('[id^=list-drawer_1_]')
       await expect(listDrawer).toBeVisible()
 
-      await openDocDrawer(page, 'button.list-drawer__create-new-button.doc-drawer__toggler')
+      await openDocDrawer({
+        page,
+        selector: 'button.list-drawer__create-new-button.doc-drawer__toggler',
+      })
       await expect(page.locator('[id^=doc-drawer_media_1_]')).toBeVisible()
 
       // upload an image and try to select it
@@ -424,9 +455,10 @@ describe('Uploads', () => {
 
       // save the document and expect an error
       await page.locator('button#action-save').click()
-      await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
-        'The following field is invalid: Audio',
-      )
+      await assertToastErrors({
+        page,
+        errors: ['Audio'],
+      })
     })
 
     test('should restrict uploads in drawer based on filterOptions', async () => {
@@ -444,7 +476,7 @@ describe('Uploads', () => {
       await wait(500) // flake workaround
       await page.locator('#field-audio .upload-relationship-details__remove').click()
 
-      await openDocDrawer(page, '.upload__listToggler')
+      await openDocDrawer({ page, selector: '.upload__listToggler' })
 
       const listDrawer = page.locator('[id^=list-drawer_1_]')
       await expect(listDrawer).toBeVisible()
@@ -693,6 +725,72 @@ describe('Uploads', () => {
     await expect(clientText).toHaveText('This text was rendered on the client')
   })
 
+  test('should show original image url on a single upload card for an upload with adminThumbnail defined', async () => {
+    await page.goto(uploadsOne.create)
+
+    const singleThumbnailButton = page.locator('#field-singleThumbnailUpload button', {
+      hasText: exactText('Create New'),
+    })
+
+    await singleThumbnailButton.click()
+
+    const singleThumbnailModal = page.locator('[id^="doc-drawer_admin-thumbnail-size"]')
+    await expect(singleThumbnailModal).toBeVisible()
+
+    await page.setInputFiles(
+      '[id^="doc-drawer_admin-thumbnail-size"] input[type="file"]',
+      path.resolve(dirname, './test-image.png'),
+    )
+    const filename = page.locator('[id^="doc-drawer_admin-thumbnail-size"] .file-field__filename')
+    await expect(filename).toHaveValue('test-image.png')
+
+    await page.waitForSelector('[id^="doc-drawer_admin-thumbnail-size"] #action-save')
+    await page.locator('[id^="doc-drawer_admin-thumbnail-size"] #action-save').click()
+
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+
+    const href = await page.locator('#field-singleThumbnailUpload a').getAttribute('href')
+
+    // Ensure the URL starts correctly
+    expect(href).toMatch(/^\/api\/admin-thumbnail-size\/file\/test-image(-\d+)?\.png$/i)
+
+    // Ensure no "-100x100" or any similar suffix
+    expect(href).not.toMatch(/-\d+x\d+\.png$/)
+  })
+
+  test('should show original image url on a hasMany upload card for an upload with adminThumbnail defined', async () => {
+    await page.goto(uploadsOne.create)
+
+    const hasManyThumbnailButton = page.locator('#field-hasManyThumbnailUpload button', {
+      hasText: exactText('Create New'),
+    })
+    await hasManyThumbnailButton.click()
+
+    const hasManyThumbnailModal = page.locator('#bulk-upload-drawer-slug-1')
+    await expect(hasManyThumbnailModal).toBeVisible()
+
+    await page.setInputFiles('#bulk-upload-drawer-slug-1 .dropzone input[type="file"]', [
+      path.resolve(dirname, './test-image.png'),
+    ])
+
+    const saveButton = page.locator('.bulk-upload--actions-bar__saveButtons button')
+    await saveButton.click()
+
+    await page.waitForSelector('#field-hasManyThumbnailUpload .upload--has-many__dragItem')
+    const itemCount = await page
+      .locator('#field-hasManyThumbnailUpload .upload--has-many__dragItem')
+      .count()
+    expect(itemCount).toEqual(1)
+
+    await page.waitForSelector('#field-hasManyThumbnailUpload .upload--has-many__dragItem a')
+    const href = await page
+      .locator('#field-hasManyThumbnailUpload .upload--has-many__dragItem a')
+      .getAttribute('href')
+
+    expect(href).toMatch(/^\/api\/admin-thumbnail-size\/file\/test-image(-\d+)?\.png$/i)
+    expect(href).not.toMatch(/-\d+x\d+\.png$/)
+  })
+
   describe('bulk uploads', () => {
     test('should bulk upload multiple files', async () => {
       // Navigate to the upload creation page
@@ -794,7 +892,6 @@ describe('Uploads', () => {
     })
 
     test('should apply field value to all bulk upload files after edit many', async () => {
-      // Navigate to the upload creation page
       await page.goto(uploadsOne.create)
 
       // Upload single file
@@ -802,12 +899,14 @@ describe('Uploads', () => {
         '.file-field input[type="file"]',
         path.resolve(dirname, './image.png'),
       )
+
       const filename = page.locator('.file-field__filename')
       await expect(filename).toHaveValue('image.png')
 
       const bulkUploadButton = page.locator('#field-hasManyUpload button', {
         hasText: exactText('Create New'),
       })
+
       await bulkUploadButton.click()
 
       const bulkUploadModal = page.locator('#bulk-upload-drawer-slug-1')
@@ -823,20 +922,17 @@ describe('Uploads', () => {
       const editManyBulkUploadModal = page.locator('#edit-uploads-2-bulk-uploads')
       await expect(editManyBulkUploadModal).toBeVisible()
 
-      const fieldSelector = page.locator('.edit-many-bulk-uploads__form .react-select')
-      await fieldSelector.click({ delay: 100 })
+      await page.locator('.edit-many-bulk-uploads__form .react-select').click({ delay: 100 })
       const options = page.locator('.rs__option')
-      // Select an option
+
       await options.locator('text=Prefix').click()
 
       await page.locator('#edit-uploads-2-bulk-uploads #field-prefix').fill('some prefix')
 
       await page.locator('.edit-many-bulk-uploads__sidebar-wrap button').click()
-
-      const saveButton = page.locator('.bulk-upload--actions-bar__saveButtons button')
-      await saveButton.click()
-
+      await page.locator('.bulk-upload--actions-bar__saveButtons button').click()
       await page.waitForSelector('#field-hasManyUpload .upload--has-many__dragItem')
+
       const itemCount = await page
         .locator('#field-hasManyUpload .upload--has-many__dragItem')
         .count()
@@ -878,7 +974,7 @@ describe('Uploads', () => {
       const errorCount = page
         .locator('#bulk-upload-drawer-slug-1 .file-selections .error-pill__count')
         .first()
-      await expect(errorCount).toHaveText('2')
+      await expect(errorCount).toHaveText('3')
 
       await page.locator('#bulk-upload-drawer-slug-1 .edit-many-bulk-uploads__toggle').click()
       const editManyBulkUploadModal = page.locator('#edit-uploads-2-bulk-uploads')
@@ -900,6 +996,73 @@ describe('Uploads', () => {
       )
 
       await saveDocAndAssert(page)
+    })
+
+    test('should show validation error when bulk uploading files and then soft removing one of the files', async () => {
+      // Navigate to the upload creation page
+      await page.goto(uploadsOne.create)
+
+      // Upload single file
+      await page.setInputFiles(
+        '.file-field input[type="file"]',
+        path.resolve(dirname, './image.png'),
+      )
+      const filename = page.locator('.file-field__filename')
+      await expect(filename).toHaveValue('image.png')
+
+      const bulkUploadButton = page.locator('#field-hasManyUpload button', {
+        hasText: exactText('Create New'),
+      })
+      await bulkUploadButton.click()
+
+      const bulkUploadModal = page.locator('#bulk-upload-drawer-slug-1')
+      await expect(bulkUploadModal).toBeVisible()
+
+      // Bulk upload multiple files at once
+      await page.setInputFiles('#bulk-upload-drawer-slug-1 .dropzone input[type="file"]', [
+        path.resolve(dirname, './image.png'),
+        path.resolve(dirname, './test-image.png'),
+      ])
+
+      await page.locator('#bulk-upload-drawer-slug-1 .edit-many-bulk-uploads__toggle').click()
+      const editManyBulkUploadModal = page.locator('#edit-uploads-2-bulk-uploads')
+      await expect(editManyBulkUploadModal).toBeVisible()
+
+      const fieldSelector = page.locator('.edit-many-bulk-uploads__form .react-select')
+      await fieldSelector.click({ delay: 100 })
+      const options = page.locator('.rs__option')
+      // Select an option
+      await options.locator('text=Prefix').click()
+
+      await page.locator('#edit-uploads-2-bulk-uploads #field-prefix').fill('some prefix')
+
+      await page.locator('.edit-many-bulk-uploads__sidebar-wrap button').click()
+
+      await page
+        .locator('#bulk-upload-drawer-slug-1 .file-field__upload .file-field__remove')
+        .click()
+
+      const chevronRight = page.locator(
+        '#bulk-upload-drawer-slug-1 .bulk-upload--actions-bar__controls button:nth-of-type(2)',
+      )
+
+      await chevronRight.click()
+
+      await expect(
+        page
+          .locator(
+            '#bulk-upload-drawer-slug-1 .file-selections .file-selections__fileRow .file-selections__fileName',
+          )
+          .first(),
+      ).toContainText('No file')
+
+      const saveButton = page.locator('.bulk-upload--actions-bar__saveButtons button')
+      await saveButton.click()
+
+      const errorCount = page
+        .locator('#bulk-upload-drawer-slug-1 .file-selections .error-pill__count')
+        .first()
+      await expect(errorCount).toHaveText('1')
     })
   })
 

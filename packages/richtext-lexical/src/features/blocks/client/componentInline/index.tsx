@@ -61,7 +61,7 @@ const InlineBlockComponentContext = createContext<InlineBlockComponentContextTyp
   initialState: false,
 })
 
-export const useInlineBlockComponentContext = () => React.useContext(InlineBlockComponentContext)
+export const useInlineBlockComponentContext = () => React.use(InlineBlockComponentContext)
 
 export const InlineBlockComponent: React.FC<Props> = (props) => {
   const { cacheBuster, formData, nodeKey } = props
@@ -391,6 +391,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         },
       ]}
       disableValidationOnSubmit
+      el="div"
       fields={clientBlock?.fields}
       initialState={initialState || {}}
       onChange={[onChange]}
@@ -425,7 +426,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         </Drawer>
       </EditDepthProvider>
       {CustomBlock ? (
-        <InlineBlockComponentContext.Provider
+        <InlineBlockComponentContext
           value={{
             EditButton,
             initialState,
@@ -436,7 +437,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
           }}
         >
           {CustomBlock}
-        </InlineBlockComponentContext.Provider>
+        </InlineBlockComponentContext>
       ) : (
         <InlineBlockContainer>
           {initialState ? <Label /> : <ShimmerEffect height="15px" width="40px" />}

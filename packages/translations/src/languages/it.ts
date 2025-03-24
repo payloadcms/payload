@@ -124,6 +124,7 @@ export const itTranslations: DefaultTranslationsObject = {
     unPublishingDocument:
       "Si è verificato un problema durante l'annullamento della pubblicazione di questo documento.",
     unspecific: 'Si è verificato un errore.',
+    unverifiedEmail: 'Verifica la tua email prima di accedere.',
     userEmailAlreadyRegistered: "Un utente con l'email fornita è già registrato.",
     userLocked: 'Questo utente è bloccato a causa di troppi tentativi di accesso non riusciti.',
     usernameAlreadyRegistered: 'Un utente con il nome utente fornito è già registrato.',
@@ -420,6 +421,7 @@ export const itTranslations: DefaultTranslationsObject = {
     height: 'Altezza',
     lessInfo: 'Meno info',
     moreInfo: 'Più info',
+    noFile: 'Nessun file',
     pasteURL: 'Incolla URL',
     previewSizes: 'Anteprime Dimensioni',
     selectCollectionToBrowse: 'Seleziona una Collezione da Sfogliare',

@@ -4,7 +4,8 @@ import type { GeneratedTypes } from 'helpers/sdk/types.js'
 import { expect, test } from '@playwright/test'
 import { navigateToDoc } from 'helpers/e2e/navigateToDoc.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
-import { upsertPrefs } from 'helpers/e2e/upsertPrefs.js'
+import { upsertPreferences } from 'helpers/e2e/preferences.js'
+import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
 import { RESTClient } from 'helpers/rest.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -16,8 +17,8 @@ import {
   changeLocale,
   closeLocaleSelector,
   ensureCompilationIsDone,
+  findTableRow,
   initPageConsoleErrorCatch,
-  openDocDrawer,
   openLocaleSelector,
   saveDocAndAssert,
   throttleTest,
@@ -30,6 +31,7 @@ import { richTextSlug } from './collections/RichText/index.js'
 import {
   defaultLocale,
   englishTitle,
+  localizedDraftsSlug,
   localizedPostsSlug,
   relationshipLocalizedSlug,
   spanishLocale,
@@ -53,6 +55,7 @@ let url: AdminUrlUtil
 let urlWithRequiredLocalizedFields: AdminUrlUtil
 let urlRelationshipLocalized: AdminUrlUtil
 let urlCannotCreateDefaultLocale: AdminUrlUtil
+let urlPostsWithDrafts: AdminUrlUtil
 
 const title = 'english title'
 const spanishTitle = 'spanish title'
@@ -76,6 +79,7 @@ describe('Localization', () => {
     richTextURL = new AdminUrlUtil(serverURL, richTextSlug)
     urlWithRequiredLocalizedFields = new AdminUrlUtil(serverURL, withRequiredLocalizedFields)
     urlCannotCreateDefaultLocale = new AdminUrlUtil(serverURL, 'cannot-create-default-locale')
+    urlPostsWithDrafts = new AdminUrlUtil(serverURL, localizedDraftsSlug)
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -109,6 +113,21 @@ describe('Localization', () => {
       await expect(page.locator('.localizer.app-header__localizer')).toBeVisible()
       await page.locator('.localizer >> button').first().click()
       await expect(page.locator('.localizer .popup.popup--active')).not.toContainText('FILTERED')
+    })
+
+    test('should filter version locale selector with filterAvailableLocales', async () => {
+      await page.goto(urlPostsWithDrafts.create)
+      await page.locator('#field-title').fill('title')
+      await page.locator('#action-save').click()
+
+      await page.locator('text=Versions').click()
+      const firstVersion = findTableRow(page, 'Current Published Version')
+      await firstVersion.locator('a').click()
+
+      await expect(page.locator('.select-version-locales__label')).toBeVisible()
+      await expect(page.locator('.select-version-locales .react-select')).not.toContainText(
+        'FILTERED',
+      )
     })
 
     test('should disable control for active locale', async () => {
@@ -318,7 +337,7 @@ describe('Localization', () => {
     })
 
     test('should not render default locale in locale selector when prefs are not default', async () => {
-      await upsertPrefs<Config, GeneratedTypes<any>>({
+      await upsertPreferences<Config, GeneratedTypes<any>>({
         payload,
         user: client.user,
         key: 'locale',
@@ -349,7 +368,7 @@ describe('Localization', () => {
       const drawerToggler =
         '#field-relationMultiRelationTo .relationship--single-value__drawer-toggler'
       await expect(page.locator(drawerToggler)).toBeEnabled()
-      await openDocDrawer(page, drawerToggler)
+      await openDocDrawer({ page, selector: drawerToggler })
       await expect(page.locator('.doc-drawer__header-text')).toContainText('spanish-relation2')
       await page.locator('.doc-drawer__header-close').click()
     })
@@ -536,6 +555,30 @@ describe('Localization', () => {
       })
 
       await cdpSession.detach()
+    })
+
+    test('should not show fallback data after saving data', async () => {
+      await page.goto(url.create)
+      await changeLocale(page, defaultLocale)
+      await page.locator('#field-title').fill(title)
+
+      await saveDocAndAssert(page)
+      await changeLocale(page, spanishLocale)
+
+      // POST data
+      await page.locator('#field-description').fill('non-localized description')
+      await saveDocAndAssert(page)
+
+      // POST updated data
+      await page.locator('#field-description').fill('non-localized description 2')
+      await saveDocAndAssert(page)
+
+      // The title should not have posted with a value
+      await expect
+        .poll(() => page.locator('#field-title').inputValue(), {
+          timeout: POLL_TOPASS_TIMEOUT,
+        })
+        .not.toBe(title)
     })
   })
 

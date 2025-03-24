@@ -33,6 +33,7 @@ import {
   rollbackTransaction,
   updateGlobal,
   updateGlobalVersion,
+  updateMany,
   updateOne,
   updateVersion,
 } from '@payloadcms/drizzle'
@@ -63,6 +64,7 @@ const filename = fileURLToPath(import.meta.url)
 export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter> {
   const postgresIDType = args.idType || 'serial'
   const payloadIDType = postgresIDType === 'serial' ? 'number' : 'text'
+  const allowIDOnCreate = args.allowIDOnCreate ?? false
 
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = findMigrationDir(args.migrationDir)
@@ -78,17 +80,22 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
     if (args.schemaName) {
       adapterSchema = pgSchema(args.schemaName)
     } else {
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       adapterSchema = { enum: pgEnum, table: pgTable }
     }
 
-    const extensions = (args.extensions ?? []).reduce((acc, name) => {
-      acc[name] = true
-      return acc
-    }, {})
+    const extensions = (args.extensions ?? []).reduce(
+      (acc, name) => {
+        acc[name] = true
+        return acc
+      },
+      {} as Record<string, boolean>,
+    )
 
     return createDatabaseAdapter<PostgresAdapter>({
       name: 'postgres',
       afterSchemaInit: args.afterSchemaInit ?? [],
+      allowIDOnCreate,
       beforeSchemaInit: args.beforeSchemaInit ?? [],
       createDatabase,
       createExtensions,
@@ -101,6 +108,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       }),
       defaultDrizzleSnapshot,
       disableCreateDatabase: args.disableCreateDatabase ?? false,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       drizzle: undefined,
       enums: {},
       extensions,
@@ -122,9 +130,11 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       logger: args.logger,
       operators: operatorMap,
       pgSchema: adapterSchema,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       pool: undefined,
       poolOptions: args.pool,
       prodMigrations: args.prodMigrations,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       push: args.push,
       relations: {},
       relationshipsSuffix: args.relationshipsSuffix || '_rels',
@@ -162,6 +172,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       find,
       findGlobal,
       findGlobalVersions,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       findOne,
       findVersions,
       indexes: new Set<string>(),
@@ -179,12 +190,15 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       queryDrafts,
       rawRelations: {},
       rawTables: {},
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       rejectInitializing,
       requireDrizzleKit,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       resolveInitializing,
       rollbackTransaction,
       updateGlobal,
       updateGlobalVersion,
+      updateMany,
       updateOne,
       updateVersion,
       upsert: updateOne,
@@ -192,6 +206,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
   }
 
   return {
+    allowIDOnCreate,
     defaultIDType: payloadIDType,
     init: adapter,
   }

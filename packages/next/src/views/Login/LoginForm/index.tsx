@@ -16,8 +16,7 @@ import {
   useConfig,
   useTranslation,
 } from '@payloadcms/ui'
-import { formatAdminURL } from '@payloadcms/ui/shared'
-import { getLoginOptions } from 'payload/shared'
+import { formatAdminURL, getLoginOptions } from 'payload/shared'
 
 import type { LoginFieldProps } from '../LoginField/index.js'
 
@@ -92,7 +91,13 @@ export const LoginForm: React.FC<{
       initialState={initialState}
       method="POST"
       onSuccess={handleLogin}
-      redirect={typeof searchParams?.redirect === 'string' ? searchParams.redirect : adminRoute}
+      redirect={
+        typeof searchParams?.redirect === 'string'
+          ? searchParams.redirect.startsWith('/')
+            ? searchParams.redirect
+            : encodeURIComponent(searchParams.redirect)
+          : adminRoute
+      }
       waitForAutocomplete
     >
       <div className={`${baseClass}__inputWrap`}>

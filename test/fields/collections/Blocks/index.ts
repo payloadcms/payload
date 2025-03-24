@@ -11,6 +11,7 @@ export const getBlocksField = (prefix?: string): BlocksField => ({
   blocks: [
     {
       slug: prefix ? `${prefix}Content` : 'content',
+      imageURL: '/api/uploads/file/payload480x320.jpg',
       interfaceName: prefix ? `${prefix}ContentBlock` : 'ContentBlock',
       admin: {
         components: {
@@ -27,6 +28,19 @@ export const getBlocksField = (prefix?: string): BlocksField => ({
           name: 'richText',
           type: 'richText',
           editor: slateEditor({}),
+        },
+      ],
+    },
+    {
+      slug: prefix ? `${prefix}NoBlockname` : 'noBlockname',
+      interfaceName: prefix ? `${prefix}NoBlockname` : 'NoBlockname',
+      admin: {
+        disableBlockName: true,
+      },
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
         },
       ],
     },

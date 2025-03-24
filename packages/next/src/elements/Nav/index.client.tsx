@@ -5,8 +5,9 @@ import type { NavPreferences } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { Link, NavGroup, useConfig, useTranslation } from '@payloadcms/ui'
-import { EntityType, formatAdminURL } from '@payloadcms/ui/shared'
+import { EntityType } from '@payloadcms/ui/shared'
 import { usePathname } from 'next/navigation.js'
+import { formatAdminURL } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 const baseClass = 'nav'
@@ -44,17 +45,20 @@ export const DefaultNavClient: React.FC<{
                 id = `nav-global-${slug}`
               }
 
-              const activeCollection =
+              const isActive =
                 pathname.startsWith(href) && ['/', undefined].includes(pathname[href.length])
 
               const Label = (
-                <span className={`${baseClass}__link-label`}>{getTranslation(label, i18n)}</span>
+                <>
+                  {isActive && <div className={`${baseClass}__link-indicator`} />}
+                  <span className={`${baseClass}__link-label`}>{getTranslation(label, i18n)}</span>
+                </>
               )
 
-              if (activeCollection) {
+              // If the URL matches the link exactly
+              if (pathname === href) {
                 return (
-                  <div className={`${baseClass}__link active`} id={id} key={i}>
-                    <div className={`${baseClass}__link-indicator`} />
+                  <div className={`${baseClass}__link`} id={id} key={i}>
                     {Label}
                   </div>
                 )

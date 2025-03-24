@@ -5,6 +5,7 @@ import type {
   CollectionOptions,
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
+import type { NodeHttpHandlerOptions } from '@smithy/node-http-handler'
 import type { Config, Plugin, UploadCollectionSlug } from 'payload'
 
 import * as AWS from '@aws-sdk/client-s3'
@@ -64,28 +65,41 @@ export type S3StorageOptions = {
 
 type S3StoragePlugin = (storageS3Args: S3StorageOptions) => Plugin
 
+let storageClient: AWS.S3 | null = null
+
+const defaultRequestHandlerOpts: NodeHttpHandlerOptions = {
+  httpAgent: {
+    keepAlive: true,
+    maxSockets: 100,
+  },
+  httpsAgent: {
+    keepAlive: true,
+    maxSockets: 100,
+  },
+}
+
 export const s3Storage: S3StoragePlugin =
   (s3StorageOptions: S3StorageOptions) =>
   (incomingConfig: Config): Config => {
-    if (s3StorageOptions.enabled === false) {
-      return incomingConfig
-    }
-
-    let storageClient: AWS.S3 | null = null
-
     const getStorageClient: () => AWS.S3 = () => {
       if (storageClient) {
         return storageClient
       }
-      storageClient = new AWS.S3(s3StorageOptions.config ?? {})
+
+      storageClient = new AWS.S3({
+        requestHandler: defaultRequestHandlerOpts,
+        ...(s3StorageOptions.config ?? {}),
+      })
       return storageClient
     }
+
+    const isPluginDisabled = s3StorageOptions.enabled === false
 
     initClientUploads({
       clientHandler: '@payloadcms/storage-s3/client#S3ClientUploadHandler',
       collections: s3StorageOptions.collections,
       config: incomingConfig,
-      enabled: !!s3StorageOptions.clientUploads,
+      enabled: !isPluginDisabled && Boolean(s3StorageOptions.clientUploads),
       serverHandler: getGenerateSignedURLHandler({
         access:
           typeof s3StorageOptions.clientUploads === 'object'
@@ -98,6 +112,10 @@ export const s3Storage: S3StoragePlugin =
       }),
       serverHandlerPath: '/storage-s3-generate-signed-url',
     })
+
+    if (isPluginDisabled) {
+      return incomingConfig
+    }
 
     const adapter = s3StorageInternal(getStorageClient, s3StorageOptions)
 
@@ -140,11 +158,12 @@ export const s3Storage: S3StoragePlugin =
 
 function s3StorageInternal(
   getStorageClient: () => AWS.S3,
-  { acl, bucket, config = {} }: S3StorageOptions,
+  { acl, bucket, clientUploads, config = {} }: S3StorageOptions,
 ): Adapter {
   return ({ collection, prefix }): GeneratedAdapter => {
     return {
       name: 's3',
+      clientUploads,
       generateURL: getGenerateURL({ bucket, config }),
       handleDelete: getHandleDelete({ bucket, getStorageClient }),
       handleUpload: getHandleUpload({
