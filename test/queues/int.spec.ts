@@ -1265,21 +1265,4 @@ describe('Queues', () => {
     expect(jobAfterRun.log[0].error.message).toBe('custom error message')
     expect(jobAfterRun.log[0].state).toBe('failed')
   })
-
-  it('can queue 10000 jobs', async () => {
-    // Create 1000 jobs
-    for (let i = 0; i < 1000; i++) {
-      await payload.jobs.queue({
-        task: 'CreateSimple',
-        input: {
-          message: 'hello!',
-        },
-      })
-    }
-
-    // run all
-    await payload.jobs.run({
-      limit: 1000,
-    })
-  })
 })

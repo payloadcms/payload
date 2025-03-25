@@ -109,7 +109,6 @@ export const runJobs = async ({
     docs: BaseJob[]
   } = { docs: [] }
 
-  console.time('runJobs')
   if (id) {
     // Only one job to run
     jobsQuery.docs = [
@@ -141,7 +140,6 @@ export const runJobs = async ({
       jobsQuery.docs = updatedDocs
     }
   }
-  console.timeEnd('runJobs')
 
   /**
    * Just for logging purposes, we want to know how many jobs are new and how many are existing (= already been tried).
