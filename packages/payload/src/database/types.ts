@@ -147,7 +147,7 @@ export interface BaseDatabaseAdapter {
 
   updateGlobalVersion: UpdateGlobalVersion
 
-  updateJobs?: UpdateJobs
+  updateJobs: UpdateJobs
 
   updateMany: UpdateMany
 

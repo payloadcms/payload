@@ -72,54 +72,24 @@ export async function updateJobs({
     return result.docs as BaseJob[]
   }
 
-  let updatedJobs: BaseJob[] | null = []
-
-  if (req.payload.db.updateJobs) {
-    const args: UpdateJobsArgs = id
-      ? {
-          id,
-          data: sanitizeUpdateData({ data }),
-          req: disableTransaction === true ? undefined : req,
-          returning,
-        }
-      : {
-          data: sanitizeUpdateData({ data }),
-          limit,
-          req: disableTransaction === true ? undefined : req,
-          returning,
-          sort,
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-          where: where as Where,
-        }
-
-    updatedJobs = await req.payload.db.updateJobs(args)
-  } else {
-    const jobsToUpdate = await req.payload.db.find({
-      collection: jobsCollectionSlug,
-      limit,
-      pagination: false,
-      req: disableTransaction === true ? undefined : req,
-      where,
-    })
-    if (!jobsToUpdate?.docs) {
-      return null
-    }
-
-    for (const job of jobsToUpdate.docs) {
-      const updateData = {
-        ...job,
-        ...data,
-      }
-      const updatedJob = await req.payload.db.updateOne({
-        id: job.id,
-        collection: jobsCollectionSlug,
-        data: sanitizeUpdateData({ data: updateData }),
+  const args: UpdateJobsArgs = id
+    ? {
+        id,
+        data: sanitizeUpdateData({ data }),
         req: disableTransaction === true ? undefined : req,
         returning,
-      })
-      updatedJobs.push(updatedJob)
-    }
-  }
+      }
+    : {
+        data: sanitizeUpdateData({ data }),
+        limit,
+        req: disableTransaction === true ? undefined : req,
+        returning,
+        sort,
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        where: where as Where,
+      }
+
+  const updatedJobs: BaseJob[] | null = await req.payload.db.updateJobs(args)
 
   if (returning === false || !updatedJobs?.length) {
     return null
