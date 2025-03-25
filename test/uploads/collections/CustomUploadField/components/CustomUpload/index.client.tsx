@@ -1,6 +1,13 @@
 'use client'
 
-import { Drawer, DrawerToggler, TextField, Upload, useDocumentInfo } from '@payloadcms/ui'
+import {
+  Drawer,
+  DrawerToggler,
+  TextField,
+  Upload,
+  UploadControlsProvider,
+  useDocumentInfo,
+} from '@payloadcms/ui'
 import React from 'react'
 
 const customDrawerSlug = 'custom-upload-drawer'
@@ -35,12 +42,14 @@ export const CustomUploadClient = () => {
   return (
     <div>
       <h3>This text was rendered on the client</h3>
-      <Upload
-        collectionSlug={collectionSlug}
-        customActions={[<CustomDrawerToggler key={0} />]}
-        initialState={initialState}
-        uploadConfig={'upload' in docConfig ? docConfig.upload : undefined}
-      />
+      <UploadControlsProvider>
+        <Upload
+          collectionSlug={collectionSlug}
+          customActions={[<CustomDrawerToggler key={0} />]}
+          initialState={initialState}
+          uploadConfig={'upload' in docConfig ? docConfig.upload : undefined}
+        />
+      </UploadControlsProvider>
       <h4>
         And that{' '}
         <span aria-label="point up" role="img">
