@@ -85,6 +85,7 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@types/pg": "8.10.2",
     "@types/to-snake-case": "1.0.0",
+    "@types/uuid": "10.0.0",
     "payload": "workspace:*"
   },
   "peerDependencies": {
