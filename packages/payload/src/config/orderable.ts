@@ -201,6 +201,7 @@ export const addOrderableEndpoint = (config: SanitizedConfig) => {
       collection: collection.slug,
       depth: 0,
       limit: 1,
+      pagination: false,
       sort: newKeyWillBe === 'greater' ? orderableFieldName : `-${orderableFieldName}`,
       where: {
         [orderableFieldName]: {
