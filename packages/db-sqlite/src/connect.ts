@@ -1,5 +1,5 @@
 import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
-import type { Connect } from 'payload'
+import type { Connect, Migration } from 'payload'
 
 import { createClient } from '@libsql/client'
 import { pushDevSchema } from '@payloadcms/drizzle'
@@ -36,7 +36,8 @@ export const connect: Connect = async function connect(
       }
     }
   } catch (err) {
-    this.payload.logger.error({ err, msg: `Error: cannot connect to SQLite: ${err.message}` })
+    const message = err instanceof Error ? err.message : String(err)
+    this.payload.logger.error({ err, msg: `Error: cannot connect to SQLite: ${message}` })
     if (typeof this.rejectInitializing === 'function') {
       this.rejectInitializing()
     }
@@ -57,6 +58,6 @@ export const connect: Connect = async function connect(
   }
 
   if (process.env.NODE_ENV === 'production' && this.prodMigrations) {
-    await this.migrate({ migrations: this.prodMigrations })
+    await this.migrate({ migrations: this.prodMigrations as Migration[] })
   }
 }
