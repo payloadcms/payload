@@ -101,6 +101,7 @@
     &__dropzoneButtons {
       display: flex;
       gap: calc(var(--base) * 0.5);
+      align-items: center;
     }
 
     &__orText {
