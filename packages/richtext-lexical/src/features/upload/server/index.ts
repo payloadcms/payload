@@ -11,7 +11,7 @@ import type {
 
 import { sanitizeFields } from 'payload'
 
-import type { UploadFeaturePropsClient } from '../client/feature.client.js'
+import type { UploadFeaturePropsClient } from '../client/index.js'
 
 import { populate } from '../../../populateGraphQL/populate.js'
 import { createServerFeature } from '../../../utilities/createServerFeature.js'

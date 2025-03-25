@@ -980,8 +980,8 @@ export type {
 
 export { createNode } from './features/typeUtilities.js' // Only useful in feature.server.ts
 
-export { UploadFeature } from './features/upload/server/feature.server.js'
-export type { UploadFeatureProps } from './features/upload/server/feature.server.js'
+export { UploadFeature } from './features/upload/server/index.js'
+export type { UploadFeatureProps } from './features/upload/server/index.js'
 
 export { type UploadData, UploadServerNode } from './features/upload/server/nodes/UploadNode.js'
 export type { EditorConfigContextType } from './lexical/config/client/EditorConfigProvider.js'
