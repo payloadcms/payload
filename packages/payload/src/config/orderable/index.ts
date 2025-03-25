@@ -1,9 +1,9 @@
 import type { BeforeChangeHook, CollectionConfig } from '../../collections/config/types.js'
-import type { Field, JoinField } from '../../fields/config/types.js'
+import type { Field } from '../../fields/config/types.js'
 import type { Endpoint, PayloadHandler, SanitizedConfig } from '../types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
-import { flattenAllFields2 } from '../../utilities/flattenAllFields.js'
+import { traverseFields } from '../../utilities/traverseFields.js'
 import { generateKeyBetween, generateNKeysBetween } from './fractional-indexing.js'
 
 /**
@@ -15,7 +15,6 @@ import { generateKeyBetween, generateNKeysBetween } from './fractional-indexing.
  * Also, if collection.defaultSort or joinField.defaultSort is not set, it will be set to the orderable field.
  */
 export const setupOrderable = (config: SanitizedConfig) => {
-  let atLeastOneOrderableField = false
   const fieldsToAdd = new Map<CollectionConfig, string[]>()
 
   config.collections.forEach((collection) => {
@@ -24,35 +23,43 @@ export const setupOrderable = (config: SanitizedConfig) => {
       fieldsToAdd.set(collection, [...currentFields, '_order'])
       collection.defaultSort = collection.defaultSort ?? '_order'
     }
-    const flattenedFields = flattenAllFields2(collection.fields)
-    flattenedFields
-      .filter((field): field is JoinField => field.type === 'join' && field.orderable === true)
-      .forEach((field) => {
-        if (Array.isArray(field.collection)) {
-          throw new Error('Orderable joins must target a single collection')
+
+    traverseFields({
+      callback: ({ field, parentRef, ref }) => {
+        if (field.type === 'array' || field.type === 'blocks') {
+          return false
         }
-        const relationshipCollection = config.collections.find((c) => c.slug === field.collection)
-        if (!relationshipCollection) {
-          throw new Error(
-            `Join field ${field.name} targets non-existent collection ${field.collection}`,
-          )
+        if (field.type === 'group' || field.type === 'tab') {
+          // @ts-expect-error ref is untyped
+          ref.prefix = field.name
         }
-        field.defaultSort = field.defaultSort ?? `_${field.collection}_${field.name}_order`
-        const currentFields = fieldsToAdd.get(relationshipCollection) || []
-        fieldsToAdd.set(relationshipCollection, [
-          ...currentFields,
-          `_${field.collection}_${field.name}_order`,
-        ])
-      })
-  })
-  Array.from(fieldsToAdd.entries()).forEach(([collection, orderableFields]) => {
-    if (orderableFields.length > 0) {
-      addOrderableFieldsAndHook(collection, orderableFields)
-      atLeastOneOrderableField = true
-    }
+        if (field.type === 'join' && field.orderable === true) {
+          if (Array.isArray(field.collection)) {
+            throw new Error('Orderable joins must target a single collection')
+          }
+          const relationshipCollection = config.collections.find((c) => c.slug === field.collection)
+          if (!relationshipCollection) {
+            return false
+          }
+          field.defaultSort = field.defaultSort ?? `_${field.collection}_${field.name}_order`
+          const currentFields = fieldsToAdd.get(relationshipCollection) || []
+          // @ts-expect-error ref is untyped
+          const prefix = parentRef?.prefix ? `${parentRef.prefix}_` : ''
+          fieldsToAdd.set(relationshipCollection, [
+            ...currentFields,
+            `_${field.collection}_${prefix}${field.name}_order`,
+          ])
+        }
+      },
+      fields: collection.fields,
+    })
   })
 
-  if (atLeastOneOrderableField) {
+  Array.from(fieldsToAdd.entries()).forEach(([collection, orderableFields]) => {
+    addOrderableFieldsAndHook(collection, orderableFields)
+  })
+
+  if (fieldsToAdd.size > 0) {
     addOrderableEndpoint(config)
   }
 }
@@ -99,6 +106,8 @@ export const addOrderableFieldsAndHook = (
             collection: collection.slug,
             depth: 0,
             limit: 1,
+            pagination: false,
+            select: { [orderableFieldName]: true },
             sort: `-${orderableFieldName}`,
           })
 
@@ -195,6 +204,7 @@ export const addOrderableEndpoint = (config: SanitizedConfig) => {
       const beforeDoc = await req.payload.findByID({
         id: targetId,
         collection: collection.slug,
+        select: { [orderableFieldName]: true },
       })
       targetKey = beforeDoc?.[orderableFieldName] || null
     }
@@ -206,6 +216,8 @@ export const addOrderableEndpoint = (config: SanitizedConfig) => {
       collection: collection.slug,
       depth: 0,
       limit: 1,
+      pagination: false,
+      select: { [orderableFieldName]: true },
       sort: newKeyWillBe === 'greater' ? orderableFieldName : `-${orderableFieldName}`,
       where: {
         [orderableFieldName]: {
