@@ -88,11 +88,11 @@ export const getFields = ({ collection, prefix }: Args): Field[] => {
           type: 'group',
           fields: [
             {
-              ...(existingSizeURLField || ({} as any)),
+              ...(existingSizeURLField || {}),
               ...baseURLField,
             },
           ],
-        }
+        } as Field
       }),
     }
 

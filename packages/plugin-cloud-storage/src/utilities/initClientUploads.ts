@@ -79,7 +79,7 @@ export const initClientUploads = <ExtraProps extends Record<string, unknown>, T>
       clientProps: {
         collectionSlug,
         enabled,
-        extra: extraClientHandlerProps ? extraClientHandlerProps(collection) : undefined,
+        extra: extraClientHandlerProps ? extraClientHandlerProps(collection!) : undefined,
         prefix,
         serverHandlerPath,
       },
