@@ -34,6 +34,7 @@ import {
   rollbackTransaction,
   updateGlobal,
   updateGlobalVersion,
+  updateJobs,
   updateMany,
   updateOne,
   updateVersion,
@@ -123,6 +124,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       tableNameMap: new Map<string, string>(),
       tables: {},
       transactionOptions: args.transactionOptions || undefined,
+      updateJobs,
       updateMany,
       versionsSuffix: args.versionsSuffix || '_v',
 

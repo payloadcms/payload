@@ -147,6 +147,8 @@ export interface BaseDatabaseAdapter {
 
   updateGlobalVersion: UpdateGlobalVersion
 
+  updateJobs?: UpdateJobs
+
   updateMany: UpdateMany
 
   updateOne: UpdateOne
@@ -537,6 +539,32 @@ export type UpdateManyArgs = {
 }
 
 export type UpdateMany = (args: UpdateManyArgs) => Promise<Document[] | null>
+
+export type UpdateJobsArgs = {
+  data: Record<string, unknown>
+  req?: Partial<PayloadRequest>
+  /**
+   * If true, returns the updated documents
+   *
+   * @default true
+   */
+  returning?: boolean
+} & (
+  | {
+      id: number | string
+      limit?: never
+      sort?: never
+      where?: never
+    }
+  | {
+      id?: never
+      limit?: number
+      sort?: Sort
+      where: Where
+    }
+)
+
+export type UpdateJobs = (args: UpdateJobsArgs) => Promise<Document[] | null>
 
 export type UpsertArgs = {
   collection: CollectionSlug

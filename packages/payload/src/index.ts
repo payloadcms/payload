@@ -1160,6 +1160,8 @@ export type {
   UpdateGlobalArgs,
   UpdateGlobalVersion,
   UpdateGlobalVersionArgs,
+  UpdateJobs,
+  UpdateJobsArgs,
   UpdateMany,
   UpdateManyArgs,
   UpdateOne,
