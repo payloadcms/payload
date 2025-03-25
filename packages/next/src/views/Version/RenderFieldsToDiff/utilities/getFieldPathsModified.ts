@@ -42,19 +42,11 @@ export function getFieldPathsModified({
 
   const parentPathToUse = parentIsUnnamed ? parentWithoutIndex : parentPath
 
-  const parentSchemaPathSegments = parentSchemaPath.split('.')
-  const parentSchemaIsUnnamed =
-    parentSchemaPathSegments[parentSchemaPathSegments.length - 1].startsWith('_index-')
-  const parentSchemaWithoutIndex = parentSchemaIsUnnamed
-    ? parentSchemaPathSegments.slice(0, -1).join('.')
-    : parentSchemaPath
-  const parentSchemaPathToUse = parentSchemaIsUnnamed ? parentSchemaWithoutIndex : parentSchemaPath
-
   if ('name' in field) {
     return {
       indexPath: '',
       path: `${parentPathToUse ? parentPathToUse + '.' : ''}${field.name}`,
-      schemaPath: `${parentSchemaPathToUse ? parentSchemaPathToUse + '.' : ''}${field.name}`,
+      schemaPath: `${parentSchemaPath ? parentSchemaPath + '.' : ''}${field.name}`,
     }
   }
 
@@ -63,6 +55,6 @@ export function getFieldPathsModified({
   return {
     indexPath: `${parentIndexPath ? parentIndexPath + '-' : ''}${index}`,
     path: `${parentPathToUse ? parentPathToUse + '.' : ''}${indexSuffix}`,
-    schemaPath: `${!parentIsUnnamed && parentSchemaPathToUse ? parentSchemaPathToUse + '.' : ''}${indexSuffix}`,
+    schemaPath: `${!parentIsUnnamed && parentSchemaPath ? parentSchemaPath + '.' : ''}${indexSuffix}`,
   }
 }

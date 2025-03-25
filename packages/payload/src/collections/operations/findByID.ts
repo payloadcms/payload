@@ -22,6 +22,7 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { validateQueryPaths } from '../../index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 import { buildAfterOperation } from './utils.js'
 
@@ -81,9 +82,14 @@ export const findByIDOperation = async <
       populate,
       req: { fallbackLocale, locale, t },
       req,
-      select,
+      select: incomingSelect,
       showHiddenFields,
     } = args
+
+    const select = sanitizeSelect({
+      forceSelect: collectionConfig.forceSelect,
+      select: incomingSelect,
+    })
 
     // /////////////////////////////////////
     // Access
@@ -111,6 +117,7 @@ export const findByIDOperation = async <
 
     const findOneArgs: FindOneArgs = {
       collection: collectionConfig.slug,
+      draftsEnabled: draftEnabled,
       joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
       locale,
       req: {

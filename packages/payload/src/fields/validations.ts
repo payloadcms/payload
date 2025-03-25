@@ -190,7 +190,19 @@ export const email: EmailFieldValidation = (
     }
   }
 
-  if ((value && !/\S[^\s@]*@\S+\.\S+/.test(value)) || (!value && required)) {
+  /**
+   * Disallows emails with double quotes (e.g., "user"@example.com, user@"example.com", "user@example.com")
+   * Rejects spaces anywhere in the email (e.g., user @example.com, user@ example.com, user name@example.com)
+   * Prevents consecutive dots in the local or domain part (e.g., user..name@example.com, user@example..com)
+   * Disallows domains that start or end with a hyphen (e.g., user@-example.com, user@example-.com)
+   * Allows standard email formats (e.g., user@example.com, user.name+alias@example.co.uk, user-name@example.org)
+   * Allows domains with consecutive hyphens as long as they are not leading/trailing (e.g., user@ex--ample.com)
+   * Supports multiple subdomains (e.g., user@sub.domain.example.com)
+   */
+  const emailRegex =
+    /^(?!.*\.\.)[\w.%+-]+@[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*\.[a-z]{2,}$/i
+
+  if ((value && !emailRegex.test(value)) || (!value && required)) {
     return t('validation:emailAddress')
   }
 
@@ -586,7 +598,7 @@ const validateFilterOptions: Validate<
             falseCollections.push(collection)
           }
 
-          const result = await payload.find({
+          const result = await req.payloadDataLoader.find({
             collection,
             depth: 0,
             limit: 0,

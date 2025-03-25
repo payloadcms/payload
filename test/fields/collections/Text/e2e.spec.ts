@@ -79,7 +79,7 @@ describe('Text', () => {
       await expect(page.locator('.cell-hiddenTextField')).toBeHidden()
       await expect(page.locator('#heading-hiddenTextField')).toBeHidden()
 
-      const columnContainer = await openListColumns(page, {})
+      const { columnContainer } = await openListColumns(page, {})
 
       await expect(
         columnContainer.locator('.column-selector__column', {
@@ -105,7 +105,7 @@ describe('Text', () => {
       await expect(page.locator('.cell-disabledTextField')).toBeHidden()
       await expect(page.locator('#heading-disabledTextField')).toBeHidden()
 
-      const columnContainer = await openListColumns(page, {})
+      const { columnContainer } = await openListColumns(page, {})
 
       await expect(
         columnContainer.locator('.column-selector__column', {
@@ -133,7 +133,7 @@ describe('Text', () => {
       await expect(page.locator('.cell-adminHiddenTextField').first()).toBeVisible()
       await expect(page.locator('#heading-adminHiddenTextField')).toBeVisible()
 
-      const columnContainer = await openListColumns(page, {})
+      const { columnContainer } = await openListColumns(page, {})
 
       await expect(
         columnContainer.locator('.column-selector__column', {

@@ -1,10 +1,5 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    /* TODO: remove the following lines */
-    "strict": false,
-    "noUncheckedIndexedAccess": false,
-  },
   "references": [
     {
       "path": "../payload"

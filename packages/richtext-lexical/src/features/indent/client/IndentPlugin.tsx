@@ -9,35 +9,62 @@ import {
   $isRangeSelection,
   COMMAND_PRIORITY_LOW,
   INDENT_CONTENT_COMMAND,
+  KEY_TAB_COMMAND,
+  OUTDENT_CONTENT_COMMAND,
+  TabNode,
 } from 'lexical'
 import { useEffect } from 'react'
 
 import type { PluginComponent } from '../../typesClient.js'
 import type { IndentFeatureProps } from '../server/index.js'
 
-export const IndentPlugin: PluginComponent<IndentFeatureProps> = (props) => {
+export const IndentPlugin: PluginComponent<IndentFeatureProps> = ({ clientProps }) => {
   const [editor] = useLexicalComposerContext()
-  const { disabledNodes } = props.clientProps
+  const { disabledNodes, disableTabNode } = clientProps
 
   useEffect(() => {
     if (!editor || !disabledNodes?.length) {
       return
     }
+    return editor.registerCommand(
+      INDENT_CONTENT_COMMAND,
+      () => {
+        return $handleIndentAndOutdent((block) => {
+          if (!disabledNodes.includes(block.getType())) {
+            const indent = block.getIndent()
+            block.setIndent(indent + 1)
+          }
+        })
+      },
+      COMMAND_PRIORITY_LOW,
+    )
+  }, [editor, disabledNodes])
+
+  useEffect(() => {
+    if (!editor || !disableTabNode) {
+      return
+    }
     return mergeRegister(
-      editor.registerCommand(
-        INDENT_CONTENT_COMMAND,
-        () => {
-          return $handleIndentAndOutdent((block) => {
-            if (!disabledNodes.includes(block.getType())) {
-              const indent = block.getIndent()
-              block.setIndent(indent + 1)
-            }
-          })
+      // This is so that when you press Tab in the middle of a paragraph,
+      // it indents the paragraph, instead of inserting a TabNode.
+      editor.registerCommand<KeyboardEvent>(
+        KEY_TAB_COMMAND,
+        (event) => {
+          event.preventDefault()
+          return editor.dispatchCommand(
+            event.shiftKey ? OUTDENT_CONTENT_COMMAND : INDENT_CONTENT_COMMAND,
+            undefined,
+          )
         },
         COMMAND_PRIORITY_LOW,
       ),
+      // Tab isn't the only way to insert a TabNode. We have to make sure
+      // it doesn't happen, for example, when pasting from the clipboard.
+      editor.registerNodeTransform(TabNode, (node) => {
+        node.remove()
+      }),
     )
-  }, [editor, disabledNodes])
+  }, [editor, disableTabNode])
 
   return <TabIndentationPlugin />
 }

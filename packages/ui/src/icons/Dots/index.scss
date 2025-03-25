@@ -17,6 +17,20 @@
       background-color: var(--theme-elevation-100);
     }
 
+    &--no-background {
+      background-color: transparent;
+      width: auto;
+      height: auto;
+
+      &:hover {
+        background-color: transparent;
+      }
+    }
+
+    &--horizontal {
+      flex-direction: row;
+    }
+
     > div {
       width: 2.5px;
       height: 2.5px;

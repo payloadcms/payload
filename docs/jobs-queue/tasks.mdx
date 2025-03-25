@@ -7,30 +7,31 @@ keywords: jobs queue, application framework, typescript, node, react, nextjs
 ---
 
 <Banner type="default">
-  A **"Task"** is a function definition that performs business logic and whose input and output are both strongly typed.
+  A **"Task"** is a function definition that performs business logic and whose
+  input and output are both strongly typed.
 </Banner>
 
 You can register Tasks on the Payload config, and then create [Jobs](/docs/jobs-queue/jobs) or [Workflows](/docs/jobs-queue/workflows) that use them. Think of Tasks like tidy, isolated "functions that do one specific thing".
 
 Payload Tasks can be configured to automatically retried if they fail, which makes them valuable for "durable" workflows like AI applications where LLMs can return non-deterministic results, and might need to be retried.
 
-Tasks can either be defined within the `jobs.tasks` array in your payload config, or they can be defined inline within a workflow.
+Tasks can either be defined within the `jobs.tasks` array in your Payload config, or they can be defined inline within a workflow.
 
 ### Defining tasks in the config
 
 Simply add a task to the `jobs.tasks` array in your Payload config. A task consists of the following fields:
 
-| Option                      | Description                                                                      |
-| --------------------------- | -------------------------------------------------------------------------------- |
-| `slug` | Define a slug-based name for this job. This slug needs to be unique among both tasks and workflows.|
-| `handler`   | The function that should be responsible for running the job. You can either pass a string-based path to the job function file, or the job function itself. If you are using large dependencies within your job, you might prefer to pass the string path because that will avoid bundling large dependencies in your Next.js app. Passing a string path is an advanced feature that may require a sophisticated build pipeline in order to work.         |
-| `inputSchema` | Define the input field schema - payload will generate a type for this schema. |
-| `interfaceName` | You can use interfaceName to change the name of the interface that is generated for this task. By default, this is "Task" + the capitalized task slug. |
-| `outputSchema` | Define the output field schema - payload will generate a type for this schema. |
-| `label` | Define a human-friendly label for this task. |
-| `onFail` | Function to be executed if the task fails. |
-| `onSuccess` | Function to be executed if the task succeeds. |
-| `retries` | Specify the number of times that this step should be retried if it fails. If this is undefined, the task will either inherit the retries from the workflow or have no retries. If this is 0, the task will not be retried. By default, this is undefined. |
+| Option          | Description                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `slug`          | Define a slug-based name for this job. This slug needs to be unique among both tasks and workflows.                                                                                                                                                                                                                                                                                                                                              |
+| `handler`       | The function that should be responsible for running the job. You can either pass a string-based path to the job function file, or the job function itself. If you are using large dependencies within your job, you might prefer to pass the string path because that will avoid bundling large dependencies in your Next.js app. Passing a string path is an advanced feature that may require a sophisticated build pipeline in order to work. |
+| `inputSchema`   | Define the input field schema - Payload will generate a type for this schema.                                                                                                                                                                                                                                                                                                                                                                    |
+| `interfaceName` | You can use interfaceName to change the name of the interface that is generated for this task. By default, this is "Task" + the capitalized task slug.                                                                                                                                                                                                                                                                                           |
+| `outputSchema`  | Define the output field schema - Payload will generate a type for this schema.                                                                                                                                                                                                                                                                                                                                                                   |
+| `label`         | Define a human-friendly label for this task.                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `onFail`        | Function to be executed if the task fails.                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `onSuccess`     | Function to be executed if the task succeeds.                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `retries`       | Specify the number of times that this step should be retried if it fails. If this is undefined, the task will either inherit the retries from the workflow or have no retries. If this is 0, the task will not be retried. By default, this is undefined.                                                                                                                                                                                        |
 
 The logic for the Task is defined in the `handler` - which can be defined as a function, or a path to a function. The `handler` will run once a worker picks picks up a Job that includes this task.
 
@@ -86,8 +87,8 @@ export default buildConfig({
           }
         },
       } as TaskConfig<'createPost'>,
-    ]
-  }
+    ],
+  },
 })
 ```
 
@@ -112,10 +113,12 @@ export default buildConfig({
       {
         // ...
         // The #createPostHandler is a named export within the `createPost.ts` file
-        handler: path.resolve(dirname, 'src/tasks/createPost.ts') + '#createPostHandler',
-      }
-    ]
-  }
+        handler:
+          path.resolve(dirname, 'src/tasks/createPost.ts') +
+          '#createPostHandler',
+      },
+    ],
+  },
 })
 ```
 
@@ -126,7 +129,11 @@ Then, the `createPost` file itself:
 ```ts
 import type { TaskHandler } from 'payload'
 
-export const createPostHandler: TaskHandler<'createPost'> = async ({ input, job, req }) => {
+export const createPostHandler: TaskHandler<'createPost'> = async ({
+  input,
+  job,
+  req,
+}) => {
   const newPost = await req.payload.create({
     collection: 'post',
     req,
@@ -165,11 +172,11 @@ export default buildConfig({
         slug: 'myTask',
         retries: {
           shouldRestore: false,
-        }
+        },
         // ...
       } as TaskConfig<'myTask'>,
-    ]
-  }
+    ],
+  },
 })
 ```
 
@@ -191,23 +198,22 @@ export default buildConfig({
         ],
         retries: {
           shouldRestore: ({ input }) => {
-            if(new Date(input.someDate) > new Date()) {
+            if (new Date(input.someDate) > new Date()) {
               return false
             }
             return true
           },
-        }
+        },
         // ...
       } as TaskConfig<'myTask'>,
-    ]
-  }
+    ],
+  },
 })
 ```
 
 ## Nested tasks
 
 You can run sub-tasks within an existing task, by using the `tasks` or `ìnlineTask` arguments passed to the task `handler` function:
-
 
 ```ts
 export default buildConfig({
@@ -222,11 +228,10 @@ export default buildConfig({
         inputSchema: [
           {
             name: 'text',
-            type: 'text'
+            type: 'text',
           },
         ],
         handler: async ({ input, req, tasks, inlineTask }) => {
-
           await inlineTask('Sub Task 1', {
             task: () => {
               // Do something
@@ -243,9 +248,9 @@ export default buildConfig({
           return {
             output: {},
           }
-        }
+        },
       } as TaskConfig<'parentTask'>,
-    ]
-  }
+    ],
+  },
 })
 ```
