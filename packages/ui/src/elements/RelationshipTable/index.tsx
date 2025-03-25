@@ -8,7 +8,7 @@ import {
   type PaginatedDocs,
   type Where,
 } from 'payload'
-import { transformColumnsToPreferences } from 'payload/shared'
+import { hoistQueryParamsToAnd, transformColumnsToPreferences } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
@@ -22,17 +22,16 @@ import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { ListQueryProvider } from '../../providers/ListQuery/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
+import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { hoistQueryParamsToAnd } from '../../utilities/mergeListSearchAndWhere.js'
 import { AnimateHeight } from '../AnimateHeight/index.js'
-import './index.scss'
 import { ColumnSelector } from '../ColumnSelector/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
 import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
-import { TableColumnsProvider } from '../TableColumns/index.js'
 import { DrawerLink } from './cells/DrawerLink/index.js'
 import { RelationshipTablePagination } from './Pagination.js'
+import './index.scss'
 
 const baseClass = 'relationship-table'
 

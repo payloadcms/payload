@@ -1,11 +1,18 @@
-import type { ClientField, FieldWithPathClient, FormState } from 'payload'
+import type { ClientField, FormState, SanitizedFieldPermissions } from 'payload'
 
-import { fieldAffectsData, fieldHasSubFields, fieldIsHiddenOrDisabled } from 'payload/shared'
+import {
+  fieldAffectsData,
+  fieldHasSubFields,
+  fieldIsHiddenOrDisabled,
+  getFieldPermissions,
+} from 'payload/shared'
 
 import { createNestedClientFieldPath } from '../../forms/Form/createNestedClientFieldPath.js'
 import { combineFieldLabel } from '../../utilities/combineFieldLabel.js'
 
 export type SelectedField = {
+  field: ClientField
+  fieldPermissions: SanitizedFieldPermissions
   path: string
 }
 
@@ -27,13 +34,21 @@ export const reduceFieldOptions = ({
   fields,
   formState,
   labelPrefix = null,
+  parentPath = '',
   path = '',
+  permissions,
 }: {
-  fields: ClientField[]
-  formState?: FormState
-  labelPrefix?: React.ReactNode
-  path?: string
-}): { Label: React.ReactNode; value: FieldWithPathClient }[] => {
+  readonly fields: ClientField[]
+  readonly formState?: FormState
+  readonly labelPrefix?: React.ReactNode
+  readonly parentPath?: string
+  readonly path?: string
+  readonly permissions:
+    | {
+        [fieldName: string]: SanitizedFieldPermissions
+      }
+    | SanitizedFieldPermissions
+}): FieldOption[] => {
   if (!fields) {
     return []
   }
@@ -41,13 +56,28 @@ export const reduceFieldOptions = ({
   const CustomLabel = formState?.[path]?.customComponents?.Label
 
   return fields?.reduce((fieldsToUse, field) => {
+    const {
+      operation: hasOperationPermission,
+      permissions: fieldPermissions,
+      read: hasReadPermission,
+    } = getFieldPermissions({
+      field,
+      operation: 'update',
+      parentName: parentPath?.includes('.')
+        ? parentPath.split('.')[parentPath.split('.').length - 1]
+        : parentPath,
+      permissions,
+    })
+
     // escape for a variety of reasons, include ui fields as they have `name`.
     if (
       (fieldAffectsData(field) || field.type === 'ui') &&
       (field.admin?.disableBulkEdit ||
         field.unique ||
         fieldIsHiddenOrDisabled(field) ||
-        ('readOnly' in field && field.readOnly))
+        ('readOnly' in field && field.readOnly) ||
+        !hasOperationPermission ||
+        !hasReadPermission)
     ) {
       return fieldsToUse
     }
@@ -58,7 +88,9 @@ export const reduceFieldOptions = ({
         ...reduceFieldOptions({
           fields: field.fields,
           labelPrefix: combineFieldLabel({ CustomLabel, field, prefix: labelPrefix }),
+          parentPath: path,
           path: createNestedClientFieldPath(path, field),
+          permissions: fieldPermissions,
         }),
       ]
     }
@@ -74,7 +106,9 @@ export const reduceFieldOptions = ({
               ...reduceFieldOptions({
                 fields: tab.fields,
                 labelPrefix,
+                parentPath: path,
                 path: isNamedTab ? createNestedClientFieldPath(path, field) : path,
+                permissions: fieldPermissions,
               }),
             ]
           }
@@ -82,10 +116,11 @@ export const reduceFieldOptions = ({
       ]
     }
 
-    const formattedField = {
+    const formattedField: FieldOption = {
       label: combineFieldLabel({ CustomLabel, field, prefix: labelPrefix }),
       value: {
-        ...field,
+        field,
+        fieldPermissions,
         path: createNestedClientFieldPath(path, field),
       },
     }
