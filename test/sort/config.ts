@@ -8,8 +8,9 @@ import { devUser } from '../credentials.js'
 import { DefaultSortCollection } from './collections/DefaultSort/index.js'
 import { DraftsCollection } from './collections/Drafts/index.js'
 import { LocalizedCollection } from './collections/Localized/index.js'
+import { OrderableCollection } from './collections/Orderable/index.js'
+import { OrderableJoinCollection } from './collections/OrderableJoin/index.js'
 import { PostsCollection } from './collections/Posts/index.js'
-import { SortableCollection } from './collections/Sortable/index.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -19,7 +20,8 @@ export default buildConfigWithDefaults({
     DraftsCollection,
     DefaultSortCollection,
     LocalizedCollection,
-    SortableCollection,
+    OrderableCollection,
+    OrderableJoinCollection,
   ],
   admin: {
     importMap: {
@@ -71,13 +73,20 @@ export async function createData(
 }
 
 async function seedSortable(payload: Payload) {
-  await payload.delete({ collection: 'sortable', where: {} })
-  await createData(payload, 'sortable', [
-    { title: 'A' },
-    { title: 'B' },
-    { title: 'C' },
-    { title: 'D' },
+  await payload.delete({ collection: 'orderable', where: {} })
+  await payload.delete({ collection: 'orderable-join', where: {} })
+
+  const joinA = await payload.create({ collection: 'orderable-join', data: { title: 'Join A' } })
+
+  await createData(payload, 'orderable', [
+    { title: 'A', orderableField: joinA.id },
+    { title: 'B', orderableField: joinA.id },
+    { title: 'C', orderableField: joinA.id },
+    { title: 'D', orderableField: joinA.id },
   ])
+
+  await payload.create({ collection: 'orderable-join', data: { title: 'Join B' } })
+
   return new Response(JSON.stringify({ success: true }), {
     headers: { 'Content-Type': 'application/json' },
     status: 200,
