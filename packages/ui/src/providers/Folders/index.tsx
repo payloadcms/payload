@@ -44,14 +44,8 @@ export type FolderContextValue = {
     itemsToMove: PolymorphicRelationshipValue[]
     toFolderID?: number | string
   }) => Promise<void>
-  onItemClick: (args: {
-    event: React.MouseEvent
-    index: number
-  }) => Promise<{ doubleClicked: boolean }>
-  onItemKeyPress: (args: {
-    event: React.KeyboardEvent
-    index: number
-  }) => Promise<{ keyCode: string }>
+  onItemClick: (args: { event: React.MouseEvent; index: number }) => { doubleClicked: boolean }
+  onItemKeyPress: (args: { event: React.KeyboardEvent; index: number }) => { keyCode: string }
   populateFolderData: (args: { folderID: number | string }) => Promise<void>
   removeItems: (args: PolymorphicRelationshipValue[]) => Promise<void>
   selectedIndexes: Set<number>
@@ -74,8 +68,8 @@ const Context = React.createContext<FolderContextValue>({
   getSelectedItems: () => [],
   hasMoreDocuments: true,
   moveToFolder: () => Promise.resolve(undefined),
-  onItemClick: () => Promise.resolve({ doubleClicked: false }),
-  onItemKeyPress: () => Promise.resolve({ keyCode: '' }),
+  onItemClick: () => ({ doubleClicked: false }),
+  onItemKeyPress: () => ({ keyCode: '' }),
   populateFolderData: () => Promise.resolve(undefined),
   removeItems: () => Promise.resolve(undefined),
   selectedIndexes: new Set(),
