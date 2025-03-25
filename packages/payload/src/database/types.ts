@@ -1,5 +1,5 @@
 import type { TypeWithID } from '../collections/config/types.js'
-import type { CollectionSlug, GlobalSlug } from '../index.js'
+import type { BaseJob, CollectionSlug, GlobalSlug } from '../index.js'
 import type {
   Document,
   JoinQuery,
@@ -566,7 +566,7 @@ export type UpdateJobsArgs = {
     }
 )
 
-export type UpdateJobs = (args: UpdateJobsArgs) => Promise<Document[] | null>
+export type UpdateJobs = (args: UpdateJobsArgs) => Promise<BaseJob[] | null>
 
 export type UpsertArgs = {
   collection: CollectionSlug
