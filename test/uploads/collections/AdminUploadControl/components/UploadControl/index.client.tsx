@@ -18,11 +18,11 @@ export const UploadControl = () => {
 
   return (
     <div>
-      <Button id="server-rendered-upload-button" onClick={loadFromFile}>
+      <Button id="load-from-file-upload-button" onClick={loadFromFile}>
         Load from File
       </Button>
       <br />
-      <Button id="client-rendered-upload-button" onClick={loadFromUrl}>
+      <Button id="load-from-url-upload-button" onClick={loadFromUrl}>
         Load from URL
       </Button>
     </div>
