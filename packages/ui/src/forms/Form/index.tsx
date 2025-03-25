@@ -721,7 +721,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const classes = [className, baseClass].filter(Boolean).join(' ')
 
   const executeOnChange = useEffectEvent((submitted: boolean) => {
-    void queueTask(async () => {
+    queueTask(async () => {
       if (Array.isArray(onChange)) {
         let revalidatedFormState: FormState = contextRef.current.fields
 
@@ -758,7 +758,7 @@ export const Form: React.FC<FormProps> = (props) => {
   useDebouncedEffect(
     () => {
       if ((isFirstRenderRef.current || !dequal(fields, prevFields.current)) && modified) {
-        void executeOnChange(submitted)
+        executeOnChange(submitted)
       }
 
       prevFields.current = fields
