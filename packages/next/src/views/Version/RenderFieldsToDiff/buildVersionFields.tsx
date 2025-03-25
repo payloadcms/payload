@@ -75,8 +75,10 @@ export const buildVersionFields = ({
 } => {
   const versionFields: VersionField[] = []
   let fieldIndex = -1
+
   for (const field of fields) {
     fieldIndex++
+
     if (fieldIsID(field)) {
       continue
     }
