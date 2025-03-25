@@ -279,6 +279,7 @@ jobs:
           - admin-root
           - auth
           - auth-basic
+          - bulk-edit
           - joins
           - field-error-states
           - fields-relationship
@@ -308,6 +309,7 @@ jobs:
           - fields__collections__Text
           - fields__collections__UI
           - fields__collections__Upload
+          - query-presets
           - form-state
           - live-preview
           - localization

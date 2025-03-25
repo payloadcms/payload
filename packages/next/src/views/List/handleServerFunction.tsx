@@ -16,6 +16,7 @@ export const renderListHandler = async (args: {
   disableActions?: boolean
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
+  disableQueryPresets?: boolean
   documentDrawerSlug: string
   drawerSlug?: string
   enableRowSelections: boolean
@@ -30,6 +31,7 @@ export const renderListHandler = async (args: {
     disableActions,
     disableBulkDelete,
     disableBulkEdit,
+    disableQueryPresets,
     drawerSlug,
     enableRowSelections,
     overrideEntityVisibility,
@@ -135,6 +137,7 @@ export const renderListHandler = async (args: {
     disableActions,
     disableBulkDelete,
     disableBulkEdit,
+    disableQueryPresets,
     drawerSlug,
     enableRowSelections,
     i18n,

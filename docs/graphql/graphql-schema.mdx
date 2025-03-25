@@ -60,14 +60,15 @@ type Collection1 {
 }
 ```
 
-The above example outputs all your definitions to a file relative from your payload config as `./graphql/schema.graphql`. By default, the file will be output to your current working directory as `schema.graphql`.
+The above example outputs all your definitions to a file relative from your Payload config as `./graphql/schema.graphql`. By default, the file will be output to your current working directory as `schema.graphql`.
 
 ### Adding an npm script
 
 <Banner type="warning">
   **Important**
 
-  Payload needs to be able to find your config to generate your GraphQL schema.
+Payload needs to be able to find your config to generate your GraphQL schema.
+
 </Banner>
 
 Payload will automatically try and locate your config, but might not always be able to find it. For example, if you are working in a `/src` directory or similar, you need to tell Payload where to find your config manually by using an environment variable.

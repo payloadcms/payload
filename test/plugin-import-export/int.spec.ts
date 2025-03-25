@@ -3,12 +3,15 @@ import type { CollectionSlug, Payload } from 'payload'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { readCSV, readJSON } from './helpers.js'
 import { richTextData } from './seed/richTextData.js'
 
 let payload: Payload
+let restClient: NextRESTClient
 let user: any
 
 const filename = fileURLToPath(import.meta.url)
@@ -16,7 +19,7 @@ const dirname = path.dirname(filename)
 
 describe('@payloadcms/plugin-import-export', () => {
   beforeAll(async () => {
-    ;({ payload } = (await initPayloadInt(dirname)) as { payload: Payload })
+    ;({ payload, restClient } = await initPayloadInt(dirname))
     user = await payload.login({
       collection: 'users',
       data: {
@@ -30,6 +33,25 @@ describe('@payloadcms/plugin-import-export', () => {
     if (typeof payload.db.destroy === 'function') {
       await payload.db.destroy()
     }
+  })
+
+  describe('graphql', () => {
+    it('should not break graphql', async () => {
+      const query = `query {
+        __schema {
+          queryType {
+            name
+          }
+        }
+      }`
+      const response = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({ query }),
+        })
+        .then((res) => res.json())
+
+      expect(response.error).toBeUndefined()
+    })
   })
 
   describe('exports', () => {
@@ -64,6 +86,53 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].group_array_0_field1).toStrictEqual('test')
       expect(data[0].createdAt).toBeDefined()
       expect(data[0].updatedAt).toBeDefined()
+    })
+
+    it('should create a file for collection csv with draft data', async () => {
+      const draftPage = await payload.create({
+        collection: 'pages',
+        user,
+        data: {
+          title: 'Draft Page',
+          _status: 'published',
+        },
+      })
+
+      await payload.update({
+        collection: 'pages',
+        id: draftPage.id,
+        data: {
+          title: 'Draft Page Updated',
+          _status: 'draft',
+        },
+      })
+
+      let doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          fields: ['id', 'title', '_status'],
+          locale: 'en',
+          format: 'csv',
+          where: {
+            title: { contains: 'Draft ' },
+          },
+        },
+      })
+
+      doc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(doc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', doc.filename as string)
+      const data = await readCSV(expectedPath)
+
+      expect(data[0].id).toBeDefined()
+      expect(data[0].title).toStrictEqual('Draft Page Updated')
+      expect(data[0]._status).toStrictEqual('draft')
     })
 
     it('should create a file for collection csv from one locale', async () => {

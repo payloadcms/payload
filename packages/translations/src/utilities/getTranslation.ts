@@ -1,9 +1,10 @@
 import type { JSX } from 'react'
 
-import type { I18n, TFunction } from '../types.js'
+import type { I18n, I18nClient, TFunction } from '../types.js'
 
 type LabelType =
-  | (({ t }: { t: TFunction }) => string)
+  | (() => JSX.Element)
+  | ((args: { i18n: I18nClient; t: TFunction }) => string)
   | JSX.Element
   | Record<string, string>
   | string
@@ -34,7 +35,9 @@ export const getTranslation = <T extends LabelType>(
   }
 
   if (typeof label === 'function') {
-    return label({ t: i18n.t }) as unknown as T extends JSX.Element ? JSX.Element : string
+    return label({ i18n: undefined as any, t: i18n.t }) as unknown as T extends JSX.Element
+      ? JSX.Element
+      : string
   }
 
   // If it's a React Element or string, then we should just pass it through

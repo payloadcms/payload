@@ -18,7 +18,9 @@ export const addListFilter = async ({
   replaceExisting?: boolean
   skipValueInput?: boolean
   value?: string
-}): Promise<Locator> => {
+}): Promise<{
+  whereBuilder: Locator
+}> => {
   await openListFilters(page, {})
 
   const whereBuilder = page.locator('.where-builder')
@@ -53,5 +55,5 @@ export const addListFilter = async ({
     }
   }
 
-  return whereBuilder
+  return { whereBuilder }
 }
