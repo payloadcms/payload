@@ -10,33 +10,31 @@ export const defaultUpdateJobs: UpdateJobs = async function updateMany(
 ) {
   const updatedJobs: BaseJob[] | null = []
 
-  const jobsToUpdate = id
-    ? [
-        await this.findOne({
-          collection: jobsCollectionSlug,
-          req,
-          where,
-        }),
-      ]
-    : (
-        await this.find({
-          collection: jobsCollectionSlug,
-          limit,
-          pagination: false,
-          req,
-          where,
-        })
-      )?.docs
+  const jobsToUpdate: BaseJob[] = (
+    id
+      ? [
+          await this.findOne({
+            collection: jobsCollectionSlug,
+            req,
+            where: { id: { equals: id } },
+          }),
+        ]
+      : (
+          await this.find({
+            collection: jobsCollectionSlug,
+            limit,
+            pagination: false,
+            req,
+            where,
+          })
+        ).docs
+  ).filter(Boolean) as BaseJob[]
 
   if (!jobsToUpdate) {
     return null
   }
 
   for (const job of jobsToUpdate) {
-    if (!job) {
-      continue
-    }
-
     const updateData = {
       ...job,
       ...data,
