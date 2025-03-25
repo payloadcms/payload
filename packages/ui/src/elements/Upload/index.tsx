@@ -14,6 +14,7 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { useUploadControls } from '../../providers/UploadControls/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { Button } from '../Button/index.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
@@ -95,6 +96,8 @@ export const Upload: React.FC<UploadProps> = (props) => {
   const { collectionSlug, customActions, initialState, onChange, uploadConfig } = props
   const { getDocumentSlots } = useServerFunctions()
   const [documentSlots, setDocumentSlots] = React.useState<DocumentSlots>({})
+  const { setUploadControlFile, setUploadControlFileUrl, uploadControlFile, uploadControlFileUrl } =
+    useUploadControls()
 
   const {
     config: {
@@ -133,12 +136,14 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
       setValue(newFile)
       setShowUrlInput(false)
+      setUploadControlFileUrl('')
+      setUploadControlFile(null)
 
       if (typeof onChange === 'function') {
         onChange(newFile)
       }
     },
-    [onChange, setValue],
+    [onChange, setValue, setUploadControlFile, setUploadControlFileUrl],
   )
 
   const renameFile = (fileToChange: File, newName: string): File => {
@@ -177,7 +182,9 @@ export const Upload: React.FC<UploadProps> = (props) => {
     setFileUrl('')
     resetUploadEdits()
     setShowUrlInput(false)
-  }, [handleFileChange, resetUploadEdits])
+    setUploadControlFileUrl('')
+    setUploadControlFile(null)
+  }, [handleFileChange, resetUploadEdits, setUploadControlFile, setUploadControlFileUrl])
 
   const onEditsSave = useCallback(
     (args: UploadEdits) => {
@@ -187,7 +194,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
     [setModified, updateUploadEdits],
   )
 
-  const handleUrlSubmit = async () => {
+  const handleUrlSubmit = useCallback(async () => {
     if (!fileUrl || uploadConfig?.pasteURL === false) {
       return
     }
@@ -236,7 +243,17 @@ export const Upload: React.FC<UploadProps> = (props) => {
       toast.error('The provided URL is not allowed.')
       setUploadStatus('failed')
     }
-  }
+  }, [
+    fileUrl,
+    uploadConfig,
+    setUploadStatus,
+    handleFileChange,
+    useServerSideFetch,
+    collectionSlug,
+    id,
+    serverURL,
+    api,
+  ])
 
   useEffect(() => {
     if (initialState?.file?.value instanceof File) {
@@ -279,6 +296,27 @@ export const Upload: React.FC<UploadProps> = (props) => {
       setDocumentSlots(slots)
     })()
   }, [getDocumentSlots, collectionSlug])
+
+  useEffect(() => {
+    const handleControlFileUrl = async () => {
+      if (uploadControlFileUrl) {
+        setFileUrl(uploadControlFileUrl)
+        await handleUrlSubmit()
+      }
+    }
+
+    void handleControlFileUrl()
+  }, [uploadControlFileUrl, handleUrlSubmit])
+
+  useEffect(() => {
+    const handleControlFile = () => {
+      if (uploadControlFile) {
+        handleFileChange(uploadControlFile)
+      }
+    }
+
+    void handleControlFile()
+  }, [uploadControlFile, handleFileChange])
 
   return (
     <div className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}>
@@ -333,6 +371,8 @@ export const Upload: React.FC<UploadProps> = (props) => {
                         buttonStyle="pill"
                         onClick={() => {
                           setShowUrlInput(true)
+                          setUploadControlFileUrl('')
+                          setUploadControlFile(null)
                         }}
                         size="small"
                       >
@@ -384,6 +424,8 @@ export const Upload: React.FC<UploadProps> = (props) => {
                 iconStyle="with-border"
                 onClick={() => {
                   setShowUrlInput(false)
+                  setUploadControlFileUrl('')
+                  setUploadControlFile(null)
                 }}
                 round
                 tooltip={t('general:cancel')}
