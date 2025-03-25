@@ -10,6 +10,7 @@ import type { PolymorphicRelationshipValue } from '../types.js'
 import { DocumentIcon } from '../../../icons/Document/index.js'
 import { FolderIcon } from '../../../icons/Folder/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
+import { useFolder } from '../../../providers/Folders/index.js'
 import { DraggableTableRow } from '../DraggableTableRow/index.js'
 import { FolderFileCard } from '../FolderFileCard/index.js'
 import { FolderFileGrid } from '../FolderFileGrid/index.js'
@@ -18,46 +19,8 @@ import './index.scss'
 
 const baseClass = 'display-items'
 
-const getShiftSelection = ({
-  selectFromIndex,
-  selectToIndex,
-}: {
-  selectFromIndex: number
-  selectToIndex: number
-}): Set<number> => {
-  if (selectFromIndex === null || selectFromIndex === undefined) {
-    return new Set([selectToIndex])
-  }
-
-  const start = Math.min(selectToIndex, selectFromIndex)
-  const end = Math.max(selectToIndex, selectFromIndex)
-  const rangeSelection = new Set(
-    Array.from({ length: Math.max(start, end) + 1 }, (_, i) => i).filter((index) => {
-      return index >= start && index <= end
-    }),
-  )
-  return rangeSelection
-}
-
-const getMetaSelection = ({
-  selectedIndexes,
-  toggleIndex,
-}: {
-  selectedIndexes: Set<number>
-  toggleIndex: number
-}): Set<number> => {
-  if (selectedIndexes.has(toggleIndex)) {
-    selectedIndexes.delete(toggleIndex)
-  } else {
-    selectedIndexes.add(toggleIndex)
-  }
-  return selectedIndexes
-}
-
 type ItemKey = `${string}-${number | string}`
-type RowItemEventData = { id: number | string; index: number; relationTo: string }
 type Props = {
-  readonly allowMultiSelection?: boolean
   readonly disabledItems?: PolymorphicRelationshipValue[]
   readonly isMovingItems?: boolean
   readonly RenderDocumentActionGroup?: (args: {
@@ -72,44 +35,29 @@ type Props = {
   readonly viewType: 'grid' | 'list'
 } & Pick<
   FolderContextValue,
-  | 'collectionUseAsTitles'
-  | 'documents'
-  | 'folderCollectionSlug'
-  | 'lastSelectedIndex'
-  | 'selectedIndexes'
-  | 'setFolderID'
-  | 'setLastSelectedIndex'
-  | 'setSelectedIndexes'
-  | 'subfolders'
+  'collectionUseAsTitles' | 'documents' | 'folderCollectionSlug' | 'setFolderID' | 'subfolders'
 >
+
 export function DisplayItems(props: Props) {
   const {
-    allowMultiSelection = true,
     collectionUseAsTitles,
     disabledItems = [],
     documents = [],
     folderCollectionSlug,
     isMovingItems = false,
-    lastSelectedIndex,
     RenderDocumentActionGroup,
     RenderSubfolderActionGroup,
-    selectedIndexes,
     selectedItems = [],
     setFolderID,
-    setLastSelectedIndex,
-    setSelectedIndexes,
     subfolders = [],
     viewType,
   } = props
-  // move all of these to props
+
   const router = useRouter()
   const { config } = useConfig()
-
-  const [focusedRowIndex, setFocusedRowIndex] = React.useState<number>()
+  const { focusedRowIndex, onItemClick, onItemKeyPress, selectedIndexes } = useFolder()
 
   const totalCount = subfolders.length + documents.length || 0
-
-  const lastClickTime = React.useRef(0)
 
   const selectedItemKeys = new Set<`${string}-${number | string}`>(
     selectedItems.reduce((acc, item) => {
@@ -144,183 +92,38 @@ export function DisplayItems(props: Props) {
     [setFolderID, folderCollectionSlug, router, config.routes.admin],
   )
 
-  const onItemKeyPress = React.useCallback(
+  const handleItemKeyPress = React.useCallback(
     async ({
-      event: e,
+      event,
       item,
     }: {
       event: React.KeyboardEvent
-      item: RowItemEventData
+      item: { id: number | string; index: number; relationTo: string }
     }): Promise<void> => {
-      const { index: itemIndex } = item
-
-      const isShiftPressed = e.shiftKey
-      const isCtrlPressed = e.ctrlKey || e.metaKey
-      let newSelectedIndexes: Set<number> = selectedIndexes
-      const keyCode = e.code
-
-      switch (e.code) {
-        case 'ArrowDown': {
-          e.preventDefault()
-          const nextIndex = Math.min(itemIndex + 1, totalCount - 1)
-          setFocusedRowIndex(nextIndex)
-
-          if (isCtrlPressed) {
-            break
-          }
-
-          if (allowMultiSelection && isShiftPressed) {
-            newSelectedIndexes = getShiftSelection({
-              selectFromIndex: Math.min(lastSelectedIndex, totalCount),
-              selectToIndex: Math.min(nextIndex, totalCount),
-            })
-          } else {
-            setLastSelectedIndex(nextIndex)
-            newSelectedIndexes = new Set([nextIndex])
-          }
-          break
-        }
-        case 'ArrowUp': {
-          e.preventDefault()
-          const prevIndex = Math.max(itemIndex - 1, 0)
-          setFocusedRowIndex(prevIndex)
-
-          if (isCtrlPressed) {
-            break
-          }
-
-          if (allowMultiSelection && isShiftPressed) {
-            newSelectedIndexes = getShiftSelection({
-              selectFromIndex: lastSelectedIndex,
-              selectToIndex: prevIndex,
-            })
-          } else {
-            setLastSelectedIndex(prevIndex)
-            newSelectedIndexes = new Set([prevIndex])
-          }
-          break
-        }
-        case 'Enter': {
-          if (selectedIndexes.size === 1) {
-            newSelectedIndexes = new Set([])
-            setFocusedRowIndex(undefined)
-          }
-          break
-        }
-        case 'Escape': {
-          setFocusedRowIndex(undefined)
-          setSelectedIndexes(new Set([]))
-          newSelectedIndexes = new Set([])
-          break
-        }
-        case 'KeyA': {
-          if (allowMultiSelection && isCtrlPressed) {
-            e.preventDefault()
-            setFocusedRowIndex(totalCount - 1)
-            newSelectedIndexes = new Set(Array.from({ length: totalCount }, (_, i) => i))
-          }
-          break
-        }
-        case 'Space': {
-          if (allowMultiSelection && isShiftPressed) {
-            e.preventDefault()
-            newSelectedIndexes = getMetaSelection({
-              selectedIndexes: newSelectedIndexes,
-              toggleIndex: itemIndex,
-            })
-            setLastSelectedIndex(itemIndex)
-          }
-          break
-        }
-        case 'Tab': {
-          if (allowMultiSelection && isShiftPressed) {
-            const prevIndex = itemIndex - 1
-            if (prevIndex < 0 && newSelectedIndexes.size > 0) {
-              setFocusedRowIndex(prevIndex)
-            }
-          } else {
-            const nextIndex = itemIndex + 1
-            if (nextIndex === totalCount && newSelectedIndexes.size > 0) {
-              setFocusedRowIndex(totalCount - 1)
-            }
-          }
-          break
-        }
-      }
-
-      setSelectedIndexes(newSelectedIndexes)
+      const { keyCode } = await onItemKeyPress({ event, index: item.index })
 
       if (selectedIndexes.size === 1 && keyCode === 'Enter') {
         await navigateAfterClick({ collectionSlug: item.relationTo, docID: item.id })
       }
     },
-    [
-      lastSelectedIndex,
-      totalCount,
-      setSelectedIndexes,
-      setLastSelectedIndex,
-      selectedIndexes,
-      navigateAfterClick,
-      allowMultiSelection,
-    ],
+    [onItemKeyPress, selectedIndexes, navigateAfterClick],
   )
 
-  const onItemClick = React.useCallback(
-    async ({ event, item }: { event: React.MouseEvent; item: RowItemEventData }): Promise<void> => {
-      const { index: itemIndex } = item
-
-      event.preventDefault()
-
-      let doubleClicked: boolean = false
-      const isCtrlPressed = event.ctrlKey || event.metaKey
-      const isShiftPressed = event.shiftKey
-      let newSelectedIndexes = new Set(selectedIndexes)
-
-      if (allowMultiSelection && isCtrlPressed) {
-        newSelectedIndexes = getMetaSelection({
-          selectedIndexes: newSelectedIndexes,
-          toggleIndex: itemIndex,
-        })
-      } else if (allowMultiSelection && isShiftPressed && lastSelectedIndex !== undefined) {
-        newSelectedIndexes = getShiftSelection({
-          selectFromIndex: lastSelectedIndex,
-          selectToIndex: itemIndex,
-        })
-      } else if (allowMultiSelection && event.type === 'pointermove') {
-        // on drag start of an unselected item
-        if (!selectedIndexes.has(itemIndex)) {
-          newSelectedIndexes = new Set([itemIndex])
-        }
-        setLastSelectedIndex(itemIndex)
-      } else {
-        // Normal click - select single item
-        newSelectedIndexes = new Set([itemIndex])
-        const now = Date.now()
-        doubleClicked = now - lastClickTime.current < 400 && lastSelectedIndex === itemIndex
-        lastClickTime.current = now
-        setLastSelectedIndex(itemIndex)
-      }
-
-      if (newSelectedIndexes.size === 0) {
-        setFocusedRowIndex(undefined)
-      } else {
-        setFocusedRowIndex(itemIndex)
-      }
-      setSelectedIndexes(newSelectedIndexes)
+  const handleItemClick = React.useCallback(
+    async ({
+      event,
+      item,
+    }: {
+      event: React.MouseEvent
+      item: { id: number | string; index: number; relationTo: string }
+    }): Promise<void> => {
+      const { doubleClicked } = await onItemClick({ event, index: item.index })
 
       if (doubleClicked) {
         await navigateAfterClick({ collectionSlug: item.relationTo, docID: item.id })
       }
     },
-    [
-      lastSelectedIndex,
-      selectedIndexes,
-      setSelectedIndexes,
-      setFocusedRowIndex,
-      setLastSelectedIndex,
-      navigateAfterClick,
-      allowMultiSelection,
-    ],
+    [onItemClick, navigateAfterClick],
   )
 
   return (
@@ -351,13 +154,13 @@ export function DisplayItems(props: Props) {
                       itemKey={itemKey}
                       key={itemKey}
                       onClick={(event) => {
-                        void onItemClick({
+                        void handleItemClick({
                           event,
                           item: { id: subfolderID, index: subfolderIndex, relationTo },
                         })
                       }}
                       onKeyDown={(event) => {
-                        void onItemKeyPress({
+                        void handleItemKeyPress({
                           event,
                           item: { id: subfolderID, index: subfolderIndex, relationTo },
                         })
@@ -408,13 +211,13 @@ export function DisplayItems(props: Props) {
                         itemKey={itemKey}
                         key={itemKey}
                         onClick={(event) => {
-                          void onItemClick({
+                          void handleItemClick({
                             event,
                             item: { id: documentID, index: adjustedIndex, relationTo },
                           })
                         }}
                         onKeyDown={(event) => {
-                          void onItemKeyPress({
+                          void handleItemKeyPress({
                             event,
                             item: { id: documentID, index: adjustedIndex, relationTo },
                           })
@@ -483,13 +286,13 @@ export function DisplayItems(props: Props) {
                     itemKey={itemKey}
                     key={itemKey}
                     onClick={(event) => {
-                      void onItemClick({
+                      void handleItemClick({
                         event,
                         item: { id: subfolderID, index: subfolderIndex, relationTo },
                       })
                     }}
                     onKeyDown={(event) => {
-                      void onItemKeyPress({
+                      void handleItemKeyPress({
                         event,
                         item: { id: subfolderID, index: subfolderIndex, relationTo },
                       })
@@ -534,13 +337,13 @@ export function DisplayItems(props: Props) {
                     itemKey={itemKey}
                     key={itemKey}
                     onClick={(event) => {
-                      void onItemClick({
+                      void handleItemClick({
                         event,
                         item: { id: documentID, index: adjustedIndex, relationTo },
                       })
                     }}
                     onKeyDown={(event) => {
-                      void onItemKeyPress({
+                      void handleItemKeyPress({
                         event,
                         item: { id: documentID, index: adjustedIndex, relationTo },
                       })

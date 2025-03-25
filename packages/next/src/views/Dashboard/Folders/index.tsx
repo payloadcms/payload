@@ -10,7 +10,8 @@ import { FolderProvider, FoldersAndDocuments, ListQueryProvider } from '@payload
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { type groupNavItems, sanitizeID } from '@payloadcms/ui/shared'
 import { redirect } from 'next/navigation.js'
-import { getFolderData, type GetFolderDataResult, isNumber } from 'payload/shared'
+import { getFolderData } from 'payload'
+import { type GetFolderDataResult, isNumber } from 'payload/shared'
 
 import './index.scss'
 

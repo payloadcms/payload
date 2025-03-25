@@ -38,6 +38,7 @@ export type ListControlsProps = {
    */
   readonly disableBulkEdit?: boolean
   readonly enableColumns?: boolean
+  readonly enableFilters?: boolean
   readonly enableSort?: boolean
   readonly handleSearchChange?: (search: string) => void
   readonly handleSortChange?: (sort: string) => void
@@ -58,6 +59,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     collectionConfig,
     collectionSlug,
     enableColumns = true,
+    enableFilters = true,
     enableSort = false,
     listMenuItems,
     renderedFilters,
@@ -166,16 +168,18 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
                 {t('general:columns')}
               </Pill>
             )}
-            <Pill
-              aria-controls={`${baseClass}-where`}
-              aria-expanded={visibleDrawer === 'where'}
-              className={`${baseClass}__toggle-where`}
-              icon={<ChevronIcon direction={visibleDrawer === 'where' ? 'up' : 'down'} />}
-              onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
-              pillStyle="light"
-            >
-              {t('general:filters')}
-            </Pill>
+            {enableFilters && (
+              <Pill
+                aria-controls={`${baseClass}-where`}
+                aria-expanded={visibleDrawer === 'where'}
+                className={`${baseClass}__toggle-where`}
+                icon={<ChevronIcon direction={visibleDrawer === 'where' ? 'up' : 'down'} />}
+                onClick={() => setVisibleDrawer(visibleDrawer !== 'where' ? 'where' : undefined)}
+                pillStyle="light"
+              >
+                {t('general:filters')}
+              </Pill>
+            )}
             {enableSort && (
               <Pill
                 aria-controls={`${baseClass}-sort`}
@@ -211,19 +215,21 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
           <ColumnSelector collectionSlug={collectionConfig.slug} />
         </AnimateHeight>
       )}
-      <AnimateHeight
-        className={`${baseClass}__where`}
-        height={visibleDrawer === 'where' ? 'auto' : 0}
-        id={`${baseClass}-where`}
-      >
-        <WhereBuilder
-          collectionPluralLabel={collectionConfig?.labels?.plural}
-          collectionSlug={collectionConfig.slug}
-          fields={collectionConfig?.fields}
-          renderedFilters={renderedFilters}
-          resolvedFilterOptions={resolvedFilterOptions}
-        />
-      </AnimateHeight>
+      {enableFilters && (
+        <AnimateHeight
+          className={`${baseClass}__where`}
+          height={visibleDrawer === 'where' ? 'auto' : 0}
+          id={`${baseClass}-where`}
+        >
+          <WhereBuilder
+            collectionPluralLabel={collectionConfig?.labels?.plural}
+            collectionSlug={collectionConfig.slug}
+            fields={collectionConfig?.fields}
+            renderedFilters={renderedFilters}
+            resolvedFilterOptions={resolvedFilterOptions}
+          />
+        </AnimateHeight>
+      )}
       {enableSort && (
         <AnimateHeight
           className={`${baseClass}__sort`}

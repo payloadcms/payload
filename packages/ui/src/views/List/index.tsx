@@ -178,6 +178,7 @@ export function DefaultListView(props: ListViewClientProps) {
                 openBulkUpload={openBulkUpload}
                 smallBreak={smallBreak}
                 t={t}
+                viewType="list"
               />
               <ListControls
                 beforeActions={

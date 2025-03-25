@@ -1,22 +1,23 @@
 import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
-import type {
-  AdminViewClientProps,
-  AdminViewServerPropsOnly,
-  ImportMap,
-  SanitizedConfig,
-} from 'payload'
 
+import { FolderProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { notFound, redirect } from 'next/navigation.js'
-import { formatAdminURL } from 'payload/shared'
-import React, { Fragment } from 'react'
+import {
+  type AdminViewClientProps,
+  type AdminViewServerPropsOnly,
+  getFolderData,
+  type ImportMap,
+  type SanitizedConfig,
+} from 'payload'
+import { formatAdminURL, isNumber } from 'payload/shared'
+import React from 'react'
 
-import { DefaultTemplate } from '../../templates/Default/index.js'
-import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { initPage } from '../../utilities/initPage/index.js'
-import { getViewFromConfig } from './getViewFromConfig.js'
+import { getRouteData } from './getRouteData.js'
+import { RootViewComponent } from './RootViewComponent.js'
 
 export type GenerateViewMetadata = (args: {
   config: SanitizedConfig
@@ -64,12 +65,13 @@ export const RootPage = async ({
   const {
     DefaultView,
     documentSubViewType,
+    folderID,
     initPageOptions,
     serverProps,
     templateClassName,
     templateType,
     viewType,
-  } = getViewFromConfig({
+  } = getRouteData({
     adminRoute,
     config,
     currentRoute,
@@ -89,6 +91,10 @@ export const RootPage = async ({
       })
       ?.then((doc) => !!doc))
 
+  /**
+   * This function is responsible for handling the case where the view is not found.
+   * The current route did not match any default views or custom route views.
+   */
   if (!DefaultView?.Component && !DefaultView?.payloadComponent) {
     if (initPageResult?.req?.user) {
       notFound()
@@ -141,6 +147,7 @@ export const RootPage = async ({
       ...serverProps,
       clientConfig,
       docID: initPageResult?.docID,
+      folderID,
       i18n: initPageResult?.req.i18n,
       importMap,
       initPageResult,
@@ -150,37 +157,61 @@ export const RootPage = async ({
     } satisfies AdminViewServerPropsOnly,
   })
 
-  return (
-    <Fragment>
-      {!templateType && <Fragment>{RenderedView}</Fragment>}
-      {templateType === 'minimal' && (
-        <MinimalTemplate className={templateClassName}>{RenderedView}</MinimalTemplate>
-      )}
-      {templateType === 'default' && (
-        <DefaultTemplate
-          collectionSlug={initPageResult?.collectionConfig?.slug}
-          docID={initPageResult?.docID}
+  if (viewType === 'collection-folders') {
+    const { breadcrumbs, hasMoreDocuments, items } = await getFolderData({
+      docLimit: searchParams?.limit ? parseInt(String(searchParams.limit), 10) : undefined,
+      folderID,
+      page: isNumber(searchParams?.page) ? parseInt(String(searchParams.page), 10) : 1,
+      payload: initPageResult?.req.payload,
+      search: typeof searchParams?.search === 'string' ? searchParams.search : undefined,
+    })
+
+    const resolvedFolderID = breadcrumbs[breadcrumbs.length - 1]?.root
+      ? undefined
+      : breadcrumbs[breadcrumbs.length - 1]?.id
+
+    if (
+      (resolvedFolderID && folderID && folderID !== String(resolvedFolderID)) ||
+      (folderID && !resolvedFolderID)
+    ) {
+      return redirect(config.routes.admin)
+    }
+
+    return (
+      <FolderProvider
+        initialData={{
+          breadcrumbs,
+          folderID,
+          hasMoreDocuments,
+          items,
+        }}
+      >
+        <RootViewComponent
           documentSubViewType={documentSubViewType}
-          globalSlug={initPageResult?.globalConfig?.slug}
-          i18n={initPageResult?.req.i18n}
-          locale={initPageResult?.locale}
+          initPageResult={initPageResult}
           params={params}
-          payload={initPageResult?.req.payload}
-          permissions={initPageResult?.permissions}
+          RenderedView={RenderedView}
           searchParams={searchParams}
-          user={initPageResult?.req.user}
-          viewActions={serverProps.viewActions}
+          serverProps={serverProps}
+          templateClassName={templateClassName}
+          templateType={templateType}
           viewType={viewType}
-          visibleEntities={{
-            // The reason we are not passing in initPageResult.visibleEntities directly is due to a "Cannot assign to read only property of object '#<Object>" error introduced in React 19
-            // which this caused as soon as initPageResult.visibleEntities is passed in
-            collections: initPageResult?.visibleEntities?.collections,
-            globals: initPageResult?.visibleEntities?.globals,
-          }}
-        >
-          {RenderedView}
-        </DefaultTemplate>
-      )}
-    </Fragment>
-  )
+        />
+      </FolderProvider>
+    )
+  } else {
+    return (
+      <RootViewComponent
+        documentSubViewType={documentSubViewType}
+        initPageResult={initPageResult}
+        params={params}
+        RenderedView={RenderedView}
+        searchParams={searchParams}
+        serverProps={serverProps}
+        templateClassName={templateClassName}
+        templateType={templateType}
+        viewType={viewType}
+      />
+    )
+  }
 }

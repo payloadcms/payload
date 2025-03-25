@@ -14,8 +14,8 @@ import { DrawerContentContainer } from '../../../DrawerContentContainer/index.js
 import { Translation } from '../../../Translation/index.js'
 import { FolderBreadcrumbs } from '../../Breadcrumbs/index.js'
 import { DisplayItems } from '../../DisplayItems/index.js'
-import './index.scss'
 import { DrawerWithFolderContext } from '../DrawerWithFolderContext.js'
+import './index.scss'
 
 const baseClass = 'move-folder-drawer'
 const confirmModalSlug = 'move-folder-drawer-confirm'
@@ -57,8 +57,8 @@ export const MoveToFolderDrawer = DrawerWithFolderContext<Props>((props) => {
     [
       folderContext?.breadcrumbs,
       folderContext?.folderID,
-      folderContext.selectedIndexes,
-      folderContext.subfolders,
+      folderContext?.selectedIndexes,
+      folderContext?.subfolders,
     ],
   )
 
@@ -83,16 +83,11 @@ export const MoveToFolderDrawer = DrawerWithFolderContext<Props>((props) => {
 
         <div>
           <DisplayItems
-            allowMultiSelection={false}
             collectionUseAsTitles={folderContext.collectionUseAsTitles}
             disabledItems={itemsToMove}
             folderCollectionSlug={folderContext.folderCollectionSlug}
-            lastSelectedIndex={folderContext.lastSelectedIndex}
-            selectedIndexes={folderContext.selectedIndexes}
             selectedItems={folderContext.getSelectedItems()}
             setFolderID={folderContext.setFolderID}
-            setLastSelectedIndex={folderContext.setLastSelectedIndex}
-            setSelectedIndexes={folderContext.setSelectedIndexes}
             subfolders={folderContext.subfolders}
             viewType="grid"
           />

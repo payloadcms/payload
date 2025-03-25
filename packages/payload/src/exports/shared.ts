@@ -47,16 +47,13 @@ export type {
   Subfolder,
 } from '../folders/types.js'
 
-export { buildFolderBreadcrumbs } from '../folders/utils/buildFolderBreadcrumbs.js'
-export { getFolderData } from '../folders/utils/getFolderData.js'
-export { getFolderDocuments } from '../folders/utils/getFolderDocuments.js'
-export { getFolderSubfolders } from '../folders/utils/getFolderSubfolders.js'
-
 export { validOperators, validOperatorSet } from '../types/constants.js'
 
 export { formatFilesize } from '../uploads/formatFilesize.js'
 
 export { isImage } from '../uploads/isImage.js'
+export { combineWhereConstraints } from '../utilities/combineWhereConstraints.js'
+
 export {
   deepCopyObject,
   deepCopyObjectComplex,

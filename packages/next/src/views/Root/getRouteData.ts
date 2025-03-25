@@ -14,6 +14,7 @@ import { formatAdminURL } from 'payload/shared'
 import type { initPage } from '../../utilities/initPage/index.js'
 
 import { Account } from '../Account/index.js'
+import { CollectionFolderView } from '../CollectionFolders/index.js'
 import { CreateFirstUserView } from '../CreateFirstUser/index.js'
 import { Dashboard } from '../Dashboard/index.js'
 import { Document as DocumentView } from '../Document/index.js'
@@ -56,7 +57,7 @@ const oneSegmentViews: OneSegmentViews = {
   unauthorized: UnauthorizedView,
 }
 
-type GetViewFromConfigArgs = {
+type GetRouteDataArgs = {
   adminRoute: string
   config: SanitizedConfig
   currentRoute: string
@@ -67,9 +68,10 @@ type GetViewFromConfigArgs = {
   segments: string[]
 }
 
-type GetViewFromConfigResult = {
+type GetRouteDataResult = {
   DefaultView: ViewFromConfig
   documentSubViewType?: DocumentSubViewTypes
+  folderID?: string
   initPageOptions: Parameters<typeof initPage>[0]
   serverProps: ServerPropsFromView
   templateClassName: string
@@ -77,19 +79,20 @@ type GetViewFromConfigResult = {
   viewType?: ViewTypes
 }
 
-export const getViewFromConfig = ({
+export const getRouteData = ({
   adminRoute,
   config,
   currentRoute,
   importMap,
   searchParams,
   segments,
-}: GetViewFromConfigArgs): GetViewFromConfigResult => {
+}: GetRouteDataArgs): GetRouteDataResult => {
   let ViewToRender: ViewFromConfig = null
   let templateClassName: string
   let templateType: 'default' | 'minimal' | undefined
   let documentSubViewType: DocumentSubViewTypes
   let viewType: ViewTypes
+  let folderID: string
 
   const initPageOptions: Parameters<typeof initPage>[0] = {
     config,
@@ -229,31 +232,46 @@ export const getViewFromConfig = ({
         templateType = 'minimal'
         viewType = 'verify'
       } else if (isCollection && matchedCollection) {
-        // Custom Views
-        // --> /collections/:collectionSlug/:id
-        // --> /collections/:collectionSlug/:id/api
-        // --> /collections/:collectionSlug/:id/preview
-        // --> /collections/:collectionSlug/:id/versions
-        // --> /collections/:collectionSlug/:id/versions/:versionID
+        if (segmentThree === 'folders') {
+          if (Object.keys(config.folders.collections).includes(matchedCollection.slug)) {
+            // Collection Folder Views
+            // --> /collections/:collectionSlug/folders
+            // --> /collections/:collectionSlug/folders/:folderID
+            ViewToRender = {
+              Component: CollectionFolderView,
+            }
 
-        ViewToRender = {
-          Component: DocumentView,
+            templateClassName = `collection-folders`
+            templateType = 'default'
+            viewType = 'collection-folders'
+            folderID = segmentFour
+          }
+        } else {
+          // Collection Edit Views
+          // --> /collections/:collectionSlug/:id
+          // --> /collections/:collectionSlug/:id/api
+          // --> /collections/:collectionSlug/:id/preview
+          // --> /collections/:collectionSlug/:id/versions
+          // --> /collections/:collectionSlug/:id/versions/:versionID
+          ViewToRender = {
+            Component: DocumentView,
+          }
+
+          templateClassName = `collection-default-edit`
+          templateType = 'default'
+
+          const viewInfo = getDocumentViewInfo([segmentFour, segmentFive])
+          viewType = viewInfo.viewType
+          documentSubViewType = viewInfo.documentSubViewType
+
+          attachViewActions({
+            collectionOrGlobal: matchedCollection,
+            serverProps,
+            viewKeyArg: documentSubViewType,
+          })
         }
-
-        templateClassName = `collection-default-edit`
-        templateType = 'default'
-
-        const viewInfo = getDocumentViewInfo([segmentFour, segmentFive])
-        viewType = viewInfo.viewType
-        documentSubViewType = viewInfo.documentSubViewType
-
-        attachViewActions({
-          collectionOrGlobal: matchedCollection,
-          serverProps,
-          viewKeyArg: documentSubViewType,
-        })
       } else if (isGlobal && matchedGlobal) {
-        // Custom Views
+        // Global Edit Views
         // --> /globals/:globalSlug/versions
         // --> /globals/:globalSlug/preview
         // --> /globals/:globalSlug/versions/:versionID
@@ -288,6 +306,7 @@ export const getViewFromConfig = ({
   return {
     DefaultView: ViewToRender,
     documentSubViewType,
+    folderID,
     initPageOptions,
     serverProps,
     templateClassName,

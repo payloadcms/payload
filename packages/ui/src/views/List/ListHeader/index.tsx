@@ -3,22 +3,24 @@ import type { ClientCollectionConfig } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import { Button } from '../../../elements/Button/index.js'
 import { useListDrawerContext } from '../../../elements/ListDrawer/Provider.js'
-import { ListSelection } from '../../../elements/ListSelection/index.js'
-import { Pill } from '../../../elements/Pill/index.js'
-import { ReactSelect } from '../../../elements/ReactSelect/index.js'
-import { FieldLabel } from '../../../fields/FieldLabel/index.js'
+import { DrawerRelationshipSelect } from '../../../elements/ListHeader/DrawerRelationshipSelect/index.js'
+import { DefaultDrawerTitleActions } from '../../../elements/ListHeader/DrawerTitleActions/index.js'
+import { CollectionListHeader } from '../../../elements/ListHeader/index.js'
+import { DefaultTitleActions } from '../../../elements/ListHeader/TitleActions/index.js'
 import { XIcon } from '../../../icons/X/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
+import { ListSelection } from '../ListSelection/index.js'
 import './index.scss'
 
-const baseClass = 'list-header'
 const drawerBaseClass = 'list-drawer'
-
+const baseClass = 'list-header'
 export type ListHeaderProps = {
+  Actions?: React.ReactNode[]
   className?: string
   collectionConfig: ClientCollectionConfig
   Description?: React.ReactNode
@@ -31,9 +33,11 @@ export type ListHeaderProps = {
   openBulkUpload: () => void
   smallBreak: boolean
   t: TFunction
+  TitleActions?: React.ReactNode[]
+  viewType?: 'folders' | 'list'
 }
 
-const DefaultListHeader: React.FC<ListHeaderProps> = ({
+export const ListHeader: React.FC<ListHeaderProps> = ({
   className,
   collectionConfig,
   Description,
@@ -46,129 +50,101 @@ const DefaultListHeader: React.FC<ListHeaderProps> = ({
   openBulkUpload,
   smallBreak,
   t,
+  viewType,
 }) => {
-  return (
-    <header className={[baseClass, className].filter(Boolean).join(' ')}>
-      <h1>{getTranslation(collectionConfig?.labels?.plural, i18n)}</h1>
-      {hasCreatePermission && (
-        <>
-          <Button
-            aria-label={i18n.t('general:createNewLabel', {
-              label: getTranslation(collectionConfig?.labels?.singular, i18n),
-            })}
-            buttonStyle="pill"
-            el={'link'}
-            size="small"
-            to={newDocumentURL}
-          >
-            {i18n.t('general:createNew')}
-          </Button>
-          {isBulkUploadEnabled && (
-            <Button
-              aria-label={t('upload:bulkUpload')}
-              buttonStyle="pill"
-              onClick={openBulkUpload}
-              size="small"
-            >
-              {t('upload:bulkUpload')}
-            </Button>
-          )}
-        </>
-      )}
-      {!smallBreak && (
-        <ListSelection
-          collectionConfig={collectionConfig}
-          disableBulkDelete={disableBulkDelete}
-          disableBulkEdit={disableBulkEdit}
-          label={getTranslation(collectionConfig?.labels?.plural, i18n)}
-        />
-      )}
-      {Description}
-    </header>
-  )
-}
-
-const ListDrawerHeader: React.FC<ListHeaderProps> = ({
-  Description,
-  hasCreatePermission,
-  i18n,
-  t,
-}) => {
-  const {
-    config: { collections },
-    getEntityConfig,
-  } = useConfig()
-
+  const { config, getEntityConfig } = useConfig()
+  const { drawerSlug, isInDrawer, selectedOption } = useListDrawerContext()
   const { closeModal } = useModal()
 
-  const {
-    DocumentDrawerToggler,
-    drawerSlug,
-    enabledCollections,
-    selectedOption,
-    setSelectedOption,
-  } = useListDrawerContext()
-
-  const collectionConfig = getEntityConfig({ collectionSlug: selectedOption.value })
-
-  const enabledCollectionConfigs = collections.filter(({ slug }) =>
-    enabledCollections.includes(slug),
-  )
-
-  const moreThanOneAvailableCollection = enabledCollections.length > 1
-
-  return (
-    <header className={`${drawerBaseClass}__header`}>
-      <div className={`${drawerBaseClass}__header-wrap`}>
-        <div className={`${drawerBaseClass}__header-content`}>
-          <h2 className={`${drawerBaseClass}__header-text`}>
-            {getTranslation(collectionConfig?.labels?.plural, i18n)}
-          </h2>
-          {hasCreatePermission && (
-            <DocumentDrawerToggler className={`${drawerBaseClass}__create-new-button`}>
-              <Pill>{t('general:createNew')}</Pill>
-            </DocumentDrawerToggler>
-          )}
-        </div>
-        <button
-          aria-label={t('general:close')}
-          className={`${drawerBaseClass}__header-close`}
-          onClick={() => {
-            closeModal(drawerSlug)
-          }}
-          type="button"
-        >
-          <XIcon />
-        </button>
-      </div>
-      {Description}
-      {moreThanOneAvailableCollection && (
-        <div className={`${drawerBaseClass}__select-collection-wrap`}>
-          <FieldLabel label={t('upload:selectCollectionToBrowse')} />
-          <ReactSelect
-            className={`${baseClass}__select-collection`}
-            onChange={setSelectedOption}
-            options={enabledCollectionConfigs.map((coll) => ({
-              label: getTranslation(coll.labels.singular, i18n),
-              value: coll.slug,
-            }))}
-            value={{
-              label: getTranslation(collectionConfig?.labels.singular, i18n),
-              value: collectionConfig?.slug,
-            }}
-          />
-        </div>
-      )}
-    </header>
-  )
-}
-
-export const ListHeader: React.FC<ListHeaderProps> = (props) => {
-  const { isInDrawer } = useListDrawerContext()
-
   if (isInDrawer) {
-    return <ListDrawerHeader {...props} />
+    return (
+      <CollectionListHeader
+        Actions={[
+          <button
+            aria-label={t('general:close')}
+            className={`${drawerBaseClass}__close-drawer-button`}
+            key="close-button"
+            onClick={() => {
+              closeModal(drawerSlug)
+            }}
+            type="button"
+          >
+            <XIcon />
+          </button>,
+        ]}
+        AfterListHeaderContent={
+          <>
+            {Description}
+            {<DrawerRelationshipSelect />}
+          </>
+        }
+        className={`${drawerBaseClass}__header`}
+        collectionConfig={getEntityConfig({ collectionSlug: selectedOption.value })}
+        TitleActions={DefaultDrawerTitleActions({
+          hasCreatePermission,
+          t,
+        }).filter(Boolean)}
+      />
+    )
   }
 
-  return <DefaultListHeader {...props} />
+  return (
+    <CollectionListHeader
+      Actions={[
+        !smallBreak && (
+          <ListSelection
+            collectionConfig={collectionConfig}
+            disableBulkDelete={disableBulkDelete}
+            disableBulkEdit={disableBulkEdit}
+            key="list-selection"
+            label={getTranslation(collectionConfig?.labels?.plural, i18n)}
+          />
+        ),
+        Object.keys(config.folders.collections).includes(collectionConfig.slug) && (
+          <div className={`${baseClass}__folder-view-buttons`} key="list-header-buttons">
+            <Button
+              buttonStyle={viewType === 'list' ? 'pill' : 'none'}
+              disabled={viewType === 'folders'}
+              el={viewType === 'list' ? 'link' : 'div'}
+              size="small"
+              to={formatAdminURL({
+                adminRoute: config.routes.admin,
+                path: `/collections/${collectionConfig.slug}/folders`,
+                serverURL: config.serverURL,
+              })}
+            >
+              {/* @todo: translate */}
+              By Folder
+            </Button>
+            <Button
+              buttonStyle={viewType === 'folders' ? 'pill' : 'none'}
+              disabled={viewType === 'list'}
+              el={viewType === 'folders' ? 'link' : 'div'}
+              size="small"
+              to={formatAdminURL({
+                adminRoute: config.routes.admin,
+                path: `/collections/${collectionConfig.slug}`,
+                serverURL: config.serverURL,
+              })}
+            >
+              {/* @todo: translate */}
+              All {getTranslation(collectionConfig?.labels?.plural, i18n)}
+            </Button>
+          </div>
+        ),
+      ].filter(Boolean)}
+      AfterListHeaderContent={Description}
+      className={className}
+      collectionConfig={collectionConfig}
+      TitleActions={DefaultTitleActions({
+        collectionConfig,
+        hasCreatePermission,
+        i18n,
+        isBulkUploadEnabled,
+        newDocumentURL,
+        openBulkUpload,
+        t,
+      }).filter(Boolean)}
+    />
+  )
 }

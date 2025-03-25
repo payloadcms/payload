@@ -16,9 +16,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { mergeListSearchAndWhere } from '../../utilities/mergeListSearchAndWhere.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
-import './index.scss'
-
-const baseClass = 'delete-documents'
+import { ListSelectionButton } from '../ListSelection/index.js'
 
 export type Props = {
   collection: ClientCollectionConfig
@@ -139,15 +137,14 @@ export const DeleteMany: React.FC<Props> = (props) => {
 
   return (
     <React.Fragment>
-      <button
-        className={`${baseClass}__toggle`}
+      <ListSelectionButton
+        aria-label={t('general:delete')}
         onClick={() => {
           openModal(modalSlug)
         }}
-        type="button"
       >
         {t('general:delete')}
-      </button>
+      </ListSelectionButton>
       <ConfirmationModal
         body={t('general:aboutToDeleteCount', {
           count,

@@ -132,7 +132,7 @@ export interface Post {
   id: string;
   title?: string | null;
   heroImage?: (string | null) | Media;
-  _parentFolder: string | FolderInterface;
+  _parentFolder?: (string | null) | FolderInterface;
   _folderSearch?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -143,7 +143,7 @@ export interface Post {
  */
 export interface Media {
   id: string;
-  _parentFolder: string | FolderInterface;
+  _parentFolder?: (string | null) | FolderInterface;
   _folderSearch?: string | null;
   updatedAt: string;
   createdAt: string;

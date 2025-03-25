@@ -67,7 +67,6 @@ function addFieldsToCollection({
       hidden: !debug,
       index: true,
       relationTo: foldersSlug,
-      required: true,
     },
     {
       name: '_folderSearch',

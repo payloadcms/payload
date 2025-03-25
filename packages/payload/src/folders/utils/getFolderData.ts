@@ -8,7 +8,7 @@ import { getFolderSubfolders } from './getFolderSubfolders.js'
 
 type Args = {
   docLimit?: number
-  folderID: null | string
+  folderID: null | number | string
   page?: number
   payload: Payload
   search?: null | string
@@ -24,7 +24,9 @@ export const getFolderData = async ({
   user,
 }: Args): Promise<GetFolderDataResult> => {
   const folderID =
-    folderIDArg && payload.db.defaultIDType === 'number' ? parseFloat(folderIDArg) : folderIDArg
+    folderIDArg && payload.db.defaultIDType === 'number'
+      ? parseFloat(String(folderIDArg))
+      : folderIDArg
 
   const breadcrumbs = buildFolderBreadcrumbs({
     folderID,

@@ -32,7 +32,7 @@ import { renderDocumentSlots } from './renderDocumentSlots.js'
 
 export const generateMetadata: GenerateEditViewMetadata = async (args) => getMetaBySegment(args)
 
-// This function will be responsible for rendering an Edit Document view
+// This function is responsible for rendering an Edit Document view
 // it will be called on the server for Edit page views as well as
 // called on-demand from document drawers
 export const renderDocument = async ({

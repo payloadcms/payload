@@ -19,7 +19,7 @@ import { useListQuery } from '../../providers/ListQuery/index.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { useConfig } from '../Config/index.js'
 import { useTranslation } from '../Translation/index.js'
-
+import { getMetaSelection, getShiftSelection } from './selection.js'
 export type FileCardData = {
   filename: string
   id: number | string
@@ -30,49 +30,57 @@ export type FileCardData = {
 
 export type FolderContextValue = {
   breadcrumbs?: FolderBreadcrumb[]
+  clearSelections: () => void
   collectionUseAsTitles: Map<string, string>
   currentFolder?: FolderInterface | null
   deleteCurrentFolder: () => Promise<Response>
   documents?: GetFolderDataResult['items']
+  focusedRowIndex: number
   folderCollectionSlug: string
   folderID?: number | string
   getSelectedItems?: () => PolymorphicRelationshipValue[]
   hasMoreDocuments: boolean
-  lastSelectedIndex?: number
   moveToFolder: (args: {
     itemsToMove: PolymorphicRelationshipValue[]
     toFolderID?: number | string
   }) => Promise<void>
+  onItemClick: (args: {
+    event: React.MouseEvent
+    index: number
+  }) => Promise<{ doubleClicked: boolean }>
+  onItemKeyPress: (args: {
+    event: React.KeyboardEvent
+    index: number
+  }) => Promise<{ keyCode: string }>
   populateFolderData: (args: { folderID: number | string }) => Promise<void>
   removeItems: (args: PolymorphicRelationshipValue[]) => Promise<void>
   selectedIndexes: Set<number>
   setBreadcrumbs: React.Dispatch<React.SetStateAction<FolderBreadcrumb[]>>
   setFolderID: (args: { folderID: number | string }) => Promise<void>
-  setLastSelectedIndex: React.Dispatch<React.SetStateAction<null | number>>
-  setSelectedIndexes: React.Dispatch<React.SetStateAction<Set<number>>>
   setSubfolders: React.Dispatch<React.SetStateAction<GetFolderDataResult['items']>>
   subfolders?: GetFolderDataResult<FolderInterface>['items']
 }
 
 const Context = React.createContext<FolderContextValue>({
   breadcrumbs: [],
+  clearSelections: () => {},
   collectionUseAsTitles: new Map(),
   currentFolder: null,
   deleteCurrentFolder: () => Promise.resolve(undefined),
   documents: [],
+  focusedRowIndex: -1,
   folderCollectionSlug: '',
   folderID: undefined,
   getSelectedItems: () => [],
   hasMoreDocuments: true,
-  lastSelectedIndex: undefined,
   moveToFolder: () => Promise.resolve(undefined),
+  onItemClick: () => Promise.resolve({ doubleClicked: false }),
+  onItemKeyPress: () => Promise.resolve({ keyCode: '' }),
   populateFolderData: () => Promise.resolve(undefined),
   removeItems: () => Promise.resolve(undefined),
   selectedIndexes: new Set(),
   setBreadcrumbs: () => {},
   setFolderID: () => Promise.resolve(undefined),
-  setLastSelectedIndex: () => {},
-  setSelectedIndexes: () => {},
   setSubfolders: () => {},
   subfolders: [],
 })
@@ -84,13 +92,13 @@ export type FolderProviderData = {
 } & GetFolderDataResult
 const folderCollectionSlug = '_folders'
 type Props = {
+  readonly allowMultiSelection?: boolean
   readonly children: React.ReactNode
   readonly initialData?: FolderProviderData
 }
-export function FolderProvider({ children, initialData }: Props) {
+export function FolderProvider({ allowMultiSelection = true, children, initialData }: Props) {
   const { config } = useConfig()
   const { routes, serverURL } = config
-  const [selectedIndexes, setSelectedIndexes] = React.useState<Set<number>>(() => new Set())
   const searchParams = useSearchParams()
   const drawerDepth = useDrawerDepth()
   const { refineListData } = useListQuery()
@@ -109,6 +117,10 @@ export function FolderProvider({ children, initialData }: Props) {
   const [documents, setDocuments] = React.useState<GetFolderDataResult['items']>(
     initialData?.items.filter((item) => item.relationTo !== folderCollectionSlug) || [],
   )
+  const [selectedIndexes, setSelectedIndexes] = React.useState<Set<number>>(() => new Set())
+  const [focusedRowIndex, setFocusedRowIndex] = React.useState(-1)
+  const [lastSelectedIndex, setLastSelectedIndex] = React.useState<null | number>(null)
+  const lastClickTime = React.useRef<null | number>(null)
   const [collectionUseAsTitles] = React.useState<Map<string, string>>(() => {
     const useAsTitleMap = new Map<string, string>()
     for (const collection of config.collections) {
@@ -116,18 +128,18 @@ export function FolderProvider({ children, initialData }: Props) {
     }
     return useAsTitleMap
   })
-  const [lastSelectedIndex, setLastSelectedIndex] = React.useState<null | number>()
   const [hasMoreDocuments, setHasMoreDocuments] = React.useState(() =>
     Boolean(initialData?.hasMoreDocuments),
   )
 
+  const totalCount = subfolders.length + documents.length
   const clearSelections = React.useCallback(() => {
     setSelectedIndexes(new Set())
     setLastSelectedIndex(undefined)
   }, [])
 
   const populateFolderData = React.useCallback(
-    async ({ folderID: folderToPopulate }) => {
+    async ({ folderID: folderToPopulate }: { folderID: number | string }) => {
       // when in a drawer, you cannot rely on the server rendered data
       const queryParams = qs.stringify(
         {
@@ -187,13 +199,163 @@ export function FolderProvider({ children, initialData }: Props) {
         await populateFolderData({ folderID: toFolderID })
       }
     },
-    [drawerDepth, populateFolderData, clearSelections, refineListData, folderBreadcrumbs],
+    [clearSelections, drawerDepth, populateFolderData, refineListData, folderBreadcrumbs],
   )
 
   const getSelectedItems = React.useCallback(() => {
     const allItems = [...subfolders, ...documents]
     return Array.from(selectedIndexes).map((index) => allItems[index])
   }, [documents, selectedIndexes, subfolders])
+
+  const onItemKeyPress = React.useCallback(
+    ({ event, index }: { event: React.KeyboardEvent; index: number }): { keyCode: string } => {
+      const { code, ctrlKey, metaKey, shiftKey } = event
+      const isShiftPressed = shiftKey
+      const isCtrlPressed = ctrlKey || metaKey
+      let newSelectedIndexes: Set<number> = selectedIndexes
+
+      switch (code) {
+        case 'ArrowDown': {
+          event.preventDefault()
+          const nextIndex = Math.min(index + 1, totalCount - 1)
+          setFocusedRowIndex(nextIndex)
+
+          if (isCtrlPressed) {
+            break
+          }
+
+          if (allowMultiSelection && isShiftPressed) {
+            newSelectedIndexes = getShiftSelection({
+              selectFromIndex: Math.min(lastSelectedIndex, totalCount),
+              selectToIndex: Math.min(nextIndex, totalCount),
+            })
+          } else {
+            setLastSelectedIndex(nextIndex)
+            newSelectedIndexes = new Set([nextIndex])
+          }
+          break
+        }
+        case 'ArrowUp': {
+          event.preventDefault()
+          const prevIndex = Math.max(index - 1, 0)
+          setFocusedRowIndex(prevIndex)
+
+          if (isCtrlPressed) {
+            break
+          }
+
+          if (allowMultiSelection && isShiftPressed) {
+            newSelectedIndexes = getShiftSelection({
+              selectFromIndex: lastSelectedIndex,
+              selectToIndex: prevIndex,
+            })
+          } else {
+            setLastSelectedIndex(prevIndex)
+            newSelectedIndexes = new Set([prevIndex])
+          }
+          break
+        }
+        case 'Enter': {
+          if (selectedIndexes.size === 1) {
+            newSelectedIndexes = new Set([])
+            setFocusedRowIndex(undefined)
+          }
+          break
+        }
+        case 'Escape': {
+          setFocusedRowIndex(undefined)
+          setSelectedIndexes(new Set([]))
+          newSelectedIndexes = new Set([])
+          break
+        }
+        case 'KeyA': {
+          if (allowMultiSelection && isCtrlPressed) {
+            event.preventDefault()
+            setFocusedRowIndex(totalCount - 1)
+            newSelectedIndexes = new Set(Array.from({ length: totalCount }, (_, i) => i))
+          }
+          break
+        }
+        case 'Space': {
+          if (allowMultiSelection && isShiftPressed) {
+            event.preventDefault()
+            newSelectedIndexes = getMetaSelection({
+              currentSelection: newSelectedIndexes,
+              toggleIndex: index,
+            })
+            setLastSelectedIndex(index)
+          } else {
+            event.preventDefault()
+            newSelectedIndexes = new Set([index])
+            setLastSelectedIndex(index)
+          }
+          break
+        }
+        case 'Tab': {
+          if (allowMultiSelection && isShiftPressed) {
+            const prevIndex = index - 1
+            if (prevIndex < 0 && newSelectedIndexes.size > 0) {
+              setFocusedRowIndex(prevIndex)
+            }
+          } else {
+            const nextIndex = index + 1
+            if (nextIndex === totalCount && newSelectedIndexes.size > 0) {
+              setFocusedRowIndex(totalCount - 1)
+            }
+          }
+          break
+        }
+      }
+
+      setSelectedIndexes(newSelectedIndexes)
+      return { keyCode: code }
+    },
+    [allowMultiSelection, lastSelectedIndex, selectedIndexes, totalCount],
+  )
+
+  const onItemClick = React.useCallback(
+    ({ event, index }: { event: React.MouseEvent; index: number }): { doubleClicked: boolean } => {
+      let doubleClicked: boolean = false
+      const isCtrlPressed = event.ctrlKey || event.metaKey
+      const isShiftPressed = event.shiftKey
+      let newSelectedIndexes = new Set(selectedIndexes)
+
+      if (allowMultiSelection && isCtrlPressed) {
+        newSelectedIndexes = getMetaSelection({
+          currentSelection: newSelectedIndexes,
+          toggleIndex: index,
+        })
+      } else if (allowMultiSelection && isShiftPressed && lastSelectedIndex !== undefined) {
+        newSelectedIndexes = getShiftSelection({
+          selectFromIndex: lastSelectedIndex,
+          selectToIndex: index,
+        })
+      } else if (allowMultiSelection && event.type === 'pointermove') {
+        // on drag start of an unselected item
+        if (!selectedIndexes.has(index)) {
+          newSelectedIndexes = new Set([index])
+        }
+        setLastSelectedIndex(index)
+      } else {
+        // Normal click - select single item
+        newSelectedIndexes = new Set([index])
+        const now = Date.now()
+        doubleClicked = now - lastClickTime.current < 400 && lastSelectedIndex === index
+        lastClickTime.current = now
+        setLastSelectedIndex(index)
+      }
+
+      if (newSelectedIndexes.size === 0) {
+        setFocusedRowIndex(undefined)
+      } else {
+        setFocusedRowIndex(index)
+      }
+
+      setSelectedIndexes(newSelectedIndexes)
+      return { doubleClicked }
+    },
+    [selectedIndexes, lastSelectedIndex, allowMultiSelection],
+  )
 
   /**
    * Remove multiple documents or folders from a folder
@@ -404,16 +566,7 @@ export function FolderProvider({ children, initialData }: Props) {
         folderID: isMovingCurrentFolder ? toFolderID : activeFolderID,
       })
     },
-    [
-      routes.api,
-      serverURL,
-      t,
-      setDocuments,
-      setSubfolders,
-      populateFolderData,
-      activeFolderID,
-      clearSelections,
-    ],
+    [t, clearSelections, populateFolderData, activeFolderID, serverURL, routes.api],
   )
 
   React.useEffect(() => {
@@ -426,9 +579,9 @@ export function FolderProvider({ children, initialData }: Props) {
         initialData?.items.filter((item) => item.relationTo !== folderCollectionSlug) || [],
       )
       setFolderBreadcrumbs(initialData?.breadcrumbs || [])
-      setSelectedIndexes(new Set())
+      clearSelections()
     }
-  }, [initialData])
+  }, [initialData, clearSelections])
 
   React.useEffect(() => {
     if (!initialData) {
@@ -437,37 +590,38 @@ export function FolderProvider({ children, initialData }: Props) {
   }, [initialData, activeFolderID, populateFolderData])
 
   return (
-    <Context.Provider
+    <Context
       value={{
         breadcrumbs: folderBreadcrumbs,
+        clearSelections,
         collectionUseAsTitles,
         currentFolder: folderBreadcrumbs ? folderBreadcrumbs[folderBreadcrumbs.length - 1] : null,
         deleteCurrentFolder,
         documents,
+        focusedRowIndex,
         folderCollectionSlug,
         folderID: activeFolderID,
         getSelectedItems,
         hasMoreDocuments,
-        lastSelectedIndex,
         moveToFolder,
+        onItemClick,
+        onItemKeyPress,
         populateFolderData,
         removeItems,
         selectedIndexes,
         setBreadcrumbs: setFolderBreadcrumbs,
         setFolderID: setNewActiveFolderID,
-        setLastSelectedIndex,
-        setSelectedIndexes,
         setSubfolders,
         subfolders,
       }}
     >
       {children}
-    </Context.Provider>
+    </Context>
   )
 }
 
 export function useFolder(): FolderContextValue {
-  const context = React.useContext(Context)
+  const context = React.use(Context)
 
   if (context === undefined) {
     throw new Error('useFolder must be used within a FolderProvider')
