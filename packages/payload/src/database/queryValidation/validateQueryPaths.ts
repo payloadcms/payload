@@ -53,8 +53,8 @@ export async function validateQueryPaths({
           if (collectionConfig) {
             promises.push(
               validateQueryPaths({
+                collectionConfig,
                 errors,
-                globalConfig,
                 overrideAccess,
                 policies,
                 req,
