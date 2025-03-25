@@ -15,19 +15,19 @@ export type SortHeaderProps = {
 const baseClass = 'sort-header'
 
 function useSort() {
-  const { handleSortChange, query } = useListQuery()
-  const sort = useRef<'asc' | 'desc'>(query.sort === '-_order' ? 'desc' : 'asc')
-  const isActive = query.sort === '-_order' || query.sort === '_order'
+  const { handleSortChange, orderableFieldName, query } = useListQuery()
+  const sort = useRef<'asc' | 'desc'>(query.sort === `-${orderableFieldName}` ? 'desc' : 'asc')
+  const isActive = query.sort === `-${orderableFieldName}` || query.sort === orderableFieldName
 
   const handleSortPress = () => {
     // If it's already sorted by the "_order" field, toggle between "asc" and "desc"
     if (isActive) {
-      void handleSortChange(sort.current === 'asc' ? '-_order' : '_order')
+      void handleSortChange(sort.current === 'asc' ? `-${orderableFieldName}` : orderableFieldName)
       sort.current = sort.current === 'asc' ? 'desc' : 'asc'
       return
     }
     // If NOT sorted by the "_order" field, sort by that field but do not toggle the current value of "asc" or "desc".
-    void handleSortChange(sort.current === 'asc' ? '_order' : '-_order')
+    void handleSortChange(sort.current === 'asc' ? orderableFieldName : `-${orderableFieldName}`)
   }
 
   return { handleSortPress, isActive, sort }

@@ -70,19 +70,27 @@ export interface Config {
     drafts: Draft;
     'default-sort': DefaultSort;
     localized: Localized;
-    sortable: Sortable;
+    orderable: Orderable;
+    'orderable-join': OrderableJoin;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    'orderable-join': {
+      orderableJoinField1: 'orderable';
+      orderableJoinField2: 'orderable';
+      nonOrderableJoinField: 'orderable';
+    };
+  };
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     drafts: DraftsSelect<false> | DraftsSelect<true>;
     'default-sort': DefaultSortSelect<false> | DefaultSortSelect<true>;
     localized: LocalizedSelect<false> | LocalizedSelect<true>;
-    sortable: SortableSelect<false> | SortableSelect<true>;
+    orderable: OrderableSelect<false> | OrderableSelect<true>;
+    'orderable-join': OrderableJoinSelect<false> | OrderableJoinSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -178,12 +186,41 @@ export interface Localized {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "sortable".
+ * via the `definition` "orderable".
  */
-export interface Sortable {
+export interface Orderable {
+  id: string;
+  _order: string;
+  _orderable_orderableJoinField2_order: string;
+  _orderable_orderableJoinField1_order: string;
+  title?: string | null;
+  orderableField?: (string | null) | OrderableJoin;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orderable-join".
+ */
+export interface OrderableJoin {
   id: string;
   _order: string;
   title?: string | null;
+  orderableJoinField1?: {
+    docs?: (string | Orderable)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  orderableJoinField2?: {
+    docs?: (string | Orderable)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  nonOrderableJoinField?: {
+    docs?: (string | Orderable)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -228,8 +265,12 @@ export interface PayloadLockedDocument {
         value: string | Localized;
       } | null)
     | ({
-        relationTo: 'sortable';
-        value: string | Sortable;
+        relationTo: 'orderable';
+        value: string | Orderable;
+      } | null)
+    | ({
+        relationTo: 'orderable-join';
+        value: string | OrderableJoin;
       } | null)
     | ({
         relationTo: 'users';
@@ -335,11 +376,27 @@ export interface LocalizedSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "sortable_select".
+ * via the `definition` "orderable_select".
  */
-export interface SortableSelect<T extends boolean = true> {
+export interface OrderableSelect<T extends boolean = true> {
+  _order?: T;
+  _orderable_orderableJoinField2_order?: T;
+  _orderable_orderableJoinField1_order?: T;
+  title?: T;
+  orderableField?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orderable-join_select".
+ */
+export interface OrderableJoinSelect<T extends boolean = true> {
   _order?: T;
   title?: T;
+  orderableJoinField1?: T;
+  orderableJoinField2?: T;
+  nonOrderableJoinField?: T;
   updatedAt?: T;
   createdAt?: T;
 }
