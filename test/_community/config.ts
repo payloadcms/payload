@@ -13,27 +13,7 @@ const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
   // ...extend config here
-  collections: [
-    PostsCollection,
-    MediaCollection,
-    {
-      slug: 'users',
-      auth: true,
-      versions: true,
-      fields: [
-        {
-          type: 'row',
-          fields: [
-            {
-              name: 'createdBy',
-              type: 'relationship',
-              relationTo: 'users',
-            },
-          ],
-        },
-      ],
-    },
-  ],
+  collections: [PostsCollection, MediaCollection],
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
