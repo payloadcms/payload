@@ -17,7 +17,6 @@ import type {
   TypeWithVersion,
   UpdateGlobalArgs,
   UpdateGlobalVersionArgs,
-  UpdateManyArgs,
   UpdateOneArgs,
   UpdateVersionArgs,
 } from 'payload'
@@ -55,6 +54,7 @@ import { commitTransaction } from './transactions/commitTransaction.js'
 import { rollbackTransaction } from './transactions/rollbackTransaction.js'
 import { updateGlobal } from './updateGlobal.js'
 import { updateGlobalVersion } from './updateGlobalVersion.js'
+import { updateJobs } from './updateJobs.js'
 import { updateMany } from './updateMany.js'
 import { updateOne } from './updateOne.js'
 import { updateVersion } from './updateVersion.js'
@@ -227,6 +227,7 @@ export function mongooseAdapter({
       mongoMemoryServer,
       sessions: {},
       transactionOptions: transactionOptions === false ? undefined : transactionOptions,
+      updateJobs,
       updateMany,
       url,
       versions: {},
