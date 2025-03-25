@@ -92,6 +92,7 @@ export interface Config {
     'admin-thumbnail-function': AdminThumbnailFunction;
     'admin-thumbnail-with-search-queries': AdminThumbnailWithSearchQuery;
     'admin-thumbnail-size': AdminThumbnailSize;
+    'admin-upload-control': AdminUploadControl;
     'optional-file': OptionalFile;
     'required-file': RequiredFile;
     versions: Version;
@@ -134,6 +135,7 @@ export interface Config {
     'admin-thumbnail-function': AdminThumbnailFunctionSelect<false> | AdminThumbnailFunctionSelect<true>;
     'admin-thumbnail-with-search-queries': AdminThumbnailWithSearchQueriesSelect<false> | AdminThumbnailWithSearchQueriesSelect<true>;
     'admin-thumbnail-size': AdminThumbnailSizeSelect<false> | AdminThumbnailSizeSelect<true>;
+    'admin-upload-control': AdminUploadControlSelect<false> | AdminUploadControlSelect<true>;
     'optional-file': OptionalFileSelect<false> | OptionalFileSelect<true>;
     'required-file': RequiredFileSelect<false> | RequiredFileSelect<true>;
     versions: VersionsSelect<false> | VersionsSelect<true>;
@@ -1137,6 +1139,24 @@ export interface AdminThumbnailWithSearchQuery {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admin-upload-control".
+ */
+export interface AdminUploadControl {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "optional-file".
  */
 export interface OptionalFile {
@@ -1398,6 +1418,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'admin-thumbnail-size';
         value: string | AdminThumbnailSize;
+      } | null)
+    | ({
+        relationTo: 'admin-upload-control';
+        value: string | AdminUploadControl;
       } | null)
     | ({
         relationTo: 'optional-file';
@@ -2493,6 +2517,23 @@ export interface AdminThumbnailSizeSelect<T extends boolean = true> {
               filename?: T;
             };
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admin-upload-control_select".
+ */
+export interface AdminUploadControlSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
