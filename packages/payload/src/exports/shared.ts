@@ -45,7 +45,6 @@ export { validOperators, validOperatorSet } from '../types/constants.js'
 export { formatFilesize } from '../uploads/formatFilesize.js'
 
 export { isImage } from '../uploads/isImage.js'
-
 export {
   deepCopyObject,
   deepCopyObjectComplex,
@@ -61,13 +60,17 @@ export {
 } from '../utilities/deepMerge.js'
 
 export { fieldSchemaToJSON } from '../utilities/fieldSchemaToJSON.js'
-
 export { flattenAllFields } from '../utilities/flattenAllFields.js'
+
 export { default as flattenTopLevelFields } from '../utilities/flattenTopLevelFields.js'
 export { formatAdminURL } from '../utilities/formatAdminURL.js'
-
+export { formatLabels, toWords } from '../utilities/formatLabels.js'
 export { getDataByPath } from '../utilities/getDataByPath.js'
+
+export { getFieldPermissions } from '../utilities/getFieldPermissions.js'
+
 export { getSelectMode } from '../utilities/getSelectMode.js'
+
 export { getSiblingData } from '../utilities/getSiblingData.js'
 
 export { getUniqueListBy } from '../utilities/getUniqueListBy.js'
@@ -84,6 +87,11 @@ export {
   isReactServerComponentOrFunction,
 } from '../utilities/isReactComponent.js'
 
+export {
+  hoistQueryParamsToAnd,
+  mergeListSearchAndWhere,
+} from '../utilities/mergeListSearchAndWhere.js'
+
 export { reduceFieldsToValues } from '../utilities/reduceFieldsToValues.js'
 
 export { setsAreEqual } from '../utilities/setsAreEqual.js'
@@ -95,8 +103,11 @@ export {
   transformColumnsToSearchParams,
 } from '../utilities/transformColumnPreferences.js'
 
+export { transformWhereQuery } from '../utilities/transformWhereQuery.js'
+
 export { unflatten } from '../utilities/unflatten.js'
 export { validateMimeType } from '../utilities/validateMimeType.js'
+export { validateWhereQuery } from '../utilities/validateWhereQuery.js'
 export { wait } from '../utilities/wait.js'
 export { default as wordBoundariesRegex } from '../utilities/wordBoundariesRegex.js'
 export { versionDefaults } from '../versions/defaults.js'

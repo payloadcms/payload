@@ -35,6 +35,7 @@ import {
   $isParagraphNode,
   $isRangeSelection,
   $isTextNode,
+  $setSelection,
   COMMAND_PRIORITY_CRITICAL,
   getDOMSelection,
   isDOMNode,
@@ -219,8 +220,7 @@ function TableActionMenu({
         updateTableCellNode(tableCellNode.getLatest())
       }
 
-      const rootNode = $getRoot()
-      rootNode.selectStart()
+      $setSelection(null)
     })
   }, [editor, tableCellNode])
 
@@ -734,7 +734,7 @@ function TableCellActionMenuContainer({
 
   useEffect(() => {
     // We call the $moveMenu callback every time the selection changes,
-    // once up front, and once after each mouseUp
+    // once up front, and once after each pointerup
     let timeoutId: ReturnType<typeof setTimeout> | undefined = undefined
     const callback = () => {
       timeoutId = undefined
@@ -751,10 +751,10 @@ function TableCellActionMenuContainer({
       editor.registerCommand(SELECTION_CHANGE_COMMAND, delayedCallback, COMMAND_PRIORITY_CRITICAL),
       editor.registerRootListener((rootElement, prevRootElement) => {
         if (prevRootElement) {
-          prevRootElement.removeEventListener('mouseup', delayedCallback)
+          prevRootElement.removeEventListener('pointerup', delayedCallback)
         }
         if (rootElement) {
-          rootElement.addEventListener('mouseup', delayedCallback)
+          rootElement.addEventListener('pointerup', delayedCallback)
           delayedCallback()
         }
       }),

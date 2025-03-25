@@ -98,7 +98,7 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
 
   const activeTabStaticDescription =
     typeof activeTabDescription === 'function'
-      ? activeTabDescription({ t: i18n.t })
+      ? activeTabDescription({ i18n, t: i18n.t })
       : activeTabDescription
 
   const hasVisibleTabs = tabStates.some(({ passesCondition }) => passesCondition)

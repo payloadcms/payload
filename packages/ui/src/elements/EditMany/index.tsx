@@ -1,8 +1,10 @@
 'use client'
-import type { ClientCollectionConfig, FieldWithPathClient } from 'payload'
+import type { ClientCollectionConfig } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import React, { useState } from 'react'
+
+import type { FieldOption } from '../FieldSelect/reduceFieldOptions.js'
 
 import { useAuth } from '../../providers/Auth/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
@@ -28,14 +30,14 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
 
   const { selectAll } = useSelection()
   const { t } = useTranslation()
-  const [selected, setSelected] = useState<FieldWithPathClient[]>([])
+
+  const [selectedFields, setSelectedFields] = useState<FieldOption[]>([])
 
   const collectionPermissions = permissions?.collections?.[slug]
-  const hasUpdatePermission = collectionPermissions?.update
 
   const drawerSlug = `edit-${slug}`
 
-  if (selectAll === SelectAllStatus.None || !hasUpdatePermission) {
+  if (selectAll === SelectAllStatus.None || !collectionPermissions?.update) {
     return null
   }
 
@@ -46,7 +48,7 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
         className={`${baseClass}__toggle`}
         onClick={() => {
           openModal(drawerSlug)
-          setSelected([])
+          setSelectedFields([])
         }}
         type="button"
       >
@@ -57,7 +59,8 @@ export const EditMany: React.FC<EditManyProps> = (props) => {
           <EditManyDrawerContent
             collection={props.collection}
             drawerSlug={drawerSlug}
-            selected={selected}
+            selectedFields={selectedFields}
+            setSelectedFields={setSelectedFields}
           />
         </Drawer>
       </EditDepthProvider>

@@ -49,7 +49,8 @@ export const buildClientFieldSchemaMap = (args: {
       if (matchedCollection.auth && !matchedCollection.auth.disableLocalStrategy) {
         ;(baseAuthFields[0] as TextFieldClient).label = i18n.t('general:password')
         ;(baseAuthFields[1] as TextFieldClient).label = i18n.t('authentication:confirmPassword')
-        fieldsToSet = baseAuthFields.concat(fieldsToSet)
+        // Place these fields _last_ to ensure they do not disrupt field paths in the field schema map
+        fieldsToSet = fieldsToSet.concat(baseAuthFields)
       }
 
       clientSchemaMap.set(collectionSlug, {

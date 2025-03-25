@@ -1,0 +1,190 @@
+---
+title: Converting JSX
+label: Converting JSX
+order: 21
+desc: Converting between lexical richtext and JSX
+keywords: lexical, richtext, jsx
+---
+
+## Converting Richtext to JSX
+
+To convert richtext to JSX, import the `RichText` component from `@payloadcms/richtext-lexical/react` and pass the richtext content to it:
+
+```tsx
+import React from 'react'
+import { RichText } from '@payloadcms/richtext-lexical/react'
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+
+export const MyComponent = ({ data }: { data: SerializedEditorState }) => {
+  return <RichText data={data} />
+}
+```
+
+The `RichText` component includes built-in converters for common Lexical nodes. You can add or override converters via the `converters` prop for custom blocks, custom nodes, or any modifications you need. See the [website template](https://github.com/payloadcms/payload/blob/main/templates/website/src/components/RichText/index.tsx) for a working example.
+
+<Banner type="default">
+  When fetching data, ensure your `depth` setting is high enough to fully
+  populate Lexical nodes such as uploads. The JSX converter requires fully
+  populated data to work correctly.
+</Banner>
+
+### Converting Internal Links
+
+By default, Payload doesn't know how to convert **internal** links to JSX, as it doesn't know what the corresponding URL of the internal link is. You'll notice that you get a "found internal link, but internalDocToHref is not provided" error in the console when you try to render content with internal links.
+
+To fix this, you need to pass the `internalDocToHref` prop to `LinkJSXConverter`. This prop is a function that receives the link node and returns the URL of the document.
+
+```tsx
+import type {
+  DefaultNodeTypes,
+  SerializedLinkNode,
+} from '@payloadcms/richtext-lexical'
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+
+import {
+  type JSXConvertersFunction,
+  LinkJSXConverter,
+  RichText,
+} from '@payloadcms/richtext-lexical/react'
+import React from 'react'
+
+const internalDocToHref = ({ linkNode }: { linkNode: SerializedLinkNode }) => {
+  const { relationTo, value } = linkNode.fields.doc!
+  if (typeof value !== 'object') {
+    throw new Error('Expected value to be an object')
+  }
+  const slug = value.slug
+
+  switch (relationTo) {
+    case 'posts':
+      return `/posts/${slug}`
+    case 'categories':
+      return `/category/${slug}`
+    case 'pages':
+      return `/${slug}`
+    default:
+      return `/${relationTo}/${slug}`
+  }
+}
+
+const jsxConverters: JSXConvertersFunction<DefaultNodeTypes> = ({
+  defaultConverters,
+}) => ({
+  ...defaultConverters,
+  ...LinkJSXConverter({ internalDocToHref }),
+})
+
+export const MyComponent: React.FC<{
+  lexicalData: SerializedEditorState
+}> = ({ lexicalData }) => {
+  return <RichText converters={jsxConverters} data={lexicalData} />
+}
+```
+
+### Converting Lexical Blocks
+
+If your rich text includes custom Blocks or Inline Blocks, you must supply custom converters that match each block's slug. This converter is not included by default, as Payload doesn't know how to render your custom blocks.
+
+For example:
+
+```tsx
+'use client'
+import type { MyInlineBlock, MyNumberBlock, MyTextBlock } from '@/payload-types'
+import type {
+  DefaultNodeTypes,
+  SerializedBlockNode,
+  SerializedInlineBlockNode,
+} from '@payloadcms/richtext-lexical'
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+
+import {
+  type JSXConvertersFunction,
+  RichText,
+} from '@payloadcms/richtext-lexical/react'
+import React from 'react'
+
+// Extend the default node types with your custom blocks for full type safety
+type NodeTypes =
+  | DefaultNodeTypes
+  | SerializedBlockNode<MyNumberBlock | MyTextBlock>
+  | SerializedInlineBlockNode<MyInlineBlock>
+
+const jsxConverters: JSXConvertersFunction<NodeTypes> = ({
+  defaultConverters,
+}) => ({
+  ...defaultConverters,
+  blocks: {
+    // Each key should match your block's slug
+    myNumberBlock: ({ node }) => <div>{node.fields.number}</div>,
+    myTextBlock: ({ node }) => (
+      <div style={{ backgroundColor: 'red' }}>{node.fields.text}</div>
+    ),
+  },
+  inlineBlocks: {
+    // Each key should match your inline block's slug
+    myInlineBlock: ({ node }) => <span>{node.fields.text}</span>,
+  },
+})
+
+export const MyComponent: React.FC<{
+  lexicalData: SerializedEditorState
+}> = ({ lexicalData }) => {
+  return <RichText converters={jsxConverters} data={lexicalData} />
+}
+```
+
+### Overriding Default JSX Converters
+
+You can override any of the default JSX converters by passing passing your custom converter, keyed to the node type, to the `converters` prop / the converters function.
+
+Example - overriding the upload node converter to use next/image:
+
+```tsx
+'use client'
+import type {
+  DefaultNodeTypes,
+  SerializedUploadNode,
+} from '@payloadcms/richtext-lexical'
+import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
+
+import {
+  type JSXConvertersFunction,
+  RichText,
+} from '@payloadcms/richtext-lexical/react'
+import Image from 'next/image'
+import React from 'react'
+
+type NodeTypes = DefaultNodeTypes
+
+// Custom upload converter component that uses next/image
+const CustomUploadComponent: React.FC<{
+  node: SerializedUploadNode
+}> = ({ node }) => {
+  if (node.relationTo === 'uploads') {
+    const uploadDoc = node.value
+    if (typeof uploadDoc !== 'object') {
+      return null
+    }
+    const { alt, height, url, width } = uploadDoc
+    return <Image alt={alt} height={height} src={url} width={width} />
+  }
+
+  return null
+}
+
+const jsxConverters: JSXConvertersFunction<NodeTypes> = ({
+  defaultConverters,
+}) => ({
+  ...defaultConverters,
+  // Override the default upload converter
+  upload: ({ node }) => {
+    return <CustomUploadComponent node={node} />
+  },
+})
+
+export const MyComponent: React.FC<{
+  lexicalData: SerializedEditorState
+}> = ({ lexicalData }) => {
+  return <RichText converters={jsxConverters} data={lexicalData} />
+}
+```

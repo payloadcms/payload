@@ -1,14 +1,14 @@
 'use client'
 
-import { fieldIsHiddenOrDisabled, getFieldPaths } from 'payload/shared'
+import { fieldIsHiddenOrDisabled, getFieldPaths, getFieldPermissions } from 'payload/shared'
 import React from 'react'
 
 import type { RenderFieldsProps } from './types.js'
 
 import { RenderIfInViewport } from '../../elements/RenderIfInViewport/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
-import './index.scss'
 import { RenderField } from './RenderField.js'
+import './index.scss'
 
 const baseClass = 'render-fields'
 
@@ -49,22 +49,21 @@ export const RenderFields: React.FC<RenderFieldsProps> = (props) => {
             return null
           }
 
-          const parentName = parentPath?.includes('.')
-            ? parentPath.split('.')[parentPath.split('.').length - 1]
-            : parentPath
+          const {
+            operation: hasOperationPermission,
+            permissions: fieldPermissions,
+            read: hasReadPermission,
+          } = getFieldPermissions({
+            field,
+            operation,
+            parentName: parentPath?.includes('.')
+              ? parentPath.split('.')[parentPath.split('.').length - 1]
+              : parentPath,
+            permissions,
+          })
 
           // If the user cannot read the field, then filter it out
           // This is different from `admin.readOnly` which is executed based on `operation`
-          const hasReadPermission =
-            permissions === true ||
-            permissions?.read === true ||
-            permissions?.[parentName] === true ||
-            ('name' in field &&
-              typeof permissions === 'object' &&
-              permissions?.[field.name] &&
-              (permissions[field.name] === true ||
-                ('read' in permissions[field.name] && permissions[field.name].read)))
-
           if ('name' in field && !hasReadPermission) {
             return null
           }
@@ -77,17 +76,7 @@ export const RenderFields: React.FC<RenderFieldsProps> = (props) => {
             isReadOnly = false
           }
 
-          // If the user does not have access control to begin with, force it to be read-only
-          const hasOperationPermission =
-            permissions === true ||
-            permissions?.[operation] === true ||
-            permissions?.[parentName] === true ||
-            ('name' in field &&
-              typeof permissions === 'object' &&
-              permissions?.[field.name] &&
-              (permissions[field.name] === true ||
-                (operation in permissions[field.name] && permissions[field.name][operation])))
-
+          // If the user does not have access at the operation level, to begin with, force it to be read-only
           if ('name' in field && !hasOperationPermission) {
             isReadOnly = true
           }
@@ -109,13 +98,7 @@ export const RenderFields: React.FC<RenderFieldsProps> = (props) => {
               parentPath={parentPath}
               parentSchemaPath={parentSchemaPath}
               path={path}
-              permissions={
-                permissions === undefined || permissions === null || permissions === true
-                  ? true
-                  : 'name' in field
-                    ? permissions?.[field.name]
-                    : permissions
-              }
+              permissions={fieldPermissions}
               readOnly={isReadOnly}
               schemaPath={schemaPath}
             />

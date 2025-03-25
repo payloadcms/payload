@@ -223,6 +223,7 @@ export default buildConfigWithDefaults({
     },
     {
       slug: 'movies',
+      versions: { drafts: true },
       fields: [
         {
           name: 'name',
@@ -241,6 +242,11 @@ export default buildConfigWithDefaults({
         {
           name: 'name',
           type: 'text',
+        },
+        {
+          name: 'localized',
+          type: 'text',
+          localized: true,
         },
         {
           name: 'movies',
