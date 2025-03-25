@@ -1,4 +1,5 @@
 'use client'
+import type { ListDrawerProps } from '@payloadcms/ui'
 import type { LexicalEditor } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
@@ -67,24 +68,18 @@ const RelationshipDrawerComponent: React.FC<Props> = ({ enabledCollectionSlugs }
     )
   }, [editor, openListDrawer])
 
-  const onSelect = useCallback(
-    ({ collectionSlug, docID }: { collectionSlug: string; docID: number | string }) => {
+  const onSelect = useCallback<NonNullable<ListDrawerProps['onSelect']>>(
+    ({ collectionSlug, doc }) => {
       insertRelationship({
         editor,
         relationTo: collectionSlug,
         replaceNodeKey,
-        value: docID,
+        value: doc.id,
       })
       closeListDrawer()
     },
     [editor, closeListDrawer, replaceNodeKey],
   )
-
-  useEffect(() => {
-    // always reset back to first option
-    // TODO: this is not working, see the ListDrawer component
-    setSelectedCollectionSlug(enabledCollectionSlugs?.[0])
-  }, [isListDrawerOpen, enabledCollectionSlugs])
 
   return <ListDrawer onSelect={onSelect} />
 }

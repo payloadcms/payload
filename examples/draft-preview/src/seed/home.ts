@@ -1,4 +1,4 @@
-import type { Page } from '../payload-types'
+import type { Page } from '@payload-types'
 
 // Used for pre-seeded content so that the homepage is not empty
 // @ts-expect-error: Page type is not fully compatible with the provided object structure
@@ -52,7 +52,7 @@ export const home: Page = {
           children: [{ text: 'Payload Admin Bar' }],
           linkType: 'custom',
           newTab: true,
-          url: 'https://github.com/payloadcms/payload-admin-bar',
+          url: 'https://github.com/payloadcms/payload/tree/main/packages/admin-bar',
         },
         {
           text: ' appear at the top of this site. This will allow you to seamlessly navigate between the two apps. Then, navigate to the ',

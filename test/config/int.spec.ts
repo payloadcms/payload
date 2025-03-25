@@ -1,11 +1,14 @@
 import type { BlockField, Payload } from 'payload'
 
+import { execSync } from 'child_process'
+import { existsSync, readFileSync, rmSync } from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { testFilePath } from './testFilePath.js'
 
 let restClient: NextRESTClient
 let payload: Payload
@@ -104,6 +107,33 @@ describe('Config', () => {
     it('includes a custom header in Access-Control-Allow-Headers', async () => {
       const response = await restClient.GET(`/pages`)
       expect(response.headers.get('Access-Control-Allow-Headers')).toContain('x-custom-header')
+    })
+  })
+
+  describe('bin config', () => {
+    const executeCLI = (command: string) => {
+      execSync(`pnpm tsx "${path.resolve(dirname, 'bin.ts')}" ${command}`, {
+        env: {
+          ...process.env,
+          PAYLOAD_CONFIG_PATH: path.resolve(dirname, 'config.ts'),
+          PAYLOAD_DROP_DATABASE: 'false',
+        },
+        stdio: 'inherit',
+        cwd: path.resolve(dirname, '../..'), // from root
+      })
+    }
+
+    const deleteTestFile = () => {
+      if (existsSync(testFilePath)) {
+        rmSync(testFilePath)
+      }
+    }
+
+    it.skip('should execute a custom script', () => {
+      deleteTestFile()
+      executeCLI('start-server')
+      expect(JSON.parse(readFileSync(testFilePath, 'utf-8')).docs).toHaveLength(1)
+      deleteTestFile()
     })
   })
 })

@@ -36,6 +36,7 @@ export type DocumentInfoProps = {
   readonly isLocked: boolean
   readonly lastUpdateTime: number
   readonly mostRecentVersionIsAutosaved: boolean
+  readonly redirectAfterCreate?: boolean
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
   readonly unpublishedVersionCount: number
@@ -49,13 +50,8 @@ export type DocumentInfoContext = {
   documentIsLocked?: boolean
   getDocPermissions: (data?: Data) => Promise<void>
   getDocPreferences: () => Promise<DocumentPreferences>
-  hasPublishedDoc: boolean
   incrementVersionCount: () => void
-  initialData: Data
-  initialState?: FormState
   isInitializing: boolean
-  lastUpdateTime?: number
-  mostRecentVersionIsAutosaved: boolean
   preferencesKey?: string
   savedDocumentData?: Data
   setCurrentEditor?: React.Dispatch<React.SetStateAction<ClientUser>>
@@ -69,10 +65,12 @@ export type DocumentInfoContext = {
   setLastUpdateTime: React.Dispatch<React.SetStateAction<number>>
   setMostRecentVersionIsAutosaved: React.Dispatch<React.SetStateAction<boolean>>
   setUnpublishedVersionCount: React.Dispatch<React.SetStateAction<number>>
+  setUploadStatus?: (status: 'failed' | 'idle' | 'uploading') => void
   title: string
-  unlockDocument: (docId: number | string, slug: string) => Promise<void>
+  unlockDocument: (docID: number | string, slug: string) => Promise<void>
   unpublishedVersionCount: number
-  updateDocumentEditor: (docId: number | string, slug: string, user: ClientUser) => Promise<void>
+  updateDocumentEditor: (docID: number | string, slug: string, user: ClientUser) => Promise<void>
   updateSavedDocumentData: (data: Data) => void
+  uploadStatus?: 'failed' | 'idle' | 'uploading'
   versionCount: number
 } & DocumentInfoProps

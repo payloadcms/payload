@@ -1,7 +1,9 @@
+import type { PgTableFn } from 'drizzle-orm/pg-core'
 import type { DatabaseAdapterObj, Payload } from 'payload'
 
 import {
   beginTransaction,
+  buildCreateMigration,
   commitTransaction,
   count,
   countGlobalVersions,
@@ -9,6 +11,7 @@ import {
   create,
   createGlobal,
   createGlobalVersion,
+  createSchemaGenerator,
   createVersion,
   deleteMany,
   deleteOne,
@@ -31,26 +34,25 @@ import {
   rollbackTransaction,
   updateGlobal,
   updateGlobalVersion,
+  updateMany,
   updateOne,
   updateVersion,
 } from '@payloadcms/drizzle'
 import {
+  columnToCodeConverter,
   countDistinct,
   createDatabase,
   createExtensions,
   createJSONQuery,
-  createMigration,
   defaultDrizzleSnapshot,
   deleteWhere,
   dropDatabase,
   execute,
-  getMigrationTemplate,
   init,
   insert,
   requireDrizzleKit,
 } from '@payloadcms/drizzle/postgres'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
-import path from 'path'
 import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
 import { fileURLToPath } from 'url'
 
@@ -59,11 +61,11 @@ import type { Args, VercelPostgresAdapter } from './types.js'
 import { connect } from './connect.js'
 
 const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
 
 export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<VercelPostgresAdapter> {
   const postgresIDType = args.idType || 'serial'
   const payloadIDType = postgresIDType === 'serial' ? 'number' : 'text'
+  const allowIDOnCreate = args.allowIDOnCreate ?? false
 
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = findMigrationDir(args.migrationDir)
@@ -79,10 +81,10 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
     if (args.schemaName) {
       adapterSchema = pgSchema(args.schemaName)
     } else {
-      adapterSchema = { enum: pgEnum, table: pgTable }
+      adapterSchema = { enum: pgEnum, table: pgTable as unknown as PgTableFn<string> }
     }
 
-    const extensions = (args.extensions ?? []).reduce((acc, name) => {
+    const extensions = (args.extensions ?? []).reduce<Record<string, boolean>>((acc, name) => {
       acc[name] = true
       return acc
     }, {})
@@ -90,11 +92,13 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
     return createDatabaseAdapter<VercelPostgresAdapter>({
       name: 'postgres',
       afterSchemaInit: args.afterSchemaInit ?? [],
+      allowIDOnCreate,
       beforeSchemaInit: args.beforeSchemaInit ?? [],
       createDatabase,
       createExtensions,
       defaultDrizzleSnapshot,
       disableCreateDatabase: args.disableCreateDatabase ?? false,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       drizzle: undefined,
       enums: {},
       extensions,
@@ -102,7 +106,15 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
         json: true,
       },
       fieldConstraints: {},
-      getMigrationTemplate,
+      forceUseVercelPostgres: args.forceUseVercelPostgres ?? false,
+      generateSchema: createSchemaGenerator({
+        columnToCodeConverter,
+        corePackageSuffix: 'pg-core',
+        defaultOutputFile: args.generateSchemaOutputFile,
+        enumImport: 'pgEnum',
+        schemaImport: 'pgSchema',
+        tableImport: 'pgTable',
+      }),
       idType: postgresIDType,
       indexes: new Set<string>(),
       initializing,
@@ -113,7 +125,10 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       pool: undefined,
       poolOptions: args.pool,
       prodMigrations: args.prodMigrations,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       push: args.push,
+      rawRelations: {},
+      rawTables: {},
       relations: {},
       relationshipsSuffix: args.relationshipsSuffix || '_rels',
       schema: {},
@@ -138,9 +153,13 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       createGlobal,
       createGlobalVersion,
       createJSONQuery,
-      createMigration(args) {
-        return createMigration.bind(this)({ ...args, dirname })
-      },
+      createMigration: buildCreateMigration({
+        executeMethod: 'execute',
+        filename,
+        sanitizeStatements({ sqlExecute, statements }) {
+          return `${sqlExecute}\n ${statements.join('\n')}\`)`
+        },
+      }),
       createVersion,
       defaultIDType: payloadIDType,
       deleteMany,
@@ -153,6 +172,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       find,
       findGlobal,
       findGlobalVersions,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       findOne,
       findVersions,
       init,
@@ -167,12 +187,15 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       packageName: '@payloadcms/db-vercel-postgres',
       payload,
       queryDrafts,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       rejectInitializing,
       requireDrizzleKit,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       resolveInitializing,
       rollbackTransaction,
       updateGlobal,
       updateGlobalVersion,
+      updateMany,
       updateOne,
       updateVersion,
       upsert: updateOne,
@@ -180,10 +203,12 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
   }
 
   return {
+    allowIDOnCreate,
     defaultIDType: payloadIDType,
     init: adapter,
   }
 }
 
 export type { MigrateDownArgs, MigrateUpArgs } from '@payloadcms/drizzle/postgres'
+export { geometryColumn } from '@payloadcms/drizzle/postgres'
 export { sql } from 'drizzle-orm'

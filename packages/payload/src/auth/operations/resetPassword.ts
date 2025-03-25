@@ -1,9 +1,9 @@
-import httpStatus from 'http-status'
+import { status as httpStatus } from 'http-status'
 
 import type { Collection } from '../../collections/config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
 
-import { APIError } from '../../errors/index.js'
+import { APIError, Forbidden } from '../../errors/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -29,13 +29,6 @@ export type Arguments = {
 }
 
 export const resetPasswordOperation = async (args: Arguments): Promise<Result> => {
-  if (
-    !Object.prototype.hasOwnProperty.call(args.data, 'token') ||
-    !Object.prototype.hasOwnProperty.call(args.data, 'password')
-  ) {
-    throw new APIError('Missing required data.', httpStatus.BAD_REQUEST)
-  }
-
   const {
     collection: { config: collectionConfig },
     data,
@@ -47,6 +40,17 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
     },
     req,
   } = args
+
+  if (
+    !Object.prototype.hasOwnProperty.call(data, 'token') ||
+    !Object.prototype.hasOwnProperty.call(data, 'password')
+  ) {
+    throw new APIError('Missing required data.', httpStatus.BAD_REQUEST)
+  }
+
+  if (collectionConfig.auth.disableLocalStrategy) {
+    throw new Forbidden(req.t)
+  }
 
   try {
     const shouldCommit = await initTransaction(req)
@@ -87,17 +91,17 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
     // beforeValidate - Collection
     // /////////////////////////////////////
 
-    await collectionConfig.hooks.beforeValidate.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      await hook({
-        collection: args.collection?.config,
-        context: req.context,
-        data: user,
-        operation: 'update',
-        req,
-      })
-    }, Promise.resolve())
+    if (collectionConfig.hooks?.beforeValidate?.length) {
+      for (const hook of collectionConfig.hooks.beforeValidate) {
+        await hook({
+          collection: args.collection?.config,
+          context: req.context,
+          data: user,
+          operation: 'update',
+          req,
+        })
+      }
+    }
 
     // /////////////////////////////////////
     // Update new password
@@ -133,6 +137,11 @@ export const resetPasswordOperation = async (args: Arguments): Promise<Result> =
     })
     if (shouldCommit) {
       await commitTransaction(req)
+    }
+
+    if (fullUser) {
+      fullUser.collection = collectionConfig.slug
+      fullUser._strategy = 'local-jwt'
     }
 
     const result = {

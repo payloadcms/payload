@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { AccessResult } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
 import type { CollectionSlug, JoinQuery } from '../../index.js'
@@ -20,7 +21,9 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { sanitizeJoinQuery } from '../../database/sanitizeJoinQuery.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
@@ -47,6 +50,8 @@ export type Arguments = {
   where?: Where
 }
 
+const lockDurationDefault = 300 // Default 5 minutes in seconds
+
 export const findOperation = async <
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug>,
@@ -60,18 +65,18 @@ export const findOperation = async <
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      args =
-        (await hook({
-          args,
-          collection: args.collection.config,
-          context: args.req.context,
-          operation: 'read',
-          req: args.req,
-        })) || args
-    }, Promise.resolve())
+    if (args.collection.config.hooks?.beforeOperation?.length) {
+      for (const hook of args.collection.config.hooks.beforeOperation) {
+        args =
+          (await hook({
+            args,
+            collection: args.collection.config,
+            context: args.req.context,
+            operation: 'read',
+            req: args.req,
+          })) || args
+      }
+    }
 
     const {
       collection: { config: collectionConfig },
@@ -89,11 +94,16 @@ export const findOperation = async <
       populate,
       req: { fallbackLocale, locale, payload },
       req,
-      select,
+      select: incomingSelect,
       showHiddenFields,
       sort,
       where,
     } = args
+
+    const select = sanitizeSelect({
+      forceSelect: collectionConfig.forceSelect,
+      select: incomingSelect,
+    })
 
     // /////////////////////////////////////
     // Access
@@ -173,6 +183,7 @@ export const findOperation = async <
 
       result = await payload.db.find<DataFromCollectionSlug<TSlug>>({
         collection: collectionConfig.slug,
+        draftsEnabled,
         joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
         limit: sanitizedLimit,
         locale,
@@ -189,13 +200,14 @@ export const findOperation = async <
       try {
         const lockDocumentsProp = collectionConfig?.lockDocuments
 
-        const lockDurationDefault = 300 // Default 5 minutes in seconds
         const lockDuration =
           typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
         const lockDurationInMilliseconds = lockDuration * 1000
 
+        const now = new Date().getTime()
+
         const lockedDocuments = await payload.find({
-          collection: 'payload-locked-documents',
+          collection: lockedDocumentsCollectionSlug,
           depth: 1,
           limit: sanitizedLimit,
           overrideAccess: false,
@@ -216,14 +228,13 @@ export const findOperation = async <
               // Query where the lock is newer than the current time minus lock time
               {
                 updatedAt: {
-                  greater_than: new Date(new Date().getTime() - lockDurationInMilliseconds),
+                  greater_than: new Date(now - lockDurationInMilliseconds),
                 },
               },
             ],
           },
         })
 
-        const now = new Date().getTime()
         const lockedDocs = Array.isArray(lockedDocuments?.docs) ? lockedDocuments.docs : []
 
         // Filter out stale locks
@@ -232,20 +243,16 @@ export const findOperation = async <
           return lastEditedAt + lockDurationInMilliseconds > now
         })
 
-        result.docs = result.docs.map((doc) => {
+        for (const doc of result.docs) {
           const lockedDoc = validLockedDocs.find((lock) => lock?.document?.value === doc.id)
-          return {
-            ...doc,
-            _isLocked: !!lockedDoc,
-            _userEditing: lockedDoc ? lockedDoc?.user?.value : null,
-          }
-        })
-      } catch (error) {
-        result.docs = result.docs.map((doc) => ({
-          ...doc,
-          _isLocked: false,
-          _userEditing: null,
-        }))
+          doc._isLocked = !!lockedDoc
+          doc._userEditing = lockedDoc ? lockedDoc?.user?.value : null
+        }
+      } catch (_err) {
+        for (const doc of result.docs) {
+          doc._isLocked = false
+          doc._userEditing = null
+        }
       }
     }
 
@@ -253,15 +260,12 @@ export const findOperation = async <
     // beforeRead - Collection
     // /////////////////////////////////////
 
-    result = {
-      ...result,
-      docs: await Promise.all(
+    if (collectionConfig?.hooks?.beforeRead?.length) {
+      result.docs = await Promise.all(
         result.docs.map(async (doc) => {
           let docRef = doc
 
-          await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
-            await priorHook
-
+          for (const hook of collectionConfig.hooks.beforeRead) {
             docRef =
               (await hook({
                 collection: collectionConfig,
@@ -270,55 +274,49 @@ export const findOperation = async <
                 query: fullWhere,
                 req,
               })) || docRef
-          }, Promise.resolve())
+          }
 
           return docRef
         }),
-      ),
+      )
     }
 
     // /////////////////////////////////////
     // afterRead - Fields
     // /////////////////////////////////////
 
-    result = {
-      ...result,
-      docs: await Promise.all(
-        result.docs.map(async (doc) =>
-          afterRead<DataFromCollectionSlug<TSlug>>({
-            collection: collectionConfig,
-            context: req.context,
-            currentDepth,
-            depth,
-            doc,
-            draft: draftsEnabled,
-            fallbackLocale,
-            findMany: true,
-            global: null,
-            locale,
-            overrideAccess,
-            populate,
-            req,
-            select,
-            showHiddenFields,
-          }),
-        ),
+    result.docs = await Promise.all(
+      result.docs.map(async (doc) =>
+        afterRead<DataFromCollectionSlug<TSlug>>({
+          collection: collectionConfig,
+          context: req.context,
+          currentDepth,
+          depth,
+          doc,
+          draft: draftsEnabled,
+          fallbackLocale,
+          findMany: true,
+          global: null,
+          locale,
+          overrideAccess,
+          populate,
+          req,
+          select,
+          showHiddenFields,
+        }),
       ),
-    }
+    )
 
     // /////////////////////////////////////
     // afterRead - Collection
     // /////////////////////////////////////
 
-    result = {
-      ...result,
-      docs: await Promise.all(
+    if (collectionConfig?.hooks?.afterRead?.length) {
+      result.docs = await Promise.all(
         result.docs.map(async (doc) => {
           let docRef = doc
 
-          await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-            await priorHook
-
+          for (const hook of collectionConfig.hooks.afterRead) {
             docRef =
               (await hook({
                 collection: collectionConfig,
@@ -328,11 +326,11 @@ export const findOperation = async <
                 query: fullWhere,
                 req,
               })) || doc
-          }, Promise.resolve())
+          }
 
           return docRef
         }),
-      ),
+      )
     }
 
     // /////////////////////////////////////

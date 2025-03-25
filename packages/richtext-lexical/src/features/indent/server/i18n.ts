@@ -33,6 +33,10 @@ export const i18n: Partial<GenericLanguages> = {
     decreaseLabel: 'Disminuir Sangría',
     increaseLabel: 'Aumentar Sangría',
   },
+  et: {
+    decreaseLabel: 'Taande vähendamine',
+    increaseLabel: 'Taande suurendamine',
+  },
   fa: {
     decreaseLabel: 'کاهش تورفتگی',
     increaseLabel: 'افزایش تورفتگی',
@@ -90,8 +94,8 @@ export const i18n: Partial<GenericLanguages> = {
     increaseLabel: 'Crește indentarea',
   },
   rs: {
-    decreaseLabel: 'Smanji uvlačenje',
-    increaseLabel: 'Povećaj uvlačenje',
+    decreaseLabel: 'Смањи увлачење',
+    increaseLabel: 'Повећај увлачење',
   },
   'rs-latin': {
     decreaseLabel: 'Smanji uvlačenje',
@@ -104,6 +108,10 @@ export const i18n: Partial<GenericLanguages> = {
   sk: {
     decreaseLabel: 'Znížiť odsadenie',
     increaseLabel: 'Zväčšiť odsadenie',
+  },
+  sl: {
+    decreaseLabel: 'Zmanjšaj zamik',
+    increaseLabel: 'Povečaj zamik',
   },
   sv: {
     decreaseLabel: 'Minska indrag',

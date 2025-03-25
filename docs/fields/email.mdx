@@ -51,25 +51,26 @@ _\* An asterisk denotes that a property is required._
 
 ## Admin Options
 
-The customize the appearance and behavior of the Email Field in the [Admin Panel](../admin/overview), you can use the `admin` option:
+To customize the appearance and behavior of the Email Field in the [Admin Panel](../admin/overview), you can use the `admin` option:
 
 ```ts
 import type { Field } from 'payload'
 
 export const MyEmailField: Field = {
   // ...
-  admin: { // highlight-line
+  admin: {
+    // highlight-line
     // ...
   },
 }
 ```
 
-The Email Field inherits all of the default options from the base [Field Admin Config](../admin/fields#admin-options), plus the following additional options:
+The Email Field inherits all of the default options from the base [Field Admin Config](./overview#admin-options), plus the following additional options:
 
-| Property                       | Description                                                                                                                            |
-| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-| **`placeholder`**              | Set this property to define a placeholder string for the field.                                                                         |
-| **`autoComplete`**             | Set this property to a string that will be used for browser autocomplete.                                                               |
+| Property           | Description                                                               |
+| ------------------ | ------------------------------------------------------------------------- |
+| **`placeholder`**  | Set this property to define a placeholder string for the field.           |
+| **`autoComplete`** | Set this property to a string that will be used for browser autocomplete. |
 
 ## Example
 
@@ -88,5 +89,91 @@ export const ExampleCollection: CollectionConfig = {
       required: true,
     },
   ],
+}
+```
+
+## Custom Components
+
+### Field
+
+#### Server Component
+
+```tsx
+import type React from 'react'
+import { EmailField } from '@payloadcms/ui'
+import type { EmailFieldServerComponent } from 'payload'
+
+export const CustomEmailFieldServer: EmailFieldServerComponent = ({
+  clientField,
+  path,
+  schemaPath,
+  permissions,
+}) => {
+  return (
+    <EmailField
+      field={clientField}
+      path={path}
+      schemaPath={schemaPath}
+      permissions={permissions}
+    />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { EmailField } from '@payloadcms/ui'
+import type { EmailFieldClientComponent } from 'payload'
+
+export const CustomEmailFieldClient: EmailFieldClientComponent = (props) => {
+  return <EmailField {...props} />
+}
+```
+
+### Label
+
+#### Server Component
+
+```tsx
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { EmailFieldLabelServerComponent } from 'payload'
+
+export const CustomEmailFieldLabelServer: EmailFieldLabelServerComponent = ({
+  clientField,
+  path,
+}) => {
+  return (
+    <FieldLabel
+      label={clientField?.label || clientField?.name}
+      path={path}
+      required={clientField?.required}
+    />
+  )
+}
+```
+
+#### Client Component
+
+```tsx
+'use client'
+import React from 'react'
+import { FieldLabel } from '@payloadcms/ui'
+import type { EmailFieldLabelClientComponent } from 'payload'
+
+export const CustomEmailFieldLabelClient: EmailFieldLabelClientComponent = ({
+  field,
+  path,
+}) => {
+  return (
+    <FieldLabel
+      label={field?.label || field?.name}
+      path={path}
+      required={field?.required}
+    />
+  )
 }
 ```

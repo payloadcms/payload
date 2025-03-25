@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { Sharp, Metadata as SharpMetadata, SharpOptions } from 'sharp'
 
 import { fileTypeFromBuffer } from 'file-type'
@@ -176,6 +177,15 @@ const getImageResizeAction = ({
     }
   }
 
+  if (withoutEnlargement === undefined && (!targetWidth || !targetHeight)) {
+    if (
+      (targetWidth && originalImage.width < targetWidth) ||
+      (targetHeight && originalImage.height < targetHeight)
+    ) {
+      return 'omit'
+    }
+  }
+
   const originalImageIsSmallerXOrY =
     originalImage.width < targetWidth || originalImage.height < targetHeight
   if (fit === 'contain' || fit === 'inside') {
@@ -350,6 +360,7 @@ export async function resizeAndTransformImageSizes({
         const prioritizeHeight = resizeAspectRatio < originalAspectRatio
         // Scales the image before extracting from it
         resized = imageToResize.resize({
+          fastShrinkOnLoad: false,
           height: prioritizeHeight ? resizeHeight : undefined,
           width: prioritizeHeight ? undefined : resizeWidth,
         })

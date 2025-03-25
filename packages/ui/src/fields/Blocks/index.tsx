@@ -1,5 +1,5 @@
 'use client'
-import type { BlocksFieldClientComponent } from 'payload'
+import type { BlocksFieldClientComponent, ClientBlock } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { Fragment, useCallback } from 'react'
@@ -39,6 +39,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     field: {
       name,
       admin: { className, description, isSortable = true } = {},
+      blockReferences,
       blocks,
       label,
       labels: labelsFromProps,
@@ -53,6 +54,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
     schemaPath: schemaPathFromProps,
     validate,
   } = props
+
   const schemaPath = schemaPathFromProps ?? name
 
   const minRows = (minRowsProp ?? required) ? 1 : 0
@@ -62,6 +64,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   const { code: locale } = useLocale()
   const {
     config: { localization },
+    config,
   } = useConfig()
   const drawerSlug = useDrawerSlug('blocks-drawer')
   const submitted = useFormSubmitted()
@@ -74,7 +77,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
 
   const editingDefaultLocale = (() => {
     if (localization && localization.fallback) {
-      const defaultLocale = localization.defaultLocale || 'en'
+      const defaultLocale = localization.defaultLocale
       return locale === defaultLocale
     }
 
@@ -95,7 +98,8 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   )
 
   const {
-    customComponents: { Description, Error, Label } = {},
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label, RowLabels } = {},
+    disabled,
     errorPaths,
     rows = [],
     showError,
@@ -250,6 +254,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
           Fallback={<FieldDescription description={description} path={path} />}
         />
       </header>
+      {BeforeInput}
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
       {(rows.length > 0 || (!valid && (showRequired || showMinRows))) && (
         <DraggableSortable
@@ -258,8 +263,12 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
           onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
         >
           {rows.map((row, i) => {
-            const { blockType } = row
-            const blockConfig = blocks.find((block) => block.slug === blockType)
+            const { blockType, isLoading } = row
+            const blockConfig: ClientBlock =
+              config.blocksMap[blockType] ??
+              ((blockReferences ?? blocks).find(
+                (block) => typeof block !== 'string' && block.slug === blockType,
+              ) as ClientBlock)
 
             if (blockConfig) {
               const rowPath = `${path}.${i}`
@@ -269,25 +278,30 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
               ).length
 
               return (
-                <DraggableSortableItem disabled={readOnly || !isSortable} id={row.id} key={row.id}>
+                <DraggableSortableItem
+                  disabled={readOnly || disabled || !isSortable}
+                  id={row.id}
+                  key={row.id}
+                >
                   {(draggableSortableItemProps) => (
                     <BlockRow
                       {...draggableSortableItemProps}
                       addRow={addRow}
                       block={blockConfig}
-                      blocks={blocks}
+                      blocks={blockReferences ?? blocks}
                       duplicateRow={duplicateRow}
                       errorCount={rowErrorCount}
                       fields={blockConfig.fields}
                       hasMaxRows={hasMaxRows}
+                      isLoading={isLoading}
                       isSortable={isSortable}
-                      Label={Label}
+                      Label={RowLabels?.[i]}
                       labels={labels}
                       moveRow={moveRow}
                       parentPath={path}
                       path={rowPath}
                       permissions={permissions}
-                      readOnly={readOnly}
+                      readOnly={readOnly || disabled}
                       removeRow={removeRow}
                       row={row}
                       rowCount={rows.length}
@@ -327,12 +341,12 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         <Fragment>
           <DrawerToggler
             className={`${baseClass}__drawer-toggler`}
-            disabled={readOnly}
+            disabled={readOnly || disabled}
             slug={drawerSlug}
           >
             <Button
               buttonStyle="icon-label"
-              disabled={readOnly}
+              disabled={readOnly || disabled}
               el="span"
               icon="plus"
               iconPosition="left"
@@ -344,12 +358,13 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
           <BlocksDrawer
             addRow={addRow}
             addRowIndex={rows?.length || 0}
-            blocks={blocks}
+            blocks={blockReferences ?? blocks}
             drawerSlug={drawerSlug}
             labels={labels}
           />
         </Fragment>
       )}
+      {AfterInput}
     </div>
   )
 }

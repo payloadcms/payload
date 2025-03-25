@@ -69,7 +69,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   const editingDefaultLocale = (() => {
     if (localization && localization.fallback) {
-      const defaultLocale = localization.defaultLocale || 'en'
+      const defaultLocale = localization.defaultLocale
       return locale === defaultLocale
     }
 
@@ -110,7 +110,8 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   )
 
   const {
-    customComponents: { Description, Error, Label, RowLabels } = {},
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label, RowLabels } = {},
+    disabled,
     errorPaths,
     rows: rowsData = [],
     showError,
@@ -197,7 +198,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   const fieldErrorCount = errorPaths.length
   const fieldHasErrors = submitted && errorPaths.length > 0
 
-  const showRequired = readOnly && rowsData.length === 0
+  const showRequired = (readOnly || disabled) && rowsData.length === 0
   const showMinRows = rowsData.length < minRows || (required && rowsData.length === 0)
 
   return (
@@ -268,6 +269,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         />
       </header>
       <NullifyLocaleField fieldValue={value} localized={localized} path={path} />
+      {BeforeInput}
       {(rowsData?.length > 0 || (!valid && (showRequired || showMinRows))) && (
         <DraggableSortable
           className={`${baseClass}__draggable-rows`}
@@ -275,7 +277,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
           onDragEnd={({ moveFromIndex, moveToIndex }) => moveRow(moveFromIndex, moveToIndex)}
         >
           {rowsData.map((rowData, i) => {
-            const { id: rowID } = rowData
+            const { id: rowID, isLoading } = rowData
 
             const rowPath = `${path}.${i}`
 
@@ -284,7 +286,11 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
             ).length
 
             return (
-              <DraggableSortableItem disabled={readOnly || !isSortable} id={rowID} key={rowID}>
+              <DraggableSortableItem
+                disabled={readOnly || disabled || !isSortable}
+                id={rowID}
+                key={rowID}
+              >
                 {(draggableSortableItemProps) => (
                   <ArrayRow
                     {...draggableSortableItemProps}
@@ -295,13 +301,14 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                     fields={fields}
                     forceRender={forceRender}
                     hasMaxRows={hasMaxRows}
+                    isLoading={isLoading}
                     isSortable={isSortable}
                     labels={labels}
                     moveRow={moveRow}
                     parentPath={path}
                     path={rowPath}
                     permissions={permissions}
-                    readOnly={readOnly}
+                    readOnly={readOnly || disabled}
                     removeRow={removeRow}
                     row={rowData}
                     rowCount={rowsData?.length}
@@ -334,11 +341,10 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
           )}
         </DraggableSortable>
       )}
-      {!hasMaxRows && (
+      {!hasMaxRows && !readOnly && (
         <Button
           buttonStyle="icon-label"
           className={`${baseClass}__add-row`}
-          disabled={readOnly}
           icon="plus"
           iconPosition="left"
           iconStyle="with-border"
@@ -349,6 +355,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
           {t('fields:addLabel', { label: getTranslation(labels.singular, i18n) })}
         </Button>
       )}
+      {AfterInput}
     </div>
   )
 }

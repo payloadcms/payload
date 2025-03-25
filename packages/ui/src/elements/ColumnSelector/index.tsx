@@ -1,17 +1,16 @@
 'use client'
 import type { SanitizedCollectionConfig } from 'payload'
 
-import React, { useId } from 'react'
-
-import type { Column } from '../Table/index.js'
+import { fieldIsHiddenOrDisabled, fieldIsID } from 'payload/shared'
+import React, { useId, useMemo } from 'react'
 
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { PlusIcon } from '../../icons/Plus/index.js'
 import { XIcon } from '../../icons/X/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
+import { useTableColumns } from '../../providers/TableColumns/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
 import { Pill } from '../Pill/index.js'
-import { useTableColumns } from '../TableColumns/index.js'
 import './index.scss'
 
 const baseClass = 'column-selector'
@@ -20,23 +19,25 @@ export type Props = {
   readonly collectionSlug: SanitizedCollectionConfig['slug']
 }
 
-const filterColumnFields = (columns: Column[]): Column[] => {
-  return columns.filter((c) => {
-    return !c?.field?.admin?.disableListColumn
-  })
-}
-
 export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
   const { columns, moveColumn, toggleColumn } = useTableColumns()
 
   const uuid = useId()
   const editDepth = useEditDepth()
 
+  const filteredColumns = useMemo(
+    () =>
+      columns.filter(
+        (col) =>
+          !(fieldIsHiddenOrDisabled(col.field) && !fieldIsID(col.field)) &&
+          !col?.field?.admin?.disableListColumn,
+      ),
+    [columns],
+  )
+
   if (!columns) {
     return null
   }
-
-  const filteredColumns = filterColumnFields(columns)
 
   return (
     <DraggableSortable
@@ -50,20 +51,7 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
       }}
     >
       {filteredColumns.map((col, i) => {
-        if (!col) {
-          return null
-        }
-
         const { accessor, active, field } = col
-
-        if (
-          col.accessor === '_select' ||
-          !field ||
-          col.CustomLabel === null ||
-          (col.CustomLabel === undefined && !('label' in field))
-        ) {
-          return null
-        }
 
         return (
           <Pill
@@ -80,7 +68,9 @@ export const ColumnSelector: React.FC<Props> = ({ collectionSlug }) => {
               void toggleColumn(accessor)
             }}
           >
-            {col.CustomLabel ?? <FieldLabel label={'label' in field && field.label} unstyled />}
+            {col.CustomLabel ?? (
+              <FieldLabel label={field && 'label' in field && field.label} unstyled />
+            )}
           </Pill>
         )
       })}

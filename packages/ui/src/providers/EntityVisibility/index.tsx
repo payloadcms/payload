@@ -1,7 +1,7 @@
 'use client'
 import type { SanitizedCollectionConfig, SanitizedGlobalConfig, VisibleEntities } from 'payload'
 
-import React, { createContext, useCallback, useContext } from 'react'
+import React, { createContext, use, useCallback } from 'react'
 
 export type VisibleEntitiesContextType = {
   isEntityVisible: ({
@@ -42,11 +42,10 @@ export const EntityVisibilityProvider: React.FC<{
   )
 
   return (
-    <EntityVisibilityContext.Provider value={{ isEntityVisible, visibleEntities }}>
+    <EntityVisibilityContext value={{ isEntityVisible, visibleEntities }}>
       {children}
-    </EntityVisibilityContext.Provider>
+    </EntityVisibilityContext>
   )
 }
 
-export const useEntityVisibility = (): VisibleEntitiesContextType =>
-  useContext(EntityVisibilityContext)
+export const useEntityVisibility = (): VisibleEntitiesContextType => use(EntityVisibilityContext)

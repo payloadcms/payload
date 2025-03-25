@@ -55,7 +55,9 @@ const columnFields: Field[] = [
   link({
     overrides: {
       admin: {
-        condition: (_, { enableLink }) => Boolean(enableLink),
+        condition: (_data, siblingData) => {
+          return Boolean(siblingData?.enableLink)
+        },
       },
     },
   }),
@@ -68,6 +70,9 @@ export const Content: Block = {
     {
       name: 'columns',
       type: 'array',
+      admin: {
+        initCollapsed: true,
+      },
       fields: columnFields,
     },
   ],

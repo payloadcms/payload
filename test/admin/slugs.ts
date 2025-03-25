@@ -8,10 +8,16 @@ export const group1Collection2Slug = 'group-one-collection-twos'
 export const group2Collection1Slug = 'group-two-collection-ones'
 export const group2Collection2Slug = 'group-two-collection-twos'
 export const hiddenCollectionSlug = 'hidden-collection'
+export const notInViewCollectionSlug = 'not-in-view-collection'
 export const noApiViewCollectionSlug = 'collection-no-api-view'
 export const disableDuplicateSlug = 'disable-duplicate'
+export const disableCopyToLocale = 'disable-copy-to-locale'
 export const uploadCollectionSlug = 'uploads'
+
+export const uploadTwoCollectionSlug = 'uploads-two'
 export const customFieldsSlug = 'custom-fields'
+
+export const listDrawerSlug = 'with-list-drawer'
 export const collectionSlugs = [
   usersCollectionSlug,
   customViews1CollectionSlug,
@@ -26,6 +32,7 @@ export const collectionSlugs = [
   noApiViewCollectionSlug,
   customFieldsSlug,
   disableDuplicateSlug,
+  listDrawerSlug,
 ]
 
 export const customGlobalViews1GlobalSlug = 'custom-global-views-one'
@@ -35,6 +42,7 @@ export const group1GlobalSlug = 'group-globals-one'
 export const group2GlobalSlug = 'group-globals-two'
 export const hiddenGlobalSlug = 'hidden-global'
 
+export const notInViewGlobalSlug = 'not-in-view-global'
 export const settingsGlobalSlug = 'settings'
 export const noApiViewGlobalSlug = 'global-no-api-view'
 export const globalSlugs = [
@@ -46,6 +54,4 @@ export const globalSlugs = [
   hiddenGlobalSlug,
   noApiViewGlobalSlug,
 ]
-
-export const customIdCollectionSlug = 'customId'
-export const customIdCollectionId = '111111111111111111111111'
+export const with300DocumentsSlug = 'with300documents'

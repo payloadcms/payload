@@ -1,6 +1,5 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { PostgresAdapter } from '@payloadcms/db-postgres/types'
-import type { Table } from 'drizzle-orm'
 import type { NextRESTClient } from 'helpers/NextRESTClient.js'
 import type { Payload, PayloadRequest, TypeWithID } from 'payload'
 
@@ -8,10 +7,12 @@ import {
   migrateRelationshipsV2_V3,
   migrateVersionsV1_V2,
 } from '@payloadcms/db-mongodb/migration-utils'
+import { randomUUID } from 'crypto'
+import { type Table } from 'drizzle-orm'
 import * as drizzlePg from 'drizzle-orm/pg-core'
 import * as drizzleSqlite from 'drizzle-orm/sqlite-core'
 import fs from 'fs'
-import { Types } from 'mongoose'
+import mongoose, { Types } from 'mongoose'
 import path from 'path'
 import {
   commitTransaction,
@@ -22,10 +23,14 @@ import {
 } from 'payload'
 import { fileURLToPath } from 'url'
 
+import type { Global2 } from './payload-types.js'
+
 import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
 import { isMongoose } from '../helpers/isMongoose.js'
 import removeFiles from '../helpers/removeFiles.js'
+import { seed } from './seed.js'
+import { errorOnUnnamedFieldsSlug, postsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -34,14 +39,22 @@ let payload: Payload
 let user: Record<string, unknown> & TypeWithID
 let token: string
 let restClient: NextRESTClient
-const collection = 'posts'
+const collection = postsSlug
 const title = 'title'
 process.env.PAYLOAD_CONFIG_PATH = path.join(dirname, 'config.ts')
 
 describe('database', () => {
   beforeAll(async () => {
+    process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, restClient } = await initPayloadInt(dirname))
     payload.db.migrationDir = path.join(dirname, './migrations')
+
+    await seed(payload)
+
+    await restClient.login({
+      slug: 'users',
+      credentials: devUser,
+    })
 
     const loginResult = await payload.login({
       collection: 'users',
@@ -136,12 +149,69 @@ describe('database', () => {
     it('should not accidentally treat nested id fields as custom id', () => {
       expect(payload.collections['fake-custom-ids'].customIDType).toBeUndefined()
     })
+
+    it('should not overwrite supplied block and array row IDs on create', async () => {
+      const arrayRowID = '67648ed5c72f13be6eacf24e'
+      const blockID = '6764de9af79a863575c5f58c'
+
+      const doc = await payload.create({
+        collection: postsSlug,
+        data: {
+          title: 'test',
+          arrayWithIDs: [
+            {
+              id: arrayRowID,
+            },
+          ],
+          blocksWithIDs: [
+            {
+              blockType: 'block',
+              id: blockID,
+            },
+          ],
+        },
+      })
+
+      expect(doc.arrayWithIDs[0].id).toStrictEqual(arrayRowID)
+      expect(doc.blocksWithIDs[0].id).toStrictEqual(blockID)
+    })
+
+    it('should overwrite supplied block and array row IDs on duplicate', async () => {
+      const arrayRowID = '6764deb5201e9e36aeba3b6c'
+      const blockID = '6764dec58c68f337a758180c'
+
+      const doc = await payload.create({
+        collection: postsSlug,
+        data: {
+          title: 'test',
+          arrayWithIDs: [
+            {
+              id: arrayRowID,
+            },
+          ],
+          blocksWithIDs: [
+            {
+              blockType: 'block',
+              id: blockID,
+            },
+          ],
+        },
+      })
+
+      const duplicate = await payload.duplicate({
+        collection: postsSlug,
+        id: doc.id,
+      })
+
+      expect(duplicate.arrayWithIDs[0].id).not.toStrictEqual(arrayRowID)
+      expect(duplicate.blocksWithIDs[0].id).not.toStrictEqual(blockID)
+    })
   })
 
   describe('timestamps', () => {
     it('should have createdAt and updatedAt timestamps to the millisecond', async () => {
       const result = await payload.create({
-        collection: 'posts',
+        collection: postsSlug,
         data: {
           title: 'hello',
         },
@@ -155,7 +225,7 @@ describe('database', () => {
     it('should allow createdAt to be set in create', async () => {
       const createdAt = new Date('2021-01-01T00:00:00.000Z').toISOString()
       const result = await payload.create({
-        collection: 'posts',
+        collection: postsSlug,
         data: {
           createdAt,
           title: 'hello',
@@ -164,7 +234,7 @@ describe('database', () => {
 
       const doc = await payload.findByID({
         id: result.id,
-        collection: 'posts',
+        collection: postsSlug,
       })
 
       expect(result.createdAt).toStrictEqual(createdAt)
@@ -174,7 +244,7 @@ describe('database', () => {
     it('updatedAt cannot be set in create', async () => {
       const updatedAt = new Date('2022-01-01T00:00:00.000Z').toISOString()
       const result = await payload.create({
-        collection: 'posts',
+        collection: postsSlug,
         data: {
           title: 'hello',
           updatedAt,
@@ -182,6 +252,194 @@ describe('database', () => {
       })
 
       expect(result.updatedAt).not.toStrictEqual(updatedAt)
+    })
+  })
+
+  describe('Data strictness', () => {
+    it('should not save and leak password, confirm-password from Local API', async () => {
+      const createdUser = await payload.create({
+        collection: 'users',
+        data: {
+          password: 'some-password',
+          // @ts-expect-error
+          'confirm-password': 'some-password',
+          email: 'user1@payloadcms.com',
+        },
+      })
+
+      let keys = Object.keys(createdUser)
+
+      expect(keys).not.toContain('password')
+      expect(keys).not.toContain('confirm-password')
+
+      const foundUser = await payload.findByID({ id: createdUser.id, collection: 'users' })
+
+      keys = Object.keys(foundUser)
+
+      expect(keys).not.toContain('password')
+      expect(keys).not.toContain('confirm-password')
+    })
+
+    it('should not save and leak password, confirm-password from payload.db', async () => {
+      const createdUser = await payload.db.create({
+        collection: 'users',
+        data: {
+          password: 'some-password',
+          'confirm-password': 'some-password',
+          email: 'user2@payloadcms.com',
+        },
+      })
+
+      let keys = Object.keys(createdUser)
+
+      expect(keys).not.toContain('password')
+      expect(keys).not.toContain('confirm-password')
+
+      const foundUser = await payload.db.findOne({
+        collection: 'users',
+        where: { id: createdUser.id },
+      })
+
+      keys = Object.keys(foundUser)
+      expect(keys).not.toContain('password')
+      expect(keys).not.toContain('confirm-password')
+    })
+  })
+
+  describe('allow ID on create', () => {
+    beforeAll(() => {
+      payload.db.allowIDOnCreate = true
+      payload.config.db.allowIDOnCreate = true
+    })
+
+    afterAll(() => {
+      payload.db.allowIDOnCreate = false
+      payload.config.db.allowIDOnCreate = false
+    })
+
+    it('local API - accepts ID on create', async () => {
+      let id: any = null
+      if (payload.db.name === 'mongoose') {
+        id = new mongoose.Types.ObjectId().toHexString()
+      } else if (payload.db.idType === 'uuid') {
+        id = randomUUID()
+      } else {
+        id = 9999
+      }
+
+      const post = await payload.create({ collection: 'posts', data: { id, title: 'created' } })
+
+      expect(post.id).toBe(id)
+    })
+
+    it('rEST API - accepts ID on create', async () => {
+      let id: any = null
+      if (payload.db.name === 'mongoose') {
+        id = new mongoose.Types.ObjectId().toHexString()
+      } else if (payload.db.idType === 'uuid') {
+        id = randomUUID()
+      } else {
+        id = 99999
+      }
+
+      const response = await restClient.POST(`/posts`, {
+        body: JSON.stringify({
+          id,
+          title: 'created',
+        }),
+      })
+
+      const post = await response.json()
+
+      expect(post.doc.id).toBe(id)
+    })
+
+    it('graphQL - accepts ID on create', async () => {
+      let id: any = null
+      if (payload.db.name === 'mongoose') {
+        id = new mongoose.Types.ObjectId().toHexString()
+      } else if (payload.db.idType === 'uuid') {
+        id = randomUUID()
+      } else {
+        id = 999999
+      }
+
+      const query = `mutation {
+                createPost(data: {title: "created", id: ${typeof id === 'string' ? `"${id}"` : id}}) {
+                id
+                title
+              }
+            }`
+      const res = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+
+      const doc = res.data.createPost
+
+      expect(doc).toMatchObject({ title: 'created', id })
+      expect(doc.id).toBe(id)
+    })
+  })
+
+  describe('Compound Indexes', () => {
+    beforeEach(async () => {
+      await payload.delete({ collection: 'compound-indexes', where: {} })
+    })
+
+    it('top level: should throw a unique error', async () => {
+      await payload.create({
+        collection: 'compound-indexes',
+        data: { three: randomUUID(), one: '1', two: '2' },
+      })
+
+      // does not fail
+      await payload.create({
+        collection: 'compound-indexes',
+        data: { three: randomUUID(), one: '1', two: '3' },
+      })
+      // does not fail
+      await payload.create({
+        collection: 'compound-indexes',
+        data: { three: randomUUID(), one: '-1', two: '2' },
+      })
+
+      // fails
+      await expect(
+        payload.create({
+          collection: 'compound-indexes',
+          data: { three: randomUUID(), one: '1', two: '2' },
+        }),
+      ).rejects.toBeTruthy()
+    })
+
+    it('combine group and top level: should throw a unique error', async () => {
+      await payload.create({
+        collection: 'compound-indexes',
+        data: {
+          one: randomUUID(),
+          three: '3',
+          group: { four: '4' },
+        },
+      })
+
+      // does not fail
+      await payload.create({
+        collection: 'compound-indexes',
+        data: { one: randomUUID(), three: '3', group: { four: '5' } },
+      })
+      // does not fail
+      await payload.create({
+        collection: 'compound-indexes',
+        data: { one: randomUUID(), three: '4', group: { four: '4' } },
+      })
+
+      // fails
+      await expect(
+        payload.create({
+          collection: 'compound-indexes',
+          data: { one: randomUUID(), three: '3', group: { four: '4' } },
+        }),
+      ).rejects.toBeTruthy()
     })
   })
 
@@ -530,7 +788,7 @@ describe('database', () => {
   describe('transactions', () => {
     describe('local api', () => {
       // sqlite cannot handle concurrent write transactions
-      if (!['sqlite'].includes(process.env.PAYLOAD_DATABASE)) {
+      if (!['sqlite', 'sqlite-uuid'].includes(process.env.PAYLOAD_DATABASE)) {
         it('should commit multiple operations in isolation', async () => {
           const req = {
             payload,
@@ -683,6 +941,7 @@ describe('database', () => {
             data: {
               title,
             },
+            depth: 0,
             disableTransaction: true,
           })
         })
@@ -754,6 +1013,599 @@ describe('database', () => {
       expect(helloDocs).toHaveLength(5)
       expect(worldDocs).toHaveLength(5)
     })
+
+    it('should CRUD point field', async () => {
+      const result = await payload.create({
+        collection: 'default-values',
+        data: {
+          point: [5, 10],
+        },
+      })
+
+      expect(result.point).toEqual([5, 10])
+    })
+
+    it('ensure updateMany updates all docs and respects where query', async () => {
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      await payload.create({
+        collection: postsSlug,
+        data: {
+          title: 'notupdated',
+        },
+      })
+
+      // Create 5 posts
+      for (let i = 0; i < 5; i++) {
+        await payload.create({
+          collection: postsSlug,
+          data: {
+            title: `v1 ${i}`,
+          },
+        })
+      }
+
+      const result = await payload.db.updateMany({
+        collection: postsSlug,
+        data: {
+          title: 'updated',
+        },
+        where: {
+          title: {
+            not_equals: 'notupdated',
+          },
+        },
+      })
+
+      expect(result?.length).toBe(5)
+      expect(result?.[0]?.title).toBe('updated')
+      expect(result?.[4]?.title).toBe('updated')
+
+      // Ensure all posts minus the one we don't want updated are updated
+      const { docs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        where: {
+          title: {
+            equals: 'updated',
+          },
+        },
+      })
+
+      expect(docs).toHaveLength(5)
+      expect(docs?.[0]?.title).toBe('updated')
+      expect(docs?.[4]?.title).toBe('updated')
+
+      const { docs: notUpdatedDocs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        where: {
+          title: {
+            not_equals: 'updated',
+          },
+        },
+      })
+
+      expect(notUpdatedDocs).toHaveLength(1)
+      expect(notUpdatedDocs?.[0]?.title).toBe('notupdated')
+    })
+
+    it('ensure updateMany respects limit', async () => {
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      // Create 11 posts
+      for (let i = 0; i < 11; i++) {
+        await payload.create({
+          collection: postsSlug,
+          data: {
+            title: 'not updated',
+          },
+        })
+      }
+
+      const result = await payload.db.updateMany({
+        collection: postsSlug,
+        data: {
+          title: 'updated',
+        },
+        limit: 5,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      expect(result?.length).toBe(5)
+      expect(result?.[0]?.title).toBe('updated')
+      expect(result?.[4]?.title).toBe('updated')
+
+      // Ensure all posts minus the one we don't want updated are updated
+      const { docs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        where: {
+          title: {
+            equals: 'updated',
+          },
+        },
+      })
+
+      expect(docs).toHaveLength(5)
+      expect(docs?.[0]?.title).toBe('updated')
+      expect(docs?.[4]?.title).toBe('updated')
+
+      const { docs: notUpdatedDocs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        where: {
+          title: {
+            equals: 'not updated',
+          },
+        },
+      })
+
+      expect(notUpdatedDocs).toHaveLength(6)
+      expect(notUpdatedDocs?.[0]?.title).toBe('not updated')
+      expect(notUpdatedDocs?.[5]?.title).toBe('not updated')
+    })
+
+    it('ensure updateMany respects limit and sort', async () => {
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      const numbers = Array.from({ length: 11 }, (_, i) => i)
+
+      // shuffle the numbers
+      numbers.sort(() => Math.random() - 0.5)
+
+      // create 11 documents numbered 0-10, but in random order
+      for (const i of numbers) {
+        await payload.create({
+          collection: postsSlug,
+          data: {
+            title: 'not updated',
+            number: i,
+          },
+        })
+      }
+
+      const result = await payload.db.updateMany({
+        collection: postsSlug,
+        data: {
+          title: 'updated',
+        },
+        limit: 5,
+        sort: 'number',
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      expect(result?.length).toBe(5)
+
+      for (let i = 0; i < 5; i++) {
+        expect(result?.[i]?.number).toBe(i)
+        expect(result?.[i]?.title).toBe('updated')
+      }
+
+      // Ensure all posts minus the one we don't want updated are updated
+      const { docs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        sort: 'number',
+        where: {
+          title: {
+            equals: 'updated',
+          },
+        },
+      })
+
+      expect(docs).toHaveLength(5)
+      for (let i = 0; i < 5; i++) {
+        expect(docs?.[i]?.number).toBe(i)
+        expect(docs?.[i]?.title).toBe('updated')
+      }
+    })
+
+    it('ensure payload.update operation respects limit and sort', async () => {
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      const numbers = Array.from({ length: 11 }, (_, i) => i)
+
+      // shuffle the numbers
+      numbers.sort(() => Math.random() - 0.5)
+
+      // create 11 documents numbered 0-10, but in random order
+      for (const i of numbers) {
+        await payload.create({
+          collection: postsSlug,
+          data: {
+            title: 'not updated',
+            number: i,
+          },
+        })
+      }
+
+      const result = await payload.update({
+        collection: postsSlug,
+        data: {
+          title: 'updated',
+        },
+        limit: 5,
+        sort: 'number',
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      expect(result?.docs.length).toBe(5)
+
+      for (let i = 0; i < 5; i++) {
+        expect(result?.docs?.[i]?.number).toBe(i)
+        expect(result?.docs?.[i]?.title).toBe('updated')
+      }
+
+      // Ensure all posts minus the one we don't want updated are updated
+      const { docs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        sort: 'number',
+        where: {
+          title: {
+            equals: 'updated',
+          },
+        },
+      })
+
+      expect(docs).toHaveLength(5)
+      for (let i = 0; i < 5; i++) {
+        expect(docs?.[i]?.number).toBe(i)
+        expect(docs?.[i]?.title).toBe('updated')
+      }
+    })
+
+    it('ensure updateMany respects limit and negative sort', async () => {
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      const numbers = Array.from({ length: 11 }, (_, i) => i)
+
+      // shuffle the numbers
+      numbers.sort(() => Math.random() - 0.5)
+
+      // create 11 documents numbered 0-10, but in random order
+      for (const i of numbers) {
+        await payload.create({
+          collection: postsSlug,
+          data: {
+            title: 'not updated',
+            number: i,
+          },
+        })
+      }
+
+      const result = await payload.db.updateMany({
+        collection: postsSlug,
+        data: {
+          title: 'updated',
+        },
+        limit: 5,
+        sort: '-number',
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      expect(result?.length).toBe(5)
+
+      for (let i = 10; i > 5; i--) {
+        expect(result?.[-i + 10]?.number).toBe(i)
+        expect(result?.[-i + 10]?.title).toBe('updated')
+      }
+
+      // Ensure all posts minus the one we don't want updated are updated
+      const { docs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        sort: '-number',
+        where: {
+          title: {
+            equals: 'updated',
+          },
+        },
+      })
+
+      expect(docs).toHaveLength(5)
+      for (let i = 10; i > 5; i--) {
+        expect(docs?.[-i + 10]?.number).toBe(i)
+        expect(docs?.[-i + 10]?.title).toBe('updated')
+      }
+    })
+
+    it('ensure payload.update operation respects limit and negative sort', async () => {
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      const numbers = Array.from({ length: 11 }, (_, i) => i)
+
+      // shuffle the numbers
+      numbers.sort(() => Math.random() - 0.5)
+
+      // create 11 documents numbered 0-10, but in random order
+      for (const i of numbers) {
+        await payload.create({
+          collection: postsSlug,
+          data: {
+            title: 'not updated',
+            number: i,
+          },
+        })
+      }
+
+      const result = await payload.update({
+        collection: postsSlug,
+        data: {
+          title: 'updated',
+        },
+        limit: 5,
+        sort: '-number',
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      expect(result?.docs?.length).toBe(5)
+
+      for (let i = 10; i > 5; i--) {
+        expect(result?.docs?.[-i + 10]?.number).toBe(i)
+        expect(result?.docs?.[-i + 10]?.title).toBe('updated')
+      }
+
+      // Ensure all posts minus the one we don't want updated are updated
+      const { docs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        sort: '-number',
+        where: {
+          title: {
+            equals: 'updated',
+          },
+        },
+      })
+
+      expect(docs).toHaveLength(5)
+      for (let i = 10; i > 5; i--) {
+        expect(docs?.[-i + 10]?.number).toBe(i)
+        expect(docs?.[-i + 10]?.title).toBe('updated')
+      }
+    })
+
+    it('ensure updateMany correctly handles 0 limit', async () => {
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      // Create 5 posts
+      for (let i = 0; i < 5; i++) {
+        await payload.create({
+          collection: postsSlug,
+          data: {
+            title: 'not updated',
+          },
+        })
+      }
+
+      const result = await payload.db.updateMany({
+        collection: postsSlug,
+        data: {
+          title: 'updated',
+        },
+        limit: 0,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      expect(result?.length).toBe(5)
+      expect(result?.[0]?.title).toBe('updated')
+      expect(result?.[4]?.title).toBe('updated')
+
+      // Ensure all posts are updated. limit: 0 should mean unlimited
+      const { docs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        where: {
+          title: {
+            equals: 'updated',
+          },
+        },
+      })
+
+      expect(docs).toHaveLength(5)
+      expect(docs?.[0]?.title).toBe('updated')
+      expect(docs?.[4]?.title).toBe('updated')
+    })
+
+    it('ensure updateMany correctly handles -1 limit', async () => {
+      await payload.db.deleteMany({
+        collection: postsSlug,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      // Create 5 posts
+      for (let i = 0; i < 5; i++) {
+        await payload.create({
+          collection: postsSlug,
+          data: {
+            title: 'not updated',
+          },
+        })
+      }
+
+      const result = await payload.db.updateMany({
+        collection: postsSlug,
+        data: {
+          title: 'updated',
+        },
+        limit: -1,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      })
+
+      expect(result?.length).toBe(5)
+      expect(result?.[0]?.title).toBe('updated')
+      expect(result?.[4]?.title).toBe('updated')
+
+      // Ensure all posts are updated. limit: -1 should mean unlimited
+      const { docs } = await payload.find({
+        collection: postsSlug,
+        depth: 0,
+        pagination: false,
+        where: {
+          title: {
+            equals: 'updated',
+          },
+        },
+      })
+
+      expect(docs).toHaveLength(5)
+      expect(docs?.[0]?.title).toBe('updated')
+      expect(docs?.[4]?.title).toBe('updated')
+    })
+  })
+
+  describe('Error Handler', () => {
+    it('should return proper top-level field validation errors', async () => {
+      let errorMessage: string = ''
+
+      try {
+        await payload.create({
+          collection: postsSlug,
+          data: {
+            // @ts-expect-error
+            title: undefined,
+          },
+        })
+      } catch (e: any) {
+        errorMessage = e.message
+      }
+
+      expect(errorMessage).toBe('The following field is invalid: Title')
+    })
+
+    it('should return validation errors in response', async () => {
+      try {
+        await payload.create({
+          collection: postsSlug,
+          data: {
+            title: 'Title',
+            D1: {
+              D2: {
+                D3: {
+                  // @ts-expect-error
+                  D4: {},
+                },
+              },
+            },
+          },
+        })
+      } catch (e: any) {
+        expect(e.message).toMatch(
+          payload.db.name === 'mongoose'
+            ? 'posts validation failed: D1.D2.D3.D4: Cast to string failed for value "{}" (type Object) at path "D4"'
+            : payload.db.name === 'sqlite'
+              ? 'SQLite3 can only bind numbers, strings, bigints, buffers, and null'
+              : '',
+        )
+      }
+    })
+
+    it('should return validation errors with proper field paths for unnamed fields', async () => {
+      try {
+        await payload.create({
+          collection: errorOnUnnamedFieldsSlug,
+          data: {
+            groupWithinUnnamedTab: {
+              // @ts-expect-error
+              text: undefined,
+            },
+          },
+        })
+      } catch (e: any) {
+        expect(e.data?.errors?.[0]?.path).toBe('groupWithinUnnamedTab.text')
+      }
+    })
   })
 
   describe('defaultValue', () => {
@@ -773,13 +1625,70 @@ describe('database', () => {
       expect(result.array[0].defaultValue).toStrictEqual('default value from database')
       expect(result.group.defaultValue).toStrictEqual('default value from database')
       expect(result.select).toStrictEqual('default')
-      // eslint-disable-next-line jest/no-conditional-in-test
-      if (payload.db.name !== 'sqlite') {
-        expect(result.point).toStrictEqual({ coordinates: [10, 20], type: 'Point' })
-      }
+      expect(result.point).toStrictEqual({ coordinates: [10, 20], type: 'Point' })
     })
   })
+
+  describe('Schema generation', () => {
+    if (process.env.PAYLOAD_DATABASE.includes('postgres')) {
+      it('should generate Drizzle Postgres schema', async () => {
+        const generatedAdapterName = process.env.PAYLOAD_DATABASE
+
+        const outputFile = path.resolve(dirname, `${generatedAdapterName}.generated-schema.ts`)
+
+        await payload.db.generateSchema({
+          outputFile,
+        })
+
+        const module = await import(outputFile)
+
+        // Confirm that the generated module exports every relation
+        for (const relation in payload.db.relations) {
+          expect(module).toHaveProperty(relation)
+        }
+
+        // Confirm that module exports every table
+        for (const table in payload.db.tables) {
+          expect(module).toHaveProperty(table)
+        }
+
+        // Confirm that module exports every enum
+        for (const enumName in payload.db.enums) {
+          expect(module).toHaveProperty(enumName)
+        }
+      })
+    }
+
+    if (process.env.PAYLOAD_DATABASE.includes('sqlite')) {
+      it('should generate Drizzle SQLite schema', async () => {
+        const generatedAdapterName = process.env.PAYLOAD_DATABASE
+
+        const outputFile = path.resolve(dirname, `${generatedAdapterName}.generated-schema.ts`)
+
+        await payload.db.generateSchema({
+          outputFile,
+        })
+
+        const module = await import(outputFile)
+
+        // Confirm that the generated module exports every relation
+        for (const relation in payload.db.relations) {
+          expect(module).toHaveProperty(relation)
+        }
+
+        // Confirm that module exports every table
+        for (const table in payload.db.tables) {
+          expect(module).toHaveProperty(table)
+        }
+      })
+    }
+  })
+
   describe('drizzle: schema hooks', () => {
+    beforeAll(() => {
+      process.env.PAYLOAD_FORCE_DRIZZLE_PUSH = 'true'
+    })
+
     it('should add tables with hooks', async () => {
       // eslint-disable-next-line jest/no-conditional-in-test
       if (payload.db.name === 'mongoose') {
@@ -1065,7 +1974,8 @@ describe('database', () => {
         data: { title: 'invalid', relationship: 'not-real-id' },
       })
     } catch (error) {
-      expect(error).toBeInstanceOf(Error)
+      // instanceof checks don't work with libsql
+      expect(error).toBeTruthy()
     }
 
     expect(invalidDoc).toBeUndefined()
@@ -1075,5 +1985,197 @@ describe('database', () => {
     })
 
     expect(relationBDocs.docs).toHaveLength(0)
+  })
+
+  it('should upsert', async () => {
+    const postShouldCreated = await payload.db.upsert({
+      req: {},
+      collection: postsSlug,
+      data: {
+        title: 'some-title-here',
+      },
+      where: {
+        title: {
+          equals: 'some-title-here',
+        },
+      },
+    })
+
+    expect(postShouldCreated).toBeTruthy()
+
+    const postShouldUpdated = await payload.db.upsert({
+      req: {},
+      collection: postsSlug,
+      data: {
+        title: 'some-title-here',
+      },
+      where: {
+        title: {
+          equals: 'some-title-here',
+        },
+      },
+    })
+
+    // Should stay the same ID
+    expect(postShouldCreated.id).toBe(postShouldUpdated.id)
+  })
+
+  it('should enforce unique ids on db level even after delete', async () => {
+    const { id } = await payload.create({ collection: postsSlug, data: { title: 'ASD' } })
+    await payload.delete({ id, collection: postsSlug })
+    const { id: id_2 } = await payload.create({ collection: postsSlug, data: { title: 'ASD' } })
+    expect(id_2).not.toBe(id)
+  })
+
+  it('payload.db.createGlobal should have globalType, updatedAt, createdAt fields', async () => {
+    const timestamp = Date.now()
+    let result = (await payload.db.createGlobal({
+      slug: 'global-2',
+      data: { text: 'this is global-2' },
+    })) as { globalType: string } & Global2
+
+    expect(result.text).toBe('this is global-2')
+    expect(result.globalType).toBe('global-2')
+    expect(timestamp).toBeLessThanOrEqual(new Date(result.createdAt as string).getTime())
+    expect(timestamp).toBeLessThanOrEqual(new Date(result.updatedAt as string).getTime())
+
+    const createdAt = new Date(result.createdAt as string).getTime()
+
+    result = (await payload.db.updateGlobal({
+      slug: 'global-2',
+      data: { text: 'this is global-2 but updated' },
+    })) as { globalType: string } & Global2
+
+    expect(result.text).toBe('this is global-2 but updated')
+    expect(result.globalType).toBe('global-2')
+    expect(createdAt).toEqual(new Date(result.createdAt as string).getTime())
+    expect(createdAt).toBeLessThan(new Date(result.updatedAt as string).getTime())
+  })
+
+  it('payload.updateGlobal should have globalType, updatedAt, createdAt fields', async () => {
+    const timestamp = Date.now()
+    let result = (await payload.updateGlobal({
+      slug: 'global-3',
+      data: { text: 'this is global-3' },
+    })) as { globalType: string } & Global2
+
+    expect(result.text).toBe('this is global-3')
+    expect(result.globalType).toBe('global-3')
+    expect(timestamp).toBeLessThanOrEqual(new Date(result.createdAt as string).getTime())
+    expect(timestamp).toBeLessThanOrEqual(new Date(result.updatedAt as string).getTime())
+
+    const createdAt = new Date(result.createdAt as string).getTime()
+
+    result = (await payload.updateGlobal({
+      slug: 'global-3',
+      data: { text: 'this is global-3 but updated' },
+    })) as { globalType: string } & Global2
+
+    expect(result.text).toBe('this is global-3 but updated')
+    expect(result.globalType).toBe('global-3')
+    expect(createdAt).toEqual(new Date(result.createdAt as string).getTime())
+    expect(createdAt).toBeLessThan(new Date(result.updatedAt as string).getTime())
+  })
+
+  it('should group where conditions with AND', async () => {
+    // create 2 docs
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'post 1',
+      },
+    })
+
+    const doc2 = await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'post 2',
+      },
+    })
+
+    const query1 = await payload.find({
+      collection: postsSlug,
+      where: {
+        id: {
+          // where order, `in` last
+          not_in: [],
+          in: [doc2.id],
+        },
+      },
+    })
+
+    const query2 = await payload.find({
+      collection: postsSlug,
+      where: {
+        id: {
+          // where order, `in` first
+          in: [doc2.id],
+          not_in: [],
+        },
+      },
+    })
+
+    const query3 = await payload.find({
+      collection: postsSlug,
+      where: {
+        and: [
+          {
+            id: {
+              in: [doc2.id],
+              not_in: [],
+            },
+          },
+        ],
+      },
+    })
+
+    expect(query1.totalDocs).toEqual(1)
+    expect(query2.totalDocs).toEqual(1)
+    expect(query3.totalDocs).toEqual(1)
+  })
+
+  it('mongodb additional keys stripping', async () => {
+    // eslint-disable-next-line jest/no-conditional-in-test
+    if (payload.db.name !== 'mongoose') {
+      return
+    }
+
+    const arrItemID = randomUUID()
+    const res = await payload.db.collections[postsSlug]?.collection.insertOne({
+      SECRET_FIELD: 'secret data',
+      arrayWithIDs: [
+        {
+          id: arrItemID,
+          additionalKeyInArray: 'true',
+          text: 'existing key',
+        },
+      ],
+    })
+
+    let payloadRes: any = await payload.findByID({
+      collection: postsSlug,
+      id: res!.insertedId.toHexString(),
+    })
+
+    expect(payloadRes.id).toBe(res!.insertedId.toHexString())
+    expect(payloadRes['SECRET_FIELD']).toBeUndefined()
+    expect(payloadRes.arrayWithIDs).toBeDefined()
+    expect(payloadRes.arrayWithIDs[0].id).toBe(arrItemID)
+    expect(payloadRes.arrayWithIDs[0].text).toBe('existing key')
+    expect(payloadRes.arrayWithIDs[0].additionalKeyInArray).toBeUndefined()
+
+    // But allows when allowAdditionaKeys is true
+    payload.db.allowAdditionalKeys = true
+
+    payloadRes = await payload.findByID({
+      collection: postsSlug,
+      id: res!.insertedId.toHexString(),
+    })
+
+    expect(payloadRes.id).toBe(res!.insertedId.toHexString())
+    expect(payloadRes['SECRET_FIELD']).toBe('secret data')
+    expect(payloadRes.arrayWithIDs[0].additionalKeyInArray).toBe('true')
+
+    payload.db.allowAdditionalKeys = false
   })
 })

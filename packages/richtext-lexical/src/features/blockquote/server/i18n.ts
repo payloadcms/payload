@@ -25,6 +25,9 @@ export const i18n: Partial<GenericLanguages> = {
   es: {
     label: 'Cita en bloque',
   },
+  et: {
+    label: 'Tsitaat',
+  },
   fa: {
     label: 'نقل قول بلوکی',
   },
@@ -68,7 +71,7 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Citat',
   },
   rs: {
-    label: 'Blok citat',
+    label: 'Блок цитата',
   },
   'rs-latin': {
     label: 'Blok citata',
@@ -79,11 +82,14 @@ export const i18n: Partial<GenericLanguages> = {
   sk: {
     label: 'Citát',
   },
+  sl: {
+    label: 'Citat',
+  },
   sv: {
     label: 'Blockcitat',
   },
   th: {
-    label: '[SKIPPED]',
+    label: 'ข้อความอ้างอิง',
   },
   tr: {
     label: 'Alıntı',

@@ -1,5 +1,5 @@
 import type { GraphQLNonNull, GraphQLObjectType } from 'graphql'
-import type { DeepRequired } from 'ts-essentials'
+import type { DeepRequired, IsAny } from 'ts-essentials'
 
 import type {
   CustomPreviewButton,
@@ -14,13 +14,15 @@ import type {
   EntityDescription,
   EntityDescriptionComponent,
   GeneratePreviewURL,
+  LabelFunction,
   LivePreviewConfig,
   MetaConfig,
+  StaticLabel,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { Field, FlattenedField } from '../../fields/config/types.js'
 import type { GlobalSlug, RequestContext, TypedGlobal, TypedGlobalSelect } from '../../index.js'
-import type { PayloadRequest, Where } from '../../types/index.js'
+import type { PayloadRequest, SelectIncludeType, Where } from '../../types/index.js'
 import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types.js'
 
 export type DataFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobal[TSlug]
@@ -115,9 +117,12 @@ export type GlobalAdminOptions = {
    */
   description?: EntityDescription
   /**
-   * Place globals into a navigational group
-   * */
-  group?: Record<string, string> | string
+   * Specify a navigational group for globals in the admin sidebar.
+   * - Provide a string to place the entity in a custom group.
+   * - Provide a record to define localized group names.
+   * - Set to `false` to exclude the entity from the sidebar / dashboard without disabling its routes.
+   */
+  group?: false | Record<string, string> | string
   /**
    * Exclude the global from the admin nav and routes
    */
@@ -137,7 +142,12 @@ export type GlobalAdminOptions = {
   preview?: GeneratePreviewURL
 }
 
-export type GlobalConfig = {
+export type GlobalConfig<TSlug extends GlobalSlug = any> = {
+  /**
+   * Do not set this property manually. This is set to true during sanitization, to avoid
+   * sanitizing the same global multiple times.
+   */
+  _sanitized?: boolean
   access?: {
     read?: Access
     readDrafts?: Access
@@ -153,8 +163,16 @@ export type GlobalConfig = {
   dbName?: DBIdentifierName
   endpoints?: false | Omit<Endpoint, 'root'>[]
   fields: Field[]
+  /**
+   * Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks
+   */
+  forceSelect?: IsAny<SelectFromGlobalSlug<TSlug>> extends true
+    ? SelectIncludeType
+    : SelectFromGlobalSlug<TSlug>
   graphQL?:
     | {
+        disableMutations?: true
+        disableQueries?: true
         name?: string
       }
     | false
@@ -165,7 +183,7 @@ export type GlobalConfig = {
     beforeRead?: BeforeReadHook[]
     beforeValidate?: BeforeValidateHook[]
   }
-  label?: Record<string, string> | string
+  label?: LabelFunction | StaticLabel
   /**
    * Enables / Disables the ability to lock documents while editing
    * @default true

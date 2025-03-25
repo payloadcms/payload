@@ -52,7 +52,8 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
   )
 
   const {
-    customComponents: { Description, Error, Label } = {},
+    customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
     setValue,
     showError,
     value: valueFromContext,
@@ -73,7 +74,7 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
         className,
         `${baseClass}--layout-${layout}`,
         showError && 'error',
-        readOnly && `${baseClass}--read-only`,
+        (readOnly || disabled) && `${baseClass}--read-only`,
       ]
         .filter(Boolean)
         .join(' ')}
@@ -90,6 +91,7 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
         }
       />
       <div className={`${fieldBaseClass}__wrap`}>
+        {BeforeInput}
         <ul className={`${baseClass}--group`} id={`field-${path.replace(/\./g, '__')}`}>
           {options.map((option) => {
             let optionValue = ''
@@ -114,19 +116,20 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
                       onChangeFromProps(optionValue)
                     }
 
-                    if (!readOnly) {
+                    if (!(readOnly || disabled)) {
                       setValue(optionValue, !!disableModifyingFormFromProps)
                     }
                   }}
                   option={optionIsObject(option) ? option : { label: option, value: option }}
                   path={path}
-                  readOnly={readOnly}
+                  readOnly={readOnly || disabled}
                   uuid={uuid}
                 />
               </li>
             )
           })}
         </ul>
+        {AfterInput}
         <RenderCustomComponent
           CustomComponent={Description}
           Fallback={<FieldDescription description={description} path={path} />}
@@ -136,4 +139,4 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
   )
 }
 
-export const RadioGroupField = withCondition(RadioGroupFieldComponent)
+export const RadioGroupField: any = withCondition(RadioGroupFieldComponent)

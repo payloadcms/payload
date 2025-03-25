@@ -97,6 +97,19 @@ export interface SelectField {
   label?: string
   name: string
   options: SelectFieldOption[]
+  placeholder?: string
+  required?: boolean
+  width?: number
+}
+
+export interface RadioField {
+  blockName?: string
+  blockType: 'radio'
+  defaultValue?: string
+  label?: string
+  name: string
+  options: SelectFieldOption[]
+  placeholder?: string
   required?: boolean
   width?: number
 }
@@ -166,7 +179,7 @@ export interface CheckboxField {
 export interface MessageField {
   blockName?: string
   blockType: 'message'
-  message: unknown
+  message: object
 }
 
 export type FormFieldBlock =
@@ -175,6 +188,7 @@ export type FormFieldBlock =
   | EmailField
   | MessageField
   | PaymentField
+  | RadioField
   | SelectField
   | StateField
   | TextAreaField

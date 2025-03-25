@@ -133,6 +133,78 @@ describe('@payloadcms/plugin-search', () => {
     expect(results).toHaveLength(0)
   })
 
+  it('should not delete a search doc if a published item has a new draft but remains published', async () => {
+    const publishedPage = await payload.create({
+      collection: 'pages',
+      data: {
+        _status: 'published',
+        title: 'Published title!',
+      },
+    })
+
+    // wait for the search document to be potentially created
+    // we do not await this within the `syncToSearch` hook
+    await wait(200)
+
+    const { docs: results } = await payload.find({
+      collection: 'search',
+      depth: 0,
+      where: {
+        'doc.value': {
+          equals: publishedPage.id,
+        },
+      },
+    })
+
+    expect(results).toHaveLength(1)
+
+    // Create a new draft
+    await payload.update({
+      collection: 'pages',
+      id: publishedPage.id,
+      draft: true,
+      data: {
+        _status: 'draft',
+        title: 'Draft title!',
+      },
+    })
+
+    // This should remain with the published content
+    const { docs: updatedResults } = await payload.find({
+      collection: 'search',
+      depth: 0,
+      where: {
+        'doc.value': {
+          equals: publishedPage.id,
+        },
+      },
+    })
+
+    expect(updatedResults).toHaveLength(1)
+
+    await payload.update({
+      collection: 'pages',
+      id: publishedPage.id,
+      data: {
+        _status: 'draft',
+        title: 'Drafted again',
+      },
+    })
+
+    // Should now be deleted given we've unpublished the page
+    const { docs: deletedResults } = await payload.find({
+      collection: 'search',
+      depth: 0,
+      where: {
+        'doc.value': {
+          equals: publishedPage.id,
+        },
+      },
+    })
+
+    expect(deletedResults).toHaveLength(0)
+  })
+
   it('should sync changes made to an existing search document', async () => {
     const pageToReceiveUpdates = await payload.create({
       collection: 'pages',
@@ -235,6 +307,46 @@ describe('@payloadcms/plugin-search', () => {
     })
 
     expect(deletedResults).toHaveLength(0)
+  })
+
+  it('should clear the proper search document when having the same doc.value but different doc.relationTo', async () => {
+    const custom_id_1 = await payload.create({
+      collection: 'custom-ids-1',
+      data: { id: 'custom_id' },
+    })
+
+    await payload.create({
+      collection: 'custom-ids-2',
+      data: { id: 'custom_id' },
+    })
+
+    await wait(200)
+
+    const {
+      docs: [docBefore],
+    } = await payload.find({
+      collection: 'search',
+      where: { 'doc.value': { equals: 'custom_id' } },
+      limit: 1,
+      sort: 'createdAt',
+    })
+
+    expect(docBefore.doc.relationTo).toBe('custom-ids-1')
+
+    await payload.delete({ collection: 'custom-ids-1', id: custom_id_1.id })
+
+    await wait(200)
+
+    const {
+      docs: [docAfter],
+    } = await payload.find({
+      collection: 'search',
+      where: { 'doc.value': { equals: 'custom_id' } },
+      limit: 1,
+      sort: 'createdAt',
+    })
+
+    expect(docAfter.doc.relationTo).toBe('custom-ids-2')
   })
 
   it('should sync localized data', async () => {

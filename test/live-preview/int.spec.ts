@@ -1,6 +1,11 @@
 import type { Payload } from 'payload'
 
-import { handleMessage, mergeData, traverseRichText } from '@payloadcms/live-preview'
+import {
+  handleMessage,
+  type LivePreviewMessageEvent,
+  mergeData,
+  traverseRichText,
+} from '@payloadcms/live-preview'
 import path from 'path'
 import { getFileByPath } from 'payload'
 import { fieldSchemaToJSON } from 'payload/shared'
@@ -8,6 +13,7 @@ import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
 import type { Media, Page, Post, Tenant } from './payload-types.js'
+import config from './config.js'
 
 import { Pages } from './collections/Pages.js'
 import { postsSlug, tenantsSlug } from './shared.js'
@@ -15,7 +21,7 @@ import { postsSlug, tenantsSlug } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const schemaJSON = fieldSchemaToJSON(Pages.fields)
+const schemaJSON = fieldSchemaToJSON(Pages.fields, config)
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -51,6 +57,7 @@ describe('Collections - Live Preview', () => {
         slug: 'post-1',
         title: 'Test Post',
         tenant: tenant.id,
+        localizedTitle: 'Test Post',
       },
     })
 
@@ -60,6 +67,7 @@ describe('Collections - Live Preview', () => {
         slug: 'post-2',
         title: 'Test Post 2',
         tenant: tenant.id,
+        localizedTitle: 'Test Post 2',
       },
     })
 
@@ -95,7 +103,7 @@ describe('Collections - Live Preview', () => {
           type: 'payload-live-preview',
         },
         origin: serverURL,
-      } as MessageEvent,
+      } as MessageEvent as LivePreviewMessageEvent<Page>,
       initialData: {
         title: 'Test Page',
       } as Page,
@@ -116,7 +124,7 @@ describe('Collections - Live Preview', () => {
           type: 'payload-live-preview',
         },
         origin: serverURL,
-      } as MessageEvent,
+      } as MessageEvent as LivePreviewMessageEvent<Page>,
       initialData: {
         title: 'Test Page',
       } as Page,
@@ -1133,6 +1141,54 @@ describe('Collections - Live Preview', () => {
     expect(merge2.relationshipPolyHasMany).toMatchObject([
       { value: updatedTestPost, relationTo: postsSlug },
     ])
+  })
+
+  it('— relationships - populates localized relationships', async () => {
+    const post = await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'Test Post',
+        slug: 'test-post',
+        hero: {
+          type: 'highImpact',
+          media: media.id,
+        },
+        localizedTitle: 'Test Post Spanish',
+      },
+      locale: 'es',
+    })
+
+    await payload.update({
+      id: post.id,
+      locale: 'en',
+      collection: postsSlug,
+      data: {
+        localizedTitle: 'Test Post English',
+      },
+    })
+
+    const initialData: Partial<Page> = {
+      title: 'Test Page',
+      relationToLocalized: post.id,
+    }
+
+    // Populate the relationships
+    const merge1 = await mergeData({
+      depth: 1,
+      fieldSchema: schemaJSON,
+      incomingData: {
+        ...initialData,
+        relationToLocalized: post.id,
+      },
+      initialData,
+      serverURL,
+      returnNumberOfRequests: true,
+      collectionPopulationRequestHandler,
+      locale: 'es',
+    })
+
+    expect(merge1._numberOfRequests).toEqual(1)
+    expect(merge1.relationToLocalized).toHaveProperty('localizedTitle', 'Test Post Spanish')
   })
 
   it('— rich text - merges text changes', async () => {

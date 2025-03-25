@@ -3,6 +3,8 @@ import type {
   BuildTableStateArgs,
   Data,
   DocumentSlots,
+  ErrorResult,
+  Locale,
   ServerFunctionClient,
 } from 'payload'
 
@@ -11,12 +13,22 @@ import React, { createContext, useCallback } from 'react'
 import type { buildFormStateHandler } from '../../utilities/buildFormState.js'
 import type { buildTableStateHandler } from '../../utilities/buildTableState.js'
 import type { CopyDataFromLocaleArgs } from '../../utilities/copyDataFromLocale.js'
+import type {
+  schedulePublishHandler,
+  SchedulePublishHandlerArgs,
+} from '../../utilities/schedulePublishHandler.js'
 
 type GetFormStateClient = (
   args: {
     signal?: AbortSignal
   } & Omit<BuildFormStateArgs, 'clientConfig' | 'req'>,
 ) => ReturnType<typeof buildFormStateHandler>
+
+type SchedulePublishClient = (
+  args: {
+    signal?: AbortSignal
+  } & Omit<SchedulePublishHandlerArgs, 'clientConfig' | 'req'>,
+) => ReturnType<typeof schedulePublishHandler>
 
 type GetTableStateClient = (
   args: {
@@ -30,11 +42,15 @@ type RenderDocument = (args: {
   docID?: number | string
   drawerSlug?: string
   initialData?: Data
+  locale?: Locale
   overrideEntityVisibility?: boolean
+  redirectAfterCreate?: boolean
   redirectAfterDelete?: boolean
   redirectAfterDuplicate?: boolean
   signal?: AbortSignal
-}) => Promise<{ data: Data; Document: React.ReactNode }>
+}) => Promise<
+  { data: Data; Document: React.ReactNode } | ({ data: never; Document: never } & ErrorResult)
+>
 
 type CopyDataFromLocaleClient = (
   args: {
@@ -53,6 +69,7 @@ type ServerFunctionsContextType = {
   getFormState: GetFormStateClient
   getTableState: GetTableStateClient
   renderDocument: RenderDocument
+  schedulePublish: SchedulePublishClient
   serverFunction: ServerFunctionClient
 }
 
@@ -61,7 +78,7 @@ export const ServerFunctionsContext = createContext<ServerFunctionsContextType |
 )
 
 export const useServerFunctions = () => {
-  const context = React.useContext(ServerFunctionsContext)
+  const context = React.use(ServerFunctionsContext)
   if (context === undefined) {
     throw new Error('useServerFunctions must be used within a ServerFunctionsProvider')
   }
@@ -85,6 +102,36 @@ export const ServerFunctionsProvider: React.FC<{
     [serverFunction],
   )
 
+  const schedulePublish = useCallback<SchedulePublishClient>(
+    async (args) => {
+      const { signal: remoteSignal, ...rest } = args
+
+      try {
+        if (!remoteSignal?.aborted) {
+          const result = (await serverFunction({
+            name: 'schedule-publish',
+            args: { ...rest },
+          })) as Awaited<ReturnType<typeof schedulePublishHandler>> // TODO: infer this type when `strictNullChecks` is enabled
+
+          if (!remoteSignal?.aborted) {
+            return result
+          }
+        }
+      } catch (_err) {
+        console.error(_err) // eslint-disable-line no-console
+      }
+
+      let error = `Error scheduling ${rest.type}`
+
+      if (rest.doc) {
+        error += ` for document with ID ${rest.doc.value} in collection ${rest.doc.relationTo}`
+      }
+
+      return { error: '' }
+    },
+    [serverFunction],
+  )
+
   const getFormState = useCallback<GetFormStateClient>(
     async (args) => {
       const { signal: remoteSignal, ...rest } = args || {}
@@ -94,7 +141,7 @@ export const ServerFunctionsProvider: React.FC<{
           const result = (await serverFunction({
             name: 'form-state',
             args: { fallbackLocale: false, ...rest },
-          })) as ReturnType<typeof buildFormStateHandler> // TODO: infer this type when `strictNullChecks` is enabled
+          })) as Awaited<ReturnType<typeof buildFormStateHandler>> // TODO: infer this type when `strictNullChecks` is enabled
 
           if (!remoteSignal?.aborted) {
             return result
@@ -118,7 +165,7 @@ export const ServerFunctionsProvider: React.FC<{
           const result = (await serverFunction({
             name: 'table-state',
             args: { fallbackLocale: false, ...rest },
-          })) as ReturnType<typeof buildTableStateHandler> // TODO: infer this type when `strictNullChecks` is enabled
+          })) as Awaited<ReturnType<typeof buildTableStateHandler>> // TODO: infer this type when `strictNullChecks` is enabled
 
           if (!remoteSignal?.aborted) {
             return result
@@ -141,7 +188,7 @@ export const ServerFunctionsProvider: React.FC<{
         const result = (await serverFunction({
           name: 'render-document',
           args: { fallbackLocale: false, ...rest },
-        })) as { data: Data; Document: React.ReactNode }
+        })) as Awaited<ReturnType<typeof renderDocument>> // TODO: infer this type when `strictNullChecks` is enabled
 
         return result
       } catch (_err) {
@@ -172,17 +219,18 @@ export const ServerFunctionsProvider: React.FC<{
   )
 
   return (
-    <ServerFunctionsContext.Provider
+    <ServerFunctionsContext
       value={{
         copyDataFromLocale,
         getDocumentSlots,
         getFormState,
         getTableState,
         renderDocument,
+        schedulePublish,
         serverFunction,
       }}
     >
       {children}
-    </ServerFunctionsContext.Provider>
+    </ServerFunctionsContext>
   )
 }

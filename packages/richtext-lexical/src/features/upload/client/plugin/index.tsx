@@ -16,7 +16,7 @@ import React, { useEffect } from 'react'
 
 import type { PluginComponent } from '../../../typesClient.js'
 import type { UploadData } from '../../server/nodes/UploadNode.js'
-import type { UploadFeaturePropsClient } from '../feature.client.js'
+import type { UploadFeaturePropsClient } from '../index.js'
 
 import { UploadDrawer } from '../drawer/index.js'
 import { $createUploadNode, UploadNode } from '../nodes/UploadNode.js'
@@ -59,15 +59,11 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = ({ client
               const { focus } = selection
               const focusNode = focus.getNode()
 
-              // First, delete currently selected node if it's an empty paragraph and if there are sufficient
-              // paragraph nodes (more than 1) left in the parent node, so that we don't "trap" the user
+              // Delete the node it it's an empty paragraph and it has at least one sibling, so that we don't "trap" the user
               if (
                 $isParagraphNode(focusNode) &&
-                focusNode.getTextContentSize() === 0 &&
-                focusNode
-                  .getParentOrThrow()
-                  .getChildren()
-                  .filter((node) => $isParagraphNode(node)).length > 1
+                !focusNode.__first &&
+                (focusNode.__prev || focusNode.__next)
               ) {
                 focusNode.remove()
               }

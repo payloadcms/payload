@@ -56,6 +56,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
     setValue,
     showError,
     value,
@@ -88,7 +89,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
 
   const handleHasManyChange = useCallback(
     (selectedOption) => {
-      if (!readOnly) {
+      if (!(readOnly || disabled)) {
         let newValue
         if (!selectedOption) {
           newValue = []
@@ -101,7 +102,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
         setValue(newValue)
       }
     },
-    [readOnly, setValue],
+    [readOnly, disabled, setValue],
   )
 
   // useEffect update valueToRender:
@@ -131,7 +132,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
         'number',
         className,
         showError && 'error',
-        readOnly && 'read-only',
+        (readOnly || disabled) && 'read-only',
         hasMany && 'has-many',
       ]
         .filter(Boolean)
@@ -149,10 +150,11 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
           CustomComponent={Error}
           Fallback={<FieldError path={path} showError={showError} />}
         />
+        {BeforeInput}
         {hasMany ? (
           <ReactSelect
             className={`field-${path.replace(/\./g, '__')}`}
-            disabled={readOnly}
+            disabled={readOnly || disabled}
             filterOption={(_, rawInput) => {
               const isOverHasMany = Array.isArray(value) && value.length >= maxRows
               return isNumber(rawInput) && !isOverHasMany
@@ -177,9 +179,8 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
           />
         ) : (
           <div>
-            {BeforeInput}
             <input
-              disabled={readOnly}
+              disabled={readOnly || disabled}
               id={`field-${path.replace(/\./g, '__')}`}
               max={max}
               min={min}
@@ -194,9 +195,9 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
               type="number"
               value={typeof value === 'number' ? value : ''}
             />
-            {AfterInput}
           </div>
         )}
+        {AfterInput}
         <RenderCustomComponent
           CustomComponent={Description}
           Fallback={<FieldDescription description={description} path={path} />}

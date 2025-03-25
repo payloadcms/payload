@@ -12,8 +12,8 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { isFieldRTL } from '../shared/index.js'
-import './index.scss'
 import { TextInput } from './Input.js'
+import './index.scss'
 
 export { TextInput, TextInputProps }
 
@@ -54,6 +54,7 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
     setValue,
     showError,
     value,
@@ -75,7 +76,7 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
 
   const handleHasManyChange = useCallback(
     (selectedOption) => {
-      if (!readOnly) {
+      if (!(readOnly || disabled)) {
         let newValue
         if (!selectedOption) {
           newValue = []
@@ -88,7 +89,7 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
         setValue(newValue)
       }
     },
-    [readOnly, setValue],
+    [readOnly, setValue, disabled],
   )
 
   // useEffect update valueToRender:
@@ -136,7 +137,7 @@ const TextFieldComponent: TextFieldClientComponent = (props) => {
       }
       path={path}
       placeholder={placeholder}
-      readOnly={readOnly}
+      readOnly={readOnly || disabled}
       required={required}
       rtl={renderRTL}
       showError={showError}

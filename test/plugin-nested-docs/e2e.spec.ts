@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 
 import type { Config, Page as PayloadPage } from './payload-types.js'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
+import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -16,10 +16,10 @@ const dirname = path.dirname(filename)
 const { beforeAll, describe } = test
 let url: AdminUrlUtil
 let page: Page
-let draftParentId: string
-let parentId: string
-let draftChildId: string
-let childId: string
+let draftParentID: string
+let parentID: string
+let draftChildID: string
+let childID: string
 
 describe('Nested Docs Plugin', () => {
   beforeAll(async ({ browser }, testInfo) => {
@@ -50,25 +50,25 @@ describe('Nested Docs Plugin', () => {
     }
 
     const parentPage = await createPage({ slug: 'parent-slug' })
-    parentId = parentPage.id
+    parentID = parentPage.id
 
     const childPage = await createPage({
       slug: 'child-slug',
       title: 'Child page',
-      parent: parentId,
+      parent: parentID,
     })
-    childId = childPage.id
+    childID = childPage.id
 
     const draftParentPage = await createPage({ slug: 'parent-slug-draft', _status: 'draft' })
-    draftParentId = draftParentPage.id
+    draftParentID = draftParentPage.id
 
     const draftChildPage = await createPage({
       slug: 'child-slug-draft',
       title: 'Child page',
-      parent: draftParentId,
+      parent: draftParentID,
       _status: 'draft',
     })
-    draftChildId = draftChildPage.id
+    draftChildID = draftChildPage.id
   })
 
   describe('Core functionality', () => {
@@ -77,7 +77,7 @@ describe('Nested Docs Plugin', () => {
     const draftButtonClass = '#action-save-draft'
 
     test('Parent slug updates breadcrumbs in child', async () => {
-      await page.goto(url.edit(childId))
+      await page.goto(url.edit(childID))
       let slug = page.locator(slugClass).nth(0)
       await expect(slug).toHaveValue('child-slug')
 
@@ -92,13 +92,13 @@ describe('Nested Docs Plugin', () => {
       // const parentSlugInChild = page.locator(parentSlugInChildClass).nth(0)
       // await expect(parentSlugInChild).toHaveValue('/parent-slug')
 
-      await page.goto(url.edit(parentId))
+      await page.goto(url.edit(parentID))
       slug = page.locator(slugClass).nth(0)
       await slug.fill('updated-parent-slug')
       await expect(slug).toHaveValue('updated-parent-slug')
       await page.locator(publishButtonClass).nth(0).click()
       await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-      await page.goto(url.edit(childId))
+      await page.goto(url.edit(childID))
 
       // TODO: remove when error states are fixed
       await apiTabButton.click()
@@ -110,7 +110,7 @@ describe('Nested Docs Plugin', () => {
     })
 
     test('Draft parent slug does not update child', async () => {
-      await page.goto(url.edit(draftChildId))
+      await page.goto(url.edit(draftChildID))
 
       // TODO: remove when error states are fixed
       const apiTabButton = page.locator('text=API')
@@ -123,11 +123,11 @@ describe('Nested Docs Plugin', () => {
       // const parentSlugInChild = page.locator(parentSlugInChildClass).nth(0)
       // await expect(parentSlugInChild).toHaveValue('/parent-slug-draft')
 
-      await page.goto(url.edit(parentId))
+      await page.goto(url.edit(parentID))
       await page.locator(slugClass).nth(0).fill('parent-updated-draft')
       await page.locator(draftButtonClass).nth(0).click()
       await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-      await page.goto(url.edit(draftChildId))
+      await page.goto(url.edit(draftChildID))
 
       await apiTabButton.click()
       const updatedBreadcrumbs = page.locator('text=/parent-slug-draft').first()
@@ -135,6 +135,19 @@ describe('Nested Docs Plugin', () => {
 
       // TODO: add back when error states are fixed
       // await expect(parentSlugInChild).toHaveValue('/parent-slug-draft')
+    })
+
+    test('Publishing parent doc should not publish child', async () => {
+      await page.goto(url.edit(childID))
+      await page.locator(slugClass).nth(0).fill('child-updated-draft')
+      await page.locator(draftButtonClass).nth(0).click()
+
+      await page.goto(url.edit(parentID))
+      await page.locator(slugClass).nth(0).fill('parent-updated-published')
+      await page.locator(publishButtonClass).nth(0).click()
+
+      await page.goto(url.edit(childID))
+      await expect(page.locator(slugClass).nth(0)).toHaveValue('child-updated-draft')
     })
   })
 })

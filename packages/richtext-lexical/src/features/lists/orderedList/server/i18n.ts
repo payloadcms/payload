@@ -25,6 +25,9 @@ export const i18n: Partial<GenericLanguages> = {
   es: {
     label: 'Lista ordenada',
   },
+  et: {
+    label: 'Sorteeritud loend',
+  },
   fa: {
     label: 'لیست مرتب شده',
   },
@@ -68,16 +71,19 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Lista ordonată',
   },
   rs: {
-    label: 'Naručeni Spisak',
+    label: 'Уређена листа',
   },
   'rs-latin': {
-    label: 'Naručeni spisak',
+    label: 'Uređena lista',
   },
   ru: {
     label: 'Упорядоченный список',
   },
   sk: {
     label: 'Zoradený zoznam',
+  },
+  sl: {
+    label: 'Urejen seznam',
   },
   sv: {
     label: 'Ordnad Lista',

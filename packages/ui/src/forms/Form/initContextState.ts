@@ -22,6 +22,7 @@ const createFormData: CreateFormData = () => undefined
 
 const setModified: SetModified = () => undefined
 const setProcessing: SetProcessing = () => undefined
+const setBackgroundProcessing: SetProcessing = () => undefined
 const setSubmitted: SetSubmitted = () => undefined
 const reset: Reset = () => undefined
 
@@ -39,14 +40,18 @@ export const initContextState: Context = {
   getFields: (): FormState => ({}),
   getSiblingData,
   initializing: undefined,
+  isValid: true,
   removeFieldRow: () => undefined,
   replaceFieldRow: () => undefined,
   replaceState: () => undefined,
   reset,
+  setBackgroundProcessing,
   setDisabled: () => undefined,
+  setIsValid: () => undefined,
   setModified,
   setProcessing,
   setSubmitted,
   submit,
+
   validateForm,
 }

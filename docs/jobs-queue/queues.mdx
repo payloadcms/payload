@@ -9,7 +9,8 @@ keywords: jobs queue, application framework, typescript, node, react, nextjs
 Queues are the final aspect of Payload's Jobs Queue and deal with how to _run your jobs_. Up to this point, all we've covered is how to queue up jobs to run, but so far, we aren't actually running any jobs.
 
 <Banner type="default">
-  A <strong>Queue</strong> is a grouping of jobs that should be executed in order of when they were added.
+  A **Queue** is a grouping of jobs that should be executed in order of when
+  they were added.
 </Banner>
 
 When you go to run jobs, Payload will query for any jobs that are added to the queue and then run them. By default, all queued jobs are added to the `default` queue.
@@ -25,7 +26,42 @@ Then, you could configure two different runner strategies:
 
 ## Executing jobs
 
-As mentioned above, you can queue jobs, but the jobs won't run unless a worker picks up your jobs and runs them. This can be done in two ways:
+As mentioned above, you can queue jobs, but the jobs won't run unless a worker picks up your jobs and runs them. This can be done in four ways:
+
+#### Cron jobs
+
+You can use the `jobs.autoRun` property to configure cron jobs:
+
+```ts
+export default buildConfig({
+  // Other configurations...
+  jobs: {
+    tasks: [
+      // your tasks here
+    ],
+    // autoRun can optionally be a function that receives `payload` as an argument
+    autoRun: [
+      {
+        cron: '0 * * * *', // every hour at minute 0
+        limit: 100, // limit jobs to process each run
+        queue: 'hourly', // name of the queue
+      },
+      // add as many cron jobs as you want
+    ],
+    shouldAutoRun: async (payload) => {
+      // Tell Payload if it should run jobs or not.
+      // This function will be invoked each time Payload goes to pick up and run jobs.
+      // If this function ever returns false, the cron schedule will be stopped.
+      return true
+    },
+  },
+})
+```
+
+<Banner type="warning">
+  autoRun is intended for use with a dedicated server that is always running,
+  and should not be used on serverless platforms like Vercel.
+</Banner>
 
 #### Endpoint
 
@@ -37,9 +73,9 @@ You can execute jobs by making a fetch request to the `/api/payload-jobs/run` en
 await fetch('/api/payload-jobs/run?limit=100&queue=nightly', {
   method: 'GET',
   headers: {
-    'Authorization': `Bearer ${token}`,
+    Authorization: `Bearer ${token}`,
   },
-});
+})
 ```
 
 This endpoint is automatically mounted for you and is helpful in conjunction with serverless platforms like Vercel, where you might want to use Vercel Cron to invoke a serverless function that executes your jobs.
@@ -81,12 +117,12 @@ export default buildConfig({
         // If there is no logged in user, then check
         // for the Vercel Cron secret to be present as an
         // Authorization header:
-        const authHeader = req.headers.get('authorization');
-        return authHeader === `Bearer ${process.env.CRON_SECRET}`;
+        const authHeader = req.headers.get('authorization')
+        return authHeader === `Bearer ${process.env.CRON_SECRET}`
       },
     },
     // Other job configurations...
-  }
+  },
 })
 ```
 
@@ -98,11 +134,26 @@ After the project is deployed to Vercel, the Vercel Cron job will automatically 
 
 If you want to process jobs programmatically from your server-side code, you can use the Local API:
 
+**Run all jobs:**
+
 ```ts
 const results = await payload.jobs.run()
 
 // You can customize the queue name and limit by passing them as arguments:
 await payload.jobs.run({ queue: 'nightly', limit: 100 })
+
+// You can provide a where clause to filter the jobs that should be run:
+await payload.jobs.run({
+  where: { 'input.message': { equals: 'secret' } },
+})
+```
+
+**Run a single job:**
+
+```ts
+const results = await payload.jobs.runByID({
+  id: myJobID,
+})
 ```
 
 #### Bin script

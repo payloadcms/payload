@@ -1,7 +1,7 @@
 import type { BuildFormStateArgs, ClientConfig, ClientUser, ErrorResult, FormState } from 'payload'
 
 import { formatErrors } from 'payload'
-import { reduceFieldsToValues } from 'payload/shared'
+import { getSelectMode, reduceFieldsToValues } from 'payload/shared'
 
 import { fieldSchemasToFormState } from '../forms/fieldSchemasToFormState/index.js'
 import { renderField } from '../forms/fieldSchemasToFormState/renderField.js'
@@ -10,11 +10,17 @@ import { getClientSchemaMap } from './getClientSchemaMap.js'
 import { getSchemaMap } from './getSchemaMap.js'
 import { handleFormStateLocking } from './handleFormStateLocking.js'
 
+export type LockedState = {
+  isLocked: boolean
+  lastEditedAt: string
+  user: ClientUser | number | string
+}
+
 type BuildFormStateSuccessResult = {
   clientConfig?: ClientConfig
   errors?: never
   indexPath?: string
-  lockedState?: { isLocked: boolean; lastEditedAt: string; user: ClientUser | number | string }
+  lockedState?: LockedState
   state: FormState
 }
 
@@ -96,8 +102,11 @@ export const buildFormState = async (
     data: incomingData,
     docPermissions,
     docPreferences,
+    documentFormState,
     formState,
     globalSlug,
+    initialBlockData,
+    initialBlockFormState,
     operation,
     renderAllFields,
     req,
@@ -108,8 +117,12 @@ export const buildFormState = async (
     },
     returnLockStatus,
     schemaPath = collectionSlug || globalSlug,
+    select,
+    skipValidation,
     updateLastEdited,
   } = args
+
+  const selectMode = select ? getSelectMode(select) : undefined
 
   let data = incomingData
 
@@ -158,6 +171,16 @@ export const buildFormState = async (
     data = reduceFieldsToValues(formState, true)
   }
 
+  let documentData = undefined
+  if (documentFormState) {
+    documentData = reduceFieldsToValues(documentFormState, true)
+  }
+
+  let blockData = initialBlockData
+  if (initialBlockFormState) {
+    blockData = reduceFieldsToValues(initialBlockFormState, true)
+  }
+
   /**
    * When building state for sub schemas we need to adjust:
    * - `fields`
@@ -178,8 +201,10 @@ export const buildFormState = async (
     clientFieldSchemaMap: clientSchemaMap,
     collectionSlug,
     data,
+    documentData,
     fields,
     fieldSchemaMap: schemaMap,
+    initialBlockData: blockData,
     operation,
     permissions: docPermissions?.fields || {},
     preferences: docPreferences || { fields: {} },
@@ -188,6 +213,9 @@ export const buildFormState = async (
     renderFieldFn: renderField,
     req,
     schemaPath,
+    select,
+    selectMode,
+    skipValidation,
   })
 
   // Maintain form state of auth / upload fields

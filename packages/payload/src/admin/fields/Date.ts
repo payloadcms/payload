@@ -6,12 +6,15 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
+  FieldPaths,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
+  FieldDiffClientComponent,
+  FieldDiffServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
 } from '../types.js'
@@ -23,12 +26,19 @@ type DateFieldBaseClientProps = {
   readonly validate?: DateFieldValidation
 }
 
+type DateFieldBaseServerProps = Pick<FieldPaths, 'path'>
+
 export type DateFieldClientProps = ClientFieldBase<DateFieldClientWithoutType> &
   DateFieldBaseClientProps
 
-export type DateFieldServerProps = ServerFieldBase<DateField, DateFieldClientWithoutType>
+export type DateFieldServerProps = DateFieldBaseServerProps &
+  ServerFieldBase<DateField, DateFieldClientWithoutType>
 
-export type DateFieldServerComponent = FieldServerComponent<DateField, DateFieldClientWithoutType>
+export type DateFieldServerComponent = FieldServerComponent<
+  DateField,
+  DateFieldClientWithoutType,
+  DateFieldBaseServerProps
+>
 
 export type DateFieldClientComponent = FieldClientComponent<
   DateFieldClientWithoutType,
@@ -56,3 +66,7 @@ export type DateFieldErrorServerComponent = FieldErrorServerComponent<
 >
 
 export type DateFieldErrorClientComponent = FieldErrorClientComponent<DateFieldClientWithoutType>
+
+export type DateFieldDiffServerComponent = FieldDiffServerComponent<DateField, DateFieldClient>
+
+export type DateFieldDiffClientComponent = FieldDiffClientComponent<DateFieldClient>

@@ -61,7 +61,29 @@ describe('@payloadcms/plugin-sentry - unit', () => {
 
     const hook = config.hooks?.afterError?.[0] as AfterErrorHook
 
-    const error = new APIError('ApiError', 500)
+    const apiError = new Error('ApiError')
+
+    const afterApiErrorHookArgs: AfterErrorHookArgs = {
+      req: {} as PayloadRequest,
+      context: {},
+      error: apiError,
+      collection: { slug: 'mock-slug' } as any,
+    }
+
+    const captureExceptionSpy = jest.spyOn(mockSentry, 'captureException')
+
+    await hook(afterApiErrorHookArgs)
+
+    expect(captureExceptionSpy).toHaveBeenCalledTimes(1)
+    expect(captureExceptionSpy).toHaveBeenCalledWith(apiError, {
+      extra: {
+        errorCollectionSlug: 'mock-slug',
+        hintTimestamp,
+      },
+    })
+    expect(captureExceptionSpy).toHaveReturnedWith(mockExceptionID)
+
+    const error = new Error('Error')
 
     const afterErrorHookArgs: AfterErrorHookArgs = {
       req: {} as PayloadRequest,
@@ -70,11 +92,9 @@ describe('@payloadcms/plugin-sentry - unit', () => {
       collection: { slug: 'mock-slug' } as any,
     }
 
-    const captureExceptionSpy = jest.spyOn(mockSentry, 'captureException')
-
     await hook(afterErrorHookArgs)
 
-    expect(captureExceptionSpy).toHaveBeenCalledTimes(1)
+    expect(captureExceptionSpy).toHaveBeenCalledTimes(2)
     expect(captureExceptionSpy).toHaveBeenCalledWith(error, {
       extra: {
         errorCollectionSlug: 'mock-slug',

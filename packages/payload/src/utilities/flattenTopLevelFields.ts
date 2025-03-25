@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { ClientTab } from '../admin/fields/Tabs.js'
 import type { ClientField } from '../fields/config/client.js'
 import type {
@@ -33,18 +34,14 @@ function flattenFields<TField extends ClientField | Field>(
   fields: TField[],
   keepPresentationalFields?: boolean,
 ): FlattenedField<TField>[] {
-  return fields.reduce<FlattenedField<TField>[]>((fieldsToUse, field) => {
+  return fields.reduce<FlattenedField<TField>[]>((acc, field) => {
     if (fieldAffectsData(field) || (keepPresentationalFields && fieldIsPresentationalOnly(field))) {
-      return [...fieldsToUse, field as FlattenedField<TField>]
-    }
-
-    if (fieldHasSubFields(field)) {
-      return [...fieldsToUse, ...flattenFields(field.fields as TField[], keepPresentationalFields)]
-    }
-
-    if (field.type === 'tabs' && 'tabs' in field) {
+      acc.push(field as FlattenedField<TField>)
+    } else if (fieldHasSubFields(field)) {
+      acc.push(...flattenFields(field.fields as TField[], keepPresentationalFields))
+    } else if (field.type === 'tabs' && 'tabs' in field) {
       return [
-        ...fieldsToUse,
+        ...acc,
         ...field.tabs.reduce<FlattenedField<TField>[]>((tabFields, tab: TabType<TField>) => {
           if (tabHasName(tab)) {
             return [...tabFields, { ...tab, type: 'tab' } as unknown as FlattenedField<TField>]
@@ -58,7 +55,7 @@ function flattenFields<TField extends ClientField | Field>(
       ]
     }
 
-    return fieldsToUse
+    return acc
   }, [])
 }
 

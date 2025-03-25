@@ -16,9 +16,9 @@ import { Pill } from '../../Pill/index.js'
 import { ShimmerEffect } from '../../ShimmerEffect/index.js'
 import { Thumbnail } from '../../Thumbnail/index.js'
 import { Actions } from '../ActionsBar/index.js'
+import './index.scss'
 import { AddFilesView } from '../AddFilesView/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
-import './index.scss'
 import { useBulkUpload } from '../index.js'
 
 const addMoreFilesDrawerSlug = 'bulk-upload-drawer--add-more-files'
@@ -88,8 +88,13 @@ export function FileSidebar() {
           </div>
 
           <div className={`${baseClass}__header__actions`}>
-            {typeof maxFiles === 'number' && totalFileCount < maxFiles ? (
-              <Pill onClick={() => openModal(addMoreFilesDrawerSlug)}>{t('upload:addFile')}</Pill>
+            {(typeof maxFiles === 'number' ? totalFileCount < maxFiles : true) ? (
+              <Pill
+                className={`${baseClass}__header__addFile`}
+                onClick={() => openModal(addMoreFilesDrawerSlug)}
+              >
+                {t('upload:addFile')}
+              </Pill>
             ) : null}
             <Button
               buttonStyle="transparent"
@@ -134,7 +139,7 @@ export function FileSidebar() {
                 ))
               : null}
             {forms.map(({ errorCount, formState }, index) => {
-              const currentFile = formState.file.value as File
+              const currentFile = (formState?.file?.value as File) || ({} as File)
 
               return (
                 <div
@@ -154,14 +159,16 @@ export function FileSidebar() {
                   >
                     <Thumbnail
                       className={`${baseClass}__thumbnail`}
-                      fileSrc={isImage(currentFile.type) ? thumbnailUrls[index] : undefined}
+                      fileSrc={isImage(currentFile.type) ? thumbnailUrls[index] : null}
                     />
                     <div className={`${baseClass}__fileDetails`}>
                       <p className={`${baseClass}__fileName`} title={currentFile.name}>
-                        {currentFile.name}
+                        {currentFile.name || t('upload:noFile')}
                       </p>
                     </div>
-                    <p className={`${baseClass}__fileSize`}>{getFileSize(currentFile)}</p>
+                    {currentFile instanceof File ? (
+                      <p className={`${baseClass}__fileSize`}>{getFileSize(currentFile)}</p>
+                    ) : null}
                     <div className={`${baseClass}__remove ${baseClass}__remove--underlay`}>
                       <XIcon />
                     </div>

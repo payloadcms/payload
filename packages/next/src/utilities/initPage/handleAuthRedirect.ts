@@ -1,6 +1,6 @@
 import type { User } from 'payload'
 
-import { formatAdminURL } from '@payloadcms/ui/shared'
+import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 
 type Args = {
@@ -9,6 +9,7 @@ type Args = {
   searchParams: { [key: string]: string | string[] }
   user?: User
 }
+
 export const handleAuthRedirect = ({ config, route, searchParams, user }: Args): string => {
   const {
     admin: {

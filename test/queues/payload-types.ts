@@ -6,10 +6,65 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
+/**
+ * Supported timezones in IANA format.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supportedTimezones".
+ */
+export type SupportedTimezones =
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji';
+
 export interface Config {
   auth: {
     users: UserAuthOperations;
   };
+  blocks: {};
   collections: {
     posts: Post;
     simple: Simple;
@@ -43,6 +98,8 @@ export interface Config {
       UpdatePost: MyUpdatePostType;
       UpdatePostStep2: TaskUpdatePostStep2;
       CreateSimple: TaskCreateSimple;
+      CreateSimpleRetriesUndefined: TaskCreateSimpleRetriesUndefined;
+      CreateSimpleRetries0: TaskCreateSimpleRetries0;
       CreateSimpleWithDuplicateMessage: TaskCreateSimpleWithDuplicateMessage;
       ExternalTask: TaskExternalTask;
       inline: {
@@ -56,9 +113,17 @@ export interface Config {
       retriesTest: WorkflowRetriesTest;
       retriesRollbackTest: WorkflowRetriesRollbackTest;
       retriesWorkflowLevelTest: WorkflowRetriesWorkflowLevelTest;
+      workflowNoRetriesSet: WorkflowWorkflowNoRetriesSet;
+      workflowRetries0: WorkflowWorkflowRetries0;
+      workflowAndTasksRetriesUndefined: WorkflowWorkflowAndTasksRetriesUndefined;
+      workflowRetries2TasksRetriesUndefined: WorkflowWorkflowRetries2TasksRetriesUndefined;
+      workflowRetries2TasksRetries0: WorkflowWorkflowRetries2TasksRetries0;
       inlineTaskTest: WorkflowInlineTaskTest;
       externalWorkflow: WorkflowExternalWorkflow;
       retriesBackoffTest: WorkflowRetriesBackoffTest;
+      subTask: WorkflowSubTask;
+      subTaskFails: WorkflowSubTaskFails;
+      longRunning: WorkflowLongRunning;
     };
   };
 }
@@ -140,6 +205,9 @@ export interface User {
  */
 export interface PayloadJob {
   id: string;
+  /**
+   * Input data provided to the job
+   */
   input?:
     | {
         [k: string]: unknown;
@@ -160,7 +228,13 @@ export interface PayloadJob {
     | null;
   completedAt?: string | null;
   totalTried?: number | null;
+  /**
+   * If hasError is true this job will not be retried
+   */
   hasError?: boolean | null;
+  /**
+   * If hasError is true, this is the error that caused it
+   */
   error?:
     | {
         [k: string]: unknown;
@@ -170,6 +244,9 @@ export interface PayloadJob {
     | number
     | boolean
     | null;
+  /**
+   * Task execution log
+   */
   log?:
     | {
         executedAt: string;
@@ -179,6 +256,8 @@ export interface PayloadJob {
           | 'UpdatePost'
           | 'UpdatePostStep2'
           | 'CreateSimple'
+          | 'CreateSimpleRetriesUndefined'
+          | 'CreateSimpleRetries0'
           | 'CreateSimpleWithDuplicateMessage'
           | 'ExternalTask';
         taskID: string;
@@ -220,9 +299,17 @@ export interface PayloadJob {
         | 'retriesTest'
         | 'retriesRollbackTest'
         | 'retriesWorkflowLevelTest'
+        | 'workflowNoRetriesSet'
+        | 'workflowRetries0'
+        | 'workflowAndTasksRetriesUndefined'
+        | 'workflowRetries2TasksRetriesUndefined'
+        | 'workflowRetries2TasksRetries0'
         | 'inlineTaskTest'
         | 'externalWorkflow'
         | 'retriesBackoffTest'
+        | 'subTask'
+        | 'subTaskFails'
+        | 'longRunning'
       )
     | null;
   taskSlug?:
@@ -231,6 +318,8 @@ export interface PayloadJob {
         | 'UpdatePost'
         | 'UpdatePostStep2'
         | 'CreateSimple'
+        | 'CreateSimpleRetriesUndefined'
+        | 'CreateSimpleRetries0'
         | 'CreateSimpleWithDuplicateMessage'
         | 'ExternalTask'
       )
@@ -445,6 +534,32 @@ export interface TaskCreateSimple {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskCreateSimpleRetriesUndefined".
+ */
+export interface TaskCreateSimpleRetriesUndefined {
+  input: {
+    message: string;
+    shouldFail?: boolean | null;
+  };
+  output: {
+    simpleID: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskCreateSimpleRetries0".
+ */
+export interface TaskCreateSimpleRetries0 {
+  input: {
+    message: string;
+    shouldFail?: boolean | null;
+  };
+  output: {
+    simpleID: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "TaskCreateSimpleWithDuplicateMessage".
  */
 export interface TaskCreateSimpleWithDuplicateMessage {
@@ -517,6 +632,51 @@ export interface WorkflowRetriesWorkflowLevelTest {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowWorkflowNoRetriesSet".
+ */
+export interface WorkflowWorkflowNoRetriesSet {
+  input: {
+    message: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowWorkflowRetries0".
+ */
+export interface WorkflowWorkflowRetries0 {
+  input: {
+    message: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowWorkflowAndTasksRetriesUndefined".
+ */
+export interface WorkflowWorkflowAndTasksRetriesUndefined {
+  input: {
+    message: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowWorkflowRetries2TasksRetriesUndefined".
+ */
+export interface WorkflowWorkflowRetries2TasksRetriesUndefined {
+  input: {
+    message: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowWorkflowRetries2TasksRetries0".
+ */
+export interface WorkflowWorkflowRetries2TasksRetries0 {
+  input: {
+    message: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "WorkflowInlineTaskTest".
  */
 export interface WorkflowInlineTaskTest {
@@ -541,6 +701,31 @@ export interface WorkflowRetriesBackoffTest {
   input: {
     message: string;
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowSubTask".
+ */
+export interface WorkflowSubTask {
+  input: {
+    message: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowSubTaskFails".
+ */
+export interface WorkflowSubTaskFails {
+  input: {
+    message: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowLongRunning".
+ */
+export interface WorkflowLongRunning {
+  input?: unknown;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

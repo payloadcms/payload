@@ -1,5 +1,8 @@
+import tailwindcssAnimate from 'tailwindcss-animate'
+import typography from '@tailwindcss/typography'
+
 /** @type {import('tailwindcss').Config} */
-export default {
+const config = {
   content: [
     './pages/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
@@ -7,7 +10,7 @@ export default {
     './src/**/*.{ts,tsx}',
   ],
   darkMode: ['selector', '[data-theme="dark"]'],
-  plugins: [require('tailwindcss-animate'), require('@tailwindcss/typography')],
+  plugins: [tailwindcssAnimate, typography],
   prefix: '',
   safelist: [
     'lg:col-span-4',
@@ -58,7 +61,7 @@ export default {
           foreground: 'hsl(var(--accent-foreground))',
         },
         background: 'hsl(var(--background))',
-        border: 'hsl(var(--border))',
+        border: 'hsla(var(--border))',
         card: {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
@@ -104,19 +107,47 @@ export default {
           to: { height: '0' },
         },
       },
-      typography: ({ theme }) => ({
+      typography: () => ({
         DEFAULT: {
-          css: {
-            '--tw-prose-body': 'var(--text)',
-            '--tw-prose-headings': 'var(--text)',
-            h1: {
-              fontSize: '4rem',
-              fontWeight: 'normal',
-              marginBottom: '0.25em',
+          css: [
+            {
+              '--tw-prose-body': 'var(--text)',
+              '--tw-prose-headings': 'var(--text)',
+              h1: {
+                fontWeight: 'normal',
+                marginBottom: '0.25em',
+              },
             },
-          },
+          ],
+        },
+        base: {
+          css: [
+            {
+              h1: {
+                fontSize: '2.5rem',
+              },
+              h2: {
+                fontSize: '1.25rem',
+                fontWeight: 600,
+              },
+            },
+          ],
+        },
+        md: {
+          css: [
+            {
+              h1: {
+                fontSize: '3.5rem',
+              },
+              h2: {
+                fontSize: '1.5rem',
+              },
+            },
+          ],
         },
       }),
     },
   },
 }
+
+export default config

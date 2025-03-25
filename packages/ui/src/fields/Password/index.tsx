@@ -42,6 +42,8 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
 
   const memoizedValidate: PasswordFieldValidation = useCallback(
     (value, options) => {
+      const pathSegments = path ? path.split('.') : []
+
       if (typeof validate === 'function') {
         return validate(value, { ...options, required })
       }
@@ -49,7 +51,10 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
       return password(value, {
         name: 'password',
         type: 'text',
+        blockData: {},
         data: {},
+        event: 'onChange',
+        path: pathSegments,
         preferences: { fields: {} },
         req: {
           payload: {
@@ -61,13 +66,12 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
         siblingData: {},
       })
     },
-    [validate, config, t, required],
+    [validate, config, t, required, path],
   )
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
-    formInitializing,
-    formProcessing,
+    disabled,
     setValue,
     showError,
     value,
@@ -75,8 +79,6 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
     path,
     validate: memoizedValidate,
   })
-
-  const disabled = disabledFromProps || formInitializing || formProcessing
 
   const renderRTL = isFieldRTL({
     fieldLocalized: false,
@@ -104,7 +106,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
       }}
       path={path}
       placeholder={placeholder}
-      readOnly={disabled}
+      readOnly={disabled || disabledFromProps}
       required={required}
       rtl={renderRTL}
       showError={showError}

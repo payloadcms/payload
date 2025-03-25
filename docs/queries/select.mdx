@@ -15,15 +15,17 @@ This is where Payload's `select` feature comes in. Here, you can define exactly 
 To specify `select` in the [Local API](../local-api/overview), you can use the `select` option in your query:
 
 ```ts
+import type { Payload } from 'payload'
+
 // Include mode
-const getPosts = async () => {
+const getPosts = async (payload: Payload) => {
   const posts = await payload.find({
     collection: 'posts',
     select: {
       text: true,
       // select a specific field from group
       group: {
-        number: true
+        number: true,
       },
       // select all fields from array
       array: true,
@@ -34,15 +36,15 @@ const getPosts = async () => {
 }
 
 // Exclude mode
-const getPosts = async () => {
+const getPosts = async (payload: Payload) => {
   const posts = await payload.find({
     collection: 'posts',
     // Select everything except for array and group.number
     select: {
       array: false,
       group: {
-        number: false
-      }
+        number: false,
+      },
     }, // highlight-line
   })
 
@@ -50,19 +52,23 @@ const getPosts = async () => {
 }
 ```
 
-
 <Banner type="warning">
-  <strong>Important:</strong>
-  To perform querying with `select` efficiently, Payload implements your `select` query on the database level. Because of that, your `beforeRead` and `afterRead` hooks may not receive the full `doc`.
+  **Important:** To perform querying with `select` efficiently, Payload
+  implements your `select` query on the database level. Because of that, your
+  `beforeRead` and `afterRead` hooks may not receive the full `doc`. To ensure
+  that some fields are always selected for your hooks / access control,
+  regardless of the `select` query you can use `forceSelect` collection config
+  property.
 </Banner>
-
 
 ## REST API
 
 To specify select in the [REST API](../rest-api/overview), you can use the `select` parameter in your query:
 
 ```ts
-fetch('https://localhost:3000/api/posts?select[color]=true&select[group][number]=true') // highlight-line
+fetch(
+  'https://localhost:3000/api/posts?select[color]=true&select[group][number]=true',
+) // highlight-line
   .then((res) => res.json())
   .then((data) => console.log(data))
 ```
@@ -73,12 +79,13 @@ For this reason, we recommend to use the extremely helpful and ubiquitous [`qs-e
 
 ```ts
 import { stringify } from 'qs-esm'
+import type { Where } from 'payload'
 
-const select = {
+const select: Where = {
   text: true,
   group: {
-    number: true
-  }
+    number: true,
+  },
   // This query could be much more complex
   // and QS would handle it beautifully
 }
@@ -91,16 +98,17 @@ const getPosts = async () => {
     { addQueryPrefix: true },
   )
 
-  const response = await fetch(`http://localhost:3000/api/posts${stringifiedQuery}`)
+  const response = await fetch(
+    `http://localhost:3000/api/posts${stringifiedQuery}`,
+  )
   // Continue to handle the response below...
 }
 ```
 
 <Banner type="info">
-  <strong>Reminder:</strong>
-  This is the same for [Globals](../configuration/globals) using the `/api/globals` endpoint.
+  **Reminder:** This is the same for [Globals](../configuration/globals) using
+  the `/api/globals` endpoint.
 </Banner>
-
 
 ## defaultPopulate collection config property
 
@@ -115,9 +123,6 @@ Loading all of the page content, its related links, and everything else is going
 
 ```ts
 import type { CollectionConfig } from 'payload'
-
-import { lexicalEditor, LinkFeature } from '@payloadcms/richtext-lexical'
-import { slateEditor } from '@payloadcms/richtext-slate'
 
 // The TSlug generic can be passed to have type safety for `defaultPopulate`.
 // If avoided, the `defaultPopulate` type resolves to `SelectType`.
@@ -137,6 +142,13 @@ export const Pages: CollectionConfig<'pages'> = {
 }
 ```
 
+<Banner type="warning">
+  **Important:** When using `defaultPopulate` on a collection with
+  [Uploads](/docs/fields/upload) enabled and you want to select the `url` field,
+  it is important to specify `filename: true` as well, otherwise Payload will
+  not be able to construct the correct file URL, instead returning `url: null`.
+</Banner>
+
 ## populate
 
 Setting `defaultPopulate` will enforce that each time Payload performs a "population" of a related document, only the fields specified will be queried and returned. However, you can override `defaultPopulate` with the `populate` property in the Local and REST API:
@@ -144,7 +156,9 @@ Setting `defaultPopulate` will enforce that each time Payload performs a "popula
 **Local API:**
 
 ```ts
-const getPosts = async () => {
+import type { Payload } from 'payload'
+
+const getPosts = async (payload: Payload) => {
   const posts = await payload.find({
     collection: 'posts',
     populate: {

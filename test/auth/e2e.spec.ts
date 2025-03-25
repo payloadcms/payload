@@ -1,10 +1,9 @@
-import type { Page } from '@playwright/test'
+import type { BrowserContext, Page } from '@playwright/test'
 import type { SanitizedConfig } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
 import path from 'path'
-import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
 
@@ -82,8 +81,9 @@ const createFirstUser = async ({
     .not.toContain('create-first-user')
 }
 
-describe('auth', () => {
+describe('Auth', () => {
   let page: Page
+  let context: BrowserContext
   let url: AdminUrlUtil
   let serverURL: string
   let apiURL: string
@@ -94,7 +94,7 @@ describe('auth', () => {
     apiURL = `${serverURL}/api`
     url = new AdminUrlUtil(serverURL, slug)
 
-    const context = await browser.newContext()
+    context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
 
@@ -108,7 +108,7 @@ describe('auth', () => {
     })
 
     await payload.create({
-      collection: 'api-keys',
+      collection: apiKeysSlug,
       data: {
         apiKey: uuid(),
         enableAPIKey: true,
@@ -116,7 +116,7 @@ describe('auth', () => {
     })
 
     await payload.create({
-      collection: 'api-keys',
+      collection: apiKeysSlug,
       data: {
         apiKey: uuid(),
         enableAPIKey: true,
@@ -188,7 +188,6 @@ describe('auth', () => {
 
     test('should have up-to-date user in `useAuth` hook', async () => {
       await page.goto(url.account)
-      await page.waitForURL(url.account)
       await expect(page.locator('#users-api-result')).toHaveText('Hello, world!')
       await expect(page.locator('#use-auth-result')).toHaveText('Hello, world!')
       const field = page.locator('#field-custom')

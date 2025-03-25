@@ -47,7 +47,11 @@ export const traverseFields = ({
         break
 
       case 'blocks':
-        field.blocks.map((block) => {
+        ;(field.blockReferences ?? field.blocks).map((_block) => {
+          // TODO: iterate over blocks mapped to block slug in v4, or pass through payload.blocks
+          const block =
+            typeof _block === 'string' ? config.blocks.find((b) => b.slug === _block) : _block
+
           const blockSchemaPath = `${schemaPath}.${block.slug}`
 
           schemaMap.set(blockSchemaPath, block)
@@ -98,6 +102,8 @@ export const traverseFields = ({
 
       case 'tabs':
         field.tabs.map((tab, tabIndex) => {
+          const isNamedTab = tabHasName(tab)
+
           const { indexPath: tabIndexPath, schemaPath: tabSchemaPath } = getFieldPaths({
             field: {
               ...tab,
@@ -115,8 +121,8 @@ export const traverseFields = ({
             config,
             fields: tab.fields,
             i18n,
-            parentIndexPath: tabHasName(tab) ? '' : tabIndexPath,
-            parentSchemaPath: tabHasName(tab) ? tabSchemaPath : parentSchemaPath,
+            parentIndexPath: isNamedTab ? '' : tabIndexPath,
+            parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
             schemaMap,
           })
         })

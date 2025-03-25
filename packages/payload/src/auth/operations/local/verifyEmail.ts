@@ -8,7 +8,7 @@ import { verifyEmailOperation } from '../verifyEmail.js'
 export type Options<T extends CollectionSlug> = {
   collection: T
   context?: RequestContext
-  req?: PayloadRequest
+  req?: Partial<PayloadRequest>
   token: string
 }
 

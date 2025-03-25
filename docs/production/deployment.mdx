@@ -7,8 +7,8 @@ keywords: deployment, production, config, configuration, documentation, Content 
 ---
 
 <Banner type="success">
-  So you've developed a Payload app, it's fully tested, and running great locally. Now it's time to
-  launch. <strong>Awesome! Great work!</strong> Now, what's next?
+  So you've developed a Payload app, it's fully tested, and running great
+  locally. Now it's time to launch. **Awesome! Great work!** Now, what's next?
 </Banner>
 
 There are many ways to deploy Payload to a production environment. When evaluating how you will deploy Payload, you need
@@ -55,18 +55,19 @@ Because _**you**_ are in complete control of who can do what with your data, you
 wield that power responsibly before deploying to Production.
 
 <Banner type="error">
-  <strong>
+  **
     By default, all Access Control functions require that a user is successfully logged in to
     Payload to create, read, update, or delete data.
-  </strong>
+  **
   But, if you allow public user registration, for example, you will want to make sure that your
   access control functions are more strict - permitting
-  {' '}
-  <strong>
-    only appropriate users
-  </strong>
-  {' '}
-  to perform appropriate actions.
+
+**
+only appropriate users
+**
+
+to perform appropriate actions.
+
 </Banner>
 
 ### Running in Production
@@ -101,8 +102,7 @@ unsupported `$facet` aggregation.
 ### CosmosDB
 
 When using Azure Cosmos DB, an index is needed for any field you may want to sort on. To add the sort index for all
-fields that may be sorted in the admin UI use the <a href="/docs/configuration/overview">indexSortableFields</a>
-configuration option.
+fields that may be sorted in the admin UI use the [indexSortableFields](/docs/configuration/overview) option.
 
 ## File storage
 
@@ -133,10 +133,11 @@ perpetually.
 - Many other more traditional web hosts
 
 <Banner type="error">
-  <strong>Warning:</strong>
-  <br />
-  If you rely on Payload's <strong>Upload</strong> functionality, make sure you either use a host
-  with a persistent filesystem or have an integration with a third-party file host like Amazon S3.
+  **Warning:**
+
+If you rely on Payload's **Upload** functionality, make sure you either use a host
+with a persistent filesystem or have an integration with a third-party file host like Amazon S3.
+
 </Banner>
 
 ### Using cloud storage providers
@@ -160,7 +161,19 @@ Follow the docs to configure any one of these storage providers. For local devel
 This is an example of a multi-stage docker build of Payload for production. Ensure you are setting your environment
 variables on deployment, like `PAYLOAD_SECRET`, `PAYLOAD_CONFIG_PATH`, and `DATABASE_URI` if needed.
 
+In your Next.js config, set the `output` property `standalone`.
+
+```js
+// next.config.js
+const nextConfig = {
+  output: 'standalone',
+}
+```
+
+Dockerfile
+
 ```dockerfile
+# Dockerfile
 # From https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile
 
 FROM node:18-alpine AS base

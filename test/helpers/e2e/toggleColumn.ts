@@ -1,29 +1,34 @@
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 
 import { exactText } from '../../helpers.js'
+import { openListColumns } from './openListColumns.js'
 
 export const toggleColumn = async (
   page: Page,
   {
-    togglerSelector = '.list-controls__toggle-columns',
-    columnContainerSelector = '.list-controls__columns',
+    togglerSelector,
+    columnContainerSelector,
     columnLabel,
+    targetState: targetStateFromArgs,
+    columnName,
+    expectURLChange = true,
   }: {
     columnContainerSelector?: string
     columnLabel: string
+    columnName?: string
+    expectURLChange?: boolean
+    targetState?: 'off' | 'on'
     togglerSelector?: string
   },
-): Promise<any> => {
-  const columnContainer = page.locator(columnContainerSelector).first()
-  const isAlreadyOpen = await columnContainer.isVisible()
-
-  if (!isAlreadyOpen) {
-    await page.locator(togglerSelector).first().click()
-  }
-
-  await expect(page.locator(`${columnContainerSelector}.rah-static--height-auto`)).toBeVisible()
+): Promise<{
+  columnContainer: Locator
+}> => {
+  const { columnContainer } = await openListColumns(page, {
+    togglerSelector,
+    columnContainerSelector,
+  })
 
   const column = columnContainer.locator(`.column-selector .column-selector__column`, {
     hasText: exactText(columnLabel),
@@ -33,17 +38,50 @@ export const toggleColumn = async (
     el.classList.contains('column-selector__column--active'),
   )
 
+  const targetState =
+    targetStateFromArgs !== undefined ? targetStateFromArgs : isActiveBeforeClick ? 'off' : 'on'
+
   await expect(column).toBeVisible()
 
-  await column.click()
+  const requiresToggle =
+    (isActiveBeforeClick && targetState === 'off') || (!isActiveBeforeClick && targetState === 'on')
 
-  if (isActiveBeforeClick) {
-    // no class
-    await expect(column).not.toHaveClass('column-selector__column--active')
-  } else {
-    // has class
-    await expect(column).toHaveClass('column-selector__column--active')
+  if (requiresToggle) {
+    await column.click()
   }
 
-  return column
+  if (targetState === 'off') {
+    // no class
+    await expect(column).not.toHaveClass(/column-selector__column--active/)
+  } else {
+    // has class
+    await expect(column).toHaveClass(/column-selector__column--active/)
+  }
+
+  if (expectURLChange && columnName && requiresToggle) {
+    await waitForColumnInURL({ page, columnName, state: targetState })
+  }
+
+  return { columnContainer }
+}
+
+export const waitForColumnInURL = async ({
+  page,
+  columnName,
+  state,
+}: {
+  columnName: string
+  page: Page
+  state: 'off' | 'on'
+}): Promise<void> => {
+  await page.waitForURL(/.*\?.*/)
+
+  const identifier = `${state === 'off' ? '-' : ''}${columnName}`
+
+  // Test that the identifier is in the URL
+  // It must appear in the `columns` query parameter, i.e. after `columns=...` and before the next `&`
+  // It must also appear in it entirety to prevent partially matching other values, i.e. between quotation marks
+  const regex = new RegExp(`columns=([^&]*${encodeURIComponent(`"${identifier}"`)}[^&]*)`)
+
+  await page.waitForURL(regex)
 }

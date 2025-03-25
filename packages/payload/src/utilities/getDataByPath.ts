@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import type { FormState } from '../admin/types.js'
 
 import { unflatten } from './unflatten.js'
