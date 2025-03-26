@@ -43,7 +43,7 @@ export { ToolbarButton } from '../../features/toolbars/shared/ToolbarButton/inde
 export { TableFeatureClient } from '../../features/experimental_table/client/index.js'
 
 export { ToolbarDropdown } from '../../features/toolbars/shared/ToolbarDropdown/index.js'
-export { UploadFeatureClient } from '../../features/upload/client/feature.client.js'
+export { UploadFeatureClient } from '../../features/upload/client/index.js'
 
 export { RichTextField } from '../../field/index.js'
 export {

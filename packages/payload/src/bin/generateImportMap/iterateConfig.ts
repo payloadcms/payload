@@ -95,8 +95,7 @@ export function iterateConfig({
   }
 
   if (config?.admin?.dependencies) {
-    for (const key in config.admin.dependencies) {
-      const dependency = config.admin.dependencies[key]
+    for (const dependency of Object.values(config.admin.dependencies)) {
       addToImportMap(dependency.path)
     }
   }

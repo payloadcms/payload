@@ -1213,6 +1213,62 @@ describe('Versions', () => {
       await expect(textInBlock.locator('tr').nth(1).locator('td').nth(3)).toHaveText('textInBlock2')
     })
 
+    test('correctly renders diff for collapsibles within block fields', async () => {
+      await navigateToVersionFieldsDiff()
+
+      const textInBlock = page.locator(
+        '[data-field-path="blocks.1.textInCollapsibleInCollapsibleBlock"]',
+      )
+
+      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
+        'textInCollapsibleInCollapsibleBlock',
+      )
+      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
+        'textInCollapsibleInCollapsibleBlock2',
+      )
+    })
+
+    test('correctly renders diff for rows within block fields', async () => {
+      await navigateToVersionFieldsDiff()
+
+      const textInBlock = page.locator('[data-field-path="blocks.1.textInRowInCollapsibleBlock"]')
+
+      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
+        'textInRowInCollapsibleBlock',
+      )
+      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
+        'textInRowInCollapsibleBlock2',
+      )
+    })
+
+    test('correctly renders diff for named tabs within block fields', async () => {
+      await navigateToVersionFieldsDiff()
+
+      const textInBlock = page.locator(
+        '[data-field-path="blocks.2.namedTab1InBlock.textInNamedTab1InBlock"]',
+      )
+
+      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
+        'textInNamedTab1InBlock',
+      )
+      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
+        'textInNamedTab1InBlock2',
+      )
+    })
+
+    test('correctly renders diff for unnamed tabs within block fields', async () => {
+      await navigateToVersionFieldsDiff()
+
+      const textInBlock = page.locator('[data-field-path="blocks.2.textInUnnamedTab2InBlock"]')
+
+      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(1)).toHaveText(
+        'textInUnnamedTab2InBlock',
+      )
+      await expect(textInBlock.locator('tr').nth(1).locator('td').nth(3)).toHaveText(
+        'textInUnnamedTab2InBlock2',
+      )
+    })
+
     test('correctly renders diff for checkbox fields', async () => {
       await navigateToVersionFieldsDiff()
 
