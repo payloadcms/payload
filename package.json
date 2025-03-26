@@ -87,6 +87,7 @@
     "runts": "cross-env NODE_OPTIONS=--no-deprecation node --no-deprecation --import @swc-node/register/esm-register",
     "script:build-template-with-local-pkgs": "pnpm --filter scripts build-template-with-local-pkgs",
     "script:gen-templates": "pnpm --filter scripts gen-templates",
+    "script:gen-templates:build": "pnpm --filter scripts gen-templates --build",
     "script:license-check": "pnpm --filter scripts license-check",
     "script:list-published": "pnpm --filter releaser list-published",
     "script:pack": "pnpm --filter scripts pack-all-to-dest",
