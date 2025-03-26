@@ -57,18 +57,13 @@ export const TextColorFeature = createServerFeature<
   key: 'textColor',
 })
 
+/* eslint-disable perfectionist/sort-objects */
 const payloadDefaultColors = {
-  blue: {
-    name: 'blue',
-    dark: '#0000FF',
-    label: 'Blue',
-    light: '#0000FF',
-  },
-  green: {
-    name: 'green',
-    dark: '#00FF00',
-    label: 'Green',
-    light: '#00FF00',
+  red: {
+    name: 'red',
+    dark: '#FF0000',
+    label: 'Red',
+    light: '#FF0000',
   },
   orange: {
     name: 'orange',
@@ -76,11 +71,23 @@ const payloadDefaultColors = {
     label: 'Orange',
     light: '#FFA500',
   },
-  pink: {
-    name: 'pink',
-    dark: '#FFC0CB',
-    label: 'Pink',
-    light: '#FFC0CB',
+  yellow: {
+    name: 'yellow',
+    dark: '#FFFF00',
+    label: 'Yellow',
+    light: '#FFFF00',
+  },
+  green: {
+    name: 'green',
+    dark: '#00FF00',
+    label: 'Green',
+    light: '#00FF00',
+  },
+  blue: {
+    name: 'blue',
+    dark: '#0000FF',
+    label: 'Blue',
+    light: '#0000FF',
   },
   purple: {
     name: 'purple',
@@ -88,16 +95,10 @@ const payloadDefaultColors = {
     label: 'Purple',
     light: '#800080',
   },
-  red: {
-    name: 'red',
-    dark: '#FF0000',
-    label: 'Red',
-    light: '#FF0000',
-  },
-  yellow: {
-    name: 'yellow',
-    dark: '#FFFF00',
-    label: 'Yellow',
-    light: '#FFFF00',
+  pink: {
+    name: 'pink',
+    dark: '#FFC0CB',
+    label: 'Pink',
+    light: '#FFC0CB',
   },
 }

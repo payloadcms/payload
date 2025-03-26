@@ -23,14 +23,17 @@ export const PostsCollection: CollectionConfig = {
           FixedToolbarFeature(),
 
           TextColorFeature({
-            textColors: [
-              { name: 'red', label: 'Red', light: '#ff0000', dark: '#ff0000' },
-              { name: 'green', label: 'Green', light: 'green', dark: 'green' },
-              { name: 'blue', label: 'Blue', light: 'blue', dark: 'blue' },
+            textColors: ({ defaultColors }) => [
+              ...Object.values(defaultColors),
+              {
+                name: 'mycustomcolor',
+                label: 'My Custom Color',
+                light: '#0000ff',
+                dark: '#0000ff',
+              },
             ],
             backgroundColors: ({ defaultColors }) => [
-              defaultColors.red,
-              defaultColors.green,
+              ...Object.values(defaultColors),
               {
                 name: 'mycustomcolor',
                 label: 'My Custom Color',
