@@ -244,7 +244,7 @@ export interface PayloadQueryPreset {
     | number
     | boolean
     | null;
-  relatedCollection: 'pages' | 'users';
+  relatedCollection: 'pages';
   updatedAt: string;
   createdAt: string;
 }

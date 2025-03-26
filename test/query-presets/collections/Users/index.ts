@@ -8,7 +8,6 @@ export const Users: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
   },
-  enableQueryPresets: true,
   auth: true,
   fields: [
     {
