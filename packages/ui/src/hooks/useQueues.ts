@@ -1,47 +1,41 @@
 import { useCallback, useRef } from 'react'
 
+type queuedFunction = () => Promise<void>
+
+/**
+ * A React hook that allows you to queue up functions to be executed in order.
+ * This is useful when you need to ensure log running networks requests are processed sequentially.
+ * Builds up a "queue" of functions to be executed, and only ever processes the last function in the queue.
+ * The remaining queue is cleared out to ensure it remains shallow.
+ */
 export function useQueues(): {
-  queueTask: (fn: (signal: AbortSignal) => Promise<void>) => void
+  queueTask: (fn: queuedFunction) => void
 } {
-  const runningTaskRef = useRef<null | Promise<void>>(null)
-  const queuedTask = useRef<((signal: AbortSignal) => Promise<void>) | null>(null)
-  const abortControllerRef = useRef<AbortController | null>(null)
+  const queue = useRef<queuedFunction[]>([])
 
-  const queueTask = useCallback((fn: (signal: AbortSignal) => Promise<void>) => {
-    // Overwrite the queued task every time a new one arrives
-    queuedTask.current = fn
+  const queueTask = useCallback((fn: queuedFunction) => {
+    queue.current.push(fn)
 
-    // If a task is already running, abort it and return
-    if (runningTaskRef.current !== null) {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort()
+    const processQueue = async () => {
+      if (queue.current.length === 0) {
+        return
       }
 
-      return
-    }
+      while (queue.current.length > 0) {
+        const latestTask = queue.current.pop() // Only process the last task in the queue
+        queue.current = [] // Reset the queue to ensure it remains shallow
 
-    const executeTask = async () => {
-      while (queuedTask.current) {
-        const taskToRun = queuedTask.current
-        queuedTask.current = null // Reset latest task before running
-
-        const controller = new AbortController()
-        abortControllerRef.current = controller
-
-        try {
-          runningTaskRef.current = taskToRun(controller.signal)
-          await runningTaskRef.current // Wait for the task to complete
-        } catch (err) {
-          if (err.name !== 'AbortError') {
+        if (latestTask) {
+          try {
+            await latestTask()
+          } catch (err) {
             console.error('Error in queued function:', err) // eslint-disable-line no-console
           }
-        } finally {
-          runningTaskRef.current = null
         }
       }
     }
 
-    void executeTask()
+    void processQueue()
   }, [])
 
   return { queueTask }
