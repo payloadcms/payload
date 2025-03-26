@@ -30,7 +30,7 @@ export const FileCell: React.FC<FileCellProps> = ({
   const previewAllowed = fieldPreviewAllowed ?? collectionConfig.upload?.displayPreview ?? true
 
   if (previewAllowed) {
-    let fileSrc: string | undefined = rowData?.thumbnailURL
+    let fileSrc: string | undefined = rowData?.thumbnailURL ?? rowData?.url
 
     if (isImage(rowData?.mimeType)) {
       fileSrc = getBestFitFromSizes({
