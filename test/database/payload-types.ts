@@ -54,6 +54,7 @@ export type SupportedTimezones =
   | 'Asia/Singapore'
   | 'Asia/Tokyo'
   | 'Asia/Seoul'
+  | 'Australia/Brisbane'
   | 'Australia/Sydney'
   | 'Pacific/Guam'
   | 'Pacific/Noumea'
@@ -151,6 +152,7 @@ export interface UserAuthOperations {
 export interface Post {
   id: string;
   title: string;
+  number?: number | null;
   D1?: {
     D2?: {
       D3?: {
@@ -545,6 +547,7 @@ export interface PayloadMigration {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
+  number?: T;
   D1?:
     | T
     | {

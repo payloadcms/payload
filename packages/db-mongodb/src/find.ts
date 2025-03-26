@@ -1,4 +1,4 @@
-import type { PaginateOptions } from 'mongoose'
+import type { PaginateOptions, PipelineStage } from 'mongoose'
 import type { Find } from 'payload'
 
 import { flattenWhereToOperators } from 'payload'
@@ -18,6 +18,7 @@ export const find: Find = async function find(
   this: MongooseAdapter,
   {
     collection: collectionSlug,
+    draftsEnabled,
     joins = {},
     limit = 0,
     locale,
@@ -41,13 +42,17 @@ export const find: Find = async function find(
     hasNearConstraint = constraints.some((prop) => Object.keys(prop).some((key) => key === 'near'))
   }
 
+  const sortAggregation: PipelineStage[] = []
+
   let sort
   if (!hasNearConstraint) {
     sort = buildSortParam({
+      adapter: this,
       config: this.payload.config,
       fields: collectionConfig.flattenedFields,
       locale,
       sort: sortArg || collectionConfig.defaultSort,
+      sortAggregation,
       timestamps: true,
     })
   }
@@ -124,12 +129,13 @@ export const find: Find = async function find(
     adapter: this,
     collection: collectionSlug,
     collectionConfig,
+    draftsEnabled,
     joins,
     locale,
     query,
   })
-  // build join aggregation
-  if (aggregate) {
+
+  if (aggregate || sortAggregation.length > 0) {
     result = await aggregatePaginate({
       adapter: this,
       collation: paginationOptions.collation,
@@ -142,6 +148,7 @@ export const find: Find = async function find(
       query,
       session: paginationOptions.options?.session ?? undefined,
       sort: paginationOptions.sort as object,
+      sortAggregation,
       useEstimatedCount: paginationOptions.useEstimatedCount,
     })
   } else {

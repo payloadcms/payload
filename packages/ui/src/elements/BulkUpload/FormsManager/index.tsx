@@ -358,7 +358,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             }),
           }
 
-          if (req.status === 413) {
+          if (req.status === 413 || req.status === 400) {
             // file too large
             currentForms[i] = {
               ...currentForms[i],

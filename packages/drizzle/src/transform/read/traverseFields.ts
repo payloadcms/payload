@@ -1,7 +1,6 @@
 import type { FlattenedBlock, FlattenedField, JoinQuery, SanitizedConfig } from 'payload'
 
 import { fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
-import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from '../../types.js'
 import type { BlocksMap } from '../../utilities/createBlocksMap.js'

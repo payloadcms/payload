@@ -3,11 +3,13 @@ import React from 'react'
 import './index.scss'
 
 export const ChevronIcon: React.FC<{
+  readonly ariaLabel?: string
   readonly className?: string
   readonly direction?: 'down' | 'left' | 'right' | 'up'
   readonly size?: 'large' | 'small'
-}> = ({ className, direction, size }) => (
+}> = ({ ariaLabel, className, direction, size }) => (
   <svg
+    aria-label={ariaLabel}
     className={['icon icon--chevron', className, size && `icon--size-${size}`]
       .filter(Boolean)
       .join(' ')}

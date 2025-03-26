@@ -1,5 +1,6 @@
 import type { PayloadComponent } from '../../../config/types.js'
 import type { ImportMap } from '../index.js'
+
 import { parsePayloadComponent } from './parsePayloadComponent.js'
 
 export const getFromImportMap = <TOutput>(args: {

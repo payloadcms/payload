@@ -41,11 +41,12 @@ export type ServerFunctionHandler = (
 export type ListQuery = {
   /*
    * This is an of strings, i.e. `['title', '-slug']`
-   * Use `transformColumnsToPreferences` to convert it back and forth
+   * Use `transformColumnsToPreferences` and `transformColumnsToSearchParams` to convert it back and forth
    */
   columns?: ColumnsFromURL
   limit?: string
   page?: string
+  preset?: number | string
   /*
     When provided, is automatically injected into the `where` object
   */
