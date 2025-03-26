@@ -389,4 +389,19 @@ describe('Query Presets', () => {
       }),
     ).toBeVisible()
   })
+
+  test('only shows query presets related to that particular collection', async () => {
+    // no results on `users` collection
+    const usersURL = new AdminUrlUtil(serverURL, 'users')
+    await page.goto(usersURL.list)
+    const drawer = await openQueryPresetDrawer({ page })
+    await expect(drawer.locator('.table table > tbody > tr')).toHaveCount(0)
+    await expect(drawer.locator('.collection-list__no-results')).toBeVisible()
+
+    // results on `pages` collection
+    await page.goto(pagesUrl.list)
+    await openQueryPresetDrawer({ page })
+    await expect(drawer.locator('.table table > tbody > tr')).toHaveCount(3)
+    await drawer.locator('.collection-list__no-results').isHidden()
+  })
 })

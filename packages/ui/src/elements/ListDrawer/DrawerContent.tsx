@@ -80,6 +80,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
         const newQuery: ListQuery = { ...(query || {}), where: { ...(query?.where || {}) } }
 
         const filterOption = filterOptions?.[slug]
+        console.log({ slug, filterOption, filterOptions, newQuery })
 
         if (filterOptions && typeof filterOption !== 'boolean') {
           newQuery.where = hoistQueryParamsToAnd(newQuery.where, filterOption)
