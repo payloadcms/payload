@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { defaultEditorFeatures, lexicalEditor } from '@payloadcms/richtext-lexical'
+import { defaultEditorFeatures, lexicalEditor, LinkFeature } from '@payloadcms/richtext-lexical'
 
 import { lexicalAccessControlSlug } from '../../slugs.js'
 
@@ -22,7 +22,29 @@ export const LexicalAccessControl: CollectionConfig = {
       name: 'richText',
       type: 'richText',
       editor: lexicalEditor({
-        features: [...defaultEditorFeatures],
+        features: [
+          ...defaultEditorFeatures,
+          LinkFeature({
+            fields: ({ defaultFields }) => [
+              ...defaultFields,
+              {
+                name: 'blocks',
+                type: 'blocks',
+                blocks: [
+                  {
+                    slug: 'block',
+                    fields: [
+                      {
+                        name: 'text',
+                        type: 'text',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          }),
+        ],
       }),
     },
   ],
