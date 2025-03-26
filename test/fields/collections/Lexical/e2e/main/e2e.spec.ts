@@ -1521,6 +1521,7 @@ describe('lexicalMain', () => {
       expect(htmlContent).not.toContain('Cargando...')
       expect(htmlContent).toContain('Start typing, or press')
     })
+    // eslint-disable-next-line playwright/expect-expect, playwright/no-skipped-test
     test.skip('ensure simple localized lexical field works', async () => {
       await navigateToLexicalFields(true, 'lexical-localized-fields')
     })
