@@ -11,20 +11,20 @@ import {
   useAllFormFields,
   useForm,
   useFormModified,
-  useFormProcessing,
   useFormSubmitted,
 } from '../../forms/Form/context.js'
 import { useDebounce } from '../../hooks/useDebounce.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
+import { useQueues } from '../../hooks/useQueues.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
-import './index.scss'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatTimeToNow } from '../../utilities/formatDocTitle/formatDateTitle.js'
 import { reduceFieldsToValuesWithValidation } from '../../utilities/reduceFieldsToValuesWithValidation.js'
 import { LeaveWithoutSaving } from '../LeaveWithoutSaving/index.js'
+import './index.scss'
 
 const baseClass = 'autosave'
 // The minimum time the saving state should be shown
@@ -54,12 +54,9 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     setUnpublishedVersionCount,
     updateSavedDocumentData,
   } = useDocumentInfo()
-  const queueRef = useRef([])
-  const isProcessingRef = useRef(false)
 
   const { reportUpdate } = useDocumentEvents()
   const { dispatchFields, isValid, setBackgroundProcessing, setIsValid, setSubmitted } = useForm()
-  const isFormProcessing = useFormProcessing()
 
   const [fields] = useAllFormFields()
   const modified = useFormModified()
@@ -105,43 +102,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   // can always retrieve the most to date locale
   localeRef.current = locale
 
-  const processQueue = React.useCallback(async () => {
-    if (isProcessingRef.current || queueRef.current.length === 0) {
-      return
-    }
-
-    // Do not autosave if the form is already processing (e.g. if the user clicked the publish button
-    // right before this autosave runs), as parallel updates could cause conflicts
-    if (isFormProcessing) {
-      queueRef.current = []
-      return
-    }
-
-    if (!isValidRef.current) {
-      // Clear queue so we don't end up in an infinite loop
-      queueRef.current = []
-      // Reset internal validation state so queue processing can run again
-      isValidRef.current = true
-      return
-    }
-    isProcessingRef.current = true
-
-    const latestAction = queueRef.current[queueRef.current.length - 1]
-    queueRef.current = []
-
-    setBackgroundProcessing(true)
-
-    try {
-      await latestAction()
-    } finally {
-      isProcessingRef.current = false
-      setBackgroundProcessing(false)
-      if (queueRef.current.length > 0) {
-        await processQueue()
-      }
-    }
-    setBackgroundProcessing(false)
-  }, [isFormProcessing, setBackgroundProcessing])
+  const { queueTask } = useQueues()
 
   const autosaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -165,7 +126,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
       }
     }
 
-    const autosave = async () => {
+    queueTask(async () => {
       if (modified) {
         startTimestamp = new Date().getTime()
 
@@ -198,6 +159,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
             if (!skipSubmission && isValidRef.current) {
               let res
+
               try {
                 res = await fetch(url, {
                   body: JSON.stringify(data),
@@ -208,7 +170,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
                   },
                   method,
                 })
-              } catch (error) {
+              } catch (_err) {
                 // Swallow Error
               }
 
@@ -297,10 +259,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
           }
         }
       }
-    }
-
-    queueRef.current.push(autosave)
-    void processQueue()
+    })
   })
 
   const didMount = useRef(false)
