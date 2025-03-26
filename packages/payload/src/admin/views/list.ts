@@ -11,8 +11,10 @@ import type { Column } from '../elements/Table.js'
 import type { Data } from '../types.js'
 
 export type ListViewSlots = {
+  AfterBulkActions?: React.ReactNode
   AfterList?: React.ReactNode
   AfterListTable?: React.ReactNode
+  BeforeBulkActions?: React.ReactNode
   BeforeList?: React.ReactNode
   BeforeListTable?: React.ReactNode
   Description?: React.ReactNode
@@ -66,6 +68,11 @@ export type ListViewSlotSharedClientProps = {
   newDocumentURL: string
 }
 
+// BeforeBulkActions
+export type BeforeBulkActionsClientProps = ListViewSlotSharedClientProps
+export type BeforeBulkActionsServerPropsOnly = {} & ListViewServerPropsOnly
+export type BeforeBulkActionsServerProps = BeforeBulkActionsClientProps & BeforeBulkActionsServerPropsOnly
+
 // BeforeList
 export type BeforeListClientProps = ListViewSlotSharedClientProps
 export type BeforeListServerPropsOnly = {} & ListViewServerPropsOnly
@@ -75,6 +82,11 @@ export type BeforeListServerProps = BeforeListClientProps & BeforeListServerProp
 export type BeforeListTableClientProps = ListViewSlotSharedClientProps
 export type BeforeListTableServerPropsOnly = {} & ListViewServerPropsOnly
 export type BeforeListTableServerProps = BeforeListTableClientProps & BeforeListTableServerPropsOnly
+
+// AfterBulkActions
+export type AfterBulkActionsClientProps = ListViewSlotSharedClientProps
+export type AfterBulkActionsServerPropsOnly = {} & ListViewServerPropsOnly
+export type AfterBulkActionsServerProps = AfterBulkActionsClientProps & AfterBulkActionsServerPropsOnly
 
 // AfterList
 export type AfterListClientProps = ListViewSlotSharedClientProps

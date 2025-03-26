@@ -12,6 +12,7 @@ import {
   exactText,
   getRoutes,
   initPageConsoleErrorCatch,
+  selectAllRows,
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
@@ -245,6 +246,30 @@ describe('List View', () => {
       await expect(
         page.locator('.collection-list--posts').locator('div', {
           hasText: exactText('AfterList custom component'),
+        }),
+      ).toBeVisible()
+    })
+
+    test('should render custom beforeBulkActions component', async () => {
+      await page.goto(postsUrl.list)
+
+      await selectAllRows(page)
+
+      await expect(
+        page.locator('.list-selection').locator('div', {
+          hasText: exactText('BeforeBulkActions custom component'),
+        }),
+      ).toBeVisible()
+    })
+
+    test('should render custom afterBulkActions component', async () => {
+      await page.goto(postsUrl.list)
+
+      await selectAllRows(page)
+
+      await expect(
+        page.locator('.list-selection').locator('div', {
+          hasText: exactText('AfterBulkActions custom component'),
         }),
       ).toBeVisible()
     })

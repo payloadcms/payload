@@ -35,9 +35,11 @@ const baseClass = 'collection-list'
 
 export function DefaultListView(props: ListViewClientProps) {
   const {
+    AfterBulkActions,
     AfterList,
     AfterListTable,
     beforeActions,
+    BeforeBulkActions,
     BeforeList,
     BeforeListTable,
     collectionSlug,
@@ -158,6 +160,8 @@ export function DefaultListView(props: ListViewClientProps) {
             {BeforeList}
             <Gutter className={`${baseClass}__wrap`}>
               <ListHeader
+                AfterBulkActions={AfterBulkActions}
+                BeforeBulkActions={BeforeBulkActions}
                 collectionConfig={collectionConfig}
                 Description={
                   <div className={`${baseClass}__sub-header`}>
@@ -259,6 +263,8 @@ export function DefaultListView(props: ListViewClientProps) {
                       {smallBreak && (
                         <div className={`${baseClass}__list-selection`}>
                           <ListSelection
+                            AfterBulkActions={AfterBulkActions}   
+                            BeforeBulkActions={BeforeBulkActions}
                             collectionConfig={collectionConfig}
                             disableBulkDelete={disableBulkDelete}
                             disableBulkEdit={disableBulkEdit}

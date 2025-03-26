@@ -350,6 +350,12 @@ export const selectTableRow = async (page: Page, title: string): Promise<void> =
   await expect(page.locator(selector)).toBeChecked()
 }
 
+export const selectAllRows = async (page: Page): Promise<void> => {
+  const selector = `#heading-_select .select-all input[type=checkbox]`
+  await page.locator(selector).check()
+  await expect(page.locator(selector)).toBeChecked()
+}
+
 export const findTableCell = (page: Page, fieldName: string, rowTitle?: string): Locator => {
   const parentEl = rowTitle ? findTableRow(page, rowTitle) : page.locator('tbody tr')
   const cell = parentEl.locator(`td.cell-${fieldName}`)
