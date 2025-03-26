@@ -45,6 +45,7 @@ export const renderListViewSlots = ({
   }
 
   const listMenuItems = collectionConfig.admin.components?.listMenuItems
+
   if (Array.isArray(listMenuItems)) {
     result.listMenuItems = [
       RenderServerComponent({
