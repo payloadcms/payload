@@ -379,6 +379,8 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         const { limit, page, sort, where } = args
         const { req } = context
 
+        const draft = Boolean(args.draft ?? context.req.query?.draft)
+
         const fullWhere = combineQueries(where, {
           [field.on]: { equals: parent._id ?? parent.id },
         })
@@ -390,6 +392,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         return await req.payload.find({
           collection,
           depth: 0,
+          draft,
           fallbackLocale: req.fallbackLocale,
           limit,
           locale: req.locale,
