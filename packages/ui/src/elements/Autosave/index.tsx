@@ -130,6 +130,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     queueRef.current = []
 
     setBackgroundProcessing(true)
+
     try {
       await latestAction()
     } finally {

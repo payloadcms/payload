@@ -720,53 +720,51 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const classes = [className, baseClass].filter(Boolean).join(' ')
 
-  const executeOnChange = useEffectEvent(async (submitted: boolean, signal: AbortSignal) => {
-    if (Array.isArray(onChange)) {
-      let revalidatedFormState: FormState = contextRef.current.fields
+  const executeOnChange = useEffectEvent((submitted: boolean) => {
+    queueTask(async () => {
+      if (Array.isArray(onChange)) {
+        let revalidatedFormState: FormState = contextRef.current.fields
 
-      for (const onChangeFn of onChange) {
-        if (signal.aborted) {
+        for (const onChangeFn of onChange) {
+          // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
+          revalidatedFormState = await onChangeFn({
+            formState: deepCopyObjectSimpleWithoutReactComponents(contextRef.current.fields),
+            submitted,
+          })
+        }
+
+        if (!revalidatedFormState) {
           return
         }
 
-        // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
-        revalidatedFormState = await onChangeFn({
-          formState: deepCopyObjectSimpleWithoutReactComponents(contextRef.current.fields),
-          submitted,
+        const { changed, newState } = mergeServerFormState({
+          existingState: contextRef.current.fields || {},
+          incomingState: revalidatedFormState,
         })
+
+        if (changed) {
+          prevFields.current = newState
+
+          dispatchFields({
+            type: 'REPLACE_STATE',
+            optimize: false,
+            state: newState,
+          })
+        }
       }
-
-      if (!revalidatedFormState) {
-        return
-      }
-
-      const { changed, newState } = mergeServerFormState({
-        existingState: contextRef.current.fields || {},
-        incomingState: revalidatedFormState,
-      })
-
-      if (changed && !signal.aborted) {
-        prevFields.current = newState
-
-        dispatchFields({
-          type: 'REPLACE_STATE',
-          optimize: false,
-          state: newState,
-        })
-      }
-    }
+    })
   })
 
   useDebouncedEffect(
     () => {
       if ((isFirstRenderRef.current || !dequal(fields, prevFields.current)) && modified) {
-        queueTask(async (signal) => executeOnChange(submitted, signal))
+        executeOnChange(submitted)
       }
 
       prevFields.current = fields
       isFirstRenderRef.current = false
     },
-    [modified, submitted, fields, queueTask],
+    [modified, submitted, fields],
     250,
   )
 
