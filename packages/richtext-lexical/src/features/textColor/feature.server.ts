@@ -1,19 +1,27 @@
+import type { TFunction } from '@payloadcms/translations'
+
 import { createServerFeature } from '../../index.js'
 
+type Color = { dark: string; label?: string; light: string; name: string }
+// OR MAYBE:
+// type Color = { label?: string; name: string, css:"color:red;--payload-dark:red2" }
+
+type ColorsCallback = ({
+  defaultColors,
+  // t,
+}: {
+  defaultColors: typeof payloadDefaultColors
+  // t: TFunction
+}) => Color[]
+
 export type TextColorFeatureProps = {
-  backgroundColors?: { inDarkMode: string; inLightMode: string; label: string }[]
-  /**
-   * TO-DO: see i18n patterns. The user should provide it in label
-   */
-  colors: { inDarkMode: string; inLightMode: string; label: string }[]
-  /**
-   * Needed for two reasons:
-   * 1. Pasting text with color from other sources.
-   * 2. Making backwards compatible changes
-   *
-   * TO-DO: see how to implement it, because you can't send functions to the server.
-   */
-  normalizeColor?: (color: string) => string
+  backgroundColors?: Color[] | ColorsCallback
+  textColors?: Color[] | ColorsCallback
+}
+
+export type TextColorSanitizedProps = {
+  backgroundColors: Color[]
+  textColors: Color[]
 }
 
 /**
@@ -25,14 +33,71 @@ export type TextColorFeatureProps = {
  */
 export const TextColorFeature = createServerFeature<
   TextColorFeatureProps,
-  TextColorFeatureProps,
+  TextColorSanitizedProps,
   TextColorFeatureProps
 >({
   feature: ({ props }) => {
+    const backgroundColors =
+      typeof props.backgroundColors === 'function'
+        ? props.backgroundColors({ defaultColors: payloadDefaultColors })
+        : props.backgroundColors
+    const textColors =
+      typeof props.textColors === 'function'
+        ? props.textColors({ defaultColors: payloadDefaultColors })
+        : props.textColors
+
     return {
       ClientFeature: '@payloadcms/richtext-lexical/client#TextColorFeatureClient',
-      clientFeatureProps: props,
+      clientFeatureProps: {
+        backgroundColors,
+        textColors,
+      },
     }
   },
   key: 'textColor',
 })
+
+const payloadDefaultColors = {
+  blue: {
+    name: 'blue',
+    dark: '#0000FF',
+    label: 'Blue',
+    light: '#0000FF',
+  },
+  green: {
+    name: 'green',
+    dark: '#00FF00',
+    label: 'Green',
+    light: '#00FF00',
+  },
+  orange: {
+    name: 'orange',
+    dark: '#FFA500',
+    label: 'Orange',
+    light: '#FFA500',
+  },
+  pink: {
+    name: 'pink',
+    dark: '#FFC0CB',
+    label: 'Pink',
+    light: '#FFC0CB',
+  },
+  purple: {
+    name: 'purple',
+    dark: '#800080',
+    label: 'Purple',
+    light: '#800080',
+  },
+  red: {
+    name: 'red',
+    dark: '#FF0000',
+    label: 'Red',
+    light: '#FF0000',
+  },
+  yellow: {
+    name: 'yellow',
+    dark: '#FFFF00',
+    label: 'Yellow',
+    light: '#FFFF00',
+  },
+}

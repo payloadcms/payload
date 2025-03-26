@@ -21,12 +21,24 @@ export const PostsCollection: CollectionConfig = {
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
           FixedToolbarFeature(),
+
           TextColorFeature({
-            colors: [
-              { label: 'Red', inLightMode: '#ff0000', inDarkMode: '#ff0000' },
-              { label: 'Green', inLightMode: 'green', inDarkMode: 'green' },
-              { label: 'Blue', inLightMode: 'blue', inDarkMode: 'blue' },
+            textColors: [
+              { name: 'red', label: 'Red', light: '#ff0000', dark: '#ff0000' },
+              { name: 'green', label: 'Green', light: 'green', dark: 'green' },
+              { name: 'blue', label: 'Blue', light: 'blue', dark: 'blue' },
             ],
+            backgroundColors: ({ defaultColors }) => [
+              defaultColors.red,
+              defaultColors.green,
+              {
+                name: 'mycustomcolor',
+                label: 'My Custom Color',
+                light: '#0000ff',
+                dark: '#0000ff',
+              },
+            ],
+
             // normalizeColor: (color) => {
             //   if (color !== '#ff0000' && color !== 'green' && color !== 'blue') {
             //     return null

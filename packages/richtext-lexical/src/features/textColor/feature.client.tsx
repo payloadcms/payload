@@ -5,30 +5,24 @@ import { $isTableSelection } from '@lexical/table'
 import { $getSelection, $isRangeSelection } from 'lexical'
 
 import type { ToolbarDropdownGroup, ToolbarGroup } from '../toolbars/types.js'
-import type { TextColorFeatureProps } from './feature.server.js'
+import type { TextColorSanitizedProps } from './feature.server.js'
 
 import { TextColorIcon } from '../../lexical/ui/icons/TextColor/index.js'
 import { createClientFeature } from '../../utilities/createClientFeature.js'
 
-const toolbarGroups = (colors: TextColorFeatureProps['colors']): ToolbarGroup[] => {
-  const items: ToolbarDropdownGroup['items'] = colors.map((color) => {
+const toolbarGroups = (props: TextColorSanitizedProps): ToolbarGroup[] => {
+  const items: ToolbarDropdownGroup['items'] = props.textColors.map((color) => {
     return {
       ChildComponent: TextColorIcon,
-      isActive: ({ selection }) => {
-        if ($isRangeSelection(selection) || $isTableSelection(selection)) {
-          // return selection.hasFormat('bold') // TO-DO: fix this
-        }
-        return false
-      },
-      key: color.label,
-      label: color.label,
+      // Component: () => <h1>Hello color.name: {color.name}</h1>,
+      key: color.name,
       onSelect: ({ editor }) => {
         editor.update(() => {
           const selection = $getSelection()
           if (!$isRangeSelection(selection)) {
             return
           }
-          $patchStyleText(selection, { color: color.value })
+          $patchStyleText(selection, { color: color.light })
         })
       },
       order: 1,
@@ -45,15 +39,13 @@ const toolbarGroups = (colors: TextColorFeatureProps['colors']): ToolbarGroup[] 
   ]
 }
 
-export const TextColorFeatureClient = createClientFeature<TextColorFeatureProps>(({ props }) => {
-  console.log('props', props)
-  const { colors } = props
+export const TextColorFeatureClient = createClientFeature<TextColorSanitizedProps>(({ props }) => {
   return {
     toolbarFixed: {
-      groups: toolbarGroups(colors),
+      groups: toolbarGroups(props),
     },
     toolbarInline: {
-      groups: toolbarGroups(colors),
+      groups: toolbarGroups(props),
     },
   }
 })
