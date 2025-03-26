@@ -13,10 +13,10 @@ if (!cachedClientConfigs) {
 export const getClientConfig = cache(
   (args: { config: SanitizedConfig; i18n: I18nClient; importMap: ImportMap }): ClientConfig => {
     const { config, i18n, importMap } = args
-    const currentLocale = i18n.language
+    const currentLanguage = i18n.language
 
-    if (cachedClientConfigs[currentLocale] && !global._payload_doNotCacheClientConfig) {
-      return cachedClientConfigs[currentLocale]
+    if (cachedClientConfigs[currentLanguage] && !global._payload_doNotCacheClientConfig) {
+      return cachedClientConfigs[currentLanguage]
     }
 
     const cachedClientConfig = createClientConfig({
@@ -25,7 +25,7 @@ export const getClientConfig = cache(
       importMap,
     })
 
-    cachedClientConfigs[currentLocale] = cachedClientConfig
+    cachedClientConfigs[currentLanguage] = cachedClientConfig
     global._payload_localizedClientConfigs = cachedClientConfigs
     global._payload_doNotCacheClientConfig = false
 
