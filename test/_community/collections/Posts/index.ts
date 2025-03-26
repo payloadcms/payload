@@ -28,8 +28,8 @@ export const PostsCollection: CollectionConfig = {
               {
                 name: 'mycustomcolor',
                 label: 'My Custom Color',
-                light: '#0000ff',
-                dark: '#0000ff',
+                light: '#A1A1AA',
+                dark: '#52525B',
               },
             ],
             backgroundColors: ({ defaultColors }) => [
@@ -37,8 +37,8 @@ export const PostsCollection: CollectionConfig = {
               {
                 name: 'mycustomcolor',
                 label: 'My Custom Color',
-                light: '#0000ff',
-                dark: '#0000ff',
+                light: '#A1A1AA',
+                dark: '#52525B',
               },
             ],
 

@@ -12,7 +12,7 @@ import { createClientFeature } from '../../utilities/createClientFeature.js'
 const toolbarGroups = (props: TextColorSanitizedProps): ToolbarGroup[] => {
   const backgroundColorItems: ToolbarDropdownGroup['items'] = props.textColors.map((color) => {
     return {
-      ChildComponent: () => <TextColorIcon color={color.light} type="background" />,
+      ChildComponent: () => <TextColorIcon color={color.dark} type="background" />,
       key: `background-${color.name}`,
       label: color.label,
       onSelect: ({ editor }) => {
@@ -29,7 +29,7 @@ const toolbarGroups = (props: TextColorSanitizedProps): ToolbarGroup[] => {
 
   const textColorItems: ToolbarDropdownGroup['items'] = props.textColors.map((color) => {
     return {
-      ChildComponent: () => <TextColorIcon color={color.light} type="text" />,
+      ChildComponent: () => <TextColorIcon color={color.dark} type="text" />,
       // Component: () => <h1>Hello color.name: {color.name}</h1>,
       key: `text-${color.name}`,
       label: color.label,
