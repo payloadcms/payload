@@ -282,6 +282,10 @@ async function main() {
       })
     }
 
+    // Generate importmap
+    log('Generating import map')
+    execSyncSafe(`pnpm --ignore-workspace generate:importmap`, { cwd: destDir })
+
     // TODO: Email?
 
     // TODO: Sharp?
@@ -445,7 +449,6 @@ async function getLatestPayloadVersion() {
     const data = await response.json()
     const latestVersion = data['dist-tags'].latest
 
-    console.log(`Latest Payload CMS version: ${latestVersion}`)
     return latestVersion
   } catch (error) {
     console.error('Error fetching Payload version:', error)
