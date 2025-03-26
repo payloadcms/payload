@@ -390,7 +390,7 @@ describe('Query Presets', () => {
     ).toBeVisible()
   })
 
-  test('only shows query presets related to that particular collection', async () => {
+  test('only shows query presets related to the underlying collection', async () => {
     // no results on `users` collection
     const usersURL = new AdminUrlUtil(serverURL, 'users')
     await page.goto(usersURL.list)
