@@ -56,6 +56,8 @@ async function main() {
   const args = minimist(process.argv.slice(2))
   const template = args['template'] // template directory name
 
+  const shouldBuild = args['build']
+
   const templateRepoUrlBase = `https://github.com/payloadcms/payload/tree/main/templates`
 
   let variations: TemplateVariation[] = [
@@ -285,6 +287,11 @@ async function main() {
     // Generate importmap
     log('Generating import map')
     execSyncSafe(`pnpm --ignore-workspace generate:importmap`, { cwd: destDir })
+
+    if (shouldBuild) {
+      log('Building...')
+      execSyncSafe(`pnpm --ignore-workspace build`, { cwd: destDir })
+    }
 
     // TODO: Email?
 
