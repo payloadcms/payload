@@ -17,6 +17,16 @@
       border-inline-start-style: solid;
       padding-inline-start: base(0.6);
       padding-block: base(0.2);
+
+      &:has(.html-diff-create-text-wrapper),
+      &:has([data-match-type='create']) {
+        border-inline-start-color: var(--theme-success-150);
+      }
+
+      &:has(.html-diff-delete-text-wrapper),
+      &:has([data-match-type='delete']) {
+        border-inline-start-color: var(--theme-error-150);
+      }
     }
 
     h1 {

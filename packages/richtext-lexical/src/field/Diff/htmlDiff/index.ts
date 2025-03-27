@@ -246,9 +246,9 @@ export class HtmlDiff {
         textStartIndex = i + 1
         if (token.match(htmlVideoTagReg)) {
           result += this.dressUpBlockTag(type, token)
-        } else if ([htmlImgTagReg].some((item) => token.match(item))) {
+        } /* else if ([htmlImgTagReg].some((item) => token.match(item))) {
           result += this.dressUpInlineTag(type, token)
-        } else {
+        }*/ else {
           result += token
         }
       } else if (isMatchElement && isHtmlTag) {

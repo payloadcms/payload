@@ -54,36 +54,28 @@ export const UploadDiffHTMLConverterAsync: (args: {
       const JSX = (
         <div className={`${baseClass}${providedCSSString}`}>
           <div className={`${baseClass}__card`}>
-            <div className={`${baseClass}__topRow`}>
-              <div className={`${baseClass}__thumbnail`}>
-                {thumbnailSRC?.length ? (
-                  <img
-                    alt={uploadDoc?.filename}
-                    data-enable-match="true"
-                    data-fields-hash={`${nodeFieldsHash}`}
-                    data-lexical-upload-id={uploadNode.value}
-                    data-lexical-upload-relation-to={uploadNode.relationTo}
-                    src={thumbnailSRC}
-                  />
-                ) : (
-                  <div
-                    data-enable-match="true"
-                    data-fields-hash={`${nodeFieldsHash}`}
-                    data-lexical-upload-id={uploadNode.value}
-                    data-lexical-upload-relation-to={uploadNode.relationTo}
-                  >
-                    <File />
-                  </div>
-                )}
+            <div
+              className={`${baseClass}__thumbnail`}
+              data-enable-match="true"
+              data-fields-hash={`${nodeFieldsHash}`}
+              data-filename={uploadDoc?.filename}
+              data-lexical-upload-id={uploadNode.value}
+              data-lexical-upload-relation-to={uploadNode.relationTo}
+              data-src={thumbnailSRC}
+            >
+              {thumbnailSRC?.length ? (
+                <img alt={uploadDoc?.filename} src={thumbnailSRC} />
+              ) : (
+                <File />
+              )}
+            </div>
+            <div className={`${baseClass}__info`}>
+              <div className={`${baseClass}__collectionLabel`}>
+                {relatedCollection?.labels?.singular
+                  ? getTranslation(relatedCollection.labels.singular, i18n)
+                  : ''}
               </div>
-              <div className={`${baseClass}__info`}>
-                <div className={`${baseClass}__collectionLabel`}>
-                  {relatedCollection?.labels?.singular
-                    ? getTranslation(relatedCollection.labels.singular, i18n)
-                    : ''}
-                </div>
-                <strong>{uploadDoc?.filename}</strong>
-              </div>
+              <strong>{uploadDoc?.filename}</strong>
             </div>
           </div>
         </div>
