@@ -4,7 +4,8 @@
   .lexical-upload-diff {
     @extend %body;
     @include shadow-sm;
-    max-width: calc(var(--base) * 10);
+    min-width: calc(var(--base) * 10);
+    max-width: fit-content;
     display: flex;
     align-items: center;
     background: var(--theme-input-bg);
@@ -44,8 +45,8 @@
     }
 
     &__thumbnail {
-      width: base(2);
-      height: base(2);
+      width: calc(var(--base) * 3 - base(0.6) * 2);
+      height: calc(var(--base) * 3 - base(0.6) * 2);
       position: relative;
       overflow: hidden;
       flex-shrink: 0;
@@ -69,9 +70,14 @@
       flex-direction: column;
       padding: calc(var(--base) * 0.25) calc(var(--base) * 0.75);
       justify-content: space-between;
+      font-weight: 400;
+
+      strong {
+        font-weight: 600;
+      }
     }
 
-    &__collectionLabel {
+    &__meta {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;

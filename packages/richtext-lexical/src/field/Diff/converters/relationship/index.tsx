@@ -2,10 +2,9 @@ import type { FileData, PayloadRequest, TypeWithID } from 'payload'
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
 
-import type { HTMLConvertersAsync } from '../../../../features/converters/lexicalToHtml/async/types.js'
-
 import './index.scss'
 
+import type { HTMLConvertersAsync } from '../../../../features/converters/lexicalToHtml/async/types.js'
 import type { SerializedRelationshipNode } from '../../../../nodeTypes.js'
 
 const baseClass = 'lexical-relationship-diff'
@@ -49,7 +48,14 @@ export const RelationshipDiffHTMLConverterAsync: (args: {
             relatedCollection?.admin?.useAsTitle &&
             data[relatedCollection.admin.useAsTitle] ? (
               <strong className={`${baseClass}__title`}>
-                {data[relatedCollection.admin?.useAsTitle]}
+                <a
+                  className={`${baseClass}__link`}
+                  href={`/${relatedCollection.slug}/${data.id}`}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  {data[relatedCollection.admin.useAsTitle]}
+                </a>
               </strong>
             ) : (
               <strong>{node.value as string}</strong>

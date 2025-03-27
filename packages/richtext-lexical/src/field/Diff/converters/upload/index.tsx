@@ -1,10 +1,13 @@
 import type { FileData, PayloadRequest, TypeWithID } from 'payload'
 
-import { getTranslation, type I18nClient } from '@payloadcms/translations'
+import { type I18nClient } from '@payloadcms/translations'
 import { File } from '@payloadcms/ui/shared'
 import { createHash } from 'crypto'
 
 import './index.scss'
+
+import { formatFilesize } from 'payload/shared'
+import React from 'react'
 
 import type { HTMLConvertersAsync } from '../../../../features/converters/lexicalToHtml/async/types.js'
 import type { UploadDataImproved } from '../../../../features/upload/server/nodes/UploadNode.js'
@@ -70,12 +73,22 @@ export const UploadDiffHTMLConverterAsync: (args: {
               )}
             </div>
             <div className={`${baseClass}__info`}>
-              <div className={`${baseClass}__collectionLabel`}>
-                {relatedCollection?.labels?.singular
-                  ? getTranslation(relatedCollection.labels.singular, i18n)
-                  : ''}
-              </div>
               <strong>{uploadDoc?.filename}</strong>
+              <div className={`${baseClass}__meta`}>
+                {formatFilesize(uploadDoc?.filesize)}
+                {typeof uploadDoc?.width === 'number' && typeof uploadDoc?.height === 'number' && (
+                  <React.Fragment>
+                    &nbsp;-&nbsp;
+                    {uploadDoc?.width}x{uploadDoc?.height}
+                  </React.Fragment>
+                )}
+                {uploadDoc?.mimeType && (
+                  <React.Fragment>
+                    &nbsp;-&nbsp;
+                    {uploadDoc?.mimeType}
+                  </React.Fragment>
+                )}
+              </div>
             </div>
           </div>
         </div>

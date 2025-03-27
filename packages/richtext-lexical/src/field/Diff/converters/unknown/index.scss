@@ -16,8 +16,14 @@
     max-height: calc(var(--base) * 4);
     padding: base(0.25);
 
-    &:hover {
-      border: 1px solid var(--theme-elevation-150);
+    &:has(.html-diff-create-text-wrapper),
+    &:has([data-match-type='create']) {
+      border-color: var(--theme-success-400);
+    }
+
+    &:has(.html-diff-delete-text-wrapper),
+    &:has([data-match-type='delete']) {
+      border-color: var(--theme-error-400);
     }
   }
 }
