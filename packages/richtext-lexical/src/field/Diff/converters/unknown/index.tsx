@@ -27,10 +27,14 @@ export const UnknownDiffHTMLConverterAsync: (args: {
 
       let nodeType = node.type
 
+      let nodeTypeSpecifier: null | string = null
+
       if (node.type === 'block') {
-        nodeType = (node as SerializedBlockNode).fields.blockType + ' Block'
+        nodeTypeSpecifier = (node as SerializedBlockNode).fields.blockType
+        nodeType = 'Block'
       } else if (node.type === 'inlineBlock') {
-        nodeType = (node as SerializedBlockNode).fields.blockType + ' InlineBlock'
+        nodeTypeSpecifier = (node as SerializedBlockNode).fields.blockType
+        nodeType = 'InlineBlock'
       }
 
       const JSX = (
@@ -39,6 +43,9 @@ export const UnknownDiffHTMLConverterAsync: (args: {
           data-enable-match="true"
           data-fields-hash={`${nodeFieldsHash}`}
         >
+          {nodeTypeSpecifier && (
+            <span className={`${baseClass}__specifier`}>{nodeTypeSpecifier}&nbsp;</span>
+          )}
           <span>{nodeType}</span>
           <div className={`${baseClass}__meta`}>
             <br />

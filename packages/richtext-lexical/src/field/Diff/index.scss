@@ -34,30 +34,35 @@
       line-height: base(1.2);
       font-weight: 600;
       font-size: base(1.4);
+      font-family: var(--font-body);
     }
     h2 {
       padding: base(0.7) 0px base(0.5);
       line-height: base(1);
       font-weight: 600;
       font-size: base(1.25);
+      font-family: var(--font-body);
     }
     h3 {
       padding: base(0.65) 0px base(0.45);
       line-height: base(0.9);
       font-weight: 600;
       font-size: base(1.1);
+      font-family: var(--font-body);
     }
     h4 {
       padding: base(0.65) 0px base(0.4);
       line-height: base(0.7);
       font-weight: 600;
       font-size: base(1);
+      font-family: var(--font-body);
     }
     h5 {
       padding: base(0.65) 0px base(0.35);
       line-height: base(0.5);
       font-weight: 600;
       font-size: base(0.9);
+      font-family: var(--font-body);
     }
 
     h6 {
@@ -65,6 +70,7 @@
       line-height: base(0.5);
       font-weight: 600;
       font-size: base(0.8);
+      font-family: var(--font-body);
     }
 
     p {
