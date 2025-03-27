@@ -6,13 +6,13 @@ import { $getSelection, $isRangeSelection } from 'lexical'
 import type { ToolbarDropdownGroup, ToolbarGroup } from '../toolbars/types.js'
 import type { TextStylesFeatureProps } from './feature.server.js'
 
-import { TextColorIcon } from '../../lexical/ui/icons/TextColor/index.js'
+import { TextStyleIcon } from '../../lexical/ui/icons/TextStyle/index.js'
 import { createClientFeature } from '../../utilities/createClientFeature.js'
 
 const toolbarGroups = (props: TextStylesFeatureProps): ToolbarGroup[] => {
   const clearColor: ToolbarDropdownGroup['items'] = [
     {
-      ChildComponent: () => <TextColorIcon />,
+      ChildComponent: () => <TextStyleIcon />,
       key: `clear-color`,
       label: 'Remove color',
       onSelect: ({ editor }) => {},
@@ -22,26 +22,21 @@ const toolbarGroups = (props: TextStylesFeatureProps): ToolbarGroup[] => {
 
   const items: ToolbarDropdownGroup['items'] = []
 
-  for (const key in props.styles) {
-    const possibleValue = props.styles[key]!
-    for (const [item, itemValue] of Object.entries(possibleValue)) {
-      const itemValue = possibleValue[item]!
+  for (const superKey in props.styles) {
+    const key = props.styles[superKey]!
+    key.forEach((value) => {
       items.push({
-        ChildComponent: () => (
-          <TextColorIcon
-            color={{ type: 'background', dark: itemValue.css, light: itemValue.css }}
-          />
-        ),
-        key: item,
-        label: itemValue.label,
+        ChildComponent: () => <TextStyleIcon css={value.css} />,
+        key: value.value,
+        label: value.label,
       })
-    }
+    })
   }
 
   return [
     {
       type: 'dropdown',
-      ChildComponent: () => <TextColorIcon />,
+      ChildComponent: () => <TextStyleIcon />,
       items: [...clearColor, ...items],
       key: 'textStyles',
       order: 30,
