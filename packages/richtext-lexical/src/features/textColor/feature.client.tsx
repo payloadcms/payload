@@ -33,6 +33,9 @@ const toolbarGroups = (props: TextColorSanitizedProps): ToolbarGroup[] => {
           if (!$isRangeSelection(selection)) {
             return
           }
+          $patchStyleText(selection, {
+            'background-color': `light-dark(${color.light},${color.dark})`,
+          })
         })
       },
       order: 2,
@@ -52,7 +55,7 @@ const toolbarGroups = (props: TextColorSanitizedProps): ToolbarGroup[] => {
           if (!$isRangeSelection(selection)) {
             return
           }
-          $patchStyleText(selection, { color: color.light })
+          $patchStyleText(selection, { color: `light-dark(${color.light},${color.dark})` })
         })
       },
       order: 3,

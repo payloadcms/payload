@@ -27,7 +27,7 @@ export const PostsCollection: CollectionConfig = {
               ...Object.values(defaultColors),
               {
                 name: 'mycustomcolor',
-                label: 'My Custom Color',
+                label: 'Custom',
                 light: '#A1A1AA',
                 dark: '#52525B',
               },
@@ -36,18 +36,11 @@ export const PostsCollection: CollectionConfig = {
               ...Object.values(defaultColors),
               {
                 name: 'mycustomcolor',
-                label: 'My Custom Color',
+                label: 'Custom',
                 light: '#A1A1AA',
                 dark: '#52525B',
               },
             ],
-
-            // normalizeColor: (color) => {
-            //   if (color !== '#ff0000' && color !== 'green' && color !== 'blue') {
-            //     return null
-            //   }
-            //   return color
-            // },
           }),
         ],
       }),
