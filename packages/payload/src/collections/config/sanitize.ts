@@ -28,6 +28,7 @@ import {
 } from './defaults.js'
 import { sanitizeAuthFields, sanitizeUploadFields } from './reservedFieldNames.js'
 import { sanitizeCompoundIndexes } from './sanitizeCompoundIndexes.js'
+import { sanitizeOrderable } from './sanitizeOrderable.js'
 import { validateUseAsTitle } from './useAsTitle.js'
 
 export const sanitizeCollection = async (
@@ -237,6 +238,8 @@ export const sanitizeCollection = async (
   validateUseAsTitle(sanitized)
 
   const sanitizedConfig = sanitized as SanitizedCollectionConfig
+
+  sanitizeOrderable(sanitizedConfig)
 
   sanitizedConfig.joins = joins
   sanitizedConfig.polymorphicJoins = polymorphicJoins
