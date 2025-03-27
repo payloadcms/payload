@@ -43,15 +43,13 @@ export type TextFieldServerComponent = FieldServerComponent<
   TextFieldBaseServerProps
 >
 
-export type TextFieldClientComponent = FieldClientComponent<
+export type TextFieldClientComponent<T extends Record<string, unknown> = {}> = FieldClientComponent<
   TextFieldClientWithoutType,
-  TextFieldBaseClientProps
+  T & TextFieldBaseClientProps
 >
 
-export type TextFieldLabelServerComponent = FieldLabelServerComponent<
-  TextField,
-  TextFieldClientWithoutType
->
+export type TextFieldLabelServerComponent<T extends Record<string, unknown> = {}> =
+  FieldLabelServerComponent<TextField, T & TextFieldClientWithoutType>
 
 export type TextFieldLabelClientComponent = FieldLabelClientComponent<TextFieldClientWithoutType>
 

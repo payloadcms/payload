@@ -34,16 +34,11 @@ export type BlocksFieldClientProps = BlocksFieldBaseClientProps &
 export type BlocksFieldServerProps = BlocksFieldBaseServerProps &
   ServerFieldBase<BlocksField, BlocksFieldClientWithoutType>
 
-export type BlocksFieldServerComponent = FieldServerComponent<
-  BlocksField,
-  BlocksFieldClientWithoutType,
-  BlocksFieldBaseServerProps
->
+export type BlocksFieldServerComponent<T extends Record<string, unknown> = {}> =
+  FieldServerComponent<BlocksField, BlocksFieldClientWithoutType, BlocksFieldBaseServerProps & T>
 
-export type BlocksFieldClientComponent = FieldClientComponent<
-  BlocksFieldClientWithoutType,
-  BlocksFieldBaseClientProps
->
+export type BlocksFieldClientComponent<T extends Record<string, unknown> = {}> =
+  FieldClientComponent<BlocksFieldClientWithoutType, BlocksFieldBaseClientProps & T>
 
 export type BlocksFieldLabelServerComponent = FieldLabelServerComponent<
   BlocksField,

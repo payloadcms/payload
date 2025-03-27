@@ -36,16 +36,11 @@ export type SelectFieldClientProps = ClientFieldBase<SelectFieldClientWithoutTyp
 export type SelectFieldServerProps = SelectFieldBaseServerProps &
   ServerFieldBase<SelectField, SelectFieldClientWithoutType>
 
-export type SelectFieldServerComponent = FieldServerComponent<
-  SelectField,
-  SelectFieldClientWithoutType,
-  SelectFieldBaseServerProps
->
+export type SelectFieldServerComponent<T extends Record<string, unknown> = {}> =
+  FieldServerComponent<SelectField, SelectFieldClientWithoutType, SelectFieldBaseServerProps & T>
 
-export type SelectFieldClientComponent = FieldClientComponent<
-  SelectFieldClientWithoutType,
-  SelectFieldBaseClientProps
->
+export type SelectFieldClientComponent<T extends Record<string, unknown> = {}> =
+  FieldClientComponent<SelectFieldClientWithoutType, SelectFieldBaseClientProps & T>
 
 export type SelectFieldLabelServerComponent = FieldLabelServerComponent<
   SelectField,

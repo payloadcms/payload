@@ -40,11 +40,14 @@ export type TabsFieldClientProps = ClientFieldBase<TabsFieldClientWithoutType> &
 
 export type TabsFieldServerProps = ServerFieldBase<TabsField, TabsFieldClientWithoutType>
 
-export type TabsFieldServerComponent = FieldServerComponent<TabsField, TabsFieldClientWithoutType>
+export type TabsFieldServerComponent<T extends Record<string, unknown> = {}> = FieldServerComponent<
+  TabsField,
+  T & TabsFieldClientWithoutType
+>
 
-export type TabsFieldClientComponent = FieldClientComponent<
+export type TabsFieldClientComponent<T extends Record<string, unknown> = {}> = FieldClientComponent<
   TabsFieldClientWithoutType,
-  TabsFieldBaseClientProps
+  T & TabsFieldBaseClientProps
 >
 
 export type TabsFieldLabelServerComponent = FieldLabelServerComponent<

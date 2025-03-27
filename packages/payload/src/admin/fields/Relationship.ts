@@ -34,16 +34,15 @@ export type RelationshipFieldClientProps = ClientFieldBase<RelationshipFieldClie
 export type RelationshipFieldServerProps = RelationshipFieldBaseServerProps &
   ServerFieldBase<RelationshipField, RelationshipFieldClientWithoutType>
 
-export type RelationshipFieldServerComponent = FieldServerComponent<
-  RelationshipField,
-  RelationshipFieldClientWithoutType,
-  RelationshipFieldBaseServerProps
->
+export type RelationshipFieldServerComponent<T extends Record<string, unknown> = {}> =
+  FieldServerComponent<
+    RelationshipField,
+    RelationshipFieldClientWithoutType,
+    RelationshipFieldBaseServerProps & T
+  >
 
-export type RelationshipFieldClientComponent = FieldClientComponent<
-  RelationshipFieldClientWithoutType,
-  RelationshipFieldBaseClientProps
->
+export type RelationshipFieldClientComponent<T extends Record<string, unknown> = {}> =
+  FieldClientComponent<RelationshipFieldClientWithoutType, RelationshipFieldBaseClientProps & T>
 
 export type RelationshipFieldLabelServerComponent = FieldLabelServerComponent<
   RelationshipField,

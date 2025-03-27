@@ -4,6 +4,7 @@ export function Banner(props: {
   message?: string
 }) {
   const { children, description, message } = props
+
   return (
     <div
       style={{

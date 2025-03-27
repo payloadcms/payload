@@ -30,11 +30,14 @@ export type RowFieldClientProps = Omit<ClientFieldBase<RowFieldClientWithoutType
 
 export type RowFieldServerProps = ServerFieldBase<RowField, RowFieldClientWithoutType>
 
-export type RowFieldServerComponent = FieldServerComponent<RowField, RowFieldClientWithoutType>
+export type RowFieldServerComponent<T extends Record<string, unknown> = {}> = FieldServerComponent<
+  RowField,
+  RowFieldClientWithoutType & T
+>
 
-export type RowFieldClientComponent = FieldClientComponent<
+export type RowFieldClientComponent<T extends Record<string, unknown> = {}> = FieldClientComponent<
   RowFieldClientWithoutType,
-  RowFieldBaseClientProps
+  RowFieldBaseClientProps & T
 >
 
 export type RowFieldLabelServerComponent = FieldLabelServerComponent<

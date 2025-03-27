@@ -34,16 +34,11 @@ export type PointFieldClientProps = ClientFieldBase<PointFieldClientWithoutType>
 export type PointFieldServerProps = PointFieldBaseServerProps &
   ServerFieldBase<PointField, PointFieldClientWithoutType>
 
-export type PointFieldServerComponent = FieldServerComponent<
-  PointField,
-  PointFieldClientWithoutType,
-  PointFieldBaseServerProps
->
+export type PointFieldServerComponent<T extends Record<string, unknown> = {}> =
+  FieldServerComponent<PointField, PointFieldClientWithoutType, PointFieldBaseServerProps & T>
 
-export type PointFieldClientComponent = FieldClientComponent<
-  PointFieldClientWithoutType,
-  PointFieldBaseClientProps
->
+export type PointFieldClientComponent<T extends Record<string, unknown> = {}> =
+  FieldClientComponent<PointFieldClientWithoutType, PointFieldBaseClientProps & T>
 
 export type PointFieldLabelServerComponent = FieldLabelServerComponent<
   PointField,
