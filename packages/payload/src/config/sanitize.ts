@@ -31,6 +31,7 @@ import {
   lockedDocumentsCollectionSlug,
 } from '../locked-documents/config.js'
 import { getPreferencesCollection, preferencesCollectionSlug } from '../preferences/config.js'
+import { getQueryPresetsConfig, queryPresetsCollectionSlug } from '../query-presets/config.js'
 import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/index.js'
 import { flattenBlock } from '../utilities/flattenAllFields.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
@@ -176,6 +177,9 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   const richTextSanitizationPromises: Array<(config: SanitizedConfig) => Promise<void>> = []
 
   const schedulePublishCollections: CollectionSlug[] = []
+
+  const queryPresetsCollections: CollectionSlug[] = []
+
   const schedulePublishGlobals: GlobalSlug[] = []
 
   const collectionSlugs = new Set<CollectionSlug>()
@@ -192,6 +196,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
    * to be populated with the sanitized blocks
    */
   config.blocks = []
+
   if (incomingConfig.blocks?.length) {
     for (const block of incomingConfig.blocks) {
       const sanitizedBlock = block
@@ -206,6 +211,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       sanitizedBlock.labels = !sanitizedBlock.labels
         ? formatLabels(sanitizedBlock.slug)
         : sanitizedBlock.labels
+
       sanitizedBlock.fields = await sanitizeFields({
         config: config as unknown as Config,
         existingFieldNames: new Set(),
@@ -232,6 +238,14 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
     if (typeof draftsConfig === 'object' && draftsConfig.schedulePublish) {
       schedulePublishCollections.push(config.collections[i].slug)
+    }
+
+    if (config.collections[i].enableQueryPresets) {
+      queryPresetsCollections.push(config.collections[i].slug)
+
+      if (!validRelationships.includes(queryPresetsCollectionSlug)) {
+        validRelationships.push(queryPresetsCollectionSlug)
+      }
     }
 
     config.collections[i] = await sanitizeCollection(
@@ -286,6 +300,20 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
         defaultJobsCollection = configWithDefaults.jobs.jobsCollectionOverrides({
           defaultJobsCollection,
         })
+
+        const hooks = defaultJobsCollection?.hooks
+        // @todo - delete this check in 4.0
+        if (hooks && config?.jobs?.runHooks !== true) {
+          for (const hook of Object.keys(hooks)) {
+            const defaultAmount = hook === 'afterRead' || hook === 'beforeChange' ? 1 : 0
+            if (hooks[hook]?.length > defaultAmount) {
+              console.warn(
+                `The jobsCollectionOverrides function is returning a collection with an additional ${hook} hook defined. These hooks will not run unless the jobs.runHooks option is set to true. Setting this option to true will negatively impact performance.`,
+              )
+              break
+            }
+          }
+        }
       }
       const sanitizedJobsCollection = await sanitizeCollection(
         config as unknown as Config,
@@ -298,35 +326,38 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     }
   }
 
-  const lockedDocumentsCollection = getLockedDocumentsCollection(config as unknown as Config)
-  if (lockedDocumentsCollection) {
-    configWithDefaults.collections.push(
-      await sanitizeCollection(
-        config as unknown as Config,
-        getLockedDocumentsCollection(config as unknown as Config),
-        richTextSanitizationPromises,
-        validRelationships,
-      ),
-    )
-  }
+  configWithDefaults.collections.push(
+    await sanitizeCollection(
+      config as unknown as Config,
+      getLockedDocumentsCollection(config as unknown as Config),
+      richTextSanitizationPromises,
+      validRelationships,
+    ),
+  )
 
-  const preferencesCollection = getPreferencesCollection(config as unknown as Config)
-  if (preferencesCollection) {
-    configWithDefaults.collections.push(
-      await sanitizeCollection(
-        config as unknown as Config,
-        getPreferencesCollection(config as unknown as Config),
-        richTextSanitizationPromises,
-        validRelationships,
-      ),
-    )
-  }
+  configWithDefaults.collections.push(
+    await sanitizeCollection(
+      config as unknown as Config,
+      getPreferencesCollection(config as unknown as Config),
+      richTextSanitizationPromises,
+      validRelationships,
+    ),
+  )
 
-  if (migrationsCollection) {
+  configWithDefaults.collections.push(
+    await sanitizeCollection(
+      config as unknown as Config,
+      migrationsCollection,
+      richTextSanitizationPromises,
+      validRelationships,
+    ),
+  )
+
+  if (queryPresetsCollections.length > 0) {
     configWithDefaults.collections.push(
       await sanitizeCollection(
         config as unknown as Config,
-        migrationsCollection,
+        getQueryPresetsConfig(config as unknown as Config),
         richTextSanitizationPromises,
         validRelationships,
       ),
@@ -366,9 +397,11 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   }
 
   const promises: Promise<void>[] = []
+
   for (const sanitizeFunction of richTextSanitizationPromises) {
     promises.push(sanitizeFunction(config as SanitizedConfig))
   }
+
   await Promise.all(promises)
 
   return config as SanitizedConfig

@@ -236,11 +236,11 @@ The following query options are supported:
 | **`sort`**  | A string used to order related results                                                              |
 | **`count`** | Whether include the count of related documents or not. Not included by default                      |
 
-These can be applied to the local API, GraphQL, and REST API.
+These can be applied to the Local API, GraphQL, and REST API.
 
 ### Local API
 
-By adding `joins` to the local API you can customize the request for each join field by the `name` of the field.
+By adding `joins` to the Local API you can customize the request for each join field by the `name` of the field.
 
 ```js
 const result = await payload.find({
@@ -287,7 +287,7 @@ const result = await payload.find({
 
 ### Rest API
 
-The rest API supports the same query options as the local API. You can use the `joins` query parameter to customize the
+The REST API supports the same query options as the Local API. You can use the `joins` query parameter to customize the
 request for each join field by the `name` of the field. For example, an API call to get a document with the related
 posts limited to 5 and sorted by title:
 

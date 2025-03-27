@@ -107,6 +107,9 @@ export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogRe
   const sections = conventionalCommits.reduce(
     (sections, c) => {
       if (c.isBreaking) {
+        if (!sections.breaking) {
+          sections.breaking = []
+        }
         sections.breaking.push(c)
       }
 

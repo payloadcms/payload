@@ -17,7 +17,7 @@ export const countDistinct: CountDistinct = async function countDistinct(
       })
       .from(this.tables[tableName])
       .where(where)
-    return Number(countResult[0].count)
+    return Number(countResult[0]?.count)
   }
 
   const chainedMethods: ChainedMethods = []
@@ -45,5 +45,5 @@ export const countDistinct: CountDistinct = async function countDistinct(
       .limit(1),
   })
 
-  return Number(countResult[0].count)
+  return Number(countResult[0]?.count)
 }

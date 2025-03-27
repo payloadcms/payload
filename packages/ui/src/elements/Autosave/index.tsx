@@ -22,7 +22,7 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import './index.scss'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { formatTimeToNow } from '../../utilities/formatDate.js'
+import { formatTimeToNow } from '../../utilities/formatDocTitle/formatDateTitle.js'
 import { reduceFieldsToValuesWithValidation } from '../../utilities/reduceFieldsToValuesWithValidation.js'
 import { LeaveWithoutSaving } from '../LeaveWithoutSaving/index.js'
 
@@ -130,6 +130,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
     queueRef.current = []
 
     setBackgroundProcessing(true)
+
     try {
       await latestAction()
     } finally {

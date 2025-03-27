@@ -117,6 +117,7 @@ export const findByIDOperation = async <
 
     const findOneArgs: FindOneArgs = {
       collection: collectionConfig.slug,
+      draftsEnabled: draftEnabled,
       joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
       locale,
       req: {

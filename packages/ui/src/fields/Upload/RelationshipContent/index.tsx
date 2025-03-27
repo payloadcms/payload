@@ -2,7 +2,7 @@
 
 import type { TypeWithID } from 'payload'
 
-import { formatFilesize } from 'payload/shared'
+import { formatFilesize, isImage } from 'payload/shared'
 import React from 'react'
 
 import type { ReloadDoc } from '../types.js'
@@ -99,7 +99,7 @@ export function RelationshipContent(props: Props) {
             alt={alt}
             className={`${baseClass}__thumbnail`}
             filename={filename}
-            fileSrc={thumbnailSrc}
+            fileSrc={isImage(mimeType) && thumbnailSrc}
             size="small"
           />
         )}

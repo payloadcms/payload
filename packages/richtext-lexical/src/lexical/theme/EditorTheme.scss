@@ -287,6 +287,15 @@
       margin: 0 0 0.4em 40px;
     }
 
+    &__listItem::marker {
+      // See https://github.com/facebook/lexical/pull/7325/files#diff-915a0be0588ee3ceb38aca4ae182f51291c8885e7af5f8dca2a91f8d92a95e0c
+      // These are applied by the ListItemNode
+      color: var(--listitem-marker-color);
+      background-color: var(--listitem-marker-background-color);
+      font-family: var(--listitem-marker-font-family);
+      font-size: var(--listitem-marker-font-size);
+    }
+
     &__listItem[dir='rtl'] {
       margin: 0 40px 0.4em 0;
     }
