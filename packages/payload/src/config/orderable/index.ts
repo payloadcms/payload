@@ -31,7 +31,9 @@ export const setupOrderable = (config: SanitizedConfig) => {
         }
         if (field.type === 'group' || field.type === 'tab') {
           // @ts-expect-error ref is untyped
-          ref.prefix = field.name
+          const parentPrefix = parentRef?.prefix ? `${parentRef.prefix}_` : ''
+          // @ts-expect-error ref is untyped
+          ref.prefix = `${parentPrefix}${field.name}`
         }
         if (field.type === 'join' && field.orderable === true) {
           if (Array.isArray(field.collection)) {
