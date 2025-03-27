@@ -128,6 +128,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
     setUploadControlFileName,
     setUploadControlFileUrl,
     uploadControlFile,
+    uploadControlFileName,
     uploadControlFileUrl,
   } = useUploadControls()
 
