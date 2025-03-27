@@ -507,11 +507,12 @@ describe('Uploads', () => {
   test('should render adminUploadControls', async () => {
     await page.goto(adminUploadControlURL.create)
 
-    const serverRenderedUploadButon = page.locator('#server-rendered-upload-button')
-    const clientRenderedUploadButon = page.locator('#client-rendered-upload-button')
+    const serverRenderedUploadButon = page.locator('#load-from-file-upload-button')
+    const clientRenderedUploadButon = page.locator('#load-from-url-upload-button')
     await expect(serverRenderedUploadButon).toBeVisible()
     await expect(clientRenderedUploadButon).toBeVisible()
   })
+  // TODO: loading from file and URL using the adminUploadControls
 
   test('should render adminThumbnail when using a function', async () => {
     await page.goto(adminThumbnailFunctionURL.list)
