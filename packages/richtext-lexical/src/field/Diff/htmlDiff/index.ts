@@ -25,10 +25,8 @@ interface HtmlDiffConfig {
   classNames: {
     createBlock: string
     createInline: string
-    createText: string
     deleteBlock: string
     deleteInline: string
-    deleteText: string
   }
   greedyBoundary: number
   greedyMatch: boolean
@@ -43,10 +41,8 @@ export interface HtmlDiffOptions {
   classNames?: Partial<{
     createBlock?: string
     createInline?: string
-    createText?: string
     deleteBlock?: string
     deleteInline?: string
-    deleteText?: string
   }>
   /**
    * @defaultValue 1000
@@ -92,10 +88,8 @@ export class HtmlDiff {
       classNames = {
         createBlock: 'html-diff-create-block-wrapper',
         createInline: 'html-diff-create-inline-wrapper',
-        createText: 'html-diff-create-text-wrapper',
         deleteBlock: 'html-diff-delete-block-wrapper',
         deleteInline: 'html-diff-delete-inline-wrapper',
-        deleteText: 'html-diff-delete-text-wrapper',
       },
       greedyBoundary = 1000,
       greedyMatch = true,
@@ -107,10 +101,8 @@ export class HtmlDiff {
       classNames: {
         createBlock: 'html-diff-create-block-wrapper',
         createInline: 'html-diff-create-inline-wrapper',
-        createText: 'html-diff-create-text-wrapper',
         deleteBlock: 'html-diff-delete-block-wrapper',
         deleteInline: 'html-diff-delete-inline-wrapper',
-        deleteText: 'html-diff-delete-text-wrapper',
         ...classNames,
       },
       greedyBoundary,
@@ -307,10 +299,10 @@ export class HtmlDiff {
       return ''
     }
     if (type === 'create') {
-      return `<span class="${this.config.classNames.createText}">${text}</span>`
+      return `<span data-match-type="create">${text}</span>`
     }
     if (type === 'delete') {
-      return `<span class="${this.config.classNames.deleteText}">${text}</span>`
+      return `<span data-match-type="delete">${text}</span>`
     }
     return ''
   }

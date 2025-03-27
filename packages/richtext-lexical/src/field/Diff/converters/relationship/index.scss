@@ -23,7 +23,7 @@
         border-color: var(--theme-success-400);
         color: var(--theme-success-800);
 
-        .html-diff-create-text-wrapper {
+        [data-match-type='create'] {
           color: var(--theme-success-800);
         }
       }
@@ -34,7 +34,7 @@
         text-decoration-line: none;
         background-color: var(--theme-error-200);
 
-        .html-diff-delete-text-wrapper {
+        [data-match-type='delete'] {
           text-decoration-line: none;
         }
 
