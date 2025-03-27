@@ -100,21 +100,20 @@ export const addOrderableFieldsAndHook = (
   const orderBeforeChangeHook: BeforeChangeHook = async ({ data, operation, req }) => {
     // Only set _order on create, not on update (unless explicitly provided)
     if (operation === 'create') {
-      await Promise.all(
-        orderableFieldNames.map(async (orderableFieldName) => {
-          const lastDoc = await req.payload.find({
-            collection: collection.slug,
-            depth: 0,
-            limit: 1,
-            pagination: false,
-            select: { [orderableFieldName]: true },
-            sort: `-${orderableFieldName}`,
-          })
+      for (const orderableFieldName of orderableFieldNames) {
+        const lastDoc = await req.payload.find({
+          collection: collection.slug,
+          depth: 0,
+          limit: 1,
+          pagination: false,
+          req,
+          select: { [orderableFieldName]: true },
+          sort: `-${orderableFieldName}`,
+        })
 
-          const lastOrderValue = lastDoc.docs[0]?.[orderableFieldName] || null
-          data[orderableFieldName] = generateKeyBetween(lastOrderValue, null)
-        }),
-      )
+        const lastOrderValue = lastDoc.docs[0]?.[orderableFieldName] || null
+        data[orderableFieldName] = generateKeyBetween(lastOrderValue, null)
+      }
     }
 
     return data
@@ -204,6 +203,7 @@ export const addOrderableEndpoint = (config: SanitizedConfig) => {
       const beforeDoc = await req.payload.findByID({
         id: targetId,
         collection: collection.slug,
+        depth: 0,
         select: { [orderableFieldName]: true },
       })
       targetKey = beforeDoc?.[orderableFieldName] || null
@@ -235,17 +235,18 @@ export const addOrderableEndpoint = (config: SanitizedConfig) => {
         : generateNKeysBetween(adjacentDocKey, targetKey, docsToMove.length)
 
     // Update each document with its new order value
-    const updatePromises = docsToMove.map((id, index) => {
-      return req.payload.update({
+    for (const [index, id] of docsToMove.entries()) {
+      await req.payload.update({
         id,
         collection: collection.slug,
         data: {
           [orderableFieldName]: orderValues[index],
         },
+        depth: 0,
+        req,
+        select: { id: true },
       })
-    })
-
-    await Promise.all(updatePromises)
+    }
 
     return new Response(JSON.stringify({ orderValues, success: true }), {
       headers: { 'Content-Type': 'application/json' },
