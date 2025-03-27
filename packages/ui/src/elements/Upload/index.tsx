@@ -123,8 +123,13 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
   } = props
   const { getDocumentSlots } = useServerFunctions()
   const [documentSlots, setDocumentSlots] = React.useState<DocumentSlots>({})
-  const { setUploadControlFile, setUploadControlFileUrl, uploadControlFile, uploadControlFileUrl } =
-    useUploadControls()
+  const {
+    setUploadControlFile,
+    setUploadControlFileName,
+    setUploadControlFileUrl,
+    uploadControlFile,
+    uploadControlFileUrl,
+  } = useUploadControls()
 
   const {
     config: {
@@ -163,13 +168,14 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
       setValue(newFile)
       setShowUrlInput(false)
       setUploadControlFileUrl('')
+      setUploadControlFileName(null)
       setUploadControlFile(null)
 
       if (typeof onChange === 'function') {
         onChange(newFile)
       }
     },
-    [onChange, setValue, setUploadControlFile, setUploadControlFileUrl],
+    [onChange, setValue, setUploadControlFile, setUploadControlFileName, setUploadControlFileUrl],
   )
 
   const renameFile = (fileToChange: File, newName: string): File => {
@@ -209,8 +215,15 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
     resetUploadEdits()
     setShowUrlInput(false)
     setUploadControlFileUrl('')
+    setUploadControlFileName(null)
     setUploadControlFile(null)
-  }, [handleFileChange, resetUploadEdits, setUploadControlFile, setUploadControlFileUrl])
+  }, [
+    handleFileChange,
+    resetUploadEdits,
+    setUploadControlFile,
+    setUploadControlFileName,
+    setUploadControlFileUrl,
+  ])
 
   const onEditsSave = useCallback(
     (args: UploadEdits) => {
@@ -235,7 +248,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
       }
 
       const blob = await clientResponse.blob()
-      const fileName = decodeURIComponent(fileUrl.split('/').pop() || '')
+      const fileName = uploadControlFileName || decodeURIComponent(fileUrl.split('/').pop() || '')
       const file = new File([blob], fileName, { type: blob.type })
 
       handleFileChange(file)
@@ -399,6 +412,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                           setShowUrlInput(true)
                           setUploadControlFileUrl('')
                           setUploadControlFile(null)
+                          setUploadControlFileName(null)
                         }}
                         size="small"
                       >
@@ -452,6 +466,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                   setShowUrlInput(false)
                   setUploadControlFileUrl('')
                   setUploadControlFile(null)
+                  setUploadControlFileName(null)
                 }}
                 round
                 tooltip={t('general:cancel')}
