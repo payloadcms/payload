@@ -1,5 +1,4 @@
 import { CheckIcon } from '@payloadcms/ui/shared'
-import { v4 as uuidv4 } from 'uuid'
 
 import type { HTMLConvertersAsync } from '../../../../features/converters/lexicalToHtml/async/types.js'
 import type { SerializedListItemNode } from '../../../../nodeTypes.js'
@@ -19,25 +18,31 @@ export const ListItemDiffHTMLConverterAsync: HTMLConvertersAsync<SerializedListI
     if ('listType' in parent && parent?.listType === 'check') {
       const ReactDOMServer = (await import('react-dom/server')).default
 
-      const uuid = uuidv4()
       const JSX = (
         <li
           aria-checked={node.checked ? true : false}
-          className={`list-item-checkbox${node.checked ? ' list-item-checkbox-checked' : ' list-item-checkbox-unchecked'}${hasSubLists ? ' nestedListItem' : ''}`}
-          data-enable-match="true"
+          className={`checkboxItem ${node.checked ? 'checkboxItem--checked' : 'checkboxItem--unchecked'}${
+            hasSubLists ? ' checkboxItem--nested' : ''
+          }`}
           role="checkbox"
           tabIndex={-1}
           value={node.value}
         >
           {hasSubLists ? (
+            // When sublists exist, just render them safely as HTML
             <div dangerouslySetInnerHTML={{ __html: children }} />
           ) : (
-            <>
-              <input checked={node.checked} id={uuid} readOnly={true} type="checkbox" />
-              <label htmlFor={uuid}>{children}</label>
-              <CheckIcon />
-              <br />
-            </>
+            // Otherwise, show our custom styled checkbox
+            <div className="checkboxItem__wrapper">
+              <div
+                className="checkboxItem__icon"
+                data-checked={node.checked}
+                data-enable-match="true"
+              >
+                {node.checked && <CheckIcon />}
+              </div>
+              <span className="checkboxItem__label">{children}</span>
+            </div>
           )}
         </li>
       )
