@@ -1,54 +1,70 @@
 @import '../../../../scss/styles.scss';
 
 @layer payload-default {
-  .lexical-relationship-diff {
-    @extend %body;
-    @include shadow-sm;
-    min-width: calc(var(--base) * 8);
-    max-width: fit-content;
+  .lexical-diff__diff-container {
+    .lexical-relationship-diff {
+      @extend %body;
+      @include shadow-sm;
+      min-width: calc(var(--base) * 8);
+      max-width: fit-content;
 
-    display: flex;
-    align-items: center;
-    background: var(--theme-input-bg);
-    border-radius: $style-radius-s;
-    border: 1px solid var(--theme-elevation-100);
-    position: relative;
-    font-family: var(--font-body);
-    margin-block: base(0.5);
-    max-height: calc(var(--base) * 4);
-    padding: base(0.6);
-
-    &:has(.html-diff-create-text-wrapper),
-    &:has([data-match-type='create']) {
-      border-color: var(--theme-success-400);
-    }
-
-    &:has(.html-diff-delete-text-wrapper),
-    &:has([data-match-type='delete']) {
-      border-color: var(--theme-error-400);
-    }
-
-    &__card {
       display: flex;
-      flex-direction: column;
-      width: 100%;
-      flex-grow: 1;
-      display: flex;
-      align-items: flex-start;
-      flex-direction: column;
-      justify-content: space-between;
-    }
+      align-items: center;
+      background-color: var(--theme-input-bg);
+      border-radius: $style-radius-s;
+      border: 1px solid var(--theme-elevation-100);
+      position: relative;
+      font-family: var(--font-body);
+      margin-block: base(0.5);
+      max-height: calc(var(--base) * 4);
+      padding: base(0.6);
 
-    &__title {
-      display: flex;
-      flex-direction: row;
-      font-weight: 600;
-    }
+      &[data-match-type='create'] {
+        border-color: var(--theme-success-400);
+        color: var(--theme-success-800);
 
-    &__collectionLabel {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+        .html-diff-create-text-wrapper {
+          color: var(--theme-success-800);
+        }
+      }
+
+      &[data-match-type='delete'] {
+        border-color: var(--theme-error-400);
+        color: var(--theme-error-800);
+        text-decoration-line: none;
+        background-color: var(--theme-error-200);
+
+        .html-diff-delete-text-wrapper {
+          text-decoration-line: none;
+        }
+
+        * {
+          color: var(--theme-error-800);
+        }
+      }
+
+      &__card {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        flex-grow: 1;
+        display: flex;
+        align-items: flex-start;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      &__title {
+        display: flex;
+        flex-direction: row;
+        font-weight: 600;
+      }
+
+      &__collectionLabel {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
     }
   }
 }

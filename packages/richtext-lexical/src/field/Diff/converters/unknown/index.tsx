@@ -34,13 +34,13 @@ export const UnknownDiffHTMLConverterAsync: (args: {
       }
 
       const JSX = (
-        <div className={`${baseClass}${providedCSSString}`}>
+        <div
+          className={`${baseClass}${providedCSSString}`}
+          data-enable-match="true"
+          data-fields-hash={`${nodeFieldsHash}`}
+        >
           <span>{nodeType}</span>
-          <div
-            className={`${baseClass}__meta`}
-            data-enable-match="true"
-            data-fields-hash={`${nodeFieldsHash}`}
-          >
+          <div className={`${baseClass}__meta`}>
             <br />
           </div>
         </div>

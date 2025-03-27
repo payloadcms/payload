@@ -1,86 +1,101 @@
 @import '../../../../scss/styles.scss';
 
 @layer payload-default {
-  .lexical-upload-diff {
-    @extend %body;
-    @include shadow-sm;
-    min-width: calc(var(--base) * 10);
-    max-width: fit-content;
-    display: flex;
-    align-items: center;
-    background: var(--theme-input-bg);
-    border-radius: $style-radius-s;
-    border: 1px solid var(--theme-elevation-100);
-    position: relative;
-    font-family: var(--font-body);
-    margin-block: base(0.5);
-    max-height: calc(var(--base) * 3);
-    padding: base(0.6);
-
-    &:has(.html-diff-create-text-wrapper),
-    &:has([data-match-type='create']) {
-      border-color: var(--theme-success-400);
-
-      .lexical-upload-diff__thumbnail {
-        border-radius: 0px;
-        border-color: var(--theme-success-400);
-      }
-    }
-
-    &:has(.html-diff-delete-text-wrapper),
-    &:has([data-match-type='delete']) {
-      border-color: var(--theme-error-400);
-
-      .lexical-upload-diff__thumbnail {
-        border-radius: 0px;
-        border-color: var(--theme-error-400);
-      }
-    }
-
-    &__card {
+  .lexical-diff__diff-container {
+    .lexical-upload-diff {
+      @extend %body;
+      @include shadow-sm;
+      min-width: calc(var(--base) * 10);
+      max-width: fit-content;
       display: flex;
-      flex-direction: row;
       align-items: center;
-      width: 100%;
-    }
-
-    &__thumbnail {
-      width: calc(var(--base) * 3 - base(0.6) * 2);
-      height: calc(var(--base) * 3 - base(0.6) * 2);
-      position: relative;
-      overflow: hidden;
-      flex-shrink: 0;
-      border-radius: 0px;
+      background-color: var(--theme-input-bg);
+      border-radius: $style-radius-s;
       border: 1px solid var(--theme-elevation-100);
+      position: relative;
+      font-family: var(--font-body);
+      margin-block: base(0.5);
+      max-height: calc(var(--base) * 3);
+      padding: base(0.6);
 
-      img,
-      svg {
-        position: absolute;
-        object-fit: cover;
+      &[data-match-type='create'] {
+        border-color: var(--theme-success-400);
+        color: var(--theme-success-800);
+
+        * {
+          color: var(--theme-success-800);
+        }
+
+        .lexical-upload-diff__thumbnail {
+          border-radius: 0px;
+          border-color: var(--theme-success-400);
+          background-color: none;
+        }
+      }
+
+      &[data-match-type='delete'] {
+        border-color: var(--theme-error-400);
+        text-decoration-line: none;
+        color: var(--theme-error-800);
+        background-color: var(--theme-error-200);
+
+        * {
+          text-decoration-line: none;
+          color: var(--theme-error-800);
+        }
+
+        .lexical-upload-diff__thumbnail {
+          border-radius: 0px;
+          border-color: var(--theme-error-400);
+          background-color: none;
+        }
+      }
+
+      &__card {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
         width: 100%;
-        height: 100%;
+      }
+
+      &__thumbnail {
+        width: calc(var(--base) * 3 - base(0.6) * 2);
+        height: calc(var(--base) * 3 - base(0.6) * 2);
+        position: relative;
+        overflow: hidden;
+        flex-shrink: 0;
         border-radius: 0px;
+        border: 1px solid var(--theme-elevation-100);
+
+        img,
+        svg {
+          position: absolute;
+          object-fit: cover;
+          width: 100%;
+          height: 100%;
+          border-radius: 0px;
+        }
       }
-    }
 
-    &__info {
-      flex-grow: 1;
-      display: flex;
-      align-items: flex-start;
-      flex-direction: column;
-      padding: calc(var(--base) * 0.25) calc(var(--base) * 0.75);
-      justify-content: space-between;
-      font-weight: 400;
+      &__info {
+        flex-grow: 1;
+        display: flex;
+        align-items: flex-start;
+        flex-direction: column;
+        padding: calc(var(--base) * 0.25) calc(var(--base) * 0.75);
+        justify-content: space-between;
+        font-weight: 400;
 
-      strong {
-        font-weight: 600;
+        strong {
+          font-weight: 600;
+        }
       }
-    }
 
-    &__meta {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      &__meta {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
     }
   }
 }

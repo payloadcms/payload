@@ -234,10 +234,15 @@ export class HtmlDiff {
 
       // If this is true, this HTML should be diffed as well - not just its children
       const isMatchElement = token.includes('data-enable-match="true"')
+      const isMatchExplicitlyDisabled = token.includes('data-enable-match="false"')
       const isHtmlTag = !!token.match(htmlTagReg)?.length
 
+      if (isMatchExplicitlyDisabled) {
+        textStartIndex = i + 1
+        result += token
+      }
       // this token is html tag
-      if (!isMatchElement && isHtmlTag) {
+      else if (!isMatchElement && isHtmlTag) {
         // handle text tokens before
         if (i > textStartIndex) {
           result += this.dressUpText(type, tokens.slice(textStartIndex, i))

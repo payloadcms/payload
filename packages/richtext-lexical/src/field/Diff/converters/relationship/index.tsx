@@ -35,7 +35,12 @@ export const RelationshipDiffHTMLConverterAsync: (args: {
       const ReactDOMServer = (await import('react-dom/server')).default
 
       const JSX = (
-        <div className={`${baseClass}${providedCSSString}`}>
+        <div
+          className={`${baseClass}${providedCSSString}`}
+          data-enable-match="true"
+          data-id={node.value}
+          data-slug={node.relationTo}
+        >
           <div className={`${baseClass}__card`}>
             <div className={`${baseClass}__collectionLabel`}>
               {i18n.t('fields:labelRelationship', {
@@ -47,9 +52,10 @@ export const RelationshipDiffHTMLConverterAsync: (args: {
             {data &&
             relatedCollection?.admin?.useAsTitle &&
             data[relatedCollection.admin.useAsTitle] ? (
-              <strong className={`${baseClass}__title`}>
+              <strong className={`${baseClass}__title`} data-enable-match="false">
                 <a
                   className={`${baseClass}__link`}
+                  data-enable-match="false"
                   href={`/${relatedCollection.slug}/${data.id}`}
                   rel="noopener noreferrer"
                   target="_blank"

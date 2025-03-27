@@ -55,17 +55,17 @@ export const UploadDiffHTMLConverterAsync: (args: {
         .digest('hex')
 
       const JSX = (
-        <div className={`${baseClass}${providedCSSString}`}>
+        <div
+          className={`${baseClass}${providedCSSString}`}
+          data-enable-match="true"
+          data-fields-hash={`${nodeFieldsHash}`}
+          data-filename={uploadDoc?.filename}
+          data-lexical-upload-id={uploadNode.value}
+          data-lexical-upload-relation-to={uploadNode.relationTo}
+          data-src={thumbnailSRC}
+        >
           <div className={`${baseClass}__card`}>
-            <div
-              className={`${baseClass}__thumbnail`}
-              data-enable-match="true"
-              data-fields-hash={`${nodeFieldsHash}`}
-              data-filename={uploadDoc?.filename}
-              data-lexical-upload-id={uploadNode.value}
-              data-lexical-upload-relation-to={uploadNode.relationTo}
-              data-src={thumbnailSRC}
-            >
+            <div className={`${baseClass}__thumbnail`}>
               {thumbnailSRC?.length ? (
                 <img alt={uploadDoc?.filename} src={thumbnailSRC} />
               ) : (
