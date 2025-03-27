@@ -101,18 +101,20 @@ export const addOrderableFieldsAndHook = (
     // Only set _order on create, not on update (unless explicitly provided)
     if (operation === 'create') {
       for (const orderableFieldName of orderableFieldNames) {
-        const lastDoc = await req.payload.find({
-          collection: collection.slug,
-          depth: 0,
-          limit: 1,
-          pagination: false,
-          req,
-          select: { [orderableFieldName]: true },
-          sort: `-${orderableFieldName}`,
-        })
+        if (!data[orderableFieldName]) {
+          const lastDoc = await req.payload.find({
+            collection: collection.slug,
+            depth: 0,
+            limit: 1,
+            pagination: false,
+            req,
+            select: { [orderableFieldName]: true },
+            sort: `-${orderableFieldName}`,
+          })
 
-        const lastOrderValue = lastDoc.docs[0]?.[orderableFieldName] || null
-        data[orderableFieldName] = generateKeyBetween(lastOrderValue, null)
+          const lastOrderValue = lastDoc.docs[0]?.[orderableFieldName] || null
+          data[orderableFieldName] = generateKeyBetween(lastOrderValue, null)
+        }
       }
     }
 
