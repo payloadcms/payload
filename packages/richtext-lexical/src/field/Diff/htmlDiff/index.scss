@@ -18,24 +18,34 @@
       &:has(.html-diff-create-text-wrapper),
       &:has([data-match-type='create']) {
         background: var(--theme-success-100);
+        color: var(--theme-success-800);
       }
 
       &:has(.html-diff-delete-text-wrapper),
       &:has([data-match-type='delete']) {
         background: var(--theme-error-100);
+        color: var(--theme-error-800);
       }
+    }
+
+    li::marker {
+      color: var(--theme-text);
     }
 
     .html-diff-delete-text-wrapper,
     [data-match-type='delete'] {
-      color: var(--theme-error-500);
-      text-decoration-color: var(--theme-error-500);
+      color: var(--theme-error-600);
+      text-decoration-color: var(--theme-error-600);
       text-decoration-line: line-through;
+      background: var(--theme-error-200);
+      border-radius: 4px;
     }
 
     .html-diff-create-text-wrapper,
     [data-match-type='create']:not(img) {
-      background: var(--theme-success-300);
+      background: var(--theme-success-200);
+      color: var(--theme-success-600);
+      border-radius: 4px;
     }
 
     .html-diff {
