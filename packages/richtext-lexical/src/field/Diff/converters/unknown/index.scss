@@ -16,7 +16,10 @@
       margin-block: base(0.5);
       max-height: calc(var(--base) * 4);
       padding: base(0.25);
-      font-family: 'SF Mono', Menlo, Consolas, Monaco, monospace;
+
+      &__specifier {
+        font-family: 'SF Mono', Menlo, Consolas, Monaco, monospace;
+      }
 
       &[data-match-type='create'] {
         border-color: var(--theme-success-400);
