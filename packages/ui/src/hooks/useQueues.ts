@@ -1,6 +1,23 @@
 import { useCallback, useRef } from 'react'
 
-type queuedFunction = () => Promise<void>
+type QueuedFunction = () => Promise<void>
+
+type QueuedTaskOptions = {
+  /**
+   * A function that is called after the queue has processed a function
+   * Used to perform side effects after processing the queue
+   * @returns {void}
+   */
+  afterProcess?: () => void
+  /**
+   * A function that can be used to prevent the queue from processing under certain conditions
+   * Can also be used to perform side effects before processing the queue
+   * @returns {boolean} If `false`, the queue will not process
+   */
+  beforeProcess?: () => boolean
+}
+
+type QueueTask = (fn: QueuedFunction, options?: QueuedTaskOptions) => void
 
 /**
  * A React hook that allows you to queue up functions to be executed in order.
@@ -19,17 +36,27 @@ type queuedFunction = () => Promise<void>
  * })
  */
 export function useQueues(): {
-  queueTask: (fn: queuedFunction) => void
+  queueTask: QueueTask
 } {
-  const queue = useRef<queuedFunction[]>([])
+  const queue = useRef<QueuedFunction[]>([])
+
   const isProcessing = useRef(false)
 
-  const queueTask = useCallback((fn: queuedFunction) => {
+  const queueTask = useCallback<QueueTask>((fn, options) => {
     queue.current.push(fn)
 
     async function processQueue() {
       if (isProcessing.current) {
         return
+      }
+
+      // Allow the consumer to prevent the queue from processing under certain conditions
+      if (typeof options?.beforeProcess === 'function') {
+        const shouldContinue = options.beforeProcess()
+
+        if (shouldContinue === false) {
+          return
+        }
       }
 
       while (queue.current.length > 0) {
@@ -44,6 +71,10 @@ export function useQueues(): {
           console.error('Error in queued function:', err) // eslint-disable-line no-console
         } finally {
           isProcessing.current = false
+
+          if (typeof options?.afterProcess === 'function') {
+            options.afterProcess()
+          }
         }
       }
     }

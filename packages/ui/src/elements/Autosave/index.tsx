@@ -126,140 +126,155 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
       }
     }
 
-    queueTask(async () => {
-      if (modified) {
-        startTimestamp = new Date().getTime()
+    queueTask(
+      async () => {
+        if (modified) {
+          startTimestamp = new Date().getTime()
 
-        setSaving(true)
+          setSaving(true)
 
-        let url: string
-        let method: string
-        let entitySlug: string
+          let url: string
+          let method: string
+          let entitySlug: string
 
-        if (collection && id) {
-          entitySlug = collection.slug
-          url = `${serverURL}${api}/${entitySlug}/${id}?draft=true&autosave=true&locale=${localeRef.current}`
-          method = 'PATCH'
-        }
+          if (collection && id) {
+            entitySlug = collection.slug
+            url = `${serverURL}${api}/${entitySlug}/${id}?draft=true&autosave=true&locale=${localeRef.current}`
+            method = 'PATCH'
+          }
 
-        if (globalDoc) {
-          entitySlug = globalDoc.slug
-          url = `${serverURL}${api}/globals/${entitySlug}?draft=true&autosave=true&locale=${localeRef.current}`
-          method = 'POST'
-        }
+          if (globalDoc) {
+            entitySlug = globalDoc.slug
+            url = `${serverURL}${api}/globals/${entitySlug}?draft=true&autosave=true&locale=${localeRef.current}`
+            method = 'POST'
+          }
 
-        if (url) {
-          if (modifiedRef.current) {
-            const { data, valid } = reduceFieldsToValuesWithValidation(fieldRef.current, true)
+          if (url) {
+            if (modifiedRef.current) {
+              const { data, valid } = reduceFieldsToValuesWithValidation(fieldRef.current, true)
 
-            data._status = 'draft'
+              data._status = 'draft'
 
-            const skipSubmission =
-              submitted && !valid && versionsConfig?.drafts && versionsConfig?.drafts?.validate
+              const skipSubmission =
+                submitted && !valid && versionsConfig?.drafts && versionsConfig?.drafts?.validate
 
-            if (!skipSubmission && isValidRef.current) {
-              let res
+              if (!skipSubmission && isValidRef.current) {
+                let res
 
-              try {
-                res = await fetch(url, {
-                  body: JSON.stringify(data),
-                  credentials: 'include',
-                  headers: {
-                    'Accept-Language': i18n.language,
-                    'Content-Type': 'application/json',
-                  },
-                  method,
-                })
-              } catch (_err) {
-                // Swallow Error
-              }
-
-              const newDate = new Date()
-              // We need to log the time in order to figure out if we need to trigger the state off later
-              endTimestamp = newDate.getTime()
-
-              if (res.status === 200) {
-                setLastUpdateTime(newDate.getTime())
-
-                reportUpdate({
-                  id,
-                  entitySlug,
-                  updatedAt: newDate.toISOString(),
-                })
-
-                if (!mostRecentVersionIsAutosaved) {
-                  incrementVersionCount()
-                  setMostRecentVersionIsAutosaved(true)
-                  setUnpublishedVersionCount((prev) => prev + 1)
-                }
-              }
-              const json = await res.json()
-
-              if (versionsConfig?.drafts && versionsConfig?.drafts?.validate && json?.errors) {
-                if (Array.isArray(json.errors)) {
-                  const [fieldErrors, nonFieldErrors] = json.errors.reduce(
-                    ([fieldErrs, nonFieldErrs], err) => {
-                      const newFieldErrs = []
-                      const newNonFieldErrs = []
-
-                      if (err?.message) {
-                        newNonFieldErrs.push(err)
-                      }
-
-                      if (Array.isArray(err?.data)) {
-                        err.data.forEach((dataError) => {
-                          if (dataError?.field) {
-                            newFieldErrs.push(dataError)
-                          } else {
-                            newNonFieldErrs.push(dataError)
-                          }
-                        })
-                      }
-
-                      return [
-                        [...fieldErrs, ...newFieldErrs],
-                        [...nonFieldErrs, ...newNonFieldErrs],
-                      ]
+                try {
+                  res = await fetch(url, {
+                    body: JSON.stringify(data),
+                    credentials: 'include',
+                    headers: {
+                      'Accept-Language': i18n.language,
+                      'Content-Type': 'application/json',
                     },
-                    [[], []],
-                  )
+                    method,
+                  })
+                } catch (_err) {
+                  // Swallow Error
+                }
 
-                  dispatchFields({
-                    type: 'ADD_SERVER_ERRORS',
-                    errors: fieldErrors,
+                const newDate = new Date()
+                // We need to log the time in order to figure out if we need to trigger the state off later
+                endTimestamp = newDate.getTime()
+
+                if (res.status === 200) {
+                  setLastUpdateTime(newDate.getTime())
+
+                  reportUpdate({
+                    id,
+                    entitySlug,
+                    updatedAt: newDate.toISOString(),
                   })
 
-                  nonFieldErrors.forEach((err) => {
-                    toast.error(err.message || i18n.t('error:unknown'))
-                  })
-
-                  // Set valid to false internally so the queue doesn't process
-                  isValidRef.current = false
-                  setIsValid(false)
-                  setSubmitted(true)
-                  hideIndicator()
-                  return
+                  if (!mostRecentVersionIsAutosaved) {
+                    incrementVersionCount()
+                    setMostRecentVersionIsAutosaved(true)
+                    setUnpublishedVersionCount((prev) => prev + 1)
+                  }
                 }
-              } else {
-                // If it's not an error then we can update the document data inside the context
-                const document = json?.doc || json?.result
+                const json = await res.json()
 
-                // Manually update the data since this function doesn't fire the `submit` function from useForm
-                if (document) {
-                  setIsValid(true)
+                if (versionsConfig?.drafts && versionsConfig?.drafts?.validate && json?.errors) {
+                  if (Array.isArray(json.errors)) {
+                    const [fieldErrors, nonFieldErrors] = json.errors.reduce(
+                      ([fieldErrs, nonFieldErrs], err) => {
+                        const newFieldErrs = []
+                        const newNonFieldErrs = []
 
-                  // Reset internal state allowing the queue to process
-                  isValidRef.current = true
-                  updateSavedDocumentData(document)
+                        if (err?.message) {
+                          newNonFieldErrs.push(err)
+                        }
+
+                        if (Array.isArray(err?.data)) {
+                          err.data.forEach((dataError) => {
+                            if (dataError?.field) {
+                              newFieldErrs.push(dataError)
+                            } else {
+                              newNonFieldErrs.push(dataError)
+                            }
+                          })
+                        }
+
+                        return [
+                          [...fieldErrs, ...newFieldErrs],
+                          [...nonFieldErrs, ...newNonFieldErrs],
+                        ]
+                      },
+                      [[], []],
+                    )
+
+                    dispatchFields({
+                      type: 'ADD_SERVER_ERRORS',
+                      errors: fieldErrors,
+                    })
+
+                    nonFieldErrors.forEach((err) => {
+                      toast.error(err.message || i18n.t('error:unknown'))
+                    })
+
+                    // Set valid to false internally so the queue doesn't process
+                    isValidRef.current = false
+                    setIsValid(false)
+                    setSubmitted(true)
+                    hideIndicator()
+                    return
+                  }
+                } else {
+                  // If it's not an error then we can update the document data inside the context
+                  const document = json?.doc || json?.result
+
+                  // Manually update the data since this function doesn't fire the `submit` function from useForm
+                  if (document) {
+                    setIsValid(true)
+
+                    // Reset internal state allowing the queue to process
+                    isValidRef.current = true
+                    updateSavedDocumentData(document)
+                  }
                 }
+
+                hideIndicator()
               }
-
-              hideIndicator()
             }
           }
         }
-      }
-    })
+      },
+      {
+        afterProcess: () => {
+          setBackgroundProcessing(false)
+        },
+        beforeProcess: () => {
+          if (!isValidRef.current) {
+            isValidRef.current = true
+            return false
+          }
+
+          setBackgroundProcessing(true)
+        },
+      },
+    )
   })
 
   const didMount = useRef(false)
