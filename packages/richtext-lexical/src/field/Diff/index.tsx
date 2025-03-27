@@ -13,7 +13,7 @@ import type { HTMLConvertersFunctionAsync } from '../../features/converters/lexi
 import { convertLexicalToHTMLAsync } from '../../features/converters/lexicalToHtml/async/index.js'
 import { getPayloadPopulateFn } from '../../features/converters/utilities/payloadPopulateFn.js'
 import { LinkDiffHTMLConverterAsync } from './converters/link.js'
-import { ListItemDiffHTMLConverterAsync } from './converters/list.js'
+import { ListItemDiffHTMLConverterAsync } from './converters/listitem/index.js'
 import { RelationshipDiffHTMLConverterAsync } from './converters/relationship/index.js'
 import { UnknownDiffHTMLConverterAsync } from './converters/unknown/index.js'
 import { UploadDiffHTMLConverterAsync } from './converters/upload/index.js'
