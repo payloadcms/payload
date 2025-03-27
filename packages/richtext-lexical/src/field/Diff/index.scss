@@ -18,5 +18,58 @@
       padding-inline-start: base(0.6);
       padding-block: base(0.2);
     }
+
+    h1 {
+      padding: base(0.7) 0px base(0.55);
+      line-height: base(1.2);
+      font-weight: 600;
+      font-size: base(1.4);
+    }
+    h2 {
+      padding: base(0.7) 0px base(0.5);
+      line-height: base(1);
+      font-weight: 600;
+      font-size: base(1.25);
+    }
+    h3 {
+      padding: base(0.65) 0px base(0.45);
+      line-height: base(0.9);
+      font-weight: 600;
+      font-size: base(1.1);
+    }
+    h4 {
+      padding: base(0.65) 0px base(0.4);
+      line-height: base(0.7);
+      font-weight: 600;
+      font-size: base(1);
+    }
+    h5 {
+      padding: base(0.65) 0px base(0.35);
+      line-height: base(0.5);
+      font-weight: 600;
+      font-size: base(0.9);
+    }
+
+    h6 {
+      padding: base(0.65) 0px base(0.35);
+      line-height: base(0.5);
+      font-weight: 600;
+      font-size: base(0.8);
+    }
+
+    p {
+      padding: base(0.4) 0 base(0.4);
+
+      // First paraagraph has no top padding
+      &:first-child {
+        padding: 0 0 base(0.4);
+      }
+    }
+
+    ul,
+    ol {
+      padding-top: base(0.4);
+      padding-bottom: base(0.4);
+    }
   }
 }
