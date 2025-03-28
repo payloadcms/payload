@@ -19,6 +19,7 @@ export type {
   PaymentField,
   PaymentFieldConfig,
   PriceCondition,
+  RadioField,
   Redirect,
   SelectField,
   SelectFieldOption,
