@@ -6,6 +6,11 @@ export const Versions: CollectionConfig = {
   slug: versionsSlug,
   fields: [
     {
+      name: 'title',
+      type: 'text',
+      required: true,
+    },
+    {
       name: 'category',
       relationTo: 'categories',
       type: 'relationship',
