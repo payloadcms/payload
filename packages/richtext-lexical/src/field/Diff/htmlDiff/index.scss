@@ -39,6 +39,10 @@
       border-radius: 4px;
     }
 
+    a[data-match-type='delete'] {
+      text-decoration-line: line-through underline;
+    }
+
     [data-match-type='create']:not(img) {
       background-color: var(--theme-success-200);
       color: var(--theme-success-600);
