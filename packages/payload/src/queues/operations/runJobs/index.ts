@@ -1,6 +1,6 @@
 // @ts-strict-ignore
-import type { PaginatedDocs } from '../../../database/types.js'
 import type { PayloadRequest, Where } from '../../../types/index.js'
+import type { QueueProcessingOrder } from '../../config/types/index.js'
 import type { WorkflowJSON } from '../../config/types/workflowJSONTypes.js'
 import type {
   BaseJob,
@@ -26,8 +26,14 @@ export type RunJobsArgs = {
   id?: number | string
   limit?: number
   overrideAccess?: boolean
+  processingOrder?: QueueProcessingOrder
   queue?: string
   req: PayloadRequest
+  /**
+   * By default, jobs are run in parallel.
+   * If you want to run them in sequence, set this to true.
+   */
+  sequential?: boolean
   where?: Where
 }
 
@@ -47,8 +53,10 @@ export const runJobs = async ({
   id,
   limit = 10,
   overrideAccess,
+  processingOrder,
   queue,
   req,
+  sequential,
   where: whereFromProps,
 }: RunJobsArgs): Promise<RunJobsResult> => {
   if (!overrideAccess) {
@@ -133,6 +141,7 @@ export const runJobs = async ({
       limit,
       req,
       returning: true,
+      sort: processingOrder,
       where,
     })
 
@@ -175,7 +184,7 @@ export const runJobs = async ({
     ? []
     : undefined
 
-  const jobPromises = jobsQuery.docs.map(async (job) => {
+  const runSingleJob = async (job) => {
     if (!job.workflowSlug && !job.taskSlug) {
       throw new Error('Job must have either a workflowSlug or a taskSlug')
     }
@@ -257,9 +266,20 @@ export const runJobs = async ({
 
       return { id: job.id, result }
     }
-  })
+  }
 
-  const resultsArray = await Promise.all(jobPromises)
+  let resultsArray: { id: number | string; result: RunJobResult }[] = []
+  if (sequential) {
+    for (const job of jobsQuery.docs) {
+      const result = await runSingleJob(job)
+      if (result !== null) {
+        resultsArray.push(result)
+      }
+    }
+  } else {
+    const jobPromises = jobsQuery.docs.map(runSingleJob)
+    resultsArray = await Promise.all(jobPromises)
+  }
 
   if (jobsToDelete && jobsToDelete.length > 0) {
     try {

@@ -1,3 +1,4 @@
+import type { QueueProcessingOrder } from './config/types/index.js'
 import type { BaseJob, RunningJobFromTask } from './config/types/workflowTypes.js'
 
 import {
@@ -99,8 +100,14 @@ export const getJobsLocalAPI = (payload: Payload) => ({
   run: async (args?: {
     limit?: number
     overrideAccess?: boolean
+    processingOrder?: QueueProcessingOrder
     queue?: string
     req?: PayloadRequest
+    /**
+     * By default, jobs are run in parallel.
+     * If you want to run them in sequence, set this to true.
+     */
+    sequential?: boolean
     where?: Where
   }): Promise<ReturnType<typeof runJobs>> => {
     const newReq: PayloadRequest = args?.req ?? (await createLocalReq({}, payload))
@@ -108,8 +115,10 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     return await runJobs({
       limit: args?.limit,
       overrideAccess: args?.overrideAccess !== false,
+      processingOrder: args?.processingOrder,
       queue: args?.queue,
       req: newReq,
+      sequential: args?.sequential,
       where: args?.where,
     })
   },
