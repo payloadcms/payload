@@ -141,7 +141,9 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       }),
     ]
   } else {
-    let defaultProcessingOrder: QueueProcessingOrder = 'createdAt'
+    let defaultProcessingOrder: QueueProcessingOrder =
+      req.payload.collections[jobsCollectionSlug].config.defaultSort ?? 'createdAt'
+
     const processingOrderConfig = req.payload.config.jobs?.processingOrder
     if (typeof processingOrderConfig === 'function') {
       defaultProcessingOrder = processingOrderConfig(args)
