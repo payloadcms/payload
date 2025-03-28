@@ -52,7 +52,7 @@ export const PostsCollection: CollectionConfig = {
 
           TextStateFeature({
             // prettier-ignore
-            styles: {
+            state: {
               color: {
                 ...defaultColors,
                 // fancy gradients!

@@ -10,16 +10,16 @@ import { registerTextStates, setTextState, StatePlugin } from './textState.js'
 const toolbarGroups = (props: TextStateFeatureProps): ToolbarGroup[] => {
   const items: ToolbarDropdownGroup['items'] = []
 
-  for (const superKey in props.styles) {
-    const key = props.styles[superKey]!
-    for (const value in key) {
-      const meta = key[value]!
+  for (const stateKey in props.state) {
+    const key = props.state[stateKey]!
+    for (const stateValue in key) {
+      const meta = key[stateValue]!
       items.push({
         ChildComponent: () => <TextStateIcon css={meta.css} />,
-        key: value,
+        key: stateValue,
         label: meta.label,
         onSelect: ({ editor }) => {
-          setTextState(editor, superKey, value)
+          setTextState(editor, stateKey, stateValue)
         },
       })
     }
@@ -31,8 +31,8 @@ const toolbarGroups = (props: TextStateFeatureProps): ToolbarGroup[] => {
       key: `clear-style`,
       label: 'Default style',
       onSelect: ({ editor }) => {
-        for (const superKey in props.styles) {
-          setTextState(editor, superKey, undefined)
+        for (const stateKey in props.state) {
+          setTextState(editor, stateKey, undefined)
         }
       },
       order: 1,
@@ -51,7 +51,7 @@ const toolbarGroups = (props: TextStateFeatureProps): ToolbarGroup[] => {
 }
 
 export const TextStateFeatureClient = createClientFeature<TextStateFeatureProps>(({ props }) => {
-  registerTextStates(props.styles)
+  registerTextStates(props.state)
   return {
     plugins: [
       {

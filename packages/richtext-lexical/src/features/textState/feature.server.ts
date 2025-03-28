@@ -12,8 +12,10 @@ export type StyleObject = Prettify<{
     | undefined
 }>
 
+export type StateValues = { [stateValue: string]: { css: StyleObject; label: string } }
+
 export type TextStateFeatureProps = {
-  styles: { [key: string]: { [value: string]: { css: StyleObject; label: string } } }
+  state: { [stateKey: string]: StateValues }
 }
 
 /**
@@ -29,7 +31,7 @@ export const TextStateFeature = createServerFeature<
     return {
       ClientFeature: '@payloadcms/richtext-lexical/client#TextStateFeatureClient',
       clientFeatureProps: {
-        styles: props.styles,
+        state: props.state,
       },
     }
   },
@@ -347,4 +349,4 @@ export const defaultColors = {
   'text-blue': { css: { 'color': `light-dark(${tailwindColors.blue[600]}, ${tailwindColors.blue[400]})`, }, label: 'Blue' },
   'text-purple': { css: { 'color': `light-dark(${tailwindColors.purple[600]}, ${tailwindColors.purple[400]})`, }, label: 'Purple' },
   'text-pink': { css: { 'color': `light-dark(${tailwindColors.pink[600]}, ${tailwindColors.pink[400]})`, }, label: 'Pink' },
-} satisfies TextStateFeatureProps['styles'][keyof TextStateFeatureProps['styles']]
+} satisfies StateValues

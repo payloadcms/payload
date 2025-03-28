@@ -5,35 +5,35 @@ import { $forEachSelectedTextNode } from '@lexical/selection'
 import { $getNodeByKey, $getState, $setState, createState, TextNode } from 'lexical'
 import { useEffect } from 'react'
 
-import { type TextStateFeatureProps } from './feature.server.js'
+import { type StateValues, type TextStateFeatureProps } from './feature.server.js'
 
 const stateMap = new Map<
   string,
   {
-    meta: TextStateFeatureProps['styles'][number]
     stateConfig: StateConfig<string, string | undefined>
+    stateValues: StateValues
   }
 >()
 
-export function registerTextStates(styles: TextStateFeatureProps['styles']) {
-  for (const stateKey in styles) {
-    const acceptedValues = Object.keys(styles[stateKey]!)
-    const state = createState(stateKey, {
+export function registerTextStates(state: TextStateFeatureProps['state']) {
+  for (const stateKey in state) {
+    const stateValues = state[stateKey]!
+    const stateConfig = createState(stateKey, {
       parse: (value) =>
-        typeof value === 'string' && acceptedValues?.includes(value) ? value : undefined,
+        typeof value === 'string' && Object.keys(stateValues).includes(value) ? value : undefined,
     })
-    stateMap.set(stateKey, { meta: styles[stateKey]!, stateConfig: state })
+    stateMap.set(stateKey, { stateConfig, stateValues })
   }
 }
 
 export function setTextState(editor: LexicalEditor, stateKey: string, value: string | undefined) {
   editor.update(() => {
     $forEachSelectedTextNode((textNode) => {
-      const stateEntry = stateMap.get(stateKey)
-      if (!stateEntry) {
+      const stateMapEntry = stateMap.get(stateKey)
+      if (!stateMapEntry) {
         throw new Error(`State config for ${stateKey} not found`)
       }
-      $setState(textNode, stateEntry.stateConfig, value)
+      $setState(textNode, stateMapEntry.stateConfig, value)
     })
   })
 }
@@ -60,7 +60,7 @@ export function StatePlugin() {
             if (!stateValue) {
               return
             }
-            const css = stateEntry.meta[stateValue]?.css
+            const css = stateEntry.stateValues[stateValue]?.css
             if (!css) {
               return
             }
