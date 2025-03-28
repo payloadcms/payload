@@ -176,7 +176,7 @@ By default, jobs are processed first in, first out (FIFO). This means that the f
 
 ### Jobs Configuration
 
-You can configure the order in which jobs are processed in the jobs configuration by passing the `processingOrder` property.
+You can configure the order in which jobs are processed in the jobs configuration by passing the `processingOrder` property. This mimics the Payload [sort](../queries/sort) property that's used for functionality such as `payload.find()`.
 
 ```ts
 export default buildConfig({
