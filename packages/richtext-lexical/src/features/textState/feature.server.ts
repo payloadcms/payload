@@ -17,7 +17,8 @@ export type TextStylesFeatureProps = {
 }
 
 /**
- * TODO
+ *
+ * @experimental There may be breaking changes to this API
  */
 export const TextStylesFeature = createServerFeature<
   TextStylesFeatureProps,
