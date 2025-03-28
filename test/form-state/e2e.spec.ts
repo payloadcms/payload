@@ -180,7 +180,7 @@ test.describe('Form State', () => {
     await cdpSession.detach()
   })
 
-  test('sequentially queued form state should not cause nested custom components to disappear', async () => {
+  test('should not cause nested custom components to disappear when queuing form state (1)', async () => {
     await page.goto(postsUrl.create)
     const field = page.locator('#field-title')
     await field.fill('Test')
@@ -227,7 +227,7 @@ test.describe('Form State', () => {
     await cdpSession.detach()
   })
 
-  test('sequentially queued form state should not cause nested custom components to disappear (2)', async () => {
+  test('should not cause nested custom components to disappear when queuing form state (2)', async () => {
     await page.goto(postsUrl.create)
     const field = page.locator('#field-title')
     await field.fill('Test')

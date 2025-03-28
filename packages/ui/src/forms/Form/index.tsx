@@ -125,7 +125,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
   contextRef.current.fields = formState
 
-  const prevFields = useRef(formState)
+  const prevFormState = useRef(formState)
 
   const validateForm = useCallback(async () => {
     const validatedFieldState = {}
@@ -723,27 +723,31 @@ export const Form: React.FC<FormProps> = (props) => {
   const executeOnChange = useEffectEvent((submitted: boolean) => {
     queueTask(async () => {
       if (Array.isArray(onChange)) {
-        let revalidatedFormState: FormState = formState
+        let revalidatedFormState: FormState = contextRef.current.fields
+
+        console.log('before send', formState)
 
         for (const onChangeFn of onChange) {
           // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
           revalidatedFormState = await onChangeFn({
-            formState: deepCopyObjectSimpleWithoutReactComponents(formState),
+            formState: deepCopyObjectSimpleWithoutReactComponents(contextRef.current.fields),
             submitted,
           })
         }
+
+        console.log('after send', formState)
 
         if (!revalidatedFormState) {
           return
         }
 
         const { changed, newState } = mergeServerFormState({
-          existingState: formState || {},
+          existingState: contextRef.current.fields || {},
           incomingState: revalidatedFormState,
         })
 
         if (changed) {
-          prevFields.current = newState
+          prevFormState.current = newState
 
           dispatchFields({
             type: 'REPLACE_STATE',
@@ -755,13 +759,15 @@ export const Form: React.FC<FormProps> = (props) => {
     })
   })
 
+  console.log(formState)
+
   useDebouncedEffect(
     () => {
-      if ((isFirstRenderRef.current || !dequal(formState, prevFields.current)) && modified) {
+      if ((isFirstRenderRef.current || !dequal(formState, prevFormState.current)) && modified) {
         executeOnChange(submitted)
       }
 
-      prevFields.current = formState
+      prevFormState.current = formState
       isFirstRenderRef.current = false
     },
     [modified, submitted, formState],
