@@ -1,9 +1,19 @@
-import type { CSSProperties } from 'react'
+import type { PropertiesHyphenFallback } from 'csstype'
+import type { Prettify } from 'ts-essentials'
 
 import { createServerFeature } from '../../index.js'
 
+// extracted from https://github.com/facebook/lexical/pull/7294
+export type StyleObject = Prettify<{
+  [K in keyof PropertiesHyphenFallback]?:
+    | Extract<PropertiesHyphenFallback[K], string>
+    // This is simplified to not deal with arrays or numbers.
+    // This is an example after all!
+    | undefined
+}>
+
 export type TextStylesFeatureProps = {
-  styles: { [key: string]: { css: CSSProperties; label: string; value: string }[] }
+  styles: { [key: string]: { [value: string]: { css: StyleObject; label: string } } }
 }
 
 /**
@@ -322,18 +332,18 @@ const tailwindColors = {
 // prettier-ignore
 /* eslint-disable perfectionist/sort-objects */
 export const defaultColors = {
-  'bg-red': { css: { backgroundColor: `light-dark(${tailwindColors.red[400]}, ${tailwindColors.red[600]})`, }, label: 'Red', value: 'bg-red' },
-  'bg-orange': { css: { backgroundColor: `light-dark(${tailwindColors.orange[400]}, ${tailwindColors.orange[600]})`, }, label: 'Orange', value: 'bg-orange' },
-  'bg-yellow': { css: { backgroundColor: `light-dark(${tailwindColors.yellow[300]}, ${tailwindColors.yellow[700]})`, }, label: 'Yellow', value: 'bg-yellow' },
-  'bg-green': { css: { backgroundColor: `light-dark(${tailwindColors.green[400]}, ${tailwindColors.green[700]})`, }, label: 'Green', value: 'bg-green' },
-  'bg-blue': { css: { backgroundColor: `light-dark(${tailwindColors.blue[400]}, ${tailwindColors.blue[600]})`, }, label: 'Blue', value: 'bg-blue' },
-  'bg-purple': { css: { backgroundColor: `light-dark(${tailwindColors.purple[400]}, ${tailwindColors.purple[600]})`, }, label: 'Purple', value: 'bg-purple' },
-  'bg-pink': { css: { backgroundColor: `light-dark(${tailwindColors.pink[400]}, ${tailwindColors.pink[600]})`, }, label: 'Pink', value: 'bg-pink' },
-  'text-red': { css: { color: `light-dark(${tailwindColors.red[600]}, ${tailwindColors.red[400]})`, }, label: 'Red', value: 'text-red' },
-  'text-orange': { css: { color: `light-dark(${tailwindColors.orange[600]}, ${tailwindColors.orange[400]})`, }, label: 'Orange', value: 'text-orange' },
-  'text-yellow': { css: { color: `light-dark(${tailwindColors.yellow[700]}, ${tailwindColors.yellow[300]})`, }, label: 'Yellow', value: 'text-yellow' },
-  'text-green': { css: { color: `light-dark(${tailwindColors.green[700]}, ${tailwindColors.green[400]})`, }, label: 'Green', value: 'text-green' },
-  'text-blue': { css: { color: `light-dark(${tailwindColors.blue[600]}, ${tailwindColors.blue[400]})`, }, label: 'Blue', value: 'text-blue' },
-  'text-purple': { css: { color: `light-dark(${tailwindColors.purple[600]}, ${tailwindColors.purple[400]})`, }, label: 'Purple', value: 'text-purple' },
-  'text-pink': { css: { color: `light-dark(${tailwindColors.pink[600]}, ${tailwindColors.pink[400]})`, }, label: 'Pink', value: 'text-pink' },
-} satisfies Record<string, { css: CSSProperties; label: string; value: string }>
+  'bg-red': { css: { 'background-color': `light-dark(${tailwindColors.red[400]}, ${tailwindColors.red[600]})`, }, label: 'Red' },
+  'bg-orange': { css: { 'background-color': `light-dark(${tailwindColors.orange[400]}, ${tailwindColors.orange[600]})`, }, label: 'Orange' },
+  'bg-yellow': { css: { 'background-color': `light-dark(${tailwindColors.yellow[300]}, ${tailwindColors.yellow[700]})`, }, label: 'Yellow' },
+  'bg-green': { css: { 'background-color': `light-dark(${tailwindColors.green[400]}, ${tailwindColors.green[700]})`, }, label: 'Green' },
+  'bg-blue': { css: { 'background-color': `light-dark(${tailwindColors.blue[400]}, ${tailwindColors.blue[600]})`, }, label: 'Blue' },
+  'bg-purple': { css: { 'background-color': `light-dark(${tailwindColors.purple[400]}, ${tailwindColors.purple[600]})`, }, label: 'Purple' },
+  'bg-pink': { css: { 'background-color': `light-dark(${tailwindColors.pink[400]}, ${tailwindColors.pink[600]})`, }, label: 'Pink' },
+  'text-red': { css: { 'color': `light-dark(${tailwindColors.red[600]}, ${tailwindColors.red[400]})`, }, label: 'Red' },
+  'text-orange': { css: { 'color': `light-dark(${tailwindColors.orange[600]}, ${tailwindColors.orange[400]})`, }, label: 'Orange' },
+  'text-yellow': { css: { 'color': `light-dark(${tailwindColors.yellow[700]}, ${tailwindColors.yellow[300]})`, }, label: 'Yellow' },
+  'text-green': { css: { 'color': `light-dark(${tailwindColors.green[700]}, ${tailwindColors.green[400]})`, }, label: 'Green' },
+  'text-blue': { css: { 'color': `light-dark(${tailwindColors.blue[600]}, ${tailwindColors.blue[400]})`, }, label: 'Blue' },
+  'text-purple': { css: { 'color': `light-dark(${tailwindColors.purple[600]}, ${tailwindColors.purple[400]})`, }, label: 'Purple' },
+  'text-pink': { css: { 'color': `light-dark(${tailwindColors.pink[600]}, ${tailwindColors.pink[400]})`, }, label: 'Pink' },
+} satisfies TextStylesFeatureProps['styles'][keyof TextStylesFeatureProps['styles']]

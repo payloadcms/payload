@@ -6,6 +6,7 @@ import {
   lexicalEditor,
   TextColorFeature,
   TextStylesFeature,
+  TreeViewFeature,
 } from '@payloadcms/richtext-lexical'
 
 export const postsSlug = 'posts'
@@ -52,14 +53,16 @@ export const PostsCollection: CollectionConfig = {
           TextStylesFeature({
             // prettier-ignore
             styles: {
-              color: Object.values(defaultColors),
-              gradient: [
-                { value: 'galaxy', label: 'Galaxy', css: { background: 'linear-gradient(to right, #0000ff, #ff0000)', color: 'white' } },
-                { value: 'bubble', label: 'Bubble', css: { backgroundImage: 'radial-gradient(50% 123.47% at 50% 50%, #00FF94 0%, #720059 100%), linear-gradient(121.28deg, #669600 0%, #FF0000 100%), linear-gradient(360deg, #0029FF 0%, #8FFF00 100%), radial-gradient(100% 164.72% at 100% 100%, #6100FF 0%, #00FF57 100%), radial-gradient(100% 148.07% at 0% 0%, #FFF500 0%, #51D500 100%)', backgroundBlendMode: 'screen, color-dodge, overlay, difference, normal' } },
-                { value: 'sunset', label: 'Sunset', css: { background: 'linear-gradient(to top, #ff5f6d, #6a3093)' } },
-              ],
+              color: defaultColors,
+              gradient: {
+                galaxy: { label: 'Galaxy', css: { background: 'linear-gradient(to right, #0000ff, #ff0000)', color: 'white' } },
+                bubble: { label: 'Bubble', css: { 'background-image': 'radial-gradient(50% 123.47% at 50% 50%, #00FF94 0%, #720059 100%), linear-gradient(121.28deg, #669600 0%, #FF0000 100%), linear-gradient(360deg, #0029FF 0%, #8FFF00 100%), radial-gradient(100% 164.72% at 100% 100%, #6100FF 0%, #00FF57 100%), radial-gradient(100% 148.07% at 0% 0%, #FFF500 0%, #51D500 100%)', 'background-blend-mode': 'screen, color-dodge, overlay, difference, normal' } },
+                sunset: { label: 'Sunset', css: { background: 'linear-gradient(to top, #ff5f6d, #6a3093)' } },
+              },
             },
           }),
+
+          TreeViewFeature(),
         ],
       }),
     },
