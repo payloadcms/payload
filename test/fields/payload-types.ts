@@ -1633,6 +1633,7 @@ export interface RelationshipField {
   relationToSelfSelectOnly?: (string | null) | RelationshipField;
   relationWithAllowCreateToFalse?: (string | null) | User;
   relationWithAllowEditToFalse?: (string | null) | User;
+  relationWithCloseOnSaveToTrue?: (string | null) | TextField;
   relationWithDynamicDefault?: (string | null) | User;
   relationHasManyWithDynamicDefault?: {
     relationTo: 'users';
@@ -3357,6 +3358,7 @@ export interface RelationshipFieldsSelect<T extends boolean = true> {
   relationToSelfSelectOnly?: T;
   relationWithAllowCreateToFalse?: T;
   relationWithAllowEditToFalse?: T;
+  relationWithCloseOnSaveToTrue?: T;
   relationWithDynamicDefault?: T;
   relationHasManyWithDynamicDefault?: T;
   relationshipWithMin?: T;
