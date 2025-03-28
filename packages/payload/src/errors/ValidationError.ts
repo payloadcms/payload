@@ -42,12 +42,24 @@ export class ValidationError extends APIError<{
     super(
       `${message} ${results.errors
         .map((f) => {
-          if (typeof f.label === 'function') {
-            if (!results.req || !results.req.i18n || !results.req.t) {
-              return f.path
+          if (f.label) {
+            if (typeof f.label === 'function') {
+              if (!results.req || !results.req.i18n || !results.req.t) {
+                return f.path
+              }
+
+              return f.label({ i18n: results.req.i18n, t: results.req.t })
             }
 
-            return f.label({ i18n: results.req.i18n, t: results.req.t })
+            if (typeof f.label === 'object') {
+              if (results.req?.i18n?.language) {
+                return f.label[results.req.i18n.language]
+              }
+
+              return f.label[Object.keys(f.label)[0]]
+            }
+
+            return f.label
           }
 
           return f.path
