@@ -1,4 +1,5 @@
 @import '../../../../scss/styles.scss';
+@import '../../colors.scss';
 
 @layer payload-default {
   .lexical-diff__diff-container {
@@ -20,26 +21,26 @@
       padding: base(0.6);
 
       &[data-match-type='create'] {
-        border-color: var(--theme-success-400);
-        color: var(--theme-success-800);
+        border-color: var(--diff-create-pill-border);
+        color: var(--diff-create-parent-color);
 
         [data-match-type='create'] {
-          color: var(--theme-success-800);
+          color: var(--diff-create-parent-color);
         }
       }
 
       &[data-match-type='delete'] {
-        border-color: var(--theme-error-400);
-        color: var(--theme-error-800);
+        border-color: var(--diff-delete-pill-border);
+        color: var(--diff-delete-parent-color);
         text-decoration-line: none;
-        background-color: var(--theme-error-200);
+        background-color: var(--diff-delete-pill-bg);
 
         [data-match-type='delete'] {
           text-decoration-line: none;
         }
 
         * {
-          color: var(--theme-error-800);
+          color: var(--diff-delete-parent-color);
         }
       }
 

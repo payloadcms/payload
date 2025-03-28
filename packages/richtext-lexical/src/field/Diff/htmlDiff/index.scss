@@ -1,4 +1,5 @@
 @import '../../../scss/styles.scss';
+@import '../colors.scss';
 
 @layer payload-default {
   .lexical-diff__diff-container {
@@ -17,13 +18,13 @@
     blockquote,
     h6 {
       &:has([data-match-type='create']) {
-        background-color: var(--theme-success-100);
-        color: var(--theme-success-800);
+        background-color: var(--diff-create-parent-bg);
+        color: var(--diff-create-parent-color);
       }
 
       &:has([data-match-type='delete']) {
-        background-color: var(--theme-error-100);
-        color: var(--theme-error-800);
+        background-color: var(--diff-delete-parent-bg);
+        color: var(--diff-delete-parent-color);
       }
     }
 
@@ -32,10 +33,10 @@
     }
 
     [data-match-type='delete'] {
-      color: var(--theme-error-600);
-      text-decoration-color: var(--theme-error-600);
+      color: var(--diff-delete-pill-color);
+      text-decoration-color: var(--diff-delete-pill-color);
       text-decoration-line: line-through;
-      background-color: var(--theme-error-200);
+      background-color: var(--diff-delete-pill-bg);
       border-radius: 4px;
     }
 
@@ -44,8 +45,8 @@
     }
 
     [data-match-type='create']:not(img) {
-      background-color: var(--theme-success-200);
-      color: var(--theme-success-600);
+      background-color: var(--diff-create-pill-bg);
+      color: var(--diff-create-pill-color);
       border-radius: 4px;
     }
 
@@ -77,16 +78,6 @@
           height: 100%;
           content: '';
         }
-      }
-
-      &-create-inline-wrapper::after,
-      &-create-block-wrapper::after {
-        background-color: var(--theme-success-200);
-      }
-
-      &-delete-inline-wrapper::after,
-      &-delete-block-wrapper::after {
-        background-color: var(--theme-error-100);
       }
     }
   }

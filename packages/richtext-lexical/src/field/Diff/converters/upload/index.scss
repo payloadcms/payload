@@ -1,4 +1,5 @@
 @import '../../../../scss/styles.scss';
+@import '../../colors.scss';
 
 @layer payload-default {
   .lexical-diff__diff-container {
@@ -19,34 +20,34 @@
       padding: base(0.6);
 
       &[data-match-type='create'] {
-        border-color: var(--theme-success-400);
-        color: var(--theme-success-800);
+        border-color: var(--diff-create-pill-border);
+        color: var(--diff-create-parent-color);
 
         * {
-          color: var(--theme-success-800);
+          color: var(--diff-create-parent-color);
         }
 
         .lexical-upload-diff__thumbnail {
           border-radius: 0px;
-          border-color: var(--theme-success-400);
+          border-color: var(--diff-create-pill-border);
           background-color: none;
         }
       }
 
       &[data-match-type='delete'] {
-        border-color: var(--theme-error-400);
+        border-color: var(--diff-delete-pill-border);
         text-decoration-line: none;
-        color: var(--theme-error-800);
-        background-color: var(--theme-error-200);
+        color: var(--diff-delete-parent-colo);
+        background-color: var(--diff-delete-pill-bg);
 
         * {
           text-decoration-line: none;
-          color: var(--theme-error-800);
+          color: var(--diff-delete-parent-colo);
         }
 
         .lexical-upload-diff__thumbnail {
           border-radius: 0px;
-          border-color: var(--theme-error-400);
+          border-color: var(--diff-delete-pill-border);
           background-color: none;
         }
       }
