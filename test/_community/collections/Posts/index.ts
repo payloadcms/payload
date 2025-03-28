@@ -54,7 +54,8 @@ export const PostsCollection: CollectionConfig = {
             // prettier-ignore
             state: {
               color: {
-                ...defaultColors,
+                ...defaultColors.background,
+                ...defaultColors.text,
                 // fancy gradients!
                 galaxy: { label: 'Galaxy', css: { background: 'linear-gradient(to right, #0000ff, #ff0000)', color: 'white' } },
                 sunset: { label: 'Sunset', css: { background: 'linear-gradient(to top, #ff5f6d, #6a3093)' } },
@@ -64,7 +65,7 @@ export const PostsCollection: CollectionConfig = {
               // (just like I did with defaultColors and my fancy gradients)
               underline: {
                 'solid': { label: 'Solid', css: { 'text-decoration': 'underline', 'text-underline-offset': '4px' } },
-                'yellow-dashed': { label: 'Yellow Dashed', css: { 'text-decoration': 'underline dashed', 'text-decoration-color': 'light-dark(#EAB308,yellow)', 'text-underline-offset': '4px' } },
+                'yellow-dashed': { label: 'Yellow Dashed', css: { 'text-decoration': 'underline dashed', 'text-decoration-color': 'light-dark(dark-yellow,yellow)', 'text-underline-offset': '4px' } },
               },
             },
           }),

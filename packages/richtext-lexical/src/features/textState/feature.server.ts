@@ -15,10 +15,48 @@ export type StyleObject = Prettify<{
 export type StateValues = { [stateValue: string]: { css: StyleObject; label: string } }
 
 export type TextStateFeatureProps = {
+  /**
+   * The keys of the top-level object (stateKeys) represent the attributes that the textNode can have (e.g., color).
+   * The values of the top-level object (stateValues) represent the values that the attribute can have (e.g., red, blue, etc.).
+   * Within the stateValue, you can define inline styles and labels.
+   *
+   * @note Because this is a common use case, we provide a defaultColors object with colors that
+   * look good in both dark and light mode, which you can use or adapt to your liking.
+   *
+   *
+   *
+   * @example
+   * import { defaultColors } from '@payloadcms/richtext-lexical'
+   *
+   * state: {
+   *   color: {
+   *     ...defaultColors.background,
+   *     ...defaultColors.text,
+   *     // fancy gradients!
+   *     galaxy: { label: 'Galaxy', css: { background: 'linear-gradient(to right, #0000ff, #ff0000)', color: 'white' } },
+   *     sunset: { label: 'Sunset', css: { background: 'linear-gradient(to top, #ff5f6d, #6a3093)' } },
+   *    },
+   *    // You can have both colored and underlined text at the same time.
+   *    // If you don't want that, you should group them within the same key.
+   *    // (just like I did with defaultColors and my fancy gradients)
+   *    underline: {
+   *      'solid': { label: 'Solid', css: { 'text-decoration': 'underline', 'text-underline-offset': '4px' } },
+   *      // You'll probably want to use the CSS light-dark() utility.
+   *      'yellow-dashed': { label: 'Yellow Dashed', css: { 'text-decoration': 'underline dashed', 'text-decoration-color': 'light-dark(#EAB308,yellow)', 'text-underline-offset': '4px' } },
+   *    },
+   * }
+   *
+   */
   state: { [stateKey: string]: StateValues }
 }
 
 /**
+ * Allows you to store key-value attributes within TextNodes and define inline styles for each combination.
+ * Inline styles are not part of the editorState, reducing the JSON size and allowing you to easily migrate or adapt styles later.
+ *
+ * This feature can be used, among other things, to add colors to text.
+ *
+ * For more information and examples, see the JSdocs for the "state" property that this feature receives as a parameter.
  *
  * @experimental There may be breaking changes to this API
  */
@@ -335,18 +373,22 @@ const tailwindColors = {
 // prettier-ignore
 /* eslint-disable perfectionist/sort-objects */
 export const defaultColors = {
-  'bg-red': { css: { 'background-color': `light-dark(${tailwindColors.red[400]}, ${tailwindColors.red[600]})`, }, label: 'Red' },
-  'bg-orange': { css: { 'background-color': `light-dark(${tailwindColors.orange[400]}, ${tailwindColors.orange[600]})`, }, label: 'Orange' },
-  'bg-yellow': { css: { 'background-color': `light-dark(${tailwindColors.yellow[300]}, ${tailwindColors.yellow[700]})`, }, label: 'Yellow' },
-  'bg-green': { css: { 'background-color': `light-dark(${tailwindColors.green[400]}, ${tailwindColors.green[700]})`, }, label: 'Green' },
-  'bg-blue': { css: { 'background-color': `light-dark(${tailwindColors.blue[400]}, ${tailwindColors.blue[600]})`, }, label: 'Blue' },
-  'bg-purple': { css: { 'background-color': `light-dark(${tailwindColors.purple[400]}, ${tailwindColors.purple[600]})`, }, label: 'Purple' },
-  'bg-pink': { css: { 'background-color': `light-dark(${tailwindColors.pink[400]}, ${tailwindColors.pink[600]})`, }, label: 'Pink' },
-  'text-red': { css: { 'color': `light-dark(${tailwindColors.red[600]}, ${tailwindColors.red[400]})`, }, label: 'Red' },
-  'text-orange': { css: { 'color': `light-dark(${tailwindColors.orange[600]}, ${tailwindColors.orange[400]})`, }, label: 'Orange' },
-  'text-yellow': { css: { 'color': `light-dark(${tailwindColors.yellow[700]}, ${tailwindColors.yellow[300]})`, }, label: 'Yellow' },
-  'text-green': { css: { 'color': `light-dark(${tailwindColors.green[700]}, ${tailwindColors.green[400]})`, }, label: 'Green' },
-  'text-blue': { css: { 'color': `light-dark(${tailwindColors.blue[600]}, ${tailwindColors.blue[400]})`, }, label: 'Blue' },
-  'text-purple': { css: { 'color': `light-dark(${tailwindColors.purple[600]}, ${tailwindColors.purple[400]})`, }, label: 'Purple' },
-  'text-pink': { css: { 'color': `light-dark(${tailwindColors.pink[600]}, ${tailwindColors.pink[400]})`, }, label: 'Pink' },
-} satisfies StateValues
+  text: {
+    'text-red': { css: { 'color': `light-dark(${tailwindColors.red[600]}, ${tailwindColors.red[400]})`, }, label: 'Red' },
+    'text-orange': { css: { 'color': `light-dark(${tailwindColors.orange[600]}, ${tailwindColors.orange[400]})`, }, label: 'Orange' },
+    'text-yellow': { css: { 'color': `light-dark(${tailwindColors.yellow[700]}, ${tailwindColors.yellow[300]})`, }, label: 'Yellow' },
+    'text-green': { css: { 'color': `light-dark(${tailwindColors.green[700]}, ${tailwindColors.green[400]})`, }, label: 'Green' },
+    'text-blue': { css: { 'color': `light-dark(${tailwindColors.blue[600]}, ${tailwindColors.blue[400]})`, }, label: 'Blue' },
+    'text-purple': { css: { 'color': `light-dark(${tailwindColors.purple[600]}, ${tailwindColors.purple[400]})`, }, label: 'Purple' },
+    'text-pink': { css: { 'color': `light-dark(${tailwindColors.pink[600]}, ${tailwindColors.pink[400]})`, }, label: 'Pink' },
+  } satisfies StateValues,
+  background: {
+    'bg-red': { css: { 'background-color': `light-dark(${tailwindColors.red[400]}, ${tailwindColors.red[600]})`, }, label: 'Red' },
+    'bg-orange': { css: { 'background-color': `light-dark(${tailwindColors.orange[400]}, ${tailwindColors.orange[600]})`, }, label: 'Orange' },
+    'bg-yellow': { css: { 'background-color': `light-dark(${tailwindColors.yellow[300]}, ${tailwindColors.yellow[700]})`, }, label: 'Yellow' },
+    'bg-green': { css: { 'background-color': `light-dark(${tailwindColors.green[400]}, ${tailwindColors.green[700]})`, }, label: 'Green' },
+    'bg-blue': { css: { 'background-color': `light-dark(${tailwindColors.blue[400]}, ${tailwindColors.blue[600]})`, }, label: 'Blue' },
+    'bg-purple': { css: { 'background-color': `light-dark(${tailwindColors.purple[400]}, ${tailwindColors.purple[600]})`, }, label: 'Purple' },
+    'bg-pink': { css: { 'background-color': `light-dark(${tailwindColors.pink[400]}, ${tailwindColors.pink[600]})`, }, label: 'Pink' },
+  } satisfies StateValues
+}
