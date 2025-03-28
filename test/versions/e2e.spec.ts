@@ -1197,11 +1197,11 @@ describe('Versions', () => {
 
       const textInArrayES = page.locator('[data-field-path="arrayLocalized"][data-locale="es"]')
 
-      await expect(textInArrayES).toContainText('No Array Localizeds found')
+      await expect(textInArrayES).toBeHidden()
 
       await page.locator('#modifiedOnly').click()
 
-      await expect(textInArrayES).toBeHidden()
+      await expect(textInArrayES).toContainText('No Array Localizeds found')
     })
 
     test('correctly renders diff for block fields', async () => {

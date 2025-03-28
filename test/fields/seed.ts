@@ -591,7 +591,67 @@ export const seed = async (_payload: Payload) => {
   await _payload.create({
     collection: 'lexical-access-control',
     data: {
-      richText: textToLexicalJSON({ text: 'text' }),
+      richText: {
+        root: {
+          children: [
+            {
+              children: [
+                {
+                  detail: 0,
+                  format: 0,
+                  mode: 'normal',
+                  style: '',
+                  text: 'text ',
+                  type: 'text',
+                  version: 1,
+                },
+                {
+                  children: [
+                    {
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: 'link',
+                      type: 'text',
+                      version: 1,
+                    },
+                  ],
+                  direction: 'ltr',
+                  format: '',
+                  indent: 0,
+                  type: 'link',
+                  version: 3,
+                  fields: {
+                    url: 'https://',
+                    newTab: false,
+                    linkType: 'custom',
+                    blocks: [
+                      {
+                        id: '67e45673cbd5181ca8cbeef7',
+                        blockType: 'block',
+                      },
+                    ],
+                  },
+                  id: '67e4566fcbd5181ca8cbeef5',
+                },
+              ],
+              direction: 'ltr',
+              format: '',
+              indent: 0,
+              type: 'paragraph',
+              version: 1,
+              textFormat: 0,
+              textStyle: '',
+            },
+          ],
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          type: 'root',
+          version: 1,
+        },
+      },
       title: 'title',
     },
     depth: 0,

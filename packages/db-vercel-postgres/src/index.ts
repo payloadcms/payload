@@ -34,6 +34,7 @@ import {
   rollbackTransaction,
   updateGlobal,
   updateGlobalVersion,
+  updateJobs,
   updateMany,
   updateOne,
   updateVersion,
@@ -138,6 +139,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       tables: {},
       tablesFilter: args.tablesFilter,
       transactionOptions: args.transactionOptions || undefined,
+      updateJobs,
       versionsSuffix: args.versionsSuffix || '_v',
 
       // DatabaseAdapter

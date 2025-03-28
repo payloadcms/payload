@@ -20,9 +20,9 @@ import minimist from 'minimist'
 import * as fs from 'node:fs/promises'
 import path from 'path'
 
-type TemplateVariations = {
+type TemplateVariation = {
   /** Base template to copy from */
-  base?: string
+  base?: 'none' | ({} & string)
   configureConfig?: boolean
   db: DbType
   /** Directory in templates dir */
@@ -56,9 +56,11 @@ async function main() {
   const args = minimist(process.argv.slice(2))
   const template = args['template'] // template directory name
 
+  const shouldBuild = args['build']
+
   const templateRepoUrlBase = `https://github.com/payloadcms/payload/tree/main/templates`
 
-  let variations: TemplateVariations[] = [
+  let variations: TemplateVariation[] = [
     {
       name: 'payload-vercel-postgres-template',
       db: 'vercel-postgres',
@@ -143,6 +145,21 @@ async function main() {
       // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
       configureConfig: false,
     },
+    {
+      name: 'website',
+      db: 'mongodb',
+      dirname: 'website',
+      generateLockfile: true,
+      sharp: true,
+      skipConfig: true, // Do not copy the payload.config.ts file from the base template
+      storage: 'localDisk',
+      // The blank template is used as a base for create-payload-app functionality,
+      // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
+      configureConfig: false,
+      base: 'none',
+      skipDockerCompose: true,
+      skipReadme: true,
+    },
   ]
 
   // If template is set, only generate that template
@@ -154,33 +171,37 @@ async function main() {
     variations = [variation]
   }
 
-  for (const {
-    name,
-    base,
-    configureConfig,
-    db,
-    dirname,
-    envNames,
-    generateLockfile,
-    sharp,
-    skipConfig = false,
-    skipDockerCompose = false,
-    skipReadme = false,
-    storage,
-    vercelDeployButtonLink,
-  } of variations) {
+  for (const variation of variations) {
+    const {
+      name,
+      base,
+      configureConfig,
+      db,
+      dirname,
+      envNames,
+      generateLockfile,
+      sharp,
+      skipConfig = false,
+      skipDockerCompose = false,
+      skipReadme = false,
+      storage,
+      vercelDeployButtonLink,
+    } = variation
+
     header(`Generating ${name}...`)
     const destDir = path.join(TEMPLATES_DIR, dirname)
-    copyRecursiveSync(path.join(TEMPLATES_DIR, base || '_template'), destDir, [
-      'node_modules',
-      '\\*\\.tgz',
-      '.next',
-      '.env$',
-      'pnpm-lock.yaml',
-      ...(skipReadme ? ['README.md'] : []),
-      ...(skipDockerCompose ? ['docker-compose.yml'] : []),
-      ...(skipConfig ? ['payload.config.ts'] : []),
-    ])
+    if (base !== 'none') {
+      copyRecursiveSync(path.join(TEMPLATES_DIR, base || '_template'), destDir, [
+        'node_modules',
+        '\\*\\.tgz',
+        '.next',
+        '.env$',
+        'pnpm-lock.yaml',
+        ...(skipReadme ? ['README.md'] : []),
+        ...(skipDockerCompose ? ['docker-compose.yml'] : []),
+        ...(skipConfig ? ['payload.config.ts'] : []),
+      ])
+    }
 
     log(`Copied to ${destDir}`)
 
@@ -216,6 +237,15 @@ async function main() {
         destDir,
       })
     }
+
+    // Fetch latest npm version of payload package:
+    const version = await getLatestPayloadVersion()
+
+    // Bump package.json versions
+    await bumpPackageJson({
+      templateDir: destDir,
+      latestVersion: version,
+    })
 
     if (generateLockfile) {
       log('Generating pnpm-lock.yaml')
@@ -254,6 +284,15 @@ async function main() {
       })
     }
 
+    // Generate importmap
+    log('Generating import map')
+    execSyncSafe(`pnpm --ignore-workspace generate:importmap`, { cwd: destDir })
+
+    if (shouldBuild) {
+      log('Building...')
+      execSyncSafe(`pnpm --ignore-workspace build`, { cwd: destDir })
+    }
+
     // TODO: Email?
 
     // TODO: Sharp?
@@ -271,7 +310,7 @@ async function generateReadme({
   destDir,
 }: {
   data: {
-    attributes: Pick<TemplateVariations, 'db' | 'storage'>
+    attributes: Pick<TemplateVariation, 'db' | 'storage'>
     description: string
     name: string
     vercelDeployButtonLink?: string
@@ -305,7 +344,7 @@ async function writeEnvExample({
 }: {
   dbType: DbType
   destDir: string
-  envNames?: TemplateVariations['envNames']
+  envNames?: TemplateVariation['envNames']
 }) {
   const envExamplePath = path.join(destDir, '.env.example')
   const envFileContents = await fs.readFile(envExamplePath, 'utf8')
@@ -375,6 +414,51 @@ function execSyncSafe(command: string, options?: Parameters<typeof execSync>[1])
     } else {
       console.error('An unexpected error occurred:', error)
     }
+    throw error
+  }
+}
+
+const DO_NOT_BUMP = ['@payloadcms/eslint-config', '@payloadcms/eslint-plugin']
+async function bumpPackageJson({
+  templateDir,
+  latestVersion,
+}: {
+  templateDir: string
+  latestVersion: string
+}) {
+  const packageJsonString = await fs.readFile(path.resolve(templateDir, 'package.json'), 'utf8')
+  const packageJson = JSON.parse(packageJsonString)
+
+  for (const key of ['dependencies', 'devDependencies']) {
+    const dependencies = packageJson[key]
+    if (dependencies) {
+      for (const [packageName, _packageVersion] of Object.entries(dependencies)) {
+        if (
+          (packageName === 'payload' || packageName.startsWith('@payloadcms')) &&
+          !DO_NOT_BUMP.includes(packageName)
+        ) {
+          dependencies[packageName] = latestVersion
+        }
+      }
+    }
+  }
+
+  // write it out
+  await fs.writeFile(
+    path.resolve(templateDir, 'package.json'),
+    JSON.stringify(packageJson, null, 2),
+  )
+}
+
+async function getLatestPayloadVersion() {
+  try {
+    const response = await fetch('https://registry.npmjs.org/payload')
+    const data = await response.json()
+    const latestVersion = data['dist-tags'].latest
+
+    return latestVersion
+  } catch (error) {
+    console.error('Error fetching Payload version:', error)
     throw error
   }
 }
