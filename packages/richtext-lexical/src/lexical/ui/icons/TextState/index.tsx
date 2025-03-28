@@ -18,7 +18,7 @@ export const TextStateIcon: React.FC<{
         alignItems: 'center',
         borderRadius: '4px',
         display: 'flex',
-        fontSize: '18px',
+        fontSize: '16px',
         height: '20px',
         justifyContent: 'center',
         width: '20px',

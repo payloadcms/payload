@@ -64,7 +64,7 @@ export const PostsCollection: CollectionConfig = {
               // (just like I did with defaultColors and my fancy gradients)
               underline: {
                 'solid': { label: 'Solid', css: { 'text-decoration': 'underline', 'text-underline-offset': '4px' } },
-                'yellow-dashed': { label: 'Yellow Dashed', css: { 'text-decoration': 'underline dashed', 'text-decoration-color': 'yellow', 'text-underline-offset': '4px' } },
+                'yellow-dashed': { label: 'Yellow Dashed', css: { 'text-decoration': 'underline dashed', 'text-decoration-color': 'light-dark(#EAB308,yellow)', 'text-underline-offset': '4px' } },
               },
             },
           }),
