@@ -533,6 +533,71 @@ describe('Queues', () => {
     payload.config.jobs.deleteJobOnComplete = true
   })
 
+  it('ensure jobs run in FIFO order by default', async () => {
+    await payload.jobs.queue({
+      workflow: 'inlineTaskTestDelayed',
+      input: {
+        message: 'task 1',
+      },
+    })
+
+    await new Promise((resolve) => setTimeout(resolve, 100))
+
+    await payload.jobs.queue({
+      workflow: 'inlineTaskTestDelayed',
+      input: {
+        message: 'task 2',
+      },
+    })
+
+    await payload.jobs.run({
+      sequential: true,
+    })
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+      sort: 'createdAt',
+    })
+
+    expect(allSimples.totalDocs).toBe(2)
+    expect(allSimples.docs?.[0]?.title).toBe('task 1')
+    expect(allSimples.docs?.[1]?.title).toBe('task 2')
+  })
+
+  it('ensure jobs can run LIFO if processingOrder is passed', async () => {
+    await payload.jobs.queue({
+      workflow: 'inlineTaskTestDelayed',
+      input: {
+        message: 'task 1',
+      },
+    })
+
+    await new Promise((resolve) => setTimeout(resolve, 100))
+
+    await payload.jobs.queue({
+      workflow: 'inlineTaskTestDelayed',
+      input: {
+        message: 'task 2',
+      },
+    })
+
+    await payload.jobs.run({
+      sequential: true,
+      processingOrder: '-createdAt',
+    })
+
+    const allSimples = await payload.find({
+      collection: 'simple',
+      limit: 100,
+      sort: 'createdAt',
+    })
+
+    expect(allSimples.totalDocs).toBe(2)
+    expect(allSimples.docs?.[0]?.title).toBe('task 2')
+    expect(allSimples.docs?.[1]?.title).toBe('task 1')
+  })
+
   it('can create new inline jobs', async () => {
     await payload.jobs.queue({
       workflow: 'inlineTaskTest',
