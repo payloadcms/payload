@@ -763,11 +763,13 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       {currentlyOpenRelationship.collectionSlug && currentlyOpenRelationship.hasReadPermission && (
         <DocumentDrawer onDelete={onDelete} onDuplicate={onDuplicate} onSave={onSave} />
       )}
-      <ListDrawer
-        allowCreate={!readOnly && allowCreate}
-        enableRowSelections={false}
-        onSelect={onListSelect}
-      />
+      {appearance === 'drawer' && (
+        <ListDrawer
+          allowCreate={!readOnly && allowCreate}
+          enableRowSelections={false}
+          onSelect={onListSelect}
+        />
+      )}
     </div>
   )
 }
