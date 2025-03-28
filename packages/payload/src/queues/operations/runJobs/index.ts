@@ -26,6 +26,13 @@ export type RunJobsArgs = {
   id?: number | string
   limit?: number
   overrideAccess?: boolean
+  /**
+   * Adjust the job processing order
+   *
+   * FIFO would equal `createdAt` and LIFO would equal `-createdAt`.
+   *
+   * @default all jobs for all queues will be executed in FIFO order.
+   */
   processingOrder?: QueueProcessingOrder
   queue?: string
   req: PayloadRequest
@@ -141,7 +148,7 @@ export const runJobs = async ({
       limit,
       req,
       returning: true,
-      sort: processingOrder,
+      sort: processingOrder ?? 'createdAt',
       where,
     })
 

@@ -1,5 +1,6 @@
 import type { CollectionConfig } from '../../../index.js'
-import type { Payload, PayloadRequest } from '../../../types/index.js'
+import type { Payload, PayloadRequest, Sort } from '../../../types/index.js'
+import type { RunJobsArgs } from '../../operations/runJobs/index.js'
 import type { TaskConfig } from './taskTypes.js'
 import type { WorkflowConfig } from './workflowTypes.js'
 
@@ -38,6 +39,13 @@ export type RunJobAccessArgs = {
 }
 
 export type RunJobAccess = (args: RunJobAccessArgs) => boolean | Promise<boolean>
+
+/**
+ * Define the order of job execution for each queue using a Payload sort string.
+ *
+ * FIFO would equal `createdAt` and LIFO would equal `-createdAt`.
+ */
+export type QueueProcessingOrder = Sort
 
 export type JobsConfig = {
   /**
@@ -80,6 +88,22 @@ export type JobsConfig = {
    * a new collection.
    */
   jobsCollectionOverrides?: (args: { defaultJobsCollection: CollectionConfig }) => CollectionConfig
+  /**
+   * Adjust the job processing order. This can be set globally or per queue.
+   *
+   * FIFO would equal `createdAt` and LIFO would equal `-createdAt`.
+   *
+   * @default all jobs for all queues will be executed in FIFO order.
+   */
+  processingOrder?:
+    | ((args: RunJobsArgs) => QueueProcessingOrder)
+    | {
+        default?: QueueProcessingOrder
+        queues: {
+          [queue: string]: QueueProcessingOrder
+        }
+      }
+    | QueueProcessingOrder
   /**
    * By default, the job system uses direct database calls for optimal performance.
    * If you added custom hooks to your jobs collection, you can set this to true to
