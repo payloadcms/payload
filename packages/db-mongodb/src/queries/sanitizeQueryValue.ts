@@ -151,6 +151,8 @@ export const sanitizeQueryValue = ({
           if (!hasCustomID) {
             if (Types.ObjectId.isValid(inVal)) {
               formattedValues.push(new Types.ObjectId(inVal))
+
+              return formattedValues
             }
           }
 
