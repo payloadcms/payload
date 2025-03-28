@@ -226,7 +226,10 @@ export const sanitizeCollection = async (
       sanitized.admin.useAsTitle = sanitized.auth.loginWithUsername ? 'username' : 'email'
     }
 
-    sanitized.fields = mergeBaseFields(sanitized.fields, getBaseAuthFields(sanitized.auth))
+    sanitized.fields = mergeBaseFields(
+      sanitized.fields,
+      getBaseAuthFields(sanitized.auth, sanitized),
+    )
   }
 
   if (collection?.admin?.pagination?.limits?.length) {
