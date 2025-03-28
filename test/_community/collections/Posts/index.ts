@@ -5,7 +5,7 @@ import {
   FixedToolbarFeature,
   lexicalEditor,
   TextColorFeature,
-  TextStylesFeature,
+  TextStateFeature,
   TreeViewFeature,
 } from '@payloadcms/richtext-lexical'
 
@@ -50,7 +50,7 @@ export const PostsCollection: CollectionConfig = {
             ],
           }),
 
-          TextStylesFeature({
+          TextStateFeature({
             // prettier-ignore
             styles: {
               color: {

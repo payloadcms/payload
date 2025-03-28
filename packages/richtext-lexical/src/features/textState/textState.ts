@@ -5,17 +5,17 @@ import { $forEachSelectedTextNode } from '@lexical/selection'
 import { $getNodeByKey, $getState, $setState, createState, TextNode } from 'lexical'
 import { useEffect } from 'react'
 
-import { type TextStylesFeatureProps } from './feature.server.js'
+import { type TextStateFeatureProps } from './feature.server.js'
 
 const stateMap = new Map<
   string,
   {
-    meta: TextStylesFeatureProps['styles'][number]
+    meta: TextStateFeatureProps['styles'][number]
     stateConfig: StateConfig<string, string | undefined>
   }
 >()
 
-export function registerTextStates(styles: TextStylesFeatureProps['styles']) {
+export function registerTextStates(styles: TextStateFeatureProps['styles']) {
   for (const stateKey in styles) {
     const acceptedValues = Object.keys(styles[stateKey]!)
     const state = createState(stateKey, {

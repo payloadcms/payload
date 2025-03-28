@@ -12,7 +12,7 @@ export type StyleObject = Prettify<{
     | undefined
 }>
 
-export type TextStylesFeatureProps = {
+export type TextStateFeatureProps = {
   styles: { [key: string]: { [value: string]: { css: StyleObject; label: string } } }
 }
 
@@ -20,20 +20,20 @@ export type TextStylesFeatureProps = {
  *
  * @experimental There may be breaking changes to this API
  */
-export const TextStylesFeature = createServerFeature<
-  TextStylesFeatureProps,
-  TextStylesFeatureProps,
-  TextStylesFeatureProps
+export const TextStateFeature = createServerFeature<
+  TextStateFeatureProps,
+  TextStateFeatureProps,
+  TextStateFeatureProps
 >({
   feature: ({ props }) => {
     return {
-      ClientFeature: '@payloadcms/richtext-lexical/client#TextStylesFeatureClient',
+      ClientFeature: '@payloadcms/richtext-lexical/client#TextStateFeatureClient',
       clientFeatureProps: {
         styles: props.styles,
       },
     }
   },
-  key: 'textStyles',
+  key: 'textStates',
 })
 
 const tailwindColors = {
@@ -347,4 +347,4 @@ export const defaultColors = {
   'text-blue': { css: { 'color': `light-dark(${tailwindColors.blue[600]}, ${tailwindColors.blue[400]})`, }, label: 'Blue' },
   'text-purple': { css: { 'color': `light-dark(${tailwindColors.purple[600]}, ${tailwindColors.purple[400]})`, }, label: 'Purple' },
   'text-pink': { css: { 'color': `light-dark(${tailwindColors.pink[600]}, ${tailwindColors.pink[400]})`, }, label: 'Pink' },
-} satisfies TextStylesFeatureProps['styles'][keyof TextStylesFeatureProps['styles']]
+} satisfies TextStateFeatureProps['styles'][keyof TextStateFeatureProps['styles']]

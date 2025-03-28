@@ -1,13 +1,13 @@
 'use client'
 
 import type { ToolbarDropdownGroup, ToolbarGroup } from '../toolbars/types.js'
-import type { TextStylesFeatureProps } from './feature.server.js'
+import type { TextStateFeatureProps } from './feature.server.js'
 
-import { TextStyleIcon } from '../../lexical/ui/icons/TextStyle/index.js'
+import { TextStateIcon } from '../../lexical/ui/icons/TextState/index.js'
 import { createClientFeature } from '../../utilities/createClientFeature.js'
 import { registerTextStates, setTextState, StatePlugin } from './textState.js'
 
-const toolbarGroups = (props: TextStylesFeatureProps): ToolbarGroup[] => {
+const toolbarGroups = (props: TextStateFeatureProps): ToolbarGroup[] => {
   const items: ToolbarDropdownGroup['items'] = []
 
   for (const superKey in props.styles) {
@@ -15,7 +15,7 @@ const toolbarGroups = (props: TextStylesFeatureProps): ToolbarGroup[] => {
     for (const value in key) {
       const meta = key[value]!
       items.push({
-        ChildComponent: () => <TextStyleIcon css={meta.css} />,
+        ChildComponent: () => <TextStateIcon css={meta.css} />,
         key: value,
         label: meta.label,
         onSelect: ({ editor }) => {
@@ -27,7 +27,7 @@ const toolbarGroups = (props: TextStylesFeatureProps): ToolbarGroup[] => {
 
   const clearStyle: ToolbarDropdownGroup['items'] = [
     {
-      ChildComponent: () => <TextStyleIcon />,
+      ChildComponent: () => <TextStateIcon />,
       key: `clear-style`,
       label: 'Default style',
       onSelect: ({ editor }) => {
@@ -42,15 +42,15 @@ const toolbarGroups = (props: TextStylesFeatureProps): ToolbarGroup[] => {
   return [
     {
       type: 'dropdown',
-      ChildComponent: () => <TextStyleIcon />,
+      ChildComponent: () => <TextStateIcon />,
       items: [...clearStyle, ...items],
-      key: 'textStyles',
+      key: 'textStates',
       order: 30,
     },
   ]
 }
 
-export const TextStylesFeatureClient = createClientFeature<TextStylesFeatureProps>(({ props }) => {
+export const TextStateFeatureClient = createClientFeature<TextStateFeatureProps>(({ props }) => {
   registerTextStates(props.styles)
   return {
     plugins: [

@@ -1,10 +1,10 @@
-import type { StyleObject } from '../../../../features/textStyles/feature.server.js'
+import type { StyleObject } from '../../../../features/textState/feature.server.js'
 
 function kebabToCamelCase(str: string): string {
   return str.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())
 }
 
-export const TextStyleIcon: React.FC<{
+export const TextStateIcon: React.FC<{
   css?: StyleObject
 }> = ({ css }) => {
   const convertedCss = css
