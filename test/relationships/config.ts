@@ -493,40 +493,40 @@ export default buildConfigWithDefaults({
         {
           type: 'relationship',
           name: 'relationship',
-          admin: { selectionType: 'drawer' },
-          relationTo: ['movies'],
+          admin: { appearance: 'drawer' },
+          relationTo: 'movies',
         },
         {
           type: 'relationship',
           name: 'hasManyRelationship',
-          admin: { selectionType: 'drawer' },
+          admin: { appearance: 'drawer' },
           hasMany: true,
-          relationTo: ['movies'],
+          relationTo: 'movies',
         },
         {
           name: 'polymorphicRelationship',
-          admin: { selectionType: 'drawer' },
+          admin: { appearance: 'drawer' },
           type: 'relationship',
           relationTo: ['movies', 'directors'],
         },
         {
           name: 'polymorphicHasManyRelationship',
-          admin: { selectionType: 'drawer' },
+          admin: { appearance: 'drawer' },
           type: 'relationship',
           hasMany: true,
           relationTo: ['movies', 'directors'],
         },
         {
           name: 'polymorphicHasManyFiltered',
-          admin: { selectionType: 'drawer' },
+          admin: { appearance: 'drawer' },
           type: 'relationship',
           hasMany: true,
-          relationTo: ['movies', 'directors', 'relation'],
+          relationTo: ['movies', 'directors'],
           filterOptions: ({ relationTo }) => {
             // returns a Where query dynamically by the type of relationship
-            if (relationTo === 'relation') {
+            if (relationTo === 'movies') {
               return {
-                disableRelation: { not_equals: true },
+                name: { not_equals: 'Movie 1' },
               }
             } else {
               return true
