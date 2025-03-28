@@ -523,10 +523,9 @@ export default buildConfigWithDefaults({
           hasMany: true,
           relationTo: ['movies', 'directors'],
           filterOptions: ({ relationTo }) => {
-            // returns a Where query dynamically by the type of relationship
             if (relationTo === 'movies') {
               return {
-                name: { not_equals: 'Movie 1' },
+                name: { equals: 'Movie 1' },
               }
             } else {
               return true

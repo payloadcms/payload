@@ -212,6 +212,6 @@ describe('Relationship Field with List Drawer', () => {
     await expect(listDrawerContent).toBeVisible()
 
     const rows = listDrawerContent.locator('table tbody tr')
-    await expect(rows).toHaveCount(2)
+    await expect(rows).toHaveCount(1)
   })
 })
