@@ -180,7 +180,7 @@ test.describe('Form State', () => {
     await cdpSession.detach()
   })
 
-  test('sequentially queued tasks not cause nested custom components to disappear', async () => {
+  test('sequentially queued form state should not cause nested custom components to disappear', async () => {
     await page.goto(postsUrl.create)
     const field = page.locator('#field-title')
     await field.fill('Test')
@@ -191,6 +191,8 @@ test.describe('Form State', () => {
       delay: 'Slow 3G',
     })
 
+    // Add a row and immediately type into another field
+    // Test that the rich text field within the row does not disappear
     await assertNetworkRequests(
       page,
       postsUrl.create,
@@ -199,6 +201,7 @@ test.describe('Form State', () => {
 
         await page.locator('#field-title').fill('Title 2')
 
+        // use `waitForSelector` to ensure the element doesn't appear and then disappear
         // eslint-disable-next-line playwright/no-wait-for-selector
         await page.waitForSelector('#field-array #array-row-0 .field-type.rich-text-lexical', {
           timeout: TEST_TIMEOUT,
@@ -206,6 +209,62 @@ test.describe('Form State', () => {
 
         await expect(
           page.locator('#field-array #array-row-0 .field-type.rich-text-lexical'),
+        ).toBeVisible()
+      },
+      {
+        allowedNumberOfRequests: 2,
+        timeout: 10000,
+      },
+    )
+
+    await cdpSession.send('Network.emulateNetworkConditions', {
+      offline: false,
+      latency: 0,
+      downloadThroughput: -1,
+      uploadThroughput: -1,
+    })
+
+    await cdpSession.detach()
+  })
+
+  test('sequentially queued form state should not cause nested custom components to disappear (2)', async () => {
+    await page.goto(postsUrl.create)
+    const field = page.locator('#field-title')
+    await field.fill('Test')
+
+    const cdpSession = await throttleTest({
+      page,
+      context,
+      delay: 'Slow 3G',
+    })
+
+    // Add two rows quickly
+    // Test that the rich text fields within the rows do not disappear
+    await assertNetworkRequests(
+      page,
+      postsUrl.create,
+      async () => {
+        await page.locator('#field-array .array-field__add-row').click()
+        await page.locator('#field-array .array-field__add-row').click()
+
+        // use `waitForSelector` to ensure the element doesn't appear and then disappear
+        // eslint-disable-next-line playwright/no-wait-for-selector
+        await page.waitForSelector('#field-array #array-row-0 .field-type.rich-text-lexical', {
+          timeout: TEST_TIMEOUT,
+        })
+
+        // use `waitForSelector` to ensure the element doesn't appear and then disappear
+        // eslint-disable-next-line playwright/no-wait-for-selector
+        await page.waitForSelector('#field-array #array-row-1 .field-type.rich-text-lexical', {
+          timeout: TEST_TIMEOUT,
+        })
+
+        await expect(
+          page.locator('#field-array #array-row-0 .field-type.rich-text-lexical'),
+        ).toBeVisible()
+
+        await expect(
+          page.locator('#field-array #array-row-1 .field-type.rich-text-lexical'),
         ).toBeVisible()
       },
       {

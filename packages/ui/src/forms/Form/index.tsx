@@ -121,11 +121,11 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const fieldsReducer = useReducer(fieldReducer, {}, () => initialState)
 
-  const [fields, dispatchFields] = fieldsReducer
+  const [formState, dispatchFields] = fieldsReducer
 
-  contextRef.current.fields = fields
+  contextRef.current.fields = formState
 
-  const prevFields = useRef(fields)
+  const prevFields = useRef(formState)
 
   const validateForm = useCallback(async () => {
     const validatedFieldState = {}
@@ -710,7 +710,7 @@ export const Form: React.FC<FormProps> = (props) => {
       refreshCookie()
     },
     15000,
-    [fields],
+    [formState],
   )
 
   useEffect(() => {
@@ -723,12 +723,12 @@ export const Form: React.FC<FormProps> = (props) => {
   const executeOnChange = useEffectEvent((submitted: boolean) => {
     queueTask(async () => {
       if (Array.isArray(onChange)) {
-        let revalidatedFormState: FormState = contextRef.current.fields
+        let revalidatedFormState: FormState = formState
 
         for (const onChangeFn of onChange) {
           // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
           revalidatedFormState = await onChangeFn({
-            formState: deepCopyObjectSimpleWithoutReactComponents(contextRef.current.fields),
+            formState: deepCopyObjectSimpleWithoutReactComponents(formState),
             submitted,
           })
         }
@@ -738,7 +738,7 @@ export const Form: React.FC<FormProps> = (props) => {
         }
 
         const { changed, newState } = mergeServerFormState({
-          existingState: contextRef.current.fields || {},
+          existingState: formState || {},
           incomingState: revalidatedFormState,
         })
 
@@ -757,14 +757,14 @@ export const Form: React.FC<FormProps> = (props) => {
 
   useDebouncedEffect(
     () => {
-      if ((isFirstRenderRef.current || !dequal(fields, prevFields.current)) && modified) {
+      if ((isFirstRenderRef.current || !dequal(formState, prevFields.current)) && modified) {
         executeOnChange(submitted)
       }
 
-      prevFields.current = fields
+      prevFields.current = formState
       isFirstRenderRef.current = false
     },
-    [modified, submitted, fields],
+    [modified, submitted, formState],
     250,
   )
 
@@ -793,7 +793,7 @@ export const Form: React.FC<FormProps> = (props) => {
         <FormContext value={contextRef.current}>
           <FormWatchContext
             value={{
-              fields,
+              fields: formState,
               ...contextRef.current,
             }}
           >
