@@ -39,21 +39,24 @@ export class ValidationError extends APIError<{
         ? en.translations.error.followingFieldsInvalid_one
         : en.translations.error.followingFieldsInvalid_other
 
+    const req = results.req
+    delete results['req']
+
     super(
       `${message} ${results.errors
         .map((f) => {
           if (f.label) {
             if (typeof f.label === 'function') {
-              if (!results.req || !results.req.i18n || !results.req.t) {
+              if (!req || !req.i18n || !req.t) {
                 return f.path
               }
 
-              return f.label({ i18n: results.req.i18n, t: results.req.t })
+              return f.label({ i18n: req.i18n, t: req.t })
             }
 
             if (typeof f.label === 'object') {
-              if (results.req?.i18n?.language) {
-                return f.label[results.req.i18n.language]
+              if (req?.i18n?.language) {
+                return f.label[req.i18n.language]
               }
 
               return f.label[Object.keys(f.label)[0]]
