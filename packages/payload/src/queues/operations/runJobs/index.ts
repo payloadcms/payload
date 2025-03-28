@@ -56,16 +56,18 @@ export type RunJobsResult = {
   remainingJobsFromQueried: number
 }
 
-export const runJobs = async ({
-  id,
-  limit = 10,
-  overrideAccess,
-  processingOrder,
-  queue,
-  req,
-  sequential,
-  where: whereFromProps,
-}: RunJobsArgs): Promise<RunJobsResult> => {
+export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
+  const {
+    id,
+    limit = 10,
+    overrideAccess,
+    processingOrder,
+    queue,
+    req,
+    sequential,
+    where: whereFromProps,
+  } = args
+
   if (!overrideAccess) {
     const hasAccess = await req.payload.config.jobs.access.run({ req })
     if (!hasAccess) {
@@ -139,6 +141,19 @@ export const runJobs = async ({
       }),
     ]
   } else {
+    let defaultProcessingOrder: QueueProcessingOrder = 'createdAt'
+    const processingOrderConfig = req.payload.config.jobs?.processingOrder
+    if (typeof processingOrderConfig === 'function') {
+      defaultProcessingOrder = processingOrderConfig(args)
+    } else if (typeof processingOrderConfig === 'object' && !Array.isArray(processingOrderConfig)) {
+      if (queue && processingOrderConfig.queues && processingOrderConfig.queues[queue]) {
+        defaultProcessingOrder = processingOrderConfig.queues[queue]
+      } else if (processingOrderConfig.default) {
+        defaultProcessingOrder = processingOrderConfig.default
+      }
+    } else if (typeof processingOrderConfig === 'string') {
+      defaultProcessingOrder = processingOrderConfig
+    }
     const updatedDocs = await updateJobs({
       data: {
         processing: true,
@@ -148,7 +163,7 @@ export const runJobs = async ({
       limit,
       req,
       returning: true,
-      sort: processingOrder ?? 'createdAt',
+      sort: processingOrder ?? defaultProcessingOrder,
       where,
     })
 

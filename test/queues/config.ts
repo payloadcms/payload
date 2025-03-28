@@ -104,6 +104,11 @@ export default buildConfigWithDefaults({
         },
       }
     },
+    processingOrder: {
+      queues: {
+        lifo: '-createdAt',
+      },
+    },
     tasks: [
       {
         retries: 2,
