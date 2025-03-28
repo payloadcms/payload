@@ -1,8 +1,12 @@
 import { useCallback, useRef } from 'react'
 
-type QueuedFunction = () => Promise<void>
+type QueuedTask = {
+  discard?: TaskOptions['discard']
+  fn: () => Promise<void> | void
+  priority?: TaskOptions['priority']
+}
 
-type QueuedTaskOptions = {
+type TaskOptions = {
   /**
    * A function that is called after the queue has processed a function
    * Used to perform side effects after processing the queue
@@ -15,9 +19,21 @@ type QueuedTaskOptions = {
    * @returns {boolean} If `false`, the queue will not process
    */
   beforeProcess?: () => boolean
+  /**
+   * All tasks that except the last task in the queue will be discarded to prevent a backlog.
+   * To ensure a task is not discarded, set the `discard` option to `false`
+   * @default undefined
+   */
+  discard?: boolean
+  /**
+   * Priority tasks will be processed before non-priority tasks
+   * This is helpful to ensure a task added later in the queue is processed first
+   * @default false
+   */
+  priority?: boolean
 }
 
-type QueueTask = (fn: QueuedFunction, options?: QueuedTaskOptions) => void
+type QueueTask = (fn: QueuedTask['fn'], options?: TaskOptions) => void
 
 /**
  * A React hook that allows you to queue up functions to be executed in order.
@@ -38,12 +54,16 @@ type QueueTask = (fn: QueuedFunction, options?: QueuedTaskOptions) => void
 export function useQueues(): {
   queueTask: QueueTask
 } {
-  const queue = useRef<QueuedFunction[]>([])
+  const queue = useRef<QueuedTask[]>([])
 
   const isProcessing = useRef(false)
 
   const queueTask = useCallback<QueueTask>((fn, options) => {
-    queue.current.push(fn)
+    queue.current.push({
+      discard: options?.discard,
+      fn,
+      priority: options?.priority,
+    })
 
     async function processQueue() {
       if (isProcessing.current) {
@@ -60,13 +80,21 @@ export function useQueues(): {
       }
 
       while (queue.current.length > 0) {
-        const latestTask = queue.current.pop() // Only process the last task in the queue
-        queue.current = [] // Discard all other tasks
+        // Only process the latest, prioritized task in the queue
+        const latestTask = queue.current.find((task) => task.priority) || queue.current.pop()
+
+        // This task is about to run, so remove the discard option if it exists
+        if ('discard' in latestTask) {
+          latestTask.discard = undefined
+        }
+
+        // Discard all other tasks that are not explicitly set to not be discarded
+        queue.current = queue.current.filter((task) => task.discard === false)
 
         isProcessing.current = true
 
         try {
-          await latestTask()
+          await latestTask.fn()
         } catch (err) {
           console.error('Error in queued function:', err) // eslint-disable-line no-console
         } finally {

@@ -606,16 +606,61 @@ export const Form: React.FC<FormProps> = (props) => {
         subFieldState,
       })
 
+      queueTask(
+        () => {
+          contextRef.current.fields[path].requiresRender = true
+        },
+        {
+          discard: false,
+          priority: true,
+        },
+      )
+
       setModified(true)
     },
-    [dispatchFields, getDataByPath],
+    [dispatchFields, getDataByPath, queueTask],
+  )
+
+  const moveFieldRow: FormContextType['moveFieldRow'] = useCallback(
+    ({ moveFromIndex, moveToIndex, path }) => {
+      dispatchFields({
+        type: 'MOVE_ROW',
+        moveFromIndex,
+        moveToIndex,
+        path,
+      })
+
+      queueTask(
+        () => {
+          contextRef.current.fields[path].requiresRender = true
+        },
+        {
+          discard: false,
+          priority: true,
+        },
+      )
+      setModified(true)
+    },
+    [dispatchFields, queueTask],
   )
 
   const removeFieldRow: FormContextType['removeFieldRow'] = useCallback(
     ({ path, rowIndex }) => {
       dispatchFields({ type: 'REMOVE_ROW', path, rowIndex })
+
+      queueTask(
+        () => {
+          contextRef.current.fields[path].requiresRender = true
+        },
+        {
+          discard: false,
+          priority: true,
+        },
+      )
+
+      setModified(true)
     },
-    [dispatchFields],
+    [dispatchFields, queueTask],
   )
 
   const replaceFieldRow: FormContextType['replaceFieldRow'] = useCallback(
@@ -631,9 +676,19 @@ export const Form: React.FC<FormProps> = (props) => {
         subFieldState,
       })
 
+      queueTask(
+        () => {
+          contextRef.current.fields[path].requiresRender = true
+        },
+        {
+          discard: false,
+          priority: true,
+        },
+      )
+
       setModified(true)
     },
-    [dispatchFields, getDataByPath],
+    [dispatchFields, getDataByPath, queueTask],
   )
 
   useEffect(() => {
@@ -672,6 +727,7 @@ export const Form: React.FC<FormProps> = (props) => {
   contextRef.current.dispatchFields = dispatchFields
   contextRef.current.addFieldRow = addFieldRow
   contextRef.current.removeFieldRow = removeFieldRow
+  contextRef.current.moveFieldRow = moveFieldRow
   contextRef.current.replaceFieldRow = replaceFieldRow
   contextRef.current.uuid = uuid
   contextRef.current.initializing = initializing
@@ -725,8 +781,6 @@ export const Form: React.FC<FormProps> = (props) => {
       if (Array.isArray(onChange)) {
         let revalidatedFormState: FormState = contextRef.current.fields
 
-        console.log('before send', formState)
-
         for (const onChangeFn of onChange) {
           // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
           revalidatedFormState = await onChangeFn({
@@ -734,8 +788,6 @@ export const Form: React.FC<FormProps> = (props) => {
             submitted,
           })
         }
-
-        console.log('after send', formState)
 
         if (!revalidatedFormState) {
           return
@@ -758,8 +810,6 @@ export const Form: React.FC<FormProps> = (props) => {
       }
     })
   })
-
-  console.log(formState)
 
   useDebouncedEffect(
     () => {

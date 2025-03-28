@@ -236,6 +236,15 @@ export type Context = {
    * For example the state could be submitted but invalid as field errors have been returned.
    */
   isValid: boolean
+  moveFieldRow: ({
+    moveFromIndex,
+    moveToIndex,
+    path,
+  }: {
+    moveFromIndex: number
+    moveToIndex: number
+    path: string
+  }) => void
   removeFieldRow: ({ path, rowIndex }: { path: string; rowIndex: number }) => void
   replaceFieldRow: ({
     blockType,
