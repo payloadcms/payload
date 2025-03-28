@@ -25,13 +25,13 @@ import React from 'react'
 
 import type { SortColumnProps } from '../../elements/SortColumn/index.js'
 
+import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import {
   RenderCustomComponent,
   RenderDefaultCell,
   SortColumn,
   // eslint-disable-next-line payload/no-imports-from-exports-dir
 } from '../../exports/client/index.js'
-import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { filterFields } from './filterFields.js'
 
 type Args = {
@@ -219,15 +219,12 @@ export const buildPolymorphicColumnState = (args: Args): Column[] => {
 
             const cellServerProps: DefaultServerCellComponentProps = {
               cellData: cellClientProps.cellData,
-              className: baseCellClientProps.className,
               collectionConfig: payload.collections[collectionSlug].config,
               collectionSlug,
-              columnIndex: baseCellClientProps.columnIndex,
               customCellProps: baseCellClientProps.customCellProps,
               field: _field,
               i18n,
               link: cellClientProps.link,
-              onClick: baseCellClientProps.onClick,
               payload,
               rowData: doc,
             }
