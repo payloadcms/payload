@@ -77,6 +77,7 @@ export const beforeChange = async <T extends JsonObject>({
         collection: collection?.slug,
         errors,
         global: global?.slug,
+        req,
       },
       req.t,
     )

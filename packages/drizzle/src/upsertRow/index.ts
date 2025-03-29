@@ -423,6 +423,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
               path: fieldName,
             },
           ],
+          req,
         },
         req?.t,
       )
