@@ -1,15 +1,21 @@
-import type { DocumentEvent } from 'payload'
+import type { DocumentEvent, FieldSchemaJSON } from 'payload'
 
 import type { PopulationsByCollection } from './types.js'
 
+import { traverseFields } from './traverseFields.js'
+
 export const traverseRichText = ({
+  blocksFieldSchema,
   externallyUpdatedRelationship,
   incomingData,
+  localeChanged,
   populationsByCollection,
   result,
 }: {
+  blocksFieldSchema: FieldSchemaJSON
   externallyUpdatedRelationship?: DocumentEvent
   incomingData: any
+  localeChanged: boolean
   populationsByCollection: PopulationsByCollection
   result: any
 }): any => {
@@ -24,8 +30,10 @@ export const traverseRichText = ({
       }
 
       return traverseRichText({
+        blocksFieldSchema,
         externallyUpdatedRelationship,
         incomingData: item,
+        localeChanged,
         populationsByCollection,
         result: result[index],
       })
@@ -43,6 +51,27 @@ export const traverseRichText = ({
         delete result[key]
       }
     })
+
+    // If the incoming data is a block, we need to handle it differently
+    if (incomingData.type === 'block') {
+      result.type = 'block'
+      result.version = 2
+      result.format = ''
+      result.fields = {}
+
+      const incomingBlockJSON = blocksFieldSchema[incomingData.fields.blockType]
+      traverseFields({
+        externallyUpdatedRelationship,
+        fieldSchema: incomingBlockJSON.fields,
+        incomingData: incomingData.fields,
+        localeChanged,
+        populationsByCollection,
+        result: result.fields,
+      })
+
+      result.fields.blockType = incomingData.fields.blockType
+      return result
+    }
 
     // Iterate over the keys of `incomingData` and populate `result`
     Object.keys(incomingData).forEach((key) => {
@@ -90,8 +119,10 @@ export const traverseRichText = ({
         }
       } else {
         result[key] = traverseRichText({
+          blocksFieldSchema,
           externallyUpdatedRelationship,
           incomingData: incomingData[key],
+          localeChanged,
           populationsByCollection,
           result: result[key],
         })

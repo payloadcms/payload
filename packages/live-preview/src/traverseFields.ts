@@ -1,5 +1,4 @@
-import type { DocumentEvent } from 'payload'
-import type { fieldSchemaToJSON } from 'payload/shared'
+import type { DocumentEvent, FieldSchemaJSON } from 'payload'
 
 import type { PopulationsByCollection } from './types.js'
 
@@ -7,7 +6,7 @@ import { traverseRichText } from './traverseRichText.js'
 
 export const traverseFields = <T>(args: {
   externallyUpdatedRelationship?: DocumentEvent
-  fieldSchema: ReturnType<typeof fieldSchemaToJSON>
+  fieldSchema: FieldSchemaJSON
   incomingData: T
   localeChanged: boolean
   populationsByCollection: PopulationsByCollection
@@ -284,8 +283,10 @@ export const traverseFields = <T>(args: {
           break
         case 'richText':
           result[fieldName] = traverseRichText({
+            blocksFieldSchema: fieldSchema.blocks,
             externallyUpdatedRelationship,
             incomingData: incomingData[fieldName],
+            localeChanged,
             populationsByCollection,
             result: result[fieldName],
           })
