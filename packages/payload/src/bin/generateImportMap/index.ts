@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import fs from 'fs'
+import fs from 'fs/promises'
 import process from 'node:process'
 
 import type { PayloadComponent, SanitizedConfig } from '../../config/types.js'
@@ -147,7 +147,7 @@ ${mapKeys.join(',\n')}
 
   if (!force) {
     // Read current import map and check in the IMPORTS if there are any new imports. If not, don't write the file.
-    const currentImportMap = await fs.promises.readFile(importMapFilePath, 'utf-8')
+    const currentImportMap = await fs.readFile(importMapFilePath, 'utf-8')
 
     if (currentImportMap?.trim() === importMapOutputFile?.trim()) {
       if (log) {
@@ -161,5 +161,5 @@ ${mapKeys.join(',\n')}
     console.log('Writing import map to', importMapFilePath)
   }
 
-  await fs.promises.writeFile(importMapFilePath, importMapOutputFile)
+  await fs.writeFile(importMapFilePath, importMapOutputFile)
 }
