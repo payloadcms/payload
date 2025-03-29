@@ -195,6 +195,7 @@ export const renderListView = async (
       drawerSlug,
       enableRowSelections,
       i18n: req.i18n,
+      orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
       payload,
       useAsTitle: collectionConfig.admin.useAsTitle,
     })
@@ -259,6 +260,7 @@ export const renderListView = async (
             defaultSort={sort}
             listPreferences={listPreferences}
             modifySearchParams={!isInDrawer}
+            orderableFieldName={collectionConfig.orderable === true ? '_order' : undefined}
           >
             {RenderServerComponent({
               clientProps: {

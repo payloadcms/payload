@@ -66,7 +66,7 @@ export const buildTableStateHandler = async (
   }
 }
 
-export const buildTableState = async (
+const buildTableState = async (
   args: BuildTableStateArgs,
 ): Promise<BuildTableStateSuccessResult> => {
   const {
@@ -74,6 +74,7 @@ export const buildTableState = async (
     columns,
     docs: docsFromArgs,
     enableRowSelections,
+    orderableFieldName,
     parent,
     query,
     renderRowTypes,
@@ -233,6 +234,7 @@ export const buildTableState = async (
     docs,
     enableRowSelections,
     i18n: req.i18n,
+    orderableFieldName,
     payload,
     renderRowTypes,
     tableAppearance,

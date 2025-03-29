@@ -65,7 +65,7 @@ export type AuthOperationsFromCollectionSlug<TSlug extends CollectionSlug> =
 
 export type RequiredDataFromCollection<TData extends JsonObject> = MarkOptional<
   TData,
-  'createdAt' | 'id' | 'sizes' | 'updatedAt'
+  'createdAt' | 'id' | 'sizes' | 'updatedAt' | `${string}_order`
 >
 
 export type RequiredDataFromCollectionSlug<TSlug extends CollectionSlug> =
@@ -507,6 +507,17 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
         duration: number
       }
     | false
+  /**
+   * If true, enables custom ordering for the collection, and documents in the listView can be reordered via drag and drop.
+   * New documents are inserted at the end of the list according to this parameter.
+   *
+   * Under the hood, a field with {@link https://observablehq.com/@dgreensp/implementing-fractional-indexing|fractional indexing} is used to optimize inserts and reorderings.
+   *
+   * @default false
+   *
+   * @experimental There may be frequent breaking changes to this API
+   */
+  orderable?: boolean
   slug: string
   /**
    * Add `createdAt` and `updatedAt` fields

@@ -1,0 +1,52 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .sort-header {
+    display: flex;
+    gap: calc(var(--base) / 2);
+    align-items: center;
+
+    &__buttons {
+      display: flex;
+      align-items: center;
+      gap: calc(var(--base) / 4);
+    }
+
+    &__button {
+      margin: 0;
+      padding: 0 !important;
+      opacity: 0.3;
+      padding: calc(var(--base) / 4);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+
+      &.sort-header--active {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      &:hover {
+        opacity: 0.7;
+      }
+    }
+
+    &:hover {
+      .btn {
+        opacity: 0.4;
+        visibility: visible;
+      }
+    }
+
+    &--appearance-condensed {
+      gap: calc(var(--base) / 4);
+
+      .sort-header__buttons {
+        gap: 0;
+      }
+    }
+  }
+}

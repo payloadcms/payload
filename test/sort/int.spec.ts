@@ -4,8 +4,11 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { Orderable, OrderableJoin } from './payload-types.js'
 
 import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { orderableSlug } from './collections/Orderable/index.js'
+import { orderableJoinSlug } from './collections/OrderableJoin/index.js'
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -63,7 +66,7 @@ describe('Sort', () => {
       })
     })
 
-    describe('Sinlge sort field', () => {
+    describe('Single sort field', () => {
       it('should sort posts by text field', async () => {
         const posts = await payload.find({
           collection: 'posts',
@@ -326,6 +329,84 @@ describe('Sort', () => {
         ])
       })
     })
+
+    describe('Orderable join', () => {
+      let related: OrderableJoin
+      let orderable1: Orderable
+      let orderable2: Orderable
+      let orderable3: Orderable
+
+      beforeAll(async () => {
+        related = await payload.create({
+          collection: orderableJoinSlug,
+          data: {
+            title: 'test',
+          },
+        })
+        orderable1 = await payload.create({
+          collection: orderableSlug,
+          data: {
+            title: 'test 1',
+            orderableField: related.id,
+          },
+        })
+
+        orderable2 = await payload.create({
+          collection: orderableSlug,
+          data: {
+            title: 'test 2',
+            orderableField: related.id,
+          },
+        })
+
+        orderable3 = await payload.create({
+          collection: orderableSlug,
+          data: {
+            title: 'test 3',
+            orderableField: related.id,
+          },
+        })
+      })
+
+      it('should set order by default', () => {
+        expect(orderable1._orderable_orderableJoinField1_order).toBeDefined()
+      })
+
+      it('should allow setting the order with the local API', async () => {
+        // create two orderableJoinSlug docs
+        orderable2 = await payload.update({
+          collection: orderableSlug,
+          id: orderable2.id,
+          data: {
+            title: 'test',
+            orderableField: related.id,
+            _orderable_orderableJoinField1_order: 'e4',
+          },
+        })
+        const orderable4 = await payload.create({
+          collection: orderableSlug,
+          data: {
+            title: 'test',
+            orderableField: related.id,
+            _orderable_orderableJoinField1_order: 'e2',
+          },
+        })
+        expect(orderable2._orderable_orderableJoinField1_order).toBe('e4')
+        expect(orderable4._orderable_orderableJoinField1_order).toBe('e2')
+      })
+      it('should sort join docs in the correct', async () => {
+        related = await payload.findByID({
+          collection: orderableJoinSlug,
+          id: related.id,
+          depth: 1,
+        })
+        const orders = (related.orderableJoinField1 as { docs: Orderable[] }).docs.map((doc) =>
+          parseInt(doc._orderable_orderableJoinField1_order, 16),
+        ) as [number, number, number]
+        expect(orders[0]).toBeLessThan(orders[1])
+        expect(orders[1]).toBeLessThan(orders[2])
+      })
+    })
   })
 
   describe('REST API', () => {
@@ -344,7 +425,7 @@ describe('Sort', () => {
       await payload.delete({ collection: 'posts', where: {} })
     })
 
-    describe('Sinlge sort field', () => {
+    describe('Single sort field', () => {
       it('should sort posts by text field', async () => {
         const res = await restClient
           .GET(`/posts`, {
