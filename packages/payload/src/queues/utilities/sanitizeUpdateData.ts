@@ -10,9 +10,17 @@ const ObjectId = (ObjectIdImport.default ||
  * This function is used to manually sanitize the data for direct db adapter operations
  */
 export function sanitizeUpdateData({ data }: { data: Partial<BaseJob> }): Partial<BaseJob> {
-  if (data.log) {
-    const sanitizedData = { ...data }
-    sanitizedData.log = sanitizedData?.log?.map((log) => {
+  const sanitizedData = { ...data }
+  delete sanitizedData.id
+  if ('createdAt' in sanitizedData) {
+    delete sanitizedData.createdAt
+  }
+  if ('updatedAt' in sanitizedData) {
+    delete sanitizedData.updatedAt
+  }
+
+  if (sanitizedData?.log?.length) {
+    sanitizedData.log = sanitizedData.log.map((log) => {
       if (log.id) {
         return log
       }
@@ -21,8 +29,7 @@ export function sanitizeUpdateData({ data }: { data: Partial<BaseJob> }): Partia
         id: new ObjectId().toHexString(),
       }
     })
-    return sanitizedData
   }
 
-  return data
+  return sanitizedData
 }
