@@ -1,6 +1,6 @@
 /* eslint no-console: 0 */
 
-import fs from 'fs/promises'
+import fs from 'fs'
 import path from 'path'
 import { format } from 'prettier'
 
@@ -204,7 +204,7 @@ export async function translateObject(props: {
       trailingComma: 'all',
     })
 
-    await fs.writeFile(filePath, fileContent, 'utf8')
+    fs.writeFileSync(filePath, fileContent, 'utf8')
   } else {
     // save
 
@@ -235,7 +235,7 @@ export async function translateObject(props: {
         trailingComma: 'all',
       })
 
-      await fs.writeFile(filePath, fileContent, 'utf8')
+      fs.writeFileSync(filePath, fileContent, 'utf8')
     }
   }
 
