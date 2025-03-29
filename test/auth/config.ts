@@ -204,6 +204,17 @@ export default buildConfigWithDefaults({
       ],
     },
     {
+      slug: 'disable-local-strategy-password',
+      auth: { disableLocalStrategy: true },
+      fields: [
+        {
+          name: 'password',
+          type: 'text',
+          required: true,
+        },
+      ],
+    },
+    {
       slug: apiKeysSlug,
       access: {
         read: ({ req: { user } }) => {
