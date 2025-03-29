@@ -1,6 +1,6 @@
 import { handleMessage } from './handleMessage.js'
 
-export const subscribe = <T>(args: {
+export const subscribe = <T extends Record<string, any>>(args: {
   apiRoute?: string
   callback: (data: T) => void
   depth?: number
