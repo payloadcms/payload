@@ -46,6 +46,7 @@ export const mergeServerFormState = ({
       if (!incomingState[path]) {
         continue
       }
+
       let fieldChanged = false
 
       /**
@@ -55,6 +56,7 @@ export const mergeServerFormState = ({
         newFieldState.errorPaths,
         incomingState[path].errorPaths as unknown as string[],
       )
+
       if (errorPathsResult.result) {
         if (errorPathsResult.changed) {
           changed = errorPathsResult.changed
@@ -95,6 +97,7 @@ export const mergeServerFormState = ({
       if (newFieldState.valid !== false) {
         newFieldState.valid = true
       }
+
       if (newFieldState.passesCondition !== false) {
         newFieldState.passesCondition = true
       }

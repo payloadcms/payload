@@ -80,7 +80,9 @@ export type Submit = (
   options?: SubmitOptions,
   e?: React.FormEvent<HTMLFormElement>,
 ) => Promise<void>
+
 export type ValidateForm = () => Promise<boolean>
+
 export type CreateFormData = (
   overrides?: Record<string, unknown>,
   /**
@@ -89,6 +91,7 @@ export type CreateFormData = (
    */
   options?: { mergeOverrideData?: boolean },
 ) => FormData | Promise<FormData>
+
 export type GetFields = () => FormState
 export type GetField = (path: string) => FormField
 export type GetData = () => Data
@@ -236,6 +239,15 @@ export type Context = {
    * For example the state could be submitted but invalid as field errors have been returned.
    */
   isValid: boolean
+  moveFieldRow: ({
+    moveFromIndex,
+    moveToIndex,
+    path,
+  }: {
+    moveFromIndex: number
+    moveToIndex: number
+    path: string
+  }) => void
   removeFieldRow: ({ path, rowIndex }: { path: string; rowIndex: number }) => void
   replaceFieldRow: ({
     blockType,
