@@ -83,6 +83,7 @@ export type HTMLConvertersAsync<
         : SerializedInlineBlockNode
     >
   }
+  unknown?: HTMLConverterAsync<SerializedLexicalNode>
 }
 
 export type HTMLConvertersFunctionAsync<

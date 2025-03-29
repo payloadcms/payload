@@ -6,7 +6,7 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import AutosavePosts from './collections/Autosave.js'
 import AutosaveWithValidate from './collections/AutosaveWithValidate.js'
 import CustomIDs from './collections/CustomIDs.js'
-import { Diff } from './collections/Diff.js'
+import { Diff } from './collections/Diff/index.js'
 import DisablePublish from './collections/DisablePublish.js'
 import DraftPosts from './collections/Drafts.js'
 import DraftWithMax from './collections/DraftsWithMax.js'
@@ -14,6 +14,7 @@ import DraftsWithValidate from './collections/DraftsWithValidate.js'
 import LocalizedPosts from './collections/Localized.js'
 import { Media } from './collections/Media.js'
 import Posts from './collections/Posts.js'
+import { TextCollection } from './collections/Text.js'
 import VersionPosts from './collections/Versions.js'
 import AutosaveGlobal from './globals/Autosave.js'
 import DisablePublishGlobal from './globals/DisablePublish.js'
@@ -42,6 +43,7 @@ export default buildConfigWithDefaults({
     VersionPosts,
     CustomIDs,
     Diff,
+    TextCollection,
     Media,
   ],
   globals: [AutosaveGlobal, DraftGlobal, DraftWithMaxGlobal, DisablePublishGlobal, LocalizedGlobal],

@@ -1,10 +1,13 @@
+export { FieldDiffLabel } from '../../elements/FieldDiffLabel/index.js'
 export { Translation } from '../../elements/Translation/index.js'
 export { withMergedProps } from '../../elements/withMergedProps/index.js' // cannot be within a 'use client', thus we export this from shared
 export { WithServerSideProps } from '../../elements/WithServerSideProps/index.js'
 export { mergeFieldStyles } from '../../fields/mergeFieldStyles.js'
 export { reduceToSerializableFields } from '../../forms/Form/reduceToSerializableFields.js'
+export { File } from '../../graphics/File/index.js'
 export { PayloadIcon } from '../../graphics/Icon/index.js'
 export { PayloadLogo } from '../../graphics/Logo/index.js'
+export { CheckIcon } from '../../icons/Check/index.js'
 // IMPORTANT: the shared.ts file CANNOT contain any Server Components _that import client components_.
 export { filterFields } from '../../providers/TableColumns/filterFields.js'
 export { getInitialColumns } from '../../providers/TableColumns/getInitialColumns.js'

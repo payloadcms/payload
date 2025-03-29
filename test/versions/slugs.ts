@@ -20,6 +20,8 @@ export const disablePublishSlug = 'disable-publish'
 
 export const disablePublishGlobalSlug = 'disable-publish-global'
 
+export const textCollectionSlug = 'text'
+
 export const collectionSlugs = [
   autosaveCollectionSlug,
   draftCollectionSlug,
@@ -27,6 +29,7 @@ export const collectionSlugs = [
   diffCollectionSlug,
   mediaCollectionSlug,
   versionCollectionSlug,
+  textCollectionSlug,
 ]
 
 export const autoSaveGlobalSlug = 'autosave-global'

@@ -1,4 +1,6 @@
-export const diffStyles = {
+import type { ReactDiffViewerStylesOverride } from 'react-diff-viewer-continued'
+
+export const diffStyles: ReactDiffViewerStylesOverride = {
   diffContainer: {
     minWidth: 'unset',
   },
@@ -25,5 +27,12 @@ export const diffStyles = {
       wordAddedBackground: 'var(--theme-success-200)',
       wordRemovedBackground: 'var(--theme-error-200)',
     },
+  },
+  wordAdded: {
+    color: 'var(--theme-success-600)',
+  },
+  wordRemoved: {
+    color: 'var(--theme-error-600)',
+    textDecorationLine: 'line-through',
   },
 }

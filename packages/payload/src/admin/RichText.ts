@@ -5,12 +5,17 @@ import type { JSONSchema4 } from 'json-schema'
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { Config, PayloadComponent, SanitizedConfig } from '../config/types.js'
 import type { ValidationFieldError } from '../errors/ValidationError.js'
-import type { FieldAffectingData, RichTextField, Validate } from '../fields/config/types.js'
+import type {
+  FieldAffectingData,
+  RichTextField,
+  RichTextFieldClient,
+  Validate,
+} from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { RequestContext } from '../index.js'
 import type { JsonObject, PayloadRequest, PopulateType } from '../types/index.js'
-import type { RichTextFieldClientProps } from './fields/RichText.js'
-import type { FieldSchemaMap } from './types.js'
+import type { RichTextFieldClientProps, RichTextFieldServerProps } from './fields/RichText.js'
+import type { FieldDiffClientProps, FieldDiffServerProps, FieldSchemaMap } from './types.js'
 
 export type AfterReadRichTextHookArgs<
   TData extends TypeWithID = any,
@@ -248,7 +253,15 @@ export type RichTextAdapter<
   ExtraFieldProperties = any,
 > = {
   CellComponent: PayloadComponent<never>
-  FieldComponent: PayloadComponent<never, RichTextFieldClientProps>
+  /**
+   * Component that will be displayed in the version diff view.
+   * If not provided, richtext content will be diffed as JSON.
+   */
+  DiffComponent?: PayloadComponent<
+    FieldDiffServerProps<RichTextField, RichTextFieldClient>,
+    FieldDiffClientProps<RichTextFieldClient>
+  >
+  FieldComponent: PayloadComponent<RichTextFieldServerProps, RichTextFieldClientProps>
 } & RichTextAdapterBase<Value, AdapterProps, ExtraFieldProperties>
 
 export type RichTextAdapterProvider<
