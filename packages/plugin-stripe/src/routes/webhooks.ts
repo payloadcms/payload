@@ -41,39 +41,48 @@ export const stripeWebhooks = async (args: {
       }
 
       if (event) {
-        handleWebhooks({
-          config,
-          event,
-          payload: req.payload,
-          pluginConfig,
-          req,
-          stripe,
-        })
-
-        // Fire external webhook handlers if they exist
-        if (typeof webhooks === 'function') {
-          webhooks({
-            config,
-            event,
-            payload: req.payload,
-            pluginConfig,
-            req,
-            stripe,
-          })
-        }
-
-        if (typeof webhooks === 'object') {
-          const webhookEventHandler = webhooks[event.type]
-          if (typeof webhookEventHandler === 'function') {
-            webhookEventHandler({
+        try {
+          // Wait for all webhook handlers to complete
+          await Promise.all([
+            // Automatic sync webhook handler
+            handleWebhooks({
               config,
               event,
               payload: req.payload,
               pluginConfig,
               req,
               stripe,
-            })
-          }
+            }),
+            // Fire external webhook handler if it exists
+            typeof webhooks === 'function'
+              ? webhooks({
+                  config,
+                  event,
+                  payload: req.payload,
+                  pluginConfig,
+                  req,
+                  stripe,
+                })
+              : Promise.resolve(),
+            // Fire external webhook handler for specific event types
+            typeof webhooks === 'object' && webhooks[event.type]
+              ? webhooks[event.type]({
+                  config,
+                  event,
+                  payload: req.payload,
+                  pluginConfig,
+                  req,
+                  stripe,
+                })
+              : Promise.resolve(),
+          ])
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : 'Unknown error'
+          req.payload.logger.error({
+            err,
+            msg: `Error processing stripe webhook event ${event.type}: ${msg}`,
+          })
+          returnStatus = 500
         }
       }
     }
