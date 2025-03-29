@@ -208,6 +208,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
   }
 
   return {
+    name: 'postgres',
     allowIDOnCreate,
     defaultIDType: payloadIDType,
     init: adapter,

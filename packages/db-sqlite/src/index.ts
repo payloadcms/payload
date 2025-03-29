@@ -197,6 +197,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
   }
 
   return {
+    name: 'sqlite',
     allowIDOnCreate,
     defaultIDType: payloadIDType,
     init: adapter,

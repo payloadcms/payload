@@ -273,6 +273,7 @@ export function mongooseAdapter({
   }
 
   return {
+    name: 'mongoose',
     allowIDOnCreate,
     defaultIDType: 'text',
     init: adapter,
