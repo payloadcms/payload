@@ -155,7 +155,7 @@ export const deTranslations: DefaultTranslationsObject = {
     enterURL: 'URL eingeben',
     internalLink: 'Interne Verlinkung',
     itemsAndMore: '{{items}} und {{count}} mehr',
-    labelRelationship: '{{label}}-Beziehung',
+    labelRelationship: '{{label}}-Verknüpfung',
     latitude: 'Breitengrad',
     linkedTo: 'Verweist auf <0>{{label}}</0>',
     linkType: 'Linktyp',
