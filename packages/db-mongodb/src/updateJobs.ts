@@ -13,6 +13,9 @@ export const updateJobs: UpdateJobs = async function updateMany(
   this: MongooseAdapter,
   { id, data, limit, req, returning, where: whereArg },
 ) {
+  if (!(data?.log as object[])?.length) {
+    delete data.log
+  }
   const where = id ? { id: { equals: id } } : (whereArg as Where)
 
   const { collectionConfig, Model } = getCollection({

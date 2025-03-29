@@ -4,7 +4,6 @@ import type { PayloadRequest, Sort, Where } from '../../types/index.js'
 import type { BaseJob } from '../config/types/workflowTypes.js'
 
 import { jobAfterRead, jobsCollectionSlug } from '../config/index.js'
-import { sanitizeUpdateData } from './sanitizeUpdateData.js'
 
 type BaseArgs = {
   data: Partial<BaseJob>
@@ -75,12 +74,12 @@ export async function updateJobs({
   const args: UpdateJobsArgs = id
     ? {
         id,
-        data: sanitizeUpdateData({ data }),
+        data,
         req: disableTransaction === true ? undefined : req,
         returning,
       }
     : {
-        data: sanitizeUpdateData({ data }),
+        data,
         limit,
         req: disableTransaction === true ? undefined : req,
         returning,

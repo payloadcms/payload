@@ -1265,4 +1265,41 @@ describe('Queues', () => {
     expect(jobAfterRun.log[0].error.message).toBe('custom error message')
     expect(jobAfterRun.log[0].state).toBe('failed')
   })
+
+  it('can reliably run workflows with parallel tasks', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    const job = await payload.jobs.queue({
+      workflow: 'parallelTask',
+      input: {},
+    })
+
+    await payload.jobs.run()
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    console.log('jobAfterRun', jobAfterRun.log)
+
+    expect(jobAfterRun.hasError).toBe(false)
+    expect(jobAfterRun.log?.length).toBe(50)
+
+    const simpleDocs = await payload.find({
+      collection: 'simple',
+      limit: 50,
+      depth: 0,
+    })
+    expect(simpleDocs.docs.length).toBe(50)
+
+    // Ensure all docs are created (= all tasks are run once)
+    for (let i = 1; i <= simpleDocs.docs.length; i++) {
+      const simpleDoc = simpleDocs.docs.find((doc) => doc.title === `parallel task ${i}`)
+      const logEntry = jobAfterRun?.log?.find((log) => log.taskID === `parallel task ${i}`)
+      expect(simpleDoc).toBeDefined()
+      expect(logEntry).toBeDefined()
+      expect((logEntry?.output as any)?.simpleID).toBe(simpleDoc?.id)
+    }
+  })
 })
