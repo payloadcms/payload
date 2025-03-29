@@ -3,7 +3,6 @@ import type { OutputInfo, Sharp, SharpOptions } from 'sharp'
 
 import { fileTypeFromBuffer } from 'file-type'
 import fs from 'fs/promises'
-import { mkdirSync } from 'node:fs'
 import sanitize from 'sanitize-filename'
 
 import type { Collection } from '../collections/config/types.js'
@@ -121,7 +120,7 @@ export const generateFileData = async <T>({
   }
 
   if (!disableLocalStorage) {
-    mkdirSync(staticPath, { recursive: true })
+    await fs.mkdir(staticPath, { recursive: true })
   }
 
   let newData = data
