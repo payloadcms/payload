@@ -4,7 +4,7 @@ export const parallelTaskWorkflow: WorkflowConfig<'parallelTask'> = {
   slug: 'parallelTask',
   inputSchema: [],
   handler: async ({ job, inlineTask }) => {
-    const taskIDs = Array.from({ length: 50 }, (_, i) => i + 1).map((i) => i.toString())
+    const taskIDs = Array.from({ length: 500 }, (_, i) => i + 1).map((i) => i.toString())
 
     await Promise.all(
       taskIDs.map(async (taskID) => {

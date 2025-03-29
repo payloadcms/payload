@@ -1267,6 +1267,7 @@ describe('Queues', () => {
   })
 
   it('can reliably run workflows with parallel tasks', async () => {
+    const amount = 500
     payload.config.jobs.deleteJobOnComplete = false
 
     const job = await payload.jobs.queue({
@@ -1281,17 +1282,15 @@ describe('Queues', () => {
       id: job.id,
     })
 
-    console.log('jobAfterRun', jobAfterRun.log)
-
     expect(jobAfterRun.hasError).toBe(false)
-    expect(jobAfterRun.log?.length).toBe(50)
+    expect(jobAfterRun.log?.length).toBe(amount)
 
     const simpleDocs = await payload.find({
       collection: 'simple',
-      limit: 50,
+      limit: amount,
       depth: 0,
     })
-    expect(simpleDocs.docs.length).toBe(50)
+    expect(simpleDocs.docs.length).toBe(amount)
 
     // Ensure all docs are created (= all tasks are run once)
     for (let i = 1; i <= simpleDocs.docs.length; i++) {
