@@ -214,6 +214,14 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
   }
 }
 
+/**
+ * @todo deprecate /types subpath export in 4.0
+ */
+export type {
+  Args as PostgresAdapterArgs,
+  GeneratedDatabaseSchema,
+  PostgresAdapter,
+} from './types.js'
 export type { MigrateDownArgs, MigrateUpArgs } from '@payloadcms/drizzle/postgres'
 export { geometryColumn } from '@payloadcms/drizzle/postgres'
 export { sql } from 'drizzle-orm'
