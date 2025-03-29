@@ -1,3 +1,5 @@
+import ObjectIdImport from 'bson-objectid'
+
 // @ts-strict-ignore
 import type { PayloadRequest } from '../../../../types/index.js'
 import type {
@@ -21,6 +23,9 @@ import type { UpdateJobFunction } from './getUpdateJobFunction.js'
 
 import { calculateBackoffWaitUntil } from './calculateBackoffWaitUntil.js'
 import { importHandlerPath } from './importHandlerPath.js'
+
+const ObjectId = (ObjectIdImport.default ||
+  ObjectIdImport) as unknown as typeof ObjectIdImport.default
 
 // Helper object type to force being passed by reference
 export type RunTaskFunctionState = {
@@ -96,6 +101,7 @@ export async function handleTaskFailed({
       }
 
   job.log.push({
+    id: new ObjectId().toHexString(),
     completedAt: new Date().toISOString(),
     error: errorJSON,
     executedAt: executedAt.toISOString(),
@@ -252,6 +258,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           log: [
             ...job.log,
             {
+              id: new ObjectId().toHexString(),
               completedAt: new Date().toISOString(),
               error: errorMessage,
               executedAt: executedAt.toISOString(),
@@ -350,6 +357,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         job.log = []
       }
       job.log.push({
+        id: new ObjectId().toHexString(),
         completedAt: new Date().toISOString(),
         executedAt: executedAt.toISOString(),
         input,

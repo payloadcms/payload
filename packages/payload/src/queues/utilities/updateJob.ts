@@ -4,7 +4,6 @@ import type { PayloadRequest, Sort, Where } from '../../types/index.js'
 import type { BaseJob } from '../config/types/workflowTypes.js'
 
 import { jobAfterRead, jobsCollectionSlug } from '../config/index.js'
-import { sanitizeUpdateData } from './sanitizeUpdateData.js'
 
 type BaseArgs = {
   data: Partial<BaseJob>
@@ -72,17 +71,24 @@ export async function updateJobs({
     return result.docs as BaseJob[]
   }
 
+  const jobReq = {
+    transactionID:
+      req.payload.db.name !== 'mongoose'
+        ? ((await req.payload.db.beginTransaction()) as string)
+        : undefined,
+  }
+
   const args: UpdateJobsArgs = id
     ? {
         id,
-        data: sanitizeUpdateData({ data }),
-        req: disableTransaction === true ? undefined : req,
+        data,
+        req: jobReq,
         returning,
       }
     : {
-        data: sanitizeUpdateData({ data }),
+        data,
         limit,
-        req: disableTransaction === true ? undefined : req,
+        req: jobReq,
         returning,
         sort,
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
@@ -90,6 +96,10 @@ export async function updateJobs({
       }
 
   const updatedJobs: BaseJob[] | null = await req.payload.db.updateJobs(args)
+
+  if (req.payload.db.name !== 'mongoose' && jobReq.transactionID) {
+    await req.payload.db.commitTransaction(jobReq.transactionID)
+  }
 
   if (returning === false || !updatedJobs?.length) {
     return null

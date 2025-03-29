@@ -70,6 +70,7 @@ export const runJob = async ({
     await updateJob({
       error: errorJSON,
       hasError: hasFinalError, // If reached max retries => final error. If hasError is true this job will not be retried
+      log: job.log,
       processing: false,
       totalTried: (job.totalTried ?? 0) + 1,
     })
@@ -82,6 +83,7 @@ export const runJob = async ({
   // Workflow has completed
   await updateJob({
     completedAt: new Date().toISOString(),
+    log: job.log,
     processing: false,
     totalTried: (job.totalTried ?? 0) + 1,
   })

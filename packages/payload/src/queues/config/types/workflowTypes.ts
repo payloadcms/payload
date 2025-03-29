@@ -18,7 +18,7 @@ export type JobLog = {
   /**
    * ID added by the array field when the log is saved in the database
    */
-  id?: string
+  id: string
   input?: Record<string, any>
   output?: Record<string, any>
   /**
