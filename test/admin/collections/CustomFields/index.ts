@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+import type { CustomProps } from './fields/Text/types.js'
+
 import { customFieldsSlug } from '../../slugs.js'
 
 export const CustomFields: CollectionConfig = {
@@ -32,7 +34,12 @@ export const CustomFields: CollectionConfig = {
           afterInput: ['/collections/CustomFields/AfterInput.js#AfterInput'],
           beforeInput: ['/collections/CustomFields/BeforeInput.js#BeforeInput'],
           Label: '/collections/CustomFields/fields/Text/LabelClient.js#CustomClientLabel',
-          Field: '/collections/CustomFields/fields/Text/FieldClient.js#CustomClientField',
+          Field: {
+            path: '/collections/CustomFields/fields/Text/FieldClient.js#CustomClientField',
+            clientProps: {
+              customProp: 'This is a custom prop',
+            } satisfies CustomProps,
+          },
           Description:
             '/collections/CustomFields/fields/Text/DescriptionClient.js#CustomClientDescription',
           Error: '/collections/CustomFields/CustomError.js#CustomError',

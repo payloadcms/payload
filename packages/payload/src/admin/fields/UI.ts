@@ -24,15 +24,15 @@ export type UIFieldClientProps = ClientFieldBase<UIFieldClientWithoutType> & UIF
 export type UIFieldServerProps = ServerFieldBase<UIField, UIFieldClientWithoutType> &
   UIFieldBaseServerProps
 
-export type UIFieldClientComponent = FieldClientComponent<
+export type UIFieldClientComponent<T extends Record<string, unknown> = {}> = FieldClientComponent<
   UIFieldClientWithoutType,
-  UIFieldBaseClientProps
+  T & UIFieldBaseClientProps
 >
 
-export type UIFieldServerComponent = FieldServerComponent<
+export type UIFieldServerComponent<T extends Record<string, unknown> = {}> = FieldServerComponent<
   UIField,
   UIFieldClientWithoutType,
-  UIFieldBaseServerProps
+  T & UIFieldBaseServerProps
 >
 
 export type UIFieldDiffServerComponent = FieldDiffServerComponent<UIField, UIFieldClient>
