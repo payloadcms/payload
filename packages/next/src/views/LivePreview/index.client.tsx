@@ -81,6 +81,7 @@ const PreviewView: React.FC<Props> = ({
   SaveButton,
   SaveDraftButton,
   schemaPath,
+  Status,
 }) => {
   const {
     id,
@@ -499,6 +500,7 @@ const PreviewView: React.FC<Props> = ({
             PublishButton,
             SaveButton,
             SaveDraftButton,
+            Status,
           }}
           data={initialData}
           disableActions={disableActions}
@@ -615,6 +617,7 @@ export const LivePreviewClient: React.FC<
           SaveDraftButton={props.SaveDraftButton}
           schemaPath={schemaPath}
           serverURL={serverURL}
+          Status={props.Status}
           Upload={props.Upload}
         />
       </LivePreviewProvider>
