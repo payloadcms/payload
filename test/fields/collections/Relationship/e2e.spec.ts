@@ -650,6 +650,112 @@ describe('relationship', () => {
 
     await expect(page.locator(tableRowLocator)).toHaveCount(1)
   })
+
+  test('should be able to selectrelationship with drawer appearance', async () => {
+    await page.goto(url.create)
+
+    const relationshipField = page.locator('#field-relationshipWithDrawerAppearance')
+    await relationshipField.click()
+    const listDrawerContent = page.locator('.list-drawer').locator('.drawer__content')
+    await expect(listDrawerContent).toBeVisible()
+
+    const firstRow = listDrawerContent.locator('table tbody tr').first()
+    const button = firstRow.locator('button')
+    await button.click()
+    await expect(listDrawerContent).toBeHidden()
+
+    const selectedValue = relationshipField.locator('.relationship--single-value__text')
+    await expect(selectedValue).toBeVisible()
+
+    // Fill required field
+    await page.locator('#field-relationship').click()
+    await page.locator('.rs__option:has-text("Seeded text document")').click()
+
+    await saveDocAndAssert(page)
+  })
+
+  test('should be able to search within relationship list drawer', async () => {
+    await page.goto(url.create)
+
+    const relationshipField = page.locator('#field-relationshipWithDrawerAppearance')
+    await relationshipField.click()
+    const searchField = page.locator('.list-drawer .search-filter')
+    await expect(searchField).toBeVisible()
+
+    const searchInput = searchField.locator('input')
+    await searchInput.fill('seeded')
+    const rows = page.locator('.list-drawer table tbody tr')
+
+    await expect(rows).toHaveCount(1)
+    const closeButton = page.locator('.list-drawer__header-close')
+    await closeButton.click()
+
+    await expect(page.locator('.list-drawer')).toBeHidden()
+  })
+
+  test('should handle read-only relationship field with list drawer appearance', async () => {
+    await page.goto(url.create)
+    const readOnlyField = page.locator(
+      '#field-readOnlyRelationshipWithDrawerAppearance .rs__control--is-disabled',
+    )
+    await expect(readOnlyField).toBeVisible()
+  })
+
+  test('should handle polymorphic relationship with list drawer appearance', async () => {
+    await page.goto(url.create)
+    const relationshipField = page.locator('#field-polymorphicRelationshipWithDrawerAppearance')
+    await relationshipField.click()
+    const listDrawerContent = page.locator('.list-drawer').locator('.drawer__content')
+    await expect(listDrawerContent).toBeVisible()
+
+    const relationToSelector = page.locator('.list-header__select-collection')
+    await expect(relationToSelector).toBeVisible()
+
+    await relationToSelector.locator('.rs__control').click()
+    const option = relationToSelector.locator('.rs__option').nth(1)
+    await option.click()
+    const firstRow = listDrawerContent.locator('table tbody tr').first()
+    const button = firstRow.locator('button')
+    await button.click()
+    await expect(listDrawerContent).toBeHidden()
+
+    const selectedValue = relationshipField.locator('.relationship--single-value__text')
+    await expect(selectedValue).toBeVisible()
+
+    // Fill required field
+    await page.locator('#field-relationship').click()
+    await page.locator('.rs__option:has-text("Seeded text document")').click()
+
+    await saveDocAndAssert(page)
+  })
+
+  test('should not be allowed to create in list drawer when allowCreate is false', async () => {
+    await page.goto(url.create)
+    const relationshipField = page.locator(
+      '#field-relationshipWithDrawerAppearanceAndAllowCreateFalse',
+    )
+    await relationshipField.click()
+    const listDrawerContent = page.locator('.list-drawer').locator('.drawer__content')
+    await expect(listDrawerContent).toBeVisible()
+
+    const createNewButton = listDrawerContent.locator('list-drawer__create-new-button')
+    await expect(createNewButton).toBeHidden()
+  })
+
+  test('should respect filterOptions in the list drawer for filtered relationship', async () => {
+    // Create test documents
+    await createTextFieldDoc({ text: 'list drawer test' })
+    await createTextFieldDoc({ text: 'not test' })
+    await page.goto(url.create)
+
+    const relationshipField = page.locator('#field-filteredRelationshipWithDrawerAppearance')
+    await relationshipField.click()
+    const listDrawerContent = page.locator('.list-drawer').locator('.drawer__content')
+    await expect(listDrawerContent).toBeVisible()
+
+    const rows = page.locator('.list-drawer table tbody tr')
+    await expect(rows).toHaveCount(1)
+  })
 })
 
 async function createTextFieldDoc(overrides?: Partial<TextField>): Promise<TextField> {

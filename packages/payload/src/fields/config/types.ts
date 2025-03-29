@@ -1143,6 +1143,7 @@ type SharedRelationshipPropertiesClient = FieldBaseClient &
 type RelationshipAdmin = {
   allowCreate?: boolean
   allowEdit?: boolean
+  appearance?: 'drawer' | 'select'
   components?: {
     afterInput?: CustomComponent[]
     beforeInput?: CustomComponent[]
@@ -1157,7 +1158,7 @@ type RelationshipAdmin = {
 } & Admin
 
 type RelationshipAdminClient = AdminClient &
-  Pick<RelationshipAdmin, 'allowCreate' | 'allowEdit' | 'isSortable'>
+  Pick<RelationshipAdmin, 'allowCreate' | 'allowEdit' | 'appearance' | 'isSortable'>
 
 export type PolymorphicRelationshipField = {
   admin?: {
