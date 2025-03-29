@@ -25,6 +25,7 @@ import {
   adminThumbnailFunctionSlug,
   adminThumbnailSizeSlug,
   adminThumbnailWithSearchQueries,
+  adminUploadControlSlug,
   animatedTypeMedia,
   audioSlug,
   customFileNameMediaSlug,
@@ -52,6 +53,7 @@ let mediaURL: AdminUrlUtil
 let animatedTypeMediaURL: AdminUrlUtil
 let audioURL: AdminUrlUtil
 let relationURL: AdminUrlUtil
+let adminUploadControlURL: AdminUrlUtil
 let adminThumbnailSizeURL: AdminUrlUtil
 let adminThumbnailFunctionURL: AdminUrlUtil
 let adminThumbnailWithSearchQueriesURL: AdminUrlUtil
@@ -83,6 +85,7 @@ describe('Uploads', () => {
     animatedTypeMediaURL = new AdminUrlUtil(serverURL, animatedTypeMedia)
     audioURL = new AdminUrlUtil(serverURL, audioSlug)
     relationURL = new AdminUrlUtil(serverURL, relationSlug)
+    adminUploadControlURL = new AdminUrlUtil(serverURL, adminUploadControlSlug)
     adminThumbnailSizeURL = new AdminUrlUtil(serverURL, adminThumbnailSizeSlug)
     adminThumbnailFunctionURL = new AdminUrlUtil(serverURL, adminThumbnailFunctionSlug)
     adminThumbnailWithSearchQueriesURL = new AdminUrlUtil(
@@ -497,6 +500,16 @@ describe('Uploads', () => {
       'File size limit has been reached',
     )
   })
+
+  test('should render adminUploadControls', async () => {
+    await page.goto(adminUploadControlURL.create)
+
+    const serverRenderedUploadButon = page.locator('#load-from-file-upload-button')
+    const clientRenderedUploadButon = page.locator('#load-from-url-upload-button')
+    await expect(serverRenderedUploadButon).toBeVisible()
+    await expect(clientRenderedUploadButon).toBeVisible()
+  })
+  // TODO: loading from file and URL using the adminUploadControls
 
   test('should render adminThumbnail when using a function', async () => {
     await page.goto(adminThumbnailFunctionURL.list)
