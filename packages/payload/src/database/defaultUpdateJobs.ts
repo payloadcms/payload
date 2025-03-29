@@ -35,10 +35,11 @@ export const defaultUpdateJobs: UpdateJobs = async function updateMany(
   }
 
   for (const job of jobsToUpdate) {
-    const updateData = {
+    const updateData: any = {
       ...job,
       ...data,
     }
+    delete updateData.id
     const updatedJob = await this.updateOne({
       id: job.id,
       collection: jobsCollectionSlug,

@@ -43,6 +43,7 @@ export const updateJobs: UpdateJobs = async function updateMany(
       ...job,
       ...data,
     }
+    delete updateData.id
 
     const result = await upsertRow({
       id: job.id,
