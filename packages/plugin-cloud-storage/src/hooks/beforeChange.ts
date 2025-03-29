@@ -29,7 +29,7 @@ export const getBeforeChangeHook =
           if (typeof originalDoc.sizes === 'object') {
             filesToDelete = filesToDelete.concat(
               Object.values(originalDoc?.sizes || []).map(
-                (resizedFileData) => resizedFileData?.filename,
+                (resizedFileData) => resizedFileData?.filename as string,
               ),
             )
           }

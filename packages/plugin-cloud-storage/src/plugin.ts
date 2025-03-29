@@ -67,9 +67,6 @@ export const cloudStoragePlugin =
               if ('clientUploadContext' in args.params) {
                 return adapter.staticHandler(req, args)
               }
-
-              // Otherwise still skip staticHandler
-              return null
             })
           }
 
