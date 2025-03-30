@@ -611,6 +611,20 @@ export const traverseFields = ({
             where: joinQueryWhere,
           })
 
+          for (let key in selectFields) {
+            const val = selectFields[key]
+
+            if (val.table && getNameFromDrizzleTable(val.table) === joinCollectionTableName) {
+              delete selectFields[key]
+              key = key.split('.').pop()
+              selectFields[key] = newAliasTable[key]
+            }
+          }
+
+          if (useDrafts) {
+            selectFields.parent = newAliasTable.parent
+          }
+
           let query: SQLiteSelect = db
             .select(selectFields as any)
             .from(newAliasTable)
@@ -631,20 +645,6 @@ export const traverseFields = ({
 
           if (limit !== 0) {
             query = query.limit(limit)
-          }
-
-          for (let key in selectFields) {
-            const val = selectFields[key]
-
-            if (val.table && getNameFromDrizzleTable(val.table) === joinCollectionTableName) {
-              delete selectFields[key]
-              key = key.split('.').pop()
-              selectFields[key] = newAliasTable[key]
-            }
-          }
-
-          if (useDrafts) {
-            selectFields.parent = newAliasTable.parent
           }
 
           const subQuery = query.as(subQueryAlias)
