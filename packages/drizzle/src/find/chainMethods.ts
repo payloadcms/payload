@@ -1,5 +1,5 @@
 /**
- * @deprecated - will be removed in 4.0. Use query + $dynamic() instead: https://orm.drizzle.team/docs/dynamic-query-building
+ * query + $dynamic() should be preferred instead: https://orm.drizzle.team/docs/dynamic-query-building
  */
 export type ChainedMethods = {
   args: unknown[]
@@ -11,7 +11,8 @@ export type ChainedMethods = {
  * @param methods
  * @param query
  *
- * @deprecated - will be removed in 4.0. Use query + $dynamic() instead: https://orm.drizzle.team/docs/dynamic-query-building
+ * query + $dynamic() should be preferred instead: https://orm.drizzle.team/docs/dynamic-query-building.
+ * chainMethods can still be useful if query needs to be built bottom-up.
  */
 const chainMethods = <T>({ methods, query }: { methods: ChainedMethods; query: T }): T => {
   return methods.reduce((query, { args, method }) => {
