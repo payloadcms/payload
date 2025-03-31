@@ -38,10 +38,16 @@
       text-decoration-line: line-through;
       background-color: var(--diff-delete-pill-bg);
       border-radius: 4px;
+      text-decoration-thickness: 1px;
     }
 
     a[data-match-type='delete'] {
-      text-decoration-line: line-through underline;
+      color: var(--diff-delete-link-color);
+    }
+
+    a[data-match-type='create']:not(img) {
+      // :not(img) required to increase specificity
+      color: var(--diff-create-link-color);
     }
 
     [data-match-type='create']:not(img) {
