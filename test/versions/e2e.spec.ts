@@ -981,6 +981,8 @@ describe('Versions', () => {
       // Fill with invalid data again, then reload and accept the warning, should contain previous data
       await titleField.fill('')
 
+      await waitForAutoSaveToRunAndComplete(page, 'error')
+
       await page.reload()
 
       await expect(titleField).toBeEnabled()
