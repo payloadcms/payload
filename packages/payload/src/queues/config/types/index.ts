@@ -96,7 +96,7 @@ export type JobsConfig = {
    * @default all jobs for all queues will be executed in FIFO order.
    */
   processingOrder?:
-    | ((args: RunJobsArgs) => QueueProcessingOrder)
+    | ((args: RunJobsArgs) => Promise<QueueProcessingOrder> | QueueProcessingOrder)
     | {
         default?: QueueProcessingOrder
         queues: {

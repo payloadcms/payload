@@ -146,7 +146,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
 
     const processingOrderConfig = req.payload.config.jobs?.processingOrder
     if (typeof processingOrderConfig === 'function') {
-      defaultProcessingOrder = processingOrderConfig(args)
+      defaultProcessingOrder = await processingOrderConfig(args)
     } else if (typeof processingOrderConfig === 'object' && !Array.isArray(processingOrderConfig)) {
       if (queue && processingOrderConfig.queues && processingOrderConfig.queues[queue]) {
         defaultProcessingOrder = processingOrderConfig.queues[queue]
