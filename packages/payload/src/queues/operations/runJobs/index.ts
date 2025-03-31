@@ -1,6 +1,5 @@
 // @ts-strict-ignore
-import type { PayloadRequest, Where } from '../../../types/index.js'
-import type { QueueProcessingOrder } from '../../config/types/index.js'
+import type { PayloadRequest, Sort, Where } from '../../../types/index.js'
 import type { WorkflowJSON } from '../../config/types/workflowJSONTypes.js'
 import type {
   BaseJob,
@@ -33,7 +32,7 @@ export type RunJobsArgs = {
    *
    * @default all jobs for all queues will be executed in FIFO order.
    */
-  processingOrder?: QueueProcessingOrder
+  processingOrder?: Sort
   queue?: string
   req: PayloadRequest
   /**
@@ -141,7 +140,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       }),
     ]
   } else {
-    let defaultProcessingOrder: QueueProcessingOrder =
+    let defaultProcessingOrder: Sort =
       req.payload.collections[jobsCollectionSlug].config.defaultSort ?? 'createdAt'
 
     const processingOrderConfig = req.payload.config.jobs?.processingOrder

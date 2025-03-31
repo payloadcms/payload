@@ -1,4 +1,3 @@
-import type { QueueProcessingOrder } from './config/types/index.js'
 import type { BaseJob, RunningJobFromTask } from './config/types/workflowTypes.js'
 
 import {
@@ -6,6 +5,7 @@ import {
   type Payload,
   type PayloadRequest,
   type RunningJob,
+  type Sort,
   type TypedJobs,
   type Where,
 } from '../index.js'
@@ -100,7 +100,12 @@ export const getJobsLocalAPI = (payload: Payload) => ({
   run: async (args?: {
     limit?: number
     overrideAccess?: boolean
-    processingOrder?: QueueProcessingOrder
+    /**
+     * Adjust the job processing order using a Payload sort string.
+     *
+     * FIFO would equal `createdAt` and LIFO would equal `-createdAt`.
+     */
+    processingOrder?: Sort
     queue?: string
     req?: PayloadRequest
     /**

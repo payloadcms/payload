@@ -40,13 +40,6 @@ export type RunJobAccessArgs = {
 
 export type RunJobAccess = (args: RunJobAccessArgs) => boolean | Promise<boolean>
 
-/**
- * Define the order of job execution for each queue using a Payload sort string.
- *
- * FIFO would equal `createdAt` and LIFO would equal `-createdAt`.
- */
-export type QueueProcessingOrder = Sort
-
 export type JobsConfig = {
   /**
    * Specify access control to determine who can interact with jobs.
@@ -89,21 +82,21 @@ export type JobsConfig = {
    */
   jobsCollectionOverrides?: (args: { defaultJobsCollection: CollectionConfig }) => CollectionConfig
   /**
-   * Adjust the job processing order. This can be set globally or per queue.
+   * Adjust the job processing order using a Payload sort string. This can be set globally or per queue.
    *
    * FIFO would equal `createdAt` and LIFO would equal `-createdAt`.
    *
    * @default all jobs for all queues will be executed in FIFO order.
    */
   processingOrder?:
-    | ((args: RunJobsArgs) => Promise<QueueProcessingOrder> | QueueProcessingOrder)
+    | ((args: RunJobsArgs) => Promise<Sort> | Sort)
     | {
-        default?: QueueProcessingOrder
+        default?: Sort
         queues: {
-          [queue: string]: QueueProcessingOrder
+          [queue: string]: Sort
         }
       }
-    | QueueProcessingOrder
+    | Sort
   /**
    * By default, the job system uses direct database calls for optimal performance.
    * If you added custom hooks to your jobs collection, you can set this to true to
