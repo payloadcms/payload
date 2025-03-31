@@ -106,7 +106,7 @@ export const mergeServerFormState = ({
               delete newFieldState[propFromServer]
             }
           } else {
-            newFieldState[propFromServer] = incomingState[path][propFromServer]
+            newFieldState[propFromServer as any] = incomingState[path][propFromServer]
           }
         }
       })
