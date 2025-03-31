@@ -60,21 +60,28 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         [path]: {
           ...state[path],
           disableFormData: true,
-          // The `ignoreServerProps` obj is used to prevent the various properties from being overridden across form state requests.
-          // This can happen when queueing a form state request with `requiresRender: true` while the another is already processing.
-          // For example:
-          //   1. One "add row" action will set `requiresRender: true` and dispatch a form state request
-          //   2. Another "add row" action will set `requiresRender: true` and queue a form state request
-          //   3. The first request will return with `requiresRender: false`
-          //   4. The second request will be dispatched with `requiresRender: false` but should be `true`
-          // To fix this, only merge the `requiresRender` property if the previous state has not set it to `true`.
-          // See the `mergeServerFormState` function for implementation details.
-          ignoreServerProps: {
-            requiresRender: state[path]?.requiresRender === true,
-          },
           requiresRender: true,
           rows: withNewRow,
           value: siblingRows.length,
+          /**
+           * The `ignoreServerProps` obj is used to prevent the various properties from being overridden across form state requests.
+           * This can happen when queueing a form state request with `requiresRender: true` while the another is already processing.
+           * For example:
+           *   1. One "add row" action will set `requiresRender: true` and dispatch a form state request
+           *   2. Another "add row" action will set `requiresRender: true` and queue a form state request
+           *   3. The first request will return with `requiresRender: false`
+           *   4. The second request will be dispatched with `requiresRender: false` but should be `true`
+           * To fix this, only merge the `requiresRender` property if the previous state has not set it to `true`.
+           * See the `mergeServerFormState` function for implementation details.
+           */
+          ...(state[path]?.requiresRender === true
+            ? {
+                ignoreServerProps: {
+                  ...(state[path]?.ignoreServerProps || {}),
+                  requiresRender: true,
+                },
+              }
+            : state[path]?.ignoreServerProps || ({} as any)),
         },
       }
 
@@ -184,6 +191,15 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
           requiresRender: true,
           rows: rowsMetadata,
           value: rows.length,
+          // See note above about `ignoreServerProps`
+          ...(state[path]?.requiresRender === true
+            ? {
+                ignoreServerProps: {
+                  ...(state[path]?.ignoreServerProps || {}),
+                  requiresRender: true,
+                },
+              }
+            : state[path]?.ignoreServerProps || ({} as any)),
         },
       }
 
@@ -212,6 +228,15 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
           ...state[path],
           requiresRender: true,
           rows: rowsWithinField,
+          // See note above about `ignoreServerProps`
+          ...(state[path]?.requiresRender === true
+            ? {
+                ignoreServerProps: {
+                  ...(state[path]?.ignoreServerProps || {}),
+                  requiresRender: true,
+                },
+              }
+            : state[path]?.ignoreServerProps || ({} as any)),
         },
       }
 
@@ -230,9 +255,8 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
 
         const copyOfMovingLabel = customComponents.RowLabels[moveFromIndex]
 
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         customComponents.RowLabels.splice(moveFromIndex, 1)
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+
         customComponents.RowLabels.splice(moveToIndex, 0, copyOfMovingLabel)
 
         newState[path].customComponents = customComponents
@@ -265,6 +289,15 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
           requiresRender: true,
           rows: rowsMetadata,
           value: rows.length,
+          // See note above about `ignoreServerProps`
+          ...(state[path]?.requiresRender === true
+            ? {
+                ignoreServerProps: {
+                  ...(state[path]?.ignoreServerProps || {}),
+                  requiresRender: true,
+                },
+              }
+            : state[path]?.ignoreServerProps || ({} as any)),
         },
         ...flattenRows(path, rows),
       }
@@ -304,6 +337,15 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
           disableFormData: true,
           rows: rowsMetadata,
           value: siblingRows.length,
+          // See note above about `ignoreServerProps`
+          ...(state[path]?.requiresRender === true
+            ? {
+                ignoreServerProps: {
+                  ...(state[path]?.ignoreServerProps || {}),
+                  requiresRender: true,
+                },
+              }
+            : state[path]?.ignoreServerProps || ({} as any)),
         },
       }
 
@@ -339,7 +381,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         return newState
       }
 
-      //TODO: Remove this in 4.0 - this is a temporary fix to prevent a breaking change
+      // TODO: Remove this in 4.0 - this is a temporary fix to prevent a breaking change
       if (action.sanitize) {
         for (const field of Object.values(action.state)) {
           if (field.valid !== false) {

@@ -93,6 +93,14 @@ export const mergeServerFormState = ({
           // To fix this, only merge the `requiresRender` property if the previous state has not set it to `true`.
           // See the `fieldReducer` function for where this gets set.
           if (newFieldState?.ignoreServerProps?.[propFromServer]) {
+            // Remove the ignored prop for the next request
+            delete newFieldState.ignoreServerProps[propFromServer]
+
+            // if no keys left, remove the entire object
+            if (Object.keys(newFieldState.ignoreServerProps).length === 0) {
+              delete newFieldState.ignoreServerProps
+            }
+
             return
           }
 
