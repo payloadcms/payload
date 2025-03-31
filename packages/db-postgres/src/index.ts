@@ -214,9 +214,6 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
   }
 }
 
-/**
- * @todo deprecate /types subpath export in 4.0
- */
 export type {
   Args as PostgresAdapterArgs,
   GeneratedDatabaseSchema,
