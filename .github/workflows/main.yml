@@ -41,14 +41,14 @@ jobs:
         with:
           filters: |
             needs_build:
-              - '.github/workflows/**'
+              - '.github/workflows/main.yml'
               - 'packages/**'
               - 'test/**'
               - 'pnpm-lock.yaml'
               - 'package.json'
               - 'templates/**'
             needs_tests:
-              - '.github/workflows/**'
+              - '.github/workflows/main.yml'
               - 'packages/**'
               - 'test/**'
               - 'pnpm-lock.yaml'
@@ -275,9 +275,11 @@ jobs:
           - admin__e2e__general
           - admin__e2e__list-view
           - admin__e2e__document-view
+          - admin-bar
           - admin-root
           - auth
           - auth-basic
+          - bulk-edit
           - joins
           - field-error-states
           - fields-relationship
@@ -307,12 +309,15 @@ jobs:
           - fields__collections__Text
           - fields__collections__UI
           - fields__collections__Upload
+          - query-presets
+          - form-state
           - live-preview
           - localization
           - locked-documents
           - i18n
           - plugin-cloud-storage
           - plugin-form-builder
+          - plugin-import-export
           - plugin-nested-docs
           - plugin-seo
           - versions
@@ -417,6 +422,7 @@ jobs:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: payloadtests
+      MONGODB_VERSION: 6.0
 
     steps:
       - uses: actions/checkout@v4
@@ -456,8 +462,14 @@ jobs:
           echo "POSTGRES_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
         if: matrix.database == 'postgres'
 
+      # Avoid dockerhub rate-limiting
+      - name: Cache Docker images
+        uses: ScribeMD/docker-cache@0.5.0
+        with:
+          key: docker-${{ runner.os }}-mongo-${{ env.MONGODB_VERSION }}
+
       - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.11.0
+        uses: supercharge/mongodb-github-action@1.12.0
         with:
           mongodb-version: 6.0
         if: matrix.database == 'mongodb'

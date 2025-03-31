@@ -1,10 +1,10 @@
 'use client'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import { LogOutIcon } from '../../icons/LogOut/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { Link } from '../Link/index.js'
 
 const baseClass = 'nav'

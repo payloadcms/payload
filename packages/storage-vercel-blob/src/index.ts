@@ -172,7 +172,7 @@ function vercelBlobStorageInternal(
   options: { baseUrl: string } & VercelBlobStorageOptions,
 ): Adapter {
   return ({ collection, prefix }): GeneratedAdapter => {
-    const { access, addRandomSuffix, baseUrl, cacheControlMaxAge, token } = options
+    const { access, addRandomSuffix, baseUrl, cacheControlMaxAge, clientUploads, token } = options
 
     if (!token) {
       throw new Error('Vercel Blob storage token is required')
@@ -180,6 +180,7 @@ function vercelBlobStorageInternal(
 
     return {
       name: 'vercel-blob',
+      clientUploads,
       generateURL: getGenerateUrl({ baseUrl, prefix }),
       handleDelete: getHandleDelete({ baseUrl, prefix, token }),
       handleUpload: getHandleUpload({

@@ -5,8 +5,10 @@ import type { SanitizedGlobalConfig } from '../config/types.js'
 
 import executeAccess from '../../auth/executeAccess.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import replaceWithDraftIfAvailable from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 
 type Args = {
@@ -35,7 +37,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     populate,
     req: { fallbackLocale, locale },
     req,
-    select,
+    select: incomingSelect,
     showHiddenFields,
   } = args
 
@@ -49,6 +51,11 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     if (!overrideAccess) {
       accessResult = await executeAccess({ req }, globalConfig.access.read)
     }
+
+    const select = sanitizeSelect({
+      forceSelect: globalConfig.forceSelect,
+      select: incomingSelect,
+    })
 
     // /////////////////////////////////////
     // Perform database operation
@@ -80,7 +87,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
         const lockDurationInMilliseconds = lockDuration * 1000
 
         const lockedDocument = await req.payload.find({
-          collection: 'payload-locked-documents',
+          collection: lockedDocumentsCollectionSlug,
           depth: 1,
           limit: 1,
           overrideAccess: false,

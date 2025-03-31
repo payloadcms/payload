@@ -141,6 +141,7 @@ function uploadthingInternal(options: UploadthingStorageOptions): Adapter {
 
   return (): GeneratedAdapter => {
     const {
+      clientUploads,
       options: { acl = 'public-read', ...utOptions },
     } = options
 
@@ -148,6 +149,7 @@ function uploadthingInternal(options: UploadthingStorageOptions): Adapter {
 
     return {
       name: 'uploadthing',
+      clientUploads,
       fields,
       generateURL,
       handleDelete: getHandleDelete({ utApi }),

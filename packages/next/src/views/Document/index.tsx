@@ -9,10 +9,11 @@ import type {
 
 import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { formatAdminURL, isEditing as getIsEditing } from '@payloadcms/ui/shared'
+import { isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { notFound, redirect } from 'next/navigation.js'
 import { logError } from 'payload'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
@@ -43,6 +44,7 @@ export const renderDocument = async ({
   initPageResult,
   overrideEntityVisibility,
   params,
+  redirectAfterCreate,
   redirectAfterDelete,
   redirectAfterDuplicate,
   searchParams,
@@ -50,6 +52,9 @@ export const renderDocument = async ({
 }: {
   drawerSlug?: string
   overrideEntityVisibility?: boolean
+  readonly redirectAfterCreate?: boolean
+  readonly redirectAfterDelete?: boolean
+  readonly redirectAfterDuplicate?: boolean
 } & AdminViewServerProps): Promise<{
   data: Data
   Document: React.ReactNode
@@ -307,7 +312,7 @@ export const renderDocument = async ({
       id = doc.id
       isEditing = getIsEditing({ id: doc.id, collectionSlug, globalSlug })
 
-      if (!drawerSlug) {
+      if (!drawerSlug && redirectAfterCreate !== false) {
         const redirectURL = formatAdminURL({
           adminRoute,
           path: `/collections/${collectionSlug}/${doc.id}`,
@@ -357,6 +362,7 @@ export const renderDocument = async ({
         key={locale?.code}
         lastUpdateTime={lastUpdateTime}
         mostRecentVersionIsAutosaved={mostRecentVersionIsAutosaved}
+        redirectAfterCreate={redirectAfterCreate}
         redirectAfterDelete={redirectAfterDelete}
         redirectAfterDuplicate={redirectAfterDuplicate}
         unpublishedVersionCount={unpublishedVersionCount}

@@ -1,5 +1,6 @@
 'use client'
 import { useRouter } from 'next/navigation.js'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback } from 'react'
 
 import type { OnCancel } from '../ConfirmationModal/index.js'
@@ -8,7 +9,6 @@ import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 
 export const stayLoggedInModalSlug = 'stay-logged-in'

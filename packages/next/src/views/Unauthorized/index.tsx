@@ -1,13 +1,11 @@
 import type { AdminViewServerProps } from 'payload'
 
 import { Button } from '@payloadcms/ui'
-import { formatAdminURL } from '@payloadcms/ui/shared'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import { FormHeader } from '../../elements/FormHeader/index.js'
 import './index.scss'
-
-export { generateUnauthorizedMetadata } from './meta.js'
 
 const baseClass = 'unauthorized'
 

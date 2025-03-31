@@ -29,7 +29,7 @@ describe('graphql', () => {
     it('should not be able to query introspection', async () => {
       const query = `query {
         __schema {
-          queryType { 
+          queryType {
             name
           }
         }
@@ -57,7 +57,7 @@ describe('graphql', () => {
         collection: 'posts',
         id: post.id,
         data: {
-          relatedToSelf: post.id,
+          relationToSelf: post.id,
         },
       })
 
@@ -79,6 +79,30 @@ describe('graphql', () => {
       expect(response.errors[0].message).toMatch(
         'The query exceeds the maximum complexity of 800. Actual complexity is 804',
       )
+    })
+
+    it('should sanitize hyphenated field names to snake case', async () => {
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'example post',
+          'hyphenated-name': 'example-hyphenated-name',
+        },
+      })
+
+      const query = `query {
+        Post(id: ${idToString(post.id, payload)}) {
+          title
+          hyphenated_name
+        }
+      }`
+
+      const { data } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+      const res = data.Post
+
+      expect(res.hyphenated_name).toStrictEqual('example-hyphenated-name')
     })
   })
 })

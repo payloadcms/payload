@@ -8,17 +8,15 @@ import type {
 } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-import { formatAdminURL } from '@payloadcms/ui/shared'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { notFound, redirect } from 'next/navigation.js'
+import { formatAdminURL } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { DefaultTemplate } from '../../templates/Default/index.js'
 import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { initPage } from '../../utilities/initPage/index.js'
 import { getViewFromConfig } from './getViewFromConfig.js'
-
-export { generatePageMetadata } from './meta.js'
 
 export type GenerateViewMetadata = (args: {
   config: SanitizedConfig
@@ -56,7 +54,7 @@ export const RootPage = async ({
 
   const currentRoute = formatAdminURL({
     adminRoute,
-    path: `${Array.isArray(params.segments) ? `/${params.segments.join('/')}` : ''}`,
+    path: Array.isArray(params.segments) ? `/${params.segments.join('/')}` : null,
   })
 
   const segments = Array.isArray(params.segments) ? params.segments : []

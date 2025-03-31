@@ -4,7 +4,7 @@ import type { SanitizedDocumentPermissions } from '../../auth/types.js'
 import type { Field, Validate } from '../../fields/config/types.js'
 import type { TypedLocale } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
-import type { PayloadRequest, Where } from '../../types/index.js'
+import type { PayloadRequest, SelectType, Where } from '../../types/index.js'
 
 export type Data = {
   [key: string]: any
@@ -91,6 +91,7 @@ export type BuildFormStateArgs = {
   req: PayloadRequest
   returnLockStatus?: boolean
   schemaPath: string
+  select?: SelectType
   skipValidation?: boolean
   updateLastEdited?: boolean
 } & (

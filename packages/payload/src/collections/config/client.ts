@@ -17,7 +17,15 @@ import { createClientFields } from '../../fields/config/client.js'
 
 export type ServerOnlyCollectionProperties = keyof Pick<
   SanitizedCollectionConfig,
-  'access' | 'custom' | 'endpoints' | 'flattenedFields' | 'hooks' | 'joins' | 'polymorphicJoins'
+  | 'access'
+  | 'custom'
+  | 'endpoints'
+  | 'flattenedFields'
+  | 'hooks'
+  | 'indexes'
+  | 'joins'
+  | 'polymorphicJoins'
+  | 'sanitizedIndexes'
 >
 
 export type ServerOnlyCollectionAdminProperties = keyof Pick<
@@ -70,6 +78,8 @@ const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] 
   'joins',
   'polymorphicJoins',
   'flattenedFields',
+  'indexes',
+  'sanitizedIndexes',
   // `upload`
   // `admin`
   // are all handled separately
@@ -205,11 +215,11 @@ export const createClientCollectionConfig = ({
         clientCollection.labels = {
           plural:
             typeof collection.labels.plural === 'function'
-              ? collection.labels.plural({ t: i18n.t })
+              ? collection.labels.plural({ i18n, t: i18n.t })
               : collection.labels.plural,
           singular:
             typeof collection.labels.singular === 'function'
-              ? collection.labels.singular({ t: i18n.t })
+              ? collection.labels.singular({ i18n, t: i18n.t })
               : collection.labels.singular,
         }
         break

@@ -54,6 +54,7 @@ export const beforeChange = async <T extends JsonObject>({
     doc,
     docWithLocales,
     errors,
+    fieldLabelPath: '',
     fields: collection?.fields || global?.fields,
     global,
     mergeLocaleActions,

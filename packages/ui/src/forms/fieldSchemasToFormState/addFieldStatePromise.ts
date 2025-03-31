@@ -11,10 +11,13 @@ import type {
   PayloadRequest,
   SanitizedFieldPermissions,
   SanitizedFieldsPermissions,
+  SelectMode,
+  SelectType,
   Validate,
 } from 'payload'
 
 import ObjectIdImport from 'bson-objectid'
+import { getBlockSelect } from 'payload'
 import {
   deepCopyObjectSimple,
   fieldAffectsData,
@@ -86,6 +89,8 @@ export type AddFieldStatePromiseArgs = {
    */
   req: PayloadRequest
   schemaPath: string
+  select?: SelectType
+  selectMode?: SelectMode
   /**
    * Whether to skip checking the field's condition. @default false
    */
@@ -130,6 +135,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     renderFieldFn,
     req,
     schemaPath,
+    select,
+    selectMode,
     skipConditionChecks = false,
     skipValidation = false,
     state,
@@ -247,6 +254,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       case 'array': {
         const arrayValue = Array.isArray(data[field.name]) ? data[field.name] : []
 
+        const arraySelect = select?.[field.name]
+
         const { promises, rows } = arrayValue.reduce(
           (acc, row, i: number) => {
             const parentPath = path + '.' + i
@@ -293,6 +302,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 renderAllFields: requiresRender,
                 renderFieldFn,
                 req,
+                select: typeof arraySelect === 'object' ? arraySelect : undefined,
+                selectMode,
                 skipConditionChecks,
                 skipValidation,
                 state,
@@ -373,6 +384,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         const { promises, rowMetadata } = blocksValue.reduce(
           (acc, row, i: number) => {
             const blockTypeToMatch: string = row.blockType
+
             const block =
               req.payload.blocks[blockTypeToMatch] ??
               ((field.blockReferences ?? field.blocks).find(
@@ -384,6 +396,12 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                 `Block with type "${row.blockType}" was found in block data, but no block with that type is defined in the config for field with schema path ${schemaPath}.`,
               )
             }
+
+            const { blockSelect, blockSelectMode } = getBlockSelect({
+              block,
+              select: select?.[field.name],
+              selectMode,
+            })
 
             const parentPath = path + '.' + i
 
@@ -468,6 +486,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
                   renderAllFields: requiresRender,
                   renderFieldFn,
                   req,
+                  select: typeof blockSelect === 'object' ? blockSelect : undefined,
+                  selectMode: blockSelectMode,
                   skipConditionChecks,
                   skipValidation,
                   state,
@@ -534,6 +554,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           state[path] = fieldState
         }
 
+        const groupSelect = select?.[field.name]
+
         await iterateFields({
           id,
           addErrorPathToParent,
@@ -561,6 +583,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           renderAllFields,
           renderFieldFn,
           req,
+          select: typeof groupSelect === 'object' ? groupSelect : undefined,
+          selectMode,
           skipConditionChecks,
           skipValidation,
           state,
@@ -685,6 +709,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
 
     await iterateFields({
       id,
+      select,
+      selectMode,
       // passthrough parent functionality
       addErrorPathToParent: addErrorPathToParentArg,
       anyParentLocalized: fieldIsLocalized(field) || anyParentLocalized,
@@ -717,6 +743,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
   } else if (field.type === 'tabs') {
     const promises = field.tabs.map((tab, tabIndex) => {
       const isNamedTab = tabHasName(tab)
+      let tabSelect: SelectType | undefined
 
       const {
         indexPath: tabIndexPath,
@@ -746,8 +773,33 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             childPermissions = tabPermissions?.fields
           }
         }
+
+        if (typeof select?.[tab.name] === 'object') {
+          tabSelect = select?.[tab.name] as SelectType
+        }
       } else {
         childPermissions = parentPermissions
+        tabSelect = select
+      }
+
+      const pathSegments = path ? path.split('.') : []
+
+      // If passesCondition is false then this should always result to false
+      // If the tab has no admin.condition provided then fallback to passesCondition and let that decide the result
+      let tabPassesCondition = passesCondition
+
+      if (passesCondition && typeof tab.admin?.condition === 'function') {
+        tabPassesCondition = tab.admin.condition(fullData, data, {
+          blockData,
+          path: pathSegments,
+          user: req.user,
+        })
+      }
+
+      if (tab?.id) {
+        state[tab.id] = {
+          passesCondition: tabPassesCondition,
+        }
       }
 
       return iterateFields({
@@ -767,7 +819,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         omitParents,
         operation,
         parentIndexPath: isNamedTab ? '' : tabIndexPath,
-        parentPassesCondition: passesCondition,
+        parentPassesCondition: tabPassesCondition,
         parentPath: isNamedTab ? tabPath : parentPath,
         parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
         permissions: childPermissions,
@@ -776,6 +828,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         renderAllFields,
         renderFieldFn,
         req,
+        select: tabSelect,
+        selectMode,
         skipConditionChecks,
         skipValidation,
         state,

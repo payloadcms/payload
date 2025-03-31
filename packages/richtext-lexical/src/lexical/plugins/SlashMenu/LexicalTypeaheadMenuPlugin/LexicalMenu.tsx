@@ -451,6 +451,16 @@ export function LexicalMenu({
   )
 }
 
+function setContainerDivAttributes(containerDiv: HTMLElement, className?: string) {
+  if (className != null) {
+    containerDiv.className = className
+  }
+  containerDiv.setAttribute('aria-label', 'Slash menu')
+  containerDiv.setAttribute('role', 'listbox')
+  containerDiv.style.display = 'block'
+  containerDiv.style.position = 'absolute'
+}
+
 export function useMenuAnchorRef(
   anchorElem: HTMLElement,
   resolution: MenuResolution | null,
@@ -508,16 +518,10 @@ export function useMenuAnchorRef(
       }
 
       if (!containerDiv.isConnected) {
-        if (className != null) {
-          containerDiv.className = className
-        }
-        containerDiv.setAttribute('aria-label', 'Slash menu')
-        containerDiv.setAttribute('id', 'slash-menu')
-        containerDiv.setAttribute('role', 'listbox')
-        containerDiv.style.display = 'block'
-        containerDiv.style.position = 'absolute'
+        setContainerDivAttributes(containerDiv, className)
         anchorElem.append(containerDiv)
       }
+      containerDiv.setAttribute('id', 'slash-menu')
       anchorElementRef.current = containerDiv
       rootElement.setAttribute('aria-controls', 'slash-menu')
     }
@@ -535,6 +539,7 @@ export function useMenuAnchorRef(
         const containerDiv = anchorElementRef.current
         if (containerDiv !== null && containerDiv.isConnected) {
           containerDiv.remove()
+          containerDiv.removeAttribute('id')
         }
       }
     }

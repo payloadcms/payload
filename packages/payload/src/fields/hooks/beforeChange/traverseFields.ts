@@ -25,6 +25,12 @@ type Args = {
    */
   docWithLocales: JsonObject
   errors: ValidationFieldError[]
+  /**
+   * Built up labels of parent fields
+   *
+   * @example "Group Field > Tab Field > Text Field"
+   */
+  fieldLabelPath: string
   fields: (Field | TabAsField)[]
   global: null | SanitizedGlobalConfig
   id?: number | string
@@ -67,6 +73,7 @@ export const traverseFields = async ({
   doc,
   docWithLocales,
   errors,
+  fieldLabelPath,
   fields,
   global,
   mergeLocaleActions,
@@ -96,6 +103,7 @@ export const traverseFields = async ({
         errors,
         field,
         fieldIndex,
+        fieldLabelPath,
         global,
         mergeLocaleActions,
         operation,

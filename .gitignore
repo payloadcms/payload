@@ -306,6 +306,8 @@ $RECYCLE.BIN/
 /build
 .swc
 app/(payload)/admin/importMap.js
+test/admin-bar/app/(payload)/admin/importMap.js
+/test/admin-bar/app/(payload)/admin/importMap.js
 test/live-preview/app/(payload)/admin/importMap.js
 /test/live-preview/app/(payload)/admin/importMap.js
 test/admin-root/app/(payload)/admin/importMap.js
@@ -318,3 +320,8 @@ test/databaseAdapter.js
 /media-with-relation-preview
 /media-without-relation-preview
 /media-without-cache-tags
+test/.localstack
+test/google-cloud-storage
+test/azurestoragedata/
+
+licenses.csv

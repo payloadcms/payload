@@ -16,7 +16,7 @@ import React, { useEffect } from 'react'
 
 import type { PluginComponent } from '../../../typesClient.js'
 import type { UploadData } from '../../server/nodes/UploadNode.js'
-import type { UploadFeaturePropsClient } from '../feature.client.js'
+import type { UploadFeaturePropsClient } from '../index.js'
 
 import { UploadDrawer } from '../drawer/index.js'
 import { $createUploadNode, UploadNode } from '../nodes/UploadNode.js'

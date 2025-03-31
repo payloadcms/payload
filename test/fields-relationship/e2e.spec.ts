@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { assertToastErrors } from 'helpers/assertToastErrors.js'
 import { addListFilter } from 'helpers/e2e/addListFilter.js'
 import { openDocControls } from 'helpers/e2e/openDocControls.js'
 import { openCreateDocDrawer, openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
@@ -22,7 +23,7 @@ import type {
 
 import { ensureCompilationIsDone, initPageConsoleErrorCatch, saveDocAndAssert } from '../helpers.js'
 import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { trackNetworkRequests } from '../helpers/e2e/trackNetworkRequests.js'
+import { assertNetworkRequests } from '../helpers/e2e/assertNetworkRequests.js'
 import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
@@ -175,7 +176,7 @@ describe('Relationship Field', () => {
     await expect(options).toHaveCount(2) // two docs
     await options.nth(0).click()
     await expect(field).toContainText(relationOneDoc.id)
-    await trackNetworkRequests(page, `/api/${relationOneSlug}`, async () => {
+    await assertNetworkRequests(page, `/api/${relationOneSlug}`, async () => {
       await saveDocAndAssert(page)
       await wait(200)
     })
@@ -288,9 +289,10 @@ describe('Relationship Field', () => {
     await expect(field).toContainText(anotherRelationOneDoc.id)
     await wait(2000) // Need to wait form state to come back before clicking save
     await page.locator('#action-save').click()
-    await expect(page.locator('.payload-toast-container')).toContainText(
-      `is invalid: ${fieldLabel}`,
-    )
+    await assertToastErrors({
+      page,
+      errors: [fieldLabel],
+    })
     filteredField = page.locator(`#field-${fieldName} .react-select`)
     await filteredField.click({ delay: 100 })
     filteredOptions = filteredField.locator('.rs__option')
@@ -303,7 +305,7 @@ describe('Relationship Field', () => {
   describe('filterOptions', () => {
     // TODO: Flaky test. Fix this! (This is an actual issue not just an e2e flake)
     test('should allow dynamic filterOptions', async () => {
-      await runFilterOptionsTest('relationshipFilteredByID', 'Relationship Filtered')
+      await runFilterOptionsTest('relationshipFilteredByID', 'Relationship Filtered By ID')
     })
 
     // TODO: Flaky test. Fix this! (This is an actual issue not just an e2e flake)
@@ -330,7 +332,7 @@ describe('Relationship Field', () => {
       // now ensure that the same filter options are applied in the list view
       await page.goto(url.list)
 
-      const whereBuilder = await addListFilter({
+      const { whereBuilder } = await addListFilter({
         page,
         fieldLabel: 'Relationship Filtered By Field',
         operatorLabel: 'equals',
@@ -365,7 +367,7 @@ describe('Relationship Field', () => {
       // now ensure that the same filter options are applied in the list view
       await page.goto(url.list)
 
-      const whereBuilder = await addListFilter({
+      const { whereBuilder } = await addListFilter({
         page,
         fieldLabel: 'Collapsible > Nested Relationship Filtered By Field',
         operatorLabel: 'equals',

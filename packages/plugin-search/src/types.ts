@@ -77,6 +77,11 @@ export type SearchPluginConfigWithLocales = {
   locales?: string[]
 } & SearchPluginConfig
 
+export type SanitizedSearchPluginConfig = {
+  reindexBatchSize: number
+  syncDrafts: boolean
+} & SearchPluginConfigWithLocales
+
 export type SyncWithSearchArgs = {
   collection: string
   pluginConfig: SearchPluginConfig

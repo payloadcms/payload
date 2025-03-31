@@ -75,8 +75,10 @@ export const buildVersionFields = ({
 } => {
   const versionFields: VersionField[] = []
   let fieldIndex = -1
+
   for (const field of fields) {
     fieldIndex++
+
     if (fieldIsID(field)) {
       continue
     }
@@ -84,7 +86,7 @@ export const buildVersionFields = ({
     const { indexPath, path, schemaPath } = getFieldPathsModified({
       field,
       index: fieldIndex,
-      parentIndexPath: 'name' in field ? '' : parentIndexPath,
+      parentIndexPath,
       parentPath,
       parentSchemaPath,
     })
@@ -253,15 +255,14 @@ const buildVersionField = ({
       tabIndex++
       const isNamedTab = tabHasName(tab)
 
+      const tabAsField = { ...tab, type: 'tab' }
+
       const {
         indexPath: tabIndexPath,
         path: tabPath,
         schemaPath: tabSchemaPath,
       } = getFieldPathsModified({
-        field: {
-          ...tab,
-          type: 'tab',
-        },
+        field: tabAsField,
         index: tabIndex,
         parentIndexPath: indexPath,
         parentPath,
@@ -280,8 +281,8 @@ const buildVersionField = ({
           modifiedOnly,
           parentIndexPath: isNamedTab ? '' : tabIndexPath,
           parentIsLocalized: parentIsLocalized || tab.localized,
-          parentPath: tabPath,
-          parentSchemaPath: tabSchemaPath,
+          parentPath: isNamedTab ? tabPath : path,
+          parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
           req,
           selectedLocales,
           versionSiblingData: 'name' in tab ? versionValue?.[tab.name] : versionValue,
@@ -289,7 +290,7 @@ const buildVersionField = ({
         label: tab.label,
       })
     }
-  } // At this point, we are dealing with a `row`, etc
+  } // At this point, we are dealing with a `row`, `collapsible`, etc
   else if ('fields' in field) {
     if (field.type === 'array' && versionValue) {
       const arrayValue = Array.isArray(versionValue) ? versionValue : []
@@ -328,8 +329,8 @@ const buildVersionField = ({
         modifiedOnly,
         parentIndexPath: 'name' in field ? '' : indexPath,
         parentIsLocalized: parentIsLocalized || ('localized' in field && field.localized),
-        parentPath: path,
-        parentSchemaPath: schemaPath,
+        parentPath: 'name' in field ? path : parentPath,
+        parentSchemaPath: 'name' in field ? schemaPath : parentSchemaPath,
         req,
         selectedLocales,
         versionSiblingData: versionValue as object,

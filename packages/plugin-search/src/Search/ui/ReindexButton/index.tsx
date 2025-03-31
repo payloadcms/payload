@@ -12,6 +12,7 @@ export const ReindexButton: SearchReindexButtonServerComponent = (props) => {
       const pluralLabel = labels?.plural
 
       if (typeof pluralLabel === 'function') {
+        // @ts-expect-error - I don't know why it gives an error. pluralLabel and i18n.t should both resolve to TFunction<DefaultTranslationKeys>
         return [collection, pluralLabel({ t: i18n.t })]
       }
 

@@ -2,7 +2,6 @@ import type { IndexOptions, Schema, SchemaOptions, SchemaTypeOptions } from 'mon
 
 import mongoose from 'mongoose'
 import {
-  APIError,
   type ArrayField,
   type BlocksField,
   type CheckboxField,
@@ -22,6 +21,7 @@ import {
   type RelationshipField,
   type RichTextField,
   type RowField,
+  type SanitizedCompoundIndex,
   type SanitizedLocalizationConfig,
   type SelectField,
   type Tab,
@@ -128,6 +128,7 @@ const localizeSchema = (
 
 export const buildSchema = (args: {
   buildSchemaOptions: BuildSchemaOptions
+  compoundIndexes?: SanitizedCompoundIndex[]
   configFields: Field[]
   parentIsLocalized?: boolean
   payload: Payload
@@ -165,6 +166,26 @@ export const buildSchema = (args: {
       }
     }
   })
+
+  if (args.compoundIndexes) {
+    for (const index of args.compoundIndexes) {
+      const indexDefinition: Record<string, 1> = {}
+
+      for (const field of index.fields) {
+        if (field.pathHasLocalized && payload.config.localization) {
+          for (const locale of payload.config.localization.locales) {
+            indexDefinition[field.localizedPath.replace('<locale>', locale.code)] = 1
+          }
+        } else {
+          indexDefinition[field.path] = 1
+        }
+      }
+
+      schema.index(indexDefinition, {
+        unique: args.buildSchemaOptions.disableUnique ? false : index.unique,
+      })
+    }
+  }
 
   return schema
 }

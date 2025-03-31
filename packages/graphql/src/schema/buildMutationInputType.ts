@@ -107,20 +107,20 @@ export function buildMutationInputType({
       type = new GraphQLList(withNullableType({ type, field, forceNullable, parentIsLocalized }))
       return {
         ...inputObjectTypeConfig,
-        [field.name]: { type },
+        [formatName(field.name)]: { type },
       }
     },
     blocks: (inputObjectTypeConfig: InputObjectTypeConfig, field: BlocksField) => ({
       ...inputObjectTypeConfig,
-      [field.name]: { type: GraphQLJSON },
+      [formatName(field.name)]: { type: GraphQLJSON },
     }),
     checkbox: (inputObjectTypeConfig: InputObjectTypeConfig, field: CheckboxField) => ({
       ...inputObjectTypeConfig,
-      [field.name]: { type: GraphQLBoolean },
+      [formatName(field.name)]: { type: GraphQLBoolean },
     }),
     code: (inputObjectTypeConfig: InputObjectTypeConfig, field: CodeField) => ({
       ...inputObjectTypeConfig,
-      [field.name]: {
+      [formatName(field.name)]: {
         type: withNullableType({ type: GraphQLString, field, forceNullable, parentIsLocalized }),
       },
     }),
@@ -134,13 +134,13 @@ export function buildMutationInputType({
       }, inputObjectTypeConfig),
     date: (inputObjectTypeConfig: InputObjectTypeConfig, field: DateField) => ({
       ...inputObjectTypeConfig,
-      [field.name]: {
+      [formatName(field.name)]: {
         type: withNullableType({ type: GraphQLString, field, forceNullable, parentIsLocalized }),
       },
     }),
     email: (inputObjectTypeConfig: InputObjectTypeConfig, field: EmailField) => ({
       ...inputObjectTypeConfig,
-      [field.name]: {
+      [formatName(field.name)]: {
         type: withNullableType({ type: GraphQLString, field, forceNullable, parentIsLocalized }),
       },
     }),
@@ -165,12 +165,12 @@ export function buildMutationInputType({
       }
       return {
         ...inputObjectTypeConfig,
-        [field.name]: { type },
+        [formatName(field.name)]: { type },
       }
     },
     json: (inputObjectTypeConfig: InputObjectTypeConfig, field: JSONField) => ({
       ...inputObjectTypeConfig,
-      [field.name]: {
+      [formatName(field.name)]: {
         type: withNullableType({ type: GraphQLJSON, field, forceNullable, parentIsLocalized }),
       },
     }),
@@ -178,7 +178,7 @@ export function buildMutationInputType({
       const type = field.name === 'id' ? GraphQLInt : GraphQLFloat
       return {
         ...inputObjectTypeConfig,
-        [field.name]: {
+        [formatName(field.name)]: {
           type: withNullableType({
             type: field.hasMany === true ? new GraphQLList(type) : type,
             field,
@@ -190,7 +190,7 @@ export function buildMutationInputType({
     },
     point: (inputObjectTypeConfig: InputObjectTypeConfig, field: PointField) => ({
       ...inputObjectTypeConfig,
-      [field.name]: {
+      [formatName(field.name)]: {
         type: withNullableType({
           type: new GraphQLList(GraphQLFloat),
           field,
@@ -201,7 +201,7 @@ export function buildMutationInputType({
     }),
     radio: (inputObjectTypeConfig: InputObjectTypeConfig, field: RadioField) => ({
       ...inputObjectTypeConfig,
-      [field.name]: {
+      [formatName(field.name)]: {
         type: withNullableType({ type: GraphQLString, field, forceNullable, parentIsLocalized }),
       },
     }),
@@ -247,12 +247,12 @@ export function buildMutationInputType({
 
       return {
         ...inputObjectTypeConfig,
-        [field.name]: { type: field.hasMany ? new GraphQLList(type) : type },
+        [formatName(field.name)]: { type: field.hasMany ? new GraphQLList(type) : type },
       }
     },
     richText: (inputObjectTypeConfig: InputObjectTypeConfig, field: RichTextField) => ({
       ...inputObjectTypeConfig,
-      [field.name]: {
+      [formatName(field.name)]: {
         type: withNullableType({ type: GraphQLJSON, field, forceNullable, parentIsLocalized }),
       },
     }),
@@ -292,7 +292,7 @@ export function buildMutationInputType({
 
       return {
         ...inputObjectTypeConfig,
-        [field.name]: { type },
+        [formatName(field.name)]: { type },
       }
     },
     tabs: (inputObjectTypeConfig: InputObjectTypeConfig, field: TabsField) => {
@@ -336,7 +336,7 @@ export function buildMutationInputType({
     },
     text: (inputObjectTypeConfig: InputObjectTypeConfig, field: TextField) => ({
       ...inputObjectTypeConfig,
-      [field.name]: {
+      [formatName(field.name)]: {
         type: withNullableType({
           type: field.hasMany === true ? new GraphQLList(GraphQLString) : GraphQLString,
           field,
@@ -347,7 +347,7 @@ export function buildMutationInputType({
     }),
     textarea: (inputObjectTypeConfig: InputObjectTypeConfig, field: TextareaField) => ({
       ...inputObjectTypeConfig,
-      [field.name]: {
+      [formatName(field.name)]: {
         type: withNullableType({ type: GraphQLString, field, forceNullable, parentIsLocalized }),
       },
     }),
@@ -393,7 +393,7 @@ export function buildMutationInputType({
 
       return {
         ...inputObjectTypeConfig,
-        [field.name]: { type: field.hasMany ? new GraphQLList(type) : type },
+        [formatName(field.name)]: { type: field.hasMany ? new GraphQLList(type) : type },
       }
     },
   }

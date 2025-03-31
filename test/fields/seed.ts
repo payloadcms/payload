@@ -69,10 +69,15 @@ const dirname = path.dirname(filename)
 
 export const seed = async (_payload: Payload) => {
   const jpgPath = path.resolve(dirname, './collections/Upload/payload.jpg')
+  const jpg480x320Path = path.resolve(dirname, './collections/Upload/payload480x320.jpg')
   const pngPath = path.resolve(dirname, './uploads/payload.png')
 
   // Get both files in parallel
-  const [jpgFile, pngFile] = await Promise.all([getFileByPath(jpgPath), getFileByPath(pngPath)])
+  const [jpgFile, jpg480x320File, pngFile] = await Promise.all([
+    getFileByPath(jpgPath),
+    getFileByPath(jpg480x320Path),
+    getFileByPath(pngPath),
+  ])
 
   const createdArrayDoc = await _payload.create({
     collection: arrayFieldsSlug,
@@ -117,6 +122,14 @@ export const seed = async (_payload: Payload) => {
       media: createdPNGDoc.id,
     },
     file: jpgFile,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  await _payload.create({
+    collection: uploadsSlug,
+    data: {},
+    file: jpg480x320File,
     depth: 0,
     overrideAccess: true,
   })
@@ -498,6 +511,16 @@ export const seed = async (_payload: Payload) => {
     depth: 0,
   })
 
+  const getInlineBlock = () => ({
+    type: 'inlineBlock',
+    fields: {
+      id: Math.random().toString(36).substring(2, 15),
+      text: 'text',
+      blockType: 'inlineBlockInLexical',
+    },
+    version: 1,
+  })
+
   await _payload.create({
     collection: 'LexicalInBlock',
     depth: 0,
@@ -535,6 +558,32 @@ export const seed = async (_payload: Payload) => {
           blockName: '2',
           lexical: textToLexicalJSON({ text: '2' }),
         },
+        {
+          blockType: 'lexicalInBlock2',
+          lexical: {
+            root: {
+              children: [
+                {
+                  children: [...Array.from({ length: 20 }, () => getInlineBlock())],
+                  direction: null,
+                  format: '',
+                  indent: 0,
+                  type: 'paragraph',
+                  version: 1,
+                  textFormat: 0,
+                  textStyle: '',
+                },
+              ],
+              direction: null,
+              format: '',
+              indent: 0,
+              type: 'root',
+              version: 1,
+            },
+          },
+          id: '67e1af0b78de3228e23ef1d5',
+          blockName: '1',
+        },
       ],
     },
   })
@@ -542,7 +591,67 @@ export const seed = async (_payload: Payload) => {
   await _payload.create({
     collection: 'lexical-access-control',
     data: {
-      richText: textToLexicalJSON({ text: 'text' }),
+      richText: {
+        root: {
+          children: [
+            {
+              children: [
+                {
+                  detail: 0,
+                  format: 0,
+                  mode: 'normal',
+                  style: '',
+                  text: 'text ',
+                  type: 'text',
+                  version: 1,
+                },
+                {
+                  children: [
+                    {
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: 'link',
+                      type: 'text',
+                      version: 1,
+                    },
+                  ],
+                  direction: 'ltr',
+                  format: '',
+                  indent: 0,
+                  type: 'link',
+                  version: 3,
+                  fields: {
+                    url: 'https://',
+                    newTab: false,
+                    linkType: 'custom',
+                    blocks: [
+                      {
+                        id: '67e45673cbd5181ca8cbeef7',
+                        blockType: 'block',
+                      },
+                    ],
+                  },
+                  id: '67e4566fcbd5181ca8cbeef5',
+                },
+              ],
+              direction: 'ltr',
+              format: '',
+              indent: 0,
+              type: 'paragraph',
+              version: 1,
+              textFormat: 0,
+              textStyle: '',
+            },
+          ],
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          type: 'root',
+          version: 1,
+        },
+      },
       title: 'title',
     },
     depth: 0,

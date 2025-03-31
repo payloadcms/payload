@@ -2,8 +2,8 @@
 import type { SanitizedConfig } from 'payload'
 
 import { Link } from '@payloadcms/ui'
-import { formatAdminURL } from '@payloadcms/ui/shared'
 import { useParams, usePathname, useSearchParams } from 'next/navigation.js'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 export const DocumentTabLink: React.FC<{

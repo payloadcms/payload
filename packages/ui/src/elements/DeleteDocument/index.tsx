@@ -4,6 +4,7 @@ import type { SanitizedCollectionConfig } from 'payload'
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback } from 'react'
 import { toast } from 'sonner'
 
@@ -15,7 +16,6 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
-import { formatAdminURL } from '../../utilities/formatAdminURL.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { PopupList } from '../Popup/index.js'
 import { Translation } from '../Translation/index.js'
@@ -59,8 +59,6 @@ export const DeleteDocument: React.FC<Props> = (props) => {
   const { title } = useDocumentInfo()
   const { startRouteTransition } = useRouteTransition()
   const { openModal } = useModal()
-
-  const titleToRender = titleFromProps || title || id
 
   const modalSlug = `delete-${id}`
 
@@ -163,7 +161,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
               t={t}
               variables={{
                 label: getTranslation(singularLabel, i18n),
-                title: titleToRender,
+                title: titleFromProps || title || id,
               }}
             />
           }

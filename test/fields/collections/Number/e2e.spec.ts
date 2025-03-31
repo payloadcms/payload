@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { addListFilter } from 'helpers/e2e/addListFilter.js'
 import { openListFilters } from 'helpers/e2e/openListFilters.js'
 import path from 'path'
 import { wait } from 'payload/shared'
@@ -15,12 +16,12 @@ import {
   saveDocAndAssert,
 } from '../../../helpers.js'
 import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
+import { assertToastErrors } from '../../../helpers/assertToastErrors.js'
 import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
 import { RESTClient } from '../../../helpers/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { numberDoc } from './shared.js'
-import { addListFilter } from 'helpers/e2e/addListFilter.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -110,7 +111,6 @@ describe('Number', () => {
   test('should bypass min rows validation when no rows present and field is not required', async () => {
     await page.goto(url.create)
     await saveDocAndAssert(page)
-    expect(true).toBe(true) // the above fn contains the assertion
   })
 
   test('should fail min rows validation when rows are present', async () => {
@@ -120,9 +120,10 @@ describe('Number', () => {
     await page.keyboard.type(String(input))
     await page.keyboard.press('Enter')
     await page.click('#action-save', { delay: 100 })
-    await expect(page.locator('.payload-toast-container')).toContainText(
-      'The following field is invalid: With Min Rows',
-    )
+    await assertToastErrors({
+      page,
+      errors: ['With Min Rows'],
+    })
   })
 
   test('should keep data removed on save if deleted', async () => {

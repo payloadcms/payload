@@ -7,6 +7,7 @@ import type {
   PayloadRequest,
   PopulateType,
   SelectType,
+  Sort,
   TransformCollectionWithSelect,
   Where,
 } from '../../../types/index.js'
@@ -131,6 +132,12 @@ export type ByIDOptions<
    */
   limit?: never
   /**
+   * Sort the documents, can be a string or an array of strings
+   * @example '-createdAt' // Sort DESC by createdAt
+   * @example ['group', '-createdAt'] // sort by 2 fields, ASC group and DESC createdAt
+   */
+  sort?: never
+  /**
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where?: never
@@ -148,6 +155,12 @@ export type ManyOptions<
    * Limit documents to update
    */
   limit?: number
+  /**
+   * Sort the documents, can be a string or an array of strings
+   * @example '-createdAt' // Sort DESC by createdAt
+   * @example ['group', '-createdAt'] // sort by 2 fields, ASC group and DESC createdAt
+   */
+  sort?: Sort
   /**
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
@@ -205,6 +218,7 @@ async function updateLocal<
     publishSpecificLocale,
     select,
     showHiddenFields,
+    sort,
     where,
   } = options
 
@@ -237,6 +251,7 @@ async function updateLocal<
     req,
     select,
     showHiddenFields,
+    sort,
     where,
   }
 

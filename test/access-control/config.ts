@@ -10,6 +10,7 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { textToLexicalJSON } from '../fields/collections/LexicalLocalized/textToLexicalJSON.js'
 import { Disabled } from './collections/Disabled/index.js'
+import { Hooks } from './collections/hooks/index.js'
 import { Regression1 } from './collections/Regression-1/index.js'
 import { Regression2 } from './collections/Regression-2/index.js'
 import { RichText } from './collections/RichText/index.js'
@@ -567,6 +568,7 @@ export default buildConfigWithDefaults(
       RichText,
       Regression1,
       Regression2,
+      Hooks,
     ],
     globals: [
       {

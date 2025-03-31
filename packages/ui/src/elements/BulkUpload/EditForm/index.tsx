@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useEffect } from 'react'
 
 import type { EditFormProps } from './types.js'
@@ -17,7 +18,6 @@ import { useRouteTransition } from '../../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { useUploadEdits } from '../../../providers/UploadEdits/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../../utilities/abortAndIgnore.js'
-import { formatAdminURL } from '../../../utilities/formatAdminURL.js'
 import { useDocumentDrawerContext } from '../../DocumentDrawer/Provider.js'
 import { DocumentFields } from '../../DocumentFields/index.js'
 import { Upload } from '../../Upload/index.js'

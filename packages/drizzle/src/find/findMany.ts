@@ -22,6 +22,7 @@ type Args = {
 export const findMany = async function find({
   adapter,
   collectionSlug,
+  draftsEnabled,
   fields,
   joins: joinQuery,
   limit: limitArg,
@@ -74,6 +75,7 @@ export const findMany = async function find({
     adapter,
     collectionSlug,
     depth: 0,
+    draftsEnabled,
     fields,
     joinQuery,
     joins,

@@ -87,6 +87,7 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
 
         req.file = {
           name: filename,
+          clientUploadContext,
           data: Buffer.from(await response.arrayBuffer()),
           mimetype: response.headers.get('Content-Type') || mimeType,
           size,

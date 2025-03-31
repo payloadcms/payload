@@ -58,6 +58,8 @@ export const useField = <TValue,>(options: Options): FieldType<TValue> => {
   const prevValid = useRef(valid)
   const prevErrorMessage = useRef(field?.errorMessage)
 
+  const pathSegments = path ? path.split('.') : []
+
   // Method to return from `useField`, used to
   // update field values from field component(s)
   const setValue = useCallback(
@@ -103,6 +105,7 @@ export const useField = <TValue,>(options: Options): FieldType<TValue> => {
   const result: FieldType<TValue> = useMemo(
     () => ({
       customComponents: field?.customComponents,
+      disabled: processing || initializing,
       errorMessage: field?.errorMessage,
       errorPaths: field?.errorPaths || [],
       filterOptions,
@@ -154,6 +157,7 @@ export const useField = <TValue,>(options: Options): FieldType<TValue> => {
                 data: documentForm?.getData ? documentForm.getData() : data,
                 event: 'onChange',
                 operation,
+                path: pathSegments,
                 preferences: {} as any,
                 req: {
                   payload: {

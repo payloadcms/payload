@@ -40,6 +40,13 @@ const Code: CollectionConfig = {
         language: 'css',
       },
     },
+    {
+      name: 'codeWithPadding',
+      type: 'code',
+      admin: {
+        editorOptions: { padding: { bottom: 25, top: 25 } },
+      },
+    },
   ],
 }
 

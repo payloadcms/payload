@@ -2,18 +2,21 @@
 
 import type { JsonObject } from 'payload'
 
+import { isImage } from 'payload/shared'
 import React from 'react'
 
 import type { ReloadDoc } from '../types.js'
 
+import { getBestFitFromSizes } from '../../../utilities/getBestFitFromSizes.js'
+import './index.scss'
 import { RelationshipContent } from '../RelationshipContent/index.js'
 import { UploadCard } from '../UploadCard/index.js'
-import './index.scss'
 
 const baseClass = 'upload upload--has-one'
 
 type Props = {
   readonly className?: string
+  readonly displayPreview?: boolean
   readonly fileDoc: {
     relationTo: string
     value: JsonObject
@@ -25,7 +28,7 @@ type Props = {
 }
 
 export function UploadComponentHasOne(props: Props) {
-  const { className, fileDoc, onRemove, readonly, reloadDoc, serverURL } = props
+  const { className, displayPreview, fileDoc, onRemove, readonly, reloadDoc, serverURL } = props
   const { relationTo, value } = fileDoc
   const id = String(value?.id)
 
@@ -48,6 +51,15 @@ export function UploadComponentHasOne(props: Props) {
     }
   }
 
+  if (isImage(value.mimeType)) {
+    thumbnailSrc = getBestFitFromSizes({
+      sizes: value.sizes,
+      thumbnailURL: thumbnailSrc,
+      url: src,
+      width: value.width,
+    })
+  }
+
   return (
     <UploadCard className={[baseClass, className].filter(Boolean).join(' ')}>
       <RelationshipContent
@@ -56,13 +68,14 @@ export function UploadComponentHasOne(props: Props) {
         alt={(value?.alt || value?.filename) as string}
         byteSize={value.filesize as number}
         collectionSlug={relationTo}
+        displayPreview={displayPreview}
         filename={value.filename as string}
         id={id}
         mimeType={value?.mimeType as string}
         onRemove={onRemove}
         reloadDoc={reloadDoc}
         src={src}
-        thumbnailSrc={thumbnailSrc || src}
+        thumbnailSrc={thumbnailSrc}
         x={value?.width as number}
         y={value?.height as number}
       />

@@ -390,7 +390,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
 
           return field
         },
-        state[action.path] || ({} as FormField),
+        state?.[action.path] || ({} as FormField),
       )
 
       const newState = {

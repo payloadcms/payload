@@ -2,7 +2,7 @@ import type { I18n } from '@payloadcms/translations'
 import type { Metadata } from 'next'
 import type { AdminViewServerProps, ImportMap, SanitizedConfig } from 'payload'
 
-import { formatAdminURL } from '@payloadcms/ui/shared'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import { DefaultTemplate } from '../../templates/Default/index.js'
@@ -10,7 +10,7 @@ import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
 import { initPage } from '../../utilities/initPage/index.js'
 import { NotFoundClient } from './index.client.js'
 
-export const generatePageMetadata = async ({
+export const generateNotFoundViewMetadata = async ({
   config: configPromise,
 }: {
   config: Promise<SanitizedConfig> | SanitizedConfig

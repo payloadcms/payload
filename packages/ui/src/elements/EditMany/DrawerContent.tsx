@@ -1,18 +1,21 @@
 'use client'
 
-import type { FieldWithPathClient, FormState } from 'payload'
+import type { SelectType } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter, useSearchParams } from 'next/navigation.js'
+import { mergeListSearchAndWhere, unflatten } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { FormProps } from '../../forms/Form/index.js'
+import type { OnFieldSelect } from '../FieldSelect/index.js'
+import type { FieldOption } from '../FieldSelect/reduceFieldOptions.js'
 
 import { useForm } from '../../forms/Form/context.js'
 import { Form } from '../../forms/Form/index.js'
-import { RenderFields } from '../../forms/RenderFields/index.js'
+import { RenderField } from '../../forms/RenderFields/RenderField.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
 import { XIcon } from '../../icons/X/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
@@ -24,32 +27,16 @@ import { SelectAllStatus, useSelection } from '../../providers/Selection/index.j
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
-import { filterOutUploadFields } from '../../utilities/filterOutUploadFields.js'
-import { mergeListSearchAndWhere } from '../../utilities/mergeListSearchAndWhere.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { FieldSelect } from '../FieldSelect/index.js'
 import { baseClass, type EditManyProps } from './index.js'
 import './index.scss'
-
-const sanitizeUnselectedFields = (formState: FormState, selected: FieldWithPathClient[]) => {
-  const filteredData = selected.reduce((acc, field) => {
-    const foundState = formState?.[field.path]
-
-    if (foundState) {
-      acc[field.path] = formState?.[field.path]?.value
-    }
-
-    return acc
-  }, {} as FormData)
-
-  return filteredData
-}
+import '../../forms/RenderFields/index.scss'
 
 const Submit: React.FC<{
   readonly action: string
   readonly disabled: boolean
-  readonly selected?: FieldWithPathClient[]
-}> = ({ action, disabled, selected }) => {
+}> = ({ action, disabled }) => {
   const { submit } = useForm()
   const { t } = useTranslation()
 
@@ -57,10 +44,9 @@ const Submit: React.FC<{
     void submit({
       action,
       method: 'PATCH',
-      overrides: (formState) => sanitizeUnselectedFields(formState, selected),
       skipValidation: true,
     })
-  }, [action, submit, selected])
+  }, [action, submit])
 
   return (
     <FormSubmit className={`${baseClass}__save`} disabled={disabled} onClick={save}>
@@ -72,8 +58,7 @@ const Submit: React.FC<{
 const PublishButton: React.FC<{
   action: string
   disabled: boolean
-  selected?: FieldWithPathClient[]
-}> = ({ action, disabled, selected }) => {
+}> = ({ action, disabled }) => {
   const { submit } = useForm()
   const { t } = useTranslation()
 
@@ -81,13 +66,12 @@ const PublishButton: React.FC<{
     void submit({
       action,
       method: 'PATCH',
-      overrides: (formState) => ({
-        ...sanitizeUnselectedFields(formState, selected),
+      overrides: {
         _status: 'published',
-      }),
+      },
       skipValidation: true,
     })
-  }, [action, submit, selected])
+  }, [action, submit])
 
   return (
     <FormSubmit className={`${baseClass}__publish`} disabled={disabled} onClick={save}>
@@ -99,8 +83,7 @@ const PublishButton: React.FC<{
 const SaveDraftButton: React.FC<{
   action: string
   disabled: boolean
-  selected?: FieldWithPathClient[]
-}> = ({ action, disabled, selected }) => {
+}> = ({ action, disabled }) => {
   const { submit } = useForm()
   const { t } = useTranslation()
 
@@ -108,13 +91,12 @@ const SaveDraftButton: React.FC<{
     void submit({
       action,
       method: 'PATCH',
-      overrides: (formState) => ({
-        ...sanitizeUnselectedFields(formState, selected),
+      overrides: {
         _status: 'draft',
-      }),
+      },
       skipValidation: true,
     })
-  }, [action, submit, selected])
+  }, [action, submit])
 
   return (
     <FormSubmit
@@ -131,14 +113,16 @@ const SaveDraftButton: React.FC<{
 export const EditManyDrawerContent: React.FC<
   {
     drawerSlug: string
-    selected: FieldWithPathClient[]
+    selectedFields: FieldOption[]
+    setSelectedFields: (fields: FieldOption[]) => void
   } & EditManyProps
 > = (props) => {
   const {
-    collection: { slug, fields, labels: { plural, singular } } = {},
+    collection: { fields, labels: { plural, singular } } = {},
     collection,
     drawerSlug,
-    selected: selectedFromProps,
+    selectedFields,
+    setSelectedFields,
   } = props
 
   const { permissions, user } = useAuth()
@@ -156,69 +140,45 @@ export const EditManyDrawerContent: React.FC<
 
   const { count, getQueryParams, selectAll } = useSelection()
   const { i18n, t } = useTranslation()
-  const [selected, setSelected] = useState<FieldWithPathClient[]>([])
 
-  useEffect(() => {
-    setSelected(selectedFromProps)
-  }, [selectedFromProps])
+  const [isInitializing, setIsInitializing] = useState(false)
 
   const router = useRouter()
-  const [initialState, setInitialState] = useState<FormState>()
-  const hasInitializedState = React.useRef(false)
   const abortFormStateRef = React.useRef<AbortController>(null)
   const { clearRouteCache } = useRouteCache()
-  const collectionPermissions = permissions?.collections?.[slug]
+  const collectionPermissions = permissions?.collections?.[collection.slug]
   const searchParams = useSearchParams()
 
-  const filteredFields = filterOutUploadFields(fields)
-
-  React.useEffect(() => {
-    const controller = new AbortController()
-
-    if (!hasInitializedState.current) {
-      const getInitialState = async () => {
-        const { state: result } = await getFormState({
-          collectionSlug: slug,
-          data: {},
-          docPermissions: collectionPermissions,
-          docPreferences: null,
-          operation: 'update',
-          schemaPath: slug,
-          signal: controller.signal,
-          skipValidation: true,
-        })
-
-        setInitialState(result)
-        hasInitializedState.current = true
-      }
-
-      void getInitialState()
-    }
-
-    return () => {
-      abortAndIgnore(controller)
-    }
-  }, [apiRoute, hasInitializedState, serverURL, slug, getFormState, user, collectionPermissions])
+  const select = useMemo<SelectType>(() => {
+    return unflatten(
+      selectedFields.reduce((acc, option) => {
+        acc[option.value.path] = true
+        return acc
+      }, {} as SelectType),
+    )
+  }, [selectedFields])
 
   const onChange: FormProps['onChange'][0] = useCallback(
-    async ({ formState: prevFormState }) => {
+    async ({ formState: prevFormState, submitted }) => {
       const controller = handleAbortRef(abortFormStateRef)
 
       const { state } = await getFormState({
-        collectionSlug: slug,
+        collectionSlug: collection.slug,
         docPermissions: collectionPermissions,
         docPreferences: null,
         formState: prevFormState,
         operation: 'update',
-        schemaPath: slug,
+        schemaPath: collection.slug,
+        select,
         signal: controller.signal,
+        skipValidation: !submitted,
       })
 
       abortFormStateRef.current = null
 
       return state
     },
-    [getFormState, slug, collectionPermissions],
+    [getFormState, collection, collectionPermissions, select],
   )
 
   useEffect(() => {
@@ -252,21 +212,52 @@ export const EditManyDrawerContent: React.FC<
     closeModal(drawerSlug)
   }
 
+  const onFieldSelect = useCallback<OnFieldSelect>(
+    async ({ dispatchFields, formState, selected }) => {
+      setIsInitializing(true)
+
+      setSelectedFields(selected || [])
+
+      const { state } = await getFormState({
+        collectionSlug: collection.slug,
+        docPermissions: collectionPermissions,
+        docPreferences: null,
+        formState,
+        operation: 'update',
+        schemaPath: collection.slug,
+        select: unflatten(
+          selected.reduce((acc, option) => {
+            acc[option.value.path] = true
+            return acc
+          }, {} as SelectType),
+        ),
+        skipValidation: true,
+      })
+
+      dispatchFields({
+        type: 'UPDATE_MANY',
+        formState: state,
+      })
+
+      setIsInitializing(false)
+    },
+    [getFormState, collection.slug, collectionPermissions, setSelectedFields],
+  )
+
   return (
     <DocumentInfoProvider
-      collectionSlug={slug}
+      collectionSlug={collection.slug}
       currentEditor={user}
       hasPublishedDoc={false}
       id={null}
       initialData={{}}
-      initialState={initialState}
       isLocked={false}
       lastUpdateTime={0}
       mostRecentVersionIsAutosaved={false}
       unpublishedVersionCount={0}
       versionCount={0}
     >
-      <OperationContext.Provider value="update">
+      <OperationContext value="update">
         <div className={`${baseClass}__main`}>
           <div className={`${baseClass}__header`}>
             <h2 className={`${baseClass}__header__title`}>
@@ -287,20 +278,35 @@ export const EditManyDrawerContent: React.FC<
           </div>
           <Form
             className={`${baseClass}__form`}
-            initialState={initialState}
+            isInitializing={isInitializing}
             onChange={[onChange]}
             onSuccess={onSuccess}
           >
-            <FieldSelect fields={filteredFields} setSelected={setSelected} />
-            {selected.length === 0 ? null : (
-              <RenderFields
-                fields={selected}
-                parentIndexPath=""
-                parentPath=""
-                parentSchemaPath={slug}
-                permissions={collectionPermissions?.fields}
-                readOnly={false}
-              />
+            <FieldSelect
+              fields={fields}
+              onChange={onFieldSelect}
+              permissions={collectionPermissions.fields}
+            />
+            {selectedFields.length === 0 ? null : (
+              <div className="render-fields">
+                {selectedFields.map((option, i) => {
+                  const {
+                    value: { field, fieldPermissions, path },
+                  } = option
+
+                  return (
+                    <RenderField
+                      clientFieldConfig={field}
+                      indexPath=""
+                      key={`${path}-${i}`}
+                      parentPath=""
+                      parentSchemaPath=""
+                      path={path}
+                      permissions={fieldPermissions}
+                    />
+                  )
+                })}
+              </div>
             )}
             <div className={`${baseClass}__sidebar-wrap`}>
               <div className={`${baseClass}__sidebar`}>
@@ -309,21 +315,18 @@ export const EditManyDrawerContent: React.FC<
                     {collection?.versions?.drafts ? (
                       <React.Fragment>
                         <SaveDraftButton
-                          action={`${serverURL}${apiRoute}/${slug}${queryString}&draft=true`}
-                          disabled={selected.length === 0}
-                          selected={selected}
+                          action={`${serverURL}${apiRoute}/${collection.slug}${queryString}&draft=true`}
+                          disabled={selectedFields.length === 0}
                         />
                         <PublishButton
-                          action={`${serverURL}${apiRoute}/${slug}${queryString}&draft=true`}
-                          disabled={selected.length === 0}
-                          selected={selected}
+                          action={`${serverURL}${apiRoute}/${collection.slug}${queryString}&draft=true`}
+                          disabled={selectedFields.length === 0}
                         />
                       </React.Fragment>
                     ) : (
                       <Submit
-                        action={`${serverURL}${apiRoute}/${slug}${queryString}`}
-                        disabled={selected.length === 0}
-                        selected={selected}
+                        action={`${serverURL}${apiRoute}/${collection.slug}${queryString}`}
+                        disabled={selectedFields.length === 0}
                       />
                     )}
                   </div>
@@ -332,7 +335,7 @@ export const EditManyDrawerContent: React.FC<
             </div>
           </Form>
         </div>
-      </OperationContext.Provider>
+      </OperationContext>
     </DocumentInfoProvider>
   )
 }

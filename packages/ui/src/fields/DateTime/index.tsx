@@ -58,6 +58,7 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
     setValue,
     showError,
     value,
@@ -102,7 +103,7 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
 
   const onChange = useCallback(
     (incomingDate: Date) => {
-      if (!readOnly) {
+      if (!(readOnly || disabled)) {
         if (timezone && selectedTimezone && incomingDate) {
           // Create TZDate instances for the selected timezone
           const TZDateWithSelectedTz = TZDate.tz(selectedTimezone)
@@ -132,7 +133,7 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
         }
       }
     },
-    [readOnly, setValue, timezone, selectedTimezone],
+    [readOnly, disabled, timezone, selectedTimezone, isDateOnly, setValue],
   )
 
   const onChangeTimezone = useCallback(
@@ -157,7 +158,7 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
         baseClass,
         className,
         showError && `${baseClass}--has-error`,
-        readOnly && 'read-only',
+        (readOnly || disabled) && 'read-only',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -180,7 +181,7 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
             ...datePickerProps?.overrides,
           }}
           placeholder={getTranslation(placeholder, i18n)}
-          readOnly={readOnly}
+          readOnly={readOnly || disabled}
           value={displayedValue}
         />
         {timezone && supportedTimezones.length > 0 && (

@@ -54,6 +54,7 @@ export type SupportedTimezones =
   | 'Asia/Singapore'
   | 'Asia/Tokyo'
   | 'Asia/Seoul'
+  | 'Australia/Brisbane'
   | 'Australia/Sydney'
   | 'Pacific/Guam'
   | 'Pacific/Noumea'
@@ -78,6 +79,7 @@ export interface Config {
     'custom-ids': CustomId;
     'fake-custom-ids': FakeCustomId;
     'relationships-migration': RelationshipsMigration;
+    'compound-indexes': CompoundIndex;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -97,6 +99,7 @@ export interface Config {
     'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
     'fake-custom-ids': FakeCustomIdsSelect<false> | FakeCustomIdsSelect<true>;
     'relationships-migration': RelationshipsMigrationSelect<false> | RelationshipsMigrationSelect<true>;
+    'compound-indexes': CompoundIndexesSelect<false> | CompoundIndexesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -149,6 +152,7 @@ export interface UserAuthOperations {
 export interface Post {
   id: string;
   title: string;
+  number?: number | null;
   D1?: {
     D2?: {
       D3?: {
@@ -402,6 +406,21 @@ export interface RelationshipsMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "compound-indexes".
+ */
+export interface CompoundIndex {
+  id: string;
+  one?: string | null;
+  two?: string | null;
+  three?: string | null;
+  group?: {
+    four?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -473,6 +492,10 @@ export interface PayloadLockedDocument {
         value: string | RelationshipsMigration;
       } | null)
     | ({
+        relationTo: 'compound-indexes';
+        value: string | CompoundIndex;
+      } | null)
+    | ({
         relationTo: 'users';
         value: string | User;
       } | null);
@@ -524,6 +547,7 @@ export interface PayloadMigration {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
+  number?: T;
   D1?:
     | T
     | {
@@ -752,6 +776,22 @@ export interface FakeCustomIdsSelect<T extends boolean = true> {
 export interface RelationshipsMigrationSelect<T extends boolean = true> {
   relationship?: T;
   relationship_2?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "compound-indexes_select".
+ */
+export interface CompoundIndexesSelect<T extends boolean = true> {
+  one?: T;
+  two?: T;
+  three?: T;
+  group?:
+    | T
+    | {
+        four?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }

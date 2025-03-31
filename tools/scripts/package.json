@@ -1,10 +1,10 @@
 {
   "name": "@tools/scripts",
   "version": "0.0.1",
-  "description": "",
+  "description": "Shared scripts for Payload internal tooling",
   "keywords": [],
-  "license": "ISC",
-  "author": "",
+  "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
   "type": "module",
   "exports": {
     ".": {
@@ -16,6 +16,7 @@
     "build": "tsc",
     "build-template-with-local-pkgs": "pnpm runts src/build-template-with-local-pkgs.ts",
     "gen-templates": "pnpm runts src/generate-template-variations.ts",
+    "license-check": "pnpm runts src/license-check.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "pack-all-to-dest": "pnpm runts src/pack-all-to-dest.ts",
@@ -29,6 +30,8 @@
     "chalk": "^4.1.2",
     "changelogen": "^0.5.5",
     "create-payload-app": "workspace:*",
+    "csv-stringify": "^6.5.2",
+    "license-checker": "25.0.1",
     "open": "^10.1.0"
   }
 }

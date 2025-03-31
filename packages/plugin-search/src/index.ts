@@ -1,6 +1,6 @@
 import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, Config } from 'payload'
 
-import type { SearchPluginConfig, SearchPluginConfigWithLocales } from './types.js'
+import type { SanitizedSearchPluginConfig, SearchPluginConfig } from './types.js'
 
 import { deleteFromSearch } from './Search/hooks/deleteFromSearch.js'
 import { syncWithSearch } from './Search/hooks/syncWithSearch.js'
@@ -35,7 +35,7 @@ export const searchPlugin =
           .map((collection) => [collection.slug, collection.labels]),
       )
 
-      const pluginConfig: SearchPluginConfigWithLocales = {
+      const pluginConfig: SanitizedSearchPluginConfig = {
         // write any config defaults here
         deleteDrafts: true,
         labels,

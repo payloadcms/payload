@@ -9,7 +9,12 @@ import type { PayloadRequest, Where } from '../../types/index.js'
 import type { User } from '../types.js'
 
 import { buildAfterOperation } from '../../collections/operations/utils.js'
-import { AuthenticationError, LockedAuth, ValidationError } from '../../errors/index.js'
+import {
+  AuthenticationError,
+  LockedAuth,
+  UnverifiedEmail,
+  ValidationError,
+} from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { Forbidden } from '../../index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -179,11 +184,16 @@ export const loginOperation = async <TSlug extends CollectionSlug>(
       where: whereConstraint,
     })
 
-    if (!user || (args.collection.config.auth.verify && user._verified === false)) {
+    if (!user) {
       throw new AuthenticationError(req.t, Boolean(canLoginWithUsername && sanitizedUsername))
     }
 
+    if (args.collection.config.auth.verify && user._verified === false) {
+      throw new UnverifiedEmail({ t: req.t })
+    }
+
     user.collection = collectionConfig.slug
+    user._strategy = 'local-jwt'
 
     if (isLocked(new Date(user.lockUntil).getTime())) {
       throw new LockedAuth(req.t)
