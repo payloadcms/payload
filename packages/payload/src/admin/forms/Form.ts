@@ -45,6 +45,7 @@ export type FieldState = {
    */
   fieldSchema?: Field
   filterOptions?: FilterOptionsResult
+  ignoreRequiresRenderResult?: boolean
   initialValue?: unknown
   passesCondition?: boolean
   requiresRender?: boolean

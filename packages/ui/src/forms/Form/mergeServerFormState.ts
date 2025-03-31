@@ -78,18 +78,30 @@ export const mergeServerFormState = ({
       /**
        * Handle adding all the remaining props that should be updated in the local form state from the server form state
        */
-      serverPropsToAccept.forEach((prop) => {
-        if (!dequal(incomingState[path]?.[prop], newFieldState[prop])) {
+      serverPropsToAccept.forEach((propFromServer) => {
+        if (!dequal(incomingState[path]?.[propFromServer], newFieldState[propFromServer])) {
           changed = true
           fieldChanged = true
-          if (!(prop in incomingState[path])) {
+
+          // The `ignoreRequiresRenderResult` property is used to prevent the `requiresRender` property from being overridden across requests.
+          // This can happen when queueing a form state request with `requiresRender: true` while the another is already processing.
+          // For example:
+          //   1. One "add row" action will set `requiresRender: true` and dispatch a form state request
+          //   2. Another "add row" action will set `requiresRender: true` and queue a form state request
+          //   3. The first request will return with `requiresRender: false`
+          //   4. The second request will be dispatched with `requiresRender: false` but should be `true`
+          if (propFromServer === 'requiresRender' && newFieldState.ignoreRequiresRenderResult) {
+            return
+          }
+
+          if (!(propFromServer in incomingState[path])) {
             // Regarding excluding the customComponents prop from being deleted: the incoming state might not have been rendered, as rendering components for every form onchange is expensive.
             // Thus, we simply re-use the initial render state
-            if (prop !== 'customComponents') {
-              delete newFieldState[prop]
+            if (propFromServer !== 'customComponents') {
+              delete newFieldState[propFromServer]
             }
           } else {
-            newFieldState[prop] = incomingState[path][prop]
+            newFieldState[propFromServer] = incomingState[path][propFromServer]
           }
         }
       })
@@ -109,7 +121,6 @@ export const mergeServerFormState = ({
     // Now loop over values that are part of incoming state but not part of existing state, and add them to the new state.
     // This can happen if a new array row was added. In our local state, we simply add out stubbed `array` and `array.[index].id` entries to the local form state.
     // However, all other array sub-fields are not added to the local state - those will be added by the server and may be incoming here.
-
     for (const [path, field] of Object.entries(incomingState)) {
       if (!existingState[path]) {
         changed = true

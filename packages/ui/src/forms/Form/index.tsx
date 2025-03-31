@@ -606,19 +606,9 @@ export const Form: React.FC<FormProps> = (props) => {
         subFieldState,
       })
 
-      queueTask(
-        () => {
-          contextRef.current.fields[path].requiresRender = true
-        },
-        {
-          discard: false,
-          priority: true,
-        },
-      )
-
       setModified(true)
     },
-    [dispatchFields, getDataByPath, queueTask],
+    [dispatchFields, getDataByPath],
   )
 
   const moveFieldRow: FormContextType['moveFieldRow'] = useCallback(
@@ -630,37 +620,18 @@ export const Form: React.FC<FormProps> = (props) => {
         path,
       })
 
-      queueTask(
-        () => {
-          contextRef.current.fields[path].requiresRender = true
-        },
-        {
-          discard: false,
-          priority: true,
-        },
-      )
       setModified(true)
     },
-    [dispatchFields, queueTask],
+    [dispatchFields],
   )
 
   const removeFieldRow: FormContextType['removeFieldRow'] = useCallback(
     ({ path, rowIndex }) => {
       dispatchFields({ type: 'REMOVE_ROW', path, rowIndex })
 
-      queueTask(
-        () => {
-          contextRef.current.fields[path].requiresRender = true
-        },
-        {
-          discard: false,
-          priority: true,
-        },
-      )
-
       setModified(true)
     },
-    [dispatchFields, queueTask],
+    [dispatchFields],
   )
 
   const replaceFieldRow: FormContextType['replaceFieldRow'] = useCallback(
@@ -676,19 +647,9 @@ export const Form: React.FC<FormProps> = (props) => {
         subFieldState,
       })
 
-      queueTask(
-        () => {
-          contextRef.current.fields[path].requiresRender = true
-        },
-        {
-          discard: false,
-          priority: true,
-        },
-      )
-
       setModified(true)
     },
-    [dispatchFields, getDataByPath, queueTask],
+    [dispatchFields, getDataByPath],
   )
 
   useEffect(() => {
