@@ -45,7 +45,7 @@ export type FieldState = {
    */
   fieldSchema?: Field
   filterOptions?: FilterOptionsResult
-  ignoreRequiresRenderResult?: boolean
+  ignoreServerProps?: Partial<Record<keyof FieldState, boolean>>
   initialValue?: unknown
   passesCondition?: boolean
   requiresRender?: boolean
