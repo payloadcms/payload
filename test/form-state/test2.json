@@ -1,0 +1,466 @@
+{
+  "lockedState": {
+    "isLocked": true,
+    "lastEditedAt": "2025-03-31T21:44:00.115Z",
+    "user": {
+      "createdAt": "2025-03-31T21:30:11.215Z",
+      "updatedAt": "2025-03-31T21:30:11.215Z",
+      "email": "dev@payloadcms.com",
+      "id": "67eb09635d15fc77b1da4823",
+      "loginAttempts": 0,
+      "collection": "users",
+      "_strategy": "local-jwt"
+    }
+  },
+  "state": {
+    "title": {
+      "value": "example post",
+      "initialValue": "example post",
+      "lastRenderedPath": "title"
+    },
+    "renderTracker": {
+      "lastRenderedPath": "renderTracker",
+      "customComponents": {
+        "Field": [
+          "$",
+          "$L2",
+          null,
+          {
+            "path": "renderTracker",
+            "children": [
+              "$",
+              "$L3",
+              "field.admin.components.Field",
+              {
+                "field": {
+                  "name": "renderTracker",
+                  "type": "text",
+                  "admin": {},
+                  "label": "Render Tracker"
+                },
+                "path": "renderTracker",
+                "permissions": true,
+                "readOnly": false,
+                "schemaPath": "posts.renderTracker"
+              },
+              null,
+              [
+                [
+                  "RenderServerComponent",
+                  "webpack-internal:///(rsc)/./packages/ui/src/elements/RenderServerComponent/index.tsx",
+                  59,
+                  95
+                ],
+                [
+                  "renderField",
+                  "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/renderField.tsx",
+                  259,
+                  126
+                ],
+                [
+                  "addFieldStatePromise",
+                  "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/addFieldStatePromise.ts",
+                  584,
+                  9
+                ],
+                [
+                  "eval",
+                  "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/iterateFields.ts",
+                  51,
+                  101
+                ],
+                [
+                  "iterateFields",
+                  "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/iterateFields.ts",
+                  15,
+                  12
+                ],
+                [
+                  "fieldSchemasToFormState",
+                  "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/index.tsx",
+                  36,
+                  79
+                ],
+                [
+                  "async buildFormState",
+                  "webpack-internal:///(rsc)/./packages/ui/src/utilities/buildFormState.ts",
+                  130,
+                  29
+                ],
+                [
+                  "async buildFormStateHandler",
+                  "webpack-internal:///(rsc)/./packages/ui/src/utilities/buildFormState.ts",
+                  55,
+                  21
+                ],
+                [
+                  "async Server.<anonymous>",
+                  "file:///Users/jacobfletcher/dev/payload/payload/test/dev.ts",
+                  1,
+                  2848
+                ]
+              ],
+              1
+            ]
+          },
+          null,
+          [
+            [
+              "renderField",
+              "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/renderField.tsx",
+              257,
+              128
+            ],
+            [
+              "addFieldStatePromise",
+              "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/addFieldStatePromise.ts",
+              584,
+              9
+            ],
+            [
+              "eval",
+              "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/iterateFields.ts",
+              51,
+              101
+            ],
+            [
+              "iterateFields",
+              "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/iterateFields.ts",
+              15,
+              12
+            ],
+            [
+              "fieldSchemasToFormState",
+              "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/index.tsx",
+              36,
+              79
+            ],
+            [
+              "async buildFormState",
+              "webpack-internal:///(rsc)/./packages/ui/src/utilities/buildFormState.ts",
+              130,
+              29
+            ],
+            [
+              "async buildFormStateHandler",
+              "webpack-internal:///(rsc)/./packages/ui/src/utilities/buildFormState.ts",
+              55,
+              21
+            ],
+            [
+              "async Server.<anonymous>",
+              "file:///Users/jacobfletcher/dev/payload/payload/test/dev.ts",
+              1,
+              2848
+            ]
+          ],
+          0
+        ]
+      }
+    },
+    "validateUsingEvent": { "lastRenderedPath": "validateUsingEvent" },
+    "array.0.id": {
+      "value": "67eb09903a4c5f0cce051442",
+      "initialValue": "67eb09903a4c5f0cce051442"
+    },
+    "array.0.richText": {
+      "lastRenderedPath": "array.0.richText",
+      "customComponents": {
+        "Field": [
+          "$",
+          "$L2",
+          null,
+          { "path": "array.0.richText", "children": "$L4" },
+          null,
+          [
+            [
+              "renderField",
+              "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/renderField.tsx",
+              156,
+              128
+            ],
+            [
+              "addFieldStatePromise",
+              "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/addFieldStatePromise.ts",
+              584,
+              9
+            ],
+            [
+              "eval",
+              "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/iterateFields.ts",
+              51,
+              101
+            ],
+            [
+              "iterateFields",
+              "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/iterateFields.ts",
+              15,
+              12
+            ],
+            [
+              "arrayValue.reduce.promises",
+              "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/addFieldStatePromise.ts",
+              125,
+              107
+            ],
+            [
+              "addFieldStatePromise",
+              "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/addFieldStatePromise.ts",
+              112,
+              59
+            ],
+            [
+              "eval",
+              "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/iterateFields.ts",
+              51,
+              101
+            ],
+            [
+              "iterateFields",
+              "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/iterateFields.ts",
+              15,
+              12
+            ],
+            [
+              "fieldSchemasToFormState",
+              "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/index.tsx",
+              36,
+              79
+            ],
+            [
+              "async buildFormState",
+              "webpack-internal:///(rsc)/./packages/ui/src/utilities/buildFormState.ts",
+              130,
+              29
+            ],
+            [
+              "async buildFormStateHandler",
+              "webpack-internal:///(rsc)/./packages/ui/src/utilities/buildFormState.ts",
+              55,
+              21
+            ],
+            [
+              "async Server.<anonymous>",
+              "file:///Users/jacobfletcher/dev/payload/payload/test/dev.ts",
+              1,
+              2848
+            ]
+          ],
+          0
+        ]
+      }
+    },
+    "array.1.id": {
+      "value": "67eb09923a4c5f0cce051444",
+      "initialValue": "67eb09923a4c5f0cce051444",
+      "lastRenderedPath": "array.1.id"
+    },
+    "array.1.richText": {
+      "lastRenderedPath": "array.1.richText",
+      "customComponents": {
+        "Field": [
+          "$",
+          "$L2",
+          null,
+          { "path": "array.1.richText", "children": "$L6" },
+          null,
+          [
+            [
+              "renderField",
+              "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/renderField.tsx",
+              156,
+              128
+            ],
+            [
+              "addFieldStatePromise",
+              "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/addFieldStatePromise.ts",
+              584,
+              9
+            ],
+            [
+              "eval",
+              "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/iterateFields.ts",
+              51,
+              101
+            ],
+            [
+              "iterateFields",
+              "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/iterateFields.ts",
+              15,
+              12
+            ],
+            [
+              "arrayValue.reduce.promises",
+              "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/addFieldStatePromise.ts",
+              125,
+              107
+            ],
+            [
+              "addFieldStatePromise",
+              "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/addFieldStatePromise.ts",
+              112,
+              59
+            ],
+            [
+              "eval",
+              "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/iterateFields.ts",
+              51,
+              101
+            ],
+            [
+              "iterateFields",
+              "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/iterateFields.ts",
+              15,
+              12
+            ],
+            [
+              "fieldSchemasToFormState",
+              "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/index.tsx",
+              36,
+              79
+            ],
+            [
+              "async buildFormState",
+              "webpack-internal:///(rsc)/./packages/ui/src/utilities/buildFormState.ts",
+              130,
+              29
+            ],
+            [
+              "async buildFormStateHandler",
+              "webpack-internal:///(rsc)/./packages/ui/src/utilities/buildFormState.ts",
+              55,
+              21
+            ],
+            [
+              "async Server.<anonymous>",
+              "file:///Users/jacobfletcher/dev/payload/payload/test/dev.ts",
+              1,
+              2848
+            ]
+          ],
+          0
+        ]
+      }
+    },
+    "array.2.id": {
+      "value": "67eb0a7f3a4c5f0cce051446",
+      "initialValue": "67eb0a7f3a4c5f0cce051446"
+    },
+    "array.2.richText": {},
+    "array.3.id": {
+      "value": "67eb0c9f3a4c5f0cce051448",
+      "initialValue": "67eb0c9f3a4c5f0cce051448",
+      "lastRenderedPath": "array.3.id"
+    },
+    "array.3.richText": {
+      "lastRenderedPath": "array.3.richText",
+      "customComponents": {
+        "Field": [
+          "$",
+          "$L2",
+          null,
+          { "path": "array.3.richText", "children": "$L8" },
+          null,
+          [
+            [
+              "renderField",
+              "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/renderField.tsx",
+              156,
+              128
+            ],
+            [
+              "addFieldStatePromise",
+              "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/addFieldStatePromise.ts",
+              584,
+              9
+            ],
+            [
+              "eval",
+              "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/iterateFields.ts",
+              51,
+              101
+            ],
+            [
+              "iterateFields",
+              "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/iterateFields.ts",
+              15,
+              12
+            ],
+            [
+              "arrayValue.reduce.promises",
+              "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/addFieldStatePromise.ts",
+              125,
+              107
+            ],
+            [
+              "addFieldStatePromise",
+              "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/addFieldStatePromise.ts",
+              112,
+              59
+            ],
+            [
+              "eval",
+              "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/iterateFields.ts",
+              51,
+              101
+            ],
+            [
+              "iterateFields",
+              "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/iterateFields.ts",
+              15,
+              12
+            ],
+            [
+              "fieldSchemasToFormState",
+              "webpack-internal:///(rsc)/./packages/ui/src/forms/fieldSchemasToFormState/index.tsx",
+              36,
+              79
+            ],
+            [
+              "async buildFormState",
+              "webpack-internal:///(rsc)/./packages/ui/src/utilities/buildFormState.ts",
+              130,
+              29
+            ],
+            [
+              "async buildFormStateHandler",
+              "webpack-internal:///(rsc)/./packages/ui/src/utilities/buildFormState.ts",
+              55,
+              21
+            ],
+            [
+              "async Server.<anonymous>",
+              "file:///Users/jacobfletcher/dev/payload/payload/test/dev.ts",
+              1,
+              2848
+            ]
+          ],
+          0
+        ]
+      }
+    },
+    "updatedAt": {
+      "value": "2025-03-31T21:30:11.221Z",
+      "initialValue": "2025-03-31T21:30:11.221Z",
+      "lastRenderedPath": "updatedAt"
+    },
+    "createdAt": {
+      "value": "2025-03-31T21:30:11.221Z",
+      "initialValue": "2025-03-31T21:30:11.221Z",
+      "lastRenderedPath": "createdAt"
+    },
+    "blocks": { "value": 0, "initialValue": 0, "rows": [], "lastRenderedPath": "blocks" },
+    "array": {
+      "rows": [
+        { "id": "67eb09903a4c5f0cce051442" },
+        { "id": "67eb09923a4c5f0cce051444" },
+        { "id": "67eb0a7f3a4c5f0cce051446" },
+        { "id": "67eb0c9f3a4c5f0cce051448" }
+      ],
+      "value": 4,
+      "initialValue": 4,
+      "disableFormData": true,
+      "lastRenderedPath": "array"
+    }
+  }
+}

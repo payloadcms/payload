@@ -5,7 +5,7 @@ import type { FormState } from 'payload'
 import { expect, test } from '@playwright/test'
 import { addBlock } from 'helpers/e2e/addBlock.js'
 import { assertNetworkRequests } from 'helpers/e2e/assertNetworkRequests.js'
-import { assertRequestBody } from 'helpers/e2e/assertRequestBody.js'
+import { assertResponseBody } from 'helpers/e2e/assertResponseBody.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -194,21 +194,50 @@ test.describe('Form State', () => {
     })
 
     // Add a row and immediately type into another field
-    // Test that the rich text field within the row does not disappear
+    // Test that:
+    // 1. The rich text field within the row does not disappear
+    // 2. The rich text in row 1 is rendered on the first request
+    // 3. The rich text in row 1 is not rendered on the second request
+    // 4. The rich text in row 2 is rendered on the second request
     await assertNetworkRequests(
       page,
       postsUrl.create,
       async () => {
-        // Ensure `requiresRender` is `true` is set for the first request
-        await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
+        // Ensure the response contains rendered components for the first row
+        await assertResponseBody<{ state: FormState }>(page, {
           action: page.locator('#field-array .array-field__add-row').click(),
-          // expect: (body) => body[0]?.args?.formState?.array?.requiresRender === true,
+          url: '/admin/collections/posts/create',
+          expect: (body) =>
+            Boolean(
+              body.state?.array?.lastRenderedPath === 'array' &&
+                body.state?.['array.0.richText'] &&
+                ['lastRenderedPath', 'customComponents'].every(
+                  (key) =>
+                    body.state?.['array.0.richText'] && key in body.state['array.0.richText'],
+                ),
+            ),
         })
 
-        // Ensure `requiresRender` is `false` for the second request
-        await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
+        // Ensure the response contains rendered components for the second row
+        // But does _not_ contain rendered components for the first row
+        await assertResponseBody<{ state: FormState }>(page, {
           action: page.locator('#field-title').fill('Title 2'),
-          // expect: (body) => body[0]?.args?.formState?.array?.requiresRender === false,
+          url: '/admin/collections/posts/create',
+          expect: (body) =>
+            Boolean(
+              body.state?.array?.lastRenderedPath === 'array' &&
+                // ensure first row _DOES NOT_ have rendered components
+                body.state?.['array.0.richText'] &&
+                !['lastRenderedPath', 'customComponents'].every(
+                  (key) =>
+                    body.state?.['array.0.richText'] && key in body.state['array.0.richText'],
+                ) &&
+                // ensure second row _DOES_ have rendered components
+                body.state?.['array.1.richText'] &&
+                ['lastRenderedPath', 'customComponents'].every(
+                  (key) => body.state['array.1.richText'] && key in body.state['array.1.richText'],
+                ),
+            ),
         })
 
         // use `waitForSelector` to ensure the element doesn't appear and then disappear
@@ -255,14 +284,16 @@ test.describe('Form State', () => {
       postsUrl.create,
       async () => {
         // Ensure `requiresRender` is `true` is set for the first request
-        await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
+        await assertResponseBody<{ state: FormState }>(page, {
           action: page.locator('#field-array .array-field__add-row').click(),
+          url: '/admin/collections/posts/create',
           // expect: (body) => body[0]?.args?.formState?.array?.requiresRender === true,
         })
 
         // Ensure `requiresRender` is `true` is set for the second request
-        await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
+        await assertResponseBody<{ state: FormState }>(page, {
           action: page.locator('#field-array .array-field__add-row').click(),
+          url: '/admin/collections/posts/create',
           // expect: (body) => body[0]?.args?.formState?.array?.requiresRender === true,
         })
 
@@ -293,8 +324,9 @@ test.describe('Form State', () => {
     )
 
     // Ensure `requiresRender` is `false` for the third request
-    await assertRequestBody<{ args: { formState: FormState } }[]>(page, {
+    await assertResponseBody<{ state: FormState }>(page, {
       action: page.locator('#field-title').fill('Title 2'),
+      url: '/admin/collections/posts/create',
       // expect: (body) => body[0]?.args?.formState?.array?.requiresRender === false,
     })
 
