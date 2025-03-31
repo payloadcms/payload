@@ -120,6 +120,7 @@ export const esTranslations: DefaultTranslationsObject = {
     unknown: 'Ocurrió un error desconocido.',
     unPublishingDocument: 'Ocurrió un error al despublicar este documento.',
     unspecific: 'Ocurrió un error.',
+    unverifiedEmail: 'Por favor, verifica tu correo electrónico antes de iniciar sesión.',
     userEmailAlreadyRegistered:
       'Ya hay un usuario registrado con el correo electrónico proporcionado.',
     userLocked:
@@ -318,6 +319,7 @@ export const esTranslations: DefaultTranslationsObject = {
     selectAll: 'Seleccionar todo {{count}} {{label}}',
     selectAllRows: 'Selecciona todas las filas',
     selectedCount: '{{count}} {{label}} seleccionado',
+    selectLabel: 'Seleccione {{label}}',
     selectValue: 'Selecciona un valor',
     showAllLabel: 'Muestra todas {{label}}',
     sorryNotFound: 'Lo sentimos. No hay nada que corresponda con tu solicitud.',
@@ -345,7 +347,9 @@ export const esTranslations: DefaultTranslationsObject = {
     upcomingEvents: 'Próximos Eventos',
     updatedAt: 'Fecha de modificado',
     updatedCountSuccessfully: '{{count}} {{label}} actualizado con éxito.',
+    updatedLabelSuccessfully: 'Actualizado {{label}} con éxito.',
     updatedSuccessfully: 'Actualizado con éxito.',
+    updateForEveryone: 'Actualización para todos',
     updating: 'Actualizando',
     uploading: 'Subiendo',
     uploadingBulk: 'Subiendo {{current}} de {{total}}',
@@ -402,6 +406,7 @@ export const esTranslations: DefaultTranslationsObject = {
     height: 'Alto',
     lessInfo: 'Menos info',
     moreInfo: 'Más info',
+    noFile: 'Ningún archivo',
     pasteURL: 'Pegar URL',
     previewSizes: 'Tamaños de Vista Previa',
     selectCollectionToBrowse: 'Selecciona una Colección',

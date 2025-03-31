@@ -10,7 +10,7 @@ import { TableCellNode, TableNode, TableRowNode } from '@lexical/table'
 import { sanitizeFields } from 'payload'
 
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
-import { convertLexicalNodesToHTML } from '../../converters/html_deprecated/converter/index.js'
+import { convertLexicalNodesToHTML } from '../../converters/lexicalToHtml_deprecated/converter/index.js'
 import { createNode } from '../../typeUtilities.js'
 import { TableMarkdownTransformer } from '../markdownTransformer.js'
 

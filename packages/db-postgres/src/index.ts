@@ -33,6 +33,7 @@ import {
   rollbackTransaction,
   updateGlobal,
   updateGlobalVersion,
+  updateJobs,
   updateMany,
   updateOne,
   updateVersion,
@@ -64,6 +65,7 @@ const filename = fileURLToPath(import.meta.url)
 export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter> {
   const postgresIDType = args.idType || 'serial'
   const payloadIDType = postgresIDType === 'serial' ? 'number' : 'text'
+  const allowIDOnCreate = args.allowIDOnCreate ?? false
 
   function adapter({ payload }: { payload: Payload }) {
     const migrationDir = findMigrationDir(args.migrationDir)
@@ -94,6 +96,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
     return createDatabaseAdapter<PostgresAdapter>({
       name: 'postgres',
       afterSchemaInit: args.afterSchemaInit ?? [],
+      allowIDOnCreate,
       beforeSchemaInit: args.beforeSchemaInit ?? [],
       createDatabase,
       createExtensions,
@@ -170,6 +173,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       find,
       findGlobal,
       findGlobalVersions,
+      updateJobs,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       findOne,
       findVersions,
@@ -204,6 +208,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
   }
 
   return {
+    allowIDOnCreate,
     defaultIDType: payloadIDType,
     init: adapter,
   }

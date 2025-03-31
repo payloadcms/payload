@@ -43,7 +43,7 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
     }
   }, [fileSrc, mimeType])
 
-  let src: string = ''
+  let src: null | string = null
 
   /**
    * If an imageCacheTag is provided, append it to the fileSrc

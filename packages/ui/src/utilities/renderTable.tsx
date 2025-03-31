@@ -18,10 +18,10 @@ import { fieldAffectsData, fieldIsHiddenOrDisabled, flattenTopLevelFields } from
 import type { Column } from '../exports/client/index.js'
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
-import { buildColumnState } from '../elements/TableColumns/buildColumnState.js'
-import { buildPolymorphicColumnState } from '../elements/TableColumns/buildPolymorphicColumnState.js'
-import { filterFields } from '../elements/TableColumns/filterFields.js'
-import { getInitialColumns } from '../elements/TableColumns/getInitialColumns.js'
+import { buildColumnState } from '../providers/TableColumns/buildColumnState.js'
+import { buildPolymorphicColumnState } from '../providers/TableColumns/buildPolymorphicColumnState.js'
+import { filterFields } from '../providers/TableColumns/filterFields.js'
+import { getInitialColumns } from '../providers/TableColumns/getInitialColumns.js'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import { Pill, SelectAll, SelectRow, Table } from '../exports/client/index.js'

@@ -1,20 +1,29 @@
+import type {
+  AdminViewServerProps,
+  ColumnPreference,
+  DefaultDocumentIDType,
+  ListPreferences,
+  ListQuery,
+  ListViewClientProps,
+  ListViewServerPropsOnly,
+  QueryPreset,
+  SanitizedCollectionPermission,
+  Where,
+} from 'payload'
+
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
-import { mergeListSearchAndWhere } from '@payloadcms/ui/shared'
 import { notFound } from 'next/navigation.js'
 import {
-  type AdminViewServerProps,
-  type ColumnPreference,
-  type ListPreferences,
-  type ListQuery,
-  type ListViewClientProps,
-  type ListViewServerPropsOnly,
-  type Where,
-} from 'payload'
-import { formatAdminURL, isNumber, transformColumnsToPreferences } from 'payload/shared'
+  formatAdminURL,
+  isNumber,
+  mergeListSearchAndWhere,
+  transformColumnsToPreferences,
+} from 'payload/shared'
 import React, { Fragment } from 'react'
 
+import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
 import { renderListViewSlots } from './renderListViewSlots.js'
 import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
 
@@ -22,10 +31,13 @@ type RenderListViewArgs = {
   customCellProps?: Record<string, any>
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
+  disableQueryPresets?: boolean
   drawerSlug?: string
   enableRowSelections: boolean
   overrideEntityVisibility?: boolean
   query: ListQuery
+  redirectAfterDelete?: boolean
+  redirectAfterDuplicate?: boolean
 } & AdminViewServerProps
 
 export const renderListView = async (
@@ -38,6 +50,7 @@ export const renderListView = async (
     customCellProps,
     disableBulkDelete,
     disableBulkEdit,
+    disableQueryPresets,
     drawerSlug,
     enableRowSelections,
     initPageResult,
@@ -85,6 +98,7 @@ export const renderListView = async (
     value: {
       columns,
       limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
+      preset: (query?.preset as DefaultDocumentIDType) || null,
       sort: query?.sort as string,
     },
   })
@@ -124,6 +138,32 @@ export const renderListView = async (
         where = {
           and: [where, baseListFilter].filter(Boolean),
         }
+      }
+    }
+
+    let queryPreset: QueryPreset | undefined
+    let queryPresetPermissions: SanitizedCollectionPermission | undefined
+
+    if (listPreferences?.preset) {
+      try {
+        queryPreset = (await payload.findByID({
+          id: listPreferences?.preset,
+          collection: 'payload-query-presets',
+          depth: 0,
+          overrideAccess: false,
+          user,
+        })) as QueryPreset
+
+        if (queryPreset) {
+          queryPresetPermissions = await getDocumentPermissions({
+            id: queryPreset.id,
+            collectionConfig: config.collections.find((c) => c.slug === 'payload-query-presets'),
+            data: queryPreset,
+            req,
+          })?.then(({ docPermissions }) => docPermissions)
+        }
+      } catch (err) {
+        req.payload.logger.error(`Error fetching query preset or preset permissions: ${err}`)
       }
     }
 
@@ -212,6 +252,7 @@ export const renderListView = async (
         <Fragment>
           <HydrateAuthProvider permissions={permissions} />
           <ListQueryProvider
+            collectionSlug={collectionSlug}
             columns={transformColumnsToPreferences(columnState)}
             data={data}
             defaultLimit={limit}
@@ -226,10 +267,13 @@ export const renderListView = async (
                 columnState,
                 disableBulkDelete,
                 disableBulkEdit,
+                disableQueryPresets,
                 enableRowSelections,
                 hasCreatePermission,
                 listPreferences,
                 newDocumentURL,
+                queryPreset,
+                queryPresetPermissions,
                 renderedFilters,
                 resolvedFilterOptions,
                 Table,

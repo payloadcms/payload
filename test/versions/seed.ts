@@ -6,7 +6,6 @@ import type { DraftPost } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
 import { executePromises } from '../helpers/executePromises.js'
-import { titleToDelete } from './shared.js'
 import {
   autosaveWithValidateCollectionSlug,
   diffCollectionSlug,
@@ -114,18 +113,6 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
   })
 
   await _payload.create({
-    collection: draftCollectionSlug,
-    data: {
-      blocksField,
-      description: 'Description',
-      title: titleToDelete,
-    },
-    depth: 0,
-    overrideAccess: true,
-    draft: true,
-  })
-
-  await _payload.create({
     collection: autosaveWithValidateCollectionSlug,
     data: {
       title: 'Initial seeded title',
@@ -150,6 +137,18 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
         {
           blockType: 'TextBlock',
           textInBlock: 'textInBlock',
+        },
+        {
+          blockType: 'CollapsibleBlock',
+          textInCollapsibleInCollapsibleBlock: 'textInCollapsibleInCollapsibleBlock',
+          textInRowInCollapsibleBlock: 'textInRowInCollapsibleBlock',
+        },
+        {
+          blockType: 'TabsBlock',
+          namedTab1InBlock: {
+            textInNamedTab1InBlock: 'textInNamedTab1InBlock',
+          },
+          textInUnnamedTab2InBlock: 'textInUnnamedTab2InBlock',
         },
       ],
       checkbox: true,
@@ -198,6 +197,18 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
         {
           blockType: 'TextBlock',
           textInBlock: 'textInBlock2',
+        },
+        {
+          blockType: 'CollapsibleBlock',
+          textInCollapsibleInCollapsibleBlock: 'textInCollapsibleInCollapsibleBlock2',
+          textInRowInCollapsibleBlock: 'textInRowInCollapsibleBlock2',
+        },
+        {
+          blockType: 'TabsBlock',
+          namedTab1InBlock: {
+            textInNamedTab1InBlock: 'textInNamedTab1InBlock2',
+          },
+          textInUnnamedTab2InBlock: 'textInUnnamedTab2InBlock2',
         },
       ],
       checkbox: false,

@@ -1,7 +1,15 @@
-import type { FieldAffectingData, Payload, User } from 'payload'
+import type {
+  BasePayload,
+  EmailFieldValidation,
+  FieldAffectingData,
+  Payload,
+  SanitizedConfig,
+  User,
+} from 'payload'
 
 import { jwtDecode } from 'jwt-decode'
 import path from 'path'
+import { email as emailValidation } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
 
@@ -967,6 +975,61 @@ describe('Auth', () => {
           overrideAccess: true,
         }),
       ).rejects.toThrow('Token is either invalid or has expired.')
+    })
+  })
+
+  describe('Email - format validation', () => {
+    const mockT = jest.fn((key) => key) // Mocks translation function
+
+    const mockContext: Parameters<EmailFieldValidation>[1] = {
+      // @ts-expect-error: Mocking context for email validation
+      req: {
+        payload: {
+          collections: {} as Record<string, never>,
+          config: {} as SanitizedConfig,
+        } as unknown as BasePayload,
+        t: mockT,
+      },
+      required: true,
+      siblingData: {},
+      blockData: {},
+      data: {},
+      path: ['email'],
+      preferences: { fields: {} },
+    }
+    it('should allow standard formatted emails', () => {
+      expect(emailValidation('user@example.com', mockContext)).toBe(true)
+      expect(emailValidation('user.name+alias@example.co.uk', mockContext)).toBe(true)
+      expect(emailValidation('user-name@example.org', mockContext)).toBe(true)
+      expect(emailValidation('user@ex--ample.com', mockContext)).toBe(true)
+    })
+
+    it('should not allow emails with double quotes', () => {
+      expect(emailValidation('"user"@example.com', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user@"example.com"', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('"user@example.com"', mockContext)).toBe('validation:emailAddress')
+    })
+
+    it('should not allow emails with spaces', () => {
+      expect(emailValidation('user @example.com', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user@ example.com', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user name@example.com', mockContext)).toBe('validation:emailAddress')
+    })
+
+    it('should not allow emails with consecutive dots', () => {
+      expect(emailValidation('user..name@example.com', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user@example..com', mockContext)).toBe('validation:emailAddress')
+    })
+
+    it('should not allow emails with invalid domains', () => {
+      expect(emailValidation('user@example', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user@example..com', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user@example.c', mockContext)).toBe('validation:emailAddress')
+    })
+
+    it('should not allow domains starting or ending with a hyphen', () => {
+      expect(emailValidation('user@-example.com', mockContext)).toBe('validation:emailAddress')
+      expect(emailValidation('user@example-.com', mockContext)).toBe('validation:emailAddress')
     })
   })
 })
