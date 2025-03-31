@@ -58,10 +58,6 @@ import { init } from './init.js'
 import { insert } from './insert.js'
 import { requireDrizzleKit } from './requireDrizzleKit.js'
 
-export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
-
-export { sql } from 'drizzle-orm'
-
 const filename = fileURLToPath(import.meta.url)
 
 export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
@@ -202,3 +198,26 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
     init: adapter,
   }
 }
+
+/**
+ * @todo deprecate /types subpath export in 4.0
+ */
+export type {
+  Args as SQLiteAdapterArgs,
+  CountDistinct,
+  DeleteWhere,
+  DropDatabase,
+  Execute,
+  GeneratedDatabaseSchema,
+  GenericColumns,
+  GenericRelation,
+  GenericTable,
+  IDType,
+  Insert,
+  MigrateDownArgs,
+  MigrateUpArgs,
+  SQLiteAdapter,
+  SQLiteSchemaHook,
+} from './types.js'
+
+export { sql } from 'drizzle-orm'

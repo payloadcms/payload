@@ -31,6 +31,45 @@ export { buildRawSchema } from './schema/buildRawSchema.js'
 export { beginTransaction } from './transactions/beginTransaction.js'
 export { commitTransaction } from './transactions/commitTransaction.js'
 export { rollbackTransaction } from './transactions/rollbackTransaction.js'
+export type {
+  BaseRawColumn,
+  BuildDrizzleTable,
+  BuildQueryJoinAliases,
+  ChainedMethods,
+  ColumnToCodeConverter,
+  CountDistinct,
+  CreateJSONQueryArgs,
+  DeleteWhere,
+  DrizzleAdapter,
+  DrizzleTransaction,
+  DropDatabase,
+  EnumRawColumn,
+  Execute,
+  GenericColumn,
+  GenericColumns,
+  GenericPgColumn,
+  GenericRelation,
+  GenericTable,
+  IDType,
+  Insert,
+  IntegerRawColumn,
+  Migration,
+  PostgresDB,
+  RawColumn,
+  RawForeignKey,
+  RawIndex,
+  RawRelation,
+  RawTable,
+  RelationMap,
+  RequireDrizzleKit,
+  SetColumnID,
+  SQLiteDB,
+  TimestampRawColumn,
+  TransactionPg,
+  TransactionSQLite,
+  UUIDRawColumn,
+  VectorRawColumn,
+} from './types.js'
 export { updateGlobal } from './updateGlobal.js'
 export { updateGlobalVersion } from './updateGlobalVersion.js'
 export { updateJobs } from './updateJobs.js'
